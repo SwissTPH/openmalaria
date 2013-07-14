@@ -91,7 +91,7 @@ public:
   virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
   
   /** Set up vector population interventions. */
-  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) =0;
+  virtual void initVectorPopInterv( const scnXml::VectorIntervention::DescriptionType& elt, size_t instance ) =0;
   
   /// Checkpointing
   template<class S>

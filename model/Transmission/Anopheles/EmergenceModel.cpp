@@ -162,7 +162,7 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 
 // -----  Summary and intervention functions  -----
 
-void EmergenceModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
+void EmergenceModel::initVectorPopInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
     assert( instance >= 0 );
     if( emergence.size() <= instance )
         emergence.resize( instance+1 );

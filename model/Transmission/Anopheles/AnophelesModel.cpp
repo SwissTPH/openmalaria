@@ -264,7 +264,7 @@ void AnophelesModel::init2 (size_t sIndex,
     // All set up to drive simulation from forcedS_v
 }
 
-void AnophelesModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
+void AnophelesModel::initVectorPopInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
     transmission.initVectorPopInterv( elt, instance );
     
     assert( instance >= 0 );

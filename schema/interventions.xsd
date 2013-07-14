@@ -557,7 +557,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Using the latter would invalidate existing XMLs and cause excess.
             confusion. XSD 1.1 does not have this limitation but still has
             limited support. -->
-            <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="VectorPopIntervention"/>
+            <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="VectorIntervention"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -569,7 +569,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="VectorPopIntervention">
+  <xs:complexType name="VectorIntervention">
     <xs:annotation>
       <xs:documentation>
         An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
@@ -586,7 +586,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="description">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="anopheles" maxOccurs="unbounded" type="VectorPopDescAnoph"/>
+            <xs:element name="species" maxOccurs="unbounded" type="VectorSpeciesIntervention"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -1397,11 +1397,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="VectorPopDescAnoph">
+  <xs:complexType name="VectorSpeciesIntervention">
     <xs:annotation>
       <xs:documentation>
-        Descriptions of initial effectiveness of the effects of
-        vector population interventions.
+        Descriptions of the effects of vector interventions with per-species effects.
       </xs:documentation>
       <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
     </xs:annotation>
@@ -1469,12 +1468,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:all>
-    <xs:attribute name="mosquito" type="xs:string" use="required">
+    <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Name of the affected anopheles-mosquito species.
+          Name of the species/subspecies/variant.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Mosquito species</xs:appinfo>
+        <xs:appinfo>type:string;name:Species/subspecies/variant name</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

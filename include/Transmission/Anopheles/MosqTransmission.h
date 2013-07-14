@@ -71,7 +71,7 @@ public:
     void initIterateScale ( double factor );
     
     /** Set up the non-host-specific interventions. */
-    inline void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
+    inline void initVectorPopInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
         emergence->initVectorPopInterv( elt, instance ); }
     //@}
     

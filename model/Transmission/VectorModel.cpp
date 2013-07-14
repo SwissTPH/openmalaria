@@ -264,9 +264,9 @@ void VectorModel::init2 (const std::list<Host::Human>& population, int populatio
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
-void VectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) {
-    typedef scnXml::VectorPopIntervention::DescriptionType::AnophelesSequence AS;
-    const AS& as = elt.getAnopheles();
+void VectorModel::initVectorPopInterv( const scnXml::VectorIntervention::DescriptionType& elt, size_t instance ) {
+    typedef scnXml::VectorIntervention::DescriptionType::SpeciesSequence AS;
+    const AS& as = elt.getSpecies();
     if( as.size() != numSpecies ){
         throw util::xml_scenario_error(
             "vectorPop.description: must have one element for each "
@@ -274,7 +274,7 @@ void VectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::Desc
         );
     }
     for( AS::const_iterator it = as.begin(); it != as.end(); ++it ){
-        species[getSpeciesIndex(it->getMosquito())].initVectorPopInterv ( *it, instance );
+        species[getSpeciesIndex(it->getName())].initVectorPopInterv ( *it, instance );
     }
 }
 

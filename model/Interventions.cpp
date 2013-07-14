@@ -267,9 +267,9 @@ private:
     TimeStep maxInterventionAge;
 };
 
-class TimedVectorPopIntervention : public TimedIntervention {
+class TimedVectorIntervention : public TimedIntervention {
 public:
-    TimedVectorPopIntervention( TimeStep deployTime, size_t instance ) :
+    TimedVectorIntervention( TimeStep deployTime, size_t instance ) :
         TimedIntervention( deployTime ),
         inst(instance)
     {}
@@ -532,7 +532,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         const SeqT& seq = intervElt.getVectorPop().get().getIntervention();
         size_t instance = 0;
         for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
-            const scnXml::VectorPopIntervention& elt = *it;
+            const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
                 activeInterventions.set ( Interventions::VECTOR_POP, true );
                 population._transmissionModel->initVectorPopInterv( elt.getDescription(), instance );
@@ -540,7 +540,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
                 for ( It it = seq.begin(); it != seq.end(); ++it ) {
-                    timed.push_back( new TimedVectorPopIntervention(TimeStep( it->getTime() ), instance) );
+                    timed.push_back( new TimedVectorIntervention(TimeStep( it->getTime() ), instance) );
                 }
                 instance++;
             }
