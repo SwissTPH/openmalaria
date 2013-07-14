@@ -561,11 +561,291 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="human" type="HumanInterventions">
+        <xs:annotation>
+          <xs:documentation>
+            Encapsulates all interventions whose effects are specific to the
+            human host: any interventions where target humans may be selected
+            via population-coverage, age limits and cohort membership.
+            
+            TODO: move appropriate elements to be children of this element
+          </xs:documentation>
+          <xs:appinfo>name:Human-specific interventions;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:all>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Name of set of interventions</xs:documentation>
         <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="HumanInterventions">
+    <xs:sequence>
+      <xs:element name="intervention" minOccurs="0" maxOccurs="unbounded" type="HumanIntervention">
+        <xs:annotation>
+          <xs:documentation>
+            An intervention describes a set of effects achieved by the
+            deployment of some device, e.g. by drug administration,
+            vaccination, insecticide spraying, net distribution.
+            
+            Where multiple interventions have overlapping effects see the
+            description of the effect for how these combine.
+          </xs:documentation>
+          <xs:appinfo>name:Intervention;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="campaign">
+        <xs:annotation>
+          <xs:documentation>
+            This element describes the deployment of a set of interventions at
+            a given time or set of times. The deployment may have age
+            restrictions, restriction to a certain cohort, and has a specified
+            coverage.
+            
+            If multiple interventions are deployed by this campaign, they are
+            deployed to the same set of people (i.e. a set of people is
+            selected based on coverage and other restrictions, then all
+            interventions in the campaign are deployed to this set of people).
+            
+            If multiple deployment times are given then entire process is
+            repeated at each time (this is a short way of configuring multiple
+            campaigns which are identical apart from the deployment time).
+          </xs:documentation>
+          <xs:appinfo>type:list of elements;name:Campaign;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="cumulativeCoverage" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+          If this element is not specified, standard deployment occurs, where
+          a portion of the population as given by the coverage property of this
+          campaign is selected, and interventions are deployed to all of
+          these people.
+          
+          If this attribute is specified, instead, the population is divided
+          into two sets: those who have received a certain intervention
+          recently, and those who have not. If the proportion of people in the
+          first set is less than the desired coverage, then the proportion of
+          people from the second set needed to increase total coverage to the
+          desired coverage is calculated. This proportion is then used as the
+          probablity of selection from the second set into a third set of
+          people who then receive the interventions deployed by this campaign.
+          
+          Note that selection is stochastic so the final coverage level may not
+          be exactly that desired. Note also that the intervention used when
+          selecting people need not actually be one of the interventions
+          deployed in this campaign, although that is the intended use case.
+                </xs:documentation>
+                <xs:appinfo>name:Cumulative coverage;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="intervention" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The identifier (short name) of the intervention used when
+                      selecting people.
+                    </xs:documentation>
+                    <xs:appinfo>name:Intervention;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="maxAge" type="xs:double" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The maximum age at which the intervention used when
+                      selecting people is considered effective. Individuals are
+                      considered covered when they previously received the
+                      intervention and the time since the last reception (in
+                      years) is strictly less than this age.
+                    </xs:documentation>
+                    <xs:appinfo>name:Maximum effective age of intervention;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="intervention" minOccurs="1" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  An intervention deployed by the campaign. The campaign must
+                  deploy at least one intervention, but may deploy several
+                  simultaneously (and to the same set of humans).
+                </xs:documentation>
+                <xs:appinfo>name:Intervention;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="id" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The identifier (short name) of an intervention deployed by this campaign.
+                    </xs:documentation>
+                    <xs:appinfo>name:Intervention name;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="time" minOccurs="1" maxOccurs="unbounded">
+              <xs:annotation><xs:appinfo>name:Time;</xs:appinfo></xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="step" type="xs:int" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The time-step at which this campaign is rolled out
+                      (campaigns are simulated as enacting all changes
+                      instantaneously). Time must be at least 0 where 0 means
+                      the first time step of the intervention-period.
+                      
+                      Multiple times may be given (by repeating the parent
+                      element); in this case this the campaign is repeated in
+                      full at each time. (This is just a convenient way of
+                      copying the entire campaign.)
+                    </xs:documentation>
+                    <xs:appinfo>name:Time step;units:time-steps;min:0;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="maxAge" type="xs:double" default="100">
+            <xs:annotation>
+              <xs:documentation>
+                Maximum age of eligible individuals (defaults to 100)
+              </xs:documentation>
+              <xs:appinfo>type:double;units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="minAge" type="xs:double" default="0">
+            <xs:annotation>
+              <xs:documentation>
+                Minimum age of eligible individuals (defaults to 0)
+              </xs:documentation>
+              <xs:appinfo>type:double;units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="coverage" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Coverage of intervention
+              </xs:documentation>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;sweepable:true</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="cohort" type="xs:boolean" default="false">
+            <xs:annotation>
+              <xs:documentation>
+                Restrict distribution to chosen cohort.
+              </xs:documentation>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Cohort only;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="continuousDeployment">
+        <xs:annotation>
+          <xs:documentation>Continuous age-based deployment of interventions
+            (through EPI, post-natal and school-based programmes, etc.).
+            
+            As with campaign-based deployment, a set of target people is
+            selected who then receive all interventions listed here.
+          </xs:documentation>
+          <xs:appinfo>type:list of elements;name:Age-based vaccination;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="intervention" minOccurs="1" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  An intervention deployed by the continuous deployment description.
+                  The continuous deployment must
+                  deploy at least one intervention, but may deploy several
+                  simultaneously (to the same set of humans).
+                </xs:documentation>
+                <xs:appinfo>name:Intervention;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="id" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The identifier (short name) of an intervention deployed by this campaign.
+                    </xs:documentation>
+                    <xs:appinfo>name:Intervention name;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Target age of intervention
+              </xs:documentation>
+              <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="coverage" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Coverage of intervention
+              </xs:documentation>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion covered;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="cohort" type="xs:boolean" default="false">
+            <xs:annotation>
+              <xs:documentation>
+                Restrict distribution to chosen cohort (default: false).
+              </xs:documentation>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Cohort only;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="begin" type="xs:int" default="0">
+            <xs:annotation>
+              <xs:documentation>
+                First timestep (from 0 at the beginning of the intervention period)
+                this item is active. Defaults to 0.
+              </xs:documentation>
+              <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:First timestep active;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="end" type="xs:int" default="2147483647">
+            <xs:annotation>
+              <xs:documentation>
+                End of the period during which the intervention is active (to be
+                exact, the first timestep of the intervention period at which the item
+                becomes inactive). Defaults to 2147483647.
+              </xs:documentation>
+              <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>Name of set of interventions</xs:documentation>
+        <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="HumanIntervention">
+    <xs:all>
+    </xs:all>
+    <xs:attribute name="id" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          A short name or code identifying the intervention (used to refer to
+          the intervention in deployments).
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="description" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          A short description of the intervention effects
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
