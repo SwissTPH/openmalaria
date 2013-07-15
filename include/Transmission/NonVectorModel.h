@@ -37,7 +37,7 @@ public:
   
   virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
-  virtual void initVectorPopInterv( const scnXml::VectorIntervention::DescriptionType& elt, size_t instance );
+  virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::SpeciesSequence& list, size_t instance );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;

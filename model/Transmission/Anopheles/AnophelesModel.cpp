@@ -264,8 +264,8 @@ void AnophelesModel::init2 (size_t sIndex,
     // All set up to drive simulation from forcedS_v
 }
 
-void AnophelesModel::initVectorPopInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
-    transmission.initVectorPopInterv( elt, instance );
+void AnophelesModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
+    transmission.initVectorInterv( elt, instance );
     
     assert( instance >= 0 );
     if( seekingDeathRateIntervs.size() <= instance )

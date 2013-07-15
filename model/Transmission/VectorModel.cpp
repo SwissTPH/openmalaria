@@ -27,10 +27,54 @@
 #include <fstream>
 #include <map>
 #include <cmath>
+#include <set>
 
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
+
+class SpeciesIndexChecker{
+public:
+    SpeciesIndexChecker( const string& intervName, const map<string,size_t>& indices ) :
+        _intervName( intervName ), _indices( indices ){}
+    
+    /** Return the index in speciesIndex of mosquito, throwing if not found. */
+    size_t getIndex( string species ){
+        if( found.count( species ) > 0 ){
+            ostringstream msg;
+            msg << "Intervention \"" << _intervName
+                << "\" has multiple descriptions for vector species \""
+                << species << "\"";
+            throw util::xml_scenario_error( msg.str() );
+        }
+        map<string,size_t>::const_iterator sIndex = _indices.find( species );
+        if( sIndex == _indices.end() ){
+            ostringstream msg;
+            msg << "Intervention \"" << _intervName
+                << "\" has a description for vector species \"" << species
+                << "\", but this species is not mentioned in the entomology section";
+            throw util::xml_scenario_error( msg.str() );
+        }
+        found.insert( species );
+        return sIndex->second;
+    }
+    /** Throw if some species was missed. */
+    void checkNoneMissed() const{
+        for( map<string,size_t>::const_iterator it = _indices.begin(); it != _indices.end(); ++it ){
+            if( found.count( it->first ) == 0 ){
+                ostringstream msg;
+                msg << "Intervention \"" << _intervName
+                    << "\" has a no description for vector species \""
+                    << it->first << "\"";
+                throw util::xml_scenario_error( msg.str() );
+            }
+        }
+    }
+private:
+    const string& _intervName;
+    const map<string,size_t>& _indices;
+    set<string> found;
+};
 
 double VectorModel::meanPopAvail (const std::list<Host::Human>& population, int populationSize) {
     double sumRelativeAvailability = 0.0;
@@ -264,18 +308,15 @@ void VectorModel::init2 (const std::list<Host::Human>& population, int populatio
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
-void VectorModel::initVectorPopInterv( const scnXml::VectorIntervention::DescriptionType& elt, size_t instance ) {
-    typedef scnXml::VectorIntervention::DescriptionType::SpeciesSequence AS;
-    const AS& as = elt.getSpecies();
-    if( as.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "vectorPop.description: must have one element for each "
-            "mosquito species described in entomology"
-        );
+void VectorModel::initVectorInterv( const scnXml::VectorIntervention::DescriptionType::SpeciesSequence& list, size_t instance ) {
+    //TODO: get intervention name
+    string intervName = "vector intervention " + instance;
+    SpeciesIndexChecker checker( intervName, speciesIndex );
+    for( scnXml::VectorIntervention::DescriptionType::SpeciesConstIterator it = list.begin(); it != list.end(); ++it ){
+        const string& name = it->getName();
+        species[checker.getIndex(name)].initVectorInterv ( *it, instance );
     }
-    for( AS::const_iterator it = as.begin(); it != as.end(); ++it ){
-        species[getSpeciesIndex(it->getName())].initVectorPopInterv ( *it, instance );
-    }
+    checker.checkNoneMissed();
 }
 
 
@@ -393,15 +434,11 @@ void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
     double proportionUse = _ITNParams.init( elt );
     typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
-    if( ap.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "ITN.description.anophelesParams: must have one element for each "
-            "mosquito species described in entomology"
-        );
-    }
+    SpeciesIndexChecker checker( "ITN", speciesIndex );
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
-        species[getSpeciesIndex(it->getMosquito())].setITNDescription (_ITNParams, *it, proportionUse);
+        species[checker.getIndex(it->getMosquito())].setITNDescription (_ITNParams, *it, proportionUse);
     }
+    checker.checkNoneMissed();
 }
 void VectorModel::setIRSDescription (const scnXml::IRS& elt){
     checkSimMode();
@@ -410,30 +447,22 @@ void VectorModel::setIRSDescription (const scnXml::IRS& elt){
         
         typedef scnXml::IRSDescription_v1::AnophelesParamsSequence AP;
         const AP& ap = elt.getDescription().get().getAnophelesParams();
-        if( ap.size() != numSpecies ){
-            throw util::xml_scenario_error(
-                "IRS.simpleDescription.anophelesParams: must have one element "
-                "for each mosquito species described in entomology"
-            );
-        }
+        SpeciesIndexChecker checker( "IRS v1", speciesIndex );
         for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-            species[getSpeciesIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
+            species[checker.getIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
         }
+        checker.checkNoneMissed();
     }else{
         assert( elt.getDescription_v2().present() );   // choice: one or the other
         _IRSParams.init( elt.getDescription_v2().get() );
         
         typedef scnXml::IRSDescription_v2::AnophelesParamsSequence AP;
         const AP& ap = elt.getDescription_v2().get().getAnophelesParams();
-        if( ap.size() != numSpecies ){
-            throw util::xml_scenario_error(
-                "IRS.description.anophelesParams: must have one element for "
-                "each mosquito species described in entomology"
-            );
-        }
+        SpeciesIndexChecker checker( "IRS v2", speciesIndex );
         for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-            species[getSpeciesIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
+            species[checker.getIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
         }
+        checker.checkNoneMissed();
     }
 }
 void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
@@ -441,15 +470,11 @@ void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
     PerHost::setVADescription (elt);
     typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
-    if( ap.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "vectorDeterrent.anophelesParams: must have one element for each "
-            "mosquito species described in entomology"
-        );
-    }
+    SpeciesIndexChecker checker( "vector deterrent", speciesIndex );
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[getSpeciesIndex(it->getMosquito())].setVADescription (*it);
+        species[checker.getIndex(it->getMosquito())].setVADescription (*it);
     }
+    checker.checkNoneMissed();
 }
 
 void VectorModel::deployVectorPopInterv (size_t instance) {

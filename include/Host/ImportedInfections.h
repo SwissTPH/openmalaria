@@ -37,7 +37,7 @@ namespace OM { namespace Host {
          * @param iiElt The scenario element with description of rates
          * @returns True if any infections are imported
          */
-        bool init( const scnXml::ImportedInfections& iiElt );
+        void init( const scnXml::ImportedInfections& iiElt );
         
         /** Import this time-step's imported infections, according to initialised rates
          * 

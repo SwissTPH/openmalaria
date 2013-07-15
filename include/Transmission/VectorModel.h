@@ -47,7 +47,7 @@ public:
    * information from the human population structure. */
   virtual void init2 (const std::list<Host::Human>& population, int populationSize);
   
-  virtual void initVectorPopInterv( const scnXml::VectorIntervention::DescriptionType& elt, size_t instance );
+  virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::SpeciesSequence& list, size_t instance );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
@@ -80,18 +80,6 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
-  /** Return the index in speciesIndex of mosquito, throwing if not found. */
-  size_t getSpeciesIndex (string mosquito)const {
-    map<string,size_t>::const_iterator sIndex = speciesIndex.find (mosquito);
-    if (sIndex == speciesIndex.end()) {
-      ostringstream oss;
-      oss << "Intervention description for anopheles species \""
-	  << mosquito << "\": species not found in entomology description";
-      throw util::xml_scenario_error(oss.str());
-    }
-    return sIndex->second;
-  }
-    
     /** Return the mean availability of human population to mosquitoes. */
     static double meanPopAvail (const std::list<Host::Human>& population, int populationSize);
     

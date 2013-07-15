@@ -23,7 +23,7 @@
 
 namespace OM { namespace Host {
     
-bool ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
+void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     const scnXml::ImportedInfections::TimedType& tElt = iiElt.getTimed();
     if( tElt.getPeriod() < 0 ){
         throw util::xml_scenario_error( "interventions.importedInfections.timed.period cannot be negative" );
@@ -54,14 +54,11 @@ bool ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
                 ++i;
             }
         }
-        // first or second value non-zero
-        return (rate[0].value != 0.0) || (rate.size() > 1 && rate[1].value != 0.0);
     }
-    return false;       // no list
 }
 
 void ImportedInfections::import( Population& population ){
-    assert( rate.size() > 0 );  // please don't call me otherwise!
+    if( rate.size() == 0 ) return;      // no imported infections
     assert( TimeStep::interventionPeriod >= TimeStep(0) );
     TimeStep now = TimeStep::interventionPeriod;
     if( period > TimeStep(0) ){

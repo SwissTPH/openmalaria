@@ -313,7 +313,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getChangeHS().present() ){
         const scnXml::ChangeHS& chs = intervElt.getChangeHS().get();
         if( chs.getTimedDeployment().size() > 0 ){
-            activeInterventions.set (Interventions::CHANGE_HS, true);
             // timed deployments:
             typedef scnXml::ChangeHS::TimedDeploymentSequence::const_iterator It;
             for( It it = chs.getTimedDeployment().begin(); it != chs.getTimedDeployment().end(); ++it ){
@@ -324,7 +323,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getChangeEIR().present() ){
         const scnXml::ChangeEIR& eir = intervElt.getChangeEIR().get();
         if( eir.getTimedDeployment().size() > 0 ){
-            activeInterventions.set (Interventions::CHANGE_EIR, true);
             // timed deployments:
             typedef scnXml::ChangeEIR::TimedDeploymentSequence::const_iterator It;
             for( It it = eir.getTimedDeployment().begin(); it != eir.getTimedDeployment().end(); ++it ){
@@ -335,7 +333,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getMDA().present() ){
         const scnXml::MDA& mda = intervElt.getMDA().get();
         if( mda.getTimed().present() ){
-            activeInterventions.set( Interventions::MDA, true );
             // read description:
             if( TimeStep::interval == 5 ){
                 if( !mda.getDiagnostic().present() ){
@@ -365,7 +362,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getVaccine().present() ){
         const scnXml::Vaccine& vacc = intervElt.getVaccine().get();
         if( vacc.getContinuous().present() || vacc.getTimed().present() ){
-            activeInterventions.set (Interventions::VACCINE, true);
             // read descriptions:
             Host::Vaccine::init( vacc );
             // continuous deployments:
@@ -390,7 +386,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getIPT().present() ){
         const scnXml::IPT& ipt = intervElt.getIPT().get();
         // read description (note: this is required by IPT WIH model, so do it even if there is no deployment)
-        activeInterventions.set (Interventions::IPTI, true);
         WithinHost::DescriptiveIPTWithinHost::init( ipt.getDescription() );
         // continuous deployments:
         if( ipt.getContinuous().present() ){
@@ -412,7 +407,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getITN().present() ){
         const scnXml::ITN& itn = intervElt.getITN().get();
         if( itn.getTimed().present() || itn.getContinuous().present() ){
-            activeInterventions.set (Interventions::ITN, true);
             // read description
             population.transmissionModel().setITNDescription( itn.getDescription() );
             // continuous deployments:
@@ -436,7 +430,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getIRS().present() ){
         const scnXml::IRS& irs = intervElt.getIRS().get();
         if( irs.getTimed().present() ){
-            activeInterventions.set (Interventions::IRS, true);
             // read description
             population.transmissionModel().setIRSDescription( irs );
             // timed deployments:
@@ -450,7 +443,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getVectorDeterrent().present() ){
         const scnXml::VectorDeterrent& va = intervElt.getVectorDeterrent().get();
         if( va.getTimed().present() ){
-            activeInterventions.set (Interventions::VEC_AVAIL, true);
             // read description
             population.transmissionModel().setVADescription( va );
             // timed deployments:
@@ -464,7 +456,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getCohort().present() ){
         const scnXml::Cohort& ch = intervElt.getCohort().get();
         if( ch.getTimed().present() || ch.getContinuous().present() ){
-            activeInterventions.set (Interventions::COHORT, true);
+            _cohortEnabled = true;
             // continuous deployments:
             if( ch.getContinuous().present() ){
                 const scnXml::ContinuousList::DeploySequence& seq = ch.getContinuous().get().getDeploy();
@@ -485,15 +477,11 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     }
     if( intervElt.getImportedInfections().present() ){
         const scnXml::ImportedInfections& ii = intervElt.getImportedInfections().get();
-        if( importedInfections.init( ii ) ){
-            // init() returns true when infections get imported
-            activeInterventions.set (Interventions::IMPORTED_INFECTIONS, true);
-        }
+        importedInfections.init( ii );
     }
     if( intervElt.getImmuneSuppression().present() ){
         const scnXml::ImmuneSuppression& elt = intervElt.getImmuneSuppression().get();
         if( elt.getTimed().present() ){
-            activeInterventions.set (Interventions::IMMUNE_SUPPRESSION, true);
             // timed deployments:
             const scnXml::MassList::DeploySequence& seq = elt.getTimed().get().getDeploy();
             typedef scnXml::MassList::DeploySequence::const_iterator It;
@@ -505,10 +493,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getInsertR_0Case().present() ){
         const scnXml::InsertR_0Case& elt = intervElt.getInsertR_0Case().get();
         if( elt.getTimedDeployment().size() > 0 ){
-            activeInterventions.set (Interventions::R_0_CASE, true);
             Host::Vaccine::verifyEnabledForR_0();
-            // uses vaccines but see note in Vaccine::initParameters()
-            // activeInterventions.set (Interventions::VACCINE, true);
             // timed deployments:
             typedef scnXml::InsertR_0Case::TimedDeploymentSequence::const_iterator It;
             for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
@@ -519,7 +504,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getUninfectVectors().present() ){
         const scnXml::UninfectVectors& elt = intervElt.getUninfectVectors().get();
         if( elt.getTimedDeployment().size() > 0 ){
-            activeInterventions.set (Interventions::UNINFECT_VECTORS, true);
             // timed deployments:
             typedef scnXml::UninfectVectors::TimedDeploymentSequence::const_iterator It;
             for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
@@ -534,8 +518,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
-                activeInterventions.set ( Interventions::VECTOR_POP, true );
-                population._transmissionModel->initVectorPopInterv( elt.getDescription(), instance );
+                population._transmissionModel->initVectorInterv( elt.getDescription().getSpecies(), instance );
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
@@ -582,9 +565,7 @@ void InterventionManager::deploy(OM::Population& population) {
         return;
     
     // deploy imported infections (not strictly speaking an intervention)
-    if( activeInterventions[ Interventions::IMPORTED_INFECTIONS ] ){
-        importedInfections.import( population );
-    }
+    importedInfections.import( population );
     
     // deploy timed interventions
     while( timed[nextTimed].time <= TimeStep::interventionPeriod ){

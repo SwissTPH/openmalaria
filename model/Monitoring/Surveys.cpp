@@ -80,7 +80,7 @@ void SurveysType::initCohortOnly(OM::InterventionManager& interventions){
       _cohortOnly = mon.getCohortOnly().get();
   } else {
       // Trap potential bug in scenario design
-      if( interventions.isActive(Interventions::COHORT) ){
+      if( interventions.cohortEnabled() ){
           throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
       }
   }

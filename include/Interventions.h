@@ -107,10 +107,9 @@ public:
      * interventions have been used. */
     void loadFromCheckpoint( OM::Population& population, OM::util::TimeStep interventionTime );
     
-    /// Returns true if intervention is active
-    inline bool isActive( Interventions::Flags intervention ) const{
-        assert( intervention < Interventions::SIZE );
-        return activeInterventions[intervention];
+    /// Returns true if any cohort selection "intervention" is active
+    inline bool cohortEnabled() const{
+        return _cohortEnabled;
     }
     
     /** @brief Deploy interventions
@@ -122,7 +121,6 @@ public:
     void deploy (OM::Population& population);
     
 private:
-    bitset<Interventions::SIZE> activeInterventions;
     // All continuous interventions, sorted by deployment age (weakly increasing)
     vector<AgeIntervention> ctsIntervs;
     // List of all timed interventions. Should be sorted (time weakly increasing).
@@ -132,6 +130,7 @@ private:
     // imported infections are not really interventions, and handled by a separate class
     // (but are grouped here for convenience and due toassociation in schema)
     Host::ImportedInfections importedInfections;
+    bool _cohortEnabled;
 };
 
 }
