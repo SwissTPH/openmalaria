@@ -1,0 +1,69 @@
+#!/bin/sh
+
+# Script to build the SchemaTranslator under linux.
+# (If somebody wants to write configuration for a proper build tool or
+# something compatible with other platforms, feel free, but those are beyond
+# my requirements.)
+
+# Default location to look for Kotlin
+KOTLIN_DIR=/home/install/kotlinc
+
+# Assume javac and jar are available:
+JAVAC=$(which javac)
+JAR=$(which jar)
+
+# Location for built classes
+CLASSES=classes
+# Location of sources
+SRC=src
+# Location for output jar
+ST_JAR=bin/schema-translator.jar
+
+while [ $# -gt 0 ]
+do
+    case "$1" in
+        -k)  KOTLIN_DIR="$2"; shift;;
+        -h) echo "Usage: $0 [/path/to/kotlinc]"; exit 0;;
+        *) echo "Unknown argument: $1" >&2; shift; break;;
+    esac
+    shift
+done
+
+KOTLINC="$KOTLIN_DIR/bin/kotlinc-jvm"
+KOTLIN_RUNTIME="$KOTLIN_DIR/lib/kotlin-runtime.jar"
+
+if [ ! -f "$KOTLINC" ]; then
+    echo "Unable to find kotlin compiler (or compiler is not executable). Results:" >&2
+    ls -l "$KOTLINC" >&2
+    echo >&2
+    echo "Usage: $0 [/path/to/kotlinc]"
+    exit 1;
+fi
+if [ ! -f "$KOTLIN_RUNTIME" ]; then
+    echo "Unable to find kotlin runtime library. Results:" >&2
+    ls -l "$KOTLIN_RUNTIME" >&2
+    echo >&2
+    echo "Usage: $0 [/path/to/kotlinc]"
+    exit 1;
+fi
+
+
+# always do a clean build
+if [ -e "$CLASSES" ]; then
+    rm -rf "$CLASSES"
+fi
+mkdir -p "$CLASSES"
+
+echo -n "Compiling " &&\
+"$KOTLINC" -classpath "$CLASSES" -output "$CLASSES" \
+    -src "$SRC/SchemaTranslator/TranslatorKotlin.kt" &&\
+echo -n . &&\
+"$JAVAC" -cp "$CLASSES:$KOTLIN_RUNTIME" -d "$CLASSES" \
+    "$SRC/SchemaTranslator/TranslatorJava.java" &&\
+echo -n . &&\
+"$KOTLINC" -classpath "$CLASSES" -output "$CLASSES" \
+    -src "$SRC/SchemaTranslator/SchemaTranslator.kt" &&\
+echo -n . &&\
+"$JAR" c -f "$ST_JAR" -m META-INF/MANIFEST.MF -C "$CLASSES" SchemaTranslator &&\
+echo ". success. You should now be able to run the SchemaTranslator with:" &&\
+echo "java -jar $ST_JAR"
