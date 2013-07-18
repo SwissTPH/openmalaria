@@ -179,7 +179,7 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="Full Set"/>
+  <interventions name="No interventions"/>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">
       <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
