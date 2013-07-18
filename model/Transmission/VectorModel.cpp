@@ -308,12 +308,12 @@ void VectorModel::init2 (const std::list<Host::Human>& population, int populatio
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
-void VectorModel::initVectorInterv( const scnXml::VectorIntervention::DescriptionType::SpeciesSequence& list, size_t instance ) {
+void VectorModel::initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance ) {
     //TODO: get intervention name
     string intervName = "vector intervention " + instance;
     SpeciesIndexChecker checker( intervName, speciesIndex );
-    for( scnXml::VectorIntervention::DescriptionType::SpeciesConstIterator it = list.begin(); it != list.end(); ++it ){
-        const string& name = it->getName();
+    for( scnXml::VectorIntervention::DescriptionType::AnophelesConstIterator it = list.begin(); it != list.end(); ++it ){
+        const string& name = it->getMosquito();
         species[checker.getIndex(name)].initVectorInterv ( *it, instance );
     }
     checker.checkNoneMissed();

@@ -308,7 +308,7 @@ TimedMassIntervention* createTimedMassCumIntervention(
 // -----  InterventionManager  -----
 
 InterventionManager::InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population) :
-    nextTimed(0)
+    nextTimed(0), _cohortEnabled(false)
 {
     if( intervElt.getChangeHS().present() ){
         const scnXml::ChangeHS& chs = intervElt.getChangeHS().get();
@@ -518,7 +518,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
-                population._transmissionModel->initVectorInterv( elt.getDescription().getSpecies(), instance );
+                population._transmissionModel->initVectorInterv( elt.getDescription().getAnopheles(), instance );
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;

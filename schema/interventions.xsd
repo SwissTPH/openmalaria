@@ -561,7 +561,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="human" type="HumanInterventions">
+      <xs:element name="human" type="HumanInterventions" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
             Encapsulates all interventions whose effects are specific to the
@@ -866,7 +866,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="description">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="species" maxOccurs="unbounded" type="VectorSpeciesIntervention"/>
+            <xs:element name="anopheles" maxOccurs="unbounded" type="VectorSpeciesIntervention"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -1748,7 +1748,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:all>
-    <xs:attribute name="name" type="xs:string" use="required">
+    <xs:attribute name="mosquito" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
           Name of the species/subspecies/variant.
