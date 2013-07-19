@@ -29,6 +29,7 @@
 #include "Monitoring/Surveys.h"
 
 namespace OM {
+    using Host::Human;
 
 // -----  AgeIntervention  -----
 
@@ -151,7 +152,7 @@ public:
     }
 };
 
-/// Deployment of mass-to-human interventions
+/// Deployment of mass-to-human interventions (TODO: phase out usages of this)
 class TimedMassIntervention : public TimedIntervention {
 public:
     /** 
@@ -202,7 +203,54 @@ protected:
     void (Host::Human::*intervention) (const OM::Population&);       // callback: per-human deployment
 };
 
-/// Deployment of mass-to-human interventions with cumulative-deployment support
+/// Timed deployment of human-specific interventions
+class TimedHumanIntervention : public TimedIntervention {
+public:
+    /** 
+     * @param mass XML element specifying the age range and compliance
+     * (proportion of eligible individuals who receive the intervention).
+     * @param intervention The HumanIntervention to deploy. */
+    TimedHumanIntervention( const scnXml::Mass& mass,
+                           const HumanIntervention* intervention ) :
+        TimedIntervention( TimeStep( mass.getTime() ) ),
+        minAge( TimeStep::fromYears( mass.getMinAge() ) ),
+        maxAge( TimeStep::fromYears( mass.getMaxAge() ) ),
+        cohortOnly( mass.getCohort() ),
+        coverage( mass.getCoverage() ),
+        intervention( intervention )
+    {
+        if( !(coverage >= 0.0 && coverage <= 1.0) ){
+            throw util::xml_scenario_error("timed intervention coverage must be in range [0,1]");
+        }
+        if( minAge < TimeStep(0) || maxAge < minAge ){
+            throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
+        }
+    }
+    
+    virtual void deploy (OM::Population& population) {
+        Population::HumanPop& popList = population.getList();
+        for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
+            if( age >= minAge && age < maxAge ){
+                if( !cohortOnly || iter->getInCohort() ){
+                    if( util::random::uniform_01() < coverage ){
+                        intervention->deploy( *iter );
+                    }
+                }
+            }
+        }
+    }
+    
+protected:
+    // restrictions on deployment
+    TimeStep minAge;
+    TimeStep maxAge;
+    bool cohortOnly;
+    double coverage;    // proportion coverage within group meeting above restrictions
+    const HumanIntervention *intervention;
+};
+
+/// Deployment of mass-to-human interventions with cumulative-deployment support (TODO: phase out usages of this)
 class TimedMassCumIntervention : public TimedMassIntervention {
 public:
     /** As massIntervention, but supports "increase to target coverage" mode:
@@ -291,7 +339,9 @@ private:
  * @param isProtectedCb A member-function pointer to a
  * "bool func (TimeStep maxAge)" function on a Human which returns true if
  * the Human is still protected by an intervention of the type in question
- * which is no older than maxAge. */
+ * which is no older than maxAge.
+ * 
+ *  (TODO: phase out usages of this) */
 TimedMassIntervention* createTimedMassCumIntervention(
     const scnXml::MassCum& mass,
     void (Host::Human::*deployIntervention)(const OM::Population&),
@@ -304,8 +354,46 @@ TimedMassIntervention* createTimedMassCumIntervention(
     }
 }
 
+// ———  HumanInterventionEffect  ———
 
-// -----  InterventionManager  -----
+void HumanIntervention::deploy( Human& human ) const{
+    for( vector<const HumanInterventionEffect*>::const_iterator it = effects.begin();
+            it != effects.end(); ++it )
+    {
+        (*it)->deploy( human );
+    }
+}
+
+class MDAEffect : public HumanInterventionEffect {
+public:
+    MDAEffect( const scnXml::MDA& mda ) {
+        // Set description. TODO: allow multiple descriptions.
+        if( TimeStep::interval == 5 ){
+            if( !mda.getDiagnostic().present() ){
+                // Note: allow no description for now to avoid XML changes.
+                //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
+                scnXml::HSDiagnostic diagnostic;
+                scnXml::Deterministic det(0.0);
+                diagnostic.setDeterministic(det);
+                Clinical::ClinicalImmediateOutcomes::initMDA(diagnostic);
+            }else{
+                Clinical::ClinicalImmediateOutcomes::initMDA( mda.getDiagnostic().get() );
+            }
+        }else{
+            if( !mda.getDescription().present() ){
+                throw util::xml_scenario_error( "error: interventions.MDA.description element required for MDA with 1-day timestep" );
+            }
+            Clinical::ESCaseManagement::initMDA( mda.getDescription().get() );
+        }
+    }
+    
+    void deploy( Human& human ) const{
+        human.massDrugAdministration();
+    }
+};
+
+
+// ———  InterventionManager  ———
 
 InterventionManager::InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population) :
     nextTimed(0), _cohortEnabled(false)
@@ -327,35 +415,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             typedef scnXml::ChangeEIR::TimedDeploymentSequence::const_iterator It;
             for( It it = eir.getTimedDeployment().begin(); it != eir.getTimedDeployment().end(); ++it ){
                 timed.push_back( new TimedChangeEIRIntervention( *it ) );
-            }
-        }
-    }
-    if( intervElt.getMDA().present() ){
-        const scnXml::MDA& mda = intervElt.getMDA().get();
-        if( mda.getTimed().present() ){
-            // read description:
-            if( TimeStep::interval == 5 ){
-                if( !mda.getDiagnostic().present() ){
-                    // Note: allow no description for now to avoid XML changes.
-                    //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
-                    scnXml::HSDiagnostic diagnostic;
-                    scnXml::Deterministic det(0.0);
-                    diagnostic.setDeterministic(det);
-                    Clinical::ClinicalImmediateOutcomes::initMDA(diagnostic);
-                }else{
-                    Clinical::ClinicalImmediateOutcomes::initMDA( mda.getDiagnostic().get() );
-                }
-            }else{
-                if( !mda.getDescription().present() ){
-                    throw util::xml_scenario_error( "error: interventions.MDA.description element required for MDA with 1-day timestep" );
-                }
-                Clinical::ESCaseManagement::initMDA( mda.getDescription().get() );
-            }
-            // timed deployments:
-            const scnXml::MassList::DeploySequence& seq = mda.getTimed().get().getDeploy();
-            typedef scnXml::MassList::DeploySequence::const_iterator It;
-            for( It it = seq.begin(); it != seq.end(); ++it ){
-                timed.push_back( new TimedMassIntervention( *it, &Host::Human::massDrugAdministration ) );
             }
         }
     }
@@ -528,6 +587,61 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 instance++;
             }
         }
+    }
+    if( intervElt.getHuman().present() ){
+        const scnXml::HumanInterventions& human = intervElt.getHuman().get();
+        map<string,size_t> identifierMap;
+        
+        // 1. Read effects
+        for( scnXml::HumanInterventions::EffectConstIterator it = human.getEffect().begin(),
+                end = human.getEffect().end(); it != end; ++it )
+        {
+            const scnXml::HumanInterventionEffect& effect = *it;
+            identifierMap[effect.getId()] = humanEffects.size();        // i.e. index of next item
+            if( effect.getMDA().present() ){
+                humanEffects.push_back( new MDAEffect( effect.getMDA().get() ) );
+            }else{
+                throw util::xml_scenario_error( "expected intervention.human.effect element to have a child, didn't find it (perhaps I need updating)" );
+            }
+        }
+        
+        // 2. Read list of interventions
+        for( scnXml::HumanInterventions::InterventionConstIterator it = human.getIntervention().begin(),
+                end = human.getIntervention().end(); it != end; ++it )
+        {
+            const scnXml::Intervention& elt = *it;
+            // 2.a intervention effects
+            HumanIntervention *intervention = new HumanIntervention();
+            for( scnXml::Intervention::EffectConstIterator it2 = elt.getEffect().begin(),
+                    end2 = elt.getEffect().end(); it2 != end2; ++it2 )
+            {
+                map<string,size_t>::const_iterator result = identifierMap.find( it2->getId() );
+                if( result == identifierMap.end() ){
+                    ostringstream msg;
+                    msg << "human intervention references effect with id \""
+                        << it2->getId()
+                        << "\", but no effect with this id was found";
+                    throw util::xml_scenario_error( msg.str() );
+                }
+                intervention->addEffect( &humanEffects[result->second] );
+            }
+            // 2.b intervention deployments
+            if( elt.getContinuous().present() ){
+                throw util::unimplemented_exception( "continuous deployment of human interventions" );
+            }
+            if( elt.getTimed().present() ){
+                const scnXml::MassListWithCum& timedElt = elt.getTimed().get();
+                if( timedElt.getCumulativeCoverage().present() )
+                    throw util::unimplemented_exception( "cumulative coverage for human interventions" );
+                for( scnXml::MassListWithCum::DeployConstIterator it2 = timedElt.getDeploy().begin(),
+                        end2 = timedElt.getDeploy().end(); it2 != end2; ++it2 )
+                {
+                    timed.push_back( new TimedHumanIntervention( *it2, intervention ) );
+                }
+            }
+            humanInterventions.push_back( intervention );
+        }
+        human.getIntervention();
     }
     
     // lists must be sorted, increasing

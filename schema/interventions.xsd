@@ -101,77 +101,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="MDA" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Description and deployment of MDA interventions
-            (can also be configured as screen and treat or intermittent
-            preventative treatment with 1-day time-step models).
-            
-            Currently neither diagnostic nor description need be provided for
-            5-day timestep model; this may change in the future.
-          </xs:documentation>
-          <xs:appinfo>name:Mass drug administration;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:choice>
-              <xs:element name="diagnostic" type="HSDiagnostic" minOccurs="0">
-                <xs:annotation>
-                  <xs:documentation>
-                    Description of diagnostic used by mass treatment option
-                    of five-day case management model — may be used to model
-                    MDA without diagnostic or MSAT.
-                    
-                    Drugs are administered whenever the test outcome is positive.
-                  </xs:documentation>
-                  <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="description" minOccurs="0">
-                <xs:annotation>
-                  <xs:documentation>
-                    Description of treatment type used by mass treatment option
-                    of one-day case management model. Can be used to describe
-                    one-size-fits-all mass drug dosing, age-based mass drug dosing
-                    and screen-and-treat. Number of treatments given can be
-                    reported by the nMDAs option.
-                  </xs:documentation>
-                  <xs:appinfo>type:string;name:Diagnostic and treatment (1-day);</xs:appinfo>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:complexContent>
-                    <xs:extension base="HSESCaseManagement">
-                      <xs:attribute name="name" type="xs:string" use="optional">
-                        <xs:annotation>
-                          <xs:documentation>Name of set of interventions</xs:documentation>
-                          <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
-                        </xs:annotation>
-                      </xs:attribute>
-                    </xs:extension>
-                  </xs:complexContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:choice>
-            <xs:element minOccurs="0" name="timed" type="massList">
-              <xs:annotation>
-                <xs:documentation>
-                  List of timed deployments of mass-drug-administration.
-                </xs:documentation>
-                <xs:appinfo>type:list of elements;name:Mass administration;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of intervention
-              </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
       <xs:element name="vaccine" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -583,7 +512,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="HumanInterventions">
     <xs:sequence>
-      <xs:element name="effect" minOccurs="0" maxOccurs="unbounded" type="HumanIntervention">
+      <xs:element name="effect" minOccurs="0" maxOccurs="unbounded" type="HumanInterventionEffect">
         <xs:annotation>
           <xs:documentation>
             A description of an effect achieved by an intervention.
@@ -658,20 +587,75 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Name of intervention</xs:documentation>
+              <xs:appinfo>type:string;name:Intervention name;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>Name of set of interventions</xs:documentation>
-        <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="HumanIntervention">
-    <xs:all>
-    </xs:all>
-    <xs:attribute name="id" type="xs:string">
+  <xs:complexType name="HumanInterventionEffect">
+    <xs:choice>
+      <xs:element name="MDA" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of MDA interventions
+            (can also be configured as screen and treat or intermittent
+            preventative treatment with 1-day time-step models).
+            
+            Currently neither diagnostic nor description need be provided for
+            5-day timestep model; this may change in the future.
+          </xs:documentation>
+          <xs:appinfo>name:Mass drug administration;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice>
+              <xs:element name="diagnostic" type="HSDiagnostic" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    Description of diagnostic used by mass treatment option
+                    of five-day case management model — may be used to model
+                    MDA without diagnostic or MSAT.
+                    
+                    Drugs are administered whenever the test outcome is positive.
+                  </xs:documentation>
+                  <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="description" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    Description of treatment type used by mass treatment option
+                    of one-day case management model. Can be used to describe
+                    one-size-fits-all mass drug dosing, age-based mass drug dosing
+                    and screen-and-treat. Number of treatments given can be
+                    reported by the nMDAs option.
+                  </xs:documentation>
+                  <xs:appinfo>type:string;name:Diagnostic and treatment (1-day);</xs:appinfo>
+                </xs:annotation>
+                <xs:complexType>
+                  <xs:complexContent>
+                    <xs:extension base="HSESCaseManagement">
+                      <xs:attribute name="name" type="xs:string" use="optional">
+                        <xs:annotation>
+                          <xs:documentation>Name of set of interventions</xs:documentation>
+                          <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+                        </xs:annotation>
+                      </xs:attribute>
+                    </xs:extension>
+                  </xs:complexContent>
+                </xs:complexType>
+              </xs:element>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:choice>
+    <xs:attribute name="id" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
           A short name or code identifying the intervention (used to refer to
@@ -680,7 +664,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="description" type="xs:string">
+    <xs:attribute name="description" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
           A short description of the intervention effects
@@ -924,7 +908,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
       <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="massCum" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="deploy" type="mass" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="vaccineDescription">

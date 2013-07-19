@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="32" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="150">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -294,11 +294,17 @@
         <deploy coverage="0.7" time="7"/>
       </timed>
     </vectorDeterrent>
-    <MDA>
-      <timed>
-        <deploy coverage="0.95" time="7"/>
-      </timed>
-    </MDA>
+    <human>
+      <effect id="MDA">
+        <MDA/>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy coverage="0.95" time="7"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">

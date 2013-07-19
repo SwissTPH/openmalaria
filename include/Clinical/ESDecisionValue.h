@@ -81,6 +81,10 @@ struct ESDecisionValueMap {
     ESDecisionValueMap () :
 	next_bit(0)
     {}
+    /** No values have been added? */
+    bool empty() const{
+        return id_map.empty();
+    }
     /** Reset to zero. */
     void clear() {
 	id_map.clear();

@@ -49,7 +49,7 @@ public class TranslatorJava extends TranslatorKotlin{
             getScenarioElement().setAttribute("wuID", "0");
         if (!getScenarioElement().hasAttribute("assimMode"))
             getScenarioElement().setAttribute("assimMode", "0");
-        Element elt = getChildElement(getScenarioElement(), "entoData");
+        Element elt = getChildElementOpt(getScenarioElement(), "entoData");
         if (elt != null && elt.hasAttribute("firstDay")) {
             System.out.println("Warning: Removed firstDay attribute");
             elt.removeAttribute("firstDay");
@@ -118,7 +118,7 @@ public class TranslatorJava extends TranslatorKotlin{
      * been moved from param.
      */
     public void translate3To4() {
-        Element params = getChildElement(getScenarioElement(), "parameters");
+        Element params = getChildElementOpt(getScenarioElement(), "parameters");
         Attr eip = null;
         if (params != null) {
             eip = params.getAttributeNode("eipDuration");
@@ -127,7 +127,7 @@ public class TranslatorJava extends TranslatorKotlin{
 
         // Attribute added to nonVector, if used, below.
 
-        Element elt = getChildElement(getScenarioElement(), "entoData");
+        Element elt = getChildElementOpt(getScenarioElement(), "entoData");
         if (elt != null) {
             NodeList list = elt.getElementsByTagName("EIRDaily");
             if (list.getLength() != 0) {
@@ -162,15 +162,15 @@ public class TranslatorJava extends TranslatorKotlin{
             elt.removeAttribute("inputType");
         }
 
-        elt = getChildElement(getScenarioElement(), "interventions");
+        elt = getChildElementOpt(getScenarioElement(), "interventions");
         if (elt != null) {
-            Element timed = getChildElement(elt, "timed");
+            Element timed = getChildElementOpt(elt, "timed");
             if (timed != null) {
                 // NOTE: should check whole "intervention" list
                 Element interv = (Element) timed.getElementsByTagName(
                         "intervention").item(0);
                 if (interv != null) {
-                    Element cEIR = getChildElement(interv, "changeEIR");
+                    Element cEIR = getChildElementOpt(interv, "changeEIR");
                     if (cEIR != null) {
                         cEIR.removeAttribute("inputType");
                         cEIR.removeAttribute("name"); // part of EntoData not
@@ -251,7 +251,7 @@ public class TranslatorJava extends TranslatorKotlin{
     // file. The relevant test scenarios have already been converted.
     public void translate7To8() {
         Element eD = getChildElement(getScenarioElement(), "entoData");
-        Element vect = getChildElement(eD, "vector");
+        Element vect = getChildElementOpt(eD, "vector");
         if (vect != null) {
             Element anoph = getChildElement(vect, "anopheles");
             Element mosq = getChildElement(anoph, "mosq");
@@ -279,12 +279,12 @@ public class TranslatorJava extends TranslatorKotlin{
     // Version 11 removes cached emerge rates from the schema
     public void translate10To11() {
         Element eD = getChildElement(getScenarioElement(), "entoData");
-        Element vect = getChildElement(eD, "vector");
+        Element vect = getChildElementOpt(eD, "vector");
         if (vect != null) {
             NodeList species = vect.getElementsByTagName("anopheles");
             for (int i = 0; i < species.getLength(); ++i) {
                 Element anoph = (Element) species.item(i);
-                Element er = getChildElement(anoph, "emergence");
+                Element er = getChildElementOpt(anoph, "emergence");
                 if (er != null)
                     anoph.removeChild(er);
                 // These are from the parameter values based on Anopheles
@@ -473,7 +473,7 @@ public class TranslatorJava extends TranslatorKotlin{
 
         getScenarioElement().appendChild(model);
 
-        Element healthSystemOld = getChildElement(getScenarioElement(), "healthSystem");
+        Element healthSystemOld = getChildElementOpt(getScenarioElement(), "healthSystem");
         Element eventScheduler = (Element) getScenarioElement()
                 .getElementsByTagName("EventScheduler").item(0);
         Attr healthSystemMemory;
@@ -519,7 +519,7 @@ public class TranslatorJava extends TranslatorKotlin{
         Element Intervention = (Element) getScenarioElement().getElementsByTagName(
                 "intervention").item(0);
         if (Intervention != null) {
-            Element changeHS = getChildElement(Intervention, "changeHS");
+            Element changeHS = getChildElementOpt(Intervention, "changeHS");
 
             if (changeHS != null) {
                 changeHS.removeAttribute("healthSystemMemory");
@@ -630,9 +630,9 @@ public class TranslatorJava extends TranslatorKotlin{
                 // unless an intervention at time 0 specifies EIR values, the scenario was buggy
                 boolean hasTransientEIRAt0 = false;
 
-                Element elt = getChildElement(getScenarioElement(), "interventions");
+                Element elt = getChildElementOpt(getScenarioElement(), "interventions");
                 if (elt != null) {
-                    Element timed = getChildElement(elt, "timed");
+                    Element timed = getChildElementOpt(elt, "timed");
                     if (timed != null) {
                         NodeList intervs = timed.getElementsByTagName("intervention");
                         for (int i = 0; i < intervs.getLength(); i++) {
@@ -640,7 +640,7 @@ public class TranslatorJava extends TranslatorKotlin{
                             if (Integer.parseInt(interv.getAttribute("time")) != 0)
                                 continue;       // only interested in interv. at time 0
 
-                            Element cEIR = getChildElement(interv, "changeEIR");
+                            Element cEIR = getChildElementOpt(interv, "changeEIR");
                             if (cEIR != null)   // yes, have applicable transient EIR data
                                 hasTransientEIRAt0 = true;
                         }
@@ -654,10 +654,10 @@ public class TranslatorJava extends TranslatorKotlin{
                 mode.setValue ("4");
             }
 
-            Element model = getChildElement(getScenarioElement(), "model");
+            Element model = getChildElementOpt(getScenarioElement(), "model");
             if (model!=null)
             {
-                Element t_parameters = getChildElement(model, "parameters");
+                Element t_parameters = getChildElementOpt(model, "parameters");
                 if (t_parameters!=null)
                     t_parameters.removeAttribute("delta");
             }
@@ -672,7 +672,7 @@ public class TranslatorJava extends TranslatorKotlin{
     // pSequelaeInpatient data moved from ImmediateOutcomes to parent HealthSystem element, and changed form.
     public void translate19To20() throws DocumentException{
         Element monitoring = getChildElement(getScenarioElement(), "monitoring");
-        Element ctsMon = getChildElement(monitoring, "continuous");
+        Element ctsMon = getChildElementOpt(monitoring, "continuous");
         if ( ctsMon != null ) {
             // Guess the common update. If not, complain.
             if ( ctsMon.getAttribute("period").equals("5") )
@@ -691,7 +691,7 @@ public class TranslatorJava extends TranslatorKotlin{
         }
 
         Element eD = getChildElement(getScenarioElement(), "entoData");
-        Element vect = getChildElement(eD, "vector");
+        Element vect = getChildElementOpt(eD, "vector");
         if (vect != null) {
             NodeList species = vect.getElementsByTagName("anopheles");
             for (int i = 0; i < species.getLength(); ++i) {
@@ -704,16 +704,16 @@ public class TranslatorJava extends TranslatorKotlin{
         }
 
         // IPTI_SP_MODEL option (try to work out whether it should be used)
-        Element interventions = getChildElement(getScenarioElement(), "interventions");
+        Element interventions = getChildElementOpt(getScenarioElement(), "interventions");
         if (interventions != null) {
-            Element iptiDesc = getChildElement(interventions, "iptiDescription");
+            Element iptiDesc = getChildElementOpt(interventions, "iptiDescription");
             if (iptiDesc != null) {
                 int nIPTI = 0;
-                Element continuous = getChildElement(interventions, "continuous");
+                Element continuous = getChildElementOpt(interventions, "continuous");
                 if (continuous != null) {
                     nIPTI += continuous.getElementsByTagName("ipti").getLength();
                 }
-                Element timed = getChildElement(interventions, "timed");
+                Element timed = getChildElementOpt(interventions, "timed");
                 if (timed != null) {
                     NodeList tIntervs = timed.getElementsByTagName("intervention");
                     for (int i = 0; i < tIntervs.getLength(); ++i) {
@@ -755,7 +755,7 @@ public class TranslatorJava extends TranslatorKotlin{
         Element hs = getChildElement(getScenarioElement(), "healthSystem");
         translateHealthSystem19To20( hs );
         if (interventions != null) {
-            Element timed = getChildElement(interventions, "timed");
+            Element timed = getChildElementOpt(interventions, "timed");
             if (timed != null) {
                 NodeList changeHS = timed.getElementsByTagName("changeHS");
                 for (int i = 0; i < changeHS.getLength(); ++i) {
@@ -786,7 +786,7 @@ public class TranslatorJava extends TranslatorKotlin{
     }
     void translateHealthSystem19To20 (Element hs) throws DocumentException{
             // pSequelaeInpatient update
-            Element hsio = getChildElement(hs, "ImmediateOutcomes");
+            Element hsio = getChildElementOpt(hs, "ImmediateOutcomes");
             double[] pSeqGroupLBound = new double[] { 0.0, 5.0 };
             double[] pSeqGroupValue;
             if ( hsio != null ) {
@@ -1071,7 +1071,7 @@ public class TranslatorJava extends TranslatorKotlin{
         for ( Node n : anophs ) {
             Element a = (Element) n;
             Element interv;
-            interv = getChildElement(a,descriptionElt);
+            interv = getChildElementOpt(a,descriptionElt);
             if (interv != null) {
                 NodeList effects = interv.getChildNodes();
                 for (int i=0; i<effects.getLength();++i) {
@@ -1138,7 +1138,7 @@ public class TranslatorJava extends TranslatorKotlin{
             // Name changes:
             Element ento = getChildElement(getScenarioElement(),"entoData");
             getScenarioDocument().renameNode(ento,null,"entomology");
-            Element vec = getChildElement(ento,"vector");
+            Element vec = getChildElementOpt(ento,"vector");
             if ( vec!=null ) {
                 for (Node n:getChildNodes(vec,"anopheles")) {
                     for (Node m:getChildNodes( n,"eir")) {
@@ -1234,7 +1234,7 @@ public class TranslatorJava extends TranslatorKotlin{
                 }
             }
             interventions.removeChild(descriptions);
-            Element continuous = getChildElement(interventions,"continuous");
+            Element continuous = getChildElementOpt(interventions,"continuous");
             if (continuous != null) {
                 NodeList cont = continuous.getChildNodes();
                 l = cont.getLength();
@@ -1267,7 +1267,7 @@ public class TranslatorJava extends TranslatorKotlin{
                 interventions.removeChild(continuous);
             }
             boolean givenIIWarning = false;
-            Element timed = getChildElement(interventions,"timed");
+            Element timed = getChildElementOpt(interventions,"timed");
             if (timed != null) {
                 List<Node> times = getChildNodes(timed,"intervention");
                 for ( Node timeNode : times ) {
@@ -1392,7 +1392,7 @@ public class TranslatorJava extends TranslatorKotlin{
      */
     public void translate28To29() {
         Element interventions = getChildElement(getScenarioElement(),"interventions");
-        Element ITNDesc = getChildElement(interventions,"ITN");
+        Element ITNDesc = getChildElementOpt(interventions,"ITN");
         if( ITNDesc != null ){
             if( getOptions().getITN29Translation() == ITN29ParameterTranslation.NONE ){
                 throwDocumentException("Error: ITN description changed. Pass argument --ITN-description to replace or ignore (see help)");
@@ -1518,7 +1518,7 @@ public class TranslatorJava extends TranslatorKotlin{
             ento.removeAttribute("annualEIR");
         }
 
-        Element vector = getChildElement(ento,"vector");
+        Element vector = getChildElementOpt(ento,"vector");
         if(vector != null){
             List<Node> anophs = getChildNodes(vector,"anopheles");
             for( Node anophNode : anophs ){
@@ -1553,7 +1553,7 @@ public class TranslatorJava extends TranslatorKotlin{
                 seas.setAttribute("input","EIR");
                 anoph.insertBefore(seas, anoph.getFirstChild());
 
-                Element eir = getChildElement(anoph,"EIR");
+                Element eir = getChildElementOpt(anoph,"EIR");
                 if( eir != null ){
                     Element fS = getScenarioDocument().createElement("fourierSeries");
                     seas.appendChild(fS);
@@ -1592,7 +1592,7 @@ public class TranslatorJava extends TranslatorKotlin{
                     anoph.removeChild( eir );
                 }
 
-                Element mE = getChildElement(anoph,"monthlyEIR");
+                Element mE = getChildElementOpt(anoph,"monthlyEIR");
                 if( mE != null ){
                     Element mV = getScenarioDocument().createElement("monthlyValues");
                     seas.appendChild(mV);
@@ -1612,19 +1612,19 @@ public class TranslatorJava extends TranslatorKotlin{
         }
 
         Element intervs = getChildElement(getScenarioElement(),"interventions");
-        Element interv = getChildElement(intervs,"changeHS");
+        Element interv = getChildElementOpt(intervs,"changeHS");
         if(interv != null){
             for( Node n : getChildNodes(interv,"timed") )
                 getScenarioDocument().renameNode( n, null, "timedDeployment" );
         }
 
-        interv = getChildElement(intervs,"changeEIR");
+        interv = getChildElementOpt(intervs,"changeEIR");
         if(interv != null){
             for( Node n : getChildNodes(interv,"timed") )
                 getScenarioDocument().renameNode( n, null, "timedDeployment" );
         }
 
-        interv = getChildElement(intervs,"MDA");
+        interv = getChildElementOpt(intervs,"MDA");
         if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
             Element list  = getScenarioDocument().createElement("timed");
             for( Node n : getChildNodes(interv, "timed") ){
@@ -1634,7 +1634,7 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"vaccine");
+        interv = getChildElementOpt(intervs,"vaccine");
         if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
             Element list  = getScenarioDocument().createElement("continuous");
             for( Node n : getChildNodes(interv, "continuous") ){
@@ -1652,7 +1652,7 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"IPT");
+        interv = getChildElementOpt(intervs,"IPT");
         if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
             Element list  = getScenarioDocument().createElement("continuous");
             for( Node n : getChildNodes(interv, "continuous") ){
@@ -1670,7 +1670,7 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"ITN");
+        interv = getChildElementOpt(intervs,"ITN");
         if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
             Element list  = getScenarioDocument().createElement("continuous");
             for( Node n : getChildNodes(interv, "continuous") ){
@@ -1688,7 +1688,7 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"IRS");
+        interv = getChildElementOpt(intervs,"IRS");
         if( interv != null ){
             if( /*TODO: use old or replace?*/ true ){
                 Element desc = getScenarioDocument().createElement("description");
@@ -1717,7 +1717,7 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"vectorDeterrent");
+        interv = getChildElementOpt(intervs,"vectorDeterrent");
         if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
             Element list  = getScenarioDocument().createElement("timed");
             for( Node n : getChildNodes(interv, "timed") ){
@@ -1727,7 +1727,7 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"cohort");
+        interv = getChildElementOpt(intervs,"cohort");
         if( interv != null && interv.getElementsByTagName("continuous").getLength() > 0 ){
             Element list  = getScenarioDocument().createElement("continuous");
             for( Node n : getChildNodes(interv, "continuous") ){
@@ -1745,7 +1745,7 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"immuneSuppression");
+        interv = getChildElementOpt(intervs,"immuneSuppression");
         if( interv != null && interv.getElementsByTagName("timed").getLength() > 0 ){
             Element list  = getScenarioDocument().createElement("timed");
             for( Node n : getChildNodes(interv, "timed") ){
@@ -1755,13 +1755,13 @@ public class TranslatorJava extends TranslatorKotlin{
             interv.appendChild(list);
         }
 
-        interv = getChildElement(intervs,"insertR_0Case");
+        interv = getChildElementOpt(intervs,"insertR_0Case");
         if(interv != null){
             for( Node n : getChildNodes(interv,"timed") )
                 getScenarioDocument().renameNode( n, null, "timedDeployment" );
         }
 
-        interv = getChildElement(intervs,"uninfectVectors");
+        interv = getChildElementOpt(intervs,"uninfectVectors");
         if(interv != null){
             for( Node n : getChildNodes(interv,"timed") )
                 getScenarioDocument().renameNode( n, null, "timedDeployment" );
@@ -1798,7 +1798,7 @@ public class TranslatorJava extends TranslatorKotlin{
             }
 
             Element intervs = getChildElement(getScenarioElement(), "interventions");
-            Element larv = getChildElement( intervs, "larviciding" );
+            Element larv = getChildElementOpt( intervs, "larviciding" );
             if( larv != null ){
                 // create new "vectorPop" parent
                 Element vectorPop = getScenarioDocument().createElement( "vectorPop" );
@@ -2112,7 +2112,7 @@ public class TranslatorJava extends TranslatorKotlin{
                 eventScheduler.appendChild(clinicalOutcomes);
 
 
-                Element CFR = getChildElement(changeHS, "CFR");
+                Element CFR = getChildElementOpt(changeHS, "CFR");
                 if (CFR!=null)
                     changeHS.insertBefore(eventScheduler, CFR);
                 else
@@ -2325,7 +2325,7 @@ public class TranslatorJava extends TranslatorKotlin{
             eventScheduler.appendChild(clinicalOutcomes);
 
 
-            Element CFR = getChildElement(healthSystem, "CFR");
+            Element CFR = getChildElementOpt(healthSystem, "CFR");
             if (CFR!=null)
                 healthSystem.insertBefore(eventScheduler, CFR);
             else
@@ -2553,7 +2553,7 @@ public class TranslatorJava extends TranslatorKotlin{
             eventScheduler.appendChild(clinicalOutcomes);
 
 
-            Element CFR = getChildElement(healthSystem, "CFR");
+            Element CFR = getChildElementOpt(healthSystem, "CFR");
             if (CFR!=null)
                 healthSystem.insertBefore(eventScheduler, CFR);
             else

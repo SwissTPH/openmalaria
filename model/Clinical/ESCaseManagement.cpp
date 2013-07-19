@@ -347,11 +347,17 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
 	throw xml_scenario_error((format("Treatment description given for treatment %1% which isn't an output of \"treatment\" decision") %value).str());
     return it->second;
 }
-void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeType treeType) {
-    // This function is also used to load a new health-system from intervention data; therefore clear old data:
-    dvMap.clear();
-    decisions.clear();
-    treatments.clear();
+void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeType treeType, bool reinitialise) {
+    if( reinitialise ){
+        // This function is also used to load a new health-system from intervention data; therefore clear old data:
+        dvMap.clear();
+        decisions.clear();
+        treatments.clear();
+    }else{
+        if( !dvMap.empty() || !decisions.empty() || !treatments.empty() )
+            // multiple MDA descriptions are probably the only thing that will cause this...
+            throw util::unimplemented_exception( "multiple MDA descriptions" );
+    }
     
     // Construct processor & read from XML.
     // Fills dvMap (which must be done before evaluating treatments).
@@ -445,8 +451,8 @@ void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem
     if( !healthSystem.getEventScheduler().present() )
 	throw util::xml_scenario_error ("Expected EventScheduler section in healthSystem data (initial or intervention)");
     const scnXml::HSEventScheduler& esData = healthSystem.getEventScheduler().get();
-    uncomplicated.initialize (esData.getUncomplicated (), ESDecisionMap::Uncomplicated);
-    complicated.initialize (esData.getComplicated (), ESDecisionMap::Complicated);
+    uncomplicated.initialize (esData.getUncomplicated (), ESDecisionMap::Uncomplicated, true);
+    complicated.initialize (esData.getComplicated (), ESDecisionMap::Complicated, true);
     
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
@@ -474,7 +480,7 @@ pair<ESDecisionValue, bool> executeTree(
 }
 
 void ESCaseManagement::initMDA (const scnXml::MDA::DescriptionType& desc){
-    mda.initialize( desc, ESDecisionMap::MDA );
+    mda.initialize( desc, ESDecisionMap::MDA, false );
 }
 
 void ESCaseManagement::massDrugAdministration(

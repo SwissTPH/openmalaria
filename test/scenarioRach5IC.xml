@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Rachuonyo 5-day Intervention cohort" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Rachuonyo 5-day Intervention cohort" schemaVersion="32" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Rachuonyo" popSize="979">
     <ageGroup lowerbound="0">
       <group poppercent="2.6" upperbound="1"/>
@@ -169,11 +169,17 @@
         <deploy coverage="0.157818" maxAge="90" minAge="20" time="4"/>
       </timed>
     </cohort>
-    <MDA>
-      <timed>
-        <deploy cohort="true" coverage="1" time="30"/>
-      </timed>
-    </MDA>
+    <human>
+      <effect id="MDA">
+        <MDA/>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy cohort="true" coverage="1" time="30"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Kenya ACT">

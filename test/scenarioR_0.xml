@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="R_0: count secondary infections from one primary" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="R_0: count secondary infections from one primary" schemaVersion="32" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -85,16 +85,6 @@
         <deploy coverage="1" time="73"/>
       </timed>
     </vaccine>
-    <MDA>
-      <timed>
-        <deploy coverage="1" time="73"/>
-        <deploy coverage="1" time="74"/>
-        <deploy coverage="1" time="75"/>
-        <deploy coverage="1" time="76"/>
-        <deploy coverage="1" time="77"/>
-        <deploy coverage="1" time="78"/>
-      </timed>
-    </MDA>
     <uninfectVectors>
       <timedDeployment time="73"/>
       <timedDeployment time="74"/>
@@ -111,6 +101,22 @@
     <insertR_0Case>
       <timedDeployment time="146"/>
     </insertR_0Case>
+    <human>
+      <effect id="MDA">
+        <MDA/>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy coverage="1" time="73"/>
+          <deploy coverage="1" time="74"/>
+          <deploy coverage="1" time="75"/>
+          <deploy coverage="1" time="76"/>
+          <deploy coverage="1" time="77"/>
+          <deploy coverage="1" time="78"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="no treatment">

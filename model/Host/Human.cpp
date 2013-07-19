@@ -214,7 +214,7 @@ void Human::timedIPT (const OM::Population&) {
   withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
 }
 
-void Human::massDrugAdministration (const OM::Population&) {
+void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
 }
 

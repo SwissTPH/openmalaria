@@ -10,9 +10,6 @@ import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import kotlin.dom.*
 import java.util.ArrayList
-import java.io.FileReader
-import java.io.FileOutputStream
-import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.Result
 import javax.xml.transform.OutputKeys
@@ -22,12 +19,6 @@ import javax.xml.validation.Schema
 import javax.xml.validation.Validator
 import javax.xml.transform.Source
 import org.xml.sax.SAXParseException
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.Statement
-import java.sql.ResultSet
-import java.io.StringReader
-import java.io.StringWriter
 import java.lang.reflect.Method
 import java.lang.reflect.InvocationTargetException
 
@@ -71,7 +62,7 @@ class Options {
     var inputFolder = File("scenarios")
     var schemaFolder = File("../../schema/")
 
-    val latestVersion = 31
+    val latestVersion = 32
     var targetVersion = latestVersion
 
     var doValidation = true
@@ -181,7 +172,14 @@ abstract class Translator(input: InputSource, options: Options) {
         }
         return r
     }
-    fun getChildElement(node: Node, name: String): Element? {
+    fun getChildElement(node: Node, name: String): Element {
+        var elts : List<Node> = getChildNodes(node, name)
+        if (elts.size > 1)
+            throw DocumentException("Expected ${node.getNodeName()} not to have more than one sub-element with name ${name}")
+        if (elts.size == 1) return elts.get(0) as Element
+        throw DocumentException( "Node ${node.getNodeName()} does not have required child ${name}" )
+    }
+    fun getChildElementOpt(node: Node, name: String): Element? {
         var elts : List<Node> = getChildNodes(node, name)
         if (elts.size > 1)
             throw DocumentException("Expected ${node.getNodeName()} not to have more than one sub-element with name ${name}")
@@ -288,5 +286,27 @@ abstract class Translator(input: InputSource, options: Options) {
 
 /** Extension to hold translation functions written in Kotlin. */
 abstract class TranslatorKotlin(input: InputSource, options: Options) : Translator(input,options){
-
+    public fun translate31To32(){
+        val interventions = getChildElement(scenarioElement, "interventions")
+        val MDA = getChildElementOpt(interventions, "MDA")
+        if (MDA != null){
+            val human = scenarioDocument.createElement("human")!!
+            interventions.appendChild(human)
+            val effect = scenarioDocument.createElement("effect")!!
+            human.appendChild(effect)
+            
+            val intervention = scenarioDocument.createElement("intervention")!!
+            human.appendChild(intervention)
+            
+            val interventionEffect = scenarioDocument.createElement("effect")!!
+            interventionEffect.setAttribute("id","MDA")
+            intervention.appendChild(interventionEffect)
+            val timed = getChildElementOpt(MDA,"timed")
+            if (timed != null)
+                intervention.appendChild(timed) // massList to massListWithCum
+            
+            effect.setAttribute("id","MDA")
+            effect.appendChild(MDA) // "timed" child removed
+        }
+    }
 }

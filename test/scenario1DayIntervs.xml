@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="examples of some interventions on 1-day TS" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="examples of some interventions on 1-day TS" schemaVersion="32" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -84,38 +84,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="none">
-    <MDA>
-      <description>
-        <decisions>
-          <decision depends="result" name="treatment" values="MQ,none">
-            result(negative): none
-            result(none): none
-            result(positive): MQ
-          </decision>
-          <decision depends="" name="test" values="none,microscopy,RDT">
-            RDT
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="MQ">
-            <schedule>
-              <medicate drug="MQ" hour="0" mg="1200"/>
-            </schedule>
-          </treatment>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-        </treatments>
-      </description>
-      <timed>
-        <deploy coverage="0.6" time="160"/>
-        <deploy coverage="0.6" time="860"/>
-        <deploy coverage="0.6" time="870"/>
-        <deploy coverage="0.6" time="1580"/>
-        <deploy coverage="0.6" time="1595"/>
-        <deploy coverage="0.6" time="1610"/>
-      </timed>
-    </MDA>
     <vaccine>
       <description vaccineType="PEV">
         <decay L="5" function="exponential"/>
@@ -132,6 +100,45 @@
         <deploy coverage="0.99" targetAgeYrs="5"/>
       </continuous>
     </vaccine>
+    <human>
+      <effect id="MDA">
+        <MDA>
+          <description>
+            <decisions>
+              <decision depends="result" name="treatment" values="MQ,none">
+            result(negative): none
+            result(none): none
+            result(positive): MQ
+          </decision>
+              <decision depends="" name="test" values="none,microscopy,RDT">
+            RDT
+          </decision>
+            </decisions>
+            <treatments>
+              <treatment name="MQ">
+                <schedule>
+                  <medicate drug="MQ" hour="0" mg="1200"/>
+                </schedule>
+              </treatment>
+              <treatment name="none">
+                <schedule/>
+              </treatment>
+            </treatments>
+          </description>
+        </MDA>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy coverage="0.6" time="160"/>
+          <deploy coverage="0.6" time="860"/>
+          <deploy coverage="0.6" time="870"/>
+          <deploy coverage="0.6" time="1580"/>
+          <deploy coverage="0.6" time="1595"/>
+          <deploy coverage="0.6" time="1610"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <EventScheduler>

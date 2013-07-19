@@ -96,7 +96,7 @@ public:
   ///@brief Deploy "intervention" functions
   //@{
   /// Asks the clinical model to deal with this
-  void massDrugAdministration (const OM::Population&);
+  void massDrugAdministration ();
   
   /// Vaccinate & report mass vaccination
   void massVaccinate (const OM::Population&);

@@ -86,6 +86,40 @@ public:
     TimeStep time;
 };
 
+/** A description of one effect of a human intervention.
+ * 
+ * Note that one "effect" can have several "actions", but that deployment and
+ * decay of these "actions" is usually related.
+ * 
+ * This is a base class. */
+class HumanInterventionEffect {
+public:
+    /** Deploy the effect to a pre-selected human. */
+    virtual void deploy( Host::Human& human ) const =0;
+    
+protected:
+    /** Construct (from a derived class). */
+    HumanInterventionEffect() {}
+    
+private:
+    /** Don't copy (this may be possible but shouldn't be needed). */
+    HumanInterventionEffect( const HumanInterventionEffect& );
+};
+
+/** A description of a human intervention (as a list of effects). */
+class HumanIntervention {
+public:
+    /** Add an effect. */
+    inline void addEffect( const HumanInterventionEffect *effect ){ effects.push_back( effect ); }
+    
+    /** Deploy all effects to a pre-selected human. */
+    void deploy( Host::Human& human ) const;
+    
+private:
+    // List of pointers to effects. Does not manage memory (InterventionManager::humanEffects does that).
+    vector<const HumanInterventionEffect*> effects;
+};
+
 /** Management of interventions deployed on a per-timestep basis. */
 class InterventionManager {
 public:
@@ -121,6 +155,12 @@ public:
     void deploy (OM::Population& population);
     
 private:
+    // All human intervention effects, indexed by a number. This list is used
+    // during initialisation and thereafter only for memory management.
+    boost::ptr_vector<HumanInterventionEffect> humanEffects;
+    // All human interventions. These are stored here for memory management
+    // only (so that they are deleted when this class is destroyed).
+    boost::ptr_vector<HumanIntervention> humanInterventions;
     // All continuous interventions, sorted by deployment age (weakly increasing)
     vector<AgeIntervention> ctsIntervs;
     // List of all timed interventions. Should be sorted (time weakly increasing).
