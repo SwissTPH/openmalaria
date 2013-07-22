@@ -7,7 +7,7 @@
 # Z_LIBRARIES
 
 # list common paths here:
-FIND_PATH(Z_INCLUDE_DIRS zconf.h
+FIND_PATH(Z_INCLUDE_DIRS zlib.h
  PATHS
   ${CMAKE_SOURCE_DIR}/../zlib/include
   ${CMAKE_SOURCE_DIR}/../zlib
