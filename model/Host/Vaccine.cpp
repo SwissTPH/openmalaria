@@ -22,6 +22,7 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "schema/interventions.h"
+#include "util/StreamValidator.h"
 
 #include <cmath>
 
@@ -43,10 +44,20 @@ double Vaccine::getEfficacy (int numPrevDoses)
     if (numPrevDoses >= (int) initialMeanEfficacy.size())
         numPrevDoses = initialMeanEfficacy.size() - 1;
     double ime = initialMeanEfficacy[numPrevDoses];
+    //NOTE: With extra valiadation in random, the first difference is noticed here:
+    util::streamValidate(ime);
+    util::streamValidate(efficacyB);
     if (ime == 0.0){
         return 0.0;
     } else if (ime < 1.0) {
-        return random::betaWithMean (ime, efficacyB);
+        double result = random::betaWithMean (ime, efficacyB);
+        //NOTE: Without extra validation in random, the first difference is noticed here:
+        util::streamValidate(result);
+        //TODO: Why the difference? Bug in/limitation of StreamValidatior?
+        // Extra memory allocation due to the extra logging causes some bad
+        // memory usage to manifest differently? Am I forgetting to initialise
+        // some variable?
+        return result;
     } else {
         return 1.0;
     }
