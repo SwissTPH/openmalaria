@@ -46,7 +46,8 @@ Innate immunity related
  * beta_N := minimum value for R_N^x (value 0.5198)
  * psi_N := minimum value for R_N^y  (value 0.0946)
  * kappa_N := slope of innate immune responses R_N^x and R_N^y (value 2.9506)
- * sigma_epsilon := standard deviation associated with random effects (logNormal) (value 1.4217) 
+ * sigma_epsilon := standard deviation used when sampling circulating densities
+ (gaussian or gamma distributions, default value 1.4217)
 
 Clonal immunity related
  * beta_C := minimum value for R_C^x  (value 0.1872)
@@ -86,7 +87,7 @@ Parameters to assign infection dependent parameters
 const double beta_N=0.5198;
 const double psi_N=0.0946;
 const double kappa_N=2.9506;
-const double sigma_epsilon=1.4217; 
+double sigma_epsilon=1.4217; 
 
 /* Clonal immunity related */
 const double beta_C=0.1872;
@@ -137,7 +138,6 @@ const double b_TV = 0.3093;
 const double m_rep=16.0; 
 const double Omega=0.00025;
 //TODO ending of infection is density per microL of ADULTS, we need to relate weight to BV
-
 //@}
 
 CommonInfection* createPennyInfection (uint32_t protID) {
@@ -155,17 +155,9 @@ void PennyInfection::init() {
     CommonWithinHost::createInfection = &createPennyInfection;
     CommonWithinHost::checkpointedInfection = &checkpointedPennyInfection;
 
-    if(util::ModelOptions::option (util::IMMUNE_THRESHOLD_GAMMA)) {
-	immune_threshold_gamma = true;
-    } else {
-	immune_threshold_gamma = false;
-    }
-    
-    if(util::ModelOptions::option (util::UPDATE_DENSITY_GAMMA)) {
-	update_density_gamma = true;
-    } else {
-	update_density_gamma = false;
-    }
+    immune_threshold_gamma = util::ModelOptions::option (util::IMMUNE_THRESHOLD_GAMMA);
+    update_density_gamma = util::ModelOptions::option (util::UPDATE_DENSITY_GAMMA);
+    sigma_epsilon = InputData.getParameter( Params::PENNY_CIR_DENS_SIGMA );
 }
 
 PennyInfection::PennyInfection(uint32_t protID):
@@ -264,8 +256,10 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
         } else {
 	    
 	    if( update_density_gamma ) {
-	      	double a_cirDens = pow(log(cirDensity_new),2)/pow(sigma_epsilon,2);
-		double b_cirDens = pow(sigma_epsilon,2)/log(cirDensity_new);
+                double logDens = log(cirDensity_new);
+                double variance_epsilon = sigma_epsilon*sigma_epsilon;
+	      	double a_cirDens = logDens*logDens/variance_epsilon;
+		double b_cirDens = variance_epsilon/log(cirDensity_new);
 		cirDensity_new = exp(random::gamma(a_cirDens,b_cirDens) ) * survivalFactor;
 	    } else {
 		cirDensity_new = exp(random::gauss(log(cirDensity_new),sigma_epsilon)) * survivalFactor;

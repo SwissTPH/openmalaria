@@ -92,6 +92,11 @@ namespace Params {
     
     /// exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day, with Event Scheduler model
     CFR_NEG_LOG_ALPHA = 38,
+    
+    /** Used when sampling new circulating parasite densities.
+     *
+     * Value from Matlab fitting: 1.4217. */
+    PENNY_CIR_DENS_SIGMA = 39,
     MAX
   };
 }
@@ -147,10 +152,18 @@ namespace Params {
 	 * running the main simulation, so only changes added during init will
 	 * be saved. (This avoids worrying about checkpointing.) */
 	bool documentChanged;
-
+        
+        /** Set parameter values from a list.
+         * 
+         * @param paramSeq XML sequence of elements each defining a parameter
+         * @param uniquelySet If true, complain if a parameter is being set more than once
+         * 
+         * Note: if calling this multiple times (presumably just for unit
+         * testing), it doesn't clear old values (though it does override any
+         * set in the new list). */
+        void setParameterValues (const scnXml::Parameters::ParameterSequence& paramSeq, bool uniquelySet);
 	
     private:
-	void initParameterValues ();
 	
 	/// Sometimes used to save changes to the xml.
 	std::string xmlFileName;

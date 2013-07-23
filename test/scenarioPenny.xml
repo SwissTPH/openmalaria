@@ -1092,6 +1092,7 @@
       <parameter include="0" name="Diff positive days mean" number="36" value="2.2736"/>
       <parameter include="0" name="Diff positive days sd" number="37" value="0.2315"/>
       <parameter include="1" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.940524"/>
+      <parameter include="1" name="sigma epsilon in Penny infection model" number="39" value="1.4217"/>
     </parameters>
   </model>
 </scenario>

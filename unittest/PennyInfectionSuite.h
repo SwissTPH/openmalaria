@@ -38,6 +38,9 @@ public:
     void setUp () {
         TimeStep::init( 1, 90.0 );
         UnittestUtil::Infection_init_1day ();
+        scnXml::Parameters::ParameterSequence paramSeq;
+        paramSeq.push_back( scnXml::Parameter("", Params::PENNY_CIR_DENS_SIGMA, 1.4217) );
+        InputData.setParameterValues( paramSeq, false );
         PennyInfection::init();
         TimeStep::simulation = TimeStep(7);     // value shouldn't be important
         util::random::seed( 1095 );

@@ -33,15 +33,14 @@ namespace OM {
     
 // Initialization functions:
 
-void InputDataType::initParameterValues()
+void InputDataType::setParameterValues(const scnXml::Parameters::ParameterSequence& paramSeq, bool uniquelySet)
 {
-    // set parameters
-    const scnXml::Parameters::ParameterSequence& paramSeq = scenario->getModel().getParameters().getParameter();
     for (scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
         int i = it->getNumber();
         if (i < 0 || i >= Params::MAX)
 	    throw util::xml_scenario_error( (format("parameter with invalid index %1%") %i).str() );
-	if( !parameterValues.insert( make_pair( i, it->getValue() ) ).second )
+        bool insert = parameterValues.insert( make_pair( i, it->getValue() ) ).second;
+	if( uniquelySet && !insert )
 	    throw util::xml_scenario_error( (format("parameter with index %1% described twice") %i).str() );
     }
 }
@@ -84,7 +83,7 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     if (scenarioVersion > SCHEMA_VERSION)
         throw util::xml_scenario_error ("Error: new schema version unsupported");
 
-    initParameterValues();
+    setParameterValues( scenario->getModel().getParameters().getParameter(), true );
     return cksum;
 }
 
