@@ -71,6 +71,7 @@ namespace OM { namespace util {
 	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
+            codeMap["PENNY_JULY_2013"]=PENNY_JULY_2013;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -204,6 +205,9 @@ namespace OM { namespace util {
         // Required options (above table can't check these):
         if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
             throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
+        
+        if( optSet_bs[PENNY_JULY_2013] && !optSet_bs[PENNY_WITHIN_HOST_MODEL] )
+            throw xml_scenario_error( "PENNY_JULY_2013 requires PENNY_WITHIN_HOST_MODEL" );
         
         if( TimeStep::interval != 1 ){
             bitset<NUM_OPTIONS> require1DayTS;

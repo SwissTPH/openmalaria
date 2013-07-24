@@ -221,6 +221,9 @@ namespace OM { namespace util {
          * Requires vector model. */
         VECTOR_SIMPLE_MPD_MODEL,
         
+        /** Use the new version of the Penny model, as implemented July 2013. */
+        PENNY_JULY_2013,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

@@ -85,8 +85,8 @@ private:
     // tracked summation of densities with decay for clonal immunity (sigmoidal function)
     double clonalSummation;
     
-    // 
-    
+    // Number of times a new variant has replaced an old one in this infection
+    size_t numNewVariants;
     
     // allow unittest to access private vars
     friend class ::PennyInfectionSuite;

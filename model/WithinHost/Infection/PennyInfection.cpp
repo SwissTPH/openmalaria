@@ -107,6 +107,8 @@ const double prob_lambda_V = 1.0 / lambda_V;
 /* distribution model paramters */
 bool PennyInfection::immune_threshold_gamma = false;
 bool PennyInfection::update_density_gamma = false;
+bool immune_threshold_July_2013 = false;
+size_t limit_new_variants = numeric_limits<size_t>::max();
 
 /* Parameters to assign infection dependent parameters */
 const double mu_Y=3.9700;
@@ -136,7 +138,7 @@ const double b_TV = 0.3093;
 
 /* Other infection parameters */
 const double m_rep=16.0; 
-const double Omega=0.00025;
+double Omega=0.00025;
 //TODO ending of infection is density per microL of ADULTS, we need to relate weight to BV
 //@}
 
@@ -157,17 +159,33 @@ void PennyInfection::init() {
 
     immune_threshold_gamma = util::ModelOptions::option (util::IMMUNE_THRESHOLD_GAMMA);
     update_density_gamma = util::ModelOptions::option (util::UPDATE_DENSITY_GAMMA);
+    if( util::ModelOptions::option( util::PENNY_JULY_2013 ) ) {
+        Omega = 5e-6;
+        immune_threshold_July_2013 = true;
+        limit_new_variants = 50;
+    }
     sigma_epsilon = InputData.getParameter( Params::PENNY_CIR_DENS_SIGMA );
 }
 
 PennyInfection::PennyInfection(uint32_t protID):
         CommonInfection(protID),
         variantSpecificSummation(0),
-        clonalSummation(0)
+        clonalSummation(0),
+        numNewVariants(0)
 {
     // assign infection dependent immune thresholds
     // using gamma distribution
-    if(immune_threshold_gamma) {
+    if( immune_threshold_July_2013 ){
+        do {
+            threshold_N = exp(random::gauss(mu_TN, sigma_TN));
+        }while( threshold_N <= 2e3 || threshold_N >= 8e4 );
+        do{
+            threshold_V = exp(random::gauss(mu_TV, sigma_TV));
+        }while( threshold_V / threshold_N >= 1e-3 );
+        do{
+            threshold_C = exp(random::gauss(mu_TC, sigma_TC));
+        } while( threshold_N <= threshold_C || threshold_V / threshold_C <= 4e-2);
+    }else if(immune_threshold_gamma) {
       do {
         threshold_N = exp(random::gamma(a_TN,b_TN));
         threshold_C = exp(random::gamma(a_TC,b_TC));
@@ -294,13 +312,17 @@ bool PennyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfectio
 }
 
 double PennyInfection::getVariantSpecificSummation() {
-    // check if new dominant variant has arrived
-    bool newVarDominant = random::bernoulli(prob_lambda_V);
-    //draw from bernouli distrb, prob 1/lambda_V
-    if (newVarDominant) {
-        variantSpecificSummation = 0;
-        for(int i=0; i<delta_V; ++i){
-            seqDensities[i] = 0.0;
+    // limit the number of new variants to 50
+    if( numNewVariants < limit_new_variants ){
+        // check if new dominant variant has arrived
+        bool newVarDominant = random::bernoulli(prob_lambda_V);
+        //draw from bernouli distrb, prob 1/lambda_V
+        if (newVarDominant) {
+            numNewVariants += 1; // starts at 0 for first variant
+            variantSpecificSummation = 0;
+            for(int i=0; i<delta_V; ++i){
+                seqDensities[i] = 0.0;
+            }
         }
     }
     //The effective exposure is computed by adding in the delta_V-day lagged parasite density 
@@ -335,6 +357,7 @@ PennyInfection::PennyInfection (istream& stream) :
     threshold_C & stream;
     variantSpecificSummation & stream;
     clonalSummation & stream;
+    numNewVariants & stream;
 }
 
 void PennyInfection::checkpoint (ostream& stream) {
@@ -350,6 +373,7 @@ void PennyInfection::checkpoint (ostream& stream) {
     threshold_C & stream;
     variantSpecificSummation & stream;
     clonalSummation & stream;
+    numNewVariants & stream;
 }
 
 }
