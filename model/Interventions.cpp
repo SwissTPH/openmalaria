@@ -418,6 +418,61 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }
         }
     }
+    if( intervElt.getHuman().present() ){
+        const scnXml::HumanInterventions& human = intervElt.getHuman().get();
+        map<string,size_t> identifierMap;
+        
+        // 1. Read effects
+        for( scnXml::HumanInterventions::EffectConstIterator it = human.getEffect().begin(),
+                end = human.getEffect().end(); it != end; ++it )
+        {
+            const scnXml::HumanInterventionEffect& effect = *it;
+            identifierMap[effect.getId()] = humanEffects.size();        // i.e. index of next item
+            if( effect.getMDA().present() ){
+                humanEffects.push_back( new MDAEffect( effect.getMDA().get() ) );
+            }else{
+                throw util::xml_scenario_error( "expected intervention.human.effect element to have a child, didn't find it (perhaps I need updating)" );
+            }
+        }
+        
+        // 2. Read list of interventions
+        for( scnXml::HumanInterventions::InterventionConstIterator it = human.getIntervention().begin(),
+                end = human.getIntervention().end(); it != end; ++it )
+        {
+            const scnXml::Intervention& elt = *it;
+            // 2.a intervention effects
+            HumanIntervention *intervention = new HumanIntervention();
+            for( scnXml::Intervention::EffectConstIterator it2 = elt.getEffect().begin(),
+                    end2 = elt.getEffect().end(); it2 != end2; ++it2 )
+            {
+                map<string,size_t>::const_iterator result = identifierMap.find( it2->getId() );
+                if( result == identifierMap.end() ){
+                    ostringstream msg;
+                    msg << "human intervention references effect with id \""
+                        << it2->getId()
+                        << "\", but no effect with this id was found";
+                    throw util::xml_scenario_error( msg.str() );
+                }
+                intervention->addEffect( &humanEffects[result->second] );
+            }
+            // 2.b intervention deployments
+            if( elt.getContinuous().present() ){
+                throw util::unimplemented_exception( "continuous deployment of human interventions" );
+            }
+            if( elt.getTimed().present() ){
+                const scnXml::MassListWithCum& timedElt = elt.getTimed().get();
+                if( timedElt.getCumulativeCoverage().present() )
+                    throw util::unimplemented_exception( "cumulative coverage for human interventions" );
+                for( scnXml::MassListWithCum::DeployConstIterator it2 = timedElt.getDeploy().begin(),
+                        end2 = timedElt.getDeploy().end(); it2 != end2; ++it2 )
+                {
+                    timed.push_back( new TimedHumanIntervention( *it2, intervention ) );
+                }
+            }
+            humanInterventions.push_back( intervention );
+        }
+        human.getIntervention();
+    }
     if( intervElt.getVaccine().present() ){
         const scnXml::Vaccine& vacc = intervElt.getVaccine().get();
         if( vacc.getContinuous().present() || vacc.getTimed().present() ){
@@ -587,61 +642,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 instance++;
             }
         }
-    }
-    if( intervElt.getHuman().present() ){
-        const scnXml::HumanInterventions& human = intervElt.getHuman().get();
-        map<string,size_t> identifierMap;
-        
-        // 1. Read effects
-        for( scnXml::HumanInterventions::EffectConstIterator it = human.getEffect().begin(),
-                end = human.getEffect().end(); it != end; ++it )
-        {
-            const scnXml::HumanInterventionEffect& effect = *it;
-            identifierMap[effect.getId()] = humanEffects.size();        // i.e. index of next item
-            if( effect.getMDA().present() ){
-                humanEffects.push_back( new MDAEffect( effect.getMDA().get() ) );
-            }else{
-                throw util::xml_scenario_error( "expected intervention.human.effect element to have a child, didn't find it (perhaps I need updating)" );
-            }
-        }
-        
-        // 2. Read list of interventions
-        for( scnXml::HumanInterventions::InterventionConstIterator it = human.getIntervention().begin(),
-                end = human.getIntervention().end(); it != end; ++it )
-        {
-            const scnXml::Intervention& elt = *it;
-            // 2.a intervention effects
-            HumanIntervention *intervention = new HumanIntervention();
-            for( scnXml::Intervention::EffectConstIterator it2 = elt.getEffect().begin(),
-                    end2 = elt.getEffect().end(); it2 != end2; ++it2 )
-            {
-                map<string,size_t>::const_iterator result = identifierMap.find( it2->getId() );
-                if( result == identifierMap.end() ){
-                    ostringstream msg;
-                    msg << "human intervention references effect with id \""
-                        << it2->getId()
-                        << "\", but no effect with this id was found";
-                    throw util::xml_scenario_error( msg.str() );
-                }
-                intervention->addEffect( &humanEffects[result->second] );
-            }
-            // 2.b intervention deployments
-            if( elt.getContinuous().present() ){
-                throw util::unimplemented_exception( "continuous deployment of human interventions" );
-            }
-            if( elt.getTimed().present() ){
-                const scnXml::MassListWithCum& timedElt = elt.getTimed().get();
-                if( timedElt.getCumulativeCoverage().present() )
-                    throw util::unimplemented_exception( "cumulative coverage for human interventions" );
-                for( scnXml::MassListWithCum::DeployConstIterator it2 = timedElt.getDeploy().begin(),
-                        end2 = timedElt.getDeploy().end(); it2 != end2; ++it2 )
-                {
-                    timed.push_back( new TimedHumanIntervention( *it2, intervention ) );
-                }
-            }
-            humanInterventions.push_back( intervention );
-        }
-        human.getIntervention();
     }
     
     // lists must be sorted, increasing
