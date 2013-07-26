@@ -20,6 +20,7 @@
 
 #include "Host/ImportedInfections.h"
 #include "util/random.h"
+#include "Population.h"
 
 namespace OM { namespace Host {
     

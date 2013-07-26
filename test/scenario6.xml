@@ -166,39 +166,46 @@
     </ageGroup>
   </monitoring>
   <interventions name="BSVPEVTBV Ref EPI modified modified">
-    <vaccine>
-      <description vaccineType="TBV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="1"/>
-        <initialEfficacy value="1"/>
-        <initialEfficacy value="1"/>
-      </description>
-      <description vaccineType="BSV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="1"/>
-        <initialEfficacy value="1"/>
-        <initialEfficacy value="1"/>
-      </description>
-      <description vaccineType="PEV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="1"/>
-        <initialEfficacy value="1"/>
-        <initialEfficacy value="1"/>
-      </description>
-      <continuous>
-        <deploy coverage="1" targetAgeYrs="0.0833"/>
-        <deploy coverage="1" targetAgeYrs="0.17"/>
-        <deploy coverage="1" targetAgeYrs="0.25"/>
-        <deploy coverage="1" targetAgeYrs="1.25"/>
-        <deploy coverage="1" targetAgeYrs="2.25"/>
-      </continuous>
-      <timed>
-        <deploy coverage="1" maxAge="999" minAge="0" time="26"/>
-      </timed>
-    </vaccine>
+    <human>
+      <effect id="vaccine">
+        <vaccine>
+          <description vaccineType="TBV">
+            <decay L="0.0" function="constant"/>
+            <efficacyB value="10"/>
+            <initialEfficacy value="1"/>
+            <initialEfficacy value="1"/>
+            <initialEfficacy value="1"/>
+          </description>
+          <description vaccineType="BSV">
+            <decay L="0.0" function="constant"/>
+            <efficacyB value="10"/>
+            <initialEfficacy value="1"/>
+            <initialEfficacy value="1"/>
+            <initialEfficacy value="1"/>
+          </description>
+          <description vaccineType="PEV">
+            <decay L="0.0" function="constant"/>
+            <efficacyB value="10"/>
+            <initialEfficacy value="1"/>
+            <initialEfficacy value="1"/>
+            <initialEfficacy value="1"/>
+          </description>
+        </vaccine>
+      </effect>
+      <intervention>
+        <effect id="vaccine"/>
+        <continuous>
+          <deploy coverage="1" targetAgeYrs="0.0833"/>
+          <deploy coverage="1" targetAgeYrs="0.17"/>
+          <deploy coverage="1" targetAgeYrs="0.25"/>
+          <deploy coverage="1" targetAgeYrs="1.25"/>
+          <deploy coverage="1" targetAgeYrs="2.25"/>
+        </continuous>
+        <timed>
+          <deploy coverage="1" maxAge="999" minAge="0" time="26"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">

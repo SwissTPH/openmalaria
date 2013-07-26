@@ -21,6 +21,7 @@ import javax.xml.transform.Source
 import org.xml.sax.SAXParseException
 import java.lang.reflect.Method
 import java.lang.reflect.InvocationTargetException
+import java.util.TreeSet
 
 // ———  part 1: define utility classes (enums, simple containers)  ———
 
@@ -167,8 +168,20 @@ abstract class Translator(input: InputSource, options: Options) {
         var l: Int = children.getLength()
         val r = ArrayList<Node>()
         for (i in 0..l - 1) {
-            if (name == (children.item(i)!!.getNodeName()))
-                r.add(children.item(i)!!)
+            val item = children.item(i)!!
+            if (name == item.getNodeName())
+                r.add(item)
+        }
+        return r
+    }
+    fun getChildElements(node: Node, name: String) : ArrayList<Element> {
+        var children: NodeList = node.getChildNodes()
+        var l: Int = children.getLength()
+        val r = ArrayList<Element>()
+        for (i in 0..l - 1) {
+            val item = children.item(i)!!
+            if (item is Element && name == item.getNodeName())
+                r.add(item)
         }
         return r
     }
@@ -288,25 +301,78 @@ abstract class Translator(input: InputSource, options: Options) {
 abstract class TranslatorKotlin(input: InputSource, options: Options) : Translator(input,options){
     public fun translate31To32(){
         val interventions = getChildElement(scenarioElement, "interventions")
+        val effectIdents : jet.MutableSet<String> = TreeSet<String>()
+        val humanEffects = ArrayList<Element>()
+        val humanInterventions = ArrayList<Element>()
+        fun effectIdent(suggestedIdent: String): String{
+            // find a unique effect identifier
+            var ident = suggestedIdent
+            var app = 0
+            while (effectIdents.contains(ident)){
+                ident = suggestedIdent + app
+                app += 1
+            }
+            return ident
+        }
+        fun newEffect(ident: String): Element{
+            val effect = scenarioDocument.createElement("effect")!!
+            if (effectIdents.contains(ident))
+                // actually, SetupException isn't really the right choice, but it's not a DocumentException either...
+                throw SetupException("effect id is not unique")
+            effectIdents.add(ident)
+            effect.setAttribute("id",ident)
+            humanEffects.add(effect)
+            return effect
+        }
+        fun newIntervention(effects: Array<String>): Element{
+            val intervention = scenarioDocument.createElement("intervention")!!
+            for (effect in effects){
+                val interventionEffect = scenarioDocument.createElement("effect")!!
+                interventionEffect.setAttribute("id",effect)
+                intervention.appendChild(interventionEffect)
+            }
+            humanInterventions.add(intervention)
+            return intervention
+        }
+        
         val MDA = getChildElementOpt(interventions, "MDA")
         if (MDA != null){
-            val human = scenarioDocument.createElement("human")!!
-            interventions.appendChild(human)
-            val effect = scenarioDocument.createElement("effect")!!
-            human.appendChild(effect)
+            val ident = effectIdent("MDA")
+            val effect = newEffect(ident)
+            val intervention = newIntervention(array(ident))
             
-            val intervention = scenarioDocument.createElement("intervention")!!
-            human.appendChild(intervention)
-            
-            val interventionEffect = scenarioDocument.createElement("effect")!!
-            interventionEffect.setAttribute("id","MDA")
-            intervention.appendChild(interventionEffect)
             val timed = getChildElementOpt(MDA,"timed")
             if (timed != null)
                 intervention.appendChild(timed) // massList to massListWithCum
             
-            effect.setAttribute("id","MDA")
             effect.appendChild(MDA) // "timed" child removed
+        }
+        
+        val vaccine = getChildElementOpt(interventions, "vaccine")
+        if (vaccine != null){
+            val ident = effectIdent("vaccine")
+            val effect = newEffect(ident)
+            val intervention = newIntervention(array(ident))
+            val cts = getChildElementOpt(vaccine, "continuous")
+            if (cts != null) intervention.appendChild(cts)
+            val timed = getChildElementOpt(vaccine, "timed")
+            if (timed != null){
+                for (deploy in getChildElements(timed, "deploy")){
+                    if (deploy.getAttributeNode("cumulativeWithMaxAge") != null)
+                        throw DocumentException("can't handle cumulative deployment translations yet")
+                }
+                intervention.appendChild(timed)
+            }
+            effect.appendChild(vaccine)
+        }
+        
+        if (humanEffects.size > 0){
+            val human = scenarioDocument.createElement("human")!!
+            interventions.appendChild(human)
+            for (effect in humanEffects)
+                human.appendChild(effect)
+            for (intervention in humanInterventions)
+                human.appendChild(intervention)
         }
     }
 }

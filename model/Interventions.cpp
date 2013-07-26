@@ -31,29 +31,27 @@
 namespace OM {
     using Host::Human;
 
-// -----  AgeIntervention  -----
+// ———  ContinuousDeployment and derivatives  ———
 
-AgeIntervention::AgeIntervention(
-    const ::scnXml::ContinuousDeployment& elt, void(Host::Human::*func) (const OM::Population&)
-) :
+ContinuousDeployment::ContinuousDeployment(
+        const ::scnXml::ContinuousDeployment& elt ) :
     begin( elt.getBegin() ),
     end( elt.getEnd() ),
-    ageTimesteps( TimeStep::fromYears( elt.getTargetAgeYrs() ) ),
+    deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) ),
     cohortOnly( elt.getCohort() ),
-    coverage( elt.getCoverage() ),
-    deploy( func )
+    coverage( elt.getCoverage() )
 {
     if( begin < TimeStep(0) || end < begin ){
         throw util::xml_scenario_error("continuous intervention must have 0 <= begin <= end");
     }
-    if( ageTimesteps <= TimeStep(0) ){
+    if( deployAge <= TimeStep(0) ){
         ostringstream msg;
         msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
-        msg << " years corresponds to timestep "<<ageTimesteps;
+        msg << " years corresponds to timestep "<<deployAge;
         msg << "; must be at least timestep 1.";
         throw util::xml_scenario_error( msg.str() );
     }
-    if( ageTimesteps > TimeStep::maxAgeIntervals ){
+    if( deployAge > TimeStep::maxAgeIntervals ){
         ostringstream msg;
         msg << "continuous intervention must have target age no greater than ";
         msg << TimeStep::maxAgeIntervals * TimeStep::yearsPerInterval;
@@ -64,9 +62,67 @@ AgeIntervention::AgeIntervention(
     }
 }
 
-// -----  TimedIntervention and derivatives  -----
+bool ContinuousDeployment::filterAndDeploy( Host::Human& human, const Population& population )const{
+    TimeStep age = TimeStep::simulation - human.getDateOfBirth();
+    if( deployAge > age ){
+        // stop processing continuous deployments for this
+        // human for now because remaining ones happen in the future
+        return false;
+    }else if( deployAge == age ){
+        if( begin <= TimeStep::interventionPeriod &&
+            TimeStep::interventionPeriod < end &&
+            ( !cohortOnly || human.isInCohort() ) &&
+            util::random::uniform_01() < coverage )     // RNG call should be last test
+        {
+            deploy( human, population );
+        }
+    }//else: for some reason, a deployment age was missed; ignore it
+    return true;
+}
 
-TimedIntervention::TimedIntervention(TimeStep deploymentTime) :
+/** Age-based (continuous) deployment. */
+//TODO: phase out usage of this
+class AgeBasedDeployment : public ContinuousDeployment {
+public:
+    AgeBasedDeployment( const ::scnXml::ContinuousDeployment& elt,
+            void(Host::Human::*func) (const OM::Population&) ) :
+        ContinuousDeployment(elt),
+        deployFn( func )
+    {
+    }
+    
+protected:
+    virtual void deploy( Host::Human& human, const Population& population )const{
+        (human.*deployFn)( population );
+    }
+    
+    // Member function pointer to the function (in Human) responsible for deploying intervention:
+    typedef void (Host::Human::*DeploymentFunction) (const OM::Population&);
+    DeploymentFunction deployFn;
+};
+
+/** Age-based deployment for new list-of-effect interventions. */
+class ContinuousHumanIntervention : public ContinuousDeployment {
+public:
+    ContinuousHumanIntervention( const scnXml::ContinuousDeployment& elt,
+                                 const HumanIntervention* intervention ) :
+        ContinuousDeployment( elt ),
+        intervention( intervention )
+    {
+    }
+    
+protected:
+    virtual void deploy( Host::Human& human, const Population& population )const{
+        intervention->deploy( human, Deployment::CTS );
+    }
+    
+    const HumanIntervention *intervention;
+};
+
+
+// ———  TimedDeployment and derivatives  ———
+
+TimedDeployment::TimedDeployment(TimeStep deploymentTime) :
     time( deploymentTime )
 {
     if( deploymentTime < TimeStep(0) ){
@@ -77,24 +133,24 @@ TimedIntervention::TimedIntervention(TimeStep deploymentTime) :
     }
 }
 
-class DummyIntervention : public TimedIntervention {
+class DummyTimedDeployment : public TimedDeployment {
 public:
-    DummyIntervention() :
-        TimedIntervention( TimeStep(0) )
+    DummyTimedDeployment() :
+        TimedDeployment( TimeStep(0) )
     {
-        // TimedIntervention's ctor checks that the deployment time-step is
+        // TimedDeployment's ctor checks that the deployment time-step is
         // within the intervention period. We want this time to be after the
-        // last time-step, so set the time here after TimedIntervention's ctor
+        // last time-step, so set the time here after TimedDeployment's ctor
         // check has been done (hacky).
         time = TimeStep::future;
     }
     virtual void deploy (OM::Population&) {}
 };
 
-class TimedChangeHSIntervention : public TimedIntervention {
+class TimedChangeHSDeployment : public TimedDeployment {
 public:
-    TimedChangeHSIntervention( const scnXml::ChangeHS::TimedDeploymentType& hs ) :
-        TimedIntervention( TimeStep( hs.getTime() ) ),
+    TimedChangeHSDeployment( const scnXml::ChangeHS::TimedDeploymentType& hs ) :
+        TimedDeployment( TimeStep( hs.getTime() ) ),
         newHS( hs._clone() )
     {}
     virtual void deploy (OM::Population& population) {
@@ -107,10 +163,10 @@ private:
     scnXml::HealthSystem *newHS;
 };
 
-class TimedChangeEIRIntervention : public TimedIntervention {
+class TimedChangeEIRDeployment : public TimedDeployment {
 public:
-    TimedChangeEIRIntervention( const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
-        TimedIntervention( TimeStep( nv.getTime() ) ),
+    TimedChangeEIRDeployment( const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
+        TimedDeployment( TimeStep( nv.getTime() ) ),
         newEIR( nv._clone() )
     {}
     virtual void deploy (OM::Population& population) {
@@ -123,20 +179,20 @@ private:
     scnXml::NonVector *newEIR;
 };
 
-class TimedUninfectVectorsIntervention : public TimedIntervention {
+class TimedUninfectVectorsDeployment : public TimedDeployment {
 public:
-    TimedUninfectVectorsIntervention( TimeStep deployTime ) :
-        TimedIntervention( deployTime )
+    TimedUninfectVectorsDeployment( TimeStep deployTime ) :
+        TimedDeployment( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
         population.transmissionModel().uninfectVectors();
     }
 };
 
-class TimedR_0Intervention : public TimedIntervention {
+class TimedR_0Deployment : public TimedDeployment {
 public:
-    TimedR_0Intervention( TimeStep deployTime ) :
-        TimedIntervention( deployTime )
+    TimedR_0Deployment( TimeStep deployTime ) :
+        TimedDeployment( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
         int i = (int)std::floor (util::random::uniform_01() * population.getSize());        // pick a human
@@ -153,7 +209,7 @@ public:
 };
 
 /// Deployment of mass-to-human interventions (TODO: phase out usages of this)
-class TimedMassIntervention : public TimedIntervention {
+class TimedMassDeployment : public TimedDeployment {
 public:
     /** 
      * @param mass XML element specifying the age range and compliance
@@ -162,9 +218,9 @@ public:
      *      "void func (const OM::Population&)" function within human which
      *      activates the intervention. Population is passed for acces to static
      *      params. */
-    TimedMassIntervention( const scnXml::Mass& mass,
+    TimedMassDeployment( const scnXml::Mass& mass,
                            void (Host::Human::*deployIntervention)(const OM::Population&) ) :
-        TimedIntervention( TimeStep( mass.getTime() ) ),
+        TimedDeployment( TimeStep( mass.getTime() ) ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
         maxAge( TimeStep::fromYears( mass.getMaxAge() ) ),
         cohortOnly( mass.getCohort() ),
@@ -184,7 +240,7 @@ public:
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
-                if( !cohortOnly || iter->getInCohort() ){
+                if( !cohortOnly || iter->isInCohort() ){
                     if( util::random::uniform_01() < coverage ){
                         // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
                         ( (*iter).*intervention) (population);
@@ -204,15 +260,15 @@ protected:
 };
 
 /// Timed deployment of human-specific interventions
-class TimedHumanIntervention : public TimedIntervention {
+class TimedHumanDeployment : public TimedDeployment {
 public:
     /** 
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy. */
-    TimedHumanIntervention( const scnXml::Mass& mass,
+    TimedHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention ) :
-        TimedIntervention( TimeStep( mass.getTime() ) ),
+        TimedDeployment( TimeStep( mass.getTime() ) ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
         maxAge( TimeStep::fromYears( mass.getMaxAge() ) ),
         cohortOnly( mass.getCohort() ),
@@ -232,9 +288,9 @@ public:
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
-                if( !cohortOnly || iter->getInCohort() ){
+                if( !cohortOnly || iter->isInCohort() ){
                     if( util::random::uniform_01() < coverage ){
-                        intervention->deploy( *iter );
+                        intervention->deploy( *iter, Deployment::TIMED );
                     }
                 }
             }
@@ -251,7 +307,7 @@ protected:
 };
 
 /// Deployment of mass-to-human interventions with cumulative-deployment support (TODO: phase out usages of this)
-class TimedMassCumIntervention : public TimedMassIntervention {
+class TimedMassCumDeployment : public TimedMassDeployment {
 public:
     /** As massIntervention, but supports "increase to target coverage" mode:
      * Deployment is only to unprotected humans and brings
@@ -267,10 +323,10 @@ public:
      * "bool func (TimeStep maxAge)" function on a Human which returns true if
      * the Human is still protected by an intervention of the type in question
      * which is no older than maxAge. */
-    TimedMassCumIntervention( const scnXml::MassCum& mass,
+    TimedMassCumDeployment( const scnXml::MassCum& mass,
                               void (Host::Human::*deployIntervention)(const OM::Population&),
                               bool (Host::Human::*isProtectedCb) (TimeStep) const ) :
-        TimedMassIntervention( mass, deployIntervention ),
+        TimedMassDeployment( mass, deployIntervention ),
         isProtected( isProtectedCb ),
         maxInterventionAge( TimeStep::fromYears( mass.getCumulativeWithMaxAge().get() ) )
     {}
@@ -283,7 +339,7 @@ public:
         for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
-                if( !cohortOnly || iter->getInCohort() ){
+                if( !cohortOnly || iter->isInCohort() ){
                     total+=1;
                     if( !((*iter).*isProtected)(maxInterventionAge) )
                         unprotected.push_back( &*iter );
@@ -315,10 +371,10 @@ private:
     TimeStep maxInterventionAge;
 };
 
-class TimedVectorIntervention : public TimedIntervention {
+class TimedVectorDeployment : public TimedDeployment {
 public:
-    TimedVectorIntervention( TimeStep deployTime, size_t instance ) :
-        TimedIntervention( deployTime ),
+    TimedVectorDeployment( TimeStep deployTime, size_t instance ) :
+        TimedDeployment( deployTime ),
         inst(instance)
     {}
     virtual void deploy (OM::Population& population) {
@@ -342,25 +398,25 @@ private:
  * which is no older than maxAge.
  * 
  *  (TODO: phase out usages of this) */
-TimedMassIntervention* createTimedMassCumIntervention(
+TimedMassDeployment* createTimedMassCumIntervention(
     const scnXml::MassCum& mass,
     void (Host::Human::*deployIntervention)(const OM::Population&),
     bool (Host::Human::*isProtectedCb) (TimeStep) const
 ){
     if( mass.getCumulativeWithMaxAge().present() ){
-        return new TimedMassCumIntervention( mass, deployIntervention, isProtectedCb );
+        return new TimedMassCumDeployment( mass, deployIntervention, isProtectedCb );
     }else{
-        return new TimedMassIntervention( mass, deployIntervention );
+        return new TimedMassDeployment( mass, deployIntervention );
     }
 }
 
 // ———  HumanInterventionEffect  ———
 
-void HumanIntervention::deploy( Human& human ) const{
+void HumanIntervention::deploy( Human& human, Deployment::Method method ) const{
     for( vector<const HumanInterventionEffect*>::const_iterator it = effects.begin();
             it != effects.end(); ++it )
     {
-        (*it)->deploy( human );
+        (*it)->deploy( human, method );
     }
 }
 
@@ -387,8 +443,23 @@ public:
         }
     }
     
-    void deploy( Human& human ) const{
+    void deploy( Human& human, Deployment::Method method ) const{
+        if( method != Deployment::TIMED )
+            //TODO: easy, except reporting (and rename?)
+            throw util::unimplemented_exception("MDA via cts deployment");
         human.massDrugAdministration();
+    }
+};
+
+class VaccineEffect : public HumanInterventionEffect {
+public:
+    VaccineEffect( const scnXml::Vaccine::DescriptionSequence& seq ){
+        //TODO: further revise vaccine description in XSD
+        Host::Vaccine::initDescription( seq );
+    }
+    
+    void deploy( Human& human, Deployment::Method method )const{
+        human.deployVaccine( method );
     }
 };
 
@@ -404,7 +475,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             // timed deployments:
             typedef scnXml::ChangeHS::TimedDeploymentSequence::const_iterator It;
             for( It it = chs.getTimedDeployment().begin(); it != chs.getTimedDeployment().end(); ++it ){
-                timed.push_back( new TimedChangeHSIntervention( *it ) );
+                timed.push_back( new TimedChangeHSDeployment( *it ) );
             }
         }
     }
@@ -414,7 +485,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             // timed deployments:
             typedef scnXml::ChangeEIR::TimedDeploymentSequence::const_iterator It;
             for( It it = eir.getTimedDeployment().begin(); it != eir.getTimedDeployment().end(); ++it ){
-                timed.push_back( new TimedChangeEIRIntervention( *it ) );
+                timed.push_back( new TimedChangeEIRDeployment( *it ) );
             }
         }
     }
@@ -423,22 +494,29 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         map<string,size_t> identifierMap;
         
         // 1. Read effects
-        for( scnXml::HumanInterventions::EffectConstIterator it = human.getEffect().begin(),
-                end = human.getEffect().end(); it != end; ++it )
+        for( scnXml::HumanInterventions::EffectConstIterator it =
+                human.getEffect().begin(), end = human.getEffect().end();
+                it != end; ++it )
         {
             const scnXml::HumanInterventionEffect& effect = *it;
             identifierMap[effect.getId()] = humanEffects.size();        // i.e. index of next item
             if( effect.getMDA().present() ){
                 humanEffects.push_back( new MDAEffect( effect.getMDA().get() ) );
+            }else if( effect.getVaccine().present() ){
+                humanEffects.push_back( new VaccineEffect( effect.getVaccine().get().getDescription() ) );
             }else{
-                throw util::xml_scenario_error( "expected intervention.human.effect element to have a child, didn't find it (perhaps I need updating)" );
+                throw util::xml_scenario_error(
+                    "expected intervention.human.effect element to have a "
+                    "child, didn't find it (perhaps I need updating)" );
             }
         }
         
         // 2. Read list of interventions
-        for( scnXml::HumanInterventions::InterventionConstIterator it = human.getIntervention().begin(),
+        for( scnXml::HumanInterventions::InterventionConstIterator it =
+                human.getIntervention().begin(),
                 end = human.getIntervention().end(); it != end; ++it )
         {
+            bool hasVaccineEffect = false;      // for vaccine EPI deployment
             const scnXml::Intervention& elt = *it;
             // 2.a intervention effects
             HumanIntervention *intervention = new HumanIntervention();
@@ -453,48 +531,35 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                         << "\", but no effect with this id was found";
                     throw util::xml_scenario_error( msg.str() );
                 }
-                intervention->addEffect( &humanEffects[result->second] );
+                const HumanInterventionEffect* effect = &humanEffects[result->second];
+                intervention->addEffect( effect );
+                if( dynamic_cast<const VaccineEffect*>( effect ) != 0 ) hasVaccineEffect = true;
             }
             // 2.b intervention deployments
             if( elt.getContinuous().present() ){
-                throw util::unimplemented_exception( "continuous deployment of human interventions" );
+                const scnXml::ContinuousList::DeploySequence& ctsSeq =
+                        elt.getContinuous().get().getDeploy();
+                for( scnXml::ContinuousList::DeployConstIterator it2 = ctsSeq.begin(),
+                    end2 = ctsSeq.end(); it2 != end2; ++it2 )
+                {
+                    continuous.push_back( new ContinuousHumanIntervention( *it2, intervention ) );
+                }
+                if( hasVaccineEffect )
+                    Host::Vaccine::initSchedule( ctsSeq );
             }
             if( elt.getTimed().present() ){
                 const scnXml::MassListWithCum& timedElt = elt.getTimed().get();
                 if( timedElt.getCumulativeCoverage().present() )
-                    throw util::unimplemented_exception( "cumulative coverage for human interventions" );
-                for( scnXml::MassListWithCum::DeployConstIterator it2 = timedElt.getDeploy().begin(),
-                        end2 = timedElt.getDeploy().end(); it2 != end2; ++it2 )
+                    throw util::unimplemented_exception(
+                        "cumulative coverage for human interventions" );
+                for( scnXml::MassListWithCum::DeployConstIterator it2 =
+                        timedElt.getDeploy().begin(), end2 =
+                        timedElt.getDeploy().end(); it2 != end2; ++it2 )
                 {
-                    timed.push_back( new TimedHumanIntervention( *it2, intervention ) );
+                    timed.push_back( new TimedHumanDeployment( *it2, intervention ) );
                 }
             }
             humanInterventions.push_back( intervention );
-        }
-        human.getIntervention();
-    }
-    if( intervElt.getVaccine().present() ){
-        const scnXml::Vaccine& vacc = intervElt.getVaccine().get();
-        if( vacc.getContinuous().present() || vacc.getTimed().present() ){
-            // read descriptions:
-            Host::Vaccine::init( vacc );
-            // continuous deployments:
-            // We let ctsVaccinate determine whether according to past vaccinations this dose should be administered
-            if( vacc.getContinuous().present() ){
-                const scnXml::ContinuousList::DeploySequence& seq = vacc.getContinuous().get().getDeploy();
-                typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
-                for( CIt it = seq.begin(); it != seq.end(); ++it ){
-                    ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::ctsVaccinate ) );
-                }
-            }
-            // timed deployments:
-            if( vacc.getTimed().present() ){
-                const scnXml::MassCumList::DeploySequence& seq = vacc.getTimed().get().getDeploy();
-                typedef scnXml::MassCumList::DeploySequence::const_iterator It;
-                for( It it = seq.begin(); it != seq.end(); ++it ){
-                    timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massVaccinate, &Host::Human::hasVaccineProtection ) );
-                }
-            }
         }
     }
     if( intervElt.getIPT().present() ){
@@ -506,7 +571,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             const scnXml::ContinuousList::DeploySequence& seq = ipt.getContinuous().get().getDeploy();
             typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
             for( CIt it = seq.begin(); it != seq.end(); ++it ){
-                ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::continuousIPT ) );
+                continuous.push_back( new AgeBasedDeployment( *it, &Host::Human::continuousIPT ) );
             }
         }
         // timed deployments:
@@ -528,7 +593,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 const scnXml::ContinuousList::DeploySequence& seq = itn.getContinuous().get().getDeploy();
                 typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
                 for( CIt it = seq.begin(); it != seq.end(); ++it ){
-                    ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::ctsITN ) );
+                    continuous.push_back( new AgeBasedDeployment( *it, &Host::Human::ctsITN ) );
                 }
             }
             // timed deployments:
@@ -576,7 +641,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 const scnXml::ContinuousList::DeploySequence& seq = ch.getContinuous().get().getDeploy();
                 typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
                 for( CIt it = seq.begin(); it != seq.end(); ++it ){
-                    ctsIntervs.push_back( AgeIntervention( *it, &Host::Human::addToCohort ) );
+                    continuous.push_back( new AgeBasedDeployment( *it, &Host::Human::addToCohort ) );
                 }
             }
             // timed deployments:
@@ -600,10 +665,11 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             const scnXml::MassList::DeploySequence& seq = elt.getTimed().get().getDeploy();
             typedef scnXml::MassList::DeploySequence::const_iterator It;
             for( It it = seq.begin(); it != seq.end(); ++it ){
-                timed.push_back( new TimedMassIntervention( *it, &Host::Human::immuneSuppression ) );
+                timed.push_back( new TimedMassDeployment( *it, &Host::Human::immuneSuppression ) );
             }
         }
     }
+    // Must come after vaccines are initialised:
     if( intervElt.getInsertR_0Case().present() ){
         const scnXml::InsertR_0Case& elt = intervElt.getInsertR_0Case().get();
         if( elt.getTimedDeployment().size() > 0 ){
@@ -611,7 +677,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             // timed deployments:
             typedef scnXml::InsertR_0Case::TimedDeploymentSequence::const_iterator It;
             for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
-                timed.push_back( new TimedR_0Intervention( TimeStep( it->getTime() ) ) );
+                timed.push_back( new TimedR_0Deployment( TimeStep( it->getTime() ) ) );
             }
         }
     }
@@ -621,7 +687,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             // timed deployments:
             typedef scnXml::UninfectVectors::TimedDeploymentSequence::const_iterator It;
             for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
-                timed.push_back( new TimedUninfectVectorsIntervention( TimeStep( it->getTime() ) ) );
+                timed.push_back( new TimedUninfectVectorsDeployment( TimeStep( it->getTime() ) ) );
             }
         }
     }
@@ -637,23 +703,23 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
                 for ( It it = seq.begin(); it != seq.end(); ++it ) {
-                    timed.push_back( new TimedVectorIntervention(TimeStep( it->getTime() ), instance) );
+                    timed.push_back( new TimedVectorDeployment(TimeStep( it->getTime() ), instance) );
                 }
                 instance++;
             }
         }
     }
-    
+
     // lists must be sorted, increasing
     // For reproducability, we need to use stable_sort, not sort.
-    stable_sort( ctsIntervs.begin(), ctsIntervs.end() );
     // NOTE: I'd rather use stable_sort, but it's not available. Results are
     // the same without as with a hacked BOOST version including stable_sort.
+    continuous.sort();
     timed.sort();
     
     // make sure the list ends with something always in the future, so we don't
     // have to check nextTimed is within range:
-    timed.push_back( new DummyIntervention() );
+    timed.push_back( new DummyTimedDeployment() );
 }
 
 void InterventionManager::loadFromCheckpoint( OM::Population& population, TimeStep interventionTime ){
@@ -662,8 +728,8 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, TimeSt
     // Only redeploy those which happened before this timestep.
     assert( nextTimed == 0 );
     while( timed[nextTimed].time < interventionTime ){
-        if( dynamic_cast<TimedChangeHSIntervention*>(&timed[nextTimed])!=0 ||
-            dynamic_cast<TimedChangeEIRIntervention*>(&timed[nextTimed])!=0 ){
+        if( dynamic_cast<TimedChangeHSDeployment*>(&timed[nextTimed])!=0 ||
+            dynamic_cast<TimedChangeEIRDeployment*>(&timed[nextTimed])!=0 ){
             //Note: neither changeHS nor changeEIR interventions care what the
             //current timestep is when they are deployed, so we don't need to
             //tell them the deployment time.
@@ -692,28 +758,11 @@ void InterventionManager::deploy(OM::Population& population) {
         it != population.getList().end(); ++it )
     {
         uint32_t nextCtsDist = it->getNextCtsDist();
-        TimeStep ageTimeSteps = TimeStep::simulation - it->getDateOfBirth();
         // deploy continuous interventions
-        while( nextCtsDist < ctsIntervs.size() )
+        while( nextCtsDist < continuous.size() )
         {
-            if( ctsIntervs[nextCtsDist].ageTimesteps > ageTimeSteps )
-                break;      // remaining intervs happen in future
-            // If interv for now, do it. (If we missed the time, ignore it.)
-            if( ctsIntervs[nextCtsDist].ageTimesteps == ageTimeSteps )
-            {
-                if( ctsIntervs[nextCtsDist].begin <= TimeStep::interventionPeriod &&
-                    TimeStep::interventionPeriod < ctsIntervs[nextCtsDist].end )
-                {
-                    if( !ctsIntervs[nextCtsDist].cohortOnly || it->getInCohort() )
-                    {
-                        if (util::random::uniform_01() < ctsIntervs[nextCtsDist].coverage)
-                        {
-                            // Call member function ctsIntervs[nextCtsDist].deploy
-                            ((*it).*(ctsIntervs[nextCtsDist].deploy)) (population);
-                        }
-                    }
-                }
-            }
+            if( !continuous[nextCtsDist].filterAndDeploy( *it, population ) )
+                break;  // deployment (and all remaining) happens in the future
             nextCtsDist = it->incrNextCtsDist();
         }
     }

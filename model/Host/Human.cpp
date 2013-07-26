@@ -32,6 +32,7 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Interventions.h"
+#include "Population.h"
 
 #include <string>
 #include <string.h>
@@ -196,15 +197,16 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
 }
 
 
-void Human::massVaccinate (const OM::Population&) {
-    _vaccine.vaccinate();
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
-}
-void Human::ctsVaccinate (const OM::Population&) {
-    if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
+void Human::deployVaccine( Deployment::Method method ){
+    if( method == Deployment::TIMED ){
         _vaccine.vaccinate();
-        Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
-    }
+        Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
+    }else if( method == Deployment::CTS ){
+        if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
+            _vaccine.vaccinate();
+            Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
+        }
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 void Human::continuousIPT (const OM::Population&) {
@@ -237,9 +239,6 @@ void Human::massVA (const OM::Population&) {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
 }
 
-bool Human::hasVaccineProtection(TimeStep maxInterventionAge) const{
-    return _vaccine.hasProtection(maxInterventionAge);
-}
 bool Human::hasIPTiProtection(TimeStep maxInterventionAge) const{
     return withinHostModel->hasIPTiProtection(maxInterventionAge);
 }

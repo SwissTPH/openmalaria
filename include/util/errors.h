@@ -33,6 +33,7 @@ using namespace std;
  */
 #define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) )
 #define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ )
+#define SWITCH_DEFAULT_EXCEPTION OM::util::traced_exception( OM::util::Messages::SwitchDefault, __FILE__, __LINE__, Error::SwitchDefault )
 
 // #define OM_NO_STACK_TRACE
 
@@ -82,8 +83,12 @@ namespace OM { namespace util {
         VectorFitting,
         InfLambda,
         NotImplemented,
+        SwitchDefault,
         Max
     }; }
+    namespace Messages {
+        extern const char *SwitchDefault;
+    }
     
     // As in the "Advanced Bash-Scripting Guide"; not directly relevant to C++
     // but gives some idea what codes make sense to use.

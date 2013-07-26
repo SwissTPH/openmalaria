@@ -22,11 +22,13 @@
 #define OM_IMPORTED_INFECTIONS
 
 #include "Global.h"
-#include "Population.h"
 #include "schema/interventions.h"
 #include "util/errors.h"
 
-namespace OM { namespace Host {
+namespace OM {
+    class Population;
+
+namespace Host {
 
     class ImportedInfections {
     public:

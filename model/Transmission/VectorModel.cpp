@@ -310,8 +310,9 @@ void VectorModel::init2 (const std::list<Host::Human>& population, int populatio
 
 void VectorModel::initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance ) {
     //TODO: get intervention name
-    string intervName = "vector intervention " + instance;
-    SpeciesIndexChecker checker( intervName, speciesIndex );
+    ostringstream intervName;
+    intervName << "vector intervention " << instance;
+    SpeciesIndexChecker checker( intervName.str(), speciesIndex );
     for( scnXml::VectorIntervention::DescriptionType::AnophelesConstIterator it = list.begin(); it != list.end(); ++it ){
         const string& name = it->getMosquito();
         species[checker.getIndex(name)].initVectorInterv ( *it, instance );

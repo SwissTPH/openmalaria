@@ -33,6 +33,8 @@
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
 
+const char *Messages::SwitchDefault = "no valid option selected in a switch statement or if/else tree";
+
 base_exception::base_exception(const string& msg, int code) :
     runtime_error(msg),
     errCode(code)

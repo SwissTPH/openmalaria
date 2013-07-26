@@ -101,43 +101,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="vaccine" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Description and deployment of vaccine interventions.
-          </xs:documentation>
-          <xs:appinfo>name:Vaccines;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="3" minOccurs="0" name="description" type="vaccineDescription" />
-            <xs:element minOccurs="0" name="continuous" type="continuousList">
-              <xs:annotation>
-                <xs:documentation>List of ages at which vaccination takes place
-                (through EPI, post-natal and school-based programmes, etc.).
-                </xs:documentation>
-                <xs:appinfo>type:list of elements;name:Age-based vaccination;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element minOccurs="0" name="timed" type="massCumList">
-              <xs:annotation>
-                <xs:documentation>
-                  List of timed mass vaccinations in the communitsy
-                </xs:documentation>
-                <xs:appinfo>type:list of elements;name:Mass vaccination;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of intervention
-              </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
       <xs:element name="IPT" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -654,22 +617,35 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
+      <xs:element name="vaccine" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of vaccine interventions.
+          </xs:documentation>
+          <xs:appinfo>name:Vaccines;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element maxOccurs="3" minOccurs="0" name="description" type="vaccineDescription" />
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
     </xs:choice>
     <xs:attribute name="id" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          A short name or code identifying the intervention (used to refer to
-          the intervention in deployments).
+          A short name or code identifying the intervention effect
+          (used to refer to this effect when describing an intervention).
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+        <xs:appinfo>type:string;name:Effect ID;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="description" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
-          A short description of the intervention effects
+          A short description of the intervention effect
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+        <xs:appinfo>type:string;name:Description of effect;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

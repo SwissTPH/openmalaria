@@ -21,14 +21,18 @@
 #define Hmod_TimedDist
 
 #include "Global.h"
-#include "Population.h"
 #include "Host/ImportedInfections.h"
 #include "schema/interventions.h"
 #include <boost/ptr_container/ptr_vector.hpp>
+#include <boost/concept_check.hpp>
 #include <bitset>
 
 namespace OM {
     using ::boost::ptr_vector;
+    class Population;
+    namespace Host {
+        class Human;
+    }
 
 /** Used to describe which interventions are in use. */
 namespace Interventions {
@@ -51,38 +55,55 @@ namespace Interventions {
     };
 }
 
-/** Age-based (continuous) deployment. */
-class AgeIntervention {
+namespace Deployment {
+    enum Method {
+        TIMED,   // mass distribution campaign
+        CTS     // continuous deployment (EPI, etc.)
+    };
+}
+
+/** Interface for continuous deployment of an intervention. */
+class ContinuousDeployment {
 public:
-    AgeIntervention( const ::scnXml::ContinuousDeployment& elt,
-        void(Host::Human::*func) (const OM::Population&) );
+    /// Create, passing deployment age
+    ContinuousDeployment( const ::scnXml::ContinuousDeployment& elt );
+    virtual ~ContinuousDeployment() {}
     
-    inline bool operator< (const AgeIntervention& that) const{
-        return this->ageTimesteps < that.ageTimesteps;
+    /// For sorting
+    inline bool operator<( const ContinuousDeployment& that )const{
+        return this->deployAge < that.deployAge;
     }
     
+    /** Apply filters and potentially deploy.
+     * 
+     * @returns false iff this deployment (and thus all later ones in the
+     *  ordered list) happens in the future. */
+    bool filterAndDeploy( Host::Human& human, const Population& population ) const;
+    
+protected:
+    /// Deploy to a selected human.
+    virtual void deploy( Host::Human& human, const Population& population ) const =0;
+    
     TimeStep begin, end;    // first timeStep active and first timeStep no-longer active
-    TimeStep ageTimesteps;
+    TimeStep deployAge;
     bool cohortOnly;
     double coverage;
-    // Member function pointer to the function (in Human) responsible for deploying intervention:
-    typedef void (Host::Human::*DeploymentFunction) (const OM::Population&);
-    DeploymentFunction deploy;
 };
 
-/** Interface of a timed intervention. */
-class TimedIntervention {
+/** Interface for timed deployment of an intervention. */
+class TimedDeployment {
 public:
     /// Create, passing time of deployment
-    TimedIntervention(TimeStep deploymentTime);
-    virtual ~TimedIntervention() {}
+    TimedDeployment(TimeStep deploymentTime);
+    virtual ~TimedDeployment() {}
     
-    inline bool operator< (const TimedIntervention& that) const{
+    inline bool operator< (const TimedDeployment& that) const{
         return this->time < that.time;
     }
     
     virtual void deploy (OM::Population&) =0;
     
+    // Read access required in this file; don't really need protection:
     TimeStep time;
 };
 
@@ -94,8 +115,12 @@ public:
  * This is a base class. */
 class HumanInterventionEffect {
 public:
-    /** Deploy the effect to a pre-selected human. */
-    virtual void deploy( Host::Human& human ) const =0;
+    /** Deploy the effect to a pre-selected human.
+     * 
+     * @param human Individual receiving the intervention
+     * @param method Channel of deployment (mass, continuous)
+     */
+    virtual void deploy( Host::Human& human, Deployment::Method method ) const =0;
     
 protected:
     /** Construct (from a derived class). */
@@ -113,7 +138,7 @@ public:
     inline void addEffect( const HumanInterventionEffect *effect ){ effects.push_back( effect ); }
     
     /** Deploy all effects to a pre-selected human. */
-    void deploy( Host::Human& human ) const;
+    void deploy( Host::Human& human, Deployment::Method method ) const;
     
 private:
     // List of pointers to effects. Does not manage memory (InterventionManager::humanEffects does that).
@@ -161,10 +186,10 @@ private:
     // All human interventions. These are stored here for memory management
     // only (so that they are deleted when this class is destroyed).
     boost::ptr_vector<HumanIntervention> humanInterventions;
-    // All continuous interventions, sorted by deployment age (weakly increasing)
-    vector<AgeIntervention> ctsIntervs;
+    // Continuous interventions, sorted by deployment age (weakly increasing)
+    ptr_vector<ContinuousDeployment> continuous;
     // List of all timed interventions. Should be sorted (time weakly increasing).
-    ptr_vector<TimedIntervention> timed;
+    ptr_vector<TimedDeployment> timed;
     uint32_t nextTimed;
     
     // imported infections are not really interventions, and handled by a separate class

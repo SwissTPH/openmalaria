@@ -166,38 +166,45 @@
     </ageGroup>
   </monitoring>
   <interventions name="BSVPEVTBV Ref EPI modified modified">
-    <vaccine>
-      <description vaccineType="TBV">
-        <decay L="0.5" function="exponential"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="0.4"/>
-        <initialEfficacy value="0.46"/>
-        <initialEfficacy value="0.52"/>
-      </description>
-      <description vaccineType="BSV">
-        <decay L="0.5" function="exponential"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="0.4"/>
-        <initialEfficacy value="0.46"/>
-        <initialEfficacy value="0.52"/>
-      </description>
-      <description vaccineType="PEV">
-        <decay L="0.5" function="exponential"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="0.4"/>
-        <initialEfficacy value="0.46"/>
-        <initialEfficacy value="0.52"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.95" targetAgeYrs="0.0833"/>
-        <deploy coverage="0.95" targetAgeYrs="0.17"/>
-        <deploy coverage="0.99" targetAgeYrs="0.25"/>
-        <deploy coverage="0.99" targetAgeYrs="1.25"/>
-        <deploy coverage="0.99" targetAgeYrs="2.25"/>
-        <deploy coverage="0.99" targetAgeYrs="3.25"/>
-        <deploy coverage="0.99" targetAgeYrs="4.25"/>
-      </continuous>
-    </vaccine>
+    <human>
+      <effect id="vaccine">
+        <vaccine>
+          <description vaccineType="TBV">
+            <decay L="0.5" function="exponential"/>
+            <efficacyB value="10"/>
+            <initialEfficacy value="0.4"/>
+            <initialEfficacy value="0.46"/>
+            <initialEfficacy value="0.52"/>
+          </description>
+          <description vaccineType="BSV">
+            <decay L="0.5" function="exponential"/>
+            <efficacyB value="10"/>
+            <initialEfficacy value="0.4"/>
+            <initialEfficacy value="0.46"/>
+            <initialEfficacy value="0.52"/>
+          </description>
+          <description vaccineType="PEV">
+            <decay L="0.5" function="exponential"/>
+            <efficacyB value="10"/>
+            <initialEfficacy value="0.4"/>
+            <initialEfficacy value="0.46"/>
+            <initialEfficacy value="0.52"/>
+          </description>
+        </vaccine>
+      </effect>
+      <intervention>
+        <effect id="vaccine"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.0833"/>
+          <deploy coverage="0.95" targetAgeYrs="0.17"/>
+          <deploy coverage="0.99" targetAgeYrs="0.25"/>
+          <deploy coverage="0.99" targetAgeYrs="1.25"/>
+          <deploy coverage="0.99" targetAgeYrs="2.25"/>
+          <deploy coverage="0.99" targetAgeYrs="3.25"/>
+          <deploy coverage="0.99" targetAgeYrs="4.25"/>
+        </continuous>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">

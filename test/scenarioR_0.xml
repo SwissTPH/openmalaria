@@ -67,24 +67,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <vaccine>
-      <description vaccineType="PEV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="0"/>
-        <initialEfficacy value="0"/>
-      </description>
-      <description vaccineType="TBV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="1"/>
-        <initialEfficacy value="1"/>
-      </description>
-      <continuous>
-        <deploy coverage="1" targetAgeYrs="0.0137"/>
-      </continuous>
-      <timed>
-        <deploy coverage="1" time="73"/>
-      </timed>
-    </vaccine>
     <uninfectVectors>
       <timedDeployment time="73"/>
       <timedDeployment time="74"/>
@@ -105,6 +87,20 @@
       <effect id="MDA">
         <MDA/>
       </effect>
+      <effect id="vaccine">
+        <vaccine>
+          <description vaccineType="PEV">
+            <decay L="0.0" function="constant"/>
+            <efficacyB value="0"/>
+            <initialEfficacy value="0"/>
+          </description>
+          <description vaccineType="TBV">
+            <decay L="0.0" function="constant"/>
+            <efficacyB value="1"/>
+            <initialEfficacy value="1"/>
+          </description>
+        </vaccine>
+      </effect>
       <intervention>
         <effect id="MDA"/>
         <timed>
@@ -114,6 +110,15 @@
           <deploy coverage="1" time="76"/>
           <deploy coverage="1" time="77"/>
           <deploy coverage="1" time="78"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="vaccine"/>
+        <continuous>
+          <deploy coverage="1" targetAgeYrs="0.0137"/>
+        </continuous>
+        <timed>
+          <deploy coverage="1" time="73"/>
         </timed>
       </intervention>
     </human>

@@ -43,7 +43,11 @@ class Vaccine {
 public:
     // Static:
     /// Set parameters from xml (only called if vaccines are used)
-    static void init (const scnXml::Vaccine& xmlVaccine);
+    static void initDescription (const scnXml::Vaccine::DescriptionSequence& vaccDesc);
+    /// Set schedule. Needed for correct EPI deployment. TODO: a model of how
+    /// vaccine booster shots work would allow this to be moved to intervention
+    /// deployment.
+    static void initSchedule( const scnXml::ContinuousList::DeploySequence& schedule );
     
     /// Special for R_0: check is set up correctly or throw xml_scenario_error
     static void verifyEnabledForR_0 ();
@@ -97,6 +101,7 @@ public:
 
     /// Returns true if a continuous vaccine dose should be given.
     bool doCtsVaccination (TimeStep ageTSteps) {
+        assert( Vaccine::_numberOfEpiDoses != 0 );
         // Deployment is affected by previous missed doses and mass vaccinations,
         // unlike other continuous interventions; extra test:
         return _lastVaccineDose < (int)Vaccine::_numberOfEpiDoses

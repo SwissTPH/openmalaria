@@ -267,7 +267,6 @@ void AnophelesModel::init2 (size_t sIndex,
 void AnophelesModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
     transmission.initVectorInterv( elt, instance );
     
-    assert( instance >= 0 );
     if( seekingDeathRateIntervs.size() <= instance )
         seekingDeathRateIntervs.resize( instance+1 );
     if( probDeathOvipositingIntervs.size() <= instance )
@@ -290,7 +289,7 @@ void AnophelesModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
 void AnophelesModel::deployVectorPopInterv (size_t instance){
     transmission.emergence->deployVectorPopInterv(instance);
     // do same as in above function (of EmergenceModel)
-    assert( 0 <= instance && instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
+    assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
     seekingDeathRateIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
     probDeathOvipositingIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
 }

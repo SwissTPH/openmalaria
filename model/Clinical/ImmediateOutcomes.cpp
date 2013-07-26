@@ -62,13 +62,13 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 // -----  other methods  -----
 
 void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
-    Monitoring::Surveys.getSurvey(human.getInCohort()).reportMassScreening(human.getMonitoringAgeGroup(), 1);
+    Monitoring::Surveys.getSurvey(human.isInCohort()).reportMassScreening(human.getMonitoringAgeGroup(), 1);
     if( !massTreatDiagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
         return;
     }
     // We need to pass the is-severe state for the IPT code.
     human.withinHostModel->clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
-    Monitoring::Surveys.getSurvey(human.getInCohort()).reportMDA(human.getMonitoringAgeGroup(), 1);
+    Monitoring::Surveys.getSurvey(human.isInCohort()).reportMDA(human.getMonitoringAgeGroup(), 1);
 }
 
 void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
@@ -77,12 +77,12 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
 
     if (pgState & Pathogenesis::MALARIA) {
         if (pgState & Pathogenesis::COMPLICATED)
-            effectiveTreatment = severeMalaria (ageYears, human.getMonitoringAgeGroup(), _doomed, human.getInCohort());
+            effectiveTreatment = severeMalaria (ageYears, human.getMonitoringAgeGroup(), _doomed, human.isInCohort());
         else if (pgState == Pathogenesis::STATE_MALARIA) {
             // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
             // included. Validity is debatable, but there's no point changing now.
             // (This does affect tests.)
-            effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
+            effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.isInCohort());
         }
 
         if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && _doomed == 0)
@@ -92,7 +92,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
             human.withinHostModel->immunityPenalisation();
         }
     } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria
-        effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
+        effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.isInCohort());
     }
 
     if (effectiveTreatment) {

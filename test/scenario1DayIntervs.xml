@@ -84,22 +84,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="none">
-    <vaccine>
-      <description vaccineType="PEV">
-        <decay L="5" function="exponential"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="0.512"/>
-        <initialEfficacy value="0.64"/>
-        <initialEfficacy value="0.8"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.95" targetAgeYrs="0.0833"/>
-        <deploy coverage="0.95" targetAgeYrs="0.17"/>
-        <deploy coverage="0.99" targetAgeYrs="0.25"/>
-        <deploy coverage="0.99" targetAgeYrs="2"/>
-        <deploy coverage="0.99" targetAgeYrs="5"/>
-      </continuous>
-    </vaccine>
     <human>
       <effect id="MDA">
         <MDA>
@@ -127,6 +111,17 @@
           </description>
         </MDA>
       </effect>
+      <effect id="vaccine">
+        <vaccine>
+          <description vaccineType="PEV">
+            <decay L="5" function="exponential"/>
+            <efficacyB value="10"/>
+            <initialEfficacy value="0.512"/>
+            <initialEfficacy value="0.64"/>
+            <initialEfficacy value="0.8"/>
+          </description>
+        </vaccine>
+      </effect>
       <intervention>
         <effect id="MDA"/>
         <timed>
@@ -137,6 +132,16 @@
           <deploy coverage="0.6" time="1595"/>
           <deploy coverage="0.6" time="1610"/>
         </timed>
+      </intervention>
+      <intervention>
+        <effect id="vaccine"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.0833"/>
+          <deploy coverage="0.95" targetAgeYrs="0.17"/>
+          <deploy coverage="0.99" targetAgeYrs="0.25"/>
+          <deploy coverage="0.99" targetAgeYrs="2"/>
+          <deploy coverage="0.99" targetAgeYrs="5"/>
+        </continuous>
       </intervention>
     </human>
   </interventions>

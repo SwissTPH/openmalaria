@@ -63,11 +63,9 @@ double Vaccine::getEfficacy (int numPrevDoses)
     }
 }
 
-void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
+void Vaccine::initDescription(const scnXml::Vaccine::DescriptionSequence& vaccDesc)
 {
     const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
-    const scnXml::Vaccine::DescriptionSequence& vaccDesc =
-	xmlVaccine.getDescription();
     if (vaccDesc.size() == 0) {
         // Since this function was called, we know Vaccines are used
         throw util::xml_scenario_error ("Vaccine intervention without description");
@@ -86,24 +84,27 @@ void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
         else
             throw util::xml_scenario_error ("vaccineType invalid");
     }
-
+    
     //Read in vaccine specifications
     PEV.initVaccine (VdPEV);
     BSV.initVaccine (VdBSV);
     TBV.initVaccine (VdTBV);
+}
 
-    _numberOfEpiDoses = xmlVaccine.getContinuous().present() ?
-        xmlVaccine.getContinuous().get().getDeploy().size() : 0;
+void Vaccine::initSchedule( const scnXml::ContinuousList::DeploySequence& schedule ){
+    if( _numberOfEpiDoses > 0 && schedule.size() > 0 ){
+        throw util::xml_scenario_error( "A vaccine effect has multiple continuous deployments. No model of how these should interact is included in OpenMalaria." );
+    }
+    _numberOfEpiDoses = schedule.size();
     if (_numberOfEpiDoses) {
         targetAgeTStep.resize (_numberOfEpiDoses, TimeStep(0));
-        const scnXml::ContinuousList::DeploySequence& cVS = xmlVaccine.getContinuous().get().getDeploy();
         for (size_t i = 0;i < _numberOfEpiDoses; ++i) {
-            if (i >= cVS.size()) {
+            if (i >= schedule.size()) {
                 ostringstream msg;
                 msg << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous";
                 throw util::xml_scenario_error (msg.str());
             }
-            targetAgeTStep[i] = TimeStep::fromYears( cVS[i].getTargetAgeYrs() );
+            targetAgeTStep[i] = TimeStep::fromYears( schedule[i].getTargetAgeYrs() );
         }
     }
 }
@@ -116,6 +117,8 @@ void Vaccine::verifyEnabledForR_0 (){
 void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)
 {
     if (vd != NULL) {
+        if( active )
+            throw util::unimplemented_exception( "multiple vaccine interventions for the same type of vaccine" );
         active = true;
 
         // set efficacyB:

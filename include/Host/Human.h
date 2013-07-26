@@ -25,6 +25,7 @@
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
+#include "Interventions.h"
 
 namespace OM {
     namespace Transmission {
@@ -98,10 +99,8 @@ public:
   /// Asks the clinical model to deal with this
   void massDrugAdministration ();
   
-  /// Vaccinate & report mass vaccination
-  void massVaccinate (const OM::Population&);
-  /// If individual hasn't dropped out, vaccinate & report EPI
-  void ctsVaccinate (const OM::Population&);
+  /// Mass/EPI vaccination
+  void deployVaccine( Deployment::Method method );
   
   void continuousIPT (const OM::Population&);
   void timedIPT (const OM::Population&);
@@ -129,7 +128,6 @@ public:
   
   ///@brief Functions to check coverage by interventions
   //@{
-    bool hasVaccineProtection(TimeStep maxInterventionAge) const;
     bool hasIPTiProtection(TimeStep maxInterventionAge) const;
     bool hasITNProtection(TimeStep maxInterventionAge) const;
     bool hasIRSProtection(TimeStep maxInterventionAge) const;
@@ -152,7 +150,7 @@ public:
   // crux for timed deployment as intervention up to some limit:
   inline bool getInCohort(TimeStep)const{ return _inCohort; }
   /// Return true if human is a member of the cohort
-  inline bool getInCohort()const{ return _inCohort; }
+  inline bool isInCohort()const{ return _inCohort; }
   
   /// Return the index of next continuous intervention to be deployed
   inline uint32_t getNextCtsDist()const{ return nextCtsDist; }

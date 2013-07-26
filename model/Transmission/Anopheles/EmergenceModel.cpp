@@ -163,7 +163,6 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 // -----  Summary and intervention functions  -----
 
 void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
-    assert( instance >= 0 );
     if( emergence.size() <= instance )
         emergence.resize( instance+1 );
     
@@ -176,7 +175,7 @@ void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
 }
 
 void EmergenceModel::deployVectorPopInterv (size_t instance) {
-    assert( 0 <= instance && instance < emergence.size() );
+    assert( instance < emergence.size() );
     
     // Note: intervention acts first on time-step following (+1) deployment.
     // This at least is consistent with previous results and gives the correct number of time steps of deployment
