@@ -463,6 +463,17 @@ public:
     }
 };
 
+class IPTEffect : public HumanInterventionEffect {
+public:
+    IPTEffect( const scnXml::IPTDescription& elt ){
+        WithinHost::DescriptiveIPTWithinHost::init( elt );
+    }
+    
+    void deploy( Human& human, Deployment::Method method )const{
+        human.deployIPT( method );
+    }
+};
+
 
 // ———  InterventionManager  ———
 
@@ -503,7 +514,10 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             if( effect.getMDA().present() ){
                 humanEffects.push_back( new MDAEffect( effect.getMDA().get() ) );
             }else if( effect.getVaccine().present() ){
+                //TODO
                 humanEffects.push_back( new VaccineEffect( effect.getVaccine().get().getDescription() ) );
+            }else if( effect.getIPT().present() ){
+                humanEffects.push_back( new IPTEffect( effect.getIPT().get() ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "
@@ -560,27 +574,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 }
             }
             humanInterventions.push_back( intervention );
-        }
-    }
-    if( intervElt.getIPT().present() ){
-        const scnXml::IPT& ipt = intervElt.getIPT().get();
-        // read description (note: this is required by IPT WIH model, so do it even if there is no deployment)
-        WithinHost::DescriptiveIPTWithinHost::init( ipt.getDescription() );
-        // continuous deployments:
-        if( ipt.getContinuous().present() ){
-            const scnXml::ContinuousList::DeploySequence& seq = ipt.getContinuous().get().getDeploy();
-            typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
-            for( CIt it = seq.begin(); it != seq.end(); ++it ){
-                continuous.push_back( new AgeBasedDeployment( *it, &Host::Human::continuousIPT ) );
-            }
-        }
-        // timed deployments:
-        if( ipt.getTimed().present() ){
-            const scnXml::MassCumList::DeploySequence& seq = ipt.getTimed().get().getDeploy();
-            typedef scnXml::MassCumList::DeploySequence::const_iterator It;
-            for( It it = seq.begin(); it != seq.end(); ++it ){
-                timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::timedIPT, &Host::Human::hasIPTiProtection ) );
-            }
         }
     }
     if( intervElt.getITN().present() ){

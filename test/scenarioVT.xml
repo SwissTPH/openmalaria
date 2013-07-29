@@ -180,18 +180,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <IPT>
-      <description iptiEffect="13">
-        <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
-        <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
-        <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.95" targetAgeYrs="0.17"/>
-        <deploy coverage="0.95" targetAgeYrs="0.25"/>
-        <deploy coverage="0.95" targetAgeYrs="0.75"/>
-      </continuous>
-    </IPT>
     <ITN name="Extended ITNs">
       <description>
         <usage value="0.8"/>
@@ -267,6 +255,23 @@
       <anopheles duration="1825" effectiveness="0.75" mosquito="gambiae_ss"/>
     </larviciding>
     -->
+    <human>
+      <effect id="IPT">
+        <IPT iptiEffect="13">
+          <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
+          <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
+          <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
+        </IPT>
+      </effect>
+      <intervention>
+        <effect id="IPT"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.17"/>
+          <deploy coverage="0.95" targetAgeYrs="0.25"/>
+          <deploy coverage="0.95" targetAgeYrs="0.75"/>
+        </continuous>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">

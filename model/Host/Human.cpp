@@ -209,11 +209,12 @@ void Human::deployVaccine( Deployment::Method method ){
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::continuousIPT (const OM::Population&) {
-    withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
-}
-void Human::timedIPT (const OM::Population&) {
-  withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
+void Human::deployIPT( Deployment::Method method ){
+    if( method == Deployment::CTS ){
+        withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
+    }else if( method == Deployment::TIMED ){
+        withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 void Human::massDrugAdministration () {
@@ -239,9 +240,6 @@ void Human::massVA (const OM::Population&) {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
 }
 
-bool Human::hasIPTiProtection(TimeStep maxInterventionAge) const{
-    return withinHostModel->hasIPTiProtection(maxInterventionAge);
-}
 bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.getITN().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
 }

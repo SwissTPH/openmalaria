@@ -335,36 +335,39 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             return intervention
         }
         
-        val MDA = getChildElementOpt(interventions, "MDA")
-        if (MDA != null){
-            val ident = effectIdent("MDA")
-            val effect = newEffect(ident)
-            val intervention = newIntervention(array(ident))
-            
-            val timed = getChildElementOpt(MDA,"timed")
-            if (timed != null)
-                intervention.appendChild(timed) // massList to massListWithCum
-            
-            effect.appendChild(MDA) // "timed" child removed
-        }
-        
-        val vaccine = getChildElementOpt(interventions, "vaccine")
-        if (vaccine != null){
-            val ident = effectIdent("vaccine")
-            val effect = newEffect(ident)
-            val intervention = newIntervention(array(ident))
-            val cts = getChildElementOpt(vaccine, "continuous")
-            if (cts != null) intervention.appendChild(cts)
-            val timed = getChildElementOpt(vaccine, "timed")
-            if (timed != null){
-                for (deploy in getChildElements(timed, "deploy")){
-                    if (deploy.getAttributeNode("cumulativeWithMaxAge") != null)
-                        throw DocumentException("can't handle cumulative deployment translations yet")
+        fun updateElt(name: String, stripDescElt: Boolean){
+            val elt = getChildElementOpt(interventions, name)
+            if (elt != null){
+                val ident = effectIdent(name)
+                val effect = newEffect(ident)
+                val intervention = newIntervention(array(ident))
+
+                val cts = getChildElementOpt(elt, "continuous")
+                if (cts != null) intervention.appendChild(cts)
+                
+                val timed = getChildElementOpt(elt, "timed")
+                if (timed != null){
+                    // Note: type change from massList or massCumList to massListWithCum
+                    intervention.appendChild(timed)
+                    for (deploy in getChildElements(timed, "deploy")){
+                        if (deploy.getAttributeNode("cumulativeWithMaxAge") != null)
+                            throw DocumentException("can't handle cumulative deployment translations yet")
+                    }
                 }
-                intervention.appendChild(timed)
+                
+                if (stripDescElt){
+                    val desc = getChildElement(elt,"description")
+                    val renamed = scenarioDocument.renameNode(desc,"",name)!!
+                    effect.appendChild(renamed)
+                    interventions.removeChild(elt)  // now defunct
+                }else{
+                    effect.appendChild(elt) // after removal of "continuous" and "timed" child elements
+                }
             }
-            effect.appendChild(vaccine)
         }
+        updateElt("MDA",false)
+        updateElt("vaccine",false)
+        updateElt("IPT",true) 
         
         if (humanEffects.size > 0){
             val human = scenarioDocument.createElement("human")!!

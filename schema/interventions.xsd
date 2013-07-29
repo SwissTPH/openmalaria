@@ -101,43 +101,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="IPT" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Description and deployment of IPT interventions.
-          </xs:documentation>
-          <xs:appinfo>name:Intermittent preventative treatment;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="1" name="description" type="IPTDescription" />
-            <xs:element minOccurs="0" name="continuous" type="continuousList">
-              <xs:annotation>
-                <xs:documentation>List of ages at which IPTi/IPTc deployment takes place
-                (through EPI, post-natal and school-based programmes, etc.).
-                </xs:documentation>
-                <xs:appinfo>type:list of elements;name:Age-based IPT deployment;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element minOccurs="0" name="timed" type="massCumList">
-              <xs:annotation>
-                <xs:documentation>
-                  List of timed IPTi/IPTc distribution
-                </xs:documentation>
-                <xs:appinfo>name:Mass IPT administration;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of intervention
-              </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
       <xs:element name="ITN" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -629,6 +592,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element maxOccurs="3" minOccurs="0" name="description" type="vaccineDescription" />
           </xs:sequence>
         </xs:complexType>
+      </xs:element>
+      <xs:element name="IPT" minOccurs="0" type="IPTDescription">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of IPT interventions.
+          </xs:documentation>
+          <xs:appinfo>name:Intermittent preventative treatment;</xs:appinfo>
+        </xs:annotation>
       </xs:element>
     </xs:choice>
     <xs:attribute name="id" type="xs:string" use="required">

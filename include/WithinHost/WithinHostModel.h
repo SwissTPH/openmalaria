@@ -104,8 +104,6 @@ public:
   virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Timed deployment for IPT
   virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  /// Last IPTi dose recent enough to give protection?
-  virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   //@}
   
   ///@brief Immunity model

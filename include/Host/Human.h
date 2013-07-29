@@ -99,11 +99,10 @@ public:
   /// Asks the clinical model to deal with this
   void massDrugAdministration ();
   
-  /// Mass/EPI vaccination
+  /// Mass/EPI vaccination (note: extra checks may still prevent EPI vaccination)
   void deployVaccine( Deployment::Method method );
-  
-  void continuousIPT (const OM::Population&);
-  void timedIPT (const OM::Population&);
+  /// Mass/continuous IPT deployment (note: these don't have exactly the same effect)
+  void deployIPT( Deployment::Method method );
   
   /// Give human a new ITN via mass deployment
   void massITN (const OM::Population&);
