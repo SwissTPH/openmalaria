@@ -101,25 +101,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <ITN name="LLIN test">
-      <description>
-        <usage value="0.8"/>
-        <holeRate mean="0.9" sigma="0.8"/>
-        <ripRate mean="0.7" sigma="0.8"/>
-        <ripFactor value="0.4"/>
-        <initialInsecticide mu="70" sigma="20"/>
-        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
-        <attritionOfNets L="12" function="smooth-compact" k="2"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-      </description>
-      <continuous>
-        <deploy coverage=".677" targetAgeYrs="0.0833"/>
-      </continuous>
-    </ITN>
     <IRS name="new param">
       <description_v2>
         <!-- Initial insecticide: units are μg/cm²; no variance here -->
@@ -177,11 +158,33 @@
       <effect id="MDA">
         <MDA/>
       </effect>
+      <effect id="ITN">
+        <ITN>
+          <usage value="0.8"/>
+          <holeRate mean="0.9" sigma="0.8"/>
+          <ripRate mean="0.7" sigma="0.8"/>
+          <ripFactor value="0.4"/>
+          <initialInsecticide mu="70" sigma="20"/>
+          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <attritionOfNets L="12" function="smooth-compact" k="2"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+        </ITN>
+      </effect>
       <intervention>
         <effect id="MDA"/>
         <timed>
           <deploy cohort="true" coverage="1" time="30"/>
         </timed>
+      </intervention>
+      <intervention>
+        <effect id="ITN"/>
+        <continuous>
+          <deploy coverage=".677" targetAgeYrs="0.0833"/>
+        </continuous>
       </intervention>
     </human>
   </interventions>

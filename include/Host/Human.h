@@ -103,11 +103,9 @@ public:
   void deployVaccine( Deployment::Method method );
   /// Mass/continuous IPT deployment (note: these don't have exactly the same effect)
   void deployIPT( Deployment::Method method );
+  /// Mass/continuous ITN deployment
+  void deployITN( Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   
-  /// Give human a new ITN via mass deployment
-  void massITN (const OM::Population&);
-  /// Give a human a new ITN through EPI
-  void ctsITN (const OM::Population&);
   /// Give human a new IRS through mass deployment
   void massIRS (const OM::Population&);
   /// Give human a new VA intervention through mass deployment
@@ -128,7 +126,6 @@ public:
   ///@brief Functions to check coverage by interventions
   //@{
     bool hasIPTiProtection(TimeStep maxInterventionAge) const;
-    bool hasITNProtection(TimeStep maxInterventionAge) const;
     bool hasIRSProtection(TimeStep maxInterventionAge) const;
     bool hasVAProtection(TimeStep maxInterventionAge) const;
   //@}

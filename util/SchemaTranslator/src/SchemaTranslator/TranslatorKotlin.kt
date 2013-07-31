@@ -365,9 +365,10 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 }
             }
         }
-        updateElt("MDA",false)
-        updateElt("vaccine",false)
-        updateElt("IPT",true) 
+        updateElt("MDA", false)
+        updateElt("vaccine", false)
+        updateElt("IPT", true) 
+        updateElt("ITN", true)
         
         if (humanEffects.size > 0){
             val human = scenarioDocument.createElement("human")!!

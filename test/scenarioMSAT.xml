@@ -119,39 +119,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="ITN and MSAT">
-    <ITN name="Extended ITNs">
-      <description>
-        <usage value="0.8"/>
-        <holeRate mean=".9" sigma=".8"/>
-        <ripRate mean=".7" sigma=".8"/>
-        <ripFactor value="0.4"/>
-        <initialInsecticide mu="70" sigma="20"/>
-        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
-        <attritionOfNets L="12" function="smooth-compact" k="2"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-        <anophelesParams mosquito="funestus">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-        <anophelesParams mosquito="arabiensis">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-      </description>
-      <!-- at 2, 6, 10 and 16 years -->
-      <timed>
-        <deploy coverage="0.20" time="146"/>
-        <deploy coverage="0.20" time="438"/>
-        <deploy coverage="0.20" time="730"/>
-        <deploy coverage="0.20" time="1168"/>
-      </timed>
-    </ITN>
     <importedInfections>
       <timed>
         <rate time="0" value="5"/>
@@ -207,6 +174,32 @@
           </description>
         </MDA>
       </effect>
+      <effect id="ITN">
+        <ITN>
+          <usage value="0.8"/>
+          <holeRate mean=".9" sigma=".8"/>
+          <ripRate mean=".7" sigma=".8"/>
+          <ripFactor value="0.4"/>
+          <initialInsecticide mu="70" sigma="20"/>
+          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <attritionOfNets L="12" function="smooth-compact" k="2"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="funestus">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="arabiensis">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+        </ITN>
+      </effect>
       <intervention>
         <effect id="MDA"/>
         <timed>
@@ -218,6 +211,15 @@
           <deploy coverage="0.85" time="3309"/>
           <deploy coverage="0.85" time="3674"/>
           <deploy coverage="0.85" time="4039"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="ITN"/>
+        <timed>
+          <deploy coverage="0.20" time="146"/>
+          <deploy coverage="0.20" time="438"/>
+          <deploy coverage="0.20" time="730"/>
+          <deploy coverage="0.20" time="1168"/>
         </timed>
       </intervention>
     </human>

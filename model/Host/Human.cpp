@@ -210,24 +210,24 @@ void Human::deployVaccine( Deployment::Method method ){
 }
 
 void Human::deployIPT( Deployment::Method method ){
-    if( method == Deployment::CTS ){
-        withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
-    }else if( method == Deployment::TIMED ){
+    if( method == Deployment::TIMED ){
         withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
+    }else if( method == Deployment::CTS ){
+        withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
+    }else throw SWITCH_DEFAULT_EXCEPTION;
+}
+
+void Human::deployITN( Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
+    perHostTransmission.setupITN ( transmissionModel );
+    if( method == Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
+    }else if( method == Deployment::CTS ){
+        Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
-}
-
-void Human::massITN (const OM::Population& population){
-    perHostTransmission.setupITN (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
-}
-void Human::ctsITN (const OM::Population& population){
-    perHostTransmission.setupITN (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
 }
 
 void Human::massIRS (const OM::Population& population) {
@@ -240,9 +240,6 @@ void Human::massVA (const OM::Population&) {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
 }
 
-bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.getITN().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
-}
 bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.getIRS().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
 }

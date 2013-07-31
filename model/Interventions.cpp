@@ -474,6 +474,23 @@ public:
     }
 };
 
+class ITNEffect : public HumanInterventionEffect {
+public:
+    ITNEffect( const scnXml::ITNDescription& elt,
+               Transmission::TransmissionModel& transmissionModel ) :
+               transmission( transmissionModel )
+    {
+        transmissionModel.setITNDescription( elt );
+    }
+    
+    void deploy( Human& human, Deployment::Method method )const{
+        human.deployITN( method, transmission );
+    }
+    
+private:
+    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
+};
+
 
 // ———  InterventionManager  ———
 
@@ -518,6 +535,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 humanEffects.push_back( new VaccineEffect( effect.getVaccine().get().getDescription() ) );
             }else if( effect.getIPT().present() ){
                 humanEffects.push_back( new IPTEffect( effect.getIPT().get() ) );
+            }else if( effect.getITN().present() ){
+                humanEffects.push_back( new ITNEffect( effect.getITN().get(), population.transmissionModel() ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "
@@ -574,29 +593,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 }
             }
             humanInterventions.push_back( intervention );
-        }
-    }
-    if( intervElt.getITN().present() ){
-        const scnXml::ITN& itn = intervElt.getITN().get();
-        if( itn.getTimed().present() || itn.getContinuous().present() ){
-            // read description
-            population.transmissionModel().setITNDescription( itn.getDescription() );
-            // continuous deployments:
-            if( itn.getContinuous().present() ){
-                const scnXml::ContinuousList::DeploySequence& seq = itn.getContinuous().get().getDeploy();
-                typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
-                for( CIt it = seq.begin(); it != seq.end(); ++it ){
-                    continuous.push_back( new AgeBasedDeployment( *it, &Host::Human::ctsITN ) );
-                }
-            }
-            // timed deployments:
-            if( itn.getTimed().present() ){
-                const scnXml::MassCumList::DeploySequence& seq = itn.getTimed().get().getDeploy();
-                typedef scnXml::MassCumList::DeploySequence::const_iterator It;
-                for( It it = seq.begin(); it != seq.end(); ++it ){
-                    timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massITN, &Host::Human::hasITNProtection ) );
-                }
-            }
         }
     }
     if( intervElt.getIRS().present() ){
