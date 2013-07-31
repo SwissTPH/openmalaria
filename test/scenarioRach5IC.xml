@@ -99,42 +99,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <IRS name="Pyreth">
-      <description>
-        <decay L="0.25" function="exponential"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency value="0.1116"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.2772"/>
-        </anophelesParams>
-      </description>
-      <timed>
-        <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="18"/>
-        <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="19"/>
-        <deploy coverage="0.17325" cumulativeWithMaxAge="36" time="20"/>
-        <deploy coverage="0.231" cumulativeWithMaxAge="36" time="21"/>
-        <deploy coverage="0.28875" cumulativeWithMaxAge="36" time="22"/>
-        <deploy coverage="0.3465" cumulativeWithMaxAge="36" time="23"/>
-        <deploy coverage="0.40425" cumulativeWithMaxAge="36" time="24"/>
-        <deploy coverage="0.462" cumulativeWithMaxAge="36" time="25"/>
-        <deploy coverage="0.51975" cumulativeWithMaxAge="36" time="26"/>
-        <deploy coverage="0.5775" cumulativeWithMaxAge="36" time="27"/>
-        <deploy coverage="0.63525" cumulativeWithMaxAge="36" time="28"/>
-        <deploy coverage="0.693" cumulativeWithMaxAge="36" time="29"/>
-        <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="103"/>
-        <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="104"/>
-        <deploy coverage="0.17325" cumulativeWithMaxAge="36" time="105"/>
-        <deploy coverage="0.231" cumulativeWithMaxAge="36" time="106"/>
-        <deploy coverage="0.28875" cumulativeWithMaxAge="36" time="107"/>
-        <deploy coverage="0.3465" cumulativeWithMaxAge="36" time="108"/>
-        <deploy coverage="0.40425" cumulativeWithMaxAge="36" time="109"/>
-        <deploy coverage="0.462" cumulativeWithMaxAge="36" time="110"/>
-        <deploy coverage="0.51975" cumulativeWithMaxAge="36" time="111"/>
-        <deploy coverage="0.5775" cumulativeWithMaxAge="36" time="112"/>
-        <deploy coverage="0.63525" cumulativeWithMaxAge="36" time="113"/>
-        <deploy coverage="0.693" cumulativeWithMaxAge="36" time="114"/>
-      </timed>
-    </IRS>
     <vectorDeterrent name="hypothetical deterrency">
       <decay L="4" function="exponential"/>
       <anophelesParams mosquito="gambiae_ss">
@@ -154,7 +118,7 @@
       <effect id="MDA">
         <MDA/>
       </effect>
-      <effect id="ITN">
+      <effect description="LLIN test" id="ITN">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean="0.9" sigma="0.8"/>
@@ -170,17 +134,59 @@
           </anophelesParams>
         </ITN>
       </effect>
+      <effect description="Pyreth" id="IRS">
+        <IRS>
+          <description>
+            <decay L="0.25" function="exponential"/>
+            <anophelesParams mosquito="gambiae_ss">
+              <deterrency value="0.1116"/>
+              <preprandialKillingEffect value="0"/>
+              <postprandialKillingEffect value="0.2772"/>
+            </anophelesParams>
+          </description>
+        </IRS>
+      </effect>
       <intervention>
         <effect id="MDA"/>
         <timed>
           <deploy cohort="true" coverage="1" time="30"/>
         </timed>
       </intervention>
-      <intervention>
+      <intervention name="LLIN test">
         <effect id="ITN"/>
         <continuous>
           <deploy coverage=".677" targetAgeYrs="0.0833"/>
         </continuous>
+      </intervention>
+      <intervention name="Pyreth">
+        <effect id="IRS"/>
+        <timed>
+          <cumulativeCoverage effect="IRS" maxAgeYears="36.0"/>
+          <deploy coverage="0.05775" time="18"/>
+          <deploy coverage="0.1155" time="19"/>
+          <deploy coverage="0.17325" time="20"/>
+          <deploy coverage="0.231" time="21"/>
+          <deploy coverage="0.28875" time="22"/>
+          <deploy coverage="0.3465" time="23"/>
+          <deploy coverage="0.40425" time="24"/>
+          <deploy coverage="0.462" time="25"/>
+          <deploy coverage="0.51975" time="26"/>
+          <deploy coverage="0.5775" time="27"/>
+          <deploy coverage="0.63525" time="28"/>
+          <deploy coverage="0.693" time="29"/>
+          <deploy coverage="0.05775" time="103"/>
+          <deploy coverage="0.1155" time="104"/>
+          <deploy coverage="0.17325" time="105"/>
+          <deploy coverage="0.231" time="106"/>
+          <deploy coverage="0.28875" time="107"/>
+          <deploy coverage="0.3465" time="108"/>
+          <deploy coverage="0.40425" time="109"/>
+          <deploy coverage="0.462" time="110"/>
+          <deploy coverage="0.51975" time="111"/>
+          <deploy coverage="0.5775" time="112"/>
+          <deploy coverage="0.63525" time="113"/>
+          <deploy coverage="0.693" time="114"/>
+        </timed>
       </intervention>
     </human>
   </interventions>

@@ -22,6 +22,7 @@ import org.xml.sax.SAXParseException
 import java.lang.reflect.Method
 import java.lang.reflect.InvocationTargetException
 import java.util.TreeSet
+import java.util.TreeMap
 
 // ———  part 1: define utility classes (enums, simple containers)  ———
 
@@ -348,11 +349,44 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 val timed = getChildElementOpt(elt, "timed")
                 if (timed != null){
                     // Note: type change from massList or massCumList to massListWithCum
-                    intervention.appendChild(timed)
+                    // Map of "cumulative max age" to "timed element"
+                    val cumTimedLists = TreeMap<Double,Element>()
+                    var hasNonCum = false
                     for (deploy in getChildElements(timed, "deploy")){
-                        if (deploy.getAttributeNode("cumulativeWithMaxAge") != null)
-                            throw DocumentException("can't handle cumulative deployment translations yet")
+                        val maxAgeNode = deploy.getAttributeNode("cumulativeWithMaxAge")
+                        if (maxAgeNode != null){
+                            val age = java.lang.Double.parseDouble( maxAgeNode.getValue() )
+                            fun makeTimedList(): Element {
+                                val tL = scenarioDocument.createElement("timed")!!
+                                val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
+                                cumCov.setAttribute("effect",ident) // effect is uniquely used in this case, so translation is exact
+                                cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(age))
+                                tL.appendChild(cumCov)
+                                cumTimedLists.put(age, tL)
+                                return tL
+                            }
+                            val timedList : Element = cumTimedLists.get( age ) ?: makeTimedList()
+                            deploy.removeAttribute("cumulativeWithMaxAge")
+                            timedList.appendChild(deploy)
+                        }else{
+                            hasNonCum = true
+                        }
                     }
+                    if (hasNonCum)
+                        intervention.appendChild(timed)
+                    else
+                        elt.removeChild(timed)
+                    for (item in cumTimedLists){
+                        intervention.appendChild(item.component2())
+                    }
+                }
+                
+                val nameAttr = elt.getAttributeNode("name")
+                if (nameAttr != null){
+                    //Note: name could be applied to effect or deployment descriptor; do both since we don't know to which it refers
+                    effect.setAttribute("description",nameAttr.getValue())
+                    intervention.setAttribute("name",nameAttr.getValue())
+                    elt.removeAttribute("name")
                 }
                 
                 if (stripDescElt){
@@ -369,6 +403,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         updateElt("vaccine", false)
         updateElt("IPT", true) 
         updateElt("ITN", true)
+        updateElt("IRS", false)
         
         if (humanEffects.size > 0){
             val human = scenarioDocument.createElement("human")!!

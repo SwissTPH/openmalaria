@@ -66,7 +66,10 @@ virtual checkpoint (ostream& stream);
  * 
  * One should declare "using namespace OM::util::checkpoint" to use the operator& functions defined
  * here. */
-namespace OM { namespace util { namespace checkpoint {
+namespace OM { namespace util {
+    class TimeStep;     // forward declare for a support function; don't really want another include here
+
+namespace checkpoint {
     
     const long DEFAULT_MAX_LENGTH = 2000;
     
@@ -233,13 +236,16 @@ namespace OM { namespace util { namespace checkpoint {
     }
     */
     
-    void operator& (map<string,double> x, ostream& stream);
+    void operator& (const map<string,double>& x, ostream& stream);
     void operator& (map<string, double >& x, istream& stream);
     
-    void operator& (map<double,double> x, ostream& stream);
+    void operator& (const map<double,double>& x, ostream& stream);
     void operator& (map<double, double>& x, istream& stream);
     
-    void operator& (multimap<double,double> x, ostream& stream);
+    void operator& (const map<size_t,TimeStep>& x, ostream& stream);
+    void operator& (map<size_t,TimeStep>& x, istream& stream);
+    
+    void operator& (const multimap<double,double>& x, ostream& stream);
     void operator& (multimap<double, double>& x, istream& stream);
     //@}
     

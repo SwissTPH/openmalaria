@@ -79,6 +79,7 @@ public:
       _probTransmissionToMosquito & stream;
       _inCohort & stream;
       nextCtsDist & stream;
+      lastDeployments & stream;
   }
   //@}
   
@@ -96,6 +97,22 @@ public:
   
   ///@brief Deploy "intervention" functions
   //@{
+  /** Deploys an intervention.
+   * 
+   * The purpose of this function is principally to allow recording of when
+   * each intervention effect is deployed (for cumulative deployment).
+   * 
+   * The number of wrapper functions in intervention deployment could probably
+   * be reduced somehow (TODO). */
+  void deploy( const HumanInterventionEffect& effect, Deployment::Method method );
+  
+  /** Determines for the purposes of cumulative deployment whether an effect is
+   * still current.
+   * 
+   * @returns true if the intervention effect should be re-deployed (too old)
+   */
+  bool needsRedeployment( size_t effect_index, TimeStep maxAge );
+  
   /// Asks the clinical model to deal with this
   void massDrugAdministration ();
   
@@ -105,9 +122,9 @@ public:
   void deployIPT( Deployment::Method method );
   /// Mass/continuous ITN deployment
   void deployITN( Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
+  /// Mass/continuous IRS deployment
+  void deployIRS( Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   
-  /// Give human a new IRS through mass deployment
-  void massIRS (const OM::Population&);
   /// Give human a new VA intervention through mass deployment
   void massVA (const OM::Population&);
   
@@ -126,7 +143,6 @@ public:
   ///@brief Functions to check coverage by interventions
   //@{
     bool hasIPTiProtection(TimeStep maxInterventionAge) const;
-    bool hasIRSProtection(TimeStep maxInterventionAge) const;
     bool hasVAProtection(TimeStep maxInterventionAge) const;
   //@}
   
@@ -269,6 +285,9 @@ private:
   
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
+  
+  /// Last deployment times of intervention effects by effect index
+  map<size_t,TimeStep> lastDeployments;
   
 public: //lazy: give read access to these
   /// Remove from cohort as soon as individual has patent parasites?

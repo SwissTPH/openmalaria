@@ -174,7 +174,7 @@
           </description>
         </MDA>
       </effect>
-      <effect id="ITN">
+      <effect description="Extended ITNs" id="ITN">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean=".9" sigma=".8"/>
@@ -213,7 +213,7 @@
           <deploy coverage="0.85" time="4039"/>
         </timed>
       </intervention>
-      <intervention>
+      <intervention name="Extended ITNs">
         <effect id="ITN"/>
         <timed>
           <deploy coverage="0.20" time="146"/>

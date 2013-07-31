@@ -101,43 +101,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="IRS" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Description and deployment of indoor insecticide interventions
-            (IRS, durable wall linings, insecticide-treated-paint, etc.)
-            
-            User must choose between using &lt;description&gt; (the old
-            model, where effect decays directly) and &lt;description_v2&gt; (the
-            new model where effect decays indirectly based on decay of insecticide).
-          </xs:documentation>
-          <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:choice>
-              <xs:element name="description" type="IRSDescription_v1"/>
-              <xs:element name="description_v2" type="IRSDescription_v2"/>
-            </xs:choice>
-            <xs:element minOccurs="0" name="timed" type="massCumList">
-              <xs:annotation>
-                <xs:documentation>
-                  List of timed IRS deployment in the communitsy
-                </xs:documentation>
-                <xs:appinfo>name:Mass IRS deployment;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of intervention
-              </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
       <xs:element name="vectorDeterrent" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -466,11 +429,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>type:list of elements;name:Age-based (continuous) deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" name="timed" type="massListWithCum">
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massListWithCum">
               <xs:annotation>
                 <xs:documentation>
                   List of timed deployments of the intervention (that is, of
                   deployment campaigns).
+                  
+                  Cumulative deployment mode can be specified for all deployments in a timed list.
+                  To allow multiple cumulative deployment descriptions, the entire timed list
+                  may be repeated.
                 </xs:documentation>
                 <xs:appinfo>name:Mass (timed) deployment;</xs:appinfo>
               </xs:annotation>
@@ -571,6 +538,27 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:documentation>
           <xs:appinfo>name:Bed nets;</xs:appinfo>
         </xs:annotation>
+      </xs:element>
+      <xs:element name="IRS" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description and deployment of indoor insecticide interventions
+            (IRS, durable wall linings, insecticide-treated-paint, etc.)
+            
+            User must choose between using &lt;description&gt; (the old
+            model, where effect decays directly) and &lt;description_v2&gt; (the
+            new model where effect decays indirectly based on decay of insecticide).
+          </xs:documentation>
+          <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:choice>
+              <xs:element name="description" type="IRSDescription_v1"/>
+              <xs:element name="description_v2" type="IRSDescription_v2"/>
+            </xs:choice>
+          </xs:sequence>
+        </xs:complexType>
       </xs:element>
     </xs:choice>
     <xs:attribute name="id" type="xs:string" use="required">
@@ -811,7 +799,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:appinfo>name:Intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="maxAge" type="xs:double" use="required">
+          <xs:attribute name="maxAgeYears" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
                 The maximum age at which the effect used when selecting

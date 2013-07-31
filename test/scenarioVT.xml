@@ -180,29 +180,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <IRS name="DDT test">
-      <description>
-        <decay L="0.5" function="exponential"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency value="0.56"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.24"/>
-        </anophelesParams>
-        <anophelesParams mosquito="funestus">
-          <deterrency value="0.56"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.24"/>
-        </anophelesParams>
-        <anophelesParams mosquito="arabiensis">
-          <deterrency value="0.56"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.24"/>
-        </anophelesParams>
-      </description>
-      <timed>
-        <deploy coverage="0.8" time="7"/>
-      </timed>
-    </IRS>
     <vectorDeterrent name="hypothetical deterrency">
       <decay L="4" function="exponential"/>
       <anophelesParams mosquito="gambiae_ss">
@@ -231,7 +208,7 @@
           <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
         </IPT>
       </effect>
-      <effect id="ITN">
+      <effect description="Extended ITNs" id="ITN">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean=".9" sigma=".8"/>
@@ -257,6 +234,28 @@
           </anophelesParams>
         </ITN>
       </effect>
+      <effect description="DDT test" id="IRS">
+        <IRS>
+          <description>
+            <decay L="0.5" function="exponential"/>
+            <anophelesParams mosquito="gambiae_ss">
+              <deterrency value="0.56"/>
+              <preprandialKillingEffect value="0"/>
+              <postprandialKillingEffect value="0.24"/>
+            </anophelesParams>
+            <anophelesParams mosquito="funestus">
+              <deterrency value="0.56"/>
+              <preprandialKillingEffect value="0"/>
+              <postprandialKillingEffect value="0.24"/>
+            </anophelesParams>
+            <anophelesParams mosquito="arabiensis">
+              <deterrency value="0.56"/>
+              <preprandialKillingEffect value="0"/>
+              <postprandialKillingEffect value="0.24"/>
+            </anophelesParams>
+          </description>
+        </IRS>
+      </effect>
       <intervention>
         <effect id="IPT"/>
         <continuous>
@@ -265,13 +264,19 @@
           <deploy coverage="0.95" targetAgeYrs="0.75"/>
         </continuous>
       </intervention>
-      <intervention>
+      <intervention name="Extended ITNs">
         <effect id="ITN"/>
         <continuous>
           <deploy coverage="0.95" targetAgeYrs="0.0833"/>
         </continuous>
         <timed>
           <deploy coverage="0.9" time="7"/>
+        </timed>
+      </intervention>
+      <intervention name="DDT test">
+        <effect id="IRS"/>
+        <timed>
+          <deploy coverage="0.8" time="7"/>
         </timed>
       </intervention>
     </human>

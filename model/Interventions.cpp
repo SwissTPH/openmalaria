@@ -306,6 +306,61 @@ protected:
     const HumanIntervention *intervention;
 };
 
+/// Timed deployment of human-specific interventions in cumulative mode
+class TimedCumulativeHumanDeployment : public TimedHumanDeployment {
+public:
+    /** 
+     * @param mass XML element specifying the age range and compliance
+     * (proportion of eligible individuals who receive the intervention).
+     * @param intervention The HumanIntervention to deploy.
+     * @param effect_index Index of effect to test coverage for
+     * @param maxAge Maximum time-span to consider a deployed effect still to be effective */
+    TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
+                           const HumanIntervention* intervention,
+                           size_t effect_index, TimeStep maxAge ) :
+        TimedHumanDeployment( mass, intervention ),
+        cumCovInd( effect_index ), maxInterventionAge( maxAge )
+    {
+    }
+    
+    virtual void deploy (OM::Population& population) {
+        // Cumulative case: bring target group's coverage up to target coverage
+        vector<Host::Human*> unprotected;
+        size_t total = 0;       // number of humans within age bound and optionally cohort
+        Population::HumanPop& popList = population.getList();
+        for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
+            if( age >= minAge && age < maxAge ){
+                if( !cohortOnly || iter->isInCohort() ){
+                    total+=1;
+                    if( iter->needsRedeployment(cumCovInd, maxInterventionAge) )
+                        unprotected.push_back( &*iter );
+                }
+            }
+        }
+        
+        double propProtected = static_cast<double>( total - unprotected.size() ) / static_cast<double>( total );
+        if( propProtected < coverage ){
+            // Proportion propProtected are already covered, so need to
+            // additionally cover the proportion (coverage - propProtected),
+            // selected from the list unprotected.
+            double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
+            for (vector<Host::Human*>::iterator iter = unprotected.begin();
+                 iter != unprotected.end(); ++iter)
+            {
+                if( util::random::uniform_01() < additionalCoverage ){
+                    intervention->deploy( **iter, Deployment::TIMED );
+                }
+            }
+        }
+    }
+    
+protected:
+    size_t cumCovInd;
+    // max age at which an intervention is considered not to need replacement
+    TimeStep maxInterventionAge;
+};
+
 /// Deployment of mass-to-human interventions with cumulative-deployment support (TODO: phase out usages of this)
 class TimedMassCumDeployment : public TimedMassDeployment {
 public:
@@ -416,13 +471,13 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method ) const{
     for( vector<const HumanInterventionEffect*>::const_iterator it = effects.begin();
             it != effects.end(); ++it )
     {
-        (*it)->deploy( human, method );
+        human.deploy( **it, method );
     }
 }
 
 class MDAEffect : public HumanInterventionEffect {
 public:
-    MDAEffect( const scnXml::MDA& mda ) {
+    MDAEffect( size_t index, const scnXml::MDA& mda ) : HumanInterventionEffect(index) {
         // Set description. TODO: allow multiple descriptions.
         if( TimeStep::interval == 5 ){
             if( !mda.getDiagnostic().present() ){
@@ -453,7 +508,9 @@ public:
 
 class VaccineEffect : public HumanInterventionEffect {
 public:
-    VaccineEffect( const scnXml::Vaccine::DescriptionSequence& seq ){
+    VaccineEffect( size_t index, const scnXml::Vaccine::DescriptionSequence& seq ) :
+            HumanInterventionEffect(index)
+    {
         //TODO: further revise vaccine description in XSD
         Host::Vaccine::initDescription( seq );
     }
@@ -465,7 +522,7 @@ public:
 
 class IPTEffect : public HumanInterventionEffect {
 public:
-    IPTEffect( const scnXml::IPTDescription& elt ){
+    IPTEffect( size_t index, const scnXml::IPTDescription& elt ) : HumanInterventionEffect(index){
         WithinHost::DescriptiveIPTWithinHost::init( elt );
     }
     
@@ -476,8 +533,8 @@ public:
 
 class ITNEffect : public HumanInterventionEffect {
 public:
-    ITNEffect( const scnXml::ITNDescription& elt,
-               Transmission::TransmissionModel& transmissionModel ) :
+    ITNEffect( size_t index, const scnXml::ITNDescription& elt,
+               Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
                transmission( transmissionModel )
     {
         transmissionModel.setITNDescription( elt );
@@ -485,6 +542,23 @@ public:
     
     void deploy( Human& human, Deployment::Method method )const{
         human.deployITN( method, transmission );
+    }
+    
+private:
+    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
+};
+
+class IRSEffect : public HumanInterventionEffect {
+public:
+    IRSEffect( size_t index, const scnXml::IRS& elt,
+               Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
+               transmission( transmissionModel )
+    {
+        transmissionModel.setIRSDescription( elt );
+    }
+    
+    void deploy( Human& human, Deployment::Method method )const{
+        human.deployIRS( method, transmission );
     }
     
 private:
@@ -527,16 +601,26 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 it != end; ++it )
         {
             const scnXml::HumanInterventionEffect& effect = *it;
-            identifierMap[effect.getId()] = humanEffects.size();        // i.e. index of next item
+            if( identifierMap.count( effect.getId() ) > 0 ){
+                ostringstream msg;
+                msg << "The id attribute of intervention.human.effect elements must be unique; found \""
+                        << effect.getId() << "\" twice.";
+                throw util::xml_scenario_error( msg.str() );
+            }
+            size_t index = humanEffects.size();        // i.e. index of next item
+            identifierMap[effect.getId()] = index;
             if( effect.getMDA().present() ){
-                humanEffects.push_back( new MDAEffect( effect.getMDA().get() ) );
+                humanEffects.push_back( new MDAEffect( index, effect.getMDA().get() ) );
             }else if( effect.getVaccine().present() ){
-                //TODO
-                humanEffects.push_back( new VaccineEffect( effect.getVaccine().get().getDescription() ) );
+                //TODO: separate out different effects
+                humanEffects.push_back( new VaccineEffect( index, effect.getVaccine().get().getDescription() ) );
             }else if( effect.getIPT().present() ){
-                humanEffects.push_back( new IPTEffect( effect.getIPT().get() ) );
+                humanEffects.push_back( new IPTEffect( index, effect.getIPT().get() ) );
             }else if( effect.getITN().present() ){
-                humanEffects.push_back( new ITNEffect( effect.getITN().get(), population.transmissionModel() ) );
+                humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), population.transmissionModel() ) );
+            }else if( effect.getIRS().present() ){
+                //TODO: separate different descriptions into separate effects; one can become "generic vector intervention" or something
+                humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), population.transmissionModel() ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "
@@ -580,32 +664,38 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 if( hasVaccineEffect )
                     Host::Vaccine::initSchedule( ctsSeq );
             }
-            if( elt.getTimed().present() ){
-                const scnXml::MassListWithCum& timedElt = elt.getTimed().get();
-                if( timedElt.getCumulativeCoverage().present() )
-                    throw util::unimplemented_exception(
-                        "cumulative coverage for human interventions" );
-                for( scnXml::MassListWithCum::DeployConstIterator it2 =
-                        timedElt.getDeploy().begin(), end2 =
-                        timedElt.getDeploy().end(); it2 != end2; ++it2 )
-                {
-                    timed.push_back( new TimedHumanDeployment( *it2, intervention ) );
+            for( scnXml::Intervention::TimedConstIterator timedIt = elt.getTimed().begin();
+                timedIt != elt.getTimed().end(); ++timedIt )
+            {
+                if( timedIt->getCumulativeCoverage().present() ){
+                    const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
+                    map<string,size_t>::const_iterator effect_it = identifierMap.find( cumCov.getEffect() );
+                    if( effect_it == identifierMap.end() ){
+                        ostringstream msg;
+                        msg << "interventions.human.intervention.timed."
+                                "cumulativeCoverage: element refers to effect identifier \""
+                                << cumCov.getEffect()
+                                << "\" but no effect with this id was found";
+                        throw util::xml_scenario_error( msg.str() );
+                    }
+                    size_t effect = effect_it->second;
+                    TimeStep maxAge = TimeStep::fromYears( cumCov.getMaxAgeYears() );
+                    for( scnXml::MassListWithCum::DeployConstIterator it2 =
+                            timedIt->getDeploy().begin(), end2 =
+                            timedIt->getDeploy().end(); it2 != end2; ++it2 )
+                    {
+                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, effect, maxAge ) );
+                    }
+                }else{
+                    for( scnXml::MassListWithCum::DeployConstIterator it2 =
+                            timedIt->getDeploy().begin(), end2 =
+                            timedIt->getDeploy().end(); it2 != end2; ++it2 )
+                    {
+                        timed.push_back( new TimedHumanDeployment( *it2, intervention ) );
+                    }
                 }
             }
             humanInterventions.push_back( intervention );
-        }
-    }
-    if( intervElt.getIRS().present() ){
-        const scnXml::IRS& irs = intervElt.getIRS().get();
-        if( irs.getTimed().present() ){
-            // read description
-            population.transmissionModel().setIRSDescription( irs );
-            // timed deployments:
-            const scnXml::MassCumList::DeploySequence& seq = irs.getTimed().get().getDeploy();
-            typedef scnXml::MassCumList::DeploySequence::const_iterator It;
-            for( It it = seq.begin(); it != seq.end(); ++it ){
-                timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massIRS, &Host::Human::hasIRSProtection ) );
-            }
         }
     }
     if( intervElt.getVectorDeterrent().present() ){

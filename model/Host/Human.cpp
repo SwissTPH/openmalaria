@@ -196,6 +196,19 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     withinHostModel->update(nNewInfs, ageYears, _vaccine.getBSVEfficacy());
 }
 
+void Human::deploy( const HumanInterventionEffect& effect, Deployment::Method method ){
+    effect.deploy( *this, method );
+    lastDeployments[effect.getIndex()] = TimeStep::simulation;
+}
+
+bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
+    map<size_t,TimeStep>::const_iterator it = lastDeployments.find( effect_index );
+    if( it == lastDeployments.end() ){
+        return true;  // no previous deployment
+    }else{
+        return it->second + maxAge <= TimeStep::simulation;
+    }
+}
 
 void Human::deployVaccine( Deployment::Method method ){
     if( method == Deployment::TIMED ){
@@ -226,13 +239,17 @@ void Human::deployITN( Deployment::Method method, Transmission::TransmissionMode
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::massDrugAdministration () {
-    clinicalModel->massDrugAdministration (*this);
+void Human::deployIRS( Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
+    perHostTransmission.setupIRS ( transmissionModel );
+    if( method == Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
+    }else if( method == Deployment::CTS ){
+        //TODO: report
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::massIRS (const OM::Population& population) {
-    perHostTransmission.setupIRS (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
+void Human::massDrugAdministration () {
+    clinicalModel->massDrugAdministration (*this);
 }
 
 void Human::massVA (const OM::Population&) {
@@ -240,9 +257,6 @@ void Human::massVA (const OM::Population&) {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
 }
 
-bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.getIRS().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
-}
 bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasVAProtection(maxInterventionAge);
 }

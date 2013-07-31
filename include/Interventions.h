@@ -122,13 +122,22 @@ public:
      */
     virtual void deploy( Host::Human& human, Deployment::Method method ) const =0;
     
+    inline size_t getIndex()const{ return index; }
+    
 protected:
-    /** Construct (from a derived class). */
-    HumanInterventionEffect() {}
+    /** Construct (from a derived class).
+     * 
+     * @param index Effect index; used as an identifier for cumulative deployment.
+     */
+    HumanInterventionEffect(size_t index) : index(index) {}
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
     HumanInterventionEffect( const HumanInterventionEffect& );
+    
+    /// Identifier needed to record deployments so that cumulative deployment
+    /// can work. Can't use "this" because it needs to be checkpointed.
+    size_t index;
 };
 
 /** A description of a human intervention (as a list of effects). */
