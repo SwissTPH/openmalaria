@@ -193,7 +193,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int nNewInfs = infIncidence->numNewInfections( *this, EIR );
     
-    withinHostModel->update(nNewInfs, ageYears, _vaccine.getBSVEfficacy());
+    withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(Vaccine::BSV));
 }
 
 void Human::deploy( const HumanInterventionEffect& effect, Deployment::Method method ){
@@ -210,14 +210,16 @@ bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
     }
 }
 
-void Human::deployVaccine( Deployment::Method method ){
+void Human::deployVaccine( Deployment::Method method, Vaccine::Types type ){
     if( method == Deployment::TIMED ){
-        _vaccine.vaccinate();
-        Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
+        _vaccine.vaccinate( type );
+        if( type == Vaccine::reportType )
+            Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
     }else if( method == Deployment::CTS ){
-        if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
-            _vaccine.vaccinate();
-            Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
+        if ( _vaccine.getsEPIVaccination( type, TimeStep::simulation - _dateOfBirth ) ){
+            _vaccine.vaccinate( type );
+            if( type == Vaccine::reportType )
+                Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
         }
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
@@ -348,7 +350,7 @@ void Human::updateInfectiousness() {
   transmit=std::min(transmit, 1.0);
   
   //    Include here the effect of transmission-blocking vaccination
-  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getTBVEfficacy());
+  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getEfficacy( Vaccine::TBV ));
   util::streamValidate( _probTransmissionToMosquito );
 }
 

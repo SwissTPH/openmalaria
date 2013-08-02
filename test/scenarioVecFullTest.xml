@@ -202,23 +202,23 @@
       <effect id="MDA">
         <MDA/>
       </effect>
-      <effect id="vaccine">
-        <vaccine>
-          <description vaccineType="TBV">
-            <decay L="10.0" function="exponential"/>
-            <efficacyB value="10"/>
-            <initialEfficacy value="0.512"/>
-            <initialEfficacy value="0.64"/>
-            <initialEfficacy value="0.8"/>
-          </description>
-          <description vaccineType="PEV">
-            <decay L="10.0" function="exponential"/>
-            <efficacyB value="10"/>
-            <initialEfficacy value="0.512"/>
-            <initialEfficacy value="0.64"/>
-            <initialEfficacy value="0.8"/>
-          </description>
-        </vaccine>
+      <effect id="TBV">
+        <TBV>
+          <decay L="10.0" function="exponential"/>
+          <efficacyB value="10"/>
+          <initialEfficacy value="0.512"/>
+          <initialEfficacy value="0.64"/>
+          <initialEfficacy value="0.8"/>
+        </TBV>
+      </effect>
+      <effect id="PEV">
+        <PEV>
+          <decay L="10.0" function="exponential"/>
+          <efficacyB value="10"/>
+          <initialEfficacy value="0.512"/>
+          <initialEfficacy value="0.64"/>
+          <initialEfficacy value="0.8"/>
+        </PEV>
       </effect>
       <effect id="IPT">
         <IPT iptiEffect="13">
@@ -282,7 +282,8 @@
         </timed>
       </intervention>
       <intervention>
-        <effect id="vaccine"/>
+        <effect id="TBV"/>
+        <effect id="PEV"/>
         <continuous>
           <deploy coverage="0.95" targetAgeYrs="0.0833"/>
           <deploy coverage="0.95" targetAgeYrs="0.17"/>

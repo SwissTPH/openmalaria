@@ -84,13 +84,21 @@ enum SurveyMeasure {
     /// Number of deaths directly caused by malaria
     nDirDeaths= 19,
     
-    /// number of EPI vaccine doses given
+    /** Number of vaccine doses given via EPI.
+     * 
+     * Since schema 22, each vaccine type may be deployed independently. To be
+     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
+     * (with an "effect" element) will be reported. */
     nEPIVaccinations= 20,
     
     /// all cause infant mortality rate
     allCauseIMR= 21,
     
-    /// number of Mass / Campaign vaccine doses given
+    /** Number of vaccine doses given via mass campaign.
+     * 
+     * Since schema 22, each vaccine type may be deployed independently. To be
+     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
+     * (with an "effect" element) will be reported. */
     nMassVaccinations= 22,
     
     /// recoveries in hospital

@@ -30,18 +30,14 @@ namespace OM {
 namespace Host {
 using namespace OM::util;
 
-vector<TimeStep> Vaccine::targetAgeTStep;
-size_t Vaccine::_numberOfEpiDoses = 0;
-Vaccine Vaccine::PEV;
-Vaccine Vaccine::BSV;
-Vaccine Vaccine::TBV;
+Vaccine Vaccine::types[NumVaccineTypes];
+Vaccine::Types Vaccine::reportType = NumVaccineTypes;
 
-
-double Vaccine::getEfficacy (int numPrevDoses)
+double Vaccine::getInitialEfficacy (size_t numPrevDoses)
 {
     /* If initialMeanEfficacy.size or more doses have already been given, use
      * the last efficacy. */
-    if (numPrevDoses >= (int) initialMeanEfficacy.size())
+    if (numPrevDoses >= initialMeanEfficacy.size())
         numPrevDoses = initialMeanEfficacy.size() - 1;
     double ime = initialMeanEfficacy[numPrevDoses];
     //NOTE: With extra valiadation in random, the first difference is noticed here:
@@ -63,106 +59,87 @@ double Vaccine::getEfficacy (int numPrevDoses)
     }
 }
 
-void Vaccine::initDescription(const scnXml::Vaccine::DescriptionSequence& vaccDesc)
-{
-    const scnXml::VaccineDescription *VdPEV = 0, *VdBSV = 0, *VdTBV = 0;
-    if (vaccDesc.size() == 0) {
-        // Since this function was called, we know Vaccines are used
-        throw util::xml_scenario_error ("Vaccine intervention without description");
-	// Note: R_0 intervention uses vaccines, but not deployment; hence
-	// it is safe to use without vaccine descriptions.
-    }
-    for (scnXml::Vaccine::DescriptionSequence::const_iterator i = vaccDesc.begin();
-            i != vaccDesc.end(); ++i) {
-        const string& type = i->getVaccineType();
-        if (type == "PEV")
-            VdPEV = & (*i);
-        else if (type == "BSV")
-            VdBSV = & (*i);
-        else if (type == "TBV")
-            VdTBV = & (*i);
-        else
-            throw util::xml_scenario_error ("vaccineType invalid");
-    }
-    
-    //Read in vaccine specifications
-    PEV.initVaccine (VdPEV);
-    BSV.initVaccine (VdBSV);
-    TBV.initVaccine (VdTBV);
-}
-
 void Vaccine::initSchedule( const scnXml::ContinuousList::DeploySequence& schedule ){
-    if( _numberOfEpiDoses > 0 && schedule.size() > 0 ){
-        throw util::xml_scenario_error( "A vaccine effect has multiple continuous deployments. No model of how these should interact is included in OpenMalaria." );
+    if( targetAgeTStep.size() > 0 && schedule.size() > 0 ){
+        throw util::xml_scenario_error( "A vaccine effect has multiple "
+                "continuous deployments. No model of how these should interact is included in OpenMalaria." );
     }
-    _numberOfEpiDoses = schedule.size();
-    if (_numberOfEpiDoses) {
-        targetAgeTStep.resize (_numberOfEpiDoses, TimeStep(0));
-        for (size_t i = 0;i < _numberOfEpiDoses; ++i) {
-            if (i >= schedule.size()) {
-                ostringstream msg;
-                msg << "Expected " << _numberOfEpiDoses << " vaccine parameters in scenario.xml: interventions->continuous";
-                throw util::xml_scenario_error (msg.str());
-            }
+    size_t numDoses = schedule.size();
+    if (numDoses > 0) {
+        targetAgeTStep.resize (numDoses, TimeStep(0));
+        for (size_t i = 0;i < numDoses; ++i) {
             targetAgeTStep[i] = TimeStep::fromYears( schedule[i].getTargetAgeYrs() );
         }
     }
 }
 
 void Vaccine::verifyEnabledForR_0 (){
-    if( !PEV.active || !TBV.active )
-        throw util::xml_scenario_error("PEV and TBV vaccines must have a description to use the insertR_0Case intervention");
+    if( !types[PEV].active || !types[TBV].active )
+        throw util::xml_scenario_error("PEV and TBV vaccines must have a "
+                "description to use the insertR_0Case intervention");
 }
 
-void Vaccine::initVaccine (const scnXml::VaccineDescription* vd)
+void Vaccine::initVaccine (const scnXml::VaccineDescription& vd, Types type)
 {
-    if (vd != NULL) {
-        if( active )
-            throw util::unimplemented_exception( "multiple vaccine interventions for the same type of vaccine" );
-        active = true;
-
-        // set efficacyB:
-        efficacyB = vd->getEfficacyB().getValue();
-
-        // set initialMeanEfficacy:
-        const scnXml::VaccineDescription::InitialEfficacySequence ies = vd->getInitialEfficacy();
-        initialMeanEfficacy.resize (ies.size());
-        for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
-            initialMeanEfficacy[i] = ies[i].getValue();
-
-        decayFunc = DecayFunction::makeObject( vd->getDecay(), "decay" );
+    if( active )
+        throw util::unimplemented_exception( "multiple vaccine interventions for the same type of vaccine" );
+    active = true;
+    
+    if( reportType == NumVaccineTypes /* the initial value */ ){
+        // set to the first type described
+        reportType = type;
     }
+
+    // set efficacyB:
+    efficacyB = vd.getEfficacyB().getValue();
+
+    // set initialMeanEfficacy:
+    const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
+    initialMeanEfficacy.resize (ies.size());
+    for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
+        initialMeanEfficacy[i] = ies[i].getValue();
+
+    decayFunc = DecayFunction::makeObject( vd.getDecay(), "decay" );
 }
 
+PerHumanVaccine::PerHumanVaccine(){
+    types.reserve( Vaccine::NumVaccineTypes );
+    types.push_back( PerEffectPerHumanVaccine( Vaccine::PEV ) );
+    types.push_back( PerEffectPerHumanVaccine( Vaccine::BSV ) );
+    types.push_back( PerEffectPerHumanVaccine( Vaccine::TBV ) );
+}
 
-PerHumanVaccine::PerHumanVaccine() :
-        _lastVaccineDose(0), _timeLastVaccine(TimeStep::never),
-        _initialPEVEfficacy(0.0), _initialBSVEfficacy(0.0), _initialTBVEfficacy(0.0)
+PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( Vaccine::Types type ) :
+        numDosesAdministered(0), initialEfficacy(0.0)
 {
-    if (Vaccine::PEV.active)
-        hetSamplePEV = Vaccine::PEV.decayFunc->hetSample();
-    if (Vaccine::BSV.active)
-        hetSampleBSV = Vaccine::BSV.decayFunc->hetSample();
-    if (Vaccine::TBV.active)
-        hetSampleTBV = Vaccine::TBV.decayFunc->hetSample();
+    if (Vaccine::types[type].active)
+        hetSample = Vaccine::types[type].decayFunc->hetSample();
 }
 
-void PerHumanVaccine::vaccinate() {
-    //Index to look up initial efficacy relevant for this dose.
-    if (Vaccine::PEV.active)
-        _initialPEVEfficacy = Vaccine::PEV.getEfficacy(_lastVaccineDose);
-
-    if (Vaccine::BSV.active)
-        _initialBSVEfficacy = Vaccine::BSV.getEfficacy(_lastVaccineDose);
-
-    if (Vaccine::TBV.active)
-        _initialTBVEfficacy = Vaccine::TBV.getEfficacy(_lastVaccineDose);
-
-    ++_lastVaccineDose;
-    _timeLastVaccine = TimeStep::simulation;
+double PerEffectPerHumanVaccine::getEfficacy( Vaccine::Types type ) const{
+    util::streamValidate( initialEfficacy );
+    util::streamValidate( timeLastDeployment.asInt() );
+    util::streamValidate( hetSample.getTMult() );
+    return initialEfficacy * Vaccine::types[type].decayFunc->eval(
+        TimeStep::simulation - timeLastDeployment, hetSample );
 }
-bool PerHumanVaccine::hasProtection(TimeStep maxInterventionAge)const{
-    return _timeLastVaccine + maxInterventionAge > TimeStep::simulation;
+
+/// Returns true if this individual should get a vaccine dose via EPI
+bool PerEffectPerHumanVaccine::getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps )const{
+    const Vaccine& vacc = Vaccine::types[type];
+    assert( vacc.targetAgeTStep.size() != 0 );
+    // Deployment is affected by previous missed doses and mass vaccinations,
+    // unlike other continuous interventions; extra test:
+    return numDosesAdministered < vacc.targetAgeTStep.size()
+            && vacc.targetAgeTStep[numDosesAdministered] == ageTSteps;
+}
+
+void PerEffectPerHumanVaccine::vaccinate( Vaccine::Types type ) {
+    initialEfficacy = Vaccine::types[type].getInitialEfficacy(numDosesAdministered);
+    util::streamValidate(initialEfficacy);
+
+    ++numDosesAdministered;
+    timeLastDeployment = TimeStep::simulation;
 }
 
 }

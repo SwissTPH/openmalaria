@@ -107,6 +107,18 @@ public:
     TimeStep time;
 };
 
+/** Enumeration of all effects, in the order that these should be deployed in
+ * within a single intervention. */
+enum EffectType {
+    MDA,
+    PEV,
+    BSV,
+    TBV,
+    IPT,
+    ITN,
+    IRS
+};
+
 /** A description of one effect of a human intervention.
  * 
  * Note that one "effect" can have several "actions", but that deployment and
@@ -123,6 +135,12 @@ public:
     virtual void deploy( Host::Human& human, Deployment::Method method ) const =0;
     
     inline size_t getIndex()const{ return index; }
+    
+    /** Returns the appropriate descriptor from the EffectType enum.
+     * 
+     * This is only used a small number of times during setup, so doesn't need
+     * to be fast. */
+    virtual EffectType effectType() const=0;
     
 protected:
     /** Construct (from a derived class).
@@ -148,6 +166,18 @@ public:
     
     /** Deploy all effects to a pre-selected human. */
     void deploy( Host::Human& human, Deployment::Method method ) const;
+    
+    /** Sort effects according to a standard order.
+     * 
+     * The point of this is to make results repeatable even when users change
+     * the ordering of a list of intervention's effects (since getting
+     * repeatable results out of OpenMalaria is often a headache anyway, we
+     * might as well at least remove this hurdle).
+     * 
+     * Note that when multiple interventions are deployed simultaneously, the
+     * order of their deployments is still dependent on the order in the XML
+     * file. */
+    void sortEffects();
     
 private:
     // List of pointers to effects. Does not manage memory (InterventionManager::humanEffects does that).

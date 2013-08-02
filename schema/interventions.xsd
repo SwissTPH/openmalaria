@@ -455,7 +455,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="HumanInterventionEffect">
     <xs:choice>
-      <xs:element name="MDA" minOccurs="0">
+      <xs:element name="MDA">
         <xs:annotation>
           <xs:documentation>
             Description and deployment of MDA interventions
@@ -510,18 +510,29 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="vaccine" minOccurs="0">
+      <xs:element name="PEV" type="vaccineDescription">
         <xs:annotation>
           <xs:documentation>
-            Description and deployment of vaccine interventions.
+            Pre-erythrocytic vaccine (PEV): prevents a proportion of infections from commencing.
           </xs:documentation>
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element maxOccurs="3" minOccurs="0" name="description" type="vaccineDescription" />
-          </xs:sequence>
-        </xs:complexType>
+      </xs:element>
+      <xs:element name="BSV" type="vaccineDescription">
+        <xs:annotation>
+          <xs:documentation>
+            Blood-stage vaccine (BSV): acts as a killing factor on blood-stage parasites
+          </xs:documentation>
+          <xs:appinfo>name:Vaccines;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="TBV" type="vaccineDescription">
+        <xs:annotation>
+          <xs:documentation>
+            Transmission-blocking vaccine (TBV): one minus this scales the probability of transmission to mosquitoes
+          </xs:documentation>
+          <xs:appinfo>name:Vaccines;</xs:appinfo>
+        </xs:annotation>
       </xs:element>
       <xs:element name="IPT" minOccurs="0" type="IPTDescription">
         <xs:annotation>
@@ -819,7 +830,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="vaccineDescription">
     <xs:annotation>
-      <xs:documentation>List of vaccine descriptions</xs:documentation>
+      <xs:documentation>Description of a vaccine's effect</xs:documentation>
       <xs:appinfo>name:Vaccine descriptions;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
@@ -855,25 +866,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="vaccineType" use="required">
-      <xs:annotation>
-        <xs:documentation>Type of vaccine</xs:documentation>
-        <xs:appinfo>units:Code;name:Type of vaccine;</xs:appinfo>
-      </xs:annotation>
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="PEV" />
-          <xs:enumeration value="BSV" />
-          <xs:enumeration value="TBV" />
-        </xs:restriction>
-      </xs:simpleType>
-    </xs:attribute>
-    <xs:attribute name="name" type="xs:string" use="optional">
-      <xs:annotation>
-        <xs:documentation>Name of vaccine</xs:documentation>
-        <xs:appinfo>type:string;name:Vaccine;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="IPTDescription">
     <xs:sequence>

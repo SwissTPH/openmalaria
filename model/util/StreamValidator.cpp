@@ -114,7 +114,7 @@ void StreamValidatorType::handle( SVType value ){
 	if( value != *readIt ){
 	    // Attach a debugger with a breakpoint here to get the backtrace,
 	    // if the one caught by traced_exception isn't enough.
-	    throw TRACED_EXCEPTION_DEFAULT ("StreamValidator: out of sync!");
+	    throw TRACED_EXCEPTION_DEFAULT ("StreamValidator: out of sync! Examine the stack trace to work out why (you may want to re-run this in a debugger with a break point on this line to get a better trace).");
 	}
 	++readIt;
     }

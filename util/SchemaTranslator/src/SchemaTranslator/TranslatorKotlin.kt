@@ -325,7 +325,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             humanEffects.add(effect)
             return effect
         }
-        fun newIntervention(effects: Array<String>): Element{
+        fun newIntervention(effects: List<String>): Element{
             val intervention = scenarioDocument.createElement("intervention")!!
             for (effect in effects){
                 val interventionEffect = scenarioDocument.createElement("effect")!!
@@ -336,50 +336,55 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             return intervention
         }
         
+        // move any deployment descriptions from elt to intervention, applying necessary transformations
+        fun processDeployments(elt: Element, intervention: Element, cumCovEffectIdent: String){
+            val cts = getChildElementOpt(elt, "continuous")
+            if (cts != null) intervention.appendChild(cts)
+
+            val timed = getChildElementOpt(elt, "timed")
+            if (timed != null){
+                // Note: type change from massList or massCumList to massListWithCum
+                // Map of "cumulative max age" to "timed element"
+                val cumTimedLists = TreeMap<Double,Element>()
+                var hasNonCum = false
+                for (deploy in getChildElements(timed, "deploy")){
+                    val maxAgeNode = deploy.getAttributeNode("cumulativeWithMaxAge")
+                    if (maxAgeNode != null){
+                        val age = java.lang.Double.parseDouble( maxAgeNode.getValue() )
+                        fun makeTimedList(): Element {
+                            val tL = scenarioDocument.createElement("timed")!!
+                            val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
+                            cumCov.setAttribute("effect",cumCovEffectIdent) // effect is uniquely used in this case, so translation is exact
+                            cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(age))
+                            tL.appendChild(cumCov)
+                            cumTimedLists.put(age, tL)
+                            return tL
+                        }
+                        val timedList : Element = cumTimedLists.get( age ) ?: makeTimedList()
+                        deploy.removeAttribute("cumulativeWithMaxAge")
+                        timedList.appendChild(deploy)
+                    }else{
+                        hasNonCum = true
+                    }
+                }
+                if (hasNonCum)
+                    intervention.appendChild(timed)
+                else
+                    elt.removeChild(timed)
+                for (item in cumTimedLists){
+                    intervention.appendChild(item.component2())
+                }
+            }
+        }
+        
         fun updateElt(name: String, stripDescElt: Boolean){
             val elt = getChildElementOpt(interventions, name)
             if (elt != null){
                 val ident = effectIdent(name)
                 val effect = newEffect(ident)
-                val intervention = newIntervention(array(ident))
+                val intervention = newIntervention(listOf(ident))
 
-                val cts = getChildElementOpt(elt, "continuous")
-                if (cts != null) intervention.appendChild(cts)
-                
-                val timed = getChildElementOpt(elt, "timed")
-                if (timed != null){
-                    // Note: type change from massList or massCumList to massListWithCum
-                    // Map of "cumulative max age" to "timed element"
-                    val cumTimedLists = TreeMap<Double,Element>()
-                    var hasNonCum = false
-                    for (deploy in getChildElements(timed, "deploy")){
-                        val maxAgeNode = deploy.getAttributeNode("cumulativeWithMaxAge")
-                        if (maxAgeNode != null){
-                            val age = java.lang.Double.parseDouble( maxAgeNode.getValue() )
-                            fun makeTimedList(): Element {
-                                val tL = scenarioDocument.createElement("timed")!!
-                                val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
-                                cumCov.setAttribute("effect",ident) // effect is uniquely used in this case, so translation is exact
-                                cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(age))
-                                tL.appendChild(cumCov)
-                                cumTimedLists.put(age, tL)
-                                return tL
-                            }
-                            val timedList : Element = cumTimedLists.get( age ) ?: makeTimedList()
-                            deploy.removeAttribute("cumulativeWithMaxAge")
-                            timedList.appendChild(deploy)
-                        }else{
-                            hasNonCum = true
-                        }
-                    }
-                    if (hasNonCum)
-                        intervention.appendChild(timed)
-                    else
-                        elt.removeChild(timed)
-                    for (item in cumTimedLists){
-                        intervention.appendChild(item.component2())
-                    }
-                }
+                processDeployments(elt, intervention, ident)
                 
                 val nameAttr = elt.getAttributeNode("name")
                 if (nameAttr != null){
@@ -399,8 +404,41 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 }
             }
         }
+        fun updateVaccineElt(name: String){
+            val elt = getChildElementOpt(interventions, name)
+            if (elt != null){
+                val idents = ArrayList<String>()
+                for (vacc in getChildElements(elt, "description")){
+                    val vaccineType = vacc.getAttribute("vaccineType")!!
+                    vacc.removeAttribute("vaccineType")
+                    val ident = effectIdent(vaccineType)
+                    idents.add(ident)
+                    val effect = newEffect(ident)
+                    val renamed = scenarioDocument.renameNode(vacc,"",vaccineType)!!
+                    effect.appendChild(renamed)
+                }
+                if (idents.size == 0){
+                    // corner case: vaccine element with no children was allowed, but is useless
+                    interventions.removeChild(elt)
+                    return
+                }
+                val intervention = newIntervention(idents)
+
+                // Use any identifier for cumCov since all effects are deployed simultaneously
+                processDeployments(elt, intervention, idents[0])
+                
+                val nameAttr = elt.getAttributeNode("name")
+                if (nameAttr != null){
+                    //Note: name could be applied to effect or deployment descriptor; apply to deployment since we have multiple effects
+                    intervention.setAttribute("name",nameAttr.getValue())
+                    elt.removeAttribute("name")
+                }
+                
+                interventions.removeChild(elt)  // now defunct
+            }
+        }
         updateElt("MDA", false)
-        updateElt("vaccine", false)
+        updateVaccineElt("vaccine")
         updateElt("IPT", true) 
         updateElt("ITN", true)
         updateElt("IRS", false)

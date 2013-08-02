@@ -475,6 +475,13 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method ) const{
     }
 }
 
+bool effectCmp(const HumanInterventionEffect *a, const HumanInterventionEffect *b){
+    return a->effectType() < b->effectType();
+}
+void HumanIntervention::sortEffects(){
+    std::sort( effects.begin(), effects.end(), effectCmp );
+}
+
 class MDAEffect : public HumanInterventionEffect {
 public:
     MDAEffect( size_t index, const scnXml::MDA& mda ) : HumanInterventionEffect(index) {
@@ -504,20 +511,33 @@ public:
             throw util::unimplemented_exception("MDA via cts deployment");
         human.massDrugAdministration();
     }
+    
+    virtual EffectType effectType() const{ return MDA; }
 };
 
 class VaccineEffect : public HumanInterventionEffect {
 public:
-    VaccineEffect( size_t index, const scnXml::Vaccine::DescriptionSequence& seq ) :
-            HumanInterventionEffect(index)
+    VaccineEffect( size_t index, const scnXml::VaccineDescription& seq, Host::Vaccine::Types type ) :
+            HumanInterventionEffect(index), type(type)
     {
-        //TODO: further revise vaccine description in XSD
-        Host::Vaccine::initDescription( seq );
+        Host::Vaccine::types[type].initVaccine( seq, type );
     }
     
     void deploy( Human& human, Deployment::Method method )const{
-        human.deployVaccine( method );
+        human.deployVaccine( method, type );
     }
+    
+    virtual EffectType effectType() const{
+        if( type == Host::Vaccine::PEV ) return PEV;
+        else if( type == Host::Vaccine::BSV ) return BSV;
+        else if( type == Host::Vaccine::TBV ) return TBV;
+        else throw SWITCH_DEFAULT_EXCEPTION;
+    }
+    
+    inline Host::Vaccine::Types getVaccineType()const{ return type; }
+    
+private:
+    Host::Vaccine::Types type;
 };
 
 class IPTEffect : public HumanInterventionEffect {
@@ -529,6 +549,8 @@ public:
     void deploy( Human& human, Deployment::Method method )const{
         human.deployIPT( method );
     }
+    
+    virtual EffectType effectType() const{ return IPT; }
 };
 
 class ITNEffect : public HumanInterventionEffect {
@@ -543,6 +565,8 @@ public:
     void deploy( Human& human, Deployment::Method method )const{
         human.deployITN( method, transmission );
     }
+    
+    virtual EffectType effectType() const{ return ITN; }
     
 private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
@@ -560,6 +584,8 @@ public:
     void deploy( Human& human, Deployment::Method method )const{
         human.deployIRS( method, transmission );
     }
+    
+    virtual EffectType effectType() const{ return IRS; }
     
 private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
@@ -611,9 +637,12 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             identifierMap[effect.getId()] = index;
             if( effect.getMDA().present() ){
                 humanEffects.push_back( new MDAEffect( index, effect.getMDA().get() ) );
-            }else if( effect.getVaccine().present() ){
-                //TODO: separate out different effects
-                humanEffects.push_back( new VaccineEffect( index, effect.getVaccine().get().getDescription() ) );
+            }else if( effect.getPEV().present() ){
+                humanEffects.push_back( new VaccineEffect( index, effect.getPEV().get(), Host::Vaccine::PEV ) );
+            }else if( effect.getBSV().present() ){
+                humanEffects.push_back( new VaccineEffect( index, effect.getBSV().get(), Host::Vaccine::BSV ) );
+            }else if( effect.getTBV().present() ){
+                humanEffects.push_back( new VaccineEffect( index, effect.getTBV().get(), Host::Vaccine::TBV ) );
             }else if( effect.getIPT().present() ){
                 humanEffects.push_back( new IPTEffect( index, effect.getIPT().get() ) );
             }else if( effect.getITN().present() ){
@@ -633,7 +662,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 human.getIntervention().begin(),
                 end = human.getIntervention().end(); it != end; ++it )
         {
-            bool hasVaccineEffect = false;      // for vaccine EPI deployment
+            list<Host::Vaccine::Types> vaccineEffects;      // for vaccine EPI deployment
             const scnXml::Intervention& elt = *it;
             // 2.a intervention effects
             HumanIntervention *intervention = new HumanIntervention();
@@ -650,8 +679,13 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 }
                 const HumanInterventionEffect* effect = &humanEffects[result->second];
                 intervention->addEffect( effect );
-                if( dynamic_cast<const VaccineEffect*>( effect ) != 0 ) hasVaccineEffect = true;
+                const VaccineEffect *vaccEffect = dynamic_cast<const VaccineEffect*>( effect );
+                if( vaccEffect != 0 ) {
+                    vaccineEffects.push_back( vaccEffect->getVaccineType() );
+                }
             }
+            intervention->sortEffects();
+            
             // 2.b intervention deployments
             if( elt.getContinuous().present() ){
                 const scnXml::ContinuousList::DeploySequence& ctsSeq =
@@ -661,8 +695,9 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 {
                     continuous.push_back( new ContinuousHumanIntervention( *it2, intervention ) );
                 }
-                if( hasVaccineEffect )
-                    Host::Vaccine::initSchedule( ctsSeq );
+                for( list<Host::Vaccine::Types>::const_iterator it = vaccineEffects.begin(); it != vaccineEffects.end(); ++it ){
+                    Host::Vaccine::types[*it].initSchedule( ctsSeq );
+                }
             }
             for( scnXml::Intervention::TimedConstIterator timedIt = elt.getTimed().begin();
                 timedIt != elt.getTimed().end(); ++timedIt )

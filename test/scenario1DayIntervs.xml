@@ -111,16 +111,14 @@
           </description>
         </MDA>
       </effect>
-      <effect id="vaccine">
-        <vaccine>
-          <description vaccineType="PEV">
-            <decay L="5" function="exponential"/>
-            <efficacyB value="10"/>
-            <initialEfficacy value="0.512"/>
-            <initialEfficacy value="0.64"/>
-            <initialEfficacy value="0.8"/>
-          </description>
-        </vaccine>
+      <effect id="PEV">
+        <PEV>
+          <decay L="5" function="exponential"/>
+          <efficacyB value="10"/>
+          <initialEfficacy value="0.512"/>
+          <initialEfficacy value="0.64"/>
+          <initialEfficacy value="0.8"/>
+        </PEV>
       </effect>
       <intervention>
         <effect id="MDA"/>
@@ -134,7 +132,7 @@
         </timed>
       </intervention>
       <intervention>
-        <effect id="vaccine"/>
+        <effect id="PEV"/>
         <continuous>
           <deploy coverage="0.95" targetAgeYrs="0.0833"/>
           <deploy coverage="0.95" targetAgeYrs="0.17"/>

@@ -167,33 +167,37 @@
   </monitoring>
   <interventions name="BSVPEVTBV Ref EPI modified modified">
     <human>
-      <effect id="vaccine">
-        <vaccine>
-          <description vaccineType="TBV">
-            <decay L="0.0" function="constant"/>
-            <efficacyB value="10"/>
-            <initialEfficacy value="1"/>
-            <initialEfficacy value="1"/>
-            <initialEfficacy value="1"/>
-          </description>
-          <description vaccineType="BSV">
-            <decay L="0.0" function="constant"/>
-            <efficacyB value="10"/>
-            <initialEfficacy value="1"/>
-            <initialEfficacy value="1"/>
-            <initialEfficacy value="1"/>
-          </description>
-          <description vaccineType="PEV">
-            <decay L="0.0" function="constant"/>
-            <efficacyB value="10"/>
-            <initialEfficacy value="1"/>
-            <initialEfficacy value="1"/>
-            <initialEfficacy value="1"/>
-          </description>
-        </vaccine>
+      <effect id="TBV">
+        <TBV>
+          <decay L="0.0" function="constant"/>
+          <efficacyB value="10"/>
+          <initialEfficacy value="1"/>
+          <initialEfficacy value="1"/>
+          <initialEfficacy value="1"/>
+        </TBV>
+      </effect>
+      <effect id="BSV">
+        <BSV>
+          <decay L="0.0" function="constant"/>
+          <efficacyB value="10"/>
+          <initialEfficacy value="1"/>
+          <initialEfficacy value="1"/>
+          <initialEfficacy value="1"/>
+        </BSV>
+      </effect>
+      <effect id="PEV">
+        <PEV>
+          <decay L="0.0" function="constant"/>
+          <efficacyB value="10"/>
+          <initialEfficacy value="1"/>
+          <initialEfficacy value="1"/>
+          <initialEfficacy value="1"/>
+        </PEV>
       </effect>
       <intervention>
-        <effect id="vaccine"/>
+        <effect id="TBV"/>
+        <effect id="BSV"/>
+        <effect id="PEV"/>
         <continuous>
           <deploy coverage="1" targetAgeYrs="0.0833"/>
           <deploy coverage="1" targetAgeYrs="0.17"/>

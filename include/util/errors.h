@@ -31,9 +31,9 @@ using namespace std;
 /* Macros to ease use of traced_exception.
  * msg should be obvious, and code is the program exit code.
  */
-#define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) )
-#define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ )
-#define SWITCH_DEFAULT_EXCEPTION OM::util::traced_exception( OM::util::Messages::SwitchDefault, __FILE__, __LINE__, Error::SwitchDefault )
+#define TRACED_EXCEPTION( msg, code ) ::OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) )
+#define TRACED_EXCEPTION_DEFAULT( msg ) ::OM::util::traced_exception( (msg), __FILE__, __LINE__ )
+#define SWITCH_DEFAULT_EXCEPTION ::OM::util::traced_exception( OM::util::Messages::SwitchDefault, __FILE__, __LINE__, ::OM::util::Error::SwitchDefault )
 
 // #define OM_NO_STACK_TRACE
 

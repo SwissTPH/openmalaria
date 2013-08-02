@@ -30,7 +30,7 @@ namespace Host {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using boost::shared_ptr;
-
+    
 /** Vaccine intervention parameters.
  *
  * Used to represent PEV, BSV and TBV vaccines.
@@ -41,46 +41,43 @@ namespace Host {
  * All parameters (inc. non-static) are only set by initParameters(). */
 class Vaccine {
 public:
-    // Static:
-    /// Set parameters from xml (only called if vaccines are used)
-    static void initDescription (const scnXml::Vaccine::DescriptionSequence& vaccDesc);
-    /// Set schedule. Needed for correct EPI deployment. TODO: a model of how
-    /// vaccine booster shots work would allow this to be moved to intervention
-    /// deployment.
-    static void initSchedule( const scnXml::ContinuousList::DeploySequence& schedule );
-    
+    enum Types { PEV, BSV, TBV, NumVaccineTypes };
+
+    // ———  static  ———
     /// Special for R_0: check is set up correctly or throw xml_scenario_error
     static void verifyEnabledForR_0 ();
     
-private:
-    /*! Common to all vaccine types. Number of vaccine doses that are given
-     * either through EPI or as EPI Boosters. */
-    static size_t _numberOfEpiDoses;
-
-    /** Target age for EPI-like vaccination, in time steps. */
-    static vector<TimeStep> targetAgeTStep;
-
-    /// Preerythrocytic reduces h vaccine parameters
-    static Vaccine PEV;
-    /// Erythrocytic reduces y vaccine parameters
-    static Vaccine BSV;
-    /// Transmission blocking reduces k vaccine parameters
-    static Vaccine TBV;
-
-    //Non-static:
-    Vaccine() : active(false), decayFunc(DecayFunction::makeConstantObject()), efficacyB(1.0) {}
+    /** @brief Three types of vaccine.
+     * 
+     * TODO: multiple descriptions should be allowed for each type. */
+    static Vaccine types[NumVaccineTypes];
     
+    /// Only one type of vaccine is reported via the old mechanism: the one given here
+    static Types reportType;
+
+    // ———  non-static  ———
     /** Per-type initialization
      * @returns decay */
-    void initVaccine (const scnXml::VaccineDescription* vd);
+    void initVaccine (const scnXml::VaccineDescription& vd, Types type);
+    
+    /// Set schedule. Needed for correct EPI deployment.
+    /// TODO: a model of how vaccine booster shots work would allow this to be
+    /// moved to intervention deployment.
+    void initSchedule( const scnXml::ContinuousList::DeploySequence& schedule );
 
-    /** Get the efficacy of the vaccine.
+private:
+    Vaccine() : active(false), decayFunc(DecayFunction::makeConstantObject()), efficacyB(1.0) {}
+    
+    /** Get the initial efficacy of the vaccine.
      *
      * @param numPrevDoses The number of prior vaccinations of the individual. */
-    double getEfficacy (int numPrevDoses);
+    double getInitialEfficacy (size_t numPrevDoses);
 
     /// True if this vaccine is in use
     bool active;
+
+    /** Target age for EPI-like vaccination, in time steps. */
+    vector<TimeStep> targetAgeTStep;
 
     /// Function representing decay of effect
     shared_ptr<DecayFunction> decayFunc;
@@ -92,77 +89,78 @@ private:
     double efficacyB;
 
     friend class PerHumanVaccine;
+    friend class PerEffectPerHumanVaccine;
+};
+
+/** Per vaccine effect (type), per human details. */
+class PerEffectPerHumanVaccine {
+    double getEfficacy( Vaccine::Types type ) const;
+    
+    /// Returns true if this individual should get a vaccine dose via EPI
+    bool getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps ) const;
+
+    /** Update efficacies and the number of doses in this human. */
+    void vaccinate( Vaccine::Types type );
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        numDosesAdministered & stream;
+        timeLastDeployment & stream;
+        initialEfficacy & stream;
+        hetSample & stream;
+    }
+    
+private:
+    PerEffectPerHumanVaccine(Vaccine::Types type );
+    
+    /** Number of vaccine doses this individual has received.
+     *
+     * If an individual misses one EPI (continuous) vaccine dose, it's
+     * intentional that they also miss following EPI doses (unless a timed mass
+     * vaccination reintroduces them to the EPI schedule). */
+    size_t numDosesAdministered;
+    /// Timestep of last vaccination with this vaccine type
+    TimeStep timeLastDeployment;
+    /// Efficacy at last deployment (undecayed)
+    double initialEfficacy;
+    DecayFuncHet hetSample;
+    
+    friend class PerHumanVaccine;
 };
 
 /** Per-human vaccine code. */
 class PerHumanVaccine {
 public:
     PerHumanVaccine();
-
-    /// Returns true if a continuous vaccine dose should be given.
-    bool doCtsVaccination (TimeStep ageTSteps) {
-        assert( Vaccine::_numberOfEpiDoses != 0 );
-        // Deployment is affected by previous missed doses and mass vaccinations,
-        // unlike other continuous interventions; extra test:
-        return _lastVaccineDose < (int)Vaccine::_numberOfEpiDoses
-               && Vaccine::targetAgeTStep[_lastVaccineDose] == ageTSteps;
-    }
-
-    /** Update efficacies and the number of doses in this human. */
-    void vaccinate();
-    /// Has been vaccinated within considered effective duration?
-    bool hasProtection(TimeStep maxInterventionAge)const;
-
-    inline double getPEVEfficacy()const {
-        return _initialPEVEfficacy * Vaccine::PEV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSamplePEV );
-    }
-    inline double getBSVEfficacy()const {
-        return _initialBSVEfficacy * Vaccine::BSV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleBSV );
-    }
-    inline double getTBVEfficacy()const {
-        return _initialTBVEfficacy * Vaccine::TBV.decayFunc->eval( TimeStep::simulation - _timeLastVaccine, hetSampleTBV );
-    }
     
+    inline double getEfficacy( Vaccine::Types type )const{
+        return types[type].getEfficacy( type );
+    }
+    inline bool getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps ){
+        return types[type].getsEPIVaccination( type, ageTSteps );
+    }
+    inline void vaccinate( Vaccine::Types type ){
+        types[type].vaccinate( type );
+    }
+
     /// Hack for R_0 experiment: make current human the infection source
     inline void specialR_0(){
-        assert( Vaccine::PEV.active && Vaccine::TBV.active );
-	_initialPEVEfficacy = 1.0;
-        _initialTBVEfficacy = 0.0;
+        assert( Vaccine::types[Vaccine::PEV].active && Vaccine::types[Vaccine::TBV].active );
+        types[Vaccine::PEV].initialEfficacy = 1.0;
+        types[Vaccine::TBV].initialEfficacy = 0.0;
     }
     
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        _lastVaccineDose & stream;
-        _timeLastVaccine & stream;
-        _initialBSVEfficacy & stream;
-        _initialPEVEfficacy & stream;
-        _initialTBVEfficacy & stream;
-        hetSamplePEV & stream;
-        hetSampleBSV & stream;
-        hetSampleTBV & stream;
+        for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i ){
+            types[i] & stream;
+        }
     }
 
-
-private:
-    /** Number of vaccine doses this individual has received.
-     *
-     * If an individual misses one EPI (continuous) vaccine dose, it's
-     * intentional that they also miss following EPI doses (unless a timed mass
-     * vaccination reintroduces them to the EPI schedule). */
-    int _lastVaccineDose;
-    /// Timestep of last vaccination
-    TimeStep _timeLastVaccine;
-    //!Remaining efficacy of Pre-erythrocytic vaccines
-    double _initialPEVEfficacy;
-    //!Remaining efficacy of Blood-stage vaccines
-    double _initialBSVEfficacy;
-    //!Remaining efficacy of Transmission-blocking vaccines
-    double _initialTBVEfficacy;
-    
-    DecayFuncHet hetSamplePEV;
-    DecayFuncHet hetSampleBSV;
-    DecayFuncHet hetSampleTBV;
+    /// Details for each vaccine type
+    vector<PerEffectPerHumanVaccine> types;
 };
 
 }
