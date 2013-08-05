@@ -235,7 +235,7 @@
         </ITN>
       </effect>
       <effect description="DDT test" id="IRS">
-        <vector>
+        <GVI>
           <decay L="0.5" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency value="0.56"/>
@@ -252,7 +252,7 @@
             <preprandialKillingEffect value="0"/>
             <postprandialKillingEffect value="0.24"/>
           </anophelesParams>
-        </vector>
+        </GVI>
       </effect>
       <intervention>
         <effect id="IPT"/>

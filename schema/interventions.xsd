@@ -558,7 +558,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="vector" minOccurs="0" type="vectorIntervDesc">
+      <xs:element name="GVI" minOccurs="0" type="GVIDescription">
         <xs:annotation>
           <xs:documentation>
             Low-level description of intervention effects on vectors (i.e.
@@ -1179,7 +1179,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="vectorIntervDesc">
+  <xs:complexType name="GVIDescription">
     <xs:sequence>
       <xs:element name="decay" type="DecayFunction">
         <xs:annotation>

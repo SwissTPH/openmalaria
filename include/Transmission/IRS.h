@@ -38,17 +38,11 @@ namespace OM { namespace Transmission {
 /** Constant parameters for extended IRS model. */
 class IRSParams {
 public:
-    IRSParams() : simpleModel(false), maxInsecticide(numeric_limits< double >::signaling_NaN()) {}
-    //TODO: this class should no longer be used for low-level IRS
-    /** Set parameters for the old model from elt. Don't call both! */
-    void init( const scnXml::VectorIntervDesc& elt);
+    IRSParams() : maxInsecticide(numeric_limits< double >::signaling_NaN()) {}
     /** Set parameters for the new model from elt. */
     void init( const scnXml::IRSDescription& elt);
     
 private:
-    // If true, use the older model with direct decay of effect; otherwise,
-    // Use the Briet model with decay of insecticide (similar to ITN model).
-    bool simpleModel;
     NormalSampler initialInsecticide;
     double maxInsecticide;		// maximum initial insecticide
     shared_ptr<DecayFunction> insecticideDecay;
@@ -65,8 +59,6 @@ public:
         proportionProtected( numeric_limits<double>::signaling_NaN() ),
         proportionUnprotected( numeric_limits<double>::signaling_NaN() )
     {}
-    void init(const IRSParams& params,
-              const scnXml::VectorIntervDesc::AnophelesParamsType& elt);
     void init(const IRSParams& params,
               const scnXml::IRSDescription::AnophelesParamsType& elt);
     
@@ -95,10 +87,6 @@ private:
     public:
         RelativeAttractiveness();
         
-        // for the old model: use lPF instead as the deterrency
-        inline double oldDeterrency() const { return lPF; }
-        void oldDeterrency(double d);
-        
         /** Set parameters.
          * 
          * It is checked that input parameters lie in a range such that
@@ -122,10 +110,6 @@ private:
     class SurvivalFactor {
     public:
         SurvivalFactor();
-        
-        // for the old model: use PF instead as the effect
-        inline double oldEffect() const { return PF; }
-        inline void oldEffect(double e) { PF = e; }
         
         /** Set parameters.
          * 
@@ -173,15 +157,11 @@ public:
     inline TimeStep timeOfDeployment()const{
         return deployTime;
     }
-    /** Old model: this is the survival factor of the effect. New model: not
-     * used, except as part of getInsecticideContent below. */
-    inline double getEffectSurvival(const IRSParams& params)const{
-        return params.insecticideDecay->eval (TimeStep::simulation - deployTime,
-                                              insecticideDecayHet);
-    }
     /// Get remaining insecticide content based on initial amount and decay.
     inline double getInsecticideContent(const IRSParams& params)const{
-        return initialInsecticide * getEffectSurvival( params );
+        double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
+                                              insecticideDecayHet);
+        return initialInsecticide * effectSurvival;
     }
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
@@ -199,7 +179,6 @@ private:
     double initialInsecticide;	// units: mg/m²
     
     // these parameters are sampled from log-normal per IRS, but thereafter constant:
-    //Old model: used as heterogeneity of general decay
     DecayFuncHet insecticideDecayHet;
 };
 

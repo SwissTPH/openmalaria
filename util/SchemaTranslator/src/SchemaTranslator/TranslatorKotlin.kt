@@ -301,7 +301,7 @@ abstract class Translator(input: InputSource, options: Options) {
 /** Extension to hold translation functions written in Kotlin. */
 abstract class TranslatorKotlin(input: InputSource, options: Options) : Translator(input,options){
     public fun translate31To32(){
-        var changeIRSReportingToVectorInterv = false
+        var changeIRSReportingToGVI = false
         val interventions = getChildElement(scenarioElement, "interventions")
         val effectIdents : jet.MutableSet<String> = TreeSet<String>()
         val humanEffects = ArrayList<Element>()
@@ -457,8 +457,8 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
 
                 val desc = getChildElementOpt(elt,"description")
                 val renamed = if (desc != null){
-                    changeIRSReportingToVectorInterv = true
-                    scenarioDocument.renameNode(desc,"","vector")!!
+                    changeIRSReportingToGVI = true
+                    scenarioDocument.renameNode(desc,"","GVI")!!
                 }else{
                     val desc2 = getChildElement(elt,"description_v2")
                     scenarioDocument.renameNode(desc2,"",name)!!
@@ -482,13 +482,13 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 human.appendChild(intervention)
         }
         
-        if (changeIRSReportingToVectorInterv){
+        if (changeIRSReportingToGVI){
             val mon = getChildElement(scenarioElement, "monitoring")
             val survOpts = getChildElement(mon, "SurveyOptions")
             for (opt in getChildElements(survOpts, "option")){
                 if (opt.getAttribute("name").equals("nMassIRS"))
                     // replace the name (IRS won't be used so don't need both opts)
-                    opt.setAttribute("name","nMassVectorInterv")
+                    opt.setAttribute("name","nMassGVI")
             }
         }
     }

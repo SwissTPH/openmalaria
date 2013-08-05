@@ -479,7 +479,7 @@ bool effectCmp(const HumanInterventionEffect *a, const HumanInterventionEffect *
     return a->effectType() < b->effectType();
 }
 void HumanIntervention::sortEffects(){
-    std::sort( effects.begin(), effects.end(), effectCmp );
+    std::stable_sort( effects.begin(), effects.end(), effectCmp );
 }
 
 class MDAEffect : public HumanInterventionEffect {
@@ -591,20 +591,20 @@ private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
 };
 
-class VectorEffect : public HumanInterventionEffect {
+class GVIEffect : public HumanInterventionEffect {
 public:
-    VectorEffect( size_t index, const scnXml::VectorIntervDesc& elt,
+    GVIEffect( size_t index, const scnXml::GVIDescription& elt,
                Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
                transmission( transmissionModel )
     {
-        transmissionModel.setVectorIntervDesc( elt );
+        transmissionModel.setGVIDescription( elt );
     }
     
     void deploy( Human& human, Deployment::Method method )const{
-        human.deployVectorInterv( method, transmission );
+        human.deployGVI( method, transmission );
     }
     
-    virtual EffectType effectType() const{ return IRS; }
+    virtual EffectType effectType() const{ return GVI; }
     
 private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
@@ -671,8 +671,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), population.transmissionModel() ) );
             }else if( effect.getIRS().present() ){
                 humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), population.transmissionModel() ) );
-            }else if( effect.getVector().present() ){
-                humanEffects.push_back( new VectorEffect( index, effect.getVector().get(), population.transmissionModel() ) );
+            }else if( effect.getGVI().present() ){
+                humanEffects.push_back( new GVIEffect( index, effect.getGVI().get(), population.transmissionModel() ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "

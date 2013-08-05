@@ -58,6 +58,7 @@ set (Model_CPP
   Transmission/Anopheles/PerHost.cpp
   Transmission/ITN.cpp
   Transmission/IRS.cpp
+  Transmission/GVI.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp

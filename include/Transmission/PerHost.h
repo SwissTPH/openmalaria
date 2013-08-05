@@ -23,6 +23,7 @@
 #include "Transmission/Anopheles/PerHost.h"
 #include "Transmission/ITN.h"
 #include "Transmission/IRS.h"
+#include "Transmission/GVI.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include <boost/shared_ptr.hpp>
@@ -74,7 +75,7 @@ public:
     /// Give individual a new IRS as of time timeStep.
     void setupIRS (const TransmissionModel& tm);
     /// Give individual a new set of vector intervention effects
-    void setupVectorInterv (const TransmissionModel& tm);
+    void setupGVI (const TransmissionModel& tm);
     /// Give individual a new VA intervention as of time timeStep.
     void setupVA ();
     
@@ -193,6 +194,7 @@ public:
         timestepVA & stream;
         net & stream;
         irs & stream;
+        gvi & stream;
     }
     //@}
     
@@ -215,6 +217,7 @@ private:
 
     ITN net;
     IRS irs;
+    GVI gvi;
     
     static AgeGroupInterpolation* relAvailAge;
     

@@ -49,7 +49,8 @@ PerHost::PerHost (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false),
         timestepVA(TimeStep::never),
         net(tm),
-        irs(tm)
+        irs(tm),
+        gvi(tm)
 {
     if ( VADecay.get() != 0 )
         hetSampleVA = VADecay->hetSample();
@@ -76,11 +77,10 @@ void PerHost::setupIRS (const TransmissionModel& tm) {
         irs.deploy(vTM->getIRSParams());
     }
 }
-void PerHost::setupVectorInterv( const TransmissionModel& tm ){
+void PerHost::setupGVI( const TransmissionModel& tm ){
     const VectorModel* vTM = dynamic_cast<const VectorModel*> (&tm);
     if (vTM != 0) {
-        //TODO: this shouldn't be using IRS stuff
-        irs.deploy(vTM->getIRSParams());
+        gvi.deploy(vTM->getGVIParams());
     }
 }
 void PerHost::setupVA () {
@@ -104,6 +104,9 @@ double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base, s
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= irs.relativeAttractiveness(base.irs);
     }
+    if (gvi.timeOfDeployment() >= TimeStep(0)) {
+        alpha_i *= gvi.relativeAttractiveness(base.gvi);
+    }
     if (timestepVA >= TimeStep(0)) {
         alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation - timestepVA, hetSampleVA));
     }
@@ -117,6 +120,9 @@ double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speci
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= irs.preprandialSurvivalFactor(base.irs);
     }
+    if (gvi.timeOfDeployment() >= TimeStep(0)) {
+        P_B_i *= gvi.preprandialSurvivalFactor(base.gvi);
+    }
     return P_B_i;
 }
 double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
@@ -126,6 +132,9 @@ double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t spec
     }
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         pRest *= irs.postprandialSurvivalFactor(base.irs);
+    }
+    if (gvi.timeOfDeployment() >= TimeStep(0)) {
+        pRest *= gvi.postprandialSurvivalFactor(base.gvi);
     }
     return pRest;
 }

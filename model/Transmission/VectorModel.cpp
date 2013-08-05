@@ -219,7 +219,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, AnophelesModel(&_ITNParams, &_IRSParams));
+    species.resize (numSpecies, AnophelesModel(&_ITNParams, &_IRSParams, &_GVIParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -453,15 +453,15 @@ void VectorModel::setIRSDescription (const scnXml::IRSDescription& elt){
     }
     checker.checkNoneMissed();
 }
-void VectorModel::setVectorIntervDesc (const scnXml::VectorIntervDesc& elt){
+void VectorModel::setGVIDescription (const scnXml::GVIDescription& elt){
     checkSimMode();
-    _IRSParams.init( elt );
+    _GVIParams.init( elt );
     
-    typedef scnXml::VectorIntervDesc::AnophelesParamsSequence AP;
+    typedef scnXml::GVIDescription::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
     SpeciesIndexChecker checker( "vector intervention", speciesIndex );
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[checker.getIndex(it->getMosquito())].setVectorIntervDesc (_IRSParams, *it);
+        species[checker.getIndex(it->getMosquito())].setGVIDescription (_GVIParams, *it);
     }
     checker.checkNoneMissed();
 }
@@ -500,7 +500,7 @@ void VectorModel::summarize (Monitoring::Survey& survey) {
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams, &_IRSParams));
+    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams, &_IRSParams, &_GVIParams));
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

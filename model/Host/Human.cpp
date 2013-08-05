@@ -250,10 +250,10 @@ void Human::deployIRS( Deployment::Method method, Transmission::TransmissionMode
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployVectorInterv( Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
-    perHostTransmission.setupVectorInterv( transmissionModel );
+void Human::deployGVI( Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
+    perHostTransmission.setupGVI( transmissionModel );
     if( method == Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(_inCohort).reportMassVectorInterv( getMonitoringAgeGroup(), 1 );
+        Monitoring::Surveys.getSurvey(_inCohort).reportMassGVI( getMonitoringAgeGroup(), 1 );
     }else if( method == Deployment::CTS ){
         //TODO: report
     }else throw SWITCH_DEFAULT_EXCEPTION;

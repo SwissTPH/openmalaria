@@ -54,9 +54,9 @@ void PerHostBase::setIRSDescription (const IRSParams& params,
         const scnXml::IRSDescription::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
-void PerHostBase::setVectorIntervDesc (const IRSParams& params,
-        const scnXml::VectorIntervDesc::AnophelesParamsType& elt){
-    irs.init( params, elt );
+void PerHostBase::setGVIDescription (const GVIParams& params,
+        const scnXml::GVIDescription::AnophelesParamsType& elt){
+    gvi.init( params, elt );
 }
 
 void PerHostBase::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {

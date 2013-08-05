@@ -26,6 +26,7 @@
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/ITN.h"
 #include "Transmission/IRS.h"
+#include "Transmission/GVI.h"
 
 namespace scnXml {
   class Vector;
@@ -63,7 +64,7 @@ public:
   
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRSDescription&);
-  virtual void setVectorIntervDesc (const scnXml::VectorIntervDesc&);
+  virtual void setGVIDescription (const scnXml::GVIDescription&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();
@@ -73,6 +74,9 @@ public:
   }
   inline const IRSParams& getIRSParams() const{
       return _IRSParams;
+  }
+  inline const GVIParams& getGVIParams() const{
+      return _GVIParams;
   }
   virtual void summarize (Monitoring::Survey& survey);
   
@@ -137,6 +141,8 @@ private:
   ITNParams _ITNParams;
   /** ditto */
   IRSParams _IRSParams;
+  /** Parameters used by generic vector intervention. */
+  GVIParams _GVIParams;
   
   friend class PerHost;
   friend class AnophelesModelSuite;

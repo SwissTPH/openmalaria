@@ -34,27 +34,6 @@ namespace OM {
         class Human;
     }
 
-/** Used to describe which interventions are in use. */
-namespace Interventions {
-    enum Flags {
-        CHANGE_HS,
-        CHANGE_EIR,
-        VACCINE,        // any vaccine
-        MDA,
-        IPTI,
-        ITN,
-        IRS,
-        VEC_AVAIL,
-        IMMUNE_SUPPRESSION,
-        COHORT,
-        VECTOR_POP,
-        R_0_CASE,
-        IMPORTED_INFECTIONS,
-        UNINFECT_VECTORS,
-        SIZE
-    };
-}
-
 namespace Deployment {
     enum Method {
         TIMED,   // mass distribution campaign
@@ -110,13 +89,14 @@ public:
 /** Enumeration of all effects, in the order that these should be deployed in
  * within a single intervention. */
 enum EffectType {
-    MDA,
-    PEV,
-    BSV,
-    TBV,
-    IPT,
-    ITN,
-    IRS
+    MDA,        // mass drug administration
+    PEV,        // pre-erythrocytic vaccine
+    BSV,        // blood-stage vaccine
+    TBV,        // transmission-blocking vaccine
+    IPT,        // intermittent preventative treatment
+    ITN,        // insecticide treated net
+    IRS,        // indoor residual spraying
+    GVI,        // generic vector intervention
 };
 
 /** A description of one effect of a human intervention.

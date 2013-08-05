@@ -94,7 +94,7 @@ class SurveyMeasureMap {
 	    codeMap["nMassITNs"] = SM::nMassITNs;
 	    codeMap["nEPI_ITNs"] = SM::nEPI_ITNs;
 	    codeMap["nMassIRS"] = SM::nMassIRS;
-            codeMap["nMassVectorInterv"] = SM::nMassVectorInterv;
+            codeMap["nMassGVI"] = SM::nMassGVI;
 	    codeMap["nMassVA"] = SM::nMassVA;
             codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
             codeMap["nAddedToCohort"] = SM::nAddedToCohort;
@@ -210,7 +210,7 @@ void Survey::allocate ()
     _numMassITNs.resize (numAgeGroups);
     _numEPI_ITNs.resize (numAgeGroups);
     _numMassIRS.resize (numAgeGroups);
-    _numMassVectorInterv.resize (numAgeGroups);
+    _numMassGVI.resize (numAgeGroups);
     _numMassVA.resize (numAgeGroups);
     _numAddedToCohort.resize (numAgeGroups);
     _numRemovedFromCohort.resize (numAgeGroups);
@@ -351,8 +351,8 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   if (active[SM::nMassIRS]) {
       writePerAgeGroup (outputFile, SM::nMassIRS, survey, _numMassIRS);
   }
-  if (active[SM::nMassVectorInterv]) {
-      writePerAgeGroup (outputFile, SM::nMassVectorInterv, survey, _numMassVectorInterv);
+  if (active[SM::nMassGVI]) {
+      writePerAgeGroup (outputFile, SM::nMassGVI, survey, _numMassGVI);
   }
   if (active[SM::nMassVA]) {
       writePerAgeGroup (outputFile, SM::nMassVA, survey, _numMassVA);

@@ -23,6 +23,7 @@
 
 #include "Transmission/ITN.h"
 #include "Transmission/IRS.h"
+#include "Transmission/GVI.h"
 #include "util/sampler.h"
 
 namespace OM {
@@ -35,9 +36,10 @@ namespace Anopheles {
  * Parameters are read from XML, and the availability rate is adjusted. */
 class PerHostBase {
 public:
-    PerHostBase(const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
+    PerHostBase(const ITNParams* baseITNParams, const IRSParams* baseIRSParams, const GVIParams* baseGVIParams) :
             net( baseITNParams ),
             irs( baseIRSParams ),
+            gvi( baseGVIParams ),
             VADeterrency(numeric_limits< double >::signaling_NaN())
     {}
     
@@ -57,7 +59,7 @@ public:
     //@{
     void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
     void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt);
-    void setVectorIntervDesc (const IRSParams& params, const scnXml::VectorIntervDesc::AnophelesParamsType& elt);
+    void setGVIDescription (const GVIParams& params, const scnXml::GVIDescription::AnophelesParamsType& elt);
     void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
     //@}
     
@@ -89,6 +91,7 @@ public:
     //@{
     ITNAnophelesParams net;
     IRSAnophelesParams irs;
+    GVIAnophelesParams gvi;
     double VADeterrency;
     //@}
 };

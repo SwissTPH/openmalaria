@@ -31,39 +31,19 @@ namespace OM { namespace Transmission {
     using util::random::poisson;
 
 void IRSParams::init( const scnXml::IRSDescription& elt) {
-    simpleModel = false;
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
-    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "IRS.description.insecticideDecay" );
-}
-void IRSParams::init( const scnXml::VectorIntervDesc& elt) {
-    simpleModel = true;
-    insecticideDecay = DecayFunction::makeObject( elt.getDecay(), "IRS.simpleDescription.decay" );
+    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "interventions.human.IRS.description.insecticideDecay" );
 }
 
 void IRSAnophelesParams::init(
     const IRSParams& params,
     const scnXml::IRSDescription::AnophelesParamsType& elt)
 {
-    assert( !params.simpleModel );
     _relativeAttractiveness.init( params, elt.getDeterrency() );
     _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
     _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
-    // Simpler version of ITN usage/action:
-    double propActive = elt.getPropActive();
-    assert( propActive >= 0.0 && propActive <= 1.0 );
-    proportionProtected = propActive;
-    proportionUnprotected = 1.0 - proportionProtected;
-}
-void IRSAnophelesParams::init(
-    const IRSParams& params,
-    const scnXml::VectorIntervDesc::AnophelesParamsType& elt)
-{
-    assert( params.simpleModel );
-    _relativeAttractiveness.oldDeterrency( elt.getDeterrency().getValue() );
-    _preprandialKillingEffect.oldEffect( elt.getPreprandialKillingEffect().getValue() );
-    _postprandialKillingEffect.oldEffect( elt.getPostprandialKillingEffect().getValue() );
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
     assert( propActive >= 0.0 && propActive <= 1.0 );
@@ -78,12 +58,6 @@ IRSAnophelesParams::RelativeAttractiveness::RelativeAttractiveness() :
     lPF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
 {}
-void IRSAnophelesParams::RelativeAttractiveness::oldDeterrency(double d){
-    if( lPF == lPF ){
-        throw util::unimplemented_exception( "multiple IRS interventions" );
-    }
-    lPF = d;
-}
 void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, const scnXml::IRSDeterrency& elt){
     double PF = elt.getInsecticideFactor();
     insecticideScaling = elt.getInsecticideScalingFactor();
@@ -121,8 +95,10 @@ void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, c
         cerr.flush();
     }
 #endif
-    // this just sets lPF, checking it wasn't set before
-    oldDeterrency( log( PF ) );
+    if( lPF == lPF ){
+        throw util::unimplemented_exception( "multiple IRS interventions" );
+    }
+    lPF = log( PF );
 }
 IRSAnophelesParams::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),
@@ -225,56 +201,33 @@ IRS::IRS (const TransmissionModel& tm) :
             return;     // no IRS
         // Varience factor of decay is sampled once per human: human is assumed
         // to account for most variance.
-        if( params.simpleModel ){
-            insecticideDecayHet = params.insecticideDecay->hetSample();
-        }else{
-            insecticideDecayHet = params.insecticideDecay->hetSample();
-        }
+        insecticideDecayHet = params.insecticideDecay->hetSample();
     }
 }
 
 void IRS::deploy(const IRSParams& params) {
     deployTime = TimeStep::simulation;
-    if( !params.simpleModel ){
-        // this is sampled independently: initial insecticide content doesn't depend on handling
-        initialInsecticide = params.initialInsecticide.sample();
-        if( initialInsecticide < 0.0 )
-            initialInsecticide = 0.0;	// avoid negative samples
-        if( initialInsecticide > params.maxInsecticide )
-            initialInsecticide = params.maxInsecticide;
-    }
+    
+    // this is sampled independently: initial insecticide content doesn't depend on handling
+    initialInsecticide = params.initialInsecticide.sample();
+    if( initialInsecticide < 0.0 )
+        initialInsecticide = 0.0;	// avoid negative samples
+    if( initialInsecticide > params.maxInsecticide )
+        initialInsecticide = params.maxInsecticide;
 }
 
 double IRS::relativeAttractiveness(const IRSAnophelesParams& params) const{
-    double effect;
-    if( params.base->simpleModel ){
-        effect = (1.0 - params._relativeAttractiveness.oldDeterrency() *
-            getEffectSurvival(*params.base));
-    }else{
-        effect = params.relativeAttractiveness( getInsecticideContent(*params.base) );
-    }
+    double effect = params.relativeAttractiveness( getInsecticideContent(*params.base) );
     return params.byProtection( effect );
 }
 
 double IRS::preprandialSurvivalFactor(const IRSAnophelesParams& params) const{
-    double effect;
-    if( params.base->simpleModel ){
-        effect = (1.0 - params._preprandialKillingEffect.oldEffect() *
-            getEffectSurvival(*params.base));
-    }else{
-        effect = params.preprandialSurvivalFactor( getInsecticideContent(*params.base) );
-    }
+    double effect = params.preprandialSurvivalFactor( getInsecticideContent(*params.base) );
     return params.byProtection( effect );
 }
 
 double IRS::postprandialSurvivalFactor(const IRSAnophelesParams& params) const{
-    double effect;
-    if( params.base->simpleModel ){
-        effect = (1.0 - params._postprandialKillingEffect.oldEffect() *
-            getEffectSurvival(*params.base));
-    }else{
-        effect = params.postprandialSurvivalFactor( getInsecticideContent(*params.base) );
-    }
+    double effect = params.postprandialSurvivalFactor( getInsecticideContent(*params.base) );
     return params.byProtection( effect );
 }
 

@@ -212,8 +212,8 @@ public:
 	_numMassIRS[ageGroup.i()] += val;
 	return *this;
     }
-    Survey& reportMassVectorInterv (AgeGroup ageGroup, int val) {
-        _numMassVectorInterv[ageGroup.i()] += val;
+    Survey& reportMassGVI (AgeGroup ageGroup, int val) {
+        _numMassGVI[ageGroup.i()] += val;
         return *this;
     }
     Survey& reportMassVA (AgeGroup ageGroup, int val) {
@@ -342,7 +342,7 @@ public:
     _numMassITNs & stream;
     _numEPI_ITNs & stream;
     _numMassIRS & stream;
-    _numMassVectorInterv & stream;
+    _numMassGVI & stream;
     _numMassVA & stream;
     _numClinical_Microscopy & stream;
     _numAddedToCohort & stream;
@@ -398,7 +398,7 @@ private:
   vector<int> _numMassITNs;
   vector<int> _numEPI_ITNs;
   vector<int> _numMassIRS;
-  vector<int> _numMassVectorInterv;
+  vector<int> _numMassGVI;
   vector<int> _numMassVA;
   vector<int> _numAddedToCohort;
   vector<int> _numRemovedFromCohort;
