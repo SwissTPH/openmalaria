@@ -85,6 +85,7 @@ set (Model_CPP
   util/AgeGroupInterpolation.cpp
   util/TimeStep.cpp
   util/sampler.cpp
+  util/SpeciesIndexChecker.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp

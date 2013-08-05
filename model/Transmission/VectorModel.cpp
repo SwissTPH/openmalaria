@@ -23,6 +23,7 @@
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
+#include "util/SpeciesIndexChecker.h"
 
 #include <fstream>
 #include <map>
@@ -32,49 +33,6 @@
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
-
-class SpeciesIndexChecker{
-public:
-    SpeciesIndexChecker( const string& intervName, const map<string,size_t>& indices ) :
-        _intervName( intervName ), _indices( indices ){}
-    
-    /** Return the index in speciesIndex of mosquito, throwing if not found. */
-    size_t getIndex( string species ){
-        if( found.count( species ) > 0 ){
-            ostringstream msg;
-            msg << "Intervention \"" << _intervName
-                << "\" has multiple descriptions for vector species \""
-                << species << "\"";
-            throw util::xml_scenario_error( msg.str() );
-        }
-        map<string,size_t>::const_iterator sIndex = _indices.find( species );
-        if( sIndex == _indices.end() ){
-            ostringstream msg;
-            msg << "Intervention \"" << _intervName
-                << "\" has a description for vector species \"" << species
-                << "\", but this species is not mentioned in the entomology section";
-            throw util::xml_scenario_error( msg.str() );
-        }
-        found.insert( species );
-        return sIndex->second;
-    }
-    /** Throw if some species was missed. */
-    void checkNoneMissed() const{
-        for( map<string,size_t>::const_iterator it = _indices.begin(); it != _indices.end(); ++it ){
-            if( found.count( it->first ) == 0 ){
-                ostringstream msg;
-                msg << "Intervention \"" << _intervName
-                    << "\" has a no description for vector species \""
-                    << it->first << "\"";
-                throw util::xml_scenario_error( msg.str() );
-            }
-        }
-    }
-private:
-    const string& _intervName;
-    const map<string,size_t>& _indices;
-    set<string> found;
-};
 
 double VectorModel::meanPopAvail (const std::list<Host::Human>& population, int populationSize) {
     double sumRelativeAvailability = 0.0;

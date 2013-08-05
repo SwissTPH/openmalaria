@@ -595,19 +595,19 @@ class GVIEffect : public HumanInterventionEffect {
 public:
     GVIEffect( size_t index, const scnXml::GVIDescription& elt,
                Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
-               transmission( transmissionModel )
+               params( transmissionModel.setGVIDescription( elt ) )
     {
-        transmissionModel.setGVIDescription( elt );
     }
     
     void deploy( Human& human, Deployment::Method method )const{
-        human.deployGVI( method, transmission );
+        human.deployGVI( method, params );
     }
     
     virtual EffectType effectType() const{ return GVI; }
     
 private:
-    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
+    //TODO: should not be part of transmission namespace (interventions namespace?)
+    const Transmission::GVIParams& params;
 };
 
 
