@@ -62,7 +62,8 @@ public:
   virtual double calculateEIR(PerHost& host, double ageYears); 
   
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
-  virtual void setIRSDescription (const scnXml::IRS&);
+  virtual void setIRSDescription (const scnXml::IRSDescription&);
+  virtual void setVectorIntervDesc (const scnXml::VectorIntervDesc&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();

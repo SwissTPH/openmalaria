@@ -254,26 +254,24 @@
         </ITN>
       </effect>
       <effect description="DDT test" id="IRS">
-        <IRS>
-          <description>
-            <decay L="0.5" function="exponential"/>
-            <anophelesParams mosquito="gambiae_ss" propActive="1">
-              <deterrency value="0.56"/>
-              <preprandialKillingEffect value="0"/>
-              <postprandialKillingEffect value="0.24"/>
-            </anophelesParams>
-            <anophelesParams mosquito="funestus" propActive="1">
-              <deterrency value="0.56"/>
-              <preprandialKillingEffect value="0"/>
-              <postprandialKillingEffect value="0.24"/>
-            </anophelesParams>
-            <anophelesParams mosquito="arabiensis" propActive="1">
-              <deterrency value="0.56"/>
-              <preprandialKillingEffect value="0"/>
-              <postprandialKillingEffect value="0.24"/>
-            </anophelesParams>
-          </description>
-        </IRS>
+        <vector>
+          <decay L="0.5" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss" propActive="1">
+            <deterrency value="0.56"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.24"/>
+          </anophelesParams>
+          <anophelesParams mosquito="funestus" propActive="1">
+            <deterrency value="0.56"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.24"/>
+          </anophelesParams>
+          <anophelesParams mosquito="arabiensis" propActive="1">
+            <deterrency value="0.56"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.24"/>
+          </anophelesParams>
+        </vector>
       </effect>
       <intervention>
         <effect id="MDA"/>

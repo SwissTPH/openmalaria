@@ -301,6 +301,7 @@ abstract class Translator(input: InputSource, options: Options) {
 /** Extension to hold translation functions written in Kotlin. */
 abstract class TranslatorKotlin(input: InputSource, options: Options) : Translator(input,options){
     public fun translate31To32(){
+        var changeIRSReportingToVectorInterv = false
         val interventions = getChildElement(scenarioElement, "interventions")
         val effectIdents : jet.MutableSet<String> = TreeSet<String>()
         val humanEffects = ArrayList<Element>()
@@ -437,11 +438,40 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 interventions.removeChild(elt)  // now defunct
             }
         }
+        fun updateIRS(name: String){
+            val elt = getChildElementOpt(interventions, name)
+            if (elt != null){
+                val ident = effectIdent(name)
+                val effect = newEffect(ident)
+                val intervention = newIntervention(listOf(ident))
+
+                processDeployments(elt, intervention, ident)
+                
+                val nameAttr = elt.getAttributeNode("name")
+                if (nameAttr != null){
+                    //Note: name could be applied to effect or deployment descriptor; do both since we don't know to which it refers
+                    effect.setAttribute("description",nameAttr.getValue())
+                    intervention.setAttribute("name",nameAttr.getValue())
+                    elt.removeAttribute("name")
+                }
+
+                val desc = getChildElementOpt(elt,"description")
+                val renamed = if (desc != null){
+                    changeIRSReportingToVectorInterv = true
+                    scenarioDocument.renameNode(desc,"","vector")!!
+                }else{
+                    val desc2 = getChildElement(elt,"description_v2")
+                    scenarioDocument.renameNode(desc2,"",name)!!
+                }
+                effect.appendChild(renamed)
+                interventions.removeChild(elt)  // now defunct
+            }
+        }
         updateElt("MDA", false)
         updateVaccineElt("vaccine")
         updateElt("IPT", true) 
         updateElt("ITN", true)
-        updateElt("IRS", false)
+        updateIRS("IRS")
         
         if (humanEffects.size > 0){
             val human = scenarioDocument.createElement("human")!!
@@ -450,6 +480,16 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 human.appendChild(effect)
             for (intervention in humanInterventions)
                 human.appendChild(intervention)
+        }
+        
+        if (changeIRSReportingToVectorInterv){
+            val mon = getChildElement(scenarioElement, "monitoring")
+            val survOpts = getChildElement(mon, "SurveyOptions")
+            for (opt in getChildElements(survOpts, "option")){
+                if (opt.getAttribute("name").equals("nMassIRS"))
+                    // replace the name (IRS won't be used so don't need both opts)
+                    opt.setAttribute("name","nMassVectorInterv")
+            }
         }
     }
 }

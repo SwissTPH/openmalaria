@@ -441,30 +441,29 @@ void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
     }
     checker.checkNoneMissed();
 }
-void VectorModel::setIRSDescription (const scnXml::IRS& elt){
+void VectorModel::setIRSDescription (const scnXml::IRSDescription& elt){
     checkSimMode();
-    if( elt.getDescription().present() ){
-        _IRSParams.init( elt.getDescription().get() );
-        
-        typedef scnXml::IRSDescription_v1::AnophelesParamsSequence AP;
-        const AP& ap = elt.getDescription().get().getAnophelesParams();
-        SpeciesIndexChecker checker( "IRS v1", speciesIndex );
-        for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-            species[checker.getIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
-        }
-        checker.checkNoneMissed();
-    }else{
-        assert( elt.getDescription_v2().present() );   // choice: one or the other
-        _IRSParams.init( elt.getDescription_v2().get() );
-        
-        typedef scnXml::IRSDescription_v2::AnophelesParamsSequence AP;
-        const AP& ap = elt.getDescription_v2().get().getAnophelesParams();
-        SpeciesIndexChecker checker( "IRS v2", speciesIndex );
-        for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-            species[checker.getIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
-        }
-        checker.checkNoneMissed();
+    _IRSParams.init( elt );
+    
+    typedef scnXml::IRSDescription::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    SpeciesIndexChecker checker( "IRS", speciesIndex );
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
+        species[checker.getIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
     }
+    checker.checkNoneMissed();
+}
+void VectorModel::setVectorIntervDesc (const scnXml::VectorIntervDesc& elt){
+    checkSimMode();
+    _IRSParams.init( elt );
+    
+    typedef scnXml::VectorIntervDesc::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    SpeciesIndexChecker checker( "vector intervention", speciesIndex );
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
+        species[checker.getIndex(it->getMosquito())].setVectorIntervDesc (_IRSParams, *it);
+    }
+    checker.checkNoneMissed();
 }
 void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
     checkSimMode();

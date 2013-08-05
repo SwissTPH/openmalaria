@@ -537,7 +537,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="IPT" minOccurs="0" type="IPTDescription">
         <xs:annotation>
           <xs:documentation>
-            Description and deployment of IPT interventions.
+            Description of IPT interventions.
           </xs:documentation>
           <xs:appinfo>name:Intermittent preventative treatment;</xs:appinfo>
         </xs:annotation>
@@ -545,31 +545,34 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="ITN" minOccurs="0" type="ITNDescription">
         <xs:annotation>
           <xs:documentation>
-            Description and deployment of bed-net interventions (ITNs, LLINs).
+            Description of bed-net interventions (ITNs, LLINs).
           </xs:documentation>
           <xs:appinfo>name:Bed nets;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="IRS" minOccurs="0">
+      <xs:element name="IRS" minOccurs="0" type="IRSDescription">
         <xs:annotation>
           <xs:documentation>
-            Description and deployment of indoor insecticide interventions
-            (IRS, durable wall linings, insecticide-treated-paint, etc.)
-            
-            User must choose between using &lt;description&gt; (the old
-            model, where effect decays directly) and &lt;description_v2&gt; (the
-            new model where effect decays indirectly based on decay of insecticide).
+            Description of indoor residual spraying interventions.
           </xs:documentation>
           <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:choice>
-              <xs:element name="description" type="IRSDescription_v1"/>
-              <xs:element name="description_v2" type="IRSDescription_v2"/>
-            </xs:choice>
-          </xs:sequence>
-        </xs:complexType>
+      </xs:element>
+      <xs:element name="vector" minOccurs="0" type="vectorIntervDesc">
+        <xs:annotation>
+          <xs:documentation>
+            Low-level description of intervention effects on vectors (i.e.
+            mosquitoes). Can be used to describe simple ITN or IRS
+            interventions (though more complex models are available for these
+            interventions) or other interventions such as mosquito repellant
+            or ivermectin.
+            
+            Note that all actions of this intervention "effect" will decay
+            according to a single decay function. If independant decay is
+            wanted, separate "effect" elements can be used.
+          </xs:documentation>
+          <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
+        </xs:annotation>
       </xs:element>
     </xs:choice>
     <xs:attribute name="id" type="xs:string" use="required">
@@ -1176,20 +1179,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="IRSDescription_v1">
-    <xs:annotation>
-      <xs:documentation>
-        Description of effect for the simple model: IRS has three effects, whos
-        strength is calculated as the product of an input parameter and
-        "survival of effect", which is given by a decay function.
-      </xs:documentation>
-      <xs:appinfo>name:Description (simple, direct decay);</xs:appinfo>
-    </xs:annotation>
+  <xs:complexType name="vectorIntervDesc">
     <xs:sequence>
       <xs:element name="decay" type="DecayFunction">
         <xs:annotation>
           <xs:documentation>
-            Description of decay of IRS. Documentation: see DecayFunction type or
+            Description of decay of all intervention effects.
+            Documentation: see DecayFunction type or
             http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
           </xs:documentation>
           <xs:appinfo>name:Decay;</xs:appinfo>
@@ -1268,7 +1264,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="IRSDescription_v2">
+  <xs:complexType name="IRSDescription">
     <xs:annotation>
       <xs:documentation>
         Description of effect for the more complex and probably more realistic

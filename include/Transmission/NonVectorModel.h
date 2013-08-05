@@ -61,7 +61,8 @@ public:
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
   virtual void setITNDescription ( const scnXml::ITNDescription&);
-  virtual void setIRSDescription (const scnXml::IRS&);
+  virtual void setIRSDescription (const scnXml::IRSDescription&);
+  virtual void setVectorIntervDesc (const scnXml::VectorIntervDesc&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   

@@ -73,6 +73,8 @@ public:
     void setupITN (const TransmissionModel& tm);
     /// Give individual a new IRS as of time timeStep.
     void setupIRS (const TransmissionModel& tm);
+    /// Give individual a new set of vector intervention effects
+    void setupVectorInterv (const TransmissionModel& tm);
     /// Give individual a new VA intervention as of time timeStep.
     void setupVA ();
     

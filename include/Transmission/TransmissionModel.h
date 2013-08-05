@@ -170,7 +170,9 @@ public:
   /** Set ITN parameters. */
   virtual void setITNDescription ( const scnXml::ITNDescription&) =0;
   /** Set IRS parameters. */
-  virtual void setIRSDescription (const scnXml::IRS&) =0;
+  virtual void setIRSDescription (const scnXml::IRSDescription&) =0;
+  /** Set generic vector intervention parameters. */
+  virtual void setVectorIntervDesc (const scnXml::VectorIntervDesc&) =0;
   /** Set vector deterrent parameters. */
   virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
   /** Set the larviciding intervention params.

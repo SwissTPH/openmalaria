@@ -574,7 +574,7 @@ private:
 
 class IRSEffect : public HumanInterventionEffect {
 public:
-    IRSEffect( size_t index, const scnXml::IRS& elt,
+    IRSEffect( size_t index, const scnXml::IRSDescription& elt,
                Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
                transmission( transmissionModel )
     {
@@ -583,6 +583,25 @@ public:
     
     void deploy( Human& human, Deployment::Method method )const{
         human.deployIRS( method, transmission );
+    }
+    
+    virtual EffectType effectType() const{ return IRS; }
+    
+private:
+    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
+};
+
+class VectorEffect : public HumanInterventionEffect {
+public:
+    VectorEffect( size_t index, const scnXml::VectorIntervDesc& elt,
+               Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
+               transmission( transmissionModel )
+    {
+        transmissionModel.setVectorIntervDesc( elt );
+    }
+    
+    void deploy( Human& human, Deployment::Method method )const{
+        human.deployVectorInterv( method, transmission );
     }
     
     virtual EffectType effectType() const{ return IRS; }
@@ -636,8 +655,11 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             size_t index = humanEffects.size();        // i.e. index of next item
             identifierMap[effect.getId()] = index;
             if( effect.getMDA().present() ){
+                //TODO: separate descriptions?
+                //TODO: allow continuous deployment
                 humanEffects.push_back( new MDAEffect( index, effect.getMDA().get() ) );
             }else if( effect.getPEV().present() ){
+                //TODO: allow multiple descriptions of each vaccine type
                 humanEffects.push_back( new VaccineEffect( index, effect.getPEV().get(), Host::Vaccine::PEV ) );
             }else if( effect.getBSV().present() ){
                 humanEffects.push_back( new VaccineEffect( index, effect.getBSV().get(), Host::Vaccine::BSV ) );
@@ -648,8 +670,9 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }else if( effect.getITN().present() ){
                 humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), population.transmissionModel() ) );
             }else if( effect.getIRS().present() ){
-                //TODO: separate different descriptions into separate effects; one can become "generic vector intervention" or something
                 humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), population.transmissionModel() ) );
+            }else if( effect.getVector().present() ){
+                humanEffects.push_back( new VectorEffect( index, effect.getVector().get(), population.transmissionModel() ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "

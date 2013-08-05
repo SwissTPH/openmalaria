@@ -138,16 +138,14 @@
       </effect>
       <effect description="new param" id="IRS">
         <IRS>
-          <description_v2>
-            <!-- Initial insecticide: units are μg/cm²; no variance here -->
-            <initialInsecticide mu="118" sigma="0"/>
-            <insecticideDecay L="0.15" function="exponential"/>
-            <anophelesParams mosquito="gambiae_ss">
-              <deterrency insecticideFactor="0.12" insecticideScalingFactor="0.05"/>
-              <preprandialKillingEffect baseFactor="0.01" insecticideFactor="0.25" insecticideScalingFactor="0.008"/>
-              <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
-            </anophelesParams>
-          </description_v2>
+          <!-- Initial insecticide: units are μg/cm²; no variance here -->
+          <initialInsecticide mu="118" sigma="0"/>
+          <insecticideDecay L="0.15" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency insecticideFactor="0.12" insecticideScalingFactor="0.05"/>
+            <preprandialKillingEffect baseFactor="0.01" insecticideFactor="0.25" insecticideScalingFactor="0.008"/>
+            <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
+          </anophelesParams>
         </IRS>
       </effect>
       <intervention>

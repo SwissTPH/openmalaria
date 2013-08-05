@@ -59,7 +59,7 @@
       <option name="Vector_Sv" value="false"/>
       <option name="inputEIR" value="false"/>
       <option name="simulatedEIR" value="false"/>
-      <option name="nMassIRS" value="true"/>
+      <option name="nMassVectorInterv" value="true"/>
       <option name="nMDAs" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="200">
@@ -135,16 +135,14 @@
         </ITN>
       </effect>
       <effect description="Pyreth" id="IRS">
-        <IRS>
-          <description>
-            <decay L="0.25" function="exponential"/>
-            <anophelesParams mosquito="gambiae_ss">
-              <deterrency value="0.1116"/>
-              <preprandialKillingEffect value="0"/>
-              <postprandialKillingEffect value="0.2772"/>
-            </anophelesParams>
-          </description>
-        </IRS>
+        <vector>
+          <decay L="0.25" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency value="0.1116"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.2772"/>
+          </anophelesParams>
+        </vector>
       </effect>
       <intervention>
         <effect id="MDA"/>

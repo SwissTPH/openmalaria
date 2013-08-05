@@ -51,11 +51,11 @@ void PerHostBase::setITNDescription (const ITNParams& params,
 }
 
 void PerHostBase::setIRSDescription (const IRSParams& params,
-        const scnXml::IRSDescription_v1::AnophelesParamsType& elt){
+        const scnXml::IRSDescription::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
-void PerHostBase::setIRSDescription (const IRSParams& params,
-        const scnXml::IRSDescription_v2::AnophelesParamsType& elt){
+void PerHostBase::setVectorIntervDesc (const IRSParams& params,
+        const scnXml::VectorIntervDesc::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
 

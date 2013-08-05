@@ -221,6 +221,13 @@ enum SurveyMeasure {
      * operation. */
     nMassScreenings = 55,
     
+    /** Report the number of mass deployments of generic vector interventions.
+     * 
+     * Note: this is a provisionary reporting measure. Like many other measures,
+     * it is insufficient now that multiple descriptions of any intervention
+     * type are possible. */
+    nMassVectorInterv = 56,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };

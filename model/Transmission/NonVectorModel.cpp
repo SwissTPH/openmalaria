@@ -184,7 +184,10 @@ void NonVectorModel::uninfectVectors(){
 void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
   throw util::xml_scenario_error (viError);
 }
-void NonVectorModel::setIRSDescription (const scnXml::IRS&) {
+void NonVectorModel::setIRSDescription (const scnXml::IRSDescription&) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::setVectorIntervDesc (const scnXml::VectorIntervDesc&){
   throw util::xml_scenario_error (viError);
 }
 void NonVectorModel::setVADescription (const scnXml::VectorDeterrent&) {

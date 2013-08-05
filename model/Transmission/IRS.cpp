@@ -30,26 +30,26 @@
 namespace OM { namespace Transmission {
     using util::random::poisson;
 
-void IRSParams::init( const scnXml::IRSDescription_v1& elt) {
-    simpleModel = true;
-    insecticideDecay = DecayFunction::makeObject( elt.getDecay(), "IRS.simpleDescription.decay" );
-}
-void IRSParams::init( const scnXml::IRSDescription_v2& elt) {
+void IRSParams::init( const scnXml::IRSDescription& elt) {
     simpleModel = false;
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "IRS.description.insecticideDecay" );
 }
+void IRSParams::init( const scnXml::VectorIntervDesc& elt) {
+    simpleModel = true;
+    insecticideDecay = DecayFunction::makeObject( elt.getDecay(), "IRS.simpleDescription.decay" );
+}
 
 void IRSAnophelesParams::init(
     const IRSParams& params,
-    const scnXml::IRSDescription_v1::AnophelesParamsType& elt)
+    const scnXml::IRSDescription::AnophelesParamsType& elt)
 {
-    assert( params.simpleModel );
-    _relativeAttractiveness.oldDeterrency( elt.getDeterrency().getValue() );
-    _preprandialKillingEffect.oldEffect( elt.getPreprandialKillingEffect().getValue() );
-    _postprandialKillingEffect.oldEffect( elt.getPostprandialKillingEffect().getValue() );
+    assert( !params.simpleModel );
+    _relativeAttractiveness.init( params, elt.getDeterrency() );
+    _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
+    _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
     assert( propActive >= 0.0 && propActive <= 1.0 );
@@ -58,12 +58,12 @@ void IRSAnophelesParams::init(
 }
 void IRSAnophelesParams::init(
     const IRSParams& params,
-    const scnXml::IRSDescription_v2::AnophelesParamsType& elt)
+    const scnXml::VectorIntervDesc::AnophelesParamsType& elt)
 {
-    assert( !params.simpleModel );
-    _relativeAttractiveness.init( params, elt.getDeterrency() );
-    _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
-    _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
+    assert( params.simpleModel );
+    _relativeAttractiveness.oldDeterrency( elt.getDeterrency().getValue() );
+    _preprandialKillingEffect.oldEffect( elt.getPreprandialKillingEffect().getValue() );
+    _postprandialKillingEffect.oldEffect( elt.getPostprandialKillingEffect().getValue() );
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
     assert( propActive >= 0.0 && propActive <= 1.0 );
