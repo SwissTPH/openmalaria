@@ -172,7 +172,7 @@ public:
   /** Set IRS parameters. */
   virtual void setIRSDescription (const scnXml::IRSDescription&) =0;
   /** Set generic vector intervention parameters. */
-  virtual void setGVIDescription (const scnXml::GVIDescription&) =0;
+  virtual const GVIParams& setGVIDescription (const scnXml::GVIDescription&) =0;
   /** Set vector deterrent parameters. */
   virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
   /** Set the larviciding intervention params.

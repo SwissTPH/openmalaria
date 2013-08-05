@@ -187,7 +187,7 @@ void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
 void NonVectorModel::setIRSDescription (const scnXml::IRSDescription&) {
   throw util::xml_scenario_error (viError);
 }
-void NonVectorModel::setGVIDescription (const scnXml::GVIDescription&){
+const GVIParams& NonVectorModel::setGVIDescription (const scnXml::GVIDescription&){
   throw util::xml_scenario_error (viError);
 }
 void NonVectorModel::setVADescription (const scnXml::VectorDeterrent&) {

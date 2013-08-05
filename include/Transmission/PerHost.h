@@ -75,7 +75,9 @@ public:
     /// Give individual a new IRS as of time timeStep.
     void setupIRS (const TransmissionModel& tm);
     /// Give individual a new set of vector intervention effects
-    void setupGVI (const TransmissionModel& tm);
+    inline void setupGVI (const GVIParams& params){
+        gvi.deploy( params );
+    }
     /// Give individual a new VA intervention as of time timeStep.
     void setupVA ();
     

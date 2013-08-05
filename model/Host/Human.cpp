@@ -250,8 +250,8 @@ void Human::deployIRS( Deployment::Method method, Transmission::TransmissionMode
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployGVI( Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
-    perHostTransmission.setupGVI( transmissionModel );
+void Human::deployGVI( Deployment::Method method, const Transmission::GVIParams& params ){
+    perHostTransmission.setupGVI( params );
     if( method == Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(_inCohort).reportMassGVI( getMonitoringAgeGroup(), 1 );
     }else if( method == Deployment::CTS ){

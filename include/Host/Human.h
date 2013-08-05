@@ -125,7 +125,7 @@ public:
   /// Mass/continuous IRS deployment
   void deployIRS( Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   /// Mass/continuous deployment of generic vector intervention
-  void deployGVI( Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
+  void deployGVI( Deployment::Method method, const Transmission::GVIParams& params );
   
   /// Give human a new VA intervention through mass deployment
   void massVA (const OM::Population&);

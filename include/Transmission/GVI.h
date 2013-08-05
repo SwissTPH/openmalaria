@@ -83,6 +83,8 @@ private:
 
 /** Low-level (generic) vector intervention model. Has three effects:
  * deterrency, pre-prandial killing and post-prandial killing.
+ * 
+ * This is the per-host (but not per vector) part.
  */
 class GVI {
 public:

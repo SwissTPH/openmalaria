@@ -77,12 +77,6 @@ void PerHost::setupIRS (const TransmissionModel& tm) {
         irs.deploy(vTM->getIRSParams());
     }
 }
-void PerHost::setupGVI( const TransmissionModel& tm ){
-    const VectorModel* vTM = dynamic_cast<const VectorModel*> (&tm);
-    if (vTM != 0) {
-        gvi.deploy(vTM->getGVIParams());
-    }
-}
 void PerHost::setupVA () {
     if( VADecay.get() == 0 ){
         throw util::xml_scenario_error ("Vector availability intervention without description of decay");

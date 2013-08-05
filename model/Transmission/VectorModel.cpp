@@ -411,7 +411,7 @@ void VectorModel::setIRSDescription (const scnXml::IRSDescription& elt){
     }
     checker.checkNoneMissed();
 }
-void VectorModel::setGVIDescription (const scnXml::GVIDescription& elt){
+const GVIParams& VectorModel::setGVIDescription (const scnXml::GVIDescription& elt){
     checkSimMode();
     _GVIParams.init( elt );
     
@@ -422,6 +422,7 @@ void VectorModel::setGVIDescription (const scnXml::GVIDescription& elt){
         species[checker.getIndex(it->getMosquito())].setGVIDescription (_GVIParams, *it);
     }
     checker.checkNoneMissed();
+    return _GVIParams;
 }
 void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
     checkSimMode();
