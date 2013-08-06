@@ -117,7 +117,7 @@ Population::Population()
 
 Population::~Population()
 {
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         iter->destroy();
     }
     delete _transmissionModel;
@@ -133,7 +133,7 @@ void Population::checkpoint (istream& stream)
     for (size_t i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back (Host::Human (*_transmissionModel, TimeStep(0)));
+        population.push_back( new Host::Human (*_transmissionModel, TimeStep(0)) );
         population.back() & stream;
     }
     if (population.size() != popSize)
@@ -143,7 +143,7 @@ void Population::checkpoint (istream& stream)
 void Population::checkpoint (ostream& stream)
 {
     population.size() & stream;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter)
+    for (Iter iter = population.begin(); iter != population.end(); ++iter)
         (*iter) & stream;
 }
 
@@ -175,7 +175,7 @@ void Population::createInitialHumans ()
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
     assert( TimeStep::simulation == TimeStep(0) );      // assumed below
-    _transmissionModel->init2 (population, populationSize);
+    _transmissionModel->init2 (*this);
 }
 
 
@@ -184,7 +184,7 @@ void Population::createInitialHumans ()
 void Population::newHuman (TimeStep dob)
 {
     util::streamValidate( dob.asInt() );
-    population.push_back (Host::Human (*_transmissionModel, dob));
+    population.push_back( new Host::Human (*_transmissionModel, dob) );
     ++recentBirths;
 }
 
@@ -194,16 +194,16 @@ void Population::update1()
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
     // (until humans old enough to be pregnate get updated and can be infected).
-    Host::NeonatalMortality::update (population);
+    Host::NeonatalMortality::update (*this);
     
     // Human::updateInfectiousness() needs to be updated before vectorUpdate()
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         iter->updateInfectiousness();
     }
     
     // This should be called before humans contract new infections in the simulation step.
     // This needs the whole population (it is an approximation before all humans are updated).
-    _transmissionModel->vectorUpdate (population, populationSize);
+    _transmissionModel->vectorUpdate (*this);
 
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
@@ -214,9 +214,9 @@ void Population::update1()
 
     // Update each human in turn
     //std::cout<<" time " <<t<<std::endl;
-    HumanIter last = population.end();
+    Iter last = population.end();
     --last;
-    for (HumanIter iter = population.begin(); iter != population.end();) {
+    for (Iter iter = population.begin(); iter != population.end();) {
         // Update human, and remove if too old:
         if (iter->update (_transmissionModel,
 		/* Only include humans who can survive until vector init.
@@ -254,7 +254,7 @@ void Population::update1()
     
     // Doesn't matter whether non-updated humans are included (value isn't used
     // before all humans are updated).
-    _transmissionModel->update (population, populationSize);
+    _transmissionModel->update (*this);
 }
 
 
@@ -265,10 +265,10 @@ void Population::ctsHosts (ostream& stream){
     stream << '\t' << population.size();
 }
 void Population::ctsHostDemography (ostream& stream){
-    list<Host::Human>::reverse_iterator it = population.rbegin();
+    Population::ConstReverseIter it = population.crbegin();
     int cumCount = 0;
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
-        while( it != population.rend() && it->getAgeInYears() < ubound ){
+        while( it != population.crend() && it->getAgeInYears() < ubound ){
             ++cumCount;
             ++it;
         }
@@ -281,7 +281,7 @@ void Population::ctsRecentBirths (ostream& stream){
 }
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( iter->getWithinHostModel().parasiteDensityDetectible() )
             ++patent;
     }
@@ -289,7 +289,7 @@ void Population::ctsPatentHosts (ostream& stream){
 }
 void Population::ctsImmunityh (ostream& stream){
     double x = 0.0;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         x += iter->getWithinHostModel().getCumulativeh();
     }
     x /= populationSize;
@@ -297,7 +297,7 @@ void Population::ctsImmunityh (ostream& stream){
 }
 void Population::ctsImmunityY (ostream& stream){
     double x = 0.0;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         x += iter->getWithinHostModel().getCumulativeY();
     }
     x /= populationSize;
@@ -306,7 +306,7 @@ void Population::ctsImmunityY (ostream& stream){
 void Population::ctsMedianImmunityY (ostream& stream){
     vector<double> list;
     list.reserve( populationSize );
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         list.push_back( iter->getWithinHostModel().getCumulativeY() );
     }
     sort( list.begin(), list.end() );
@@ -322,7 +322,7 @@ void Population::ctsMedianImmunityY (ostream& stream){
 void Population::ctsMeanAgeAvailEffect (ostream& stream){
     int nHumans = 0;
     double avail = 0.0;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
             avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYears());
@@ -332,7 +332,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
 }
 void Population::ctsNetsOwned (ostream& stream){
     int nNets = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
             ++nNets;
     }
@@ -341,7 +341,7 @@ void Population::ctsNetsOwned (ostream& stream){
 void Population::ctsNetHoleIndex (ostream& stream){
     double meanVar = 0.0;
     int nNets = 0;
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
             ++nNets;
             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
@@ -352,14 +352,14 @@ void Population::ctsNetHoleIndex (ostream& stream){
 
 void Population::newSurvey ()
 {
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         iter->summarize();
     }
     _transmissionModel->summarize( *Monitoring::Surveys.current );
 }
 
 void Population::flushReports (){
-    for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         iter->flushReports();
     }
 }    

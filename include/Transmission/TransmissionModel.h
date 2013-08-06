@@ -22,7 +22,7 @@
 #define Hmod_TransmissionModel 
 
 #include "Global.h"
-#include "Host/Human.h"
+#include "Population.h"
 #include "util/errors.h"
 #include "schema/interventions.h"
 
@@ -88,7 +88,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
+  virtual void init2( const Population& population ) =0;
   
   /** Set up vector population interventions. */
   virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance ) =0;
@@ -140,12 +140,12 @@ public:
   /** Needs to be called each step of the simulation before Human::update().
    *
    * when the vector model is used this updates mosquito populations. */
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {};
+  virtual void vectorUpdate (const Population& population) {};
   /** Needs to be called each time-step after Human::update().
    * 
    * Updates summary statistics related to transmission as well as the
    * the non-vector model (when in use). */
-  virtual void update (const std::list<Host::Human>& population, int populationSize) =0;
+  virtual void update (const Population& population) =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
@@ -201,7 +201,7 @@ protected:
   /** Needs to be called each time-step after Human::update() to update summary
    * statististics related to transmission. Also returns kappa (the average
    * human infectiousness weighted by availability to mosquitoes). */
-  double updateKappa (const std::list<Host::Human>& population);
+  double updateKappa (const Population& population);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

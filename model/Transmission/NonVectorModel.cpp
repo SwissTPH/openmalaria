@@ -73,7 +73,7 @@ NonVectorModel::NonVectorModel(const scnXml::NonVector& nonVectorData) :
 
 NonVectorModel::~NonVectorModel () {}
 
-void NonVectorModel::init2 (const std::list<Host::Human>& population, int populationSize) {
+void NonVectorModel::init2 (const Population&) {
     // no set-up needed; just indicate we're ready to roll:
     simulationMode = forcedEIR;
 }
@@ -197,7 +197,7 @@ void NonVectorModel::deployVectorPopInterv (size_t instance) {
   throw util::xml_scenario_error (viError);
 }
 
-void NonVectorModel::update (const std::list<Host::Human>& population, int populationSize) {
+void NonVectorModel::update (const Population& population) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){

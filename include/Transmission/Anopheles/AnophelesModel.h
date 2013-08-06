@@ -29,18 +29,13 @@
 #include "Transmission/Anopheles/FixedEmergence.h"
 #include "util/SimpleDecayingValue.h"
 
-#include <list>
 #include <vector>
 #include <limits>
 
 namespace OM {
-namespace Host {
-class Human;
-}
+    class Population;
 namespace Transmission {
 namespace Anopheles {
-
-using namespace std;
 
 /** Per-species part for vector transmission model.
  *
@@ -93,15 +88,13 @@ public:
      *
      * @param sIndex Index in VectorModel::species of this class.
      * @param population The human population
-     * @param populationSize Number of humans (use instead of population.size())
      * @param meanPopAvail The mean availability of age-based relative
      * availability of humans to mosquitoes across populations.
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
     void init2 (size_t sIndex,
-                   const std::list<Host::Human>& population,
-                   int populationSize,
+                   const Population& population,
                    double meanPopAvail);
     
     /** Set up the non-host-specific interventions. */
@@ -148,12 +141,11 @@ public:
      *
      * @param population The human population; so we can sum up availability and
      *  infectiousness.
-     * @param populationSize Number of humans
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (const std::list<Host::Human>& population,
-        int populationSize, size_t sIndex, bool isDynamic);
+    void advancePeriod (const Population& population,
+        size_t sIndex, bool isDynamic);
 
     /** Returns the EIR calculated by advancePeriod().
      *

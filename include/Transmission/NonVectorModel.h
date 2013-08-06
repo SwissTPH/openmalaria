@@ -35,7 +35,7 @@ public:
   NonVectorModel(const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorModel();
   
-  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const Population& population);
   
   virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance );
   
@@ -68,8 +68,8 @@ public:
   
   virtual void uninfectVectors();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {}
-  virtual void update (const std::list<Host::Human>& population, int populationSize);
+  virtual void vectorUpdate (const Population& population) {}
+  virtual void update (const Population& population);
   virtual double calculateEIR(PerHost& perHost, double ageYears);
   
 private:

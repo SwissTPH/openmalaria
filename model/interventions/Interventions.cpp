@@ -195,14 +195,14 @@ public:
         TimedDeployment( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
-        int i = (int)std::floor (util::random::uniform_01() * population.getSize());        // pick a human
-        Population::HumanIter it = population.getList().begin();
+        int i = (int)std::floor (util::random::uniform_01() * population.size());        // pick a human
+        Population::Iter it = population.begin();
         while (i > 0){  // find human (can't use population[i])
             ++it;
             --i;
         }
         assert( i == 0 );
-        assert( it != population.getList().end() );
+        assert( it != population.end() );
         it->R_0Vaccines();
         it->addInfection();
     }
@@ -236,8 +236,7 @@ public:
     }
     
     virtual void deploy (OM::Population& population) {
-        Population::HumanPop& popList = population.getList();
-        for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->isInCohort() ){
@@ -284,8 +283,7 @@ public:
     }
     
     virtual void deploy (OM::Population& population) {
-        Population::HumanPop& popList = population.getList();
-        for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->isInCohort() ){
@@ -327,8 +325,7 @@ public:
         // Cumulative case: bring target group's coverage up to target coverage
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally cohort
-        Population::HumanPop& popList = population.getList();
-        for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->isInCohort() ){
@@ -388,10 +385,9 @@ public:
     
     void deploy(OM::Population& population){
         // Cumulative case: bring target group's coverage up to target coverage
-        Population::HumanPop& popList = population.getList();
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally cohort
-        for (Population::HumanIter iter = popList.begin(); iter != popList.end(); ++iter) {
+        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
                 if( !cohortOnly || iter->isInCohort() ){
@@ -891,9 +887,7 @@ void InterventionManager::deploy(OM::Population& population) {
     }
     
     // deploy continuous interventions
-    for( Population::HumanIter it = population.getList().begin();
-        it != population.getList().end(); ++it )
-    {
+    for( Population::Iter it = population.begin(); it != population.end(); ++it ){
         uint32_t nextCtsDist = it->getNextCtsDist();
         // deploy continuous interventions
         while( nextCtsDist < continuous.size() )

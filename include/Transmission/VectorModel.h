@@ -47,7 +47,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const Population& population);
   
   virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance );
   
@@ -58,8 +58,8 @@ public:
   virtual TimeStep expectedInitDuration ();
   virtual TimeStep initIterate ();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
-  virtual void update (const std::list<Host::Human>& population, int populationSize);
+  virtual void vectorUpdate (const Population& population);
+  virtual void update (const Population& population);
 
   virtual double calculateEIR(PerHost& host, double ageYears); 
   
@@ -87,7 +87,7 @@ protected:
     
 private:
     /** Return the mean availability of human population to mosquitoes. */
-    static double meanPopAvail (const std::list<Host::Human>& population, int populationSize);
+    static double meanPopAvail (const Population& population);
     
     /** Confirm simulationMode allows use of interventions; throw if not. */
     void checkSimMode() const;

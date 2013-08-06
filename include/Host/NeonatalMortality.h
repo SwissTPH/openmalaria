@@ -22,10 +22,10 @@
 #define Hmod_NeonatalMortality
 
 #include "Global.h"
-#include <list>
 
-namespace OM { namespace Host {
-    class Human;
+namespace OM {
+    class Population;
+namespace Host {
 
 class NeonatalMortality {
 public:
@@ -40,7 +40,7 @@ public:
   static bool eventNeonatalMortality();
   
   /** Calculate risk of a neonatal mortality based on humans 20-25 years old. */
-  static void update (const list<Host::Human>& population);
+  static void update (const Population& population);
   
 private:
   /** Calculates the risk of neonatal mortality. */
