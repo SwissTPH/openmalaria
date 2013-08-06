@@ -18,22 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TRANSMISSION_ITN
-#define TRANSMISSION_ITN
+#ifndef OM_INTERVENTIONS_ITN
+#define OM_INTERVENTIONS_ITN
 
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
+    // forward declare:
+    class TransmissionModel;
+}
+namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
-    // forward declare:
-    class TransmissionModel;
 
 /** Constant parameters for extended ITN model. */
 class ITNParams {
@@ -94,7 +97,7 @@ private:
          * 
          * It is checked that parameters lie in a suitible range, giving a
          * survival factor between 0 and 1. */
-        void init(const OM::Transmission::ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName);
+        void init(const ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName);
         
         /** Part of survival factor, used by new ITN deterrency model. */
         double rel_pAtt( double holeIndex, double insecticideContent )const;
@@ -129,7 +132,7 @@ private:
          * It is checked that input parameters lie in a range such that
          * the relative availability is always in the range (0,1] — that is,
          * the deterrent can never be perfect, but can have zero effect. */
-        RADeterrency(const OM::Transmission::ITNParams& params, const scnXml::ITNDeterrency& elt);
+        RADeterrency(const ITNParams& params, const scnXml::ITNDeterrency& elt);
         
         virtual double relativeAttractiveness( double holeIndex, double insecticideContent ) const;
         
@@ -146,7 +149,7 @@ private:
          * It is checked that input parameters lie in a range such that
          * the relative availability is always in the range (0,1] — that is,
          * the deterrent can never be perfect, but can have zero effect. */
-        RATwoStageDeterrency(const OM::Transmission::ITNParams& params, const scnXml::TwoStageDeterrency& elt);
+        RATwoStageDeterrency(const ITNParams& params, const scnXml::TwoStageDeterrency& elt);
         
         virtual double relativeAttractiveness( double holeIndex, double insecticideContent ) const;
         
@@ -171,7 +174,7 @@ private:
  */
 class ITN {
 public:
-    ITN (const TransmissionModel& tm);
+    ITN (const Transmission::TransmissionModel& tm);
     
     /// Checkpointing
     template<class S>

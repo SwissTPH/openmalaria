@@ -31,7 +31,6 @@
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
-#include "Interventions.h"
 #include "Population.h"
 
 #include <string>
@@ -196,7 +195,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(Vaccine::BSV));
 }
 
-void Human::deploy( const HumanInterventionEffect& effect, Deployment::Method method ){
+void Human::deploy( const interventions::HumanInterventionEffect& effect, interventions::Deployment::Method method ){
     effect.deploy( *this, method );
     lastDeployments[effect.getIndex()] = TimeStep::simulation;
 }
@@ -210,12 +209,12 @@ bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
     }
 }
 
-void Human::deployVaccine( Deployment::Method method, Vaccine::Types type ){
-    if( method == Deployment::TIMED ){
+void Human::deployVaccine( interventions::Deployment::Method method, Vaccine::Types type ){
+    if( method == interventions::Deployment::TIMED ){
         _vaccine.vaccinate( type );
         if( type == Vaccine::reportType )
             Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
-    }else if( method == Deployment::CTS ){
+    }else if( method == interventions::Deployment::CTS ){
         if ( _vaccine.getsEPIVaccination( type, TimeStep::simulation - _dateOfBirth ) ){
             _vaccine.vaccinate( type );
             if( type == Vaccine::reportType )
@@ -224,37 +223,37 @@ void Human::deployVaccine( Deployment::Method method, Vaccine::Types type ){
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployIPT( Deployment::Method method ){
-    if( method == Deployment::TIMED ){
+void Human::deployIPT( interventions::Deployment::Method method ){
+    if( method == interventions::Deployment::TIMED ){
         withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
-    }else if( method == Deployment::CTS ){
+    }else if( method == interventions::Deployment::CTS ){
         withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployITN( Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
+void Human::deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
     perHostTransmission.setupITN ( transmissionModel );
-    if( method == Deployment::TIMED ){
+    if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
-    }else if( method == Deployment::CTS ){
+    }else if( method == interventions::Deployment::CTS ){
         Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployIRS( Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
+void Human::deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
     perHostTransmission.setupIRS ( transmissionModel );
-    if( method == Deployment::TIMED ){
+    if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
-    }else if( method == Deployment::CTS ){
+    }else if( method == interventions::Deployment::CTS ){
         //TODO: report
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployGVI( Deployment::Method method, const Transmission::GVIParams& params ){
+void Human::deployGVI( interventions::Deployment::Method method, const interventions::GVIParams& params ){
     perHostTransmission.setupGVI( params );
-    if( method == Deployment::TIMED ){
+    if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(_inCohort).reportMassGVI( getMonitoringAgeGroup(), 1 );
-    }else if( method == Deployment::CTS ){
+    }else if( method == interventions::Deployment::CTS ){
         //TODO: report
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }

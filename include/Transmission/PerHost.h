@@ -21,9 +21,10 @@
 #define Hmod_PerHost
 
 #include "Transmission/Anopheles/PerHost.h"
-#include "Transmission/ITN.h"
-#include "Transmission/IRS.h"
-#include "Transmission/GVI.h"
+//TODO: PerHost shouldn't need to know about specific interventions
+#include "interventions/ITN.h"
+#include "interventions/IRS.h"
+#include "interventions/GVI.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include <boost/shared_ptr.hpp>
@@ -60,7 +61,7 @@ public:
     //@}
     
     /// Call once per timestep. Updates net holes.
-    inline void update(const ITNParams& params) {
+    inline void update(const interventions::ITNParams& params) {
         net.update(params);
     }
     
@@ -75,7 +76,7 @@ public:
     /// Give individual a new IRS as of time timeStep.
     void setupIRS (const TransmissionModel& tm);
     /// Give individual a new set of vector intervention effects
-    inline void setupGVI (const GVIParams& params){
+    inline void setupGVI (const interventions::GVIParams& params){
         gvi.deploy( params );
     }
     /// Give individual a new VA intervention as of time timeStep.
@@ -173,11 +174,11 @@ public:
     ///@brief Miscellaneous
     //@{
     /// Get a reference to the net
-    inline const ITN& getITN() const{
+    inline const interventions::ITN& getITN() const{
         return net;
     }
     /// Get a reference to the IRS
-    inline const IRS& getIRS() const{
+    inline const interventions::IRS& getIRS() const{
         return irs;
     }
     
@@ -217,9 +218,9 @@ private:
     
     DecayFuncHet hetSampleVA;
 
-    ITN net;
-    IRS irs;
-    GVI gvi;
+    interventions::ITN net;
+    interventions::IRS irs;
+    interventions::GVI gvi;
     
     static AgeGroupInterpolation* relAvailAge;
     

@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Interventions.h"
+#include "interventions/Interventions.h"
 #include "Host/Vaccine.h"
 #include "Population.h"
 #include "util/random.h"
@@ -28,7 +28,7 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "Monitoring/Surveys.h"
 
-namespace OM {
+namespace OM { namespace interventions {
     using Host::Human;
 
 // ———  ContinuousDeployment and derivatives  ———
@@ -512,7 +512,7 @@ public:
         human.massDrugAdministration();
     }
     
-    virtual EffectType effectType() const{ return MDA; }
+    virtual Effect::Type effectType() const{ return Effect::MDA; }
 };
 
 class VaccineEffect : public HumanInterventionEffect {
@@ -527,10 +527,10 @@ public:
         human.deployVaccine( method, type );
     }
     
-    virtual EffectType effectType() const{
-        if( type == Host::Vaccine::PEV ) return PEV;
-        else if( type == Host::Vaccine::BSV ) return BSV;
-        else if( type == Host::Vaccine::TBV ) return TBV;
+    virtual Effect::Type effectType() const{
+        if( type == Host::Vaccine::PEV ) return Effect::PEV;
+        else if( type == Host::Vaccine::BSV ) return Effect::BSV;
+        else if( type == Host::Vaccine::TBV ) return Effect::TBV;
         else throw SWITCH_DEFAULT_EXCEPTION;
     }
     
@@ -550,7 +550,7 @@ public:
         human.deployIPT( method );
     }
     
-    virtual EffectType effectType() const{ return IPT; }
+    virtual Effect::Type effectType() const{ return Effect::IPT; }
 };
 
 class ITNEffect : public HumanInterventionEffect {
@@ -566,7 +566,7 @@ public:
         human.deployITN( method, transmission );
     }
     
-    virtual EffectType effectType() const{ return ITN; }
+    virtual Effect::Type effectType() const{ return Effect::ITN; }
     
 private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
@@ -585,7 +585,7 @@ public:
         human.deployIRS( method, transmission );
     }
     
-    virtual EffectType effectType() const{ return IRS; }
+    virtual Effect::Type effectType() const{ return Effect::IRS; }
     
 private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
@@ -603,11 +603,11 @@ public:
         human.deployGVI( method, params );
     }
     
-    virtual EffectType effectType() const{ return GVI; }
+    virtual Effect::Type effectType() const{ return Effect::GVI; }
     
 private:
     //TODO: should not be part of transmission namespace (interventions namespace?)
-    const Transmission::GVIParams& params;
+    const GVIParams& params;
 };
 
 
@@ -905,4 +905,4 @@ void InterventionManager::deploy(OM::Population& population) {
     }
 }
 
-}
+} }

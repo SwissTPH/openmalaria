@@ -27,7 +27,7 @@
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
-#include "Interventions.h"
+#include "interventions/Interventions.h"
 
 #include <gzstream/gzstream.h>
 #include <fstream>
@@ -71,7 +71,7 @@ void SurveysType::init ()
     _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
   current = &_survey[0];
 }
-void SurveysType::initCohortOnly(OM::InterventionManager& interventions){
+void SurveysType::initCohortOnly(interventions::InterventionManager& interventions){
     //TODO: re-integrate with above. Probably most of above initialization could
     // happen later, but for now it's easier not to change order.
   _cohortOnly = false;

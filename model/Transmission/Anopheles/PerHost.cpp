@@ -44,17 +44,17 @@ void PerHostBase::operator =(const scnXml::Mosq& mosq)
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
 }
 
-void PerHostBase::setITNDescription (const ITNParams& params,
+void PerHostBase::setITNDescription (const interventions::ITNParams& params,
                                      const scnXml::ITNDescription::AnophelesParamsType& elt,
                                      double proportionUse){
     net.init( params, elt, proportionUse );
 }
 
-void PerHostBase::setIRSDescription (const IRSParams& params,
+void PerHostBase::setIRSDescription (const interventions::IRSParams& params,
         const scnXml::IRSDescription::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
-void PerHostBase::setGVIDescription (const GVIParams& params,
+void PerHostBase::setGVIDescription (const interventions::GVIParams& params,
         const scnXml::GVIDescription::AnophelesParamsType& elt){
     gvi.init( params, elt );
 }

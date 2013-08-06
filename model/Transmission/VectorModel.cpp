@@ -130,7 +130,7 @@ void VectorModel::ctsIRSInsecticideContent (const Population& population, ostrea
 }
 void VectorModel::ctsIRSEffects (const Population& population, ostream& stream) {
     for( size_t i = 0; i < numSpecies; ++i ){
-        const IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
+        const interventions::IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
         double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
         for (Population::ConstHumanIter iter = population.getList().begin(),
                 end = population.getList().end(); iter != end; ++iter) {
@@ -411,7 +411,7 @@ void VectorModel::setIRSDescription (const scnXml::IRSDescription& elt){
     }
     checker.checkNoneMissed();
 }
-const GVIParams& VectorModel::setGVIDescription (const scnXml::GVIDescription& elt){
+const interventions::GVIParams& VectorModel::setGVIDescription (const scnXml::GVIDescription& elt){
     checkSimMode();
     _GVIParams.init( elt );
     

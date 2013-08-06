@@ -62,8 +62,8 @@ Simulation::Simulation(util::Checksum ck) :
     Surveys.init();
     Population::init();
     population = auto_ptr<Population>(new Population);
-    interventions = auto_ptr<InterventionManager>(
-        new InterventionManager( InputData().getInterventions(), *population ) );
+    interventions = auto_ptr_interv_manager(
+        new interventions::InterventionManager( InputData().getInterventions(), *population ) );
     Surveys.initCohortOnly( *interventions );
     
     workUnitIdentifier = InputData().getWuID();

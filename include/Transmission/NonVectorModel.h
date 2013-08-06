@@ -62,7 +62,7 @@ public:
   
   virtual void setITNDescription ( const scnXml::ITNDescription&);
   virtual void setIRSDescription (const scnXml::IRSDescription&);
-  virtual const GVIParams& setGVIDescription (const scnXml::GVIDescription&);
+  virtual const interventions::GVIParams& setGVIDescription (const scnXml::GVIDescription&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   

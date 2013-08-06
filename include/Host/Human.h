@@ -25,7 +25,7 @@
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
-#include "Interventions.h"
+#include "interventions/Interventions.h"
 
 namespace OM {
     namespace Transmission {
@@ -104,7 +104,7 @@ public:
    * 
    * The number of wrapper functions in intervention deployment could probably
    * be reduced somehow (TODO). */
-  void deploy( const HumanInterventionEffect& effect, Deployment::Method method );
+  void deploy( const interventions::HumanInterventionEffect& effect, interventions::Deployment::Method method );
   
   /** Determines for the purposes of cumulative deployment whether an effect is
    * still current.
@@ -117,15 +117,15 @@ public:
   void massDrugAdministration ();
   
   /// Mass/EPI vaccination (note: extra checks may still prevent EPI vaccination)
-  void deployVaccine( Deployment::Method method, Vaccine::Types type );
+  void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );
   /// Mass/continuous IPT deployment (note: these don't have exactly the same effect)
-  void deployIPT( Deployment::Method method );
+  void deployIPT( interventions::Deployment::Method method );
   /// Mass/continuous ITN deployment
-  void deployITN( Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
+  void deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   /// Mass/continuous IRS deployment
-  void deployIRS( Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
+  void deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   /// Mass/continuous deployment of generic vector intervention
-  void deployGVI( Deployment::Method method, const Transmission::GVIParams& params );
+  void deployGVI( interventions::Deployment::Method method, const interventions::GVIParams& params );
   
   /// Give human a new VA intervention through mass deployment
   void massVA (const OM::Population&);

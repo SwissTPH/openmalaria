@@ -18,22 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TRANSMISSION_IRS
-#define TRANSMISSION_IRS
+#ifndef OM_INTERVENTIONS_IRS
+#define OM_INTERVENTIONS_IRS
 
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
+    // forward declare:
+    class TransmissionModel;
+}
+namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
-    // forward declare:
-    class TransmissionModel;
 
 /** Constant parameters for extended IRS model. */
 class IRSParams {
@@ -92,7 +95,7 @@ private:
          * It is checked that input parameters lie in a range such that
          * the relative availability is always in the range (0,1] — that is,
          * the deterrent can never be perfect, but can have zero effect. */
-        void init(const OM::Transmission::IRSParams& params,
+        void init(const IRSParams& params,
                   const scnXml::IRSDeterrency& elt);
         
         /** Calculate effect. Positive is interpreted as having a positive effect
@@ -115,7 +118,7 @@ private:
          * 
          * It is checked that parameters lie in a suitible range, giving a
          * survival factor between 0 and 1. */
-        void init(const OM::Transmission::IRSParams& params,
+        void init(const IRSParams& params,
                   const scnXml::IRSKillingEffect& elt, bool postPrandial);
         
         /** Calculate additional survival factor imposed by IRS on pre-/post-
@@ -143,7 +146,7 @@ private:
  */
 class IRS {
 public:
-    IRS (const TransmissionModel& tm);
+    IRS (const Transmission::TransmissionModel& tm);
     
     /// Checkpointing
     template<class S>

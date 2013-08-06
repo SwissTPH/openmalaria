@@ -24,9 +24,10 @@
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
-#include "Transmission/ITN.h"
-#include "Transmission/IRS.h"
-#include "Transmission/GVI.h"
+//TODO: the vector model shouldn't have to know about specific interventions
+#include "interventions//ITN.h"
+#include "interventions/IRS.h"
+#include "interventions/GVI.h"
 
 namespace scnXml {
   class Vector;
@@ -64,18 +65,18 @@ public:
   
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRSDescription&);
-  virtual const GVIParams& setGVIDescription (const scnXml::GVIDescription&);
+  virtual const interventions::GVIParams& setGVIDescription (const scnXml::GVIDescription&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();
   
-  inline const ITNParams& getITNParams () const{
+  inline const interventions::ITNParams& getITNParams () const{
       return _ITNParams;
   }
-  inline const IRSParams& getIRSParams() const{
+  inline const interventions::IRSParams& getIRSParams() const{
       return _IRSParams;
   }
-  inline const GVIParams& getGVIParams() const{
+  inline const interventions::GVIParams& getGVIParams() const{
       return _GVIParams;
   }
   virtual void summarize (Monitoring::Survey& survey);
@@ -138,11 +139,11 @@ private:
   //@}
   
   /** Parameters used by ITN and IRS models. */
-  ITNParams _ITNParams;
+  interventions::ITNParams _ITNParams;
   /** ditto */
-  IRSParams _IRSParams;
+  interventions::IRSParams _IRSParams;
   /** Parameters used by generic vector intervention. */
-  GVIParams _GVIParams;
+  interventions::GVIParams _GVIParams;
   
   friend class PerHost;
   friend class AnophelesModelSuite;

@@ -62,7 +62,7 @@ class AnophelesModel
 public:
     ///@brief Initialisation and destruction
     //@{
-    AnophelesModel (const ITNParams* baseITNParams, const IRSParams* baseIRSParams, const GVIParams* baseGVIParams) :
+    AnophelesModel (const interventions::ITNParams* baseITNParams, const interventions::IRSParams* baseIRSParams, const interventions::GVIParams* baseGVIParams) :
             humanBase(baseITNParams, baseIRSParams, baseGVIParams),
             partialEIR(0.0)
     {}
@@ -123,16 +123,16 @@ public:
 
     /** @brief Set up intervention descriptions for humans, for this anopheles species. */
     //@{
-    inline void setITNDescription (const ITNParams& params,
+    inline void setITNDescription (const interventions::ITNParams& params,
             const scnXml::ITNDescription::AnophelesParamsType& elt,
             double proportionUse) {
         humanBase.setITNDescription (params, elt, proportionUse);
     }
-    inline void setIRSDescription (const IRSParams& params,
+    inline void setIRSDescription (const interventions::IRSParams& params,
             const scnXml::IRSDescription::AnophelesParamsType& elt) {
         humanBase.setIRSDescription (params, elt);
     }
-    inline void setGVIDescription (const GVIParams& params,
+    inline void setGVIDescription (const interventions::GVIParams& params,
             const scnXml::GVIDescription::AnophelesParamsType& elt) {
         humanBase.setGVIDescription (params, elt);
     }

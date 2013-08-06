@@ -9,7 +9,6 @@ set (Model_CPP
   PopulationAgeStructure.cpp
   PopulationStats.cpp
   inputData.cpp
-  Interventions.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
@@ -56,9 +55,6 @@ set (Model_CPP
   #Transmission/Anopheles/LifeCycle.cpp
   #Transmission/Anopheles/ResourceFitter.cpp
   Transmission/Anopheles/PerHost.cpp
-  Transmission/ITN.cpp
-  Transmission/IRS.cpp
-  Transmission/GVI.cpp
   
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp
@@ -90,6 +86,11 @@ set (Model_CPP
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp
   Monitoring/Survey.cpp
+  
+  interventions/Interventions.cpp
+  interventions/ITN.cpp
+  interventions/IRS.cpp
+  interventions/GVI.cpp
 )
 
 # Headers - only included so they show up in IDEs:

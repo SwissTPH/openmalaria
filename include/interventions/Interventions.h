@@ -17,8 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-#ifndef Hmod_TimedDist
-#define Hmod_TimedDist
+#ifndef OM_INTERVENTIONS_INTERVENTIONS
+#define OM_INTERVENTIONS_INTERVENTIONS
 
 #include "Global.h"
 #include "Host/ImportedInfections.h"
@@ -28,11 +28,13 @@
 #include <bitset>
 
 namespace OM {
-    using ::boost::ptr_vector;
     class Population;
     namespace Host {
         class Human;
     }
+
+namespace interventions {
+    using ::boost::ptr_vector;
 
 namespace Deployment {
     enum Method {
@@ -88,7 +90,7 @@ public:
 
 /** Enumeration of all effects, in the order that these should be deployed in
  * within a single intervention. */
-enum EffectType {
+namespace Effect { enum Type {
     MDA,        // mass drug administration
     PEV,        // pre-erythrocytic vaccine
     BSV,        // blood-stage vaccine
@@ -97,7 +99,7 @@ enum EffectType {
     ITN,        // insecticide treated net
     IRS,        // indoor residual spraying
     GVI,        // generic vector intervention
-};
+}; }
 
 /** A description of one effect of a human intervention.
  * 
@@ -120,7 +122,7 @@ public:
      * 
      * This is only used a small number of times during setup, so doesn't need
      * to be fast. */
-    virtual EffectType effectType() const=0;
+    virtual Effect::Type effectType() const=0;
     
 protected:
     /** Construct (from a derived class).
@@ -213,9 +215,9 @@ private:
     
     // imported infections are not really interventions, and handled by a separate class
     // (but are grouped here for convenience and due toassociation in schema)
-    Host::ImportedInfections importedInfections;
+    OM::Host::ImportedInfections importedInfections;
     bool _cohortEnabled;
 };
 
-}
+} }
 #endif

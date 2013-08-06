@@ -18,22 +18,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TRANSMISSION_GVI
-#define TRANSMISSION_GVI
+#ifndef OM_INTERVENTIONS_GVI
+#define OM_INTERVENTIONS_GVI
 
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
+    // forward declare:
+    class TransmissionModel;
+}
+namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
-    // forward declare:
-    class TransmissionModel;
 
 /** Constant parameters for generic vector intervention model. */
 class GVIParams {
@@ -88,7 +91,7 @@ private:
  */
 class GVI {
 public:
-    GVI (const TransmissionModel& tm);
+    GVI (const Transmission::TransmissionModel& tm);
     
     /// Checkpointing
     template<class S>

@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/GVI.h"
+#include "interventions//GVI.h"
 //TODO: we shouldn't have a dependency on the vector/transmission model class
 //here; currently it's a work-around for GVI parameters not always being present.
 #include "Transmission/VectorModel.h"
@@ -27,7 +27,7 @@
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
-namespace OM { namespace Transmission {
+namespace OM { namespace interventions {
     using util::random::poisson;
 
 void GVIParams::init( const scnXml::GVIDescription& elt) {
@@ -53,12 +53,12 @@ void GVIAnophelesParams::init(
 
 
 // ———  per-human data  ———
-GVI::GVI (const TransmissionModel& tm) :
+GVI::GVI (const Transmission::TransmissionModel& tm) :
     initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
 {
     //TODO: we shouldn't really have vector intervention data (this class) if there's no vector
     // model, should we? Allocate dynamically or based on model?
-    const VectorModel* vt = dynamic_cast<const VectorModel*>(&tm);
+    const Transmission::VectorModel* vt = dynamic_cast<const Transmission::VectorModel*>(&tm);
     if( vt != 0 ){
         const GVIParams& params = vt->getGVIParams();
         if( params.decay.get() == 0 )

@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/ITN.h"
+#include "interventions//ITN.h"
 //TODO: we shouldn't have a dependency on the vector/transmission model class
 //here; currently it's a work-around for ITN parameters not always being present.
 #include "Transmission/VectorModel.h"
@@ -27,7 +27,7 @@
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
-namespace OM { namespace Transmission {
+namespace OM { namespace interventions {
     using util::random::poisson;
 
 double ITNParams::init( const scnXml::ITNDescription& elt) {
@@ -148,7 +148,7 @@ ITNAnophelesParams::RADeterrency::RADeterrency(const ITNParams& params, const sc
     lIF = log( IF );
 }
 ITNAnophelesParams::RATwoStageDeterrency::RATwoStageDeterrency(
-        const OM::Transmission::ITNParams& params,
+        const ITNParams& params,
         const scnXml::TwoStageDeterrency& elt) :
     lPFEntering( numeric_limits< double >::signaling_NaN() ),
     insecticideScalingEntering( numeric_limits< double >::signaling_NaN() )
@@ -205,7 +205,7 @@ ITNAnophelesParams::SurvivalFactor::SurvivalFactor() :
     insecticideScaling( numeric_limits< double >::signaling_NaN() ),
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
-void ITNAnophelesParams::SurvivalFactor::init(const OM::Transmission::ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName){
+void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName){
     BF = elt.getBaseFactor();
     HF = elt.getHoleFactor();
     PF = elt.getInsecticideFactor();
@@ -369,7 +369,7 @@ double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, dou
     return survivalFactor;
 }
 
-ITN::ITN(const TransmissionModel& tm) :
+ITN::ITN(const Transmission::TransmissionModel& tm) :
         nHoles( 0 ),
         holeIndex( numeric_limits<double>::signaling_NaN() ),
         initialInsecticide( numeric_limits<double>::signaling_NaN() ),
@@ -378,7 +378,7 @@ ITN::ITN(const TransmissionModel& tm) :
 {
     //TODO: we shouldn't really have ITN data (this class) if there's no vector
     // model, should we? Allocate dynamically or based on model?
-    const VectorModel* vt = dynamic_cast<const VectorModel*>(&tm);
+    const Transmission::VectorModel* vt = dynamic_cast<const Transmission::VectorModel*>(&tm);
     if( vt != 0 ){
         const ITNParams& params = vt->getITNParams();
         if( params.insecticideDecay.get() == 0 )

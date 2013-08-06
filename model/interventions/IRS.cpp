@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/IRS.h"
+#include "interventions//IRS.h"
 //TODO: we shouldn't have a dependency on the vector/transmission model class
 //here; currently it's a work-around for IRS parameters not always being present.
 #include "Transmission/VectorModel.h"
@@ -27,7 +27,7 @@
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
-namespace OM { namespace Transmission {
+namespace OM { namespace interventions {
     using util::random::poisson;
 
 void IRSParams::init( const scnXml::IRSDescription& elt) {
@@ -189,12 +189,12 @@ double IRSAnophelesParams::SurvivalFactor::survivalFactor(
 
 
 // ———  per-human data  ———
-IRS::IRS (const TransmissionModel& tm) :
+IRS::IRS (const Transmission::TransmissionModel& tm) :
     initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
 {
     //TODO: we shouldn't really have IRS data (this class) if there's no vector
     // model, should we? Allocate dynamically or based on model?
-    const VectorModel* vt = dynamic_cast<const VectorModel*>(&tm);
+    const Transmission::VectorModel* vt = dynamic_cast<const Transmission::VectorModel*>(&tm);
     if( vt != 0 ){
         const IRSParams& params = vt->getIRSParams();
         if( params.insecticideDecay.get() == 0 )
