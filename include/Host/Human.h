@@ -158,8 +158,6 @@ public:
     return withinHostModel->parasiteDensityDetectible();
   }
   
-  // crux for timed deployment as intervention up to some limit:
-  inline bool getInCohort(TimeStep)const{ return _inCohort; }
   /// Return true if human is a member of the cohort
   inline bool isInCohort()const{ return _inCohort; }
   
@@ -186,7 +184,7 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort (const OM::Population&);
+  void addToCohort ();
   
   /** Remove from cohort. As with addToCohort, deals with reporting.
    *

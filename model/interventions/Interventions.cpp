@@ -588,6 +588,19 @@ private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
 };
 
+class CohortSelectionEffect : public HumanInterventionEffect {
+public:
+    CohortSelectionEffect( size_t index ) : HumanInterventionEffect(index)
+    {
+    }
+    
+    void deploy( Human& human, Deployment::Method method )const{
+        human.addToCohort();
+    }
+    
+    virtual Effect::Type effectType() const{ return Effect::COHORT; }
+};
+
 
 // ———  InterventionManager  ———
 
@@ -655,6 +668,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
                 humanEffects.push_back( new interventions::GVIParams( index, effect.getGVI().get(), *species_index_map ) );
+            }else if( effect.getCohort().present() ){
+                humanEffects.push_back( new CohortSelectionEffect( index ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "
@@ -736,28 +751,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 }
             }
             humanInterventions.push_back( intervention );
-        }
-    }
-    if( intervElt.getCohort().present() ){
-        const scnXml::Cohort& ch = intervElt.getCohort().get();
-        if( ch.getTimed().present() || ch.getContinuous().present() ){
-            _cohortEnabled = true;
-            // continuous deployments:
-            if( ch.getContinuous().present() ){
-                const scnXml::ContinuousList::DeploySequence& seq = ch.getContinuous().get().getDeploy();
-                typedef scnXml::ContinuousList::DeploySequence::const_iterator CIt;
-                for( CIt it = seq.begin(); it != seq.end(); ++it ){
-                    continuous.push_back( new AgeBasedDeployment( *it, &Host::Human::addToCohort ) );
-                }
-            }
-            // timed deployments:
-            if( ch.getTimed().present() ){
-                const scnXml::MassCumList::DeploySequence& seq = ch.getTimed().get().getDeploy();
-                typedef scnXml::MassCumList::DeploySequence::const_iterator It;
-                for( It it = seq.begin(); it != seq.end(); ++it ){
-                    timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::addToCohort, &Host::Human::getInCohort ) );
-                }
-            }
         }
     }
     if( intervElt.getImportedInfections().present() ){

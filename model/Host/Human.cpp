@@ -298,7 +298,7 @@ void Human::summarize() {
     }
 }
 
-void Human::addToCohort (const OM::Population&){
+void Human::addToCohort (){
     if( _inCohort ) return;	// nothing to do
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,

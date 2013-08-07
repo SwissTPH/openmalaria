@@ -99,6 +99,7 @@ namespace Effect { enum Type {
     ITN,        // insecticide treated net
     IRS,        // indoor residual spraying
     GVI,        // generic vector intervention
+    COHORT,     // cohort selection
 }; }
 
 /** A description of one effect of a human intervention.

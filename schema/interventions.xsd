@@ -101,40 +101,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="cohort" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Recruitment of cohort as a pseudo-intervention.
-          </xs:documentation>
-          <xs:appinfo>name:Cohort recruitment;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element minOccurs="0" name="continuous" type="continuousList">
-              <xs:annotation>
-                <xs:documentation>List of ages at which cohort recruitment takes place.
-                </xs:documentation>
-                <xs:appinfo>name:Age-based cohort recruitment;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element minOccurs="0" name="timed" type="massCumList">
-              <xs:annotation>
-                <xs:documentation>List of times of mass cohort selection.
-                </xs:documentation>
-                <xs:appinfo>name:Mass cohort selection;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of intervention
-              </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
       <xs:element minOccurs="0" name="importedInfections">
         <xs:annotation>
           <xs:documentation>
@@ -558,6 +524,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:documentation>
           <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
         </xs:annotation>
+      </xs:element>
+      <xs:element name="cohort" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Recruitment of cohort as a pseudo-intervention.
+          </xs:documentation>
+          <xs:appinfo>name:Cohort recruitment;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType/>
       </xs:element>
     </xs:choice>
     <xs:attribute name="id" type="xs:string" use="required">

@@ -99,15 +99,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <cohort>
-      <timed>
-        <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
-        <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>
-        <deploy coverage="0.195228" maxAge="15" minAge="10" time="2"/>
-        <deploy coverage="0.207164" maxAge="20" minAge="15" time="3"/>
-        <deploy coverage="0.157818" maxAge="90" minAge="20" time="4"/>
-      </timed>
-    </cohort>
     <human>
       <effect id="MDA">
         <MDA/>
@@ -145,6 +136,9 @@
             <deterrency value="0"/>
           </anophelesParams>
         </GVI>
+      </effect>
+      <effect id="cohort">
+        <cohort/>
       </effect>
       <intervention>
         <effect id="MDA"/>
@@ -186,6 +180,16 @@
           <deploy coverage="0.5775" time="112"/>
           <deploy coverage="0.63525" time="113"/>
           <deploy coverage="0.693" time="114"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="cohort"/>
+        <timed>
+          <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
+          <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>
+          <deploy coverage="0.195228" maxAge="15" minAge="10" time="2"/>
+          <deploy coverage="0.207164" maxAge="20" minAge="15" time="3"/>
+          <deploy coverage="0.157818" maxAge="90" minAge="20" time="4"/>
         </timed>
       </intervention>
     </human>

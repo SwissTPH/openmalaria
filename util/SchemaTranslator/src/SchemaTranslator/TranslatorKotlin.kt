@@ -300,6 +300,18 @@ abstract class Translator(input: InputSource, options: Options) {
 
 /** Extension to hold translation functions written in Kotlin. */
 abstract class TranslatorKotlin(input: InputSource, options: Options) : Translator(input,options){
+    /** Translate to schema 32.
+     * 
+     * Many differences to intervention description.
+     * 
+     * Warning: you may get some validation errors of the type
+     * 
+     * - Error: org.xml.sax.SAXParseException; cvc-complex-type.2.1: Element
+     * - 'cohort' must have no character or element information item
+     * - [children], because the type's content type is empty.
+     * 
+     * This appears to be a bug in the validator, because xmllint reports no
+     * problems and the scenarios look valid. */
     public fun translate31To32(){
         var changeIRSReportingToGVI = false
         val interventions = getChildElement(scenarioElement, "interventions")
@@ -461,6 +473,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         updateElt("ITN", "ITN", true)
         updateIRS()
         updateElt("vectorDeterrent", "GVI", false)
+        updateElt("cohort", "cohort", false)
         
         if (humanEffects.size > 0){
             val human = scenarioDocument.createElement("human")!!
