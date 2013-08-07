@@ -23,7 +23,6 @@
 
 #include "Global.h"
 #include "Population.h"
-#include "Interventions.h"
 #include "util/BoincWrapper.h"
 
 using namespace std;
@@ -82,8 +81,6 @@ private:
     int phase;  // only need be a class member because value is checkpointed
     
     auto_ptr<Population> population;
-    
-    auto_ptr<InterventionManager> interventions;
     
     /** Some identifier is needed to prevent checkpoint cheats. Ideally a unique identifier per
      * workunit, but a random integer number should do the job. */

@@ -63,9 +63,9 @@ void CommonWithinHost::clearAllInfections() {
 void CommonWithinHost::medicate(string drugName, double qty, double time, double duration, double bodyMass) {
     pkpdModel->medicate(drugName, qty, time, duration, bodyMass);
 }
-void CommonWithinHost::immuneSuppression() {
+void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        (*inf)->immuneSuppression();
+        (*inf)->clearImmunity();
     }
     _cumulativeh = 0.0;
     _cumulativeYlag = 0.0;

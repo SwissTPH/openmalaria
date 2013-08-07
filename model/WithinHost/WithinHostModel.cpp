@@ -114,9 +114,6 @@ void WithinHostModel::continuousIPT (Monitoring::AgeGroup, bool) {
 void WithinHostModel::timedIPT (Monitoring::AgeGroup, bool) {
   throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
-bool WithinHostModel::hasIPTiProtection (TimeStep maxInterventionAge) const {
-  throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
-}
 
 
 // -----  immunity  -----

@@ -35,9 +35,9 @@ public:
   NonVectorModel(const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorModel();
   
-  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const Population& population);
   
-  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance );
+  virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
@@ -60,15 +60,16 @@ public:
    * Similar calculation to that used during initialization. */
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
+  virtual const map<string,size_t>& getSpeciesIndexMap();
+  
   virtual void setITNDescription ( const scnXml::ITNDescription&);
-  virtual void setIRSDescription (const scnXml::IRS&);
-  virtual void setVADescription (const scnXml::VectorDeterrent&);
+  virtual void setIRSDescription (const scnXml::IRSDescription&);
   virtual void deployVectorPopInterv (size_t instance);
   
   virtual void uninfectVectors();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {}
-  virtual void update (const std::list<Host::Human>& population, int populationSize);
+  virtual void vectorUpdate (const Population& population) {}
+  virtual void update (const Population& population);
   virtual double calculateEIR(PerHost& perHost, double ageYears);
   
 private:

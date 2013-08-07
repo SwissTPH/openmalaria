@@ -20,7 +20,7 @@
 
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/PerHost.h"
-#include "Host/Human.h"
+#include "Population.h"
 
 #include "util/errors.h"
 
@@ -213,8 +213,7 @@ double AnophelesModel::calcEntoAvailability(double N_i, double P_A, double P_Ai)
 // -----  Initialisation of model which is done after creating initial humans  -----
 
 void AnophelesModel::init2 (size_t sIndex,
-                                const std::list<Host::Human>& population,
-                                int populationSize,
+                                const Population& population,
                                 double meanPopAvail)
 {
     // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
@@ -231,7 +230,7 @@ void AnophelesModel::init2 (size_t sIndex,
     // P_dif; here we assume that P_E is constant.
     double initialP_df = 0.0;
 
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
         leaveSeekingStateRate += prod;
@@ -259,15 +258,14 @@ void AnophelesModel::init2 (size_t sIndex,
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
-    transmission.emergence->init2( initialP_A, initialP_df, populationSize * meanPopAvail / sumPFindBite, transmission );
+    transmission.emergence->init2( initialP_A, initialP_df, population.size() * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
 }
 
-void AnophelesModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
-    transmission.initVectorPopInterv( elt, instance );
+void AnophelesModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
+    transmission.initVectorInterv( elt, instance );
     
-    assert( instance >= 0 );
     if( seekingDeathRateIntervs.size() <= instance )
         seekingDeathRateIntervs.resize( instance+1 );
     if( probDeathOvipositingIntervs.size() <= instance )
@@ -290,15 +288,14 @@ void AnophelesModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt,
 void AnophelesModel::deployVectorPopInterv (size_t instance){
     transmission.emergence->deployVectorPopInterv(instance);
     // do same as in above function (of EmergenceModel)
-    assert( 0 <= instance && instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
+    assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
     seekingDeathRateIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
     probDeathOvipositingIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
 }
 
 
 // Every TimeStep::interval days:
-void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
-                                     int populationSize,
+void AnophelesModel::advancePeriod (const Population& population,
                                      size_t sIndex,
                                      bool isDynamic) {
     transmission.emergence->update();
@@ -347,7 +344,7 @@ void AnophelesModel::advancePeriod (const std::list<Host::Human>& population,
     // P_dif; here we assume that P_E is constant.
     double tsP_df = 0.0;
     double tsP_dif = 0.0;
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
         leaveSeekingStateRate += prod;

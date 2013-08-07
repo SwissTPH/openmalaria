@@ -132,7 +132,7 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-double TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
+double TransmissionModel::updateKappa (const Population& population) {
     // We calculate kappa for output and non-vector model, and kappaByAge for
     // the shared graphics.
 
@@ -142,7 +142,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     nByAge.assign (noOfAgeGroupsSharedMem, 0);
     numTransmittingHumans = 0;
 
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
         t *= h->probTransmissionToMosquito();
@@ -158,7 +158,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
 
 
     size_t lKMod = mod_nn(TimeStep::simulation, laggedKappa.size());	// now
-    if( population.empty() ){     // this is valid
+    if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN

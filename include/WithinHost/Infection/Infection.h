@@ -65,7 +65,7 @@ public:
   
   /// Resets immunity properties specific to the infection (should only be
   /// called along with immuneSuppression() on within-host model).
-  inline void immuneSuppression(){
+  inline void clearImmunity(){
       _cumulativeExposureJ = 0.0;
   }
   

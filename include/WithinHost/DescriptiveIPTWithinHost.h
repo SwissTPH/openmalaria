@@ -49,7 +49,6 @@ public:
   virtual void clearInfections (bool isSevere);
   virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
   virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   
 protected:
   virtual DescriptiveInfection* createInfection ();

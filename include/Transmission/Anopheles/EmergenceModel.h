@@ -69,7 +69,7 @@ public:
         int EIPDuration );
     
     /** Set up the non-host-specific interventions. */
-    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance );
+    void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
     
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */

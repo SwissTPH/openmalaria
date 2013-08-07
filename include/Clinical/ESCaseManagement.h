@@ -158,8 +158,11 @@ class ESDecisionMap {
          *
          * @param cm XML element describing probabilistic decisions and treatments
          * @param complicated Determines whether hard-coded decisions for the
-         * uncomplicated or complicated case are added. */
-        void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType);
+         * uncomplicated or complicated case are added.
+         * @param reinitialise If true, clear any previously initialised data
+         * (e.g. for replacement health system); if false, throw an exception
+         * if the map was previously initialised. */
+        void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType, bool reinitialise);
         
         /** Run decision tree to arrive at an outcome.
          *

@@ -22,11 +22,13 @@
 #define OM_IMPORTED_INFECTIONS
 
 #include "Global.h"
-#include "Population.h"
 #include "schema/interventions.h"
 #include "util/errors.h"
 
-namespace OM { namespace Host {
+namespace OM {
+    class Population;
+
+namespace Host {
 
     class ImportedInfections {
     public:
@@ -37,7 +39,7 @@ namespace OM { namespace Host {
          * @param iiElt The scenario element with description of rates
          * @returns True if any infections are imported
          */
-        bool init( const scnXml::ImportedInfections& iiElt );
+        void init( const scnXml::ImportedInfections& iiElt );
         
         /** Import this time-step's imported infections, according to initialised rates
          * 
@@ -45,7 +47,7 @@ namespace OM { namespace Host {
          *  from the importedInfectionsPerThousandHosts. The bernoulli distribution
          *  is then used to predict if an human has imported the infection in the
          *  population or not. A maximum of one infection can be imported per
-         * intervention.
+         *  person.
          * 
          * @param pop The Population class encapsulating all humans */
         void import( Population& pop );

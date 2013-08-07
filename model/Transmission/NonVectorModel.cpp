@@ -1,3 +1,4 @@
+
 /* This file is part of OpenMalaria.
  * 
  * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
@@ -73,13 +74,13 @@ NonVectorModel::NonVectorModel(const scnXml::NonVector& nonVectorData) :
 
 NonVectorModel::~NonVectorModel () {}
 
-void NonVectorModel::init2 (const std::list<Host::Human>& population, int populationSize) {
+void NonVectorModel::init2 (const Population&) {
     // no set-up needed; just indicate we're ready to roll:
     simulationMode = forcedEIR;
 }
 
 const char* viError = "vector model interventions can not be used with the non-vector model";
-void NonVectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) {
+void NonVectorModel::initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance ) {
     throw util::xml_scenario_error( viError );
 }
 
@@ -174,6 +175,10 @@ void NonVectorModel::changeEIRIntervention (
   annualEIR = numeric_limits<double>::quiet_NaN();
 }
 
+const map<string,size_t>& NonVectorModel::getSpeciesIndexMap(){
+    throw util::xml_scenario_error( "attempt to use a vector-affecting intervention with the non-vector model" );
+}
+
 void NonVectorModel::uninfectVectors(){
     if( simulationMode != dynamicEIR )
 	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
@@ -184,17 +189,14 @@ void NonVectorModel::uninfectVectors(){
 void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
   throw util::xml_scenario_error (viError);
 }
-void NonVectorModel::setIRSDescription (const scnXml::IRS&) {
-  throw util::xml_scenario_error (viError);
-}
-void NonVectorModel::setVADescription (const scnXml::VectorDeterrent&) {
+void NonVectorModel::setIRSDescription (const scnXml::IRSDescription&) {
   throw util::xml_scenario_error (viError);
 }
 void NonVectorModel::deployVectorPopInterv (size_t instance) {
   throw util::xml_scenario_error (viError);
 }
 
-void NonVectorModel::update (const std::list<Host::Human>& population, int populationSize) {
+void NonVectorModel::update (const Population& population) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){

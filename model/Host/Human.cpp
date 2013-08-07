@@ -31,7 +31,7 @@
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
-#include "Interventions.h"
+#include "Population.h"
 
 #include <string>
 #include <string.h>
@@ -192,65 +192,85 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int nNewInfs = infIncidence->numNewInfections( *this, EIR );
     
-    withinHostModel->update(nNewInfs, ageYears, _vaccine.getBSVEfficacy());
+    withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(Vaccine::BSV));
 }
 
-
-void Human::massVaccinate (const OM::Population&) {
-    _vaccine.vaccinate();
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
+void Human::deploy( const interventions::HumanInterventionEffect& effect, interventions::Deployment::Method method ){
+    effect.deploy( *this, method );
+    lastDeployments[effect.getIndex()] = TimeStep::simulation;
 }
-void Human::ctsVaccinate (const OM::Population&) {
-    if ( _vaccine.doCtsVaccination( TimeStep::simulation - _dateOfBirth ) ){
-        _vaccine.vaccinate();
-        Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
+
+bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
+    map<size_t,TimeStep>::const_iterator it = lastDeployments.find( effect_index );
+    if( it == lastDeployments.end() ){
+        return true;  // no previous deployment
+    }else{
+        return it->second + maxAge <= TimeStep::simulation;
     }
 }
 
-void Human::continuousIPT (const OM::Population&) {
-    withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
-}
-void Human::timedIPT (const OM::Population&) {
-  withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
+void Human::deployVaccine( interventions::Deployment::Method method, Vaccine::Types type ){
+    if( method == interventions::Deployment::TIMED ){
+        _vaccine.vaccinate( type );
+        if( type == Vaccine::reportType )
+            Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
+    }else if( method == interventions::Deployment::CTS ){
+        if ( _vaccine.getsEPIVaccination( type, TimeStep::simulation - _dateOfBirth ) ){
+            _vaccine.vaccinate( type );
+            if( type == Vaccine::reportType )
+                Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
+        }
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::massDrugAdministration (const OM::Population&) {
+void Human::deployIPT( interventions::Deployment::Method method ){
+    if( method == interventions::Deployment::TIMED ){
+        withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
+    }else if( method == interventions::Deployment::CTS ){
+        withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
+    }else throw SWITCH_DEFAULT_EXCEPTION;
+}
+
+void Human::deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
+    perHostTransmission.setupITN ( transmissionModel );
+    if( method == interventions::Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
+    }else if( method == interventions::Deployment::CTS ){
+        Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
+    }else throw SWITCH_DEFAULT_EXCEPTION;
+}
+
+void Human::deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
+    perHostTransmission.setupIRS ( transmissionModel );
+    if( method == interventions::Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
+    }else if( method == interventions::Deployment::CTS ){
+        //TODO: report
+    }else throw SWITCH_DEFAULT_EXCEPTION;
+}
+
+void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
 }
 
-void Human::massITN (const OM::Population& population){
-    perHostTransmission.setupITN (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
-}
-void Human::ctsITN (const OM::Population& population){
-    perHostTransmission.setupITN (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
-}
-
-void Human::massIRS (const OM::Population& population) {
-    perHostTransmission.setupIRS (population.transmissionModel());
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
-}
-
-void Human::massVA (const OM::Population&) {
-    perHostTransmission.setupVA ();
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
-}
-
-bool Human::hasVaccineProtection(TimeStep maxInterventionAge) const{
-    return _vaccine.hasProtection(maxInterventionAge);
-}
-bool Human::hasIPTiProtection(TimeStep maxInterventionAge) const{
-    return withinHostModel->hasIPTiProtection(maxInterventionAge);
-}
-bool Human::hasITNProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.getITN().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
-}
-bool Human::hasIRSProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.getIRS().timeOfDeployment() + maxInterventionAge > TimeStep::simulation;
-}
-bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.hasVAProtection(maxInterventionAge);
+void Human::reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const{
+    if( method == interventions::Deployment::TIMED ){
+        switch( type ){
+            case interventions::Effect::GVI:
+                Monitoring::Surveys.getSurvey(_inCohort).reportMassGVI( getMonitoringAgeGroup(), 1 );
+                break;
+            default:
+                throw SWITCH_DEFAULT_EXCEPTION;
+        }
+    }else if( method == interventions::Deployment::CTS ){
+        switch( type ){
+            case interventions::Effect::GVI:
+                //TODO: report
+                break;
+            default:
+                throw SWITCH_DEFAULT_EXCEPTION;
+        }
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 double Human::getAgeInYears() const{
@@ -278,7 +298,7 @@ void Human::summarize() {
     }
 }
 
-void Human::addToCohort (const OM::Population&){
+void Human::addToCohort (){
     if( _inCohort ) return;	// nothing to do
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,
@@ -340,7 +360,7 @@ void Human::updateInfectiousness() {
   transmit=std::min(transmit, 1.0);
   
   //    Include here the effect of transmission-blocking vaccination
-  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getTBVEfficacy());
+  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getEfficacy( Vaccine::TBV ));
   util::streamValidate( _probTransmissionToMosquito );
 }
 

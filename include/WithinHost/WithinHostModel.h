@@ -104,8 +104,6 @@ public:
   virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
   /// Timed deployment for IPT
   virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  /// Last IPTi dose recent enough to give protection?
-  virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   //@}
   
   ///@brief Immunity model
@@ -114,7 +112,7 @@ public:
   void immunityPenalisation();
   
   /// Special intervention: clears all immunity
-  virtual void immuneSuppression() =0;
+  virtual void clearImmunity() =0;
   
   /** The maximum number of infections a human can have. The only real reason
    * for this limit is to prevent incase bad input from causing the number of

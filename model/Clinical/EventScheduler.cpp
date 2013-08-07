@@ -173,7 +173,7 @@ void ClinicalEventScheduler::massDrugAdministration(Human& human){
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration (
         ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
-        medicateQueue, human.getInCohort(), human.getMonitoringAgeGroup()
+        medicateQueue, human.isInCohort(), human.getMonitoringAgeGroup()
     );
 }
 
@@ -189,7 +189,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
 	    
-	    latestReport.update (human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (human.isInCohort(), human.getMonitoringAgeGroup(), pgState);
         } else {
 	    if ( pgState & Pathogenesis::COMPLICATED ) {
 		if( random::uniform_01() < ESCaseManagement::pSequelaeInpatient( ageYears ) ){
@@ -201,7 +201,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
             }
 	    // report bout, at conclusion of episode:
-	    latestReport.update (human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (human.isInCohort(), human.getMonitoringAgeGroup(), pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)
 	    pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
@@ -264,20 +264,20 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.getInCohort()
+	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.isInCohort()
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
 	    timeLastTreatment = TimeStep::simulation;
             if( pgState & Pathogenesis::COMPLICATED ){
-                Monitoring::Surveys.getSurvey(human.getInCohort())
+                Monitoring::Surveys.getSurvey(human.isInCohort())
                     .reportTreatments3( human.getMonitoringAgeGroup(), 1 );
             }else{
                 if( pgState & Pathogenesis::SECOND_CASE ){
-                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                    Monitoring::Surveys.getSurvey(human.isInCohort())
                         .reportTreatments2( human.getMonitoringAgeGroup(), 1 );
                 }else{
-                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                    Monitoring::Surveys.getSurvey(human.isInCohort())
                         .reportTreatments1( human.getMonitoringAgeGroup(), 1 );
                 }
             }
@@ -343,7 +343,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double treatmentEffectMult = 1.0;
                 
                 if( random::uniform_01() < pTreatment ){
-                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                    Monitoring::Surveys.getSurvey(human.isInCohort())
                         .reportAntibioticTreatments( human.getMonitoringAgeGroup(), 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
                 }
@@ -419,10 +419,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             double bodyMass = ageToWeight( ageYears );
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
             if( it->duration > 0.0 ){
-                Monitoring::Surveys.getSurvey(human.getInCohort())
+                Monitoring::Surveys.getSurvey(human.isInCohort())
                 .report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
             }else{      // 0 or NaN
-                Monitoring::Surveys.getSurvey(human.getInCohort())
+                Monitoring::Surveys.getSurvey(human.isInCohort())
                 .report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
             }
 	    medicateQueue.erase (it);

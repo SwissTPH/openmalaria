@@ -20,10 +20,13 @@
 
 #include "Clinical/Diagnostic.h"
 #include "util/random.h"
+#include "util/errors.h"
 
 namespace OM { namespace Clinical {
     
     void Diagnostic::init( const scnXml::HSDiagnostic& elt ){
+        if( density == density )
+            throw util::unimplemented_exception( "multiple MDA interventions" );
         if( elt.getDeterministic().present() ){
             specificity = numeric_limits<double>::quiet_NaN();
             density = elt.getDeterministic().get().getMinDensity();

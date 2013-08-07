@@ -26,7 +26,9 @@
 #include <assert.h>
 
 namespace OM {
+namespace interventions {
     class InterventionManager;
+}
 namespace Monitoring {
     
 /** Class to collect surveys and write them out.
@@ -72,7 +74,7 @@ class SurveysType
 
     /** Read in some params from XML and allocate memory. */
     void init ();
-    void initCohortOnly(OM::InterventionManager& interventions);
+    void initCohortOnly();
     
     //! It increments the survey period
     void incrementSurveyPeriod();

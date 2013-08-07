@@ -88,7 +88,7 @@ int main(int argc, char* argv[]) {
         cerr << "In: " << scenarioFile << endl;
         exitStatus = e.getCode();
     } catch (const OM::util::base_exception& e) {
-        cerr << "Error: " << e.what() << endl;
+        cerr << "Error: " << e.message() << endl;
         exitStatus = e.getCode();
     } catch (const exception& e) {
         cerr << "Error: " << e.what() << endl;

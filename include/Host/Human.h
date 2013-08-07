@@ -25,6 +25,7 @@
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
+#include "interventions/Interventions.h"
 
 namespace OM {
     namespace Transmission {
@@ -78,6 +79,7 @@ public:
       _probTransmissionToMosquito & stream;
       _inCohort & stream;
       nextCtsDist & stream;
+      lastDeployments & stream;
   }
   //@}
   
@@ -95,29 +97,37 @@ public:
   
   ///@brief Deploy "intervention" functions
   //@{
+  /** Deploys an intervention.
+   * 
+   * The purpose of this function is principally to allow recording of when
+   * each intervention effect is deployed (for cumulative deployment).
+   * 
+   * The number of wrapper functions in intervention deployment could probably
+   * be reduced somehow (TODO). */
+  void deploy( const interventions::HumanInterventionEffect& effect, interventions::Deployment::Method method );
+  
+  /** Determines for the purposes of cumulative deployment whether an effect is
+   * still current.
+   * 
+   * @returns true if the intervention effect should be re-deployed (too old)
+   */
+  bool needsRedeployment( size_t effect_index, TimeStep maxAge );
+  
   /// Asks the clinical model to deal with this
-  void massDrugAdministration (const OM::Population&);
+  void massDrugAdministration ();
   
-  /// Vaccinate & report mass vaccination
-  void massVaccinate (const OM::Population&);
-  /// If individual hasn't dropped out, vaccinate & report EPI
-  void ctsVaccinate (const OM::Population&);
-  
-  void continuousIPT (const OM::Population&);
-  void timedIPT (const OM::Population&);
-  
-  /// Give human a new ITN via mass deployment
-  void massITN (const OM::Population&);
-  /// Give a human a new ITN through EPI
-  void ctsITN (const OM::Population&);
-  /// Give human a new IRS through mass deployment
-  void massIRS (const OM::Population&);
-  /// Give human a new VA intervention through mass deployment
-  void massVA (const OM::Population&);
+  /// Mass/EPI vaccination (note: extra checks may still prevent EPI vaccination)
+  void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );
+  /// Mass/continuous IPT deployment (note: these don't have exactly the same effect)
+  void deployIPT( interventions::Deployment::Method method );
+  /// Mass/continuous ITN deployment
+  void deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
+  /// Mass/continuous IRS deployment
+  void deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   
   /// Resets immunity
-  inline void immuneSuppression(const OM::Population&) {
-      withinHostModel->immuneSuppression();
+  inline void clearImmunity() {
+      withinHostModel->clearImmunity();
   }
   
   /// Infect the human (with an imported infection).
@@ -125,15 +135,9 @@ public:
   
   /// Add PEV and remove TBV (vaccines) from human
   inline void R_0Vaccines() { _vaccine.specialR_0(); }
-  //@}
   
-  ///@brief Functions to check coverage by interventions
-  //@{
-    bool hasVaccineProtection(TimeStep maxInterventionAge) const;
-    bool hasIPTiProtection(TimeStep maxInterventionAge) const;
-    bool hasITNProtection(TimeStep maxInterventionAge) const;
-    bool hasIRSProtection(TimeStep maxInterventionAge) const;
-    bool hasVAProtection(TimeStep maxInterventionAge) const;
+  /** Report deployment of an intervention to this human. */
+  void reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const;
   //@}
   
   /// @brief Small functions
@@ -149,10 +153,8 @@ public:
     return withinHostModel->parasiteDensityDetectible();
   }
   
-  // crux for timed deployment as intervention up to some limit:
-  inline bool getInCohort(TimeStep)const{ return _inCohort; }
   /// Return true if human is a member of the cohort
-  inline bool getInCohort()const{ return _inCohort; }
+  inline bool isInCohort()const{ return _inCohort; }
   
   /// Return the index of next continuous intervention to be deployed
   inline uint32_t getNextCtsDist()const{ return nextCtsDist; }
@@ -177,7 +179,7 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort (const OM::Population&);
+  void addToCohort ();
   
   /** Remove from cohort. As with addToCohort, deals with reporting.
    *
@@ -275,6 +277,9 @@ private:
   
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
+  
+  /// Last deployment times of intervention effects by effect index
+  map<size_t,TimeStep> lastDeployments;
   
 public: //lazy: give read access to these
   /// Remove from cohort as soon as individual has patent parasites?

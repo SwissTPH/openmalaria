@@ -18,36 +18,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef TRANSMISSION_IRS
-#define TRANSMISSION_IRS
+#ifndef OM_INTERVENTIONS_IRS
+#define OM_INTERVENTIONS_IRS
 
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
 
-namespace OM { namespace Transmission {
+namespace OM {
+namespace Transmission {
+    // forward declare:
+    class TransmissionModel;
+}
+namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
-    // forward declare:
-    class TransmissionModel;
 
 /** Constant parameters for extended IRS model. */
 class IRSParams {
 public:
-    IRSParams() : simpleModel(false), maxInsecticide(numeric_limits< double >::signaling_NaN()) {}
-    /** Set parameters for the old model from elt. Don't call both! */
-    void init( const scnXml::IRSDescription_v1& elt);
+    IRSParams() : maxInsecticide(numeric_limits< double >::signaling_NaN()) {}
     /** Set parameters for the new model from elt. */
-    void init( const scnXml::IRSDescription_v2& elt);
+    void init( const scnXml::IRSDescription& elt);
     
 private:
-    // If true, use the older model with direct decay of effect; otherwise,
-    // Use the Briet model with decay of insecticide (similar to ITN model).
-    bool simpleModel;
     NormalSampler initialInsecticide;
     double maxInsecticide;		// maximum initial insecticide
     shared_ptr<DecayFunction> insecticideDecay;
@@ -65,9 +63,7 @@ public:
         proportionUnprotected( numeric_limits<double>::signaling_NaN() )
     {}
     void init(const IRSParams& params,
-              const scnXml::IRSDescription_v1::AnophelesParamsType& elt);
-    void init(const IRSParams& params,
-              const scnXml::IRSDescription_v2::AnophelesParamsType& elt);
+              const scnXml::IRSDescription::AnophelesParamsType& elt);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     inline double relativeAttractiveness( double insecticideContent )const{
@@ -94,16 +90,12 @@ private:
     public:
         RelativeAttractiveness();
         
-        // for the old model: use lPF instead as the deterrency
-        inline double oldDeterrency() const { return lPF; }
-        inline void oldDeterrency(double d) { lPF = d; }
-        
         /** Set parameters.
          * 
          * It is checked that input parameters lie in a range such that
          * the relative availability is always in the range (0,1] — that is,
          * the deterrent can never be perfect, but can have zero effect. */
-        void init(const OM::Transmission::IRSParams& params,
+        void init(const IRSParams& params,
                   const scnXml::IRSDeterrency& elt);
         
         /** Calculate effect. Positive is interpreted as having a positive effect
@@ -122,15 +114,11 @@ private:
     public:
         SurvivalFactor();
         
-        // for the old model: use PF instead as the effect
-        inline double oldEffect() const { return PF; }
-        inline void oldEffect(double e) { PF = e; }
-        
         /** Set parameters.
          * 
          * It is checked that parameters lie in a suitible range, giving a
          * survival factor between 0 and 1. */
-        void init(const OM::Transmission::IRSParams& params,
+        void init(const IRSParams& params,
                   const scnXml::IRSKillingEffect& elt, bool postPrandial);
         
         /** Calculate additional survival factor imposed by IRS on pre-/post-
@@ -158,7 +146,7 @@ private:
  */
 class IRS {
 public:
-    IRS (const TransmissionModel& tm);
+    IRS (const Transmission::TransmissionModel& tm);
     
     /// Checkpointing
     template<class S>
@@ -172,15 +160,11 @@ public:
     inline TimeStep timeOfDeployment()const{
         return deployTime;
     }
-    /** Old model: this is the survival factor of the effect. New model: not
-     * used, except as part of getInsecticideContent below. */
-    inline double getEffectSurvival(const IRSParams& params)const{
-        return params.insecticideDecay->eval (TimeStep::simulation - deployTime,
-                                              insecticideDecayHet);
-    }
     /// Get remaining insecticide content based on initial amount and decay.
     inline double getInsecticideContent(const IRSParams& params)const{
-        return initialInsecticide * getEffectSurvival( params );
+        double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
+                                              insecticideDecayHet);
+        return initialInsecticide * effectSurvival;
     }
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
@@ -198,7 +182,6 @@ private:
     double initialInsecticide;	// units: mg/m²
     
     // these parameters are sampled from log-normal per IRS, but thereafter constant:
-    //Old model: used as heterogeneity of general decay
     DecayFuncHet insecticideDecayHet;
 };
 

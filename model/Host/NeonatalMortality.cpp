@@ -19,7 +19,7 @@
  */
 
 #include "Host/NeonatalMortality.h"
-#include "Host/Human.h"
+#include "Population.h"
 #include "util/random.h"
 
 #include <cmath>
@@ -49,12 +49,12 @@ bool NeonatalMortality::eventNeonatalMortality() {
   return random::uniform_01() <= _riskFromMaternalInfection;
 }
 
-void NeonatalMortality::update (const list<Host::Human>& population) {
+void NeonatalMortality::update (const Population& population) {
   // For individuals in the age range 20-25, we sum:
   int nCounter=0;	// total number
   int pCounter=0;	// number with patent infections, needed for prev in 20-25y
   
-  for (std::list<Host::Human>::const_iterator iter = population.begin(); iter != population.end(); ++iter){
+  for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
     //NOTE: this is based on last time-step's parasite densities but this
     // time-step's age, which is a bit strange (though not very significant).
     double ageYears = iter->getAgeInYears();

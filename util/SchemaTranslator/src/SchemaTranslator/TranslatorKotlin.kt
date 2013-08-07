@@ -10,9 +10,6 @@ import org.w3c.dom.Node
 import org.w3c.dom.NodeList
 import kotlin.dom.*
 import java.util.ArrayList
-import java.io.FileReader
-import java.io.FileOutputStream
-import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.TransformerFactory
 import javax.xml.transform.Result
 import javax.xml.transform.OutputKeys
@@ -22,14 +19,10 @@ import javax.xml.validation.Schema
 import javax.xml.validation.Validator
 import javax.xml.transform.Source
 import org.xml.sax.SAXParseException
-import java.sql.Connection
-import java.sql.DriverManager
-import java.sql.Statement
-import java.sql.ResultSet
-import java.io.StringReader
-import java.io.StringWriter
 import java.lang.reflect.Method
 import java.lang.reflect.InvocationTargetException
+import java.util.TreeSet
+import java.util.TreeMap
 
 // ———  part 1: define utility classes (enums, simple containers)  ———
 
@@ -71,7 +64,7 @@ class Options {
     var inputFolder = File("scenarios")
     var schemaFolder = File("../../schema/")
 
-    val latestVersion = 31
+    val latestVersion = 32
     var targetVersion = latestVersion
 
     var doValidation = true
@@ -176,12 +169,31 @@ abstract class Translator(input: InputSource, options: Options) {
         var l: Int = children.getLength()
         val r = ArrayList<Node>()
         for (i in 0..l - 1) {
-            if (name == (children.item(i)!!.getNodeName()))
-                r.add(children.item(i)!!)
+            val item = children.item(i)!!
+            if (name == item.getNodeName())
+                r.add(item)
         }
         return r
     }
-    fun getChildElement(node: Node, name: String): Element? {
+    fun getChildElements(node: Node, name: String) : ArrayList<Element> {
+        var children: NodeList = node.getChildNodes()
+        var l: Int = children.getLength()
+        val r = ArrayList<Element>()
+        for (i in 0..l - 1) {
+            val item = children.item(i)!!
+            if (item is Element && name == item.getNodeName())
+                r.add(item)
+        }
+        return r
+    }
+    fun getChildElement(node: Node, name: String): Element {
+        var elts : List<Node> = getChildNodes(node, name)
+        if (elts.size > 1)
+            throw DocumentException("Expected ${node.getNodeName()} not to have more than one sub-element with name ${name}")
+        if (elts.size == 1) return elts.get(0) as Element
+        throw DocumentException( "Node ${node.getNodeName()} does not have required child ${name}" )
+    }
+    fun getChildElementOpt(node: Node, name: String): Element? {
         var elts : List<Node> = getChildNodes(node, name)
         if (elts.size > 1)
             throw DocumentException("Expected ${node.getNodeName()} not to have more than one sub-element with name ${name}")
@@ -288,5 +300,199 @@ abstract class Translator(input: InputSource, options: Options) {
 
 /** Extension to hold translation functions written in Kotlin. */
 abstract class TranslatorKotlin(input: InputSource, options: Options) : Translator(input,options){
+    /** Translate to schema 32.
+     * 
+     * Many differences to intervention description.
+     * 
+     * Warning: you may get some validation errors of the type
+     * 
+     * - Error: org.xml.sax.SAXParseException; cvc-complex-type.2.1: Element
+     * - 'cohort' must have no character or element information item
+     * - [children], because the type's content type is empty.
+     * 
+     * This appears to be a bug in the validator, because xmllint reports no
+     * problems and the scenarios look valid. */
+    public fun translate31To32(){
+        var changeIRSReportingToGVI = false
+        val interventions = getChildElement(scenarioElement, "interventions")
+        val effectIdents : jet.MutableSet<String> = TreeSet<String>()
+        val humanEffects = ArrayList<Element>()
+        val humanInterventions = ArrayList<Element>()
+        fun effectIdent(suggestedIdent: String): String{
+            // find a unique effect identifier
+            var ident = suggestedIdent
+            var app = 0
+            while (effectIdents.contains(ident)){
+                ident = suggestedIdent + app
+                app += 1
+            }
+            return ident
+        }
+        fun newEffect(ident: String, desc: String?): Element{
+            val effect = scenarioDocument.createElement("effect")!!
+            if (effectIdents.contains(ident))
+                // actually, SetupException isn't really the right choice, but it's not a DocumentException either...
+                throw SetupException("effect id is not unique")
+            effectIdents.add(ident)
+            effect.setAttribute("id",ident)
+            humanEffects.add(effect)
+            if (desc != null)
+                effect.setAttribute("name",desc)
+            return effect
+        }
+        
+        // move any deployment descriptions from elt to intervention, applying necessary transformations
+        fun processDeployments(effects: List<String>, elt: Element, cumCovEffectIdent: String){
+            val intervention = scenarioDocument.createElement("intervention")!!
+            for (effect in effects){
+                val interventionEffect = scenarioDocument.createElement("effect")!!
+                interventionEffect.setAttribute("id",effect)
+                intervention.appendChild(interventionEffect)
+            }
+            
+            val cts = getChildElementOpt(elt, "continuous")
+            if (cts != null) intervention.appendChild(cts)
 
+            val timed = getChildElementOpt(elt, "timed")
+            if (timed != null){
+                // Note: type change from massList or massCumList to massListWithCum
+                // Map of "cumulative max age" to "timed element"
+                val cumTimedLists = TreeMap<Double,Element>()
+                var hasNonCum = false
+                for (deploy in getChildElements(timed, "deploy")){
+                    val maxAgeNode = deploy.getAttributeNode("cumulativeWithMaxAge")
+                    if (maxAgeNode != null){
+                        val age = java.lang.Double.parseDouble( maxAgeNode.getValue() )
+                        fun makeTimedList(): Element {
+                            val tL = scenarioDocument.createElement("timed")!!
+                            val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
+                            cumCov.setAttribute("effect",cumCovEffectIdent) // effect is uniquely used in this case, so translation is exact
+                            cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(age))
+                            tL.appendChild(cumCov)
+                            cumTimedLists.put(age, tL)
+                            return tL
+                        }
+                        val timedList : Element = cumTimedLists.get( age ) ?: makeTimedList()
+                        deploy.removeAttribute("cumulativeWithMaxAge")
+                        timedList.appendChild(deploy)
+                    }else{
+                        hasNonCum = true
+                    }
+                }
+                if (hasNonCum)
+                    intervention.appendChild(timed)
+                else
+                    elt.removeChild(timed)
+                for (item in cumTimedLists){
+                    intervention.appendChild(item.component2())
+                }
+            }
+
+            val nameAttr = elt.getAttributeNode("name")
+            if (nameAttr != null){
+                // move name attribute if it exists
+                intervention.setAttribute("name",nameAttr.getValue())
+                elt.removeAttribute("name")
+            }
+            
+            if (getChildElements(intervention, "continuous").size +
+                getChildElements(intervention, "timed").size > 0)
+            {
+                humanInterventions.add(intervention)
+            }
+        }
+        
+        fun updateElt(srcName: String, trgName: String, stripDescElt: Boolean){
+            val elt = getChildElementOpt(interventions, srcName)
+            if (elt != null){
+                val ident = effectIdent(srcName)
+                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
+
+                processDeployments(listOf(ident), elt, ident)
+                
+                if (stripDescElt){
+                    val desc = getChildElement(elt,"description")
+                    val renamed = scenarioDocument.renameNode(desc,"",trgName)!!
+                    effect.appendChild(renamed)
+                    interventions.removeChild(elt)  // now defunct
+                }else{
+                    val renamed = scenarioDocument.renameNode(elt,"",trgName)!!
+                    effect.appendChild(renamed) // after removal of "continuous" and "timed" child elements
+                }
+            }
+        }
+        fun updateVaccineElt(){
+            val elt = getChildElementOpt(interventions, "vaccine")
+            if (elt != null){
+                val idents = ArrayList<String>()
+                for (vacc in getChildElements(elt, "description")){
+                    val vaccineType = vacc.getAttribute("vaccineType")!!
+                    vacc.removeAttribute("vaccineType")
+                    val ident = effectIdent(vaccineType)
+                    idents.add(ident)
+                    val effect = newEffect(ident, null)
+                    val renamed = scenarioDocument.renameNode(vacc,"",vaccineType)!!
+                    effect.appendChild(renamed)
+                }
+                if (idents.size == 0){
+                    // corner case: vaccine element with no children was allowed, but is useless
+                    interventions.removeChild(elt)
+                    return
+                }
+
+                // Use any identifier for cumCov since all effects are deployed simultaneously
+                processDeployments(idents, elt, idents[0])
+                
+                interventions.removeChild(elt)  // now defunct
+            }
+        }
+        fun updateIRS(){
+            var name = "IRS"
+            val elt = getChildElementOpt(interventions, name)
+            if (elt != null){
+                val desc = getChildElementOpt(elt,"description")
+                val renamed = if (desc != null){
+                    changeIRSReportingToGVI = true
+                    name = "GVI"
+                    scenarioDocument.renameNode(desc,"",name)!!
+                }else{
+                    val desc2 = getChildElement(elt,"description_v2")
+                    scenarioDocument.renameNode(desc2,"",name)!!
+                }
+                val ident = effectIdent(name)
+                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
+                effect.appendChild(renamed)
+                
+                processDeployments(listOf(ident), elt, ident)
+                interventions.removeChild(elt)  // now defunct
+            }
+        }
+        updateElt("MDA", "MDA", false)
+        updateVaccineElt()
+        updateElt("IPT", "IPT", true) 
+        updateElt("ITN", "ITN", true)
+        updateIRS()
+        updateElt("vectorDeterrent", "GVI", false)
+        updateElt("cohort", "cohort", false)
+        updateElt("immuneSuppression", "clearImmunity", false)
+        
+        if (humanEffects.size > 0){
+            val human = scenarioDocument.createElement("human")!!
+            interventions.appendChild(human)
+            for (effect in humanEffects)
+                human.appendChild(effect)
+            for (intervention in humanInterventions)
+                human.appendChild(intervention)
+        }
+        
+        if (changeIRSReportingToGVI){
+            val mon = getChildElement(scenarioElement, "monitoring")
+            val survOpts = getChildElement(mon, "SurveyOptions")
+            for (opt in getChildElements(survOpts, "option")){
+                if (opt.getAttribute("name").equals("nMassIRS"))
+                    // replace the name (IRS won't be used so don't need both opts)
+                    opt.setAttribute("name","nMassGVI")
+            }
+        }
+    }
 }

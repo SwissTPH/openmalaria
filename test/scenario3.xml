@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" name="Namawala1_16" schemaVersion="31" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="802" name="Namawala1_16" schemaVersion="32" wuID="56305339" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -60,18 +60,23 @@
     </ageGroup>
   </monitoring>
   <interventions name="IPTi">
-    <IPT>
-      <description iptiEffect="12">
-        <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="9" tolPeriod="4"/>
-        <infGenotype ACR="1.0" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
-        <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.99" targetAgeYrs="0.274"/>
-        <deploy coverage="0.95" targetAgeYrs="0.36987"/>
-        <deploy coverage="0.95" targetAgeYrs="0.79453"/>
-      </continuous>
-    </IPT>
+    <human>
+      <effect id="IPT">
+        <IPT iptiEffect="12">
+          <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="9" tolPeriod="4"/>
+          <infGenotype ACR="1.0" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
+          <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
+        </IPT>
+      </effect>
+      <intervention>
+        <effect id="IPT"/>
+        <continuous>
+          <deploy coverage="0.99" targetAgeYrs="0.274"/>
+          <deploy coverage="0.95" targetAgeYrs="0.36987"/>
+          <deploy coverage="0.95" targetAgeYrs="0.79453"/>
+        </continuous>
+      </intervention>
+    </human>
   </interventions>
   <!-- Namawala 1_16 -->
   <healthSystem>

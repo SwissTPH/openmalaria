@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/IRS.h"
+#include "interventions//IRS.h"
 //TODO: we shouldn't have a dependency on the vector/transmission model class
 //here; currently it's a work-around for IRS parameters not always being present.
 #include "Transmission/VectorModel.h"
@@ -27,40 +27,20 @@
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
-namespace OM { namespace Transmission {
+namespace OM { namespace interventions {
     using util::random::poisson;
 
-void IRSParams::init( const scnXml::IRSDescription_v1& elt) {
-    simpleModel = true;
-    insecticideDecay = DecayFunction::makeObject( elt.getDecay(), "IRS.simpleDescription.decay" );
-}
-void IRSParams::init( const scnXml::IRSDescription_v2& elt) {
-    simpleModel = false;
+void IRSParams::init( const scnXml::IRSDescription& elt) {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
-    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "IRS.description.insecticideDecay" );
+    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "interventions.human.IRS.description.insecticideDecay" );
 }
 
 void IRSAnophelesParams::init(
     const IRSParams& params,
-    const scnXml::IRSDescription_v1::AnophelesParamsType& elt)
+    const scnXml::IRSDescription::AnophelesParamsType& elt)
 {
-    assert( params.simpleModel );
-    _relativeAttractiveness.oldDeterrency( elt.getDeterrency().getValue() );
-    _preprandialKillingEffect.oldEffect( elt.getPreprandialKillingEffect().getValue() );
-    _postprandialKillingEffect.oldEffect( elt.getPostprandialKillingEffect().getValue() );
-    // Simpler version of ITN usage/action:
-    double propActive = elt.getPropActive();
-    assert( propActive >= 0.0 && propActive <= 1.0 );
-    proportionProtected = propActive;
-    proportionUnprotected = 1.0 - proportionProtected;
-}
-void IRSAnophelesParams::init(
-    const IRSParams& params,
-    const scnXml::IRSDescription_v2::AnophelesParamsType& elt)
-{
-    assert( !params.simpleModel );
     _relativeAttractiveness.init( params, elt.getDeterrency() );
     _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
     _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
@@ -115,6 +95,9 @@ void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, c
         cerr.flush();
     }
 #endif
+    if( lPF == lPF ){
+        throw util::unimplemented_exception( "multiple IRS interventions" );
+    }
     lPF = log( PF );
 }
 IRSAnophelesParams::SurvivalFactor::SurvivalFactor() :
@@ -206,68 +189,45 @@ double IRSAnophelesParams::SurvivalFactor::survivalFactor(
 
 
 // ———  per-human data  ———
-IRS::IRS (const TransmissionModel& tm) :
+IRS::IRS (const Transmission::TransmissionModel& tm) :
     initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
 {
     //TODO: we shouldn't really have IRS data (this class) if there's no vector
     // model, should we? Allocate dynamically or based on model?
-    const VectorModel* vt = dynamic_cast<const VectorModel*>(&tm);
+    const Transmission::VectorModel* vt = dynamic_cast<const Transmission::VectorModel*>(&tm);
     if( vt != 0 ){
         const IRSParams& params = vt->getIRSParams();
         if( params.insecticideDecay.get() == 0 )
             return;     // no IRS
         // Varience factor of decay is sampled once per human: human is assumed
         // to account for most variance.
-        if( params.simpleModel ){
-            insecticideDecayHet = params.insecticideDecay->hetSample();
-        }else{
-            insecticideDecayHet = params.insecticideDecay->hetSample();
-        }
+        insecticideDecayHet = params.insecticideDecay->hetSample();
     }
 }
 
 void IRS::deploy(const IRSParams& params) {
     deployTime = TimeStep::simulation;
-    if( !params.simpleModel ){
-        // this is sampled independently: initial insecticide content doesn't depend on handling
-        initialInsecticide = params.initialInsecticide.sample();
-        if( initialInsecticide < 0.0 )
-            initialInsecticide = 0.0;	// avoid negative samples
-        if( initialInsecticide > params.maxInsecticide )
-            initialInsecticide = params.maxInsecticide;
-    }
+    
+    // this is sampled independently: initial insecticide content doesn't depend on handling
+    initialInsecticide = params.initialInsecticide.sample();
+    if( initialInsecticide < 0.0 )
+        initialInsecticide = 0.0;	// avoid negative samples
+    if( initialInsecticide > params.maxInsecticide )
+        initialInsecticide = params.maxInsecticide;
 }
 
 double IRS::relativeAttractiveness(const IRSAnophelesParams& params) const{
-    double effect;
-    if( params.base->simpleModel ){
-        effect = (1.0 - params._relativeAttractiveness.oldDeterrency() *
-            getEffectSurvival(*params.base));
-    }else{
-        effect = params.relativeAttractiveness( getInsecticideContent(*params.base) );
-    }
+    double effect = params.relativeAttractiveness( getInsecticideContent(*params.base) );
     return params.byProtection( effect );
 }
 
 double IRS::preprandialSurvivalFactor(const IRSAnophelesParams& params) const{
-    double effect;
-    if( params.base->simpleModel ){
-        effect = (1.0 - params._preprandialKillingEffect.oldEffect() *
-            getEffectSurvival(*params.base));
-    }else{
-        effect = params.preprandialSurvivalFactor( getInsecticideContent(*params.base) );
-    }
+    double effect = params.preprandialSurvivalFactor( getInsecticideContent(*params.base) );
     return params.byProtection( effect );
 }
 
 double IRS::postprandialSurvivalFactor(const IRSAnophelesParams& params) const{
-    double effect;
-    if( params.base->simpleModel ){
-        effect = (1.0 - params._postprandialKillingEffect.oldEffect() *
-            getEffectSurvival(*params.base));
-    }else{
-        effect = params.postprandialSurvivalFactor( getInsecticideContent(*params.base) );
-    }
+    double effect = params.postprandialSurvivalFactor( getInsecticideContent(*params.base) );
     return params.byProtection( effect );
 }
 
