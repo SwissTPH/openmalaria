@@ -316,7 +316,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             }
             return ident
         }
-        fun newEffect(ident: String): Element{
+        fun newEffect(ident: String, desc: String?): Element{
             val effect = scenarioDocument.createElement("effect")!!
             if (effectIdents.contains(ident))
                 // actually, SetupException isn't really the right choice, but it's not a DocumentException either...
@@ -324,21 +324,20 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             effectIdents.add(ident)
             effect.setAttribute("id",ident)
             humanEffects.add(effect)
+            if (desc != null)
+                effect.setAttribute("name",desc)
             return effect
         }
-        fun newIntervention(effects: List<String>): Element{
+        
+        // move any deployment descriptions from elt to intervention, applying necessary transformations
+        fun processDeployments(effects: List<String>, elt: Element, cumCovEffectIdent: String){
             val intervention = scenarioDocument.createElement("intervention")!!
             for (effect in effects){
                 val interventionEffect = scenarioDocument.createElement("effect")!!
                 interventionEffect.setAttribute("id",effect)
                 intervention.appendChild(interventionEffect)
             }
-            humanInterventions.add(intervention)
-            return intervention
-        }
-        
-        // move any deployment descriptions from elt to intervention, applying necessary transformations
-        fun processDeployments(elt: Element, intervention: Element, cumCovEffectIdent: String){
+            
             val cts = getChildElementOpt(elt, "continuous")
             if (cts != null) intervention.appendChild(cts)
 
@@ -376,37 +375,42 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     intervention.appendChild(item.component2())
                 }
             }
+
+            val nameAttr = elt.getAttributeNode("name")
+            if (nameAttr != null){
+                // move name attribute if it exists
+                intervention.setAttribute("name",nameAttr.getValue())
+                elt.removeAttribute("name")
+            }
+            
+            if (getChildElements(intervention, "continuous").size +
+                getChildElements(intervention, "timed").size > 0)
+            {
+                humanInterventions.add(intervention)
+            }
         }
         
-        fun updateElt(name: String, stripDescElt: Boolean){
-            val elt = getChildElementOpt(interventions, name)
+        fun updateElt(srcName: String, trgName: String, stripDescElt: Boolean){
+            val elt = getChildElementOpt(interventions, srcName)
             if (elt != null){
-                val ident = effectIdent(name)
-                val effect = newEffect(ident)
-                val intervention = newIntervention(listOf(ident))
+                val ident = effectIdent(srcName)
+                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
 
-                processDeployments(elt, intervention, ident)
-                
-                val nameAttr = elt.getAttributeNode("name")
-                if (nameAttr != null){
-                    //Note: name could be applied to effect or deployment descriptor; do both since we don't know to which it refers
-                    effect.setAttribute("description",nameAttr.getValue())
-                    intervention.setAttribute("name",nameAttr.getValue())
-                    elt.removeAttribute("name")
-                }
+                processDeployments(listOf(ident), elt, ident)
                 
                 if (stripDescElt){
                     val desc = getChildElement(elt,"description")
-                    val renamed = scenarioDocument.renameNode(desc,"",name)!!
+                    val renamed = scenarioDocument.renameNode(desc,"",trgName)!!
                     effect.appendChild(renamed)
                     interventions.removeChild(elt)  // now defunct
                 }else{
-                    effect.appendChild(elt) // after removal of "continuous" and "timed" child elements
+                    val renamed = scenarioDocument.renameNode(elt,"",trgName)!!
+                    effect.appendChild(renamed) // after removal of "continuous" and "timed" child elements
                 }
             }
         }
-        fun updateVaccineElt(name: String){
-            val elt = getChildElementOpt(interventions, name)
+        fun updateVaccineElt(){
+            val elt = getChildElementOpt(interventions, "vaccine")
             if (elt != null){
                 val idents = ArrayList<String>()
                 for (vacc in getChildElements(elt, "description")){
@@ -414,7 +418,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     vacc.removeAttribute("vaccineType")
                     val ident = effectIdent(vaccineType)
                     idents.add(ident)
-                    val effect = newEffect(ident)
+                    val effect = newEffect(ident, null)
                     val renamed = scenarioDocument.renameNode(vacc,"",vaccineType)!!
                     effect.appendChild(renamed)
                 }
@@ -423,55 +427,40 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     interventions.removeChild(elt)
                     return
                 }
-                val intervention = newIntervention(idents)
 
                 // Use any identifier for cumCov since all effects are deployed simultaneously
-                processDeployments(elt, intervention, idents[0])
-                
-                val nameAttr = elt.getAttributeNode("name")
-                if (nameAttr != null){
-                    //Note: name could be applied to effect or deployment descriptor; apply to deployment since we have multiple effects
-                    intervention.setAttribute("name",nameAttr.getValue())
-                    elt.removeAttribute("name")
-                }
+                processDeployments(idents, elt, idents[0])
                 
                 interventions.removeChild(elt)  // now defunct
             }
         }
-        fun updateIRS(name: String){
+        fun updateIRS(){
+            var name = "IRS"
             val elt = getChildElementOpt(interventions, name)
             if (elt != null){
-                val ident = effectIdent(name)
-                val effect = newEffect(ident)
-                val intervention = newIntervention(listOf(ident))
-
-                processDeployments(elt, intervention, ident)
-                
-                val nameAttr = elt.getAttributeNode("name")
-                if (nameAttr != null){
-                    //Note: name could be applied to effect or deployment descriptor; do both since we don't know to which it refers
-                    effect.setAttribute("description",nameAttr.getValue())
-                    intervention.setAttribute("name",nameAttr.getValue())
-                    elt.removeAttribute("name")
-                }
-
                 val desc = getChildElementOpt(elt,"description")
                 val renamed = if (desc != null){
                     changeIRSReportingToGVI = true
-                    scenarioDocument.renameNode(desc,"","GVI")!!
+                    name = "GVI"
+                    scenarioDocument.renameNode(desc,"",name)!!
                 }else{
                     val desc2 = getChildElement(elt,"description_v2")
                     scenarioDocument.renameNode(desc2,"",name)!!
                 }
+                val ident = effectIdent(name)
+                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
                 effect.appendChild(renamed)
+                
+                processDeployments(listOf(ident), elt, ident)
                 interventions.removeChild(elt)  // now defunct
             }
         }
-        updateElt("MDA", false)
-        updateVaccineElt("vaccine")
-        updateElt("IPT", true) 
-        updateElt("ITN", true)
-        updateIRS("IRS")
+        updateElt("MDA", "MDA", false)
+        updateVaccineElt()
+        updateElt("IPT", "IPT", true) 
+        updateElt("ITN", "ITN", true)
+        updateIRS()
+        updateElt("vectorDeterrent", "GVI", false)
         
         if (humanEffects.size > 0){
             val human = scenarioDocument.createElement("human")!!

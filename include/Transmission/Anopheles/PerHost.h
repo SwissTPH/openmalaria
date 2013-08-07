@@ -58,7 +58,6 @@ public:
     //@{
     void setITNDescription (const interventions::ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
     void setIRSDescription (const interventions::IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt);
-    void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
     //@}
     
 

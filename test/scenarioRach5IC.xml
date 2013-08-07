@@ -99,12 +99,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <vectorDeterrent name="hypothetical deterrency">
-      <decay L="4" function="exponential"/>
-      <anophelesParams mosquito="gambiae_ss">
-        <deterrency value="0"/>
-      </anophelesParams>
-    </vectorDeterrent>
     <cohort>
       <timed>
         <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
@@ -118,7 +112,7 @@
       <effect id="MDA">
         <MDA/>
       </effect>
-      <effect description="LLIN test" id="ITN">
+      <effect id="ITN" name="LLIN test">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean="0.9" sigma="0.8"/>
@@ -134,13 +128,21 @@
           </anophelesParams>
         </ITN>
       </effect>
-      <effect description="Pyreth" id="IRS">
+      <effect id="GVI" name="Pyreth">
         <GVI>
           <decay L="0.25" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency value="0.1116"/>
             <preprandialKillingEffect value="0"/>
             <postprandialKillingEffect value="0.2772"/>
+          </anophelesParams>
+        </GVI>
+      </effect>
+      <effect id="vectorDeterrent" name="hypothetical deterrency">
+        <GVI>
+          <decay L="4" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency value="0"/>
           </anophelesParams>
         </GVI>
       </effect>
@@ -157,9 +159,9 @@
         </continuous>
       </intervention>
       <intervention name="Pyreth">
-        <effect id="IRS"/>
+        <effect id="GVI"/>
         <timed>
-          <cumulativeCoverage effect="IRS" maxAgeYears="36.0"/>
+          <cumulativeCoverage effect="GVI" maxAgeYears="36.0"/>
           <deploy coverage="0.05775" time="18"/>
           <deploy coverage="0.1155" time="19"/>
           <deploy coverage="0.17325" time="20"/>

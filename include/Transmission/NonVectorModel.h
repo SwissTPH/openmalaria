@@ -64,7 +64,6 @@ public:
   
   virtual void setITNDescription ( const scnXml::ITNDescription&);
   virtual void setIRSDescription (const scnXml::IRSDescription&);
-  virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   
   virtual void uninfectVectors();

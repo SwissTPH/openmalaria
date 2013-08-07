@@ -738,19 +738,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             humanInterventions.push_back( intervention );
         }
     }
-    if( intervElt.getVectorDeterrent().present() ){
-        const scnXml::VectorDeterrent& va = intervElt.getVectorDeterrent().get();
-        if( va.getTimed().present() ){
-            // read description
-            population.transmissionModel().setVADescription( va );
-            // timed deployments:
-            const scnXml::MassCumList::DeploySequence& seq = va.getTimed().get().getDeploy();
-            typedef scnXml::MassCumList::DeploySequence::const_iterator It;
-            for( It it = seq.begin(); it != seq.end(); ++it ){
-                timed.push_back( createTimedMassCumIntervention( *it, &Host::Human::massVA, &Host::Human::hasVAProtection ) );
-            }
-        }
-    }
     if( intervElt.getCohort().present() ){
         const scnXml::Cohort& ch = intervElt.getCohort().get();
         if( ch.getTimed().present() || ch.getContinuous().present() ){

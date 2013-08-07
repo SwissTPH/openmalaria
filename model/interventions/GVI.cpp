@@ -54,12 +54,12 @@ GVIParams::GVIParams( size_t index, const scnXml::GVIDescription& elt,
 
 void GVIParams::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt)
 {
-    if( _relativeAttractiveness == _relativeAttractiveness ){
+    if( deterrency == deterrency ){
         throw util::unimplemented_exception( "multiple GVI interventions" );
     }
-    _relativeAttractiveness = elt.getDeterrency().getValue();
-    _preprandialKillingEffect = elt.getPreprandialKillingEffect().getValue();
-    _postprandialKillingEffect = elt.getPostprandialKillingEffect().getValue();
+    deterrency = elt.getDeterrency().present() ? elt.getDeterrency().get().getValue() : 0.0;
+    preprandialKilling = elt.getPreprandialKillingEffect().present() ? elt.getPreprandialKillingEffect().get().getValue() : 0.0;
+    postprandialKilling = elt.getPostprandialKillingEffect().present() ? elt.getPostprandialKillingEffect().get().getValue() : 0.0;
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
     assert( propActive >= 0.0 && propActive <= 1.0 );
@@ -86,7 +86,7 @@ double HumanGVI::relativeAttractiveness(const HumanInterventionEffect& gen_param
     assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
     const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
     const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
-    double effect = (1.0 - anoph._relativeAttractiveness *
+    double effect = (1.0 - anoph.deterrency *
             getEffectSurvival(params));
     return anoph.byProtection( effect );
 }
@@ -95,7 +95,7 @@ double HumanGVI::preprandialSurvivalFactor(const HumanInterventionEffect& gen_pa
     assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
     const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
     const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
-    double effect = (1.0 - anoph._preprandialKillingEffect *
+    double effect = (1.0 - anoph.preprandialKilling *
             getEffectSurvival(params));
     return anoph.byProtection( effect );
 }
@@ -104,7 +104,7 @@ double HumanGVI::postprandialSurvivalFactor(const HumanInterventionEffect& gen_p
     assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
     const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
     const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
-    double effect = (1.0 - anoph._postprandialKillingEffect *
+    double effect = (1.0 - anoph.postprandialKilling *
             getEffectSurvival(params));
     return anoph.byProtection( effect );
 }

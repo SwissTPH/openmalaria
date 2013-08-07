@@ -253,15 +253,6 @@ void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
 }
 
-void Human::massVA (const OM::Population&) {
-    perHostTransmission.setupVA ();
-    Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
-}
-
-bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
-    return perHostTransmission.hasVAProtection(maxInterventionAge);
-}
-
 void Human::reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const{
     if( method == interventions::Deployment::TIMED ){
         switch( type ){

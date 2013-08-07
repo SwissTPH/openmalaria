@@ -30,7 +30,6 @@ using namespace OM::util;
 // -----  PerHost static  -----
 
 AgeGroupInterpolation* PerHost::relAvailAge = AgeGroupInterpolation::dummyObject();
-shared_ptr<DecayFunction> PerHost::VADecay;
 
 void PerHost::init () {
     relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
@@ -39,21 +38,13 @@ void PerHost::cleanup () {
     AgeGroupInterpolation::freeObject( relAvailAge );
 }
 
-void PerHost::setVADescription (const scnXml::VectorDeterrent& elt) {
-    VADecay = DecayFunction::makeObject( elt.getDecay(), "VADecay" );
-}
-
 // -----  PerHost non-static -----
 
 PerHost::PerHost (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false),
-        timestepVA(TimeStep::never),
         net(tm),
         irs(tm)
 {
-    //TODO: human heterogeneity wrt GVI was sampled here, now will be sampled on each deployment
-    if ( VADecay.get() != 0 )
-        hetSampleVA = VADecay->hetSample();
 }
 void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
@@ -77,12 +68,6 @@ void PerHost::setupIRS (const TransmissionModel& tm) {
         irs.deploy(vTM->getIRSParams());
     }
 }
-void PerHost::setupVA () {
-    if( VADecay.get() == 0 ){
-        throw util::xml_scenario_error ("Vector availability intervention without description of decay");
-    }
-    timestepVA = TimeStep::simulation;
-}
 
 
 // Note: in the case an intervention is not present, we can use the approximation
@@ -99,9 +84,6 @@ double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base, s
         alpha_i *= irs.relativeAttractiveness(base.irs);
     }
     alpha_i *= interventions.relativeAttractiveness( speciesIndex );
-    if (timestepVA >= TimeStep(0)) {
-        alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation - timestepVA, hetSampleVA));
-    }
     return alpha_i;
 }
 double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {

@@ -101,45 +101,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="vectorDeterrent" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Description and deployment of interventions affecting only
-            human-mosquito availability (deterrents).
-          </xs:documentation>
-          <xs:appinfo>name:Vector deterrents;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="decay" type="DecayFunction">
-              <xs:annotation>
-                <xs:documentation>
-                  Description of decay of vector deterrent. Documentation: see DecayFunction type or
-                  http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
-                </xs:documentation>
-                <xs:appinfo>name:Decay;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="anophelesParams" maxOccurs="unbounded" type="BaseInterventionDescription"/>
-            <xs:element minOccurs="0" name="timed" type="massCumList">
-              <xs:annotation>
-                <xs:documentation>
-                  List of timed mosquito deterrent deployment in the communitsy
-                </xs:documentation>
-                <xs:appinfo>name:Mass deployment;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Name of intervention
-              </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
       <xs:element name="cohort" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -253,6 +214,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:sequence>
             <xs:element name="timed" type="massList" minOccurs="0"/>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="insertR_0Case">
@@ -288,6 +257,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:complexType>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="uninfectVectors">
@@ -323,6 +300,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:complexType>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of intervention
+              </xs:documentation>
+              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element minOccurs="0" name="vectorPop">
@@ -584,12 +569,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>type:string;name:Effect ID;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="description" type="xs:string" use="optional">
+    <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
-          A short description of the intervention effect
+          An informal name/description for the effect
         </xs:documentation>
-        <xs:appinfo>type:string;name:Description of effect;</xs:appinfo>
+        <xs:appinfo>type:string;name:Name of effect;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -932,12 +917,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>type:list of elements;name:Description of ipti effect;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="name" type="xs:string" use="optional">
-      <xs:annotation>
-        <xs:documentation>Name of IPT intervention</xs:documentation>
-        <xs:appinfo>type:string;name:IPT name;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ITNDescription">
     <xs:annotation>
@@ -1197,7 +1176,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="deterrency" type="inputValue">
+            <xs:element name="deterrency" type="inputValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on attractiveness of humans to mosquitoes relative to
@@ -1210,7 +1189,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="preprandialKillingEffect" type="inputValue">
+            <xs:element name="preprandialKillingEffect" type="inputValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to bite a human
@@ -1225,7 +1204,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="postprandialKillingEffect" type="inputValue">
+            <xs:element name="postprandialKillingEffect" type="inputValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to escape from
@@ -1526,33 +1505,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Name of the species/subspecies/variant.
         </xs:documentation>
         <xs:appinfo>type:string;name:Species/subspecies/variant name</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="BaseInterventionDescription">
-    <xs:annotation>
-      <xs:documentation>
-        Descriptions of initial effectiveness of each of the effects of
-        interventions. Decay is specified by a separate element (ITNDecay etc.)
-      </xs:documentation>
-      <xs:appinfo>units:dimensionless;min:0;max:1;name:Deterrency;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="deterrency" type="inputValue">
-        <xs:annotation>
-          <xs:documentation>
-                  One minus this multiplies the host's availability.
-                </xs:documentation>
-          <xs:appinfo>units:dimensionless;min:0;max:1;name:Deterrency;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="mosquito" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name of the affected anopheles-mosquito species.
-        </xs:documentation>
-        <xs:appinfo>type:string;name:Mosquito species</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

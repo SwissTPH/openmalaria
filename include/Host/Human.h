@@ -125,9 +125,6 @@ public:
   /// Mass/continuous IRS deployment
   void deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   
-  /// Give human a new VA intervention through mass deployment
-  void massVA (const OM::Population&);
-  
   /// Resets immunity
   inline void immuneSuppression(const OM::Population&) {
       withinHostModel->immuneSuppression();
@@ -146,7 +143,6 @@ public:
   ///@brief Functions to check coverage by interventions
   //@{
     bool hasIPTiProtection(TimeStep maxInterventionAge) const;
-    bool hasVAProtection(TimeStep maxInterventionAge) const;
   //@}
   
   /// @brief Small functions

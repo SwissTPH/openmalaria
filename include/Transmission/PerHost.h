@@ -50,8 +50,6 @@ public:
     static void init ();
     /** Static cleanup. */
     static void cleanup ();
-    
-    static void setVADescription (const scnXml::VectorDeterrent& elt);
     //@}
     
     ///@brief Initialisation / checkpionting
@@ -77,11 +75,6 @@ public:
     void setupIRS (const TransmissionModel& tm);
     /// Give individual a new VA intervention as of time timeStep.
     void setupVA ();
-    
-    /// Is individual protected by a VA?
-    inline bool hasVAProtection(TimeStep maxInterventionAge)const{
-        return timestepVA + maxInterventionAge > TimeStep::simulation;
-    }
     //@}
     
     /** @brief Availability of host to mosquitoes */
@@ -190,7 +183,6 @@ public:
         species & stream;
         _relativeAvailabilityHet & stream;
         outsideTransmission & stream;
-        timestepVA & stream;
         net & stream;
         irs & stream;
         interventions & stream;
@@ -206,13 +198,6 @@ private:
     // Heterogeneity factor in availability; this is already multiplied into the
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
-    
-    // (TimeStep::simulation - timestepXXX) is the age of the intervention in
-    // the new time-step (that being updated).
-    // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
-    TimeStep timestepVA;
-    
-    DecayFuncHet hetSampleVA;
 
     interventions::ITN net;
     interventions::IRS irs;
@@ -221,10 +206,6 @@ public:
 private:
     
     static AgeGroupInterpolation* relAvailAge;
-    
-    // descriptions of decay of interventions
-    // set if specific intervention is used
-    static shared_ptr<DecayFunction> VADecay;
 };
 
 }

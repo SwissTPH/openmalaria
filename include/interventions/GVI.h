@@ -60,9 +60,9 @@ private:
         GVIAnopheles() :
             proportionProtected( numeric_limits<double>::signaling_NaN() ),
             proportionUnprotected( numeric_limits<double>::signaling_NaN() ),
-            _relativeAttractiveness( numeric_limits<double>::signaling_NaN() ),
-            _preprandialKillingEffect( numeric_limits<double>::signaling_NaN() ),
-            _postprandialKillingEffect( numeric_limits<double>::signaling_NaN() )
+            deterrency( numeric_limits<double>::signaling_NaN() ),
+            preprandialKilling( numeric_limits<double>::signaling_NaN() ),
+            postprandialKilling( numeric_limits<double>::signaling_NaN() )
         {}
         void init(const scnXml::GVIDescription::AnophelesParamsType& elt);
         
@@ -73,9 +73,9 @@ private:
         
         double proportionProtected;
         double proportionUnprotected;
-        double _relativeAttractiveness;
-        double _preprandialKillingEffect;
-        double _postprandialKillingEffect;
+        double deterrency;
+        double preprandialKilling;
+        double postprandialKilling;
         
         friend class HumanGVI;
     };

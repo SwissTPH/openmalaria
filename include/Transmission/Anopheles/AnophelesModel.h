@@ -125,9 +125,6 @@ public:
             const scnXml::IRSDescription::AnophelesParamsType& elt) {
         humanBase.setIRSDescription (params, elt);
     }
-    inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
-        humanBase.setVADescription (vaDesc);
-    }
     //@}
     
     

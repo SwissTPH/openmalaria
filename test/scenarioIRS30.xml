@@ -101,12 +101,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <vectorDeterrent name="hypothetical deterrency">
-      <decay L="4" function="exponential"/>
-      <anophelesParams mosquito="gambiae_ss">
-        <deterrency value="0"/>
-      </anophelesParams>
-    </vectorDeterrent>
     <cohort>
       <timed>
         <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
@@ -120,7 +114,7 @@
       <effect id="MDA">
         <MDA/>
       </effect>
-      <effect description="LLIN test" id="ITN">
+      <effect id="ITN" name="LLIN test">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean="0.9" sigma="0.8"/>
@@ -136,7 +130,7 @@
           </anophelesParams>
         </ITN>
       </effect>
-      <effect description="new param" id="IRS">
+      <effect id="IRS" name="new param">
         <IRS>
           <!-- Initial insecticide: units are μg/cm²; no variance here -->
           <initialInsecticide mu="118" sigma="0"/>
@@ -147,6 +141,14 @@
             <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
           </anophelesParams>
         </IRS>
+      </effect>
+      <effect id="vectorDeterrent" name="hypothetical deterrency">
+        <GVI>
+          <decay L="4" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency value="0"/>
+          </anophelesParams>
+        </GVI>
       </effect>
       <intervention>
         <effect id="MDA"/>

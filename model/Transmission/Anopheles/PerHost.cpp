@@ -55,13 +55,6 @@ void PerHostBase::setIRSDescription (const interventions::IRSParams& params,
     irs.init( params, elt );
 }
 
-void PerHostBase::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
-    if( VADeterrency == VADeterrency ){
-        throw util::unimplemented_exception( "multiple vector deterrent interventions" );
-    }
-    VADeterrency = vaDesc.getDeterrency().getValue();
-}
-
 }
 }
 }

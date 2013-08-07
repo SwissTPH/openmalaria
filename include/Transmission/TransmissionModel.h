@@ -177,8 +177,6 @@ public:
   virtual void setITNDescription ( const scnXml::ITNDescription&) =0;
   /** Set IRS parameters. */
   virtual void setIRSDescription (const scnXml::IRSDescription&) =0;
-  /** Set vector deterrent parameters. */
-  virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
   /** Set the larviciding intervention params.
    *
    * Instance: the index of this instance of the intervention. Each instance

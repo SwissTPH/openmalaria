@@ -192,8 +192,8 @@ enum SurveyMeasure {
      *
      * Modelled IRS: affects one person, cannot be plastered over. */
     nMassIRS = 46,
-    /** The number of people newly protected by a vector-availability
-     * intervention since the last survey. */
+    /** Defunct; was used by "vector availability" intervention (which is now a
+     * sub-set of GVI). */
     nMassVA = 47,
     
     /// Number of malarial tests via microscopy used

@@ -410,17 +410,6 @@ void VectorModel::setIRSDescription (const scnXml::IRSDescription& elt){
     }
     checker.checkNoneMissed();
 }
-void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
-    checkSimMode();
-    PerHost::setVADescription (elt);
-    typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
-    const AP& ap = elt.getAnophelesParams();
-    SpeciesIndexChecker checker( "vector deterrent", speciesIndex );
-    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[checker.getIndex(it->getMosquito())].setVADescription (*it);
-    }
-    checker.checkNoneMissed();
-}
 
 void VectorModel::deployVectorPopInterv (size_t instance) {
     checkSimMode();
