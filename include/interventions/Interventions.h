@@ -100,6 +100,7 @@ namespace Effect { enum Type {
     IRS,        // indoor residual spraying
     GVI,        // generic vector intervention
     COHORT,     // cohort selection
+    CLEAR_IMMUNITY,     // reset accumulated immunity to zero
 }; }
 
 /** A description of one effect of a human intervention.

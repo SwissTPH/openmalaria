@@ -75,11 +75,6 @@
       <timedDeployment time="77"/>
       <timedDeployment time="78"/>
     </uninfectVectors>
-    <immuneSuppression>
-      <timed>
-        <deploy coverage="1" time="78"/>
-      </timed>
-    </immuneSuppression>
     <insertR_0Case>
       <timedDeployment time="146"/>
     </insertR_0Case>
@@ -101,6 +96,9 @@
           <initialEfficacy value="1"/>
         </TBV>
       </effect>
+      <effect id="immuneSuppression">
+        <clearImmunity/>
+      </effect>
       <intervention>
         <effect id="MDA"/>
         <timed>
@@ -120,6 +118,12 @@
         </continuous>
         <timed>
           <deploy coverage="1" time="73"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="immuneSuppression"/>
+        <timed>
+          <deploy coverage="1" time="78"/>
         </timed>
       </intervention>
     </human>

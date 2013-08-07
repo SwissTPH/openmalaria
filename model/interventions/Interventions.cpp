@@ -81,27 +81,6 @@ bool ContinuousDeployment::filterAndDeploy( Host::Human& human, const Population
     return true;
 }
 
-/** Age-based (continuous) deployment. */
-//TODO: phase out usage of this
-class AgeBasedDeployment : public ContinuousDeployment {
-public:
-    AgeBasedDeployment( const ::scnXml::ContinuousDeployment& elt,
-            void(Host::Human::*func) (const OM::Population&) ) :
-        ContinuousDeployment(elt),
-        deployFn( func )
-    {
-    }
-    
-protected:
-    virtual void deploy( Host::Human& human, const Population& population )const{
-        (human.*deployFn)( population );
-    }
-    
-    // Member function pointer to the function (in Human) responsible for deploying intervention:
-    typedef void (Host::Human::*DeploymentFunction) (const OM::Population&);
-    DeploymentFunction deployFn;
-};
-
 /** Age-based deployment for new list-of-effect interventions. */
 class ContinuousHumanIntervention : public ContinuousDeployment {
 public:
@@ -209,56 +188,6 @@ public:
     }
 };
 
-/// Deployment of mass-to-human interventions (TODO: phase out usages of this)
-class TimedMassDeployment : public TimedDeployment {
-public:
-    /** 
-     * @param mass XML element specifying the age range and compliance
-     * (proportion of eligible individuals who receive the intervention).
-     * @param deployIntervention A member-function pointer to a
-     *      "void func (const OM::Population&)" function within human which
-     *      activates the intervention. Population is passed for acces to static
-     *      params. */
-    TimedMassDeployment( const scnXml::Mass& mass,
-                           void (Host::Human::*deployIntervention)(const OM::Population&) ) :
-        TimedDeployment( TimeStep( mass.getTime() ) ),
-        minAge( TimeStep::fromYears( mass.getMinAge() ) ),
-        maxAge( TimeStep::fromYears( mass.getMaxAge() ) ),
-        cohortOnly( mass.getCohort() ),
-        coverage( mass.getCoverage() ),
-        intervention( deployIntervention )
-    {
-        if( !(coverage >= 0.0 && coverage <= 1.0) ){
-            throw util::xml_scenario_error("timed intervention coverage must be in range [0,1]");
-        }
-        if( minAge < TimeStep(0) || maxAge < minAge ){
-            throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
-        }
-    }
-    
-    virtual void deploy (OM::Population& population) {
-        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
-            if( age >= minAge && age < maxAge ){
-                if( !cohortOnly || iter->isInCohort() ){
-                    if( util::random::uniform_01() < coverage ){
-                        // This is UGLY syntax. It just means call intervention() on the human pointed by iter.
-                        ( (*iter).*intervention) (population);
-                    }
-                }
-            }
-        }
-    }
-    
-protected:
-    // restrictions on deployment
-    TimeStep minAge;
-    TimeStep maxAge;
-    bool cohortOnly;
-    double coverage;    // proportion coverage within group meeting above restrictions
-    void (Host::Human::*intervention) (const OM::Population&);       // callback: per-human deployment
-};
-
 /// Timed deployment of human-specific interventions
 class TimedHumanDeployment : public TimedDeployment {
 public:
@@ -359,70 +288,6 @@ protected:
     TimeStep maxInterventionAge;
 };
 
-/// Deployment of mass-to-human interventions with cumulative-deployment support (TODO: phase out usages of this)
-class TimedMassCumDeployment : public TimedMassDeployment {
-public:
-    /** As massIntervention, but supports "increase to target coverage" mode:
-     * Deployment is only to unprotected humans and brings
-     * total coverage up to the level given in description.
-     * 
-     * @param mass XML element specifying the age range and compliance
-     * (proportion of eligible individuals who receive the intervention).
-     * @param deployIntervention A member-function pointer to a
-     *      "void func (const OM::Population&)" function within human which
-     *      activates the intervention. Population is passed for acces to static
-     *      params.
-     * @param isProtectedCb A member-function pointer to a
-     * "bool func (TimeStep maxAge)" function on a Human which returns true if
-     * the Human is still protected by an intervention of the type in question
-     * which is no older than maxAge. */
-    TimedMassCumDeployment( const scnXml::MassCum& mass,
-                              void (Host::Human::*deployIntervention)(const OM::Population&),
-                              bool (Host::Human::*isProtectedCb) (TimeStep) const ) :
-        TimedMassDeployment( mass, deployIntervention ),
-        isProtected( isProtectedCb ),
-        maxInterventionAge( TimeStep::fromYears( mass.getCumulativeWithMaxAge().get() ) )
-    {}
-    
-    void deploy(OM::Population& population){
-        // Cumulative case: bring target group's coverage up to target coverage
-        vector<Host::Human*> unprotected;
-        size_t total = 0;       // number of humans within age bound and optionally cohort
-        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
-            if( age >= minAge && age < maxAge ){
-                if( !cohortOnly || iter->isInCohort() ){
-                    total+=1;
-                    if( !((*iter).*isProtected)(maxInterventionAge) )
-                        unprotected.push_back( &*iter );
-                }
-            }
-        }
-        
-        double propProtected = static_cast<double>( total - unprotected.size() ) / static_cast<double>( total );
-        if( propProtected < coverage ){
-            // Proportion propProtected are already covered, so need to
-            // additionally cover the proportion (coverage - propProtected),
-            // selected from the list unprotected.
-            double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
-            for (vector<Host::Human*>::iterator iter = unprotected.begin();
-                 iter != unprotected.end(); ++iter)
-            {
-                if( util::random::uniform_01() < additionalCoverage ){
-                    ( (**iter).*intervention) (population);
-                }
-            }
-        }
-    }
-    
-private:
-    // callback to ascertain whether a human is still under protection from an
-    // intervention young enough not to need replacement
-    bool (Host::Human::*isProtected) (TimeStep) const;
-    // max age at which an intervention is considered not to need replacement
-    TimeStep maxInterventionAge;
-};
-
 class TimedVectorDeployment : public TimedDeployment {
 public:
     TimedVectorDeployment( TimeStep deployTime, size_t instance ) :
@@ -435,32 +300,6 @@ public:
 private:
     size_t inst;
 };
-
-/** Create either a TimedMassCumIntervention or a TimedMassIntervention,
- * depending on whether the cumulativeWithMaxAge attribute is present.
- * 
- * @param mass XML element specifying the age range and compliance
- * (proportion of eligible individuals who receive the intervention).
- * @param deployIntervention A member-function pointer to a
- *      "void func (const OM::Population&)" function within human which
- *      activates the intervention. Population is passed for acces to static params.
- * @param isProtectedCb A member-function pointer to a
- * "bool func (TimeStep maxAge)" function on a Human which returns true if
- * the Human is still protected by an intervention of the type in question
- * which is no older than maxAge.
- * 
- *  (TODO: phase out usages of this) */
-TimedMassDeployment* createTimedMassCumIntervention(
-    const scnXml::MassCum& mass,
-    void (Host::Human::*deployIntervention)(const OM::Population&),
-    bool (Host::Human::*isProtectedCb) (TimeStep) const
-){
-    if( mass.getCumulativeWithMaxAge().present() ){
-        return new TimedMassCumDeployment( mass, deployIntervention, isProtectedCb );
-    }else{
-        return new TimedMassDeployment( mass, deployIntervention );
-    }
-}
 
 // ———  HumanInterventionEffect  ———
 
@@ -590,15 +429,24 @@ private:
 
 class CohortSelectionEffect : public HumanInterventionEffect {
 public:
-    CohortSelectionEffect( size_t index ) : HumanInterventionEffect(index)
-    {
-    }
+    CohortSelectionEffect( size_t index ) : HumanInterventionEffect(index) {}
     
     void deploy( Human& human, Deployment::Method method )const{
         human.addToCohort();
     }
     
     virtual Effect::Type effectType() const{ return Effect::COHORT; }
+};
+
+class ClearImmunityEffect : public HumanInterventionEffect {
+public:
+    ClearImmunityEffect( size_t index ) : HumanInterventionEffect(index) {}
+    
+    void deploy( Human& human, Deployment::Method method )const{
+        human.clearImmunity();
+    }
+    
+    virtual Effect::Type effectType() const{ return Effect::CLEAR_IMMUNITY; }
 };
 
 
@@ -670,6 +518,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 humanEffects.push_back( new interventions::GVIParams( index, effect.getGVI().get(), *species_index_map ) );
             }else if( effect.getCohort().present() ){
                 humanEffects.push_back( new CohortSelectionEffect( index ) );
+            }else if( effect.getClearImmunity().present() ){
+                humanEffects.push_back( new ClearImmunityEffect( index ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "
@@ -756,17 +606,6 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getImportedInfections().present() ){
         const scnXml::ImportedInfections& ii = intervElt.getImportedInfections().get();
         importedInfections.init( ii );
-    }
-    if( intervElt.getImmuneSuppression().present() ){
-        const scnXml::ImmuneSuppression& elt = intervElt.getImmuneSuppression().get();
-        if( elt.getTimed().present() ){
-            // timed deployments:
-            const scnXml::MassList::DeploySequence& seq = elt.getTimed().get().getDeploy();
-            typedef scnXml::MassList::DeploySequence::const_iterator It;
-            for( It it = seq.begin(); it != seq.end(); ++it ){
-                timed.push_back( new TimedMassDeployment( *it, &Host::Human::immuneSuppression ) );
-            }
-        }
     }
     // Must come after vaccines are initialised:
     if( intervElt.getInsertR_0Case().present() ){

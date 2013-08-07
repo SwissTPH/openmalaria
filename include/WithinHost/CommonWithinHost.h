@@ -47,7 +47,7 @@ public:
     virtual void clearAllInfections();
     
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
-    virtual void immuneSuppression();
+    virtual void clearImmunity();
     
     virtual void update (int nNewInfs, double ageInYears, double BSVEfficacy);
     

@@ -474,6 +474,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         updateIRS()
         updateElt("vectorDeterrent", "GVI", false)
         updateElt("cohort", "cohort", false)
+        updateElt("immuneSuppression", "clearImmunity", false)
         
         if (humanEffects.size > 0){
             val human = scenarioDocument.createElement("human")!!

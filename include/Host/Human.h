@@ -126,8 +126,8 @@ public:
   void deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   
   /// Resets immunity
-  inline void immuneSuppression(const OM::Population&) {
-      withinHostModel->immuneSuppression();
+  inline void clearImmunity() {
+      withinHostModel->clearImmunity();
   }
   
   /// Infect the human (with an imported infection).
@@ -138,11 +138,6 @@ public:
   
   /** Report deployment of an intervention to this human. */
   void reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const;
-  //@}
-  
-  ///@brief Functions to check coverage by interventions
-  //@{
-    bool hasIPTiProtection(TimeStep maxInterventionAge) const;
   //@}
   
   /// @brief Small functions
