@@ -124,8 +124,6 @@ public:
   void deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   /// Mass/continuous IRS deployment
   void deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
-  /// Mass/continuous deployment of generic vector intervention
-  void deployGVI( interventions::Deployment::Method method, const interventions::GVIParams& params );
   
   /// Give human a new VA intervention through mass deployment
   void massVA (const OM::Population&);
@@ -140,6 +138,9 @@ public:
   
   /// Add PEV and remove TBV (vaccines) from human
   inline void R_0Vaccines() { _vaccine.specialR_0(); }
+  
+  /** Report deployment of an intervention to this human. */
+  void reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const;
   //@}
   
   ///@brief Functions to check coverage by interventions

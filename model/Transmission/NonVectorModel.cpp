@@ -1,3 +1,4 @@
+
 /* This file is part of OpenMalaria.
  * 
  * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
@@ -174,6 +175,10 @@ void NonVectorModel::changeEIRIntervention (
   annualEIR = numeric_limits<double>::quiet_NaN();
 }
 
+const map<string,size_t>& NonVectorModel::getSpeciesIndexMap(){
+    throw util::xml_scenario_error( "attempt to use a vector-affecting intervention with the non-vector model" );
+}
+
 void NonVectorModel::uninfectVectors(){
     if( simulationMode != dynamicEIR )
 	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
@@ -185,9 +190,6 @@ void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
   throw util::xml_scenario_error (viError);
 }
 void NonVectorModel::setIRSDescription (const scnXml::IRSDescription&) {
-  throw util::xml_scenario_error (viError);
-}
-const interventions::GVIParams& NonVectorModel::setGVIDescription (const scnXml::GVIDescription&){
   throw util::xml_scenario_error (viError);
 }
 void NonVectorModel::setVADescription (const scnXml::VectorDeterrent&) {

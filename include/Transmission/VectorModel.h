@@ -27,7 +27,6 @@
 //TODO: the vector model shouldn't have to know about specific interventions
 #include "interventions//ITN.h"
 #include "interventions/IRS.h"
-#include "interventions/GVI.h"
 
 namespace scnXml {
   class Vector;
@@ -63,9 +62,9 @@ public:
 
   virtual double calculateEIR(PerHost& host, double ageYears); 
   
+  virtual const map<string,size_t>& getSpeciesIndexMap();
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void setIRSDescription (const scnXml::IRSDescription&);
-  virtual const interventions::GVIParams& setGVIDescription (const scnXml::GVIDescription&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();
@@ -75,9 +74,6 @@ public:
   }
   inline const interventions::IRSParams& getIRSParams() const{
       return _IRSParams;
-  }
-  inline const interventions::GVIParams& getGVIParams() const{
-      return _GVIParams;
   }
   virtual void summarize (Monitoring::Survey& survey);
   
@@ -142,8 +138,6 @@ private:
   interventions::ITNParams _ITNParams;
   /** ditto */
   interventions::IRSParams _IRSParams;
-  /** Parameters used by generic vector intervention. */
-  interventions::GVIParams _GVIParams;
   
   friend class PerHost;
   friend class AnophelesModelSuite;

@@ -54,10 +54,6 @@ void PerHostBase::setIRSDescription (const interventions::IRSParams& params,
         const scnXml::IRSDescription::AnophelesParamsType& elt){
     irs.init( params, elt );
 }
-void PerHostBase::setGVIDescription (const interventions::GVIParams& params,
-        const scnXml::GVIDescription::AnophelesParamsType& elt){
-    gvi.init( params, elt );
-}
 
 void PerHostBase::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
     if( VADeterrency == VADeterrency ){

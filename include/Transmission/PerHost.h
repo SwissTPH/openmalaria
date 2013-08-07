@@ -24,7 +24,7 @@
 //TODO: PerHost shouldn't need to know about specific interventions
 #include "interventions/ITN.h"
 #include "interventions/IRS.h"
-#include "interventions/GVI.h"
+#include "interventions/HumanVectorInterventions.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include <boost/shared_ptr.hpp>
@@ -75,10 +75,6 @@ public:
     void setupITN (const TransmissionModel& tm);
     /// Give individual a new IRS as of time timeStep.
     void setupIRS (const TransmissionModel& tm);
-    /// Give individual a new set of vector intervention effects
-    inline void setupGVI (const interventions::GVIParams& params){
-        gvi.deploy( params );
-    }
     /// Give individual a new VA intervention as of time timeStep.
     void setupVA ();
     
@@ -197,7 +193,7 @@ public:
         timestepVA & stream;
         net & stream;
         irs & stream;
-        gvi & stream;
+        interventions & stream;
     }
     //@}
     
@@ -220,7 +216,9 @@ private:
 
     interventions::ITN net;
     interventions::IRS irs;
-    interventions::GVI gvi;
+public:
+    interventions::HumanVectorInterventions interventions;
+private:
     
     static AgeGroupInterpolation* relAvailAge;
     

@@ -167,12 +167,16 @@ public:
    * called before this function in order to return the correct value. */
   double getEIR (PerHost& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
+  /** Non-vector model: throw an exception. Vector model: check that the
+   * simulation mode allows interventions, and return a map of species names
+   * to indecies. Each index must be unique and in the range [0,n) where
+   * n is the number of species. */
+  virtual const map<string,size_t>& getSpeciesIndexMap() =0;
+  
   /** Set ITN parameters. */
   virtual void setITNDescription ( const scnXml::ITNDescription&) =0;
   /** Set IRS parameters. */
   virtual void setIRSDescription (const scnXml::IRSDescription&) =0;
-  /** Set generic vector intervention parameters. */
-  virtual const interventions::GVIParams& setGVIDescription (const scnXml::GVIDescription&) =0;
   /** Set vector deterrent parameters. */
   virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
   /** Set the larviciding intervention params.

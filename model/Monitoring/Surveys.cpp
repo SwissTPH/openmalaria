@@ -71,7 +71,7 @@ void SurveysType::init ()
     _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
   current = &_survey[0];
 }
-void SurveysType::initCohortOnly(interventions::InterventionManager& interventions){
+void SurveysType::initCohortOnly(){
     //TODO: re-integrate with above. Probably most of above initialization could
     // happen later, but for now it's easier not to change order.
   _cohortOnly = false;
@@ -80,7 +80,7 @@ void SurveysType::initCohortOnly(interventions::InterventionManager& interventio
       _cohortOnly = mon.getCohortOnly().get();
   } else {
       // Trap potential bug in scenario design
-      if( interventions.cohortEnabled() ){
+      if( interventions::manager->cohortEnabled() ){
           throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
       }
   }

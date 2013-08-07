@@ -82,9 +82,6 @@ private:
     
     auto_ptr<Population> population;
     
-    typedef auto_ptr<interventions::InterventionManager> auto_ptr_interv_manager;
-    auto_ptr_interv_manager interventions;
-    
     /** Some identifier is needed to prevent checkpoint cheats. Ideally a unique identifier per
      * workunit, but a random integer number should do the job. */
     int workUnitIdentifier;

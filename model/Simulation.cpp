@@ -42,6 +42,8 @@ namespace OM {
     using Monitoring::Continuous;
     using Monitoring::Surveys;
 
+interventions::auto_ptr_interv_manager interventions::manager;
+
 // -----  Set-up & tear-down  -----
 
 Simulation::Simulation(util::Checksum ck) :
@@ -62,9 +64,9 @@ Simulation::Simulation(util::Checksum ck) :
     Surveys.init();
     Population::init();
     population = auto_ptr<Population>(new Population);
-    interventions = auto_ptr_interv_manager(
+    interventions::manager = interventions::auto_ptr_interv_manager(
         new interventions::InterventionManager( InputData().getInterventions(), *population ) );
-    Surveys.initCohortOnly( *interventions );
+    Surveys.initCohortOnly();
     
     workUnitIdentifier = InputData().getWuID();
 }
@@ -150,7 +152,7 @@ int Simulation::start(){
             }
             
             // deploy interventions
-            interventions->deploy( *population );
+            interventions::manager->deploy( *population );
             
             // update
             ++TimeStep::simulation;
@@ -349,8 +351,8 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
         phase & stream;
         (*population) & stream;
         PopulationStats::staticCheckpoint( stream );
-        (*interventions) & stream;
-        interventions->loadFromCheckpoint( *population, TimeStep::interventionPeriod );
+        (*interventions::manager) & stream;
+        interventions::manager->loadFromCheckpoint( *population, TimeStep::interventionPeriod );
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
@@ -402,7 +404,7 @@ void Simulation::checkpoint (ostream& stream, int checkpointNum) {
     phase & stream;
     (*population) & stream;
     PopulationStats::staticCheckpoint( stream );
-    (*interventions) & stream;
+    (*interventions::manager) & stream;
     
     TimeStep::simulation & stream;
     util::random::checkpoint (stream, checkpointNum);

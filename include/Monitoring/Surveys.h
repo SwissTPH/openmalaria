@@ -74,7 +74,7 @@ class SurveysType
 
     /** Read in some params from XML and allocate memory. */
     void init ();
-    void initCohortOnly(OM::interventions::InterventionManager& interventions);
+    void initCohortOnly();
     
     //! It increments the survey period
     void incrementSurveyPeriod();

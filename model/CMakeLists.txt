@@ -88,6 +88,7 @@ set (Model_CPP
   Monitoring/Survey.cpp
   
   interventions/Interventions.cpp
+  interventions/HumanVectorInterventions.cpp
   interventions/ITN.cpp
   interventions/IRS.cpp
   interventions/GVI.cpp

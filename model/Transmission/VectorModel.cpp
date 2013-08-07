@@ -171,7 +171,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, AnophelesModel(&_ITNParams, &_IRSParams, &_GVIParams));
+    species.resize (numSpecies, AnophelesModel(&_ITNParams, &_IRSParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -382,6 +382,11 @@ void VectorModel::checkSimMode() const{
     }
 }
 
+const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
+    checkSimMode();     //TODO: can probably eventually inline
+    return speciesIndex;
+}
+
 void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
     checkSimMode();
     double proportionUse = _ITNParams.init( elt );
@@ -404,19 +409,6 @@ void VectorModel::setIRSDescription (const scnXml::IRSDescription& elt){
         species[checker.getIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
     }
     checker.checkNoneMissed();
-}
-const interventions::GVIParams& VectorModel::setGVIDescription (const scnXml::GVIDescription& elt){
-    checkSimMode();
-    _GVIParams.init( elt );
-    
-    typedef scnXml::GVIDescription::AnophelesParamsSequence AP;
-    const AP& ap = elt.getAnophelesParams();
-    SpeciesIndexChecker checker( "vector intervention", speciesIndex );
-    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[checker.getIndex(it->getMosquito())].setGVIDescription (_GVIParams, *it);
-    }
-    checker.checkNoneMissed();
-    return _GVIParams;
 }
 void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
     checkSimMode();
@@ -453,7 +445,7 @@ void VectorModel::summarize (Monitoring::Survey& survey) {
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams, &_IRSParams, &_GVIParams));
+    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams, &_IRSParams));
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

@@ -47,7 +47,7 @@ namespace Deployment {
 class ContinuousDeployment {
 public:
     /// Create, passing deployment age
-    ContinuousDeployment( const ::scnXml::ContinuousDeployment& elt );
+    explicit ContinuousDeployment( const ::scnXml::ContinuousDeployment& elt );
     virtual ~ContinuousDeployment() {}
     
     /// For sorting
@@ -75,7 +75,7 @@ protected:
 class TimedDeployment {
 public:
     /// Create, passing time of deployment
-    TimedDeployment(TimeStep deploymentTime);
+    explicit TimedDeployment(TimeStep deploymentTime);
     virtual ~TimedDeployment() {}
     
     inline bool operator< (const TimedDeployment& that) const{
@@ -116,6 +116,7 @@ public:
      */
     virtual void deploy( Host::Human& human, Deployment::Method method ) const =0;
     
+    /** Get the effect index. */
     inline size_t getIndex()const{ return index; }
     
     /** Returns the appropriate descriptor from the EffectType enum.
@@ -127,16 +128,16 @@ public:
 protected:
     /** Construct (from a derived class).
      * 
-     * @param index Effect index; used as an identifier for cumulative deployment.
+     * @param index Effect index; used as an identifier for cumulative
+     *  deployment as well as to match human-specific components to general
+     *  parameters (i.e. objects of the class extending this one).
      */
-    HumanInterventionEffect(size_t index) : index(index) {}
+    explicit HumanInterventionEffect(size_t index) : index(index) {}
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
     HumanInterventionEffect( const HumanInterventionEffect& );
     
-    /// Identifier needed to record deployments so that cumulative deployment
-    /// can work. Can't use "this" because it needs to be checkpointed.
     size_t index;
 };
 
@@ -200,6 +201,15 @@ public:
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */
     void deploy (OM::Population& population);
     
+    /** Get a constant reference to an effect class with a certain index.
+     * 
+     * @throws util::base_exception if the index is out-of-range */
+    inline const HumanInterventionEffect& getEffect( size_t index ){
+        if( index >= humanEffects.size() )
+            throw util::base_exception( "invalid index" );
+        return humanEffects[index];
+    }
+    
 private:
     // All human intervention effects, indexed by a number. This list is used
     // during initialisation and thereafter only for memory management.
@@ -219,5 +229,10 @@ private:
     bool _cohortEnabled;
 };
 
+/** Type of container for manager. */
+typedef auto_ptr<InterventionManager> auto_ptr_interv_manager;
+/** InterventionManager instance. It is the Simulation class's responsibility
+ * to set this up before starting simulations. It should exist thereafter. */
+extern auto_ptr_interv_manager manager; // defined in Simulation.cpp
 } }
 #endif

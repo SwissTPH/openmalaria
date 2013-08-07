@@ -24,7 +24,6 @@
 //TODO: perhost shouldn't need to know about specific interventions
 #include "interventions/ITN.h"
 #include "interventions/IRS.h"
-#include "interventions/GVI.h"
 #include "util/sampler.h"
 
 namespace OM {
@@ -37,10 +36,9 @@ namespace Anopheles {
  * Parameters are read from XML, and the availability rate is adjusted. */
 class PerHostBase {
 public:
-    PerHostBase(const interventions::ITNParams* baseITNParams, const interventions::IRSParams* baseIRSParams, const interventions::GVIParams* baseGVIParams) :
+    PerHostBase(const interventions::ITNParams* baseITNParams, const interventions::IRSParams* baseIRSParams) :
             net( baseITNParams ),
             irs( baseIRSParams ),
-            gvi( baseGVIParams ),
             VADeterrency(numeric_limits< double >::signaling_NaN())
     {}
     
@@ -60,7 +58,6 @@ public:
     //@{
     void setITNDescription (const interventions::ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
     void setIRSDescription (const interventions::IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt);
-    void setGVIDescription (const interventions::GVIParams& params, const scnXml::GVIDescription::AnophelesParamsType& elt);
     void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
     //@}
     
@@ -92,7 +89,6 @@ public:
     //@{
     interventions::ITNAnophelesParams net;
     interventions::IRSAnophelesParams irs;
-    interventions::GVIAnophelesParams gvi;
     double VADeterrency;
     //@}
 };

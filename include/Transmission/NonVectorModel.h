@@ -60,9 +60,10 @@ public:
    * Similar calculation to that used during initialization. */
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
+  virtual const map<string,size_t>& getSpeciesIndexMap();
+  
   virtual void setITNDescription ( const scnXml::ITNDescription&);
   virtual void setIRSDescription (const scnXml::IRSDescription&);
-  virtual const interventions::GVIParams& setGVIDescription (const scnXml::GVIDescription&);
   virtual void setVADescription (const scnXml::VectorDeterrent&);
   virtual void deployVectorPopInterv (size_t instance);
   

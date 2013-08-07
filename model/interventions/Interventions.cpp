@@ -27,6 +27,7 @@
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Monitoring/Surveys.h"
+#include "interventions/GVI.h"
 
 namespace OM { namespace interventions {
     using Host::Human;
@@ -587,25 +588,6 @@ private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
 };
 
-class GVIEffect : public HumanInterventionEffect {
-public:
-    GVIEffect( size_t index, const scnXml::GVIDescription& elt,
-               Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
-               params( transmissionModel.setGVIDescription( elt ) )
-    {
-    }
-    
-    void deploy( Human& human, Deployment::Method method )const{
-        human.deployGVI( method, params );
-    }
-    
-    virtual Effect::Type effectType() const{ return Effect::GVI; }
-    
-private:
-    //TODO: should not be part of transmission namespace (interventions namespace?)
-    const GVIParams& params;
-};
-
 
 // ———  InterventionManager  ———
 
@@ -632,6 +614,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }
         }
     }
+    Transmission::TransmissionModel& transmission = population.transmissionModel();
+    const map<string,size_t>* species_index_map = 0;
     if( intervElt.getHuman().present() ){
         const scnXml::HumanInterventions& human = intervElt.getHuman().get();
         map<string,size_t> identifierMap;
@@ -664,11 +648,13 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }else if( effect.getIPT().present() ){
                 humanEffects.push_back( new IPTEffect( index, effect.getIPT().get() ) );
             }else if( effect.getITN().present() ){
-                humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), population.transmissionModel() ) );
+                humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), transmission ) );
             }else if( effect.getIRS().present() ){
-                humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), population.transmissionModel() ) );
+                humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), transmission ) );
             }else if( effect.getGVI().present() ){
-                humanEffects.push_back( new GVIEffect( index, effect.getGVI().get(), population.transmissionModel() ) );
+                if( species_index_map == 0 )
+                    species_index_map = &transmission.getSpeciesIndexMap();
+                humanEffects.push_back( new interventions::GVIParams( index, effect.getGVI().get(), *species_index_map ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "

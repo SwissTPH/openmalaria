@@ -21,17 +21,14 @@
 #ifndef OM_INTERVENTIONS_GVI
 #define OM_INTERVENTIONS_GVI
 
+#include "Interventions.h"
+#include "interventions/HumanVectorInterventions.h"
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
 
-namespace OM {
-namespace Transmission {
-    // forward declare:
-    class TransmissionModel;
-}
-namespace interventions {
+namespace OM { namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::NormalSampler;
@@ -39,49 +36,56 @@ namespace interventions {
     using boost::shared_ptr;
 
 /** Constant parameters for generic vector intervention model. */
-class GVIParams {
+class GVIParams : public HumanVectorInterventionParams {
 public:
-    GVIParams() :  maxInsecticide(numeric_limits< double >::signaling_NaN()) {}
-    /** Set parameters */
-    void init( const scnXml::GVIDescription& elt);
+    /** Initialise parameters
+     * 
+     * @param elt Effect description from XML
+     * @param species_name_map Map of species names to indices.
+     */
+    GVIParams( size_t index, const scnXml::GVIDescription& elt,
+               const map<string,size_t>& species_name_map );
+    
+    void deploy( Host::Human& human, Deployment::Method method )const;
+    
+    virtual Effect::Type effectType() const{ return Effect::GVI; }
+    
+    virtual HumanVectorIntervention* makeHumanPart() const;
+    virtual HumanVectorIntervention* makeHumanPart( istream& stream, size_t index ) const;
     
 private:
+    /** Per mosquito-species parameters for generic vector intervention model. */
+    class GVIAnopheles {
+    public:
+        GVIAnopheles() :
+            proportionProtected( numeric_limits<double>::signaling_NaN() ),
+            proportionUnprotected( numeric_limits<double>::signaling_NaN() ),
+            _relativeAttractiveness( numeric_limits<double>::signaling_NaN() ),
+            _preprandialKillingEffect( numeric_limits<double>::signaling_NaN() ),
+            _postprandialKillingEffect( numeric_limits<double>::signaling_NaN() )
+        {}
+        void init(const scnXml::GVIDescription::AnophelesParamsType& elt);
+        
+        /// Return x*proportionProtected + proportionUnprotected
+        inline double byProtection(double x) const{
+            return x*proportionProtected + proportionUnprotected;
+        }
+        
+        double proportionProtected;
+        double proportionUnprotected;
+        double _relativeAttractiveness;
+        double _preprandialKillingEffect;
+        double _postprandialKillingEffect;
+        
+        friend class HumanGVI;
+    };
+    
     NormalSampler initialInsecticide;
     double maxInsecticide;		// maximum initial insecticide
     shared_ptr<DecayFunction> decay;
+    vector<GVIAnopheles> species;  // vector specific params
     
-    friend class GVI;
-    friend class GVIAnophelesParams;
-};
-
-/** Per mosquito-species parameters for generic vector intervention model. */
-class GVIAnophelesParams {
-public:
-    GVIAnophelesParams( const GVIParams* b ) :
-        base( b ),
-        proportionProtected( numeric_limits<double>::signaling_NaN() ),
-        proportionUnprotected( numeric_limits<double>::signaling_NaN() ),
-        _relativeAttractiveness( numeric_limits<double>::signaling_NaN() ),
-        _preprandialKillingEffect( numeric_limits<double>::signaling_NaN() ),
-        _postprandialKillingEffect( numeric_limits<double>::signaling_NaN() )
-    {}
-    void init(const GVIParams& params,
-              const scnXml::GVIDescription::AnophelesParamsType& elt);
-    
-    /// Return x*proportionProtected + proportionUnprotected
-    inline double byProtection(double x) const{
-        return x*proportionProtected + proportionUnprotected;
-    }
-    
-private:
-    const GVIParams* base;
-    double proportionProtected;
-    double proportionUnprotected;
-    double _relativeAttractiveness;
-    double _preprandialKillingEffect;
-    double _postprandialKillingEffect;
-    
-    friend class GVI;
+    friend class HumanGVI;
 };
 
 /** Low-level (generic) vector intervention model. Has three effects:
@@ -89,9 +93,10 @@ private:
  * 
  * This is the per-host (but not per vector) part.
  */
-class GVI {
+class HumanGVI : public HumanVectorIntervention {
 public:
-    GVI (const Transmission::TransmissionModel& tm);
+    HumanGVI( const GVIParams& params );
+    HumanGVI( istream& stream, size_t index );
     
     /// Checkpointing
     template<class S>
@@ -101,7 +106,8 @@ public:
         decayHet & stream;
     }
     
-    void deploy(const GVIParams& params);
+    virtual void deploy( const HumanVectorInterventionParams& params );
+    
     inline TimeStep timeOfDeployment()const{
         return deployTime;
     }
@@ -112,13 +118,16 @@ public:
     }
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    double relativeAttractiveness(const GVIAnophelesParams& params) const;
+    virtual double relativeAttractiveness(const HumanInterventionEffect& params, size_t speciesIndex) const;
     /// Get killing effect on mosquitoes before they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double preprandialSurvivalFactor(const GVIAnophelesParams& params) const;
+    virtual double preprandialSurvivalFactor(const HumanInterventionEffect& params, size_t speciesIndex) const;
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double postprandialSurvivalFactor(const GVIAnophelesParams& params) const;
+    virtual double postprandialSurvivalFactor(const HumanInterventionEffect& params, size_t speciesIndex) const;
+    
+protected:
+    virtual void checkpoint( ostream& stream );
     
 private:
     // these parameters express the current state of the intervention:

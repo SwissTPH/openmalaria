@@ -18,25 +18,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "interventions//GVI.h"
-//TODO: we shouldn't have a dependency on the vector/transmission model class
-//here; currently it's a work-around for GVI parameters not always being present.
-#include "Transmission/VectorModel.h"
-#include "util/random.h"
-#include "util/errors.h"
-#include "R_nmath/qnorm.h"
+#include "interventions/GVI.h"
+#include "Host/Human.h"
+#include "util/SpeciesIndexChecker.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
-    using util::random::poisson;
 
-void GVIParams::init( const scnXml::GVIDescription& elt) {
+GVIParams::GVIParams( size_t index, const scnXml::GVIDescription& elt,
+        const map<string,size_t>& species_name_map ) : HumanVectorInterventionParams(index)
+{
     decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
+    
+    typedef scnXml::GVIDescription::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    species.resize( species_name_map.size() );
+    util::SpeciesIndexChecker checker( "GVI intervention", species_name_map );
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
+        species[checker.getIndex(it->getMosquito())].init (*it);
+    }
+    checker.checkNoneMissed();
 }
 
-void GVIAnophelesParams::init(
-    const GVIParams& params,
-    const scnXml::GVIDescription::AnophelesParamsType& elt)
+ void GVIParams::deploy( Host::Human& human, Deployment::Method method )const{
+     human.perHostTransmission.interventions.deploy(*this);
+     human.reportDeployment( Effect::GVI, method );
+ }
+ 
+ HumanVectorIntervention* GVIParams::makeHumanPart() const{
+     return new HumanGVI( *this );
+ }
+ HumanVectorIntervention* GVIParams::makeHumanPart( istream& stream, size_t index ) const{
+     return new HumanGVI( stream, index );
+ }
+
+void GVIParams::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt)
 {
     if( _relativeAttractiveness == _relativeAttractiveness ){
         throw util::unimplemented_exception( "multiple GVI interventions" );
@@ -53,42 +69,56 @@ void GVIAnophelesParams::init(
 
 
 // ———  per-human data  ———
-GVI::GVI (const Transmission::TransmissionModel& tm) :
+HumanGVI::HumanGVI ( const GVIParams& params ) :
+    HumanVectorIntervention( params.getIndex() ),
     initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
 {
-    //TODO: we shouldn't really have vector intervention data (this class) if there's no vector
-    // model, should we? Allocate dynamically or based on model?
-    const Transmission::VectorModel* vt = dynamic_cast<const Transmission::VectorModel*>(&tm);
-    if( vt != 0 ){
-        const GVIParams& params = vt->getGVIParams();
-        if( params.decay.get() == 0 )
-            return;     // no intervention
-        // Varience factor of decay is sampled once per human: human is assumed
-        // to account for most variance.
-        decayHet = params.decay->hetSample();
-    }
+    // Varience factor of decay is sampled once per human: human is assumed
+    // to account for most variance.
+    decayHet = params.decay->hetSample();
 }
 
-void GVI::deploy(const GVIParams& params) {
+void HumanGVI::deploy( const HumanVectorInterventionParams& params ) {
     deployTime = TimeStep::simulation;
 }
 
-double GVI::relativeAttractiveness(const GVIAnophelesParams& params) const{
-    double effect = (1.0 - params._relativeAttractiveness *
-            getEffectSurvival(*params.base));
-    return params.byProtection( effect );
+double HumanGVI::relativeAttractiveness(const HumanInterventionEffect& gen_params, size_t speciesIndex) const{
+    assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
+    const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
+    const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
+    double effect = (1.0 - anoph._relativeAttractiveness *
+            getEffectSurvival(params));
+    return anoph.byProtection( effect );
 }
 
-double GVI::preprandialSurvivalFactor(const GVIAnophelesParams& params) const{
-    double effect = (1.0 - params._preprandialKillingEffect *
-            getEffectSurvival(*params.base));
-    return params.byProtection( effect );
+double HumanGVI::preprandialSurvivalFactor(const HumanInterventionEffect& gen_params, size_t speciesIndex) const{
+    assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
+    const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
+    const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
+    double effect = (1.0 - anoph._preprandialKillingEffect *
+            getEffectSurvival(params));
+    return anoph.byProtection( effect );
 }
 
-double GVI::postprandialSurvivalFactor(const GVIAnophelesParams& params) const{
-    double effect = (1.0 - params._postprandialKillingEffect *
-            getEffectSurvival(*params.base));
-    return params.byProtection( effect );
+double HumanGVI::postprandialSurvivalFactor(const HumanInterventionEffect& gen_params, size_t speciesIndex) const{
+    assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
+    const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
+    const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
+    double effect = (1.0 - anoph._postprandialKillingEffect *
+            getEffectSurvival(params));
+    return anoph.byProtection( effect );
+}
+
+void HumanGVI::checkpoint( ostream& stream ){
+    deployTime & stream;
+    initialInsecticide & stream;
+    decayHet & stream;
+}
+HumanGVI::HumanGVI( istream& stream, size_t index ) : HumanVectorIntervention( index )
+{
+    deployTime & stream;
+    initialInsecticide & stream;
+    decayHet & stream;
 }
 
 } }

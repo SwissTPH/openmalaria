@@ -249,15 +249,6 @@ void Human::deployIRS( interventions::Deployment::Method method, Transmission::T
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployGVI( interventions::Deployment::Method method, const interventions::GVIParams& params ){
-    perHostTransmission.setupGVI( params );
-    if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(_inCohort).reportMassGVI( getMonitoringAgeGroup(), 1 );
-    }else if( method == interventions::Deployment::CTS ){
-        //TODO: report
-    }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
 void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
 }
@@ -269,6 +260,26 @@ void Human::massVA (const OM::Population&) {
 
 bool Human::hasVAProtection(TimeStep maxInterventionAge) const{
     return perHostTransmission.hasVAProtection(maxInterventionAge);
+}
+
+void Human::reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const{
+    if( method == interventions::Deployment::TIMED ){
+        switch( type ){
+            case interventions::Effect::GVI:
+                Monitoring::Surveys.getSurvey(_inCohort).reportMassGVI( getMonitoringAgeGroup(), 1 );
+                break;
+            default:
+                throw SWITCH_DEFAULT_EXCEPTION;
+        }
+    }else if( method == interventions::Deployment::CTS ){
+        switch( type ){
+            case interventions::Effect::GVI:
+                //TODO: report
+                break;
+            default:
+                throw SWITCH_DEFAULT_EXCEPTION;
+        }
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 double Human::getAgeInYears() const{

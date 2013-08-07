@@ -49,9 +49,9 @@ PerHost::PerHost (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false),
         timestepVA(TimeStep::never),
         net(tm),
-        irs(tm),
-        gvi(tm)
+        irs(tm)
 {
+    //TODO: human heterogeneity wrt GVI was sampled here, now will be sampled on each deployment
     if ( VADecay.get() != 0 )
         hetSampleVA = VADecay->hetSample();
 }
@@ -98,9 +98,7 @@ double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base, s
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= irs.relativeAttractiveness(base.irs);
     }
-    if (gvi.timeOfDeployment() >= TimeStep(0)) {
-        alpha_i *= gvi.relativeAttractiveness(base.gvi);
-    }
+    alpha_i *= interventions.relativeAttractiveness( speciesIndex );
     if (timestepVA >= TimeStep(0)) {
         alpha_i *= (1.0 - base.VADeterrency * VADecay->eval (TimeStep::simulation - timestepVA, hetSampleVA));
     }
@@ -114,9 +112,7 @@ double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speci
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= irs.preprandialSurvivalFactor(base.irs);
     }
-    if (gvi.timeOfDeployment() >= TimeStep(0)) {
-        P_B_i *= gvi.preprandialSurvivalFactor(base.gvi);
-    }
+    P_B_i *= interventions.preprandialSurvivalFactor( speciesIndex );
     return P_B_i;
 }
 double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
@@ -127,9 +123,7 @@ double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t spec
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         pRest *= irs.postprandialSurvivalFactor(base.irs);
     }
-    if (gvi.timeOfDeployment() >= TimeStep(0)) {
-        pRest *= gvi.postprandialSurvivalFactor(base.gvi);
-    }
+    pRest *= interventions.postprandialSurvivalFactor( speciesIndex );
     return pRest;
 }
 
