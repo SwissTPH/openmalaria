@@ -639,7 +639,14 @@
     </changeEIR>
     <human>
       <effect id="MDA">
-        <MDA/>
+        <MDA>
+          <drugEffect>
+            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
+            <compliersEffective>
+              <timestep pClearance="1"/>
+            </compliersEffective>
+          </drugEffect>
+        </MDA>
       </effect>
       <intervention>
         <effect id="MDA"/>

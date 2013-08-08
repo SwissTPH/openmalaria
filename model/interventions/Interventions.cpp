@@ -24,6 +24,7 @@
 #include "util/random.h"
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
+#include "Clinical/Diagnostic.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Monitoring/Surveys.h"
@@ -321,19 +322,42 @@ void HumanIntervention::sortEffects(){
 class MDAEffect : public HumanInterventionEffect {
 public:
     MDAEffect( size_t index, const scnXml::MDA& mda ) : HumanInterventionEffect(index) {
-        // Set description. TODO: allow multiple descriptions.
         if( TimeStep::interval == 5 ){
+            if( !mda.getDrugEffect().present() )
+                throw util::xml_scenario_error( "interventions.human.effect.MDA: drugEffect element required for 5-day timestep" );
             if( !mda.getDiagnostic().present() ){
                 // Note: allow no description for now to avoid XML changes.
                 //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
                 scnXml::HSDiagnostic diagnostic;
                 scnXml::Deterministic det(0.0);
                 diagnostic.setDeterministic(det);
-                Clinical::ClinicalImmediateOutcomes::initMDA(diagnostic);
+                this->diagnostic.init(diagnostic);
             }else{
-                Clinical::ClinicalImmediateOutcomes::initMDA( mda.getDiagnostic().get() );
+                diagnostic.init( mda.getDiagnostic().get() );
+            }
+            const scnXml::DrugWithCompliance& drug = mda.getDrugEffect().get();
+            double pCompliance = drug.getCompliance().getPCompliance();
+            double nonComplierMult = drug.getCompliance().getNonCompliersMultiplier();
+            double mult = pCompliance + (1.0 - pCompliance) * nonComplierMult;
+            const scnXml::CompliersEffective::TimestepSequence& seq = drug.getCompliersEffective().getTimestep();
+            size_t len = seq.size();
+            pClearanceByTime.resize(len);
+            for( size_t i = 0; i < len; ++i ){
+                double pCompliers = seq[i].getPClearance();
+                pClearanceByTime[i] = mult * pCompliers;
+            }
+            if( len < 1 ){
+                throw util::xml_scenario_error( "interventions.human.effect.MDA.drugEffect: require at least one timestep element" );
+            }
+            if( len > 1 ){
+                throw util::unimplemented_exception( "MDA with prophylactic effect (i.e. more than one timestep element in drugEffect element" );
             }
         }else{
+            // We could either do what we did before for the 1-day timestep
+            // (below, and calling ClinicalEventScheduler::massDrugAdministration
+            // on deployment), or we could use the 5-day timestep approach
+            // (or even support both).
+            throw util::unimplemented_exception( "MDA/MSAT on 1-day timestep (disabled pending review)" );
             if( !mda.getDescription().present() ){
                 throw util::xml_scenario_error( "error: interventions.MDA.description element required for MDA with 1-day timestep" );
             }
@@ -342,13 +366,24 @@ public:
     }
     
     void deploy( Human& human, Deployment::Method method ) const{
-        if( method != Deployment::TIMED )
-            //TODO: easy, except reporting (and rename?)
-            throw util::unimplemented_exception("MDA via cts deployment");
-        human.massDrugAdministration();
+        //TODO: shouldn't really use the same reports for mass and continuous deployment, right?
+        
+        Monitoring::Surveys.getSurvey(human.isInCohort()).reportMassScreening(human.getMonitoringAgeGroup(), 1);
+        if( !diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
+            return;
+        }
+        double pClearance = pClearanceByTime[0];
+        if( pClearance >= 1.0 || util::random::bernoulli( pClearance ) ){
+            human.withinHostModel->clearInfections(human.getClinicalModel().latestIsSevere());
+        }
+        Monitoring::Surveys.getSurvey(human.isInCohort()).reportMDA(human.getMonitoringAgeGroup(), 1);
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA; }
+    
+private:
+    Clinical::Diagnostic diagnostic;
+    vector<double> pClearanceByTime;
 };
 
 class VaccineEffect : public HumanInterventionEffect {
@@ -379,6 +414,9 @@ private:
 class IPTEffect : public HumanInterventionEffect {
 public:
     IPTEffect( size_t index, const scnXml::IPTDescription& elt ) : HumanInterventionEffect(index){
+        // Check compatibilities with MDA model, in particular use of clearInfections(bool).
+        // Is it needed now MDA allows prophylactic effects and continuous deployment, anyway?
+        throw util::unimplemented_exception( "IPT model (disabled pending review)" );
         WithinHost::DescriptiveIPTWithinHost::init( elt );
     }
     

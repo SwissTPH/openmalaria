@@ -100,7 +100,6 @@ public:
    * Only supported by immediate outcomes model. */
   virtual bool notAtRisk() =0;
   
-  virtual void massDrugAdministration(Human& human) =0;
   
   /// Summarize PathogenesisModel details
   void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
@@ -109,6 +108,15 @@ public:
   /// class is about to be destroyed anyway to avoid affecting output.
   inline void flushReports (){
       latestReport.flush();
+  }
+  
+  /** Return true if the latest not-yet-reported/cleared/... episode is
+   * severe.
+   * 
+   * TODO: this is for compatibility with old IPT code. Work out whether it's
+   * necessary. */
+  inline bool latestIsSevere() const{
+      return latestReport.getState() == Pathogenesis::STATE_SEVERE;
   }
   
   /// Checkpointing

@@ -421,6 +421,33 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 }
             }
         }
+        fun updateMDA(){
+            val name = "MDA"
+            val elt = getChildElementOpt(interventions, name)
+            if (elt != null){
+                val ident = effectIdent(name)
+                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
+
+                processDeployments(listOf(ident), elt, ident)
+                
+                if (getChildElementOpt(elt, "description") == null){
+                    // no 1-day-TS description; add the new 5-day-TS drug description
+                    val drugEffect = scenarioDocument.createElement("drugEffect")!!
+                    elt.appendChild(drugEffect)
+                    val compliance = scenarioDocument.createElement("compliance")!!
+                    compliance.setAttribute("pCompliance", "1")
+                    compliance.setAttribute("nonCompliersMultiplier", "1")
+                    drugEffect.appendChild(compliance)
+                    val compliersEffective = scenarioDocument.createElement("compliersEffective")!!
+                    drugEffect.appendChild(compliersEffective)
+                    val timestep = scenarioDocument.createElement("timestep")!!
+                    timestep.setAttribute("pClearance","1")
+                    compliersEffective.appendChild(timestep)
+                }
+
+                effect.appendChild(elt) // after removal of "continuous" and "timed" child elements
+            }
+        }
         fun updateVaccineElt(){
             val elt = getChildElementOpt(interventions, "vaccine")
             if (elt != null){
@@ -467,7 +494,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 interventions.removeChild(elt)  // now defunct
             }
         }
-        updateElt("MDA", "MDA", false)
+        updateMDA()
         updateVaccineElt()
         updateElt("IPT", "IPT", true) 
         updateElt("ITN", "ITN", true)

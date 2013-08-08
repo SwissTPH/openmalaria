@@ -384,12 +384,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="MDA">
         <xs:annotation>
           <xs:documentation>
-            Description and deployment of MDA interventions
-            (can also be configured as screen and treat or intermittent
-            preventative treatment with 1-day time-step models).
+            Description of MDA/MSAT interventions (Mass Screen and Treat is
+            just Mass Drug Administration with a diagnostic).
             
-            Currently neither diagnostic nor description need be provided for
-            5-day timestep model; this may change in the future.
+            For the 5-day timestep model, a diagnostic is optional; with no
+            diagnostic description, the intervention behaves like MDA (no
+            screening, just deliver drugs). A drug description is required.
+            
+            For the 1-day timestep model, the case management system is piggy-
+            backed and a full decision tree can (and currently must) be used.
           </xs:documentation>
           <xs:appinfo>name:Mass drug administration;</xs:appinfo>
         </xs:annotation>
@@ -404,11 +407,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       of five-day case management model — may be used to model
                       MDA without diagnostic or MSAT.
                       
-                      Drugs are administered whenever the test outcome is positive.
+                      The diagnostic is used on hosts selected by the coverage
+                      parameters, and drugs are administered whenever the test
+                      outcome is positive.
                     </xs:documentation>
                     <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
                   </xs:annotation>
                 </xs:element>
+                <xs:element name="drugEffect" type="DrugWithCompliance"/>
               </xs:sequence>
               <xs:element name="description" minOccurs="0">
                 <xs:annotation>
