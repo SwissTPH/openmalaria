@@ -160,6 +160,7 @@ void PennyInfection::init() {
     immune_threshold_gamma = util::ModelOptions::option (util::IMMUNE_THRESHOLD_GAMMA);
     update_density_gamma = util::ModelOptions::option (util::UPDATE_DENSITY_GAMMA);
     if( util::ModelOptions::option( util::PENNY_JULY_2013 ) ) {
+        throw util::xml_scenario_error( "This option is not yet ready for use. Don't use on BOINC because it sometimes causes hangs (infinite loops while sampling threshold_C)." );
         Omega = 5e-6;
         immune_threshold_July_2013 = true;
         limit_new_variants = 50;
