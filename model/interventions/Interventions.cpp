@@ -22,6 +22,7 @@
 #include "Host/Vaccine.h"
 #include "Population.h"
 #include "util/random.h"
+#include <util/ModelOptions.h>
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
 #include "Clinical/Diagnostic.h"
@@ -351,7 +352,9 @@ public:
     MDAEffect( size_t index, const scnXml::MDA& mda ) : HumanInterventionEffect(index) {
         if( TimeStep::interval == 5 ){
             if( !mda.getDrugEffect().present() )
-                throw util::xml_scenario_error( "interventions.human.effect.MDA: drugEffect element required for 5-day timestep" );
+                throw util::xml_scenario_error(
+                    "interventions.human.effect.MDA: drugEffect element "
+                    "required for 5-day timestep" );
             if( !mda.getDiagnostic().present() ){
                 // Note: allow no description for now to avoid XML changes.
                 //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
@@ -366,7 +369,8 @@ public:
             double pCompliance = drug.getCompliance().getPCompliance();
             double nonComplierMult = drug.getCompliance().getNonCompliersMultiplier();
             double mult = pCompliance + (1.0 - pCompliance) * nonComplierMult;
-            const scnXml::CompliersEffective::TimestepSequence& seq = drug.getCompliersEffective().getTimestep();
+            const scnXml::CompliersEffective::TimestepSequence& seq =
+                    drug.getCompliersEffective().getTimestep();
             size_t len = seq.size();
             pClearanceByTime.resize(len);
             for( size_t i = 0; i < len; ++i ){
@@ -374,19 +378,28 @@ public:
                 pClearanceByTime[i] = mult * pCompliers;
             }
             if( len < 1 ){
-                throw util::xml_scenario_error( "interventions.human.effect.MDA.drugEffect: require at least one timestep element" );
+                throw util::xml_scenario_error(
+                    "interventions.human.effect.MDA.drugEffect: require at "
+                    "least one timestep element" );
             }
             if( len > 1 ){
-                throw util::unimplemented_exception( "MDA with prophylactic effect (i.e. more than one timestep element in drugEffect element" );
+                if( !util::ModelOptions::option( util::PROPHYLACTIC_DRUG_ACTION_MODEL ) )
+                    throw util::xml_scenario_error(
+                        "MDA with prophylactic effect (i.e. with more than one"
+                        " timestep element in drugEffect element) requires the"
+                        " PROPHYLACTIC_DRUG_ACTION_MODEL" );
             }
         }else{
             // We could either do what we did before for the 1-day timestep
             // (below, and calling ClinicalEventScheduler::massDrugAdministration
             // on deployment), or we could use the 5-day timestep approach
             // (or even support both).
-            throw util::unimplemented_exception( "MDA/MSAT on 1-day timestep (disabled pending review)" );
+            throw util::unimplemented_exception(
+                    "MDA/MSAT on 1-day timestep (disabled pending review)" );
             if( !mda.getDescription().present() ){
-                throw util::xml_scenario_error( "error: interventions.MDA.description element required for MDA with 1-day timestep" );
+                throw util::xml_scenario_error(
+                        "error: interventions.MDA.description element required"
+                        " for MDA with 1-day timestep" );
             }
             Clinical::ESCaseManagement::initMDA( mda.getDescription().get() );
         }
@@ -395,15 +408,19 @@ public:
     void deploy( Human& human, Deployment::Method method ) const{
         //TODO: shouldn't really use the same reports for mass and continuous deployment, right?
         
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassScreening(human.getMonitoringAgeGroup(), 1);
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort())
+                .reportMassScreening(human.getMonitoringAgeGroup(), 1);
         if( !diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
             return;
         }
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort())
+                .reportMDA(human.getMonitoringAgeGroup(), 1);
         double pClearance = pClearanceByTime[0];
         if( pClearance >= 1.0 || util::random::bernoulli( pClearance ) ){
             human.withinHostModel->clearInfections(human.getClinicalModel().latestIsSevere());
         }
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMDA(human.getMonitoringAgeGroup(), 1);
+        if( pClearanceByTime.size() > 1 )
+            human.withinHostModel->addProphylacticEffects( pClearanceByTime );
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA; }

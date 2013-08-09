@@ -71,6 +71,7 @@ namespace OM { namespace util {
 	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
+            codeMap["PROPHYLACTIC_DRUG_ACTION_MODEL"]=PROPHYLACTIC_DRUG_ACTION_MODEL;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -187,6 +188,9 @@ namespace OM { namespace util {
 	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
 	incompatibilities[COMORB_TREAT_HET]
 	    .set(TRIPLE_HET);
+        
+        incompatibilities[IPTI_SP_MODEL]
+            .set(PROPHYLACTIC_DRUG_ACTION_MODEL);
         
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {

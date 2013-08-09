@@ -190,6 +190,8 @@
             <compliance nonCompliersMultiplier="1" pCompliance="1"/>
             <compliersEffective>
               <timestep pClearance="1"/>
+              <timestep pClearance="0.5"/>
+              <timestep pClearance="0.1"/>
             </compliersEffective>
           </drugEffect>
         </MDA>
@@ -211,13 +213,6 @@
           <initialEfficacy value="0.64"/>
           <initialEfficacy value="0.8"/>
         </PEV>
-      </effect>
-      <effect id="IPT">
-        <IPT iptiEffect="13">
-          <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
-          <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
-          <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
-        </IPT>
       </effect>
       <effect id="ITN" name="Extended ITNs">
         <ITN>
@@ -281,6 +276,11 @@
       </effect>
       <intervention>
         <effect id="MDA"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.17"/>
+          <deploy coverage="0.95" targetAgeYrs="0.25"/>
+          <deploy coverage="0.95" targetAgeYrs="0.75"/>
+        </continuous>
         <timed>
           <deploy coverage="0.95" time="7"/>
         </timed>
@@ -301,14 +301,6 @@
           <deploy coverage="0.95" time="731"/>
           <deploy coverage="0.95" time="1096"/>
         </timed>
-      </intervention>
-      <intervention>
-        <effect id="IPT"/>
-        <continuous>
-          <deploy coverage="0.95" targetAgeYrs="0.17"/>
-          <deploy coverage="0.95" targetAgeYrs="0.25"/>
-          <deploy coverage="0.95" targetAgeYrs="0.75"/>
-        </continuous>
       </intervention>
       <intervention name="Extended ITNs">
         <effect id="ITN"/>
@@ -461,7 +453,7 @@
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-      <option name="IPTI_SP_MODEL" value="true"/>
+      <option name="PROPHYLACTIC_DRUG_ACTION_MODEL" value="true"/>
       <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>

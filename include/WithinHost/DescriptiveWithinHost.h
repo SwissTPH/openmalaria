@@ -47,6 +47,8 @@ public:
   
   virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);
   
+  virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
+  
 protected:
   virtual DescriptiveInfection* createInfection ();
   virtual int countInfections (int& patentInfections);
@@ -57,6 +59,8 @@ protected:
   virtual void IPTattenuateAsexualMinTotalDensity () {}
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
   //@}
+  
+  virtual void drugAction();    // for prophylactic effect;     //TODO
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

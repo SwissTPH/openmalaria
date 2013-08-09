@@ -14,7 +14,7 @@ configure_file (
 # working tests (with checkpointing):
 set (OM_BOXTEST_NAMES
   #disabled because of IPT:
-  # 2 3 IPT VecFullTest VT
+  # 2 3 IPT VT
   # disabled because of MDA on 1-day-timestep:
   # 1DayIntervs Cohort MSAT
   1 4 5 6 9 10 11 12
@@ -38,6 +38,7 @@ set (OM_BOXTEST_NAMES
   # disabled because the vector lifecycle model isn't yet done:
   # VecLCMonthly VecLCTest
   VecMonthly
+  VecFullTest
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
