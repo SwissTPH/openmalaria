@@ -41,7 +41,7 @@ void HumanVectorInterventions::deploy( const HumanVectorInterventionParams& para
 double HumanVectorInterventions::relativeAttractiveness( size_t speciesIndex )const{
     double factor = 1;
     for( ActiveList::const_iterator it = active.begin(); it != active.end(); ++it ){
-        factor *= it->relativeAttractiveness( manager->getEffect(it->getIndex()), speciesIndex );
+        factor *= it->relativeAttractiveness( InterventionManager::instance->getEffect(it->getIndex()), speciesIndex );
     }
     return factor;
 }
@@ -49,7 +49,7 @@ double HumanVectorInterventions::relativeAttractiveness( size_t speciesIndex )co
 double HumanVectorInterventions::preprandialSurvivalFactor( size_t speciesIndex )const{
     double factor = 1;
     for( ActiveList::const_iterator it = active.begin(); it != active.end(); ++it ){
-        factor *= it->preprandialSurvivalFactor( manager->getEffect(it->getIndex()), speciesIndex );
+        factor *= it->preprandialSurvivalFactor( InterventionManager::instance->getEffect(it->getIndex()), speciesIndex );
     }
     return factor;
 }
@@ -57,7 +57,7 @@ double HumanVectorInterventions::preprandialSurvivalFactor( size_t speciesIndex 
 double HumanVectorInterventions::postprandialSurvivalFactor( size_t speciesIndex )const{
     double factor = 1;
     for( ActiveList::const_iterator it = active.begin(); it != active.end(); ++it ){
-        factor *= it->postprandialSurvivalFactor( manager->getEffect(it->getIndex()), speciesIndex );
+        factor *= it->postprandialSurvivalFactor( InterventionManager::instance->getEffect(it->getIndex()), speciesIndex );
     }
     return factor;
 }
@@ -77,7 +77,7 @@ void HumanVectorInterventions::checkpoint( istream& stream ){
         size_t index;
         index & stream;
         try{
-            const HumanInterventionEffect& gen_params = manager->getEffect( index );   // may throw
+            const HumanInterventionEffect& gen_params = InterventionManager::instance->getEffect( index );   // may throw
             const HumanVectorInterventionParams *params = dynamic_cast<const HumanVectorInterventionParams*>( &gen_params );
             if( params == 0 )
                 throw util::base_exception( "" );       // see catch block below

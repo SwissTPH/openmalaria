@@ -150,7 +150,8 @@
       <intervention>
         <effect id="MDA"/>
         <timed>
-          <deploy cohort="true" coverage="1" time="30"/>
+          <restrictToCohort id="cohort"/>
+          <deploy coverage="1" time="30"/>
         </timed>
       </intervention>
       <intervention name="LLIN test">

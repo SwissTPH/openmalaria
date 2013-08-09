@@ -26,6 +26,7 @@
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/Interventions.h"
+#include <set>
 
 namespace OM {
     namespace Transmission {
@@ -77,8 +78,8 @@ public:
       _dateOfBirth & stream;
       _vaccine & stream;
       _probTransmissionToMosquito & stream;
-      _inCohort & stream;
       nextCtsDist & stream;
+      cohorts & stream;
       lastDeployments & stream;
   }
   //@}
@@ -150,8 +151,17 @@ public:
     return withinHostModel->parasiteDensityDetectible();
   }
   
-  /// Return true if human is a member of the cohort
-  inline bool isInCohort()const{ return _inCohort; }
+  /** Return true if human is a member of the cohort.
+   * 
+   * Note: the maximum value of size_t is considered to be the population, of
+   * which every human is a member. */
+  inline bool isInCohort( size_t index )const{
+      return index == numeric_limits<size_t>::max() || cohorts.count( index ) > 0;
+  }
+  /** Return true if human is a member of any cohort.
+   *
+   * (TODO: code should be updated not to use this) */
+  inline bool isInAnyCohort()const{ return cohorts.size() > 0; }
   
   /// Return the index of next continuous intervention to be deployed
   inline uint32_t getNextCtsDist()const{ return nextCtsDist; }
@@ -165,7 +175,8 @@ public:
   /// Return the current survey to use (depends on survey time and whether or
   /// not individual is in the cohort).
   Monitoring::Survey& getSurvey() const{
-      return Monitoring::Surveys.getSurvey( _inCohort );
+      //TODO: inappropriate use of cohorts
+      return Monitoring::Surveys.getSurvey( cohorts.size() > 0 );
   }
   
   //! Summarize the state of a human individual.
@@ -176,12 +187,14 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort ();
+  void addToCohort ( size_t index );
   
-  /** Remove from cohort. As with addToCohort, deals with reporting.
+  /** Remove from a cohort. As with addToCohort, deals with reporting.
    *
    * Can be safely called when human is not in cohort. */
-  void removeFromCohort();
+  void removeFromCohort( size_t index );
+  /** As removeFromCohort, but for all cohorts. */ //TODO: check usages of this
+  void removeFromAllCohorts();
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
@@ -273,12 +286,12 @@ private:
   /// The next continuous distribution in the series
   uint32_t nextCtsDist;
   
-  /// True if human is included in a cohort.
-  bool _inCohort;
-  
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
   
+  //TODO: are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
+  /// The set of cohorts (intervention indexes) to which this human is a member
+  set<size_t> cohorts;
   /// Last deployment times of intervention effects by effect index
   map<size_t,TimeStep> lastDeployments;
   

@@ -23,6 +23,7 @@ import java.lang.reflect.Method
 import java.lang.reflect.InvocationTargetException
 import java.util.TreeSet
 import java.util.TreeMap
+import org.w3c.dom.Attr
 
 // ———  part 1: define utility classes (enums, simple containers)  ———
 
@@ -58,7 +59,6 @@ enum class IptiReportOnlyAtRiskBehaviour {
 enum class ITN29ParameterTranslation {
     NONE; REPLACE; MANUAL  // note: could add option to approximate old behaviour
 }
-
 class Options {
     var outputFolder = File("translatedScenarios")
     var inputFolder = File("scenarios")
@@ -298,6 +298,24 @@ abstract class Translator(input: InputSource, options: Options) {
 
 // ———  part 3: main update routines  ———
 
+// For some reason I get type errors if this is declared within the function it's used in
+class TimedKey(cohort:Boolean, age:Double?) : Comparable<TimedKey>{
+    val cohort = cohort
+    val age = age
+    override fun compareTo(other: TimedKey): Int =
+        if (cohort != other.cohort){
+            if (cohort == false) -1 else 1
+        }else if (age == null){
+            if (other.age == null) 0 else -1
+        }else if (other.age == null){
+            1
+        }else{
+            // Using !! here appears to be both necessary and unnecessary.
+            // Broken type checker makes us live with warnings.
+            java.lang.Double.compare(age!!, other.age!!)
+        }
+}
+
 /** Extension to hold translation functions written in Kotlin. */
 abstract class TranslatorKotlin(input: InputSource, options: Options) : Translator(input,options){
     /** Translate to schema 32.
@@ -350,39 +368,84 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 intervention.appendChild(interventionEffect)
             }
             
+            fun extractBool(attr: Attr?, deploy: Element): Boolean {
+                if (attr == null) return false
+                else{
+                    val result = java.lang.Boolean.parseBoolean(attr.getValue())
+                    deploy.removeAttributeNode(attr)
+                    return result
+                }
+            }
+
             val cts = getChildElementOpt(elt, "continuous")
-            if (cts != null) intervention.appendChild(cts)
+            if (cts != null) {
+                var ctsNonCohort: Element? = null
+                var ctsCohort: Element? = null
+                
+                for (deploy in getChildElements(cts, "deploy")){
+                    val cohort : Boolean = extractBool(deploy.getAttributeNode("cohort"), deploy)
+                    val list: Element = if (cohort){
+                        if (ctsCohort == null) {
+                            ctsCohort = scenarioDocument.createElement("continuous")!!
+                            val rTC = scenarioDocument.createElement("restrictToCohort")!!
+                            rTC.setAttribute("id","cohort") // effect id _will_ be "cohort"
+                            ctsCohort!!.appendChild(rTC)
+                        }
+                        ctsCohort!!
+                    }else{
+                        if (ctsNonCohort == null) {
+                            ctsNonCohort = scenarioDocument.createElement("continuous")!!
+                        }
+                        ctsNonCohort!!
+                    }
+                    list.appendChild(deploy)
+                }
+                
+                elt.removeChild(cts)
+                if (ctsNonCohort != null) intervention.appendChild(ctsNonCohort!!)
+                if (ctsCohort != null) intervention.appendChild(ctsCohort!!)
+            }
 
             val timed = getChildElementOpt(elt, "timed")
             if (timed != null){
                 // Note: type change from massList or massCumList to massListWithCum
                 // Map of "cumulative max age" to "timed element"
-                val cumTimedLists = TreeMap<Double,Element>()
-                var hasNonCum = false
+                val cumTimedLists = TreeMap<TimedKey,Element>()
                 for (deploy in getChildElements(timed, "deploy")){
-                    val maxAgeNode = deploy.getAttributeNode("cumulativeWithMaxAge")
-                    if (maxAgeNode != null){
-                        val age = java.lang.Double.parseDouble( maxAgeNode.getValue() )
-                        fun makeTimedList(): Element {
-                            val tL = scenarioDocument.createElement("timed")!!
+                    fun extractDoubleOpt(attr: Attr?): Double? {
+                        if (attr == null) return null
+                        else{
+                            val result = java.lang.Double.parseDouble(attr.getValue())
+                            deploy.removeAttributeNode(attr)
+                            return result
+                        }
+                    }
+
+                    val cohort : Boolean = extractBool(deploy.getAttributeNode("cohort"), deploy)
+                    val cumAge : Double? = extractDoubleOpt(deploy.getAttributeNode("cumulativeWithMaxAge"))
+                    val key = TimedKey(cohort, cumAge)
+
+                    fun makeTimedList(): Element {
+                        val tL = scenarioDocument.createElement("timed")!!
+                        if (cohort){
+                            val rTC = scenarioDocument.createElement("restrictToCohort")!!
+                            rTC.setAttribute("id","cohort") // effect id _will_ be "cohort"
+                            tL.appendChild(rTC)
+                        }
+                        if (cumAge != null){
                             val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
                             cumCov.setAttribute("effect",cumCovEffectIdent) // effect is uniquely used in this case, so translation is exact
-                            cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(age))
+                            cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(cumAge))
                             tL.appendChild(cumCov)
-                            cumTimedLists.put(age, tL)
-                            return tL
                         }
-                        val timedList : Element = cumTimedLists.get( age ) ?: makeTimedList()
-                        deploy.removeAttribute("cumulativeWithMaxAge")
-                        timedList.appendChild(deploy)
-                    }else{
-                        hasNonCum = true
+                        cumTimedLists.put(key, tL)
+                        return tL
                     }
+                    val timedList : Element = cumTimedLists.get( key ) ?: makeTimedList()
+                    deploy.removeAttribute("cumulativeWithMaxAge")
+                    timedList.appendChild(deploy)
                 }
-                if (hasNonCum)
-                    intervention.appendChild(timed)
-                else
-                    elt.removeChild(timed)
+                elt.removeChild(timed)
                 for (item in cumTimedLists){
                     intervention.appendChild(item.component2())
                 }
