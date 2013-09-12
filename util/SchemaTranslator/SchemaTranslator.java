@@ -2268,6 +2268,7 @@ public class SchemaTranslator {
             }
 
             Element intervs = getChildElement(scenarioElement, "interventions");
+            if( intervs == null ) return true;
             Element larv = getChildElement( intervs, "larviciding" );
             if( larv != null ){
                 // create new "vectorPop" parent
