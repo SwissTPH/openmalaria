@@ -1798,6 +1798,7 @@ public class TranslatorJava extends TranslatorKotlin{
             }
 
             Element intervs = getChildElement(getScenarioElement(), "interventions");
+            if( intervs == null ) return true;
             Element larv = getChildElementOpt( intervs, "larviciding" );
             if( larv != null ){
                 // create new "vectorPop" parent
