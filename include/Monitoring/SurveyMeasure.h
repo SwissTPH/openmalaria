@@ -38,11 +38,13 @@ namespace SM {
 enum SurveyMeasure {
     /// Total number of humans
     nHost = 0,
-    /// Number of infected hosts 
+    /** The number of human hosts with an infection (patent or not) on the
+     * reporting timestep */
     nInfect = 1,
     /// Expected number of infected hosts
     nExpectd= 2,
-    /// Number of patent hosts
+    /** The number of human hosts whose total (blood-stage) parasite density is
+     * above the detection threshold */
     nPatent= 3,
     
     /// Sum of the log of the pyrogen threshold
@@ -50,14 +52,16 @@ enum SurveyMeasure {
     /// Sum of the logarithm of the parasite density
     sumlogDens= 5,
     
-    /// Total infections
+    /** The sum of the all infections (detectable or not) across all human
+     * hosts */
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *
      * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
      * mosquitoes that get infected). Single value, not per age-group. */
     nTransmit= 7,
-    /// Total patent infections
+    /** The sum of all detectable infections (where blood stage parasite
+     * density is above the detection limit) across all human hosts. */
     totalPatentInf= 8,
     /// Contribution to immunity functions (output not used)
     contrib= 9,
