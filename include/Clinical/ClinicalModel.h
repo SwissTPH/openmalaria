@@ -100,6 +100,7 @@ public:
    * Only supported by immediate outcomes model. */
   virtual bool notAtRisk() =0;
   
+  virtual void massDrugAdministration(Human& human) =0;
   
   /// Summarize PathogenesisModel details
   void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);

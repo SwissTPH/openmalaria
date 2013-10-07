@@ -493,7 +493,15 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
 
                 processDeployments(listOf(ident), elt, ident)
                 
-                if (getChildElementOpt(elt, "description") == null){
+                System.out.println("Updating MDA")
+                val desc1d = getChildElementOpt(elt, "description")
+                if (desc1d != null ){
+                    System.out.println("Updating MDA — 1D")
+                    val renamed = scenarioDocument.renameNode(desc1d, "", "MDA1D")!!
+                    effect.appendChild(renamed)
+                    interventions.removeChild(elt)
+                }else{
+                    System.out.println("Updating MDA — simple")
                     // no 1-day-TS description; add the new 5-day-TS drug description
                     val drugEffect = scenarioDocument.createElement("drugEffect")!!
                     elt.appendChild(drugEffect)
@@ -506,9 +514,8 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     val timestep = scenarioDocument.createElement("timestep")!!
                     timestep.setAttribute("pClearance","1")
                     compliersEffective.appendChild(timestep)
+                    effect.appendChild(elt) // after removal of "continuous" and "timed" child elements
                 }
-
-                effect.appendChild(elt) // after removal of "continuous" and "timed" child elements
             }
         }
         fun updateVaccineElt(){

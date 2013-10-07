@@ -350,59 +350,40 @@ void HumanIntervention::sortEffects(){
 class MDAEffect : public HumanInterventionEffect {
 public:
     MDAEffect( size_t index, const scnXml::MDA& mda ) : HumanInterventionEffect(index) {
-        if( TimeStep::interval == 5 ){
-            if( !mda.getDrugEffect().present() )
-                throw util::xml_scenario_error(
-                    "interventions.human.effect.MDA: drugEffect element "
-                    "required for 5-day timestep" );
-            if( !mda.getDiagnostic().present() ){
-                // Note: allow no description for now to avoid XML changes.
-                //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
-                scnXml::HSDiagnostic diagnostic;
-                scnXml::Deterministic det(0.0);
-                diagnostic.setDeterministic(det);
-                this->diagnostic.init(diagnostic);
-            }else{
-                diagnostic.init( mda.getDiagnostic().get() );
-            }
-            const scnXml::DrugWithCompliance& drug = mda.getDrugEffect().get();
-            double pCompliance = drug.getCompliance().getPCompliance();
-            double nonComplierMult = drug.getCompliance().getNonCompliersMultiplier();
-            double mult = pCompliance + (1.0 - pCompliance) * nonComplierMult;
-            const scnXml::CompliersEffective::TimestepSequence& seq =
-                    drug.getCompliersEffective().getTimestep();
-            size_t len = seq.size();
-            pClearanceByTime.resize(len);
-            for( size_t i = 0; i < len; ++i ){
-                double pCompliers = seq[i].getPClearance();
-                pClearanceByTime[i] = mult * pCompliers;
-            }
-            if( len < 1 ){
-                throw util::xml_scenario_error(
-                    "interventions.human.effect.MDA.drugEffect: require at "
-                    "least one timestep element" );
-            }
-            if( len > 1 ){
-                if( !util::ModelOptions::option( util::PROPHYLACTIC_DRUG_ACTION_MODEL ) )
-                    throw util::xml_scenario_error(
-                        "MDA with prophylactic effect (i.e. with more than one"
-                        " timestep element in drugEffect element) requires the"
-                        " PROPHYLACTIC_DRUG_ACTION_MODEL" );
-            }
+        if( !mda.getDiagnostic().present() ){
+            // Note: allow no description for now to avoid XML changes.
+            //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
+            scnXml::HSDiagnostic diagnostic;
+            scnXml::Deterministic det(0.0);
+            diagnostic.setDeterministic(det);
+            this->diagnostic.init(diagnostic);
         }else{
-            // We could either do what we did before for the 1-day timestep
-            // (below, and calling ClinicalEventScheduler::massDrugAdministration
-            // on deployment), or we could use the 5-day timestep approach
-            // (or even support both).
-            throw util::unimplemented_exception(
-                    "MDA/MSAT on 1-day timestep (disabled pending review)" );
-            if( !mda.getDescription().present() ){
-                throw util::xml_scenario_error(
-                        "error: interventions.MDA.description element required"
-                        " for MDA with 1-day timestep" );
-            }
-            Clinical::ESCaseManagement::initMDA( mda.getDescription().get() );
+            diagnostic.init( mda.getDiagnostic().get() );
         }
+        const scnXml::DrugWithCompliance& drug = mda.getDrugEffect();
+        double pCompliance = drug.getCompliance().getPCompliance();
+        double nonComplierMult = drug.getCompliance().getNonCompliersMultiplier();
+        double mult = pCompliance + (1.0 - pCompliance) * nonComplierMult;
+        const scnXml::CompliersEffective::TimestepSequence& seq =
+                drug.getCompliersEffective().getTimestep();
+        size_t len = seq.size();
+        pClearanceByTime.resize(len);
+        for( size_t i = 0; i < len; ++i ){
+            double pCompliers = seq[i].getPClearance();
+            pClearanceByTime[i] = mult * pCompliers;
+        }
+        if( len < 1 ){
+            throw util::xml_scenario_error(
+                "interventions.human.effect.MDA.drugEffect: require at "
+                "least one timestep element" );
+        }
+        if( len > 1 ){
+            if( !util::ModelOptions::option( util::PROPHYLACTIC_DRUG_ACTION_MODEL ) )
+                throw util::xml_scenario_error(
+                    "MDA with prophylactic effect (i.e. with more than one"
+                    " timestep element in drugEffect element) requires the"
+                    " PROPHYLACTIC_DRUG_ACTION_MODEL" );
+        }   
     }
     
     void deploy( Human& human, Deployment::Method method ) const{
@@ -428,6 +409,21 @@ public:
 private:
     Clinical::Diagnostic diagnostic;
     vector<double> pClearanceByTime;
+};
+
+class MDA1DEffect : public HumanInterventionEffect {
+public:
+    MDA1DEffect( size_t index, const scnXml::MDA1D& description ) : HumanInterventionEffect(index) {
+        Clinical::ESCaseManagement::initMDA( description );
+    }
+    
+    void deploy( Human& human, Deployment::Method method ) const{
+        human.massDrugAdministration();
+    }
+    
+    virtual Effect::Type effectType() const{ return Effect::MDA_TS1D; }
+    
+private:
 };
 
 class VaccineEffect : public HumanInterventionEffect {
@@ -584,9 +580,11 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             size_t index = humanEffects.size();        // i.e. index of next item
             identifierMap[effect.getId()] = index;
             if( effect.getMDA().present() ){
-                //TODO: separate descriptions?
-                //TODO: allow continuous deployment
+                //TODO: monitoring
                 humanEffects.push_back( new MDAEffect( index, effect.getMDA().get() ) );
+            }else if( effect.getMDA1D().present() ){
+                //TODO: monitoring
+                humanEffects.push_back( new MDA1DEffect( index, effect.getMDA1D().get() ) );
             }else if( effect.getPEV().present() ){
                 //TODO: allow multiple descriptions of each vaccine type
                 humanEffects.push_back( new VaccineEffect( index, effect.getPEV().get(), Host::Vaccine::PEV ) );

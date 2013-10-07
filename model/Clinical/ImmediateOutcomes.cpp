@@ -60,6 +60,10 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
+void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
+    assert(false);      // should never be called
+}
+
 void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
     bool effectiveTreatment = false;
     State pgState = pathogenesisModel->determineState (ageYears, *human.withinHostModel);

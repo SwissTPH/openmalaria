@@ -386,64 +386,68 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="MDA">
         <xs:annotation>
           <xs:documentation>
-            Description of MDA/MSAT interventions (Mass Screen and Treat is
+            Description of a MDA/MSAT intervention (Mass Screen and Treat is
             just Mass Drug Administration with a diagnostic).
             
-            For the 5-day timestep model, a diagnostic is optional; with no
-            diagnostic description, the intervention behaves like MDA (no
-            screening, just deliver drugs). A drug description is required.
+            This MDA/MSAT model allows a diagnostic and drug action modelled
+            by direct clearance rates. For the 1-day timestep models, a more
+            detailed model of drug action and more flexible model of deployment
+            decisions are available; see MDA1D.
             
-            For the 1-day timestep model, the case management system is piggy-
-            backed and a full decision tree can (and currently must) be used.
+            With no diagnostic description this intervention behaves like MDA
+            (no screening, just deliver drugs). A drug description is required.
           </xs:documentation>
-          <xs:appinfo>name:Mass drug administration;</xs:appinfo>
+          <xs:appinfo>name:Mass drug administration (simple);</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:choice>
-              <xs:sequence>
-                <xs:element name="diagnostic" type="HSDiagnostic" minOccurs="0">
-                  <xs:annotation>
-                    <xs:documentation>
-                      Description of diagnostic used by mass treatment option
-                      of five-day case management model — may be used to model
-                      MDA without diagnostic or MSAT.
-                      
-                      The diagnostic is used on hosts selected by the coverage
-                      parameters, and drugs are administered whenever the test
-                      outcome is positive.
-                    </xs:documentation>
-                    <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
-                  </xs:annotation>
-                </xs:element>
-                <xs:element name="drugEffect" type="DrugWithCompliance"/>
-              </xs:sequence>
-              <xs:element name="description" minOccurs="0">
-                <xs:annotation>
-                  <xs:documentation>
-                    Description of treatment type used by mass treatment option
-                    of one-day case management model. Can be used to describe
-                    one-size-fits-all mass drug dosing, age-based mass drug dosing
-                    and screen-and-treat. Number of treatments given can be
-                    reported by the nMDAs option.
-                  </xs:documentation>
-                  <xs:appinfo>type:string;name:Diagnostic and treatment (1-day);</xs:appinfo>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:complexContent>
-                    <xs:extension base="HSESCaseManagement">
-                      <xs:attribute name="name" type="xs:string" use="optional">
-                        <xs:annotation>
-                          <xs:documentation>Name of set of interventions</xs:documentation>
-                          <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
-                        </xs:annotation>
-                      </xs:attribute>
-                    </xs:extension>
-                  </xs:complexContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:choice>
+            <xs:element name="diagnostic" type="HSDiagnostic" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  Description of diagnostic used by mass treatment option
+                  of five-day case management model — may be used to model
+                  MDA without diagnostic or MSAT.
+                  
+                  The diagnostic is used on hosts selected by the coverage
+                  parameters, and drugs are administered whenever the test
+                  outcome is positive.
+                </xs:documentation>
+                <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="drugEffect" type="DrugWithCompliance"/>
           </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="MDA1D">
+        <xs:annotation>
+          <xs:documentation>
+            Description of a MDA/MSAT intervention (Mass Screen and Treat is
+            just Mass Drug Administration with a diagnostic).
+            
+            This MDA/MSAT model piggy-backs the 1-day timestep case management
+            and drug models, and thus is only available when using a 1-day
+            timestep.
+            
+            Description of treatment type used by mass treatment option of
+            one-day case management model. Can be used to describe
+            one-size-fits-all mass drug dosing, age-based mass drug dosing and
+            screen-and-treat. Number of treatments given can be reported by
+            the nMDAs option.
+          </xs:documentation>
+          <xs:appinfo>name:Mass drug administration (with decision tree and drug PK/PD model);</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="HSESCaseManagement">
+              <xs:attribute name="name" type="xs:string" use="optional">
+                <xs:annotation>
+                  <xs:documentation>Name of set of interventions</xs:documentation>
+                  <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
         </xs:complexType>
       </xs:element>
       <xs:element name="PEV" type="vaccineDescription">

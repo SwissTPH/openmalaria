@@ -126,53 +126,51 @@
     </importedInfections>
     <human>
       <effect id="MDA">
-        <MDA>
-          <description>
-            <decisions>
-              <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
+        <MDA1D>
+          <decisions>
+            <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
             age(0-3): 0_3
             age(3-9): 3_9
             age(9-15): 9_15
             age(15-inf): 15_inf
           </decision>
-              <decision depends="" name="test" values="none,microscopy,RDT">
+            <decision depends="" name="test" values="none,microscopy,RDT">
              RDT
           </decision>
-              <decision depends="result" name="treatment" values="none,AL_treat">
+            <decision depends="result" name="treatment" values="none,AL_treat">
               result(negative): none
               result(positive): AL_treat
               result(none): none
           </decision>
-            </decisions>
-            <treatments>
-              <treatment name="AL_treat">
-                <schedule>
-                  <medicate drug="AR" hour="0" mg="20"/>
-                  <medicate drug="LU" hour="0" mg="120"/>
-                  <medicate drug="AR" hour="8" mg="20"/>
-                  <medicate drug="LU" hour="8" mg="120"/>
-                  <medicate drug="AR" hour="24" mg="20"/>
-                  <medicate drug="LU" hour="24" mg="120"/>
-                  <medicate drug="AR" hour="36" mg="20"/>
-                  <medicate drug="LU" hour="36" mg="120"/>
-                  <medicate drug="AR" hour="48" mg="20"/>
-                  <medicate drug="LU" hour="48" mg="120"/>
-                  <medicate drug="AR" hour="60" mg="20"/>
-                  <medicate drug="LU" hour="60" mg="120"/>
-                </schedule>
-                <modifier decision="age_AL">
-                  <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
-                  <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
-                  <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
-                  <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
-                </modifier>
-              </treatment>
-              <treatment name="none">
-                <schedule/>
-              </treatment>
-            </treatments>
-          </description>
-        </MDA>
+          </decisions>
+          <treatments>
+            <treatment name="AL_treat">
+              <schedule>
+                <medicate drug="AR" hour="0" mg="20"/>
+                <medicate drug="LU" hour="0" mg="120"/>
+                <medicate drug="AR" hour="8" mg="20"/>
+                <medicate drug="LU" hour="8" mg="120"/>
+                <medicate drug="AR" hour="24" mg="20"/>
+                <medicate drug="LU" hour="24" mg="120"/>
+                <medicate drug="AR" hour="36" mg="20"/>
+                <medicate drug="LU" hour="36" mg="120"/>
+                <medicate drug="AR" hour="48" mg="20"/>
+                <medicate drug="LU" hour="48" mg="120"/>
+                <medicate drug="AR" hour="60" mg="20"/>
+                <medicate drug="LU" hour="60" mg="120"/>
+              </schedule>
+              <modifier decision="age_AL">
+                <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
+                <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
+                <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
+                <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
+              </modifier>
+            </treatment>
+            <treatment name="none">
+              <schedule/>
+            </treatment>
+          </treatments>
+        </MDA1D>
       </effect>
       <effect id="ITN" name="Extended ITNs">
         <ITN>

@@ -86,30 +86,28 @@
   <interventions name="none">
     <human>
       <effect id="MDA">
-        <MDA>
-          <description>
-            <decisions>
-              <decision depends="result" name="treatment" values="MQ,none">
+        <MDA1D>
+          <decisions>
+            <decision depends="result" name="treatment" values="MQ,none">
             result(negative): none
             result(none): none
             result(positive): MQ
           </decision>
-              <decision depends="" name="test" values="none,microscopy,RDT">
+            <decision depends="" name="test" values="none,microscopy,RDT">
             RDT
           </decision>
-            </decisions>
-            <treatments>
-              <treatment name="MQ">
-                <schedule>
-                  <medicate drug="MQ" hour="0" mg="1200"/>
-                </schedule>
-              </treatment>
-              <treatment name="none">
-                <schedule/>
-              </treatment>
-            </treatments>
-          </description>
-        </MDA>
+          </decisions>
+          <treatments>
+            <treatment name="MQ">
+              <schedule>
+                <medicate drug="MQ" hour="0" mg="1200"/>
+              </schedule>
+            </treatment>
+            <treatment name="none">
+              <schedule/>
+            </treatment>
+          </treatments>
+        </MDA1D>
       </effect>
       <effect id="PEV">
         <PEV>

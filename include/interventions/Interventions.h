@@ -50,6 +50,7 @@ class TimedDeployment;
  * within a single intervention. */
 namespace Effect { enum Type {
     MDA,        // mass drug administration
+    MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
     PEV,        // pre-erythrocytic vaccine
     BSV,        // blood-stage vaccine
     TBV,        // transmission-blocking vaccine

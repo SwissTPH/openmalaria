@@ -57,7 +57,6 @@ public:
     
     virtual bool notAtRisk();
 
-    //TODO: This function is no longer used. Revise (does it make sense for MDA to use this on a 1-day TS?)
     virtual void massDrugAdministration(Human& human);
 
 protected:

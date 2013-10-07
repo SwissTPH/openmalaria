@@ -356,7 +356,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeT
     }else{
         if( !dvMap.empty() || !decisions.empty() || !treatments.empty() )
             // multiple MDA descriptions are probably the only thing that will cause this...
-            throw util::unimplemented_exception( "multiple MDA descriptions" );
+            throw util::unimplemented_exception( "multiple MDA descriptions using 1-day TS decision tree" );
     }
     
     // Construct processor & read from XML.
@@ -479,7 +479,7 @@ pair<ESDecisionValue, bool> executeTree(
     return make_pair( outcome, schedule.anyTreatments() );
 }
 
-void ESCaseManagement::initMDA (const scnXml::MDA::DescriptionType& desc){
+void ESCaseManagement::initMDA (const scnXml::MDA1D& desc){
     mda.initialize( desc, ESDecisionMap::MDA, false );
 }
 
