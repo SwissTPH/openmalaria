@@ -114,6 +114,14 @@ public:
   /// Special intervention: clears all immunity
   virtual void clearImmunity() =0;
   
+  /** Add a prophylactic effect for drugs.
+   * 
+   * In its current version, this function assumes the first element of the
+   * vector is today's clearance probability which has already been applied
+   * (and therefore will not be used by this function), and the next n values
+   * are clearance probabilities for the next n timesteps. */
+    virtual void addProphylacticEffects(const vector<double>& pClearanceByTime) =0;
+  
   /** The maximum number of infections a human can have. The only real reason
    * for this limit is to prevent incase bad input from causing the number of
    * infections to baloon stupidly.

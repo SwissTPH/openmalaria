@@ -80,21 +80,19 @@
   <interventions name="cohort selection">
     <human>
       <effect id="MDA">
-        <MDA>
-          <description>
-            <decisions>
-              <decision depends="" name="treatment" values="1">1</decision>
-              <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
-            </decisions>
-            <treatments>
-              <treatment name="1">
-                <schedule>
-                  <medicate drug="MQ" hour="0" mg="1200"/>
-                </schedule>
-              </treatment>
-            </treatments>
-          </description>
-        </MDA>
+        <MDA1D>
+          <decisions>
+            <decision depends="" name="treatment" values="1">1</decision>
+            <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
+          </decisions>
+          <treatments>
+            <treatment name="1">
+              <schedule>
+                <medicate drug="MQ" hour="0" mg="1200"/>
+              </schedule>
+            </treatment>
+          </treatments>
+        </MDA1D>
       </effect>
       <effect id="cohort">
         <cohort/>

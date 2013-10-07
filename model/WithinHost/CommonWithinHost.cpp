@@ -133,6 +133,11 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
     pkpdModel->decayDrugs ();
 }
 
+void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {
+    // this should actually be easy; it just isn't needed yet
+    throw util::unimplemented_exception( "prophylactic effects on 1-day timestep" );
+}
+
 
 // -----  Summarize  -----
 

@@ -43,55 +43,14 @@ namespace Deployment {
     };
 }
 
-/** Interface for continuous deployment of an intervention. */
-class ContinuousDeployment {
-public:
-    /// Create, passing deployment age
-    explicit ContinuousDeployment( const ::scnXml::ContinuousDeployment& elt );
-    virtual ~ContinuousDeployment() {}
-    
-    /// For sorting
-    inline bool operator<( const ContinuousDeployment& that )const{
-        return this->deployAge < that.deployAge;
-    }
-    
-    /** Apply filters and potentially deploy.
-     * 
-     * @returns false iff this deployment (and thus all later ones in the
-     *  ordered list) happens in the future. */
-    bool filterAndDeploy( Host::Human& human, const Population& population ) const;
-    
-protected:
-    /// Deploy to a selected human.
-    virtual void deploy( Host::Human& human, const Population& population ) const =0;
-    
-    TimeStep begin, end;    // first timeStep active and first timeStep no-longer active
-    TimeStep deployAge;
-    bool cohortOnly;
-    double coverage;
-};
-
-/** Interface for timed deployment of an intervention. */
-class TimedDeployment {
-public:
-    /// Create, passing time of deployment
-    explicit TimedDeployment(TimeStep deploymentTime);
-    virtual ~TimedDeployment() {}
-    
-    inline bool operator< (const TimedDeployment& that) const{
-        return this->time < that.time;
-    }
-    
-    virtual void deploy (OM::Population&) =0;
-    
-    // Read access required in this file; don't really need protection:
-    TimeStep time;
-};
+class ContinuousHumanDeployment;
+class TimedDeployment;
 
 /** Enumeration of all effects, in the order that these should be deployed in
  * within a single intervention. */
 namespace Effect { enum Type {
     MDA,        // mass drug administration
+    MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
     PEV,        // pre-erythrocytic vaccine
     BSV,        // blood-stage vaccine
     TBV,        // transmission-blocking vaccine
@@ -172,8 +131,12 @@ private:
 /** Management of interventions deployed on a per-timestep basis. */
 class InterventionManager {
 public:
-    /** Read XML descriptions. */
-    InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population);
+    /** Make an instance. For use by Simulation class only. */
+    static void makeInstance( const scnXml::Interventions& intervElt, OM::Population& population );
+    
+    /** InterventionManager instance. It is the Simulation class's responsibility
+     * to set this up before starting simulations. It should exist thereafter. */
+    static auto_ptr<InterventionManager> instance;
     
     /// Checkpointing
     template<class S>
@@ -213,6 +176,9 @@ public:
     }
     
 private:
+    /** Read XML descriptions. */
+    InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population);
+    
     // All human intervention effects, indexed by a number. This list is used
     // during initialisation and thereafter only for memory management.
     boost::ptr_vector<HumanInterventionEffect> humanEffects;
@@ -220,7 +186,7 @@ private:
     // only (so that they are deleted when this class is destroyed).
     boost::ptr_vector<HumanIntervention> humanInterventions;
     // Continuous interventions, sorted by deployment age (weakly increasing)
-    ptr_vector<ContinuousDeployment> continuous;
+    ptr_vector<ContinuousHumanDeployment> continuous;
     // List of all timed interventions. Should be sorted (time weakly increasing).
     ptr_vector<TimedDeployment> timed;
     uint32_t nextTimed;
@@ -231,10 +197,5 @@ private:
     bool _cohortEnabled;
 };
 
-/** Type of container for manager. */
-typedef auto_ptr<InterventionManager> auto_ptr_interv_manager;
-/** InterventionManager instance. It is the Simulation class's responsibility
- * to set this up before starting simulations. It should exist thereafter. */
-extern auto_ptr_interv_manager manager; // defined in Simulation.cpp
 } }
 #endif

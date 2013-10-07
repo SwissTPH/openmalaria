@@ -887,4 +887,85 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="DrugWithCompliance">
+    <xs:annotation>
+      <xs:documentation>
+        A simple description of the effect of a drug regime administration in
+        terms of clearance rates on administration and optionally for several
+        further timesteps (a simple model for prophylactic effects).
+      </xs:documentation>
+      <xs:appinfo>name:Drug regime effect</xs:appinfo>
+    </xs:annotation>
+    <xs:all>
+      <xs:element name="compliance">
+        <xs:annotation>
+          <xs:appinfo>name:Description of compliance;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="pCompliance" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Proportion of drug recipients who comply with the dosage regime.
+              </xs:documentation>
+              <xs:appinfo>name:Compliance;units:Dimensionless;min:0;max:1;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="nonCompliersMultiplier" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Describes clearance probabilities for non-compliers in relation
+                to those for compliers: each probability of clearing infections
+                is multiplied by this value.
+              </xs:documentation>
+              <xs:appinfo>name:Clearance probability multiplier for non-compliers;units:Dimensionless;min:0;max:1;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="compliersEffective">
+        <xs:annotation>
+          <xs:documentation>
+            Description of clearance effects among compliant hosts
+          </xs:documentation>
+          <xs:appinfo>name:Clearance rates for compliant hosts;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="timestep" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  At least one instance of this element is required. The first
+                  element describes the probability of clearing infections on
+                  the timestep of deployment, the next the probability on the
+                  following timestep, and so on. There is no limit to how many
+                  timestep's effects and thus how long the prophylactic effect
+                  can be.
+                </xs:documentation>
+                <xs:appinfo>name:Per timestep effect;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="pClearance" use="required" type="xs:double">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The probability of clearing all infections on this timestep.
+                      The effect is, based on this probability, either to clear all
+                      current infections, or to do nothing. (This is more appropriate
+                      to modelling adherence/dosing problems than resistance. Model
+                      extensions to deal with resistance better may be desirable in
+                      the future.)
+                      
+                      Does not allow for entering adherence rates, so give the derived
+                      clearance rate (i.e. clearance_with_adherence * adherence_rate +
+                      clearance_bad_adherence * (1 - adherence_rate)).
+                    </xs:documentation>
+                    <xs:appinfo>name:Probability of clearance;type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:all>
+  </xs:complexType>
 </xs:schema>

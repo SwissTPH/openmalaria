@@ -21,6 +21,7 @@
 #include "WithinHost/WithinHostModel.h"
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
+#include "WithinHost/ProphylacticActionWithinHost.h"
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
@@ -86,8 +87,10 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
       util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
     return new CommonWithinHost();
   } else {
-    if ( util::ModelOptions::option( IPTI_SP_MODEL ) )
+    if( util::ModelOptions::option( IPTI_SP_MODEL ) )
       return new DescriptiveIPTWithinHost();
+    else if( util::ModelOptions::option( PROPHYLACTIC_DRUG_ACTION_MODEL ) )
+        return new ProphylacticActionWithinHost();
     else
       return new DescriptiveWithinHostModel();
   }

@@ -222,6 +222,11 @@ namespace OM { namespace util {
          * Requires vector model. */
         VECTOR_SIMPLE_MPD_MODEL,
         
+        /** Model allowing drugs to have prophylactic effect.
+         * 
+         * Currently fairly simple and only used by MDA. */
+        PROPHYLACTIC_DRUG_ACTION_MODEL,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

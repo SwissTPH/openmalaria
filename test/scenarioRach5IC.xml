@@ -101,7 +101,14 @@
   <interventions name="Full Set">
     <human>
       <effect id="MDA">
-        <MDA/>
+        <MDA>
+          <drugEffect>
+            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
+            <compliersEffective>
+              <timestep pClearance="1"/>
+            </compliersEffective>
+          </drugEffect>
+        </MDA>
       </effect>
       <effect id="ITN" name="LLIN test">
         <ITN>
@@ -143,7 +150,8 @@
       <intervention>
         <effect id="MDA"/>
         <timed>
-          <deploy cohort="true" coverage="1" time="30"/>
+          <restrictToCohort id="cohort"/>
+          <deploy coverage="1" time="30"/>
         </timed>
       </intervention>
       <intervention name="LLIN test">
@@ -278,7 +286,6 @@
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-      <option name="IPTI_SP_MODEL" value="false"/>
       <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>

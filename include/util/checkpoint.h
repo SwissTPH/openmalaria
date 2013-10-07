@@ -30,6 +30,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <set>
 using namespace std;
 
 /** @brief Checkpointing utility functions
@@ -235,6 +236,9 @@ namespace checkpoint {
         }
     }
     */
+    
+    void operator& (const set<size_t>&x, ostream& stream);
+    void operator& (set<size_t>& x, istream& stream);
     
     void operator& (const map<string,double>& x, ostream& stream);
     void operator& (map<string, double >& x, istream& stream);

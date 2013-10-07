@@ -77,7 +77,6 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
     nextCtsDist(0),
-    _inCohort(false),
     _probTransmissionToMosquito(0.0)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
@@ -213,37 +212,37 @@ void Human::deployVaccine( interventions::Deployment::Method method, Vaccine::Ty
     if( method == interventions::Deployment::TIMED ){
         _vaccine.vaccinate( type );
         if( type == Vaccine::reportType )
-            Monitoring::Surveys.getSurvey(_inCohort).reportMassVaccinations (getMonitoringAgeGroup(), 1);
+            Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassVaccinations (getMonitoringAgeGroup(), 1);
     }else if( method == interventions::Deployment::CTS ){
         if ( _vaccine.getsEPIVaccination( type, TimeStep::simulation - _dateOfBirth ) ){
             _vaccine.vaccinate( type );
             if( type == Vaccine::reportType )
-                Monitoring::Surveys.getSurvey(_inCohort).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
+                Monitoring::Surveys.getSurvey(isInAnyCohort()).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
         }
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 void Human::deployIPT( interventions::Deployment::Method method ){
     if( method == interventions::Deployment::TIMED ){
-        withinHostModel->timedIPT (getMonitoringAgeGroup(), _inCohort);
+        withinHostModel->timedIPT (getMonitoringAgeGroup(), isInAnyCohort());
     }else if( method == interventions::Deployment::CTS ){
-        withinHostModel->continuousIPT( getMonitoringAgeGroup(), _inCohort );
+        withinHostModel->continuousIPT( getMonitoringAgeGroup(), isInAnyCohort() );
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 void Human::deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
     perHostTransmission.setupITN ( transmissionModel );
     if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(_inCohort).reportMassITNs( getMonitoringAgeGroup(), 1 );
+        Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassITNs( getMonitoringAgeGroup(), 1 );
     }else if( method == interventions::Deployment::CTS ){
-        Monitoring::Surveys.getSurvey(_inCohort).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
+        Monitoring::Surveys.getSurvey(isInAnyCohort()).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 void Human::deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
     perHostTransmission.setupIRS ( transmissionModel );
     if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(_inCohort).reportMassIRS( getMonitoringAgeGroup(), 1 );
+        Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassIRS( getMonitoringAgeGroup(), 1 );
     }else if( method == interventions::Deployment::CTS ){
         //TODO: report
     }else throw SWITCH_DEFAULT_EXCEPTION;
@@ -257,7 +256,7 @@ void Human::reportDeployment( interventions::Effect::Type type, interventions::D
     if( method == interventions::Deployment::TIMED ){
         switch( type ){
             case interventions::Effect::GVI:
-                Monitoring::Surveys.getSurvey(_inCohort).reportMassGVI( getMonitoringAgeGroup(), 1 );
+                Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassGVI( getMonitoringAgeGroup(), 1 );
                 break;
             default:
                 throw SWITCH_DEFAULT_EXCEPTION;
@@ -287,32 +286,39 @@ void Human::summarize() {
         return;
     }
     
-    Monitoring::Survey& survey( Monitoring::Surveys.getSurvey( _inCohort ) );
+    Monitoring::Survey& survey( Monitoring::Surveys.getSurvey( isInAnyCohort() ) );
     survey.reportHosts (getMonitoringAgeGroup(), 1);
     bool patent = withinHostModel->summarize (survey, getMonitoringAgeGroup());
     infIncidence->summarize (survey, getMonitoringAgeGroup());
     clinicalModel->summarize (survey, getMonitoringAgeGroup());
     
     if( cohortFirstInfectionOnly && patent ){
-        removeFromCohort();
+        removeFromAllCohorts(); //TODO: how to handle with multiple cohorts?
     }
 }
 
-void Human::addToCohort (){
-    if( _inCohort ) return;	// nothing to do
+void Human::addToCohort (size_t index){
+    if( cohorts.count(index) > 0 ) return;	// nothing to do
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,
     // although episode reports still need to be flushed.
     flushReports();
-    _inCohort = true;
+    cohorts.insert(index);
+    //TODO: reporting is inappropriate
     Monitoring::Surveys.current->reportAddedToCohort( getMonitoringAgeGroup(), 1 );
 }
-void Human::removeFromCohort(){
-    if( _inCohort ){
+void Human::removeFromCohort( size_t index ){
+    if( cohorts.count(index) > 0 ){
         // Data should be flushed as with addToCohort().
         flushReports();
-        _inCohort = false;
+        cohorts.erase( index );
+        //TODO: reporting
         Monitoring::Surveys.current->reportRemovedFromCohort( getMonitoringAgeGroup(), 1 );
+    }
+}
+void Human::removeFromAllCohorts(){
+    while( cohorts.begin() != cohorts.end() ){
+        removeFromCohort( *cohorts.begin() );
     }
 }
 

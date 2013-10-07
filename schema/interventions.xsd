@@ -284,7 +284,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Name of set of interventions</xs:documentation>
-        <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+        <xs:appinfo>type:string;name:Name of intervention set;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -347,10 +347,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:attribute>
               </xs:complexType>
             </xs:element>
-            <xs:element minOccurs="0" name="continuous" type="continuousList">
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="continuousList">
             <xs:annotation>
                 <xs:documentation>List of ages at which deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
+                
+                Cohort restriction may be added as a property of the list of continuous deployments.
                 </xs:documentation>
                 <xs:appinfo>type:list of elements;name:Age-based (continuous) deployment;</xs:appinfo>
               </xs:annotation>
@@ -384,58 +386,68 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="MDA">
         <xs:annotation>
           <xs:documentation>
-            Description and deployment of MDA interventions
-            (can also be configured as screen and treat or intermittent
-            preventative treatment with 1-day time-step models).
+            Description of a MDA/MSAT intervention (Mass Screen and Treat is
+            just Mass Drug Administration with a diagnostic).
             
-            Currently neither diagnostic nor description need be provided for
-            5-day timestep model; this may change in the future.
+            This MDA/MSAT model allows a diagnostic and drug action modelled
+            by direct clearance rates. For the 1-day timestep models, a more
+            detailed model of drug action and more flexible model of deployment
+            decisions are available; see MDA1D.
+            
+            With no diagnostic description this intervention behaves like MDA
+            (no screening, just deliver drugs). A drug description is required.
           </xs:documentation>
-          <xs:appinfo>name:Mass drug administration;</xs:appinfo>
+          <xs:appinfo>name:Mass drug administration (simple);</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:choice>
-              <xs:sequence>
-                <xs:element name="diagnostic" type="HSDiagnostic" minOccurs="0">
-                  <xs:annotation>
-                    <xs:documentation>
-                      Description of diagnostic used by mass treatment option
-                      of five-day case management model — may be used to model
-                      MDA without diagnostic or MSAT.
-                      
-                      Drugs are administered whenever the test outcome is positive.
-                    </xs:documentation>
-                    <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
-                  </xs:annotation>
-                </xs:element>
-              </xs:sequence>
-              <xs:element name="description" minOccurs="0">
-                <xs:annotation>
-                  <xs:documentation>
-                    Description of treatment type used by mass treatment option
-                    of one-day case management model. Can be used to describe
-                    one-size-fits-all mass drug dosing, age-based mass drug dosing
-                    and screen-and-treat. Number of treatments given can be
-                    reported by the nMDAs option.
-                  </xs:documentation>
-                  <xs:appinfo>type:string;name:Diagnostic and treatment (1-day);</xs:appinfo>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:complexContent>
-                    <xs:extension base="HSESCaseManagement">
-                      <xs:attribute name="name" type="xs:string" use="optional">
-                        <xs:annotation>
-                          <xs:documentation>Name of set of interventions</xs:documentation>
-                          <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
-                        </xs:annotation>
-                      </xs:attribute>
-                    </xs:extension>
-                  </xs:complexContent>
-                </xs:complexType>
-              </xs:element>
-            </xs:choice>
+            <xs:element name="diagnostic" type="HSDiagnostic" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  Description of diagnostic used by mass treatment option
+                  of five-day case management model — may be used to model
+                  MDA without diagnostic or MSAT.
+                  
+                  The diagnostic is used on hosts selected by the coverage
+                  parameters, and drugs are administered whenever the test
+                  outcome is positive.
+                </xs:documentation>
+                <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="drugEffect" type="DrugWithCompliance"/>
           </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="MDA1D">
+        <xs:annotation>
+          <xs:documentation>
+            Description of a MDA/MSAT intervention (Mass Screen and Treat is
+            just Mass Drug Administration with a diagnostic).
+            
+            This MDA/MSAT model piggy-backs the 1-day timestep case management
+            and drug models, and thus is only available when using a 1-day
+            timestep.
+            
+            Description of treatment type used by mass treatment option of
+            one-day case management model. Can be used to describe
+            one-size-fits-all mass drug dosing, age-based mass drug dosing and
+            screen-and-treat. Number of treatments given can be reported by
+            the nMDAs option.
+          </xs:documentation>
+          <xs:appinfo>name:Mass drug administration (with decision tree and drug PK/PD model);</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="HSESCaseManagement">
+              <xs:attribute name="name" type="xs:string" use="optional">
+                <xs:annotation>
+                  <xs:documentation>Name of set of interventions</xs:documentation>
+                  <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
         </xs:complexType>
       </xs:element>
       <xs:element name="PEV" type="vaccineDescription">
@@ -628,39 +640,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;sweepable:true</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="cohort" type="xs:boolean" default="false">
-      <xs:annotation>
-        <xs:documentation>
-          Restrict distribution to chosen cohort.
-        </xs:documentation>
-        <xs:appinfo>units:dimensionless;min:0;max:1;name:Cohort only;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="massCum">
-    <xs:complexContent>
-      <xs:extension base="mass">
-        <xs:attribute name="cumulativeWithMaxAge" type="xs:double" use="optional">
-          <xs:annotation>
-            <xs:documentation>
-              If present, activate cumulate deployment mode where intervention
-              is only deployed to individuals not already considered protected
-              in sufficient quantity to bring the total proportion of people
-              covered up to level described by "coverage".
-              
-              Individuals are considered already protected by this intervention
-              when the age of the last net/dose/etc. received is less than
-              "maximum age" (this attribute) years old (i.e. when
-              timeLastDeployment+maximumAge>currentTimeStep).
-            </xs:documentation>
-            <xs:appinfo>units:Years;name:Cumulative deployment: maximum age;min:0</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="continuousList">
     <xs:sequence>
+      <xs:element name="restrictToCohort" type="RestrictToCohort" minOccurs="0"/>
       <!-- Note: minimum is 1 to save an extra check in code. -->
       <xs:element name="deploy" type="continuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -680,14 +663,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Coverage of intervention
         </xs:documentation>
         <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion covered;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="cohort" type="xs:boolean" default="false">
-      <xs:annotation>
-        <xs:documentation>
-          Restrict distribution to chosen cohort (default: false).
-        </xs:documentation>
-        <xs:appinfo>units:dimensionless;min:0;max:1;name:Cohort only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="begin" type="xs:int" default="0">
@@ -716,20 +691,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="deploy" type="timedBase" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="massList">
-    <xs:sequence>
-      <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="mass" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="massCumList">
-    <xs:sequence>
-      <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="massCum" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
   <xs:complexType name="massListWithCum">
     <xs:sequence>
+      <xs:element name="restrictToCohort" minOccurs="0" type="RestrictToCohort"/>
       <xs:element name="cumulativeCoverage" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -761,7 +725,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 The identifier (short name) of the effect used when
                 selecting people.
               </xs:documentation>
-              <xs:appinfo>name:Intervention;</xs:appinfo>
+              <xs:appinfo>name:Effect identifier;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="maxAgeYears" type="xs:double" use="required">
@@ -781,6 +745,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <!-- Note: minimum is 1 to save an extra check in code. -->
       <xs:element name="deploy" type="mass" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="RestrictToCohort">
+    <xs:annotation>
+      <xs:documentation>
+        If this element is specified, deployment is restricted to a
+        specific cohort (specified via the "id" attribute); otherwise
+        cohort membership has no effect on deployment.
+      </xs:documentation>
+      <xs:appinfo>name:Restrict to cohort;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="id" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The identifier (short name) of the cohort (which is that of the
+          effect used to select the cohort).
+        </xs:documentation>
+        <xs:appinfo>name:Identifier;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="vaccineDescription">
     <xs:annotation>

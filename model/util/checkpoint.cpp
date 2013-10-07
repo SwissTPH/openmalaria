@@ -219,6 +219,22 @@ namespace OM { namespace util { namespace checkpoint {
             throw checkpoint_error ("stream read error string");
     }
     
+    void operator& (const set<size_t>&x, ostream& stream){
+        x.size() & stream;
+        for( set<size_t>::const_iterator it = x.begin(); it != x.end(); ++it )
+            *it & stream;
+    }
+    void operator& (set<size_t>& x, istream& stream){
+        size_t len;
+        len & stream;
+        validateListSize(len);
+        for( size_t i = 0; i < len; ++i ){
+            size_t index;
+            index & stream;
+            x.insert( index );
+        }
+    }
+    
     // map<S,T> — template doesn't work on gcc
     void operator& (const map<string,double>& x, ostream& stream) {
         x.size() & stream;

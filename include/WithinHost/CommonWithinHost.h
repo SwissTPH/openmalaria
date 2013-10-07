@@ -51,6 +51,8 @@ public:
     
     virtual void update (int nNewInfs, double ageInYears, double BSVEfficacy);
     
+    virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
+    
     /** \brief Factory functions to create infections.
      *
      * These allow creation of the correct type of infection in a generic manner.

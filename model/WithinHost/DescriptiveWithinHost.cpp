@@ -22,6 +22,7 @@
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
+#include "util/errors.h"
 #include <cassert>
 
 using namespace std;
@@ -83,6 +84,8 @@ void DescriptiveWithinHostModel::importInfection(){
 
 // -----  Density calculations  -----
 
+void DescriptiveWithinHostModel::drugAction(){}
+
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -106,6 +109,8 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     double cumulativeh=_cumulativeh;
     double cumulativeY=_cumulativeY;
     _cumulativeh += nNewInfs;
+    
+    drugAction();
 
     for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
@@ -147,6 +152,10 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
 
     IPTattenuateAsexualMinTotalDensity();
+}
+
+void DescriptiveWithinHostModel::addProphylacticEffects(const vector<double>& pClearanceByTime) {
+    throw util::xml_scenario_error( "Please enable PROPHYLACTIC_DRUG_ACTION_MODEL" );
 }
 
 
