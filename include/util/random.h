@@ -62,11 +62,14 @@ namespace random {
     
     /** This function returns a random integer from the Poisson distribution with mean lambda. */
     int poisson(double lambda);
-    //@}
 
-    /** This function returns 1 or 0 (Bernoulli distribution).
-     *
-     */
+    /** This function returns true with probability prob or 0 with probability
+     * 1-prob (Bernoulli distribution). */
     bool bernoulli(double prob);
+    
+    /** This function returns an integer from 0 to 1-n, where every value has
+     * equal probability of being sampled. */
+    int uniform (int n);
+    //@}
 }
 } }

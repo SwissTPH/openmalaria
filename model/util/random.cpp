@@ -222,10 +222,13 @@ int random::poisson(double lambda){
     return gsl_ran_poisson (rng.gsl_generator, lambda);
 }
 
-bool random::bernoulli(double prob)
-{
+bool random::bernoulli(double prob){
     // return true iff our variate is less than the probability
     return random::uniform_01() < prob;
+}
+
+int random::uniform(int n){
+    return random::uniform_01() * n;
 }
 
 } }

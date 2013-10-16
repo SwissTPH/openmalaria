@@ -71,6 +71,7 @@ namespace OM { namespace util {
 	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
+            codeMap["MOLINEAUX_PAIRWISE_SAMPLE"]=MOLINEAUX_PAIRWISE_SAMPLE;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -187,6 +188,10 @@ namespace OM { namespace util {
 	    .set(COMORB_TREAT_HET)	.set(TRIPLE_HET);
 	incompatibilities[COMORB_TREAT_HET]
 	    .set(TRIPLE_HET);
+        
+        incompatibilities[MOLINEAUX_PAIRWISE_SAMPLE]
+            .set(FIRST_LOCAL_MAXIMUM_GAMMA)
+            .set(MEAN_DURATION_GAMMA);
         
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {

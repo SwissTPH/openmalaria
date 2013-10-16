@@ -222,6 +222,10 @@ namespace OM { namespace util {
          * Requires vector model. */
         VECTOR_SIMPLE_MPD_MODEL,
         
+        /** Sample case-specific densities P*c and P*m as a pair from one of
+         * the 35 patient records. */
+        MOLINEAUX_PAIRWISE_SAMPLE,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

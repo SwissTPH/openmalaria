@@ -46,6 +46,7 @@ double MolineauxInfection::sd_scale_diff_pos_days  = std::numeric_limits<double>
 bool MolineauxInfection::first_local_maximum_gamma = false;
 bool MolineauxInfection::mean_duration_gamma = false;
 bool MolineauxInfection::multi_factor_gamma  = false;
+bool MolineauxInfection::pairwise_PStar_sample = false;
 
 double MolineauxInfection::qPow[v];
 
@@ -81,6 +82,52 @@ const int kappa_c=3;
 const int kappa_m=1;
 const int kappa_v=3;
 const double C=1.0;
+
+/* Case-specific parameters.
+ * 
+ * For each of the 35 Malaria Therapy patients, this is:
+ *  0) the duration of the infection as last day with positive density minus first positive
+ *  1) the parasite density in parasites/microlitre at the first local maximum
+ * 
+ * Indexing is 2*patient + param where 0 <= patient < 35 and 0 <= param < 2.
+ */
+const double caseSpecificData[] = {
+        216, 18600, // G131
+        198, 13080, // G140
+        206, 45720, // G141
+        366, 23760, // G142
+        230, 60840, // G143
+        172, 6000, // G146
+        100, 2340, // G147
+        236, 31440, // G159
+        236, 453600, // G161
+        120, 4240, // G173
+        176, 195840, // G174
+        178, 60120, // G178
+        36, 8720, // G184
+        44, 8000, // G193
+        242, 395280, // G200
+        70, 28320, // G210
+        292, 200160, // G212
+        248, 59320, // G217
+        98, 66480, // G23
+        176, 61200, // G230
+        234, 169920, // G240
+        226, 46800, // G264
+        270, 19260, // G265
+        278, 86040, // G279
+        212, 110160, // G290
+        264, 43200, // G385
+        364, 133920, // G407
+        184, 222480, // G408
+        160, 21420, // G414
+        220, 74160, // G416
+        132, 210960, // G423
+        176, 89280, // G439
+        208, 105840, // G445
+        330, 21600, // G457
+        404, 156240 // G48
+};
 //@}
 
 CommonInfection* createMolineauxInfection (uint32_t protID) {
@@ -128,6 +175,9 @@ void MolineauxInfection::init() {
     } else {
 	multi_factor_gamma = false;
     }
+    
+    pairwise_PStar_sample = util::ModelOptions::option( util::MOLINEAUX_PAIRWISE_SAMPLE );
+    assert( !pairwise_PStar_sample && ( first_local_maximum_gamma || mean_duration_gamma ) );
 
    for(int i=0;i<50;i++)
    {
@@ -149,10 +199,8 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 	} else {
 	  while (m[i]<1.0) {    
 	    m[i]=static_cast<float>(random::gauss(mu_m, sigma_m));
-
 	  }
 	}
-        
     }
 
     for (size_t tau=0; tau<taus;tau++)
@@ -165,23 +213,27 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
     variants[0].P = 0.1f;
     variantTranscendingSummation = 0.0;
     
-    
-    // sampling first local maximum
-    // for gamma distribution shape and scale parameters are > 0 so if parameter == 0 mean that gauss distibution is choosen
-    if( first_local_maximum_gamma ) {
-	Pstar_c = static_cast<float>(k_c*pow(random::gamma(mean_shape_first_local_max,sd_scale_first_local_max),10.0));
-    } else {
-	Pstar_c = static_cast<float>(k_c*pow(random::gauss(mean_shape_first_local_max,sd_scale_first_local_max),10.0));
+    if( pairwise_PStar_sample ){
+        int patient = util::random::uniform( 35 );
+        Pstar_c = k_c * caseSpecificData[2 * patient + 1];
+        Pstar_m = k_m * caseSpecificData[2 * patient + 0];
+    }else{
+        // sampling first local maximum
+        // for gamma distribution shape and scale parameters are > 0 so if parameter == 0 mean that gauss distibution is choosen
+        if( first_local_maximum_gamma ) {
+            Pstar_c = static_cast<float>(k_c*pow(random::gamma(mean_shape_first_local_max,sd_scale_first_local_max),10.0));
+        } else {
+            Pstar_c = static_cast<float>(k_c*pow(random::gauss(mean_shape_first_local_max,sd_scale_first_local_max),10.0));
+        }
+        
+        // sampling duration
+        // for gamma distribution shape and scale parameters are > 0 so if parameter == 0 mean that gauss distibution is choosen
+        if( mean_duration_gamma ) {
+            Pstar_m = static_cast<float>(k_m*pow(random::gamma(mean_shape_diff_pos_days,sd_scale_diff_pos_days),10.0));
+        } else {
+            Pstar_m = static_cast<float>(k_m*pow(random::gauss(mean_shape_diff_pos_days,sd_scale_diff_pos_days),10.0));
+        }
     }
-    
-    // sampling duration
-    // for gamma distribution shape and scale parameters are > 0 so if parameter == 0 mean that gauss distibution is choosen
-    if( mean_duration_gamma ) {
-	  Pstar_m = static_cast<float>(k_m*pow(random::gamma(mean_shape_diff_pos_days,sd_scale_diff_pos_days),10.0));
-    } else {
-	  Pstar_m = static_cast<float>(k_m*pow(random::gauss(mean_shape_diff_pos_days,sd_scale_diff_pos_days),10.0));
-    }
-    
 }
 
 MolineauxInfection::Variant::Variant () :
