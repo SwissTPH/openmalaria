@@ -177,7 +177,7 @@ void MolineauxInfection::init() {
     }
     
     pairwise_PStar_sample = util::ModelOptions::option( util::MOLINEAUX_PAIRWISE_SAMPLE );
-    assert( !pairwise_PStar_sample && ( first_local_maximum_gamma || mean_duration_gamma ) );
+    assert( !pairwise_PStar_sample || ( !first_local_maximum_gamma && !mean_duration_gamma ) );
 
    for(int i=0;i<50;i++)
    {

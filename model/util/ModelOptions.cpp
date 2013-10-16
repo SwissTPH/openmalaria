@@ -210,6 +210,15 @@ namespace OM { namespace util {
         // Required options (above table can't check these):
         if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
             throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
+        if( !optSet_bs[MOLINEAUX_WITHIN_HOST_MODEL] && (
+            optSet_bs[FIRST_LOCAL_MAXIMUM_GAMMA] ||
+            optSet_bs[MEAN_DURATION_GAMMA] ||
+            optSet_bs[PARASITE_REPLICATION_GAMMA] ) )
+            throw xml_scenario_error( "Molineaux model option used without MOLINEAUX_WITHIN_HOST_MODEL option" );
+        if( !optSet_bs[PENNY_WITHIN_HOST_MODEL] && (
+            optSet_bs[IMMUNE_THRESHOLD_GAMMA] ||
+            optSet_bs[UPDATE_DENSITY_GAMMA] ) )
+            throw xml_scenario_error( "Penny model option used without PENNY_WITHIN_HOST_MODEL option" );
         
         if( TimeStep::interval == 5 ){
             bitset<NUM_OPTIONS> require1DayTS;
