@@ -142,7 +142,6 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
 
         ++inf;
     }
-    assert( numInfs == static_cast<int>(infections.size()) );
     util::streamValidate( totalDensity );
     assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
 
@@ -170,6 +169,7 @@ void DescriptiveWithinHostModel::checkpoint (istream& stream) {
     for (int i=0; i<numInfs; ++i) {
         loadInfection(stream);  // create infections using a virtual function call
     }
+    assert( numInfs == static_cast<int>(infections.size()) );
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     WithinHostModel::checkpoint (stream);

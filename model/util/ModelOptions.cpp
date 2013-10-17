@@ -227,7 +227,6 @@ namespace OM { namespace util {
                 .set( INCLUDES_PK_PD )
                 .set( CLINICAL_EVENT_SCHEDULER )
                 .set( EMPIRICAL_WITHIN_HOST_MODEL )
-                .set( MOLINEAUX_WITHIN_HOST_MODEL )
                 .set( PENNY_WITHIN_HOST_MODEL );
             
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
