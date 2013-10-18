@@ -139,9 +139,6 @@ CommonInfection* checkpointedMolineauxInfection (istream& stream) {
 }
 
 void MolineauxInfection::init() {
-    if (TimeStep::interval != 1)
-        throw util::xml_scenario_error ("MolineauxInfection only supports scenarii using an interval of 1");
-
     CommonWithinHost::createInfection = &createMolineauxInfection;
     CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
     
