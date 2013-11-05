@@ -98,14 +98,10 @@ public:
   
   ///@brief Deploy "intervention" functions
   //@{
-  /** Deploys an intervention.
-   * 
-   * The purpose of this function is principally to allow recording of when
-   * each intervention effect is deployed (for cumulative deployment).
-   * 
-   * The number of wrapper functions in intervention deployment could probably
-   * be reduced somehow (TODO). */
-  void deploy( const interventions::HumanInterventionEffect& effect, interventions::Deployment::Method method );
+  /** Mark a certain intervention effect as being deployed now. */
+  inline void updateLastDeployed( size_t index ){
+      lastDeployments[index] = TimeStep::simulation;
+  }
   
   /** Determines for the purposes of cumulative deployment whether an effect is
    * still current.
@@ -161,9 +157,8 @@ public:
   inline bool isInCohort( size_t index )const{
       return index == numeric_limits<size_t>::max() || cohorts.count( index ) > 0;
   }
-  /** Return true if human is a member of any cohort.
-   *
-   * (TODO: code should be updated not to use this) */
+  /** Return true if human is a member of any cohort. */
+  //TODO(monitoring): outputs per cohort, not simply any cohort or everyone
   inline bool isInAnyCohort()const{ return cohorts.size() > 0; }
   
   /// Return the index of next continuous intervention to be deployed
@@ -178,8 +173,7 @@ public:
   /// Return the current survey to use (depends on survey time and whether or
   /// not individual is in the cohort).
   Monitoring::Survey& getSurvey() const{
-      //TODO: inappropriate use of cohorts
-      return Monitoring::Surveys.getSurvey( cohorts.size() > 0 );
+      return Monitoring::Surveys.getSurvey( isInAnyCohort() );
   }
   
   //! Summarize the state of a human individual.
@@ -196,7 +190,10 @@ public:
    *
    * Can be safely called when human is not in cohort. */
   void removeFromCohort( size_t index );
-  /** As removeFromCohort, but for all cohorts. */ //TODO: check usages of this
+  /** As removeFromCohort, but for all cohorts. */
+  //TODO(monitoring): firstBoutOnly / firstTreatmentOnly / firstInfectionOnly
+  //should either become properties of the cohort or be removed. After that
+  // this function can be removed.
   void removeFromAllCohorts();
   
   /// Flush any information pending reporting. Should only be called at destruction.
@@ -206,7 +203,6 @@ public:
    * 
    * Returns the value for the last time-step on which updateInfectiousness
    * has been called. */
-  //TODO: per genotype? (for LSTM's spread of resistance modelling)
   inline double probTransmissionToMosquito() const {
     return _probTransmissionToMosquito;
   }
@@ -292,7 +288,7 @@ private:
   /// Cached value of calcProbTransmissionToMosquito; checkpointed
   double _probTransmissionToMosquito;
   
-  //TODO: are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
+  //TODO(performance): are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
   /// The set of cohorts (intervention indexes) to which this human is a member
   set<size_t> cohorts;
   /// Last deployment times of intervention effects by effect index

@@ -111,7 +111,9 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method ) const{
     for( vector<const HumanInterventionEffect*>::const_iterator it = effects.begin();
             it != effects.end(); ++it )
     {
-        human.deploy( **it, method );
+        const interventions::HumanInterventionEffect& effect = **it;
+        effect.deploy( human, method );
+        human.updateLastDeployed( effect.getIndex() );
     }
 }
 

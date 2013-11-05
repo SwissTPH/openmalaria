@@ -194,11 +194,6 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(Vaccine::BSV));
 }
 
-void Human::deploy( const interventions::HumanInterventionEffect& effect, interventions::Deployment::Method method ){
-    effect.deploy( *this, method );
-    lastDeployments[effect.getIndex()] = TimeStep::simulation;
-}
-
 bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
     map<size_t,TimeStep>::const_iterator it = lastDeployments.find( effect_index );
     if( it == lastDeployments.end() ){
@@ -293,7 +288,7 @@ void Human::summarize() {
     clinicalModel->summarize (survey, getMonitoringAgeGroup());
     
     if( cohortFirstInfectionOnly && patent ){
-        removeFromAllCohorts(); //TODO: how to handle with multiple cohorts?
+        removeFromAllCohorts();
     }
 }
 
