@@ -93,6 +93,7 @@ set (Model_CPP
   interventions/ITN.cpp
   interventions/IRS.cpp
   interventions/GVI.cpp
+  interventions/Cohort.cpp
 )
 
 # Headers - only included so they show up in IDEs:

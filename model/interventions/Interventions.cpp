@@ -200,7 +200,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                     species_index_map = &transmission.getSpeciesIndexMap();
                 humanEffects.push_back( new interventions::GVIParams( index, effect.getGVI().get(), *species_index_map ) );
             }else if( effect.getCohort().present() ){
-                humanEffects.push_back( new CohortSelectionEffect( index ) );
+                humanEffects.push_back( new CohortSelectionEffect( index, effect.getCohort().get() ) );
+                _cohortEnabled = true;
             }else if( effect.getClearImmunity().present() ){
                 humanEffects.push_back( new ClearImmunityEffect( index ) );
             }else{

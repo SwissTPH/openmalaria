@@ -32,6 +32,7 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
+#include "interventions/Interventions.h"
 
 #include <string>
 #include <string.h>
@@ -43,9 +44,6 @@
 namespace OM { namespace Host {
     using namespace OM::util;
     int Human::_ylagLen = 0;
-    bool Human::cohortFirstBoutOnly = false;
-    bool Human::cohortFirstTreatmentOnly = false;
-    bool Human::cohortFirstInfectionOnly = false;
 
 // -----  Static functions  -----
 
@@ -56,10 +54,6 @@ void Human::initHumanParameters () {    // static
     WithinHost::WithinHostModel::init();
     Clinical::ClinicalModel::init();
     _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
-    
-    cohortFirstBoutOnly = InputData().getMonitoring().getFirstBoutOnly();
-    cohortFirstTreatmentOnly = InputData().getMonitoring().getFirstTreatmentOnly();
-    cohortFirstInfectionOnly = InputData().getMonitoring().getFirstInfectionOnly();
 }
 
 void Human::clear() {   // static clear
@@ -239,7 +233,7 @@ void Human::deployIRS( interventions::Deployment::Method method, Transmission::T
     if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassIRS( getMonitoringAgeGroup(), 1 );
     }else if( method == interventions::Deployment::CTS ){
-        //TODO: report
+        //TODO(monitoring): report
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
@@ -259,7 +253,7 @@ void Human::reportDeployment( interventions::Effect::Type type, interventions::D
     }else if( method == interventions::Deployment::CTS ){
         switch( type ){
             case interventions::Effect::GVI:
-                //TODO: report
+                //TODO(monitoring): report
                 break;
             default:
                 throw SWITCH_DEFAULT_EXCEPTION;
@@ -287,8 +281,8 @@ void Human::summarize() {
     infIncidence->summarize (survey, getMonitoringAgeGroup());
     clinicalModel->summarize (survey, getMonitoringAgeGroup());
     
-    if( cohortFirstInfectionOnly && patent ){
-        removeFromAllCohorts();
+    if( patent ){
+        removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_INFECTION );
     }
 }
 
@@ -299,7 +293,7 @@ void Human::addToCohort (size_t index){
     // although episode reports still need to be flushed.
     flushReports();
     cohorts.insert(index);
-    //TODO: reporting is inappropriate
+    //TODO(monitoring): reporting is inappropriate
     Monitoring::Surveys.current->reportAddedToCohort( getMonitoringAgeGroup(), 1 );
 }
 void Human::removeFromCohort( size_t index ){
@@ -307,16 +301,16 @@ void Human::removeFromCohort( size_t index ){
         // Data should be flushed as with addToCohort().
         flushReports();
         cohorts.erase( index );
-        //TODO: reporting
+        //TODO(monitoring): reporting
         Monitoring::Surveys.current->reportRemovedFromCohort( getMonitoringAgeGroup(), 1 );
     }
 }
-void Human::removeFromAllCohorts(){
-    while( cohorts.begin() != cohorts.end() ){
-        removeFromCohort( *cohorts.begin() );
+void Human::removeFromCohorts( interventions::CohortSelectionEffect::RemoveAtCode code ){
+    const vector<size_t>& removeAtList = interventions::CohortSelectionEffect::removeAtIds[code];
+    for( vector<size_t>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
+        removeFromCohort( *it );    // only does anything if in cohort
     }
 }
-
 
 void Human::flushReports (){
     clinicalModel->flushReports();

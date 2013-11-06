@@ -113,7 +113,7 @@ protected:
   double _pinfected;
   
   //!Number of infective bites since birth
-  double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
+  double _cumulativeEIRa;//TODO(memory opt): not needed by NegBinomMAII and LogNormalMAII
   
   //BEGIN Static data set by init()
   /* Shape constant of (Gamma) distribution of availability

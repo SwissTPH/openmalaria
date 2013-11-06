@@ -23,6 +23,7 @@
 #include "util/random.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
+#include "interventions/Cohort.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
@@ -432,11 +433,11 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	it = next;
     }
     
-    if( human.cohortFirstTreatmentOnly && timeLastTreatment == TimeStep::simulation ){
-        human.removeFromAllCohorts();
+    if( timeLastTreatment == TimeStep::simulation ){
+        human.removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_TREATMENT );
     }
-    if( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ){
-        human.removeFromAllCohorts();
+    if( pgState & Pathogenesis::SICK ){
+        human.removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_BOUT );
     }
 }
 

@@ -19,6 +19,7 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
+#include "interventions/Cohort.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -92,11 +93,11 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         human.withinHostModel->clearInfections (latestReport.getState() == Pathogenesis::STATE_SEVERE);
     }
 
-    if ( human.cohortFirstTreatmentOnly && _tLastTreatment == TimeStep::simulation ) {
-        human.removeFromAllCohorts();
+    if( _tLastTreatment == TimeStep::simulation ){
+        human.removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_TREATMENT );
     }
-    if ( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ) {
-        human.removeFromAllCohorts();
+    if( pgState & Pathogenesis::SICK ){
+        human.removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_BOUT );
     }
 }
 

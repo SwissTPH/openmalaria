@@ -465,7 +465,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             }
         }
         
-        fun updateElt(srcName: String, trgName: String, stripDescElt: Boolean){
+        fun updateElt(srcName: String, trgName: String, stripDescElt: Boolean): Element?{
             val elt = getChildElementOpt(interventions, srcName)
             if (elt != null){
                 val ident = effectIdent(srcName)
@@ -482,7 +482,9 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     val renamed = scenarioDocument.renameNode(elt,"",trgName)!!
                     effect.appendChild(renamed) // after removal of "continuous" and "timed" child elements
                 }
+                return effect
             }
+            return null
         }
         fun updateMDA(){
             val name = "MDA"
@@ -570,7 +572,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         updateElt("ITN", "ITN", true)
         updateIRS()
         updateElt("vectorDeterrent", "GVI", false)
-        updateElt("cohort", "cohort", false)
+        val cohortElt = updateElt("cohort", "cohort", false)
         updateElt("immuneSuppression", "clearImmunity", false)
         
         if (humanEffects.size > 0){
@@ -581,15 +583,32 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             for (intervention in humanInterventions)
                 human.appendChild(intervention)
         }
-        
+
+        val monitoring = getChildElement(scenarioElement, "monitoring")
+
         if (changeIRSReportingToGVI){
-            val mon = getChildElement(scenarioElement, "monitoring")
-            val survOpts = getChildElement(mon, "SurveyOptions")
+            val survOpts = getChildElement(monitoring, "SurveyOptions")
             for (opt in getChildElements(survOpts, "option")){
                 if (opt.getAttribute("name").equals("nMassIRS"))
                     // replace the name (IRS won't be used so don't need both opts)
                     opt.setAttribute("name","nMassGVI")
             }
         }
+        
+        if (cohortElt != null){
+            fun copyAttr(attrName: String){
+                val attr = monitoring.getAttributeNode(attrName)
+                if (attr != null){
+                    cohortElt.setAttribute(attrName, attr.getValue())
+                }
+            }
+            copyAttr("firstBoutOnly")
+            copyAttr("firstTreatmentOnly")
+            copyAttr("firstInfectionOnly")
+        }
+        // these we need to do even if cohortElt == null:
+        monitoring.removeAttribute("firstBoutOnly")
+        monitoring.removeAttribute("firstTreatmentOnly")
+        monitoring.removeAttribute("firstInfectionOnly")
     }
 }

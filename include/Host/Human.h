@@ -26,6 +26,7 @@
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/Interventions.h"
+#include "interventions/Cohort.h"
 #include <set>
 
 namespace OM {
@@ -190,11 +191,9 @@ public:
    *
    * Can be safely called when human is not in cohort. */
   void removeFromCohort( size_t index );
-  /** As removeFromCohort, but for all cohorts. */
-  //TODO(monitoring): firstBoutOnly / firstTreatmentOnly / firstInfectionOnly
-  //should either become properties of the cohort or be removed. After that
-  // this function can be removed.
-  void removeFromAllCohorts();
+  
+  /** Act on remove-from-cohort-on-first-xyz events. */
+  void removeFromCohorts( interventions::CohortSelectionEffect::RemoveAtCode code );
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
@@ -293,14 +292,6 @@ private:
   set<size_t> cohorts;
   /// Last deployment times of intervention effects by effect index
   map<size_t,TimeStep> lastDeployments;
-  
-public: //lazy: give read access to these
-  /// Remove from cohort as soon as individual has patent parasites?
-  static bool cohortFirstInfectionOnly;
-  /// Remove from cohort as soon as individual receives treatment?
-  static bool cohortFirstTreatmentOnly;
-  /// Remove from cohort as soon as individual gets sick (any sickness)?
-  static bool cohortFirstBoutOnly;
 };
 
 } }

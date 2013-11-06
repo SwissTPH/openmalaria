@@ -23,6 +23,7 @@
 
 // The includes here are more for documentation than required.
 #include "interventions/Interventions.h"
+#include "interventions/Cohort.h"
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
 #include "Clinical/ESCaseManagement.h"
@@ -194,17 +195,6 @@ public:
     
 private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
-};
-
-class CohortSelectionEffect : public HumanInterventionEffect {
-public:
-    CohortSelectionEffect( size_t index ) : HumanInterventionEffect(index) {}
-    
-    void deploy( Human& human, Deployment::Method method )const{
-        human.addToCohort( getIndex() );
-    }
-    
-    virtual Effect::Type effectType() const{ return Effect::COHORT; }
 };
 
 class ClearImmunityEffect : public HumanInterventionEffect {
