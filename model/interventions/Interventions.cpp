@@ -265,7 +265,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                     continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, cohort ) );
                 }
                 for( list<Host::Vaccine::Types>::const_iterator it = vaccineEffects.begin(); it != vaccineEffects.end(); ++it ){
-                    Host::Vaccine::types[*it].initSchedule( ctsSeq );
+                    Host::Vaccine::initSchedule( *it, ctsSeq );
                 }
             }
             for( scnXml::Intervention::TimedConstIterator timedIt = elt.getTimed().begin();

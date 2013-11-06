@@ -123,7 +123,7 @@ public:
     VaccineEffect( size_t index, const scnXml::VaccineDescription& seq, Host::Vaccine::Types type ) :
             HumanInterventionEffect(index), type(type)
     {
-        Host::Vaccine::types[type].initVaccine( seq, type );
+        Host::Vaccine::init( seq, type );
     }
     
     void deploy( Human& human, Deployment::Method method )const{

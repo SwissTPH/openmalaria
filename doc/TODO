@@ -15,3 +15,6 @@ Olivier's model: Funestus and Arabiensis larvae shouldn't compete with each
 other at all, while indoor-biting and outdoor-biting Arabiensis larvae should
 compete for the same resources. Should extend SimpleMPD model to allow this.
 
+Vaccines:
+Deployment model (exactly as now, or configurable?)
+Effect interaction (multiply survival factors?)

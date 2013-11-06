@@ -47,31 +47,43 @@ public:
     /// Special for R_0: check is set up correctly or throw xml_scenario_error
     static void verifyEnabledForR_0 ();
     
-    /** @brief Three types of vaccine.
-     * 
-     * TODO: multiple descriptions should be allowed for each type. */
-    static Vaccine types[NumVaccineTypes];
-    
-    /// Only one type of vaccine is reported via the old mechanism: the one given here
-    static Types reportType;
+    /** Until the monitoring system is updated, only one type of vaccination
+     * should be reported. Which to report is described here. */
+    inline static bool reportFor( Types type ){ return reportType == type; }
 
-    // ———  non-static  ———
-    /** Per-type initialization
-     * @returns decay */
-    void initVaccine (const scnXml::VaccineDescription& vd, Types type);
+    /** Per-type initialization */
+    inline static void init( const scnXml::VaccineDescription& vd, Types type ){
+        types[type].initVaccine( vd, type );
+    }
     
     /// Set schedule. Needed for correct EPI deployment.
-    /// TODO: a model of how vaccine booster shots work would allow this to be
+    /// TODO(vaccines): a model of how vaccine booster shots work would allow this to be
     /// moved to intervention deployment.
-    void initSchedule( const scnXml::ContinuousList::DeploySequence& schedule );
-
+    inline static void initSchedule( Types type, const scnXml::ContinuousList::DeploySequence& schedule ){
+        types[type].initScheduleInternal( schedule );
+    }
+    
 private:
+    // ———  non-static  ———
+    
     Vaccine() : active(false), decayFunc(DecayFunction::makeConstantObject()), efficacyB(1.0) {}
+    
+    void initVaccine (const scnXml::VaccineDescription& vd, Types type);
+    
+    void initScheduleInternal( const scnXml::ContinuousList::DeploySequence& schedule );
     
     /** Get the initial efficacy of the vaccine.
      *
      * @param numPrevDoses The number of prior vaccinations of the individual. */
     double getInitialEfficacy (size_t numPrevDoses);
+
+    /** @brief Three types of vaccine.
+     * 
+     * TODO(vaccines): multiple descriptions should be allowed for each type. */
+    static Vaccine types[NumVaccineTypes];
+    
+    /// Only one type of vaccine is reported via the old mechanism: the one given here
+    static Types reportType;
 
     /// True if this vaccine is in use
     bool active;
@@ -159,6 +171,7 @@ public:
         }
     }
 
+private:
     /// Details for each vaccine type
     vector<PerEffectPerHumanVaccine> types;
 };

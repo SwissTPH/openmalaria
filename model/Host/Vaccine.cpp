@@ -59,7 +59,7 @@ double Vaccine::getInitialEfficacy (size_t numPrevDoses)
     }
 }
 
-void Vaccine::initSchedule( const scnXml::ContinuousList::DeploySequence& schedule ){
+void Vaccine::initScheduleInternal( const scnXml::ContinuousList::DeploySequence& schedule ){
     if( targetAgeTStep.size() > 0 && schedule.size() > 0 ){
         throw util::xml_scenario_error( "A vaccine effect has multiple "
                 "continuous deployments. No model of how these should interact is included in OpenMalaria." );
