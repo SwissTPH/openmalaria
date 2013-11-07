@@ -23,7 +23,7 @@
 #include "util/errors.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
-#include "inputData.h"
+#include "util/DocumentLoader.h"
 
 #include <sstream>
 #include <iostream>
@@ -196,8 +196,8 @@ namespace OM { namespace util {
 	
 	if (cloVersion || cloHelp){
             cerr<<"OpenMalaria simulator of malaria epidemiology and control, schema version "
-                  <<InputDataType::SCHEMA_VERSION<<endl
-                  <<"(oldest compatible: "<<InputDataType::SCHEMA_VERSION_OLDEST_COMPATIBLE
+                  <<DocumentLoader::SCHEMA_VERSION<<endl
+                  <<"(oldest compatible: "<<DocumentLoader::SCHEMA_VERSION_OLDEST_COMPATIBLE
                   <<"). For more information, see"<<endl
                   <<"http://code.google.com/p/openmalaria/"<<endl<<endl
                   <<"OpenMalaria is copyright © 2005-2010 Swiss Tropical Institute and Liverpool"<<endl

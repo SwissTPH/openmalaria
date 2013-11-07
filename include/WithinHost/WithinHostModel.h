@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "WithinHost/Infection/Infection.h"
 #include "Monitoring/Survey.h"
+#include "Parameters.h"
 
 #include <list>
 
@@ -31,6 +32,7 @@ using namespace std;
 
 class UnittestUtil;
 
+namespace scnXml { class Scenario; }
 namespace OM { namespace WithinHost {
     
 /*! Within Host Model abstract class.
@@ -41,7 +43,7 @@ public:
   /// @brief Static methods
   //@{
   /// Initialise static parameters
-  static void init();
+  static void init(const OM::Parameters& parameters, const scnXml::Scenario& scenario);
   
   /// Create an instance using the appropriate model
   static WithinHostModel* createWithinHostModel ();

@@ -19,9 +19,9 @@
  */
 
 #include "PkPd/Drug/LSTMDrugType.h"
-#include "inputData.h"
 #include "util/errors.h"
 #include "util/random.h"
+#include <schema/pharmacology.h>
 
 #include <cmath>
 

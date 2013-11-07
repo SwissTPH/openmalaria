@@ -20,8 +20,8 @@
 
 // Declaration in LSTMDrugType.h due to circular dependency:
 #include "PkPd/Drug/LSTMDrugType.h"
-#include "inputData.h"
 #include "util/errors.h"
+#include "schema/pharmacology.h"
 
 #include <cmath>
 #include <stdexcept>

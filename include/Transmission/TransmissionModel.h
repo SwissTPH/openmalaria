@@ -77,11 +77,11 @@ public:
   ///@brief Creation, destruction and checkpointing
   //@{
   /// Creates a derived class
-  static TransmissionModel* createTransmissionModel (int populationSize);
+  static TransmissionModel* createTransmissionModel (const scnXml::EntoData& entoData, int populationSize);
   
 protected:
   //! Reads all entomological parameters from the input datafile. 
-  TransmissionModel();
+  TransmissionModel(const scnXml::EntoData& entoData);
 public:
   //!Deallocate memory for TransmissionModel parameters and clean up
   virtual ~TransmissionModel();

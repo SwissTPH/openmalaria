@@ -38,7 +38,7 @@ public:
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 
   // Static:
-  static void init();
+  static void init(const OM::Parameters& parameters);
 
 private:
   ///@brief static vars set by init()

@@ -73,8 +73,8 @@ class SurveysType
     }
 
     /** Read in some params from XML and allocate memory. */
-    void init ();
-    void initCohortOnly();
+    void init (const scnXml::Monitoring& monitoring);
+    void initCohortOnly(const scnXml::Monitoring& monitoring);
     
     //! It increments the survey period
     void incrementSurveyPeriod();

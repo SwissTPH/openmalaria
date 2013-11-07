@@ -19,7 +19,6 @@
  */
 
 #include "Population.h"
-#include "inputData.h"
 #include "Monitoring/Surveys.h"
 #include "Monitoring/Continuous.h"
 
@@ -36,6 +35,7 @@
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/StreamValidator.h"
+#include <schema/scenario.h>
 
 #include <cmath>
 #include <boost/format.hpp>
@@ -48,13 +48,13 @@ namespace OM
 
 // -----  Population: static data / methods  -----
 
-void Population::init()
+void Population::init( const Parameters& parameters, const scnXml::Scenario& scenario )
 {
-    Host::Human::initHumanParameters();
+    Host::Human::initHumanParameters( parameters, scenario );
     Host::NeonatalMortality::init();
-    PkPd::PkPdModel::init();
+    PkPd::PkPdModel::init( scenario );
     
-    AgeStructure::init ();
+    AgeStructure::init( scenario.getDemography() );
 }
 
 void Population::clear()
@@ -81,8 +81,8 @@ void Population::staticCheckpoint (ostream& stream)
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
-Population::Population()
-    : populationSize (InputData().getDemography().getPopSize())
+Population::Population(const scnXml::EntoData& entoData, size_t populationSize)
+    : populationSize (populationSize)
 {
     using Monitoring::Continuous;
     Continuous.registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
@@ -112,7 +112,7 @@ Population::Population()
     Continuous.registerCallback( "mean hole index", "\tmean hole index",
         MakeDelegate( this, &Population::ctsNetHoleIndex ) );
     
-    _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(populationSize);
+    _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(entoData, populationSize);
 }
 
 Population::~Population()

@@ -19,7 +19,7 @@
  */
 
 #include "Pathogenesis/Pyrogen.h"
-#include "inputData.h"
+#include "Parameters.h"
 #include <cmath>
 
 using namespace std;
@@ -32,12 +32,12 @@ double PyrogenPathogenesis::Ystar2_13;
 double PyrogenPathogenesis::alpha14;
 double PyrogenPathogenesis::Ystar1_26;
 
-void PyrogenPathogenesis::init(){
-  initPyroThres=InputData.getParameter(Params::Y_STAR_0);
-  smuY=-log(0.5)/(TimeStep::stepsPerYear*InputData.getParameter(Params::Y_STAR_HALF_LIFE));
-  Ystar2_13=InputData.getParameter(Params::Y_STAR_SQ);
-  alpha14=InputData.getParameter(Params::ALPHA);
-  Ystar1_26=InputData.getParameter(Params::Y_STAR_1);
+void PyrogenPathogenesis::init( const Parameters& parameters ){
+  initPyroThres=parameters[Parameters::Y_STAR_0];
+  smuY=-log(0.5)/(TimeStep::stepsPerYear*parameters[Parameters::Y_STAR_HALF_LIFE]);
+  Ystar2_13=parameters[Parameters::Y_STAR_SQ];
+  alpha14=parameters[Parameters::ALPHA];
+  Ystar1_26=parameters[Parameters::Y_STAR_1];
 }
 
 PyrogenPathogenesis::PyrogenPathogenesis(double cF) :

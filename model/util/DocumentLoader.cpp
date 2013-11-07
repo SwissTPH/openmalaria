@@ -19,7 +19,7 @@
  */
 
 
-#include "inputData.h"
+#include "util/DocumentLoader.h"
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 
@@ -29,27 +29,9 @@
 #include <map>
 #include <boost/format.hpp>
 
-namespace OM {
-    using boost::format;
-    
-// Initialization functions:
+namespace OM { namespace util {
 
-void InputDataType::initParameterValues()
-{
-    // set parameters
-    const scnXml::Parameters::ParameterSequence& paramSeq = scenario->getModel().getParameters().getParameter();
-    for (scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
-        int i = it->getNumber();
-        if (i < 0 || i >= Params::MAX)
-	    throw util::xml_scenario_error( (format("parameter with invalid index %1%") %i).str() );
-	if( !parameterValues.insert( make_pair( i, it->getValue() ) ).second )
-	    throw util::xml_scenario_error( (format("parameter with index %1% described twice") %i).str() );
-    }
-}
-
-
-util::Checksum InputDataType::createDocument (std::string lXmlFile)
-{
+Checksum DocumentLoader::loadDocument (std::string lXmlFile){
     xmlFileName = lXmlFile;
     //Parses the document
     
@@ -84,12 +66,10 @@ util::Checksum InputDataType::createDocument (std::string lXmlFile)
     }
     if (scenarioVersion > SCHEMA_VERSION)
         throw util::xml_scenario_error ("Error: new schema version unsupported");
-
-    initParameterValues();
     return cksum;
 }
 
-void InputDataType::saveDocument()
+void DocumentLoader::saveDocument()
 {
     if (documentChanged) {
         // get the "basename" (file name without path) of xmlFileName as a C string:
@@ -116,20 +96,5 @@ void InputDataType::saveDocument()
     }
 }
 
-void InputDataType::freeDocument(){
-    // Destructors should handle cleanup
-}
 
-
-double InputDataType::getParameter (size_t i)
-{
-    std::map<int, double>::const_iterator it = parameterValues.find( i );
-    if( it == parameterValues.end() )
-	throw util::xml_scenario_error( (format("parameter %1% required but not described") %i).str() );
-    return it->second;
-}
-
-
-
-InputDataType InputData;
-}
+} }

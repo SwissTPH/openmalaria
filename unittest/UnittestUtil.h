@@ -25,13 +25,14 @@
 
 #include "Global.h"
 #include "util/ModelOptions.h"
-#include "inputData.h"
 
 #include "PkPd/PkPdModel.h"
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WithinHostModel.h"
+
+#include "schema/pharmacology.h"
 
 using namespace OM;
 using namespace WithinHost;

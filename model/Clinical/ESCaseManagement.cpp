@@ -22,7 +22,6 @@
 #include "Clinical/ESDecisionTree.h"
 #include "Clinical/EventScheduler.h"
 #include "Clinical/parser.h"
-#include "inputData.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 
@@ -447,7 +446,7 @@ ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
 ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
 ESDecisionMap ESCaseManagement::mda;
 
-void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
+void ESCaseManagement::setHealthSystem( const scnXml::HealthSystem& healthSystem) {
     if( !healthSystem.getEventScheduler().present() )
 	throw util::xml_scenario_error ("Expected EventScheduler section in healthSystem data (initial or intervention)");
     const scnXml::HSEventScheduler& esData = healthSystem.getEventScheduler().get();

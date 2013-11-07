@@ -22,12 +22,14 @@
 #define Hmod_PathogenesisModel
 
 #include "Global.h"
+#include "Parameters.h"
 #include "Monitoring/Survey.h"
 #include "Pathogenesis/State.h"
 #include "util/AgeGroupInterpolation.h"
 
 namespace scnXml{
     class HSESNMF;
+    class Clinical;
 }
 
 namespace OM {
@@ -43,7 +45,7 @@ using util::AgeGroupInterpolation;
 class PathogenesisModel {
 public:
     /// Calls static init on correct PathogenesisModel.
-    static void init();
+    static void init( const Parameters& parameters, const scnXml::Clinical& clinical );
     static void init_NMF( const scnXml::HSESNMF& nmfDesc );
     static void cleanup();
 

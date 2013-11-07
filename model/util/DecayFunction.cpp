@@ -20,7 +20,6 @@
 
 #include "util/DecayFunction.h"
 #include "util/errors.h"
-#include "inputData.h"
 #include "util/StreamValidator.h"
 #include "util/random.h"
 

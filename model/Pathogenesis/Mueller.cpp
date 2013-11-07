@@ -19,7 +19,7 @@
  */
 
 #include "Pathogenesis/Mueller.h"
-#include "inputData.h"
+#include "Parameters.h"
 
 #include <cmath>
 using namespace std;
@@ -29,9 +29,9 @@ namespace OM { namespace Pathogenesis {
 double MuellerPathogenesis::rateMultiplier_31;
 double MuellerPathogenesis::densityExponent_32;
 
-void MuellerPathogenesis::init(){
-  rateMultiplier_31=InputData.getParameter(Params::MUELLER_RATE_MULTIPLIER);
-  densityExponent_32=InputData.getParameter(Params::MUELLER_DENSITY_EXPONENT);
+void MuellerPathogenesis::init( const Parameters& parameters ){
+  rateMultiplier_31=parameters[Parameters::MUELLER_RATE_MULTIPLIER];
+  densityExponent_32=parameters[Parameters::MUELLER_DENSITY_EXPONENT];
 }
 
 double MuellerPathogenesis::getPEpisode(double, double totalDensity) {

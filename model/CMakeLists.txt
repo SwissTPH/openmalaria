@@ -4,11 +4,11 @@
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  Simulation.cpp
+  Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
   PopulationStats.cpp
-  inputData.cpp
+  Parameters.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
@@ -83,6 +83,7 @@ set (Model_CPP
   util/TimeStep.cpp
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp
+  util/DocumentLoader.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp

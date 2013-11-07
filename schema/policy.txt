@@ -9,7 +9,7 @@ Update policy:
 *   update scenario.xsd and C++ code
 *   update the schema translator (../util/SchemaTranslator) with a function translating the last release version to the next (translateXToY where X is current version, Y=X+1), doing necessary translations and writing a comment explaining the change
 *   update test scenarios when necessary (at least those run by ctest)
-*   within inputData.cpp, update SCHEMA_VERSION to the next version number (otherwise it'll refuse to run updated scenarios)
+*   in DocumentLoader.h, update SCHEMA_VERSION to the next version number (otherwise it'll refuse to run updated scenarios)
 
 Release policy (new schema versions):
 *   copy build/schema/scenario_current.xsd to scenario_VER.xsd

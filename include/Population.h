@@ -28,6 +28,7 @@
 #include <boost/ptr_container/ptr_list.hpp>
 #include <fstream>
 
+namespace scnXml{ class Scenario; }
 namespace OM
 {
 
@@ -36,7 +37,7 @@ class Population
 {
 public:
     /// Call static inits of sub-models
-    static void init();
+    static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
 
     /// Calls static clear on sub-models to free memory
     static void clear();
@@ -46,7 +47,7 @@ public:
     static void staticCheckpoint (ostream& stream); ///< ditto
 
 
-    Population();
+    Population( const scnXml::EntoData& entoData, size_t populationSize );
     //! Clears human collection.
     ~Population();
 

@@ -25,7 +25,7 @@
 #include "Clinical/ESDecisionValue.h"
 #include "Pathogenesis/State.h"
 #include "WithinHost/WithinHostModel.h"
-#include "inputData.h"
+#include <schema/healthSystem.h>
 
 #include <map>
 #include <boost/unordered_map.hpp>

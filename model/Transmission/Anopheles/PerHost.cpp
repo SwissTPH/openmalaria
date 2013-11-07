@@ -19,7 +19,6 @@
  */
 
 #include "Transmission/Anopheles/PerHost.h"
-#include "inputData.h"
 #include "util/errors.h"
 
 namespace OM {

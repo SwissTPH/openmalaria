@@ -27,11 +27,10 @@
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Infection/PennyInfection.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
-//using namespace std;
+#include "schema/scenario.h"
 
 #include <cmath>
 #include <boost/format.hpp>
@@ -49,34 +48,35 @@ double WithinHostModel::detectionLimit;
 
 // -----  static functions  -----
 
-void WithinHostModel::init() {
-  Infection::init();
-  sigma_i=sqrt(InputData.getParameter(Params::SIGMA_I_SQ));
-  immPenalty_22=1-exp(InputData.getParameter(Params::IMMUNITY_PENALTY));
-  immEffectorRemain=exp(-InputData.getParameter(Params::IMMUNE_EFFECTOR_DECAY));
-  asexImmRemain=exp(-InputData.getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+void WithinHostModel::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
+  Infection::init( parameters, scenario.getModel().getParameters().getLatentp() );
+  sigma_i=sqrt(parameters[Parameters::SIGMA_I_SQ]);
+  immPenalty_22=1-exp(parameters[Parameters::IMMUNITY_PENALTY]);
+  immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
+  asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
   
   double densitybias;
   if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
-      densitybias=InputData.getParameter(Params::DENSITY_BIAS_GARKI);
+      densitybias=parameters[Parameters::DENSITY_BIAS_GARKI];
   } else {
-    if ((InputData().getAnalysisNo() >= 22) && (InputData().getAnalysisNo() <= 30)) {
+    int analysisNo = scenario.getAnalysisNo();
+    if ((analysisNo >= 22) && (analysisNo <= 30)) {
 	cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
     }
-    densitybias=InputData.getParameter(Params::DENSITY_BIAS_NON_GARKI);
+    densitybias=parameters[Parameters::DENSITY_BIAS_NON_GARKI];
   }
-  detectionLimit=InputData().getMonitoring().getSurveys().getDetectionLimit()*densitybias;
+  detectionLimit=scenario.getMonitoring().getSurveys().getDetectionLimit()*densitybias;
   
   if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
     DummyInfection::init ();
   } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
     EmpiricalInfection::init();	// 1-day timestep check
   } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
-    MolineauxInfection::init();
+    MolineauxInfection::init( parameters );
   } else if (util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
       PennyInfection::init();
   } else {
-    DescriptiveInfection::init ();	// 5-day timestep check
+    DescriptiveInfection::init( parameters );	// 5-day timestep check
   }
 }
 

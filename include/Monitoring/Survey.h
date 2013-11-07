@@ -26,6 +26,7 @@
 #include <bitset>
 #include <map>
 
+namespace scnXml{ class Monitoring; }
 namespace OM { namespace Monitoring {
 
 /** Included for type-saftey: don't allow implicit double->int conversions.
@@ -64,7 +65,7 @@ class AgeGroup {
     size_t _i;
     
     /// Initialize _lowerbound and _upperbound
-    static void init ();
+    static void init (const scnXml::Monitoring& monitoring);
     
     //BEGIN Static parameters only set by init()
     /// Lower boundary of the youngest agegroup
@@ -85,7 +86,7 @@ class Survey {
   //@{
   private:
     /// Initialize static parameters.
-    static void init();
+    static void init(const scnXml::Monitoring& monitoring);
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).

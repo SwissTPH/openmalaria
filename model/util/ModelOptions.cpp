@@ -21,7 +21,7 @@
 #include "util/ModelOptions.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
-#include "inputData.h"
+#include "schema/util.h"
 
 #include <sstream>
 #include <iostream>
@@ -95,7 +95,7 @@ namespace OM { namespace util {
 	}
     };
     
-    void ModelOptions::init () {
+    void ModelOptions::init( const scnXml::OptionSet& options ){
 	OptionCodeMap codeMap;
 	
 	// State of all default options:
@@ -106,7 +106,7 @@ namespace OM { namespace util {
 	// Set optSet to defaults, then override any given in the XML file:
 	bitset<NUM_OPTIONS> optSet_bs = defaultOptSet;
 	
-	const scnXml::OptionSet::OptionSequence& optSeq = InputData().getModel().getModelOptions().getOption();
+	const scnXml::OptionSet::OptionSequence& optSeq = options.getOption();
 	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
 	    optSet_bs[codeMap[it->getName()]] = it->getValue();
 	}

@@ -19,8 +19,8 @@
  */
 
 #include "Monitoring/Survey.h"
-#include "inputData.h"
 #include "util/errors.h"
+#include "schema/monitoring.h"
 
 #include <stdexcept>
 
@@ -126,25 +126,24 @@ class SurveyMeasureMap {
 };
 
 
-void Survey::init () {
-    AgeGroup::init ();
+void Survey::init (const scnXml::Monitoring& monitoring) {
+    AgeGroup::init (monitoring);
     
     // by default, none are active
     active.reset ();
     SurveyMeasureMap codeMap;
     
-    scnXml::OptionSet::OptionSequence sOSeq = InputData().getMonitoring().getSurveyOptions().getOption();
+    scnXml::OptionSet::OptionSequence sOSeq = monitoring.getSurveyOptions().getOption();
     for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 	active[codeMap[it->getName()]] = it->getValue();
     }
 }
-void AgeGroup::init () {
-    const scnXml::Monitoring& mon = InputData().getMonitoring();
-    const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
+void AgeGroup::init (const scnXml::Monitoring& monitoring) {
+    const scnXml::AgeGroup::GroupSequence& groups = monitoring.getAgeGroup().getGroup();
     /* note that the last age group includes individuals who are        *
     * either younger than Lowerbound or older than the last Upperbound */
     _upperbound.resize (groups.size() + 1);
-    _lowerbound = mon.getAgeGroup().getLowerbound();
+    _lowerbound = monitoring.getAgeGroup().getLowerbound();
     if (!(_lowerbound <= 0.0))
 	throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
 

@@ -20,7 +20,6 @@
  */
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
@@ -37,8 +36,9 @@ const double NonVectorModel::min_EIR_mult= 0.01;
 
 const int nYearsWarmupData = 5;
 
-NonVectorModel::NonVectorModel(const scnXml::NonVector& nonVectorData) :
-  nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
+NonVectorModel::NonVectorModel(const scnXml::EntoData& entoData, const scnXml::NonVector& nonVectorData) :
+    TransmissionModel(entoData),
+    nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
 {
     laggedKappa.resize( nspore.asInt()+1, 0.0 );
     

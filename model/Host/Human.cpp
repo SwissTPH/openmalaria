@@ -24,7 +24,6 @@
 #include "Clinical/ClinicalModel.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"        // only for summarizing
 
-#include "inputData.h"
 #include "Transmission/TransmissionModel.h"
 #include "Monitoring/Surveys.h"
 #include "PopulationStats.h"
@@ -33,6 +32,7 @@
 #include "util/StreamValidator.h"
 #include "Population.h"
 #include "interventions/Interventions.h"
+#include <schema/scenario.h>
 
 #include <string>
 #include <string.h>
@@ -47,12 +47,13 @@ namespace OM { namespace Host {
 
 // -----  Static functions  -----
 
-void Human::initHumanParameters () {    // static
+void Human::initHumanParameters( const Parameters& parameters, const scnXml::Scenario& scenario ) {    // static
+    const scnXml::Model& model = scenario.getModel();
     // Init models used by humans:
-    Transmission::PerHost::init();
-    InfectionIncidenceModel::init();
-    WithinHost::WithinHostModel::init();
-    Clinical::ClinicalModel::init();
+    Transmission::PerHost::init( model.getHuman().getAvailabilityToMosquitoes() );
+    InfectionIncidenceModel::init( parameters );
+    WithinHost::WithinHostModel::init( parameters, scenario );
+    Clinical::ClinicalModel::init( parameters, model, scenario.getHealthSystem() );
     _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
 }
 

@@ -25,6 +25,7 @@
 
 class UnittestUtil;
 
+namespace scnXml{ class OptionSet; }
 namespace OM { namespace util {
     
     /** Flags signalling which versions of some models to use. */
@@ -248,7 +249,7 @@ namespace OM { namespace util {
 	
 	/// Set options from XML file.
         /// Relies on Global::init() already having been called.
-	static void init ();
+	static void init (const scnXml::OptionSet& options);
         
     private:
         // Reset opts to default. Used by unit tests.

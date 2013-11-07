@@ -23,10 +23,11 @@
 #include "Pathogenesis/Predet.h"
 #include "Pathogenesis/Mueller.h"
 #include "WithinHost/WithinHostModel.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include <Parameters.h>
+#include <schema/healthSystem.h>
 
 #include <cmath>
 using namespace std;
@@ -46,28 +47,27 @@ AgeGroupInterpolation* PathogenesisModel::NMF_need_antibiotic = AgeGroupInterpol
 AgeGroupInterpolation* PathogenesisModel::MF_need_antibiotic = AgeGroupInterpolation::dummyObject();
 
 
-void PathogenesisModel::init() {
-    indirRiskCoFactor_18=(1-exp(-InputData.getParameter(Params::INDIRECT_RISK_COFACTOR)));
-    sevMal_21=InputData.getParameter(Params::SEVERE_MALARIA_THRESHHOLD);
-    comorbintercept_24=1-exp(-InputData.getParameter(Params::COMORBIDITY_INTERCEPT));
-    critAgeComorb_30=InputData.getParameter(Params::CRITICAL_AGE_FOR_COMORBIDITY);
+void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinical& clinical ) {
+    indirRiskCoFactor_18=(1-exp(-parameters[Parameters::INDIRECT_RISK_COFACTOR]));
+    sevMal_21=parameters[Parameters::SEVERE_MALARIA_THRESHHOLD];
+    comorbintercept_24=1-exp(-parameters[Parameters::COMORBIDITY_INTERCEPT]);
+    critAgeComorb_30=parameters[Parameters::CRITICAL_AGE_FOR_COMORBIDITY];
 
     if (util::ModelOptions::option (util::PREDETERMINED_EPISODES)) {
         //no separate init:
-        PyrogenPathogenesis::init();
+        PyrogenPathogenesis::init( parameters );
     } else {
         if (util::ModelOptions::option (util::MUELLER_PRESENTATION_MODEL))
-            MuellerPathogenesis::init();
+            MuellerPathogenesis::init( parameters );
         else
-            PyrogenPathogenesis::init();
+            PyrogenPathogenesis::init( parameters );
     }
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
-        if( !InputData().getModel().getClinical().getNonMalariaFevers().present() ){
+        if( !clinical.getNonMalariaFevers().present() ){
             throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
         }
-        const scnXml::Clinical::NonMalariaFeversType& nmfDesc =
-            InputData().getModel().getClinical().getNonMalariaFevers().get();
+        const scnXml::Clinical::NonMalariaFeversType& nmfDesc = clinical.getNonMalariaFevers().get();
         NMF_incidence = AgeGroupInterpolation::makeObject( nmfDesc.getIncidence(), "incidence" );
         NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc.getPrNeedTreatmentNMF(), "prNeedTreatmentNMF" );
         MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc.getPrNeedTreatmentMF(), "prNeedTreatmentMF" );

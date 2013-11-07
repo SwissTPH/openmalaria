@@ -18,26 +18,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_Simulation
-#define Hmod_Simulation
+#ifndef Hmod_Simulator
+#define Hmod_Simulator
 
 #include "Global.h"
 #include "Population.h"
 #include "util/BoincWrapper.h"
-
 using namespace std;
 
+namespace scnXml{ class Monitoring; }
 namespace OM {
     
 //! Main simulation class
-class Simulation{
+class Simulator{
 public: 
     //!  Inititalise all step specific constants and variables.
-    Simulation(util::Checksum);
-    ~Simulation();
+    Simulator( util::Checksum ck, const scnXml::Scenario scenario );
+    ~Simulator();
     
     //! Entry point to simulation.
-    int start();
+    void start(const scnXml::Monitoring& monitoring);
     
 private:
     /** @brief checkpointing functions
@@ -86,7 +86,7 @@ private:
      * workunit, but a random integer number should do the job. */
     int workUnitIdentifier;
     
-    /// Checksum of scenario; also used for work-unit validation on checkpoint loading.
+    // Stored so that it can be verified across checkpoints
     util::Checksum cksum;
     
     friend class AnophelesModelSuite;

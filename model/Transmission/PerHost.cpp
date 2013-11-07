@@ -20,7 +20,6 @@
 #include "Transmission/PerHost.h"
 #include "Transmission/VectorModel.h"
 #include "Transmission/Anopheles/PerHost.h"
-#include "inputData.h"
 #include "util/errors.h"
 
 namespace OM {
@@ -31,8 +30,8 @@ using namespace OM::util;
 
 AgeGroupInterpolation* PerHost::relAvailAge = AgeGroupInterpolation::dummyObject();
 
-void PerHost::init () {
-    relAvailAge = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getAvailabilityToMosquitoes(), "availabilityToMosquitoes" );
+void PerHost::init ( const scnXml::AgeGroupValues& availabilityToMosquitoes ) {
+    relAvailAge = AgeGroupInterpolation::makeObject( availabilityToMosquitoes, "availabilityToMosquitoes" );
 }
 void PerHost::cleanup () {
     AgeGroupInterpolation::freeObject( relAvailAge );

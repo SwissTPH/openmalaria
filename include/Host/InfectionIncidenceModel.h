@@ -25,7 +25,9 @@
 #include "Monitoring/Survey.h"
 #include "Transmission/PerHost.h"
 
-namespace OM { namespace Host {
+namespace OM {
+    class Parameters;
+namespace Host {
     class Human;
     
 /** Models how a per-host EIR translates into new infections
@@ -45,7 +47,7 @@ public:
   ///@brief Static initialisation & constructors
   //@{
   /// Read in/initialise parameters
-  static void init();
+  static void init(const Parameters& parameters);
   /// Create a new instance
   static InfectionIncidenceModel* createModel ();
   

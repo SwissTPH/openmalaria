@@ -25,9 +25,9 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "Host/NeonatalMortality.h"
 
-#include "inputData.h"
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
+#include <schema/scenario.h>
 
 namespace OM { namespace Clinical {
 
@@ -38,18 +38,19 @@ double ClinicalModel::_nonMalariaMortality;
 
 // -----  static methods  -----
 
-void ClinicalModel::init () {
-  infantDeaths.resize(TimeStep::stepsPerYear);
-  infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
-  _nonMalariaMortality=InputData.getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
-  
-  Pathogenesis::PathogenesisModel::init();
-  Episode::init();
-  if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-    ClinicalEventScheduler::init();
-  else
-    ClinicalImmediateOutcomes::initParameters();
-  CaseManagementCommon::initCommon();
+void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem ) {
+    infantDeaths.resize(TimeStep::stepsPerYear);
+    infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
+    _nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
+    
+    Pathogenesis::PathogenesisModel::init( parameters, model.getClinical() );
+    Episode::init( model.getClinical().getHealthSystemMemory() );
+    if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
+        ClinicalEventScheduler::init( parameters, model.getHuman() );
+    }else{
+        ClinicalImmediateOutcomes::initParameters();
+    }
+    CaseManagementCommon::initCommon( parameters, healthSystem );
 }
 void ClinicalModel::cleanup () {
   CaseManagementCommon::cleanupCommon();

@@ -21,7 +21,7 @@
 #include "util/AgeGroupInterpolation.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
-#include "inputData.h"
+#include "schema/healthSystem.h"
 
 #include <fstream>
 #include <boost/format.hpp>

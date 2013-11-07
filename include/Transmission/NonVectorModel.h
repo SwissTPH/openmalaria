@@ -32,7 +32,7 @@ namespace OM { namespace Transmission {
 class NonVectorModel : public TransmissionModel { 
 public:
 
-  NonVectorModel(const scnXml::NonVector& nonVectorData);
+  NonVectorModel(const scnXml::EntoData& entoData, const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorModel();
   
   virtual void init2 (const Population& population);

@@ -19,15 +19,17 @@
  */
 
 #include "util/BoincWrapper.h"
-#include "inputData.h"	//Include parser for the input
+#include "util/DocumentLoader.h"
 
 #include "Global.h"
-#include "Simulation.h"
+#include "Simulator.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
 
 #include <cstdio>
 #include <cerrno>
+
+using namespace OM;
 
 /** main() — initializes and shuts down BOINC, loads scenario XML and
  * runs simulation. */
@@ -36,29 +38,35 @@ int main(int argc, char* argv[]) {
     string scenarioFile;
     
     try {
-        OM::util::set_gsl_handler();
+        util::set_gsl_handler();        // init
         
-        scenarioFile = OM::util::CommandLine::parse (argc, argv);
-	
-        OM::util::BoincWrapper::init();
-	
-        scenarioFile = OM::util::CommandLine::lookupResource (scenarioFile);
-        OM::util::Checksum cksum = OM::InputData.createDocument(scenarioFile);
-	
-	OM::Simulation simulation (cksum);	// constructor runs; various initialisations
-	
-	// Save changes to the document if any occurred.
-        OM::InputData.saveDocument();
-	
-	if ( !OM::util::CommandLine::option(OM::util::CommandLine::SKIP_SIMULATION) )
-	    simulation.start();
-	
-	// We call boinc_finish before cleanup since it should help ensure
-	// app isn't killed between writing output.txt and calling boinc_finish,
-	// and may speed up exit.
-	OM::util::BoincWrapper::finish(exitStatus);	// Never returns
-	
-	// simulation's destructor runs
+        scenarioFile = util::CommandLine::parse (argc, argv);   // parse arguments
+        
+        util::BoincWrapper::init();     // BOINC init
+        
+        // Load the scenario document:
+        scenarioFile = util::CommandLine::lookupResource (scenarioFile);
+        util::DocumentLoader documentLoader;
+        util::Checksum cksum = documentLoader.loadDocument(scenarioFile);
+        
+        // Set up the simulator
+        Simulator simulator( cksum, documentLoader.document() );
+        
+        // Save changes to the document if any occurred.
+        documentLoader.saveDocument();
+        
+        // Write scenario checksum, only if simulation completed.
+        cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
+        
+        if ( !util::CommandLine::option(util::CommandLine::SKIP_SIMULATION) )
+            simulator.start(documentLoader.document().getMonitoring());
+        
+        // We call boinc_finish before cleanup since it should help ensure
+        // app isn't killed between writing output.txt and calling boinc_finish,
+        // and may speed up exit.
+        util::BoincWrapper::finish(exitStatus);	// Never returns
+        
+        // simulation's destructor runs
     } catch (const OM::util::cmd_exception& e) {
         if( e.getCode() == 0 ){
             // this is not an error, but exiting due to command line
@@ -100,11 +108,9 @@ int main(int argc, char* argv[]) {
     
     // If we get to here, we already know an error occurred.
     if( errno != 0 )
-	std::perror( "OpenMalaria" );
-    
-    // Free memory (though usually we don't bother at exit to save time)
-    OM::InputData.freeDocument();
+        std::perror( "OpenMalaria" );
     
     // In case an exception was thrown, we call boinc_finish here:
-    OM::util::BoincWrapper::finish(exitStatus);	// Never returns
+    util::BoincWrapper::finish(exitStatus);	// Never returns
+    return exitStatus;  // isn't actually reached, but avoids compiler warning
 }

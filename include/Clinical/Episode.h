@@ -39,7 +39,7 @@ namespace OM { namespace Clinical {
 class Episode{
 public:
     /** Set healthSystemMemory. */
-    static void init();
+    static void init( int hsMemory );
     
   Episode() : _time(TimeStep::never), _ageGroup() {};
   ~Episode();

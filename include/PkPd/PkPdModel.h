@@ -29,6 +29,7 @@ using namespace std;
 
 class UnittestUtil;
 
+namespace scnXml{ class Scenario; }
 namespace OM { namespace PkPd {
     
 /** Encapsulates both the static operations for PKPD models and the per-human
@@ -48,7 +49,7 @@ class PkPdModel {
 public:
   ///@brief Static functions
   //@{
-  static void init ();
+  static void init ( const scnXml::Scenario& scenario );
   static void cleanup ();
   
   // checkpointing of static data: not required since all data is set up by init

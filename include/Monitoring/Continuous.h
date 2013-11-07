@@ -28,6 +28,7 @@
 
 using fastdelegate::MakeDelegate;
 
+namespace scnXml{ class Monitoring; }
 namespace OM { namespace Monitoring {
     
     /** Class to deal with continuous output data.
@@ -46,7 +47,7 @@ namespace OM { namespace Monitoring {
 	 * assume we shouldn't overwrite existing files for security reasons).
 	 * 
 	 * Callbacks should be registered before init() is called. */
-	void init (bool isCheckpoint);
+	void init (const scnXml::Monitoring& monitoring, bool isCheckpoint);
         
         /** When compiled in BOINC mode, this copies data to the final
          * compressing output file. Otherwise it does nothing. */

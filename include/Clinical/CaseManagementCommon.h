@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "util/AgeGroupInterpolation.h"
 #include "schema/interventions.h"
+#include "Parameters.h"
 
 namespace OM { namespace Clinical {
     /** Code shared between case management systems, to:
@@ -39,7 +40,7 @@ namespace OM { namespace Clinical {
 	/** Initialisation - reads fatality rates, etc.
 	 * Both derived case management systems have their own init function;
 	 * this is named "initCommon" to avoid confusion over which is called. */
-	static void initCommon ();
+	static void initCommon( const Parameters& parameters, const scnXml::HealthSystem& healthSystem );
         /// Free memory
         static void cleanupCommon ();
         

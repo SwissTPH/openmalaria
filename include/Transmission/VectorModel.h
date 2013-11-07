@@ -41,7 +41,7 @@ namespace OM { namespace Transmission {
  * code is in the Anopheles directory and namespace. */
 class VectorModel : public TransmissionModel {
 public:
-  VectorModel(const scnXml::Vector vectorData, int populationSize);
+  VectorModel(const scnXml::EntoData& entoData, const scnXml::Vector vectorData, int populationSize);
   virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring

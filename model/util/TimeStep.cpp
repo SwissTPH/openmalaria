@@ -22,7 +22,6 @@
 #include <cmath>
 
 #include "Global.h"
-#include "inputData.h"
 #include "util/errors.h"
 
 namespace OM {

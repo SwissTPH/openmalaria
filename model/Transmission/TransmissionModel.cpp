@@ -22,7 +22,6 @@
 #include "Transmission/VectorModel.h"
 #include "Transmission/PerHost.h"
 
-#include "inputData.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
@@ -37,15 +36,14 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
-TransmissionModel* TransmissionModel::createTransmissionModel (int populationSize) {
+TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::EntoData& entoData, int populationSize) {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData& entoData = InputData().getEntomology();
   const scnXml::EntoData::VectorOptional& vectorData = entoData.getVector();
 
   TransmissionModel *model;
   if (vectorData.present())
-    model = new VectorModel(vectorData.get(), populationSize);
+    model = new VectorModel(entoData, vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
@@ -53,7 +51,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ) ||
         util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL ))
         throw util::xml_scenario_error("VECTOR_*_MODEL is only compatible with the vector model (and non-vector data is present).");
-    model = new NonVectorModel(nonVectorData.get());
+    model = new NonVectorModel(entoData, nonVectorData.get());
   }
 
   if( entoData.getScaledAnnualEIR().present() ){
@@ -97,9 +95,9 @@ SimulationMode readMode(const string& str){
         // set automatically.
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
-TransmissionModel::TransmissionModel() :
+TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
     simulationMode(forcedEIR),
-    interventionMode(readMode(InputData().getEntomology().getMode())),
+    interventionMode(readMode(entoData.getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),

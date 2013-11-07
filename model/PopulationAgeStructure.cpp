@@ -20,8 +20,8 @@
 
 #include "PopulationAgeStructure.h"
 #include "Global.h"
-#include "inputData.h"
 #include "util/errors.h"
+#include <schema/demography.h>
 
 #include <cmath>
 #include <gsl_vector_double.h>
@@ -34,6 +34,7 @@ namespace OM {
 vector<double> AgeStructure::ageGroupBounds;
 vector<double> AgeStructure::ageGroupPercent;
 
+double AgeStructure::initialRho = 0.0;
 double AgeStructure::mu0;
 double AgeStructure::mu1;
 double AgeStructure::alpha0;
@@ -43,11 +44,11 @@ double AgeStructure::rho;
 vector<double> AgeStructure::cumAgeProp;
 
 
-void AgeStructure::init () {
+void AgeStructure::init( const scnXml::Demography& demography ){
     // this number of cells are needed:
     cumAgeProp.resize (TimeStep::maxAgeIntervals.asInt()+1);
     
-    estimateRemovalRates();
+    estimateRemovalRates( demography );
     calcCumAgeProp();
 }
 
@@ -108,15 +109,14 @@ void minimizeCalc_rss(double (*func) (double,double), double param1,double param
     gsl_multimin_fminimizer_free (minimizer);
 }
 
-void AgeStructure::estimateRemovalRates ()
-{
+void AgeStructure::estimateRemovalRates( const scnXml::Demography& demography ){
     // mu1, alpha1: These are estimated here
     // mu0, alpha0: These are fixed alpha0=4.0, mu0 calculated from the other parameters
     // rho - population growth rate (input)
     
     //Get lower and upper age bounds for age groups and cumulative precentage of population from field data
     double sumperc = 0.0;
-    const scnXml::AgeGroupPerC::GroupSequence& group = InputData().getDemography().getAgeGroup().getGroup();
+    const scnXml::AgeGroupPerC::GroupSequence& group = demography.getAgeGroup().getGroup();
     
     size_t ngroups = group.size() + 1;
     ageGroupBounds.resize(ngroups+1,0);
@@ -140,6 +140,10 @@ void AgeStructure::estimateRemovalRates ()
     is minimised for values of mu1 and alpha1
     calls setDemoParameters to calculate the RSS
     */
+    if( demography.getGrowthRate().present() ){
+        initialRho = demography.getGrowthRate().get();
+    }
+
     /* NOTE: unused --- why?
     double tol = 0.00000000001;
     int maxcal = 500000;
@@ -154,9 +158,7 @@ void AgeStructure::estimateRemovalRates ()
 // Static method used by estimateRemovalRates
 double AgeStructure::setDemoParameters (double param1, double param2)
 {
-    rho = 0.0;
-    if (InputData().getDemography().getGrowthRate().present())
-    	rho = InputData().getDemography().getGrowthRate().get();
+    rho = initialRho;
 
     rho = rho * (0.01 * TimeStep::yearsPerInterval);
     if (rho != 0.0)
@@ -197,12 +199,12 @@ double AgeStructure::setDemoParameters (double param1, double param2)
     ageGroupPercent[0] = perc_inf * L1 / L_inf;
     ageGroupPercent[1] = perc_inf - ageGroupPercent[0];
     
-    double valsetDemoParameters = 0.0;
+    double result = 0.0;
     for (size_t i = 0; i < ngroups - 1; i++) {
 	double residual = log (pred[i]) - log (ageGroupPercent[i]);
-	valsetDemoParameters += residual * residual;
+	result += residual * residual;
     }
-    return valsetDemoParameters;
+    return result;
 }
 
 void AgeStructure::calcCumAgeProp ()

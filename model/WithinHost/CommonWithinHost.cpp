@@ -19,7 +19,6 @@
  */
 
 #include "WithinHost/CommonWithinHost.h"
-#include "inputData.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"

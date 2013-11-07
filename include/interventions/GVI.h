@@ -81,7 +81,6 @@ private:
     };
     
     NormalSampler initialInsecticide;
-    double maxInsecticide;		// maximum initial insecticide
     shared_ptr<DecayFunction> decay;
     vector<GVIAnopheles> species;  // vector specific params
     

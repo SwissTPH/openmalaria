@@ -26,6 +26,7 @@
 #include "Episode.h"
 #include <memory>
 
+namespace scnXml{ class Model; }
 namespace OM { namespace Clinical {
     using Host::Human;
 
@@ -39,14 +40,14 @@ namespace OM { namespace Clinical {
  * Patient outcomes include full recovery, recovery with sequelae and death.
  * 
  * Reporting includes patient outcome and potentially drug usage and use of
- * RDTs (Rapid Diagnostic Tests) for costing purposes. */
+ * RDTs (Rapid Diagnostic Tests) for costing purposes. */\
 class ClinicalModel
 {
 public:
   /// @brief Static functions
   //@{
   /// Initialise whichever model is in use.
-  static void init ();
+  static void init ( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem );
   /// Cleanup on exit
   static void cleanup ();
   

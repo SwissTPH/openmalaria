@@ -57,7 +57,7 @@ public:
      * the category boundaries for the grouping of time since first positive
      * slide.
      */
-    static void init();
+    static void init(const OM::Parameters& parameters);
     //@}
     
     ///@name Constructors

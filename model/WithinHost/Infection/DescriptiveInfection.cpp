@@ -19,7 +19,6 @@
  */
 
 #include "WithinHost/Infection/DescriptiveInfection.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
@@ -43,7 +42,7 @@ double DescriptiveInfection::xNuStar;
 
 // ———  static init/clear ———
 
-void DescriptiveInfection::init () {
+void DescriptiveInfection::init (const Parameters& parameters) {
     // Error checks
     if (TimeStep::interval != 5){
         // To support non-5-day time-step models, either different data would
@@ -55,8 +54,8 @@ void DescriptiveInfection::init () {
         throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
     
     // Read parameters
-    sigma0sq=InputData.getParameter(Params::SIGMA0_SQ);
-    xNuStar=InputData.getParameter(Params::X_NU_STAR);
+    sigma0sq=parameters[Parameters::SIGMA0_SQ];
+    xNuStar=parameters[Parameters::X_NU_STAR];
     
     // Read file empirical parasite densities
     string densities_filename = util::CommandLine::lookupResource ("densities.csv");

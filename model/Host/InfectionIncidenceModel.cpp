@@ -20,13 +20,13 @@
 
 #include "Host/InfectionIncidenceModel.h"
 #include "Host/Human.h"
-#include "inputData.h"
 #include "Transmission/PerHost.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
 #include "util/errors.h"
 #include "WithinHost/WithinHostModel.h"
+#include "Parameters.h"
 
 #include <stdexcept>
 #include <cmath>
@@ -48,14 +48,14 @@ int InfectionIncidenceModel::ctsNewInfections = 0;
 
 // -----  static initialisation  -----
 
-void InfectionIncidenceModel::init () {
-  BaselineAvailabilityShapeParam=InputData.getParameter(Params::BASELINE_AVAILABILITY_SHAPE);
+void InfectionIncidenceModel::init ( const Parameters& parameters ) {
+  BaselineAvailabilityShapeParam=parameters[Parameters::BASELINE_AVAILABILITY_SHAPE];
   
-  gamma_p=InputData.getParameter(Params::GAMMA_P);
-  Sinf=1-exp(-InputData.getParameter(Params::NEG_LOG_ONE_MINUS_SINF));
-  Simm=InputData.getParameter(Params::SIMM);
-  EstarInv = 1.0/InputData.getParameter(Params::E_STAR);
-  Xstar_pInv = 1.0/InputData.getParameter(Params::X_STAR_P);
+  gamma_p=parameters[Parameters::GAMMA_P];
+  Sinf=1-exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_SINF]);
+  Simm=parameters[Parameters::SIMM];
+  EstarInv = 1.0/parameters[Parameters::E_STAR];
+  Xstar_pInv = 1.0/parameters[Parameters::X_STAR_P];
   
   //! constant defining the constraint for the Gamma shape parameters
   /// Used for the case where availability is assumed gamma distributed

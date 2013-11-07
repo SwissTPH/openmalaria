@@ -20,7 +20,6 @@
 
 #include "WithinHost/Infection/PennyInfection.h"
 #include "WithinHost/CommonWithinHost.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"

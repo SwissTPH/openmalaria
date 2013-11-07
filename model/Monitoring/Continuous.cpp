@@ -22,9 +22,9 @@
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Survey.h"	// lineEnd
 #include "util/errors.h"
-#include "inputData.h"
 #include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
+#include "schema/monitoring.h"
 
 #include <vector>
 #include <map>
@@ -102,9 +102,8 @@ namespace OM { namespace Monitoring {
    
     /* Initialise: enable outputs registered and requested in XML.
      * Search for Continuous::registerCallback to see outputs available. */
-    void ContinuousType::init (bool isCheckpoint) {
-	const scnXml::Monitoring::ContinuousOptional& ctsOpt =
-	    InputData().getMonitoring().getContinuous();
+    void ContinuousType::init (const scnXml::Monitoring& monitoring, bool isCheckpoint) {
+	const scnXml::Monitoring::ContinuousOptional& ctsOpt = monitoring.getContinuous();
 	if( ctsOpt.present() == false ) {
 	    ctsPeriod = 0;
 	    return;

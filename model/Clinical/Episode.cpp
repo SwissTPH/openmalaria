@@ -20,7 +20,6 @@
 
 #include "Clinical/Episode.h"
 #include "Monitoring/Surveys.h"
-#include "inputData.h"
 
 
 namespace OM {
@@ -30,8 +29,8 @@ using Monitoring::Surveys;
 TimeStep Episode::healthSystemMemory( TimeStep::never );
 
 
-void Episode::init() {
-    healthSystemMemory = TimeStep(InputData().getModel().getClinical().getHealthSystemMemory());
+void Episode::init( int hsMemory ) {
+    healthSystemMemory = TimeStep( hsMemory );
 }
 
 

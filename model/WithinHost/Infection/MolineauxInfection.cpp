@@ -20,7 +20,6 @@
 
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/CommonWithinHost.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
@@ -91,18 +90,18 @@ CommonInfection* checkpointedMolineauxInfection (istream& stream) {
     return new MolineauxInfection (stream);
 }
 
-void MolineauxInfection::init() {
+void MolineauxInfection::init( const Parameters& parameters ){
     if (TimeStep::interval != 1)
         throw util::xml_scenario_error ("MolineauxInfection only supports scenarii using an interval of 1");
 
     CommonWithinHost::createInfection = &createMolineauxInfection;
     CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
     
-    mean_shape_first_local_max = InputData.getParameter(Params::MEAN_LOCAL_MAX_DENSITY);
-    sd_scale_first_local_max = InputData.getParameter(Params::SD_LOCAL_MAX_DENSITY);
+    mean_shape_first_local_max = parameters[Parameters::MEAN_LOCAL_MAX_DENSITY];
+    sd_scale_first_local_max = parameters[Parameters::SD_LOCAL_MAX_DENSITY];
     
-    mean_shape_diff_pos_days = InputData.getParameter(Params::MEAN_DIFF_POS_DAYS);
-    sd_scale_diff_pos_days = InputData.getParameter(Params::SD_DIFF_POS_DAYS);
+    mean_shape_diff_pos_days = parameters[Parameters::MEAN_DIFF_POS_DAYS];
+    sd_scale_diff_pos_days = parameters[Parameters::SD_DIFF_POS_DAYS];
     
     
     // with gamma distribution shape and scale parameters has to be recalculated 

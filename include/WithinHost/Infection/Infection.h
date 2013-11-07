@@ -22,6 +22,7 @@
 #define Hmod_Infection
 
 #include "Global.h"
+#include "Parameters.h"
 
 class UnittestUtil;
 
@@ -29,7 +30,7 @@ namespace OM { namespace WithinHost {
     
 class Infection {
 public:
-  static void init();
+  static void init( const OM::Parameters& parameters, int latentP );
   
   Infection (uint32_t protID) :
     _startdate(TimeStep::simulation),

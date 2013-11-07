@@ -19,7 +19,6 @@
  */
 
 #include "Clinical/EventScheduler.h"
-#include "inputData.h"
 #include "util/random.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
@@ -27,6 +26,7 @@
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
+#include <schema/scenario.h>
 
 #include <limits>
 
@@ -39,6 +39,7 @@ TimeStep ClinicalEventScheduler::complicatedCaseDuration(TimeStep::never);
 TimeStep ClinicalEventScheduler::extraDaysAtRisk(TimeStep::never);
 vector<double> ClinicalEventScheduler::cumDailyPrImmUCTS;
 double ClinicalEventScheduler::neg_v;
+double ClinicalEventScheduler::alpha;
 
 double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
@@ -55,23 +56,30 @@ AgeGroupInterpolation* ClinicalEventScheduler::severeNmfMortality = AgeGroupInte
 
 // -----  static init  -----
 
-void ClinicalEventScheduler::init ()
+void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Human& human )
 {
     if (TimeStep::interval != 1)
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
     if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
-    if( !InputData().getModel().getHuman().getWeight().present() ){
+    if( !human.getWeight().present() ){
         throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
     }
-    weight = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getWeight().get(), "weight" );
-    hetWeightMultStdDev = InputData().getModel().getHuman().getWeight().get().getMultStdDev();
+    weight = AgeGroupInterpolation::makeObject( human.getWeight().get(), "weight" );
+    hetWeightMultStdDev = human.getWeight().get().getMultStdDev();
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
     minHetWeightMult = 0.5 / weight->eval( 0.0 );
+    
+    alpha = exp( -parameters[Parameters::CFR_NEG_LOG_ALPHA] );
+    if( !(0.0<=alpha && alpha<=1.0) ){
+        throw util::xml_scenario_error(
+            "Clinical outcomes: propDeathsFirstDay should be within range [0,1]");
+    }
+    neg_v = -parameters[Parameters::CFR_SCALE_FACTOR];
 }
 
-void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esData) {
+void ClinicalEventScheduler::setParameters(const scnXml::HSEventScheduler& esData) {
     const scnXml::ClinicalOutcomes& coData = esData.getClinicalOutcomes();
     
     maxUCSeekingMemory = TimeStep(coData.getMaxUCSeekingMemory());
@@ -99,14 +107,7 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
     }
     cumDailyPrImmUCTS.back() = 1.0;
     
-    double alpha = exp( -InputData.getParameter( Params::CFR_NEG_LOG_ALPHA ) );
-    if( !(0.0<=alpha && alpha<=1.0) ){
-	throw util::xml_scenario_error(
-            "Clinical outcomes: propDeathsFirstDay should be within range [0,1]");
-    }
-    
     CaseManagementCommon::scaleCaseFatalityRate( alpha );
-    neg_v = - InputData.getParameter( Params::CFR_SCALE_FACTOR );
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
         if( !esData.getNonMalariaFevers().present() ){

@@ -24,7 +24,7 @@
 // #include "PkPd/Proteome.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
-#include "inputData.h"
+#include <schema/scenario.h>
 
 // submodels:
 // #include "PkPd/HoshenPkPdModel.h"
@@ -42,11 +42,11 @@ PkPdModel::ActiveModel PkPdModel::activeModel = PkPdModel::NON_PKPD;
 
 // -----  static functions  -----
 
-void PkPdModel::init () {
+void PkPdModel::init( const scnXml::Scenario& scenario ){
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-	if (InputData().getPharmacology().present()) {
+	if (scenario.getPharmacology().present()) {
 	    activeModel = LSTM_PKPD;
-	    LSTMDrugType::init(InputData().getPharmacology().get ());
+	    LSTMDrugType::init(scenario.getPharmacology().get ());
 	} else {
 	    activeModel = HOSHEN_PKPD;
             // Hoshen model has been removed.

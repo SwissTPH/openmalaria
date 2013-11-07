@@ -18,21 +18,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Simulation.h"
+#include "Simulator.h"
 
-#include "util/BoincWrapper.h"
-#include "util/timer.h"
-#include "Monitoring/Continuous.h"
-#include "Monitoring/Surveys.h"
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
-#include "inputData.h"
+#include "PopulationStats.h"
+#include "Parameters.h"
+#include "Monitoring/Continuous.h"
+#include "Monitoring/Surveys.h"
+#include "util/BoincWrapper.h"
+#include "util/timer.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
-#include "PopulationStats.h"
+#include <schema/scenario.h>
 
 #include <fstream>
 #include <gzstream/gzstream.h>
@@ -45,31 +46,35 @@ namespace OM {
 
 // -----  Set-up & tear-down  -----
 
-Simulation::Simulation(util::Checksum ck) :
+Simulator::Simulator( util::Checksum ck, const scnXml::Scenario scenario ) :
     simPeriodEnd(0),
     totalSimDuration(0),
     phase(STARTING_PHASE),
     workUnitIdentifier(0),
     cksum(ck)
 {
-    OM::TimeStep::init(InputData().getModel().getParameters().getInterval(),
-                       InputData().getDemography().getMaximumAgeYrs());
+    const scnXml::Model& model = scenario.getModel();
+    const scnXml::Demography& demography = scenario.getDemography();
+    
+    Parameters parameters( model.getParameters() );
+    
+    OM::TimeStep::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
     
     // Initialize input variables and allocate memory.
     // We try to make initialization hierarchical (i.e. most classes initialise
     // through Population::init).
-    util::random::seed (InputData().getModel().getParameters().getIseed());
-    util::ModelOptions::init ();
-    Surveys.init();
-    Population::init();
-    population = auto_ptr<Population>(new Population);
-    interventions::InterventionManager::makeInstance( InputData().getInterventions(), *population );
-    Surveys.initCohortOnly();
+    util::random::seed( model.getParameters().getIseed() );
+    util::ModelOptions::init( model.getModelOptions() );
+    Surveys.init( scenario.getMonitoring() );
+    Population::init( parameters, scenario );
+    population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
+    interventions::InterventionManager::makeInstance( scenario.getInterventions(), *population );
+    Surveys.initCohortOnly( scenario.getMonitoring() );
     
-    workUnitIdentifier = InputData().getWuID();
+    workUnitIdentifier = scenario.getWuID();
 }
 
-Simulation::~Simulation(){
+Simulator::~Simulator(){
     //free memory
     Population::clear();
 }
@@ -94,7 +99,7 @@ enum Phase {
     END_SIM         // should have largest value of all enumerations
 };
 
-int Simulation::start(){
+void Simulator::start(const scnXml::Monitoring& monitoring){
     TimeStep::simulation = TimeStep( 0 );
     
     // Make sure warmup period is at least as long as a human lifespan, as the
@@ -118,10 +123,10 @@ int Simulation::start(){
         + Surveys.getFinalTimestep() + TimeStep( 1 );
     
     if (isCheckpoint()) {
-        Continuous.init( true );
+        Continuous.init( monitoring, true );
         readCheckpoint();
     } else {
-        Continuous.init( false );
+        Continuous.init( monitoring, false );
         population->createInitialHumans();
     }
     // Set to either a checkpointing timestep or min int value. We only need to
@@ -217,14 +222,9 @@ int Simulation::start(){
     Surveys.writeSummaryArrays();
     Continuous.finalise();
     
-    // Write scenario checksum, only if simulation completed.
-    cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
-    
 # ifdef OM_STREAM_VALIDATOR
     util::StreamValidator.saveStream();
 # endif
-    
-    return 0;
 }
 
 
@@ -232,7 +232,7 @@ int Simulation::start(){
 
 const char* CHECKPOINT = "checkpoint";
 
-bool Simulation::isCheckpoint(){
+bool Simulator::isCheckpoint(){
   ifstream checkpointFile(CHECKPOINT,ios::in);
   // If not open, file doesn't exist (or is inaccessible)
   return checkpointFile.is_open();
@@ -248,7 +248,7 @@ int readCheckpointNum () {
     return checkpointNum;
 }
 
-void Simulation::writeCheckpoint(){
+void Simulator::writeCheckpoint(){
     // We alternate between two checkpoints, in case program is closed while writing.
     const int NUM_CHECKPOINTS = 2;
     
@@ -301,7 +301,7 @@ void Simulation::writeCheckpoint(){
 //     cerr << " OK" << endl;
 }
 
-void Simulation::readCheckpoint() {
+void Simulator::readCheckpoint() {
     int checkpointNum = readCheckpointNum();
     
   // Open the latest file
@@ -332,7 +332,7 @@ void Simulation::readCheckpoint() {
 
 //   -----  checkpointing: Simulation data  -----
 
-void Simulation::checkpoint (istream& stream, int checkpointNum) {
+void Simulator::checkpoint (istream& stream, int checkpointNum) {
     try {
         util::checkpoint::header (stream);
         util::CommandLine::staticCheckpoint (stream);
@@ -382,7 +382,7 @@ void Simulation::checkpoint (istream& stream, int checkpointNum) {
         throw util::checkpoint_error ("stream read error");
 }
 
-void Simulation::checkpoint (ostream& stream, int checkpointNum) {
+void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     util::checkpoint::header (stream);
     if (stream == NULL || !stream.good())
         throw util::checkpoint_error ("Unable to write to file");

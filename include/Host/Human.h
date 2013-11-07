@@ -29,6 +29,9 @@
 #include "interventions/Cohort.h"
 #include <set>
 
+namespace scnXml {
+    class Scenario;
+}
 namespace OM {
     namespace Transmission {
 	class TransmissionModel;
@@ -230,7 +233,7 @@ public:
   
   ///@name static public
   //@{
-  static void initHumanParameters ();
+  static void initHumanParameters (const OM::Parameters& parameters, const scnXml::Scenario& scenario);
   
   static void clear();
   //@}

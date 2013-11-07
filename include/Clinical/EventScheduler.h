@@ -30,7 +30,8 @@
 #include <list>
 
 namespace scnXml {
-class HSEventScheduler;
+    class HSEventScheduler;
+    class Human;
 }
 
 namespace OM {
@@ -48,7 +49,7 @@ using util::AgeGroupInterpolation;
 class ClinicalEventScheduler : public ClinicalModel
 {
 public:
-    static void init ();
+    static void init (const OM::Parameters& parameters, const scnXml::Human& human);
     static void setParameters (const scnXml::HSEventScheduler& esData);
     static void cleanup ();
 
@@ -82,6 +83,8 @@ private:
 
     /// Parameter of S(t) for t > 0
     static double neg_v;
+    /// Parameter
+    static double alpha;
     
     /** Weight model. Currently looks up a weight dependant on age from a table
      * in an entirely deterministic way.

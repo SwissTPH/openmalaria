@@ -47,7 +47,7 @@ public:
     /// @brief Static member functions
     //@{
     /** Static initialisation. */
-    static void init ();
+    static void init (const scnXml::AgeGroupValues& availabilityToMosquitoes);
     /** Static cleanup. */
     static void cleanup ();
     //@}

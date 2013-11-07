@@ -19,7 +19,6 @@
  */
 
 #include "Transmission/VectorModel.h"
-#include "inputData.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
@@ -155,8 +154,10 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
-VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
-    : initIterations(0), numSpecies(0)
+VectorModel::VectorModel (const scnXml::EntoData& entoData,
+                          const scnXml::Vector vectorData, int populationSize) :
+    TransmissionModel( entoData ),
+    initIterations(0), numSpecies(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.
     // TransmissionModel::createTransmissionModel checks length of list >= 1.
