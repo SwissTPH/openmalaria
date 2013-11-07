@@ -22,7 +22,7 @@
 #define OM_INTERVENTIONS_GVI
 
 #include "Interventions.h"
-#include "interventions/HumanVectorInterventions.h"
+#include "Transmission/PerHost.h"
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
@@ -34,24 +34,25 @@ namespace OM { namespace interventions {
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
+    using Transmission::PerHostInterventionData;
 
 /** Constant parameters for generic vector intervention model. */
-class GVIParams : public HumanVectorInterventionParams {
+class GVIEffect : public Transmission::HumanVectorInterventionEffect {
 public:
     /** Initialise parameters
      * 
      * @param elt Effect description from XML
      * @param species_name_map Map of species names to indices.
      */
-    GVIParams( size_t index, const scnXml::GVIDescription& elt,
+    GVIEffect( size_t index, const scnXml::GVIDescription& elt,
                const map<string,size_t>& species_name_map );
     
     void deploy( Host::Human& human, Deployment::Method method )const;
     
     virtual Effect::Type effectType() const{ return Effect::GVI; }
     
-    virtual HumanVectorIntervention* makeHumanPart() const;
-    virtual HumanVectorIntervention* makeHumanPart( istream& stream, size_t index ) const;
+    virtual PerHostInterventionData* makeHumanPart() const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
     
 private:
     /** Per mosquito-species parameters for generic vector intervention model. */
@@ -84,6 +85,10 @@ private:
     shared_ptr<DecayFunction> decay;
     vector<GVIAnopheles> species;  // vector specific params
     
+    // This is sparse vector: only indexes corresponding to a GVI effect are used
+    // No memory management
+    static vector<GVIEffect*> effectsByIndex;
+    
     friend class HumanGVI;
 };
 
@@ -92,9 +97,9 @@ private:
  * 
  * This is the per-host (but not per vector) part.
  */
-class HumanGVI : public HumanVectorIntervention {
+class HumanGVI : public PerHostInterventionData {
 public:
-    HumanGVI( const GVIParams& params );
+    HumanGVI( const GVIEffect& params );
     HumanGVI( istream& stream, size_t index );
     
     /// Checkpointing
@@ -105,25 +110,25 @@ public:
         decayHet & stream;
     }
     
-    virtual void deploy( const HumanVectorInterventionParams& params );
+    virtual void redeploy();
     
     inline TimeStep timeOfDeployment()const{
         return deployTime;
     }
     /** This is the survival factor of the effect. */
-    inline double getEffectSurvival(const GVIParams& params)const{
+    inline double getEffectSurvival(const GVIEffect& params)const{
         return params.decay->eval (TimeStep::simulation - deployTime,
                                               decayHet);
     }
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    virtual double relativeAttractiveness(const HumanInterventionEffect& params, size_t speciesIndex) const;
+    virtual double relativeAttractiveness(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes before they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    virtual double preprandialSurvivalFactor(const HumanInterventionEffect& params, size_t speciesIndex) const;
+    virtual double preprandialSurvivalFactor(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    virtual double postprandialSurvivalFactor(const HumanInterventionEffect& params, size_t speciesIndex) const;
+    virtual double postprandialSurvivalFactor(size_t speciesIndex) const;
     
 protected:
     virtual void checkpoint( ostream& stream );

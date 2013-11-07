@@ -25,8 +25,10 @@
 
 namespace OM { namespace interventions {
 
-GVIParams::GVIParams( size_t index, const scnXml::GVIDescription& elt,
-        const map<string,size_t>& species_name_map ) : HumanVectorInterventionParams(index)
+vector<GVIEffect*> GVIEffect::effectsByIndex;
+
+GVIEffect::GVIEffect( size_t index, const scnXml::GVIDescription& elt,
+        const map<string,size_t>& species_name_map ) : Transmission::HumanVectorInterventionEffect(index)
 {
     decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
     
@@ -38,21 +40,24 @@ GVIParams::GVIParams( size_t index, const scnXml::GVIDescription& elt,
         species[checker.getIndex(it->getMosquito())].init (*it);
     }
     checker.checkNoneMissed();
+    
+    if( effectsByIndex.size() <= index ) effectsByIndex.resize( index+1, 0 );
+    effectsByIndex[index] = this;
 }
 
- void GVIParams::deploy( Host::Human& human, Deployment::Method method )const{
-     human.perHostTransmission.interventions.deploy(*this);
+ void GVIEffect::deploy( Host::Human& human, Deployment::Method method )const{
+     human.perHostTransmission.deployEffect(*this);
      human.reportDeployment( Effect::GVI, method );
  }
  
- HumanVectorIntervention* GVIParams::makeHumanPart() const{
+ PerHostInterventionData* GVIEffect::makeHumanPart() const{
      return new HumanGVI( *this );
  }
- HumanVectorIntervention* GVIParams::makeHumanPart( istream& stream, size_t index ) const{
+ PerHostInterventionData* GVIEffect::makeHumanPart( istream& stream, size_t index ) const{
      return new HumanGVI( stream, index );
  }
 
-void GVIParams::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt)
+void GVIEffect::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt)
 {
     if( deterrency == deterrency ){
         throw util::unimplemented_exception( "multiple GVI interventions" );
@@ -69,8 +74,9 @@ void GVIParams::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParams
 
 
 // ———  per-human data  ———
-HumanGVI::HumanGVI ( const GVIParams& params ) :
-    HumanVectorIntervention( params.getIndex() ),
+HumanGVI::HumanGVI ( const GVIEffect& params ) :
+    PerHostInterventionData( params.getIndex() ),
+    deployTime( TimeStep::simulation ),
     initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
 {
     // Varience factor of decay is sampled once per human: human is assumed
@@ -78,34 +84,28 @@ HumanGVI::HumanGVI ( const GVIParams& params ) :
     decayHet = params.decay->hetSample();
 }
 
-void HumanGVI::deploy( const HumanVectorInterventionParams& params ) {
+void HumanGVI::redeploy() {
     deployTime = TimeStep::simulation;
 }
 
-double HumanGVI::relativeAttractiveness(const HumanInterventionEffect& gen_params, size_t speciesIndex) const{
-    assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
-    const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
-    const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
-    double effect = (1.0 - anoph.deterrency *
-            getEffectSurvival(params));
+double HumanGVI::relativeAttractiveness(size_t speciesIndex) const{
+    const GVIEffect& params = *GVIEffect::effectsByIndex[index];
+    const GVIEffect::GVIAnopheles& anoph = params.species[speciesIndex];
+    double effect = (1.0 - anoph.deterrency * getEffectSurvival(params));
     return anoph.byProtection( effect );
 }
 
-double HumanGVI::preprandialSurvivalFactor(const HumanInterventionEffect& gen_params, size_t speciesIndex) const{
-    assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
-    const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
-    const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
-    double effect = (1.0 - anoph.preprandialKilling *
-            getEffectSurvival(params));
+double HumanGVI::preprandialSurvivalFactor(size_t speciesIndex) const{
+    const GVIEffect& params = *GVIEffect::effectsByIndex[index];
+    const GVIEffect::GVIAnopheles& anoph = params.species[speciesIndex];
+    double effect = (1.0 - anoph.preprandialKilling * getEffectSurvival(params));
     return anoph.byProtection( effect );
 }
 
-double HumanGVI::postprandialSurvivalFactor(const HumanInterventionEffect& gen_params, size_t speciesIndex) const{
-    assert( dynamic_cast<const GVIParams*>(&gen_params) != 0 );
-    const GVIParams& params = *dynamic_cast<const GVIParams*>(&gen_params);
-    const GVIParams::GVIAnopheles& anoph = params.species[speciesIndex];
-    double effect = (1.0 - anoph.postprandialKilling *
-            getEffectSurvival(params));
+double HumanGVI::postprandialSurvivalFactor(size_t speciesIndex) const{
+    const GVIEffect& params = *GVIEffect::effectsByIndex[index];
+    const GVIEffect::GVIAnopheles& anoph = params.species[speciesIndex];
+    double effect = (1.0 - anoph.postprandialKilling * getEffectSurvival(params));
     return anoph.byProtection( effect );
 }
 
@@ -114,7 +114,7 @@ void HumanGVI::checkpoint( ostream& stream ){
     initialInsecticide & stream;
     decayHet & stream;
 }
-HumanGVI::HumanGVI( istream& stream, size_t index ) : HumanVectorIntervention( index )
+HumanGVI::HumanGVI( istream& stream, size_t index ) : PerHostInterventionData( index )
 {
     deployTime & stream;
     initialInsecticide & stream;

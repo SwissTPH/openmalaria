@@ -21,6 +21,7 @@
 #include "Transmission/VectorModel.h"
 #include "Transmission/Anopheles/PerHost.h"
 #include "util/errors.h"
+#include "util/checkpoint.h"
 
 namespace OM {
 namespace Transmission {
@@ -68,6 +69,20 @@ void PerHost::setupIRS (const TransmissionModel& tm) {
     }
 }
 
+void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
+    //TODO: this adds intervention deployment details; should we ever remove
+    // them (once deployment effect is zero or some such)?
+    for( ListActiveEffects::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+        if( it->getIndex() == params.getIndex() ){
+            // already have a deployment for that description; just update it
+            it->redeploy();
+            return;
+        }
+    }
+    // no deployment for that description: must make a new one
+    activeEffects.push_back( params.makeHumanPart() );
+}
+
 
 // Note: in the case an intervention is not present, we can use the approximation
 // of Weibull decay over (TimeStep::simulation - TimeStep::never) timesteps
@@ -82,7 +97,9 @@ double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base, s
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= irs.relativeAttractiveness(base.irs);
     }
-    alpha_i *= interventions.relativeAttractiveness( speciesIndex );
+    for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+        alpha_i *= it->relativeAttractiveness( speciesIndex );
+    }
     return alpha_i;
 }
 double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
@@ -93,7 +110,9 @@ double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speci
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= irs.preprandialSurvivalFactor(base.irs);
     }
-    P_B_i *= interventions.preprandialSurvivalFactor( speciesIndex );
+    for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+        P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
+    }
     return P_B_i;
 }
 double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
@@ -104,8 +123,38 @@ double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t spec
     if (irs.timeOfDeployment() >= TimeStep(0)) {
         pRest *= irs.postprandialSurvivalFactor(base.irs);
     }
-    pRest *= interventions.postprandialSurvivalFactor( speciesIndex );
+    for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+        pRest *= it->postprandialSurvivalFactor( speciesIndex );
+    }
     return pRest;
+}
+
+void PerHost::checkpointIntervs( ostream& stream ){
+    activeEffects.size() & stream;
+    for( boost::ptr_list<PerHostInterventionData>::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+        *it & stream;
+    }
+}
+void PerHost::checkpointIntervs( istream& stream ){
+    size_t l;
+    l & stream;
+    validateListSize(l);
+    activeEffects.clear();
+    for( size_t i = 0; i < l; ++i ){
+        size_t index;
+        index & stream;
+        try{
+            const interventions::HumanInterventionEffect& gen_params = interventions::InterventionManager::instance->getEffect( index );   // may throw
+            const HumanVectorInterventionEffect *params = dynamic_cast<const HumanVectorInterventionEffect*>( &gen_params );
+            if( params == 0 )
+                throw util::base_exception( "" );       // see catch block below
+            PerHostInterventionData *v = params->makeHumanPart( stream, index );
+            activeEffects.push_back( v );
+        }catch( util::base_exception e ){
+            // two causes, both boil down to index being wrong
+            throw util::checkpoint_error( "bad value in checkpoint file" );
+        }
+    }
 }
 
 }

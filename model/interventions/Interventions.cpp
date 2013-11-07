@@ -198,7 +198,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }else if( effect.getGVI().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanEffects.push_back( new interventions::GVIParams( index, effect.getGVI().get(), *species_index_map ) );
+                humanEffects.push_back( new GVIEffect( index, effect.getGVI().get(), *species_index_map ) );
             }else if( effect.getCohort().present() ){
                 humanEffects.push_back( new CohortSelectionEffect( index, effect.getCohort().get() ) );
                 _cohortEnabled = true;

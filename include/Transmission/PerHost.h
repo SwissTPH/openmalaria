@@ -24,9 +24,10 @@
 //TODO: PerHost shouldn't need to know about specific interventions
 #include "interventions/ITN.h"
 #include "interventions/IRS.h"
-#include "interventions/HumanVectorInterventions.h"
+#include "interventions/Interventions.h"        // only for HumanInterventionEffect
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
+#include <boost/ptr_container/ptr_list.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
@@ -37,6 +38,59 @@ using util::AgeGroupInterpolation;
 using util::DecayFunction;
 using util::DecayFuncHet;
 using boost::shared_ptr;
+
+/**
+ * A base class for interventions affecting human-vector interaction.
+ * 
+ * The constructor should initialise the data to represent an intervention
+ * deployed at this time (TimeStep::simulation).
+ * 
+ * redeploy() should reset the intervention to a freshly deployed state. If
+ * necessary, PerHost::deployEffect can be updated to make it create a new
+ * instance instead of calling redeploy.
+ */
+class PerHostInterventionData {
+public:
+    /** Deploy an intervention. */
+    virtual void redeploy() =0;
+    
+    /// Get effect of deterrencies of interventions, as an attractiveness multiplier.
+    virtual double relativeAttractiveness(size_t speciesIndex) const =0;
+    /** Get the killing effect on mosquitoes before they've eaten as a survival
+     * multiplier. */
+    virtual double preprandialSurvivalFactor(size_t speciesIndex) const =0;
+    /** Get the killing effect on mosquitoes after they've eaten as a survival
+     * multiplier. */
+    virtual double postprandialSurvivalFactor(size_t speciesIndex) const =0;
+    
+    /// Index of effect describing the intervention
+    inline size_t getIndex() const { return index; }
+    
+    /// Checkpointing (write only)
+    void operator& (ostream& stream) {
+        index & stream;
+        checkpoint( stream );
+    }
+    
+protected:
+    /// Set the effect index
+    explicit PerHostInterventionData( size_t index ) : index(index) {}
+    
+    /// Checkpointing: write
+    virtual void checkpoint( ostream& stream ) =0;
+    
+    size_t index;       // effect index; don't change
+};
+
+/** A base class for human vector intervention parameters. */
+class HumanVectorInterventionEffect : public interventions::HumanInterventionEffect {
+public:
+    /** Create a new object to store human-specific details of deployment. */
+    virtual PerHostInterventionData* makeHumanPart() const =0;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const =0;
+protected:
+    explicit HumanVectorInterventionEffect(size_t index) : HumanInterventionEffect(index) {}
+};
 
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
@@ -73,8 +127,8 @@ public:
     void setupITN (const TransmissionModel& tm);
     /// Give individual a new IRS as of time timeStep.
     void setupIRS (const TransmissionModel& tm);
-    /// Give individual a new VA intervention as of time timeStep.
-    void setupVA ();
+    /// Deploy some intervention effect
+    void deployEffect( const HumanVectorInterventionEffect& params );
     //@}
     
     /** @brief Availability of host to mosquitoes */
@@ -185,11 +239,14 @@ public:
         outsideTransmission & stream;
         net & stream;
         irs & stream;
-        interventions & stream;
+        checkpointIntervs( stream );
     }
     //@}
     
 private:
+    void checkpointIntervs( ostream& stream );
+    void checkpointIntervs( istream& stream );
+    
     vector<Anopheles::PerHost> species;
     
     // Determines whether human is outside transmission
@@ -201,9 +258,8 @@ private:
 
     interventions::ITN net;
     interventions::IRS irs;
-public:
-    interventions::HumanVectorInterventions interventions;
-private:
+    typedef boost::ptr_list<PerHostInterventionData> ListActiveEffects;
+    ListActiveEffects activeEffects;
     
     static AgeGroupInterpolation* relAvailAge;
 };
