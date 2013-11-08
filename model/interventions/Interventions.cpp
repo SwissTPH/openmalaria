@@ -195,7 +195,9 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }else if( effect.getIPT().present() ){
                 humanEffects.push_back( new IPTEffect( index, effect.getIPT().get() ) );
             }else if( effect.getITN().present() ){
-                humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), transmission ) );
+                if( species_index_map == 0 )
+                    species_index_map = &transmission.getSpeciesIndexMap();
+                humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), *species_index_map ) );
             }else if( effect.getIRS().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();

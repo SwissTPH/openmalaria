@@ -79,7 +79,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
         const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears(), _ITNParams );
+            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears() );
         }
         stream << '\t' << total / population.size();
     }
@@ -89,7 +89,7 @@ void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
 	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.probMosqBiting( params, i, _ITNParams );
+            total += iter->perHostTransmission.probMosqBiting( params, i );
         }
         stream << '\t' << total / population.size();
     }
@@ -99,7 +99,7 @@ void VectorModel::ctsCbP_CD (const Population& population, ostream& stream){
 	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.probMosqResting( params, i, _ITNParams );
+            total += iter->perHostTransmission.probMosqResting( params, i );
         }
         stream << '\t' << total / population.size();
     }
@@ -258,7 +258,7 @@ VectorModel::~VectorModel () {
 void VectorModel::init2 (const Population& population) {
     double mPA = meanPopAvail(population);
     for (size_t i = 0; i < numSpecies; ++i) {
-        species[i].init2 (i, population, mPA, _ITNParams);
+        species[i].init2 (i, population, mPA);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
@@ -352,7 +352,7 @@ TimeStep VectorModel::initIterate () {
 }
 
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {
-    host.update(_ITNParams);
+    host.update();
     if (simulationMode == forcedEIR){
         return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
                * host.relativeAvailabilityHetAge (ageYears);
@@ -360,7 +360,7 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
         assert( simulationMode == dynamicEIR );
         double simEIR = 0.0;
         for (size_t i = 0; i < numSpecies; ++i) {
-            simEIR += species[i].calculateEIR (i, host, _ITNParams);
+            simEIR += species[i].calculateEIR (i, host);
         }
         simEIR *= host.relativeAvailabilityAge (ageYears);
         return simEIR;
@@ -371,7 +371,7 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
 // Every Global::interval days:
 void VectorModel::vectorUpdate (const Population& population) {
     for (size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, i, simulationMode == dynamicEIR, _ITNParams);
+        species[i].advancePeriod (population, i, simulationMode == dynamicEIR);
     }
 }
 void VectorModel::update (const Population& population) {
@@ -388,11 +388,6 @@ void VectorModel::checkSimMode() const{
 const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
     checkSimMode();     //TODO: can probably eventually inline
     return speciesIndex;
-}
-
-void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
-    checkSimMode();
-    _ITNParams.init( elt, speciesIndex );
 }
 
 void VectorModel::deployVectorPopInterv (size_t instance) {

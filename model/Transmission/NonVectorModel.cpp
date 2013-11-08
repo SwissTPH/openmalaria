@@ -186,9 +186,6 @@ void NonVectorModel::uninfectVectors(){
     laggedKappa.assign( laggedKappa.size(), 0.0 );
 }
 
-void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
-  throw util::xml_scenario_error (viError);
-}
 void NonVectorModel::deployVectorPopInterv (size_t instance) {
   throw util::xml_scenario_error (viError);
 }

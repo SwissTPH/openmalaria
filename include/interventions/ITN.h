@@ -42,24 +42,12 @@ namespace interventions {
 class ITNEffect : public HumanInterventionEffect {
 public:
     ITNEffect( size_t index, const scnXml::ITNDescription& elt,
-               Transmission::TransmissionModel& transmissionModel );
+               const map< string, size_t >& species_name_map );
     
     void deploy( Host::Human& human, Deployment::Method method )const;
     
     virtual Effect::Type effectType() const;
     
-private:
-    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
-};
-
-/** Constant parameters for extended ITN model. */
-class ITNParams {
-public:
-    ITNParams() : ripFactor( numeric_limits<double>::signaling_NaN() ) {}
-    /** Set parameters from elt. */
-    void init( const scnXml::ITNDescription& elt, const map< string, size_t >& species_name_map);
-    
-private:
     /** Per mosquito-species parameters for extended ITN model. */
     class ITNAnopheles {
     public:
@@ -178,8 +166,11 @@ private:
     shared_ptr<DecayFunction> attritionOfNets;
     vector<ITNAnopheles> species; // vector specific params
     
+    // This is sparse vector: only indexes corresponding to a IRS effect are used
+    // No memory management
+    static vector<ITNEffect*> effectsByIndex;
+    
     friend class HumanITN;
-    friend class ITNAnophelesParams;
 };
 
 /** Extended ITN model by OB.
@@ -188,7 +179,7 @@ private:
  */
 class HumanITN {
 public:
-    HumanITN (const Transmission::TransmissionModel& tm);
+    HumanITN ();
     
     /// Checkpointing
     template<class S>
@@ -203,30 +194,30 @@ public:
         insecticideDecayHet & stream;
     }
     
-    void deploy(const ITNParams& params);
+    void deploy(const ITNEffect& params);
     inline TimeStep timeOfDeployment()const{
         return deployTime;
     }
     inline double getHoleIndex()const{
         return holeIndex;
     }
-    inline double getInsecticideContent(const ITNParams& params)const{
+    inline double getInsecticideContent(const ITNEffect& params)const{
         double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
                                               insecticideDecayHet);
         return initialInsecticide * effectSurvival;
     }
     
     /// Call once per timestep to update holes
-    void update(const ITNParams& params);
+    void update();
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    double relativeAttractiveness(size_t speciesIndex, const ITNParams& itnParams) const;
+    double relativeAttractiveness(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes before they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double preprandialSurvivalFactor(size_t speciesIndex, const ITNParams& itnParams) const;
+    double preprandialSurvivalFactor(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double postprandialSurvivalFactor(size_t speciesIndex, const ITNParams& itnParams) const;
+    double postprandialSurvivalFactor(size_t speciesIndex) const;
     
 private:
     // these parameters express the current state of the net:

@@ -173,8 +173,6 @@ public:
    * n is the number of species. */
   virtual const map<string,size_t>& getSpeciesIndexMap() =0;
   
-  /** Set ITN parameters. */
-  virtual void setITNDescription ( const scnXml::ITNDescription&) =0;
   /** Set the larviciding intervention params.
    *
    * Instance: the index of this instance of the intervention. Each instance

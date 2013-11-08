@@ -59,16 +59,12 @@ public:
   virtual void vectorUpdate (const Population& population);
   virtual void update (const Population& population);
 
-  virtual double calculateEIR(PerHost& host, double ageYears); 
+  virtual double calculateEIR(OM::Transmission::PerHost& host, double ageYears); 
   
   virtual const map<string,size_t>& getSpeciesIndexMap();
-  virtual void setITNDescription ( const scnXml::ITNDescription& elt);
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();
   
-  inline const interventions::ITNParams& getITNParams () const{
-      return _ITNParams;
-  }
   virtual void summarize (Monitoring::Survey& survey);
   
 protected:
@@ -127,9 +123,6 @@ private:
    * found. Doesn't need checkpointing. */
   map<string,size_t> speciesIndex;
   //@}
-  
-  /** Parameters used by ITN model. */
-  interventions::ITNParams _ITNParams;
   
   friend class PerHost;
   friend class AnophelesModelSuite;

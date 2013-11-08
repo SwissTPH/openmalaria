@@ -18,41 +18,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "interventions//ITN.h"
-//TODO: we shouldn't have a dependency on the vector/transmission model class
-//here; currently it's a work-around for ITN parameters not always being present.
-#include "Transmission/VectorModel.h"
+#include "interventions/ITN.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/SpeciesIndexChecker.h"
+#include "Host/Human.h" //TODO: temporary
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
     using util::random::poisson;
 
+vector<ITNEffect*> ITNEffect::effectsByIndex;
+size_t itnIndex = numeric_limits<size_t>::max();        //TODO: this is temporary
+
 ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
-                Transmission::TransmissionModel& transmissionModel ) :
+                const map<string, size_t>& species_name_map ) :
         HumanInterventionEffect(index),
-        transmission( transmissionModel )
+        ripFactor( numeric_limits<double>::signaling_NaN() )
 {
-    transmissionModel.setITNDescription( elt );
-}
-
-void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
-    human.perHostTransmission.setupITN ( transmission );
-    if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassITNs( human.getMonitoringAgeGroup(), 1 );
-    }else if( method == interventions::Deployment::CTS ){
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportEPI_ITNs( human.getMonitoringAgeGroup(), 1 );
-    }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
-Effect::Type ITNEffect::effectType() const{
-    return Effect::ITN;
-}
-
-void ITNParams::init( const scnXml::ITNDescription& elt, const map< string, size_t >& species_name_map) {
+    if( itnIndex != numeric_limits<size_t>::max() ){
+        throw util::unimplemented_exception( "multiple ITN effects" );
+    }
+    itnIndex = index;
+    
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
@@ -74,9 +63,25 @@ void ITNParams::init( const scnXml::ITNDescription& elt, const map< string, size
         species[checker.getIndex(it->getMosquito())].init (*it, propUse, maxInsecticide);
     }
     checker.checkNoneMissed();
+    
+    if( effectsByIndex.size() <= index ) effectsByIndex.resize( index+1, 0 );
+    effectsByIndex[index] = this;
 }
 
-void ITNParams::ITNAnopheles::init(
+void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
+    human.perHostTransmission.setupITN ( *this );
+    if( method == interventions::Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassITNs( human.getMonitoringAgeGroup(), 1 );
+    }else if( method == interventions::Deployment::CTS ){
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportEPI_ITNs( human.getMonitoringAgeGroup(), 1 );
+    }else throw SWITCH_DEFAULT_EXCEPTION;
+}
+
+Effect::Type ITNEffect::effectType() const{
+    return Effect::ITN;
+}
+
+void ITNEffect::ITNAnopheles::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
     double proportionUse,
     double maxInsecticide)
@@ -107,7 +112,7 @@ void ITNParams::ITNAnopheles::init(
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
-ITNParams::ITNAnopheles::RADeterrency::RADeterrency(const scnXml::ITNDeterrency& elt,
+ITNEffect::ITNAnopheles::RADeterrency::RADeterrency(const scnXml::ITNDeterrency& elt,
                                                    double maxInsecticide) :
     lHF( numeric_limits< double >::signaling_NaN() ),
     lPF( numeric_limits< double >::signaling_NaN() ),
@@ -184,7 +189,7 @@ ITNParams::ITNAnopheles::RADeterrency::RADeterrency(const scnXml::ITNDeterrency&
     lPF = log( PF );
     lIF = log( IF );
 }
-ITNParams::ITNAnopheles::RATwoStageDeterrency::RATwoStageDeterrency(
+ITNEffect::ITNAnopheles::RATwoStageDeterrency::RATwoStageDeterrency(
         const scnXml::TwoStageDeterrency& elt, double maxInsecticide) :
     lPFEntering( numeric_limits< double >::signaling_NaN() ),
     insecticideScalingEntering( numeric_limits< double >::signaling_NaN() )
@@ -232,7 +237,7 @@ ITNParams::ITNAnopheles::RATwoStageDeterrency::RATwoStageDeterrency(
     
     pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking" );
 }
-ITNParams::ITNAnopheles::SurvivalFactor::SurvivalFactor() :
+ITNEffect::ITNAnopheles::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),
     HF( numeric_limits< double >::signaling_NaN() ),
     PF( numeric_limits< double >::signaling_NaN() ),
@@ -241,7 +246,7 @@ ITNParams::ITNAnopheles::SurvivalFactor::SurvivalFactor() :
     insecticideScaling( numeric_limits< double >::signaling_NaN() ),
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
-void ITNParams::ITNAnopheles::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
+void ITNEffect::ITNAnopheles::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
                                                    double maxInsecticide, const char* eltName){
     BF = elt.getBaseFactor();
     HF = elt.getHoleFactor();
@@ -351,7 +356,7 @@ void ITNParams::ITNAnopheles::SurvivalFactor::init(const scnXml::ITNKillingEffec
         //throw util::xml_scenario_error( msg.str() );
     }
 }
-double ITNParams::ITNAnopheles::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
+double ITNEffect::ITNAnopheles::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
@@ -361,7 +366,7 @@ double ITNParams::ITNAnopheles::RADeterrency::relativeAttractiveness( double hol
         relAvail = 0.0;
     return relAvail;
 }
-double ITNParams::ITNAnopheles::RATwoStageDeterrency::relativeAttractiveness(
+double ITNEffect::ITNAnopheles::RATwoStageDeterrency::relativeAttractiveness(
         double holeIndex, double insecticideContent )const
 {
     // This is essentially a combination of the relative attractiveness as used
@@ -383,7 +388,7 @@ double ITNParams::ITNAnopheles::RATwoStageDeterrency::relativeAttractiveness(
         return 0.0;
     return pEnt * rel_pAtt;
 }
-double ITNParams::ITNAnopheles::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
+double ITNEffect::ITNAnopheles::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double pAtt = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
@@ -391,7 +396,7 @@ double ITNParams::ITNAnopheles::SurvivalFactor::rel_pAtt( double holeIndex, doub
     //assert( pAtt <= 1.0 );
     return pAtt / BF;
 }
-double ITNParams::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
+double ITNEffect::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
@@ -406,31 +411,26 @@ double ITNParams::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex
     return survivalFactor;
 }
 
-HumanITN::HumanITN(const Transmission::TransmissionModel& tm) :
+HumanITN::HumanITN() :
         nHoles( 0 ),
         holeIndex( numeric_limits<double>::signaling_NaN() ),
         initialInsecticide( numeric_limits<double>::signaling_NaN() ),
         holeRate( numeric_limits<double>::signaling_NaN() ),
         ripRate( numeric_limits<double>::signaling_NaN() )
 {
-    //TODO: we shouldn't really have ITN data (this class) if there's no vector
-    // model, should we? Allocate dynamically or based on model?
-    const Transmission::VectorModel* vt = dynamic_cast<const Transmission::VectorModel*>(&tm);
-    if( vt != 0 ){
-        const ITNParams& params = vt->getITNParams();
-        if( params.insecticideDecay.get() == 0 )
-            return;     // no ITNs
-        // Net rips and insecticide loss are assumed to co-vary dependent on
-        // handling of net. They are sampled once per human: human handling is
-        // presumed to be the largest cause of variance.
-        util::NormalSample x = util::NormalSample::generate();
-        holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
-        ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
-        insecticideDecayHet = params.insecticideDecay->hetSample(x);
-    }
+    if( itnIndex == numeric_limits<size_t>::max() ) return;     // no ITN description
+    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    
+    // Net rips and insecticide loss are assumed to co-vary dependent on
+    // handling of net. They are sampled once per human: human handling is
+    // presumed to be the largest cause of variance.
+    util::NormalSample x = util::NormalSample::generate();
+    holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
+    ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
+    insecticideDecayHet = params.insecticideDecay->hetSample(x);
 }
 
-void HumanITN::deploy(const ITNParams& params) {
+void HumanITN::deploy(const OM::interventions::ITNEffect& params) {
     deployTime = TimeStep::simulation;
     disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
     nHoles = 0;
@@ -443,7 +443,9 @@ void HumanITN::deploy(const ITNParams& params) {
         initialInsecticide = params.maxInsecticide;
 }
 
-void HumanITN::update(const ITNParams& params){
+void HumanITN::update(){
+    if( itnIndex == numeric_limits<size_t>::max() ) return;     // no ITN description
+    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
     if( deployTime != TimeStep::never ){
         // First use is at age 1, so don't remove until *after* disposalTime to
         // get use over the full duration given by sampleAgeOfDecay().
@@ -456,21 +458,24 @@ void HumanITN::update(const ITNParams& params){
     }
 }
 
-double HumanITN::relativeAttractiveness(size_t speciesIndex,
-                                            const ITNParams& params) const{
-    const ITNParams::ITNAnopheles& anoph = params.species[speciesIndex];
+double HumanITN::relativeAttractiveness(size_t speciesIndex) const{
+    if( itnIndex == numeric_limits<size_t>::max() ) return 1.0;     // no ITN description
+    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
-double HumanITN::preprandialSurvivalFactor(size_t speciesIndex,
-                                            const ITNParams& params) const{
-    const ITNParams::ITNAnopheles& anoph = params.species[speciesIndex];
+double HumanITN::preprandialSurvivalFactor(size_t speciesIndex) const{
+    if( itnIndex == numeric_limits<size_t>::max() ) return 1.0;     // no ITN description
+    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
-double HumanITN::postprandialSurvivalFactor(size_t speciesIndex,
-                                            const ITNParams& params) const{
-    const ITNParams::ITNAnopheles& anoph = params.species[speciesIndex];
+double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
+    if( itnIndex == numeric_limits<size_t>::max() ) return 1.0;     // no ITN description
+    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 

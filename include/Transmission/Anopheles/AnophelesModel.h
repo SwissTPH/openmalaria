@@ -92,7 +92,9 @@ public:
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void init2 (size_t sIndex, const OM::Population& population, double meanPopAvail, const OM::interventions::ITNParams& itnParams);
+    void init2 (size_t sIndex,
+                   const OM::Population& population,
+                   double meanPopAvail);
     
     /** Set up the non-host-specific interventions. */
     void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
@@ -121,7 +123,8 @@ public:
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (const OM::Population& population, size_t sIndex, bool isDynamic, const OM::interventions::ITNParams& itnParams);
+    void advancePeriod (const OM::Population& population,
+        size_t sIndex, bool isDynamic);
 
     /** Returns the EIR calculated by advancePeriod().
      *
@@ -130,8 +133,7 @@ public:
      *
      * @param sIndex Index of this in VectorModel::species
      * @param host PerHost of the human requesting this EIR. */
-    double calculateEIR (size_t sIndex, Transmission::PerHost& host,
-                         const interventions::ITNParams& itnParams );
+    double calculateEIR (size_t sIndex, Transmission::PerHost& host );
     //@}
 
 
