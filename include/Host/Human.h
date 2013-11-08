@@ -121,8 +121,6 @@ public:
   void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );
   /// Mass/continuous IPT deployment (note: these don't have exactly the same effect)
   void deployIPT( interventions::Deployment::Method method );
-  /// Mass/continuous ITN deployment
-  void deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   
   /// Resets immunity
   inline void clearImmunity() {

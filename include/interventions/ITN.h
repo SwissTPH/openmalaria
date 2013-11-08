@@ -68,7 +68,7 @@ private:
     shared_ptr<DecayFunction> insecticideDecay;
     shared_ptr<DecayFunction> attritionOfNets;
     
-    friend class ITN;
+    friend class HumanITN;
     friend class ITNAnophelesParams;
 };
 
@@ -179,16 +179,16 @@ private:
     SurvivalFactor _preprandialKillingEffect;
     SurvivalFactor _postprandialKillingEffect;
     
-    friend class ITN;
+    friend class HumanITN;
 };
 
 /** Extended ITN model by OB.
  * 
  * Each instance describes a hypothetical net (or no net).
  */
-class ITN {
+class HumanITN {
 public:
-    ITN (const Transmission::TransmissionModel& tm);
+    HumanITN (const Transmission::TransmissionModel& tm);
     
     /// Checkpointing
     template<class S>
@@ -211,7 +211,9 @@ public:
         return holeIndex;
     }
     inline double getInsecticideContent(const ITNParams& params)const{
-        return initialInsecticide * params.insecticideDecay->eval (TimeStep::simulation - deployTime, insecticideDecayHet);
+        double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
+                                              insecticideDecayHet);
+        return initialInsecticide * effectSurvival;
     }
     
     /// Call once per timestep to update holes

@@ -39,7 +39,12 @@ ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
 }
 
 void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
-    human.deployITN( method, transmission );
+    human.perHostTransmission.setupITN ( transmission );
+    if( method == interventions::Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassITNs( human.getMonitoringAgeGroup(), 1 );
+    }else if( method == interventions::Deployment::CTS ){
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportEPI_ITNs( human.getMonitoringAgeGroup(), 1 );
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 Effect::Type ITNEffect::effectType() const{
@@ -385,7 +390,7 @@ double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, dou
     return survivalFactor;
 }
 
-ITN::ITN(const Transmission::TransmissionModel& tm) :
+HumanITN::HumanITN(const Transmission::TransmissionModel& tm) :
         nHoles( 0 ),
         holeIndex( numeric_limits<double>::signaling_NaN() ),
         initialInsecticide( numeric_limits<double>::signaling_NaN() ),
@@ -409,7 +414,7 @@ ITN::ITN(const Transmission::TransmissionModel& tm) :
     }
 }
 
-void ITN::deploy(const ITNParams& params) {
+void HumanITN::deploy(const ITNParams& params) {
     deployTime = TimeStep::simulation;
     disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
     nHoles = 0;
@@ -422,7 +427,7 @@ void ITN::deploy(const ITNParams& params) {
         initialInsecticide = params.maxInsecticide;
 }
 
-void ITN::update(const ITNParams& params){
+void HumanITN::update(const ITNParams& params){
     if( deployTime != TimeStep::never ){
         // First use is at age 1, so don't remove until *after* disposalTime to
         // get use over the full duration given by sampleAgeOfDecay().
@@ -435,15 +440,15 @@ void ITN::update(const ITNParams& params){
     }
 }
 
-double ITN::relativeAttractiveness(const ITNAnophelesParams& params) const{
+double HumanITN::relativeAttractiveness(const ITNAnophelesParams& params) const{
     return params.relativeAttractiveness( holeIndex, getInsecticideContent(*params.base) );
 }
 
-double ITN::preprandialSurvivalFactor(const ITNAnophelesParams& params) const{
+double HumanITN::preprandialSurvivalFactor(const ITNAnophelesParams& params) const{
     return params.preprandialSurvivalFactor( holeIndex, getInsecticideContent(*params.base) );
 }
 
-double ITN::postprandialSurvivalFactor(const ITNAnophelesParams& params) const{
+double HumanITN::postprandialSurvivalFactor(const ITNAnophelesParams& params) const{
     return params.postprandialSurvivalFactor( holeIndex, getInsecticideContent(*params.base) );
 }
 

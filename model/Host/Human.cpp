@@ -220,15 +220,6 @@ void Human::deployIPT( interventions::Deployment::Method method ){
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
-    perHostTransmission.setupITN ( transmissionModel );
-    if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassITNs( getMonitoringAgeGroup(), 1 );
-    }else if( method == interventions::Deployment::CTS ){
-        Monitoring::Surveys.getSurvey(isInAnyCohort()).reportEPI_ITNs( getMonitoringAgeGroup(), 1 );
-    }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
 void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
 }

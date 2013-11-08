@@ -220,7 +220,7 @@ public:
     ///@brief Miscellaneous
     //@{
     /// Get a reference to the net
-    inline const interventions::ITN& getITN() const{
+    inline const interventions::HumanITN& getITN() const{
         return net;
     }
     
@@ -254,7 +254,7 @@ private:
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
 
-    interventions::ITN net;
+    interventions::HumanITN net;
     typedef boost::ptr_list<PerHostInterventionData> ListActiveEffects;
     ListActiveEffects activeEffects;
     
