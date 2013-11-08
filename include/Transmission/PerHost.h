@@ -65,17 +65,21 @@ public:
     
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
-        index & stream;
+        index & stream; // must be first; read externally so that the correct
+                // makeHumanPart function can be found
         checkpoint( stream );
     }
     
 protected:
     /// Set the effect index
-    explicit PerHostInterventionData( size_t index ) : index(index) {}
+    explicit PerHostInterventionData( size_t index ) :
+            deployTime( TimeStep::simulation ),
+            index(index) {}
     
     /// Checkpointing: write
     virtual void checkpoint( ostream& stream ) =0;
     
+    TimeStep deployTime;        // time of deployment or TimeStep::never
     size_t index;       // effect index; don't change
 };
 

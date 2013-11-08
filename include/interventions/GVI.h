@@ -102,19 +102,8 @@ public:
     HumanGVI( const GVIEffect& params );
     HumanGVI( istream& stream, size_t index );
     
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        deployTime & stream;
-        initialInsecticide & stream;
-        decayHet & stream;
-    }
-    
     virtual void redeploy();
     
-    inline TimeStep timeOfDeployment()const{
-        return deployTime;
-    }
     /** This is the survival factor of the effect. */
     inline double getEffectSurvival(const GVIEffect& params)const{
         return params.decay->eval (TimeStep::simulation - deployTime, decayHet);
@@ -133,11 +122,7 @@ protected:
     virtual void checkpoint( ostream& stream );
     
 private:
-    // these parameters express the current state of the intervention:
-    TimeStep deployTime;	// time of deployment or TimeStep::never
-    double initialInsecticide;	// units: mg/m²
-    
-    // this parameters are sampled from log-normal per intervention, but thereafter constant:
+    // this parameter is sampled on first deployment, but never resampled for the same human:
     DecayFuncHet decayHet;
 };
 

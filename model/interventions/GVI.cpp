@@ -78,9 +78,7 @@ void GVIEffect::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParams
 
 // ———  per-human data  ———
 HumanGVI::HumanGVI ( const GVIEffect& params ) :
-    PerHostInterventionData( params.getIndex() ),
-    deployTime( TimeStep::simulation ),
-    initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
+    PerHostInterventionData( params.getIndex() )
 {
     // Varience factor of decay is sampled once per human: human is assumed
     // to account for most variance.
@@ -114,13 +112,11 @@ double HumanGVI::postprandialSurvivalFactor(size_t speciesIndex) const{
 
 void HumanGVI::checkpoint( ostream& stream ){
     deployTime & stream;
-    initialInsecticide & stream;
     decayHet & stream;
 }
 HumanGVI::HumanGVI( istream& stream, size_t index ) : PerHostInterventionData( index )
 {
     deployTime & stream;
-    initialInsecticide & stream;
     decayHet & stream;
 }
 
