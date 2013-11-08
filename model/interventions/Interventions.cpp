@@ -157,6 +157,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
         }
     }
     Transmission::TransmissionModel& transmission = population.transmissionModel();
+    // species_index_map is not available with the non-vector model or
+    // non-dynamic mode, so setting it (lazily) also checks sim mode:
     const map<string,size_t>* species_index_map = 0;
     if( intervElt.getHuman().present() ){
         const scnXml::HumanInterventions& human = intervElt.getHuman().get();

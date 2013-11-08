@@ -49,7 +49,7 @@ public:
     
     void deploy( Host::Human& human, Deployment::Method method )const;
     
-    virtual Effect::Type effectType() const{ return Effect::GVI; }
+    virtual Effect::Type effectType() const;
     
     virtual PerHostInterventionData* makeHumanPart() const;
     virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
@@ -117,8 +117,7 @@ public:
     }
     /** This is the survival factor of the effect. */
     inline double getEffectSurvival(const GVIEffect& params)const{
-        return params.decay->eval (TimeStep::simulation - deployTime,
-                                              decayHet);
+        return params.decay->eval (TimeStep::simulation - deployTime, decayHet);
     }
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.

@@ -28,7 +28,8 @@ namespace OM { namespace interventions {
 vector<GVIEffect*> GVIEffect::effectsByIndex;
 
 GVIEffect::GVIEffect( size_t index, const scnXml::GVIDescription& elt,
-        const map<string,size_t>& species_name_map ) : Transmission::HumanVectorInterventionEffect(index)
+        const map<string,size_t>& species_name_map ) :
+        Transmission::HumanVectorInterventionEffect(index)
 {
     decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
     
@@ -45,17 +46,19 @@ GVIEffect::GVIEffect( size_t index, const scnXml::GVIDescription& elt,
     effectsByIndex[index] = this;
 }
 
- void GVIEffect::deploy( Host::Human& human, Deployment::Method method )const{
-     human.perHostTransmission.deployEffect(*this);
-     human.reportDeployment( Effect::GVI, method );
- }
- 
- PerHostInterventionData* GVIEffect::makeHumanPart() const{
-     return new HumanGVI( *this );
- }
- PerHostInterventionData* GVIEffect::makeHumanPart( istream& stream, size_t index ) const{
-     return new HumanGVI( stream, index );
- }
+void GVIEffect::deploy( Host::Human& human, Deployment::Method method )const{
+    human.perHostTransmission.deployEffect(*this);
+    human.reportDeployment( Effect::GVI, method );
+}
+
+Effect::Type GVIEffect::effectType()const{ return Effect::GVI; }
+
+PerHostInterventionData* GVIEffect::makeHumanPart() const{
+    return new HumanGVI( *this );
+}
+PerHostInterventionData* GVIEffect::makeHumanPart( istream& stream, size_t index ) const{
+    return new HumanGVI( stream, index );
+}
 
 void GVIEffect::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt)
 {

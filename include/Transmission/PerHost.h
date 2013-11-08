@@ -21,9 +21,6 @@
 #define Hmod_PerHost
 
 #include "Transmission/Anopheles/PerHost.h"
-//TODO: PerHost shouldn't need to know about specific interventions
-#include "interventions/ITN.h"
-#include "interventions/IRS.h"
 #include "interventions/Interventions.h"        // only for HumanInterventionEffect
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"

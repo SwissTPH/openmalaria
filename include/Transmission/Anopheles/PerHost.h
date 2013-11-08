@@ -38,8 +38,7 @@ class PerHostBase {
 public:
     PerHostBase(const interventions::ITNParams* baseITNParams, const interventions::IRSParams* baseIRSParams) :
             net( baseITNParams ),
-            irs( baseIRSParams ),
-            VADeterrency(numeric_limits< double >::signaling_NaN())
+            irs( baseIRSParams )
     {}
     
     /** Set parameters from an XML element. */
@@ -88,7 +87,6 @@ public:
     //@{
     interventions::ITNAnophelesParams net;
     interventions::IRSAnophelesParams irs;
-    double VADeterrency;
     //@}
 };
 
