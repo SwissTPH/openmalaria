@@ -174,7 +174,7 @@ VectorModel::VectorModel (const scnXml::EntoData& entoData,
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, AnophelesModel(&_ITNParams, &_IRSParams));
+    species.resize (numSpecies, AnophelesModel(&_ITNParams));
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -401,18 +401,6 @@ void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
     }
     checker.checkNoneMissed();
 }
-void VectorModel::setIRSDescription (const scnXml::IRSDescription& elt){
-    checkSimMode();
-    _IRSParams.init( elt );
-    
-    typedef scnXml::IRSDescription::AnophelesParamsSequence AP;
-    const AP& ap = elt.getAnophelesParams();
-    SpeciesIndexChecker checker( "IRS", speciesIndex );
-    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[checker.getIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
-    }
-    checker.checkNoneMissed();
-}
 
 void VectorModel::deployVectorPopInterv (size_t instance) {
     checkSimMode();
@@ -437,7 +425,7 @@ void VectorModel::summarize (Monitoring::Survey& survey) {
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams, &_IRSParams));
+    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams));
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

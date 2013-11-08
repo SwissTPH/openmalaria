@@ -178,25 +178,6 @@ private:
     Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
 };
 
-class IRSEffect : public HumanInterventionEffect {
-public:
-    IRSEffect( size_t index, const scnXml::IRSDescription& elt,
-               Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
-               transmission( transmissionModel )
-    {
-        transmissionModel.setIRSDescription( elt );
-    }
-    
-    void deploy( Human& human, Deployment::Method method )const{
-        human.deployIRS( method, transmission );
-    }
-    
-    virtual Effect::Type effectType() const{ return Effect::IRS; }
-    
-private:
-    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
-};
-
 class ClearImmunityEffect : public HumanInterventionEffect {
 public:
     ClearImmunityEffect( size_t index ) : HumanInterventionEffect(index) {}

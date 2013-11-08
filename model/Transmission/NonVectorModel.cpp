@@ -189,9 +189,6 @@ void NonVectorModel::uninfectVectors(){
 void NonVectorModel::setITNDescription (const scnXml::ITNDescription&) {
   throw util::xml_scenario_error (viError);
 }
-void NonVectorModel::setIRSDescription (const scnXml::IRSDescription&) {
-  throw util::xml_scenario_error (viError);
-}
 void NonVectorModel::deployVectorPopInterv (size_t instance) {
   throw util::xml_scenario_error (viError);
 }

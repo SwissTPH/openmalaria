@@ -26,7 +26,6 @@
 #include "Transmission/Anopheles/AnophelesModel.h"
 //TODO: the vector model shouldn't have to know about specific interventions
 #include "interventions//ITN.h"
-#include "interventions/IRS.h"
 
 namespace scnXml {
   class Vector;
@@ -64,15 +63,11 @@ public:
   
   virtual const map<string,size_t>& getSpeciesIndexMap();
   virtual void setITNDescription ( const scnXml::ITNDescription& elt);
-  virtual void setIRSDescription (const scnXml::IRSDescription&);
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();
   
   inline const interventions::ITNParams& getITNParams () const{
       return _ITNParams;
-  }
-  inline const interventions::IRSParams& getIRSParams() const{
-      return _IRSParams;
   }
   virtual void summarize (Monitoring::Survey& survey);
   
@@ -133,10 +128,8 @@ private:
   map<string,size_t> speciesIndex;
   //@}
   
-  /** Parameters used by ITN and IRS models. */
+  /** Parameters used by ITN model. */
   interventions::ITNParams _ITNParams;
-  /** ditto */
-  interventions::IRSParams _IRSParams;
   
   friend class PerHost;
   friend class AnophelesModelSuite;

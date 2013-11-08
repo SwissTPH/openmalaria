@@ -18,32 +18,68 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "interventions//IRS.h"
-//TODO: we shouldn't have a dependency on the vector/transmission model class
-//here; currently it's a work-around for IRS parameters not always being present.
-#include "Transmission/VectorModel.h"
+#include "interventions/IRS.h"
+#include "Host/Human.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "Monitoring/Surveys.h"
+#include "util/SpeciesIndexChecker.h"
+
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
     using util::random::poisson;
 
-void IRSParams::init( const scnXml::IRSDescription& elt) {
+vector<IRSEffect*> IRSEffect::effectsByIndex;
+
+IRSEffect::IRSEffect( size_t index, const scnXml::IRSDescription& elt,
+        const map<string,size_t>& species_name_map ) :
+        Transmission::HumanVectorInterventionEffect(index)
+{
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
-    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "interventions.human.IRS.description.insecticideDecay" );
+    insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(),
+                                                  "interventions.human.IRS.description.insecticideDecay" );
+    
+    typedef scnXml::IRSDescription::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    species.resize( species_name_map.size() );
+    util::SpeciesIndexChecker checker( "IRS intervention", species_name_map );
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
+        species[checker.getIndex(it->getMosquito())].init (*it, maxInsecticide);
+    }
+    checker.checkNoneMissed();
+    
+    if( effectsByIndex.size() <= index ) effectsByIndex.resize( index+1, 0 );
+    effectsByIndex[index] = this;
 }
 
-void IRSAnophelesParams::init(
-    const IRSParams& params,
-    const scnXml::IRSDescription::AnophelesParamsType& elt)
+void IRSEffect::deploy( Host::Human& human, Deployment::Method method )const{
+    human.perHostTransmission.deployEffect(*this);
+    if( method == interventions::Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassIRS( human.getMonitoringAgeGroup(), 1 );
+    }else if( method == interventions::Deployment::CTS ){
+        //TODO(monitoring): report
+    }else throw SWITCH_DEFAULT_EXCEPTION;
+}
+
+Effect::Type IRSEffect::effectType()const{ return Effect::IRS; }
+
+PerHostInterventionData* IRSEffect::makeHumanPart() const{
+    return new HumanIRS( *this );
+}
+PerHostInterventionData* IRSEffect::makeHumanPart( istream& stream, size_t index ) const{
+    return new HumanIRS( stream, index );
+}
+
+void IRSEffect::IRSAnopheles::init(const scnXml::IRSDescription::AnophelesParamsType& elt,
+                                   double maxInsecticide)
 {
-    _relativeAttractiveness.init( params, elt.getDeterrency() );
-    _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), false );
-    _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), true );
+    _relativeAttractiveness.init( elt.getDeterrency() );
+    _preprandialKillingEffect.init( elt.getPreprandialKillingEffect(), false, maxInsecticide );
+    _postprandialKillingEffect.init( elt.getPostprandialKillingEffect(), true, maxInsecticide );
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
     assert( propActive >= 0.0 && propActive <= 1.0 );
@@ -54,11 +90,11 @@ void IRSAnophelesParams::init(
 inline bool inRange01( double x ){
     return x>=0.0 && x<= 1.0;
 }
-IRSAnophelesParams::RelativeAttractiveness::RelativeAttractiveness() :
+IRSEffect::IRSAnopheles::RelativeAttractiveness::RelativeAttractiveness() :
     lPF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
 {}
-void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, const scnXml::IRSDeterrency& elt){
+void IRSEffect::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDeterrency& elt){
     double PF = elt.getInsecticideFactor();
     insecticideScaling = elt.getInsecticideScalingFactor();
     if( !( PF > 0.0) ){
@@ -100,13 +136,14 @@ void IRSAnophelesParams::RelativeAttractiveness::init(const IRSParams& params, c
     }
     lPF = log( PF );
 }
-IRSAnophelesParams::SurvivalFactor::SurvivalFactor() :
+IRSEffect::IRSAnopheles::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),
     PF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() ),
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
-void IRSAnophelesParams::SurvivalFactor::init(const IRSParams& params, const scnXml::IRSKillingEffect& elt, bool postPrandial){
+void IRSEffect::IRSAnopheles::SurvivalFactor::init(const scnXml::IRSKillingEffect& elt,
+                                                   bool postPrandial, double maxInsecticide){
     BF = elt.getBaseFactor();
     PF = elt.getInsecticideFactor();
     insecticideScaling = elt.getInsecticideScalingFactor();
@@ -149,7 +186,7 @@ void IRSAnophelesParams::SurvivalFactor::init(const IRSParams& params, const scn
     As with the ITN model, we impose a maximum value on the initial insecticide
     content, Pmax, such that the probability of sampling a value from our
     parameterise normal distribution greater than Pmax is 0.001. */
-    double pmax = 1.0-exp(-params.maxInsecticide*insecticideScaling);
+    double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
     if( !( PF >= 0.0 && BF+PF*pmax <= 1.0 ) ){
         ostringstream msg;
         msg << "IRS.description.anophelesParams." << (postPrandial?"post":"pre")
@@ -161,7 +198,7 @@ void IRSAnophelesParams::SurvivalFactor::init(const IRSParams& params, const scn
         //throw util::xml_scenario_error( msg.str() );
     }
 }
-double IRSAnophelesParams::RelativeAttractiveness::relativeAttractiveness(
+double IRSEffect::IRSAnopheles::RelativeAttractiveness::relativeAttractiveness(
         double insecticideContent
 ) const {
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
@@ -172,7 +209,7 @@ double IRSAnophelesParams::RelativeAttractiveness::relativeAttractiveness(
         return 0.0;
     return relAvail;
 }
-double IRSAnophelesParams::SurvivalFactor::survivalFactor(
+double IRSEffect::IRSAnopheles::SurvivalFactor::survivalFactor(
         double insecticideContent
 ) const {
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
@@ -187,48 +224,66 @@ double IRSAnophelesParams::SurvivalFactor::survivalFactor(
     return survivalFactor;
 }
 
+double IRSEffect::sampleInitialInsecticide() const{
+    double sample = initialInsecticide.sample();
+    if( sample < 0.0 )
+        sample = 0.0;       // avoid negative samples
+    if( sample > maxInsecticide )
+        sample = maxInsecticide;
+    return sample;
+}
+
 
 // ———  per-human data  ———
-IRS::IRS (const Transmission::TransmissionModel& tm) :
-    initialInsecticide( 0.0 )   // start with no insecticide (for monitoring)
+HumanIRS::HumanIRS( const IRSEffect& params ) :
+    PerHostInterventionData( params.getIndex() ),
+    initialInsecticide( params.sampleInitialInsecticide() )
 {
-    //TODO: we shouldn't really have IRS data (this class) if there's no vector
-    // model, should we? Allocate dynamically or based on model?
-    const Transmission::VectorModel* vt = dynamic_cast<const Transmission::VectorModel*>(&tm);
-    if( vt != 0 ){
-        const IRSParams& params = vt->getIRSParams();
-        if( params.insecticideDecay.get() == 0 )
-            return;     // no IRS
-        // Varience factor of decay is sampled once per human: human is assumed
-        // to account for most variance.
-        insecticideDecayHet = params.insecticideDecay->hetSample();
-    }
+    // Varience factor of decay is sampled once per human: human is assumed
+    // to account for most variance.
+    insecticideDecayHet = params.insecticideDecay->hetSample();
 }
 
-void IRS::deploy(const IRSParams& params) {
+void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionEffect& params ) {
     deployTime = TimeStep::simulation;
-    
-    // this is sampled independently: initial insecticide content doesn't depend on handling
-    initialInsecticide = params.initialInsecticide.sample();
-    if( initialInsecticide < 0.0 )
-        initialInsecticide = 0.0;	// avoid negative samples
-    if( initialInsecticide > params.maxInsecticide )
-        initialInsecticide = params.maxInsecticide;
+    initialInsecticide = dynamic_cast<const IRSEffect*>(&params)->sampleInitialInsecticide();
 }
 
-double IRS::relativeAttractiveness(const IRSAnophelesParams& params) const{
-    double effect = params.relativeAttractiveness( getInsecticideContent(*params.base) );
-    return params.byProtection( effect );
+double HumanIRS::relativeAttractiveness(size_t speciesIndex) const{
+    const IRSEffect& params = *IRSEffect::effectsByIndex[index];
+    const IRSEffect::IRSAnopheles& anoph = params.species[speciesIndex];
+    double effect = anoph.relativeAttractiveness( getInsecticideContent(params) );
+    return anoph.byProtection( effect );
 }
 
-double IRS::preprandialSurvivalFactor(const IRSAnophelesParams& params) const{
-    double effect = params.preprandialSurvivalFactor( getInsecticideContent(*params.base) );
-    return params.byProtection( effect );
+double HumanIRS::preprandialSurvivalFactor(size_t speciesIndex) const{
+    const IRSEffect& params = *IRSEffect::effectsByIndex[index];
+    const IRSEffect::IRSAnopheles& anoph = params.species[speciesIndex];
+    double effect = anoph.preprandialSurvivalFactor( getInsecticideContent(params) );
+    return anoph.byProtection( effect );
 }
 
-double IRS::postprandialSurvivalFactor(const IRSAnophelesParams& params) const{
-    double effect = params.postprandialSurvivalFactor( getInsecticideContent(*params.base) );
-    return params.byProtection( effect );
+double HumanIRS::postprandialSurvivalFactor(size_t speciesIndex) const{
+    const IRSEffect& params = *IRSEffect::effectsByIndex[index];
+    const IRSEffect::IRSAnopheles& anoph = params.species[speciesIndex];
+    double effect = anoph.postprandialSurvivalFactor( getInsecticideContent(params) );
+    return anoph.byProtection( effect );
+}
+
+void HumanIRS::checkpoint( ostream& stream ){
+    deployTime & stream;
+    index & stream;
+    initialInsecticide & stream;
+    insecticideDecayHet & stream;
+}
+HumanIRS::HumanIRS( istream& stream, size_t index ) : PerHostInterventionData( index )
+{
+    deployTime & stream;
+    size_t index2;
+    index2 & stream;
+    if( index != index2 ) throw util::checkpoint_error( "Intervention effect indices changed" );
+    initialInsecticide & stream;
+    insecticideDecayHet & stream;
 }
 
 } }

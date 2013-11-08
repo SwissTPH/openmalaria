@@ -23,7 +23,6 @@
 
 //TODO: perhost shouldn't need to know about specific interventions
 #include "interventions/ITN.h"
-#include "interventions/IRS.h"
 #include "util/sampler.h"
 
 namespace OM {
@@ -36,9 +35,8 @@ namespace Anopheles {
  * Parameters are read from XML, and the availability rate is adjusted. */
 class PerHostBase {
 public:
-    PerHostBase(const interventions::ITNParams* baseITNParams, const interventions::IRSParams* baseIRSParams) :
-            net( baseITNParams ),
-            irs( baseIRSParams )
+    PerHostBase(const interventions::ITNParams* baseITNParams) :
+            net( baseITNParams )
     {}
     
     /** Set parameters from an XML element. */
@@ -56,7 +54,6 @@ public:
     /** @brief Set up vector-model intervention parameters. */
     //@{
     void setITNDescription (const interventions::ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
-    void setIRSDescription (const interventions::IRSParams& params, const scnXml::IRSDescription::AnophelesParamsType& elt);
     //@}
     
 
@@ -86,7 +83,6 @@ public:
      * elsewhere (by DecayFunction type). */
     //@{
     interventions::ITNAnophelesParams net;
-    interventions::IRSAnophelesParams irs;
     //@}
 };
 

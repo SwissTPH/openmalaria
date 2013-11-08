@@ -49,11 +49,6 @@ void PerHostBase::setITNDescription (const interventions::ITNParams& params,
     net.init( params, elt, proportionUse );
 }
 
-void PerHostBase::setIRSDescription (const interventions::IRSParams& params,
-        const scnXml::IRSDescription::AnophelesParamsType& elt){
-    irs.init( params, elt );
-}
-
 }
 }
 }

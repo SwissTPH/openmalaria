@@ -223,10 +223,6 @@ public:
     inline const interventions::ITN& getITN() const{
         return net;
     }
-    /// Get a reference to the IRS
-    inline const interventions::IRS& getIRS() const{
-        return irs;
-    }
     
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
@@ -241,7 +237,6 @@ public:
         _relativeAvailabilityHet & stream;
         outsideTransmission & stream;
         net & stream;
-        irs & stream;
         checkpointIntervs( stream );
     }
     //@}
@@ -260,7 +255,6 @@ private:
     double _relativeAvailabilityHet;
 
     interventions::ITN net;
-    interventions::IRS irs;
     typedef boost::ptr_list<PerHostInterventionData> ListActiveEffects;
     ListActiveEffects activeEffects;
     

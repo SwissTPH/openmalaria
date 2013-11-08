@@ -229,15 +229,6 @@ void Human::deployITN( interventions::Deployment::Method method, Transmission::T
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel ){
-    perHostTransmission.setupIRS ( transmissionModel );
-    if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassIRS( getMonitoringAgeGroup(), 1 );
-    }else if( method == interventions::Deployment::CTS ){
-        //TODO(monitoring): report
-    }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
 void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
 }

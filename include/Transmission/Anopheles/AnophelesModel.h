@@ -57,8 +57,8 @@ class AnophelesModel
 public:
     ///@brief Initialisation and destruction
     //@{
-    AnophelesModel (const interventions::ITNParams* baseITNParams, const interventions::IRSParams* baseIRSParams) :
-            humanBase(baseITNParams, baseIRSParams),
+    AnophelesModel (const interventions::ITNParams* baseITNParams) :
+            humanBase(baseITNParams),
             partialEIR(0.0)
     {}
     
@@ -120,10 +120,6 @@ public:
             const scnXml::ITNDescription::AnophelesParamsType& elt,
             double proportionUse) {
         humanBase.setITNDescription (params, elt, proportionUse);
-    }
-    inline void setIRSDescription (const interventions::IRSParams& params,
-            const scnXml::IRSDescription::AnophelesParamsType& elt) {
-        humanBase.setIRSDescription (params, elt);
     }
     //@}
     

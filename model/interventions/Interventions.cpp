@@ -23,6 +23,7 @@
 #include "util/random.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/GVI.h"
+#include "interventions/IRS.h"
 #include "interventions/HumanInterventionEffects.hpp"
 #include "interventions/TimedDeployments.hpp"
 
@@ -196,7 +197,9 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }else if( effect.getITN().present() ){
                 humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), transmission ) );
             }else if( effect.getIRS().present() ){
-                humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), transmission ) );
+                if( species_index_map == 0 )
+                    species_index_map = &transmission.getSpeciesIndexMap();
+                humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), *species_index_map ) );
             }else if( effect.getGVI().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();

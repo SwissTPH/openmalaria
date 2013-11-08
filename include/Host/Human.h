@@ -123,8 +123,6 @@ public:
   void deployIPT( interventions::Deployment::Method method );
   /// Mass/continuous ITN deployment
   void deployITN( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
-  /// Mass/continuous IRS deployment
-  void deployIRS( interventions::Deployment::Method method, Transmission::TransmissionModel& transmissionModel );
   
   /// Resets immunity
   inline void clearImmunity() {

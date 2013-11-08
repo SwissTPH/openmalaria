@@ -63,7 +63,6 @@ public:
   virtual const map<string,size_t>& getSpeciesIndexMap();
   
   virtual void setITNDescription ( const scnXml::ITNDescription&);
-  virtual void setIRSDescription (const scnXml::IRSDescription&);
   virtual void deployVectorPopInterv (size_t instance);
   
   virtual void uninfectVectors();

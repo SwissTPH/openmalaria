@@ -22,166 +22,163 @@
 #define OM_INTERVENTIONS_IRS
 
 #include "util/DecayFunction.h"
-#include "util/sampler.h"
+#include "Transmission/PerHost.h"
 #include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
-namespace Transmission {
-    // forward declare:
-    class TransmissionModel;
-}
 namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
+    using Transmission::PerHostInterventionData;
 
-/** Constant parameters for extended IRS model. */
-class IRSParams {
+class IRSEffect : public Transmission::HumanVectorInterventionEffect {
 public:
-    IRSParams() : maxInsecticide(numeric_limits< double >::signaling_NaN()) {}
-    /** Set parameters for the new model from elt. */
-    void init( const scnXml::IRSDescription& elt);
+    IRSEffect( size_t index, const scnXml::IRSDescription& elt,
+        const map<string,size_t>& species_name_map );
+    
+    virtual void deploy( Host::Human& human, Deployment::Method method )const;
+    
+    virtual Effect::Type effectType() const;
+    
+    virtual PerHostInterventionData* makeHumanPart() const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
     
 private:
-    NormalSampler initialInsecticide;
-    double maxInsecticide;		// maximum initial insecticide
-    shared_ptr<DecayFunction> insecticideDecay;
-    
-    friend class IRS;
-    friend class IRSAnophelesParams;
-};
-
-/** Per mosquito-species parameters for extended IRS model. */
-class IRSAnophelesParams {
-public:
-    IRSAnophelesParams( const IRSParams* b ) :
-        base( b ),
-        proportionProtected( numeric_limits<double>::signaling_NaN() ),
-        proportionUnprotected( numeric_limits<double>::signaling_NaN() )
-    {}
-    void init(const IRSParams& params,
-              const scnXml::IRSDescription::AnophelesParamsType& elt);
-    
-    /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    inline double relativeAttractiveness( double insecticideContent )const{
-        return _relativeAttractiveness.relativeAttractiveness( insecticideContent );
-    }
-    /// Get killing effect on mosquitoes before feeding.
-    /// See ComponentParams::effect for a more detailed description.
-    inline double preprandialSurvivalFactor( double insecticideContent )const{
-        return _preprandialKillingEffect.survivalFactor( insecticideContent );
-    }
-    /// Get killing effect on mosquitoes after they've eaten.
-    /// See ComponentParams::effect for a more detailed description.
-    inline double postprandialSurvivalFactor( double insecticideContent )const{
-        return _postprandialKillingEffect.survivalFactor( insecticideContent );
-    }
-    
-    /// Return x*proportionProtected + proportionUnprotected
-    inline double byProtection(double x) const{
-        return x*proportionProtected + proportionUnprotected;
-    }
-    
-private:
-    class RelativeAttractiveness {
+    /** Per mosquito-species parameters for extended IRS model. */
+    class IRSAnopheles {
     public:
-        RelativeAttractiveness();
+        IRSAnopheles() :
+            proportionProtected( numeric_limits<double>::signaling_NaN() ),
+            proportionUnprotected( numeric_limits<double>::signaling_NaN() )
+        {}
+        void init(const scnXml::IRSDescription::AnophelesParamsType& elt, double maxInsecticide);
         
-        /** Set parameters.
-         * 
-         * It is checked that input parameters lie in a range such that
-         * the relative availability is always in the range (0,1] — that is,
-         * the deterrent can never be perfect, but can have zero effect. */
-        void init(const IRSParams& params,
-                  const scnXml::IRSDeterrency& elt);
+        /// Get deterrency. See ComponentParams::effect for a more detailed description.
+        inline double relativeAttractiveness( double insecticideContent )const{
+            return _relativeAttractiveness.relativeAttractiveness( insecticideContent );
+        }
+        /// Get killing effect on mosquitoes before feeding.
+        /// See ComponentParams::effect for a more detailed description.
+        inline double preprandialSurvivalFactor( double insecticideContent )const{
+            return _preprandialKillingEffect.survivalFactor( insecticideContent );
+        }
+        /// Get killing effect on mosquitoes after they've eaten.
+        /// See ComponentParams::effect for a more detailed description.
+        inline double postprandialSurvivalFactor( double insecticideContent )const{
+            return _postprandialKillingEffect.survivalFactor( insecticideContent );
+        }
         
-        /** Calculate effect. Positive is interpreted as having a positive effect
-        * (thus decreasing availability or survival) and negative as having a
-        * negative effect. Effect is not bounded, though it tends to
-        * zero as holeIndex becomes large and insecticideContent tends to zero,
-        * and parameters should be defined such that it is always in the
-        * range [0,1]. */
-        double relativeAttractiveness( double insecticideContent )const;
+        /// Return x*proportionProtected + proportionUnprotected
+        inline double byProtection(double x) const{
+            return x*proportionProtected + proportionUnprotected;
+        }
         
-    protected:
-        double lPF;      // log of insecticide factor
-        double insecticideScaling;
-    };
-    class SurvivalFactor {
-    public:
-        SurvivalFactor();
-        
-        /** Set parameters.
-         * 
-         * It is checked that parameters lie in a suitible range, giving a
-         * survival factor between 0 and 1. */
-        void init(const IRSParams& params,
-                  const scnXml::IRSKillingEffect& elt, bool postPrandial);
-        
-        /** Calculate additional survival factor imposed by IRS on pre-/post-
-         * prandial killing. Should be bounded to [0,1] and tend to 1 as the
-         * IRS ages. */
-        double survivalFactor( double insecticideContent )const;
     private:
-        double BF,PF;	// base and insecticide factors
-        double insecticideScaling;
-        double invBaseSurvival; // stored for performance only
+        class RelativeAttractiveness {
+        public:
+            RelativeAttractiveness();
+            
+            /** Set parameters.
+            * 
+            * It is checked that input parameters lie in a range such that
+            * the relative availability is always in the range (0,1] — that is,
+            * the deterrent can never be perfect, but can have zero effect. */
+            void init(const scnXml::IRSDeterrency& elt);
+            
+            /** Calculate effect. Positive is interpreted as having a positive effect
+            * (thus decreasing availability or survival) and negative as having a
+            * negative effect. Effect is not bounded, though it tends to
+            * zero as holeIndex becomes large and insecticideContent tends to zero,
+            * and parameters should be defined such that it is always in the
+            * range [0,1]. */
+            double relativeAttractiveness( double insecticideContent )const;
+            
+        protected:
+            double lPF;      // log of insecticide factor
+            double insecticideScaling;
+        };
+        class SurvivalFactor {
+        public:
+            SurvivalFactor();
+            
+            /** Set parameters.
+            * 
+            * It is checked that parameters lie in a suitible range, giving a
+            * survival factor between 0 and 1. */
+            void init(const scnXml::IRSKillingEffect& elt, bool postPrandial, double maxInsecticide);
+            
+            /** Calculate additional survival factor imposed by IRS on pre-/post-
+            * prandial killing. Should be bounded to [0,1] and tend to 1 as the
+            * IRS ages. */
+            double survivalFactor( double insecticideContent )const;
+        private:
+            double BF,PF;   // base and insecticide factors
+            double insecticideScaling;
+            double invBaseSurvival; // stored for performance only
+        };
+        double proportionProtected;
+        double proportionUnprotected;
+        RelativeAttractiveness _relativeAttractiveness;
+        SurvivalFactor _preprandialKillingEffect;
+        SurvivalFactor _postprandialKillingEffect;
+        
+        friend class HumanIRS;
     };
-    const IRSParams* base;
-    double proportionProtected;
-    double proportionUnprotected;
-    RelativeAttractiveness _relativeAttractiveness;
-    SurvivalFactor _preprandialKillingEffect;
-    SurvivalFactor _postprandialKillingEffect;
     
-    friend class IRS;
+    double sampleInitialInsecticide() const;
+    
+    NormalSampler initialInsecticide;
+    double maxInsecticide;              // maximum initial insecticide
+    shared_ptr<DecayFunction> insecticideDecay;
+    vector<IRSAnopheles> species; // vector specific params
+    
+    // This is sparse vector: only indexes corresponding to a IRS effect are used
+    // No memory management
+    static vector<IRSEffect*> effectsByIndex;
+    
+    friend class HumanIRS;
 };
 
 /** Extended IRS model by OB and original model.
  * 
  * Each instance describes the effects of indoor residual spraying.
  */
-class IRS {
+class HumanIRS : public PerHostInterventionData {
 public:
-    IRS (const Transmission::TransmissionModel& tm);
+    HumanIRS( const IRSEffect& params );
+    HumanIRS( istream& stream, size_t index );
     
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        deployTime & stream;
-        initialInsecticide & stream;
-        insecticideDecayHet & stream;
-    }
+    virtual void redeploy(const Transmission::HumanVectorInterventionEffect& params);
     
-    void deploy(const IRSParams& params);
-    inline TimeStep timeOfDeployment()const{
-        return deployTime;
-    }
     /// Get remaining insecticide content based on initial amount and decay.
-    inline double getInsecticideContent(const IRSParams& params)const{
+    inline double getInsecticideContent(const IRSEffect& params)const{
         double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
                                               insecticideDecayHet);
         return initialInsecticide * effectSurvival;
     }
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    double relativeAttractiveness(const IRSAnophelesParams& params) const;
+    virtual double relativeAttractiveness(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes before they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double preprandialSurvivalFactor(const IRSAnophelesParams& params) const;
+    virtual double preprandialSurvivalFactor(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double postprandialSurvivalFactor(const IRSAnophelesParams& params) const;
+    virtual double postprandialSurvivalFactor(size_t speciesIndex) const;
+    
+protected:
+    virtual void checkpoint( ostream& stream );
     
 private:
-    // these parameters express the current state of the IRS:
-    TimeStep deployTime;	// time of deployment or TimeStep::never
+    // this is sampled for each deployment: initial insecticide content doesn't
+    // depend on handling by the recipient
     double initialInsecticide;	// units: mg/m²
     
-    // these parameters are sampled from log-normal per IRS, but thereafter constant:
+    // this parameter is sampled on first deployment, but never resampled for the same human:
     DecayFuncHet insecticideDecayHet;
 };
 

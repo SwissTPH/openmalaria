@@ -42,8 +42,7 @@ void PerHost::cleanup () {
 
 PerHost::PerHost (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false),
-        net(tm),
-        irs(tm)
+        net(tm)
 {
 }
 void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
@@ -60,12 +59,6 @@ void PerHost::setupITN (const TransmissionModel& tm) {
     const VectorModel* vTM = dynamic_cast<const VectorModel*> (&tm);
     if (vTM != 0) {
         net.deploy(vTM->getITNParams());
-    }
-}
-void PerHost::setupIRS (const TransmissionModel& tm) {
-    const VectorModel* vTM = dynamic_cast<const VectorModel*> (&tm);
-    if (vTM != 0) {
-        irs.deploy(vTM->getIRSParams());
     }
 }
 
@@ -94,9 +87,6 @@ double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base, s
     if (net.timeOfDeployment() >= TimeStep(0)) {
         alpha_i *= net.relativeAttractiveness(base.net);
     }
-    if (irs.timeOfDeployment() >= TimeStep(0)) {
-        alpha_i *= irs.relativeAttractiveness(base.irs);
-    }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         alpha_i *= it->relativeAttractiveness( speciesIndex );
     }
@@ -107,9 +97,6 @@ double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speci
     if (net.timeOfDeployment() >= TimeStep(0)) {
         P_B_i *= net.preprandialSurvivalFactor(base.net);
     }
-    if (irs.timeOfDeployment() >= TimeStep(0)) {
-        P_B_i *= irs.preprandialSurvivalFactor(base.irs);
-    }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
     }
@@ -119,9 +106,6 @@ double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t spec
     double pRest = species[speciesIndex].getProbMosqRest();
     if (net.timeOfDeployment() >= TimeStep(0)) {
         pRest *= net.postprandialSurvivalFactor(base.net);
-    }
-    if (irs.timeOfDeployment() >= TimeStep(0)) {
-        pRest *= irs.postprandialSurvivalFactor(base.irs);
     }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         pRest *= it->postprandialSurvivalFactor( speciesIndex );
