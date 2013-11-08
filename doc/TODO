@@ -16,3 +16,5 @@ compete for the same resources. Should extend SimpleMPD model to allow this.
 Vaccines:
 Deployment model (exactly as now, or configurable?)
 Effect interaction (multiply survival factors?)
+
+Make test/run.py run tests in parallel
