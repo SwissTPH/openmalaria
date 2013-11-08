@@ -102,7 +102,7 @@ public:
     HumanGVI( const GVIEffect& params );
     HumanGVI( istream& stream, size_t index );
     
-    virtual void redeploy();
+    virtual void redeploy( const Transmission::HumanVectorInterventionEffect& );
     
     /** This is the survival factor of the effect. */
     inline double getEffectSurvival(const GVIEffect& params)const{

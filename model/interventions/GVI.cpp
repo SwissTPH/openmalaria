@@ -85,7 +85,7 @@ HumanGVI::HumanGVI ( const GVIEffect& params ) :
     decayHet = params.decay->hetSample();
 }
 
-void HumanGVI::redeploy() {
+void HumanGVI::redeploy(const Transmission::HumanVectorInterventionEffect&) {
     deployTime = TimeStep::simulation;
 }
 

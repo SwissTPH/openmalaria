@@ -75,7 +75,7 @@ void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
     for( ListActiveEffects::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         if( it->getIndex() == params.getIndex() ){
             // already have a deployment for that description; just update it
-            it->redeploy();
+            it->redeploy( params );
             return;
         }
     }

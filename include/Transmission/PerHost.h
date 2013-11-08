@@ -36,6 +36,8 @@ using util::DecayFunction;
 using util::DecayFuncHet;
 using boost::shared_ptr;
 
+class HumanVectorInterventionEffect;
+
 /**
  * A base class for interventions affecting human-vector interaction.
  * 
@@ -49,7 +51,7 @@ using boost::shared_ptr;
 class PerHostInterventionData {
 public:
     /** Deploy an intervention. */
-    virtual void redeploy() =0;
+    virtual void redeploy( const HumanVectorInterventionEffect& params ) =0;
     
     /// Get effect of deterrencies of interventions, as an attractiveness multiplier.
     virtual double relativeAttractiveness(size_t speciesIndex) const =0;
