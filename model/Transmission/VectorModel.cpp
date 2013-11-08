@@ -116,25 +116,27 @@ void VectorModel::ctsNetInsecticideContent (const Population& population, ostrea
     stream << '\t' << meanVar/n;
 }
 void VectorModel::ctsIRSInsecticideContent (const Population& population, ostream& stream) {
-    double totalInsecticide = 0.0;
-    for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-        totalInsecticide += iter->perHostTransmission.getIRS().getInsecticideContent(_IRSParams);
-    }
-    stream << '\t' << totalInsecticide / population.size();
+    //TODO(monitoring): work out how this applies when multiple IRS effects are allowed
+//     double totalInsecticide = 0.0;
+//     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
+//         totalInsecticide += iter->perHostTransmission.getIRS().getInsecticideContent(_IRSParams);
+//     }
+//     stream << '\t' << totalInsecticide / population.size();
 }
 void VectorModel::ctsIRSEffects (const Population& population, ostream& stream) {
-    for( size_t i = 0; i < numSpecies; ++i ){
-        const interventions::IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
-        double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
-        for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            totalRA += iter->perHostTransmission.getIRS().relativeAttractiveness(params);
-            totalPrePSF += iter->perHostTransmission.getIRS().preprandialSurvivalFactor(params);
-            totalPostPSF += iter->perHostTransmission.getIRS().postprandialSurvivalFactor(params);
-        }
-        stream << '\t' << totalRA / population.size()
-            << '\t' << totalPrePSF / population.size()
-            << '\t' << totalPostPSF / population.size();
-    }
+    //TODO(monitoring): work out how this applies when multiple IRS effects are allowed
+//     for( size_t i = 0; i < numSpecies; ++i ){
+//         const interventions::IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
+//         double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
+//         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
+//             totalRA += iter->perHostTransmission.getIRS().relativeAttractiveness(params);
+//             totalPrePSF += iter->perHostTransmission.getIRS().preprandialSurvivalFactor(params);
+//             totalPostPSF += iter->perHostTransmission.getIRS().postprandialSurvivalFactor(params);
+//         }
+//         stream << '\t' << totalRA / population.size()
+//             << '\t' << totalPrePSF / population.size()
+//             << '\t' << totalPostPSF / population.size();
+//     }
 }
 
 void VectorModel::ctsCbResAvailability (ostream& stream) {
@@ -237,14 +239,14 @@ VectorModel::VectorModel (const scnXml::EntoData& entoData,
         "\tmean insecticide content",
         MakeDelegate( this, &VectorModel::ctsNetInsecticideContent ) );
     // Mean IRS insecticide across whole population
-    Continuous.registerCallback( "IRS insecticide content",
-        "\tIRS insecticide content",
-        MakeDelegate( this, &VectorModel::ctsIRSInsecticideContent ) );
+//     Continuous.registerCallback( "IRS insecticide content",
+//         "\tIRS insecticide content",
+//         MakeDelegate( this, &VectorModel::ctsIRSInsecticideContent ) );
     // Mean values of relative attractiveness, pre- and post-prandial survival
     // IRS-induced factors of mosquitoes (i.e. only the portion of deterrent
     // and killing effects attributable to IRS).
-    Continuous.registerCallback( "IRS effects", ctsIRSEffects.str(),
-        MakeDelegate( this, &VectorModel::ctsIRSEffects ) );
+//     Continuous.registerCallback( "IRS effects", ctsIRSEffects.str(),
+//         MakeDelegate( this, &VectorModel::ctsIRSEffects ) );
     Continuous.registerCallback( "resource availability", ctsRA.str(),
         MakeDelegate( this, &VectorModel::ctsCbResAvailability ) );
     Continuous.registerCallback( "resource requirements", ctsRR.str(),
