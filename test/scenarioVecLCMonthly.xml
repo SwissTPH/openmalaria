@@ -41,7 +41,7 @@
       <option name="num transmitting humans" value="true"/>
       <option name="nets owned" value="true"/>
       <option name="mean hole index"/>
-      <option name="mean insecticide content"/>
+      <!--<option name="mean insecticide content"/>-->
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>

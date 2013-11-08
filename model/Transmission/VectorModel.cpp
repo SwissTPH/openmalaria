@@ -105,15 +105,15 @@ void VectorModel::ctsCbP_CD (const Population& population, ostream& stream){
     }
 }
 void VectorModel::ctsNetInsecticideContent (const Population& population, ostream& stream){
-    double meanVar = 0.0;
-    int n = 0;
-    for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
-            ++n;
-            meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
-        }
-    }
-    stream << '\t' << meanVar/n;
+//     double meanVar = 0.0;
+//     int n = 0;
+//     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//             ++n;
+//             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
+//         }
+//     }
+//     stream << '\t' << meanVar/n;
 }
 void VectorModel::ctsIRSInsecticideContent (const Population& population, ostream& stream) {
     //TODO(monitoring): work out how this applies when multiple IRS effects are allowed
@@ -235,9 +235,9 @@ VectorModel::VectorModel (const scnXml::EntoData& entoData,
     Continuous.registerCallback( "alpha", ctsAlpha.str(), MakeDelegate( this, &VectorModel::ctsCbAlpha ) );
     Continuous.registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorModel::ctsCbP_B ) );
     Continuous.registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorModel::ctsCbP_CD ) );
-    Continuous.registerCallback( "mean insecticide content",
-        "\tmean insecticide content",
-        MakeDelegate( this, &VectorModel::ctsNetInsecticideContent ) );
+//     Continuous.registerCallback( "mean insecticide content",
+//         "\tmean insecticide content",
+//         MakeDelegate( this, &VectorModel::ctsNetInsecticideContent ) );
     // Mean IRS insecticide across whole population
 //     Continuous.registerCallback( "IRS insecticide content",
 //         "\tIRS insecticide content",
