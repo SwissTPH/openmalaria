@@ -82,30 +82,34 @@ void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
-double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base,
+                                size_t speciesIndex,
+                                const interventions::ITNParams& itnParams) const {
     double alpha_i = species[speciesIndex].getEntoAvailability();
     if (net.timeOfDeployment() >= TimeStep(0)) {
-        alpha_i *= net.relativeAttractiveness(base.net);
+        alpha_i *= net.relativeAttractiveness(speciesIndex, itnParams);
     }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         alpha_i *= it->relativeAttractiveness( speciesIndex );
     }
     return alpha_i;
 }
-double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex,
+                                const interventions::ITNParams& itnParams) const {
     double P_B_i = species[speciesIndex].getProbMosqBiting();
     if (net.timeOfDeployment() >= TimeStep(0)) {
-        P_B_i *= net.preprandialSurvivalFactor(base.net);
+        P_B_i *= net.preprandialSurvivalFactor(speciesIndex, itnParams);
     }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
     }
     return P_B_i;
 }
-double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex,
+                                const interventions::ITNParams& itnParams) const {
     double pRest = species[speciesIndex].getProbMosqRest();
     if (net.timeOfDeployment() >= TimeStep(0)) {
-        pRest *= net.postprandialSurvivalFactor(base.net);
+        pRest *= net.postprandialSurvivalFactor(speciesIndex, itnParams);
     }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         pRest *= it->postprandialSurvivalFactor( speciesIndex );

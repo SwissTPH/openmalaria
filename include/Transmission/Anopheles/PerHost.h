@@ -21,9 +21,8 @@
 #ifndef Hmod_Anopheles_PerHost
 #define Hmod_Anopheles_PerHost
 
-//TODO: perhost shouldn't need to know about specific interventions
-#include "interventions/ITN.h"
 #include "util/sampler.h"
+#include "schema/entomology.h"
 
 namespace OM {
 namespace Transmission {
@@ -35,10 +34,6 @@ namespace Anopheles {
  * Parameters are read from XML, and the availability rate is adjusted. */
 class PerHostBase {
 public:
-    PerHostBase(const interventions::ITNParams* baseITNParams) :
-            net( baseITNParams )
-    {}
-    
     /** Set parameters from an XML element. */
     void operator= (const scnXml::Mosq& mosq);
 
@@ -50,12 +45,6 @@ public:
     inline void setEntoAvailability(double entoAvailability){
         this->entoAvailability.setMean( entoAvailability );
     }
-    
-    /** @brief Set up vector-model intervention parameters. */
-    //@{
-    void setITNDescription (const interventions::ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
-    //@}
-    
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
      * 
@@ -75,14 +64,6 @@ public:
     /** Probability of mosquito successfully resting after finding a resting site
      * (P_D_i). */
     util::BetaSampler probMosqSurvivalResting;
-    //@}
-    
-    /** @brief Intervention description parameters
-     *
-     * These describe initial effectiveness. Decay rate/shape is specified
-     * elsewhere (by DecayFunction type). */
-    //@{
-    interventions::ITNAnophelesParams net;
     //@}
 };
 

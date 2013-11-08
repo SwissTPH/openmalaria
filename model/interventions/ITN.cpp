@@ -24,6 +24,7 @@
 #include "Transmission/VectorModel.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "util/SpeciesIndexChecker.h"
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
@@ -51,7 +52,7 @@ Effect::Type ITNEffect::effectType() const{
     return Effect::ITN;
 }
 
-double ITNParams::init( const scnXml::ITNDescription& elt) {
+void ITNParams::init( const scnXml::ITNDescription& elt, const map< string, size_t >& species_name_map) {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
@@ -64,25 +65,39 @@ double ITNParams::init( const scnXml::ITNDescription& elt) {
     if( !( propUse >= 0.0 && propUse <= 1.0 ) ){
         throw util::xml_scenario_error("ITN.description.proportionUse: must be within range [0,1]");
     }
-    return propUse;
+    
+    typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
+    const AP& ap = elt.getAnophelesParams();
+    species.resize(species_name_map.size());
+    util::SpeciesIndexChecker checker( "ITN", species_name_map );
+    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
+        species[checker.getIndex(it->getMosquito())].init (*it, propUse, maxInsecticide);
+    }
+    checker.checkNoneMissed();
 }
 
-void ITNAnophelesParams::init(
-    const ITNParams& params,
+void ITNParams::ITNAnopheles::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
-    double proportionUse)
+    double proportionUse,
+    double maxInsecticide)
 {
     if( _relativeAttractiveness.get() != 0 ){
         throw util::unimplemented_exception( "multiple ITN interventions" );
     }
     if (elt.getDeterrency().present())
-        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(new RADeterrency( params, elt.getDeterrency().get() ));
+        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(
+            new RADeterrency( elt.getDeterrency().get(), maxInsecticide ));
     else{
         assert (elt.getTwoStageDeterrency().present());
-        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(new RATwoStageDeterrency( params, elt.getTwoStageDeterrency().get() ));
+        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(
+            new RATwoStageDeterrency( elt.getTwoStageDeterrency().get(), maxInsecticide ));
     }
-    _preprandialKillingEffect.init( params, elt.getPreprandialKillingEffect(), "ITN.description.anophelesParams.preprandialKillingFactor" );
-    _postprandialKillingEffect.init( params, elt.getPostprandialKillingEffect(), "ITN.description.anophelesParams.postprandialKillingFactor" );
+    _preprandialKillingEffect.init( elt.getPreprandialKillingEffect(),
+                                    maxInsecticide,
+                                    "ITN.description.anophelesParams.preprandialKillingFactor" );
+    _postprandialKillingEffect.init( elt.getPostprandialKillingEffect(),
+                                    maxInsecticide,
+                                    "ITN.description.anophelesParams.postprandialKillingFactor" );
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
     double propActive = elt.getPropActive();
@@ -92,7 +107,8 @@ void ITNAnophelesParams::init(
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
-ITNAnophelesParams::RADeterrency::RADeterrency(const ITNParams& params, const scnXml::ITNDeterrency& elt) :
+ITNParams::ITNAnopheles::RADeterrency::RADeterrency(const scnXml::ITNDeterrency& elt,
+                                                   double maxInsecticide) :
     lHF( numeric_limits< double >::signaling_NaN() ),
     lPF( numeric_limits< double >::signaling_NaN() ),
     lIF( numeric_limits< double >::signaling_NaN() ),
@@ -141,7 +157,7 @@ ITNAnophelesParams::RADeterrency::RADeterrency(const ITNParams& params, const sc
     // Print out a warning if nets may increase transmission, but only in
     // non-BOINC mode, since it is not unreasonable and volunteers often
     // mistake this kind of warning as indicating a problem.
-    double pmax = 1.0-exp(-params.maxInsecticide*insecticideScaling);
+    double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
     if( !( HF > 0.0 && PF > 0.0 && IF > 0.0 &&
             HF <= 1.0 && PF <= 1.0 && HF*pow(PF*IF,pmax) <= 1.0 ) )
     {
@@ -168,9 +184,8 @@ ITNAnophelesParams::RADeterrency::RADeterrency(const ITNParams& params, const sc
     lPF = log( PF );
     lIF = log( IF );
 }
-ITNAnophelesParams::RATwoStageDeterrency::RATwoStageDeterrency(
-        const ITNParams& params,
-        const scnXml::TwoStageDeterrency& elt) :
+ITNParams::ITNAnopheles::RATwoStageDeterrency::RATwoStageDeterrency(
+        const scnXml::TwoStageDeterrency& elt, double maxInsecticide) :
     lPFEntering( numeric_limits< double >::signaling_NaN() ),
     insecticideScalingEntering( numeric_limits< double >::signaling_NaN() )
 {
@@ -215,9 +230,9 @@ ITNAnophelesParams::RATwoStageDeterrency::RATwoStageDeterrency(
 #endif
     lPFEntering = log( PF );
     
-    pAttacking.init( params, elt.getAttacking(), "ITN.description.anophelesParams.twoStageDeterrency.attacking" );
+    pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking" );
 }
-ITNAnophelesParams::SurvivalFactor::SurvivalFactor() :
+ITNParams::ITNAnopheles::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),
     HF( numeric_limits< double >::signaling_NaN() ),
     PF( numeric_limits< double >::signaling_NaN() ),
@@ -226,7 +241,8 @@ ITNAnophelesParams::SurvivalFactor::SurvivalFactor() :
     insecticideScaling( numeric_limits< double >::signaling_NaN() ),
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
-void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scnXml::ITNKillingEffect& elt, const char* eltName){
+void ITNParams::ITNAnopheles::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
+                                                   double maxInsecticide, const char* eltName){
     BF = elt.getBaseFactor();
     HF = elt.getHoleFactor();
     PF = elt.getInsecticideFactor();
@@ -310,7 +326,7 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
     impose a maximum value on the initial insecticide content, Pmax, such that
     the probability of sampling a value from our parameterise normal
     distribution greater than Pmax is 0.001. */
-    double pmax = 1.0-exp(-params.maxInsecticide*insecticideScaling);
+    double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
     if( !( BF+HF <= 1.0 && HF >= 0.0
         && BF+PF*pmax <= 1.0 && PF >= 0.0
         && BF+HF+(PF+IF)*pmax <= 1.0 && HF+(PF+IF)*pmax >= 0.0 ) )
@@ -335,7 +351,7 @@ void ITNAnophelesParams::SurvivalFactor::init(const ITNParams& params, const scn
         //throw util::xml_scenario_error( msg.str() );
     }
 }
-double ITNAnophelesParams::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
+double ITNParams::ITNAnopheles::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
@@ -345,7 +361,7 @@ double ITNAnophelesParams::RADeterrency::relativeAttractiveness( double holeInde
         relAvail = 0.0;
     return relAvail;
 }
-double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
+double ITNParams::ITNAnopheles::RATwoStageDeterrency::relativeAttractiveness(
         double holeIndex, double insecticideContent )const
 {
     // This is essentially a combination of the relative attractiveness as used
@@ -367,7 +383,7 @@ double ITNAnophelesParams::RATwoStageDeterrency::relativeAttractiveness(
         return 0.0;
     return pEnt * rel_pAtt;
 }
-double ITNAnophelesParams::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
+double ITNParams::ITNAnopheles::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double pAtt = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
@@ -375,7 +391,7 @@ double ITNAnophelesParams::SurvivalFactor::rel_pAtt( double holeIndex, double in
     //assert( pAtt <= 1.0 );
     return pAtt / BF;
 }
-double ITNAnophelesParams::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
+double ITNParams::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
@@ -440,16 +456,22 @@ void HumanITN::update(const ITNParams& params){
     }
 }
 
-double HumanITN::relativeAttractiveness(const ITNAnophelesParams& params) const{
-    return params.relativeAttractiveness( holeIndex, getInsecticideContent(*params.base) );
+double HumanITN::relativeAttractiveness(size_t speciesIndex,
+                                            const ITNParams& params) const{
+    const ITNParams::ITNAnopheles& anoph = params.species[speciesIndex];
+    return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
-double HumanITN::preprandialSurvivalFactor(const ITNAnophelesParams& params) const{
-    return params.preprandialSurvivalFactor( holeIndex, getInsecticideContent(*params.base) );
+double HumanITN::preprandialSurvivalFactor(size_t speciesIndex,
+                                            const ITNParams& params) const{
+    const ITNParams::ITNAnopheles& anoph = params.species[speciesIndex];
+    return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
-double HumanITN::postprandialSurvivalFactor(const ITNAnophelesParams& params) const{
-    return params.postprandialSurvivalFactor( holeIndex, getInsecticideContent(*params.base) );
+double HumanITN::postprandialSurvivalFactor(size_t speciesIndex,
+                                            const ITNParams& params) const{
+    const ITNParams::ITNAnopheles& anoph = params.species[speciesIndex];
+    return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
 } }

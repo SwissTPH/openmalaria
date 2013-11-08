@@ -57,8 +57,7 @@ class AnophelesModel
 public:
     ///@brief Initialisation and destruction
     //@{
-    AnophelesModel (const interventions::ITNParams* baseITNParams) :
-            humanBase(baseITNParams),
+    AnophelesModel () :
             partialEIR(0.0)
     {}
     
@@ -93,9 +92,7 @@ public:
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void init2 (size_t sIndex,
-                   const Population& population,
-                   double meanPopAvail);
+    void init2 (size_t sIndex, const OM::Population& population, double meanPopAvail, const OM::interventions::ITNParams& itnParams);
     
     /** Set up the non-host-specific interventions. */
     void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
@@ -114,15 +111,6 @@ public:
     }
     //@}
 
-    /** @brief Set up intervention descriptions for humans, for this anopheles species. */
-    //@{
-    inline void setITNDescription (const interventions::ITNParams& params,
-            const scnXml::ITNDescription::AnophelesParamsType& elt,
-            double proportionUse) {
-        humanBase.setITNDescription (params, elt, proportionUse);
-    }
-    //@}
-    
     
     ///@brief Functions called as part of usual per-timestep operations
     //@{
@@ -133,8 +121,7 @@ public:
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (const Population& population,
-        size_t sIndex, bool isDynamic);
+    void advancePeriod (const OM::Population& population, size_t sIndex, bool isDynamic, const OM::interventions::ITNParams& itnParams);
 
     /** Returns the EIR calculated by advancePeriod().
      *
@@ -143,17 +130,8 @@ public:
      *
      * @param sIndex Index of this in VectorModel::species
      * @param host PerHost of the human requesting this EIR. */
-    double calculateEIR (size_t sIndex, ::OM::Transmission::PerHost& host) {
-        if ( partialEIR != partialEIR ) {
-            cerr<<"partialEIR is not a number; "<<sIndex<<endl;
-        }
-        /* Calculates EIR per individual (hence N_i == 1).
-         *
-         * See comment in AnophelesModel::advancePeriod for method. */
-        return partialEIR
-               * host.entoAvailabilityHetVecItv (humanBase, sIndex)
-               * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
-    }
+    double calculateEIR (size_t sIndex, Transmission::PerHost& host,
+                         const interventions::ITNParams& itnParams );
     //@}
 
 

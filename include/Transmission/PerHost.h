@@ -24,6 +24,8 @@
 #include "interventions/Interventions.h"        // only for HumanInterventionEffect
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
+//TODO: perhost shouldn't need to know about specific interventions
+#include "interventions/ITN.h"
 #include <boost/ptr_container/ptr_list.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -187,7 +189,8 @@ public:
      * rate factors.)
      * 
      * Assume mean is human-to-vector availability rate factor. */
-    double entoAvailabilityHetVecItv( const Anopheles::PerHostBase& base, size_t speciesIndex ) const;
+    double entoAvailabilityHetVecItv( const Anopheles::PerHostBase& base,
+                                      size_t speciesIndex, const interventions::ITNParams& itnParams ) const;
     
     /** Availability rate of human to mosquitoes (α_i). Equals 
      * entoAvailabilityHetVecItv()*getRelativeAvailability().
@@ -199,9 +202,9 @@ public:
     inline double entoAvailabilityFull (
         const Anopheles::PerHostBase& base,
         size_t speciesIndex,
-        double ageYears
+        double ageYears, const interventions::ITNParams& itnParams
     ) const {
-        return entoAvailabilityHetVecItv (base, speciesIndex)
+        return entoAvailabilityHetVecItv (base, speciesIndex, itnParams)
             * relativeAvailabilityAge (ageYears);
     }
     //@}
@@ -209,10 +212,12 @@ public:
     ///@brief Get killing effects of interventions pre/post biting
     //@{
     /** Probability of a mosquito succesfully biting a host (P_B_i). */
-    double probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const;
+    double probMosqBiting (const OM::Transmission::Anopheles::PerHostBase& base,
+                           size_t speciesIndex, const OM::interventions::ITNParams& itnParams) const;
     /** Probability of a mosquito succesfully finding a resting
      * place after biting and then resting (P_C_i * P_D_i). */
-    double probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const;
+    double probMosqResting (const Anopheles::PerHostBase& base,
+                            size_t speciesIndex, const interventions::ITNParams& itnParams ) const;
     /** Set true to remove human from transmission. Must set back to false
      * to restore transmission. */
     //@}

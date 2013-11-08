@@ -214,7 +214,8 @@ double AnophelesModel::calcEntoAvailability(double N_i, double P_A, double P_Ai)
 
 void AnophelesModel::init2 (size_t sIndex,
                                 const Population& population,
-                                double meanPopAvail)
+                                double meanPopAvail,
+                         const interventions::ITNParams& itnParams)
 {
     // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
     
@@ -232,11 +233,11 @@ void AnophelesModel::init2 (size_t sIndex,
 
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), itnParams);
         leaveSeekingStateRate += prod;
-        prod *= host.probMosqBiting(humanBase, sIndex);
+        prod *= host.probMosqBiting(humanBase, sIndex, itnParams);
         sumPFindBite += prod;
-        initialP_df += prod * host.probMosqResting(humanBase, sIndex);
+        initialP_df += prod * host.probMosqResting(humanBase, sIndex, itnParams);
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
@@ -297,7 +298,8 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
 // Every TimeStep::interval days:
 void AnophelesModel::advancePeriod (const Population& population,
                                      size_t sIndex,
-                                     bool isDynamic) {
+                                     bool isDynamic,
+                         const interventions::ITNParams& itnParams) {
     transmission.emergence->update();
     
     /* Largely equations correspond to Nakul Chitnis's model in
@@ -346,10 +348,10 @@ void AnophelesModel::advancePeriod (const Population& population,
     double tsP_dif = 0.0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears(), itnParams);
         leaveSeekingStateRate += prod;
-        prod *= host.probMosqBiting(humanBase, sIndex)
-                * host.probMosqResting(humanBase, sIndex);
+        prod *= host.probMosqBiting(humanBase, sIndex, itnParams)
+                * host.probMosqResting(humanBase, sIndex, itnParams);
         tsP_df += prod;
         tsP_dif += prod * h->probTransmissionToMosquito();
     }
@@ -387,6 +389,19 @@ void AnophelesModel::advancePeriod (const Population& population,
     for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
         partialEIR += transmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
     }
+}
+
+double AnophelesModel::calculateEIR (size_t sIndex, Transmission::PerHost& host,
+                         const interventions::ITNParams& itnParams ) {
+    if ( partialEIR != partialEIR ) {
+        cerr<<"partialEIR is not a number; "<<sIndex<<endl;
+    }
+    /* Calculates EIR per individual (hence N_i == 1).
+        *
+        * See comment in AnophelesModel::advancePeriod for method. */
+    return partialEIR
+            * host.entoAvailabilityHetVecItv (humanBase, sIndex, itnParams)
+            * host.probMosqBiting(humanBase, sIndex, itnParams);        // probability of biting, once commited
 }
 
 }

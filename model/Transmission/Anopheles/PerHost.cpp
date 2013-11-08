@@ -43,12 +43,6 @@ void PerHostBase::operator =(const scnXml::Mosq& mosq)
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
 }
 
-void PerHostBase::setITNDescription (const interventions::ITNParams& params,
-                                     const scnXml::ITNDescription::AnophelesParamsType& elt,
-                                     double proportionUse){
-    net.init( params, elt, proportionUse );
-}
-
 }
 }
 }

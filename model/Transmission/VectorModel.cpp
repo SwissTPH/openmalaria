@@ -79,7 +79,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
         const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears() );
+            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears(), _ITNParams );
         }
         stream << '\t' << total / population.size();
     }
@@ -89,7 +89,7 @@ void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
 	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.probMosqBiting( params, i );
+            total += iter->perHostTransmission.probMosqBiting( params, i, _ITNParams );
         }
         stream << '\t' << total / population.size();
     }
@@ -99,7 +99,7 @@ void VectorModel::ctsCbP_CD (const Population& population, ostream& stream){
 	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.probMosqResting( params, i );
+            total += iter->perHostTransmission.probMosqResting( params, i, _ITNParams );
         }
         stream << '\t' << total / population.size();
     }
@@ -174,7 +174,7 @@ VectorModel::VectorModel (const scnXml::EntoData& entoData,
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, AnophelesModel(&_ITNParams));
+    species.resize (numSpecies, AnophelesModel());
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -258,7 +258,7 @@ VectorModel::~VectorModel () {
 void VectorModel::init2 (const Population& population) {
     double mPA = meanPopAvail(population);
     for (size_t i = 0; i < numSpecies; ++i) {
-        species[i].init2 (i, population, mPA);
+        species[i].init2 (i, population, mPA, _ITNParams);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
@@ -360,7 +360,7 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
         assert( simulationMode == dynamicEIR );
         double simEIR = 0.0;
         for (size_t i = 0; i < numSpecies; ++i) {
-            simEIR += species[i].calculateEIR (i, host);
+            simEIR += species[i].calculateEIR (i, host, _ITNParams);
         }
         simEIR *= host.relativeAvailabilityAge (ageYears);
         return simEIR;
@@ -371,7 +371,7 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
 // Every Global::interval days:
 void VectorModel::vectorUpdate (const Population& population) {
     for (size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, i, simulationMode == dynamicEIR);
+        species[i].advancePeriod (population, i, simulationMode == dynamicEIR, _ITNParams);
     }
 }
 void VectorModel::update (const Population& population) {
@@ -392,14 +392,7 @@ const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
 
 void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
     checkSimMode();
-    double proportionUse = _ITNParams.init( elt );
-    typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
-    const AP& ap = elt.getAnophelesParams();
-    SpeciesIndexChecker checker( "ITN", speciesIndex );
-    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
-        species[checker.getIndex(it->getMosquito())].setITNDescription (_ITNParams, *it, proportionUse);
-    }
-    checker.checkNoneMissed();
+    _ITNParams.init( elt, speciesIndex );
 }
 
 void VectorModel::deployVectorPopInterv (size_t instance) {
@@ -425,7 +418,7 @@ void VectorModel::summarize (Monitoring::Survey& survey) {
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams));
+    species & stream;
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
