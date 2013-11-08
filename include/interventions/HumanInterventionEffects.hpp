@@ -159,25 +159,6 @@ public:
     virtual Effect::Type effectType() const{ return Effect::IPT; }
 };
 
-class ITNEffect : public HumanInterventionEffect {
-public:
-    ITNEffect( size_t index, const scnXml::ITNDescription& elt,
-               Transmission::TransmissionModel& transmissionModel ) : HumanInterventionEffect(index),
-               transmission( transmissionModel )
-    {
-        transmissionModel.setITNDescription( elt );
-    }
-    
-    void deploy( Human& human, Deployment::Method method )const{
-        human.deployITN( method, transmission );
-    }
-    
-    virtual Effect::Type effectType() const{ return Effect::ITN; }
-    
-private:
-    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
-};
-
 class ClearImmunityEffect : public HumanInterventionEffect {
 public:
     ClearImmunityEffect( size_t index ) : HumanInterventionEffect(index) {}

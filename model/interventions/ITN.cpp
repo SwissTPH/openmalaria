@@ -30,6 +30,22 @@
 namespace OM { namespace interventions {
     using util::random::poisson;
 
+ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
+                Transmission::TransmissionModel& transmissionModel ) :
+        HumanInterventionEffect(index),
+        transmission( transmissionModel )
+{
+    transmissionModel.setITNDescription( elt );
+}
+
+void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
+    human.deployITN( method, transmission );
+}
+
+Effect::Type ITNEffect::effectType() const{
+    return Effect::ITN;
+}
+
 double ITNParams::init( const scnXml::ITNDescription& elt) {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be

@@ -24,6 +24,7 @@
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
+#include "interventions/Interventions.h"        //TODO: only temporary
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
@@ -37,6 +38,19 @@ namespace interventions {
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
+
+class ITNEffect : public HumanInterventionEffect {
+public:
+    ITNEffect( size_t index, const scnXml::ITNDescription& elt,
+               Transmission::TransmissionModel& transmissionModel );
+    
+    void deploy( Host::Human& human, Deployment::Method method )const;
+    
+    virtual Effect::Type effectType() const;
+    
+private:
+    Transmission::TransmissionModel& transmission;      //TODO: storing this is not a nice solution; do we need to pass?
+};
 
 /** Constant parameters for extended ITN model. */
 class ITNParams {
