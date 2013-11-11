@@ -28,10 +28,6 @@
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
-namespace Transmission {
-    // forward declare:
-    class TransmissionModel;
-}
 namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;

@@ -221,11 +221,6 @@ public:
     
     ///@brief Miscellaneous
     //@{
-    /// Get a reference to the net
-    inline const interventions::HumanITN& getITN() const{
-        return net;
-    }
-    
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
     static inline double adultAge() {

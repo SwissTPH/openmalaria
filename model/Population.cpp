@@ -107,10 +107,10 @@ Population::Population(const scnXml::EntoData& entoData, size_t populationSize)
     Continuous.registerCallback( "human age availability",
         "\thuman age availability",
         MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
-    Continuous.registerCallback( "nets owned", "\tnets owned",
-        MakeDelegate( this, &Population::ctsNetsOwned ) );
-    Continuous.registerCallback( "mean hole index", "\tmean hole index",
-        MakeDelegate( this, &Population::ctsNetHoleIndex ) );
+//     Continuous.registerCallback( "nets owned", "\tnets owned",
+//         MakeDelegate( this, &Population::ctsNetsOwned ) );
+//     Continuous.registerCallback( "mean hole index", "\tmean hole index",
+//         MakeDelegate( this, &Population::ctsNetHoleIndex ) );
     
     _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(entoData, populationSize);
 }
@@ -331,23 +331,23 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     stream << '\t' << avail/nHumans;
 }
 void Population::ctsNetsOwned (ostream& stream){
-    int nNets = 0;
-    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
-            ++nNets;
-    }
-    stream << '\t' << nNets;
+//     int nNets = 0;
+//     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
+//             ++nNets;
+//     }
+//     stream << '\t' << nNets;
 }
 void Population::ctsNetHoleIndex (ostream& stream){
-    double meanVar = 0.0;
-    int nNets = 0;
-    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
-            ++nNets;
-            meanVar += iter->perHostTransmission.getITN().getHoleIndex();
-        }
-    }
-    stream << '\t' << meanVar/nNets;
+//     double meanVar = 0.0;
+//     int nNets = 0;
+//     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//             ++nNets;
+//             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
+//         }
+//     }
+//     stream << '\t' << meanVar/nNets;
 }
 
 void Population::newSurvey ()
