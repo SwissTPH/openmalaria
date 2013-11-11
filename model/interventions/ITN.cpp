@@ -418,19 +418,23 @@ HumanITN::HumanITN() :
         holeRate( numeric_limits<double>::signaling_NaN() ),
         ripRate( numeric_limits<double>::signaling_NaN() )
 {
-    if( itnIndex == numeric_limits<size_t>::max() ) return;     // no ITN description
-    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
-    
-    // Net rips and insecticide loss are assumed to co-vary dependent on
-    // handling of net. They are sampled once per human: human handling is
-    // presumed to be the largest cause of variance.
-    util::NormalSample x = util::NormalSample::generate();
-    holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
-    ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
-    insecticideDecayHet = params.insecticideDecay->hetSample(x);
 }
 
 void HumanITN::deploy(const OM::interventions::ITNEffect& params) {
+    // sample per-human parameters on first deployment:
+    if( isnan( holeRate ) ){
+        if( itnIndex == numeric_limits<size_t>::max() ) return;     // no ITN description
+        const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+        
+        // Net rips and insecticide loss are assumed to co-vary dependent on
+        // handling of net. They are sampled once per human: human handling is
+        // presumed to be the largest cause of variance.
+        util::NormalSample x = util::NormalSample::generate();
+        holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
+        ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
+        insecticideDecayHet = params.insecticideDecay->hetSample(x);
+    }
+    
     deployTime = TimeStep::simulation;
     disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
     nHoles = 0;
