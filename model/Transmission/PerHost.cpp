@@ -43,9 +43,6 @@ void PerHost::cleanup () {
 PerHost::PerHost (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false)
 {
-    const interventions::ITNEffect* itnParams = interventions::ITNEffect::getITNParams();
-    if( itnParams != 0 )
-        activeEffects.push_back( itnParams->makeHumanPart() );
 }
 void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
@@ -64,8 +61,8 @@ void PerHost::update(){
 }
 
 void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
-    //TODO: this adds intervention deployment details; should we ever remove
-    // them (once deployment effect is zero or some such)?
+    // This adds per-host per-intervention details to the host's data set.
+    // This data is never removed since it can contain per-host heterogeneity samples.
     for( ListActiveEffects::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         if( it->getIndex() == params.getIndex() ){
             // already have a deployment for that description; just update it

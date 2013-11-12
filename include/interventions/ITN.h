@@ -48,8 +48,6 @@ public:
     virtual PerHostInterventionData* makeHumanPart() const;
     virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
     
-    static const ITNEffect* getITNParams();
-    
     /** Per mosquito-species parameters for extended ITN model. */
     class ITNAnopheles {
     public:

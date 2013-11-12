@@ -82,13 +82,6 @@ PerHostInterventionData* ITNEffect::makeHumanPart( istream& stream, size_t index
     return new HumanITN( stream, index );
 }
 
-const ITNEffect* ITNEffect::getITNParams(){
-    for( vector<ITNEffect*>::const_iterator it = effectsByIndex.begin(); it != effectsByIndex.end(); ++it ){
-        if( *it != 0 ) return *it;
-    }
-    return 0;        // no ITN
-}
-
 void ITNEffect::ITNAnopheles::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
     double proportionUse,
@@ -422,26 +415,28 @@ double ITNEffect::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex
 HumanITN::HumanITN( const ITNEffect& params ) :
         PerHostInterventionData( params.getIndex() ),
         nHoles( 0 ),
-        holeIndex( numeric_limits<double>::signaling_NaN() ),
-        initialInsecticide( numeric_limits<double>::signaling_NaN() ),
-        holeRate( numeric_limits<double>::signaling_NaN() ),
-        ripRate( numeric_limits<double>::signaling_NaN() )
+        holeIndex( 0.0 )
 {
-    deployTime = TimeStep::never;
+    // Net rips and insecticide loss are assumed to co-vary dependent on
+    // handling of net. They are sampled once per human: human handling is
+    // presumed to be the largest cause of variance.
+    util::NormalSample x = util::NormalSample::generate();
+    holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
+    ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
+    insecticideDecayHet = params.insecticideDecay->hetSample(x);
+
+    // Sample per-deployment variables as in redeploy:
+    disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
+    // this is sampled independently: initial insecticide content doesn't depend on handling
+    initialInsecticide = params.initialInsecticide.sample();
+    if( initialInsecticide < 0.0 )
+        initialInsecticide = 0.0;       // avoid negative samples
+    if( initialInsecticide > params.maxInsecticide )
+        initialInsecticide = params.maxInsecticide;
 }
 
 void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionEffect& params0) {
     const ITNEffect& params = *dynamic_cast<const ITNEffect*>(&params0);
-    // sample per-human parameters on first deployment:
-    if( isnan( holeRate ) ){
-        // Net rips and insecticide loss are assumed to co-vary dependent on
-        // handling of net. They are sampled once per human: human handling is
-        // presumed to be the largest cause of variance.
-        util::NormalSample x = util::NormalSample::generate();
-        holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
-        ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
-        insecticideDecayHet = params.insecticideDecay->hetSample(x);
-    }
     
     deployTime = TimeStep::simulation;
     disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
