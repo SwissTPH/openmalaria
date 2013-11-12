@@ -41,7 +41,7 @@ public:
     */
     static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 30;
     
-    DocumentLoader () : scenario(NULL) {}
+    DocumentLoader () : documentChanged(false), scenario(NULL) {}
     
     /** @brief Reads the document in the xmlFile
     * 
