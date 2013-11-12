@@ -22,9 +22,9 @@
 #define OM_INTERVENTIONS_ITN
 
 #include "util/DecayFunction.h"
+#include "Transmission/PerHost.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
-#include "interventions/Interventions.h"        //TODO: only temporary
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
@@ -34,15 +34,21 @@ namespace interventions {
     using util::NormalSampler;
     using util::LognormalSampler;
     using boost::shared_ptr;
+    using Transmission::PerHostInterventionData;
 
-class ITNEffect : public HumanInterventionEffect {
+class ITNEffect : public Transmission::HumanVectorInterventionEffect {
 public:
     ITNEffect( size_t index, const scnXml::ITNDescription& elt,
                const map< string, size_t >& species_name_map );
     
-    void deploy( Host::Human& human, Deployment::Method method )const;
+    virtual void deploy( Host::Human& human, Deployment::Method method )const;
     
     virtual Effect::Type effectType() const;
+    
+    virtual PerHostInterventionData* makeHumanPart() const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
+    
+    static const ITNEffect* getITNParams();
     
     /** Per mosquito-species parameters for extended ITN model. */
     class ITNAnopheles {
@@ -173,27 +179,13 @@ public:
  * 
  * Each instance describes a hypothetical net (or no net).
  */
-class HumanITN {
+class HumanITN : public PerHostInterventionData {
 public:
-    HumanITN ();
+    HumanITN( const ITNEffect& params );
+    HumanITN( istream& stream, size_t index );
     
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        deployTime & stream;
-        disposalTime & stream;
-        nHoles & stream;
-        holeIndex & stream;
-        initialInsecticide & stream;
-        holeRate & stream;
-        ripRate & stream;
-        insecticideDecayHet & stream;
-    }
+    virtual void redeploy(const Transmission::HumanVectorInterventionEffect& params);
     
-    void deploy(const ITNEffect& params);
-    inline TimeStep timeOfDeployment()const{
-        return deployTime;
-    }
     inline double getHoleIndex()const{
         return holeIndex;
     }
@@ -204,20 +196,22 @@ public:
     }
     
     /// Call once per timestep to update holes
-    void update();
+    virtual void update();
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
-    double relativeAttractiveness(size_t speciesIndex) const;
+    virtual double relativeAttractiveness(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes before they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double preprandialSurvivalFactor(size_t speciesIndex) const;
+    virtual double preprandialSurvivalFactor(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
-    double postprandialSurvivalFactor(size_t speciesIndex) const;
+    virtual double postprandialSurvivalFactor(size_t speciesIndex) const;
+    
+protected:
+    virtual void checkpoint( ostream& stream );
     
 private:
     // these parameters express the current state of the net:
-    TimeStep deployTime;	// time of deployment or TimeStep::never
     TimeStep disposalTime;	// time at which net will be disposed of (if it's not already been replaced)
     int nHoles;				// total number of holes
     double holeIndex;		// a measure of both the number and size of holes

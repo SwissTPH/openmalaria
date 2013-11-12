@@ -24,6 +24,7 @@
 #include "Monitoring/Surveys.h"
 #include "interventions/GVI.h"
 #include "interventions/IRS.h"
+#include "interventions/ITN.h"
 #include "interventions/HumanInterventionEffects.hpp"
 #include "interventions/TimedDeployments.hpp"
 

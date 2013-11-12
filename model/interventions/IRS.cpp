@@ -249,6 +249,9 @@ void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionEffect& 
     initialInsecticide = dynamic_cast<const IRSEffect*>(&params)->sampleInitialInsecticide();
 }
 
+void HumanIRS::update(){
+}
+
 double HumanIRS::relativeAttractiveness(size_t speciesIndex) const{
     const IRSEffect& params = *IRSEffect::effectsByIndex[index];
     const IRSEffect::IRSAnopheles& anoph = params.species[speciesIndex];
@@ -272,16 +275,12 @@ double HumanIRS::postprandialSurvivalFactor(size_t speciesIndex) const{
 
 void HumanIRS::checkpoint( ostream& stream ){
     deployTime & stream;
-    index & stream;
     initialInsecticide & stream;
     insecticideDecayHet & stream;
 }
 HumanIRS::HumanIRS( istream& stream, size_t index ) : PerHostInterventionData( index )
 {
     deployTime & stream;
-    size_t index2;
-    index2 & stream;
-    if( index != index2 ) throw util::checkpoint_error( "Intervention effect indices changed" );
     initialInsecticide & stream;
     insecticideDecayHet & stream;
 }

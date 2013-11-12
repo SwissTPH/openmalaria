@@ -30,18 +30,12 @@ namespace OM { namespace interventions {
     using util::random::poisson;
 
 vector<ITNEffect*> ITNEffect::effectsByIndex;
-size_t itnIndex = numeric_limits<size_t>::max();        //TODO: this is temporary
 
 ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
-                const map<string, size_t>& species_name_map ) :
-        HumanInterventionEffect(index),
+        const map<string, size_t>& species_name_map ) :
+        Transmission::HumanVectorInterventionEffect(index),
         ripFactor( numeric_limits<double>::signaling_NaN() )
 {
-    if( itnIndex != numeric_limits<size_t>::max() ){
-        throw util::unimplemented_exception( "multiple ITN effects" );
-    }
-    itnIndex = index;
-    
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
@@ -69,7 +63,7 @@ ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
 }
 
 void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
-    human.perHostTransmission.setupITN ( *this );
+    human.perHostTransmission.deployEffect( *this );
     if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassITNs( human.getMonitoringAgeGroup(), 1 );
     }else if( method == interventions::Deployment::CTS ){
@@ -79,6 +73,20 @@ void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
 
 Effect::Type ITNEffect::effectType() const{
     return Effect::ITN;
+}
+
+PerHostInterventionData* ITNEffect::makeHumanPart() const{
+    return new HumanITN( *this );
+}
+PerHostInterventionData* ITNEffect::makeHumanPart( istream& stream, size_t index ) const{
+    return new HumanITN( stream, index );
+}
+
+const ITNEffect* ITNEffect::getITNParams(){
+    for( vector<ITNEffect*>::const_iterator it = effectsByIndex.begin(); it != effectsByIndex.end(); ++it ){
+        if( *it != 0 ) return *it;
+    }
+    return 0;        // no ITN
 }
 
 void ITNEffect::ITNAnopheles::init(
@@ -411,21 +419,21 @@ double ITNEffect::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex
     return survivalFactor;
 }
 
-HumanITN::HumanITN() :
+HumanITN::HumanITN( const ITNEffect& params ) :
+        PerHostInterventionData( params.getIndex() ),
         nHoles( 0 ),
         holeIndex( numeric_limits<double>::signaling_NaN() ),
         initialInsecticide( numeric_limits<double>::signaling_NaN() ),
         holeRate( numeric_limits<double>::signaling_NaN() ),
         ripRate( numeric_limits<double>::signaling_NaN() )
 {
+    deployTime = TimeStep::never;
 }
 
-void HumanITN::deploy(const OM::interventions::ITNEffect& params) {
+void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionEffect& params0) {
+    const ITNEffect& params = *dynamic_cast<const ITNEffect*>(&params0);
     // sample per-human parameters on first deployment:
     if( isnan( holeRate ) ){
-        if( itnIndex == numeric_limits<size_t>::max() ) return;     // no ITN description
-        const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
-        
         // Net rips and insecticide loss are assumed to co-vary dependent on
         // handling of net. They are sampled once per human: human handling is
         // presumed to be the largest cause of variance.
@@ -448,8 +456,7 @@ void HumanITN::deploy(const OM::interventions::ITNEffect& params) {
 }
 
 void HumanITN::update(){
-    if( itnIndex == numeric_limits<size_t>::max() ) return;     // no ITN description
-    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
     if( deployTime != TimeStep::never ){
         // First use is at age 1, so don't remove until *after* disposalTime to
         // get use over the full duration given by sampleAgeOfDecay().
@@ -463,24 +470,46 @@ void HumanITN::update(){
 }
 
 double HumanITN::relativeAttractiveness(size_t speciesIndex) const{
-    if( itnIndex == numeric_limits<size_t>::max() ) return 1.0;     // no ITN description
-    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    if( deployTime == TimeStep::never ) return 1.0;
+    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
     const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::preprandialSurvivalFactor(size_t speciesIndex) const{
-    if( itnIndex == numeric_limits<size_t>::max() ) return 1.0;     // no ITN description
-    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    if( deployTime == TimeStep::never ) return 1.0;
+    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
     const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
-    if( itnIndex == numeric_limits<size_t>::max() ) return 1.0;     // no ITN description
-    const ITNEffect& params = *ITNEffect::effectsByIndex[itnIndex];
+    if( deployTime == TimeStep::never ) return 1.0;
+    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
     const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
+}
+
+void HumanITN::checkpoint( ostream& stream ){
+    deployTime & stream;
+    disposalTime & stream;
+    nHoles & stream;
+    holeIndex & stream;
+    initialInsecticide & stream;
+    holeRate & stream;
+    ripRate & stream;
+    insecticideDecayHet & stream;
+}
+HumanITN::HumanITN( istream& stream, size_t index ) : PerHostInterventionData( index )
+{
+    deployTime & stream;
+    disposalTime & stream;
+    nHoles & stream;
+    holeIndex & stream;
+    initialInsecticide & stream;
+    holeRate & stream;
+    ripRate & stream;
+    insecticideDecayHet & stream;
 }
 
 } }

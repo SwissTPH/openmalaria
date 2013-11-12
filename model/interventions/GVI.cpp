@@ -89,6 +89,9 @@ void HumanGVI::redeploy(const Transmission::HumanVectorInterventionEffect&) {
     deployTime = TimeStep::simulation;
 }
 
+void HumanGVI::update(){
+}
+
 double HumanGVI::relativeAttractiveness(size_t speciesIndex) const{
     const GVIEffect& params = *GVIEffect::effectsByIndex[index];
     const GVIEffect::GVIAnopheles& anoph = params.species[speciesIndex];

@@ -149,11 +149,13 @@ namespace OM { namespace Monitoring {
 	    streamStart = ctsOStream.tellp();
 	    // we set position later, in staticCheckpoint
 	}else{
+#ifndef WITHOUT_BOINC
 	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
 		throw util::base_exception (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
             }
+#endif
 	    
 	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
 	    streamStart = ctsOStream.tellp();

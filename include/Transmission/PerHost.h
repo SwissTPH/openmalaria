@@ -24,8 +24,6 @@
 #include "interventions/Interventions.h"        // only for HumanInterventionEffect
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
-//TODO: perhost shouldn't need to know about specific interventions
-#include "interventions/ITN.h"
 #include <boost/ptr_container/ptr_list.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -54,6 +52,9 @@ class PerHostInterventionData {
 public:
     /** Deploy an intervention. */
     virtual void redeploy( const HumanVectorInterventionEffect& params ) =0;
+    
+    /** Per-timestep update. Used by ITNs to update hole decay. */
+    virtual void update() =0;
     
     /// Get effect of deterrencies of interventions, as an attractiveness multiplier.
     virtual double relativeAttractiveness(size_t speciesIndex) const =0;
@@ -118,9 +119,7 @@ public:
     //@}
     
     /// Call once per timestep. Updates net holes.
-    inline void update() {
-        net.update();
-    }
+    void update();
     
     ///@brief Intervention controls
     //@{
@@ -128,10 +127,6 @@ public:
         outsideTransmission = s;
     }
   
-    /// Give individual a new ITN as of time timeStep.
-    void setupITN (const OM::interventions::ITNEffect& params);
-    /// Give individual a new IRS as of time timeStep.
-    void setupIRS (const TransmissionModel& tm);
     /// Deploy some intervention effect
     void deployEffect( const HumanVectorInterventionEffect& params );
     //@}
@@ -233,7 +228,6 @@ public:
         species & stream;
         _relativeAvailabilityHet & stream;
         outsideTransmission & stream;
-        net & stream;
         checkpointIntervs( stream );
     }
     //@}
@@ -251,7 +245,6 @@ private:
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
 
-    interventions::HumanITN net;
     typedef boost::ptr_list<PerHostInterventionData> ListActiveEffects;
     ListActiveEffects activeEffects;
     

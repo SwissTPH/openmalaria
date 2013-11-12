@@ -161,6 +161,9 @@ public:
         return initialInsecticide * effectSurvival;
     }
     
+    /// Call once per timestep to update holes
+    virtual void update();
+    
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     virtual double relativeAttractiveness(size_t speciesIndex) const;
     /// Get killing effect on mosquitoes before they've eaten.

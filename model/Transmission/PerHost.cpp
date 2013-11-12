@@ -43,6 +43,9 @@ void PerHost::cleanup () {
 PerHost::PerHost (const Transmission::TransmissionModel& tm) :
         outsideTransmission(false)
 {
+    const interventions::ITNEffect* itnParams = interventions::ITNEffect::getITNParams();
+    if( itnParams != 0 )
+        activeEffects.push_back( itnParams->makeHumanPart() );
 }
 void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
@@ -54,8 +57,10 @@ void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     }
 }
 
-void PerHost::setupITN (const interventions::ITNEffect& params) {
-    net.deploy(params);
+void PerHost::update(){
+    for( ListActiveEffects::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+        it->update();
+    }
 }
 
 void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
@@ -81,9 +86,6 @@ void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
 double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base,
                                 size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].getEntoAvailability();
-    if (net.timeOfDeployment() >= TimeStep(0)) {
-        alpha_i *= net.relativeAttractiveness(speciesIndex);
-    }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         alpha_i *= it->relativeAttractiveness( speciesIndex );
     }
@@ -91,9 +93,6 @@ double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base,
 }
 double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].getProbMosqBiting();
-    if (net.timeOfDeployment() >= TimeStep(0)) {
-        P_B_i *= net.preprandialSurvivalFactor(speciesIndex);
-    }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
     }
@@ -101,9 +100,6 @@ double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speci
 }
 double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].getProbMosqRest();
-    if (net.timeOfDeployment() >= TimeStep(0)) {
-        pRest *= net.postprandialSurvivalFactor(speciesIndex);
-    }
     for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
         pRest *= it->postprandialSurvivalFactor( speciesIndex );
     }
