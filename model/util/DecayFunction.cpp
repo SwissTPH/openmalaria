@@ -105,7 +105,7 @@ public:
     }
     
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep( std::floor(1.0 / invL + 0.5) /* C++11: std::round */ );
+        return TimeStep( static_cast<int>(std::floor(1.0 / invL + 0.5)) /* C++11: std::round */ );
     }
     
 private:
