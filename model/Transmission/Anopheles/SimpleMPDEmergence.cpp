@@ -44,7 +44,7 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) :
     invLarvalResources.assign (TimeStep::DAYS_IN_YEAR, 0.0);
     
     developmentDuration = elt.getDevelopmentDuration().getValue();
-    if (!developmentDuration > 0)
+    if (!(developmentDuration > 0))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentDuration: "
             "must be positive");
     probPreadultSurvival = elt.getDevelopmentSurvival().getValue();
@@ -52,7 +52,7 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) :
         throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentSurvival: "
             "must be a probability (in range [0,1]");
     fEggsLaidByOviposit = elt.getFemaleEggsLaidByOviposit().getValue();
-    if (!fEggsLaidByOviposit > 0)
+    if (!(fEggsLaidByOviposit > 0))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.femaleEggsLaidByOviposit: "
             "must be positive");
     nOvipositingDelayed.assign (developmentDuration, 0.0);
@@ -75,8 +75,8 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
     
     // Initialise nOvipositingDelayed
-    int y1 = TimeStep::DAYS_IN_YEAR,
-        tau = transmission.getMosqRestDuration();
+	int y1 = TimeStep::DAYS_IN_YEAR;
+    int tau = transmission.getMosqRestDuration();	//TODO: why is mosqRestDuration of double type?
     for (int t=0; t<developmentDuration; ++t){
         nOvipositingDelayed[mod_nn(t+tau, developmentDuration)] =
             tsP_df * initNvFromSv * forcedS_v[t];

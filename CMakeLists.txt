@@ -125,7 +125,7 @@ if (OM_BOINC_INTEGRATION)
     set (BOINC_LIB_POSTFIX "")
   endif (OM_USE_LIBCMT)
   message (STATUS "Looking for: boinc${BOINC_LIB_POSTFIX}")
-  set (BOINC_BASE_PATH ${CMAKE_SOURCE_DIR}/../boinc)
+  set (BOINC_BASE_PATH ${CMAKE_SOURCE_DIR}/../boinc CACHE PATH "Path to BOINC source directory")
   message (STATUS "in: ${BOINC_BASE_PATH}/win_build/Build/Win32/Release (and /Debug)")
   find_library (BOINC_LIB_OPT boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
     PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Release
@@ -169,7 +169,12 @@ if (OM_BOINC_INTEGRATION)
   endif ()
   set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
   
-  include_directories (${CMAKE_SOURCE_DIR}/../boinc ${CMAKE_SOURCE_DIR}/../boinc/api ${CMAKE_SOURCE_DIR}/../boinc/lib)
+  # Include directories. This a bit non-standard, but so are the BOINC sources.
+  if ((EXISTS "${BOINC_BASE_PATH}/api/boinc_api.h") AND (EXISTS "${BOINC_BASE_PATH}/lib/boinc_win.h"))
+    include_directories (${BOINC_BASE_PATH} ${BOINC_BASE_PATH}/api ${BOINC_BASE_PATH}/lib)
+  else()
+	message (FATAL_ERROR "Not found: api/boinc_api.h and lib/boinc_win.h in BOINC_BASE_PATH. Try adjusting that variable.")
+  endif ()
   mark_as_advanced (BOINC_API_LIB BOINC_LIB BOINC_API_LIB_OPT BOINC_API_LIB_DBG BOINC_LIB_OPT BOINC_LIB_DBG)
 else (OM_BOINC_INTEGRATION)
   add_definitions (-DWITHOUT_BOINC)
