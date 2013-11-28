@@ -90,7 +90,7 @@ public:
                 .reportMDA(human.getMonitoringAgeGroup(), 1);
         double pClearance = pClearanceByTime[0];
         if( pClearance >= 1.0 || util::random::bernoulli( pClearance ) ){
-            human.withinHostModel->clearInfections(human.getClinicalModel().latestIsSevere());
+            human.withinHostModel->clearAllInfections();
         }
         if( pClearanceByTime.size() > 1 )
             human.withinHostModel->addProphylacticEffects( pClearanceByTime );
@@ -141,22 +141,6 @@ public:
     
 private:
     Host::Vaccine::Types type;
-};
-
-class IPTEffect : public HumanInterventionEffect {
-public:
-    IPTEffect( size_t index, const scnXml::IPTDescription& elt ) : HumanInterventionEffect(index){
-        // Check compatibilities with MDA model, in particular use of clearInfections(bool).
-        // Is it needed now MDA allows prophylactic effects and continuous deployment, anyway?
-        throw util::unimplemented_exception( "IPT model (disabled pending review)" );
-        WithinHost::DescriptiveIPTWithinHost::init( elt );
-    }
-    
-    void deploy( Human& human, Deployment::Method method )const{
-        human.deployIPT( method );
-    }
-    
-    virtual Effect::Type effectType() const{ return Effect::IPT; }
 };
 
 class ClearImmunityEffect : public HumanInterventionEffect {

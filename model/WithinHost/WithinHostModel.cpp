@@ -88,7 +88,7 @@ WithinHostModel* WithinHostModel::createWithinHostModel () {
     return new CommonWithinHost();
   } else {
     if( util::ModelOptions::option( IPTI_SP_MODEL ) )
-      return new DescriptiveIPTWithinHost();
+      throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
     else if( util::ModelOptions::option( PROPHYLACTIC_DRUG_ACTION_MODEL ) )
         return new ProphylacticActionWithinHost();
     else
@@ -104,18 +104,6 @@ WithinHostModel::WithinHostModel () :
     numInfs(0), totalDensity(0.0), timeStepMaxDensity(0.0)
 {
     _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
-}
-
-
-void WithinHostModel::clearInfections (bool) {
-  clearAllInfections();
-}
-
-void WithinHostModel::continuousIPT (Monitoring::AgeGroup, bool) {
-  throw util::xml_scenario_error (string ("Continuous IPT treatment when no IPT description is present in interventions"));
-}
-void WithinHostModel::timedIPT (Monitoring::AgeGroup, bool) {
-  throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 
 

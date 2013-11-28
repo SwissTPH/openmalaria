@@ -52,7 +52,7 @@ void ProphylacticActionWithinHost::drugAction(){
     if( pendingClearanceProbabilities.empty() ) return;
     double pClearance = pendingClearanceProbabilities.front().first;
     if( util::random::bernoulli( pClearance ) )
-        clearInfections(false); // value false is ignored since we're not using IPT
+        clearAllInfections();
     pendingClearanceProbabilities.pop_front();
 }
 

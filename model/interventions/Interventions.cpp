@@ -194,7 +194,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
             }else if( effect.getTBV().present() ){
                 humanEffects.push_back( new VaccineEffect( index, effect.getTBV().get(), Host::Vaccine::TBV ) );
             }else if( effect.getIPT().present() ){
-                humanEffects.push_back( new IPTEffect( index, effect.getIPT().get() ) );
+		// TODO: also remove XML elements from XSD in a later versions
+                throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
             }else if( effect.getITN().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();

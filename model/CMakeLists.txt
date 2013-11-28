@@ -59,11 +59,9 @@ set (Model_CPP
   WithinHost/WithinHostModel.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
-  WithinHost/DescriptiveIPTWithinHost.cpp
   WithinHost/ProphylacticActionWithinHost.cpp
   WithinHost/Infection/Infection.cpp
   WithinHost/Infection/DescriptiveInfection.cpp
-  WithinHost/Infection/DescriptiveIPTInfection.cpp
   WithinHost/Infection/DummyInfection.cpp
   WithinHost/Infection/EmpiricalInfection.cpp
   WithinHost/Infection/MolineauxInfection.cpp

@@ -212,14 +212,6 @@ void Human::deployVaccine( interventions::Deployment::Method method, Vaccine::Ty
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::deployIPT( interventions::Deployment::Method method ){
-    if( method == interventions::Deployment::TIMED ){
-        withinHostModel->timedIPT (getMonitoringAgeGroup(), isInAnyCohort());
-    }else if( method == interventions::Deployment::CTS ){
-        withinHostModel->continuousIPT( getMonitoringAgeGroup(), isInAnyCohort() );
-    }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
 void Human::massDrugAdministration () {
     clinicalModel->massDrugAdministration (*this);
 }

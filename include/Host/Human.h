@@ -118,9 +118,7 @@ public:
   void massDrugAdministration ();
   
   /// Mass/EPI vaccination (note: extra checks may still prevent EPI vaccination)
-  void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );
-  /// Mass/continuous IPT deployment (note: these don't have exactly the same effect)
-  void deployIPT( interventions::Deployment::Method method );
+  void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );	
   
   /// Resets immunity
   inline void clearImmunity() {

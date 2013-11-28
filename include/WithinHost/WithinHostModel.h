@@ -66,12 +66,6 @@ public:
   
   /// Create a new infection within this human
   virtual void importInfection() =0;
-  /** Conditionally clears all infections. Not used with the PK/PD model.
-   *
-   * If IPT isn't present, it just calls clearAllInfections(); otherwise it
-   * uses IPT code to determine whether to clear all infections or do nothing
-   * (isSevere is only used in the IPT case). */
-  virtual void clearInfections (bool isSevere);
   
   /** Medicate drugs (wraps drug's medicate).
    *
@@ -100,14 +94,6 @@ public:
   inline double getCumulativeh() const {return _cumulativeh;}
   inline double getCumulativeY() const {return _cumulativeY;}
   
-  ///@brief Only do anything when IPT is present:
-  //@{
-  /// Continuous deployment for IPT
-  virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  /// Timed deployment for IPT
-  virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  //@}
-  
   ///@brief Immunity model
   //@{
   /// Called to effect some penalty on immunity − but what? Please document.
@@ -123,6 +109,9 @@ public:
    * (and therefore will not be used by this function), and the next n values
    * are clearance probabilities for the next n timesteps. */
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime) =0;
+  
+  /** Literally just removes all infections in an individual. */
+  virtual void clearAllInfections() =0;
   
   /** The maximum number of infections a human can have. The only real reason
    * for this limit is to prevent incase bad input from causing the number of
@@ -156,13 +145,6 @@ protected:
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
-  
-  /** Literally just removes all infections in an individual.
-   *
-   * Normally clearInfections() would be called instead, which, when IPT is not
-   * active, just calls this function (although this needs to be changed for
-   * PK_PD integration). */
-  virtual void clearAllInfections() =0;
   
   /// Multiplicity of infection
   int numInfs;

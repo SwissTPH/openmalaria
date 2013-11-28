@@ -90,7 +90,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
     }
 
     if (effectiveTreatment) {
-        human.withinHostModel->clearInfections (latestReport.getState() == Pathogenesis::STATE_SEVERE);
+        human.withinHostModel->clearAllInfections ();
     }
 
     if( _tLastTreatment == TimeStep::simulation ){

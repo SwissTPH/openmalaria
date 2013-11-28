@@ -32,7 +32,7 @@ namespace OM { namespace WithinHost {
     
 /** Common within-host model functionality.
  *
- * This is not used by the old Descriptive (or DescriptiveIPT) within-host
+ * This is not used by the old Descriptive within-host
  * models, but encapsulates nearly all the within-host (non-infection) code
  * required by the Dummy and Empirical within-host models.
  */
