@@ -99,7 +99,6 @@ class ESDecisionValueBase : public ESDecisionTree {
         // value (or 0) from each dependency) to a list of cumulative probabilities.
         // Indecies in this list map to the same index in values; last entry must be 1.0.
         // (Representation is primarily designed for random decisions.)
-        //NOTE: be interesting to compare performance between boost::unordered_map and std::map
         typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
         map_cum_p_t map_cum_p;
         

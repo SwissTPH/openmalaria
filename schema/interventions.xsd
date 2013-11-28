@@ -274,8 +274,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Encapsulates all interventions whose effects are specific to the
             human host: any interventions where target humans may be selected
             via population-coverage, age limits and cohort membership.
-            
-            TODO: move appropriate elements to be children of this element
           </xs:documentation>
           <xs:appinfo>name:Human-specific interventions;</xs:appinfo>
         </xs:annotation>
