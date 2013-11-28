@@ -139,10 +139,6 @@ private:
     
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
-     *TODO: no longer true:
-     * Also has another temporary use between initialise and setupNv0 calls:
-     * "initOvFromSv" or  (ρ_O / ρ_S).
-     *
      * Should be checkpointed. */
     double initNv0FromSv;       ///< ditto
     //@}

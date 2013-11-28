@@ -148,7 +148,7 @@ void WithinHostModel::immunityPenalisation() {
 bool WithinHostModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
   int patentInfections = 0;
   int numInfections = countInfections (patentInfections);
-  if (numInfections) {
+  if (numInfections > 0) {
     survey.reportInfectedHosts(ageGroup,1);
     survey.addToInfections(ageGroup, numInfections);
     survey.addToPatentInfections(ageGroup, patentInfections);

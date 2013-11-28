@@ -60,7 +60,7 @@ protected:
   virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
   //@}
   
-  virtual void drugAction();    // for prophylactic effect;     //TODO
+  virtual void drugAction();    // for prophylactic effect;     //TODO(drug action)
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

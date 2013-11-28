@@ -24,8 +24,6 @@
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
-//TODO: the vector model shouldn't have to know about specific interventions
-#include "interventions//ITN.h"
 
 namespace scnXml {
   class Vector;

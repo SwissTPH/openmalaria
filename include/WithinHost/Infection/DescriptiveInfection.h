@@ -50,12 +50,11 @@ public:
     ///@name Static init/cleanup
     //@{
     //TODO: what does the following note mean?
-    /** Init constants common to all Phase A (AJTMH 75(2)) infections.
+    /** Init constants common to all Phase A (AJTMH 75(2)) infections (i.e.
+     * those models documented in the referenced publication).
      * 
-     * Once constants are initialised then cumulative distributions of parasite
-     * densities and durations of patency from the malariatherapy data and also
-     * the category boundaries for the grouping of time since first positive
-     * slide.
+     * Loads some constants as well as observations used by these empirical
+     * models.
      */
     static void init(const OM::Parameters& parameters);
     //@}

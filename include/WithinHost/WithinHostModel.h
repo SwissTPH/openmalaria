@@ -196,8 +196,7 @@ protected:
   static double immEffectorRemain;
   
   /*
-  The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
-  TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
+  The detection limit (in parasites/ul) is currently the same for PCR and for microscopy (and apparently should also be for Garki)
   The density bias allows the detection limit for microscopy to be higher for other sites
   */
   static double detectionLimit;
