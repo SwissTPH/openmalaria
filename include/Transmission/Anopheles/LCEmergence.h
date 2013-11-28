@@ -23,7 +23,6 @@
 
 #include "Global.h"
 #include "Transmission/Anopheles/EmergenceModel.h"
-//TODO: should LifeCycle be integrated here?
 #include "Transmission/Anopheles/LifeCycle.h"
 #include "schema/interventions.h"
 #include <vector>
@@ -136,11 +135,19 @@ private:
     double initialP_A, initialP_df;
     //@}
     
-    /// Parameters for life-cycle (excluding parasite transmission)
+    /**
+     * @brief Parameters and variables for the vector life-cycle model (this
+     * excludes infection of Plasmodium infections.
+     * 
+     * TODO(vec lifecycle): integrate these parameters and variables in this
+     * class?
+     */
+    //@{
+    /// Parameters
     LifeCycleParams lcParams;
-    
-    /// Mosquito life-cycle state
+    /// State
     LifeCycle lifeCycle;
+    //@}
     
     friend class ::MosqLifeCycleSuite;
 };

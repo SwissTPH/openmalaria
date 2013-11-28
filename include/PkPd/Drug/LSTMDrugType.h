@@ -77,7 +77,7 @@ class LSTMDrugAllele {
     /// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
     double IC50_pow_slope;
     /// Maximal drug killing rate per day
-    double max_killing_rate;    //TODO: keep this and power?
+    double max_killing_rate;
     
 public:
     LSTMDrugAllele( const scnXml::Allele& allele, double elimination_rate_constant );

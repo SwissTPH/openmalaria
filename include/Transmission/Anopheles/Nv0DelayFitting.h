@@ -55,7 +55,7 @@ struct eDFunctor
     T f = 0.0, df = 0.0, ddf = 0.0;
     
     // Calculate inverse discrete Fourier transform
-    // TODO: This may not interpolate sensibly. See for example
+    // TODO(vec lifecycle): This may not interpolate sensibly. See for example
     // https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Trigonometric_interpolation_polynomial
     for (size_t t=0; t<p; ++t) {
       T wt = w*t+fcR+d;
@@ -70,7 +70,7 @@ struct eDFunctor
       // The difference of logarithms of sample and fourier value
       T diff = val - logSamples[t];		// deriv. wrt. d is just dval
       // Differences of first and second derivatives of samples
-      // TODO: derivatives of samples shouldn't be zero. Presumably, however, fitting still works.
+      // TODO(vec lifecycle): derivatives of samples shouldn't be zero. Presumably, however, fitting still works.
       T ddiff = dval - 0.0;
       T dddiff = ddval - 0.0;
       

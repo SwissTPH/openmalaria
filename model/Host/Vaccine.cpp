@@ -40,16 +40,16 @@ double Vaccine::getInitialEfficacy (size_t numPrevDoses)
     if (numPrevDoses >= initialMeanEfficacy.size())
         numPrevDoses = initialMeanEfficacy.size() - 1;
     double ime = initialMeanEfficacy[numPrevDoses];
-    //NOTE: With extra valiadation in random, the first difference is noticed here:
+    //NOTE(validation): With extra valiadation in random, the first difference is noticed here:
     util::streamValidate(ime);
     util::streamValidate(efficacyB);
     if (ime == 0.0){
         return 0.0;
     } else if (ime < 1.0) {
         double result = random::betaWithMean (ime, efficacyB);
-        //NOTE: Without extra validation in random, the first difference is noticed here:
+        //NOTE(validation):: Without extra validation in random, the first difference is noticed here:
         util::streamValidate(result);
-        //TODO: Why the difference? Bug in/limitation of StreamValidatior?
+        //TODO(validation):: Why the difference? Bug in/limitation of StreamValidatior?
         // Extra memory allocation due to the extra logging causes some bad
         // memory usage to manifest differently? Am I forgetting to initialise
         // some variable?

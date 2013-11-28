@@ -64,8 +64,8 @@ void NeonatalMortality::update (const Population& population) {
     if(ageYears >= 25.0) continue;
     if (ageYears < 20.0) break;	// Not interested in younger individuals.
     
-    //TODO: detectibleInfection depends on a diagnostic; this outcome shouldn't
-    // be dependent on the diagnostic used!
+    //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
+    // reporting, but the one used should be that used to parameterise this model
     nCounter ++;
     if (iter->detectibleInfection())
       pCounter ++;

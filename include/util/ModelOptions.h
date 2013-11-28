@@ -268,7 +268,7 @@ namespace OM { namespace util {
          * Space-wise, using an int for each bit is very inefficient. But
          * that's irrelevant compared to the size of the program!
          * 
-         * TODO: performance is not as good as using a uint32_t (which is now
+         * TODO(performance): slower than using a uint32_t (which is now
          * too small). Maybe use uint64_t?
          */
 	static vector<bool> optArray;

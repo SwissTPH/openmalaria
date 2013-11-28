@@ -94,7 +94,7 @@ private:
      * then a sampling duration of 365 intervals. */
     void simulate1Year();
     
-public: //FIXME: only public for debugging
+public: //TODO(vec lifecycle): only public for debugging
     /** Sample: given descriptor for resource availability x, calculate
      * resultant emergence rate.
      * 

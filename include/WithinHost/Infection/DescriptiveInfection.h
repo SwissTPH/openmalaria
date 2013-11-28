@@ -49,12 +49,12 @@ class DescriptiveInfection : public Infection {
 public:
     ///@name Static init/cleanup
     //@{
-    //TODO: what does the following note mean?
-    /** Init constants common to all Phase A (AJTMH 75(2)) infections (i.e.
-     * those models documented in the referenced publication).
+    /**
+     * Loads some constants: parameters used by the empirical models.
      * 
-     * Loads some constants as well as observations used by these empirical
-     * models.
+     * An old comment said the following, but due to code changes may not be completely accurate now:
+     * Init constants common to all Phase A (AJTMH 75(2)) infections (i.e.
+     * those models documented in the referenced publication).
      */
     static void init(const OM::Parameters& parameters);
     //@}
