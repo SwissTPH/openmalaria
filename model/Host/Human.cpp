@@ -212,10 +212,6 @@ void Human::deployVaccine( interventions::Deployment::Method method, Vaccine::Ty
     }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-void Human::massDrugAdministration () {
-    clinicalModel->massDrugAdministration (*this);
-}
-
 void Human::reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const{
     if( method == interventions::Deployment::TIMED ){
         switch( type ){

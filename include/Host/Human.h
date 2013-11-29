@@ -114,9 +114,6 @@ public:
    */
   bool needsRedeployment( size_t effect_index, TimeStep maxAge );
   
-  /// Asks the clinical model to deal with this
-  void massDrugAdministration ();
-  
   /// Mass/EPI vaccination (note: extra checks may still prevent EPI vaccination)
   void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );	
   
@@ -219,7 +216,7 @@ public:
       return _vaccine;
   }
   
-  inline const Clinical::ClinicalModel& getClinicalModel() const{
+  inline Clinical::ClinicalModel& getClinicalModel() {
       return *clinicalModel;
   }
   //@}
