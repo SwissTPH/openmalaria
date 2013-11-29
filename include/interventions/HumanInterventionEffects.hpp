@@ -130,7 +130,7 @@ public:
     }
     
     void deploy( Human& human, Deployment::Method method )const{
-        human.deployVaccine( method, type );
+        human.getVaccine().vaccinate( human, method, type );
     }
     
     virtual Effect::Type effectType() const{

@@ -114,9 +114,6 @@ public:
    */
   bool needsRedeployment( size_t effect_index, TimeStep maxAge );
   
-  /// Mass/EPI vaccination (note: extra checks may still prevent EPI vaccination)
-  void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );	
-  
   /// Resets immunity
   inline void clearImmunity() {
       withinHostModel->clearImmunity();
@@ -134,8 +131,14 @@ public:
   
   /// @brief Small functions
   //@{
-  //! Get the age in years, based on current TimeStep::simulation.
-  double getAgeInYears() const;
+    /** Get the age in time steps, based on current TimeStep::simulation. */
+    inline TimeStep getAgeInTimeSteps() const{
+        return TimeStep::simulation - _dateOfBirth;
+    }
+    /** Get the age in years, based on current TimeStep::simulation. */
+    inline double getAgeInYears() const{
+        return (TimeStep::simulation - _dateOfBirth).inYears();
+    }
   
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
@@ -212,9 +215,8 @@ public:
       return monitoringAgeGroup;
   }
   
-  inline const PerHumanVaccine& getVaccine() const{
-      return _vaccine;
-  }
+  inline PerHumanVaccine& getVaccine(){ return _vaccine; }
+  inline const PerHumanVaccine& getVaccine() const{ return _vaccine; }
   
   inline Clinical::ClinicalModel& getClinicalModel() {
       return *clinicalModel;

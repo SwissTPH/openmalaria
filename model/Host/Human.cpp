@@ -198,20 +198,6 @@ bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
     }
 }
 
-void Human::deployVaccine( interventions::Deployment::Method method, Vaccine::Types type ){
-    if( method == interventions::Deployment::TIMED ){
-        _vaccine.vaccinate( type );
-        if( Vaccine::reportFor( type ) )
-            Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassVaccinations (getMonitoringAgeGroup(), 1);
-    }else if( method == interventions::Deployment::CTS ){
-        if ( _vaccine.getsEPIVaccination( type, TimeStep::simulation - _dateOfBirth ) ){
-            _vaccine.vaccinate( type );
-            if( Vaccine::reportFor( type ) )
-                Monitoring::Surveys.getSurvey(isInAnyCohort()).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
-        }
-    }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
 void Human::reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const{
     if( method == interventions::Deployment::TIMED ){
         switch( type ){
@@ -230,10 +216,6 @@ void Human::reportDeployment( interventions::Effect::Type type, interventions::D
                 throw SWITCH_DEFAULT_EXCEPTION;
         }
     }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
-double Human::getAgeInYears() const{
-    return (TimeStep::simulation - _dateOfBirth).inYears();
 }
 
 
