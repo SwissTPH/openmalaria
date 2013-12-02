@@ -79,7 +79,7 @@ public:
     }
     
     void deploy( Human& human, Deployment::Method method ) const{
-        //TODO(monitoring): shouldn't really use the same reports for mass and continuous deployment, right?
+        //TODO(monitoring): separate reports for mass and continuous deployments
         
         Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                 .reportMassScreening(human.getMonitoringAgeGroup(), 1);
@@ -88,6 +88,7 @@ public:
         }
         Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                 .reportMDA(human.getMonitoringAgeGroup(), 1);
+	
         double pClearance = pClearanceByTime[0];
         if( pClearance >= 1.0 || util::random::bernoulli( pClearance ) ){
             human.withinHostModel->clearAllInfections();
@@ -106,11 +107,13 @@ private:
 class MDA1DEffect : public HumanInterventionEffect {
 public:
     MDA1DEffect( size_t index, const scnXml::MDA1D& description ) : HumanInterventionEffect(index) {
+	if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
+	  throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
         Clinical::ESCaseManagement::initMDA( description );
     }
     
     void deploy( Human& human, Deployment::Method method ) const{
-        human.massDrugAdministration();
+        human.getClinicalModel().massDrugAdministration ( human );
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA_TS1D; }
@@ -120,27 +123,27 @@ private:
 
 class VaccineEffect : public HumanInterventionEffect {
 public:
-    VaccineEffect( size_t index, const scnXml::VaccineDescription& seq, Host::Vaccine::Types type ) :
+    VaccineEffect( size_t index, const scnXml::VaccineDescription& seq, Vaccine::Types type ) :
             HumanInterventionEffect(index), type(type)
     {
-        Host::Vaccine::init( seq, type );
+        Vaccine::init( seq, type );
     }
     
     void deploy( Human& human, Deployment::Method method )const{
-        human.deployVaccine( method, type );
+        human.getVaccine().vaccinate( human, method, type );
     }
     
     virtual Effect::Type effectType() const{
-        if( type == Host::Vaccine::PEV ) return Effect::PEV;
-        else if( type == Host::Vaccine::BSV ) return Effect::BSV;
-        else if( type == Host::Vaccine::TBV ) return Effect::TBV;
+        if( type == Vaccine::PEV ) return Effect::PEV;
+        else if( type == Vaccine::BSV ) return Effect::BSV;
+        else if( type == Vaccine::TBV ) return Effect::TBV;
         else throw SWITCH_DEFAULT_EXCEPTION;
     }
     
-    inline Host::Vaccine::Types getVaccineType()const{ return type; }
+    inline Vaccine::Types getVaccineType()const{ return type; }
     
 private:
-    Host::Vaccine::Types type;
+    Vaccine::Types type;
 };
 
 class ClearImmunityEffect : public HumanInterventionEffect {

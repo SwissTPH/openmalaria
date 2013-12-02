@@ -186,7 +186,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int nNewInfs = infIncidence->numNewInfections( *this, EIR );
     
-    withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(Vaccine::BSV));
+    withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(interventions::Vaccine::BSV));
 }
 
 bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
@@ -196,24 +196,6 @@ bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
     }else{
         return it->second + maxAge <= TimeStep::simulation;
     }
-}
-
-void Human::deployVaccine( interventions::Deployment::Method method, Vaccine::Types type ){
-    if( method == interventions::Deployment::TIMED ){
-        _vaccine.vaccinate( type );
-        if( Vaccine::reportFor( type ) )
-            Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassVaccinations (getMonitoringAgeGroup(), 1);
-    }else if( method == interventions::Deployment::CTS ){
-        if ( _vaccine.getsEPIVaccination( type, TimeStep::simulation - _dateOfBirth ) ){
-            _vaccine.vaccinate( type );
-            if( Vaccine::reportFor( type ) )
-                Monitoring::Surveys.getSurvey(isInAnyCohort()).reportEPIVaccinations (getMonitoringAgeGroup(), 1);
-        }
-    }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
-void Human::massDrugAdministration () {
-    clinicalModel->massDrugAdministration (*this);
 }
 
 void Human::reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const{
@@ -234,10 +216,6 @@ void Human::reportDeployment( interventions::Effect::Type type, interventions::D
                 throw SWITCH_DEFAULT_EXCEPTION;
         }
     }else throw SWITCH_DEFAULT_EXCEPTION;
-}
-
-double Human::getAgeInYears() const{
-    return (TimeStep::simulation - _dateOfBirth).inYears();
 }
 
 
@@ -330,7 +308,7 @@ void Human::updateInfectiousness() {
   transmit=std::min(transmit, 1.0);
   
   //    Include here the effect of transmission-blocking vaccination
-  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getEfficacy( Vaccine::TBV ));
+  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getEfficacy( interventions::Vaccine::TBV ));
   util::streamValidate( _probTransmissionToMosquito );
 }
 

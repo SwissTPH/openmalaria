@@ -20,7 +20,7 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "Global.h"
-#include "Host/Vaccine.h"
+#include "interventions/Vaccine.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
@@ -114,12 +114,6 @@ public:
    */
   bool needsRedeployment( size_t effect_index, TimeStep maxAge );
   
-  /// Asks the clinical model to deal with this
-  void massDrugAdministration ();
-  
-  /// Mass/EPI vaccination (note: extra checks may still prevent EPI vaccination)
-  void deployVaccine( interventions::Deployment::Method method, Vaccine::Types type );	
-  
   /// Resets immunity
   inline void clearImmunity() {
       withinHostModel->clearImmunity();
@@ -137,8 +131,14 @@ public:
   
   /// @brief Small functions
   //@{
-  //! Get the age in years, based on current TimeStep::simulation.
-  double getAgeInYears() const;
+    /** Get the age in time steps, based on current TimeStep::simulation. */
+    inline TimeStep getAgeInTimeSteps() const{
+        return TimeStep::simulation - _dateOfBirth;
+    }
+    /** Get the age in years, based on current TimeStep::simulation. */
+    inline double getAgeInYears() const{
+        return (TimeStep::simulation - _dateOfBirth).inYears();
+    }
   
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
@@ -215,11 +215,10 @@ public:
       return monitoringAgeGroup;
   }
   
-  inline const PerHumanVaccine& getVaccine() const{
-      return _vaccine;
-  }
+  inline interventions::PerHumanVaccine& getVaccine(){ return _vaccine; }
+  inline const interventions::PerHumanVaccine& getVaccine() const{ return _vaccine; }
   
-  inline const Clinical::ClinicalModel& getClinicalModel() const{
+  inline Clinical::ClinicalModel& getClinicalModel() {
       return *clinicalModel;
   }
   //@}
@@ -263,7 +262,7 @@ private:
   Monitoring::AgeGroup monitoringAgeGroup;
   
   /// Vaccines
-  PerHumanVaccine _vaccine;
+  interventions::PerHumanVaccine _vaccine;
   
   /** Total asexual blood stage density over last 20 days (uses samples from
    * 10, 15 and 20 days ago).

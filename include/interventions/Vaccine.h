@@ -20,13 +20,17 @@
 #ifndef Hmod_Vaccine
 #define Hmod_Vaccine
 
+#include "schema/interventions.h"
+#include "interventions/Interventions.h"
 #include "Global.h"
 #include "util/DecayFunction.h"
-#include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace Host {
+    class Human;
+}
+namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using boost::shared_ptr;
@@ -47,10 +51,6 @@ public:
     /// Special for R_0: check is set up correctly or throw xml_scenario_error
     static void verifyEnabledForR_0 ();
     
-    /** Until the monitoring system is updated, only one type of vaccination
-     * should be reported. Which to report is described here. */
-    inline static bool reportFor( Types type ){ return reportType == type; }
-
     /** Per-type initialization */
     inline static void init( const scnXml::VaccineDescription& vd, Types type ){
         types[type].initVaccine( vd, type );
@@ -82,7 +82,8 @@ private:
      * TODO(vaccines): multiple descriptions should be allowed for each type. */
     static Vaccine types[NumVaccineTypes];
     
-    /// Only one type of vaccine is reported via the old mechanism: the one given here
+    /** Until the monitoring system is updated, only one type of vaccination
+     * should be reported. Which to report is described here. */
     static Types reportType;
 
     /// True if this vaccine is in use
@@ -112,7 +113,8 @@ class PerEffectPerHumanVaccine {
     bool getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps ) const;
 
     /** Update efficacies and the number of doses in this human. */
-    void vaccinate( Vaccine::Types type );
+    void vaccinate( Deployment::Method method,
+                    Vaccine::Types type );
     
     /// Checkpointing
     template<class S>
@@ -149,12 +151,10 @@ public:
     inline double getEfficacy( Vaccine::Types type )const{
         return types[type].getEfficacy( type );
     }
-    inline bool getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps ){
-        return types[type].getsEPIVaccination( type, ageTSteps );
-    }
-    inline void vaccinate( Vaccine::Types type ){
-        types[type].vaccinate( type );
-    }
+    
+    void vaccinate( const Host::Human& human,
+                           Deployment::Method method,
+                           Vaccine::Types type );
 
     /// Hack for R_0 experiment: make current human the infection source
     inline void specialR_0(){
