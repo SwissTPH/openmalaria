@@ -22,6 +22,7 @@
 #define Hmod_util_ModelOptions
 
 #include "Global.h"
+#include <bitset>
 
 class UnittestUtil;
 
@@ -186,13 +187,8 @@ namespace OM { namespace util {
 	/** Use the IPT(i) drug model (DescriptiveIPTWithinHost and
 	 * DescriptiveIPTInfection classes) with its simple SP model.
 	 * 
-	 * NOTE: code is unmaintained in order to keep results comparable with
-	 * previous experiments run. On a 1-day timestep, we now have a better
-	 * drug model, but will need to rewrite IPT code to purely be an
-	 * intervention.
-         * 
-         * Note: previously this implied REPORT_ONLY_AT_RISK; now it does not.
-	 */
+	 * This has been removed; mass drug interventions can be used as a
+         * replacement. */
 	IPTI_SP_MODEL,
 	
 	/** Turn off reporting of several outputs for humans suffering a recent
@@ -236,42 +232,31 @@ namespace OM { namespace util {
     /// Encapsulation for "modelVersion" xml attribute
     class ModelOptions {
     public:
-	/** Return true if given option (from OptionCodes) is active. */
+	/** Return true if given option (from OptionCodes) is active.
+         * 
+         * Performance note: calling this a few times (e.g. during init) is
+         * fine, but code needing a value repeatedly should cache it locally.
+         */
 	static inline bool option(OptionCodes code) {
-	    return optArray[code];
-	}
-	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
-	 * TRIPLE_HET are active. */
-	static inline bool anyTransHet () {
-            return optArray[TRANS_HET] || optArray[COMORB_TRANS_HET] ||
-                optArray[TRANS_TREAT_HET] || optArray[TRIPLE_HET];
+	    return options.test( code );
 	}
 	
-	/// Set options from XML file.
-        /// Relies on Global::init() already having been called.
+	/** Read options from the XML element. */
 	static void init (const scnXml::OptionSet& options);
         
     private:
         // Reset opts to default. Used by unit tests.
         static inline void reset() {
-            optArray.assign(NUM_OPTIONS, false);
-            optArray[MAX_DENS_CORRECTION] = true;
+            options.reset();
+            options.set( MAX_DENS_CORRECTION );
+            options.set( INNATE_MAX_DENS );
         }
         static inline void set(OptionCodes code) {
-            optArray[code] = true;
+            options.set( code );
         }
         
-	/** Model options.
-	 *
-	 * Default value set by init().
-         *
-         * Space-wise, using an int for each bit is very inefficient. But
-         * that's irrelevant compared to the size of the program!
-         * 
-         * TODO(performance): slower than using a uint32_t (which is now
-         * too small). Maybe use uint64_t?
-         */
-	static vector<bool> optArray;
+	// The model options
+	static std::bitset<NUM_OPTIONS> options;
 	
 	friend class ::UnittestUtil;	// Note: class is in base namespace
     };

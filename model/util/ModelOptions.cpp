@@ -27,7 +27,7 @@
 #include <iostream>
 
 namespace OM { namespace util {
-    vector<bool> ModelOptions::optArray;
+    std::bitset<NUM_OPTIONS> ModelOptions::options;
     
     // Utility: converts option strings to codes and back
     class OptionCodeMap {
@@ -95,7 +95,7 @@ namespace OM { namespace util {
 	}
     };
     
-    void ModelOptions::init( const scnXml::OptionSet& options ){
+    void ModelOptions::init( const scnXml::OptionSet& optionsElt ){
 	OptionCodeMap codeMap;
 	
 	// State of all default options:
@@ -103,23 +103,27 @@ namespace OM { namespace util {
 	defaultOptSet.set (MAX_DENS_CORRECTION);
         defaultOptSet.set (INNATE_MAX_DENS);
 	
-	// Set optSet to defaults, then override any given in the XML file:
-	bitset<NUM_OPTIONS> optSet_bs = defaultOptSet;
+	// Set options to defaults, then override any given in the XML file:
+	options = defaultOptSet;
 	
-	const scnXml::OptionSet::OptionSequence& optSeq = options.getOption();
+	const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.getOption();
 	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
-	    optSet_bs[codeMap[it->getName()]] = it->getValue();
+	    options[codeMap[it->getName()]] = it->getValue();
 	}
 	
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
 	    cout << "Non-default model options:";
 	    for (int i = 0; i < NUM_OPTIONS; ++i) {
-		if (optSet_bs[i] != defaultOptSet[i])
-		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i];
+		if (options[i] != defaultOptSet[i])
+		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << options[i];
 	    }
 	    cout << endl;
 	}
+	
+	// Test for removed options
+        if( util::ModelOptions::option( IPTI_SP_MODEL ) )
+            throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
 	
 	// Test for incompatible options
 	
@@ -193,21 +197,21 @@ namespace OM { namespace util {
             .set(PROPHYLACTIC_DRUG_ACTION_MODEL);
         
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
-	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {
+	    if (options [i] && (options & incompatibilities[i]).any()) {
 		ostringstream msg;
-		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << optSet_bs[i]
+		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << options[i]
 			<< " is incompatible with flags:";
-		bitset<NUM_OPTIONS> incompat = (optSet_bs & incompatibilities[i]);
+		bitset<NUM_OPTIONS> incompat = (options & incompatibilities[i]);
 		for (int j = 0; j < NUM_OPTIONS; ++j) {
 		    if (incompat[j])
-			msg << "\t" << codeMap.toString(OptionCodes(j)) << "=" << optSet_bs[j];
+			msg << "\t" << codeMap.toString(OptionCodes(j)) << "=" << options[j];
 		}
 		throw xml_scenario_error (msg.str());
 	    }
 	}
 	
         // Required options (above table can't check these):
-        if (optSet_bs[INNATE_MAX_DENS] && !optSet_bs[MAX_DENS_CORRECTION])
+        if (options[INNATE_MAX_DENS] && !options[MAX_DENS_CORRECTION])
             throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
         
         if( TimeStep::interval == 5 ){
@@ -221,7 +225,7 @@ namespace OM { namespace util {
                 .set( PENNY_WITHIN_HOST_MODEL );
             
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
-                if (optSet_bs [i] && require1DayTS[i]) {
+                if (options [i] && require1DayTS[i]) {
                     ostringstream msg;
                     msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 1-day timestep.";
                     throw xml_scenario_error (msg.str());
@@ -235,7 +239,7 @@ namespace OM { namespace util {
                 .set( REPORT_ONLY_AT_RISK );
             
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
-                if (optSet_bs [i] && require5DayTS[i]) {
+                if (options [i] && require5DayTS[i]) {
                     ostringstream msg;
                     msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day timestep.";
                     throw xml_scenario_error (msg.str());
@@ -246,14 +250,6 @@ namespace OM { namespace util {
             msg << "Timestep interval set to " << TimeStep::interval << " days but only 1 and 5 days are supported.";
             throw xml_scenario_error (msg.str());
         }
-	
-	// Convert from bitset to array. Bitset used purely for historical
-	// reasons; optArray because its faster.
-	optArray.assign( NUM_OPTIONS, false );
-	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
-	    if (optSet_bs[i])
-		optArray[i] = true;
-	}
     }
     
 } }

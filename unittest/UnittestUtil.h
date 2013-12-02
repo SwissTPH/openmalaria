@@ -39,6 +39,12 @@ using namespace WithinHost;
 
 using ::OM::util::ModelOptions;
 
+namespace OM {
+    namespace WithinHost {
+        extern bool opt_common_whm;
+    }
+}
+
 class UnittestUtil {
 public:
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
@@ -114,6 +120,7 @@ public:
 	TimeStep::init( 1, 90.0 );
         ModelOptions::reset();
         ModelOptions::set(util::EMPIRICAL_WITHIN_HOST_MODEL);
+        OM::WithinHost::opt_common_whm = true;
     }
     
     static void AgeGroupInterpolation_init() {

@@ -53,6 +53,8 @@ double ClinicalEventScheduler::logOddsAbInformal = std::numeric_limits<double>::
 double ClinicalEventScheduler::oneMinusEfficacyAb = std::numeric_limits<double>::signaling_NaN();
 AgeGroupInterpolation* ClinicalEventScheduler::severeNmfMortality = AgeGroupInterpolation::dummyObject();
 
+bool opt_penalisation_episodes = false, opt_non_malaria_fevers = false;
+
 
 // -----  static init  -----
 
@@ -62,6 +64,9 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::H
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
     if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
+    
+    opt_penalisation_episodes = util::ModelOptions::option (util::PENALISATION_EPISODES);
+    opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
     
     if( !human.getWeight().present() ){
         throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
@@ -260,7 +265,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);
 	
 	if (pgState & Pathogenesis::MALARIA) {
-	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
+	    if (opt_penalisation_episodes) {
 		withinHostModel.immunityPenalisation();
 	    }
 	}
@@ -309,7 +314,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
 	
-	if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
+	if( opt_non_malaria_fevers ){
             if( (pgState & Pathogenesis::SICK) && !(pgState & Pathogenesis::COMPLICATED) ){
                 // Have a NMF or UC malaria case
                 double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears, (pgState & Pathogenesis::MALARIA) != Pathogenesis::NONE );

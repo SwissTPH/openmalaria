@@ -46,54 +46,55 @@ double WithinHostModel::asexImmRemain;
 double WithinHostModel::immEffectorRemain;
 double WithinHostModel::detectionLimit;
 
+bool opt_dummy_whm = false, opt_empirical_whm = false,
+        opt_molineaux_whm = false, opt_penny_whm = false,
+        opt_common_whm = false, opt_proph_drug_model = false;
+
 // -----  static functions  -----
 
 void WithinHostModel::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
-  Infection::init( parameters, scenario.getModel().getParameters().getLatentp() );
-  sigma_i=sqrt(parameters[Parameters::SIGMA_I_SQ]);
-  immPenalty_22=1-exp(parameters[Parameters::IMMUNITY_PENALTY]);
-  immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
-  asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
-  
-  double densitybias;
-  if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
-      densitybias=parameters[Parameters::DENSITY_BIAS_GARKI];
-  } else {
-    int analysisNo = scenario.getAnalysisNo();
-    if ((analysisNo >= 22) && (analysisNo <= 30)) {
-	cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+    Infection::init( parameters, scenario.getModel().getParameters().getLatentp() );
+    sigma_i=sqrt(parameters[Parameters::SIGMA_I_SQ]);
+    immPenalty_22=1-exp(parameters[Parameters::IMMUNITY_PENALTY]);
+    immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
+    asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
+    
+    double densitybias;
+    if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
+        densitybias=parameters[Parameters::DENSITY_BIAS_GARKI];
+    } else {
+        int analysisNo = scenario.getAnalysisNo();
+        if ((analysisNo >= 22) && (analysisNo <= 30)) {
+            cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+        }
+        densitybias=parameters[Parameters::DENSITY_BIAS_NON_GARKI];
     }
-    densitybias=parameters[Parameters::DENSITY_BIAS_NON_GARKI];
-  }
-  detectionLimit=scenario.getMonitoring().getSurveys().getDetectionLimit()*densitybias;
-  
-  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
-    DummyInfection::init ();
-  } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
-    EmpiricalInfection::init();	// 1-day timestep check
-  } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
-    MolineauxInfection::init( parameters );
-  } else if (util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
-      PennyInfection::init();
-  } else {
-    DescriptiveInfection::init( parameters );	// 5-day timestep check
-  }
+    detectionLimit=scenario.getMonitoring().getSurveys().getDetectionLimit()*densitybias;
+    
+    if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
+        opt_dummy_whm = true;
+        DummyInfection::init ();
+    } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
+        opt_empirical_whm = true;
+        EmpiricalInfection::init();	// 1-day timestep check
+    } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
+        opt_molineaux_whm = true;
+        MolineauxInfection::init( parameters );
+    } else if (util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
+        opt_penny_whm = true;
+        PennyInfection::init();
+    } else {
+        DescriptiveInfection::init( parameters );	// 5-day timestep check
+    }
+    opt_common_whm = opt_dummy_whm || opt_empirical_whm
+            || opt_molineaux_whm || opt_penny_whm;
+    opt_proph_drug_model = util::ModelOptions::option( PROPHYLACTIC_DRUG_ACTION_MODEL );
 }
 
 WithinHostModel* WithinHostModel::createWithinHostModel () {
-  if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) ||
-      util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL) ||
-      util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL) ||
-      util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
-    return new CommonWithinHost();
-  } else {
-    if( util::ModelOptions::option( IPTI_SP_MODEL ) )
-      throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
-    else if( util::ModelOptions::option( PROPHYLACTIC_DRUG_ACTION_MODEL ) )
-        return new ProphylacticActionWithinHost();
-    else
-      return new DescriptiveWithinHostModel();
-  }
+    if (opt_common_whm) return new CommonWithinHost();
+    if( opt_proph_drug_model ) return new ProphylacticActionWithinHost();
+    return new DescriptiveWithinHostModel();
 }
 
 

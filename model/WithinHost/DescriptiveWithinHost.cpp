@@ -30,6 +30,8 @@ using namespace std;
 namespace OM {
 namespace WithinHost {
 
+extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
+
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
@@ -137,7 +139,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
 
         IPTattenuateAsexualDensity (*inf);
 
-        if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
+        if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
         timeStepMaxDensity = infStepMaxDens;
 

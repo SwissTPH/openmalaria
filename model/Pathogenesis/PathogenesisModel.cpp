@@ -46,6 +46,8 @@ AgeGroupInterpolation* PathogenesisModel::NMF_incidence = AgeGroupInterpolation:
 AgeGroupInterpolation* PathogenesisModel::NMF_need_antibiotic = AgeGroupInterpolation::dummyObject();
 AgeGroupInterpolation* PathogenesisModel::MF_need_antibiotic = AgeGroupInterpolation::dummyObject();
 
+bool opt_predetermined_episodes = false, opt_mueller_pres_model = false;
+
 
 void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinical& clinical ) {
     indirRiskCoFactor_18=(1-exp(-parameters[Parameters::INDIRECT_RISK_COFACTOR]));
@@ -54,13 +56,16 @@ void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinic
     critAgeComorb_30=parameters[Parameters::CRITICAL_AGE_FOR_COMORBIDITY];
 
     if (util::ModelOptions::option (util::PREDETERMINED_EPISODES)) {
+        opt_predetermined_episodes = true;
         //no separate init:
         PyrogenPathogenesis::init( parameters );
     } else {
-        if (util::ModelOptions::option (util::MUELLER_PRESENTATION_MODEL))
+        if (util::ModelOptions::option (util::MUELLER_PRESENTATION_MODEL)){
+            opt_mueller_pres_model = true;
             MuellerPathogenesis::init( parameters );
-        else
+        }else{
             PyrogenPathogenesis::init( parameters );
+        }
     }
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
@@ -80,11 +85,11 @@ void PathogenesisModel::cleanup() {
 }
 
 PathogenesisModel* PathogenesisModel::createPathogenesisModel(double cF) {
-    if (util::ModelOptions::option (util::PREDETERMINED_EPISODES)) {
+    if (opt_predetermined_episodes) {
         return new PredetPathogenesis(cF);
     }
     else {
-        if (util::ModelOptions::option (util::MUELLER_PRESENTATION_MODEL)) {
+        if (opt_mueller_pres_model) {
             return new MuellerPathogenesis(cF);
         }
         else {

@@ -39,6 +39,8 @@ double DescriptiveInfection::meanLogParasiteCount[numDurations][numDurations];
 double DescriptiveInfection::sigma0sq;
 double DescriptiveInfection::xNuStar;
 
+bool bugfix_max_dens = true, bugfix_innate_max_dens = true;
+
 
 // ———  static init/clear ———
 
@@ -52,6 +54,13 @@ void DescriptiveInfection::init (const Parameters& parameters) {
     }
     if (util::ModelOptions::option (util::INCLUDES_PK_PD))
         throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
+    
+    // Bug fixes: these are enabled by default but may be off in old parameterisations
+    bugfix_innate_max_dens = util::ModelOptions::option (util::INNATE_MAX_DENS);
+    // Warning: if MAX_DENS_CORRECTION is off, infections not yet at the blood
+    // stage could result in BSVEfficacy and potentially innateImmSurvFact
+    // being applied to timeStepMaxDensity more than once in some cases.
+    bugfix_max_dens = util::ModelOptions::option (util::MAX_DENS_CORRECTION);
     
     // Read parameters
     sigma0sq=parameters[Parameters::SIGMA0_SQ];
@@ -140,9 +149,7 @@ void DescriptiveInfection::determineDensities(double ageInYears,
     TimeStep infage = TimeStep::simulation - _startdate - latentp;
     if ( infage < TimeStep(0)) {
         _density = 0.0;
-        // Bug fix (on by default but originally omitted):
-        if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
-            timeStepMaxDensity = 0.0;
+        if (bugfix_max_dens) timeStepMaxDensity = 0.0;
     }else{
         timeStepMaxDensity = 0.0;
         
@@ -191,15 +198,9 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         timeStepMaxDensity = min(timeStepMaxDensity, maxDens);
     }
     
-    // WARNING: if MAX_DENS_CORRECTION is off, infections not yet at the blood
-    // stage could result in BSVEfficacy and potentially innateImmSurvFact
-    // being applied to timeStepMaxDensity more than once in some cases.
-    
     //Compute the proportion of parasites remaining after innate blood stage effect
     _density *= innateImmSurvFact;
-    // INNATE_MAX_DENS bug-fix: initially this wasn't enabled. In new scenarios it is by default.
-    if (util::ModelOptions::option (util::INNATE_MAX_DENS))
-	timeStepMaxDensity *= innateImmSurvFact;
+    if (bugfix_innate_max_dens) timeStepMaxDensity *= innateImmSurvFact;
     
     //Include here the effect of blood stage vaccination
     double factor = 1.0 - BSVEfficacy;

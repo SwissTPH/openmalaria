@@ -44,10 +44,24 @@
 namespace OM { namespace Host {
     using namespace OM::util;
     int Human::_ylagLen = 0;
+    
+    bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
+            opt_trans_treat_het = false, opt_comorb_treat_het = false,
+            opt_comorb_trans_het = false, opt_triple_het = false,
+            opt_report_only_at_risk = false;
 
 // -----  Static functions  -----
 
 void Human::initHumanParameters( const Parameters& parameters, const scnXml::Scenario& scenario ) {    // static
+    opt_trans_het = util::ModelOptions::option (util::TRANS_HET);
+    opt_comorb_het = util::ModelOptions::option (util::COMORB_HET);
+    opt_treat_het = util::ModelOptions::option (util::TREAT_HET);
+    opt_trans_treat_het = util::ModelOptions::option (util::TRANS_TREAT_HET);
+    opt_comorb_treat_het = util::ModelOptions::option (util::COMORB_TREAT_HET);
+    opt_comorb_trans_het = util::ModelOptions::option (util::COMORB_TRANS_HET);
+    opt_triple_het = util::ModelOptions::option (util::TRIPLE_HET);
+    opt_report_only_at_risk = util::ModelOptions::option( util::REPORT_ONLY_AT_RISK );
+    
     const scnXml::Model& model = scenario.getModel();
     // Init models used by humans:
     Transmission::PerHost::init( model.getHuman().getAvailabilityToMosquitoes() );
@@ -90,32 +104,32 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
   double _treatmentSeekingFactor = 1.0;
   double availabilityFactor = 1.0;
   
-  if (util::ModelOptions::option (util::TRANS_HET)) {
+  if (opt_trans_het) {
     availabilityFactor=0.2;
     if (random::uniform_01() < 0.5) {
       availabilityFactor=1.8;
     }
   }
-  if (util::ModelOptions::option (util::COMORB_HET)) {
+  if (opt_comorb_het) {
     _comorbidityFactor=0.2;
     if (random::uniform_01() < 0.5) {
       _comorbidityFactor=1.8;
     }   
   }
-  if (util::ModelOptions::option (util::TREAT_HET)) {
+  if (opt_treat_het) {
     _treatmentSeekingFactor=0.2;
     if (random::uniform_01() < 0.5) {            
       _treatmentSeekingFactor=1.8;
     }   
   }
-  if (util::ModelOptions::option (util::TRANS_TREAT_HET)) {
+  if (opt_trans_treat_het) {
     _treatmentSeekingFactor=0.2;
     availabilityFactor=1.8;
     if (random::uniform_01()<0.5) {
       _treatmentSeekingFactor=1.8;
       availabilityFactor=0.2;
     }
-  } else if (util::ModelOptions::option (util::COMORB_TREAT_HET)) {
+  } else if (opt_comorb_treat_het) {
     if (random::uniform_01()<0.5) {
       _comorbidityFactor=1.8;
       _treatmentSeekingFactor=0.2;
@@ -123,14 +137,14 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
       _comorbidityFactor=0.2;
       _treatmentSeekingFactor=1.8;
     }
-  } else if (util::ModelOptions::option (util::COMORB_TRANS_HET)) {
+  } else if (opt_comorb_trans_het) {
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
     if (random::uniform_01()<0.5) {
       availabilityFactor=0.2;
       _comorbidityFactor=0.2;
     }
-  } else if (util::ModelOptions::option (util::TRIPLE_HET)) {
+  } else if (opt_triple_het) {
     availabilityFactor=1.8;
     _comorbidityFactor=1.8;
     _treatmentSeekingFactor=0.2;
@@ -221,8 +235,7 @@ void Human::reportDeployment( interventions::Effect::Type type, interventions::D
 
 void Human::summarize() {
     // 5-day only, compatibility option:
-    if( util::ModelOptions::option( util::REPORT_ONLY_AT_RISK ) &&
-        clinicalModel->notAtRisk() ){
+    if( opt_report_only_at_risk && clinicalModel->notAtRisk() ){
         // This modifies the denominator to treat the 4*5 day intervals
         // after a bout as 'not at risk' to match the IPTi trials
         return;

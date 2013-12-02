@@ -33,6 +33,8 @@ double ClinicalImmediateOutcomes::probGetsTreatment[3];
 double ClinicalImmediateOutcomes::probParasitesCleared[3];
 double ClinicalImmediateOutcomes::cureRate[3];
 
+extern bool opt_penalisation_episodes;
+
 // -----  static init  -----
 
 void ClinicalImmediateOutcomes::initParameters () {
@@ -82,7 +84,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && _doomed == 0)
             _doomed = -TimeStep::interval;
 
-        if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
+        if (opt_penalisation_episodes) {
             human.withinHostModel->immunityPenalisation();
         }
     } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria

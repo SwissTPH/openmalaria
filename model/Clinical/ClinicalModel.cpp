@@ -35,6 +35,7 @@ vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;
 double ClinicalModel::_nonMalariaMortality;
 
+bool opt_event_scheduler = false;
 
 // -----  static methods  -----
 
@@ -46,6 +47,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical() );
     Episode::init( model.getClinical().getHealthSystemMemory() );
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
+        opt_event_scheduler = true;
         ClinicalEventScheduler::init( parameters, model.getHuman() );
     }else{
         ClinicalImmediateOutcomes::initParameters();
@@ -54,7 +56,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
 }
 void ClinicalModel::cleanup () {
   CaseManagementCommon::cleanupCommon();
-    if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+    if (opt_event_scheduler)
 	ClinicalEventScheduler::cleanup();
     Pathogenesis::PathogenesisModel::cleanup ();
 }
@@ -69,7 +71,7 @@ void ClinicalModel::staticCheckpoint (ostream& stream) {
 }
 
 ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
-  if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
+  if (opt_event_scheduler)
     return new ClinicalEventScheduler (cF, tSF);
   else
     return new ClinicalImmediateOutcomes (cF, tSF);
