@@ -253,8 +253,6 @@ private:
     //@{
     /** Death rate of mosquitoes while host-seeking (μ_vA).
      *
-     * TODO: the model could be extended to allow this and mosqSeekingDuration to vary over the year.
-     *
      * Unit: animals/day. */
     double mosqSeekingDeathRate;
 

@@ -46,7 +46,7 @@ class MosqTransmission;
  * Simple mosquito population dynamics model ensures reduction in adult
  * mosquito numbers affects emergence.
  * 
- * TODO: most of this code is identical to that from the FixedEmergence model.
+ * TODO(vec lifecycle): most of this code is identical to that from the FixedEmergence model.
  * Use common base or even make this extend FixedEmergence?
  */
 class SimpleMPDEmergence : public EmergenceModel
