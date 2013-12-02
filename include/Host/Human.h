@@ -20,7 +20,7 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "Global.h"
-#include "Host/Vaccine.h"
+#include "interventions/Vaccine.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
@@ -215,8 +215,8 @@ public:
       return monitoringAgeGroup;
   }
   
-  inline PerHumanVaccine& getVaccine(){ return _vaccine; }
-  inline const PerHumanVaccine& getVaccine() const{ return _vaccine; }
+  inline interventions::PerHumanVaccine& getVaccine(){ return _vaccine; }
+  inline const interventions::PerHumanVaccine& getVaccine() const{ return _vaccine; }
   
   inline Clinical::ClinicalModel& getClinicalModel() {
       return *clinicalModel;
@@ -262,7 +262,7 @@ private:
   Monitoring::AgeGroup monitoringAgeGroup;
   
   /// Vaccines
-  PerHumanVaccine _vaccine;
+  interventions::PerHumanVaccine _vaccine;
   
   /** Total asexual blood stage density over last 20 days (uses samples from
    * 10, 15 and 20 days ago).

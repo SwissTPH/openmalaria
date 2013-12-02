@@ -188,11 +188,11 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 humanEffects.push_back( new MDA1DEffect( index, effect.getMDA1D().get() ) );
             }else if( effect.getPEV().present() ){
                 //TODO: allow multiple descriptions of each vaccine type
-                humanEffects.push_back( new VaccineEffect( index, effect.getPEV().get(), Host::Vaccine::PEV ) );
+                humanEffects.push_back( new VaccineEffect( index, effect.getPEV().get(), Vaccine::PEV ) );
             }else if( effect.getBSV().present() ){
-                humanEffects.push_back( new VaccineEffect( index, effect.getBSV().get(), Host::Vaccine::BSV ) );
+                humanEffects.push_back( new VaccineEffect( index, effect.getBSV().get(), Vaccine::BSV ) );
             }else if( effect.getTBV().present() ){
-                humanEffects.push_back( new VaccineEffect( index, effect.getTBV().get(), Host::Vaccine::TBV ) );
+                humanEffects.push_back( new VaccineEffect( index, effect.getTBV().get(), Vaccine::TBV ) );
             }else if( effect.getIPT().present() ){
 		// TODO: also remove XML elements from XSD in a later versions
                 throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
@@ -225,7 +225,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 human.getIntervention().begin(),
                 end = human.getIntervention().end(); it != end; ++it )
         {
-            list<Host::Vaccine::Types> vaccineEffects;      // for vaccine EPI deployment
+            list<Vaccine::Types> vaccineEffects;      // for vaccine EPI deployment
             const scnXml::Intervention& elt = *it;
             // 2.a intervention effects
             HumanIntervention *intervention = new HumanIntervention();
@@ -273,8 +273,8 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 {
                     continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, cohort ) );
                 }
-                for( list<Host::Vaccine::Types>::const_iterator it = vaccineEffects.begin(); it != vaccineEffects.end(); ++it ){
-                    Host::Vaccine::initSchedule( *it, ctsSeq );
+                for( list<Vaccine::Types>::const_iterator it = vaccineEffects.begin(); it != vaccineEffects.end(); ++it ){
+                    Vaccine::initSchedule( *it, ctsSeq );
                 }
             }
             for( scnXml::Intervention::TimedConstIterator timedIt = elt.getTimed().begin();
@@ -333,7 +333,7 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     if( intervElt.getInsertR_0Case().present() ){
         const scnXml::InsertR_0Case& elt = intervElt.getInsertR_0Case().get();
         if( elt.getTimedDeployment().size() > 0 ){
-            Host::Vaccine::verifyEnabledForR_0();
+            Vaccine::verifyEnabledForR_0();
             // timed deployments:
             typedef scnXml::InsertR_0Case::TimedDeploymentSequence::const_iterator It;
             for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){

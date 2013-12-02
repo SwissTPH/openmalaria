@@ -13,7 +13,6 @@ set (Model_CPP
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
   Host/NeonatalMortality.cpp
-  Host/Vaccine.cpp
   Host/ImportedInfections.cpp
   
   Clinical/ClinicalModel.cpp
@@ -92,6 +91,7 @@ set (Model_CPP
   interventions/IRS.cpp
   interventions/GVI.cpp
   interventions/Cohort.cpp
+  interventions/Vaccine.cpp
 )
 
 # Headers - only included so they show up in IDEs:

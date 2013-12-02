@@ -186,7 +186,7 @@ void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, 
     double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
     int nNewInfs = infIncidence->numNewInfections( *this, EIR );
     
-    withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(Vaccine::BSV));
+    withinHostModel->update(nNewInfs, ageYears, _vaccine.getEfficacy(interventions::Vaccine::BSV));
 }
 
 bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
@@ -308,7 +308,7 @@ void Human::updateInfectiousness() {
   transmit=std::min(transmit, 1.0);
   
   //    Include here the effect of transmission-blocking vaccination
-  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getEfficacy( Vaccine::TBV ));
+  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getEfficacy( interventions::Vaccine::TBV ));
   util::streamValidate( _probTransmissionToMosquito );
 }
 

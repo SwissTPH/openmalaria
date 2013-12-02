@@ -123,10 +123,10 @@ private:
 
 class VaccineEffect : public HumanInterventionEffect {
 public:
-    VaccineEffect( size_t index, const scnXml::VaccineDescription& seq, Host::Vaccine::Types type ) :
+    VaccineEffect( size_t index, const scnXml::VaccineDescription& seq, Vaccine::Types type ) :
             HumanInterventionEffect(index), type(type)
     {
-        Host::Vaccine::init( seq, type );
+        Vaccine::init( seq, type );
     }
     
     void deploy( Human& human, Deployment::Method method )const{
@@ -134,16 +134,16 @@ public:
     }
     
     virtual Effect::Type effectType() const{
-        if( type == Host::Vaccine::PEV ) return Effect::PEV;
-        else if( type == Host::Vaccine::BSV ) return Effect::BSV;
-        else if( type == Host::Vaccine::TBV ) return Effect::TBV;
+        if( type == Vaccine::PEV ) return Effect::PEV;
+        else if( type == Vaccine::BSV ) return Effect::BSV;
+        else if( type == Vaccine::TBV ) return Effect::TBV;
         else throw SWITCH_DEFAULT_EXCEPTION;
     }
     
-    inline Host::Vaccine::Types getVaccineType()const{ return type; }
+    inline Vaccine::Types getVaccineType()const{ return type; }
     
 private:
-    Host::Vaccine::Types type;
+    Vaccine::Types type;
 };
 
 class ClearImmunityEffect : public HumanInterventionEffect {

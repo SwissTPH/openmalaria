@@ -29,6 +29,8 @@
 namespace OM {
 namespace Host {
     class Human;
+}
+namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using boost::shared_ptr;
@@ -111,8 +113,8 @@ class PerEffectPerHumanVaccine {
     bool getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps ) const;
 
     /** Update efficacies and the number of doses in this human. */
-    void vaccinate( OM::interventions::Deployment::Method method,
-                    OM::Host::Vaccine::Types type );
+    void vaccinate( Deployment::Method method,
+                    Vaccine::Types type );
     
     /// Checkpointing
     template<class S>
@@ -151,7 +153,7 @@ public:
     }
     
     void vaccinate( const Host::Human& human,
-                           interventions::Deployment::Method method,
+                           Deployment::Method method,
                            Vaccine::Types type );
 
     /// Hack for R_0 experiment: make current human the infection source

@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Host/Vaccine.h"
-#include <Host/Human.h>
+#include "interventions/Vaccine.h"
+#include "Host/Human.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "schema/interventions.h"
@@ -30,7 +30,7 @@
 #include <cmath>
 
 namespace OM {
-namespace Host {
+namespace interventions {
 using namespace OM::util;
 
 Vaccine Vaccine::types[NumVaccineTypes];
@@ -137,7 +137,7 @@ bool PerEffectPerHumanVaccine::getsEPIVaccination( Vaccine::Types type, TimeStep
             && vacc.targetAgeTStep[numDosesAdministered] == ageTSteps;
 }
 
-void PerEffectPerHumanVaccine::vaccinate( interventions::Deployment::Method method,
+void PerEffectPerHumanVaccine::vaccinate( Deployment::Method method,
 					  Vaccine::Types type ) {
     initialEfficacy = Vaccine::types[type].getInitialEfficacy(numDosesAdministered);
     util::streamValidate(initialEfficacy);
@@ -147,16 +147,16 @@ void PerEffectPerHumanVaccine::vaccinate( interventions::Deployment::Method meth
 }
 
 void PerHumanVaccine::vaccinate( const Host::Human& human,
-                                 interventions::Deployment::Method method, Vaccine::Types type )
+                                 Deployment::Method method, Vaccine::Types type )
 {
-    if( method == interventions::Deployment::TIMED ||
+    if( method == Deployment::TIMED ||
         types[type].getsEPIVaccination( type, human.getAgeInTimeSteps() ) )
     {
         //TODO: eventually it should be unnecessary to pass type here
         types[type].vaccinate( method, type );
         
         if( Vaccine::reportType == type ){
-            if( method == interventions::Deployment::TIMED )
+            if( method == Deployment::TIMED )
                 Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                     .reportMassVaccinations (human.getMonitoringAgeGroup(), 1);
             else
