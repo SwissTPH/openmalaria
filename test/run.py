@@ -96,7 +96,12 @@ def linkOrCopy (src, dest):
     if not os.path.isfile(src):
         raise RunError("linkOrCopy: can't find file "+src)
     if hasattr(os, 'symlink'):
-        os.symlink(os.path.abspath(src), dest)
+        try:
+            # This can still fail: a VirtualBox guest is not allowed to create
+            # links on a drive shared by the host
+            os.symlink(os.path.abspath(src), dest)
+        except OSError,e:
+            shutil.copy2(src, dest)
     else:
         shutil.copy2(src, dest)
 
