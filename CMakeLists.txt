@@ -1,5 +1,5 @@
 # Root CMake configuration for OpenMalaria
-# Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+# Copyright © 2005-2013 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
 cmake_minimum_required (VERSION 2.4)
@@ -26,8 +26,10 @@ IF( ${CMAKE_COMPILER_IS_GNUCXX} )
   option (OM_STATICALLY_LINK "Attempt to link libraries, including stdc++, statically.")
   if (OM_STATICALLY_LINK)
     link_directories (${CMAKE_SOURCE_DIR}/lib)
-    ADD_DEFINITIONS(-static-libgcc)
-    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc")
+    # Note: -static-libstdc++ is only available since GCC 4.5
+    # See: http://www.trilithium.com/johan/2005/06/static-libstdc/
+    ADD_DEFINITIONS(-static-libgcc -static-libstdc++)
+    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
   endif (OM_STATICALLY_LINK)
 ENDIF( ${CMAKE_COMPILER_IS_GNUCXX} )
 
@@ -119,63 +121,7 @@ endif(Boost_FOUND)
 
 option (OM_BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
 if (OM_BOINC_INTEGRATION)
-  if (OM_USE_LIBCMT) # pick only the right libs
-    set (BOINC_LIB_POSTFIX "_staticcrt")
-  else (OM_USE_LIBCMT)
-    set (BOINC_LIB_POSTFIX "")
-  endif (OM_USE_LIBCMT)
-  message (STATUS "Looking for: boinc${BOINC_LIB_POSTFIX}")
-  set (BOINC_BASE_PATH ${CMAKE_SOURCE_DIR}/../boinc CACHE PATH "Path to BOINC source directory")
-  message (STATUS "in: ${BOINC_BASE_PATH}/win_build/Build/Win32/Release (and /Debug)")
-  find_library (BOINC_LIB_OPT boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
-    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Release
-    ${BOINC_BASE_PATH}/lib
-  )
-  find_library (BOINC_LIB_DBG boinc${BOINC_LIB_POSTFIX} libboinc${BOINC_LIB_POSTFIX}
-    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Debug
-  )
-  if (BOINC_LIB_OPT)
-    if (BOINC_LIB_DBG)
-      set (BOINC_LIB optimized ${BOINC_LIB_OPT} debug ${BOINC_LIB_DBG})
-    else ()
-      set (BOINC_LIB ${BOINC_LIB_OPT})
-    endif ()
-  else ()
-    if (BOINC_LIB_DBG)
-      set (BOINC_LIB ${BOINC_LIB_DBG})
-    else ()
-      message (FATAL_ERROR "Unable to find boinc library")
-    endif ()
-  endif ()
-  find_library (BOINC_API_LIB_OPT boinc_api${BOINC_API_LIB_POSTFIX} libboincapi${BOINC_API_LIB_POSTFIX}
-    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Release
-    ${BOINC_BASE_PATH}/api
-  )
-  find_library (BOINC_API_LIB_DBG boinc_api${BOINC_API_LIB_POSTFIX} libboincapi${BOINC_API_LIB_POSTFIX}
-    PATHS ${BOINC_BASE_PATH}/win_build/Build/Win32/Debug
-  )
-  if (BOINC_API_LIB_OPT)
-    if (BOINC_API_LIB_DBG)
-      set (BOINC_API_LIB optimized ${BOINC_API_LIB_OPT} debug ${BOINC_API_LIB_DBG})
-    else ()
-      set (BOINC_API_LIB ${BOINC_API_LIB_OPT})
-    endif ()
-  else ()
-    if (BOINC_API_LIB_DBG)
-      set (BOINC_API_LIB ${BOINC_API_LIB_DBG})
-    else ()
-      message (FATAL_ERROR "Unable to find boinc_api/libboincapi library")
-    endif ()
-  endif ()
-  set (BOINC_LIBRARIES ${BOINC_API_LIB} ${BOINC_LIB})
-  
-  # Include directories. This a bit non-standard, but so are the BOINC sources.
-  if ((EXISTS "${BOINC_BASE_PATH}/api/boinc_api.h") AND (EXISTS "${BOINC_BASE_PATH}/lib/boinc_win.h"))
-    include_directories (${BOINC_BASE_PATH} ${BOINC_BASE_PATH}/api ${BOINC_BASE_PATH}/lib)
-  else()
-	message (FATAL_ERROR "Not found: api/boinc_api.h and lib/boinc_win.h in BOINC_BASE_PATH. Try adjusting that variable.")
-  endif ()
-  mark_as_advanced (BOINC_API_LIB BOINC_LIB BOINC_API_LIB_OPT BOINC_API_LIB_DBG BOINC_LIB_OPT BOINC_LIB_DBG)
+  find_package (BOINC)
 else (OM_BOINC_INTEGRATION)
   add_definitions (-DWITHOUT_BOINC)
 endif (OM_BOINC_INTEGRATION)
@@ -208,6 +154,7 @@ if (UNIX)
 endif (UNIX)
 mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
 
+message (STATUS "BOINC includes: ${BOINC_INCLUDE_DIRS}")
 include_directories (SYSTEM
   ${XSD_INCLUDE_DIRS}
   ${XERCESC_INCLUDE_DIRS}
@@ -215,6 +162,7 @@ include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${SPIRIT_INCLUDE_DIRS}
+  ${BOINC_INCLUDE_DIRS}
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}
