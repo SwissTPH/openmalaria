@@ -49,7 +49,10 @@ private:
     // Use the Briet model with decay of insecticide (similar to ITN model).
     bool simpleModel;
     NormalSampler initialInsecticide;
+public:
+    //NOTE: public since the SurvivalFactor class can't access otherwise on the mac
     double maxInsecticide;		// maximum initial insecticide
+private:
     shared_ptr<DecayFunction> insecticideDecay;
     
     friend class IRS;

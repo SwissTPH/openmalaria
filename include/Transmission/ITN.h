@@ -46,7 +46,10 @@ private:
     NormalSampler initialInsecticide;
     LognormalSampler holeRate;	// holes per annum
     LognormalSampler ripRate;	// rips per hole per annum
+public:
+    //NOTE: public since the SurvivalFactor class can't access otherwise on the mac
     double maxInsecticide;		// maximum initial insecticide
+private:
     double ripFactor;			// factor expressing how significant rips are in comparison to holes
     shared_ptr<DecayFunction> insecticideDecay;
     shared_ptr<DecayFunction> attritionOfNets;

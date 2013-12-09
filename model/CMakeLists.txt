@@ -101,6 +101,7 @@ include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${SPIRIT_INCLUDE_DIRS}
+  ${BOINC_INCLUDE_DIRS}
 
   ${CMAKE_SOURCE_DIR}/contrib
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
