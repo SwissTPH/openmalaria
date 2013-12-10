@@ -54,6 +54,11 @@
 
 #ifdef _MSC_VER
 #define isnan(x) _isnan(x)
+#elif defined __APPLE__
+#ifndef isnan
+// This appears not to be defined on our old (10.5) mac
+#define isnan(x) (x!=x)
+#endif
 #endif
 #define ISNAN(x) (isnan(x)!=0)
 
