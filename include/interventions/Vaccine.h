@@ -107,6 +107,8 @@ private:
 
 /** Per vaccine effect (type), per human details. */
 class PerEffectPerHumanVaccine {
+    PerEffectPerHumanVaccine();
+    
     double getEfficacy( Vaccine::Types type ) const;
     
     /// Returns true if this individual should get a vaccine dose via EPI
@@ -133,7 +135,7 @@ private:
      * If an individual misses one EPI (continuous) vaccine dose, it's
      * intentional that they also miss following EPI doses (unless a timed mass
      * vaccination reintroduces them to the EPI schedule). */
-    size_t numDosesAdministered;
+    uint32_t numDosesAdministered;
     /// Timestep of last vaccination with this vaccine type
     TimeStep timeLastDeployment;
     /// Efficacy at last deployment (undecayed)
@@ -173,7 +175,7 @@ public:
 
 private:
     /// Details for each vaccine type
-    vector<PerEffectPerHumanVaccine> types;
+    PerEffectPerHumanVaccine types[Vaccine::NumVaccineTypes];
 };
 
 }

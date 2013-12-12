@@ -27,6 +27,7 @@
 #include "Monitoring/Surveys.h"
 #include <interventions/Interventions.h>
 
+#include <limits>
 #include <cmath>
 
 namespace OM {
@@ -106,10 +107,15 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription& vd, Types type)
 }
 
 PerHumanVaccine::PerHumanVaccine(){
-    types.reserve( Vaccine::NumVaccineTypes );
-    types.push_back( PerEffectPerHumanVaccine( Vaccine::PEV ) );
-    types.push_back( PerEffectPerHumanVaccine( Vaccine::BSV ) );
-    types.push_back( PerEffectPerHumanVaccine( Vaccine::TBV ) );
+    for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i ){
+        types[i] = PerEffectPerHumanVaccine( static_cast<Vaccine::Types>( i ) );
+    }
+}
+
+PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
+    numDosesAdministered(-1),
+    initialEfficacy( std::numeric_limits<double>::signaling_NaN() )
+{
 }
 
 PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( Vaccine::Types type ) :
