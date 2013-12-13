@@ -741,7 +741,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           If this element is not specified, standard deployment occurs, where
           a portion of the population as given by the coverage property of this
           campaign is selected, and interventions are deployed to all of
-          these people.
+          these people (regardless of previous coverage).
           
           If this attribute is specified, instead, the population is divided
           into two sets: those who have received a certain intervention effect

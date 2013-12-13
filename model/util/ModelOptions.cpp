@@ -111,6 +111,7 @@ namespace OM { namespace util {
 	    options[codeMap[it->getName()]] = it->getValue();
 	}
 	
+#ifdef WITHOUT_BOINC
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
 	    cout << "Non-default model options:";
@@ -120,6 +121,7 @@ namespace OM { namespace util {
 	    }
 	    cout << endl;
 	}
+#endif
 	
 	// Test for removed options
         if( util::ModelOptions::option( IPTI_SP_MODEL ) )

@@ -306,6 +306,7 @@ namespace OM { namespace util {
     }
     
     void AgeGroupInterpolation::outputSamples( const string name ){
+#ifdef WITHOUT_BOINC
         if( !util::CommandLine::option(util::CommandLine::SAMPLE_INTERPOLATIONS) ){
             return;
         }
@@ -315,5 +316,6 @@ namespace OM { namespace util {
         for( double age = 0.0; age < max; age += 0.1 ){
             fstream << age << "," << this->eval( age ) << endl;
         }
+#endif
     }
 } }
