@@ -109,15 +109,6 @@ private:
 class PerEffectPerHumanVaccine {
     PerEffectPerHumanVaccine();
     
-    double getEfficacy( Vaccine::Types type ) const;
-    
-    /// Returns true if this individual should get a vaccine dose via EPI
-    bool getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps ) const;
-
-    /** Update efficacies and the number of doses in this human. */
-    void vaccinate( Deployment::Method method,
-                    Vaccine::Types type );
-    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
@@ -150,9 +141,8 @@ class PerHumanVaccine {
 public:
     PerHumanVaccine();
     
-    inline double getEfficacy( Vaccine::Types type )const{
-        return types[type].getEfficacy( type );
-    }
+    /** Get the efficacy of the vaccine (0 for no effect, 1 for full effect). */
+    double getEfficacy( Vaccine::Types type )const;
     
     void vaccinate( const Host::Human& human,
                            Deployment::Method method,

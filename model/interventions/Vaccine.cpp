@@ -125,50 +125,43 @@ PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( Vaccine::Types type ) :
         hetSample = Vaccine::types[type].decayFunc->hetSample();
 }
 
-double PerEffectPerHumanVaccine::getEfficacy( Vaccine::Types type ) const{
-    util::streamValidate( initialEfficacy );
-    util::streamValidate( timeLastDeployment.asInt() );
-    util::streamValidate( hetSample.getTMult() );
-    return initialEfficacy * Vaccine::types[type].decayFunc->eval(
-        TimeStep::simulation - timeLastDeployment, hetSample );
-}
-
-/// Returns true if this individual should get a vaccine dose via EPI
-bool PerEffectPerHumanVaccine::getsEPIVaccination( Vaccine::Types type, TimeStep ageTSteps )const{
-    const Vaccine& vacc = Vaccine::types[type];
-    assert( vacc.targetAgeTStep.size() != 0 );
-    // Deployment is affected by previous missed doses and mass vaccinations,
-    // unlike other continuous interventions; extra test:
-    return numDosesAdministered < vacc.targetAgeTStep.size()
-            && vacc.targetAgeTStep[numDosesAdministered] == ageTSteps;
-}
-
-void PerEffectPerHumanVaccine::vaccinate( Deployment::Method method,
-					  Vaccine::Types type ) {
-    initialEfficacy = Vaccine::types[type].getInitialEfficacy(numDosesAdministered);
-    util::streamValidate(initialEfficacy);
-
-    ++numDosesAdministered;
-    timeLastDeployment = TimeStep::simulation;
+double PerHumanVaccine::getEfficacy( Vaccine::Types type ) const{
+    TimeStep age = TimeStep::simulation - types[type].timeLastDeployment;
+    return types[type].initialEfficacy *
+        Vaccine::types[type].decayFunc->eval( age, types[type].hetSample );
 }
 
 void PerHumanVaccine::vaccinate( const Host::Human& human,
                                  Deployment::Method method, Vaccine::Types type )
 {
-    if( method == Deployment::TIMED ||
-        types[type].getsEPIVaccination( type, human.getAgeInTimeSteps() ) )
-    {
-        //TODO: eventually it should be unnecessary to pass type here
-        types[type].vaccinate( method, type );
-        
-        if( Vaccine::reportType == type ){
-            if( method == Deployment::TIMED )
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                    .reportMassVaccinations (human.getMonitoringAgeGroup(), 1);
-            else
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                    .reportEPIVaccinations (human.getMonitoringAgeGroup(), 1);
+    uint32_t numDosesAdministered = types[type].numDosesAdministered;
+    
+    if( method == Deployment::CTS ){
+        // Continuous deployments are only given if the individual is not
+        // ahead of the intended schedule and hasn't dropped out.
+        const Vaccine& vacc = Vaccine::types[type];
+        assert( vacc.targetAgeTStep.size() != 0 );
+        if( numDosesAdministered >= vacc.targetAgeTStep.size() ){
+            return;        // no next dose scheduled
         }
+        if( vacc.targetAgeTStep[numDosesAdministered] != human.getAgeInTimeSteps() ){
+            return;     // either a scheduled dose was missed or we're ahead of schedule
+        }
+    }
+    
+    types[type].initialEfficacy = Vaccine::types[type].getInitialEfficacy(numDosesAdministered);
+    util::streamValidate(types[type].initialEfficacy);
+    
+    types[type].numDosesAdministered = numDosesAdministered + 1;
+    types[type].timeLastDeployment = TimeStep::simulation;
+    
+    if( Vaccine::reportType == type ){
+        if( method == Deployment::TIMED )
+            Monitoring::Surveys.getSurvey(human.isInAnyCohort())
+                .reportMassVaccinations (human.getMonitoringAgeGroup(), 1);
+        else
+            Monitoring::Surveys.getSurvey(human.isInAnyCohort())
+                .reportEPIVaccinations (human.getMonitoringAgeGroup(), 1);
     }
 }
 
