@@ -46,5 +46,11 @@ void CohortSelectionEffect::deploy( Host::Human& human, Deployment::Method metho
 Effect::Type CohortSelectionEffect::effectType() const{
     return Effect::COHORT;
 }
+    
+#ifdef WITHOUT_BOINC
+void CohortSelectionEffect::print_details( std::ostream& out )const{
+    out << getIndex() << "\tcohort selection";
+}
+#endif
 
 } }

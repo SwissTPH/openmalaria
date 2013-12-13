@@ -34,6 +34,10 @@ public:
     
     virtual Effect::Type effectType() const;
     
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const;
+#endif
+    
     /** Identifiers for types of cohort removal option, followed by NUM in last
      * place (as a counter).
      * 

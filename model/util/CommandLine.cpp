@@ -99,6 +99,9 @@ namespace OM { namespace util {
 		} else if (clo == "print-EIR") {
 		    options.set (PRINT_ANNUAL_EIR);
                     options.set (SKIP_SIMULATION);
+                } else if (clo == "print-interventions") {
+                    options.set (PRINT_INTERVENTIONS);
+                    options.set (SKIP_SIMULATION);
 		} else if (clo == "sample-interpolations") {
 		    options.set (SAMPLE_INTERPOLATIONS);
 		    options.set (SKIP_SIMULATION);
@@ -214,16 +217,18 @@ namespace OM { namespace util {
 	    << "			working directory). Not used for output files."<<endl
 	    << " -s --scenario file.xml	Uses file.xml as the scenario. If not given, scenario.xml is used." << endl
 	    << "			If path is relative (doesn't start '/'), --resource-path is used."<<endl
-            << " -o --output file.txt	Uses file.txt as output file name. If not given, output.txt is used." << endl
-            << "    --ctsout file.txt	Uses file.txt as ctsout file name. If not given, ctsout.txt is used." << endl
-            << " -n --name NAME		Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt \\"<<endl
-            << "			--ctsout ctsoutNAME.txt" <<endl
+	    << " -o --output file.txt	Uses file.txt as output file name. If not given, output.txt is used." << endl
+	    << "    --ctsout file.txt	Uses file.txt as ctsout file name. If not given, ctsout.txt is used." << endl
+	    << " -n --name NAME		Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt \\"<<endl
+	    << "			--ctsout ctsoutNAME.txt" <<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
 	    << "    --print-EIR		Print the annual EIR (of each species in vector mode) and exit." << endl
-            << "    --sample-interpolations"<<endl
-            << "			Output samples of all used age-group data according to active"<<endl
-            << "			interpolation method and exit."<<endl
-            << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
+	    << "    --print-interventions" << endl
+	    << "			Print intervention deployment details and exit." << endl
+	    << "    --sample-interpolations" <<endl
+	    << "			Output samples of all used age-group data according to active"<<endl
+	    << "			interpolation method and exit."<<endl
+	    << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
 	    << "    --checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
 	    << "			more than once. Overrides --checkpoint option."<<endl
 	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl
@@ -237,14 +242,14 @@ namespace OM { namespace util {
 	    << "    --debug-vector-fitting"<<endl
 	    << "			Show details of vector-parameter fitting. The fitting methods used" <<endl
 	    << "			aren't guaranteed to work. If they don't, this output should help"<<endl
-            << "			work out why."<<endl
+	    << "			work out why."<<endl
 #	ifdef OM_STREAM_VALIDATOR
 	    << "    --stream-validator PATH" <<endl
 	    << "			Use StreamValidator to validate against reference file PATH." <<endl
 	    << "			(note: PATH must be absolute or relative to resource path)." <<endl
 #	endif
-            << " -v --version           Display the current schema version of OpenMalaria." << endl
-            << " -h --help              Print this message." << endl<<endl
+	    << " -v --version           Display the current schema version of OpenMalaria." << endl
+	    << " -h --help              Print this message." << endl<<endl
 	    ;
 	    if( cloError )
 		throw cmd_exception( "bad argument" );

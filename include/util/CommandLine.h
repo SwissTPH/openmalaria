@@ -58,6 +58,8 @@ namespace OM { namespace util {
              * 
              * The fitting methods used aren't guaranteed to work. If they don't, this output should help work out why. */
             DEBUG_VECTOR_FITTING,
+            /** Print out details about interventions. */
+            PRINT_INTERVENTIONS,
 	    NUM_OPTIONS
 	};
 	

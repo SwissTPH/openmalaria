@@ -21,6 +21,7 @@
 #include "interventions/Interventions.h"
 #include "Population.h"
 #include "util/random.h"
+#include <util/CommandLine.h>
 #include "Monitoring/Surveys.h"
 #include "interventions/GVI.h"
 #include "interventions/IRS.h"
@@ -93,6 +94,19 @@ public:
         return true;
     }
     
+#ifdef WITHOUT_BOINC
+    inline void print_details( std::ostream& out )const{
+        out << begin << '\t';
+        if( end == TimeStep::future ) out << "(none)";
+        else out << end;
+        out << '\t' << deployAge << '\t';
+        if( cohort == numeric_limits<size_t>::max() ) out << "(none)";
+        else out << cohort;
+        out << '\t' << coverage << '\t';
+        intervention->print_details( out );
+    }
+#endif
+    
 protected:
     /// Deploy to a selected human.
     void deploy( Host::Human& human, const Population& population ) const{
@@ -125,6 +139,16 @@ bool effectCmp(const HumanInterventionEffect *a, const HumanInterventionEffect *
 void HumanIntervention::sortEffects(){
     std::stable_sort( effects.begin(), effects.end(), effectCmp );
 }
+
+#ifdef WITHOUT_BOINC
+void HumanIntervention::print_details( std::ostream& out )const{
+    out << "human:";
+    for( vector<const HumanInterventionEffect*>::const_iterator it =
+        effects.begin(); it != effects.end(); ++it ){
+        out << '\t' << (*it)->getIndex();
+    }
+}
+#endif
 
 
 // ———  InterventionManager  ———
@@ -380,6 +404,31 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
     // make sure the list ends with something always in the future, so we don't
     // have to check nextTimed is within range:
     timed.push_back( new DummyTimedDeployment() );
+    
+#ifdef WITHOUT_BOINC
+    if( util::CommandLine::option( util::CommandLine::PRINT_INTERVENTIONS ) ){
+        cout << "Continuous deployments:" << endl
+            << "begin\tend\tage\tcohort\tcoverag\teffects" << endl;
+        for( ptr_vector<ContinuousHumanDeployment>::const_iterator it =
+            continuous.begin(); it != continuous.end(); ++it ){
+            it->print_details( std::cout );
+            cout << endl;
+        }
+        cout << "Timed deployments:" << endl
+            << "time\tmin age\tmax age\tcohort\tcoverag\teffects" << endl;
+        for( ptr_vector<TimedDeployment>::const_iterator it =
+            timed.begin(); it != timed.end(); ++it ){
+            it->print_details( std::cout );
+            cout << endl;
+        }
+        cout << "Human effects:" << endl;
+        for( ptr_vector<HumanInterventionEffect>::const_iterator it =
+            humanEffects.begin(); it != humanEffects.end(); ++it ){
+            it->print_details( cout );
+            cout << endl;
+        }
+    }
+#endif
 }
 
 void InterventionManager::loadFromCheckpoint( OM::Population& population, TimeStep interventionTime ){

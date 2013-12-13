@@ -66,6 +66,12 @@ void IRSEffect::deploy( Host::Human& human, Deployment::Method method )const{
 }
 
 Effect::Type IRSEffect::effectType()const{ return Effect::IRS; }
+    
+#ifdef WITHOUT_BOINC
+void IRSEffect::print_details( std::ostream& out )const{
+    out << getIndex() << "\tIRS";
+}
+#endif
 
 PerHostInterventionData* IRSEffect::makeHumanPart() const{
     return new HumanIRS( *this );

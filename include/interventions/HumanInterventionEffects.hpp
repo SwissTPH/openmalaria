@@ -99,6 +99,12 @@ public:
     
     virtual Effect::Type effectType() const{ return Effect::MDA; }
     
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << getIndex() << "\tMDA";
+    }
+#endif
+    
 private:
     Clinical::Diagnostic diagnostic;
     vector<double> pClearanceByTime;
@@ -117,6 +123,12 @@ public:
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA_TS1D; }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << getIndex() << "\tMDA1D";
+    }
+#endif
     
 private:
 };
@@ -142,6 +154,14 @@ public:
     
     inline Vaccine::Types getVaccineType()const{ return type; }
     
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << getIndex() << "\t" <<
+            (type == Vaccine::PEV ? "PEV" : (type == Vaccine::BSV ? "BSV" : "TBV"))
+           ;
+    }
+#endif
+    
 private:
     Vaccine::Types type;
 };
@@ -155,6 +175,12 @@ public:
     }
     
     virtual Effect::Type effectType() const{ return Effect::CLEAR_IMMUNITY; }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << getIndex() << "\tclear immunity";
+    }
+#endif
 };
 
 } }

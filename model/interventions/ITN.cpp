@@ -74,6 +74,12 @@ void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
 Effect::Type ITNEffect::effectType() const{
     return Effect::ITN;
 }
+    
+#ifdef WITHOUT_BOINC
+void ITNEffect::print_details( std::ostream& out )const{
+    out << getIndex() << "\tITN";
+}
+#endif
 
 PerHostInterventionData* ITNEffect::makeHumanPart() const{
     return new HumanITN( *this );

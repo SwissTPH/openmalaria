@@ -51,6 +51,10 @@ public:
     
     virtual Effect::Type effectType() const;
     
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const;
+#endif
+    
     virtual PerHostInterventionData* makeHumanPart() const;
     virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
     

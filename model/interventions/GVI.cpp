@@ -52,6 +52,12 @@ void GVIEffect::deploy( Host::Human& human, Deployment::Method method )const{
 }
 
 Effect::Type GVIEffect::effectType()const{ return Effect::GVI; }
+    
+#ifdef WITHOUT_BOINC
+void GVIEffect::print_details( std::ostream& out )const{
+    out << getIndex() << "\tGVI";
+}
+#endif
 
 PerHostInterventionData* GVIEffect::makeHumanPart() const{
     return new HumanGVI( *this );

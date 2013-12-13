@@ -86,6 +86,10 @@ public:
      * to be fast. */
     virtual Effect::Type effectType() const=0;
     
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const =0;
+#endif
+    
 protected:
     /** Construct (from a derived class).
      * 
@@ -122,6 +126,10 @@ public:
      * order of their deployments is still dependent on the order in the XML
      * file. */
     void sortEffects();
+    
+#ifdef WITHOUT_BOINC
+    void print_details( std::ostream& out )const;
+#endif
     
 private:
     // List of pointers to effects. Does not manage memory (InterventionManager::humanEffects does that).
