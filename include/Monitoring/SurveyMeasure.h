@@ -49,7 +49,7 @@ enum SurveyMeasure {
     
     /// Sum of the log of the pyrogen threshold
     sumLogPyrogenThres = 4,
-    /// Sum of the logarithm of the parasite density
+    /**Sum of the logarithm of the parasite density of hosts with detectible parasite density. */
     sumlogDens= 5,
     
     /** The sum of the all infections (detectable or not) across all human
