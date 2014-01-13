@@ -36,7 +36,7 @@ Parameters::Parameters( const scnXml::Parameters& parameters ){
     for (scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
         int i = it->getNumber();
         if (i < 0 || i >= MAX)
-            throw util::xml_scenario_error( (format("parameter with invalid index %1%") %i).str() );
+            continue;   // ignore the parameter; no real point in making this an error
         Parameter parameter = static_cast<Parameter>(i);
         if( !parameterValues.insert( make_pair( parameter, it->getValue() ) ).second )
             throw util::xml_scenario_error( (format("parameter with index %1% described twice") %parameter).str() );
