@@ -126,7 +126,7 @@ protected:
   //! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr. 
   static double InfectionrateShapeParam;
   
-  /** @brief Variables for calculating survivalOfInoculum() */
+  /** @brief Parameters used in the "expected number of infections" model */
   //@{
   //!Steepness of relationship between success of inoculation and Xp in Phase A model 
   static double gamma_p;

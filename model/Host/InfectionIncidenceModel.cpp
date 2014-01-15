@@ -156,6 +156,7 @@ void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring:
 
 double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans) {
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
+  // Note that NegBinomMAII and LogNormalMAII supercede this model; see below
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/TimeStep::interval*EstarInv)) *
     susceptibility() * effectiveEIR;
@@ -166,10 +167,12 @@ double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEI
     susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
+  // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
   return random::gamma(InfectionrateShapeParam,
       effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
+  // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
   return random::sampleFromLogNormal(random::uniform_01(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
