@@ -685,6 +685,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="continuousList">
     <xs:sequence>
       <xs:element name="restrictToCohort" type="RestrictToCohort" minOccurs="0"/>
+      <xs:element name="additionalDeployments" type="additionalDeployments" minOccurs="0"/>
       <!-- Note: minimum is 1 to save an extra check in code. -->
       <xs:element name="deploy" type="continuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
@@ -735,6 +736,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="massListWithCum">
     <xs:sequence>
       <xs:element name="restrictToCohort" minOccurs="0" type="RestrictToCohort"/>
+      <xs:element name="additionalDeployments" type="additionalDeployments" minOccurs="0"/>
       <xs:element name="cumulativeCoverage" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -842,6 +844,83 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:documentation>
           <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
         </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="additionalDeployments">
+    <xs:annotation>
+      <xs:documentation>
+        Allows deployment of a "schedule", e.g. multiple vaccine or drug
+        doses over a time period.
+        
+        If this option is not present, each &lt;deploy&gt; element causes a
+        single deployment of the intervention's effects [to all selected
+        hosts]. If this option is present, each &lt;delpoy&gt; element first
+        causes a deployment for each host (as before), then marks the host
+        as expecting additional deployments, as described here. Each
+        additional deployment deploys the same effects as before, though note
+        that other models may allow variation in what happens (e.g. vaccine
+        models may be configured with efficacy depending on the total number
+        of deployments to the host).
+        
+        Each deploy item in this list (of additional deployments) includes a
+        timestep delay since when this "schedule" is activated (when a timed
+        or continuous "deploy" element is deployed). This must be at least one
+        and strictly greater than the previous item's timestep. Each item also
+        includes a "dropOut" probability, which is the probability that the
+        current and all future deployments from this list of additional
+        deployments are cancelled (only for the specific host and starting
+        deployment this list was applied; it does not prevent other
+        "additional deployments" in the host).
+        
+        Note that this list describes _additional deployments_ and the full
+        schedule effectively includes an item with "timestep 0" and
+        "dropOut 0".
+      </xs:documentation>
+      <xs:appinfo>name:Schedule;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="deploy" maxOccurs="unbounded" minOccurs="1">
+        <xs:annotation>
+          <xs:documentation>
+            Description of a single deployment within a schedule. There must
+            be at least one of these.
+          </xs:documentation>
+          <xs:appinfo>name:Deployment within a schedule;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="timestep" type="xs:int" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                The delay in time-steps between activation of the schedule (via
+                a &lt;deploy&gt; element of the parent &lt;timed&gt; or
+                &lt;continuous&gt; list) and deployment of this item in the
+                schedule.
+                
+                Each item must have greater time-step than the previous item,
+                and the first must be at least 1.
+              </xs:documentation>
+              <xs:appinfo>name:Delay since schedule activation;min:0;units:Time steps;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="dropOut" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                The probability that the recipient drops out of a schedule:
+                for each human who is already targetted by a deployment
+                schedule and has not already dropped-out, this is the
+                probability that he/she will "drop out" and not receive the
+                next or any future deployments within this schedule. Dropping
+                out does not prevent the individual from receiving other
+                deployments of the intervention in the future (from either the
+                same or another timed or continuous deployment list), it simply
+                un-enrolls him/her from the current list of additional
+                deployments.
+              </xs:documentation>
+              <xs:appinfo>name:Chance of drop out;min:0;max:1;units:dimensionless;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
       </xs:element>
     </xs:sequence>
   </xs:complexType>

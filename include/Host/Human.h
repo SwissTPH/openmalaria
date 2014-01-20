@@ -141,7 +141,7 @@ public:
     }
   
   //! Returns the date of birth
-  inline TimeStep getDateOfBirth() {return _dateOfBirth;}
+  inline TimeStep getDateOfBirth() const {return _dateOfBirth;}
   
   /** Does the Human have a detectible infection? */
   inline bool detectibleInfection () const {

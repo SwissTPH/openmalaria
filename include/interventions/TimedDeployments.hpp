@@ -32,6 +32,74 @@
 
 namespace OM { namespace interventions {
 
+// ———  Support: waiting deployments  ———
+
+/** Description of additional deployments for any initial deployment. */
+struct AdditionalDeployments{
+    AdditionalDeployments( TimeStep delay, double pDropOut ):
+        delay( delay ), pDropOut( pDropOut ), next( 0 /*nullptr*/ ) {}
+    TimeStep delay;
+    double pDropOut;
+    AdditionalDeployments *next;
+};
+struct WaitingDeployment{
+    /* Identifier for human: pointer plus date of birth.
+     * Combined these should uniquely find the right human; pointer may be
+     * re-used but in this case date-of-birth will always be new.
+     * 
+     * TODO(human ID): possibly add unique ID to humans and use that.
+     * 
+     * TODO(performance): possibly store this information in the Human class
+     * (but that requires an extra vector/list for every human, lots of mem)
+     */
+    const Human *human;
+    TimeStep humanDateOfBirth;
+    
+    TimeStep startTime; // deployment happens at startTime + delay
+    const AdditionalDeployments *additionalDeployments;       // linked list; process item-by-item
+    
+    const HumanIntervention *intervention;      // intervention to deploy
+    
+    Deployment::Method method;
+};
+/* List of all waiting additional deployments.
+ *
+ * TODO: performance: we could order these by time of next deployment, so that
+ * we can skip over future items quicker (trade off is slower insertions and
+ * the need to re-insert when deploying one item of a list). */
+std::list<WaitingDeployment> waitingDeployments;
+
+// ———  Base deployment class  ———
+
+/** Inherited by TimedHumanDeployment and ContinuousHumanDeployment. */
+class BaseHumanDeployment {
+protected:
+    BaseHumanDeployment( AdditionalDeployments *additionalDeployments,
+                                const HumanIntervention* intervention ) :
+            additionalDeployments( additionalDeployments ),
+            intervention( intervention )
+    {}
+    
+    /// Deploy to a selected human.
+    void deployToHuman( Host::Human& human, Deployment::Method method ) const{
+        intervention->deploy( human, method );
+        if( additionalDeployments != 0 /*nullptr*/ ){
+            WaitingDeployment wd;
+            wd.human = &human;
+            wd.humanDateOfBirth = human.getDateOfBirth();
+            wd.startTime = TimeStep::simulation;
+            wd.additionalDeployments = additionalDeployments;
+            wd.intervention = intervention;
+            wd.method = method;
+            waitingDeployments.push_back( wd );
+        }
+    }
+    
+private:
+    AdditionalDeployments *additionalDeployments;
+    const HumanIntervention *intervention;
+};
+
 // ———  TimedDeployment and derivatives  ———
 
 /** Interface for timed deployment of an intervention. */
@@ -165,22 +233,22 @@ public:
 };
 
 /// Timed deployment of human-specific interventions
-class TimedHumanDeployment : public TimedDeployment {
+class TimedHumanDeployment : public TimedDeployment, protected BaseHumanDeployment {
 public:
     /** 
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
      * @param cohort The cohort to which to deploy, or max value */
-    TimedHumanDeployment( const scnXml::Mass& mass,
-                           const HumanIntervention* intervention,
-                           size_t cohort ) :
+    TimedHumanDeployment( const scnXml::Mass& mass, size_t cohort,
+                            AdditionalDeployments *additionalDeployments,
+                            const HumanIntervention* intervention ) :
         TimedDeployment( TimeStep( mass.getTime() ) ),
+        BaseHumanDeployment( additionalDeployments, intervention ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
         maxAge( TimeStep::fromYears( mass.getMaxAge() ) ),
         cohort( cohort ),
-        coverage( mass.getCoverage() ),
-        intervention( intervention )
+        coverage( mass.getCoverage() )
     {
         if( !(coverage >= 0.0 && coverage <= 1.0) ){
             throw util::xml_scenario_error("timed intervention coverage must be in range [0,1]");
@@ -196,7 +264,7 @@ public:
             if( age >= minAge && age < maxAge ){
                 if( iter->isInCohort( cohort) ){
                     if( util::random::uniform_01() < coverage ){
-                        intervention->deploy( *iter, Deployment::TIMED );
+                        deployToHuman( *iter, Deployment::TIMED );
                     }
                 }
             }
@@ -210,7 +278,7 @@ public:
         if( cohort == numeric_limits<size_t>::max() ) out << "(none)";
         else out << cohort;
         out << '\t' << coverage << '\t';
-        intervention->print_details( out );
+//         intervention->print_details( out );
     }
 #endif
     
@@ -220,7 +288,6 @@ protected:
     TimeStep maxAge;
     size_t cohort;
     double coverage;    // proportion coverage within group meeting above restrictions
-    const HumanIntervention *intervention;
 };
 
 /// Timed deployment of human-specific interventions in cumulative mode
@@ -232,11 +299,11 @@ public:
      * @param intervention The HumanIntervention to deploy.
      * @param effect_index Index of effect to test coverage for
      * @param maxAge Maximum time-span to consider a deployed effect still to be effective */
-    TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
-                           const HumanIntervention* intervention,
-                           size_t cohort,
-                           size_t effect_index, TimeStep maxAge ) :
-        TimedHumanDeployment( mass, intervention, cohort ),
+    TimedCumulativeHumanDeployment( const scnXml::Mass& mass, size_t cohort,
+                            AdditionalDeployments *additionalDeployments,
+                            const HumanIntervention* intervention,
+                            size_t effect_index, TimeStep maxAge ) :
+        TimedHumanDeployment( mass, cohort, additionalDeployments, intervention ),
         cumCovInd( effect_index ), maxInterventionAge( maxAge )
     {
     }
@@ -266,7 +333,7 @@ public:
                  iter != unprotected.end(); ++iter)
             {
                 if( util::random::uniform_01() < additionalCoverage ){
-                    intervention->deploy( **iter, Deployment::TIMED );
+                    deployToHuman( **iter, Deployment::TIMED );
                 }
             }
         }

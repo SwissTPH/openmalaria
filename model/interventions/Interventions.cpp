@@ -34,17 +34,19 @@ namespace OM { namespace interventions {
 // ———  ContinuousHumanDeployment  ———
 
 /** Interface for continuous deployment of an intervention. */
-class ContinuousHumanDeployment {
+class ContinuousHumanDeployment : protected BaseHumanDeployment{
 public:
     /// Create, passing deployment age
     ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
-                                 const HumanIntervention* intervention, size_t cohort ) :
+                                size_t cohort,
+                                AdditionalDeployments *additionalDeployments,
+                                const HumanIntervention* intervention ) :
+            BaseHumanDeployment( additionalDeployments, intervention ),
             begin( elt.getBegin() ),
             end( elt.getEnd() ),
             deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) ),
             cohort( cohort ),
-            coverage( elt.getCoverage() ),
-            intervention( intervention )
+            coverage( elt.getCoverage() )
     {
         if( begin < TimeStep(0) || end < begin ){
             throw util::xml_scenario_error("continuous intervention must have 0 <= begin <= end");
@@ -88,7 +90,7 @@ public:
                 ( human.isInCohort( cohort ) ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
             {
-                deploy( human, population );
+                deployToHuman( human, Deployment::CTS );
             }
         }//else: for some reason, a deployment age was missed; ignore it
         return true;
@@ -103,21 +105,15 @@ public:
         if( cohort == numeric_limits<size_t>::max() ) out << "(none)";
         else out << cohort;
         out << '\t' << coverage << '\t';
-        intervention->print_details( out );
+//         intervention->print_details( out );
     }
 #endif
     
 protected:
-    /// Deploy to a selected human.
-    void deploy( Host::Human& human, const Population& population ) const{
-        intervention->deploy( human, Deployment::CTS );
-    }
-    
     TimeStep begin, end;    // first timeStep active and first timeStep no-longer active
     TimeStep deployAge;
     size_t cohort;      // size_t maximum value if no cohort
     double coverage;
-    const HumanIntervention *intervention;
 };
 
 
@@ -157,6 +153,27 @@ auto_ptr<InterventionManager> InterventionManager::instance;
 
 void InterventionManager::makeInstance( const scnXml::Interventions& intervElt, OM::Population& population ){
     instance = auto_ptr<InterventionManager>( new InterventionManager( intervElt, population ) );
+}
+
+AdditionalDeployments *readAdditionalDeployments( const ::xsd::cxx::tree::optional<scnXml::AdditionalDeployments>& aDOpt ){
+    if( !aDOpt.present() ) return 0;    // nullptr
+    
+    const scnXml::AdditionalDeployments::DeploySequence& seq = aDOpt.get().getDeploy();
+    AdditionalDeployments *list = 0;    // nullptr
+    TimeStep lastDelay(0);
+    for( scnXml::AdditionalDeployments::DeploySequence::const_reverse_iterator it = seq.rbegin(), end = seq.rend(); it != end; ++it ){
+        AdditionalDeployments *node = new AdditionalDeployments( TimeStep( it->getTimestep() ), it->getDropOut() );
+        if( !( node->delay > lastDelay ) ) throw util::xml_scenario_error(
+            "Additional deployments: timestep delays are not in increasing order, starting at least 1" );
+        lastDelay = node->delay;
+        if( !( node->pDropOut >= 0.0 && node->pDropOut <= 1.0 ) ) throw util::xml_scenario_error(
+            "Additional deployments: dropOut not in range [0,1]" );
+        // Note: we "ought" to do memory management, but the OS will clean up
+        // on exit anyway, which is exactly what we want in this case
+        node->next = list;
+        list = node;
+    }
+    return list;
 }
 
 InterventionManager::InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population) :
@@ -291,11 +308,14 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                     }
                     cohort = effect_it->second;
                 }
+                
+                AdditionalDeployments *additionalDeployments = readAdditionalDeployments( ctsIt->getAdditionalDeployments() );
+                
                 const scnXml::ContinuousList::DeploySequence& ctsSeq = ctsIt->getDeploy();
                 for( scnXml::ContinuousList::DeployConstIterator it2 = ctsSeq.begin(),
                     end2 = ctsSeq.end(); it2 != end2; ++it2 )
                 {
-                    continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, cohort ) );
+                    continuous.push_back( new ContinuousHumanDeployment( *it2, cohort, additionalDeployments, intervention ) );
                 }
                 for( list<Vaccine::Types>::const_iterator it = vaccineEffects.begin(); it != vaccineEffects.end(); ++it ){
                     Vaccine::initSchedule( *it, ctsSeq );
@@ -318,6 +338,9 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                     }
                     cohort = effect_it->second;
                 }
+                
+                AdditionalDeployments *additionalDeployments = readAdditionalDeployments( timedIt->getAdditionalDeployments() );
+                
                 if( timedIt->getCumulativeCoverage().present() ){
                     const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
                     map<string,size_t>::const_iterator effect_it = identifierMap.find( cumCov.getEffect() );
@@ -335,14 +358,14 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
                     {
-                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, cohort, effect, maxAge ) );
+                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, cohort, additionalDeployments, intervention, effect, maxAge ) );
                     }
                 }else{
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
                     {
-                        timed.push_back( new TimedHumanDeployment( *it2, intervention, cohort ) );
+                        timed.push_back( new TimedHumanDeployment( *it2, cohort, additionalDeployments, intervention ) );
                     }
                 }
             }
@@ -472,6 +495,35 @@ void InterventionManager::deploy(OM::Population& population) {
                 break;  // deployment (and all remaining) happens in the future
             nextCtsDist = it->incrNextCtsDist();
         }
+    }
+    
+    // deploy waiting interventions (schedules)
+    for( std::list<WaitingDeployment>::iterator it = waitingDeployments.begin();
+            it != waitingDeployments.end(); )
+    {
+        // for each item, is a deployment due now?
+        if( it->startTime + it->additionalDeployments->delay == TimeStep::simulation ){
+            // find the human — don't just use the pointer since it may be out-of-date
+            for( Population::Iter ith = population.begin(); ith != population.end(); ++ith ){
+                // same identifier — i.e. same human?
+                if( &*ith == it->human && ith->getDateOfBirth() == it->humanDateOfBirth ){
+                    it->intervention->deploy( *ith, it->method );
+                    // advance to next item in list
+                    it->additionalDeployments = it->additionalDeployments->next;
+                    // no next item?
+                    if( it->additionalDeployments == 0 /*nullptr*/ ){
+                        it = waitingDeployments.erase( it );
+                        continue;
+                    }
+                    goto foundWaitingHuman;// done: exit inner loop
+                }
+            }
+            // no match if didn't exit with goto: human must have died
+            it = waitingDeployments.erase( it );
+            continue;
+        }
+        foundWaitingHuman:
+        ++it;   // advance (if no continue)
     }
 }
 
