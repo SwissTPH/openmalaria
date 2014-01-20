@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// Note: this file is included by exactly one source (Interventions.cpp)
+// Note: this file is included by exactly one source (InterventionManager.cpp)
 // and contains definitions as well as declarations.
 
 // The includes here are more for documentation than required.
@@ -294,6 +294,95 @@ public:
 #endif
 private:
     size_t inst;
+};
+
+// ———  ContinuousHumanDeployment  ———
+
+/** Interface for continuous deployment of an intervention. */
+class ContinuousHumanDeployment {
+public:
+    /// Create, passing deployment age
+    ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
+                                 const HumanIntervention* intervention, size_t cohort ) :
+            begin( elt.getBegin() ),
+            end( elt.getEnd() ),
+            deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) ),
+            cohort( cohort ),
+            coverage( elt.getCoverage() ),
+            intervention( intervention )
+    {
+        if( begin < TimeStep(0) || end < begin ){
+            throw util::xml_scenario_error("continuous intervention must have 0 <= begin <= end");
+        }
+        if( deployAge <= TimeStep(0) ){
+            ostringstream msg;
+            msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
+            msg << " years corresponds to timestep "<<deployAge;
+            msg << "; must be at least timestep 1.";
+            throw util::xml_scenario_error( msg.str() );
+        }
+        if( deployAge > TimeStep::maxAgeIntervals ){
+            ostringstream msg;
+            msg << "continuous intervention must have target age no greater than ";
+            msg << TimeStep::maxAgeIntervals * TimeStep::yearsPerInterval;
+            throw util::xml_scenario_error( msg.str() );
+        }
+        if( !(coverage >= 0.0 && coverage <= 1.0) ){
+            throw util::xml_scenario_error("continuous intervention coverage must be in range [0,1]");
+        }
+    }
+    
+    /// For sorting
+    inline bool operator<( const ContinuousHumanDeployment& that )const{
+        return this->deployAge < that.deployAge;
+    }
+    
+    /** Apply filters and potentially deploy.
+     * 
+     * @returns false iff this deployment (and thus all later ones in the
+     *  ordered list) happens in the future. */
+    bool filterAndDeploy( Host::Human& human, const Population& population ) const{
+        TimeStep age = TimeStep::simulation - human.getDateOfBirth();
+        if( deployAge > age ){
+            // stop processing continuous deployments for this
+            // human for now because remaining ones happen in the future
+            return false;
+        }else if( deployAge == age ){
+            if( begin <= TimeStep::interventionPeriod &&
+                TimeStep::interventionPeriod < end &&
+                ( human.isInCohort( cohort ) ) &&
+                util::random::uniform_01() < coverage )     // RNG call should be last test
+            {
+                deploy( human, population );
+            }
+        }//else: for some reason, a deployment age was missed; ignore it
+        return true;
+    }
+    
+#ifdef WITHOUT_BOINC
+    inline void print_details( std::ostream& out )const{
+        out << begin << '\t';
+        if( end == TimeStep::future ) out << "(none)";
+        else out << end;
+        out << '\t' << deployAge << '\t';
+        if( cohort == numeric_limits<size_t>::max() ) out << "(none)";
+        else out << cohort;
+        out << '\t' << coverage << '\t';
+        intervention->print_details( out );
+    }
+#endif
+    
+protected:
+    /// Deploy to a selected human.
+    void deploy( Host::Human& human, const Population& population ) const{
+        intervention->deploy( human, Deployment::CTS );
+    }
+    
+    TimeStep begin, end;    // first timeStep active and first timeStep no-longer active
+    TimeStep deployAge;
+    size_t cohort;      // size_t maximum value if no cohort
+    double coverage;
+    const HumanIntervention *intervention;
 };
 
 } }

@@ -31,7 +31,6 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
-#include "interventions/Interventions.h"
 #include <schema/scenario.h>
 
 #include <string>
@@ -210,26 +209,6 @@ bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
     }else{
         return it->second + maxAge <= TimeStep::simulation;
     }
-}
-
-void Human::reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const{
-    if( method == interventions::Deployment::TIMED ){
-        switch( type ){
-            case interventions::Effect::GVI:
-                Monitoring::Surveys.getSurvey(isInAnyCohort()).reportMassGVI( getMonitoringAgeGroup(), 1 );
-                break;
-            default:
-                throw SWITCH_DEFAULT_EXCEPTION;
-        }
-    }else if( method == interventions::Deployment::CTS ){
-        switch( type ){
-            case interventions::Effect::GVI:
-                //TODO(monitoring): report
-                break;
-            default:
-                throw SWITCH_DEFAULT_EXCEPTION;
-        }
-    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 

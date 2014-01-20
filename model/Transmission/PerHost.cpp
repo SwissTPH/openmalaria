@@ -20,6 +20,7 @@
 #include "Transmission/PerHost.h"
 #include "Transmission/VectorModel.h"
 #include "Transmission/Anopheles/PerHost.h"
+#include "interventions/InterventionManager.hpp"
 #include "util/errors.h"
 #include "util/checkpoint.h"
 
@@ -118,7 +119,7 @@ void PerHost::checkpointIntervs( istream& stream ){
         size_t index;
         index & stream;
         try{
-            const interventions::HumanInterventionEffect& gen_params = interventions::InterventionManager::instance->getEffect( index );   // may throw
+            const interventions::HumanInterventionEffect& gen_params = interventions::InterventionManager::getEffect( index );   // may throw
             const HumanVectorInterventionEffect *params = dynamic_cast<const HumanVectorInterventionEffect*>( &gen_params );
             if( params == 0 )
                 throw util::base_exception( "" );       // see catch block below

@@ -21,7 +21,7 @@
 #define OM_INTERVENTIONS_COHORT
 
 // The includes here are more for documentation than required.
-#include "interventions/Interventions.h"
+#include "interventions/Interfaces.hpp"
 #include <schema/interventions.h>
 
 namespace OM { namespace interventions {

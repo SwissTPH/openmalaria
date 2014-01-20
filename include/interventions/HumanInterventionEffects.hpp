@@ -22,7 +22,7 @@
 // and contains definitions as well as declarations.
 
 // The includes here are more for documentation than required.
-#include "interventions/Interventions.h"
+#include "interventions/Interfaces.hpp"
 #include "interventions/Cohort.h"
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
@@ -38,6 +38,37 @@
 
 namespace OM { namespace interventions {
     using Host::Human;
+
+// ———  HumanInterventionEffect  ———
+
+void HumanIntervention::deploy( Human& human, Deployment::Method method ) const{
+    for( vector<const HumanInterventionEffect*>::const_iterator it = effects.begin();
+            it != effects.end(); ++it )
+    {
+        const interventions::HumanInterventionEffect& effect = **it;
+        effect.deploy( human, method );
+        human.updateLastDeployed( effect.getIndex() );
+    }
+}
+
+bool effectCmp(const HumanInterventionEffect *a, const HumanInterventionEffect *b){
+    return a->effectType() < b->effectType();
+}
+void HumanIntervention::sortEffects(){
+    std::stable_sort( effects.begin(), effects.end(), effectCmp );
+}
+
+#ifdef WITHOUT_BOINC
+void HumanIntervention::print_details( std::ostream& out )const{
+    out << "human:";
+    for( vector<const HumanInterventionEffect*>::const_iterator it =
+        effects.begin(); it != effects.end(); ++it ){
+        out << '\t' << (*it)->getIndex();
+    }
+}
+#endif
+
+// ———  Derivatives  ———
 
 class MDAEffect : public HumanInterventionEffect {
 public:

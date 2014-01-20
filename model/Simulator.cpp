@@ -26,6 +26,7 @@
 #include "Parameters.h"
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Surveys.h"
+#include "interventions/InterventionManager.hpp"
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
 #include "util/CommandLine.h"
@@ -68,7 +69,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario scenario ) :
     Surveys.init( scenario.getMonitoring() );
     Population::init( parameters, scenario );
     population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
-    interventions::InterventionManager::makeInstance( scenario.getInterventions(), *population );
+    interventions::InterventionManager::init( scenario.getInterventions(), *population );
     Surveys.initCohortOnly( scenario.getMonitoring() );
     
     workUnitIdentifier = scenario.getWuID();
@@ -155,7 +156,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             }
             
             // deploy interventions
-            InterventionManager::instance->deploy( *population );
+            InterventionManager::deploy( *population );
             
             // update
             ++TimeStep::simulation;
@@ -349,8 +350,8 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         phase & stream;
         (*population) & stream;
         PopulationStats::staticCheckpoint( stream );
-        (*InterventionManager::instance) & stream;
-        InterventionManager::instance->loadFromCheckpoint( *population, TimeStep::interventionPeriod );
+        InterventionManager::checkpoint( stream );
+        InterventionManager::loadFromCheckpoint( *population, TimeStep::interventionPeriod );
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
@@ -402,7 +403,7 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     phase & stream;
     (*population) & stream;
     PopulationStats::staticCheckpoint( stream );
-    (*InterventionManager::instance) & stream;
+    InterventionManager::checkpoint( stream );
     
     TimeStep::simulation & stream;
     util::random::checkpoint (stream, checkpointNum);

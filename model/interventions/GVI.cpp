@@ -21,6 +21,7 @@
 #include "interventions/GVI.h"
 #include "Host/Human.h"
 #include "util/SpeciesIndexChecker.h"
+#include "util/errors.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
@@ -48,7 +49,11 @@ GVIEffect::GVIEffect( size_t index, const scnXml::GVIDescription& elt,
 
 void GVIEffect::deploy( Host::Human& human, Deployment::Method method )const{
     human.perHostTransmission.deployEffect(*this);
-    human.reportDeployment( Effect::GVI, method );
+    if( method == interventions::Deployment::TIMED ){
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassGVI( human.getMonitoringAgeGroup(), 1 );
+    }else if( method == interventions::Deployment::CTS ){
+        //TODO(monitoring): report
+    }else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 Effect::Type GVIEffect::effectType()const{ return Effect::GVI; }

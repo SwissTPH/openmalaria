@@ -21,8 +21,8 @@
 #ifndef OM_INTERVENTIONS_GVI
 #define OM_INTERVENTIONS_GVI
 
-#include "Interventions.h"
 #include "Transmission/PerHost.h"
+#include "interventions/Interfaces.hpp"
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"

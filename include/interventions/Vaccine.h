@@ -21,7 +21,7 @@
 #define Hmod_Vaccine
 
 #include "schema/interventions.h"
-#include "interventions/Interventions.h"
+#include "interventions/Interfaces.hpp"
 #include "Global.h"
 #include "util/DecayFunction.h"
 #include <boost/shared_ptr.hpp>

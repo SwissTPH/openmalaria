@@ -21,7 +21,7 @@
 #define Hmod_PerHost
 
 #include "Transmission/Anopheles/PerHost.h"
-#include "interventions/Interventions.h"        // only for HumanInterventionEffect
+#include "interventions/Interfaces.hpp"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include <boost/ptr_container/ptr_list.hpp>

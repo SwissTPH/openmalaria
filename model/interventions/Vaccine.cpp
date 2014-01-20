@@ -25,7 +25,6 @@
 #include "schema/interventions.h"
 #include "util/StreamValidator.h"
 #include "Monitoring/Surveys.h"
-#include <interventions/Interventions.h>
 
 #include <limits>
 #include <cmath>

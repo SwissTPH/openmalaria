@@ -25,7 +25,7 @@
 #include "InfectionIncidenceModel.h"
 #include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
-#include "interventions/Interventions.h"
+#include "interventions/Vaccine.h"
 #include "interventions/Cohort.h"
 #include <set>
 
@@ -124,9 +124,6 @@ public:
   
   /// Add PEV and remove TBV (vaccines) from human
   inline void R_0Vaccines() { _vaccine.specialR_0(); }
-  
-  /** Report deployment of an intervention to this human. */
-  void reportDeployment( interventions::Effect::Type type, interventions::Deployment::Method method ) const;
   //@}
   
   /// @brief Small functions

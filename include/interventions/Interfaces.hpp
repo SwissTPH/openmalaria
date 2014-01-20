@@ -17,24 +17,17 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-#ifndef OM_INTERVENTIONS_INTERVENTIONS
-#define OM_INTERVENTIONS_INTERVENTIONS
+#ifndef OM_INTERVENTIONS_INTERFACES
+#define OM_INTERVENTIONS_INTERFACES
 
 #include "Global.h"
-#include "Host/ImportedInfections.h"
-#include "schema/interventions.h"
-#include <boost/ptr_container/ptr_vector.hpp>
-#include <boost/concept_check.hpp>
-#include <bitset>
 
 namespace OM {
-    class Population;
     namespace Host {
         class Human;
     }
 
 namespace interventions {
-    using ::boost::ptr_vector;
 
 namespace Deployment {
     enum Method {
@@ -42,9 +35,6 @@ namespace Deployment {
         CTS     // continuous deployment (EPI, etc.)
     };
 }
-
-class ContinuousHumanDeployment;
-class TimedDeployment;
 
 /** Enumeration of all effects, in the order that these should be deployed in
  * within a single intervention. */
@@ -134,75 +124,6 @@ public:
 private:
     // List of pointers to effects. Does not manage memory (InterventionManager::humanEffects does that).
     vector<const HumanInterventionEffect*> effects;
-};
-
-/** Management of interventions deployed on a per-timestep basis. */
-class InterventionManager {
-public:
-    /** Make an instance. For use by Simulation class only. */
-    static void makeInstance( const scnXml::Interventions& intervElt, OM::Population& population );
-    
-    /** InterventionManager instance. It is the Simulation class's responsibility
-     * to set this up before starting simulations. It should exist thereafter. */
-    static auto_ptr<InterventionManager> instance;
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        using namespace OM::util::checkpoint;
-        // most members are only set from XML,
-        // nextTimed varies but is re-set by loadFromCheckpoint
-        importedInfections & stream;
-    }
-
-    /** Call after loading a checkpoint, passing the intervention-period time.
-     * 
-     * Serves to replace health-system and EIR where changeHS/changeEIR
-     * interventions have been used. */
-    void loadFromCheckpoint( OM::Population& population, OM::util::TimeStep interventionTime );
-    
-    /// Returns true if any cohort selection "intervention" is active
-    inline bool cohortEnabled() const{
-        return _cohortEnabled;
-    }
-    
-    /** @brief Deploy interventions
-     *
-     * Timed interventions are deployed for this timestep.
-     * 
-     * Continuous interventions are deployed as humans reach the target ages.
-     * Unlike with vaccines, missing one schedule doesn't preclude the next. */
-    void deploy (OM::Population& population);
-    
-    /** Get a constant reference to an effect class with a certain index.
-     * 
-     * @throws util::base_exception if the index is out-of-range */
-    inline const HumanInterventionEffect& getEffect( size_t index ){
-        if( index >= humanEffects.size() )
-            throw util::base_exception( "invalid index" );
-        return humanEffects[index];
-    }
-    
-private:
-    /** Read XML descriptions. */
-    InterventionManager (const scnXml::Interventions& intervElt, OM::Population& population);
-    
-    // All human intervention effects, indexed by a number. This list is used
-    // during initialisation and thereafter only for memory management.
-    boost::ptr_vector<HumanInterventionEffect> humanEffects;
-    // All human interventions. These are stored here for memory management
-    // only (so that they are deleted when this class is destroyed).
-    boost::ptr_vector<HumanIntervention> humanInterventions;
-    // Continuous interventions, sorted by deployment age (weakly increasing)
-    ptr_vector<ContinuousHumanDeployment> continuous;
-    // List of all timed interventions. Should be sorted (time weakly increasing).
-    ptr_vector<TimedDeployment> timed;
-    uint32_t nextTimed;
-    
-    // imported infections are not really interventions, and handled by a separate class
-    // (but are grouped here for convenience and due toassociation in schema)
-    OM::Host::ImportedInfections importedInfections;
-    bool _cohortEnabled;
 };
 
 } }

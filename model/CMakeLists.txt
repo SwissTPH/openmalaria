@@ -86,7 +86,7 @@ set (Model_CPP
   Monitoring/Surveys.cpp
   Monitoring/Survey.cpp
   
-  interventions/Interventions.cpp
+  interventions/InterventionManager.cpp
   interventions/ITN.cpp
   interventions/IRS.cpp
   interventions/GVI.cpp

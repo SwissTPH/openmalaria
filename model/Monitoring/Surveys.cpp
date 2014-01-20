@@ -26,7 +26,7 @@
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
-#include "interventions/Interventions.h"
+#include "interventions/InterventionManager.hpp"
 #include "schema/monitoring.h"
 
 #include <gzstream/gzstream.h>
@@ -77,7 +77,7 @@ void SurveysType::initCohortOnly( const scnXml::Monitoring& monitoring ){
       _cohortOnly = monitoring.getCohortOnly().get();
   } else {
       // Trap potential bug in scenario design
-      if( interventions::InterventionManager::instance->cohortEnabled() ){
+      if( interventions::InterventionManager::cohortEnabled() ){
           throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
       }
   }
