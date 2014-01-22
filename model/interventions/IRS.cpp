@@ -125,9 +125,7 @@ void IRSEffect::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDete
         // Potentially warn about this... but not necessary since making humans
         // more attractive isn't really an issue.
 //     }
-    if( lPF == lPF ){
-        throw util::unimplemented_exception( "multiple IRS interventions" );
-    }
+    assert( lPF != lPF ); // double init
     lPF = log( PF );
 }
 IRSEffect::IRSAnopheles::SurvivalFactor::SurvivalFactor() :

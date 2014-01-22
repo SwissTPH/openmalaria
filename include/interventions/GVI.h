@@ -85,7 +85,6 @@ private:
         friend class HumanGVI;
     };
     
-    NormalSampler initialInsecticide;
     shared_ptr<DecayFunction> decay;
     vector<GVIAnopheles> species;  // vector specific params
     

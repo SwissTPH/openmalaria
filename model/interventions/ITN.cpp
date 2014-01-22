@@ -93,9 +93,7 @@ void ITNEffect::ITNAnopheles::init(
     double proportionUse,
     double maxInsecticide)
 {
-    if( _relativeAttractiveness.get() != 0 ){
-        throw util::unimplemented_exception( "multiple ITN interventions" );
-    }
+    assert( _relativeAttractiveness.get() == 0 );       // double init
     if (elt.getDeterrency().present())
         _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(
             new RADeterrency( elt.getDeterrency().get(), maxInsecticide ));

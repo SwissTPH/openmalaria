@@ -73,9 +73,7 @@ PerHostInterventionData* GVIEffect::makeHumanPart( istream& stream, size_t index
 
 void GVIEffect::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt)
 {
-    if( deterrency == deterrency ){
-        throw util::unimplemented_exception( "multiple GVI interventions" );
-    }
+    assert( deterrency != deterrency ); // double init
     deterrency = elt.getDeterrency().present() ? elt.getDeterrency().get().getValue() : 0.0;
     preprandialKilling = elt.getPreprandialKillingEffect().present() ? elt.getPreprandialKillingEffect().get().getValue() : 0.0;
     postprandialKilling = elt.getPostprandialKillingEffect().present() ? elt.getPostprandialKillingEffect().get().getValue() : 0.0;
