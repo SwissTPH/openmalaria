@@ -68,11 +68,7 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
   for (size_t i = 0; i < _survey.size(); ++i)
     _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
   current = &_survey[0];
-}
-void SurveysType::initCohortOnly( const scnXml::Monitoring& monitoring ){
-    //TODO: re-integrate with above. Probably most of above initialization could
-    // happen later, but for now it's easier not to change order.
-  _cohortOnly = false;
+  
   if( monitoring.getCohortOnly().present() ){
       _cohortOnly = monitoring.getCohortOnly().get();
   } else {

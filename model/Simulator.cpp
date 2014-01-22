@@ -70,7 +70,6 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario scenario ) :
     Population::init( parameters, scenario );
     population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
     interventions::InterventionManager::init( scenario.getInterventions(), *population );
-    Surveys.initCohortOnly( scenario.getMonitoring() );
     
     workUnitIdentifier = scenario.getWuID();
 }
