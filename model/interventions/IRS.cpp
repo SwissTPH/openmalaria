@@ -106,10 +106,7 @@ void IRSEffect::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDete
     if( !( PF > 0.0) ){
         ostringstream msg;
         msg << "IRS.description.anophelesParams.relativeAvailability: expected insecticideFactor to be positive.";
-        //TODO: These constraints were required. But they're too strong.
-        // Now need to work out which should still be imposed.
-        cerr << msg.str() << endl;
-        //throw util::xml_scenario_error( msg.str() );
+        throw util::xml_scenario_error( msg.str() );
     }
     
     /* We need to ensure the relative availability is non-negative. However,
@@ -124,19 +121,10 @@ void IRSEffect::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDete
      * where PF is the insecticide factor, with p∈[0,1] defined as:
      *  p=1−exp(-insecticideContent*insecticideScalingFactor).
      * We therefore just need PF ≤ 1. */
-#ifdef WITHOUT_BOINC
-    // Print out a warning if IRS may increase transmission, but only in
-    // non-BOINC mode, since it is not unreasonable and volunteers often
-    // mistake this kind of warning as indicating a problem.
-    if( !( PF <= 1.0 ) ) {
-        cerr << "Note: since the following bounds are not met, the IRS could make humans more\n";
-        cerr << "attractive to mosquitoes than they would be without IRS.\n";
-        cerr << "This note is only shown by non-BOINC executables.\n";
-        cerr << "IRS.description.anophelesParams.deterrency: bounds not met:\n";
-        cerr << "  0<insecticideFactor≤1\n";
-        cerr.flush();
-    }
-#endif
+//     if( !( PF <= 1.0 ) ) {
+        // Potentially warn about this... but not necessary since making humans
+        // more attractive isn't really an issue.
+//     }
     if( lPF == lPF ){
         throw util::unimplemented_exception( "multiple IRS interventions" );
     }
@@ -198,10 +186,7 @@ void IRSEffect::IRSAnopheles::SurvivalFactor::init(const scnXml::IRSKillingEffec
         msg << "IRS.description.anophelesParams." << (postPrandial?"post":"pre")
             << "killingFactor: expected insecticideFactor≥0, baseFactor+"
             <<pmax<<"×insecticideFactor≤1";
-        //TODO: These constraints were required. But they're too strong.
-        // Now need to work out which should still be imposed.
-        cerr << msg.str() << endl;
-        //throw util::xml_scenario_error( msg.str() );
+        throw util::xml_scenario_error( msg.str() );
     }
 }
 double IRSEffect::IRSAnopheles::RelativeAttractiveness::relativeAttractiveness(
@@ -209,10 +194,7 @@ double IRSEffect::IRSAnopheles::RelativeAttractiveness::relativeAttractiveness(
 ) const {
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lPF*insecticideComponent );
-    //TODO: limits
-    //assert( relAvail>=0.0 );
-    if (relAvail < 0.0)
-        return 0.0;
+    assert( relAvail>=0.0 );
     return relAvail;
 }
 double IRSEffect::IRSAnopheles::SurvivalFactor::survivalFactor(
@@ -221,12 +203,8 @@ double IRSEffect::IRSAnopheles::SurvivalFactor::survivalFactor(
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + PF*insecticideComponent;
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
-    //TODO: limits
-    //assert( survivalFactor >= 0.0 );
-    if (survivalFactor < 0.0)
-        return 0.0;
-    else if (survivalFactor > 1.0)
-        return 1.0;
+    assert( survivalFactor >= 0.0 );
+    assert( survivalFactor <= 1.0 );
     return survivalFactor;
 }
 

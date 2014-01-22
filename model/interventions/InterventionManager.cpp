@@ -92,10 +92,10 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             size_t index = humanEffects.size();        // i.e. index of next item
             identifierMap[effect.getId()] = index;
             if( effect.getMDA().present() ){
-                //TODO: monitoring
+                //TODO(monitoring): report
                 humanEffects.push_back( new MDAEffect( index, effect.getMDA().get() ) );
             }else if( effect.getMDA1D().present() ){
-                //TODO: monitoring
+                //TODO(monitoring): report
                 humanEffects.push_back( new MDA1DEffect( index, effect.getMDA1D().get() ) );
             }else if( effect.getPEV().present() ){
                 //TODO: allow multiple descriptions of each vaccine type
