@@ -63,6 +63,7 @@ public:
                   double proportionUse, double maxInsecticide);
         
         /// Get deterrency. See ComponentParams::effect for a more detailed description.
+        /// Range: ≥0 where 0=fullly deter, 1=no effect, >1 = attract
         inline double relativeAttractiveness( double holeIndex, double insecticideContent )const{
             return byProtection( _relativeAttractiveness->relativeAttractiveness( holeIndex, insecticideContent ) );
         }
@@ -90,8 +91,13 @@ public:
             /** Set parameters.
             * 
             * It is checked that parameters lie in a suitible range, giving a
-            * survival factor between 0 and 1. */
-            void init(const scnXml::ITNKillingEffect& elt, double maxInsecticide, const char* eltName);
+            * survival factor between 0 and 1.
+            * 
+            * @param raTwoStageConstraints If true, use the constraints for
+            *   use with RATwoStageDeterrency, otherwise use the usual constraints.
+            */
+            void init(const scnXml::ITNKillingEffect& elt, double maxInsecticide,
+                      const char* eltName, bool raTwoStageConstraints);
             
             /** Part of survival factor, used by new ITN deterrency model. */
             double rel_pAtt( double holeIndex, double insecticideContent )const;
@@ -103,18 +109,16 @@ public:
         private:
             double BF, HF, PF, IF;  // base, hole, insecticide and interaction factors
             double holeScaling, insecticideScaling;
-            double invBaseSurvival; // stored for performance only
+            double invBaseSurvival; // stored for performance only; ≥1
         };
         class RelativeAttractiveness {
         public:
             virtual ~RelativeAttractiveness() {}
             
-            /** Calculate effect. Positive is interpreted as having a positive effect
-            * (thus decreasing availability or survival) and negative as having a
-            * negative effect. Effect is not bounded, though it tends to
-            * zero as holeIndex becomes large and insecticideContent tends to zero,
-            * and parameters should be defined such that it is always in the
-            * range [0,1]. */
+            /** Calculate effect. Range of output is any value ≥ 0.
+             * 
+             * 0 implies a fully effective deterrent, 0.5 a 50% effective
+             * deterrent, 1 has no effect, >1 attracts extra mosquitoes. */
             virtual double relativeAttractiveness( double holeIndex, double insecticideContent )const =0;
         };
         class RADeterrency : public RelativeAttractiveness {

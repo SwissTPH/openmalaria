@@ -22,7 +22,7 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/SpeciesIndexChecker.h"
-#include "Host/Human.h" //TODO: temporary
+#include "Host/Human.h"
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
@@ -106,10 +106,10 @@ void ITNEffect::ITNAnopheles::init(
     }
     _preprandialKillingEffect.init( elt.getPreprandialKillingEffect(),
                                     maxInsecticide,
-                                    "ITN.description.anophelesParams.preprandialKillingFactor" );
+                                    "ITN.description.anophelesParams.preprandialKillingFactor", false );
     _postprandialKillingEffect.init( elt.getPostprandialKillingEffect(),
                                     maxInsecticide,
-                                    "ITN.description.anophelesParams.postprandialKillingFactor" );
+                                    "ITN.description.anophelesParams.postprandialKillingFactor", false );
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
     double propActive = elt.getPropActive();
@@ -201,18 +201,13 @@ ITNEffect::ITNAnopheles::RATwoStageDeterrency::RATwoStageDeterrency(
     lPFEntering( numeric_limits< double >::signaling_NaN() ),
     insecticideScalingEntering( numeric_limits< double >::signaling_NaN() )
 {
-    //TODO: this is just a copy from IRSAnophelesParams::RelativeAttractiveness::init
-    // It should be possible to abstract out a lot of this code.
-    
     double PF = elt.getEntering().getInsecticideFactor();
     insecticideScalingEntering = elt.getEntering().getInsecticideScalingFactor();
     if( !( PF > 0.0) ){
+        // we take the log of PF, so it must be positive
         ostringstream msg;
-        msg << "ITN.description.anophelesParams.twoStageDeterrency.entering: expected insecticideFactor to be positive.";
-        //TODO: These constraints were required. But they're too strong.
-        // Now need to work out which should still be imposed.
-        cerr << msg.str() << endl;
-        //throw util::xml_scenario_error( msg.str() );
+        msg << "ITN.description.anophelesParams.twoStageDeterrency.entering: insecticideFactor must be positive since we take its logarithm.";
+        throw util::xml_scenario_error( msg.str() );
     }
     
     /* We need to ensure the relative availability is non-negative. However,
@@ -242,7 +237,7 @@ ITNEffect::ITNAnopheles::RATwoStageDeterrency::RATwoStageDeterrency(
 #endif
     lPFEntering = log( PF );
     
-    pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking" );
+    pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking", true );
 }
 ITNEffect::ITNAnopheles::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),
@@ -254,7 +249,8 @@ ITNEffect::ITNAnopheles::SurvivalFactor::SurvivalFactor() :
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
 void ITNEffect::ITNAnopheles::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
-                                                   double maxInsecticide, const char* eltName){
+                                                   double maxInsecticide, const char* eltName,
+                                                   bool raTwoStageConstraints){
     BF = elt.getBaseFactor();
     HF = elt.getHoleFactor();
     PF = elt.getInsecticideFactor();
@@ -272,7 +268,81 @@ void ITNEffect::ITNAnopheles::SurvivalFactor::init(const scnXml::ITNKillingEffec
         msg << eltName << ": expected scaling factors to be non-negative";
         throw util::xml_scenario_error( msg.str() );
     }
+    // see below
+    double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
     
+    if( raTwoStageConstraints ){
+        // Note: the following argument is a modification of the one below
+        // (when !raTwoStageConstraints). The original may make more sense.
+    /* We want K ≥ 0 where K is the killing factor:
+    K=BF+HF×h+PF×p+IF×h×p, with h and p defined as:
+    h=exp(-holeIndex×holeScalingFactor),
+    p=1−exp(-insecticideContent×insecticideScalingFactor). 
+    
+    By their nature, holeIndex ≥ 0 and insecticideContent ≥ 0. We restrict:
+        holeScalingFactor ≥ 0
+        insecticideScalingFactor ≥ 0
+    Which implies both h and p lie in the range [0,1]. We also know 0 ≤ BF ≤ 1.
+    
+    We need K ≥ 0 or:
+        BF + HF×h + PF×p + IF×h×p ≥ 0   (1)
+    
+    Lets derive some limits on HF, PF and IF such that the above inequality (1)
+    is satisfied.
+    
+    A net can theoretically be unholed (holeIndex=0 ⇒ h=1) and have no
+    insecticide (thus have p=0). Substituting these values in (1) yields:
+        BF + HF ≥ 0     (2)
+    
+    The maximum value for p depends on the maximum insecticide content; denote
+    pmax = max(p). Note that holeIndex has no finite maximum; thus, although
+    for any finite value of holeIndex, h > 0, there is no h₀ > 0 s.t. for all
+    values of holeIndex h ≥ h₀. For the limiting case of a tattered but
+    insecticide-saturated net our parameters are therefore p=pmax, h=0:
+        BF + PF×pmax ≥ 0        (3)
+    
+    Consider a net saturated with insecticide (p=pmax) and without holes (h=1):
+        BF + HF + (PF+IF)×pmax ≥ 0      (4)
+    
+    The opposite extreme (the limiting case of a decayed net with no remaining
+    insecticide and a large number of holes) yields only BF ≥ 0.
+    
+    Some of the above examples of nets may be unlikely, but there is only one
+    restriction in our model making any of these cases impossible: some
+    insecticide must have been lost by the time any holes occur. We ignore this
+    since its effect is likely small, and thus all of the above are required to
+    keep the factor in the range [0,1]. Further, the inequalities (2) - (3) are
+    sufficient to keep the factor within [0,1] since h and p are non-negative
+    and act linearly in (1).
+    
+    From the definition of p, we always have pmax ≤ 1, so substituting pmax=1
+    in (5) - (8) gives us bounds which imply our requirement, however if pmax
+    is finite they are stricter than necessary. Since insecticideScalingFactor
+    is constant, max(p) coincides with max(insecticideContent) which, since
+    insecticide content only decays over time, coincides with the maximum
+    initial insecticide content, Pmax. Since the initial insecticide content is
+    sampled from a normal distribution in our model it should have no finite
+    maximum, thus implying we cannot achieve more relaxed bounds than (5) - (8)
+    when pmax=1 (unless the standard deviation of our normal distribution is 1).
+    We would however like to impose less strict bounds than these, thus we
+    impose a maximum value on the initial insecticide content, Pmax, such that
+    the probability of sampling a value from our parameterise normal
+    distribution greater than Pmax is 0.001. */
+        if( !( BF+HF >= 0.0
+            && BF+PF*pmax >= 0.0
+            && BF+HF+(PF+IF)*pmax >= 0.0 ) )
+        {
+            ostringstream msg;
+            msg << eltName << ": bounds not met:";
+            if( !(BF+HF >= 0.0) )
+                msg << " baseFactor+holeFactor≥0";
+            if( !(BF+PF*pmax >= 0.0) )
+                msg << " baseFactor+"<<pmax<<"×insecticideFactor≥0";
+            if( !(PF+HF+(PF+IF)*pmax >= 0.0) )
+                msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
+            throw util::xml_scenario_error( msg.str() );
+        }
+    }else{
     /* We want the calculated survival factor (1−K)/(1−BF) to be in the range
     [0,1] where K is the killing factor: K=BF+HF×h+PF×p+IF×h×p, with h and p
     defined as: h=exp(-holeIndex×holeScalingFactor),
@@ -338,39 +408,33 @@ void ITNEffect::ITNAnopheles::SurvivalFactor::init(const scnXml::ITNKillingEffec
     impose a maximum value on the initial insecticide content, Pmax, such that
     the probability of sampling a value from our parameterise normal
     distribution greater than Pmax is 0.001. */
-    double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
-    if( !( BF+HF <= 1.0 && HF >= 0.0
-        && BF+PF*pmax <= 1.0 && PF >= 0.0
-        && BF+HF+(PF+IF)*pmax <= 1.0 && HF+(PF+IF)*pmax >= 0.0 ) )
-    {
-        ostringstream msg;
-        msg << eltName << ": bounds not met:";
-        if( !(BF+HF<=1.0) )
-            msg << " baseFactor+holeFactor≤1";
-        if( !(HF>=0.0) )
-            msg << " holeFactor≥0";
-        if( !(BF+PF*pmax<=1.0) )
-            msg << " baseFactor+"<<pmax<<"×insecticideFactor≤1";
-        if( !(PF>=0.0) )
-            msg << " insecticideFactor≥0";      // if this fails, we know pmax>0 (since it is in any case non-negative) — well, or an NaN
-        if( !(PF+HF+(PF+IF)*pmax<=1.0) )
-            msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
-        if( !(HF+(PF+IF)*pmax>=0.0) )
-            msg << " holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
-        //TODO: These constraints were required. But they're too strong.
-        // Now need to work out which should still be imposed.
-        cerr << msg.str() << endl;
-        //throw util::xml_scenario_error( msg.str() );
+        if( !( BF+HF <= 1.0 && HF >= 0.0
+            && BF+PF*pmax <= 1.0 && PF >= 0.0
+            && BF+HF+(PF+IF)*pmax <= 1.0 && HF+(PF+IF)*pmax >= 0.0 ) )
+        {
+            ostringstream msg;
+            msg << eltName << ": bounds not met:";
+            if( !(BF+HF<=1.0) )
+                msg << " baseFactor+holeFactor≤1";
+            if( !(HF>=0.0) )
+                msg << " holeFactor≥0";
+            if( !(BF+PF*pmax<=1.0) )
+                msg << " baseFactor+"<<pmax<<"×insecticideFactor≤1";
+            if( !(PF>=0.0) )
+                msg << " insecticideFactor≥0";      // if this fails, we know pmax>0 (since it is in any case non-negative) — well, or an NaN
+            if( !(PF+HF+(PF+IF)*pmax<=1.0) )
+                msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
+            if( !(HF+(PF+IF)*pmax>=0.0) )
+                msg << " holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
+            throw util::xml_scenario_error( msg.str() );
+        }
     }
 }
 double ITNEffect::ITNAnopheles::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
-    //TODO: limits
-    //assert( relAvail>=0.0 );
-    if (relAvail < 0)
-        relAvail = 0.0;
+    assert( relAvail>=0.0 );
     return relAvail;
 }
 double ITNEffect::ITNAnopheles::RATwoStageDeterrency::relativeAttractiveness(
@@ -389,28 +453,25 @@ double ITNEffect::ITNAnopheles::RATwoStageDeterrency::relativeAttractiveness(
     assert( pEnt >= 0.0 );
     
     double rel_pAtt = pAttacking.rel_pAtt( holeIndex, insecticideContent );
-    // normalise: must have 1 when no insecticide and no net (infinite holes):
-    //TODO: limits
-    if (pEnt * rel_pAtt < 0.0)
-        return 0.0;
-    return pEnt * rel_pAtt;
+    double relAttr = pEnt * rel_pAtt;
+    assert( relAttr >= 0.0 );
+    return relAttr;
 }
 double ITNEffect::ITNAnopheles::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double pAtt = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    //TODO: limits
-    //assert( pAtt <= 1.0 );
+    assert( pAtt >= 0.0 );
     return pAtt / BF;
 }
 double ITNEffect::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
     double holeComponent = exp(-holeIndex*holeScaling);
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    //assert( killingEffect <= 1.0 );
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
-    //TODO: limits
-    //assert( survivalFactor >= 0.0 );
+    assert( killingEffect <= 1.0 );
+    assert( survivalFactor >= 0.0 );
+    assert( survivalFactor <= 1.0 );
     if (survivalFactor < 0.0)
         return 0.0;
     else if (survivalFactor > 1.0)

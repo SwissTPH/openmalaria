@@ -56,7 +56,12 @@ public:
     /** Per-timestep update. Used by ITNs to update hole decay. */
     virtual void update() =0;
     
-    /// Get effect of deterrencies of interventions, as an attractiveness multiplier.
+    /** Get effect of deterrencies of interventions, as an attractiveness multiplier.
+     * 
+     * @return a value describing effect on attractiveness. Must not be
+     * negative. 0 means mosquitoes are fully deterred, 1 that the intervention
+     * has no effect, 2 that the intervention attracts twice as many mosquitoes
+     * as would otherwise come. */
     virtual double relativeAttractiveness(size_t speciesIndex) const =0;
     /** Get the killing effect on mosquitoes before they've eaten as a survival
      * multiplier. */
