@@ -80,7 +80,8 @@ void NonVectorModel::init2 (const Population&) {
 }
 
 const char* viError = "vector model interventions can not be used with the non-vector model";
-void NonVectorModel::initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance ) {
+void NonVectorModel::initVectorInterv( const scnXml::Description::AnophelesSequence& list,
+                                       size_t instance, const string& name ) {
     throw util::xml_scenario_error( viError );
 }
 

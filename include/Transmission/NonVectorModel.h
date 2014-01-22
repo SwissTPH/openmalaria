@@ -37,7 +37,7 @@ public:
   
   virtual void init2 (const Population& population);
   
-  virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance );
+  virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;

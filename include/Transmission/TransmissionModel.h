@@ -91,7 +91,7 @@ public:
   virtual void init2( const Population& population ) =0;
   
   /** Set up vector population interventions. */
-  virtual void initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance ) =0;
+  virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name ) =0;
   
   /// Checkpointing
   template<class S>

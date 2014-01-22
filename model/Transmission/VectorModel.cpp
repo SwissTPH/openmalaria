@@ -263,11 +263,8 @@ void VectorModel::init2 (const Population& population) {
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
-void VectorModel::initVectorInterv( const scnXml::VectorIntervention::DescriptionType::AnophelesSequence& list, size_t instance ) {
-    //TODO: get intervention name
-    ostringstream intervName;
-    intervName << "vector intervention " << instance;
-    SpeciesIndexChecker checker( intervName.str(), speciesIndex );
+void VectorModel::initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name ) {
+    SpeciesIndexChecker checker( name, speciesIndex );
     for( scnXml::VectorIntervention::DescriptionType::AnophelesConstIterator it = list.begin(); it != list.end(); ++it ){
         const string& name = it->getMosquito();
         species[checker.getIndex(name)].initVectorInterv ( *it, instance );
