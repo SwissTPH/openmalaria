@@ -64,6 +64,8 @@ echo -n . &&\
 "$KOTLINC" -classpath "$CLASSES" -output "$CLASSES" \
     -src "$SRC/SchemaTranslator/SchemaTranslator.kt" &&\
 echo -n . &&\
-"$JAR" c -f "$ST_JAR" -m META-INF/MANIFEST.MF -C "$CLASSES" SchemaTranslator &&\
+"$JAR" cfm "$ST_JAR" META-INF/MANIFEST.MF -C "$CLASSES" SchemaTranslator &&\
 echo ". success. You should now be able to run the SchemaTranslator with:" &&\
 echo "java -jar $ST_JAR"
+# Note: the Java-based jar and fastjar appear to handle options differently.
+# E.g. fastjar accepts c -f $ST_JAR -m META-INF/MANIFEST.MF -C ...
