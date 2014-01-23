@@ -610,5 +610,11 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         monitoring.removeAttribute("firstBoutOnly")
         monitoring.removeAttribute("firstTreatmentOnly")
         monitoring.removeAttribute("firstInfectionOnly")
+
+        val survOpts = getChildElement(monitoring, "SurveyOptions");
+        for (opt in getChildElements(survOpts, "option")){
+            if (opt.getAttribute("name") == "nMassVA")
+                opt.setAttribute("name", "nMassGVI");
+        }
     }
 }
