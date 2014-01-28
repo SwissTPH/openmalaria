@@ -24,7 +24,7 @@
 #     set (JAVA_FILE ${CMAKE_CURRENT_SOURCE_DIR}/${SOURCE_NAME}.java)
 #     add_custom_command (OUTPUT ${ST_CLASS}
 #       DEPENDS ${JAVA_FILE}
-#       COMMAND ${JAVAC} -d ${CMAKE_CURRENT_BINARY_DIR} ${JAVA_FILE}
+#       COMMAND ${JAVAC} -source 1.6 -target 1.6 -d ${CMAKE_CURRENT_BINARY_DIR} ${JAVA_FILE}
 #       COMMENT "Compiling ${JAVA_FILE}"
 #       VERBATIM
 #     )

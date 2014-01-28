@@ -240,12 +240,15 @@ int random::poisson(double lambda){
     return result;
 }
 
-bool random::bernoulli(double prob)
-{
+bool random::bernoulli(double prob){
     // return true iff our variate is less than the probability
     bool result =random::uniform_01() < prob;
 //     util::streamValidate(result);
     return result;
+}
+
+int random::uniform(int n){
+    return random::uniform_01() * n;
 }
 
 } }

@@ -37,7 +37,7 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 CommonWithinHost::CommonWithinHost() :
         WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
-    assert( TimeStep::interval == 1 );
+    assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }
 
 CommonWithinHost::~CommonWithinHost() {
@@ -109,22 +109,26 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
 
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-        survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
         survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY);
-
-        // We update the density, and if update() returns true (parasites extinct) then remove the infection.
-        if ((*inf)->update(survivalFactor)) {
-            delete *inf;
-            inf = infections.erase(inf);        // inf points to next infection now so don't increment with ++inf
-            --numInfs;
-            continue;   // infection no longer exists so skip the rest
+        survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
+        
+        for( int step = 0, steps = TimeStep::interval; step < steps; ++step ){
+            // We update the density, and if update() returns true (parasites extinct) then remove the infection.
+            if ((*inf)->update(survivalFactor)) {
+                delete *inf;
+                inf = infections.erase(inf);        // inf points to next infection now so don't increment with ++inf
+                --numInfs;
+                goto CONTINUE_OUTER;   // infection no longer exists so skip the rest
+            }
+            
+            double density = (*inf)->getDensity();
+            totalDensity += density;
+            timeStepMaxDensity = max(timeStepMaxDensity, density);
+            _cumulativeY += density;
         }
-
-        totalDensity += (*inf)->getDensity();
-        timeStepMaxDensity = max(timeStepMaxDensity, (*inf)->getDensity());
-        _cumulativeY += TimeStep::interval*(*inf)->getDensity();
-
+        
         ++inf;
+        CONTINUE_OUTER:; // yes, it's a hideous goto — but C++98 doesn't have another way of continuing the outer loop
     }
     util::streamValidate(totalDensity);
     assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be

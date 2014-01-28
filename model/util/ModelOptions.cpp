@@ -71,6 +71,7 @@ namespace OM { namespace util {
 	    codeMap["PARASITE_REPLICATION_GAMMA"]=PARASITE_REPLICATION_GAMMA;
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
+            codeMap["MOLINEAUX_PAIRWISE_SAMPLE"]=MOLINEAUX_PAIRWISE_SAMPLE;
             codeMap["PROPHYLACTIC_DRUG_ACTION_MODEL"]=PROPHYLACTIC_DRUG_ACTION_MODEL;
 	}
 	
@@ -195,8 +196,13 @@ namespace OM { namespace util {
 	incompatibilities[COMORB_TREAT_HET]
 	    .set(TRIPLE_HET);
         
+        incompatibilities[MOLINEAUX_PAIRWISE_SAMPLE]
+            .set(FIRST_LOCAL_MAXIMUM_GAMMA)
+            .set(MEAN_DURATION_GAMMA);
+        
         incompatibilities[IPTI_SP_MODEL]
             .set(PROPHYLACTIC_DRUG_ACTION_MODEL);
+        
         
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (options [i] && (options & incompatibilities[i]).any()) {
@@ -215,6 +221,15 @@ namespace OM { namespace util {
         // Required options (above table can't check these):
         if (options[INNATE_MAX_DENS] && !options[MAX_DENS_CORRECTION])
             throw xml_scenario_error ("INNATE_MAX_DENS requires MAX_DENS_CORRECTION");
+        if( !options[MOLINEAUX_WITHIN_HOST_MODEL] && (
+            options[FIRST_LOCAL_MAXIMUM_GAMMA] ||
+            options[MEAN_DURATION_GAMMA] ||
+            options[PARASITE_REPLICATION_GAMMA] ) )
+            throw xml_scenario_error( "Molineaux model option used without MOLINEAUX_WITHIN_HOST_MODEL option" );
+        if( !options[PENNY_WITHIN_HOST_MODEL] && (
+            options[IMMUNE_THRESHOLD_GAMMA] ||
+            options[UPDATE_DENSITY_GAMMA] ) )
+            throw xml_scenario_error( "Penny model option used without PENNY_WITHIN_HOST_MODEL option" );
         
         if( TimeStep::interval == 5 ){
             bitset<NUM_OPTIONS> require1DayTS;
@@ -223,7 +238,6 @@ namespace OM { namespace util {
                 .set( INCLUDES_PK_PD )
                 .set( CLINICAL_EVENT_SCHEDULER )
                 .set( EMPIRICAL_WITHIN_HOST_MODEL )
-                .set( MOLINEAUX_WITHIN_HOST_MODEL )
                 .set( PENNY_WITHIN_HOST_MODEL );
             
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
