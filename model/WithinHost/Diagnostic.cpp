@@ -23,9 +23,15 @@
 
 namespace OM { namespace WithinHost {
 
+Diagnostic Diagnostic::default_;
 Diagnostic Diagnostic::mda;
 
-void Diagnostic::init( const scnXml::HSDiagnostic& elt ){
+void Diagnostic::setDeterministic(double limit){
+    specificity = numeric_limits<double>::quiet_NaN();
+    density = limit;
+}
+
+void Diagnostic::setXml( const scnXml::HSDiagnostic& elt ){
     if( elt.getDeterministic().present() ){
         specificity = numeric_limits<double>::quiet_NaN();
         density = elt.getDeterministic().get().getMinDensity();

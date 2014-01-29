@@ -106,15 +106,18 @@ public:
      * @param BSVEfficacy Efficacy of blood-stage vaccine */
     virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy) =0;
 
-    inline bool parasiteDensityDetectible() const {
-        return totalDensity > detectionLimit;
-    }
-
     // TODO: these should not be exposed outsite the withinhost models,
     // but must be until the 1-day time step case management models are updated
     inline double getTotalDensity() const {
         return totalDensity;
     }
+    
+    /** Simulate use of a diagnostic test, using the general detection limit.
+     * Does not report for costing purposes.
+     * 
+     * @returns true when the diagnostic is positive
+     */
+    virtual bool diagnosticDefault() const =0;
     
     /** Simulate use of a diagnostic test, using the parameters defined for use
      * with MSAT. Does not report for costing purposes.
@@ -181,13 +184,6 @@ protected:
     //TODO: should these two parameters be in this class? Should the pathogenesis model be part of the withinhost model?
     /// Total asexual blood stage density (sum of density of infections).
     double totalDensity;
-
-    /*
-    The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
-    TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
-    The density bias allows the detection limit for microscopy to be higher for other sites
-    */
-    static double detectionLimit;
 
     friend class ::UnittestUtil;
 };

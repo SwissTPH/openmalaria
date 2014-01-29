@@ -59,6 +59,7 @@ public:
     
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
     
+    virtual bool diagnosticDefault() const;
     virtual bool diagnosticMDA() const;
 
     virtual Pathogenesis::State determineMorbidity( double ageYears );

@@ -277,7 +277,7 @@ void Population::ctsRecentBirths (ostream& stream){
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
     for (HumanIter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->getWithinHostModel().parasiteDensityDetectible() )
+        if( iter->getWithinHostModel().diagnosticDefault() )
             ++patent;
     }
     stream << '\t' << patent;

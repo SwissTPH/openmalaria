@@ -68,7 +68,7 @@ void NeonatalMortality::update (const list<Host::Human>& population) {
     //TODO: detectibleInfection depends on a diagnostic; this outcome shouldn't
     // be dependent on the diagnostic used!
     nCounter ++;
-    if (iter->withinHostModel->parasiteDensityDetectible())
+    if (iter->withinHostModel->diagnosticDefault())
       pCounter ++;
   }
   

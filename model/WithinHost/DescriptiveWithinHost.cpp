@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/DescriptiveWithinHost.h"
+#include "WithinHost/Diagnostic.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
@@ -158,7 +159,7 @@ int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
     if (infections.empty()) return 0;
     for (std::list<DescriptiveInfection*>::iterator inf=infections.begin();
             inf != infections.end(); ++inf) {
-        if ((*inf)->getDensity() > detectionLimit)
+        if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
             patentInfections++;
     }
     return infections.size();

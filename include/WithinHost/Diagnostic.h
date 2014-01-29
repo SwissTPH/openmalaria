@@ -36,7 +36,11 @@ namespace OM { namespace WithinHost {
         {}
         
         /** Set parameters from an XML element. */
-        void init( const scnXml::HSDiagnostic& elt );
+        void setXml( const scnXml::HSDiagnostic& elt );
+        /** Set deterministic with a given detection limit. Note that the
+         * test uses "greater than or equal to", thus using a limit of 0 makes
+         * the test always positive. */
+        void setDeterministic( double limit );
         
         /** Use the test.
          * 
@@ -44,7 +48,16 @@ namespace OM { namespace WithinHost {
          * @returns True if outcome is positive. */
         bool isPositive( double x ) const;
         
-        static Diagnostic mda; // diagnostic configured for use with MDA (may be unconfigured, in which case it always returns positive)
+        /** The default diagnostic, set from the XML's detectionLimit.
+         * 
+         * TODO: this should be configured more flexibly in the XML. */
+        static Diagnostic default_;
+        /** The diagnostic configured for use with MSAT.
+         * 
+         * If not configured but MDA is used in the scenario, this always
+         * returns true. If no MDA or MSAT is used, it may always return false.
+         */
+        static Diagnostic mda;
         
     private:
         // either not-a-number indicating a deterministic test, or specificity

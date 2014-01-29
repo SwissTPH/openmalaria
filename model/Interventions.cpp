@@ -342,12 +342,9 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                 if( !mda.getDiagnostic().present() ){
                     // Note: allow no description for now to avoid XML changes.
                     //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
-                    scnXml::HSDiagnostic diagnostic;
-                    scnXml::Deterministic det(0.0);
-                    diagnostic.setDeterministic(det);
-                    WithinHost::Diagnostic::mda.init( diagnostic );
+                    WithinHost::Diagnostic::mda.setDeterministic( 0.0 );
                 }else{
-                    WithinHost::Diagnostic::mda.init( mda.getDiagnostic().get() );
+                    WithinHost::Diagnostic::mda.setXml( mda.getDiagnostic().get() );
                 }
             }else{
                 if( !mda.getDescription().present() ){

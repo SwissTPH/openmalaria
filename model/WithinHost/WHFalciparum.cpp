@@ -63,6 +63,23 @@ void WHFalciparum::init() {
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init();
+    
+    /*
+    The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
+    TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
+    The density bias allows the detection limit for microscopy to be higher for other sites
+    */
+    double densitybias;
+    if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
+        densitybias=InputData.getParameter(Params::DENSITY_BIAS_GARKI);
+    } else {
+        if ((InputData().getAnalysisNo() >= 22) && (InputData().getAnalysisNo() <= 30)) {
+            cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+        }
+        densitybias=InputData.getParameter(Params::DENSITY_BIAS_NON_GARKI);
+    }
+    double detectionLimit=InputData().getMonitoring().getSurveys().getDetectionLimit()*densitybias;
+    Diagnostic::default_.setDeterministic( detectionLimit );
 }
 
 
@@ -129,10 +146,12 @@ double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double t
     return probTransmissionToMosquito;
 }
 
+bool WHFalciparum::diagnosticDefault() const{
+    return Diagnostic::default_.isPositive( totalDensity );
+}
 bool WHFalciparum::diagnosticMDA() const{
     return Diagnostic::mda.isPositive( totalDensity );
 }
-
 Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
     return pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
 }
@@ -175,7 +194,7 @@ bool WHFalciparum::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup a
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
-    if (parasiteDensityDetectible()) {
+    if (diagnosticDefault()) {
         survey.reportPatentHosts(ageGroup, 1);
         survey.addToLogDensity(ageGroup, log(totalDensity));
         return true;

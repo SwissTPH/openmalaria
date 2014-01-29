@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/CommonWithinHost.h"
+#include "WithinHost/Diagnostic.h"
 #include "inputData.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
@@ -146,7 +147,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
 int CommonWithinHost::countInfections (int& patentInfections) {
     if (infections.empty()) return 0;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if ((*inf)->getDensity() > detectionLimit)
+        if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
             patentInfections++;
     }
     return infections.size();
