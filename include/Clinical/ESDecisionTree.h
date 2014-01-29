@@ -24,21 +24,21 @@
 #include "Global.h"
 #include "Clinical/ESDecisionValue.h"
 #include "Pathogenesis/State.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 #include "inputData.h"
 
 #include <map>
 #include <boost/unordered_map.hpp>
 
 namespace OM { namespace Clinical {
-    using WithinHost::WithinHostModel;
+    using WithinHost::WHInterface;
     using boost::unordered_map;
 
 struct ESHostData {
-    ESHostData (double aY, WithinHostModel& wH, Pathogenesis::State pS) :
+    ESHostData (double aY, WHInterface& wH, Pathogenesis::State pS) :
         ageYears(aY), withinHost(wH), pgState(pS) {}
     double ageYears;
-    WithinHostModel& withinHost;
+    WHInterface& withinHost;
     Pathogenesis::State pgState;
 };
 

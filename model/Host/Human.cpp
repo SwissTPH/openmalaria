@@ -53,7 +53,7 @@ void Human::initHumanParameters () {    // static
     // Init models used by humans:
     Transmission::PerHost::init();
     InfectionIncidenceModel::init();
-    WithinHost::WithinHostModel::init();
+    WithinHost::WHInterface::init();
     Clinical::ClinicalModel::init();
     _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
     
@@ -73,7 +73,7 @@ void Human::clear() {   // static clear
 // Create new human
 Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     perHostTransmission(tm),
-    withinHostModel(WithinHost::WithinHostModel::createWithinHostModel()),
+    withinHostModel(WithinHost::WHInterface::createWithinHostModel()),
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
     nextCtsDist(0),

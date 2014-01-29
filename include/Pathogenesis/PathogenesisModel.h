@@ -30,11 +30,7 @@ namespace scnXml{
     class HSESNMF;
 }
 
-namespace OM {
-namespace WithinHost {
-class WithinHostModel;
-}
-namespace Pathogenesis {
+namespace OM { namespace Pathogenesis {
 using util::AgeGroupInterpolation;
 
 /*! PathogenesisModel abstract base class.
@@ -61,7 +57,7 @@ public:
      *
      * May introduce severe or uncomplicated cases of malaria, as well as non-
      * malaria fevers. */
-    State determineState(double ageYears, WithinHost::WithinHostModel& withinHostModel);
+    State determineState(double ageYears, double timeStepMaxDensity, double endDensity);
     
     /** Given a non-malaria fever, return the probability of it requiring
      * treatment. */

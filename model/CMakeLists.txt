@@ -59,7 +59,8 @@ set (Model_CPP
   Transmission/ITN.cpp
   Transmission/IRS.cpp
   
-  WithinHost/WithinHostModel.cpp
+  WithinHost/WHInterface.cpp
+  WithinHost/WHImmunity.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
   WithinHost/DescriptiveIPTWithinHost.cpp

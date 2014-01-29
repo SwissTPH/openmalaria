@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -36,7 +36,7 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 // -----  Initialization  -----
 
 CommonWithinHost::CommonWithinHost() :
-        WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
+        WHImmunity(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
     assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }
@@ -151,7 +151,7 @@ int CommonWithinHost::countInfections (int& patentInfections) {
 
 
 void CommonWithinHost::checkpoint (istream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHImmunity::checkpoint (stream);
     (*pkpdModel) & stream;
     for (int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
@@ -160,7 +160,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHImmunity::checkpoint (stream);
     (*pkpdModel) & stream;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;

@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,7 @@
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
 #include "util/errors.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 
 #include <stdexcept>
 #include <cmath>
@@ -208,10 +208,10 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
   
   if (expectedNumInfections > 0.0000001){
     int n = random::poisson(expectedNumInfections);
-    if( n > WithinHost::WithinHostModel::MAX_INFECTIONS ){
+    if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
         // don't report: according to TS this is OK, and it generates a LOT of warnings
         // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
-        n = WithinHost::WithinHostModel::MAX_INFECTIONS;
+        n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
     human.getSurvey().reportNewInfections(human.getMonitoringAgeGroup(), n);
     ctsNewInfections += n;

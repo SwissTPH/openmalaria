@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace WithinHost {
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-        WithinHostModel()
+        WHImmunity()
 {
     assert( TimeStep::interval == 5 );
 }
@@ -165,14 +165,14 @@ int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
 // -----  Data checkpointing  -----
 
 void DescriptiveWithinHostModel::checkpoint (istream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHImmunity::checkpoint (stream);
     for (int i=0; i<numInfs; ++i) {
         loadInfection(stream);  // create infections using a virtual function call
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHImmunity::checkpoint (stream);
     BOOST_FOREACH (DescriptiveInfection* inf, infections) {
         (*inf) & stream;
     }

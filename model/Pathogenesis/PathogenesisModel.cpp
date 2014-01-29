@@ -22,7 +22,6 @@
 #include "Pathogenesis/Pyrogen.h"
 #include "Pathogenesis/Predet.h"
 #include "Pathogenesis/Mueller.h"
-#include "WithinHost/WithinHostModel.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
@@ -99,9 +98,8 @@ PathogenesisModel::PathogenesisModel(double cF) :
         _comorbidityFactor(cF)
 {}
 
-Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHost::WithinHostModel& withinHostModel) {
-    double timeStepMaxDensity = withinHostModel.getTimeStepMaxDensity();
-    double prEpisode = getPEpisode(timeStepMaxDensity, withinHostModel.getTotalDensity());
+Pathogenesis::State PathogenesisModel::determineState (double ageYears, double timeStepMaxDensity, double endDensity) {
+    double prEpisode = getPEpisode(timeStepMaxDensity, endDensity);
     
     Pathogenesis::State ret = Pathogenesis::NONE;
 

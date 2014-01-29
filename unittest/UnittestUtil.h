@@ -31,7 +31,7 @@
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "WithinHost/Infection/Infection.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 
 using namespace OM;
 using namespace WithinHost;
@@ -125,7 +125,7 @@ public:
     }
     
     // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes
-    static void setTotalParasiteDensity (WithinHostModel& whm, double density) {
+    static void setTotalParasiteDensity (WHInterface& whm, double density) {
 	whm.totalDensity = density;
     }
 };

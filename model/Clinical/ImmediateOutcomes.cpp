@@ -73,7 +73,9 @@ void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
 
 void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
     bool effectiveTreatment = false;
-    State pgState = pathogenesisModel->determineState (ageYears, *human.withinHostModel);
+    State pgState = pathogenesisModel->determineState( ageYears,
+                                                       human.withinHostModel->getTimeStepMaxDensity(),
+                                                       human.withinHostModel->getTotalDensity() );
 
     if (pgState & Pathogenesis::MALARIA) {
         if (pgState & Pathogenesis::COMPLICATED)

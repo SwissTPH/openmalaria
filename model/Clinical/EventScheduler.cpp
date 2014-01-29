@@ -21,7 +21,7 @@
 #include "Clinical/EventScheduler.h"
 #include "inputData.h"
 #include "util/random.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -178,10 +178,12 @@ void ClinicalEventScheduler::massDrugAdministration(Human& human){
 }
 
 void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
-    WithinHostModel& withinHostModel = *human.withinHostModel;
+    WHInterface& withinHostModel = *human.withinHostModel;
     // Run pathogenesisModel
     // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
-    Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
+    Pathogenesis::State newState = pathogenesisModel->determineState (ageYears,
+        withinHostModel.getTimeStepMaxDensity(), withinHostModel.getTotalDensity()
+    );
     util::streamValidate( (newState << 16) & pgState );
     
     if ( TimeStep::simulation == timeOfRecovery ) {

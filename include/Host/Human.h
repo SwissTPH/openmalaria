@@ -23,7 +23,7 @@
 #include "Host/Vaccine.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Surveys.h"
 
 namespace OM {
@@ -199,7 +199,7 @@ public:
   ///@brief Access to sub-models
   //@{
   /// The WithinHostModel models parasite density and immunity
-  inline const WithinHost::WithinHostModel& getWithinHostModel () const{
+  inline const WithinHost::WHInterface& getWithinHostModel () const{
       return *withinHostModel;
   }
   
@@ -224,8 +224,6 @@ public:
 private:
     void updateInfection(Transmission::TransmissionModel*, double ageYears);
     
-    void clearInfection(WithinHost::Infection *iCurrent);
-    
     
 public:
   /** @brief Models
@@ -236,7 +234,7 @@ public:
   Transmission::PerHost perHostTransmission;
   
   /// The WithinHostModel models parasite density and immunity
-  WithinHost::WithinHostModel *withinHostModel;
+  WithinHost::WHInterface *withinHostModel;
   
 private:
   /// The InfectionIncidenceModel translates per-host EIR into new infections

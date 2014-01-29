@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #ifndef Hmod_WithinHost_Descriptive
 #define Hmod_WithinHost_Descriptive
 
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHImmunity.h"
 #include "WithinHost/Infection/DescriptiveInfection.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ namespace OM { namespace WithinHost {
  * Note: this implementation has a few bugs with (hopefully) small effect
  * conditionally fixed (see MAX_DENS_CORRECTION and
  * INNATE_MAX_DENS). Thus results can be preserved. */
-class DescriptiveWithinHostModel : public WithinHostModel {
+class DescriptiveWithinHostModel : public WHImmunity {
 public:
   /// Create a new WHM
   DescriptiveWithinHostModel();

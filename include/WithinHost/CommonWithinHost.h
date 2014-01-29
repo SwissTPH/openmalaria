@@ -22,7 +22,7 @@
 #define Hmod_CommonWithinHost
 
 #include "Global.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHImmunity.h"
 #include "WithinHost/Infection/CommonInfection.h"
 #include "PkPd/PkPdModel.h"
 
@@ -36,7 +36,7 @@ namespace OM { namespace WithinHost {
  * models, but encapsulates nearly all the within-host (non-infection) code
  * required by the Dummy and Empirical within-host models.
  */
-class CommonWithinHost : public WithinHostModel
+class CommonWithinHost : public WHImmunity
 {
 public:
     CommonWithinHost();
