@@ -40,7 +40,6 @@ class PathogenesisModel {
 public:
     /// Calls static init on correct PathogenesisModel.
     static void init();
-    static void init_NMF( const scnXml::HSESNMF& nmfDesc );
     static void cleanup();
 
     /** Create a sub-class instance, dependant on global options.
@@ -59,16 +58,6 @@ public:
      * malaria fevers. */
     State determineState(double ageYears, double timeStepMaxDensity, double endDensity);
     
-    /** Given a non-malaria fever, return the probability of it requiring
-     * treatment. */
-    inline double pNmfRequiresTreatment(double ageYears, bool isMalarial){
-        if (isMalarial) {
-            return MF_need_antibiotic->eval( ageYears );
-        }else{
-            return NMF_need_antibiotic->eval( ageYears );
-        }
-    }
-
     /** Summarize PathogenesisModel details
      *
      * Only PyrogenPathogenesis implements this; other models don't have anything
@@ -101,13 +90,6 @@ private:
     static double comorbintercept_24;
     /// Rate of Non-Malaria Fever incidence by age. Non-seasonal.
     static AgeGroupInterpolation* NMF_incidence;
-    /// Probability that an NMF needs antibiotic treatment and could lead to death.
-    static AgeGroupInterpolation* NMF_need_antibiotic;
-    /** Probability that a malarial fever classified as uncomplicated requires
-     * antibiotic treatment (and death could occur from non-malarial causes).
-     * Unclear whether using this at the same time as comorbidity parameters
-     * makes any sense. */
-    static AgeGroupInterpolation* MF_need_antibiotic;
     //@}
 
 protected:

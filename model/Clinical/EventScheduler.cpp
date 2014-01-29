@@ -51,6 +51,8 @@ double ClinicalEventScheduler::logOddsAbInformal = std::numeric_limits<double>::
 double ClinicalEventScheduler::oneMinusEfficacyAb = std::numeric_limits<double>::signaling_NaN();
 AgeGroupInterpolation* ClinicalEventScheduler::severeNmfMortality = AgeGroupInterpolation::dummyObject();
 
+AgeGroupInterpolation* ClinicalEventScheduler::NMF_need_antibiotic = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolation* ClinicalEventScheduler::MF_need_antibiotic = AgeGroupInterpolation::dummyObject();
 
 // -----  static init  -----
 
@@ -121,11 +123,21 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
         logOddsAbInformal = log(nmfDesc.getEffectInformal());
         oneMinusEfficacyAb = 1.0 - nmfDesc.getTreatmentEfficacy();
         severeNmfMortality = AgeGroupInterpolation::makeObject( nmfDesc.getCFR(), "CFR" );
+        
+        if( !InputData().getModel().getClinical().getNonMalariaFevers().present() ){
+            throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
+        }
+        const scnXml::Clinical::NonMalariaFeversType& nmfDesc2 =
+            InputData().getModel().getClinical().getNonMalariaFevers().get();
+        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentNMF(), "prNeedTreatmentNMF" );
+        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentMF(), "prNeedTreatmentMF" );
     }
 }
 
 void ClinicalEventScheduler::cleanup () {
     AgeGroupInterpolation::freeObject( weight );
+    AgeGroupInterpolation::freeObject( NMF_need_antibiotic );
+    AgeGroupInterpolation::freeObject( MF_need_antibiotic );
 }
 
 
@@ -312,7 +324,13 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
             if( (pgState & Pathogenesis::SICK) && !(pgState & Pathogenesis::COMPLICATED) ){
                 // Have a NMF or UC malaria case
-                double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears, (pgState & Pathogenesis::MALARIA) != Pathogenesis::NONE );
+                
+                /** Given a non-malaria fever, return the probability of it requiring
+                 * treatment. */
+                bool isMalarial = (pgState & Pathogenesis::MALARIA) != Pathogenesis::NONE;
+                double pNeedTreat = isMalarial ?
+                        MF_need_antibiotic->eval( ageYears ) :
+                        NMF_need_antibiotic->eval( ageYears );
                 bool needTreat = random::bernoulli(pNeedTreat);
                 
                 // Calculate chance of antibiotic administration:
