@@ -31,10 +31,12 @@
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "util/StreamValidator.h"
 //using namespace std;
 
 #include <cmath>
 #include <boost/format.hpp>
+#include <gsl/gsl_cdf.h>
 
 
 namespace OM {
@@ -46,6 +48,7 @@ double WHFalciparum::sigma_i;
 double WHFalciparum::immPenalty_22;
 double WHFalciparum::asexImmRemain;
 double WHFalciparum::immEffectorRemain;
+int WHFalciparum::_ylagLen = 0;
 
 // -----  static functions  -----
 
@@ -54,6 +57,8 @@ void WHFalciparum::init() {
     immPenalty_22=1-exp(InputData.getParameter(Params::IMMUNITY_PENALTY));
     immEffectorRemain=exp(-InputData.getParameter(Params::IMMUNE_EFFECTOR_DECAY));
     asexImmRemain=exp(-InputData.getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+    
+    _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init();
@@ -68,6 +73,8 @@ WHFalciparum::WHFalciparum():
     timeStepMaxDensity(0.0)
 {
     _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
+    
+    _ylag.assign (_ylagLen, 0.0);
 }
 void WHFalciparum::setComorbidityFactor(double factor)
 {
@@ -77,6 +84,48 @@ void WHFalciparum::setComorbidityFactor(double factor)
 
 WHFalciparum::~WHFalciparum()
 {
+}
+
+double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const{
+    /* This model (often referred to as the gametocyte model) was designed for
+    5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
+    for 1-day timesteps to avoid having to design and analyse a new model.
+    Description: AJTMH pp.32-33 */
+    if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20){
+        // We need at least 20 days history (_ylag) to calculate infectiousness;
+        // assume no infectiousness if we don't have this history.
+        // Note: human not updated on DOB so age must be >20 days.
+        return 0.0;
+    }
+    
+    //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
+    static const double beta1=1.0;
+    static const double beta2=0.46;
+    static const double beta3=0.17;
+    static const double tau= 0.066;
+    static const double mu= -8.1;
+    
+    // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
+    // before. We have 20 days history, so use mod_nn:
+    int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt() + 1;
+    double x = beta1 * _ylag[mod_nn(firstIndex, _ylagLen)]
+            + beta2 * _ylag[mod_nn(firstIndex-TimeStep::intervalsPer5Days.asInt(), _ylagLen)]
+            + beta3 * _ylag[mod_nn(firstIndex-2*TimeStep::intervalsPer5Days.asInt(), _ylagLen)];
+    if (x < 0.001){
+        return 0.0;
+    }
+    
+    double zval=(log(x)+mu)/sqrt(1.0/tau);
+    double pone = gsl_cdf_ugaussian_P(zval);
+    double transmit=(pone*pone);
+    //transmit has to be between 0 and 1
+    transmit=std::max(transmit, 0.0);
+    transmit=std::min(transmit, 1.0);
+    
+    //    Include here the effect of transmission-blocking vaccination
+    double probTransmissionToMosquito = transmit * (1.0 - tbvEfficacy );
+    util::streamValidate( probTransmissionToMosquito );
+    return probTransmissionToMosquito;
 }
 
 Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
@@ -137,6 +186,7 @@ void WHFalciparum::checkpoint (istream& stream) {
     _cumulativeY & stream;
     _cumulativeYlag & stream;
     timeStepMaxDensity & stream;
+    _ylag & stream;
     (*pathogenesisModel) & stream;
 }
 void WHFalciparum::checkpoint (ostream& stream) {
@@ -146,6 +196,7 @@ void WHFalciparum::checkpoint (ostream& stream) {
     _cumulativeY & stream;
     _cumulativeYlag & stream;
     timeStepMaxDensity & stream;
+    _ylag & stream;
     (*pathogenesisModel) & stream;
 }
 

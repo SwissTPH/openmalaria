@@ -24,6 +24,7 @@
 
 #include "inputData.h"
 #include "Host/Human.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
@@ -146,7 +147,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
-        t *= h->probTransmissionToMosquito();
+        t *= h->withinHostModel->probTransmissionToMosquito( h->ageTimeSteps(), h->getVaccine().getTBVEfficacy() );
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;

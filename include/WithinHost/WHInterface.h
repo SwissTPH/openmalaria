@@ -67,6 +67,15 @@ public:
     }
     //@}
 
+    /** Return the infectiousness of this human to biting mosquitoes.
+     * 
+     * @param ageTimeSteps Age of the human
+     * 
+     * Calculates the value during the call, which is expensive (cache externally
+     * if the value is needed multiple times). */
+    //TODO: per genotype? (for LSTM's spread of resistance modelling)
+    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const =0;
+    
     /// @returns true if host has patent parasites
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) =0;
 

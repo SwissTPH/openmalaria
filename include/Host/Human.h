@@ -74,7 +74,6 @@ public:
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
       monitoringAgeGroup & stream;
-      _ylag & stream;
       _dateOfBirth & stream;
       _vaccine & stream;
       _inCohort & stream;
@@ -134,6 +133,9 @@ public:
   
   /// @brief Small functions
   //@{
+  /// Get the age in time steps
+  inline TimeStep ageTimeSteps() const{ return TimeStep::simulation - _dateOfBirth; }
+  
   //! Get the age in years, based on current TimeStep::simulation.
   double getAgeInYears() const;
   
@@ -177,13 +179,6 @@ public:
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
-  
-  /** Return the infectiousness of this human to biting mosquitoes.
-   * 
-   * Calculates the value during the call, which is expensive (cache externally
-   * if the value is needed multiple times). */
-  //TODO: per genotype? (for LSTM's spread of resistance modelling)
-  double probTransmissionToMosquito() const;
   
   ///@brief Access to sub-models
   //@{
@@ -235,17 +230,8 @@ private:
   Monitoring::AgeGroup monitoringAgeGroup;
   
   /// Vaccines
+  //TODO: could move TBV code to WHFalciparum, where the efficacy is now used
   PerHumanVaccine _vaccine;
-  
-  /** Total asexual blood stage density over last 20 days (uses samples from
-   * 10, 15 and 20 days ago).
-   *
-   * _ylag[mod(TimeStep::simulation, _ylagLen)] corresponds to the density from the
-   * previous time step (once updateInfection has been called). */
-  vector<double> _ylag;
-  /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
-  /// set by initHumanParameters
-  static int _ylagLen;
   
   //!Date of birth, time step since start of warmup
   TimeStep _dateOfBirth;

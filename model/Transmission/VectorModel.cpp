@@ -22,6 +22,7 @@
 #include "inputData.h"
 #include "Population.h"
 #include "Host/Human.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
@@ -377,8 +378,9 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
 void VectorModel::vectorUpdate (const Population::HumanPop& population, int populationSize) {
     vector<double> popProbTransmission;
     popProbTransmission.reserve( populationSize );
-    for( Population::ConstHumanIter it = population.begin(); it != population.end(); ++it ){
-        popProbTransmission.push_back( it->probTransmissionToMosquito() );
+    for( Population::ConstHumanIter h = population.begin(); h != population.end(); ++h ){
+        popProbTransmission.push_back( h->withinHostModel->probTransmissionToMosquito(
+            h->ageTimeSteps(), h->getVaccine().getTBVEfficacy() ) );
     }
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);

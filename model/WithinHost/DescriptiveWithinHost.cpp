@@ -84,6 +84,9 @@ void DescriptiveWithinHostModel::importInfection(){
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
+    // Cache total density for infectiousness calculations
+    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
+    
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
     PopulationStats::totalInfections += nNewInfs;

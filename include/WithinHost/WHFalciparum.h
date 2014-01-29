@@ -55,6 +55,8 @@ public:
     virtual ~WHFalciparum();
     //@}
     
+    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const;
+    
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
 
     virtual Pathogenesis::State determineMorbidity( double ageYears );
@@ -94,7 +96,14 @@ protected:
      * at the end of the timestep, but something designed to emulate the maximum
      * of 5 daily samples. */
     double timeStepMaxDensity;
-
+    
+    /** Total asexual blood stage density over last 20 days (uses samples from
+    * 10, 15 and 20 days ago).
+    *
+    * _ylag[mod(TimeStep::simulation, _ylagLen)] corresponds to the density from the
+    * previous time step (once updateInfection has been called). */
+    vector<double> _ylag;
+    
     /// The PathogenesisModel introduces illness dependant on parasite density
     auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
 
@@ -118,6 +127,9 @@ protected:
       This variable decays the effectors cumulativeH and cumulativeY exponentially.
     */
     static double immEffectorRemain;
+    /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
+    /// set by initHumanParameters
+    static int _ylagLen;
     //@}
     
     friend class ::UnittestUtil;
