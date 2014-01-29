@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "WithinHost/WHImmunity.h"
+#include "WithinHost/WHFalciparum.h"
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "WithinHost/CommonWithinHost.h"
@@ -41,14 +41,14 @@ namespace WithinHost {
 
 using namespace OM::util;
 
-double WHImmunity::sigma_i;
-double WHImmunity::immPenalty_22;
-double WHImmunity::asexImmRemain;
-double WHImmunity::immEffectorRemain;
+double WHFalciparum::sigma_i;
+double WHFalciparum::immPenalty_22;
+double WHFalciparum::asexImmRemain;
+double WHFalciparum::immEffectorRemain;
 
 // -----  static functions  -----
 
-void WHImmunity::init() {
+void WHFalciparum::init() {
     sigma_i=sqrt(InputData.getParameter(Params::SIGMA_I_SQ));
     immPenalty_22=1-exp(InputData.getParameter(Params::IMMUNITY_PENALTY));
     immEffectorRemain=exp(-InputData.getParameter(Params::IMMUNE_EFFECTOR_DECAY));
@@ -58,25 +58,25 @@ void WHImmunity::init() {
 
 // -----  Non-static  -----
 
-WHImmunity::WHImmunity () :
+WHFalciparum::WHFalciparum () :
     WHInterface(),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0)
 {
     _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
 }
 
-WHImmunity::~WHImmunity()
+WHFalciparum::~WHFalciparum()
 {
 }
 
-void WHImmunity::clearInfections (bool) {
+void WHFalciparum::clearInfections (bool) {
     clearAllInfections();
 }
 
 
 // -----  immunity  -----
 
-void WHImmunity::updateImmuneStatus() {
+void WHFalciparum::updateImmuneStatus() {
     if (immEffectorRemain < 1) {
         _cumulativeh*=immEffectorRemain;
         _cumulativeY*=immEffectorRemain;
@@ -90,7 +90,7 @@ void WHImmunity::updateImmuneStatus() {
     _cumulativeYlag = _cumulativeY;
 }
 
-void WHImmunity::immunityPenalisation() {
+void WHFalciparum::immunityPenalisation() {
     _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
     if (_cumulativeY < 0) {
         _cumulativeY=0.0;
@@ -99,14 +99,14 @@ void WHImmunity::immunityPenalisation() {
 
 
 
-void WHImmunity::checkpoint (istream& stream) {
+void WHFalciparum::checkpoint (istream& stream) {
     WHInterface::checkpoint( stream );
     _innateImmSurvFact & stream;
     _cumulativeh & stream;
     _cumulativeY & stream;
     _cumulativeYlag & stream;
 }
-void WHImmunity::checkpoint (ostream& stream) {
+void WHFalciparum::checkpoint (ostream& stream) {
     WHInterface::checkpoint( stream );
     _innateImmSurvFact & stream;
     _cumulativeh & stream;

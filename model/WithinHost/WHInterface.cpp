@@ -46,7 +46,7 @@ double WHInterface::detectionLimit;
 // -----  static functions  -----
 
 void WHInterface::init() {
-    WHImmunity::init();
+    WHFalciparum::init();
 
     Infection::init();
 

@@ -60,7 +60,7 @@ set (Model_CPP
   Transmission/IRS.cpp
   
   WithinHost/WHInterface.cpp
-  WithinHost/WHImmunity.cpp
+  WithinHost/WHFalciparum.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
   WithinHost/DescriptiveIPTWithinHost.cpp

@@ -36,7 +36,7 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 // -----  Initialization  -----
 
 CommonWithinHost::CommonWithinHost() :
-        WHImmunity(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
+        WHFalciparum(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
     assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }
@@ -151,7 +151,7 @@ int CommonWithinHost::countInfections (int& patentInfections) {
 
 
 void CommonWithinHost::checkpoint (istream& stream) {
-    WHImmunity::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     (*pkpdModel) & stream;
     for (int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
@@ -160,7 +160,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {
-    WHImmunity::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     (*pkpdModel) & stream;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;

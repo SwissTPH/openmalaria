@@ -21,7 +21,7 @@
 #ifndef Hmod_WithinHost_Descriptive
 #define Hmod_WithinHost_Descriptive
 
-#include "WithinHost/WHImmunity.h"
+#include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/DescriptiveInfection.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ namespace OM { namespace WithinHost {
  * Note: this implementation has a few bugs with (hopefully) small effect
  * conditionally fixed (see MAX_DENS_CORRECTION and
  * INNATE_MAX_DENS). Thus results can be preserved. */
-class DescriptiveWithinHostModel : public WHImmunity {
+class DescriptiveWithinHostModel : public WHFalciparum {
 public:
   /// Create a new WHM
   DescriptiveWithinHostModel();

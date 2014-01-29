@@ -32,7 +32,7 @@ namespace WithinHost {
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-        WHImmunity()
+        WHFalciparum()
 {
     assert( TimeStep::interval == 5 );
 }
@@ -165,14 +165,14 @@ int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
 // -----  Data checkpointing  -----
 
 void DescriptiveWithinHostModel::checkpoint (istream& stream) {
-    WHImmunity::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     for (int i=0; i<numInfs; ++i) {
         loadInfection(stream);  // create infections using a virtual function call
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
-    WHImmunity::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     BOOST_FOREACH (DescriptiveInfection* inf, infections) {
         (*inf) & stream;
     }

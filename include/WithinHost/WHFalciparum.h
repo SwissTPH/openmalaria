@@ -34,9 +34,9 @@ namespace OM {
 namespace WithinHost {
 
 /**
- * Immunity code used by all current P. falciparum models.
+ * Immunity code and base class for all current P. falciparum models.
  */
-class WHImmunity : public WHInterface {
+class WHFalciparum : public WHInterface {
 public:
     /// @brief Static methods
     //@{
@@ -46,8 +46,8 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHImmunity();
-    virtual ~WHImmunity();
+    WHFalciparum();
+    virtual ~WHFalciparum();
 
     /// Checkpointing
     template<class S>
