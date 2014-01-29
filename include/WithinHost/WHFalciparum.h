@@ -87,6 +87,16 @@ protected:
     //!cumulativeY from previous timestep
     double _cumulativeYlag;
     //@}
+    
+    /** Maximum parasite density of any infection during the previous interval.
+     *
+     * With 5-day timesteps, this is not just the maximum density of any infection
+     * at the end of the timestep, but something designed to emulate the maximum
+     * of 5 daily samples. */
+    double timeStepMaxDensity;
+
+    /// The PathogenesisModel introduces illness dependant on parasite density
+    auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
@@ -110,9 +120,6 @@ protected:
     static double immEffectorRemain;
     //@}
     
-    /// The PathogenesisModel introduces illness dependant on parasite density
-    auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
-
     friend class ::UnittestUtil;
 };
 

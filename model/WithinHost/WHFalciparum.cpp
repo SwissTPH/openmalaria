@@ -64,7 +64,8 @@ void WHFalciparum::init() {
 
 WHFalciparum::WHFalciparum():
     WHInterface(),
-    _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0)
+    _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
+    timeStepMaxDensity(0.0)
 {
     _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
 }
@@ -135,6 +136,7 @@ void WHFalciparum::checkpoint (istream& stream) {
     _cumulativeh & stream;
     _cumulativeY & stream;
     _cumulativeYlag & stream;
+    timeStepMaxDensity & stream;
     (*pathogenesisModel) & stream;
 }
 void WHFalciparum::checkpoint (ostream& stream) {
@@ -143,6 +145,7 @@ void WHFalciparum::checkpoint (ostream& stream) {
     _cumulativeh & stream;
     _cumulativeY & stream;
     _cumulativeYlag & stream;
+    timeStepMaxDensity & stream;
     (*pathogenesisModel) & stream;
 }
 

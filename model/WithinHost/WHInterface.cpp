@@ -92,7 +92,7 @@ WHInterface* WHInterface::createWithinHostModel () {
 // -----  Non-static  -----
 
 WHInterface::WHInterface () :
-    numInfs(0), totalDensity(0.0), timeStepMaxDensity(0.0)
+    numInfs(0), totalDensity(0.0)
 {
 }
 
@@ -124,7 +124,6 @@ bool WHInterface::hasIPTiProtection (TimeStep maxInterventionAge) const {
 void WHInterface::checkpoint (istream& stream) {
     numInfs & stream;
     totalDensity & stream;
-    timeStepMaxDensity & stream;
 
     if (numInfs > MAX_INFECTIONS)
         throw util::checkpoint_error( (boost::format("numInfs: %1%") %numInfs).str() );
@@ -132,7 +131,6 @@ void WHInterface::checkpoint (istream& stream) {
 void WHInterface::checkpoint (ostream& stream) {
     numInfs & stream;
     totalDensity & stream;
-    timeStepMaxDensity & stream;
 }
 
 }

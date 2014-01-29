@@ -105,9 +105,6 @@ public:
     inline double getTotalDensity() const {
         return totalDensity;
     }
-    inline double getTimeStepMaxDensity() const {
-        return timeStepMaxDensity;
-    }
     
     /** Use the pathogenesis model to determine, based on infection status
      * and random draw, this person't morbidity.
@@ -165,13 +162,6 @@ protected:
     //TODO: should these two parameters be in this class? Should the pathogenesis model be part of the withinhost model?
     /// Total asexual blood stage density (sum of density of infections).
     double totalDensity;
-
-    /** Maximum parasite density of any infection during the previous interval.
-     *
-     * With 5-day timesteps, this is not just the maximum density of any infection
-     * at the end of the timestep, but something designed to emulate the maximum
-     * of 5 daily samples. */
-    double timeStepMaxDensity;
 
     /*
     The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
