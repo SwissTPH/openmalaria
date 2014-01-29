@@ -22,7 +22,6 @@
 #define Hmod_ClinicalModel
 
 #include "Host/Human.h"
-#include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
 #include <memory>
 
@@ -56,9 +55,8 @@ public:
   
   /** Return a new ClinicalModel.
    *
-   * @param cF 	comorbidity factor, passed to PathogenesisModel
    * @param tSF	treatment seeking factor, passed to CaseManagementModel */
-  static ClinicalModel* createClinicalModel (double cF, double tSF);
+  static ClinicalModel* createClinicalModel (double tSF);
   
   static void initMainSimulation ();
   
@@ -102,9 +100,6 @@ public:
   
   virtual void massDrugAdministration(Human& human) =0;
   
-  /// Summarize PathogenesisModel details
-  void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
-  
   /// Force all pending summaries to be reported. Should only be called when
   /// class is about to be destroyed anyway to avoid affecting output.
   inline void flushReports (){
@@ -130,7 +125,7 @@ private:
   
 protected:
   /// Constructor.
-  ClinicalModel (double cF);
+  ClinicalModel ();
   
   /** Update for clinical model - new pathogenesis status, treatment, etc.
    *
@@ -142,9 +137,6 @@ protected:
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
-  
-  /// The PathogenesisModel introduces illness dependant on parasite density
-  auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
   
   /** Last episode; report to survey pending a new episode or human's death. */
   Episode latestReport;

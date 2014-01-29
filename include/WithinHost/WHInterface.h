@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
+#include "WithinHost/Pathogenesis/State.h"
 
 #include <list>
 
@@ -53,6 +54,10 @@ public:
     /// @brief Constructors, destructors and checkpointing functions
     //@{
     WHInterface();
+    /** Second step of initialisation (could be combined with constructor, but
+     * for the moment separate to avoid changing the order of random number
+     * samples). */
+    virtual void setComorbidityFactor( double factor ) =0;
     virtual ~WHInterface();
 
     /// Checkpointing
@@ -63,7 +68,7 @@ public:
     //@}
 
     /// @returns true if host has patent parasites
-    bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+    virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) =0;
 
     /// Create a new infection within this human
     virtual void importInfection() =0;
@@ -82,7 +87,7 @@ public:
      * @param duration Duration in days. 0 or NaN indicate oral treatment.
      * @param bodyMass	Weight of human in kg
      */
-    virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) {}
+    virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass);
 
     /** Add new infections and update the parasite densities of existing
      * infections. Also update immune status.
@@ -103,6 +108,13 @@ public:
     inline double getTimeStepMaxDensity() const {
         return timeStepMaxDensity;
     }
+    
+    /** Use the pathogenesis model to determine, based on infection status
+     * and random draw, this person't morbidity.
+     * 
+     * @param ageYears Age of human host in years
+     */
+    virtual Pathogenesis::State determineMorbidity( double ageYears ) =0;
 
     ///@brief Only do anything when IPT is present:
     //@{

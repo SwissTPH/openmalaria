@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute 
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,14 +23,14 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
-#include "Pathogenesis/State.h"
+#include "WithinHost/Pathogenesis/State.h"
 #include "util/AgeGroupInterpolation.h"
 
 namespace scnXml{
     class HSESNMF;
 }
 
-namespace OM { namespace Pathogenesis {
+namespace OM { namespace WithinHost { namespace Pathogenesis {
 using util::AgeGroupInterpolation;
 
 /*! PathogenesisModel abstract base class.
@@ -99,6 +99,5 @@ protected:
     double _comorbidityFactor;
 };
 
-}
-}
+} } }
 #endif

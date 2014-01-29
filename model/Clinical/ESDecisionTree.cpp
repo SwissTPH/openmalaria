@@ -20,6 +20,7 @@
 
 #include "Clinical/ESDecisionTree.h"
 #include "Clinical/parser.h"
+#include "WithinHost/WHInterface.h"
 #include "util/random.h"
 #include "util/errors.h"
 
@@ -311,8 +312,8 @@ namespace OM { namespace Clinical {
 	UC2 = dvMap.get( decision, "UC2" );
     }
     ESDecisionValue ESDecisionUC2Test::determineImpl (const ESDecisionValue, const ESHostData& hostData) const {
-	assert (hostData.pgState & Pathogenesis::SICK && !(hostData.pgState & Pathogenesis::COMPLICATED));
-	if (hostData.pgState & Pathogenesis::SECOND_CASE)
+	assert (hostData.pgState & WHPathogenesis::SICK && !(hostData.pgState & WHPathogenesis::COMPLICATED));
+	if (hostData.pgState & WHPathogenesis::SECOND_CASE)
 	    return UC2;
 	else
 	    return UC1;

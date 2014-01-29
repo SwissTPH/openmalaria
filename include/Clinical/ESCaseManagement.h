@@ -25,7 +25,6 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "Clinical/ESDecisionTree.h"    // needed for ESDecisionMap
 #include "Clinical/parser.h"
-#include "Pathogenesis/State.h"
 #include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
 

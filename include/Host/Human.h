@@ -23,16 +23,18 @@
 #include "Host/Vaccine.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "WithinHost/WHInterface.h"
 #include "Monitoring/Surveys.h"
 
 namespace OM {
-    namespace Transmission {
-	class TransmissionModel;
-    }
-    namespace Clinical {
-	class ClinicalModel;
-    }
+namespace Transmission {
+    class TransmissionModel;
+}
+namespace Clinical {
+    class ClinicalModel;
+}
+namespace WithinHost {
+    class WHInterface;
+}
     class Population;
 namespace Host {
 
@@ -116,9 +118,7 @@ public:
   void massVA (const OM::Population&);
   
   /// Resets immunity
-  inline void immuneSuppression(const OM::Population&) {
-      withinHostModel->immuneSuppression();
-  }
+  void immuneSuppression(const OM::Population&);
   
   /// Infect the human (with an imported infection).
   void addInfection();
@@ -143,11 +143,6 @@ public:
   
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
-  
-  /** Does the Human have a detectible infection? */
-  inline bool detectibleInfection () const {
-    return withinHostModel->parasiteDensityDetectible();
-  }
   
   // crux for timed deployment as intervention up to some limit:
   inline bool getInCohort(TimeStep)const{ return _inCohort; }

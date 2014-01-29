@@ -20,6 +20,8 @@
 
 #include "Transmission/VectorModel.h"
 #include "inputData.h"
+#include "Population.h"
+#include "Host/Human.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"

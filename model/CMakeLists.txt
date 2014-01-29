@@ -28,11 +28,6 @@ set (Model_CPP
   Clinical/parser.cpp
   Clinical/Diagnostic.cpp
   
-  Pathogenesis/PathogenesisModel.cpp
-  Pathogenesis/Mueller.cpp
-  Pathogenesis/Pyrogen.cpp
-  Pathogenesis/Predet.cpp
-  
   PkPd/PkPdModel.cpp
   #PkPd/HoshenPkPdModel.cpp
   PkPd/LSTMPkPdModel.cpp
@@ -71,6 +66,8 @@ set (Model_CPP
   WithinHost/Infection/EmpiricalInfection.cpp
   WithinHost/Infection/MolineauxInfection.cpp
   WithinHost/Infection/PennyInfection.cpp
+  WithinHost/Pathogenesis/PathogenesisModel.cpp
+  WithinHost/Pathogenesis/Submodels.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp

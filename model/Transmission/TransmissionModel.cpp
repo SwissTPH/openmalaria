@@ -23,6 +23,7 @@
 #include "Transmission/PerHost.h"
 
 #include "inputData.h"
+#include "Host/Human.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"

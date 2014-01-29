@@ -22,13 +22,14 @@
 #define Hmod_Output_Continuous
 
 #include "Global.h"
-#include "Population.h"
 #include <FastDelegate.h>
 #include <string>
 
 using fastdelegate::MakeDelegate;
 
-namespace OM { namespace Monitoring {
+namespace OM {
+    class Population;
+namespace Monitoring {
     
     /** Class to deal with continuous output data.
      *

@@ -22,24 +22,28 @@
 #define Hmod_ESDecisionTree
 
 #include "Global.h"
+#include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ESDecisionValue.h"
-#include "Pathogenesis/State.h"
-#include "WithinHost/WHInterface.h"
 #include "inputData.h"
 
 #include <map>
 #include <boost/unordered_map.hpp>
 
-namespace OM { namespace Clinical {
+namespace OM {
+namespace WithinHost {
+    class WHInterface;
+}
+namespace Clinical {
     using WithinHost::WHInterface;
+#define WHPathogenesis WithinHost::Pathogenesis
     using boost::unordered_map;
 
 struct ESHostData {
-    ESHostData (double aY, WHInterface& wH, Pathogenesis::State pS) :
+    ESHostData (double aY, WHInterface& wH, WHPathogenesis::State pS) :
         ageYears(aY), withinHost(wH), pgState(pS) {}
     double ageYears;
     WHInterface& withinHost;
-    Pathogenesis::State pgState;
+    WHPathogenesis::State pgState;
 };
 
 

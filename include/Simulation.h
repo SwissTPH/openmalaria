@@ -22,13 +22,15 @@
 #define Hmod_Simulation
 
 #include "Global.h"
-#include "Population.h"
-#include "Interventions.h"
 #include "util/BoincWrapper.h"
+#include <memory>
 
 using namespace std;
 
 namespace OM {
+
+class Population;
+class InterventionManager;
     
 //! Main simulation class
 class Simulation{

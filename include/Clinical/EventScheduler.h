@@ -52,7 +52,7 @@ public:
     static void setParameters (const scnXml::HSEventScheduler& esData);
     static void cleanup ();
 
-    ClinicalEventScheduler (double cF, double tSF);
+    ClinicalEventScheduler (double tSF);
     ~ClinicalEventScheduler ();
     
     virtual bool notAtRisk();
@@ -134,7 +134,7 @@ private:
     // have a vtable followed by 3 ints, a double and a list. Alignment probably
     // wastes some space.
     /// Current state of sickness
-    Pathogenesis::State pgState;
+    WHPathogenesis::State pgState;
 
     /** Set to when a bout should start. If TimeStep::simulation equals this, a bout
      * is started (UC & severe behaviour different).

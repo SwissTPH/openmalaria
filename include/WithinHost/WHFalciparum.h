@@ -25,6 +25,7 @@
 #include "WithinHost/WHInterface.h"
 
 #include <list>
+#include <memory>
 
 using namespace std;
 
@@ -32,6 +33,9 @@ class UnittestUtil;
 
 namespace OM {
 namespace WithinHost {
+namespace Pathogenesis {
+    class PathogenesisModel;
+}
 
 /**
  * Immunity code and base class for all current P. falciparum models.
@@ -47,34 +51,13 @@ public:
     /// @brief Constructors, destructors and checkpointing functions
     //@{
     WHFalciparum();
+    virtual void setComorbidityFactor( double factor );
     virtual ~WHFalciparum();
-
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        checkpoint (stream);
-    }
     //@}
+    
+    virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
 
-    /// Create a new infection within this human
-    virtual void importInfection() =0;
-    /** Conditionally clears all infections. Not used with the PK/PD model.
-     *
-     * If IPT isn't present, it just calls clearAllInfections(); otherwise it
-     * uses IPT code to determine whether to clear all infections or do nothing
-     * (isSevere is only used in the IPT case). */
-    virtual void clearInfections (bool isSevere);
-
-    /** Medicate drugs (wraps drug's medicate).
-     *
-     * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)
-     * @param qty		Quantity of drug to administer in mg
-     * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
-     * @param duration Duration in days. 0 or NaN indicate oral treatment.
-     * @param bodyMass	Weight of human in kg
-     */
-    virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) {}
-
+    virtual Pathogenesis::State determineMorbidity( double ageYears );
 
     inline double getCumulativeh() const {
         return _cumulativeh;
@@ -126,6 +109,9 @@ protected:
     */
     static double immEffectorRemain;
     //@}
+    
+    /// The PathogenesisModel introduces illness dependant on parasite density
+    auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
 
     friend class ::UnittestUtil;
 };

@@ -31,7 +31,7 @@
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
-using namespace OM::Pathogenesis;
+using namespace OM::WithinHost::Pathogenesis;
 using namespace OM::WithinHost;
 using namespace boost::assign; // bring 'operator+=()' into scope
 

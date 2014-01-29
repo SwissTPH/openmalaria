@@ -22,11 +22,12 @@
 #define Hmod_Episode
 
 #include "Global.h"
-#include "Pathogenesis/State.h"
+#include "WithinHost/Pathogenesis/State.h"
 #include "Monitoring/Survey.h"	//Monitoring::AgeGroup
 #include <ostream>
 
 namespace OM { namespace Clinical {
+#define WHPathogenesis WithinHost::Pathogenesis
     
 /** Summary of clinical events during a caseManagementMemory period, in one individual.
  *
@@ -53,9 +54,9 @@ public:
    * @param ageGroup Monitoring agegroup
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState);
+  void update(bool inCohort, Monitoring::AgeGroup ageGroup, WHPathogenesis::State newState);
   
-  Pathogenesis::State getState() const {return _state;};
+  WHPathogenesis::State getState() const {return _state;};
   
   /// Checkpointing
   void operator& (istream& stream);
@@ -86,7 +87,7 @@ private:
   Monitoring::AgeGroup _ageGroup;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).
-  Pathogenesis::State _state;
+  WHPathogenesis::State _state;
 };
 
 } }

@@ -18,14 +18,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Pathogenesis/Pyrogen.h"
+#include "WithinHost/Pathogenesis/Submodels.h"
 #include "inputData.h"
-#include <cmath>
 
+#include <cmath>
 using namespace std;
 
-namespace OM { namespace Pathogenesis {
-    
+namespace OM { namespace WithinHost { namespace Pathogenesis {
+
+// ———  Müller presentation model  ———
+
+double MuellerPathogenesis::rateMultiplier_31;
+double MuellerPathogenesis::densityExponent_32;
+
+void MuellerPathogenesis::init(){
+  rateMultiplier_31=InputData.getParameter(Params::MUELLER_RATE_MULTIPLIER);
+  densityExponent_32=InputData.getParameter(Params::MUELLER_DENSITY_EXPONENT);
+}
+
+double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
+  double incidenceDensity = rateMultiplier_31 * (pow(totalDensity, densityExponent_32)) * TimeStep::yearsPerInterval;
+  return 1.0-exp(-incidenceDensity);
+}
+
+
+// ———  Pyrogenic threshold model  ———
+
 double PyrogenPathogenesis::initPyroThres;
 double PyrogenPathogenesis::smuY;
 double PyrogenPathogenesis::Ystar2_13;
@@ -64,8 +82,8 @@ void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){
   //Numerical approximation to equation 2, AJTMH p.57
   for (int i=1;i<=n; ++i) {
     _pyrogenThres += totalDensity * alpha14 * TimeStep::interval * delt /
-	( (Ystar1_26 + totalDensity) * (Ystar2_13 + _pyrogenThres) )
-	- smuY * _pyrogenThres * delt;
+        ( (Ystar1_26 + totalDensity) * (Ystar2_13 + _pyrogenThres) )
+        - smuY * _pyrogenThres * delt;
   }
 }
 
@@ -79,4 +97,17 @@ void PyrogenPathogenesis::checkpoint (ostream& stream) {
     _pyrogenThres & stream;
 }
 
-} }
+
+// ———  Predetermined episodes model  ———
+
+double PredetPathogenesis::getPEpisode(double timeStepMaxDensity, double totalDensity) {
+  updatePyrogenThres(totalDensity);
+  if ( timeStepMaxDensity > _pyrogenThres) {
+      return 1;
+    }
+  else{
+    return 0;
+  }
+}
+
+} } }

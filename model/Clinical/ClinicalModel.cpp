@@ -43,7 +43,6 @@ void ClinicalModel::init () {
   infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
   _nonMalariaMortality=InputData.getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
   
-  Pathogenesis::PathogenesisModel::init();
   Episode::init();
   if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
     ClinicalEventScheduler::init();
@@ -52,10 +51,9 @@ void ClinicalModel::init () {
   CaseManagementCommon::initCommon();
 }
 void ClinicalModel::cleanup () {
-  CaseManagementCommon::cleanupCommon();
+    CaseManagementCommon::cleanupCommon();
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-	ClinicalEventScheduler::cleanup();
-    Pathogenesis::PathogenesisModel::cleanup ();
+        ClinicalEventScheduler::cleanup();
 }
 
 void ClinicalModel::staticCheckpoint (istream& stream) {
@@ -67,11 +65,11 @@ void ClinicalModel::staticCheckpoint (ostream& stream) {
     infantIntervalsAtRisk & stream;
 }
 
-ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
+ClinicalModel* ClinicalModel::createClinicalModel (double tSF) {
   if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-    return new ClinicalEventScheduler (cF, tSF);
+    return new ClinicalEventScheduler (tSF);
   else
-    return new ClinicalImmediateOutcomes (cF, tSF);
+    return new ClinicalImmediateOutcomes (tSF);
 }
 
 
@@ -96,8 +94,7 @@ double ClinicalModel::infantAllCauseMort(){
 
 // -----  non-static construction, destruction and checkpointing  -----
 
-ClinicalModel::ClinicalModel (double cF) :
-    pathogenesisModel(Pathogenesis::PathogenesisModel::createPathogenesisModel(cF)),
+ClinicalModel::ClinicalModel () :
     _doomed(0)
 {}
 ClinicalModel::~ClinicalModel () {
@@ -149,18 +146,12 @@ void ClinicalModel::updateInfantDeaths (TimeStep ageTimeSteps) {
   }
 }
 
-void ClinicalModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
-  pathogenesisModel->summarize (survey, ageGroup);
-}
-
 
 void ClinicalModel::checkpoint (istream& stream) {
-    (*pathogenesisModel) & stream;
     latestReport & stream;
     _doomed & stream;
 }
 void ClinicalModel::checkpoint (ostream& stream) {
-    (*pathogenesisModel) & stream;
     latestReport & stream;
     _doomed & stream;
 }

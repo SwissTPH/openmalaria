@@ -18,10 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Pathogenesis/PathogenesisModel.h"
-#include "Pathogenesis/Pyrogen.h"
-#include "Pathogenesis/Predet.h"
-#include "Pathogenesis/Mueller.h"
+#include "WithinHost/Pathogenesis/Submodels.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
@@ -30,8 +27,8 @@
 #include <cmath>
 using namespace std;
 
-namespace OM {
-namespace Pathogenesis {
+namespace OM { namespace WithinHost { namespace Pathogenesis {
+
 using namespace OM::util;
 
 //BEGIN static
@@ -139,5 +136,4 @@ void PathogenesisModel::checkpoint (ostream& stream) {
     _comorbidityFactor & stream;
 }
 
-}
-}
+} } }

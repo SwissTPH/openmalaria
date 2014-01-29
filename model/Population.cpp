@@ -27,9 +27,9 @@
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
+#include "WithinHost/WHInterface.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
-#include "Pathogenesis/PathogenesisModel.h"
 #include "PkPd/PkPdModel.h"
 
 #include "util/errors.h"

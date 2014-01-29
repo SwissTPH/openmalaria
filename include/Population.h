@@ -22,14 +22,15 @@
 
 #include "Global.h"
 #include "PopulationAgeStructure.h"
-#include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
 
 #include <list>
 #include <fstream>
 
-namespace OM
-{
+namespace OM {
+namespace Host {
+    class Human;
+}
 
 //! The simulated human population
 class Population

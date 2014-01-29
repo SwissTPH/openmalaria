@@ -147,7 +147,8 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     }
   }
   perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
-  clinicalModel = Clinical::ClinicalModel::createClinicalModel (_comorbidityFactor, _treatmentSeekingFactor);
+  clinicalModel = Clinical::ClinicalModel::createClinicalModel (_treatmentSeekingFactor);
+  withinHostModel->setComorbidityFactor( _comorbidityFactor );
 }
 
 void Human::destroy() {
@@ -237,6 +238,10 @@ void Human::massVA (const OM::Population&) {
     Monitoring::Surveys.getSurvey(_inCohort).reportMassVA( getMonitoringAgeGroup(), 1 );
 }
 
+void Human::immuneSuppression( const OM::Population& ){
+    withinHostModel->immuneSuppression();
+}
+
 bool Human::hasVaccineProtection(TimeStep maxInterventionAge) const{
     return _vaccine.hasProtection(maxInterventionAge);
 }
@@ -271,7 +276,6 @@ void Human::summarize() {
     survey.reportHosts (getMonitoringAgeGroup(), 1);
     bool patent = withinHostModel->summarize (survey, getMonitoringAgeGroup());
     infIncidence->summarize (survey, getMonitoringAgeGroup());
-    clinicalModel->summarize (survey, getMonitoringAgeGroup());
     
     if( cohortFirstInfectionOnly && patent ){
         removeFromCohort();

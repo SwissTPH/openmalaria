@@ -19,6 +19,7 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
+#include "WithinHost/WHInterface.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -26,7 +27,6 @@
 namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
-using ::OM::Pathogenesis::State;
 
 Diagnostic ClinicalImmediateOutcomes::massTreatDiagnostic;
 double ClinicalImmediateOutcomes::probGetsTreatment[3];
@@ -50,8 +50,7 @@ void ClinicalImmediateOutcomes::setHealthSystem (const scnXml::HealthSystem& hea
 
 // -----  construction and destruction  -----
 
-ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double cF, double tSF) :
-        ClinicalModel (cF),
+ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double tSF) :
         _tLastTreatment (TimeStep::never),
         _treatmentSeekingFactor (tSF)
 {}
@@ -67,44 +66,42 @@ void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
         return;
     }
     // We need to pass the is-severe state for the IPT code.
-    human.withinHostModel->clearInfections(latestReport.getState() == Pathogenesis::STATE_SEVERE);
+    human.withinHostModel->clearInfections(latestReport.getState() == WHPathogenesis::STATE_SEVERE);
     Monitoring::Surveys.getSurvey(human.getInCohort()).reportMDA(human.getMonitoringAgeGroup(), 1);
 }
 
 void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
     bool effectiveTreatment = false;
-    State pgState = pathogenesisModel->determineState( ageYears,
-                                                       human.withinHostModel->getTimeStepMaxDensity(),
-                                                       human.withinHostModel->getTotalDensity() );
+    WHPathogenesis::State pgState = human.withinHostModel->determineMorbidity( ageYears );
 
-    if (pgState & Pathogenesis::MALARIA) {
-        if (pgState & Pathogenesis::COMPLICATED)
+    if (pgState & WHPathogenesis::MALARIA) {
+        if (pgState & WHPathogenesis::COMPLICATED)
             effectiveTreatment = severeMalaria (ageYears, human.getMonitoringAgeGroup(), _doomed, human.getInCohort());
-        else if (pgState == Pathogenesis::STATE_MALARIA) {
+        else if (pgState == WHPathogenesis::STATE_MALARIA) {
             // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
             // included. Validity is debatable, but there's no point changing now.
             // (This does affect tests.)
             effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
         }
 
-        if ((pgState & Pathogenesis::INDIRECT_MORTALITY) && _doomed == 0)
+        if ((pgState & WHPathogenesis::INDIRECT_MORTALITY) && _doomed == 0)
             _doomed = -TimeStep::interval;
 
         if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
             human.withinHostModel->immunityPenalisation();
         }
-    } else if (pgState & Pathogenesis::SICK) { // sick but not from malaria
+    } else if (pgState & WHPathogenesis::SICK) { // sick but not from malaria
         effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
     }
 
     if (effectiveTreatment) {
-        human.withinHostModel->clearInfections (latestReport.getState() == Pathogenesis::STATE_SEVERE);
+        human.withinHostModel->clearInfections (latestReport.getState() == WHPathogenesis::STATE_SEVERE);
     }
 
     if ( human.cohortFirstTreatmentOnly && _tLastTreatment == TimeStep::simulation ) {
         human.removeFromCohort();
     }
-    if ( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ) {
+    if ( human.cohortFirstBoutOnly && (pgState & WHPathogenesis::SICK) ) {
         human.removeFromCohort();
     }
 }
@@ -113,12 +110,12 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
 // -----  private  -----
 
 bool ClinicalImmediateOutcomes::uncomplicatedEvent (
-    State pgState,
+    WHPathogenesis::State pgState,
     Monitoring::AgeGroup ageGroup,
     bool inCohort
 ) {
     latestReport.update (inCohort, ageGroup,
-                         State( pgState & Pathogenesis::STATE_MALARIA )   // mask to SICK and MALARIA flags
+                         WHPathogenesis::State( pgState & WHPathogenesis::STATE_MALARIA )   // mask to SICK and MALARIA flags
                         );
 
     Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
@@ -133,7 +130,7 @@ bool ClinicalImmediateOutcomes::uncomplicatedEvent (
             Monitoring::Surveys.getSurvey(inCohort).reportTreatments2( ageGroup, 1 );
 
         if (probParasitesCleared[regimen] > random::uniform_01()) {
-            // Could report Pathogenesis::RECOVERY to latestReport,
+            // Could report WHPathogenesis::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
             return true;        // successful treatment
         } else {
@@ -198,38 +195,38 @@ bool ClinicalImmediateOutcomes::severeMalaria (
         _tLastTreatment = TimeStep::simulation;
         Monitoring::Surveys.getSurvey(inCohort).reportTreatments3( ageGroup, 1 );
 
-        State sevTreated = State (Pathogenesis::STATE_SEVERE | Pathogenesis::EVENT_IN_HOSPITAL);
+        WHPathogenesis::State sevTreated = WHPathogenesis::State (WHPathogenesis::STATE_SEVERE | WHPathogenesis::EVENT_IN_HOSPITAL);
         if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
             if (q[6] > prandom) {
-                latestReport.update (inCohort, ageGroup, State (sevTreated | Pathogenesis::DIRECT_DEATH));
+                latestReport.update (inCohort, ageGroup, WHPathogenesis::State (sevTreated | WHPathogenesis::DIRECT_DEATH));
                 doomed  = 4;
             } else if (q[7] > prandom) { // Patient recovers, but with sequelae (don't report full recovery)
-                latestReport.update (inCohort, ageGroup, State (sevTreated | Pathogenesis::SEQUELAE));
+                latestReport.update (inCohort, ageGroup, WHPathogenesis::State (sevTreated | WHPathogenesis::SEQUELAE));
             } else { /*if (q[8] > prandom)*/
-                latestReport.update (inCohort, ageGroup, State (sevTreated | Pathogenesis::RECOVERY));
+                latestReport.update (inCohort, ageGroup, WHPathogenesis::State (sevTreated | WHPathogenesis::RECOVERY));
             }
             return true;
         } else { // Treated but parasites not cleared (in hospital)
             if (q[3] > prandom) {
-                latestReport.update (inCohort, ageGroup, State (sevTreated | Pathogenesis::DIRECT_DEATH));
+                latestReport.update (inCohort, ageGroup, WHPathogenesis::State (sevTreated | WHPathogenesis::DIRECT_DEATH));
                 doomed  = 4;
             } else if (q[4] > prandom) { // sequelae without parasite clearance
-                latestReport.update (inCohort, ageGroup, State (sevTreated | Pathogenesis::SEQUELAE));
+                latestReport.update (inCohort, ageGroup, WHPathogenesis::State (sevTreated | WHPathogenesis::SEQUELAE));
             } else { /*if (q[5] > prandom)*/
                 // No change in parasitological status: in-hospital patients
-                latestReport.update (inCohort, ageGroup, Pathogenesis::STATE_SEVERE);
+                latestReport.update (inCohort, ageGroup, WHPathogenesis::STATE_SEVERE);
             }
             return false;
         }
     } else { // Not treated
         if (q[0] > prandom) {
-            latestReport.update (inCohort, ageGroup, State (Pathogenesis::STATE_SEVERE | Pathogenesis::DIRECT_DEATH));
+            latestReport.update (inCohort, ageGroup, WHPathogenesis::State (WHPathogenesis::STATE_SEVERE | WHPathogenesis::DIRECT_DEATH));
             doomed  = 4;
         } else if (q[1] > prandom) {
-            latestReport.update (inCohort, ageGroup, State (Pathogenesis::STATE_SEVERE | Pathogenesis::SEQUELAE));
+            latestReport.update (inCohort, ageGroup, WHPathogenesis::State (WHPathogenesis::STATE_SEVERE | WHPathogenesis::SEQUELAE));
         } else { /*if (q[2] > prandom)*/
             // No change in parasitological status: non-treated
-            latestReport.update (inCohort, ageGroup, Pathogenesis::STATE_SEVERE);
+            latestReport.update (inCohort, ageGroup, WHPathogenesis::STATE_SEVERE);
         }
         return false;
     }

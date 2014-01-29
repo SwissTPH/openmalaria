@@ -21,12 +21,14 @@
 #ifndef Hmod_ClinicalImmediateOutcomes
 #define Hmod_ClinicalImmediateOutcomes
 
+#include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Clinical/Diagnostic.h"
 
 namespace OM {
 namespace Clinical {
+#define WHPathogenesis WithinHost::Pathogenesis
 
 namespace Regimen {
 /** Regimen: UC / UC2 / SEVERE.
@@ -59,7 +61,7 @@ public:
      * (Re)loads all data affected by this healthSystem element. */
     static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
 
-    ClinicalImmediateOutcomes (double cF, double tSF);
+    ClinicalImmediateOutcomes (double tSF);
     ~ClinicalImmediateOutcomes ();
 
     virtual bool notAtRisk() {
@@ -79,7 +81,7 @@ private:
     /** Called when a non-severe/complicated malaria sickness occurs.
      *
      * @returns True in case of effective or partially effective treatment, false otherwise. */
-    bool uncomplicatedEvent(OM::Pathogenesis::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
+    bool uncomplicatedEvent(WHPathogenesis::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
 
     /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
      *

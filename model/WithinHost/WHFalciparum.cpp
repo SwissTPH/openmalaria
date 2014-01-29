@@ -26,6 +26,7 @@
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Infection/PennyInfection.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
@@ -53,24 +54,32 @@ void WHFalciparum::init() {
     immPenalty_22=1-exp(InputData.getParameter(Params::IMMUNITY_PENALTY));
     immEffectorRemain=exp(-InputData.getParameter(Params::IMMUNE_EFFECTOR_DECAY));
     asexImmRemain=exp(-InputData.getParameter(Params::ASEXUAL_IMMUNITY_DECAY));
+    
+    //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
+    Pathogenesis::PathogenesisModel::init();
 }
 
 
 // -----  Non-static  -----
 
-WHFalciparum::WHFalciparum () :
+WHFalciparum::WHFalciparum():
     WHInterface(),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0)
 {
     _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
+}
+void WHFalciparum::setComorbidityFactor(double factor)
+{
+    pathogenesisModel = auto_ptr<Pathogenesis::PathogenesisModel>(
+        Pathogenesis::PathogenesisModel::createPathogenesisModel(factor) );
 }
 
 WHFalciparum::~WHFalciparum()
 {
 }
 
-void WHFalciparum::clearInfections (bool) {
-    clearAllInfections();
+Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
+    return pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
 }
 
 
@@ -98,6 +107,27 @@ void WHFalciparum::immunityPenalisation() {
 }
 
 
+// -----  Summarize  -----
+
+bool WHFalciparum::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
+    pathogenesisModel->summarize( survey, ageGroup );
+    int patentInfections = 0;
+    int numInfections = countInfections (patentInfections);
+    if (numInfections) {
+        survey.reportInfectedHosts(ageGroup,1);
+        survey.addToInfections(ageGroup, numInfections);
+        survey.addToPatentInfections(ageGroup, patentInfections);
+    }
+    // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
+    // (and are applied after update()); here we report the last calculated density.
+    if (parasiteDensityDetectible()) {
+        survey.reportPatentHosts(ageGroup, 1);
+        survey.addToLogDensity(ageGroup, log(totalDensity));
+        return true;
+    }
+    return false;
+}
+
 
 void WHFalciparum::checkpoint (istream& stream) {
     WHInterface::checkpoint( stream );
@@ -105,6 +135,7 @@ void WHFalciparum::checkpoint (istream& stream) {
     _cumulativeh & stream;
     _cumulativeY & stream;
     _cumulativeYlag & stream;
+    (*pathogenesisModel) & stream;
 }
 void WHFalciparum::checkpoint (ostream& stream) {
     WHInterface::checkpoint( stream );
@@ -112,6 +143,7 @@ void WHFalciparum::checkpoint (ostream& stream) {
     _cumulativeh & stream;
     _cumulativeY & stream;
     _cumulativeYlag & stream;
+    (*pathogenesisModel) & stream;
 }
 
 }

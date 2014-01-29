@@ -22,7 +22,7 @@
 #define Hmod_TransmissionModel 
 
 #include "Global.h"
-#include "Host/Human.h"
+#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "schema/interventions.h"
 
@@ -34,6 +34,9 @@
 
 namespace OM {
     class Summary;
+namespace Host {
+    class Human;
+}
 namespace Transmission {
     class PerHost;
 

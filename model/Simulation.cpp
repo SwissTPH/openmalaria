@@ -32,7 +32,9 @@
 #include "util/errors.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
+#include "Population.h"
 #include "PopulationStats.h"
+#include "Interventions.h"
 
 #include <fstream>
 #include <gzstream/gzstream.h>

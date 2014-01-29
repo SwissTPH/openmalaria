@@ -105,6 +105,11 @@ void WHInterface::clearInfections (bool) {
     clearAllInfections();
 }
 
+void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass)
+{
+    throw TRACED_EXCEPTION_DEFAULT( "should not call medicate() except with CommonWithinHost model" );
+}
+
 void WHInterface::continuousIPT (Monitoring::AgeGroup, bool) {
     throw util::xml_scenario_error (string ("Continuous IPT treatment when no IPT description is present in interventions"));
 }
@@ -113,27 +118,6 @@ void WHInterface::timedIPT (Monitoring::AgeGroup, bool) {
 }
 bool WHInterface::hasIPTiProtection (TimeStep maxInterventionAge) const {
     throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
-}
-
-
-// -----  Summarize  -----
-
-bool WHInterface::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
-    int patentInfections = 0;
-    int numInfections = countInfections (patentInfections);
-    if (numInfections) {
-        survey.reportInfectedHosts(ageGroup,1);
-        survey.addToInfections(ageGroup, numInfections);
-        survey.addToPatentInfections(ageGroup, patentInfections);
-    }
-    // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
-    // (and are applied after update()); here we report the last calculated density.
-    if (parasiteDensityDetectible()) {
-        survey.reportPatentHosts(ageGroup, 1);
-        survey.addToLogDensity(ageGroup, log(totalDensity));
-        return true;
-    }
-    return false;
 }
 
 

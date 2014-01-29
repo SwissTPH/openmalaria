@@ -20,6 +20,7 @@
 
 #include "Host/NeonatalMortality.h"
 #include "Host/Human.h"
+#include "WithinHost/WHInterface.h"
 #include "util/random.h"
 
 #include <cmath>
@@ -67,7 +68,7 @@ void NeonatalMortality::update (const list<Host::Human>& population) {
     //TODO: detectibleInfection depends on a diagnostic; this outcome shouldn't
     // be dependent on the diagnostic used!
     nCounter ++;
-    if (iter->detectibleInfection())
+    if (iter->withinHostModel->parasiteDensityDetectible())
       pCounter ++;
   }
   
