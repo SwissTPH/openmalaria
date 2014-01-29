@@ -387,6 +387,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // In complicated episodes, S(t), the probability of survival on
 	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
 	    // for parasite density Y(t). v_neg below is -v.
+            // TODO: this model should be revisited, and if possible placed
+            // within the WHFalciparum class (or a subclass).
 	    if( withinHostModel.getTotalDensity() > 0.0 ){	// avoid division by zero
 		double parasiteReductionEffect = withinHostModel.getTotalDensity() / previousDensity;
 		double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );

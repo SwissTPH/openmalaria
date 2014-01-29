@@ -28,7 +28,6 @@ namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
 
-Diagnostic ClinicalImmediateOutcomes::massTreatDiagnostic;
 double ClinicalImmediateOutcomes::probGetsTreatment[3];
 double ClinicalImmediateOutcomes::probParasitesCleared[3];
 double ClinicalImmediateOutcomes::cureRate[3];
@@ -62,7 +61,7 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
     Monitoring::Surveys.getSurvey(human.getInCohort()).reportMassScreening(human.getMonitoringAgeGroup(), 1);
-    if( !massTreatDiagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
+    if( !human.withinHostModel->diagnosticMDA() ){
         return;
     }
     // We need to pass the is-severe state for the IPT code.

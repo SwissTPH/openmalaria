@@ -27,6 +27,7 @@
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Infection/PennyInfection.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
+#include "WithinHost/Diagnostic.h"
 #include "inputData.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
@@ -126,6 +127,10 @@ double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double t
     double probTransmissionToMosquito = transmit * (1.0 - tbvEfficacy );
     util::streamValidate( probTransmissionToMosquito );
     return probTransmissionToMosquito;
+}
+
+bool WHFalciparum::diagnosticMDA() const{
+    return Diagnostic::mda.isPositive( totalDensity );
 }
 
 Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){

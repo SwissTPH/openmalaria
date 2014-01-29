@@ -58,6 +58,8 @@ public:
     virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const;
     
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+    
+    virtual bool diagnosticMDA() const;
 
     virtual Pathogenesis::State determineMorbidity( double ageYears );
 

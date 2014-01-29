@@ -346,8 +346,10 @@ namespace OM { namespace Clinical {
 	if (input == test_none)	// no test
 	    return none;
 	else {
+            // TODO: this should use WithinHost::Diagnostic and have all
+            // parameters defined outside case management code.
+            
 	    //TODO: reference paper
-	    //TODO: move parameters to XML
 	    double dens_50;	// parasite density giving 50% chance of positive outcome
 	    double specificity;	// chance of a negative outcome given no parasites
 	    if (input == test_microscopy) {

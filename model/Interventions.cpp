@@ -22,10 +22,11 @@
 #include "Host/Vaccine.h"
 #include "Population.h"
 #include "util/random.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
-#include "Clinical/CaseManagementCommon.h"
+#include "WithinHost/Diagnostic.h"
 #include "Monitoring/Surveys.h"
 
 namespace OM {
@@ -344,9 +345,9 @@ InterventionManager::InterventionManager (const scnXml::Interventions& intervElt
                     scnXml::HSDiagnostic diagnostic;
                     scnXml::Deterministic det(0.0);
                     diagnostic.setDeterministic(det);
-                    Clinical::ClinicalImmediateOutcomes::initMDA(diagnostic);
+                    WithinHost::Diagnostic::mda.init( diagnostic );
                 }else{
-                    Clinical::ClinicalImmediateOutcomes::initMDA( mda.getDiagnostic().get() );
+                    WithinHost::Diagnostic::mda.init( mda.getDiagnostic().get() );
                 }
             }else{
                 if( !mda.getDescription().present() ){

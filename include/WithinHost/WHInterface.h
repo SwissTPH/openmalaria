@@ -110,10 +110,20 @@ public:
         return totalDensity > detectionLimit;
     }
 
-    // TODO: these should not be exposed outsite the withinhost models:
+    // TODO: these should not be exposed outsite the withinhost models,
+    // but must be until the 1-day time step case management models are updated
     inline double getTotalDensity() const {
         return totalDensity;
     }
+    
+    /** Simulate use of a diagnostic test, using the parameters defined for use
+     * with MSAT. Does not report for costing purposes.
+     * 
+     * @returns true when the diagnostic is positive
+     * 
+     * TODO: this should be generalised and used for more than just MDA.
+     */
+    virtual bool diagnosticMDA() const =0;
     
     /** Use the pathogenesis model to determine, based on infection status
      * and random draw, this person't morbidity.

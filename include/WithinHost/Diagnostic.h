@@ -25,7 +25,7 @@
 #include "schema/interventions.h"
 #include <limits>
 
-namespace OM { namespace Clinical {
+namespace OM { namespace WithinHost {
     
     class Diagnostic {
     public:
@@ -43,6 +43,8 @@ namespace OM { namespace Clinical {
          * @param x Current parasite density in parasites per µL
          * @returns True if outcome is positive. */
         bool isPositive( double x ) const;
+        
+        static Diagnostic mda; // diagnostic configured for use with MDA (may be unconfigured, in which case it always returns positive)
         
     private:
         // either not-a-number indicating a deterministic test, or specificity
