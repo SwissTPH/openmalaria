@@ -108,9 +108,7 @@ public:
 
     // TODO: these should not be exposed outsite the withinhost models,
     // but must be until the 1-day time step case management models are updated
-    inline double getTotalDensity() const {
-        return totalDensity;
-    }
+    virtual double getTotalDensity() const;
     
     /** Simulate use of a diagnostic test, using the general detection limit.
      * Does not report for costing purposes.
@@ -180,10 +178,6 @@ protected:
 
     /// Multiplicity of infection
     int numInfs;
-
-    //TODO: should these two parameters be in this class? Should the pathogenesis model be part of the withinhost model?
-    /// Total asexual blood stage density (sum of density of infections).
-    double totalDensity;
 
     friend class ::UnittestUtil;
 };

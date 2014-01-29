@@ -79,7 +79,7 @@ WHInterface* WHInterface::createWithinHostModel () {
 // -----  Non-static  -----
 
 WHInterface::WHInterface () :
-    numInfs(0), totalDensity(0.0)
+    numInfs(0)
 {
 }
 
@@ -92,9 +92,12 @@ void WHInterface::clearInfections (bool) {
     clearAllInfections();
 }
 
-void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass)
-{
+void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){
     throw TRACED_EXCEPTION_DEFAULT( "should not call medicate() except with CommonWithinHost model" );
+}
+
+double WHInterface::getTotalDensity() const{
+    throw TRACED_EXCEPTION_DEFAULT( "getTotalDensity() called for a within host model which doesn't implement it (this probably means you're using a 1 day timestep with Vivax)" );
 }
 
 void WHInterface::continuousIPT (Monitoring::AgeGroup, bool) {
@@ -110,14 +113,12 @@ bool WHInterface::hasIPTiProtection (TimeStep maxInterventionAge) const {
 
 void WHInterface::checkpoint (istream& stream) {
     numInfs & stream;
-    totalDensity & stream;
 
     if (numInfs > MAX_INFECTIONS)
         throw util::checkpoint_error( (boost::format("numInfs: %1%") %numInfs).str() );
 }
 void WHInterface::checkpoint (ostream& stream) {
     numInfs & stream;
-    totalDensity & stream;
 }
 
 }

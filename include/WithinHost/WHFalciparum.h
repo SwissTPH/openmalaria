@@ -59,6 +59,8 @@ public:
     
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
     
+    virtual inline double getTotalDensity() const{ return totalDensity; }
+    
     virtual bool diagnosticDefault() const;
     virtual bool diagnosticMDA() const;
 
@@ -92,6 +94,9 @@ protected:
     //!cumulativeY from previous timestep
     double _cumulativeYlag;
     //@}
+    
+    /// Total asexual blood stage density (sum of density of infections).
+    double totalDensity;
     
     /** Maximum parasite density of any infection during the previous interval.
      *

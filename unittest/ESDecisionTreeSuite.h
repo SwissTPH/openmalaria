@@ -24,7 +24,6 @@
 
 #include <cxxtest/TestSuite.h>
 #include "Clinical/ESCaseManagement.h"
-#include "WithinHost/WHInterface.h"
 #include "util/random.h"
 #include "UnittestUtil.h"
 #include <limits>
@@ -48,7 +47,8 @@ public:
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
-        whm = WHInterface::createWithinHostModel();
+        whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel() );
+        ETS_ASSERT( whm != 0 );
 	hd = new ESHostData( numeric_limits< double >::quiet_NaN(), *whm, NONE );
 
 	UnittestUtil::EmpiricalWHM_setup();
@@ -461,7 +461,7 @@ public:
     
 private:
     ESDecisionValueMap* dvMap;
-    WHInterface* whm;
+    WHFalciparum* whm;
     ESHostData* hd;
 };
 
