@@ -40,7 +40,10 @@ enum SurveyMeasure {
     nHost = 0,
     /// Number of infected hosts 
     nInfect = 1,
-    /// Expected number of infected hosts
+    /** Expected number of infected hosts
+     * 
+     * This is the sum of the probabilities of each host having had at least
+     * one infection in his/her lifetime. */
     nExpectd= 2,
     /// Number of patent hosts
     nPatent= 3,
