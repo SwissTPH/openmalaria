@@ -374,12 +374,17 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
 
 
 // Every Global::interval days:
-void VectorModel::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::vectorUpdate (const Population::HumanPop& population, int populationSize) {
+    vector<double> popProbTransmission;
+    popProbTransmission.reserve( populationSize );
+    for( Population::ConstHumanIter it = population.begin(); it != population.end(); ++it ){
+        popProbTransmission.push_back( it->probTransmissionToMosquito() );
+    }
     for (size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR);
+        species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);
     }
 }
-void VectorModel::update (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::update (const Population::HumanPop& population, int populationSize) {
     TransmissionModel::updateKappa( population );
 }
 

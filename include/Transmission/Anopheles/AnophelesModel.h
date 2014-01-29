@@ -148,12 +148,15 @@ public:
      *
      * @param population The human population; so we can sum up availability and
      *  infectiousness.
-     * @param populationSize Number of humans
+     * @param popProbTransmission A vector of the probability of transmission
+     *  to mosquito for each human host (in same order as population). This is
+     *  simply a cache, since calling probTransmissionToMosquito() is expensive.
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (const std::list<Host::Human>& population,
-        int populationSize, size_t sIndex, bool isDynamic);
+    void advancePeriod( const list<Host::Human>& population,
+                        vector<double>& popProbTransmission,
+                        size_t sIndex, bool isDynamic );
 
     /** Returns the EIR calculated by advancePeriod().
      *

@@ -77,14 +77,10 @@ public:
       _ylag & stream;
       _dateOfBirth & stream;
       _vaccine & stream;
-      _probTransmissionToMosquito & stream;
       _inCohort & stream;
       nextCtsDist & stream;
   }
   //@}
-  
-  /** Update infectiousness to mosquitoes. */
-  void updateInfectiousness();
   
   /** Main human update.
    *
@@ -184,12 +180,10 @@ public:
   
   /** Return the infectiousness of this human to biting mosquitoes.
    * 
-   * Returns the value for the last time-step on which updateInfectiousness
-   * has been called. */
+   * Calculates the value during the call, which is expensive (cache externally
+   * if the value is needed multiple times). */
   //TODO: per genotype? (for LSTM's spread of resistance modelling)
-  inline double probTransmissionToMosquito() const {
-    return _probTransmissionToMosquito;
-  }
+  double probTransmissionToMosquito() const;
   
   ///@brief Access to sub-models
   //@{
@@ -215,10 +209,6 @@ public:
   
   static void clear();
   //@}
-  
-private:
-    void updateInfection(Transmission::TransmissionModel*, double ageYears);
-    
     
 public:
   /** @brief Models
@@ -265,9 +255,6 @@ private:
   
   /// True if human is included in a cohort.
   bool _inCohort;
-  
-  /// Cached value of calcProbTransmissionToMosquito; checkpointed
-  double _probTransmissionToMosquito;
   
 public: //lazy: give read access to these
   /// Remove from cohort as soon as individual has patent parasites?

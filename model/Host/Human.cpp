@@ -77,8 +77,7 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
     nextCtsDist(0),
-    _inCohort(false),
-    _probTransmissionToMosquito(0.0)
+    _inCohort(false)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
   assert( _dateOfBirth == TimeStep::simulation ||
@@ -175,7 +174,14 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         double ageYears = ageTimeSteps.inYears();
         monitoringAgeGroup.update( ageYears );
         
-        updateInfection(transmissionModel, ageYears);
+        // Cache total density for infectiousness calculations
+        _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = withinHostModel->getTotalDensity();
+        
+        double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
+        int nNewInfs = infIncidence->numNewInfections( *this, EIR );
+        
+        withinHostModel->update(nNewInfs, ageYears, _vaccine.getBSVEfficacy());
+        
         clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);
     }
@@ -184,16 +190,6 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
 
 void Human::addInfection(){
     withinHostModel->importInfection();
-}
-
-void Human::updateInfection(Transmission::TransmissionModel* transmissionModel, double ageYears){
-    // Cache total density for infectiousness calculations
-    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = withinHostModel->getTotalDensity();
-    
-    double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
-    int nNewInfs = infIncidence->numNewInfections( *this, EIR );
-    
-    withinHostModel->update(nNewInfs, ageYears, _vaccine.getBSVEfficacy());
 }
 
 
@@ -305,7 +301,7 @@ void Human::flushReports (){
     clinicalModel->flushReports();
 }
 
-void Human::updateInfectiousness() {
+double Human::probTransmissionToMosquito() const{
   /* This model (often referred to as the gametocyte model) was designed for
   5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
   for 1-day timesteps to avoid having to design and analyse a new model.
@@ -315,7 +311,7 @@ void Human::updateInfectiousness() {
     // We need at least 20 days history (_ylag) to calculate infectiousness;
     // assume no infectiousness if we don't have this history.
     // Note: human not updated on DOB so age must be >20 days.
-    return;
+    return 0.0;
   }
   
   //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
@@ -332,8 +328,7 @@ void Human::updateInfectiousness() {
            + beta2 * _ylag[mod_nn(firstIndex-TimeStep::intervalsPer5Days.asInt(), _ylagLen)]
            + beta3 * _ylag[mod_nn(firstIndex-2*TimeStep::intervalsPer5Days.asInt(), _ylagLen)];
   if (x < 0.001){
-    _probTransmissionToMosquito = 0.0;
-    return;
+    return 0.0;
   }
   
   double zval=(log(x)+mu)/sqrt(1.0/tau);
@@ -344,8 +339,9 @@ void Human::updateInfectiousness() {
   transmit=std::min(transmit, 1.0);
   
   //    Include here the effect of transmission-blocking vaccination
-  _probTransmissionToMosquito = transmit*(1.0-_vaccine.getTBVEfficacy());
-  util::streamValidate( _probTransmissionToMosquito );
+  double probTransmissionToMosquito = transmit*(1.0-_vaccine.getTBVEfficacy());
+  util::streamValidate( probTransmissionToMosquito );
+  return probTransmissionToMosquito;
 }
 
 } }
