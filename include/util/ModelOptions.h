@@ -49,10 +49,10 @@ namespace OM { namespace util {
 	* in AJTMH 75 (suppl 2) pp11-18. */
 	NEGATIVE_BINOMIAL_MASS_ACTION,
 	
-	/** @brief An IPT model, no longer used
+	/* @brief An IPT model, no longer used
 	* 
 	* Does nothing if IPT is not present. */
-	ATTENUATION_ASEXUAL_DENSITY,
+// 	ATTENUATION_ASEXUAL_DENSITY,
 	
 	/** @brief Baseline availability of humans is sampled from a log normal distribution
 	* 

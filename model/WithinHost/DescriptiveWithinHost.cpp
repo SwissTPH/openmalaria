@@ -117,9 +117,8 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // INNATE_MAX_DENS and MAX_DENS_CORRECTION would need to be required
         // (couldn't support old parameterisations using buggy versions of code
         // any more).
-        // IPT model would need to be overhauled; it might be possible to make
-        // a pseudo drug model and move SP code there and remove/generalise the
-        // rest.
+        // SP drug action and the PK/PD model would need to be abstracted
+        // behind a common interface.
         if ( (*inf)->expired() /* infection too old */
                 || eventSPClears(*inf) /* infection cleared by SP in IPT model */
            ) {
@@ -134,22 +133,18 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         double infStepMaxDens = timeStepMaxDensity;
         (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
 
-        IPTattenuateAsexualDensity (*inf);
-
         if (util::ModelOptions::option (util::MAX_DENS_CORRECTION))
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
         timeStepMaxDensity = infStepMaxDens;
 
-        totalDensity += (*inf)->getDensity();
-        (*inf)->determineDensityFinal ();
-        _cumulativeY += TimeStep::interval*(*inf)->getDensity();
+        double density = (*inf)->getDensity();
+        totalDensity += density;
+        _cumulativeY += TimeStep::interval * density;
 
         ++inf;
     }
     util::streamValidate( totalDensity );
     assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
-
-    IPTattenuateAsexualMinTotalDensity();
 }
 
 

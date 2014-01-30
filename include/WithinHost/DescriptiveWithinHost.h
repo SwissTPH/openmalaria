@@ -51,12 +51,8 @@ protected:
   virtual DescriptiveInfection* createInfection ();
   virtual InfectionCount countInfections () const;
   
-  ///@brief IPT extensions − empty otherwise
-  //@{
+  /// IPT extension
   virtual bool eventSPClears (DescriptiveInfection* inf) { return false; }
-  virtual void IPTattenuateAsexualMinTotalDensity () {}
-  virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
-  //@}
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

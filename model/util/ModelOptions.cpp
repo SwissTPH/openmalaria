@@ -38,7 +38,7 @@ namespace OM { namespace util {
 	OptionCodeMap () {
 	    codeMap["PENALISATION_EPISODES"] = PENALISATION_EPISODES;
 	    codeMap["NEGATIVE_BINOMIAL_MASS_ACTION"] = NEGATIVE_BINOMIAL_MASS_ACTION;
-	    codeMap["ATTENUATION_ASEXUAL_DENSITY"] = ATTENUATION_ASEXUAL_DENSITY;
+	    // codeMap["ATTENUATION_ASEXUAL_DENSITY"] = ATTENUATION_ASEXUAL_DENSITY;
 	    codeMap["LOGNORMAL_MASS_ACTION"] = LOGNORMAL_MASS_ACTION;
 	    codeMap["NO_PRE_ERYTHROCYTIC"] = NO_PRE_ERYTHROCYTIC;
 	    codeMap["MAX_DENS_CORRECTION"] = MAX_DENS_CORRECTION;
@@ -78,8 +78,12 @@ namespace OM { namespace util {
 	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
 	    if (codeIt == codeMap.end()) {
 		ostringstream msg;
-		msg << "Unrecognised model option: ";
-		msg << s;
+                if( s == "ATTENUATION_ASEXUAL_DENSITY" ){
+                    msg << "Please use schema 31 or earlier to use option "
+                        << s << "; it is not available in later versions.";
+                }else{
+                    msg << "Unrecognised model option: " << s;
+                }
 		throw xml_scenario_error(msg.str());
 	    }
 	    return codeIt->second;
@@ -239,7 +243,6 @@ namespace OM { namespace util {
         }else if( TimeStep::interval == 1 ){
             bitset<NUM_OPTIONS> require5DayTS;
             require5DayTS
-                .set( ATTENUATION_ASEXUAL_DENSITY )
                 .set( IPTI_SP_MODEL )
                 .set( REPORT_ONLY_AT_RISK );
             

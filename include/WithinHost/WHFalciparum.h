@@ -87,7 +87,7 @@ protected:
 
     /** Number of infections received since birth. */
     double _cumulativeh;
-    //!Cumulative parasite density since birth
+    //!Cumulative parasite density since birth (units: days * units of density)
     double _cumulativeY;
     //!cumulativeY from previous timestep
     double _cumulativeYlag;

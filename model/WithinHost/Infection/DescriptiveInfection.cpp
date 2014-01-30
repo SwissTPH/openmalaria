@@ -206,10 +206,7 @@ void DescriptiveInfection::determineDensities(double ageInYears,
     double factor = 1.0 - BSVEfficacy;
     _density *= factor;
     timeStepMaxDensity *= factor;
-}
-
-//Note: would make sense is this was also part of determineDensities, but can't really be without changing order of other logic.
-void DescriptiveInfection::determineDensityFinal () {
+    
     _cumulativeExposureJ += TimeStep::interval * _density;
 }
 
