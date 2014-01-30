@@ -79,6 +79,7 @@ namespace OM { namespace util {
         SumWeight,
         VectorFitting,
         InfLambda,
+        WHFeatures,     // these are probably all code errors
         Max
     }; }
     

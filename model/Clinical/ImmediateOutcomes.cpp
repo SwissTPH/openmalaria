@@ -85,10 +85,6 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
 
         if ((pgState & WHPathogenesis::INDIRECT_MORTALITY) && _doomed == 0)
             _doomed = -TimeStep::interval;
-
-        if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
-            human.withinHostModel->immunityPenalisation();
-        }
     } else if (pgState & WHPathogenesis::SICK) { // sick but not from malaria
         effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
     }

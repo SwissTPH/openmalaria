@@ -83,9 +83,12 @@ public:
     virtual void importInfection() =0;
     /** Conditionally clears all infections. Not used with the PK/PD model.
      *
-     * If IPT isn't present, it just calls clearAllInfections(); otherwise it
-     * uses IPT code to determine whether to clear all infections or do nothing
-     * (isSevere is only used in the IPT case). */
+     * If IPT isn't present, this literally removes all infections, both blood
+     * stage and liver stage (TODO: should it remove liver stage?).
+     * 
+     * When using the IPT model, this conditionally either does the above or
+     * does nothing.
+     */
     virtual void clearInfections (bool isSevere);
 
     /** Medicate drugs (wraps drug's medicate).
@@ -142,15 +145,13 @@ public:
     /// Last IPTi dose recent enough to give protection?
     virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
     //@}
-
-    /// Called to effect some penalty on immunity − but what? Please document.
-    virtual void immunityPenalisation() =0;
+    
     /// Special intervention: clears all immunity
     virtual void immuneSuppression() =0;
 
     // TODO: these shouldn't have to be exposed (perhaps use summarize to report the data):
-    virtual double getCumulativeh() const =0;
-    virtual double getCumulativeY() const =0;
+    virtual double getCumulativeh() const;
+    virtual double getCumulativeY() const;
 
     /** The maximum number of infections a human can have. The only real reason
      * for this limit is to prevent incase bad input from causing the number of
@@ -166,15 +167,15 @@ protected:
      * @param patentInfections In-out param: incremented for every patent infection */
     virtual int countInfections (int& patentInfections) =0;
 
-    virtual void checkpoint (istream& stream);
-    virtual void checkpoint (ostream& stream);
-
     /** Literally just removes all infections in an individual.
      *
      * Normally clearInfections() would be called instead, which, when IPT is not
      * active, just calls this function (although this needs to be changed for
      * PK_PD integration). */
     virtual void clearAllInfections() =0;
+
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
 
     /// Multiplicity of infection
     int numInfs;

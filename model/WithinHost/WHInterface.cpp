@@ -45,20 +45,6 @@ using namespace OM::util;
 
 void WHInterface::init() {
     WHFalciparum::init();
-
-    Infection::init();
-
-    if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
-        DummyInfection::init ();
-    } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
-        EmpiricalInfection::init();	// 1-day timestep check
-    } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
-        MolineauxInfection::init();
-    } else if (util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
-        PennyInfection::init();
-    } else {
-        DescriptiveInfection::init ();	// 5-day timestep check
-    }
 }
 
 WHInterface* WHInterface::createWithinHostModel () {
@@ -93,11 +79,11 @@ void WHInterface::clearInfections (bool) {
 }
 
 void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){
-    throw TRACED_EXCEPTION_DEFAULT( "should not call medicate() except with CommonWithinHost model" );
+    throw TRACED_EXCEPTION( "should not call medicate() except with CommonWithinHost model", util::Error::WHFeatures );
 }
 
 double WHInterface::getTotalDensity() const{
-    throw TRACED_EXCEPTION_DEFAULT( "getTotalDensity() called for a within host model which doesn't implement it (this probably means you're using a 1 day timestep with Vivax)" );
+    throw TRACED_EXCEPTION( "should not call getTotalDensity() with non-falciparum model", util::Error::WHFeatures );
 }
 
 void WHInterface::continuousIPT (Monitoring::AgeGroup, bool) {
@@ -108,6 +94,13 @@ void WHInterface::timedIPT (Monitoring::AgeGroup, bool) {
 }
 bool WHInterface::hasIPTiProtection (TimeStep maxInterventionAge) const {
     throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
+}
+
+double WHInterface::getCumulativeh() const{
+    throw TRACED_EXCEPTION( "should not call getCumulativeh() with non-falciparum model", util::Error::WHFeatures );
+}
+double WHInterface::getCumulativeY() const{
+    throw TRACED_EXCEPTION( "should not call getCumulativeY() with non-falciparum model", util::Error::WHFeatures );
 }
 
 

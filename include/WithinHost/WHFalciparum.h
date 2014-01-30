@@ -72,12 +72,10 @@ public:
     inline double getCumulativeY() const {
         return _cumulativeY;
     }
-
+    
 protected:
-    ///@brief Immunity model
+    ///@brief Immunity model parameters
     //@{
-    virtual void immunityPenalisation();
-
     /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY
      * have already been incremented.
      *

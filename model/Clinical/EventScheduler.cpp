@@ -268,12 +268,6 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if (timeLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
 	    pgState = WHPathogenesis::State (pgState | WHPathogenesis::SECOND_CASE);
 	
-	if (pgState & WHPathogenesis::MALARIA) {
-	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
-		withinHostModel.immunityPenalisation();
-	    }
-	}
-	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
 	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.getInCohort()
 	);

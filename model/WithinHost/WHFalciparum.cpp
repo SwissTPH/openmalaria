@@ -80,6 +80,20 @@ void WHFalciparum::init() {
     }
     double detectionLimit=InputData().getMonitoring().getSurveys().getDetectionLimit()*densitybias;
     Diagnostic::default_.setDeterministic( detectionLimit );
+    
+    Infection::init();
+    
+    if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
+        DummyInfection::init ();
+    } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
+        EmpiricalInfection::init();     // 1-day timestep check
+    } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
+        MolineauxInfection::init();
+    } else if (util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
+        PennyInfection::init();
+    } else {
+        DescriptiveInfection::init ();  // 5-day timestep check
+    }
 }
 
 
@@ -153,7 +167,18 @@ bool WHFalciparum::diagnosticMDA() const{
     return Diagnostic::mda.isPositive( totalDensity );
 }
 Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
-    return pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
+    Pathogenesis::State state =
+            pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
+    
+    if( (state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){
+        // This does immunity penalisation:
+        _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
+        if (_cumulativeY < 0) {
+            _cumulativeY=0.0;
+        }
+    }
+    
+    return state;
 }
 
 
@@ -171,13 +196,6 @@ void WHFalciparum::updateImmuneStatus() {
                       (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
     }
     _cumulativeYlag = _cumulativeY;
-}
-
-void WHFalciparum::immunityPenalisation() {
-    _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
-    if (_cumulativeY < 0) {
-        _cumulativeY=0.0;
-    }
 }
 
 
