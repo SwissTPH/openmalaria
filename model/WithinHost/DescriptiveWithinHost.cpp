@@ -155,14 +155,14 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
 
 // -----  Summarize  -----
 
-int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
-    if (infections.empty()) return 0;
-    for (std::list<DescriptiveInfection*>::iterator inf=infections.begin();
-            inf != infections.end(); ++inf) {
+WHInterface::InfectionCount DescriptiveWithinHostModel::countInfections () const{
+    InfectionCount count;       // constructor initialises counts to 0
+    count.total = infections.size();
+    for (std::list<DescriptiveInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
-            patentInfections++;
+            count.patent += 1;
     }
-    return infections.size();
+    return count;
 }
 
 

@@ -162,10 +162,16 @@ public:
 
 protected:
 
+    struct InfectionCount{
+        InfectionCount(): total(0), patent(0) {}        // initialise to 0
+        int total;      // includes blood and liver stages
+        int patent;     // number of detectible blood-stage infections
+    };
     /** For summarizing:
-     * @returns Total number of infections.
-     * @param patentInfections In-out param: incremented for every patent infection */
-    virtual int countInfections (int& patentInfections) =0;
+     * 
+     * @returns Number of infections, patent and total
+     */
+    virtual InfectionCount countInfections () const =0;
 
     /** Literally just removes all infections in an individual.
      *

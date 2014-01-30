@@ -203,12 +203,11 @@ void WHFalciparum::updateImmuneStatus() {
 
 bool WHFalciparum::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
     pathogenesisModel->summarize( survey, ageGroup );
-    int patentInfections = 0;
-    int numInfections = countInfections (patentInfections);
-    if (numInfections) {
+    InfectionCount count = countInfections();
+    if (count.total != 0) {
         survey.reportInfectedHosts(ageGroup,1);
-        survey.addToInfections(ageGroup, numInfections);
-        survey.addToPatentInfections(ageGroup, patentInfections);
+        survey.addToInfections(ageGroup, count.total);
+        survey.addToPatentInfections(ageGroup, count.patent);
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.

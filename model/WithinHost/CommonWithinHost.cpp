@@ -144,13 +144,14 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
 
 // -----  Summarize  -----
 
-int CommonWithinHost::countInfections (int& patentInfections) {
-    if (infections.empty()) return 0;
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+WHInterface::InfectionCount CommonWithinHost::countInfections () const{
+    InfectionCount count;       // constructor initialises counts to 0
+    count.total = infections.size();
+    for (std::list<CommonInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
-            patentInfections++;
+            count.patent += 1;
     }
-    return infections.size();
+    return count;
 }
 
 

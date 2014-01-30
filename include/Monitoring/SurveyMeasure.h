@@ -53,7 +53,8 @@ enum SurveyMeasure {
     /// Sum of the logarithm of the parasite density
     sumlogDens= 5,
     
-    /// Total infections
+    /** The total number of infections in the population: includes both blood
+     * and liver stages. */
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *

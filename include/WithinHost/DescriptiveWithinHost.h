@@ -49,7 +49,7 @@ public:
   
 protected:
   virtual DescriptiveInfection* createInfection ();
-  virtual int countInfections (int& patentInfections);
+  virtual InfectionCount countInfections () const;
   
   ///@brief IPT extensions − empty otherwise
   //@{

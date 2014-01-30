@@ -63,7 +63,7 @@ public:
     //@}
     
 protected:
-    virtual int countInfections (int& patentInfections);
+    virtual InfectionCount countInfections () const;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
