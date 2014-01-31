@@ -170,13 +170,14 @@ Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
     Pathogenesis::State state =
             pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
     
+    /* Note: this model can easily be re-enabled, but is not used and not considered to be a good model.
     if( (state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){
         // This does immunity penalisation:
         _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
         if (_cumulativeY < 0) {
             _cumulativeY=0.0;
         }
-    }
+    }*/
     
     return state;
 }

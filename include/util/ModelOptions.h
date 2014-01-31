@@ -29,7 +29,7 @@ namespace OM { namespace util {
     
     /** Flags signalling which versions of some models to use. */
     enum OptionCodes {
-	/** @brief Clinical episodes reduce the level of acquired immunity
+	/* @brief Clinical episodes reduce the level of acquired immunity
 	* 
 	* Effective cumulative exposure to blood stage parasites is reduced by a
 	* clinical sickness event, so that clinical bouts have a negative effect on
@@ -39,7 +39,7 @@ namespace OM { namespace util {
 	* 
 	* Default: Clinical events have no effect on immune status except
 	* secondarily via effects of treatment. */
-	PENALISATION_EPISODES = 0,
+// 	PENALISATION_EPISODES,
 	
 	/** @brief Baseline availability of humans is sampled from a gamma distribution
 	* Infections introduced by mass action with negative binomial

@@ -36,7 +36,7 @@ namespace OM { namespace util {
 	
     public:
 	OptionCodeMap () {
-	    codeMap["PENALISATION_EPISODES"] = PENALISATION_EPISODES;
+// 	    codeMap["PENALISATION_EPISODES"] = PENALISATION_EPISODES;
 	    codeMap["NEGATIVE_BINOMIAL_MASS_ACTION"] = NEGATIVE_BINOMIAL_MASS_ACTION;
 	    // codeMap["ATTENUATION_ASEXUAL_DENSITY"] = ATTENUATION_ASEXUAL_DENSITY;
 	    codeMap["LOGNORMAL_MASS_ACTION"] = LOGNORMAL_MASS_ACTION;
@@ -78,7 +78,7 @@ namespace OM { namespace util {
 	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
 	    if (codeIt == codeMap.end()) {
 		ostringstream msg;
-                if( s == "ATTENUATION_ASEXUAL_DENSITY" ){
+                if( s == "PENALISATION_EPISODES" || s == "ATTENUATION_ASEXUAL_DENSITY" ){
                     msg << "Please use schema 31 or earlier to use option "
                         << s << "; it is not available in later versions.";
                 }else{
