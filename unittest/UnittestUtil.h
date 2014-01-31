@@ -84,16 +84,16 @@ public:
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     static void Infection_init_NaN () {
 	Infection::latentp = TimeStep(0);
-	Infection::cumulativeYstar = numeric_limits<float>::quiet_NaN();
-	Infection::cumulativeHstar = numeric_limits<float>::quiet_NaN();
+	Infection::cumulativeYstar = numeric_limits<double>::quiet_NaN();
+	Infection::cumulativeHstar = numeric_limits<double>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
 	Infection::decayM = numeric_limits<double>::quiet_NaN();
     }
     static void Infection_init_5day () {
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
 	Infection::latentp = TimeStep(3);
-	Infection::cumulativeYstar = (float) 68564384.7102;
-	Infection::cumulativeHstar = (float) 71.676733;
+	Infection::cumulativeYstar = 68564384.7102;
+	Infection::cumulativeHstar = 71.676733;
 	Infection::alpha_m = 1.0 - exp(- 2.411434);
 	Infection::decayM = 2.717773;
     }

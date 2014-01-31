@@ -27,16 +27,16 @@
 
 namespace OM { namespace WithinHost {
     
-float Infection::cumulativeYstar;
-float Infection::cumulativeHstar;
+double Infection::cumulativeYstar;
+double Infection::cumulativeHstar;
 double Infection::alpha_m;
 double Infection::decayM;
 TimeStep Infection::latentp( TimeStep::never );
 
 void Infection::init () {
   latentp=TimeStep(InputData().getModel().getParameters().getLatentp());
-  cumulativeYstar = (float) InputData.getParameter (Params::CUMULATIVE_Y_STAR);
-  cumulativeHstar = (float) InputData.getParameter (Params::CUMULATIVE_H_STAR);
+  cumulativeYstar = InputData.getParameter (Params::CUMULATIVE_Y_STAR);
+  cumulativeHstar = InputData.getParameter (Params::CUMULATIVE_H_STAR);
   alpha_m = 1.0 - exp(-InputData.getParameter (Params::NEG_LOG_ONE_MINUS_ALPHA_M));
   decayM = InputData.getParameter (Params::DECAY_M);
 }

@@ -96,8 +96,8 @@ public:
   /// pre-erythrocytic latent period, in time steps
   static TimeStep latentp;
   
-  static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
-  static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
+  static double cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
+  static double cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
   
 private:
   static double alpha_m; //!< Maternal protection at birth
