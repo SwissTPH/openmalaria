@@ -192,9 +192,9 @@ void WHFalciparum::updateImmuneStatus() {
     }
     if (asexImmRemain < 1) {
         _cumulativeh*=asexImmRemain/
-                      (1+(_cumulativeh*(1-asexImmRemain)/Infection::cumulativeHstar));
+                      (1+(_cumulativeh*(1-asexImmRemain) * Infection::invCumulativeHstar));
         _cumulativeY*=asexImmRemain/
-                      (1+(_cumulativeY*(1-asexImmRemain)/Infection::cumulativeYstar));
+                      (1+(_cumulativeY*(1-asexImmRemain) * Infection::invCumulativeYstar));
     }
     _cumulativeYlag = _cumulativeY;
 }
