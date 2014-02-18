@@ -132,6 +132,8 @@ public:
     /** Use the pathogenesis model to determine, based on infection status
      * and random draw, this person't morbidity.
      * 
+     * This function is called after update() every timestep.
+     * 
      * @param ageYears Age of human host in years
      */
     virtual Pathogenesis::State determineMorbidity( double ageYears ) =0;
@@ -173,12 +175,16 @@ protected:
      */
     virtual InfectionCount countInfections () const =0;
 
-    /** Literally just removes all infections in an individual.
+    /**
+     * Used with simple drug models where treatment is either effective or non-
+     * existant. This clears all blood-stage asexual parasites, and in the case
+     * of vivax may clear some liver stage as well as gametocytes (sexual
+     * stage).
      *
      * Normally clearInfections() would be called instead, which, when IPT is not
      * active, just calls this function (although this needs to be changed for
      * PK_PD integration). */
-    virtual void clearAllInfections() =0;
+    virtual void effectiveTreatment() =0;
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

@@ -102,7 +102,7 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
     _lastSPDose=TimeStep::simulation+TimeStep(1);
     // SPAction will first act at the beginning of the next Global::interval
   }
-  clearAllInfections();
+  effectiveTreatment();
 }
 
 void DescriptiveIPTWithinHost::continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort) {

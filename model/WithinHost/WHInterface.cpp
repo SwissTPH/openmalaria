@@ -75,7 +75,7 @@ WHInterface::~WHInterface()
 
 
 void WHInterface::clearInfections (bool) {
-    clearAllInfections();
+    effectiveTreatment();
 }
 
 void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){

@@ -43,6 +43,7 @@ CommonWithinHost::CommonWithinHost() :
 }
 
 CommonWithinHost::~CommonWithinHost() {
+    //TODO: this should all happen implicitly
     delete pkpdModel;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
@@ -51,7 +52,7 @@ CommonWithinHost::~CommonWithinHost() {
 
 // -----  Simple infection adders/removers  -----
 
-void CommonWithinHost::clearAllInfections() {
+void CommonWithinHost::effectiveTreatment() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
     }

@@ -42,7 +42,7 @@ public:
   virtual void importInfection();
   /// load an infection from a checkpoint
   virtual void loadInfection(istream& stream);
-  virtual void clearAllInfections();
+  virtual void effectiveTreatment();
   virtual void immuneSuppression();
   
   virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);

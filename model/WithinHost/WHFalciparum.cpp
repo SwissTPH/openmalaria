@@ -123,6 +123,11 @@ double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double t
     5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
     for 1-day timesteps to avoid having to design and analyse a new model.
     Description: AJTMH pp.32-33 */
+    
+    /* Note: we don't allow for treatment which clears gametocytes (e.g.
+     * Primaquine). Apparently Primaquine is not commonly used in P falciparum
+     * treatment, but for vivax the effect may be important. */
+    
     if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20){
         // We need at least 20 days history (_ylag) to calculate infectiousness;
         // assume no infectiousness if we don't have this history.

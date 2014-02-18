@@ -39,7 +39,7 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
-    clearAllInfections();
+    effectiveTreatment();       //TODO: this should happen implicitly
 }
 
 
@@ -52,7 +52,7 @@ void DescriptiveWithinHostModel::loadInfection(istream& stream) {
     infections.push_back(new DescriptiveInfection(stream));
 }
 
-void DescriptiveWithinHostModel::clearAllInfections() {
+void DescriptiveWithinHostModel::effectiveTreatment() {
     std::list<DescriptiveInfection*>::iterator inf;
     for (inf=infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
