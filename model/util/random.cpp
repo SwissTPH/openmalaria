@@ -210,6 +210,7 @@ double random::beta (double a, double b){
     return gsl_ran_beta (rng.gsl_generator,a,b);
 }
 double random::betaWithMean (double m, double b){
+    //TODO(performance): could do this calculation externally, and feed in a,b instead of mean,b
     double a = m * b / (1.0 - m);
     return beta(a,b);
 }
@@ -229,6 +230,14 @@ bool random::bernoulli(double prob){
 
 int random::uniform(int n){
     return random::uniform_01() * n;
+}
+
+double random::exponential(double mean){
+    return gsl_ran_exponential(rng.gsl_generator, mean);
+}
+
+double random::weibull(double lambda, double k){
+    return gsl_ran_weibull( rng.gsl_generator, lambda, k );
 }
 
 } }

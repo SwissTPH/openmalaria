@@ -163,6 +163,8 @@ double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Tran
       effectiveEIR * susceptibility() / InfectionrateShapeParam);
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
+    //TODO: is this equivalent to gsl_ran_lognormal?
+    //TODO: optimise the calculations on consts
   return random::sampleFromLogNormal(random::uniform_01(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
