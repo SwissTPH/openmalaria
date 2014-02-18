@@ -21,6 +21,7 @@
 #include "Host/Vaccine.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 #include "schema/interventions.h"
 
 #include <cmath>
@@ -75,6 +76,9 @@ void Vaccine::init(const scnXml::Vaccine& xmlVaccine)
         else
             throw util::xml_scenario_error ("vaccineType invalid");
     }
+    
+    if( VdBSV != 0 && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
+        throw xml_scenario_error( "blood stage vaccines (BSV) cannot be used with vivax model" );
 
     //Read in vaccine specifications
     PEV.initVaccine (VdPEV);

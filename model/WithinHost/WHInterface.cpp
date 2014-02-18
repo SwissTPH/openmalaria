@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/WHVivax.h"
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "WithinHost/CommonWithinHost.h"
@@ -44,20 +45,25 @@ using namespace OM::util;
 // -----  static functions  -----
 
 void WHInterface::init() {
-    WHFalciparum::init();
+    if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+        WHVivax::init();
+    }else{
+        WHFalciparum::init();
+    }
 }
 
 WHInterface* WHInterface::createWithinHostModel () {
-    if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) ||
+    if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+        return new WHVivax();
+    }else if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL) ||
             util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL) ||
             util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL) ||
             util::ModelOptions::option (util::PENNY_WITHIN_HOST_MODEL)) {
         return new CommonWithinHost();
-    } else {
-        if ( util::ModelOptions::option( IPTI_SP_MODEL ) )
-            return new DescriptiveIPTWithinHost();
-        else
-            return new DescriptiveWithinHostModel();
+    } else if ( util::ModelOptions::option( IPTI_SP_MODEL ) ){
+        return new DescriptiveIPTWithinHost();
+    }else{
+        return new DescriptiveWithinHostModel();
     }
 }
 

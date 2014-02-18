@@ -226,6 +226,10 @@ namespace OM { namespace util {
          * the 35 patient records. */
         MOLINEAUX_PAIRWISE_SAMPLE,
         
+        /** Use a simple Vivax model instead of Falciparum.
+         * TODO: description. */
+        VIVAX_SIMPLE_MODEL,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

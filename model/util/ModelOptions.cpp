@@ -72,6 +72,7 @@ namespace OM { namespace util {
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
             codeMap["MOLINEAUX_PAIRWISE_SAMPLE"]=MOLINEAUX_PAIRWISE_SAMPLE;
+            codeMap["VIVAX_SIMPLE_MODEL"] = VIVAX_SIMPLE_MODEL;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -196,6 +197,13 @@ namespace OM { namespace util {
         incompatibilities[MOLINEAUX_PAIRWISE_SAMPLE]
             .set(FIRST_LOCAL_MAXIMUM_GAMMA)
             .set(MEAN_DURATION_GAMMA);
+        
+        incompatibilities[VIVAX_SIMPLE_MODEL]
+            .set( DUMMY_WITHIN_HOST_MODEL )
+            .set( EMPIRICAL_WITHIN_HOST_MODEL )
+            .set( MOLINEAUX_WITHIN_HOST_MODEL )
+            .set( PENNY_WITHIN_HOST_MODEL )
+            .set( IPTI_SP_MODEL );
         
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (optSet_bs [i] && (optSet_bs & incompatibilities[i]).any()) {

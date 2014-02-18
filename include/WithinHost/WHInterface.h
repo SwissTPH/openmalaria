@@ -83,8 +83,7 @@ public:
     virtual void importInfection() =0;
     /** Conditionally clears all infections. Not used with the PK/PD model.
      *
-     * If IPT isn't present, this literally removes all infections, both blood
-     * stage and liver stage (TODO: should it remove liver stage?).
+     * If IPT isn't present, this just calls effectiveTreatment().
      * 
      * When using the IPT model, this conditionally either does the above or
      * does nothing.

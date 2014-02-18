@@ -55,6 +55,7 @@ set (Model_CPP
   
   WithinHost/WHInterface.cpp
   WithinHost/WHFalciparum.cpp
+  WithinHost/WHVivax.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
   WithinHost/DescriptiveIPTWithinHost.cpp
