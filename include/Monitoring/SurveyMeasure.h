@@ -95,7 +95,15 @@ enum SurveyMeasure {
      * (with an "effect" element) will be reported. */
     nEPIVaccinations= 20,
     
-    /// all cause infant mortality rate
+    /** All cause infant mortality rate
+     * 
+     * Reports death rate of infants due to all causes (malaria as modelled
+     * plus fixed non-malaria attribution). Calculated via Kaplan-Meier method.
+     * Units: deaths per thousand births.
+     * 
+     * For more info, see ClinicalModel::infantAllCauseMort() (ClinicalModel.h,
+     * line 74).
+     */
     allCauseIMR= 21,
     
     /** Number of vaccine doses given via mass campaign.

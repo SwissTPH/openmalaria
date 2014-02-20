@@ -36,7 +36,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                           Time-step at which this replacement occurs, starting
                           from 0, the first intervention-period time-step.
                         </xs:documentation>
-                        <xs:appinfo>type:integer;name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -49,7 +49,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -85,7 +85,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                           Time-step at which this replacement occurs, starting
                           from 0, the first intervention-period time-step.
                         </xs:documentation>
-                        <xs:appinfo>type:integer;name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -98,7 +98,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -162,7 +162,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -205,7 +205,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -248,7 +248,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+              <xs:appinfo>name:Name of intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -284,7 +284,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Name of set of interventions</xs:documentation>
-        <xs:appinfo>type:string;name:Name of intervention set;</xs:appinfo>
+        <xs:appinfo>name:Name of intervention set;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -374,7 +374,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="name" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>Name of intervention</xs:documentation>
-              <xs:appinfo>type:string;name:Intervention name;</xs:appinfo>
+              <xs:appinfo>name:Intervention name;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -412,7 +412,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   parameters, and drugs are administered whenever the test
                   outcome is positive.
                 </xs:documentation>
-                <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
+                <xs:appinfo> name:Diagnostic (5-day);</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="drugEffect" type="om:DrugWithCompliance"/>
@@ -443,7 +443,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:attribute name="name" type="xs:string" use="optional">
                 <xs:annotation>
                   <xs:documentation>Name of set of interventions</xs:documentation>
-                  <xs:appinfo>type:string;name:Intervention;</xs:appinfo>
+                  <xs:appinfo>name:Intervention;</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
             </xs:extension>
@@ -561,7 +561,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 This does not prevent re-recruitment in the case that recruitment settings could
                 conceivably recruit the same individual twice.
               </xs:documentation>
-              <xs:appinfo>type:boolean;name:Time to first infection only;</xs:appinfo>
+              <xs:appinfo>name:Time to first infection only;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -587,7 +587,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           A short name or code identifying the intervention effect
           (used to refer to this effect when describing an intervention).
         </xs:documentation>
-        <xs:appinfo>type:string;name:Effect ID;</xs:appinfo>
+        <xs:appinfo>name:Effect ID;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="name" type="xs:string" use="optional">
@@ -595,7 +595,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An informal name/description for the effect
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name of effect;</xs:appinfo>
+        <xs:appinfo>name:Name of effect;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -634,7 +634,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Name of intervention (e.g. larviciding, sugar bait).
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+        <xs:appinfo>name:Name of intervention;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -664,7 +664,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Maximum age of eligible individuals (defaults to 100)
         </xs:documentation>
-        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
+        <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="minAge" type="xs:double" default="0">
@@ -672,7 +672,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Minimum age of eligible individuals (defaults to 0)
         </xs:documentation>
-        <xs:appinfo>type:double;units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
+        <xs:appinfo>units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="coverage" type="xs:double" use="required">
@@ -856,7 +856,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of age specific intervention
               </xs:documentation>
-              <xs:appinfo>type:string;name:Age specific intervention;</xs:appinfo>
+              <xs:appinfo>name:Age specific intervention;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="freq" type="xs:double" use="required">
@@ -1332,7 +1332,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-              <xs:appinfo>type:string;name:Mosquito species</xs:appinfo>
+              <xs:appinfo>name:Mosquito species</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="propActive" type="xs:double" default="1">
@@ -1345,7 +1345,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               relative attractiveness and survival factors are
               base*(1-propActing) + intervention_factor*propActing.
             </xs:documentation>
-              <xs:appinfo>type:double;units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1359,12 +1359,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Value expected to be at least 0. Negative values are not
           necessarily invalid, but allow nets to increase transmission.
         </xs:documentation>
-        <xs:appinfo>type:double;units:none;name:Insecticide factor;max:1</xs:appinfo>
+        <xs:appinfo>units:none;name:Insecticide factor;max:1</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>type:double;units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
+        <xs:appinfo>units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1496,7 +1496,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Name of the species/subspecies/variant.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Species/subspecies/variant name</xs:appinfo>
+        <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
