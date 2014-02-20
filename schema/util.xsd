@@ -3,7 +3,9 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- standard types used -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
+           xmlns:om="http://openmalaria.org/schema/scenario_32"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:complexType name="OptionSet">
     <xs:sequence>
       <xs:element name="option" minOccurs="0" maxOccurs="unbounded">

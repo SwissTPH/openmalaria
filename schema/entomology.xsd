@@ -2,12 +2,14 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
+           xmlns:om="http://openmalaria.org/schema/scenario_32"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="entoData">
     <xs:sequence>
       <xs:choice>
-        <xs:element name="nonVector" type="nonVector">
+        <xs:element name="nonVector" type="om:nonVector">
           <xs:annotation>
             <xs:documentation>
               Description of transmission setting for models without vector control interventions
@@ -23,7 +25,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:annotation>
           <xs:complexType>
             <xs:sequence>
-              <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="anophelesParams" />
+              <xs:element maxOccurs="unbounded" minOccurs="1" name="anopheles" type="om:anophelesParams" />
               <xs:element maxOccurs="unbounded" minOccurs="0" name="nonHumanHosts">
                 <xs:complexType>
                   <xs:attribute name="name" type="xs:string" use="required">
@@ -89,7 +91,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="nonVector">
     <xs:sequence>
-      <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="EIRDaily"/>
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="EIRDaily" type="om:EIRDaily"/>
     </xs:sequence>
     <xs:attribute name="eipDuration" type="xs:int" use="required">
       <xs:annotation>
@@ -311,37 +313,37 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:all>
-            <xs:element name="mosqRestDuration" type="intValue">
+            <xs:element name="mosqRestDuration" type="om:intValue">
               <xs:annotation>
                 <xs:documentation>name:Duration of the resting period of the vector (days);</xs:documentation>
                 <xs:appinfo>type:integer;units:Days;name:Duration of the resting period of the vector;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="extrinsicIncubationPeriod" type="intValue">
+            <xs:element name="extrinsicIncubationPeriod" type="om:intValue">
               <xs:annotation>
                 <xs:documentation>name:Extrinsic incubation period (days)</xs:documentation>
                 <xs:appinfo>type:integer;units:Days;name:Extrinsic incubation period;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqLaidEggsSameDayProportion" type="inputValue">
+            <xs:element name="mosqLaidEggsSameDayProportion" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Proportion of mosquitoes host seeking on same day as ovipositing</xs:documentation>
                 <xs:appinfo>type:double;units:Proportion;name:Proportion of mosquitoes host seeking on same day as ovipositing;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqSeekingDuration" type="inputValue">
+            <xs:element name="mosqSeekingDuration" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Duration of the host-seeking period of the vector (days)</xs:documentation>
                 <xs:appinfo>type:double;units:Days;name:Duration of the host-seeking period of the vector;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqSurvivalFeedingCycleProbability" type="inputValue">
+            <xs:element name="mosqSurvivalFeedingCycleProbability" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito survives the feeding cycle</xs:documentation>
                 <xs:appinfo>type:double;units:Proportion;name:Probability that the mosquito survives the feeding cycle;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="availabilityVariance" type="inputValue">
+            <xs:element name="availabilityVariance" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Variance in availability rate of humans to
                 mosquitoes. The mean rate is calculated based on other parameters.
@@ -349,31 +351,31 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:Variance in human availability rate</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbBiting" type="BetaMeanSample">
+            <xs:element name="mosqProbBiting" type="om:BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito succesfully bites chosen host</xs:documentation>
                 <xs:appinfo>type:BetaMeanSample;name:Probability that the mosquito succesfully bites chosen host;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbFindRestSite" type="BetaMeanSample">
+            <xs:element name="mosqProbFindRestSite" type="om:BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
                 <xs:appinfo>type:BetaMeanSample;name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbResting" type="BetaMeanSample">
+            <xs:element name="mosqProbResting" type="om:BetaMeanSample">
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
                 <xs:appinfo>type:BetaMeanSample;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbOvipositing" type="inputValue">
+            <xs:element name="mosqProbOvipositing" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Probability of a mosquito successfully laying eggs given that it has rested</xs:documentation>
                 <xs:appinfo>name:Probability of a mosquito successfully laying eggs given that it has rested;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqHumanBloodIndex" type="inputValue">
+            <xs:element name="mosqHumanBloodIndex" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>The proportion of resting mosquitoes which fed on human blood during the last feed.</xs:documentation>
                 <xs:appinfo>type:double;units:Proportion;name:Human blood index;</xs:appinfo>
@@ -397,7 +399,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:all>
-            <xs:element name="eggStage" type="MosqStage">
+            <xs:element name="eggStage" type="om:MosqStage">
               <xs:annotation>
                 <xs:documentation>
                   Parameters for the egg stage of development
@@ -408,7 +410,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="larvalStage">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="MosqStage">
+                  <xs:extension base="om:MosqStage">
                     <xs:annotation>
                       <xs:documentation>
                         Parameters for the larval stage of development
@@ -452,7 +454,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:complexContent>
               </xs:complexType>
             </xs:element>
-            <xs:element name="pupalStage" type="MosqStage">
+            <xs:element name="pupalStage" type="om:MosqStage">
               <xs:annotation>
                 <xs:documentation>
                   Parameters for the pupal stage of development
@@ -460,7 +462,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>type:list of elements;name:Pupal stage;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
+            <xs:element name="femaleEggsLaidByOviposit" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>
                   The total number of female eggs laid by a female
@@ -499,7 +501,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:all>
-            <xs:element name="developmentDuration" type="intValue">
+            <xs:element name="developmentDuration" type="om:intValue">
               <xs:annotation>
                 <xs:documentation>
                 Duration from egg laying to emergence in days.
@@ -507,7 +509,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>type:integer; units: Days; name:Duration; min:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="developmentSurvival" type="inputValue">
+            <xs:element name="developmentSurvival" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>
                 Probability that mosquito survives from the egg being laid to emergence,
@@ -516,7 +518,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>type:double; units:Proportion; name:Probability of survival; min:0; max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="femaleEggsLaidByOviposit" type="inputValue">
+            <xs:element name="femaleEggsLaidByOviposit" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>
                   The total number of female eggs laid by a female
@@ -536,7 +538,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:all>
-            <xs:element name="mosqRelativeEntoAvailability" type="inputValue">
+            <xs:element name="mosqRelativeEntoAvailability" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>
                   Relative availability of non-human hosts of type i to other
@@ -546,19 +548,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:Proportion;type:double; name:Relative availability of non-human host (ξ_i);</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbBiting" type="inputValue">
+            <xs:element name="mosqProbBiting" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully biting host</xs:documentation>
                 <xs:appinfo>units:Proportion;type:double;name:Probability of mosquito successfully biting host;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbFindRestSite" type="inputValue">
+            <xs:element name="mosqProbFindRestSite" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
                 <xs:appinfo>units:Proportion;type:double;name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="mosqProbResting" type="inputValue">
+            <xs:element name="mosqProbResting" type="om:inputValue">
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
                 <xs:appinfo>units:Proportion;type:double;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>

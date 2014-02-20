@@ -2,14 +2,16 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
+           xmlns:om="http://openmalaria.org/schema/scenario_32"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="monitoring">
     <xs:sequence>
       <xs:element name="continuous" minOccurs="0">
         <xs:complexType>
           <xs:complexContent>
-            <xs:extension base="OptionSet">
+            <xs:extension base="om:OptionSet">
               <xs:attribute name="period" type="xs:int" use="required">
                 <xs:annotation>
                   <xs:documentation>
@@ -41,7 +43,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:complexContent>
         </xs:complexType>
       </xs:element>
-      <xs:element name="SurveyOptions" type="OptionSet">
+      <xs:element name="SurveyOptions" type="om:OptionSet">
         <xs:annotation>
           <xs:documentation>
             List of all active survey options. See include/Survey.h for a list of
@@ -83,7 +85,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="ageGroup" type="ageGroup">
+      <xs:element name="ageGroup" type="om:ageGroup">
         <xs:annotation>
           <xs:documentation>
             List of age groups included in demography or surveys
@@ -121,7 +123,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>type:list of elements;name:list of age groups;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group" type="groupBounds" />
+      <xs:element maxOccurs="unbounded" name="group" type="om:groupBounds" />
     </xs:sequence>
     <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>

@@ -2,7 +2,9 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
+           xmlns:om="http://openmalaria.org/schema/scenario_32"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="healthSystem.xsd"/>
   <xs:include schemaLocation="entomology.xsd"/>
   <xs:include schemaLocation="util.xsd"/>
@@ -20,7 +22,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="healthSystem">
+                  <xs:extension base="om:healthSystem">
                     <xs:annotation>
                       <xs:documentation>
                         A complete replacement health system. Replaces all previous properties.
@@ -68,7 +70,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="nonVector">
+                  <xs:extension base="om:nonVector">
                     <xs:annotation>
                       <xs:documentation>
                         Replacement transmission levels. Disables feedback of
@@ -125,7 +127,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:element name="rate" minOccurs="1" maxOccurs="unbounded">
                     <xs:complexType>
                       <xs:complexContent>
-                        <xs:extension base="inputValue">
+                        <xs:extension base="om:inputValue">
                           <xs:annotation>
                             <xs:documentation>A time-rate pair.</xs:documentation>
                             <xs:appinfo>name:Rate;units:Imported cases per thousand people per year;</xs:appinfo>
@@ -264,11 +266,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Using the latter would invalidate existing XMLs and cause excess.
             confusion. XSD 1.1 does not have this limitation but still has
             limited support. -->
-            <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="VectorIntervention"/>
+            <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="om:VectorIntervention"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="human" type="HumanInterventions" minOccurs="0">
+      <xs:element name="human" type="om:HumanInterventions" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
             Encapsulates all interventions whose effects are specific to the
@@ -288,7 +290,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="HumanInterventions">
     <xs:sequence>
-      <xs:element name="effect" minOccurs="0" maxOccurs="unbounded" type="HumanInterventionEffect">
+      <xs:element name="effect" minOccurs="0" maxOccurs="unbounded" type="om:HumanInterventionEffect">
         <xs:annotation>
           <xs:documentation>
             A description of an effect achieved by an intervention.
@@ -345,7 +347,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:attribute>
               </xs:complexType>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="continuousList">
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="om:continuousList">
             <xs:annotation>
                 <xs:documentation>List of ages at which deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
@@ -355,7 +357,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>type:list of elements;name:Age-based (continuous) deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="massListWithCum">
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="om:massListWithCum">
               <xs:annotation>
                 <xs:documentation>
                   List of timed deployments of the intervention (that is, of
@@ -399,7 +401,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="diagnostic" type="HSDiagnostic" minOccurs="0">
+            <xs:element name="diagnostic" type="om:HSDiagnostic" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                   Description of diagnostic used by mass treatment option
@@ -413,7 +415,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>type:string; name:Diagnostic (5-day);</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="drugEffect" type="DrugWithCompliance"/>
+            <xs:element name="drugEffect" type="om:DrugWithCompliance"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -437,7 +439,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:complexContent>
-            <xs:extension base="HSESCaseManagement">
+            <xs:extension base="om:HSESCaseManagement">
               <xs:attribute name="name" type="xs:string" use="optional">
                 <xs:annotation>
                   <xs:documentation>Name of set of interventions</xs:documentation>
@@ -448,7 +450,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:complexContent>
         </xs:complexType>
       </xs:element>
-      <xs:element name="PEV" type="vaccineDescription">
+      <xs:element name="PEV" type="om:vaccineDescription">
         <xs:annotation>
           <xs:documentation>
             Pre-erythrocytic vaccine (PEV): prevents a proportion of infections from commencing.
@@ -456,7 +458,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="BSV" type="vaccineDescription">
+      <xs:element name="BSV" type="om:vaccineDescription">
         <xs:annotation>
           <xs:documentation>
             Blood-stage vaccine (BSV): acts as a killing factor on blood-stage parasites
@@ -464,7 +466,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="TBV" type="vaccineDescription">
+      <xs:element name="TBV" type="om:vaccineDescription">
         <xs:annotation>
           <xs:documentation>
             Transmission-blocking vaccine (TBV): one minus this scales the probability of transmission to mosquitoes
@@ -472,7 +474,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="IPT" minOccurs="0" type="IPTDescription">
+      <xs:element name="IPT" minOccurs="0" type="om:IPTDescription">
         <xs:annotation>
           <xs:documentation>
             Description of IPT interventions.
@@ -480,7 +482,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Intermittent preventative treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="ITN" minOccurs="0" type="ITNDescription">
+      <xs:element name="ITN" minOccurs="0" type="om:ITNDescription">
         <xs:annotation>
           <xs:documentation>
             Description of bed-net interventions (ITNs, LLINs).
@@ -488,7 +490,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Bed nets;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="IRS" minOccurs="0" type="IRSDescription">
+      <xs:element name="IRS" minOccurs="0" type="om:IRSDescription">
         <xs:annotation>
           <xs:documentation>
             Description of indoor residual spraying interventions.
@@ -496,7 +498,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="GVI" minOccurs="0" type="GVIDescription">
+      <xs:element name="GVI" minOccurs="0" type="om:GVIDescription">
         <xs:annotation>
           <xs:documentation>
             Low-level description of intervention effects on vectors (i.e.
@@ -614,11 +616,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="description">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="anopheles" maxOccurs="unbounded" type="VectorSpeciesIntervention"/>
+            <xs:element name="anopheles" maxOccurs="unbounded" type="om:VectorSpeciesIntervention"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="timed" type="timedBaseList">
+      <xs:element minOccurs="0" name="timed" type="om:timedBaseList">
         <xs:annotation>
           <xs:documentation>
             List of timed vector population intervention deployment
@@ -684,9 +686,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="continuousList">
     <xs:sequence>
-      <xs:element name="restrictToCohort" type="RestrictToCohort" minOccurs="0"/>
+      <xs:element name="restrictToCohort" type="om:RestrictToCohort" minOccurs="0"/>
       <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="continuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="deploy" type="om:continuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="continuousDeployment">
@@ -729,12 +731,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="timedBaseList">
     <xs:sequence>
       <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="timedBase" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="deploy" type="om:timedBase" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="massListWithCum">
     <xs:sequence>
-      <xs:element name="restrictToCohort" minOccurs="0" type="RestrictToCohort"/>
+      <xs:element name="restrictToCohort" minOccurs="0" type="om:RestrictToCohort"/>
       <xs:element name="cumulativeCoverage" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
@@ -784,7 +786,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
       <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="mass" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="deploy" type="om:mass" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="RestrictToCohort">
@@ -812,7 +814,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Vaccine descriptions;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="decay" type="DecayFunction">
+      <xs:element name="decay" type="om:DecayFunction">
         <xs:annotation>
           <xs:documentation>
             Specification of decay of efficacy. Documentation: see DecayFunction type
@@ -821,7 +823,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Decay of effect;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="efficacyB" type="inputValue">
+      <xs:element name="efficacyB" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Measure of variation in vaccine efficacy: efficacy is sampled from
@@ -831,7 +833,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Positive real;min:0.001;max:1.00E+06;name:Variance parameter for vaccine efficacy;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="inputValue">
+      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Mean efficacy values before decay (see efficacyB and decay parameter
@@ -913,7 +915,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Description</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="usage" type="inputValue">
+      <xs:element name="usage" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
           Usage of nets by humans, from 0 to 1.
@@ -927,7 +929,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="holeRate" type="LognormalSample">
+      <xs:element name="holeRate" type="om:LognormalSample">
         <xs:annotation>
           <xs:documentation>
           The rate at which new holes are made in nets.
@@ -941,7 +943,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Holes per annum;min:0;name:Rate at which holes are made;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="ripRate" type="LognormalSample">
+      <xs:element name="ripRate" type="om:LognormalSample">
         <xs:annotation>
           <xs:documentation>
           Each existing hole has a probability of being ripped bigger according
@@ -957,7 +959,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Rips per existing hole per annum;min:0;name:Rate at which holes are enlarged;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="ripFactor" type="inputValue">
+      <xs:element name="ripFactor" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
           This factor expresses how important rips are in increasing the hole.
@@ -968,7 +970,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:none;min:0;name:Rip factor;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="initialInsecticide" type="NormalSample">
+      <xs:element name="initialInsecticide" type="om:NormalSample">
         <xs:annotation>
           <xs:documentation>
           The insecticide concentration of new nets is Gaussian distributed with
@@ -979,7 +981,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="insecticideDecay" type="DecayFunction">
+      <xs:element name="insecticideDecay" type="om:DecayFunction">
         <xs:annotation>
           <xs:documentation>
           Decay curve for insecticide content of nets. Documentation: see DecayFunction
@@ -997,7 +999,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:none;name:Decay of insecticide;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="attritionOfNets" type="DecayFunction">
+      <xs:element name="attritionOfNets" type="om:DecayFunction">
         <xs:annotation>
           <xs:documentation>
           Specifies the rate at which nets are disposed of over time.
@@ -1018,7 +1020,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:choice>
-              <xs:element name="deterrency" type="ITNDeterrency">
+              <xs:element name="deterrency" type="om:ITNDeterrency">
                 <xs:annotation>
                   <xs:documentation>
                   Effect of net on attractiveness of humans to mosquitoes relative to
@@ -1049,7 +1051,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:annotation>
                 <xs:complexType>
                   <xs:all>
-                    <xs:element name="entering" type="IRSDeterrency">
+                    <xs:element name="entering" type="om:IRSDeterrency">
                       <xs:annotation>
                         <xs:documentation>
                           pEnt represents the relative probability of entering due to
@@ -1060,7 +1062,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                         <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
                       </xs:annotation>
                     </xs:element>
-                    <xs:element name="attacking" type="ITNKillingEffect">
+                    <xs:element name="attacking" type="om:ITNKillingEffect">
                       <xs:annotation>
                         <xs:documentation>
                           pAtt represents the relative probability of attacking a human
@@ -1078,7 +1080,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:complexType>
               </xs:element>
             </xs:choice>
-            <xs:element name="preprandialKillingEffect" type="ITNKillingEffect">
+            <xs:element name="preprandialKillingEffect" type="om:ITNKillingEffect">
               <xs:annotation>
                 <xs:documentation>
                 Effect of net on survival mosquitoes as they seek to bite a human
@@ -1099,7 +1101,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="postprandialKillingEffect" type="ITNKillingEffect">
+            <xs:element name="postprandialKillingEffect" type="om:ITNKillingEffect">
               <xs:annotation>
                 <xs:documentation>
                 Effect of net on survival mosquitoes as they seek to escape from
@@ -1150,7 +1152,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="GVIDescription">
     <xs:sequence>
-      <xs:element name="decay" type="DecayFunction">
+      <xs:element name="decay" type="om:DecayFunction">
         <xs:annotation>
           <xs:documentation>
             Description of decay of all intervention effects.
@@ -1166,7 +1168,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="deterrency" type="inputValue" minOccurs="0">
+            <xs:element name="deterrency" type="om:inputValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on attractiveness of humans to mosquitoes relative to
@@ -1179,7 +1181,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="preprandialKillingEffect" type="inputValue" minOccurs="0">
+            <xs:element name="preprandialKillingEffect" type="om:inputValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to bite a human
@@ -1194,7 +1196,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="postprandialKillingEffect" type="inputValue" minOccurs="0">
+            <xs:element name="postprandialKillingEffect" type="om:inputValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to escape from
@@ -1243,7 +1245,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="initialInsecticide" type="NormalSample">
+      <xs:element name="initialInsecticide" type="om:NormalSample">
         <xs:annotation>
           <xs:documentation>
           The insecticide concentration of IRS (at time of spraying) is
@@ -1255,7 +1257,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:μg/cm²;min:0;name:Initial insecticide</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="insecticideDecay" type="DecayFunction">
+      <xs:element name="insecticideDecay" type="om:DecayFunction">
         <xs:annotation>
           <xs:documentation>
           Decay curve for insecticide content of IRS. Documentation: see DecayFunction
@@ -1270,7 +1272,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="deterrency" type="IRSDeterrency">
+            <xs:element name="deterrency" type="om:IRSDeterrency">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on attractiveness of humans to mosquitoes relative to
@@ -1284,7 +1286,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="preprandialKillingEffect" type="IRSKillingEffect">
+            <xs:element name="preprandialKillingEffect" type="om:IRSKillingEffect">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to bite a human
@@ -1305,7 +1307,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="postprandialKillingEffect" type="IRSKillingEffect">
+            <xs:element name="postprandialKillingEffect" type="om:IRSKillingEffect">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to escape from
@@ -1368,7 +1370,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="IRSKillingEffect">
     <xs:complexContent>
-      <xs:extension base="IRSDeterrency">
+      <xs:extension base="om:IRSDeterrency">
         <xs:attribute name="baseFactor" type="xs:double" use="required">
           <xs:annotation>
             <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
@@ -1379,7 +1381,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="ITNDeterrency">
     <xs:complexContent>
-      <xs:extension base="IRSDeterrency">
+      <xs:extension base="om:IRSDeterrency">
         <xs:attribute name="holeFactor" type="xs:double" use="required">
           <xs:annotation>
             <xs:documentation>
@@ -1409,7 +1411,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="ITNKillingEffect">
     <xs:complexContent>
-      <xs:extension base="ITNDeterrency">
+      <xs:extension base="om:ITNDeterrency">
         <xs:attribute name="baseFactor" type="xs:double" use="required">
           <xs:annotation>
             <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
@@ -1438,7 +1440,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="decay" type="DecayFunction"/>
+            <xs:element name="decay" type="om:DecayFunction"/>
           </xs:sequence>
           <xs:attribute name="initial" type="xs:double" use="required">
             <xs:annotation>
@@ -1458,7 +1460,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="decay" type="DecayFunction"/>
+            <xs:element name="decay" type="om:DecayFunction"/>
           </xs:sequence>
           <xs:attribute name="initial" type="xs:double" use="required">
             <xs:annotation>
@@ -1479,7 +1481,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="decay" type="DecayFunction"/>
+            <xs:element name="decay" type="om:DecayFunction"/>
           </xs:sequence>
           <xs:attribute name="initial" type="xs:double" use="required">
             <xs:annotation>

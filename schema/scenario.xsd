@@ -2,7 +2,9 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
+           xmlns:om="http://openmalaria.org/schema/scenario_32"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="demography.xsd"/>
   <xs:include schemaLocation="monitoring.xsd"/>
   <xs:include schemaLocation="interventions.xsd"/>
@@ -15,7 +17,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:annotation>
     <xs:complexType>
       <xs:all>
-        <xs:element name="demography" type="demography">
+        <xs:element name="demography" type="om:demography">
           <xs:annotation>
             <xs:documentation>
               Description of demography
@@ -23,7 +25,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>type:list of elements;name:Human age distribution;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="monitoring" type="monitoring">
+        <xs:element name="monitoring" type="om:monitoring">
           <xs:annotation>
             <xs:documentation>
               Description of surveys
@@ -31,7 +33,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>type:list of elements;name:Measures to be reported;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="interventions" type="interventions">
+        <xs:element name="interventions" type="om:interventions">
           <xs:annotation>
             <xs:documentation>
               List of interventions. Generally these are either point-time
@@ -42,7 +44,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>type:list of elements;name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="healthSystem" type="healthSystem">
+        <xs:element name="healthSystem" type="om:healthSystem">
           <xs:annotation>
             <xs:documentation>
               Description of health system.
@@ -50,7 +52,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>type:list of elements;name:Health system description;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="entomology" type="entoData">
+        <xs:element name="entomology" type="om:entoData">
           <xs:annotation>
             <xs:documentation>
               Description of entomological data
@@ -58,7 +60,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>type:list of elements;name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="pharmacology" type="pharmacology" minOccurs="0">
+        <xs:element name="pharmacology" type="om:pharmacology" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
               Drug model parameters
@@ -76,7 +78,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:annotation>
           <xs:complexType>
             <xs:all>
-              <xs:element name="ModelOptions" type="OptionSet">
+              <xs:element name="ModelOptions" type="om:OptionSet">
                 <xs:annotation>
                   <xs:documentation>
                     All model options (bug fixes, choices between models, etc.).                    
@@ -86,9 +88,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:appinfo>type:list of elements;name:Model Options;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="clinical" type="clinical" />
-              <xs:element name="human" type="human"/>
-              <xs:element name="parameters" type="parameters">
+              <xs:element name="clinical" type="om:clinical" />
+              <xs:element name="human" type="om:human"/>
+              <xs:element name="parameters" type="om:parameters">
                 <xs:annotation>
                   <xs:documentation>
                     Parameters of the epidemiological model
@@ -172,7 +174,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="parameters">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="parameter" type="parameter" />
+      <xs:element maxOccurs="unbounded" name="parameter" type="om:parameter" />
     </xs:sequence>
     <xs:attribute name="interval" type="xs:int" use="required">
       <xs:annotation>
@@ -204,7 +206,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Human;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="availabilityToMosquitoes" type="AgeGroupValues">
+      <xs:element name="availabilityToMosquitoes" type="om:AgeGroupValues">
         <xs:annotation>
           <xs:documentation>
             Availability of humans to mosquitoes relative to an adult, categorized by age group
@@ -221,7 +223,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:complexContent>
-            <xs:extension base="AgeGroupValues">
+            <xs:extension base="om:AgeGroupValues">
               <xs:attribute name="multStdDev" type="xs:double" use="required">
                 <xs:annotation>
                   <xs:documentation>

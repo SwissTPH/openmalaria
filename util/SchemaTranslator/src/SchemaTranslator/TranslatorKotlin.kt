@@ -149,8 +149,8 @@ abstract class Translator(input: InputSource, options: Options) {
         fun visit(node: Node){
             for (child in node.getChildNodes().toList()){
                 if (child.getNodeType() == nodeType &&
-                child.getNodeName()!!.trim() == name &&
-                child.getNodeValue()!!.trim() == "")
+                    child.getNodeName()!!.trim() == name &&
+                    child.getNodeValue()!!.trim() == "")
                 {
                     child.getParentNode()!!.removeChild(child)
                     // child was removed so list invalid; easiest is to start again:
@@ -495,15 +495,12 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
 
                 processDeployments(listOf(ident), elt, ident)
                 
-                System.out.println("Updating MDA")
                 val desc1d = getChildElementOpt(elt, "description")
                 if (desc1d != null ){
-                    System.out.println("Updating MDA — 1D")
                     val renamed = scenarioDocument.renameNode(desc1d, "", "MDA1D")!!
                     effect.appendChild(renamed)
                     interventions.removeChild(elt)
                 }else{
-                    System.out.println("Updating MDA — simple")
                     // no 1-day-TS description; add the new 5-day-TS drug description
                     val drugEffect = scenarioDocument.createElement("drugEffect")!!
                     elt.appendChild(drugEffect)
@@ -616,5 +613,12 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             if (opt.getAttribute("name") == "nMassVA")
                 opt.setAttribute("name", "nMassGVI");
         }
+        
+        scenarioElement.removeAttribute("xsi:noNamespaceSchemaLocation")
+        scenarioElement.setAttribute("xsi:schemaLocation",
+            "http://openmalaria.org/schema/scenario_32 scenario_32.xsd")
+        scenarioDocument.renameNode(scenarioElement, 
+            "http://openmalaria.org/schema/scenario_32", "om:scenario")
+        scenarioElement = scenarioDocument.getDocumentElement()!!
     }
 }
