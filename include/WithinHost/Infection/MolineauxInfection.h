@@ -74,6 +74,9 @@ private:
 	
 	/// boolean choosing between gamma and lognormal distribution for equation 11
 	static bool multi_factor_gamma;
+        
+        /// pairwise sample of case-specific P* parameters
+        static bool pairwise_PStar_sample;
 	//@}
 	
 	/** @brief q^(i+1) array
