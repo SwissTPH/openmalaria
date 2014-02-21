@@ -23,7 +23,6 @@
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "WithinHost/CommonWithinHost.h"
-#include "WithinHost/ProphylacticActionWithinHost.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
@@ -45,7 +44,7 @@ using namespace OM::util;
 bool opt_vivax_simple = false,
         opt_dummy_whm = false, opt_empirical_whm = false,
         opt_molineaux_whm = false, opt_penny_whm = false,
-        opt_common_whm = false, opt_proph_drug_model = false;
+        opt_common_whm = false;
 
 // -----  static functions  -----
 
@@ -73,14 +72,12 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
         }
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;
-        opt_proph_drug_model = util::ModelOptions::option( PROPHYLACTIC_DRUG_ACTION_MODEL );
     }
 }
 
 WHInterface* WHInterface::createWithinHostModel () {
     if( opt_vivax_simple ) return new WHVivax();
     if( opt_common_whm ) return new CommonWithinHost();
-    if( opt_proph_drug_model ) return new ProphylacticActionWithinHost();
     return new DescriptiveWithinHostModel();
 }
 

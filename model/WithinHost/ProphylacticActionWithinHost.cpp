@@ -21,7 +21,6 @@
 #include "WithinHost/ProphylacticActionWithinHost.h"
 
 #include "util/random.h"
-#include <boost/concept_check.hpp>
 
 namespace OM { namespace WithinHost {
     using namespace util;

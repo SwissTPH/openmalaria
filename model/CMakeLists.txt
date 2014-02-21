@@ -54,7 +54,6 @@ set (Model_CPP
   WithinHost/WHVivax.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
-  WithinHost/ProphylacticActionWithinHost.cpp
   WithinHost/Infection/Infection.cpp
   WithinHost/Infection/DescriptiveInfection.cpp
   WithinHost/Infection/DummyInfection.cpp

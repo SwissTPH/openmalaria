@@ -144,7 +144,7 @@ public:
     
     /// Special intervention: clears all immunity
     virtual void clearImmunity() =0;
-
+    
     // TODO: these shouldn't have to be exposed (perhaps use summarize to report the data):
     virtual double getCumulativeh() const;
     virtual double getCumulativeY() const;

@@ -98,11 +98,9 @@ public:
                 "least one timestep element" );
         }
         if( len > 1 ){
-            if( !util::ModelOptions::option( util::PROPHYLACTIC_DRUG_ACTION_MODEL ) )
+            if( true /*model not implemented*/ )
                 throw util::xml_scenario_error(
-                    "MDA with prophylactic effect (i.e. with more than one"
-                    " timestep element in drugEffect element) requires the"
-                    " PROPHYLACTIC_DRUG_ACTION_MODEL" );
+                    "MDA with prophylactic effect (unimplemented)" );
         }   
     }
     
