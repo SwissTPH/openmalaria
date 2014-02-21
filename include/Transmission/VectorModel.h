@@ -29,7 +29,9 @@ namespace scnXml {
   class Vector;
 }
 
-namespace OM { namespace Transmission {
+namespace OM {
+    class Population;
+namespace Transmission {
     using Anopheles::AnophelesModel;
     
 /** Transmission models, Chitnis et al.

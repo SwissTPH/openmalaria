@@ -83,6 +83,7 @@ namespace OM { namespace util {
         VectorFitting,
         InfLambda,
         NotImplemented,
+        WHFeatures,     // these are probably all code errors
         SwitchDefault,
         Max
     }; }

@@ -28,10 +28,10 @@
 #include "util/ModelOptions.h"
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
-#include "Clinical/Diagnostic.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
+#include "WithinHost/Diagnostic.h"
 #include "WithinHost/DescriptiveIPTWithinHost.h"
 #include <schema/healthSystem.h>
 #include <schema/interventions.h>
@@ -76,12 +76,9 @@ public:
         if( !mda.getDiagnostic().present() ){
             // Note: allow no description for now to avoid XML changes.
             //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
-            scnXml::HSDiagnostic diagnostic;
-            scnXml::Deterministic det(0.0);
-            diagnostic.setDeterministic(det);
-            this->diagnostic.init(diagnostic);
+            diagnostic.setDeterministic( 0.0 );
         }else{
-            diagnostic.init( mda.getDiagnostic().get() );
+            diagnostic.setXml( mda.getDiagnostic().get() );
         }
         const scnXml::DrugWithCompliance& drug = mda.getDrugEffect();
         double pCompliance = drug.getCompliance().getPCompliance();
@@ -122,10 +119,12 @@ public:
 	
         double pClearance = pClearanceByTime[0];
         if( pClearance >= 1.0 || util::random::bernoulli( pClearance ) ){
-            human.withinHostModel->clearAllInfections();
+            human.withinHostModel->clearInfections(false/*value doesn't matter*/);
         }
-        if( pClearanceByTime.size() > 1 )
-            human.withinHostModel->addProphylacticEffects( pClearanceByTime );
+        if( pClearanceByTime.size() > 1 ){
+            //TODO:...
+//             human.withinHostModel->addProphylacticEffects( pClearanceByTime );
+        }
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA; }
@@ -137,7 +136,7 @@ public:
 #endif
     
 private:
-    Clinical::Diagnostic diagnostic;
+    WithinHost::Diagnostic diagnostic;
     vector<double> pClearanceByTime;
 };
 

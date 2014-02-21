@@ -28,9 +28,12 @@
 #include <boost/ptr_container/ptr_list.hpp>
 #include <fstream>
 
-namespace scnXml{ class Scenario; }
-namespace OM
-{
+namespace scnXml{
+    class EntoData;
+    class Scenario;
+}
+namespace OM {
+    class Parameters;
 
 //! The simulated human population
 class Population

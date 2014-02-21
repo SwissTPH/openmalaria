@@ -31,7 +31,7 @@ namespace OM { namespace util {
     
     /** Flags signalling which versions of some models to use. */
     enum OptionCodes {
-	/** @brief Clinical episodes reduce the level of acquired immunity
+	/* @brief Clinical episodes reduce the level of acquired immunity
 	* 
 	* Effective cumulative exposure to blood stage parasites is reduced by a
 	* clinical sickness event, so that clinical bouts have a negative effect on
@@ -41,7 +41,7 @@ namespace OM { namespace util {
 	* 
 	* Default: Clinical events have no effect on immune status except
 	* secondarily via effects of treatment. */
-	PENALISATION_EPISODES = 0,
+// 	PENALISATION_EPISODES,
 	
 	/** @brief Baseline availability of humans is sampled from a gamma distribution
 	* Infections introduced by mass action with negative binomial
@@ -51,10 +51,10 @@ namespace OM { namespace util {
 	* in AJTMH 75 (suppl 2) pp11-18. */
 	NEGATIVE_BINOMIAL_MASS_ACTION,
 	
-	/** @brief An IPT model, no longer used
+	/* @brief An IPT model, no longer used
 	* 
 	* Does nothing if IPT is not present. */
-	ATTENUATION_ASEXUAL_DENSITY,
+// 	ATTENUATION_ASEXUAL_DENSITY,
 	
 	/** @brief Baseline availability of humans is sampled from a log normal distribution
 	* 
@@ -222,6 +222,10 @@ namespace OM { namespace util {
         /** Sample case-specific densities P*c and P*m as a pair from one of
          * the 35 patient records. */
         MOLINEAUX_PAIRWISE_SAMPLE,
+        
+        /** Use a simple Vivax model instead of Falciparum.
+         * TODO: description. */
+        VIVAX_SIMPLE_MODEL,
         
         /** Model allowing drugs to have prophylactic effect.
          * 

@@ -21,7 +21,7 @@
 #ifndef MO_PATHOGENISIS_STATE
 #define MO_PATHOGENISIS_STATE
 
-namespace OM { namespace Pathogenesis {
+namespace OM { namespace WithinHost { namespace Pathogenesis {
   /** Types of sickness; used by case management.
    *
    * Most values are flags which can be combined in any form. A few
@@ -65,5 +65,5 @@ namespace OM { namespace Pathogenesis {
     STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION
   };
 
-} }
+} } }
 #endif

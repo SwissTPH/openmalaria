@@ -45,7 +45,7 @@ void Episode::flush() {
 }
 
 
-void Episode::update (bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState)
+void Episode::update (bool inCohort, Monitoring::AgeGroup ageGroup, WHPathogenesis::State newState)
 {
     if (TimeStep::simulation > (_time + healthSystemMemory)) {
         report ();
@@ -55,7 +55,7 @@ void Episode::update (bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis
         _ageGroup = ageGroup;
         _state = newState;
     } else {
-        _state = Pathogenesis::State (_state | newState);
+        _state = WHPathogenesis::State (_state | newState);
     }
 }
 
@@ -64,9 +64,9 @@ void Episode::report () {
         return;
 
     // Reports malarial/non-malarial UC fever dependent on cause, not diagnosis.
-    if (_state & Pathogenesis::MALARIA) {
+    if (_state & WHPathogenesis::MALARIA) {
         // Malarial fevers: report bout
-        if (_state & Pathogenesis::COMPLICATED) {
+        if (_state & WHPathogenesis::COMPLICATED) {
             Surveys.at(_surveyPeriod)
             .reportSevereEpisodes (_ageGroup, 1);
         } else { // UC or UC2
@@ -75,43 +75,43 @@ void Episode::report () {
         }
 
         // Report outcomes of malarial fevers
-        if (_state & Pathogenesis::EVENT_IN_HOSPITAL) {
-            if (_state & Pathogenesis::DIRECT_DEATH) {
+        if (_state & WHPathogenesis::EVENT_IN_HOSPITAL) {
+            if (_state & WHPathogenesis::DIRECT_DEATH) {
                 Surveys.at(_surveyPeriod)
                 .reportDirectDeaths (_ageGroup, 1)
                 .reportHospitalDeaths (_ageGroup, 1);
-                if (_state & Pathogenesis::EVENT_FIRST_DAY)
+                if (_state & WHPathogenesis::EVENT_FIRST_DAY)
                     Surveys.at(_surveyPeriod)
                     .report_Clinical_FirstDayDeaths (_ageGroup, 1)
                     .report_Clinical_HospitalFirstDayDeaths (_ageGroup, 1);
             }
-            else if (_state & Pathogenesis::SEQUELAE) {
+            else if (_state & WHPathogenesis::SEQUELAE) {
                 Surveys.at(_surveyPeriod)
                 .reportSequelae (_ageGroup, 1)
                 .reportHospitalSequelae (_ageGroup, 1);
             }
-            else if (_state & Pathogenesis::RECOVERY)
+            else if (_state & WHPathogenesis::RECOVERY)
                 Surveys.at(_surveyPeriod)
                 .reportHospitalRecoveries (_ageGroup, 1);
         } else {
-            if (_state & Pathogenesis::DIRECT_DEATH) {
+            if (_state & WHPathogenesis::DIRECT_DEATH) {
                 Surveys.at(_surveyPeriod)
                 .reportDirectDeaths (_ageGroup, 1);
-                if (_state & Pathogenesis::EVENT_FIRST_DAY)
+                if (_state & WHPathogenesis::EVENT_FIRST_DAY)
                     Surveys.at(_surveyPeriod)
                     .report_Clinical_FirstDayDeaths (_ageGroup, 1);
             }
-            else if (_state & Pathogenesis::SEQUELAE)
+            else if (_state & WHPathogenesis::SEQUELAE)
                 Surveys.at(_surveyPeriod)
                 .reportSequelae (_ageGroup, 1);
             // Don't care about out-of-hospital recoveries
         }
-    } else if (_state & Pathogenesis::SICK) {
+    } else if (_state & WHPathogenesis::SICK) {
         // Report non-malarial fever and outcomes
         Surveys.at(_surveyPeriod)
         .reportNonMalariaFevers (_ageGroup, 1);
 
-        if (_state & Pathogenesis::DIRECT_DEATH) {
+        if (_state & WHPathogenesis::DIRECT_DEATH) {
             Surveys.at(_surveyPeriod)
             .reportNmfDeaths (_ageGroup, 1);
         }
@@ -126,7 +126,7 @@ void Episode::operator& (istream& stream) {
         _ageGroup & stream;
         int s;
         s & stream;
-        _state = Pathogenesis::State(s);
+        _state = WHPathogenesis::State(s);
     }
 }
 void Episode::operator& (ostream& stream) {

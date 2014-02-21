@@ -35,6 +35,7 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include <schema/scenario.h>
+#include "Population.h"
 
 #include <fstream>
 #include <gzstream/gzstream.h>
@@ -47,7 +48,7 @@ namespace OM {
 
 // -----  Set-up & tear-down  -----
 
-Simulator::Simulator( util::Checksum ck, const scnXml::Scenario scenario ) :
+Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     simPeriodEnd(0),
     totalSimDuration(0),
     phase(STARTING_PHASE),

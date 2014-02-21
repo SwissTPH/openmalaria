@@ -20,6 +20,7 @@
 
 #include "Host/NeonatalMortality.h"
 #include "Population.h"
+#include "WithinHost/WHInterface.h"
 #include "util/random.h"
 
 #include <cmath>
@@ -67,7 +68,7 @@ void NeonatalMortality::update (const Population& population) {
     //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
     // reporting, but the one used should be that used to parameterise this model
     nCounter ++;
-    if (iter->detectibleInfection())
+    if (iter->withinHostModel->diagnosticDefault())
       pCounter ++;
   }
   

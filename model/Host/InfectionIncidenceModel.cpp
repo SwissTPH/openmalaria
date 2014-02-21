@@ -25,7 +25,7 @@
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
 #include "util/errors.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 #include "Parameters.h"
 
 #include <stdexcept>
@@ -173,6 +173,8 @@ double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Tran
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
+    //TODO: is this equivalent to gsl_ran_lognormal?
+    //TODO: optimise the calculations on consts
   return random::sampleFromLogNormal(random::uniform_01(),
       log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
       InfectionrateShapeParam);
@@ -218,10 +220,10 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
   
   if (expectedNumInfections > 0.0000001){
     int n = random::poisson(expectedNumInfections);
-    if( n > WithinHost::WithinHostModel::MAX_INFECTIONS ){
+    if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
         // don't report: according to TS this is OK, and it generates a LOT of warnings
         // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
-        n = WithinHost::WithinHostModel::MAX_INFECTIONS;
+        n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
     human.getSurvey().reportNewInfections(human.getMonitoringAgeGroup(), n);
     ctsNewInfections += n;

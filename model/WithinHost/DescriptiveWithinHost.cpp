@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/DescriptiveWithinHost.h"
+#include "WithinHost/Diagnostic.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
@@ -35,13 +36,13 @@ extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
 // -----  Initialization  -----
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-        WithinHostModel()
+        WHFalciparum()
 {
     assert( TimeStep::interval == 5 );
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
-    clearAllInfections();
+    effectiveTreatment();       //TODO: this should happen implicitly
 }
 
 
@@ -54,7 +55,7 @@ void DescriptiveWithinHostModel::loadInfection(istream& stream) {
     infections.push_back(new DescriptiveInfection(stream));
 }
 
-void DescriptiveWithinHostModel::clearAllInfections() {
+void DescriptiveWithinHostModel::effectiveTreatment() {
     std::list<DescriptiveInfection*>::iterator inf;
     for (inf=infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
@@ -89,6 +90,9 @@ void DescriptiveWithinHostModel::importInfection(){
 void DescriptiveWithinHostModel::drugAction(){}
 
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
+    // Cache total density for infectiousness calculations
+    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
+    
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
     PopulationStats::totalInfections += nNewInfs;
@@ -120,9 +124,8 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // INNATE_MAX_DENS and MAX_DENS_CORRECTION would need to be required
         // (couldn't support old parameterisations using buggy versions of code
         // any more).
-        // IPT model would need to be overhauled; it might be possible to make
-        // a pseudo drug model and move SP code there and remove/generalise the
-        // rest.
+        // SP drug action and the PK/PD model would need to be abstracted
+        // behind a common interface.
         if ( (*inf)->expired() /* infection too old */
                 || eventSPClears(*inf) /* infection cleared by SP in IPT model */
            ) {
@@ -137,22 +140,18 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         double infStepMaxDens = timeStepMaxDensity;
         (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
 
-        IPTattenuateAsexualDensity (*inf);
-
         if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
         timeStepMaxDensity = infStepMaxDens;
 
-        totalDensity += (*inf)->getDensity();
-        (*inf)->determineDensityFinal ();
-        _cumulativeY += TimeStep::interval*(*inf)->getDensity();
+        double density = (*inf)->getDensity();
+        totalDensity += density;
+        _cumulativeY += TimeStep::interval * density;
 
         ++inf;
     }
     util::streamValidate( totalDensity );
     assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
-
-    IPTattenuateAsexualMinTotalDensity();
 }
 
 void DescriptiveWithinHostModel::addProphylacticEffects(const vector<double>& pClearanceByTime) {
@@ -162,28 +161,28 @@ void DescriptiveWithinHostModel::addProphylacticEffects(const vector<double>& pC
 
 // -----  Summarize  -----
 
-int DescriptiveWithinHostModel::countInfections (int& patentInfections) {
-    if (infections.empty()) return 0;
-    for (std::list<DescriptiveInfection*>::iterator inf=infections.begin();
-            inf != infections.end(); ++inf) {
-        if ((*inf)->getDensity() > detectionLimit)
-            patentInfections++;
+WHInterface::InfectionCount DescriptiveWithinHostModel::countInfections () const{
+    InfectionCount count;       // constructor initialises counts to 0
+    count.total = infections.size();
+    for (std::list<DescriptiveInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+        if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
+            count.patent += 1;
     }
-    return infections.size();
+    return count;
 }
 
 
 // -----  Data checkpointing  -----
 
 void DescriptiveWithinHostModel::checkpoint (istream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     for (int i=0; i<numInfs; ++i) {
         loadInfection(stream);  // create infections using a virtual function call
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     BOOST_FOREACH (DescriptiveInfection* inf, infections) {
         (*inf) & stream;
     }

@@ -18,11 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Pathogenesis/PathogenesisModel.h"
-#include "Pathogenesis/Pyrogen.h"
-#include "Pathogenesis/Predet.h"
-#include "Pathogenesis/Mueller.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/Pathogenesis/Submodels.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -32,8 +28,8 @@
 #include <cmath>
 using namespace std;
 
-namespace OM {
-namespace Pathogenesis {
+namespace OM { namespace WithinHost { namespace Pathogenesis {
+
 using namespace OM::util;
 
 //BEGIN static
@@ -43,8 +39,6 @@ double PathogenesisModel::comorbintercept_24;
 double PathogenesisModel::critAgeComorb_30;
 
 AgeGroupInterpolation* PathogenesisModel::NMF_incidence = AgeGroupInterpolation::dummyObject();
-AgeGroupInterpolation* PathogenesisModel::NMF_need_antibiotic = AgeGroupInterpolation::dummyObject();
-AgeGroupInterpolation* PathogenesisModel::MF_need_antibiotic = AgeGroupInterpolation::dummyObject();
 
 bool opt_predetermined_episodes = false, opt_mueller_pres_model = false;
 
@@ -74,14 +68,10 @@ void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinic
         }
         const scnXml::Clinical::NonMalariaFeversType& nmfDesc = clinical.getNonMalariaFevers().get();
         NMF_incidence = AgeGroupInterpolation::makeObject( nmfDesc.getIncidence(), "incidence" );
-        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc.getPrNeedTreatmentNMF(), "prNeedTreatmentNMF" );
-        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc.getPrNeedTreatmentMF(), "prNeedTreatmentMF" );
     }
 }
 void PathogenesisModel::cleanup() {
     AgeGroupInterpolation::freeObject( NMF_incidence );
-    AgeGroupInterpolation::freeObject( NMF_need_antibiotic );
-    AgeGroupInterpolation::freeObject( MF_need_antibiotic );
 }
 
 PathogenesisModel* PathogenesisModel::createPathogenesisModel(double cF) {
@@ -104,9 +94,8 @@ PathogenesisModel::PathogenesisModel(double cF) :
         _comorbidityFactor(cF)
 {}
 
-Pathogenesis::State PathogenesisModel::determineState (double ageYears, WithinHost::WithinHostModel& withinHostModel) {
-    double timeStepMaxDensity = withinHostModel.getTimeStepMaxDensity();
-    double prEpisode = getPEpisode(timeStepMaxDensity, withinHostModel.getTotalDensity());
+Pathogenesis::State PathogenesisModel::determineState (double ageYears, double timeStepMaxDensity, double endDensity) {
+    double prEpisode = getPEpisode(timeStepMaxDensity, endDensity);
     
     Pathogenesis::State ret = Pathogenesis::NONE;
 
@@ -152,5 +141,4 @@ void PathogenesisModel::checkpoint (ostream& stream) {
     _comorbidityFactor & stream;
 }
 
-}
-}
+} } }

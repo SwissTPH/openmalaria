@@ -31,7 +31,7 @@
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "WithinHost/Infection/Infection.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHFalciparum.h"
 
 #include "schema/pharmacology.h"
 
@@ -92,16 +92,16 @@ public:
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     static void Infection_init_NaN () {
 	Infection::latentp = TimeStep(0);
-	Infection::cumulativeYstar = numeric_limits<float>::quiet_NaN();
-	Infection::cumulativeHstar = numeric_limits<float>::quiet_NaN();
+	Infection::invCumulativeYstar = numeric_limits<double>::quiet_NaN();
+	Infection::invCumulativeHstar = numeric_limits<double>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
 	Infection::decayM = numeric_limits<double>::quiet_NaN();
     }
     static void Infection_init_5day () {
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
 	Infection::latentp = TimeStep(3);
-	Infection::cumulativeYstar = (float) 68564384.7102;
-	Infection::cumulativeHstar = (float) 71.676733;
+	Infection::invCumulativeYstar = 1.0 / 68564384.7102;
+	Infection::invCumulativeHstar = 1.0 / 71.676733;
 	Infection::alpha_m = 1.0 - exp(- 2.411434);
 	Infection::decayM = 2.717773;
     }
@@ -134,7 +134,7 @@ public:
     }
     
     // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes
-    static void setTotalParasiteDensity (WithinHostModel& whm, double density) {
+    static void setTotalParasiteDensity (WHFalciparum& whm, double density) {
 	whm.totalDensity = density;
     }
 };

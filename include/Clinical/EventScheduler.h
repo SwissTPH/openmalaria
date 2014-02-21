@@ -31,7 +31,7 @@
 
 namespace scnXml {
     class HSEventScheduler;
-    class Human;
+    class Model;
 }
 
 namespace OM {
@@ -49,11 +49,11 @@ using util::AgeGroupInterpolation;
 class ClinicalEventScheduler : public ClinicalModel
 {
 public:
-    static void init (const OM::Parameters& parameters, const scnXml::Human& human);
+    static void init (const OM::Parameters& parameters, const scnXml::Model& model);
     static void setParameters (const scnXml::HSEventScheduler& esData);
     static void cleanup ();
 
-    ClinicalEventScheduler (double cF, double tSF);
+    ClinicalEventScheduler (double tSF);
     ~ClinicalEventScheduler ();
     
     virtual bool notAtRisk();
@@ -125,11 +125,19 @@ private:
      * the case is not treated. */
     static AgeGroupInterpolation* severeNmfMortality;
     
+    /// Probability that an NMF needs antibiotic treatment and could lead to death.
+    static AgeGroupInterpolation* NMF_need_antibiotic;
+    /** Probability that a malarial fever classified as uncomplicated requires
+     * antibiotic treatment (and death could occur from non-malarial causes).
+     * Unclear whether using this at the same time as comorbidity parameters
+     * makes any sense. */
+    static AgeGroupInterpolation* MF_need_antibiotic;
+    
     // Note on memory usage: Pathogenesis::State is and enum (an int), so we
     // have a vtable followed by 3 ints, a double and a list. Alignment probably
     // wastes some space.
     /// Current state of sickness
-    Pathogenesis::State pgState;
+    WHPathogenesis::State pgState;
 
     /** Set to when a bout should start. If TimeStep::simulation equals this, a bout
      * is started (UC & severe behaviour different).

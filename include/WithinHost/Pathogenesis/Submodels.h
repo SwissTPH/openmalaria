@@ -18,18 +18,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_pyrogenMorb
-#define Hmod_pyrogenMorb
+#ifndef Hmod_WH_Path_Submodels
+#define Hmod_WH_Path_Submodels
 
 #include "Global.h"
-#include "Pathogenesis/PathogenesisModel.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 
 using namespace std;
 
-namespace OM { namespace Pathogenesis {
+namespace OM { namespace WithinHost { namespace Pathogenesis {
 
-/*! Pyrogenic threshold presentation model.
-*/
+/// Müller presentation model.
+class MuellerPathogenesis : public PathogenesisModel {
+public:
+  MuellerPathogenesis(double cF) :
+    PathogenesisModel(cF) {}
+  ~MuellerPathogenesis() {}
+  
+  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
+
+  // Static:
+  static void init( const Parameters& parameters );
+
+private:
+  ///@brief static vars set by init()
+  //@{
+  static double rateMultiplier_31;
+  static double densityExponent_32;
+  //@}
+};
+
+/// Pyrogenic threshold presentation model.
 class PyrogenPathogenesis : public PathogenesisModel {
 protected:
   //!critical density for fever (clinical episodes)
@@ -44,7 +63,7 @@ public:
   virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
   
   // Static:
-  static void init(const OM::Parameters& parameters);
+  static void init( const OM::Parameters& parameters );
   
 protected:
     
@@ -66,5 +85,15 @@ private:
   //@}
 };
 
-} }
+/// Predetermined episodes presentation model.
+class PredetPathogenesis : public PyrogenPathogenesis {
+public:
+  PredetPathogenesis (double cF) :
+    PyrogenPathogenesis(cF) {}
+  ~PredetPathogenesis() {}
+  
+  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
+};
+
+} } }
 #endif

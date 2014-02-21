@@ -22,6 +22,7 @@
 #include "Host/Human.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 #include "schema/interventions.h"
 #include "util/StreamValidator.h"
 #include "Monitoring/Surveys.h"
@@ -86,6 +87,8 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription& vd, Types type)
 {
     if( active )
         throw util::unimplemented_exception( "multiple vaccine interventions for the same type of vaccine" );
+    if( type == BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
+        throw util::unimplemented_exception( "blood stage vaccines (BSV) cannot be used with vivax model" );
     active = true;
     
     if( reportType == NumVaccineTypes /* the initial value */ ){

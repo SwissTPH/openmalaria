@@ -28,6 +28,7 @@
 #include "interventions/ITN.h"
 #include "interventions/HumanInterventionEffects.hpp"
 #include "interventions/Deployments.hpp"
+#include "WithinHost/Diagnostic.h"
 
 namespace OM { namespace interventions {
 

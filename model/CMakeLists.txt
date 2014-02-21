@@ -24,12 +24,6 @@ set (Model_CPP
   Clinical/ImmediateOutcomes.cpp
   Clinical/Episode.cpp
   Clinical/parser.cpp
-  Clinical/Diagnostic.cpp
-  
-  Pathogenesis/PathogenesisModel.cpp
-  Pathogenesis/Mueller.cpp
-  Pathogenesis/Pyrogen.cpp
-  Pathogenesis/Predet.cpp
   
   PkPd/PkPdModel.cpp
   #PkPd/HoshenPkPdModel.cpp
@@ -55,7 +49,9 @@ set (Model_CPP
   #Transmission/Anopheles/ResourceFitter.cpp
   Transmission/Anopheles/PerHost.cpp
   
-  WithinHost/WithinHostModel.cpp
+  WithinHost/WHInterface.cpp
+  WithinHost/WHFalciparum.cpp
+  WithinHost/WHVivax.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
   WithinHost/ProphylacticActionWithinHost.cpp
@@ -65,6 +61,10 @@ set (Model_CPP
   WithinHost/Infection/EmpiricalInfection.cpp
   WithinHost/Infection/MolineauxInfection.cpp
   WithinHost/Infection/PennyInfection.cpp
+  WithinHost/WHVivax.cpp
+  WithinHost/Pathogenesis/PathogenesisModel.cpp
+  WithinHost/Pathogenesis/Submodels.cpp
+  WithinHost/Diagnostic.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp

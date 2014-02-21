@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/CommonWithinHost.h"
+#include "WithinHost/Diagnostic.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
@@ -35,12 +36,13 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 // -----  Initialization  -----
 
 CommonWithinHost::CommonWithinHost() :
-        WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
+        WHFalciparum(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
     assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }
 
 CommonWithinHost::~CommonWithinHost() {
+    //TODO: this should all happen implicitly
     delete pkpdModel;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
@@ -49,7 +51,7 @@ CommonWithinHost::~CommonWithinHost() {
 
 // -----  Simple infection adders/removers  -----
 
-void CommonWithinHost::clearAllInfections() {
+void CommonWithinHost::effectiveTreatment() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
     }
@@ -84,6 +86,9 @@ void CommonWithinHost::importInfection(){
 // -----  Density calculations  -----
 
 void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
+    // Cache total density for infectiousness calculations
+    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
+    
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
     PopulationStats::totalInfections += nNewInfs;
@@ -144,18 +149,19 @@ void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceBy
 
 // -----  Summarize  -----
 
-int CommonWithinHost::countInfections (int& patentInfections) {
-    if (infections.empty()) return 0;
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if ((*inf)->getDensity() > detectionLimit)
-            patentInfections++;
+WHInterface::InfectionCount CommonWithinHost::countInfections () const{
+    InfectionCount count;       // constructor initialises counts to 0
+    count.total = infections.size();
+    for (std::list<CommonInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+        if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
+            count.patent += 1;
     }
-    return infections.size();
+    return count;
 }
 
 
 void CommonWithinHost::checkpoint (istream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     (*pkpdModel) & stream;
     for (int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
@@ -164,7 +170,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     (*pkpdModel) & stream;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;

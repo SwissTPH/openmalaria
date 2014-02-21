@@ -24,7 +24,7 @@
 #include "Global.h"
 #include "Parameters.h"
 #include "Monitoring/Survey.h"
-#include "Pathogenesis/State.h"
+#include "WithinHost/Pathogenesis/State.h"
 #include "util/AgeGroupInterpolation.h"
 
 namespace scnXml{
@@ -32,11 +32,7 @@ namespace scnXml{
     class Clinical;
 }
 
-namespace OM {
-namespace WithinHost {
-class WithinHostModel;
-}
-namespace Pathogenesis {
+namespace OM { namespace WithinHost { namespace Pathogenesis {
 using util::AgeGroupInterpolation;
 
 /*! PathogenesisModel abstract base class.
@@ -46,7 +42,6 @@ class PathogenesisModel {
 public:
     /// Calls static init on correct PathogenesisModel.
     static void init( const Parameters& parameters, const scnXml::Clinical& clinical );
-    static void init_NMF( const scnXml::HSESNMF& nmfDesc );
     static void cleanup();
 
     /** Create a sub-class instance, dependant on global options.
@@ -63,18 +58,8 @@ public:
      *
      * May introduce severe or uncomplicated cases of malaria, as well as non-
      * malaria fevers. */
-    State determineState(double ageYears, WithinHost::WithinHostModel& withinHostModel);
+    State determineState(double ageYears, double timeStepMaxDensity, double endDensity);
     
-    /** Given a non-malaria fever, return the probability of it requiring
-     * treatment. */
-    inline double pNmfRequiresTreatment(double ageYears, bool isMalarial){
-        if (isMalarial) {
-            return MF_need_antibiotic->eval( ageYears );
-        }else{
-            return NMF_need_antibiotic->eval( ageYears );
-        }
-    }
-
     /** Summarize PathogenesisModel details
      *
      * Only PyrogenPathogenesis implements this; other models don't have anything
@@ -107,13 +92,6 @@ private:
     static double comorbintercept_24;
     /// Rate of Non-Malaria Fever incidence by age. Non-seasonal.
     static AgeGroupInterpolation* NMF_incidence;
-    /// Probability that an NMF needs antibiotic treatment and could lead to death.
-    static AgeGroupInterpolation* NMF_need_antibiotic;
-    /** Probability that a malarial fever classified as uncomplicated requires
-     * antibiotic treatment (and death could occur from non-malarial causes).
-     * Unclear whether using this at the same time as comorbidity parameters
-     * makes any sense. */
-    static AgeGroupInterpolation* MF_need_antibiotic;
     //@}
 
 protected:
@@ -123,6 +101,5 @@ protected:
     double _comorbidityFactor;
 };
 
-}
-}
+} } }
 #endif

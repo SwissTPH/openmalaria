@@ -36,9 +36,9 @@ namespace OM { namespace util {
 	
     public:
 	OptionCodeMap () {
-	    codeMap["PENALISATION_EPISODES"] = PENALISATION_EPISODES;
+// 	    codeMap["PENALISATION_EPISODES"] = PENALISATION_EPISODES;
 	    codeMap["NEGATIVE_BINOMIAL_MASS_ACTION"] = NEGATIVE_BINOMIAL_MASS_ACTION;
-	    codeMap["ATTENUATION_ASEXUAL_DENSITY"] = ATTENUATION_ASEXUAL_DENSITY;
+	    // codeMap["ATTENUATION_ASEXUAL_DENSITY"] = ATTENUATION_ASEXUAL_DENSITY;
 	    codeMap["LOGNORMAL_MASS_ACTION"] = LOGNORMAL_MASS_ACTION;
 	    codeMap["NO_PRE_ERYTHROCYTIC"] = NO_PRE_ERYTHROCYTIC;
 	    codeMap["MAX_DENS_CORRECTION"] = MAX_DENS_CORRECTION;
@@ -73,14 +73,19 @@ namespace OM { namespace util {
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
             codeMap["MOLINEAUX_PAIRWISE_SAMPLE"]=MOLINEAUX_PAIRWISE_SAMPLE;
             codeMap["PROPHYLACTIC_DRUG_ACTION_MODEL"]=PROPHYLACTIC_DRUG_ACTION_MODEL;
+            codeMap["VIVAX_SIMPLE_MODEL"] = VIVAX_SIMPLE_MODEL;
 	}
 	
 	OptionCodes operator[] (const string s) {
 	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
 	    if (codeIt == codeMap.end()) {
 		ostringstream msg;
-		msg << "Unrecognised model option: ";
-		msg << s;
+                if( s == "PENALISATION_EPISODES" || s == "ATTENUATION_ASEXUAL_DENSITY" ){
+                    msg << "Please use schema 31 or earlier to use option "
+                        << s << "; it is not available in later versions.";
+                }else{
+                    msg << "Unrecognised model option: " << s;
+                }
 		throw xml_scenario_error(msg.str());
 	    }
 	    return codeIt->second;
@@ -204,6 +209,13 @@ namespace OM { namespace util {
             .set(PROPHYLACTIC_DRUG_ACTION_MODEL);
         
         
+        incompatibilities[VIVAX_SIMPLE_MODEL]
+            .set( DUMMY_WITHIN_HOST_MODEL )
+            .set( EMPIRICAL_WITHIN_HOST_MODEL )
+            .set( MOLINEAUX_WITHIN_HOST_MODEL )
+            .set( PENNY_WITHIN_HOST_MODEL )
+            .set( IPTI_SP_MODEL );
+        
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (options [i] && (options & incompatibilities[i]).any()) {
 		ostringstream msg;
@@ -250,7 +262,6 @@ namespace OM { namespace util {
         }else if( TimeStep::interval == 1 ){
             bitset<NUM_OPTIONS> require5DayTS;
             require5DayTS
-                .set( ATTENUATION_ASEXUAL_DENSITY )
                 .set( IPTI_SP_MODEL )
                 .set( REPORT_ONLY_AT_RISK );
             

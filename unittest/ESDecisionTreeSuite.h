@@ -25,14 +25,13 @@
 
 #include <cxxtest/TestSuite.h>
 #include "Clinical/ESCaseManagement.h"
-#include "WithinHost/WithinHostModel.h"
 #include "util/random.h"
 #include "UnittestUtil.h"
 #include <limits>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
-using namespace OM::Pathogenesis;
+using namespace OM::WithinHost::Pathogenesis;
 using namespace OM::WithinHost;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
@@ -49,7 +48,8 @@ public:
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
-        whm = WithinHostModel::createWithinHostModel();
+        whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel() );
+        ETS_ASSERT( whm != 0 );
 	hd = new ESHostData( numeric_limits< double >::quiet_NaN(), *whm, NONE );
 
 	UnittestUtil::EmpiricalWHM_setup();
@@ -462,7 +462,7 @@ public:
     
 private:
     ESDecisionValueMap* dvMap;
-    WithinHostModel* whm;
+    WHFalciparum* whm;
     ESHostData* hd;
 };
 

@@ -1050,11 +1050,9 @@
   </pharmacology>
   <model>
     <ModelOptions>
-      <option name="MAX_DENS_CORRECTION" value="true"/>
       <option name="MOLINEAUX_WITHIN_HOST_MODEL" value="true"/>
       <option name="INCLUDES_PK_PD" value="true"/>
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-      <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="0"/>
     <human>

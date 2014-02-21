@@ -41,7 +41,10 @@ enum SurveyMeasure {
     /** The number of human hosts with an infection (patent or not) on the
      * reporting timestep */
     nInfect = 1,
-    /// Expected number of infected hosts
+    /** Expected number of infected hosts
+     * 
+     * This is the sum of the probabilities of each host having had at least
+     * one infection in his/her lifetime. */
     nExpectd= 2,
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */
@@ -52,8 +55,8 @@ enum SurveyMeasure {
     /**Sum of the logarithm of the parasite density of hosts with detectible parasite density. */
     sumlogDens= 5,
     
-    /** The sum of the all infections (detectable or not) across all human
-     * hosts */
+    /** The total number of infections in the population: includes both blood
+     * and liver stages. */
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *

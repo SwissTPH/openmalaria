@@ -25,7 +25,7 @@
 #include "schema/interventions.h"
 #include <limits>
 
-namespace OM { namespace Clinical {
+namespace OM { namespace WithinHost {
     
     class Diagnostic {
     public:
@@ -36,13 +36,28 @@ namespace OM { namespace Clinical {
         {}
         
         /** Set parameters from an XML element. */
-        void init( const scnXml::HSDiagnostic& elt );
+        void setXml( const scnXml::HSDiagnostic& elt );
+        /** Set deterministic with a given detection limit. Note that the
+         * test uses "greater than or equal to", thus using a limit of 0 makes
+         * the test always positive. */
+        void setDeterministic( double limit );
         
         /** Use the test.
          * 
          * @param x Current parasite density in parasites per µL
          * @returns True if outcome is positive. */
         bool isPositive( double x ) const;
+        
+        /** The default diagnostic, set from the XML's detectionLimit.
+         * 
+         * TODO: this should be configured more flexibly in the XML. */
+        static Diagnostic default_;
+        /** The diagnostic configured for use with MSAT.
+         * 
+         * If not configured but MDA is used in the scenario, this always
+         * returns true. If no MDA or MSAT is used, it may always return false.
+         */
+        static Diagnostic mda;
         
     private:
         // either not-a-number indicating a deterministic test, or specificity

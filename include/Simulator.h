@@ -22,18 +22,25 @@
 #define Hmod_Simulator
 
 #include "Global.h"
-#include "Population.h"
 #include "util/BoincWrapper.h"
+#include <memory>
 using namespace std;
 
-namespace scnXml{ class Monitoring; }
+namespace scnXml{
+    class Monitoring;
+    class Scenario;
+}
 namespace OM {
+namespace interventions{
+    class InterventionManager;
+}
+class Population;
     
 //! Main simulation class
 class Simulator{
 public: 
     //!  Inititalise all step specific constants and variables.
-    Simulator( util::Checksum ck, const scnXml::Scenario scenario );
+    Simulator( util::Checksum ck, const scnXml::Scenario& scenario );
     ~Simulator();
     
     //! Entry point to simulation.

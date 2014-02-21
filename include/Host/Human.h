@@ -23,7 +23,6 @@
 #include "interventions/Vaccine.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/Vaccine.h"
 #include "interventions/Cohort.h"
@@ -33,12 +32,15 @@ namespace scnXml {
     class Scenario;
 }
 namespace OM {
-    namespace Transmission {
-	class TransmissionModel;
-    }
-    namespace Clinical {
-	class ClinicalModel;
-    }
+namespace Transmission {
+    class TransmissionModel;
+}
+namespace Clinical {
+    class ClinicalModel;
+}
+namespace WithinHost {
+    class WHInterface;
+}
     class Population;
 namespace Host {
 
@@ -78,18 +80,13 @@ public:
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
       monitoringAgeGroup & stream;
-      _ylag & stream;
       _dateOfBirth & stream;
       _vaccine & stream;
-      _probTransmissionToMosquito & stream;
       nextCtsDist & stream;
       cohorts & stream;
       lastDeployments & stream;
   }
   //@}
-  
-  /** Update infectiousness to mosquitoes. */
-  void updateInfectiousness();
   
   /** Main human update.
    *
@@ -115,9 +112,7 @@ public:
   bool needsRedeployment( size_t effect_index, TimeStep maxAge );
   
   /// Resets immunity
-  inline void clearImmunity() {
-      withinHostModel->clearImmunity();
-  }
+  void clearImmunity();
   
   /// Infect the human (with an imported infection).
   void addInfection();
@@ -139,11 +134,6 @@ public:
   
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
-  
-  /** Does the Human have a detectible infection? */
-  inline bool detectibleInfection () const {
-    return withinHostModel->parasiteDensityDetectible();
-  }
   
   /** Return true if human is a member of the cohort.
    * 
@@ -192,18 +182,10 @@ public:
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
   
-  /** Return the infectiousness of this human to biting mosquitoes.
-   * 
-   * Returns the value for the last time-step on which updateInfectiousness
-   * has been called. */
-  inline double probTransmissionToMosquito() const {
-    return _probTransmissionToMosquito;
-  }
-  
   ///@brief Access to sub-models
   //@{
   /// The WithinHostModel models parasite density and immunity
-  inline const WithinHost::WithinHostModel& getWithinHostModel () const{
+  inline const WithinHost::WHInterface& getWithinHostModel () const{
       return *withinHostModel;
   }
   
@@ -227,12 +209,6 @@ public:
   
   static void clear();
   //@}
-  
-private:
-    void updateInfection(Transmission::TransmissionModel*, double ageYears);
-    
-    void clearInfection(WithinHost::Infection *iCurrent);
-    
     
 public:
   /** @brief Models
@@ -243,7 +219,7 @@ public:
   Transmission::PerHost perHostTransmission;
   
   /// The WithinHostModel models parasite density and immunity
-  WithinHost::WithinHostModel *withinHostModel;
+  WithinHost::WHInterface *withinHostModel;
   
 private:
   /// The InfectionIncidenceModel translates per-host EIR into new infections
@@ -259,17 +235,8 @@ private:
   Monitoring::AgeGroup monitoringAgeGroup;
   
   /// Vaccines
+  //TODO: could move TBV code to WHFalciparum, where the efficacy is now used
   interventions::PerHumanVaccine _vaccine;
-  
-  /** Total asexual blood stage density over last 20 days (uses samples from
-   * 10, 15 and 20 days ago).
-   *
-   * _ylag[mod(TimeStep::simulation, _ylagLen)] corresponds to the density from the
-   * previous time step (once updateInfection has been called). */
-  vector<double> _ylag;
-  /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
-  /// set by initHumanParameters
-  static int _ylagLen;
   
   //!Date of birth, time step since start of warmup
   TimeStep _dateOfBirth;
@@ -277,8 +244,6 @@ private:
   /// The next continuous distribution in the series
   uint32_t nextCtsDist;
   
-  /// Cached value of calcProbTransmissionToMosquito; checkpointed
-  double _probTransmissionToMosquito;
   
   //TODO(performance): are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
   /// The set of cohorts (intervention indexes) to which this human is a member

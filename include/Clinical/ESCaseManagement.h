@@ -25,8 +25,7 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "Clinical/ESDecisionTree.h"    // needed for ESDecisionMap
 #include "Clinical/parser.h"
-#include "Pathogenesis/State.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
 
 #include <cassert>
@@ -44,7 +43,7 @@ namespace scnXml{
     class HSESCaseManagement;
 }
 namespace OM { namespace Clinical {
-    using WithinHost::WithinHostModel;
+    using WithinHost::WHInterface;
     
 /// Auxilliary output from running case management
 struct CMAuxOutput {

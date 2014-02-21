@@ -26,16 +26,17 @@
 
 namespace OM { namespace WithinHost {
     
-float Infection::cumulativeYstar;
-float Infection::cumulativeHstar;
+double Infection::invCumulativeYstar;
+double Infection::invCumulativeHstar;
 double Infection::alpha_m;
 double Infection::decayM;
 TimeStep Infection::latentp( TimeStep::never );
 
 void Infection::init (const OM::Parameters& parameters, int latentP) {
   latentp=TimeStep(latentP);
-  cumulativeYstar = (float) parameters[Parameters::CUMULATIVE_Y_STAR];
-  cumulativeHstar = (float) parameters[Parameters::CUMULATIVE_H_STAR];
+  // calculate inverses here, so we can use multiplication later (faster):
+  invCumulativeYstar = 1.0 / parameters[Parameters::CUMULATIVE_Y_STAR];
+  invCumulativeHstar = 1.0 / parameters[Parameters::CUMULATIVE_H_STAR];
   alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
   decayM = parameters[Parameters::DECAY_M];
 }
@@ -54,9 +55,8 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
     dY=1.0;
     dH=1.0;
   } else {
-      //NOTE: multiplication is usually faster than division so could store inverse of the "star" parameters and multiply here:
-    dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
-    dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
+    dH=1.0 / (1.0 + (cumulativeh-1.0) * invCumulativeHstar);
+    dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) * invCumulativeYstar);
   }
   dA = 1.0 - alpha_m * exp(-decayM * ageInYears);
   double ret = std::min(dY*dH*dA, 1.0);

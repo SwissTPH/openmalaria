@@ -293,7 +293,10 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
 
 
 // Every TimeStep::interval days:
-void AnophelesModel::advancePeriod (const OM::Population& population, size_t sIndex, bool isDynamic) {
+void AnophelesModel::advancePeriod (const OM::Population& population,
+                                     vector<double>& popProbTransmission,
+                                     size_t sIndex,
+                                     bool isDynamic) {
     transmission.emergence->update();
     
     /* Largely equations correspond to Nakul Chitnis's model in
@@ -340,14 +343,15 @@ void AnophelesModel::advancePeriod (const OM::Population& population, size_t sIn
     // P_dif; here we assume that P_E is constant.
     double tsP_df = 0.0;
     double tsP_dif = 0.0;
-    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
+    size_t i = 0;
+    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
         tsP_df += prod;
-        tsP_dif += prod * h->probTransmissionToMosquito();
+        tsP_dif += prod * popProbTransmission[i];
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {

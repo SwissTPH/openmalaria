@@ -198,9 +198,10 @@ public:
 	// "result" decision is optimised out.
 	
 	UnittestUtil::EmpiricalWHM_setup();	// use a 1-day-TS model
-	WithinHostModel* whm = WithinHostModel::createWithinHostModel();
+	WHFalciparum* whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel() );
+        ETS_ASSERT( whm != 0 );
 	UnittestUtil::setTotalParasiteDensity( *whm, numeric_limits< double >::infinity() );	// infinite, which means P(true outcome) should be 1.0 with an RDT test
-	ESHostData hd( 16., *whm, OM::Pathogenesis::NONE );
+	ESHostData hd( 16., *whm, OM::WithinHost::Pathogenesis::NONE );
 	ESDecisionValue outcome = dMap.determine( hd );
 	delete whm;
 	

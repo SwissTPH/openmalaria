@@ -19,6 +19,7 @@
  */
 
 #include "Host/ImportedInfections.h"
+#include "Host/Human.h"
 #include "util/random.h"
 #include "Population.h"
 

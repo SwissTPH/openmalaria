@@ -97,9 +97,14 @@ bool DescriptiveIPTInfection::eventSPClears (TimeStep _lastSPDose) {
     if(TimeStep::simulation - _startdate < latentp)
 	return false;	// don't consider pre-patent infections
     
-    return
-	(TimeStep::simulation - _lastSPDose <= DescriptiveIPTInfection::genotypes[proteome_ID].proph)
-	&& (random::uniform_01() <= DescriptiveIPTInfection::genotypes[proteome_ID].ACR);
+    // outside prophylactic period
+    if( TimeStep::simulation - _lastSPDose > DescriptiveIPTInfection::genotypes[proteome_ID].proph )
+        return false;
+    
+    // random chance of clearance (in original models, the probability is one
+    // for all genotypes with prophylactic period greater than a single
+    // timestep)
+    return random::bernoulli( DescriptiveIPTInfection::genotypes[proteome_ID].ACR );
 }
 
 double DescriptiveIPTInfection::asexualAttenuation () {

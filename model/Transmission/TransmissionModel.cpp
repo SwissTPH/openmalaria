@@ -22,6 +22,8 @@
 #include "Transmission/VectorModel.h"
 #include "Transmission/PerHost.h"
 
+#include "Population.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
@@ -145,7 +147,8 @@ double TransmissionModel::updateKappa (const Population& population) {
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
-        t *= h->probTransmissionToMosquito();
+        t *= h->withinHostModel->probTransmissionToMosquito( h->getAgeInTimeSteps(),
+                                                             h->getVaccine().getEfficacy( interventions::Vaccine::TBV ) );
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;

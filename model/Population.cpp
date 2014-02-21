@@ -26,9 +26,9 @@
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
+#include "WithinHost/WHInterface.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
-#include "Pathogenesis/PathogenesisModel.h"
 #include "PkPd/PkPdModel.h"
 
 #include "util/errors.h"
@@ -196,11 +196,6 @@ void Population::update1()
     // (until humans old enough to be pregnate get updated and can be infected).
     Host::NeonatalMortality::update (*this);
     
-    // Human::updateInfectiousness() needs to be updated before vectorUpdate()
-    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        iter->updateInfectiousness();
-    }
-    
     // This should be called before humans contract new infections in the simulation step.
     // This needs the whole population (it is an approximation before all humans are updated).
     _transmissionModel->vectorUpdate (*this);
@@ -282,7 +277,7 @@ void Population::ctsRecentBirths (ostream& stream){
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->getWithinHostModel().parasiteDensityDetectible() )
+        if( iter->getWithinHostModel().diagnosticDefault() )
             ++patent;
     }
     stream << '\t' << patent;

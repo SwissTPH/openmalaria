@@ -56,7 +56,7 @@ public:
   bool eventSPClears (TimeStep _lastSPDose);
   
   /// Return: _SPattenuate == 1. Name by DH.
-  bool doSPAttenuation () { return _SPattenuate == 1; }
+  bool doSPAttenuation () const { return _SPattenuate == 1; }
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   TimeStep getAsexualAttenuationEndDate () {

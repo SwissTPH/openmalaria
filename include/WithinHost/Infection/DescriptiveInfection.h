@@ -87,9 +87,6 @@ public:
     void determineDensities(double ageInYears, double cumulativeh,
                             double cumulativeY, double &timeStepMaxDensity,
                             double innateImmSurvFact, double BSVEfficacy);
-    /** Final part of determineDensities calculation. Could be combined if not
-     * using the IPT model. */
-    void determineDensityFinal ();
     
     /** Decide on an infection duration and return it.
      * 

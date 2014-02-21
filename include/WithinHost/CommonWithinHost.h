@@ -22,7 +22,7 @@
 #define Hmod_CommonWithinHost
 
 #include "Global.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/CommonInfection.h"
 #include "PkPd/PkPdModel.h"
 
@@ -36,7 +36,7 @@ namespace OM { namespace WithinHost {
  * models, but encapsulates nearly all the within-host (non-infection) code
  * required by the Dummy and Empirical within-host models.
  */
-class CommonWithinHost : public WithinHostModel
+class CommonWithinHost : public WHFalciparum
 {
 public:
     CommonWithinHost();
@@ -44,7 +44,7 @@ public:
     
     
     virtual void importInfection();
-    virtual void clearAllInfections();
+    virtual void effectiveTreatment();
     
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
     virtual void clearImmunity();
@@ -65,7 +65,7 @@ public:
     //@}
     
 protected:
-    virtual int countInfections (int& patentInfections);
+    virtual InfectionCount countInfections () const;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

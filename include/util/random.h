@@ -70,6 +70,20 @@ namespace random {
     /** This function returns an integer from 0 to 1-n, where every value has
      * equal probability of being sampled. */
     int uniform (int n);
+    
+    /** Return a variate sampled from the exponential distribution, whose PDF
+     * is: pdf(x) = exp(-x/mean) / mean */
+    double exponential( double mean );
+    
+    /**
+     * Return a variate sampled from the Weibull distribution.
+     * 
+     * The PDF is k · x^{k-1} exp{-(x/λ)^k} / λ^k
+     * 
+     * @param lambda (λ) is the scale parameter
+     * @param k is the shape parameter
+     */
+    double weibull( double lambda, double k );
     //@}
 }
 } }
