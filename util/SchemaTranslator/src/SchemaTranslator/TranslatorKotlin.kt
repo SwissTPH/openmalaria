@@ -243,7 +243,14 @@ abstract class Translator(input: InputSource, options: Options) {
             ++schemaVersion
             schemaFileName = genSchemaName(schemaVersion)
             scenarioElement.setAttribute("schemaVersion", Integer.toString(schemaVersion))
-            scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation", schemaFileName)
+            if (schemaVersion < 32){
+                scenarioElement.setAttribute("xsi:noNamespaceSchemaLocation", schemaFileName)
+            }else{
+                // From version 32, we use an explicit namespace:
+                scenarioElement.setAttribute("xsi:schemaLocation",
+                    "http://openmalaria.org/schema/scenario_" + Integer.toString(schemaVersion)
+                    + " " + schemaFileName)
+            }
 
             val translateMeth : String = "translate" + (schemaVersion - 1) + "To" + schemaVersion
             val method : Method? = cls.getMethod(translateMeth)
@@ -614,9 +621,9 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 opt.setAttribute("name", "nMassGVI");
         }
         
+        // From version 32, we use an explicit namespace; delete the old here,
+        // the new is set by translateAndValidate()
         scenarioElement.removeAttribute("xsi:noNamespaceSchemaLocation")
-        scenarioElement.setAttribute("xsi:schemaLocation",
-            "http://openmalaria.org/schema/scenario_32 scenario_32.xsd")
         scenarioDocument.renameNode(scenarioElement, 
             "http://openmalaria.org/schema/scenario_32", "om:scenario")
         scenarioElement = scenarioDocument.getDocumentElement()!!
