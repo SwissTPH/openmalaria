@@ -25,11 +25,9 @@
 namespace OM { namespace WithinHost {
 
 Diagnostic Diagnostic::default_;
-Diagnostic Diagnostic::mda;
 
 void Diagnostic::setDeterministic(double limit){
-    if( density == density )
-        throw util::unimplemented_exception( "multiple MDA interventions" );
+    assert( density != density );       // multiple initialisations
     specificity = numeric_limits<double>::quiet_NaN();
     density = limit;
 }

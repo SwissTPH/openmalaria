@@ -107,7 +107,6 @@ public:
     virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);
     
     virtual bool diagnosticDefault() const;
-    virtual bool diagnosticMDA() const;
 
     virtual Pathogenesis::State determineMorbidity( double ageYears );
     

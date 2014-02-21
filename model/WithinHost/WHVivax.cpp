@@ -177,9 +177,6 @@ bool WHVivax::diagnosticDefault() const{
     }
     return false;
 }
-bool WHVivax::diagnosticMDA() const{
-    return diagnosticDefault();
-}
 
 Pathogenesis::State WHVivax::determineMorbidity(double ageYears){
     return morbidity;

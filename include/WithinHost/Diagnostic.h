@@ -52,12 +52,6 @@ namespace OM { namespace WithinHost {
          * 
          * TODO: this should be configured more flexibly in the XML. */
         static Diagnostic default_;
-        /** The diagnostic configured for use with MSAT.
-         * 
-         * If not configured but MDA is used in the scenario, this always
-         * returns true. If no MDA or MSAT is used, it may always return false.
-         */
-        static Diagnostic mda;
         
     private:
         // either not-a-number indicating a deterministic test, or specificity

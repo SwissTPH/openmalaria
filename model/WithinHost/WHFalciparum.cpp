@@ -156,9 +156,7 @@ double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double t
 bool WHFalciparum::diagnosticDefault() const{
     return Diagnostic::default_.isPositive( totalDensity );
 }
-bool WHFalciparum::diagnosticMDA() const{
-    return Diagnostic::mda.isPositive( totalDensity );
-}
+
 Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
     Pathogenesis::State state =
             pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );

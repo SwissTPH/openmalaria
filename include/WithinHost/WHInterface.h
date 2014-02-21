@@ -123,15 +123,6 @@ public:
      */
     virtual bool diagnosticDefault() const =0;
     
-    /** Simulate use of a diagnostic test, using the parameters defined for use
-     * with MSAT. Does not report for costing purposes.
-     * 
-     * @returns true when the diagnostic is positive
-     * 
-     * TODO: this should be generalised and used for more than just MDA.
-     */
-    virtual bool diagnosticMDA() const =0;
-    
     /** Use the pathogenesis model to determine, based on infection status
      * and random draw, this person't morbidity.
      * 

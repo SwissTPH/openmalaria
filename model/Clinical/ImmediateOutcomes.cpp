@@ -33,7 +33,6 @@ double ClinicalImmediateOutcomes::probGetsTreatment[3];
 double ClinicalImmediateOutcomes::probParasitesCleared[3];
 double ClinicalImmediateOutcomes::cureRate[3];
 
-extern bool opt_penalisation_episodes;
 
 // -----  static init  -----
 

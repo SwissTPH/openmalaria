@@ -62,7 +62,6 @@ public:
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
     virtual bool diagnosticDefault() const;
-    virtual bool diagnosticMDA() const;
 
     virtual Pathogenesis::State determineMorbidity( double ageYears );
 
