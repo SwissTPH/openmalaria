@@ -49,7 +49,7 @@ public:
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
     virtual void clearImmunity();
     
-    virtual void update (int nNewInfs, double ageInYears, double BSVEfficacy);
+    virtual void update (int nNewInfs, double ageInYears, double bsvFactor);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     

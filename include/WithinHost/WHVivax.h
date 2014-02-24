@@ -98,13 +98,13 @@ public:
     virtual ~WHVivax();
     //@}
     
-    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const;
+    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
     
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
     
     virtual void importInfection();
     
-    virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);
+    virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
     
     virtual bool diagnosticDefault() const;
 

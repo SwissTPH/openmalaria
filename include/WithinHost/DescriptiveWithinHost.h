@@ -45,7 +45,7 @@ public:
   virtual void effectiveTreatment();
   virtual void clearImmunity();
   
-  virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);
+  virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
   
   virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
   

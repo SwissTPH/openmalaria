@@ -82,11 +82,11 @@ public:
      * @param timeStepMaxDensity (In-out param) Used to return the maximum
      *  parasite density over a 5-day interval.
      * @param innateImmSurvFact Density multiplier for innate immunity.
-     * @param BSVEfficacy Density multiplier for Blood-Stage Vaccine effect.
+     * @param bsvFactor Density multiplier for Blood-Stage Vaccine effect.
      */
     void determineDensities(double ageInYears, double cumulativeh,
                             double cumulativeY, double &timeStepMaxDensity,
-                            double innateImmSurvFact, double BSVEfficacy);
+                            double innateImmSurvFact, double bsvFactor);
     
     /** Decide on an infection duration and return it.
      * 

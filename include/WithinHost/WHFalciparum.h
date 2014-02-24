@@ -55,7 +55,7 @@ public:
     virtual ~WHFalciparum();
     //@}
     
-    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const;
+    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
     
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
     

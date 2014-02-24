@@ -85,7 +85,7 @@ void CommonWithinHost::importInfection(){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
+void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor) {
     // Cache total density for infectiousness calculations
     _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
     
@@ -113,7 +113,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
     _cumulativeh += nNewInfs;
 
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
-        double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
+        double survivalFactor = bsvFactor * _innateImmSurvFact;
         survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY);
         survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
         

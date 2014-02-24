@@ -116,12 +116,12 @@ WHVivax::~WHVivax(){
 
 }
 
-double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvEfficacy) const{
+double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvFactor) const{
     if( !diagnosticDefault() ) return 0;        // no blood stage infections: no transmission
     
     // Otherwise we have at least one blood stage. We use a simple model and
     // ignore lag, the effect of Primaquine, exact densities, and recombination.
-    return probPatentInfectMosquitoes * (1.0 - tbvEfficacy );
+    return probPatentInfectMosquitoes * tbvFactor;
 }
 
 bool WHVivax::summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup){
@@ -143,7 +143,7 @@ void WHVivax::importInfection(){
     infections.resize( infections.size() + 1 );
 }
 
-void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
+void WHVivax::update(int nNewInfs, double ageInYears, double){
     // create new infections, letting the constructor do the initialisation work:
     infections.resize( infections.size() + nNewInfs );
     

@@ -78,7 +78,7 @@ public:
      * Calculates the value during the call, which is expensive (cache externally
      * if the value is needed multiple times). */
     //TODO: per genotype? (for LSTM's spread of resistance modelling)
-    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const =0;
+    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const =0;
     
     /// @returns true if host has patent parasites
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) =0;
@@ -109,8 +109,8 @@ public:
      *
      * @param nNewInfs Number of inoculations this time-step
      * @param ageInYears Age of human
-     * @param BSVEfficacy Efficacy of blood-stage vaccine */
-    virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy) =0;
+     * @param bsvFactor Parasite survival factor for blood-stage vaccines */
+    virtual void update(int nNewInfs, double ageInYears, double bsvFactor) =0;
 
     // TODO: these should not be exposed outsite the withinhost models,
     // but must be until the 1-day time step case management models are updated

@@ -125,8 +125,8 @@ class PerHumanVaccine {
 public:
     PerHumanVaccine();
     
-    /** Get the efficacy of the vaccine (0 for no effect, 1 for full effect). */
-    double getEfficacy( Vaccine::Types type )const;
+    /** Get one minus the efficacy of the vaccine (1 for no effect, 0 for full effect). */
+    double getFactor( Vaccine::Types type )const;
     
     void possiblyVaccinate( const Host::Human& human,
                            Deployment::Method method,

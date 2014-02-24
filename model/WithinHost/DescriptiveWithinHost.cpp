@@ -89,7 +89,7 @@ void DescriptiveWithinHostModel::importInfection(){
 
 void DescriptiveWithinHostModel::drugAction(){}
 
-void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
+void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor) {
     // Cache total density for infectiousness calculations
     _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
     
@@ -138,7 +138,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // Should be: infStepMaxDens = 0.0, but has some history.
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
-        (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, BSVEfficacy);
+        (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);

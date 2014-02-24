@@ -207,7 +207,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
   }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-    expectedNumInfections *= (1.0 - human.getVaccine().getEfficacy( interventions::Vaccine::PEV ));
+    expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
   
   //Update pre-erythrocytic immunity
   _cumulativeEIRa+=effectiveEIR;

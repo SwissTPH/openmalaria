@@ -106,7 +106,7 @@ WHFalciparum::~WHFalciparum()
 {
 }
 
-double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvEfficacy ) const{
+double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const{
     /* This model (often referred to as the gametocyte model) was designed for
     5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
     for 1-day timesteps to avoid having to design and analyse a new model.
@@ -148,9 +148,9 @@ double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double t
     transmit=std::min(transmit, 1.0);
     
     //    Include here the effect of transmission-blocking vaccination
-    double probTransmissionToMosquito = transmit * (1.0 - tbvEfficacy );
-    util::streamValidate( probTransmissionToMosquito );
-    return probTransmissionToMosquito;
+    double result = transmit * tbvFactor;
+    util::streamValidate( result );
+    return result;
 }
 
 bool WHFalciparum::diagnosticDefault() const{

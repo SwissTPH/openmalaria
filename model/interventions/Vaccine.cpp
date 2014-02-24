@@ -118,9 +118,9 @@ PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( Vaccine::Types type ) :
         hetSample = Vaccine::types[type].decayFunc->hetSample();
 }
 
-double PerHumanVaccine::getEfficacy( Vaccine::Types type ) const{
+double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
     TimeStep age = TimeStep::simulation - types[type].timeLastDeployment;
-    return types[type].initialEfficacy *
+    return 1.0 - types[type].initialEfficacy *
         Vaccine::types[type].decayFunc->eval( age, types[type].hetSample );
 }
 

@@ -143,7 +143,7 @@ void DescriptiveInfection::determineDensities(double ageInYears,
                                               double cumulativeY,
                                               double &timeStepMaxDensity,
                                               double innateImmSurvFact,
-                                              double BSVEfficacy)
+                                              double bsvFactor)
 {
     // Age of blood stage infection (starts latentp intervals after inoculation):
     TimeStep infage = TimeStep::simulation - _startdate - latentp;
@@ -203,9 +203,8 @@ void DescriptiveInfection::determineDensities(double ageInYears,
     if (bugfix_innate_max_dens) timeStepMaxDensity *= innateImmSurvFact;
     
     //Include here the effect of blood stage vaccination
-    double factor = 1.0 - BSVEfficacy;
-    _density *= factor;
-    timeStepMaxDensity *= factor;
+    _density *= bsvFactor;
+    timeStepMaxDensity *= bsvFactor;
     
     _cumulativeExposureJ += TimeStep::interval * _density;
 }
