@@ -21,6 +21,9 @@
 #define OM_INTERVENTIONS_INTERFACES
 
 #include "Global.h"
+#include <limits>
+
+namespace scnXml{ class DeploymentBase; }
 
 namespace OM {
     namespace Host {
@@ -52,6 +55,14 @@ namespace Effect { enum Type {
     CLEAR_IMMUNITY,     // reset accumulated immunity to zero
 }; }
 
+/** Specifies limits on the number of existing doses when deciding whether to
+ * vaccinate a human. */
+struct VaccineLimits{
+    VaccineLimits() : minPrevDoses( 0 ), maxCumDoses( std::numeric_limits<uint32_t>::max() ) {}
+    void set( const scnXml::DeploymentBase& );
+    uint32_t minPrevDoses, maxCumDoses;
+};
+
 /** A description of one effect of a human intervention.
  * 
  * Note that one "effect" can have several "actions", but that deployment and
@@ -65,7 +76,8 @@ public:
      * @param human Individual receiving the intervention
      * @param method Channel of deployment (mass, continuous)
      */
-    virtual void deploy( Host::Human& human, Deployment::Method method ) const =0;
+    virtual void deploy( Host::Human& human, Deployment::Method method,
+        VaccineLimits vaccLimits ) const =0;
     
     /** Get the effect index. */
     inline size_t getIndex()const{ return index; }
@@ -103,7 +115,8 @@ public:
     inline void addEffect( const HumanInterventionEffect *effect ){ effects.push_back( effect ); }
     
     /** Deploy all effects to a pre-selected human. */
-    void deploy( Host::Human& human, Deployment::Method method ) const;
+    void deploy( Host::Human& human, Deployment::Method method,
+        VaccineLimits vaccLimits ) const;
     
     /** Sort effects according to a standard order.
      * 

@@ -289,9 +289,9 @@
         <effect id="TBV"/>
         <effect id="PEV"/>
         <continuous>
-          <deploy coverage="0.95" targetAgeYrs="0.0833"/>
-          <deploy coverage="0.95" targetAgeYrs="0.17"/>
-          <deploy coverage="0.95" targetAgeYrs="0.25"/>
+          <deploy coverage="0.95" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
+          <deploy coverage="0.95" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
+          <deploy coverage="0.95" targetAgeYrs="0.25" vaccMaxCumDoses="3" vaccMinPrevDoses="2"/>
         </continuous>
         <timed>
           <deploy coverage="0.95" time="1"/>

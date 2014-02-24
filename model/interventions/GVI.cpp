@@ -47,7 +47,7 @@ GVIEffect::GVIEffect( size_t index, const scnXml::GVIDescription& elt,
     effectsByIndex[index] = this;
 }
 
-void GVIEffect::deploy( Host::Human& human, Deployment::Method method )const{
+void GVIEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployEffect(*this);
     if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassGVI( human.getMonitoringAgeGroup(), 1 );

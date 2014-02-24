@@ -30,7 +30,7 @@ class CohortSelectionEffect : public HumanInterventionEffect {
 public:
     CohortSelectionEffect( size_t index, const scnXml::Cohort& cohort );
     
-    virtual void deploy( Host::Human& human, Deployment::Method method ) const;
+    virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits ) const;
     
     virtual Effect::Type effectType() const;
     

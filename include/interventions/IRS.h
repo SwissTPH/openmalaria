@@ -40,7 +40,7 @@ public:
     IRSEffect( size_t index, const scnXml::IRSDescription& elt,
         const map<string,size_t>& species_name_map );
     
-    virtual void deploy( Host::Human& human, Deployment::Method method )const;
+    virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
     
     virtual Effect::Type effectType() const;
     

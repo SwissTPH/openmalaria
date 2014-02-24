@@ -138,7 +138,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 human.getIntervention().begin(),
                 end = human.getIntervention().end(); it != end; ++it )
         {
-            list<Vaccine::Types> vaccineEffects;      // for vaccine EPI deployment
             const scnXml::Intervention& elt = *it;
             // 2.a intervention effects
             HumanIntervention *intervention = new HumanIntervention();
@@ -155,10 +154,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 }
                 const HumanInterventionEffect* effect = &humanEffects[result->second];
                 intervention->addEffect( effect );
-                const VaccineEffect *vaccEffect = dynamic_cast<const VaccineEffect*>( effect );
-                if( vaccEffect != 0 ) {
-                    vaccineEffects.push_back( vaccEffect->getVaccineType() );
-                }
             }
             intervention->sortEffects();
             
@@ -185,9 +180,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                     end2 = ctsSeq.end(); it2 != end2; ++it2 )
                 {
                     continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, cohort ) );
-                }
-                for( list<Vaccine::Types>::const_iterator it = vaccineEffects.begin(); it != vaccineEffects.end(); ++it ){
-                    Vaccine::initSchedule( *it, ctsSeq );
                 }
             }
             for( scnXml::Intervention::TimedConstIterator timedIt = elt.getTimed().begin();

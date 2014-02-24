@@ -121,7 +121,7 @@
         <effect id="PEV"/>
         <effect id="TBV"/>
         <continuous>
-          <deploy coverage="1" targetAgeYrs="0.0137"/>
+          <deploy coverage="1" targetAgeYrs="0.0137" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
         </continuous>
         <timed>
           <deploy coverage="1" time="73"/>

@@ -367,7 +367,8 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         }
         
         // move any deployment descriptions from elt to intervention, applying necessary transformations
-        fun processDeployments(effects: List<String>, elt: Element, cumCovEffectIdent: String){
+        fun processDeployments(effects: List<String>, elt: Element, cumCovEffectIdent: String,
+            addVaccLimits: Boolean){
             val intervention = scenarioDocument.createElement("intervention")!!
             for (effect in effects){
                 val interventionEffect = scenarioDocument.createElement("effect")!!
@@ -389,7 +390,13 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 var ctsNonCohort: Element? = null
                 var ctsCohort: Element? = null
                 
+                var n : Int = 0
                 for (deploy in getChildElements(cts, "deploy")){
+                    if (addVaccLimits){
+                        deploy.setAttribute("vaccMinPrevDoses", Integer.toString(n))
+                        deploy.setAttribute("vaccMaxCumDoses", Integer.toString(n+1))
+                    }
+                    
                     val cohort : Boolean = extractBool(deploy.getAttributeNode("cohort"), deploy)
                     val list: Element = if (cohort){
                         if (ctsCohort == null) {
@@ -406,6 +413,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                         ctsNonCohort!!
                     }
                     list.appendChild(deploy)
+                    n += 1
                 }
                 
                 elt.removeChild(cts)
@@ -478,7 +486,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 val ident = effectIdent(srcName)
                 val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
 
-                processDeployments(listOf(ident), elt, ident)
+                processDeployments(listOf(ident), elt, ident, false)
                 
                 if (stripDescElt){
                     val desc = getChildElement(elt,"description")
@@ -500,7 +508,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 val ident = effectIdent(name)
                 val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
 
-                processDeployments(listOf(ident), elt, ident)
+                processDeployments(listOf(ident), elt, ident, false)
                 
                 val desc1d = getChildElementOpt(elt, "description")
                 if (desc1d != null ){
@@ -544,7 +552,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 }
 
                 // Use any identifier for cumCov since all effects are deployed simultaneously
-                processDeployments(idents, elt, idents[0])
+                processDeployments(idents, elt, idents[0], true)
                 
                 interventions.removeChild(elt)  // now defunct
             }
@@ -566,7 +574,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
                 effect.appendChild(renamed)
                 
-                processDeployments(listOf(ident), elt, ident)
+                processDeployments(listOf(ident), elt, ident, false)
                 interventions.removeChild(elt)  // now defunct
             }
         }

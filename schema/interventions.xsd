@@ -300,16 +300,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Each effect describes one or more actions and how the effect of
             these actions decays.
             
-            Where multiple interventions deploy the same effect (referenced by
-            the same id), these are considered multiple deployments of the same
-            thing and action is considered a booster dose in the case of
-            vaccines, replacement of the previous net in the case of ITNs, etc.
+            Different interventions may deploy the same effect to the same
+            person, if the scenario configuration allows this. In most cases
+            this will just deploy a fresh instance (e.g. a new bed net will
+            replace the old (nobody uses multiple bed nets), or a new drug
+            dose will act independently of previous doses, or in the case of a
+            vaccine, effect depends on the total number of previous
+            inoculations (including from other interventions).
             
             Where multiple effects of the same type (but with different ids)
             are deployed (whether within a single intervention or by multiple
-            interventions), they act independently (e.g. two ITN effects
-            deployed to a single host would act to reduce attractiveness or
-            survival of mosquitoes biting that host twice).
+            interventions), they act independently (e.g. two bed nets deployed
+            to a single host would act to reduce attractiveness or survival of
+            mosquitoes biting that host twice — this may be useful to simulate
+            some novel vector intervention since the two nets may have separate
+            parameters).
           </xs:documentation>
           <xs:appinfo>name:Effect;</xs:appinfo>
         </xs:annotation>
@@ -453,7 +458,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="PEV" type="om:vaccineDescription">
         <xs:annotation>
           <xs:documentation>
-            Pre-erythrocytic vaccine (PEV): prevents a proportion of infections from commencing.
+            Pre-erythrocytic vaccine (PEV): prevents a proportion of infections
+            from commencing.
           </xs:documentation>
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
@@ -461,7 +467,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="BSV" type="om:vaccineDescription">
         <xs:annotation>
           <xs:documentation>
-            Blood-stage vaccine (BSV): acts as a killing factor on blood-stage parasites
+            Blood-stage vaccine (BSV): acts as a killing factor on blood-stage
+            parasites. Exact action depends on the within host model.
           </xs:documentation>
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
@@ -469,7 +476,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="TBV" type="om:vaccineDescription">
         <xs:annotation>
           <xs:documentation>
-            Transmission-blocking vaccine (TBV): one minus this scales the probability of transmission to mosquitoes
+            Transmission-blocking vaccine (TBV): one minus this scales the
+            probability of transmission to mosquitoes
           </xs:documentation>
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
@@ -649,40 +657,71 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="mass">
-    <xs:attribute name="time" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Time-step at which this intervention occurs, starting
-          from 0, the first intervention-period time-step.
-        </xs:documentation>
-        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="maxAge" type="xs:double" default="100">
-      <xs:annotation>
-        <xs:documentation>
-          Maximum age of eligible individuals (defaults to 100)
-        </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="minAge" type="xs:double" default="0">
-      <xs:annotation>
-        <xs:documentation>
-          Minimum age of eligible individuals (defaults to 0)
-        </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
+  <xs:complexType name="deploymentBase">
     <xs:attribute name="coverage" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          Coverage of intervention
+          Proportion of otherwise eligible individuals who will receive this
+          deployment.
         </xs:documentation>
-        <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;sweepable:true</xs:appinfo>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="vaccMinPrevDoses" type="xs:int" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Applies to vaccines only: vaccine doses are only deployed by this
+          deployment if the previous number of doses (for the effect deployed)
+          is at least this number.
+          
+          For example, if this is the second deployment opportunity for this
+          vaccine and this value is 1, then this deployment cannot deploy the
+          vaccine to individuals who did not receive the first deployment.
+        </xs:documentation>
+        <xs:appinfo>name:Vaccine min previous doses;units:inoculations;min:0;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="vaccMaxCumDoses" type="xs:int" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Applies to vaccines only: vaccine doses are only deployed by this
+          deployment if the previous number of doses (for the effect deployed)
+          is less than this number.
+        </xs:documentation>
+        <xs:appinfo>name:Vaccine max cumulative doses;units:inoculations;min:0;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="mass">
+    <xs:complexContent>
+      <xs:extension base="om:deploymentBase">
+        <xs:attribute name="time" type="xs:int" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Time-step at which this intervention occurs, starting
+              from 0, the first intervention-period time-step.
+            </xs:documentation>
+            <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="maxAge" type="xs:double" default="100">
+          <xs:annotation>
+            <xs:documentation>
+              Maximum age of eligible individuals (defaults to 100)
+            </xs:documentation>
+            <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="minAge" type="xs:double" default="0">
+          <xs:annotation>
+            <xs:documentation>
+              Minimum age of eligible individuals (defaults to 0)
+            </xs:documentation>
+            <xs:appinfo>units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="continuousList">
     <xs:sequence>
@@ -692,41 +731,37 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="continuousDeployment">
-    <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Target age of intervention
-        </xs:documentation>
-        <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="coverage" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Coverage of intervention
-        </xs:documentation>
-        <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion covered;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="begin" type="xs:int" default="0">
-      <xs:annotation>
-        <xs:documentation>
-          First timestep (from 0 at the beginning of the intervention period)
-          this item is active. Defaults to 0.
-        </xs:documentation>
-        <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:First timestep active;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="end" type="xs:int" default="2147483647">
-      <xs:annotation>
-        <xs:documentation>
-          End of the period during which the intervention is active (to be
-          exact, the first timestep of the intervention period at which the item
-          becomes inactive). Defaults to 2147483647.
-        </xs:documentation>
-        <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
+    <xs:complexContent>
+      <xs:extension base="om:deploymentBase">
+        <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              Target age of intervention
+            </xs:documentation>
+            <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="begin" type="xs:int" default="0">
+          <xs:annotation>
+            <xs:documentation>
+              First timestep (from 0 at the beginning of the intervention period)
+              this item is active. Defaults to 0.
+            </xs:documentation>
+            <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:First timestep active;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="end" type="xs:int" default="2147483647">
+          <xs:annotation>
+            <xs:documentation>
+              End of the period during which the intervention is active (to be
+              exact, the first timestep of the intervention period at which the item
+              becomes inactive). Defaults to 2147483647.
+            </xs:documentation>
+            <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="timedBaseList">
     <xs:sequence>

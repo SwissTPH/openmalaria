@@ -56,21 +56,12 @@ public:
         types[type].initVaccine( vd, type );
     }
     
-    /// Set schedule. Needed for correct EPI deployment.
-    /// TODO(vaccines): a model of how vaccine booster shots work would allow this to be
-    /// moved to intervention deployment.
-    inline static void initSchedule( Types type, const scnXml::ContinuousList::DeploySequence& schedule ){
-        types[type].initScheduleInternal( schedule );
-    }
-    
 private:
     // ———  non-static  ———
     
     Vaccine() : active(false), decayFunc(DecayFunction::makeConstantObject()), efficacyB(1.0) {}
     
     void initVaccine (const scnXml::VaccineDescription& vd, Types type);
-    
-    void initScheduleInternal( const scnXml::ContinuousList::DeploySequence& schedule );
     
     /** Get the initial efficacy of the vaccine.
      *
@@ -88,9 +79,6 @@ private:
 
     /// True if this vaccine is in use
     bool active;
-
-    /** Target age for EPI-like vaccination, in time steps. */
-    vector<TimeStep> targetAgeTStep;
 
     /// Function representing decay of effect
     shared_ptr<DecayFunction> decayFunc;
@@ -144,9 +132,10 @@ public:
     /** Get the efficacy of the vaccine (0 for no effect, 1 for full effect). */
     double getEfficacy( Vaccine::Types type )const;
     
-    void vaccinate( const Host::Human& human,
+    void possiblyVaccinate( const Host::Human& human,
                            Deployment::Method method,
-                           Vaccine::Types type );
+                           Vaccine::Types type,
+                           interventions::VaccineLimits vaccLimits );
 
     /// Hack for R_0 experiment: make current human the infection source
     inline void specialR_0(){

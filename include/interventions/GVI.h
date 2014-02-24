@@ -47,7 +47,7 @@ public:
     GVIEffect( size_t index, const scnXml::GVIDescription& elt,
                const map<string,size_t>& species_name_map );
     
-    void deploy( Host::Human& human, Deployment::Method method )const;
+    void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
     
     virtual Effect::Type effectType() const;
     

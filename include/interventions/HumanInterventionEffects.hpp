@@ -41,12 +41,14 @@ namespace OM { namespace interventions {
 
 // ———  HumanInterventionEffect  ———
 
-void HumanIntervention::deploy( Human& human, Deployment::Method method ) const{
+void HumanIntervention::deploy( Human& human, Deployment::Method method,
+    VaccineLimits vaccLimits ) const
+{
     for( vector<const HumanInterventionEffect*>::const_iterator it = effects.begin();
             it != effects.end(); ++it )
     {
         const interventions::HumanInterventionEffect& effect = **it;
-        effect.deploy( human, method );
+        effect.deploy( human, method, vaccLimits );
         human.updateLastDeployed( effect.getIndex() );
     }
 }
@@ -104,7 +106,7 @@ public:
         }   
     }
     
-    void deploy( Human& human, Deployment::Method method ) const{
+    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
         //TODO(monitoring): separate reports for mass and continuous deployments
         
         Monitoring::Surveys.getSurvey(human.isInAnyCohort())
@@ -146,7 +148,7 @@ public:
         Clinical::ESCaseManagement::initMDA( description );
     }
     
-    void deploy( Human& human, Deployment::Method method ) const{
+    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
         human.getClinicalModel().massDrugAdministration ( human );
     }
     
@@ -169,8 +171,8 @@ public:
         Vaccine::init( seq, type );
     }
     
-    void deploy( Human& human, Deployment::Method method )const{
-        human.getVaccine().vaccinate( human, method, type );
+    void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits )const{
+        human.getVaccine().possiblyVaccinate( human, method, type, vaccLimits );
     }
     
     virtual Effect::Type effectType() const{
@@ -198,7 +200,7 @@ class ClearImmunityEffect : public HumanInterventionEffect {
 public:
     ClearImmunityEffect( size_t index ) : HumanInterventionEffect(index) {}
     
-    void deploy( Human& human, Deployment::Method method )const{
+    void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
         human.clearImmunity();
     }
     

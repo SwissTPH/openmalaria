@@ -62,7 +62,7 @@ ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
     effectsByIndex[index] = this;
 }
 
-void ITNEffect::deploy( Host::Human& human, Deployment::Method method )const{
+void ITNEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployEffect( *this );
     if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassITNs( human.getMonitoringAgeGroup(), 1 );

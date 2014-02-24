@@ -56,7 +56,7 @@ IRSEffect::IRSEffect( size_t index, const scnXml::IRSDescription& elt,
     effectsByIndex[index] = this;
 }
 
-void IRSEffect::deploy( Host::Human& human, Deployment::Method method )const{
+void IRSEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployEffect(*this);
     if( method == interventions::Deployment::TIMED ){
         Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassIRS( human.getMonitoringAgeGroup(), 1 );

@@ -39,7 +39,7 @@ CohortSelectionEffect::CohortSelectionEffect( size_t index, const scnXml::Cohort
     }
 }
 
-void CohortSelectionEffect::deploy( Host::Human& human, Deployment::Method method )const{
+void CohortSelectionEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.addToCohort( getIndex() );
 }
 

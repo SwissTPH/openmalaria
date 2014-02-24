@@ -63,20 +63,6 @@ double Vaccine::getInitialEfficacy (size_t numPrevDoses)
     }
 }
 
-void Vaccine::initScheduleInternal( const scnXml::ContinuousList::DeploySequence& schedule ){
-    if( targetAgeTStep.size() > 0 && schedule.size() > 0 ){
-        throw util::xml_scenario_error( "A vaccine effect has multiple "
-                "continuous deployments. No model of how these should interact is included in OpenMalaria." );
-    }
-    size_t numDoses = schedule.size();
-    if (numDoses > 0) {
-        targetAgeTStep.resize (numDoses, TimeStep(0));
-        for (size_t i = 0;i < numDoses; ++i) {
-            targetAgeTStep[i] = TimeStep::fromYears( schedule[i].getTargetAgeYrs() );
-        }
-    }
-}
-
 void Vaccine::verifyEnabledForR_0 (){
     if( !types[PEV].active || !types[TBV].active )
         throw util::xml_scenario_error("PEV and TBV vaccines must have a "
@@ -133,23 +119,15 @@ double PerHumanVaccine::getEfficacy( Vaccine::Types type ) const{
         Vaccine::types[type].decayFunc->eval( age, types[type].hetSample );
 }
 
-void PerHumanVaccine::vaccinate( const Host::Human& human,
-                                 Deployment::Method method, Vaccine::Types type )
+void PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
+                                 Deployment::Method method, Vaccine::Types type,
+                                 interventions::VaccineLimits vaccLimits )
 {
     uint32_t numDosesAdministered = types[type].numDosesAdministered;
     
-    if( method == Deployment::CTS ){
-        // Continuous deployments are only given if the individual is not
-        // ahead of the intended schedule and hasn't dropped out.
-        const Vaccine& vacc = Vaccine::types[type];
-        assert( vacc.targetAgeTStep.size() != 0 );
-        if( numDosesAdministered >= vacc.targetAgeTStep.size() ){
-            return;        // no next dose scheduled
-        }
-        if( vacc.targetAgeTStep[numDosesAdministered] != human.getAgeInTimeSteps() ){
-            return;     // either a scheduled dose was missed or we're ahead of schedule
-        }
-    }
+    if( numDosesAdministered < vaccLimits.minPrevDoses ||
+        numDosesAdministered >= vaccLimits.maxCumDoses )
+        return;         // no vaccination (this replaces the old schedule for continuous doses)
     
     types[type].initialEfficacy = Vaccine::types[type].getInitialEfficacy(numDosesAdministered);
     util::streamValidate(types[type].initialEfficacy);

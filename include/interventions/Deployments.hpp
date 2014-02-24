@@ -164,8 +164,47 @@ public:
 #endif
 };
 
+void VaccineLimits::set( const scnXml::DeploymentBase& deploy ){
+    if( deploy.getVaccMinPrevDoses().present() ){
+        int v = deploy.getVaccMinPrevDoses().get();
+        if( v < 0 ) throw util::xml_scenario_error( "vaccMinPrevDoses: min value is 0" );
+        minPrevDoses = v;
+    }
+    if( deploy.getVaccMaxCumDoses().present() ){
+        int v = deploy.getVaccMaxCumDoses().get();
+        if( v < 0 ) throw util::xml_scenario_error( "vaccMaxCumDoses: min value is 0" );
+        maxCumDoses = v;
+    }
+}
+
+/// Base class for TimedHumanDeployment and ContinuousHumanDeployment
+class HumanDeploymentBase {
+protected:
+    HumanDeploymentBase( const scnXml::DeploymentBase& deploy,
+                         const HumanIntervention* intervention,
+                         size_t cohort ) :
+            coverage( deploy.getCoverage() ),
+            cohort( cohort ),
+            intervention( intervention )
+    {
+        if( !(coverage >= 0.0 && coverage <= 1.0) ){
+            throw util::xml_scenario_error("intervention deployment coverage must be in range [0,1]");
+        }
+        vaccLimits.set( deploy );
+    }
+    
+    inline void deployToHuman( Host::Human& human, Deployment::Method method ) const{
+        intervention->deploy( human, method, vaccLimits );
+    }
+    
+    double coverage;    // proportion coverage within group meeting above restrictions
+    VaccineLimits vaccLimits;
+    size_t cohort;      // size_t maximum value if no cohort
+    const HumanIntervention *intervention;
+};
+
 /// Timed deployment of human-specific interventions
-class TimedHumanDeployment : public TimedDeployment {
+class TimedHumanDeployment : public TimedDeployment, protected HumanDeploymentBase {
 public:
     /** 
      * @param mass XML element specifying the age range and compliance
@@ -176,15 +215,10 @@ public:
                            const HumanIntervention* intervention,
                            size_t cohort ) :
         TimedDeployment( TimeStep( mass.getTime() ) ),
+        HumanDeploymentBase( mass, intervention, cohort ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
-        maxAge( TimeStep::fromYears( mass.getMaxAge() ) ),
-        cohort( cohort ),
-        coverage( mass.getCoverage() ),
-        intervention( intervention )
+        maxAge( TimeStep::fromYears( mass.getMaxAge() ) )
     {
-        if( !(coverage >= 0.0 && coverage <= 1.0) ){
-            throw util::xml_scenario_error("timed intervention coverage must be in range [0,1]");
-        }
         if( minAge < TimeStep(0) || maxAge < minAge ){
             throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
         }
@@ -196,7 +230,7 @@ public:
             if( age >= minAge && age < maxAge ){
                 if( iter->isInCohort( cohort) ){
                     if( util::random::uniform_01() < coverage ){
-                        intervention->deploy( *iter, Deployment::TIMED );
+                        deployToHuman( *iter, Deployment::TIMED );
                     }
                 }
             }
@@ -218,9 +252,6 @@ protected:
     // restrictions on deployment
     TimeStep minAge;
     TimeStep maxAge;
-    size_t cohort;
-    double coverage;    // proportion coverage within group meeting above restrictions
-    const HumanIntervention *intervention;
 };
 
 /// Timed deployment of human-specific interventions in cumulative mode
@@ -266,7 +297,7 @@ public:
                  iter != unprotected.end(); ++iter)
             {
                 if( util::random::uniform_01() < additionalCoverage ){
-                    intervention->deploy( **iter, Deployment::TIMED );
+                    deployToHuman( **iter, Deployment::TIMED );
                 }
             }
         }
@@ -299,17 +330,15 @@ private:
 // ———  ContinuousHumanDeployment  ———
 
 /** Interface for continuous deployment of an intervention. */
-class ContinuousHumanDeployment {
+class ContinuousHumanDeployment : protected HumanDeploymentBase {
 public:
     /// Create, passing deployment age
     ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
                                  const HumanIntervention* intervention, size_t cohort ) :
+            HumanDeploymentBase( elt, intervention, cohort ),
             begin( elt.getBegin() ),
             end( elt.getEnd() ),
-            deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) ),
-            cohort( cohort ),
-            coverage( elt.getCoverage() ),
-            intervention( intervention )
+            deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) )
     {
         if( begin < TimeStep(0) || end < begin ){
             throw util::xml_scenario_error("continuous intervention must have 0 <= begin <= end");
@@ -327,9 +356,8 @@ public:
             msg << TimeStep::maxAgeIntervals * TimeStep::yearsPerInterval;
             throw util::xml_scenario_error( msg.str() );
         }
-        if( !(coverage >= 0.0 && coverage <= 1.0) ){
-            throw util::xml_scenario_error("continuous intervention coverage must be in range [0,1]");
-        }
+        
+        if( elt.getVaccMinPrevDoses() );
     }
     
     /// For sorting
@@ -353,7 +381,7 @@ public:
                 ( human.isInCohort( cohort ) ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
             {
-                deploy( human, population );
+                deployToHuman( human, Deployment::CTS );
             }
         }//else: for some reason, a deployment age was missed; ignore it
         return true;
@@ -373,16 +401,8 @@ public:
 #endif
     
 protected:
-    /// Deploy to a selected human.
-    void deploy( Host::Human& human, const Population& population ) const{
-        intervention->deploy( human, Deployment::CTS );
-    }
-    
     TimeStep begin, end;    // first timeStep active and first timeStep no-longer active
     TimeStep deployAge;
-    size_t cohort;      // size_t maximum value if no cohort
-    double coverage;
-    const HumanIntervention *intervention;
 };
 
 } }
