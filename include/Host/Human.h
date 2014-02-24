@@ -116,9 +116,6 @@ public:
   
   /// Infect the human (with an imported infection).
   void addInfection();
-  
-  /// Add PEV and remove TBV (vaccines) from human
-  inline void R_0Vaccines() { _vaccine.specialR_0(); }
   //@}
   
   /// @brief Small functions

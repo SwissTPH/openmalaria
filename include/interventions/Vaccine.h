@@ -47,10 +47,6 @@ class Vaccine {
 public:
     enum Types { PEV, BSV, TBV, NumVaccineTypes };
 
-    // ———  static  ———
-    /// Special for R_0: check is set up correctly or throw xml_scenario_error
-    static void verifyEnabledForR_0 ();
-    
     /** Per-type initialization */
     inline static void init( const scnXml::VaccineDescription& vd, Types type ){
         types[type].initVaccine( vd, type );
@@ -137,12 +133,14 @@ public:
                            Vaccine::Types type,
                            interventions::VaccineLimits vaccLimits );
 
+#if 0
     /// Hack for R_0 experiment: make current human the infection source
     inline void specialR_0(){
         assert( Vaccine::types[Vaccine::PEV].active && Vaccine::types[Vaccine::TBV].active );
         types[Vaccine::PEV].initialEfficacy = 1.0;
         types[Vaccine::TBV].initialEfficacy = 0.0;
     }
+#endif
     
     /// Checkpointing
     template<class S>

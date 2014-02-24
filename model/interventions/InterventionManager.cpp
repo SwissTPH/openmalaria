@@ -236,6 +236,11 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
     }
     // Must come after vaccines are initialised:
     if( intervElt.getInsertR_0Case().present() ){
+        throw util::xml_scenario_error("R_0 code is disabled to reduce "
+            "maintenance. If you need it, either use an old OpenMalaria "
+            "version (pre 32) or request it be reenabled.");
+        // code disabled; search for R_0 to find more blocks like this:
+#if 0
         const scnXml::InsertR_0Case& elt = intervElt.getInsertR_0Case().get();
         if( elt.getTimedDeployment().size() > 0 ){
             Vaccine::verifyEnabledForR_0();
@@ -245,6 +250,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 timed.push_back( new TimedR_0Deployment( TimeStep( it->getTime() ) ) );
             }
         }
+#endif
     }
     if( intervElt.getUninfectVectors().present() ){
         const scnXml::UninfectVectors& elt = intervElt.getUninfectVectors().get();

@@ -30,7 +30,7 @@ set (OM_BOXTEST_NAMES
   NoMPDLarviciding
   Penny
   Rach5IC
-  R_0
+  # model deactivated: R_0
   SimpleMPDLarviciding
   SimpleMPDTest
   VecTest

@@ -140,6 +140,7 @@ public:
 #endif
 };
 
+#if 0
 class TimedR_0Deployment : public TimedDeployment {
 public:
     TimedR_0Deployment( TimeStep deployTime ) :
@@ -163,6 +164,7 @@ public:
     }
 #endif
 };
+#endif
 
 void VaccineLimits::set( const scnXml::DeploymentBase& deploy ){
     if( deploy.getVaccMinPrevDoses().present() ){
