@@ -100,9 +100,6 @@ void Vaccine::initVaccine (const scnXml::VaccineDescription& vd, Types type)
 }
 
 PerHumanVaccine::PerHumanVaccine(){
-    for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i ){
-        types[i] = PerEffectPerHumanVaccine( static_cast<Vaccine::Types>( i ) );
-    }
 }
 
 PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
