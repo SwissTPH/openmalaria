@@ -37,7 +37,7 @@ namespace interventions {
 
 class IRSEffect : public Transmission::HumanVectorInterventionEffect {
 public:
-    IRSEffect( size_t index, const scnXml::IRSDescription& elt,
+    IRSEffect( EffectId id, const scnXml::IRSDescription& elt,
         const map<string,size_t>& species_name_map );
     
     virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
@@ -49,7 +49,7 @@ public:
 #endif
     
     virtual PerHostInterventionData* makeHumanPart() const;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, EffectId ) const;
     
 private:
     /** Per mosquito-species parameters for extended IRS model. */
@@ -154,7 +154,7 @@ private:
 class HumanIRS : public PerHostInterventionData {
 public:
     HumanIRS( const IRSEffect& params );
-    HumanIRS( istream& stream, size_t index );
+    HumanIRS( istream& stream, EffectId id );
     
     virtual void redeploy(const Transmission::HumanVectorInterventionEffect& params);
     

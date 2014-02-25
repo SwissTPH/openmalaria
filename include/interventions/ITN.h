@@ -38,7 +38,7 @@ namespace interventions {
 
 class ITNEffect : public Transmission::HumanVectorInterventionEffect {
 public:
-    ITNEffect( size_t index, const scnXml::ITNDescription& elt,
+    ITNEffect( EffectId id, const scnXml::ITNDescription& elt,
                const map< string, size_t >& species_name_map );
     
     virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
@@ -50,7 +50,7 @@ public:
 #endif
     
     virtual PerHostInterventionData* makeHumanPart() const;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, EffectId id ) const;
     
     /** Per mosquito-species parameters for extended ITN model. */
     class ITNAnopheles {
@@ -188,7 +188,7 @@ public:
 class HumanITN : public PerHostInterventionData {
 public:
     HumanITN( const ITNEffect& params );
-    HumanITN( istream& stream, size_t index );
+    HumanITN( istream& stream, EffectId id );
     
     virtual void redeploy(const Transmission::HumanVectorInterventionEffect& params);
     

@@ -44,7 +44,7 @@ public:
      * @param elt Effect description from XML
      * @param species_name_map Map of species names to indices.
      */
-    GVIEffect( size_t index, const scnXml::GVIDescription& elt,
+    GVIEffect( EffectId, const scnXml::GVIDescription& elt,
                const map<string,size_t>& species_name_map );
     
     void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
@@ -56,7 +56,7 @@ public:
 #endif
     
     virtual PerHostInterventionData* makeHumanPart() const;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, EffectId ) const;
     
 private:
     /** Per mosquito-species parameters for generic vector intervention model. */
@@ -103,7 +103,7 @@ private:
 class HumanGVI : public PerHostInterventionData {
 public:
     HumanGVI( const GVIEffect& params );
-    HumanGVI( istream& stream, size_t index );
+    HumanGVI( istream& stream, EffectId );
     
     virtual void redeploy( const Transmission::HumanVectorInterventionEffect& );
     

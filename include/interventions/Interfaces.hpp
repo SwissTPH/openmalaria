@@ -21,7 +21,7 @@
 #define OM_INTERVENTIONS_INTERFACES
 
 #include "Global.h"
-#include <limits>
+#include <boost/integer_traits.hpp>
 
 namespace scnXml{ class DeploymentBase; }
 
@@ -58,10 +58,25 @@ namespace Effect { enum Type {
 /** Specifies limits on the number of existing doses when deciding whether to
  * vaccinate a human. */
 struct VaccineLimits{
-    VaccineLimits() : minPrevDoses( 0 ), maxCumDoses( std::numeric_limits<uint32_t>::max() ) {}
+    VaccineLimits() : minPrevDoses( 0 ), maxCumDoses( boost::integer_traits<uint32_t>::const_max ) {}
     void set( const scnXml::DeploymentBase& );
     uint32_t minPrevDoses, maxCumDoses;
 };
+
+/** Essentially just an integer, used as a vector index.
+ * 
+ * This class wraps the integer to guard against unintended conversions to or
+ * from an integer (which could be mis-use). */
+struct EffectId{
+    explicit inline EffectId( size_t id ) : id(id) {}
+    explicit inline EffectId( istream& stream ){ id & stream; }
+    inline void operator& (ostream& stream) const{ id & stream; }
+    inline bool operator== (const EffectId that) const{ return id == that.id; }
+    inline bool operator< (const EffectId that) const{ return id < that.id; }
+    size_t id;
+};
+// special value "whole population cohort" :
+static EffectId EffectId_pop = EffectId( boost::integer_traits<size_t>::const_max );
 
 /** A description of one effect of a human intervention.
  * 
@@ -80,7 +95,7 @@ public:
         VaccineLimits vaccLimits ) const =0;
     
     /** Get the effect index. */
-    inline size_t getIndex()const{ return index; }
+    inline EffectId id()const{ return m_id; }
     
     /** Returns the appropriate descriptor from the EffectType enum.
      * 
@@ -95,17 +110,17 @@ public:
 protected:
     /** Construct (from a derived class).
      * 
-     * @param index Effect index; used as an identifier for cumulative
+     * @param id Effect index; used as an identifier for cumulative
      *  deployment as well as to match human-specific components to general
      *  parameters (i.e. objects of the class extending this one).
      */
-    explicit HumanInterventionEffect(size_t index) : index(index) {}
+    explicit HumanInterventionEffect(EffectId id) : m_id(id) {}
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
     HumanInterventionEffect( const HumanInterventionEffect& );
     
-    size_t index;
+    EffectId m_id;
 };
 
 /** A description of a human intervention (as a list of effects). */

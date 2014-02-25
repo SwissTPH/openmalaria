@@ -189,8 +189,8 @@ void Human::clearImmunity(){
     withinHostModel->clearImmunity();
 }
 
-bool Human::needsRedeployment( size_t effect_index, TimeStep maxAge ){
-    map<size_t,TimeStep>::const_iterator it = lastDeployments.find( effect_index );
+bool Human::needsRedeployment( interventions::EffectId cumCovId, TimeStep maxAge ){
+    map<interventions::EffectId,TimeStep>::const_iterator it = lastDeployments.find( cumCovId );
     if( it == lastDeployments.end() ){
         return true;  // no previous deployment
     }else{
@@ -217,28 +217,28 @@ void Human::summarize() {
     }
 }
 
-void Human::addToCohort (size_t index){
-    if( cohorts.count(index) > 0 ) return;	// nothing to do
+void Human::addToCohort (interventions::EffectId id){
+    if( cohorts.count(id) > 0 ) return;	// nothing to do
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,
     // although episode reports still need to be flushed.
     flushReports();
-    cohorts.insert(index);
+    cohorts.insert(id);
     //TODO(monitoring): reporting is inappropriate
     Monitoring::Surveys.current->reportAddedToCohort( getMonitoringAgeGroup(), 1 );
 }
-void Human::removeFromCohort( size_t index ){
-    if( cohorts.count(index) > 0 ){
+void Human::removeFromCohort( interventions::EffectId id ){
+    if( cohorts.count(id) > 0 ){
         // Data should be flushed as with addToCohort().
         flushReports();
-        cohorts.erase( index );
+        cohorts.erase( id );
         //TODO(monitoring): reporting
         Monitoring::Surveys.current->reportRemovedFromCohort( getMonitoringAgeGroup(), 1 );
     }
 }
 void Human::removeFromCohorts( interventions::CohortSelectionEffect::RemoveAtCode code ){
-    const vector<size_t>& removeAtList = interventions::CohortSelectionEffect::removeAtIds[code];
-    for( vector<size_t>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
+    const vector<interventions::EffectId>& removeAtList = interventions::CohortSelectionEffect::removeAtIds[code];
+    for( vector<interventions::EffectId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
         removeFromCohort( *it );    // only does anything if in cohort
     }
 }

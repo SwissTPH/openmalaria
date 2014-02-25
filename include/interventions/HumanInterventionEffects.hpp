@@ -49,7 +49,7 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method,
     {
         const interventions::HumanInterventionEffect& effect = **it;
         effect.deploy( human, method, vaccLimits );
-        human.updateLastDeployed( effect.getIndex() );
+        human.updateLastDeployed( effect.id() );
     }
 }
 
@@ -65,7 +65,7 @@ void HumanIntervention::print_details( std::ostream& out )const{
     out << "human:";
     for( vector<const HumanInterventionEffect*>::const_iterator it =
         effects.begin(); it != effects.end(); ++it ){
-        out << '\t' << (*it)->getIndex();
+        out << '\t' << (*it)->id().id;
     }
 }
 #endif
@@ -74,7 +74,7 @@ void HumanIntervention::print_details( std::ostream& out )const{
 
 class MDAEffect : public HumanInterventionEffect {
 public:
-    MDAEffect( size_t index, const scnXml::MDA& mda ) : HumanInterventionEffect(index) {
+    MDAEffect( EffectId id, const scnXml::MDA& mda ) : HumanInterventionEffect(id) {
         if( !mda.getDiagnostic().present() ){
             // Note: allow no description for now to avoid XML changes.
             //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
@@ -131,7 +131,7 @@ public:
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << getIndex() << "\tMDA";
+        out << id().id << "\tMDA";
     }
 #endif
     
@@ -142,7 +142,7 @@ private:
 
 class MDA1DEffect : public HumanInterventionEffect {
 public:
-    MDA1DEffect( size_t index, const scnXml::MDA1D& description ) : HumanInterventionEffect(index) {
+    MDA1DEffect( EffectId id, const scnXml::MDA1D& description ) : HumanInterventionEffect(id) {
 	if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
 	  throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
         Clinical::ESCaseManagement::initMDA( description );
@@ -156,7 +156,7 @@ public:
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << getIndex() << "\tMDA1D";
+        out << id().id << "\tMDA1D";
     }
 #endif
     
@@ -165,8 +165,8 @@ private:
 
 class VaccineEffect : public HumanInterventionEffect {
 public:
-    VaccineEffect( size_t index, const scnXml::VaccineDescription& seq, Vaccine::Types type ) :
-            HumanInterventionEffect(index), type(type)
+    VaccineEffect( EffectId id, const scnXml::VaccineDescription& seq, Vaccine::Types type ) :
+            HumanInterventionEffect(id), type(type)
     {
         Vaccine::init( seq, type );
     }
@@ -186,7 +186,7 @@ public:
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << getIndex() << "\t" <<
+        out << id().id << "\t" <<
             (type == Vaccine::PEV ? "PEV" : (type == Vaccine::BSV ? "BSV" : "TBV"))
            ;
     }
@@ -198,7 +198,7 @@ private:
 
 class ClearImmunityEffect : public HumanInterventionEffect {
 public:
-    ClearImmunityEffect( size_t index ) : HumanInterventionEffect(index) {}
+    ClearImmunityEffect( EffectId id ) : HumanInterventionEffect(id) {}
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
         human.clearImmunity();
@@ -208,7 +208,7 @@ public:
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << getIndex() << "\tclear immunity";
+        out << id().id << "\tclear immunity";
     }
 #endif
 };

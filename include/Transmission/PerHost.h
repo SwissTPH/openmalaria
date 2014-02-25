@@ -71,26 +71,26 @@ public:
     virtual double postprandialSurvivalFactor(size_t speciesIndex) const =0;
     
     /// Index of effect describing the intervention
-    inline size_t getIndex() const { return index; }
+    inline interventions::EffectId id() const { return m_id; }
     
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
-        index & stream; // must be first; read externally so that the correct
+        m_id & stream; // must be first; read externally so that the correct
                 // makeHumanPart function can be found
         checkpoint( stream );
     }
     
 protected:
     /// Set the effect index
-    explicit PerHostInterventionData( size_t index ) :
+    explicit PerHostInterventionData( interventions::EffectId id ) :
             deployTime( TimeStep::simulation ),
-            index(index) {}
+            m_id(id) {}
     
     /// Checkpointing: write
     virtual void checkpoint( ostream& stream ) =0;
     
     TimeStep deployTime;        // time of deployment or TimeStep::never
-    size_t index;       // effect index; don't change
+    interventions::EffectId m_id;       // effect index; don't change
 };
 
 /** A base class for human vector intervention parameters. */
@@ -98,9 +98,9 @@ class HumanVectorInterventionEffect : public interventions::HumanInterventionEff
 public:
     /** Create a new object to store human-specific details of deployment. */
     virtual PerHostInterventionData* makeHumanPart() const =0;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, size_t index ) const =0;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::EffectId id ) const =0;
 protected:
-    explicit HumanVectorInterventionEffect(size_t index) : HumanInterventionEffect(index) {}
+    explicit HumanVectorInterventionEffect(interventions::EffectId id) : HumanInterventionEffect(id) {}
 };
 
 /** Contains TransmissionModel parameters which need to be stored per host.

@@ -75,10 +75,10 @@ public:
     /** Get a constant reference to an effect class with a certain index.
      * 
      * @throws util::base_exception if the index is out-of-range */
-    inline static const HumanInterventionEffect& getEffect( size_t index ){
-        if( index >= humanEffects.size() )
-            throw util::base_exception( "invalid index" );
-        return humanEffects[index];
+    inline static const HumanInterventionEffect& getEffect( EffectId id ){
+        if( id.id >= humanEffects.size() )
+            throw util::base_exception( "invalid effect id" );
+        return humanEffects[id.id];
     }
     
 private:

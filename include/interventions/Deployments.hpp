@@ -184,7 +184,7 @@ class HumanDeploymentBase {
 protected:
     HumanDeploymentBase( const scnXml::DeploymentBase& deploy,
                          const HumanIntervention* intervention,
-                         size_t cohort ) :
+                         EffectId cohort ) :
             coverage( deploy.getCoverage() ),
             cohort( cohort ),
             intervention( intervention )
@@ -201,7 +201,7 @@ protected:
     
     double coverage;    // proportion coverage within group meeting above restrictions
     VaccineLimits vaccLimits;
-    size_t cohort;      // size_t maximum value if no cohort
+    EffectId cohort;      // EffectId_pop if no cohort
     const HumanIntervention *intervention;
 };
 
@@ -215,7 +215,7 @@ public:
      * @param cohort The cohort to which to deploy, or max value */
     TimedHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           size_t cohort ) :
+                           EffectId cohort ) :
         TimedDeployment( TimeStep( mass.getTime() ) ),
         HumanDeploymentBase( mass, intervention, cohort ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
@@ -230,7 +230,7 @@ public:
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
-                if( iter->isInCohort( cohort) ){
+                if( iter->isInCohort( cohort ) ){
                     if( util::random::uniform_01() < coverage ){
                         deployToHuman( *iter, Deployment::TIMED );
                     }
@@ -243,8 +243,8 @@ public:
     virtual void print_details( std::ostream& out )const{
         out << time << '\t'
             << minAge << '\t' << maxAge << '\t';
-        if( cohort == numeric_limits<size_t>::max() ) out << "(none)";
-        else out << cohort;
+        if( cohort == EffectId_pop ) out << "(none)";
+        else out << cohort.id;
         out << '\t' << coverage << '\t';
         intervention->print_details( out );
     }
@@ -263,14 +263,15 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param effect_index Index of effect to test coverage for
+     * @param cohort Id of target cohort, or EffectId_pop
+     * @param cumCuvId Index of effect to test coverage for
      * @param maxAge Maximum time-span to consider a deployed effect still to be effective */
     TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           size_t cohort,
-                           size_t effect_index, TimeStep maxAge ) :
+                           EffectId cohort,
+                           EffectId cumCuvId, TimeStep maxAge ) :
         TimedHumanDeployment( mass, intervention, cohort ),
-        cumCovInd( effect_index ), maxInterventionAge( maxAge )
+        cumCovInd( cumCuvId ), maxInterventionAge( maxAge )
     {
     }
     
@@ -306,7 +307,7 @@ public:
     }
     
 protected:
-    size_t cumCovInd;
+    EffectId cumCovInd;
     // max age at which an intervention is considered not to need replacement
     TimeStep maxInterventionAge;
 };
@@ -336,7 +337,7 @@ class ContinuousHumanDeployment : protected HumanDeploymentBase {
 public:
     /// Create, passing deployment age
     ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
-                                 const HumanIntervention* intervention, size_t cohort ) :
+                                 const HumanIntervention* intervention, EffectId cohort ) :
             HumanDeploymentBase( elt, intervention, cohort ),
             begin( elt.getBegin() ),
             end( elt.getEnd() ),
@@ -395,8 +396,8 @@ public:
         if( end == TimeStep::future ) out << "(none)";
         else out << end;
         out << '\t' << deployAge << '\t';
-        if( cohort == numeric_limits<size_t>::max() ) out << "(none)";
-        else out << cohort;
+        if( cohort == EffectId_pop ) out << "(none)";
+        else out << cohort.id;
         out << '\t' << coverage << '\t';
         intervention->print_details( out );
     }

@@ -76,7 +76,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
     const map<string,size_t>* species_index_map = 0;
     if( intervElt.getHuman().present() ){
         const scnXml::HumanInterventions& human = intervElt.getHuman().get();
-        map<string,size_t> identifierMap;
+        map<string,EffectId> identifierMap;
         
         // 1. Read effects
         for( scnXml::HumanInterventions::EffectConstIterator it =
@@ -90,21 +90,21 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                         << effect.getId() << "\" twice.";
                 throw util::xml_scenario_error( msg.str() );
             }
-            size_t index = humanEffects.size();        // i.e. index of next item
-            identifierMap[effect.getId()] = index;
+            EffectId id( humanEffects.size() );        // i.e. index of next item
+            identifierMap.insert( make_pair(effect.getId(), id) );
             if( effect.getMDA().present() ){
                 //TODO(monitoring): report
-                humanEffects.push_back( new MDAEffect( index, effect.getMDA().get() ) );
+                humanEffects.push_back( new MDAEffect( id, effect.getMDA().get() ) );
             }else if( effect.getMDA1D().present() ){
                 //TODO(monitoring): report
-                humanEffects.push_back( new MDA1DEffect( index, effect.getMDA1D().get() ) );
+                humanEffects.push_back( new MDA1DEffect( id, effect.getMDA1D().get() ) );
             }else if( effect.getPEV().present() ){
                 //TODO: allow multiple descriptions of each vaccine type
-                humanEffects.push_back( new VaccineEffect( index, effect.getPEV().get(), Vaccine::PEV ) );
+                humanEffects.push_back( new VaccineEffect( id, effect.getPEV().get(), Vaccine::PEV ) );
             }else if( effect.getBSV().present() ){
-                humanEffects.push_back( new VaccineEffect( index, effect.getBSV().get(), Vaccine::BSV ) );
+                humanEffects.push_back( new VaccineEffect( id, effect.getBSV().get(), Vaccine::BSV ) );
             }else if( effect.getTBV().present() ){
-                humanEffects.push_back( new VaccineEffect( index, effect.getTBV().get(), Vaccine::TBV ) );
+                humanEffects.push_back( new VaccineEffect( id, effect.getTBV().get(), Vaccine::TBV ) );
             }else if( effect.getIPT().present() ){
                 // TODO: also remove XML elements from XSD in a later version; we keep it for now
                 // to allow the problem to be reported here (not some obscure validator error)
@@ -112,20 +112,20 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             }else if( effect.getITN().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanEffects.push_back( new ITNEffect( index, effect.getITN().get(), *species_index_map ) );
+                humanEffects.push_back( new ITNEffect( id, effect.getITN().get(), *species_index_map ) );
             }else if( effect.getIRS().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanEffects.push_back( new IRSEffect( index, effect.getIRS().get(), *species_index_map ) );
+                humanEffects.push_back( new IRSEffect( id, effect.getIRS().get(), *species_index_map ) );
             }else if( effect.getGVI().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanEffects.push_back( new GVIEffect( index, effect.getGVI().get(), *species_index_map ) );
+                humanEffects.push_back( new GVIEffect( id, effect.getGVI().get(), *species_index_map ) );
             }else if( effect.getCohort().present() ){
-                humanEffects.push_back( new CohortSelectionEffect( index, effect.getCohort().get() ) );
+                humanEffects.push_back( new CohortSelectionEffect( id, effect.getCohort().get() ) );
                 _cohortEnabled = true;
             }else if( effect.getClearImmunity().present() ){
-                humanEffects.push_back( new ClearImmunityEffect( index ) );
+                humanEffects.push_back( new ClearImmunityEffect( id ) );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.effect element to have a "
@@ -144,7 +144,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             for( scnXml::Intervention::EffectConstIterator it2 = elt.getEffect().begin(),
                     end2 = elt.getEffect().end(); it2 != end2; ++it2 )
             {
-                map<string,size_t>::const_iterator result = identifierMap.find( it2->getId() );
+                map<string,EffectId>::const_iterator result = identifierMap.find( it2->getId() );
                 if( result == identifierMap.end() ){
                     ostringstream msg;
                     msg << "human intervention references effect with id \""
@@ -152,7 +152,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                         << "\", but no effect with this id was found";
                     throw util::xml_scenario_error( msg.str() );
                 }
-                const HumanInterventionEffect* effect = &humanEffects[result->second];
+                const HumanInterventionEffect* effect = &humanEffects[result->second.id];
                 intervention->addEffect( effect );
             }
             intervention->sortEffects();
@@ -161,15 +161,15 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             for( scnXml::Intervention::ContinuousConstIterator ctsIt = elt.getContinuous().begin();
                 ctsIt != elt.getContinuous().end(); ++ctsIt )
             {
-                size_t cohort = numeric_limits<size_t>::max();
+                EffectId cohort = EffectId_pop;
                 if( ctsIt->getRestrictToCohort().present() ){
-                    const string& id = ctsIt->getRestrictToCohort().get().getId();
-                    map<string,size_t>::const_iterator effect_it = identifierMap.find( id );
+                    const string& cohortName = ctsIt->getRestrictToCohort().get().getId();
+                    map<string,EffectId>::const_iterator effect_it = identifierMap.find( cohortName );
                     if( effect_it == identifierMap.end() ){
                         ostringstream msg;
                         msg << "interventions.human.intervention.continuous."
                                 "restrictToCohort: element refers to cohort "
-                                "effect with identifier \"" << id
+                                "effect with identifier \"" << cohortName
                                 << "\" but no effect with this id was found";
                         throw util::xml_scenario_error( msg.str() );
                     }
@@ -185,15 +185,15 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             for( scnXml::Intervention::TimedConstIterator timedIt = elt.getTimed().begin();
                 timedIt != elt.getTimed().end(); ++timedIt )
             {
-                size_t cohort = numeric_limits<size_t>::max();
+                EffectId cohort = EffectId_pop;
                 if( timedIt->getRestrictToCohort().present() ){
-                    const string& id = timedIt->getRestrictToCohort().get().getId();
-                    map<string,size_t>::const_iterator effect_it = identifierMap.find( id );
+                    const string& cohortName = timedIt->getRestrictToCohort().get().getId();
+                    map<string,EffectId>::const_iterator effect_it = identifierMap.find( cohortName );
                     if( effect_it == identifierMap.end() ){
                         ostringstream msg;
                         msg << "interventions.human.intervention.timed."
                                 "restrictToCohort: element refers to cohort "
-                                "effect with identifier \"" << id
+                                "effect with identifier \"" << cohortName
                                 << "\" but no effect with this id was found";
                         throw util::xml_scenario_error( msg.str() );
                     }
@@ -201,7 +201,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 }
                 if( timedIt->getCumulativeCoverage().present() ){
                     const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
-                    map<string,size_t>::const_iterator effect_it = identifierMap.find( cumCov.getEffect() );
+                    map<string,EffectId>::const_iterator effect_it = identifierMap.find( cumCov.getEffect() );
                     if( effect_it == identifierMap.end() ){
                         ostringstream msg;
                         msg << "interventions.human.intervention.timed."
@@ -210,7 +210,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                                 << "\" but no effect with this id was found";
                         throw util::xml_scenario_error( msg.str() );
                     }
-                    size_t effect = effect_it->second;
+                    EffectId effect = effect_it->second;
                     TimeStep maxAge = TimeStep::fromYears( cumCov.getMaxAgeYears() );
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =

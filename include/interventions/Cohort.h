@@ -28,7 +28,7 @@ namespace OM { namespace interventions {
 
 class CohortSelectionEffect : public HumanInterventionEffect {
 public:
-    CohortSelectionEffect( size_t index, const scnXml::Cohort& cohort );
+    CohortSelectionEffect( EffectId, const scnXml::Cohort& cohort );
     
     virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits ) const;
     
@@ -58,7 +58,7 @@ public:
     
     /** For each RemoveAtCode (excluding NUM), this is a list of all cohort Ids
      * for which the option is enabled. */
-    static vector<size_t> removeAtIds[REMOVE_AT_NUM];
+    static vector<EffectId> removeAtIds[REMOVE_AT_NUM];
 };
 
 } }

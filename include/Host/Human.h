@@ -100,8 +100,8 @@ public:
   ///@brief Deploy "intervention" functions
   //@{
   /** Mark a certain intervention effect as being deployed now. */
-  inline void updateLastDeployed( size_t index ){
-      lastDeployments[index] = TimeStep::simulation;
+  inline void updateLastDeployed( interventions::EffectId id ){
+      lastDeployments[id] = TimeStep::simulation;
   }
   
   /** Determines for the purposes of cumulative deployment whether an effect is
@@ -109,7 +109,7 @@ public:
    * 
    * @returns true if the intervention effect should be re-deployed (too old)
    */
-  bool needsRedeployment( size_t effect_index, TimeStep maxAge );
+  bool needsRedeployment( interventions::EffectId cumCuvId, TimeStep maxAge );
   
   /// Resets immunity
   void clearImmunity();
@@ -136,8 +136,8 @@ public:
    * 
    * Note: the maximum value of size_t is considered to be the population, of
    * which every human is a member. */
-  inline bool isInCohort( size_t index )const{
-      return index == numeric_limits<size_t>::max() || cohorts.count( index ) > 0;
+  inline bool isInCohort( interventions::EffectId id )const{
+      return id == interventions::EffectId_pop || cohorts.count( id ) > 0;
   }
   /** Return true if human is a member of any cohort. */
   //TODO(monitoring): outputs per cohort, not simply any cohort or everyone
@@ -166,12 +166,12 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort ( size_t index );
+  void addToCohort ( interventions::EffectId );
   
   /** Remove from a cohort. As with addToCohort, deals with reporting.
    *
    * Can be safely called when human is not in cohort. */
-  void removeFromCohort( size_t index );
+  void removeFromCohort( interventions::EffectId );
   
   /** Act on remove-from-cohort-on-first-xyz events. */
   void removeFromCohorts( interventions::CohortSelectionEffect::RemoveAtCode code );
@@ -244,9 +244,9 @@ private:
   
   //TODO(performance): are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
   /// The set of cohorts (intervention indexes) to which this human is a member
-  set<size_t> cohorts;
+  set<interventions::EffectId> cohorts;
   /// Last deployment times of intervention effects by effect index
-  map<size_t,TimeStep> lastDeployments;
+  map<interventions::EffectId,TimeStep> lastDeployments;
 };
 
 } }

@@ -23,24 +23,24 @@
 
 namespace OM { namespace interventions {
 
-vector<size_t> CohortSelectionEffect::removeAtIds[CohortSelectionEffect::REMOVE_AT_NUM];
+vector<EffectId> CohortSelectionEffect::removeAtIds[CohortSelectionEffect::REMOVE_AT_NUM];
 
-CohortSelectionEffect::CohortSelectionEffect( size_t index, const scnXml::Cohort& cohort ) :
-        HumanInterventionEffect(index)
+CohortSelectionEffect::CohortSelectionEffect( EffectId id, const scnXml::Cohort& cohort ) :
+        HumanInterventionEffect(id)
 {
     if( cohort.getFirstBoutOnly() ){
-        removeAtIds[REMOVE_AT_FIRST_BOUT].push_back( index );
+        removeAtIds[REMOVE_AT_FIRST_BOUT].push_back( id );
     }
     if( cohort.getFirstInfectionOnly() ){
-        removeAtIds[REMOVE_AT_FIRST_INFECTION].push_back( index );
+        removeAtIds[REMOVE_AT_FIRST_INFECTION].push_back( id );
     }
     if( cohort.getFirstTreatmentOnly() ){
-        removeAtIds[REMOVE_AT_FIRST_TREATMENT].push_back( index );
+        removeAtIds[REMOVE_AT_FIRST_TREATMENT].push_back( id );
     }
 }
 
 void CohortSelectionEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
-    human.addToCohort( getIndex() );
+    human.addToCohort( id() );
 }
 
 Effect::Type CohortSelectionEffect::effectType() const{
@@ -49,7 +49,7 @@ Effect::Type CohortSelectionEffect::effectType() const{
     
 #ifdef WITHOUT_BOINC
 void CohortSelectionEffect::print_details( std::ostream& out )const{
-    out << getIndex() << "\tcohort selection";
+    out << id().id << "\tcohort selection";
 }
 #endif
 

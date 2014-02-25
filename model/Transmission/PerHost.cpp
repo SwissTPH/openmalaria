@@ -65,7 +65,7 @@ void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
     // This adds per-host per-intervention details to the host's data set.
     // This data is never removed since it can contain per-host heterogeneity samples.
     for( ListActiveEffects::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
-        if( it->getIndex() == params.getIndex() ){
+        if( it->id() == params.id() ){
             // already have a deployment for that description; just update it
             it->redeploy( params );
             return;
@@ -116,14 +116,13 @@ void PerHost::checkpointIntervs( istream& stream ){
     validateListSize(l);
     activeEffects.clear();
     for( size_t i = 0; i < l; ++i ){
-        size_t index;
-        index & stream;
+        interventions::EffectId id( stream );
         try{
-            const interventions::HumanInterventionEffect& gen_params = interventions::InterventionManager::getEffect( index );   // may throw
+            const interventions::HumanInterventionEffect& gen_params = interventions::InterventionManager::getEffect( id );   // may throw
             const HumanVectorInterventionEffect *params = dynamic_cast<const HumanVectorInterventionEffect*>( &gen_params );
             if( params == 0 )
                 throw util::base_exception( "" );       // see catch block below
-            PerHostInterventionData *v = params->makeHumanPart( stream, index );
+            PerHostInterventionData *v = params->makeHumanPart( stream, id );
             activeEffects.push_back( v );
         }catch( util::base_exception e ){
             // two causes, both boil down to index being wrong

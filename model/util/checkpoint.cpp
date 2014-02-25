@@ -20,6 +20,7 @@
 
 #include "Global.h"
 #include "util/errors.h"
+#include "interventions/Interfaces.hpp"
 
 #include <limits>
 #include <sstream>
@@ -219,19 +220,18 @@ namespace OM { namespace util { namespace checkpoint {
             throw checkpoint_error ("stream read error string");
     }
     
-    void operator& (const set<size_t>&x, ostream& stream){
+    void operator& (const set<interventions::EffectId>&x, ostream& stream){
         x.size() & stream;
-        for( set<size_t>::const_iterator it = x.begin(); it != x.end(); ++it )
+        for( set<interventions::EffectId>::const_iterator it = x.begin(); it != x.end(); ++it )
             *it & stream;
     }
-    void operator& (set<size_t>& x, istream& stream){
+    void operator& (set<interventions::EffectId>& x, istream& stream){
         size_t len;
         len & stream;
         validateListSize(len);
         for( size_t i = 0; i < len; ++i ){
-            size_t index;
-            index & stream;
-            x.insert( index );
+            interventions::EffectId id( stream );
+            x.insert( id );
         }
     }
     
@@ -279,23 +279,22 @@ namespace OM { namespace util { namespace checkpoint {
         }
     }
 
-    void operator& (const map<size_t,TimeStep>& x, ostream& stream) {
+    void operator& (const map<interventions::EffectId,TimeStep>& x, ostream& stream) {
         x.size() & stream;
-        for (map<size_t,TimeStep>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+        for (map<interventions::EffectId,TimeStep>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
             pos->second.asInt() & stream;
         }
     }
-    void operator& (map<size_t,TimeStep>& x, istream& stream) {
+    void operator& (map<interventions::EffectId,TimeStep>& x, istream& stream) {
         size_t l;
         l & stream;
         validateListSize (l);
         x.clear ();
-        map<size_t,TimeStep>::iterator pos = x.begin ();
+        map<interventions::EffectId,TimeStep>::iterator pos = x.begin ();
         for (size_t i = 0; i < l; ++i) {
-            size_t s;
+            interventions::EffectId s( stream );
             TimeStep t;
-            s & stream;
             t & stream;
             pos = x.insert (pos, make_pair (s,t));
         }

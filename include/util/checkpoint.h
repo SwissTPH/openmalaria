@@ -67,7 +67,11 @@ virtual checkpoint (ostream& stream);
  * 
  * One should declare "using namespace OM::util::checkpoint" to use the operator& functions defined
  * here. */
-namespace OM { namespace util {
+namespace OM {
+namespace interventions{
+    struct EffectId;
+}
+namespace util {
     class TimeStep;     // forward declare for a support function; don't really want another include here
 
 namespace checkpoint {
@@ -237,8 +241,8 @@ namespace checkpoint {
     }
     */
     
-    void operator& (const set<size_t>&x, ostream& stream);
-    void operator& (set<size_t>& x, istream& stream);
+    void operator& (const set<interventions::EffectId>&x, ostream& stream);
+    void operator& (set<interventions::EffectId>& x, istream& stream);
     
     void operator& (const map<string,double>& x, ostream& stream);
     void operator& (map<string, double >& x, istream& stream);
@@ -246,8 +250,8 @@ namespace checkpoint {
     void operator& (const map<double,double>& x, ostream& stream);
     void operator& (map<double, double>& x, istream& stream);
     
-    void operator& (const map<size_t,TimeStep>& x, ostream& stream);
-    void operator& (map<size_t,TimeStep>& x, istream& stream);
+    void operator& (const map<interventions::EffectId,TimeStep>& x, ostream& stream);
+    void operator& (map<interventions::EffectId,TimeStep>& x, istream& stream);
     
     void operator& (const multimap<double,double>& x, ostream& stream);
     void operator& (multimap<double, double>& x, istream& stream);

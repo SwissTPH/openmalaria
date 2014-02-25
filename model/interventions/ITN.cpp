@@ -31,9 +31,9 @@ namespace OM { namespace interventions {
 
 vector<ITNEffect*> ITNEffect::effectsByIndex;
 
-ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
+ITNEffect::ITNEffect( EffectId id, const scnXml::ITNDescription& elt,
         const map<string, size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionEffect(index),
+        Transmission::HumanVectorInterventionEffect(id),
         ripFactor( numeric_limits<double>::signaling_NaN() )
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
@@ -58,8 +58,8 @@ ITNEffect::ITNEffect( size_t index, const scnXml::ITNDescription& elt,
     }
     checker.checkNoneMissed();
     
-    if( effectsByIndex.size() <= index ) effectsByIndex.resize( index+1, 0 );
-    effectsByIndex[index] = this;
+    if( effectsByIndex.size() <= id.id ) effectsByIndex.resize( id.id+1, 0 );
+    effectsByIndex[id.id] = this;
 }
 
 void ITNEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
@@ -77,15 +77,15 @@ Effect::Type ITNEffect::effectType() const{
     
 #ifdef WITHOUT_BOINC
 void ITNEffect::print_details( std::ostream& out )const{
-    out << getIndex() << "\tITN";
+    out << id().id << "\tITN";
 }
 #endif
 
 PerHostInterventionData* ITNEffect::makeHumanPart() const{
     return new HumanITN( *this );
 }
-PerHostInterventionData* ITNEffect::makeHumanPart( istream& stream, size_t index ) const{
-    return new HumanITN( stream, index );
+PerHostInterventionData* ITNEffect::makeHumanPart( istream& stream, EffectId id ) const{
+    return new HumanITN( stream, id );
 }
 
 void ITNEffect::ITNAnopheles::init(
@@ -478,7 +478,7 @@ double ITNEffect::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIndex
 }
 
 HumanITN::HumanITN( const ITNEffect& params ) :
-        PerHostInterventionData( params.getIndex() ),
+        PerHostInterventionData( params.id() ),
         nHoles( 0 ),
         holeIndex( 0.0 )
 {
@@ -516,7 +516,7 @@ void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionEffect& p
 }
 
 void HumanITN::update(){
-    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
+    const ITNEffect& params = *ITNEffect::effectsByIndex[m_id.id];
     if( deployTime != TimeStep::never ){
         // First use is at age 1, so don't remove until *after* disposalTime to
         // get use over the full duration given by sampleAgeOfDecay().
@@ -531,21 +531,21 @@ void HumanITN::update(){
 
 double HumanITN::relativeAttractiveness(size_t speciesIndex) const{
     if( deployTime == TimeStep::never ) return 1.0;
-    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
+    const ITNEffect& params = *ITNEffect::effectsByIndex[m_id.id];
     const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::preprandialSurvivalFactor(size_t speciesIndex) const{
     if( deployTime == TimeStep::never ) return 1.0;
-    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
+    const ITNEffect& params = *ITNEffect::effectsByIndex[m_id.id];
     const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
     if( deployTime == TimeStep::never ) return 1.0;
-    const ITNEffect& params = *ITNEffect::effectsByIndex[index];
+    const ITNEffect& params = *ITNEffect::effectsByIndex[m_id.id];
     const ITNEffect::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
@@ -560,7 +560,7 @@ void HumanITN::checkpoint( ostream& stream ){
     ripRate & stream;
     insecticideDecayHet & stream;
 }
-HumanITN::HumanITN( istream& stream, size_t index ) : PerHostInterventionData( index )
+HumanITN::HumanITN( istream& stream, EffectId id ) : PerHostInterventionData( id )
 {
     deployTime & stream;
     disposalTime & stream;
