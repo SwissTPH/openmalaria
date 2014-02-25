@@ -50,14 +50,9 @@
       <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="nSeq" value="true"/>
-      <option name="nHospitalDeaths" value="true"/>
-      <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
       <option name="nEPIVaccinations" value="true"/>
       <option name="nMassVaccinations" value="true"/>
-      <option name="nHospitalRecovs" value="true"/>
-      <option name="nHospitalSeqs" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="Vector_Nv0" value="true"/>
       <option name="Vector_Nv" value="true"/>
@@ -65,6 +60,7 @@
       <option name="Vector_Sv" value="true"/>
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
+      <option name="allCauseIMR"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime>1</surveyTime>
@@ -207,7 +203,7 @@
       </effect>
       <effect id="PEV">
         <PEV>
-          <decay L="10.0" function="exponential"/>
+          <decay L="10.0" function="exponential" mu="0" sigma="0.2"/>
           <efficacyB value="10"/>
           <initialEfficacy value="0.512"/>
           <initialEfficacy value="0.64"/>
