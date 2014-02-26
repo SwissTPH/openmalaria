@@ -34,10 +34,32 @@ namespace OM {
 namespace interventions {
 using namespace OM::util;
 
-Vaccine Vaccine::types[NumVaccineTypes];
+Vaccine* Vaccine::params[NumVaccineTypes];
 Vaccine::Types Vaccine::reportType = NumVaccineTypes;
 
-double Vaccine::getInitialEfficacy (size_t numPrevDoses)
+Vaccine::Vaccine(const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
+        decayFunc(DecayFunction::makeObject( vd.getDecay(), "decay" )),
+        efficacyB(vd.getEfficacyB().getValue())
+{
+    if( params[type] != 0 )
+        throw util::unimplemented_exception( "multiple vaccine interventions for the same type of vaccine" );
+    if( type == BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
+        throw util::unimplemented_exception( "blood stage vaccines (BSV) cannot be used with vivax model" );
+    
+    if( reportType == NumVaccineTypes /* the initial value */ ){
+        // set to the first type described
+        reportType = type;
+    }
+
+    const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
+    initialMeanEfficacy.resize (ies.size());
+    for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
+        initialMeanEfficacy[i] = ies[i].getValue();
+    
+    params[type] = this;
+}
+
+double Vaccine::getInitialEfficacy (size_t numPrevDoses) const
 {
     /* If initialMeanEfficacy.size or more doses have already been given, use
      * the last efficacy. */
@@ -74,34 +96,6 @@ void Vaccine::verifyEnabledForR_0 (){
 }
 #endif
 
-void Vaccine::initVaccine (const scnXml::VaccineDescription& vd, Types type)
-{
-    if( active )
-        throw util::unimplemented_exception( "multiple vaccine interventions for the same type of vaccine" );
-    if( type == BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
-        throw util::unimplemented_exception( "blood stage vaccines (BSV) cannot be used with vivax model" );
-    active = true;
-    
-    if( reportType == NumVaccineTypes /* the initial value */ ){
-        // set to the first type described
-        reportType = type;
-    }
-
-    // set efficacyB:
-    efficacyB = vd.getEfficacyB().getValue();
-
-    // set initialMeanEfficacy:
-    const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
-    initialMeanEfficacy.resize (ies.size());
-    for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
-        initialMeanEfficacy[i] = ies[i].getValue();
-
-    decayFunc = DecayFunction::makeObject( vd.getDecay(), "decay" );
-}
-
-PerHumanVaccine::PerHumanVaccine(){
-}
-
 PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
     numDosesAdministered(0),
     initialEfficacy( std::numeric_limits<double>::signaling_NaN() )
@@ -111,15 +105,15 @@ PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
 PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( Vaccine::Types type ) :
         numDosesAdministered(0), initialEfficacy(0.0)
 {
-    if (Vaccine::types[type].active)
-        hetSample = Vaccine::types[type].decayFunc->hetSample();
+    if (Vaccine::params[type] != 0)
+        hetSample = Vaccine::params[type]->decayFunc->hetSample();
 }
 
 double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
     const PerEffectPerHumanVaccine& effect = types[type];
     if( effect.initialEfficacy != effect.initialEfficacy ) return 1.0;        // never deployed
     TimeStep age = TimeStep::simulation - effect.timeLastDeployment;
-    double decayFactor = Vaccine::types[type].decayFunc->eval( age, effect.hetSample );
+    double decayFactor = Vaccine::getParams(type).decayFunc->eval( age, effect.hetSample );
     return 1.0 - effect.initialEfficacy * decayFactor;
 }
 
@@ -137,7 +131,7 @@ void PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
     if( effect.initialEfficacy != effect.initialEfficacy )
         effect = PerEffectPerHumanVaccine( static_cast<Vaccine::Types>( type ) );
     
-    effect.initialEfficacy = Vaccine::types[type].getInitialEfficacy(effect.numDosesAdministered);
+    effect.initialEfficacy = Vaccine::getParams(type).getInitialEfficacy(effect.numDosesAdministered);
     util::streamValidate(effect.initialEfficacy);
     
     effect.numDosesAdministered += 1;

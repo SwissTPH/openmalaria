@@ -47,34 +47,29 @@ class Vaccine {
 public:
     enum Types { PEV, BSV, TBV, NumVaccineTypes };
 
-    /** Per-type initialization */
-    inline static void init( const scnXml::VaccineDescription& vd, Types type ){
-        types[type].initVaccine( vd, type );
-    }
+    Vaccine(const scnXml::VaccineDescription& vd, Types type);
     
 private:
-    // ———  non-static  ———
-    
-    Vaccine() : active(false), decayFunc(DecayFunction::makeConstantObject()), efficacyB(1.0) {}
-    
-    void initVaccine (const scnXml::VaccineDescription& vd, Types type);
-    
     /** Get the initial efficacy of the vaccine.
      *
      * @param numPrevDoses The number of prior vaccinations of the individual. */
-    double getInitialEfficacy (size_t numPrevDoses);
+    double getInitialEfficacy (size_t numPrevDoses) const;
 
-    /** @brief Three types of vaccine.
+    inline static const Vaccine& getParams( Types type ){
+        assert( params[type] != 0 );
+        return *params[type];
+    }
+    
+    /** @brief Vaccine static parameters
      * 
-     * TODO(vaccines): multiple descriptions should be allowed for each type. */
-    static Vaccine types[NumVaccineTypes];
+     * Each instance is either null or points to data for the vaccine type.
+     *
+     * No memory management (only leak is at exit which OS deals with). */
+    static Vaccine* params[NumVaccineTypes];
     
     /** Until the monitoring system is updated, only one type of vaccination
      * should be reported. Which to report is described here. */
     static Types reportType;
-
-    /// True if this vaccine is in use
-    bool active;
 
     /// Function representing decay of effect
     shared_ptr<DecayFunction> decayFunc;
@@ -123,7 +118,7 @@ private:
 /** Per-human vaccine code. */
 class PerHumanVaccine {
 public:
-    PerHumanVaccine();
+    PerHumanVaccine() {}
     
     /** Get one minus the efficacy of the vaccine (1 for no effect, 0 for full effect). */
     double getFactor( Vaccine::Types type )const;
@@ -136,7 +131,7 @@ public:
 #if 0
     /// Hack for R_0 experiment: make current human the infection source
     inline void specialR_0(){
-        assert( Vaccine::types[Vaccine::PEV].active && Vaccine::types[Vaccine::TBV].active );
+        assert( Vaccine::types[Vaccine::PEV] != 0 && Vaccine::types[Vaccine::TBV] != 0 );
         types[Vaccine::PEV].initialEfficacy = 1.0;
         types[Vaccine::TBV].initialEfficacy = 0.0;
     }

@@ -168,7 +168,7 @@ public:
     VaccineEffect( EffectId id, const scnXml::VaccineDescription& seq, Vaccine::Types type ) :
             HumanInterventionEffect(id), type(type)
     {
-        Vaccine::init( seq, type );
+        new Vaccine( seq, type );
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits )const{
