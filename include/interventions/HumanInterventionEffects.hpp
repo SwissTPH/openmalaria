@@ -168,11 +168,12 @@ public:
     VaccineEffect( EffectId id, const scnXml::VaccineDescription& seq, Vaccine::Types type ) :
             HumanInterventionEffect(id), type(type)
     {
-        new Vaccine( seq, type );
+        // TODO: these two classes can be combined
+        new Vaccine( seq, type, id );
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits )const{
-        human.getVaccine().possiblyVaccinate( human, method, type, vaccLimits );
+        human.getVaccine().possiblyVaccinate( human, method, id(), vaccLimits );
     }
     
     virtual Effect::Type effectType() const{

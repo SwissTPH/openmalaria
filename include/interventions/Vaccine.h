@@ -47,7 +47,9 @@ class Vaccine {
 public:
     enum Types { PEV, BSV, TBV, NumVaccineTypes };
 
-    Vaccine(const scnXml::VaccineDescription& vd, Types type);
+    Vaccine(const scnXml::VaccineDescription& vd, Types type, EffectId effect);
+    
+    Types type;
     
 private:
     /** Get the initial efficacy of the vaccine.
@@ -55,21 +57,23 @@ private:
      * @param numPrevDoses The number of prior vaccinations of the individual. */
     double getInitialEfficacy (size_t numPrevDoses) const;
 
-    inline static const Vaccine& getParams( Types type ){
-        assert( params[type] != 0 );
-        return *params[type];
+    inline static const Vaccine& getParams( EffectId effect ){
+        assert( effect.id >= 0 && effect.id < params.size() && params[effect.id] != 0 );
+        return *Vaccine::params[effect.id];
     }
     
     /** @brief Vaccine static parameters
      * 
-     * Each instance is either null or points to data for the vaccine type.
+     * Each instance is either null or points to data for the vaccine effect
+     * with the given effect ID.
      *
      * No memory management (only leak is at exit which OS deals with). */
-    static Vaccine* params[NumVaccineTypes];
+    static vector<Vaccine*> params;
     
+    //TODO(monitoring):
     /** Until the monitoring system is updated, only one type of vaccination
-     * should be reported. Which to report is described here. */
-    static Types reportType;
+     * delivery can be reported. This is whichever is first configured. */
+    static EffectId reportEffect;
 
     /// Function representing decay of effect
     shared_ptr<DecayFunction> decayFunc;
@@ -93,6 +97,7 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
+        effect & stream;
         numDosesAdministered & stream;
         timeLastDeployment & stream;
         initialEfficacy & stream;
@@ -100,8 +105,10 @@ public:
     }
     
 private:
-    PerEffectPerHumanVaccine( const Vaccine& params );
+    PerEffectPerHumanVaccine( EffectId id, const Vaccine& params );
     
+    EffectId effect;      // id of effect (for finding parameters)
+    // Type of vaccine
     /** Number of vaccine doses this individual has received.
      *
      * If an individual misses one EPI (continuous) vaccine dose, it's
@@ -120,59 +127,35 @@ private:
 /** Per-human vaccine code. */
 class PerHumanVaccine {
 public:
-    PerHumanVaccine() {
-        types[0] = types[1] = types[2] = 0;
-    }
-    ~PerHumanVaccine(){
-        for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i )
-            if( types[i] != 0 )
-                delete types[i];
-    }
+    PerHumanVaccine() {}
     
     /** Get one minus the efficacy of the vaccine (1 for no effect, 0 for full effect). */
     double getFactor( Vaccine::Types type )const;
     
+    /** Vaccinate unless the passed VaccineLimits specify not to. */
     void possiblyVaccinate( const Host::Human& human,
-                           Deployment::Method method,
-                           Vaccine::Types type,
+                           Deployment::Method method, EffectId effectId,
                            interventions::VaccineLimits vaccLimits );
 
 #if 0
     /// Hack for R_0 experiment: make current human the infection source
     inline void specialR_0(){
-        assert( Vaccine::types[Vaccine::PEV] != 0 && Vaccine::types[Vaccine::TBV] != 0 );
-        types[Vaccine::PEV].initialEfficacy = 1.0;
-        types[Vaccine::TBV].initialEfficacy = 0.0;
+        // At this point special TBV should have been given to everyone but the PEV to no-one
+        effects[R_0_PEV].initialEfficacy = 1.0;
+        effects[R_0_TBV].initialEfficacy = 0.0;
     }
 #endif
     
     /// Checkpointing
-    void operator& (ostream& stream) {
-        for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i ){
-            if( types[i] == 0 ){
-                false & stream;
-            }else{
-                true & stream;
-                (*types[i]) & stream;
-            }
-        }
-    }
-    void operator& (istream& stream) {
-        for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i ){
-            bool hasEffect;
-            hasEffect & stream;
-            if( hasEffect ){
-                types[i] = new PerEffectPerHumanVaccine();
-                (*types[i]) & stream;
-            }else{
-                types[i] = 0;
-            }
-        }
+    template<class S>
+    void operator& (S& stream) {
+        effects & stream;
     }
 
 private:
-    /// Details for each vaccine type
-    PerEffectPerHumanVaccine* types[Vaccine::NumVaccineTypes];
+    /// Details for each deployed vaccine for this human
+    typedef vector<PerEffectPerHumanVaccine> EffectList;
+    EffectList effects;
 };
 
 }

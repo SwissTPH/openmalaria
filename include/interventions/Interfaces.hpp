@@ -70,6 +70,7 @@ struct VaccineLimits{
 struct EffectId{
     explicit inline EffectId( size_t id ) : id(id) {}
     explicit inline EffectId( istream& stream ){ id & stream; }
+    inline void operator& (istream& stream) { id & stream; }
     inline void operator& (ostream& stream) const{ id & stream; }
     inline bool operator== (const EffectId that) const{ return id == that.id; }
     inline bool operator< (const EffectId that) const{ return id < that.id; }

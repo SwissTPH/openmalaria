@@ -34,21 +34,20 @@ namespace OM {
 namespace interventions {
 using namespace OM::util;
 
-Vaccine* Vaccine::params[NumVaccineTypes];
-Vaccine::Types Vaccine::reportType = NumVaccineTypes;
+vector<Vaccine*> Vaccine::params;
+EffectId Vaccine::reportEffect = EffectId_pop;
 
-Vaccine::Vaccine(const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
+Vaccine::Vaccine(const scnXml::VaccineDescription& vd, Vaccine::Types type, EffectId effect) :
+        type(type),
         decayFunc(DecayFunction::makeObject( vd.getDecay(), "decay" )),
         efficacyB(vd.getEfficacyB().getValue())
 {
-    if( params[type] != 0 )
-        throw util::unimplemented_exception( "multiple vaccine interventions for the same type of vaccine" );
     if( type == BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
         throw util::unimplemented_exception( "blood stage vaccines (BSV) cannot be used with vivax model" );
     
-    if( reportType == NumVaccineTypes /* the initial value */ ){
+    if( reportEffect == EffectId_pop /* the initial value */ ){
         // set to the first type described
-        reportType = type;
+        reportEffect = effect;
     }
 
     const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
@@ -56,7 +55,9 @@ Vaccine::Vaccine(const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
     for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
         initialMeanEfficacy[i] = ies[i].getValue();
     
-    params[type] = this;
+    if( params.size() <= effect.id ) params.resize( effect.id + 1 );
+    assert( params[effect.id] == 0 );
+    params[effect.id] = this;
 }
 
 double Vaccine::getInitialEfficacy (size_t numPrevDoses) const
@@ -96,42 +97,54 @@ void Vaccine::verifyEnabledForR_0 (){
 }
 #endif
 
+// this is only used for checkpointing; loaded values are unimportant
 PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
+    effect(EffectId_pop),
     numDosesAdministered(0),
     initialEfficacy( std::numeric_limits<double>::signaling_NaN() )
 {
 }
 
-PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( const Vaccine& params ) :
-        numDosesAdministered(0), initialEfficacy(0.0)
+PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( EffectId id, const Vaccine& params ) :
+    effect( id ), numDosesAdministered(0), initialEfficacy(0.0)
 {
     hetSample = params.decayFunc->hetSample();
 }
 
 double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
-    if( types[type] == 0 ) return 1.0;  // never deployed
-    const PerEffectPerHumanVaccine& effect = *types[type];
-    TimeStep age = TimeStep::simulation - effect.timeLastDeployment;
-    double decayFactor = Vaccine::getParams(type).decayFunc->eval( age, effect.hetSample );
-    return 1.0 - effect.initialEfficacy * decayFactor;
+    double factor = 1.0;
+    for( EffectList::const_iterator effect = effects.begin(); effect != effects.end(); ++effect ){
+        if( Vaccine::getParams(effect->effect).type == type ){
+            TimeStep age = TimeStep::simulation - effect->timeLastDeployment;
+            double decayFactor = Vaccine::getParams(effect->effect).decayFunc->eval( age, effect->hetSample );
+            factor *= 1.0 - effect->initialEfficacy * decayFactor;
+        }
+    }
+    return factor;
 }
 
 void PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
-                                 Deployment::Method method, Vaccine::Types type,
+                                 Deployment::Method method, EffectId effectId,
                                  interventions::VaccineLimits vaccLimits )
 {
-    PerEffectPerHumanVaccine* effect = types[type];
+    PerEffectPerHumanVaccine* effect = 0;
+    for( EffectList::iterator it = effects.begin(); it != effects.end(); ++it ){
+        if( it->effect == effectId ){
+            effect = &*it;
+            break;
+        }
+    }
     
     uint32_t numDosesAdministered = (effect == 0) ? 0 : effect->numDosesAdministered;
     if( numDosesAdministered < vaccLimits.minPrevDoses ||
         numDosesAdministered >= vaccLimits.maxCumDoses )
         return;         // no vaccination (this replaces the old schedule for continuous doses)
     
-    const Vaccine& params = Vaccine::getParams( type );
+    const Vaccine& params = Vaccine::getParams( effectId );
     
     if( effect == 0 ){
-        types[type] = new PerEffectPerHumanVaccine( params );
-        effect = types[type];
+        effects.push_back( PerEffectPerHumanVaccine( effectId, params ) );
+        effect = &effects.back();
     }
     
     effect->initialEfficacy = params.getInitialEfficacy(numDosesAdministered);
@@ -140,7 +153,7 @@ void PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
     effect->numDosesAdministered = numDosesAdministered + 1;
     effect->timeLastDeployment = TimeStep::simulation;
     
-    if( Vaccine::reportType == type ){
+    if( Vaccine::reportEffect == effectId ){
         if( method == Deployment::TIMED )
             Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                 .reportMassVaccinations (human.getMonitoringAgeGroup(), 1);
