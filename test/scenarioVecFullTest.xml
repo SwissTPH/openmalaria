@@ -192,6 +192,14 @@
           </drugEffect>
         </MDA>
       </effect>
+      <effect id="PevDrug">
+        <!-- this is a made-up short-effect pre-erythrocytic effect drug -->
+        <PEV>
+          <decay L="0.548" function="smooth-compact"/>
+          <efficacyB value="1.5"/>
+          <initialEfficacy value="0.5"/>
+        </PEV>
+      </effect>
       <effect id="TBV">
         <TBV>
           <decay L="10.0" function="exponential"/>
@@ -272,36 +280,33 @@
       </effect>
       <intervention>
         <effect id="MDA"/>
+        <effect id="PevDrug"/>
         <continuous>
-          <deploy coverage="0.95" targetAgeYrs="0.17"/>
-          <deploy coverage="0.95" targetAgeYrs="0.25"/>
-          <deploy coverage="0.95" targetAgeYrs="0.75"/>
+          <deploy coverage="0.15" targetAgeYrs="0.75"/>
         </continuous>
         <timed>
-          <deploy coverage="0.95" time="7"/>
+          <deploy coverage="0.75" time="300"/>
         </timed>
       </intervention>
       <intervention>
         <effect id="TBV"/>
         <effect id="PEV"/>
         <continuous>
-          <deploy coverage="0.95" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
-          <deploy coverage="0.95" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
-          <deploy coverage="0.95" targetAgeYrs="0.25" vaccMaxCumDoses="3" vaccMinPrevDoses="2"/>
+          <deploy coverage="0.4" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
+          <deploy coverage="0.4" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
+          <deploy coverage="0.4" targetAgeYrs="0.25" vaccMaxCumDoses="3" vaccMinPrevDoses="2"/>
         </continuous>
         <timed>
-          <deploy coverage="0.95" time="1"/>
-          <deploy coverage="0.95" time="7"/>
-          <deploy coverage="0.95" time="13"/>
-          <deploy coverage="0.95" time="366"/>
-          <deploy coverage="0.95" time="731"/>
-          <deploy coverage="0.95" time="1096"/>
+          <deploy coverage="0.5" time="7" vaccMaxCumDoses="3"/>
+          <deploy coverage="0.5" time="366" vaccMaxCumDoses="3"/>
+          <deploy coverage="0.5" time="731" vaccMaxCumDoses="3"/>
+          <deploy coverage="0.5" time="1096" vaccMaxCumDoses="3"/>
         </timed>
       </intervention>
       <intervention name="Extended ITNs">
         <effect id="ITN"/>
         <continuous>
-          <deploy coverage="0.95" targetAgeYrs="0.0833"/>
+          <deploy coverage="0.5" targetAgeYrs="0.0833"/>
         </continuous>
         <timed>
           <deploy coverage="0.95" time="7"/>
@@ -310,13 +315,13 @@
       <intervention name="DDT test">
         <effect id="GVI"/>
         <timed>
-          <deploy coverage="0.95" time="7"/>
+          <deploy coverage="0.7" time="80"/>
         </timed>
       </intervention>
       <intervention name="hypothetical deterrency">
         <effect id="vectorDeterrent"/>
         <timed>
-          <deploy coverage="0.7" time="7"/>
+          <deploy coverage="0.7" time="200"/>
         </timed>
       </intervention>
     </human>
