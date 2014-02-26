@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -57,7 +57,7 @@ namespace OM { namespace util {
      * trace (output to a file called "StreamValidator" in working directory).
      * 
      * 3. Run scenario with checkpointing and the "--stream-validator" option,
-     * through a debugger. For example, from the build directory:
+     * optionally through a debugger. For example, from the build directory:
      * "test/run.py Empirical --gdb -- --stream-validator ../build/test/Empirical-6_Fsvp/StreamValidator --checkpoint"
      * 
      * 4. Run in debugger (step 3 should have loaded the debugger).
@@ -65,7 +65,7 @@ namespace OM { namespace util {
      * the second section after loading a checkpoint should run out of sync.
      * We want to catch where it runs out of sync; to do this, we add a break
      * point at the line mentioned in StreamValidator.cpp:
-     * "break StreamValidator.cpp:103". Now run the program until it hits this
+     * "break StreamValidator.cpp:117". Now run the program until it hits this
      * break-point (probably twice), then get a stack trace ("bt"). The desync
      * occurred somewhere between here and the previous call to streamValidate()
      * in the code. If the debugger never reaches the "out of sync" message in

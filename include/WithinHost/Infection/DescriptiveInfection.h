@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,15 +49,14 @@ class DescriptiveInfection : public Infection {
 public:
     ///@name Static init/cleanup
     //@{
-    //TODO: what does the following note mean?
-    /** Init constants common to all Phase A (AJTMH 75(2)) infections.
+    /**
+     * Loads some constants: parameters used by the empirical models.
      * 
-     * Once constants are initialised then cumulative distributions of parasite
-     * densities and durations of patency from the malariatherapy data and also
-     * the category boundaries for the grouping of time since first positive
-     * slide.
+     * An old comment said the following, but due to code changes may not be completely accurate now:
+     * Init constants common to all Phase A (AJTMH 75(2)) infections (i.e.
+     * those models documented in the referenced publication).
      */
-    static void init();
+    static void init(const OM::Parameters& parameters);
     //@}
     
     ///@name Constructors
@@ -83,14 +82,11 @@ public:
      * @param timeStepMaxDensity (In-out param) Used to return the maximum
      *  parasite density over a 5-day interval.
      * @param innateImmSurvFact Density multiplier for innate immunity.
-     * @param BSVEfficacy Density multiplier for Blood-Stage Vaccine effect.
+     * @param bsvFactor Density multiplier for Blood-Stage Vaccine effect.
      */
     void determineDensities(double ageInYears, double cumulativeh,
                             double cumulativeY, double &timeStepMaxDensity,
-                            double innateImmSurvFact, double BSVEfficacy);
-    /** Final part of determineDensities calculation. Could be combined if not
-     * using the IPT model. */
-    void determineDensityFinal ();
+                            double innateImmSurvFact, double bsvFactor);
     
     /** Decide on an infection duration and return it.
      * 

@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,18 +29,13 @@
 #include "Transmission/Anopheles/FixedEmergence.h"
 #include "util/SimpleDecayingValue.h"
 
-#include <list>
 #include <vector>
 #include <limits>
 
 namespace OM {
-namespace Host {
-class Human;
-}
+    class Population;
 namespace Transmission {
 namespace Anopheles {
-
-using namespace std;
 
 /** Per-species part for vector transmission model.
  *
@@ -62,8 +57,7 @@ class AnophelesModel
 public:
     ///@brief Initialisation and destruction
     //@{
-    AnophelesModel (const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
-            humanBase(baseITNParams,baseIRSParams),
+    AnophelesModel () :
             partialEIR(0.0)
     {}
     
@@ -93,19 +87,17 @@ public:
      *
      * @param sIndex Index in VectorModel::species of this class.
      * @param population The human population
-     * @param populationSize Number of humans (use instead of population.size())
      * @param meanPopAvail The mean availability of age-based relative
      * availability of humans to mosquitoes across populations.
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
     void init2 (size_t sIndex,
-                   const std::list<Host::Human>& population,
-                   int populationSize,
+                   const OM::Population& population,
                    double meanPopAvail);
     
     /** Set up the non-host-specific interventions. */
-    void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance );
+    void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
     
     /** Return base-line human parameters for the mosquito. */
     inline const Anopheles::PerHostBase& getHumanBaseParams () {
@@ -121,26 +113,6 @@ public:
     }
     //@}
 
-    /** @brief Set up intervention descriptions for humans, for this anopheles species. */
-    //@{
-    inline void setITNDescription (const ITNParams& params,
-            const scnXml::ITNDescription::AnophelesParamsType& elt,
-            double proportionUse) {
-        humanBase.setITNDescription (params, elt, proportionUse);
-    }
-    inline void setIRSDescription (const IRSParams& params,
-            const scnXml::IRSDescription_v1::AnophelesParamsType& elt) {
-        humanBase.setIRSDescription (params, elt);
-    }
-    inline void setIRSDescription (const IRSParams& params,
-            const scnXml::IRSDescription_v2::AnophelesParamsType& elt) {
-        humanBase.setIRSDescription (params, elt);
-    }
-    inline void setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
-        humanBase.setVADescription (vaDesc);
-    }
-    //@}
-    
     
     ///@brief Functions called as part of usual per-timestep operations
     //@{
@@ -148,12 +120,15 @@ public:
      *
      * @param population The human population; so we can sum up availability and
      *  infectiousness.
-     * @param populationSize Number of humans
+     * @param popProbTransmission A vector of the probability of transmission
+     *  to mosquito for each human host (in same order as population). This is
+     *  simply a cache, since calling probTransmissionToMosquito() is expensive.
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (const std::list<Host::Human>& population,
-        int populationSize, size_t sIndex, bool isDynamic);
+    void advancePeriod( const OM::Population& population,
+                        vector<double>& popProbTransmission,
+                        size_t sIndex, bool isDynamic );
 
     /** Returns the EIR calculated by advancePeriod().
      *
@@ -162,17 +137,7 @@ public:
      *
      * @param sIndex Index of this in VectorModel::species
      * @param host PerHost of the human requesting this EIR. */
-    double calculateEIR (size_t sIndex, ::OM::Transmission::PerHost& host) {
-        if ( partialEIR != partialEIR ) {
-            cerr<<"partialEIR is not a number; "<<sIndex<<endl;
-        }
-        /* Calculates EIR per individual (hence N_i == 1).
-         *
-         * See comment in AnophelesModel::advancePeriod for method. */
-        return partialEIR
-               * host.entoAvailabilityHetVecItv (humanBase, sIndex)
-               * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
-    }
+    double calculateEIR (size_t sIndex, Transmission::PerHost& host );
     //@}
 
 
@@ -291,8 +256,6 @@ private:
      * need checkpointing. */
     //@{
     /** Death rate of mosquitoes while host-seeking (μ_vA).
-     *
-     * TODO: the model could be extended to allow this and mosqSeekingDuration to vary over the year.
      *
      * Unit: animals/day. */
     double mosqSeekingDeathRate;

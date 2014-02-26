@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Survey.h"	// lineEnd
 #include "util/errors.h"
-#include "inputData.h"
 #include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
+#include "schema/monitoring.h"
 
 #include <vector>
 #include <map>
@@ -102,9 +102,8 @@ namespace OM { namespace Monitoring {
    
     /* Initialise: enable outputs registered and requested in XML.
      * Search for Continuous::registerCallback to see outputs available. */
-    void ContinuousType::init (bool isCheckpoint) {
-	const scnXml::Monitoring::ContinuousOptional& ctsOpt =
-	    InputData().getMonitoring().getContinuous();
+    void ContinuousType::init (const scnXml::Monitoring& monitoring, bool isCheckpoint) {
+	const scnXml::Monitoring::ContinuousOptional& ctsOpt = monitoring.getContinuous();
 	if( ctsOpt.present() == false ) {
 	    ctsPeriod = 0;
 	    return;
@@ -150,11 +149,13 @@ namespace OM { namespace Monitoring {
 	    streamStart = ctsOStream.tellp();
 	    // we set position later, in staticCheckpoint
 	}else{
+#ifndef WITHOUT_BOINC
 	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
 		// It could be from an old run. But we won't remove/truncate
 		// existing files as a security precaution for running on BOINC.
 		throw util::base_exception (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
             }
+#endif
 	    
 	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
 	    streamStart = ctsOStream.tellp();

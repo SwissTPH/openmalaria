@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,6 +32,8 @@
 
 /** Standard exception classes for OpenMalaria. */
 namespace OM { namespace util {
+
+const char *Messages::SwitchDefault = "no valid option selected in a switch statement or if/else tree";
 
 base_exception::base_exception(const string& msg, int code) :
     runtime_error(msg),
@@ -120,7 +122,26 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
 #endif
     return stream;
 }
- 
+
+unimplemented_exception::unimplemented_exception(const string& msg) :
+        base_exception(msg, Error::NotImplemented)
+{}
+const char *unimplemented_exception::message() const{
+    const char *base_msg = base_exception::what();
+    size_t base_len = strlen( base_msg );
+    size_t required = base_len + msg_pre.size();
+    if( msg_buf.size() == 0 ){
+        msg_buf.assign( required, '0' );
+        memcpy( &msg_buf[0], msg_pre.c_str(), msg_pre.size() );
+    }else if( msg_buf.size() < required ){
+        msg_buf.resize( required );
+    }
+    memcpy( &msg_buf[msg_pre.size()], base_msg, base_len );
+    return &msg_buf[0];
+}
+const string unimplemented_exception::msg_pre = "Sorry, this feature hasn't been implemented by OpenMalaria yet: ";
+vector<char> unimplemented_exception::msg_buf;
+
 xml_scenario_error::xml_scenario_error(const string& msg) :
     base_exception(msg, Error::XmlScenario)
 {}

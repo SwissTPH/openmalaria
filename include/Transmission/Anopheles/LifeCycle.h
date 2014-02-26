@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -185,8 +185,8 @@ public:
      * 
      * @param lcParams Fixed parameters for the life-cycle model
      * @param nOvipositingMosqs The number of adults which successfully
-     * oviposited this/last time-step. TODO: we're setting new value based on
-     * num ovipositing yesterday? That's not right.
+     * oviposited this/last time-step. TODO(vec lifecycle): we're setting new
+     * value based on num ovipositing yesterday? That's not right.
      * @param d The current day (exact value isn't important; it must be
      * non-negative and incremented by one between calls).
      * @param dYear1 The day of the year of the last calculated time-point.
@@ -229,7 +229,7 @@ private:
     vector<double> newPupae;
     
     friend class ::MosqLifeCycleSuite;
-    friend class ResourceFitter;        // FIXME: this is temporary for debugging
+    friend class ResourceFitter;        // TODO(vec lifecycle): this is temporary for debugging
 };
 
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Mass screen-and-treat and ITNs" schemaVersion="31" wuID="536305339" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Mass screen-and-treat and ITNs" schemaVersion="32" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -35,9 +35,9 @@
       <option name="immunity Y" value="true"/>
       <option name="new infections" value="true"/>
       <option name="num transmitting humans" value="true"/>
-      <option name="nets owned" value="true"/>
+      <!--<option name="nets owned" value="true"/>
       <option name="mean hole index"/>
-      <option name="mean insecticide content"/>
+      <option name="mean insecticide content"/>-->
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
@@ -119,101 +119,108 @@
     </ageGroup>
   </monitoring>
   <interventions name="ITN and MSAT">
-    <MDA>
-      <description>
-        <decisions>
-          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
-            age(0-3): 0_3
-            age(3-9): 3_9
-            age(9-15): 9_15
-            age(15-inf): 15_inf
-          </decision>
-          <decision depends="" name="test" values="none,microscopy,RDT">
-             RDT
-          </decision>
-          <decision depends="result" name="treatment" values="none,AL_treat">
-              result(negative): none
-              result(positive): AL_treat
-              result(none): none
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="AL_treat">
-            <schedule>
-              <medicate drug="AR" hour="0" mg="20"/>
-              <medicate drug="LU" hour="0" mg="120"/>
-              <medicate drug="AR" hour="8" mg="20"/>
-              <medicate drug="LU" hour="8" mg="120"/>
-              <medicate drug="AR" hour="24" mg="20"/>
-              <medicate drug="LU" hour="24" mg="120"/>
-              <medicate drug="AR" hour="36" mg="20"/>
-              <medicate drug="LU" hour="36" mg="120"/>
-              <medicate drug="AR" hour="48" mg="20"/>
-              <medicate drug="LU" hour="48" mg="120"/>
-              <medicate drug="AR" hour="60" mg="20"/>
-              <medicate drug="LU" hour="60" mg="120"/>
-            </schedule>
-            <modifier decision="age_AL">
-              <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
-              <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
-              <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
-              <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
-            </modifier>
-          </treatment>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-        </treatments>
-      </description>
-      <timed>
-        <deploy coverage="0.85" time="1484"/>
-        <deploy coverage="0.85" time="1849"/>
-        <deploy coverage="0.85" time="2214"/>
-        <deploy coverage="0.85" time="2579"/>
-        <deploy coverage="0.85" time="2944"/>
-        <deploy coverage="0.85" time="3309"/>
-        <deploy coverage="0.85" time="3674"/>
-        <deploy coverage="0.85" time="4039"/>
-      </timed>
-    </MDA>
-    <ITN name="Extended ITNs">
-      <description>
-        <usage value="0.8"/>
-        <holeRate mean=".9" sigma=".8"/>
-        <ripRate mean=".7" sigma=".8"/>
-        <ripFactor value="0.4"/>
-        <initialInsecticide mu="70" sigma="20"/>
-        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
-        <attritionOfNets L="12" function="smooth-compact" k="2"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-        <anophelesParams mosquito="funestus">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-        <anophelesParams mosquito="arabiensis">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-      </description>
-      <!-- at 2, 6, 10 and 16 years -->
-      <timed>
-        <deploy coverage="0.20" time="146"/>
-        <deploy coverage="0.20" time="438"/>
-        <deploy coverage="0.20" time="730"/>
-        <deploy coverage="0.20" time="1168"/>
-      </timed>
-    </ITN>
     <importedInfections>
       <timed>
         <rate time="0" value="5"/>
       </timed>
     </importedInfections>
+    <human>
+      <effect id="MDA">
+        <MDA1D>
+          <decisions>
+            <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
+            age(0-3): 0_3
+            age(3-9): 3_9
+            age(9-15): 9_15
+            age(15-inf): 15_inf
+          </decision>
+            <decision depends="" name="test" values="none,microscopy,RDT">
+             RDT
+          </decision>
+            <decision depends="result" name="treatment" values="none,AL_treat">
+              result(negative): none
+              result(positive): AL_treat
+              result(none): none
+          </decision>
+          </decisions>
+          <treatments>
+            <treatment name="AL_treat">
+              <schedule>
+                <medicate drug="AR" hour="0" mg="20"/>
+                <medicate drug="LU" hour="0" mg="120"/>
+                <medicate drug="AR" hour="8" mg="20"/>
+                <medicate drug="LU" hour="8" mg="120"/>
+                <medicate drug="AR" hour="24" mg="20"/>
+                <medicate drug="LU" hour="24" mg="120"/>
+                <medicate drug="AR" hour="36" mg="20"/>
+                <medicate drug="LU" hour="36" mg="120"/>
+                <medicate drug="AR" hour="48" mg="20"/>
+                <medicate drug="LU" hour="48" mg="120"/>
+                <medicate drug="AR" hour="60" mg="20"/>
+                <medicate drug="LU" hour="60" mg="120"/>
+              </schedule>
+              <modifier decision="age_AL">
+                <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
+                <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
+                <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
+                <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
+              </modifier>
+            </treatment>
+            <treatment name="none">
+              <schedule/>
+            </treatment>
+          </treatments>
+        </MDA1D>
+      </effect>
+      <effect id="ITN" name="Extended ITNs">
+        <ITN>
+          <usage value="0.8"/>
+          <holeRate mean=".9" sigma=".8"/>
+          <ripRate mean=".7" sigma=".8"/>
+          <ripFactor value="0.4"/>
+          <initialInsecticide mu="70" sigma="20"/>
+          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <attritionOfNets L="12" function="smooth-compact" k="2"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="funestus">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="arabiensis">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+        </ITN>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy coverage="0.85" time="1484"/>
+          <deploy coverage="0.85" time="1849"/>
+          <deploy coverage="0.85" time="2214"/>
+          <deploy coverage="0.85" time="2579"/>
+          <deploy coverage="0.85" time="2944"/>
+          <deploy coverage="0.85" time="3309"/>
+          <deploy coverage="0.85" time="3674"/>
+          <deploy coverage="0.85" time="4039"/>
+        </timed>
+      </intervention>
+      <intervention name="Extended ITNs">
+        <effect id="ITN"/>
+        <timed>
+          <deploy coverage="0.20" time="146"/>
+          <deploy coverage="0.20" time="438"/>
+          <deploy coverage="0.20" time="730"/>
+          <deploy coverage="0.20" time="1168"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <EventScheduler>
@@ -925,11 +932,9 @@
   </pharmacology>
   <model>
     <ModelOptions>
-      <option name="MAX_DENS_CORRECTION" value="true"/>
       <option name="MOLINEAUX_WITHIN_HOST_MODEL" value="true"/>
       <option name="INCLUDES_PK_PD" value="true"/>
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-      <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="14"/>
     <!-- run id=740 parameterization id=243641 sampling date=2010-08-21 11:14:03 lossfunction=82.879291 -->
@@ -1014,4 +1019,4 @@
       <parameter include="1" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.937431"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

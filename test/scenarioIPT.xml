@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" name="IPTi_seas_niak21_d4mo" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="83" name="IPTi_seas_niak21_d4mo" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -168,22 +168,27 @@
     </ageGroup>
   </monitoring>
   <interventions name="IPTi_seas_SP">
-    <IPT>
-      <description iptiEffect="18">
-        <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
-        <infGenotype ACR="1.0" atten="1" freq="0.1" name="double" proph="2" tolPeriod="4"/>
-        <infGenotype ACR="0.5" atten="1" freq="0.1" name="triple" proph="0" tolPeriod="4"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.95" targetAgeYrs="0.25"/>
-        <deploy coverage="0.95" targetAgeYrs="0.33"/>
-        <deploy coverage="0.95" targetAgeYrs="0.75"/>
-      </continuous>
-      <timed>
-        <deploy coverage=".8" time="7"/>
-        <deploy coverage=".8" time="79"/>
-      </timed>
-    </IPT>
+    <human>
+      <effect id="IPT">
+        <IPT iptiEffect="18">
+          <infGenotype ACR="1.0" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
+          <infGenotype ACR="1.0" atten="1" freq="0.1" name="double" proph="2" tolPeriod="4"/>
+          <infGenotype ACR="0.5" atten="1" freq="0.1" name="triple" proph="0" tolPeriod="4"/>
+        </IPT>
+      </effect>
+      <intervention>
+        <effect id="IPT"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.25"/>
+          <deploy coverage="0.95" targetAgeYrs="0.33"/>
+          <deploy coverage="0.95" targetAgeYrs="0.75"/>
+        </continuous>
+        <timed>
+          <deploy coverage=".8" time="7"/>
+          <deploy coverage=".8" time="79"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <!-- Niakhar seasonality scaled to an EIR of 21 -->
   <healthSystem>
@@ -656,4 +661,4 @@
       <parameter include="1" name=" critical age for comorbidity " number="30" value="0.115906"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

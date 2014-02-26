@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -114,7 +114,7 @@ void StreamValidatorType::handle( SVType value ){
 	if( value != *readIt ){
 	    // Attach a debugger with a breakpoint here to get the backtrace,
 	    // if the one caught by traced_exception isn't enough.
-	    throw TRACED_EXCEPTION_DEFAULT ("StreamValidator: out of sync!");
+	    throw TRACED_EXCEPTION_DEFAULT ("StreamValidator: out of sync! Examine the stack trace to work out why (you may want to re-run this in a debugger with a break point on this line to get a better trace).");
 	}
 	++readIt;
     }

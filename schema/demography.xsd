@@ -2,11 +2,13 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
+           xmlns:om="http://openmalaria.org/schema/scenario_32"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!---HumanPopulationStructure-->
   <xs:complexType name="demography">
     <xs:sequence>
-      <xs:element name="ageGroup" type="ageGroupPerC">
+      <xs:element name="ageGroup" type="om:ageGroupPerC">
         <xs:annotation>
           <xs:documentation>
             list of age groups included in demography
@@ -56,7 +58,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>type:list of elements;name:list of age groups;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group" type="groupBoundsPerC" />
+      <xs:element maxOccurs="unbounded" name="group" type="om:groupBoundsPerC" />
     </xs:sequence>
     <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>

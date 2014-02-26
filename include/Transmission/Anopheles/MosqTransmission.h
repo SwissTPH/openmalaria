@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -71,8 +71,8 @@ public:
     void initIterateScale ( double factor );
     
     /** Set up the non-host-specific interventions. */
-    inline void initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
-        emergence->initVectorPopInterv( elt, instance ); }
+    inline void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
+        emergence->initVectorInterv( elt, instance ); }
     //@}
     
     /** Update by one day (may be called multiple times for 1 time-step update).

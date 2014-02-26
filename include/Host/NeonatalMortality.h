@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,10 @@
 #define Hmod_NeonatalMortality
 
 #include "Global.h"
-#include <list>
 
-namespace OM { namespace Host {
-    class Human;
+namespace OM {
+    class Population;
+namespace Host {
 
 class NeonatalMortality {
 public:
@@ -40,7 +40,7 @@ public:
   static bool eventNeonatalMortality();
   
   /** Calculate risk of a neonatal mortality based on humans 20-25 years old. */
-  static void update (const list<Host::Human>& population);
+  static void update (const Population& population);
   
 private:
   /** Calculates the risk of neonatal mortality. */

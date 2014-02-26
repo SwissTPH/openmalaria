@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Rachuonyo 5-day Intervention cohort" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Rachuonyo 5-day Intervention cohort" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="Rachuonyo" popSize="979">
     <ageGroup lowerbound="0">
       <group poppercent="2.6" upperbound="1"/>
@@ -59,7 +59,7 @@
       <option name="Vector_Sv" value="false"/>
       <option name="inputEIR" value="false"/>
       <option name="simulatedEIR" value="false"/>
-      <option name="nMassIRS" value="true"/>
+      <option name="nMassGVI" value="true"/>
       <option name="nMDAs" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="200">
@@ -99,81 +99,108 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <ITN name="LLIN test">
-      <description>
-        <usage value="0.8"/>
-        <holeRate mean="0.9" sigma="0.8"/>
-        <ripRate mean="0.7" sigma="0.8"/>
-        <ripFactor value="0.4"/>
-        <initialInsecticide mu="70" sigma="20"/>
-        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
-        <attritionOfNets L="12" function="smooth-compact" k="2"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-      </description>
-      <continuous>
-        <deploy coverage=".677" targetAgeYrs="0.0833"/>
-      </continuous>
-    </ITN>
-    <IRS name="Pyreth">
-      <description>
-        <decay L="0.25" function="exponential"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency value="0.1116"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.2772"/>
-        </anophelesParams>
-      </description>
-      <timed>
-        <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="18"/>
-        <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="19"/>
-        <deploy coverage="0.17325" cumulativeWithMaxAge="36" time="20"/>
-        <deploy coverage="0.231" cumulativeWithMaxAge="36" time="21"/>
-        <deploy coverage="0.28875" cumulativeWithMaxAge="36" time="22"/>
-        <deploy coverage="0.3465" cumulativeWithMaxAge="36" time="23"/>
-        <deploy coverage="0.40425" cumulativeWithMaxAge="36" time="24"/>
-        <deploy coverage="0.462" cumulativeWithMaxAge="36" time="25"/>
-        <deploy coverage="0.51975" cumulativeWithMaxAge="36" time="26"/>
-        <deploy coverage="0.5775" cumulativeWithMaxAge="36" time="27"/>
-        <deploy coverage="0.63525" cumulativeWithMaxAge="36" time="28"/>
-        <deploy coverage="0.693" cumulativeWithMaxAge="36" time="29"/>
-        <deploy coverage="0.05775" cumulativeWithMaxAge="36" time="103"/>
-        <deploy coverage="0.1155" cumulativeWithMaxAge="36" time="104"/>
-        <deploy coverage="0.17325" cumulativeWithMaxAge="36" time="105"/>
-        <deploy coverage="0.231" cumulativeWithMaxAge="36" time="106"/>
-        <deploy coverage="0.28875" cumulativeWithMaxAge="36" time="107"/>
-        <deploy coverage="0.3465" cumulativeWithMaxAge="36" time="108"/>
-        <deploy coverage="0.40425" cumulativeWithMaxAge="36" time="109"/>
-        <deploy coverage="0.462" cumulativeWithMaxAge="36" time="110"/>
-        <deploy coverage="0.51975" cumulativeWithMaxAge="36" time="111"/>
-        <deploy coverage="0.5775" cumulativeWithMaxAge="36" time="112"/>
-        <deploy coverage="0.63525" cumulativeWithMaxAge="36" time="113"/>
-        <deploy coverage="0.693" cumulativeWithMaxAge="36" time="114"/>
-      </timed>
-    </IRS>
-    <vectorDeterrent name="hypothetical deterrency">
-      <decay L="4" function="exponential"/>
-      <anophelesParams mosquito="gambiae_ss">
-        <deterrency value="0"/>
-      </anophelesParams>
-    </vectorDeterrent>
-    <cohort>
-      <timed>
-        <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
-        <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>
-        <deploy coverage="0.195228" maxAge="15" minAge="10" time="2"/>
-        <deploy coverage="0.207164" maxAge="20" minAge="15" time="3"/>
-        <deploy coverage="0.157818" maxAge="90" minAge="20" time="4"/>
-      </timed>
-    </cohort>
-    <MDA>
-      <timed>
-        <deploy cohort="true" coverage="1" time="30"/>
-      </timed>
-    </MDA>
+    <human>
+      <effect id="MDA">
+        <MDA>
+          <drugEffect>
+            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
+            <compliersEffective>
+              <timestep pClearance="1"/>
+            </compliersEffective>
+          </drugEffect>
+        </MDA>
+      </effect>
+      <effect id="ITN" name="LLIN test">
+        <ITN>
+          <usage value="0.8"/>
+          <holeRate mean="0.9" sigma="0.8"/>
+          <ripRate mean="0.7" sigma="0.8"/>
+          <ripFactor value="0.4"/>
+          <initialInsecticide mu="70" sigma="20"/>
+          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <attritionOfNets L="12" function="smooth-compact" k="2"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+        </ITN>
+      </effect>
+      <effect id="GVI" name="Pyreth">
+        <GVI>
+          <decay L="0.25" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency value="0.1116"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.2772"/>
+          </anophelesParams>
+        </GVI>
+      </effect>
+      <effect id="vectorDeterrent" name="hypothetical deterrency">
+        <GVI>
+          <decay L="4" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency value="0"/>
+          </anophelesParams>
+        </GVI>
+      </effect>
+      <effect id="cohort">
+        <cohort/>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <restrictToCohort id="cohort"/>
+          <deploy coverage="1" time="30"/>
+        </timed>
+      </intervention>
+      <intervention name="LLIN test">
+        <effect id="ITN"/>
+        <continuous>
+          <deploy coverage=".677" targetAgeYrs="0.0833"/>
+        </continuous>
+      </intervention>
+      <intervention name="Pyreth">
+        <effect id="GVI"/>
+        <timed>
+          <cumulativeCoverage effect="GVI" maxAgeYears="36.0"/>
+          <deploy coverage="0.05775" time="18"/>
+          <deploy coverage="0.1155" time="19"/>
+          <deploy coverage="0.17325" time="20"/>
+          <deploy coverage="0.231" time="21"/>
+          <deploy coverage="0.28875" time="22"/>
+          <deploy coverage="0.3465" time="23"/>
+          <deploy coverage="0.40425" time="24"/>
+          <deploy coverage="0.462" time="25"/>
+          <deploy coverage="0.51975" time="26"/>
+          <deploy coverage="0.5775" time="27"/>
+          <deploy coverage="0.63525" time="28"/>
+          <deploy coverage="0.693" time="29"/>
+          <deploy coverage="0.05775" time="103"/>
+          <deploy coverage="0.1155" time="104"/>
+          <deploy coverage="0.17325" time="105"/>
+          <deploy coverage="0.231" time="106"/>
+          <deploy coverage="0.28875" time="107"/>
+          <deploy coverage="0.3465" time="108"/>
+          <deploy coverage="0.40425" time="109"/>
+          <deploy coverage="0.462" time="110"/>
+          <deploy coverage="0.51975" time="111"/>
+          <deploy coverage="0.5775" time="112"/>
+          <deploy coverage="0.63525" time="113"/>
+          <deploy coverage="0.693" time="114"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="cohort"/>
+        <timed>
+          <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
+          <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>
+          <deploy coverage="0.195228" maxAge="15" minAge="10" time="2"/>
+          <deploy coverage="0.207164" maxAge="20" minAge="15" time="3"/>
+          <deploy coverage="0.157818" maxAge="90" minAge="20" time="4"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Kenya ACT">
@@ -259,7 +286,6 @@
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-      <option name="IPTI_SP_MODEL" value="false"/>
       <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
@@ -318,4 +344,4 @@
       <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

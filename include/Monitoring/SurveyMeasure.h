@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -38,26 +38,33 @@ namespace SM {
 enum SurveyMeasure {
     /// Total number of humans
     nHost = 0,
-    /// Number of infected hosts 
+    /** The number of human hosts with an infection (patent or not) on the
+     * reporting timestep */
     nInfect = 1,
-    /// Expected number of infected hosts
+    /** Expected number of infected hosts
+     * 
+     * This is the sum of the probabilities of each host having had at least
+     * one infection in his/her lifetime. */
     nExpectd= 2,
-    /// Number of patent hosts
+    /** The number of human hosts whose total (blood-stage) parasite density is
+     * above the detection threshold */
     nPatent= 3,
     
     /// Sum of the log of the pyrogen threshold
     sumLogPyrogenThres = 4,
-    /// Sum of the logarithm of the parasite density
+    /**Sum of the logarithm of the parasite density of hosts with detectible parasite density. */
     sumlogDens= 5,
     
-    /// Total infections
+    /** The total number of infections in the population: includes both blood
+     * and liver stages. */
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *
      * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
      * mosquitoes that get infected). Single value, not per age-group. */
     nTransmit= 7,
-    /// Total patent infections
+    /** The sum of all detectable infections (where blood stage parasite
+     * density is above the detection limit) across all human hosts. */
     totalPatentInf= 8,
     /// Contribution to immunity functions (output not used)
     contrib= 9,
@@ -84,13 +91,29 @@ enum SurveyMeasure {
     /// Number of deaths directly caused by malaria
     nDirDeaths= 19,
     
-    /// number of EPI vaccine doses given
+    /** Number of vaccine doses given via EPI.
+     * 
+     * Since schema 22, each vaccine type may be deployed independently. To be
+     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
+     * (with an "effect" element) will be reported. */
     nEPIVaccinations= 20,
     
-    /// all cause infant mortality rate
+    /** All cause infant mortality rate
+     * 
+     * Reports death rate of infants due to all causes (malaria as modelled
+     * plus fixed non-malaria attribution). Calculated via Kaplan-Meier method.
+     * Units: deaths per thousand births.
+     * 
+     * For more info, see ClinicalModel::infantAllCauseMort() (ClinicalModel.h,
+     * line 74).
+     */
     allCauseIMR= 21,
     
-    /// number of Mass / Campaign vaccine doses given
+    /** Number of vaccine doses given via mass campaign.
+     * 
+     * Since schema 22, each vaccine type may be deployed independently. To be
+     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
+     * (with an "effect" element) will be reported. */
     nMassVaccinations= 22,
     
     /// recoveries in hospital
@@ -184,8 +207,8 @@ enum SurveyMeasure {
      *
      * Modelled IRS: affects one person, cannot be plastered over. */
     nMassIRS = 46,
-    /** The number of people newly protected by a vector-availability
-     * intervention since the last survey. */
+    /** Defunct; was used by "vector availability" intervention (which is now a
+     * sub-set of GVI). */
     nMassVA = 47,
     
     /// Number of malarial tests via microscopy used
@@ -212,6 +235,13 @@ enum SurveyMeasure {
     /** Report the number of screenings used in a mass screen-and-treat
      * operation. */
     nMassScreenings = 55,
+    
+    /** Report the number of mass deployments of generic vector interventions.
+     * 
+     * Note: this is a provisionary reporting measure. Like many other measures,
+     * it is insufficient now that multiple descriptions of any intervention
+     * type are possible. */
+    nMassGVI = 56,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

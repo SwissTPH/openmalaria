@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,10 +22,13 @@
 #define Hmod_ClinicalModel
 
 #include "Host/Human.h"
-#include "Pathogenesis/PathogenesisModel.h"
 #include "Episode.h"
 #include <memory>
 
+namespace scnXml{
+    class Model;
+    class HealthSystem;
+}
 namespace OM { namespace Clinical {
     using Host::Human;
 
@@ -39,14 +42,14 @@ namespace OM { namespace Clinical {
  * Patient outcomes include full recovery, recovery with sequelae and death.
  * 
  * Reporting includes patient outcome and potentially drug usage and use of
- * RDTs (Rapid Diagnostic Tests) for costing purposes. */
+ * RDTs (Rapid Diagnostic Tests) for costing purposes. */\
 class ClinicalModel
 {
 public:
   /// @brief Static functions
   //@{
   /// Initialise whichever model is in use.
-  static void init ();
+  static void init ( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem );
   /// Cleanup on exit
   static void cleanup ();
   
@@ -56,9 +59,8 @@ public:
   
   /** Return a new ClinicalModel.
    *
-   * @param cF 	comorbidity factor, passed to PathogenesisModel
    * @param tSF	treatment seeking factor, passed to CaseManagementModel */
-  static ClinicalModel* createClinicalModel (double cF, double tSF);
+  static ClinicalModel* createClinicalModel (double tSF);
   
   static void initMainSimulation ();
   
@@ -102,9 +104,6 @@ public:
   
   virtual void massDrugAdministration(Human& human) =0;
   
-  /// Summarize PathogenesisModel details
-  void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
-  
   /// Force all pending summaries to be reported. Should only be called when
   /// class is about to be destroyed anyway to avoid affecting output.
   inline void flushReports (){
@@ -130,7 +129,7 @@ private:
   
 protected:
   /// Constructor.
-  ClinicalModel (double cF);
+  ClinicalModel ();
   
   /** Update for clinical model - new pathogenesis status, treatment, etc.
    *
@@ -142,9 +141,6 @@ protected:
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
-  
-  /// The PathogenesisModel introduces illness dependant on parasite density
-  auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
   
   /** Last episode; report to survey pending a new episode or human's death. */
   Episode latestReport;

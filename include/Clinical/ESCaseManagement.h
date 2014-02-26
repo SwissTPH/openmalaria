@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,8 +25,7 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "Clinical/ESDecisionTree.h"    // needed for ESDecisionMap
 #include "Clinical/parser.h"
-#include "Pathogenesis/State.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
 
 #include <cassert>
@@ -44,7 +43,7 @@ namespace scnXml{
     class HSESCaseManagement;
 }
 namespace OM { namespace Clinical {
-    using WithinHost::WithinHostModel;
+    using WithinHost::WHInterface;
     
 /// Auxilliary output from running case management
 struct CMAuxOutput {
@@ -158,8 +157,11 @@ class ESDecisionMap {
          *
          * @param cm XML element describing probabilistic decisions and treatments
          * @param complicated Determines whether hard-coded decisions for the
-         * uncomplicated or complicated case are added. */
-        void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType);
+         * uncomplicated or complicated case are added.
+         * @param reinitialise If true, clear any previously initialised data
+         * (e.g. for replacement health system); if false, throw an exception
+         * if the map was previously initialised. */
+        void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType, bool reinitialise);
         
         /** Run decision tree to arrive at an outcome.
          *
@@ -255,7 +257,7 @@ class ESCaseManagement : public CaseManagementCommon {
         
         /** Set up MDA drug. Must be called if massDrugAdministration() is
          * ever used to deploy an MDA intervention. */
-        static void initMDA (const scnXml::MDA::DescriptionType& desc);
+        static void initMDA (const scnXml::MDA1D& desc);
         
         static void massDrugAdministration(
             const ESHostData& hostData,

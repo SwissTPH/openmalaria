@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,11 +19,13 @@
  */
 
 #include "Host/ImportedInfections.h"
+#include "Host/Human.h"
 #include "util/random.h"
+#include "Population.h"
 
 namespace OM { namespace Host {
     
-bool ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
+void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     const scnXml::ImportedInfections::TimedType& tElt = iiElt.getTimed();
     if( tElt.getPeriod() < 0 ){
         throw util::xml_scenario_error( "interventions.importedInfections.timed.period cannot be negative" );
@@ -54,14 +56,11 @@ bool ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
                 ++i;
             }
         }
-        // first or second value non-zero
-        return (rate[0].value != 0.0) || (rate.size() > 1 && rate[1].value != 0.0);
     }
-    return false;       // no list
 }
 
 void ImportedInfections::import( Population& population ){
-    assert( rate.size() > 0 );  // please don't call me otherwise!
+    if( rate.size() == 0 ) return;      // no imported infections
     assert( TimeStep::interventionPeriod >= TimeStep(0) );
     TimeStep now = TimeStep::interventionPeriod;
     if( period > TimeStep(0) ){
@@ -79,7 +78,7 @@ void ImportedInfections::import( Population& population ){
     
     double rateNow = rate[lastIndex].value;
     if( rateNow > 0.0 ){
-        for(Population::HumanIter it = population.getList().begin(); it!=population.getList().end(); ++it){
+        for(Population::Iter it = population.begin(); it!=population.end(); ++it){
             if(util::random::bernoulli( rateNow )){
                 it->addInfection();
             }

@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,8 +19,8 @@
  */
 
 #include "Monitoring/Survey.h"
-#include "inputData.h"
 #include "util/errors.h"
+#include "schema/monitoring.h"
 
 #include <stdexcept>
 
@@ -94,7 +94,7 @@ class SurveyMeasureMap {
 	    codeMap["nMassITNs"] = SM::nMassITNs;
 	    codeMap["nEPI_ITNs"] = SM::nEPI_ITNs;
 	    codeMap["nMassIRS"] = SM::nMassIRS;
-	    codeMap["nMassVA"] = SM::nMassVA;
+            codeMap["nMassGVI"] = SM::nMassGVI;
             codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
             codeMap["nAddedToCohort"] = SM::nAddedToCohort;
             codeMap["nRemovedFromCohort"] = SM::nRemovedFromCohort;
@@ -126,25 +126,24 @@ class SurveyMeasureMap {
 };
 
 
-void Survey::init () {
-    AgeGroup::init ();
+void Survey::init (const scnXml::Monitoring& monitoring) {
+    AgeGroup::init (monitoring);
     
     // by default, none are active
     active.reset ();
     SurveyMeasureMap codeMap;
     
-    scnXml::OptionSet::OptionSequence sOSeq = InputData().getMonitoring().getSurveyOptions().getOption();
+    scnXml::OptionSet::OptionSequence sOSeq = monitoring.getSurveyOptions().getOption();
     for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 	active[codeMap[it->getName()]] = it->getValue();
     }
 }
-void AgeGroup::init () {
-    const scnXml::Monitoring& mon = InputData().getMonitoring();
-    const scnXml::AgeGroup::GroupSequence& groups = mon.getAgeGroup().getGroup();
+void AgeGroup::init (const scnXml::Monitoring& monitoring) {
+    const scnXml::AgeGroup::GroupSequence& groups = monitoring.getAgeGroup().getGroup();
     /* note that the last age group includes individuals who are        *
     * either younger than Lowerbound or older than the last Upperbound */
     _upperbound.resize (groups.size() + 1);
-    _lowerbound = mon.getAgeGroup().getLowerbound();
+    _lowerbound = monitoring.getAgeGroup().getLowerbound();
     if (!(_lowerbound <= 0.0))
 	throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
 
@@ -209,7 +208,7 @@ void Survey::allocate ()
     _numMassITNs.resize (numAgeGroups);
     _numEPI_ITNs.resize (numAgeGroups);
     _numMassIRS.resize (numAgeGroups);
-    _numMassVA.resize (numAgeGroups);
+    _numMassGVI.resize (numAgeGroups);
     _numAddedToCohort.resize (numAgeGroups);
     _numRemovedFromCohort.resize (numAgeGroups);
     _numMDAs.resize (numAgeGroups);
@@ -349,8 +348,8 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   if (active[SM::nMassIRS]) {
       writePerAgeGroup (outputFile, SM::nMassIRS, survey, _numMassIRS);
   }
-  if (active[SM::nMassVA]) {
-      writePerAgeGroup (outputFile, SM::nMassVA, survey, _numMassVA);
+  if (active[SM::nMassGVI]) {
+      writePerAgeGroup (outputFile, SM::nMassGVI, survey, _numMassGVI);
   }
   if (active[SM::Clinical_Microscopy]) {
       writeValue (outputFile, SM::Clinical_Microscopy, survey, _numClinical_Microscopy);

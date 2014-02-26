@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -49,14 +49,11 @@ public:
   virtual void clearInfections (bool isSevere);
   virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
   virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-  virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
   
 protected:
   virtual DescriptiveInfection* createInfection ();
   
   virtual bool eventSPClears (DescriptiveInfection* inf);
-  virtual void IPTattenuateAsexualMinTotalDensity ();
-  virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,19 +20,25 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "Global.h"
-#include "Host/Vaccine.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "WithinHost/WithinHostModel.h"
 #include "Monitoring/Surveys.h"
+#include "interventions/HumanComponents.h"
+#include <set>
 
+namespace scnXml {
+    class Scenario;
+}
 namespace OM {
-    namespace Transmission {
-	class TransmissionModel;
-    }
-    namespace Clinical {
-	class ClinicalModel;
-    }
+namespace Transmission {
+    class TransmissionModel;
+}
+namespace Clinical {
+    class ClinicalModel;
+}
+namespace WithinHost {
+    class WHInterface;
+}
     class Population;
 namespace Host {
 
@@ -72,17 +78,13 @@ public:
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
       monitoringAgeGroup & stream;
-      _ylag & stream;
       _dateOfBirth & stream;
       _vaccine & stream;
-      _probTransmissionToMosquito & stream;
-      _inCohort & stream;
       nextCtsDist & stream;
+      cohorts & stream;
+      lastDeployments & stream;
   }
   //@}
-  
-  /** Update infectiousness to mosquitoes. */
-  void updateInfectiousness();
   
   /** Main human update.
    *
@@ -95,64 +97,49 @@ public:
   
   ///@brief Deploy "intervention" functions
   //@{
-  /// Asks the clinical model to deal with this
-  void massDrugAdministration (const OM::Population&);
+  /** Mark a certain intervention effect as being deployed now. */
+  inline void updateLastDeployed( interventions::EffectId id ){
+      lastDeployments[id] = TimeStep::simulation;
+  }
   
-  /// Vaccinate & report mass vaccination
-  void massVaccinate (const OM::Population&);
-  /// If individual hasn't dropped out, vaccinate & report EPI
-  void ctsVaccinate (const OM::Population&);
-  
-  void continuousIPT (const OM::Population&);
-  void timedIPT (const OM::Population&);
-  
-  /// Give human a new ITN via mass deployment
-  void massITN (const OM::Population&);
-  /// Give a human a new ITN through EPI
-  void ctsITN (const OM::Population&);
-  /// Give human a new IRS through mass deployment
-  void massIRS (const OM::Population&);
-  /// Give human a new VA intervention through mass deployment
-  void massVA (const OM::Population&);
+  /** Determines for the purposes of cumulative deployment whether an effect is
+   * still current.
+   * 
+   * @returns true if the intervention effect should be re-deployed (too old)
+   */
+  bool needsRedeployment( interventions::EffectId cumCuvId, TimeStep maxAge );
   
   /// Resets immunity
-  inline void immuneSuppression(const OM::Population&) {
-      withinHostModel->immuneSuppression();
-  }
+  void clearImmunity();
   
   /// Infect the human (with an imported infection).
   void addInfection();
-  
-  /// Add PEV and remove TBV (vaccines) from human
-  inline void R_0Vaccines() { _vaccine.specialR_0(); }
-  //@}
-  
-  ///@brief Functions to check coverage by interventions
-  //@{
-    bool hasVaccineProtection(TimeStep maxInterventionAge) const;
-    bool hasIPTiProtection(TimeStep maxInterventionAge) const;
-    bool hasITNProtection(TimeStep maxInterventionAge) const;
-    bool hasIRSProtection(TimeStep maxInterventionAge) const;
-    bool hasVAProtection(TimeStep maxInterventionAge) const;
   //@}
   
   /// @brief Small functions
   //@{
-  //! Get the age in years, based on current TimeStep::simulation.
-  double getAgeInYears() const;
+    /** Get the age in time steps, based on current TimeStep::simulation. */
+    inline TimeStep getAgeInTimeSteps() const{
+        return TimeStep::simulation - _dateOfBirth;
+    }
+    /** Get the age in years, based on current TimeStep::simulation. */
+    inline double getAgeInYears() const{
+        return (TimeStep::simulation - _dateOfBirth).inYears();
+    }
   
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
   
-  /** Does the Human have a detectible infection? */
-  inline bool detectibleInfection () const {
-    return withinHostModel->parasiteDensityDetectible();
+  /** Return true if human is a member of the cohort.
+   * 
+   * Note: the maximum value of size_t is considered to be the population, of
+   * which every human is a member. */
+  inline bool isInCohort( interventions::EffectId id )const{
+      return id == interventions::EffectId_pop || cohorts.count( id ) > 0;
   }
-  
-  // crux for timed deployment as intervention up to some limit:
-  inline bool getInCohort(TimeStep)const{ return _inCohort; }
-  /// Return true if human is a member of the cohort
-  inline bool getInCohort()const{ return _inCohort; }
+  /** Return true if human is a member of any cohort. */
+  //TODO(monitoring): outputs per cohort, not simply any cohort or everyone
+  inline bool isInAnyCohort()const{ return cohorts.size() > 0; }
   
   /// Return the index of next continuous intervention to be deployed
   inline uint32_t getNextCtsDist()const{ return nextCtsDist; }
@@ -166,7 +153,7 @@ public:
   /// Return the current survey to use (depends on survey time and whether or
   /// not individual is in the cohort).
   Monitoring::Survey& getSurvey() const{
-      return Monitoring::Surveys.getSurvey( _inCohort );
+      return Monitoring::Surveys.getSurvey( isInAnyCohort() );
   }
   
   //! Summarize the state of a human individual.
@@ -177,29 +164,23 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort (const OM::Population&);
+  void addToCohort ( interventions::EffectId );
   
-  /** Remove from cohort. As with addToCohort, deals with reporting.
+  /** Remove from a cohort. As with addToCohort, deals with reporting.
    *
    * Can be safely called when human is not in cohort. */
-  void removeFromCohort();
+  void removeFromCohort( interventions::EffectId );
+  
+  /** Act on remove-from-cohort-on-first-xyz events. */
+  void removeFromCohorts( interventions::Cohort::RemoveAtCode code );
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
   
-  /** Return the infectiousness of this human to biting mosquitoes.
-   * 
-   * Returns the value for the last time-step on which updateInfectiousness
-   * has been called. */
-  //TODO: per genotype? (for LSTM's spread of resistance modelling)
-  inline double probTransmissionToMosquito() const {
-    return _probTransmissionToMosquito;
-  }
-  
   ///@brief Access to sub-models
   //@{
   /// The WithinHostModel models parasite density and immunity
-  inline const WithinHost::WithinHostModel& getWithinHostModel () const{
+  inline const WithinHost::WHInterface& getWithinHostModel () const{
       return *withinHostModel;
   }
   
@@ -208,24 +189,21 @@ public:
       return monitoringAgeGroup;
   }
   
-  inline const PerHumanVaccine& getVaccine() const{
-      return _vaccine;
+  inline interventions::PerHumanVaccine& getVaccine(){ return _vaccine; }
+  inline const interventions::PerHumanVaccine& getVaccine() const{ return _vaccine; }
+  
+  inline Clinical::ClinicalModel& getClinicalModel() {
+      return *clinicalModel;
   }
   //@}
   
   
   ///@name static public
   //@{
-  static void initHumanParameters ();
+  static void initHumanParameters (const OM::Parameters& parameters, const scnXml::Scenario& scenario);
   
   static void clear();
   //@}
-  
-private:
-    void updateInfection(Transmission::TransmissionModel*, double ageYears);
-    
-    void clearInfection(WithinHost::Infection *iCurrent);
-    
     
 public:
   /** @brief Models
@@ -236,7 +214,7 @@ public:
   Transmission::PerHost perHostTransmission;
   
   /// The WithinHostModel models parasite density and immunity
-  WithinHost::WithinHostModel *withinHostModel;
+  WithinHost::WHInterface *withinHostModel;
   
 private:
   /// The InfectionIncidenceModel translates per-host EIR into new infections
@@ -252,17 +230,8 @@ private:
   Monitoring::AgeGroup monitoringAgeGroup;
   
   /// Vaccines
-  PerHumanVaccine _vaccine;
-  
-  /** Total asexual blood stage density over last 20 days (uses samples from
-   * 10, 15 and 20 days ago).
-   *
-   * _ylag[mod(TimeStep::simulation, _ylagLen)] corresponds to the density from the
-   * previous time step (once updateInfection has been called). */
-  vector<double> _ylag;
-  /// Length of _ylag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
-  /// set by initHumanParameters
-  static int _ylagLen;
+  //TODO: could move TBV code to WHFalciparum, where the efficacy is now used
+  interventions::PerHumanVaccine _vaccine;
   
   //!Date of birth, time step since start of warmup
   TimeStep _dateOfBirth;
@@ -270,19 +239,12 @@ private:
   /// The next continuous distribution in the series
   uint32_t nextCtsDist;
   
-  /// True if human is included in a cohort.
-  bool _inCohort;
   
-  /// Cached value of calcProbTransmissionToMosquito; checkpointed
-  double _probTransmissionToMosquito;
-  
-public: //lazy: give read access to these
-  /// Remove from cohort as soon as individual has patent parasites?
-  static bool cohortFirstInfectionOnly;
-  /// Remove from cohort as soon as individual receives treatment?
-  static bool cohortFirstTreatmentOnly;
-  /// Remove from cohort as soon as individual gets sick (any sickness)?
-  static bool cohortFirstBoutOnly;
+  //TODO(performance): are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
+  /// The set of cohorts (intervention indexes) to which this human is a member
+  set<interventions::EffectId> cohorts;
+  /// Last deployment times of intervention effects by effect index
+  map<interventions::EffectId,TimeStep> lastDeployments;
 };
 
 } }

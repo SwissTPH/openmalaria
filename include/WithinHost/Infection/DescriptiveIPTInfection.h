@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -56,7 +56,7 @@ public:
   bool eventSPClears (TimeStep _lastSPDose);
   
   /// Return: _SPattenuate == 1. Name by DH.
-  bool doSPAttenuation () { return _SPattenuate == 1; }
+  bool doSPAttenuation () const { return _SPattenuate == 1; }
   double asexualAttenuation ();
   /// Extraction by DH; probably not most accurate name.
   TimeStep getAsexualAttenuationEndDate () {

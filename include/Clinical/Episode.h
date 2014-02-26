@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,11 +22,12 @@
 #define Hmod_Episode
 
 #include "Global.h"
-#include "Pathogenesis/State.h"
+#include "WithinHost/Pathogenesis/State.h"
 #include "Monitoring/Survey.h"	//Monitoring::AgeGroup
 #include <ostream>
 
 namespace OM { namespace Clinical {
+#define WHPathogenesis WithinHost::Pathogenesis
     
 /** Summary of clinical events during a caseManagementMemory period, in one individual.
  *
@@ -39,7 +40,7 @@ namespace OM { namespace Clinical {
 class Episode{
 public:
     /** Set healthSystemMemory. */
-    static void init();
+    static void init( int hsMemory );
     
   Episode() : _time(TimeStep::never), _ageGroup() {};
   ~Episode();
@@ -53,9 +54,9 @@ public:
    * @param ageGroup Monitoring agegroup
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(bool inCohort, Monitoring::AgeGroup ageGroup, Pathogenesis::State newState);
+  void update(bool inCohort, Monitoring::AgeGroup ageGroup, WHPathogenesis::State newState);
   
-  Pathogenesis::State getState() const {return _state;};
+  WHPathogenesis::State getState() const {return _state;};
   
   /// Checkpointing
   void operator& (istream& stream);
@@ -86,7 +87,7 @@ private:
   Monitoring::AgeGroup _ageGroup;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).
-  Pathogenesis::State _state;
+  WHPathogenesis::State _state;
 };
 
 } }

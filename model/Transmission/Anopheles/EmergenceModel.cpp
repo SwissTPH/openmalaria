@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -134,10 +134,12 @@ void EmergenceModel::initEIR(
         initialisationEIR[mod_nn(1 + i / TimeStep::interval, TimeStep::stepsPerYear)] += speciesEIR[i];
     }
     
+#ifdef WITHOUT_BOINC
     if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {
         cout << "Annual EIR for "<<anoph.getMosquito()
              << ": "<<vectors::sum( speciesEIR )<<endl;
     }
+#endif
 
     // Set other data used for mosqEmergeRate calculation:
     FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
@@ -162,8 +164,7 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 
 // -----  Summary and intervention functions  -----
 
-void EmergenceModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt, size_t instance ){
-    assert( instance >= 0 );
+void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
     if( emergence.size() <= instance )
         emergence.resize( instance+1 );
     
@@ -176,7 +177,7 @@ void EmergenceModel::initVectorPopInterv( const scnXml::VectorPopDescAnoph& elt,
 }
 
 void EmergenceModel::deployVectorPopInterv (size_t instance) {
-    assert( 0 <= instance && instance < emergence.size() );
+    assert( instance < emergence.size() );
     
     // Note: intervention acts first on time-step following (+1) deployment.
     // This at least is consistent with previous results and gives the correct number of time steps of deployment

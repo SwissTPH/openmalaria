@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,6 +30,7 @@
 #include <vector>
 #include <list>
 #include <map>
+#include <set>
 using namespace std;
 
 /** @brief Checkpointing utility functions
@@ -66,7 +67,14 @@ virtual checkpoint (ostream& stream);
  * 
  * One should declare "using namespace OM::util::checkpoint" to use the operator& functions defined
  * here. */
-namespace OM { namespace util { namespace checkpoint {
+namespace OM {
+namespace interventions{
+    struct EffectId;
+}
+namespace util {
+    class TimeStep;     // forward declare for a support function; don't really want another include here
+
+namespace checkpoint {
     
     const long DEFAULT_MAX_LENGTH = 2000;
     
@@ -233,13 +241,19 @@ namespace OM { namespace util { namespace checkpoint {
     }
     */
     
-    void operator& (map<string,double> x, ostream& stream);
+    void operator& (const set<interventions::EffectId>&x, ostream& stream);
+    void operator& (set<interventions::EffectId>& x, istream& stream);
+    
+    void operator& (const map<string,double>& x, ostream& stream);
     void operator& (map<string, double >& x, istream& stream);
     
-    void operator& (map<double,double> x, ostream& stream);
+    void operator& (const map<double,double>& x, ostream& stream);
     void operator& (map<double, double>& x, istream& stream);
     
-    void operator& (multimap<double,double> x, ostream& stream);
+    void operator& (const map<interventions::EffectId,TimeStep>& x, ostream& stream);
+    void operator& (map<interventions::EffectId,TimeStep>& x, istream& stream);
+    
+    void operator& (const multimap<double,double>& x, ostream& stream);
     void operator& (multimap<double, double>& x, istream& stream);
     //@}
     

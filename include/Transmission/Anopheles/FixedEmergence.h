@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -113,10 +113,6 @@ private:
     vector<double> quinquennialS_v;
     
     /** Conversion factor from forcedS_v to mosqEmergeRate.
-     *
-     *TODO: no longer true:
-     * Also has another temporary use between initialise and setupNv0 calls:
-     * "initOvFromSv" or  (ρ_O / ρ_S).
      *
      * Should be checkpointed. */
     double initNv0FromSv;       ///< ditto

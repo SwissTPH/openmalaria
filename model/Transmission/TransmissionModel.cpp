@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,8 @@
 #include "Transmission/VectorModel.h"
 #include "Transmission/PerHost.h"
 
-#include "inputData.h"
+#include "Population.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
@@ -37,15 +38,14 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
-TransmissionModel* TransmissionModel::createTransmissionModel (int populationSize) {
+TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::EntoData& entoData, int populationSize) {
   // EntoData contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData& entoData = InputData().getEntomology();
   const scnXml::EntoData::VectorOptional& vectorData = entoData.getVector();
 
   TransmissionModel *model;
   if (vectorData.present())
-    model = new VectorModel(vectorData.get(), populationSize);
+    model = new VectorModel(entoData, vectorData.get(), populationSize);
   else {
       const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
@@ -53,7 +53,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ) ||
         util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL ))
         throw util::xml_scenario_error("VECTOR_*_MODEL is only compatible with the vector model (and non-vector data is present).");
-    model = new NonVectorModel(nonVectorData.get());
+    model = new NonVectorModel(entoData, nonVectorData.get());
   }
 
   if( entoData.getScaledAnnualEIR().present() ){
@@ -61,11 +61,13 @@ TransmissionModel* TransmissionModel::createTransmissionModel (int populationSiz
       assert( vectors::approxEqual( model->annualEIR, entoData.getScaledAnnualEIR().get() ) );
   }
 
+#ifdef WITHOUT_BOINC
   if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
       //Note: after internal scaling (which doesn't imply exit)
       //but before external scaling.
       cout << "Total annual EIR: "<<model->annualEIR<<endl;
   }
+#endif
 
   return model;
 }
@@ -97,9 +99,9 @@ SimulationMode readMode(const string& str){
         // set automatically.
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
-TransmissionModel::TransmissionModel() :
+TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
     simulationMode(forcedEIR),
-    interventionMode(readMode(InputData().getEntomology().getMode())),
+    interventionMode(readMode(entoData.getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
@@ -132,7 +134,7 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-double TransmissionModel::updateKappa (const std::list<Host::Human>& population) {
+double TransmissionModel::updateKappa (const Population& population) {
     // We calculate kappa for output and non-vector model, and kappaByAge for
     // the shared graphics.
 
@@ -142,10 +144,11 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
     nByAge.assign (noOfAgeGroupsSharedMem, 0);
     numTransmittingHumans = 0;
 
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h) {
+    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
-        t *= h->probTransmissionToMosquito();
+        t *= h->withinHostModel->probTransmissionToMosquito( h->getAgeInTimeSteps(),
+                                                             h->getVaccine().getFactor( interventions::Vaccine::TBV ) );
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;
@@ -158,7 +161,7 @@ double TransmissionModel::updateKappa (const std::list<Host::Human>& population)
 
 
     size_t lKMod = mod_nn(TimeStep::simulation, laggedKappa.size());	// now
-    if( population.empty() ){     // this is valid
+    if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN

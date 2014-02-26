@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,9 +22,9 @@
 #define Hmod_TransmissionModel 
 
 #include "Global.h"
-#include "Host/Human.h"
 #include "util/errors.h"
 #include "schema/interventions.h"
+#include "Monitoring/Survey.h"
 
 #include <fstream>
 #include <string.h>
@@ -34,6 +34,7 @@
 
 namespace OM {
     class Summary;
+    class Population;
 namespace Transmission {
     class PerHost;
 
@@ -77,21 +78,21 @@ public:
   ///@brief Creation, destruction and checkpointing
   //@{
   /// Creates a derived class
-  static TransmissionModel* createTransmissionModel (int populationSize);
+  static TransmissionModel* createTransmissionModel (const scnXml::EntoData& entoData, int populationSize);
   
 protected:
   //! Reads all entomological parameters from the input datafile. 
-  TransmissionModel();
+  TransmissionModel(const scnXml::EntoData& entoData);
 public:
   //!Deallocate memory for TransmissionModel parameters and clean up
   virtual ~TransmissionModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2 (const std::list<Host::Human>& population, int populationSize) =0;
+  virtual void init2( const Population& population ) =0;
   
   /** Set up vector population interventions. */
-  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) =0;
+  virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name ) =0;
   
   /// Checkpointing
   template<class S>
@@ -140,12 +141,12 @@ public:
   /** Needs to be called each step of the simulation before Human::update().
    *
    * when the vector model is used this updates mosquito populations. */
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {};
+  virtual void vectorUpdate (const Population& population) {};
   /** Needs to be called each time-step after Human::update().
    * 
    * Updates summary statistics related to transmission as well as the
    * the non-vector model (when in use). */
-  virtual void update (const std::list<Host::Human>& population, int populationSize) =0;
+  virtual void update (const Population& population) =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
@@ -167,12 +168,12 @@ public:
    * called before this function in order to return the correct value. */
   double getEIR (PerHost& host, double ageYears, Monitoring::AgeGroup ageGroup);
   
-  /** Set ITN parameters. */
-  virtual void setITNDescription ( const scnXml::ITNDescription&) =0;
-  /** Set IRS parameters. */
-  virtual void setIRSDescription (const scnXml::IRS&) =0;
-  /** Set vector deterrent parameters. */
-  virtual void setVADescription (const scnXml::VectorDeterrent&) =0;
+  /** Non-vector model: throw an exception. Vector model: check that the
+   * simulation mode allows interventions, and return a map of species names
+   * to indecies. Each index must be unique and in the range [0,n) where
+   * n is the number of species. */
+  virtual const map<string,size_t>& getSpeciesIndexMap() =0;
+  
   /** Set the larviciding intervention params.
    *
    * Instance: the index of this instance of the intervention. Each instance
@@ -199,7 +200,7 @@ protected:
   /** Needs to be called each time-step after Human::update() to update summary
    * statististics related to transmission. Also returns kappa (the average
    * human infectiousness weighted by availability to mosquitoes). */
-  double updateKappa (const std::list<Host::Human>& population);
+  double updateKappa (const Population& population);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

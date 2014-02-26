@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,7 @@
 #define Hmod_CommonWithinHost
 
 #include "Global.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/CommonInfection.h"
 #include "PkPd/PkPdModel.h"
 
@@ -32,11 +32,11 @@ namespace OM { namespace WithinHost {
     
 /** Common within-host model functionality.
  *
- * This is not used by the old Descriptive (or DescriptiveIPT) within-host
+ * This is not used by the old Descriptive within-host
  * models, but encapsulates nearly all the within-host (non-infection) code
  * required by the Dummy and Empirical within-host models.
  */
-class CommonWithinHost : public WithinHostModel
+class CommonWithinHost : public WHFalciparum
 {
 public:
     CommonWithinHost();
@@ -44,12 +44,14 @@ public:
     
     
     virtual void importInfection();
-    virtual void clearAllInfections();
+    virtual void effectiveTreatment();
     
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
-    virtual void immuneSuppression();
+    virtual void clearImmunity();
     
-    virtual void update (int nNewInfs, double ageInYears, double BSVEfficacy);
+    virtual void update (int nNewInfs, double ageInYears, double bsvFactor);
+    
+    virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     
     /** \brief Factory functions to create infections.
      *
@@ -63,7 +65,7 @@ public:
     //@}
     
 protected:
-    virtual int countInfections (int& patentInfections);
+    virtual InfectionCount countInfections () const;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

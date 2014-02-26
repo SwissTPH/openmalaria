@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,7 +25,9 @@
 #include "Monitoring/Survey.h"
 #include "Transmission/PerHost.h"
 
-namespace OM { namespace Host {
+namespace OM {
+    class Parameters;
+namespace Host {
     class Human;
     
 /** Models how a per-host EIR translates into new infections
@@ -45,7 +47,7 @@ public:
   ///@brief Static initialisation & constructors
   //@{
   /// Read in/initialise parameters
-  static void init();
+  static void init(const Parameters& parameters);
   /// Create a new instance
   static InfectionIncidenceModel* createModel ();
   
@@ -113,7 +115,7 @@ protected:
   double _pinfected;
   
   //!Number of infective bites since birth
-  double _cumulativeEIRa;//TODO: not needed by NegBinomMAII and LogNormalMAII
+  double _cumulativeEIRa;//TODO(memory opt): not needed by NegBinomMAII and LogNormalMAII
   
   //BEGIN Static data set by init()
   /* Shape constant of (Gamma) distribution of availability
@@ -124,7 +126,7 @@ protected:
   //! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr. 
   static double InfectionrateShapeParam;
   
-  /** @brief Variables for calculating survivalOfInoculum() */
+  /** @brief Parameters used in the "expected number of infections" model */
   //@{
   //!Steepness of relationship between success of inoculation and Xp in Phase A model 
   static double gamma_p;

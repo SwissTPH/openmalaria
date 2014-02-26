@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,13 +19,14 @@
  */
 
 #include "Clinical/EventScheduler.h"
-#include "inputData.h"
 #include "util/random.h"
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Surveys.h"
+#include "interventions/Cohort.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
+#include <schema/scenario.h>
 
 #include <limits>
 
@@ -38,6 +39,7 @@ TimeStep ClinicalEventScheduler::complicatedCaseDuration(TimeStep::never);
 TimeStep ClinicalEventScheduler::extraDaysAtRisk(TimeStep::never);
 vector<double> ClinicalEventScheduler::cumDailyPrImmUCTS;
 double ClinicalEventScheduler::neg_v;
+double ClinicalEventScheduler::alpha;
 
 double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
@@ -51,26 +53,50 @@ double ClinicalEventScheduler::logOddsAbInformal = std::numeric_limits<double>::
 double ClinicalEventScheduler::oneMinusEfficacyAb = std::numeric_limits<double>::signaling_NaN();
 AgeGroupInterpolation* ClinicalEventScheduler::severeNmfMortality = AgeGroupInterpolation::dummyObject();
 
+bool opt_non_malaria_fevers = false;
+
+AgeGroupInterpolation* ClinicalEventScheduler::NMF_need_antibiotic = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolation* ClinicalEventScheduler::MF_need_antibiotic = AgeGroupInterpolation::dummyObject();
 
 // -----  static init  -----
 
-void ClinicalEventScheduler::init ()
+void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Model& model )
 {
     if (TimeStep::interval != 1)
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
     if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
-    if( !InputData().getModel().getHuman().getWeight().present() ){
+    opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
+    
+    const scnXml::Human human = model.getHuman();
+    if( !human.getWeight().present() ){
         throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
     }
-    weight = AgeGroupInterpolation::makeObject( InputData().getModel().getHuman().getWeight().get(), "weight" );
-    hetWeightMultStdDev = InputData().getModel().getHuman().getWeight().get().getMultStdDev();
+    weight = AgeGroupInterpolation::makeObject( human.getWeight().get(), "weight" );
+    hetWeightMultStdDev = human.getWeight().get().getMultStdDev();
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
     minHetWeightMult = 0.5 / weight->eval( 0.0 );
+    
+    alpha = exp( -parameters[Parameters::CFR_NEG_LOG_ALPHA] );
+    if( !(0.0<=alpha && alpha<=1.0) ){
+        throw util::xml_scenario_error(
+            "Clinical outcomes: propDeathsFirstDay should be within range [0,1]");
+    }
+    neg_v = -parameters[Parameters::CFR_SCALE_FACTOR];
+    
+    if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
+        if( !model.getClinical().getNonMalariaFevers().present() ){
+            throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
+        }
+        const scnXml::Clinical::NonMalariaFeversType& nmfDesc2 =
+            model.getClinical().getNonMalariaFevers().get();
+        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentNMF(), "prNeedTreatmentNMF" );
+        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentMF(), "prNeedTreatmentMF" );
+    }
 }
 
-void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esData) {
+void ClinicalEventScheduler::setParameters(const scnXml::HSEventScheduler& esData) {
     const scnXml::ClinicalOutcomes& coData = esData.getClinicalOutcomes();
     
     maxUCSeekingMemory = TimeStep(coData.getMaxUCSeekingMemory());
@@ -98,14 +124,7 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
     }
     cumDailyPrImmUCTS.back() = 1.0;
     
-    double alpha = exp( -InputData.getParameter( Params::CFR_NEG_LOG_ALPHA ) );
-    if( !(0.0<=alpha && alpha<=1.0) ){
-	throw util::xml_scenario_error(
-            "Clinical outcomes: propDeathsFirstDay should be within range [0,1]");
-    }
-    
     CaseManagementCommon::scaleCaseFatalityRate( alpha );
-    neg_v = - InputData.getParameter( Params::CFR_SCALE_FACTOR );
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
         if( !esData.getNonMalariaFevers().present() ){
@@ -126,14 +145,15 @@ void ClinicalEventScheduler::setParameters (const scnXml::HSEventScheduler& esDa
 
 void ClinicalEventScheduler::cleanup () {
     AgeGroupInterpolation::freeObject( weight );
+    AgeGroupInterpolation::freeObject( NMF_need_antibiotic );
+    AgeGroupInterpolation::freeObject( MF_need_antibiotic );
 }
 
 
 // -----  construction, destruction and checkpointing  -----
 
-ClinicalEventScheduler::ClinicalEventScheduler (double cF, double tSF) :
-        ClinicalModel (cF),
-        pgState (Pathogenesis::NONE),
+ClinicalEventScheduler::ClinicalEventScheduler (double tSF) :
+        pgState (WHPathogenesis::NONE),
         caseStartTime (TimeStep::never),
         timeOfRecovery (TimeStep::never),
         timeLastTreatment (TimeStep::never),
@@ -173,62 +193,62 @@ void ClinicalEventScheduler::massDrugAdministration(Human& human){
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration (
         ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
-        medicateQueue, human.getInCohort(), human.getMonitoringAgeGroup()
+        medicateQueue, human.isInAnyCohort(), human.getMonitoringAgeGroup()
     );
 }
 
 void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
-    WithinHostModel& withinHostModel = *human.withinHostModel;
+    WHInterface& withinHostModel = *human.withinHostModel;
     // Run pathogenesisModel
-    // Note: we use Pathogenesis::COMPLICATED instead of Pathogenesis::SEVERE.
-    Pathogenesis::State newState = pathogenesisModel->determineState (ageYears, withinHostModel);
+    // Note: we use WHPathogenesis::COMPLICATED instead of WHPathogenesis::SEVERE.
+    WHPathogenesis::State newState = human.withinHostModel->determineMorbidity( ageYears );
     util::streamValidate( (newState << 16) & pgState );
     
     if ( TimeStep::simulation == timeOfRecovery ) {
-	if( pgState & Pathogenesis::DIRECT_DEATH ){
+	if( pgState & WHPathogenesis::DIRECT_DEATH ){
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
 	    
-	    latestReport.update (human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (human.isInAnyCohort(), human.getMonitoringAgeGroup(), pgState);
         } else {
-	    if ( pgState & Pathogenesis::COMPLICATED ) {
+	    if ( pgState & WHPathogenesis::COMPLICATED ) {
 		if( random::uniform_01() < ESCaseManagement::pSequelaeInpatient( ageYears ) ){
-		    pgState = Pathogenesis::State (pgState | Pathogenesis::SEQUELAE);
+		    pgState = WHPathogenesis::State (pgState | WHPathogenesis::SEQUELAE);
                 }else{
-		    pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+		    pgState = WHPathogenesis::State (pgState | WHPathogenesis::RECOVERY);
                 }
 	    } else {
-		pgState = Pathogenesis::State (pgState | Pathogenesis::RECOVERY);
+		pgState = WHPathogenesis::State (pgState | WHPathogenesis::RECOVERY);
             }
 	    // report bout, at conclusion of episode:
-	    latestReport.update (human.getInCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (human.isInAnyCohort(), human.getMonitoringAgeGroup(), pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)
-	    pgState = Pathogenesis::NONE;	// recovery (reset to healthy state)
+	    pgState = WHPathogenesis::NONE;	// recovery (reset to healthy state)
 	    
 	    // And returns to transmission (if was removed)
 	    human.perHostTransmission.removeFromTransmission( false );
 	}
     }
     
-    if ( newState & Pathogenesis::SICK ){
+    if ( newState & WHPathogenesis::SICK ){
         // we have some new case: is it severe/complicated?
-        if ( newState & Pathogenesis::COMPLICATED ){
-            if ( pgState & Pathogenesis::COMPLICATED ) {
+        if ( newState & WHPathogenesis::COMPLICATED ){
+            if ( pgState & WHPathogenesis::COMPLICATED ) {
                 // previously severe: no events happen for course of medication
             } else {
                 // previously healthy or UC: progress to severe
-                pgState = Pathogenesis::State (pgState | newState | Pathogenesis::RUN_CM_TREE);
+                pgState = WHPathogenesis::State (pgState | newState | WHPathogenesis::RUN_CM_TREE);
                 caseStartTime = TimeStep::simulation;
             }
         } else {
             // uncomplicated case (UC/UC2/NMF): is it new?
-            if (pgState & Pathogenesis::SICK) {
+            if (pgState & WHPathogenesis::SICK) {
                 // previously UC; nothing to do
             }else{
                 if( caseStartTime < TimeStep::simulation ) {
                     // new UC case
-                    pgState = Pathogenesis::State (pgState | newState | Pathogenesis::RUN_CM_TREE);
+                    pgState = WHPathogenesis::State (pgState | newState | WHPathogenesis::RUN_CM_TREE);
                     
                     double uVariate = random::uniform_01();
                     size_t i = 0;
@@ -245,46 +265,40 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             }
         }
         
-        if (pgState & Pathogenesis::INDIRECT_MORTALITY && _doomed == 0)
+        if (pgState & WHPathogenesis::INDIRECT_MORTALITY && _doomed == 0)
             _doomed = -TimeStep::interval; // start indirect mortality countdown
     }
     
-    if ( caseStartTime == TimeStep::simulation && pgState & Pathogenesis::RUN_CM_TREE ){
+    if ( caseStartTime == TimeStep::simulation && pgState & WHPathogenesis::RUN_CM_TREE ){
         // OK, we're about to run the CM tree
-        pgState = Pathogenesis::State (pgState & ~Pathogenesis::RUN_CM_TREE);
+        pgState = WHPathogenesis::State (pgState & ~WHPathogenesis::RUN_CM_TREE);
         
 	// If last treatment prescribed was in recent memory, consider second line.
 	if (timeLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
-	    pgState = Pathogenesis::State (pgState | Pathogenesis::SECOND_CASE);
-	
-	if (pgState & Pathogenesis::MALARIA) {
-	    if (util::ModelOptions::option (util::PENALISATION_EPISODES)) {
-		withinHostModel.immunityPenalisation();
-	    }
-	}
+	    pgState = WHPathogenesis::State (pgState | WHPathogenesis::SECOND_CASE);
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.getInCohort()
+	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.isInAnyCohort()
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
 	    timeLastTreatment = TimeStep::simulation;
-            if( pgState & Pathogenesis::COMPLICATED ){
-                Monitoring::Surveys.getSurvey(human.getInCohort())
+            if( pgState & WHPathogenesis::COMPLICATED ){
+                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                     .reportTreatments3( human.getMonitoringAgeGroup(), 1 );
             }else{
-                if( pgState & Pathogenesis::SECOND_CASE ){
-                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                if( pgState & WHPathogenesis::SECOND_CASE ){
+                    Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                         .reportTreatments2( human.getMonitoringAgeGroup(), 1 );
                 }else{
-                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                    Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                         .reportTreatments1( human.getMonitoringAgeGroup(), 1 );
                 }
             }
         }
 	
 	if ( auxOut.hospitalisation != CMAuxOutput::NONE ) {	// in hospital
-	    pgState = Pathogenesis::State (pgState | Pathogenesis::EVENT_IN_HOSPITAL);
+	    pgState = WHPathogenesis::State (pgState | WHPathogenesis::EVENT_IN_HOSPITAL);
 	    
 	    if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
 		++caseStartTime;
@@ -292,25 +306,31 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	
 	// Case fatality rate (first day of illness)
 	// P(death) is some fixed input scaled by age-specific CFR.
-	if( (pgState & Pathogenesis::COMPLICATED)
-	    && !(pgState & Pathogenesis::DIRECT_DEATH)
+	if( (pgState & WHPathogenesis::COMPLICATED)
+	    && !(pgState & WHPathogenesis::DIRECT_DEATH)
 	) {
 	    double pDeath = CaseManagementCommon::caseFatality( ageYears );
 	    // community fatality rate when not in hospital or delayed hospital entry
 	    if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
-		pDeath = CaseManagementCommon::getCommunityCaseFatalityRate( pDeath );
+                pDeath = CaseManagementCommon::getCommunityCaseFatalityRate( pDeath );
 	    if (random::uniform_01() < pDeath) {
-		pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH | Pathogenesis::EVENT_FIRST_DAY);
+		pgState = WHPathogenesis::State (pgState | WHPathogenesis::DIRECT_DEATH | WHPathogenesis::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
 		//timeOfRecovery += extraDaysAtRisk;	(no point updating; will be set later: ATORWD)
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
 	}
 	
-	if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
-            if( (pgState & Pathogenesis::SICK) && !(pgState & Pathogenesis::COMPLICATED) ){
+	if( opt_non_malaria_fevers ){
+            if( (pgState & WHPathogenesis::SICK) && !(pgState & WHPathogenesis::COMPLICATED) ){
                 // Have a NMF or UC malaria case
-                double pNeedTreat = pathogenesisModel->pNmfRequiresTreatment( ageYears, (pgState & Pathogenesis::MALARIA) != Pathogenesis::NONE );
+                
+                /** Given a non-malaria fever, return the probability of it requiring
+                 * treatment. */
+                bool isMalarial = (pgState & WHPathogenesis::MALARIA) != WHPathogenesis::NONE;
+                double pNeedTreat = isMalarial ?
+                        MF_need_antibiotic->eval( ageYears ) :
+                        NMF_need_antibiotic->eval( ageYears );
                 bool needTreat = random::bernoulli(pNeedTreat);
                 
                 // Calculate chance of antibiotic administration:
@@ -343,7 +363,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double treatmentEffectMult = 1.0;
                 
                 if( random::uniform_01() < pTreatment ){
-                    Monitoring::Surveys.getSurvey(human.getInCohort())
+                    Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                         .reportAntibioticTreatments( human.getMonitoringAgeGroup(), 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
                 }
@@ -353,7 +373,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 if( needTreat ){
                     double pDeath = severeNmfMortality->eval( ageYears ) * treatmentEffectMult;
                     if( random::uniform_01() < pDeath ){
-                        pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+                        pgState = WHPathogenesis::State (pgState | WHPathogenesis::DIRECT_DEATH);
                     }
                 }
             }
@@ -363,21 +383,23 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	
 	// Case fatality rate (subsequent days)
 	// Complicated case & at risk of death (note: extraDaysAtRisk <= 0)
-	if( (pgState & Pathogenesis::COMPLICATED)
-	    && !(pgState & Pathogenesis::DIRECT_DEATH)
+	if( (pgState & WHPathogenesis::COMPLICATED)
+	    && !(pgState & WHPathogenesis::DIRECT_DEATH)
 	    && (TimeStep::simulation < timeOfRecovery + extraDaysAtRisk)
 	) {
 	    // In complicated episodes, S(t), the probability of survival on
 	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
 	    // for parasite density Y(t). v_neg below is -v.
+            // TODO: this model should be revisited, and if possible placed
+            // within the WHFalciparum class (or a subclass).
 	    if( withinHostModel.getTotalDensity() > 0.0 ){	// avoid division by zero
 		double parasiteReductionEffect = withinHostModel.getTotalDensity() / previousDensity;
 		double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );
 		// community fatality rate when not in hospital
-		if( !(pgState & Pathogenesis::EVENT_IN_HOSPITAL) )
+		if( !(pgState & WHPathogenesis::EVENT_IN_HOSPITAL) )
 		    pDeath = CaseManagementCommon::getCommunityCaseFatalityRate( pDeath );
 		if (random::uniform_01() < pDeath) {
-		    pgState = Pathogenesis::State (pgState | Pathogenesis::DIRECT_DEATH);
+		    pgState = WHPathogenesis::State (pgState | WHPathogenesis::DIRECT_DEATH);
 		    // Human is killed at end of time at risk
 		    timeOfRecovery += extraDaysAtRisk;	// may be re-set later (see ATORWD)
 		}
@@ -392,10 +414,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	// Patients in hospital are removed from the transmission cycle.
 	// This should have an effect from the start of the next timestep.
 	// NOTE: This is not very accurate, but considered of little importance.
-	if (pgState & Pathogenesis::EVENT_IN_HOSPITAL)
+	if (pgState & WHPathogenesis::EVENT_IN_HOSPITAL)
 	    human.perHostTransmission.removeFromTransmission( true );
 	
-	if (pgState & Pathogenesis::COMPLICATED) {
+	if (pgState & WHPathogenesis::COMPLICATED) {
 	    // complicatedCaseDuration should to some respects be associated
 	    // with medication duration, however ongoing medications after
 	    // exiting hospital are OK and medications terminating before the
@@ -403,7 +425,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // can't recieve new infections due to zero transmission in hospital.
 	    timeOfRecovery = TimeStep::simulation + complicatedCaseDuration;
 	    // Time should be adjusted to end of at-risk period when patient dies:
-	    if( pgState & Pathogenesis::DIRECT_DEATH )	// death may already have been determined
+	    if( pgState & WHPathogenesis::DIRECT_DEATH )	// death may already have been determined
 		timeOfRecovery += extraDaysAtRisk;	// ATORWD (search keyword)
 	} else {
 	    timeOfRecovery = TimeStep::simulation + uncomplicatedCaseDuration;
@@ -419,10 +441,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             double bodyMass = ageToWeight( ageYears );
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
             if( it->duration > 0.0 ){
-                Monitoring::Surveys.getSurvey(human.getInCohort())
+                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                 .report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
             }else{      // 0 or NaN
-                Monitoring::Surveys.getSurvey(human.getInCohort())
+                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                 .report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
             }
 	    medicateQueue.erase (it);
@@ -432,11 +454,11 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	it = next;
     }
     
-    if( human.cohortFirstTreatmentOnly && timeLastTreatment == TimeStep::simulation ){
-        human.removeFromCohort();
+    if( timeLastTreatment == TimeStep::simulation ){
+        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_TREATMENT );
     }
-    if( human.cohortFirstBoutOnly && (pgState & Pathogenesis::SICK) ){
-        human.removeFromCohort();
+    if( pgState & WHPathogenesis::SICK ){
+        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_BOUT );
     }
 }
 
@@ -445,7 +467,7 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     ClinicalModel::checkpoint (stream);
     int s;
     s & stream;
-    pgState = Pathogenesis::State(s);
+    pgState = WHPathogenesis::State(s);
     caseStartTime & stream;
     timeOfRecovery & stream;
     timeLastTreatment & stream;

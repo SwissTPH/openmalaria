@@ -1,7 +1,8 @@
 /*
  This file is part of OpenMalaria.
  
- Copyright (C) 2005-2010 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+ Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  
  OpenMalaria is free software; you can redistribute it and/or modify
  it under the terms of the GNU General Public License as published by
@@ -161,7 +162,7 @@ public:
 	::scnXml::HSESCaseManagement xmlCM( decisions, treatments );
 	
 	// use complicated tree, because it doesn't add so many unwanted decisions
-	dMap.initialize( xmlCM, ESDecisionMap::Complicated );
+	dMap.initialize( xmlCM, ESDecisionMap::Complicated, true );
     }
     
     // Note: use ETS_..., not TS_..., when assertion should throw if false (prevent dangerous operations)
@@ -197,9 +198,10 @@ public:
 	// "result" decision is optimised out.
 	
 	UnittestUtil::EmpiricalWHM_setup();	// use a 1-day-TS model
-	WithinHostModel* whm = WithinHostModel::createWithinHostModel();
+	WHFalciparum* whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel() );
+        ETS_ASSERT( whm != 0 );
 	UnittestUtil::setTotalParasiteDensity( *whm, numeric_limits< double >::infinity() );	// infinite, which means P(true outcome) should be 1.0 with an RDT test
-	ESHostData hd( 16., *whm, OM::Pathogenesis::NONE );
+	ESHostData hd( 16., *whm, OM::WithinHost::Pathogenesis::NONE );
 	ESDecisionValue outcome = dMap.determine( hd );
 	delete whm;
 	

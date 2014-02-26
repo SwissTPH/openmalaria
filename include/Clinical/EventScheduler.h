@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -30,7 +30,8 @@
 #include <list>
 
 namespace scnXml {
-class HSEventScheduler;
+    class HSEventScheduler;
+    class Model;
 }
 
 namespace OM {
@@ -48,11 +49,11 @@ using util::AgeGroupInterpolation;
 class ClinicalEventScheduler : public ClinicalModel
 {
 public:
-    static void init ();
+    static void init (const OM::Parameters& parameters, const scnXml::Model& model);
     static void setParameters (const scnXml::HSEventScheduler& esData);
     static void cleanup ();
 
-    ClinicalEventScheduler (double cF, double tSF);
+    ClinicalEventScheduler (double tSF);
     ~ClinicalEventScheduler ();
     
     virtual bool notAtRisk();
@@ -82,6 +83,8 @@ private:
 
     /// Parameter of S(t) for t > 0
     static double neg_v;
+    /// Parameter
+    static double alpha;
     
     /** Weight model. Currently looks up a weight dependant on age from a table
      * in an entirely deterministic way.
@@ -122,11 +125,19 @@ private:
      * the case is not treated. */
     static AgeGroupInterpolation* severeNmfMortality;
     
+    /// Probability that an NMF needs antibiotic treatment and could lead to death.
+    static AgeGroupInterpolation* NMF_need_antibiotic;
+    /** Probability that a malarial fever classified as uncomplicated requires
+     * antibiotic treatment (and death could occur from non-malarial causes).
+     * Unclear whether using this at the same time as comorbidity parameters
+     * makes any sense. */
+    static AgeGroupInterpolation* MF_need_antibiotic;
+    
     // Note on memory usage: Pathogenesis::State is and enum (an int), so we
     // have a vtable followed by 3 ints, a double and a list. Alignment probably
     // wastes some space.
     /// Current state of sickness
-    Pathogenesis::State pgState;
+    WHPathogenesis::State pgState;
 
     /** Set to when a bout should start. If TimeStep::simulation equals this, a bout
      * is started (UC & severe behaviour different).

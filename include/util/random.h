@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -62,11 +62,28 @@ namespace random {
     
     /** This function returns a random integer from the Poisson distribution with mean lambda. */
     int poisson(double lambda);
-    //@}
 
-    /** This function returns 1 or 0 (Bernoulli distribution).
-     *
-     */
+    /** This function returns true with probability prob or 0 with probability
+     * 1-prob (Bernoulli distribution). */
     bool bernoulli(double prob);
+    
+    /** This function returns an integer from 0 to 1-n, where every value has
+     * equal probability of being sampled. */
+    int uniform (int n);
+    
+    /** Return a variate sampled from the exponential distribution, whose PDF
+     * is: pdf(x) = exp(-x/mean) / mean */
+    double exponential( double mean );
+    
+    /**
+     * Return a variate sampled from the Weibull distribution.
+     * 
+     * The PDF is k · x^{k-1} exp{-(x/λ)^k} / λ^k
+     * 
+     * @param lambda (λ) is the scale parameter
+     * @param k is the shape parameter
+     */
+    double weibull( double lambda, double k );
+    //@}
 }
 } }

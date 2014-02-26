@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="R_0: count secondary infections from one primary" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="R_0: count secondary infections from one primary" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -67,34 +67,6 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <vaccine>
-      <description vaccineType="PEV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="0"/>
-        <initialEfficacy value="0"/>
-      </description>
-      <description vaccineType="TBV">
-        <decay L="0.0" function="constant"/>
-        <efficacyB value="1"/>
-        <initialEfficacy value="1"/>
-      </description>
-      <continuous>
-        <deploy coverage="1" targetAgeYrs="0.0137"/>
-      </continuous>
-      <timed>
-        <deploy coverage="1" time="73"/>
-      </timed>
-    </vaccine>
-    <MDA>
-      <timed>
-        <deploy coverage="1" time="73"/>
-        <deploy coverage="1" time="74"/>
-        <deploy coverage="1" time="75"/>
-        <deploy coverage="1" time="76"/>
-        <deploy coverage="1" time="77"/>
-        <deploy coverage="1" time="78"/>
-      </timed>
-    </MDA>
     <uninfectVectors>
       <timedDeployment time="73"/>
       <timedDeployment time="74"/>
@@ -103,14 +75,65 @@
       <timedDeployment time="77"/>
       <timedDeployment time="78"/>
     </uninfectVectors>
-    <immuneSuppression>
-      <timed>
-        <deploy coverage="1" time="78"/>
-      </timed>
-    </immuneSuppression>
     <insertR_0Case>
       <timedDeployment time="146"/>
     </insertR_0Case>
+    <human>
+      <effect id="MDA">
+        <MDA>
+          <drugEffect>
+            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
+            <compliersEffective>
+              <timestep pClearance="1"/>
+            </compliersEffective>
+          </drugEffect>
+        </MDA>
+      </effect>
+      <effect id="PEV">
+        <PEV>
+          <decay L="0.0" function="constant"/>
+          <efficacyB value="0"/>
+          <initialEfficacy value="0"/>
+        </PEV>
+      </effect>
+      <effect id="TBV">
+        <TBV>
+          <decay L="0.0" function="constant"/>
+          <efficacyB value="1"/>
+          <initialEfficacy value="1"/>
+        </TBV>
+      </effect>
+      <effect id="immuneSuppression">
+        <clearImmunity/>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy coverage="1" time="73"/>
+          <deploy coverage="1" time="74"/>
+          <deploy coverage="1" time="75"/>
+          <deploy coverage="1" time="76"/>
+          <deploy coverage="1" time="77"/>
+          <deploy coverage="1" time="78"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="PEV"/>
+        <effect id="TBV"/>
+        <continuous>
+          <deploy coverage="1" targetAgeYrs="0.0137" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
+        </continuous>
+        <timed>
+          <deploy coverage="1" time="73"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="immuneSuppression"/>
+        <timed>
+          <deploy coverage="1" time="78"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="no treatment">
@@ -299,4 +322,4 @@
       <parameter include="1" name="critical age for comorbidity" number="30" value="0.124479"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

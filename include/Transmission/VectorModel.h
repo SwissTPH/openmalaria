@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -24,14 +24,14 @@
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
-#include "Transmission/ITN.h"
-#include "Transmission/IRS.h"
 
 namespace scnXml {
   class Vector;
 }
 
-namespace OM { namespace Transmission {
+namespace OM {
+    class Population;
+namespace Transmission {
     using Anopheles::AnophelesModel;
     
 /** Transmission models, Chitnis et al.
@@ -40,14 +40,14 @@ namespace OM { namespace Transmission {
  * code is in the Anopheles directory and namespace. */
 class VectorModel : public TransmissionModel {
 public:
-  VectorModel(const scnXml::Vector vectorData, int populationSize);
+  VectorModel(const scnXml::EntoData& entoData, const scnXml::Vector vectorData, int populationSize);
   virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const Population& population);
   
-  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance );
+  virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
@@ -56,23 +56,15 @@ public:
   virtual TimeStep expectedInitDuration ();
   virtual TimeStep initIterate ();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize);
-  virtual void update (const std::list<Host::Human>& population, int populationSize);
+  virtual void vectorUpdate (const Population& population);
+  virtual void update (const Population& population);
 
-  virtual double calculateEIR(PerHost& host, double ageYears); 
+  virtual double calculateEIR(OM::Transmission::PerHost& host, double ageYears); 
   
-  virtual void setITNDescription ( const scnXml::ITNDescription& elt);
-  virtual void setIRSDescription (const scnXml::IRS&);
-  virtual void setVADescription (const scnXml::VectorDeterrent&);
+  virtual const map<string,size_t>& getSpeciesIndexMap();
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();
   
-  inline const ITNParams& getITNParams () const{
-      return _ITNParams;
-  }
-  inline const IRSParams& getIRSParams() const{
-      return _IRSParams;
-  }
   virtual void summarize (Monitoring::Survey& survey);
   
 protected:
@@ -80,20 +72,8 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
-  /** Return the index in speciesIndex of mosquito, throwing if not found. */
-  size_t getSpeciesIndex (string mosquito)const {
-    map<string,size_t>::const_iterator sIndex = speciesIndex.find (mosquito);
-    if (sIndex == speciesIndex.end()) {
-      ostringstream oss;
-      oss << "Intervention description for anopheles species \""
-	  << mosquito << "\": species not found in entomology description";
-      throw util::xml_scenario_error(oss.str());
-    }
-    return sIndex->second;
-  }
-    
     /** Return the mean availability of human population to mosquitoes. */
-    static double meanPopAvail (const std::list<Host::Human>& population, int populationSize);
+    static double meanPopAvail (const Population& population);
     
     /** Confirm simulationMode allows use of interventions; throw if not. */
     void checkSimMode() const;
@@ -143,11 +123,6 @@ private:
    * found. Doesn't need checkpointing. */
   map<string,size_t> speciesIndex;
   //@}
-  
-  /** Parameters used by ITN and IRS models. */
-  ITNParams _ITNParams;
-  /** ditto */
-  IRSParams _IRSParams;
   
   friend class PerHost;
   friend class AnophelesModelSuite;

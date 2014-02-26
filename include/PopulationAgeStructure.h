@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -23,6 +23,7 @@
 #include <vector>
 #include "Global.h"
 
+namespace scnXml{ class Demography; }
 namespace OM
 {
     /** Encapsulates code just setting up the age structure (i.e.  cumAgeProp). */
@@ -30,7 +31,7 @@ namespace OM
     {
     public:
 	/** Set up cumAgeProp from XML data. */
-	static void init ();
+	static void init ( const scnXml::Demography& demography );
 	
 	/** Return maximum individual lifetime in intervals that AgeStructure can handle. */
 	static inline TimeStep getMaxTimestepsPerLife () {
@@ -44,7 +45,7 @@ namespace OM
     private:
         /*! Estimates demography parameters to define a smooth curve for the target
         population age-distribution (age in years) */
-        static void estimateRemovalRates();
+        static void estimateRemovalRates( const scnXml::Demography& demography );
 	
         /** For input values for alpha1 and mu1, the fit to field data (residualSS)
         * is calculated and returned function called iteratively by
@@ -69,6 +70,7 @@ namespace OM
         static vector<double> ageGroupBounds;
 	static vector<double> ageGroupPercent;
         //@}
+        static double initialRho;
         /** Parameters defining smooth curve of target age-distribution.
         *
         * Set by estimateRemovalRates() (via setDemoParameters()) and used by

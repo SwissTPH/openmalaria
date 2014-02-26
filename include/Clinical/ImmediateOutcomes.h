@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,12 +21,13 @@
 #ifndef Hmod_ClinicalImmediateOutcomes
 #define Hmod_ClinicalImmediateOutcomes
 
+#include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
-#include "Clinical/Diagnostic.h"
 
 namespace OM {
 namespace Clinical {
+#define WHPathogenesis WithinHost::Pathogenesis
 
 namespace Regimen {
 /** Regimen: UC / UC2 / SEVERE.
@@ -49,17 +50,11 @@ public:
     /** Initialises parameters, loading from XML data. */
     static void initParameters ();
 
-    /** Set up MDA drug. Must be called if massDrugAdministration() is
-        * ever used to deploy an MDA intervention. */
-    static inline void initMDA (const scnXml::HSDiagnostic& elt){
-        massTreatDiagnostic.init( elt );
-    }
-    
     /** Load health system data from initial data or an intervention's data (both from XML).
      * (Re)loads all data affected by this healthSystem element. */
     static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
 
-    ClinicalImmediateOutcomes (double cF, double tSF);
+    ClinicalImmediateOutcomes (double tSF);
     ~ClinicalImmediateOutcomes ();
 
     virtual bool notAtRisk() {
@@ -79,7 +74,7 @@ private:
     /** Called when a non-severe/complicated malaria sickness occurs.
      *
      * @returns True in case of effective or partially effective treatment, false otherwise. */
-    bool uncomplicatedEvent(OM::Pathogenesis::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
+    bool uncomplicatedEvent(WHPathogenesis::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
 
     /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
      *
@@ -94,9 +89,6 @@ private:
     //! treatment seeking for heterogeneity
     double _treatmentSeekingFactor;
     
-    // Diagnostic used by MDA/MSAT
-    static Diagnostic massTreatDiagnostic;
-
     /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
     static void setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& healthSystem);
 

@@ -4,17 +4,15 @@
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  Simulation.cpp
+  Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
   PopulationStats.cpp
-  inputData.cpp
-  Interventions.cpp
+  Parameters.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
   Host/NeonatalMortality.cpp
-  Host/Vaccine.cpp
   Host/ImportedInfections.cpp
   
   Clinical/ClinicalModel.cpp
@@ -26,12 +24,6 @@ set (Model_CPP
   Clinical/ImmediateOutcomes.cpp
   Clinical/Episode.cpp
   Clinical/parser.cpp
-  Clinical/Diagnostic.cpp
-  
-  Pathogenesis/PathogenesisModel.cpp
-  Pathogenesis/Mueller.cpp
-  Pathogenesis/Pyrogen.cpp
-  Pathogenesis/Predet.cpp
   
   PkPd/PkPdModel.cpp
   #PkPd/HoshenPkPdModel.cpp
@@ -56,20 +48,22 @@ set (Model_CPP
   #Transmission/Anopheles/LifeCycle.cpp
   #Transmission/Anopheles/ResourceFitter.cpp
   Transmission/Anopheles/PerHost.cpp
-  Transmission/ITN.cpp
-  Transmission/IRS.cpp
   
-  WithinHost/WithinHostModel.cpp
+  WithinHost/WHInterface.cpp
+  WithinHost/WHFalciparum.cpp
+  WithinHost/WHVivax.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
-  WithinHost/DescriptiveIPTWithinHost.cpp
   WithinHost/Infection/Infection.cpp
   WithinHost/Infection/DescriptiveInfection.cpp
-  WithinHost/Infection/DescriptiveIPTInfection.cpp
   WithinHost/Infection/DummyInfection.cpp
   WithinHost/Infection/EmpiricalInfection.cpp
   WithinHost/Infection/MolineauxInfection.cpp
   WithinHost/Infection/PennyInfection.cpp
+  WithinHost/WHVivax.cpp
+  WithinHost/Pathogenesis/PathogenesisModel.cpp
+  WithinHost/Pathogenesis/Submodels.cpp
+  WithinHost/Diagnostic.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp
@@ -84,10 +78,19 @@ set (Model_CPP
   util/AgeGroupInterpolation.cpp
   util/TimeStep.cpp
   util/sampler.cpp
+  util/SpeciesIndexChecker.cpp
+  util/DocumentLoader.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp
   Monitoring/Survey.cpp
+  
+  interventions/InterventionManager.cpp
+  interventions/ITN.cpp
+  interventions/IRS.cpp
+  interventions/GVI.cpp
+  interventions/Cohort.cpp
+  interventions/Vaccine.cpp
 )
 
 # Headers - only included so they show up in IDEs:

@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -29,6 +29,7 @@ using namespace std;
 
 class UnittestUtil;
 
+namespace scnXml{ class Scenario; }
 namespace OM { namespace PkPd {
     
 /** Encapsulates both the static operations for PKPD models and the per-human
@@ -48,7 +49,7 @@ class PkPdModel {
 public:
   ///@brief Static functions
   //@{
-  static void init ();
+  static void init ( const scnXml::Scenario& scenario );
   static void cleanup ();
   
   // checkpointing of static data: not required since all data is set up by init

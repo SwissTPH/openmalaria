@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #include "util/AgeGroupInterpolation.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
-#include "inputData.h"
+#include "schema/healthSystem.h"
 
 #include <fstream>
 #include <boost/format.hpp>
@@ -306,6 +306,7 @@ namespace OM { namespace util {
     }
     
     void AgeGroupInterpolation::outputSamples( const string name ){
+#ifdef WITHOUT_BOINC
         if( !util::CommandLine::option(util::CommandLine::SAMPLE_INTERPOLATIONS) ){
             return;
         }
@@ -315,5 +316,6 @@ namespace OM { namespace util {
         for( double age = 0.0; age < max; age += 0.1 ){
             fstream << age << "," << this->eval( age ) << endl;
         }
+#endif
     }
 } }

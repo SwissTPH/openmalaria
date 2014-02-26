@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Full set of interventions" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="10000">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -33,9 +33,9 @@
       <option name="immunity Y" value="true"/>
       <option name="new infections" value="true"/>
       <option name="num transmitting humans" value="true"/>
-      <option name="nets owned" value="true"/>
+      <!--<option name="nets owned" value="true"/>
       <option name="mean hole index"/>
-      <option name="mean insecticide content"/>
+      <option name="mean insecticide content"/>-->
     </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
@@ -180,93 +180,109 @@
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <IPT>
-      <description iptiEffect="13">
-        <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
-        <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
-        <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.95" targetAgeYrs="0.17"/>
-        <deploy coverage="0.95" targetAgeYrs="0.25"/>
-        <deploy coverage="0.95" targetAgeYrs="0.75"/>
-      </continuous>
-    </IPT>
-    <ITN name="Extended ITNs">
-      <description>
-        <usage value="0.8"/>
-        <holeRate mean=".9" sigma=".8"/>
-        <ripRate mean=".7" sigma=".8"/>
-        <ripFactor value="0.4"/>
-        <initialInsecticide mu="70" sigma="20"/>
-        <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
-        <attritionOfNets L="12" function="smooth-compact" k="2"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-        <anophelesParams mosquito="funestus">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-        <anophelesParams mosquito="arabiensis">
-          <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
-          <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
-          <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
-        </anophelesParams>
-      </description>
-      <continuous>
-        <deploy coverage="0.95" targetAgeYrs="0.0833"/>
-      </continuous>
-      <timed>
-        <deploy coverage="0.9" time="7"/>
-      </timed>
-    </ITN>
-    <IRS name="DDT test">
-      <description>
-        <decay L="0.5" function="exponential"/>
-        <anophelesParams mosquito="gambiae_ss">
-          <deterrency value="0.56"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.24"/>
-        </anophelesParams>
-        <anophelesParams mosquito="funestus">
-          <deterrency value="0.56"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.24"/>
-        </anophelesParams>
-        <anophelesParams mosquito="arabiensis">
-          <deterrency value="0.56"/>
-          <preprandialKillingEffect value="0"/>
-          <postprandialKillingEffect value="0.24"/>
-        </anophelesParams>
-      </description>
-      <timed>
-        <deploy coverage="0.8" time="7"/>
-      </timed>
-    </IRS>
-    <vectorDeterrent name="hypothetical deterrency">
-      <decay L="4" function="exponential"/>
-      <anophelesParams mosquito="gambiae_ss">
-        <deterrency value="0.2"/>
-      </anophelesParams>
-      <anophelesParams mosquito="funestus">
-        <deterrency value="0.2"/>
-      </anophelesParams>
-      <anophelesParams mosquito="arabiensis">
-        <deterrency value="0.2"/>
-      </anophelesParams>
-      <timed>
-        <deploy coverage="0.7" time="7"/>
-      </timed>
-    </vectorDeterrent>
     <!--
     <larviciding>
       <anopheles duration="1825" effectiveness="0.75" mosquito="gambiae_ss"/>
     </larviciding>
     -->
+    <human>
+      <effect id="IPT">
+        <IPT iptiEffect="13">
+          <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
+          <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
+          <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
+        </IPT>
+      </effect>
+      <effect id="ITN" name="Extended ITNs">
+        <ITN>
+          <usage value="0.8"/>
+          <holeRate mean=".9" sigma=".8"/>
+          <ripRate mean=".7" sigma=".8"/>
+          <ripFactor value="0.4"/>
+          <initialInsecticide mu="70" sigma="20"/>
+          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <attritionOfNets L="12" function="smooth-compact" k="2"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="funestus">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="arabiensis">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+        </ITN>
+      </effect>
+      <effect id="GVI" name="DDT test">
+        <GVI>
+          <decay L="0.5" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency value="0.56"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.24"/>
+          </anophelesParams>
+          <anophelesParams mosquito="funestus">
+            <deterrency value="0.56"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.24"/>
+          </anophelesParams>
+          <anophelesParams mosquito="arabiensis">
+            <deterrency value="0.56"/>
+            <preprandialKillingEffect value="0"/>
+            <postprandialKillingEffect value="0.24"/>
+          </anophelesParams>
+        </GVI>
+      </effect>
+      <effect id="vectorDeterrent" name="hypothetical deterrency">
+        <GVI>
+          <decay L="4" function="exponential"/>
+          <anophelesParams mosquito="gambiae_ss">
+            <deterrency value="0.2"/>
+          </anophelesParams>
+          <anophelesParams mosquito="funestus">
+            <deterrency value="0.2"/>
+          </anophelesParams>
+          <anophelesParams mosquito="arabiensis">
+            <deterrency value="0.2"/>
+          </anophelesParams>
+        </GVI>
+      </effect>
+      <intervention>
+        <effect id="IPT"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.17"/>
+          <deploy coverage="0.95" targetAgeYrs="0.25"/>
+          <deploy coverage="0.95" targetAgeYrs="0.75"/>
+        </continuous>
+      </intervention>
+      <intervention name="Extended ITNs">
+        <effect id="ITN"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.0833"/>
+        </continuous>
+        <timed>
+          <deploy coverage="0.9" time="7"/>
+        </timed>
+      </intervention>
+      <intervention name="DDT test">
+        <effect id="GVI"/>
+        <timed>
+          <deploy coverage="0.8" time="7"/>
+        </timed>
+      </intervention>
+      <intervention name="hypothetical deterrency">
+        <effect id="vectorDeterrent"/>
+        <timed>
+          <deploy coverage="0.7" time="7"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT">
@@ -441,4 +457,4 @@
       <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

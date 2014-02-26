@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
  */
 
 #include "Transmission/Anopheles/PerHost.h"
-#include "inputData.h"
 #include "util/errors.h"
 
 namespace OM {
@@ -42,25 +41,6 @@ void PerHostBase::operator =(const scnXml::Mosq& mosq)
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
-}
-
-void PerHostBase::setITNDescription (const ITNParams& params,
-                                     const scnXml::ITNDescription::AnophelesParamsType& elt,
-                                     double proportionUse){
-    net.init( params, elt, proportionUse );
-}
-
-void PerHostBase::setIRSDescription (const IRSParams& params,
-        const scnXml::IRSDescription_v1::AnophelesParamsType& elt){
-    irs.init( params, elt );
-}
-void PerHostBase::setIRSDescription (const IRSParams& params,
-        const scnXml::IRSDescription_v2::AnophelesParamsType& elt){
-    irs.init( params, elt );
-}
-
-void PerHostBase::setVADescription (const scnXml::BaseInterventionDescription& vaDesc) {
-    VADeterrency = vaDesc.getDeterrency().getValue();
 }
 
 }

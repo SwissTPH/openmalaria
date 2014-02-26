@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,15 +22,18 @@
 #define OM_util_errors
 
 #include <stdexcept>
+#include <vector>
 #include <boost/static_assert.hpp>
+#include <string.h>
 
 using namespace std;
 
 /* Macros to ease use of traced_exception.
  * msg should be obvious, and code is the program exit code.
  */
-#define TRACED_EXCEPTION( msg, code ) OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) )
-#define TRACED_EXCEPTION_DEFAULT( msg ) OM::util::traced_exception( (msg), __FILE__, __LINE__ )
+#define TRACED_EXCEPTION( msg, code ) ::OM::util::traced_exception( (msg), __FILE__, __LINE__, (code) )
+#define TRACED_EXCEPTION_DEFAULT( msg ) ::OM::util::traced_exception( (msg), __FILE__, __LINE__ )
+#define SWITCH_DEFAULT_EXCEPTION ::OM::util::traced_exception( OM::util::Messages::SwitchDefault, __FILE__, __LINE__, ::OM::util::Error::SwitchDefault )
 
 // #define OM_NO_STACK_TRACE
 
@@ -79,8 +82,14 @@ namespace OM { namespace util {
         SumWeight,
         VectorFitting,
         InfLambda,
+        NotImplemented,
+        WHFeatures,     // these are probably all code errors
+        SwitchDefault,
         Max
     }; }
+    namespace Messages {
+        extern const char *SwitchDefault;
+    }
     
     // As in the "Advanced Bash-Scripting Guide"; not directly relevant to C++
     // but gives some idea what codes make sense to use.
@@ -99,11 +108,34 @@ namespace OM { namespace util {
         // for common errors, specify a unique TRACED_DEFAULT to help segregate
         // errors in BOINC server summaries; otherwise leave the default
         explicit base_exception(const string& msg, int code=Error::Default);
+        /** Get the classification. This should be some value of the
+         * Error::ErrorCodes enum. */
         inline int getCode() const{
             return errCode;
         }
+        /** Get the message. Use this as opposed to what() to enable overriding
+         * (without dealing with the messy details of how exactly each standard
+         * library defines what()). */
+        virtual const char* message() const{
+            return what();
+        }
     private:
         int errCode;
+    };
+    
+    /** Extension of base_exception for not-yet-implemented features. */
+    class unimplemented_exception : public base_exception {
+    public:
+        explicit unimplemented_exception(const string& msg);
+        
+        /** Complete the error message.
+         *
+         * Warning: this function is not very robust. References to the
+         * returned result should not survive beyond a second call to this
+         * function (from any unimplemented_exception object). */
+        virtual const char* message() const;
+        static vector<char> msg_buf;
+        static const string msg_pre;
     };
     
     /** Extension of base_exception which tries to get a stack trace. Also

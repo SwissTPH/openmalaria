@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -58,6 +58,8 @@ namespace OM { namespace util {
              * 
              * The fitting methods used aren't guaranteed to work. If they don't, this output should help work out why. */
             DEBUG_VECTOR_FITTING,
+            /** Print out details about interventions. */
+            PRINT_INTERVENTIONS,
 	    NUM_OPTIONS
 	};
 	

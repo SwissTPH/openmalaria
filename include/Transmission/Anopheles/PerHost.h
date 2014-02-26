@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,9 +21,8 @@
 #ifndef Hmod_Anopheles_PerHost
 #define Hmod_Anopheles_PerHost
 
-#include "Transmission/ITN.h"
-#include "Transmission/IRS.h"
 #include "util/sampler.h"
+#include "schema/entomology.h"
 
 namespace OM {
 namespace Transmission {
@@ -35,12 +34,6 @@ namespace Anopheles {
  * Parameters are read from XML, and the availability rate is adjusted. */
 class PerHostBase {
 public:
-    PerHostBase(const ITNParams* baseITNParams, const IRSParams* baseIRSParams) :
-            net( baseITNParams ),
-            irs( baseIRSParams ),
-            VADeterrency(numeric_limits< double >::signaling_NaN())
-    {}
-    
     /** Set parameters from an XML element. */
     void operator= (const scnXml::Mosq& mosq);
 
@@ -52,15 +45,6 @@ public:
     inline void setEntoAvailability(double entoAvailability){
         this->entoAvailability.setMean( entoAvailability );
     }
-    
-    /** @brief Set up vector-model intervention parameters. */
-    //@{
-    void setITNDescription (const ITNParams& params, const scnXml::ITNDescription::AnophelesParamsType& elt, double proportionUse);
-    void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription_v1::AnophelesParamsType& elt);
-    void setIRSDescription (const IRSParams& params, const scnXml::IRSDescription_v2::AnophelesParamsType& elt);
-    void setVADescription (const scnXml::BaseInterventionDescription& vaDesc);
-    //@}
-    
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
      * 
@@ -80,16 +64,6 @@ public:
     /** Probability of mosquito successfully resting after finding a resting site
      * (P_D_i). */
     util::BetaSampler probMosqSurvivalResting;
-    //@}
-    
-    /** @brief Intervention description parameters
-     *
-     * These describe initial effectiveness. Decay rate/shape is specified
-     * elsewhere (by DecayFunction type). */
-    //@{
-    ITNAnophelesParams net;
-    IRSAnophelesParams irs;
-    double VADeterrency;
     //@}
 };
 

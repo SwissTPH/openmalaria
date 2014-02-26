@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,12 +22,12 @@
 #include <boost/math/nonfinite_num_facets.hpp>
 
 #include "Monitoring/Surveys.h"
-#include "inputData.h"
 #include "Clinical/ClinicalModel.h"
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
-#include "Interventions.h"
+#include "interventions/InterventionManager.hpp"
+#include "schema/monitoring.h"
 
 #include <gzstream/gzstream.h>
 #include <fstream>
@@ -38,13 +38,11 @@ namespace OM { namespace Monitoring {
     
 SurveysType Surveys;
 
-void SurveysType::init ()
-{
+void SurveysType::init( const scnXml::Monitoring& monitoring ){
   _surveyPeriod = 0;
   _cohortOnly = false;
-  const scnXml::Monitoring& mon = InputData().getMonitoring();
   
-  const scnXml::Surveys::SurveyTimeSequence& survs = mon.getSurveys().getSurveyTime();
+  const scnXml::Surveys::SurveyTimeSequence& survs = monitoring.getSurveys().getSurveyTime();
 
   _surveysTimeIntervals.reserve (survs.size() + 1);
   TimeStep last( TimeStep::never );
@@ -64,23 +62,18 @@ void SurveysType::init ()
   _surveysTimeIntervals.push_back( TimeStep::never );
   currentTimestep = _surveysTimeIntervals[0];
 
-  Survey::init ();
+  Survey::init( monitoring );
 
   _survey.resize (_surveysTimeIntervals.size());
   for (size_t i = 0; i < _survey.size(); ++i)
     _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
   current = &_survey[0];
-}
-void SurveysType::initCohortOnly(OM::InterventionManager& interventions){
-    //TODO: re-integrate with above. Probably most of above initialization could
-    // happen later, but for now it's easier not to change order.
-  _cohortOnly = false;
-  const scnXml::Monitoring& mon = InputData().getMonitoring();
-  if( mon.getCohortOnly().present() ){
-      _cohortOnly = mon.getCohortOnly().get();
+  
+  if( monitoring.getCohortOnly().present() ){
+      _cohortOnly = monitoring.getCohortOnly().get();
   } else {
       // Trap potential bug in scenario design
-      if( interventions.isActive(Interventions::COHORT) ){
+      if( interventions::InterventionManager::cohortEnabled() ){
           throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
       }
   }

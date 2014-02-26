@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,18 +25,22 @@
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
 
-#include <list>
+#include <boost/ptr_container/ptr_list.hpp>
 #include <fstream>
 
-namespace OM
-{
+namespace scnXml{
+    class EntoData;
+    class Scenario;
+}
+namespace OM {
+    class Parameters;
 
 //! The simulated human population
 class Population
 {
 public:
     /// Call static inits of sub-models
-    static void init();
+    static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
 
     /// Calls static clear on sub-models to free memory
     static void clear();
@@ -46,7 +50,7 @@ public:
     static void staticCheckpoint (ostream& stream); ///< ditto
 
 
-    Population();
+    Population( const scnXml::EntoData& entoData, size_t populationSize );
     //! Clears human collection.
     ~Population();
 
@@ -83,25 +87,30 @@ public:
     /// Flush anything pending report. Should only be called just before destruction.
     void flushReports();
     
-    /// Type of population list
-    typedef list<Host::Human> HumanPop;
+    /// Type of population list. Store pointers to humans only to avoid copy
+    /// operations which (AFAIAA) are otherwise required in C++98.
+    typedef boost::ptr_list<Host::Human> HumanPop;
     /// Iterator type of population
-    typedef HumanPop::iterator HumanIter;
+    typedef HumanPop::iterator Iter;
     /// Const iterator type of population
-    typedef HumanPop::const_iterator ConstHumanIter;
+    typedef HumanPop::const_iterator ConstIter;
+    /// Const reverse iterator type of population
+    typedef HumanPop::const_reverse_iterator ConstReverseIter;
     
-    /** Return the list of humans. */
-    inline HumanPop& getList() {
-        return population;
-    }
-    /** Get const list */
-    inline const HumanPop& getList() const {
-        return population;
-    }
+    /** @brief Access the population list, as a whole or with iterators. */
+    //@{
+    // non-const versions are needed to do things like add infections
+    inline Iter begin() { return population.begin(); }
+    inline Iter end() { return population.end(); }
+    inline ConstIter cbegin() const{ return population.cbegin(); }
+    inline ConstIter cend() const{ return population.cend(); }
+    inline ConstReverseIter crbegin() const{ return population.crbegin(); }
+    inline ConstReverseIter crend() const{ return population.crend(); }
     /** Return the number of humans. */
-    inline int getSize() const {
+    inline size_t size() const {
         return populationSize;
     }
+    //@}
     /** Return access to the transmission model. */
     inline Transmission::TransmissionModel& transmissionModel() {
         return *_transmissionModel;
@@ -143,7 +152,7 @@ private:
 
 
     //! Size of the human population
-    int populationSize;
+    size_t populationSize;
     
     ///@brief Variables for continuous reporting
     //@{

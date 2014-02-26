@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,6 @@
  */
 
 #include "WithinHost/Infection/Infection.h"
-#include "inputData.h"
 #include "util/ModelOptions.h"
 #include "util/StreamValidator.h"
 
@@ -27,18 +26,19 @@
 
 namespace OM { namespace WithinHost {
     
-float Infection::cumulativeYstar;
-float Infection::cumulativeHstar;
+double Infection::invCumulativeYstar;
+double Infection::invCumulativeHstar;
 double Infection::alpha_m;
 double Infection::decayM;
 TimeStep Infection::latentp( TimeStep::never );
 
-void Infection::init () {
-  latentp=TimeStep(InputData().getModel().getParameters().getLatentp());
-  cumulativeYstar = (float) InputData.getParameter (Params::CUMULATIVE_Y_STAR);
-  cumulativeHstar = (float) InputData.getParameter (Params::CUMULATIVE_H_STAR);
-  alpha_m = 1.0 - exp(-InputData.getParameter (Params::NEG_LOG_ONE_MINUS_ALPHA_M));
-  decayM = InputData.getParameter (Params::DECAY_M);
+void Infection::init (const OM::Parameters& parameters, int latentP) {
+  latentp=TimeStep(latentP);
+  // calculate inverses here, so we can use multiplication later (faster):
+  invCumulativeYstar = 1.0 / parameters[Parameters::CUMULATIVE_Y_STAR];
+  invCumulativeHstar = 1.0 / parameters[Parameters::CUMULATIVE_H_STAR];
+  alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
+  decayM = parameters[Parameters::DECAY_M];
 }
 
 
@@ -55,9 +55,8 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
     dY=1.0;
     dH=1.0;
   } else {
-      //NOTE: multiplication is usually faster than division so could store inverse of the "star" parameters and multiply here:
-    dH=1.0 / (1.0 + (cumulativeh-1.0) / cumulativeHstar);
-    dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) / cumulativeYstar);
+    dH=1.0 / (1.0 + (cumulativeh-1.0) * invCumulativeHstar);
+    dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) * invCumulativeYstar);
   }
   dA = 1.0 - alpha_m * exp(-decayM * ageInYears);
   double ret = std::min(dY*dH*dA, 1.0);

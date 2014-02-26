@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,14 +22,16 @@
 #define Hmod_util_ModelOptions
 
 #include "Global.h"
+#include <bitset>
 
 class UnittestUtil;
 
+namespace scnXml{ class OptionSet; }
 namespace OM { namespace util {
     
     /** Flags signalling which versions of some models to use. */
     enum OptionCodes {
-	/** @brief Clinical episodes reduce the level of acquired immunity
+	/* @brief Clinical episodes reduce the level of acquired immunity
 	* 
 	* Effective cumulative exposure to blood stage parasites is reduced by a
 	* clinical sickness event, so that clinical bouts have a negative effect on
@@ -39,7 +41,7 @@ namespace OM { namespace util {
 	* 
 	* Default: Clinical events have no effect on immune status except
 	* secondarily via effects of treatment. */
-	PENALISATION_EPISODES = 0,
+// 	PENALISATION_EPISODES,
 	
 	/** @brief Baseline availability of humans is sampled from a gamma distribution
 	* Infections introduced by mass action with negative binomial
@@ -49,10 +51,10 @@ namespace OM { namespace util {
 	* in AJTMH 75 (suppl 2) pp11-18. */
 	NEGATIVE_BINOMIAL_MASS_ACTION,
 	
-	/** @brief An IPT model, no longer used
+	/* @brief An IPT model, no longer used
 	* 
 	* Does nothing if IPT is not present. */
-	ATTENUATION_ASEXUAL_DENSITY,
+// 	ATTENUATION_ASEXUAL_DENSITY,
 	
 	/** @brief Baseline availability of humans is sampled from a log normal distribution
 	* 
@@ -185,13 +187,8 @@ namespace OM { namespace util {
 	/** Use the IPT(i) drug model (DescriptiveIPTWithinHost and
 	 * DescriptiveIPTInfection classes) with its simple SP model.
 	 * 
-	 * NOTE: code is unmaintained in order to keep results comparable with
-	 * previous experiments run. On a 1-day timestep, we now have a better
-	 * drug model, but will need to rewrite IPT code to purely be an
-	 * intervention.
-         * 
-         * Note: previously this implied REPORT_ONLY_AT_RISK; now it does not.
-	 */
+	 * This has been removed; mass drug interventions can be used as a
+         * replacement. */
 	IPTI_SP_MODEL,
 	
 	/** Turn off reporting of several outputs for humans suffering a recent
@@ -222,6 +219,19 @@ namespace OM { namespace util {
          * Requires vector model. */
         VECTOR_SIMPLE_MPD_MODEL,
         
+        /** Sample case-specific densities P*c and P*m as a pair from one of
+         * the 35 patient records. */
+        MOLINEAUX_PAIRWISE_SAMPLE,
+        
+        /** Use a simple Vivax model instead of Falciparum.
+         * TODO: description. */
+        VIVAX_SIMPLE_MODEL,
+        
+        /** Model allowing drugs to have prophylactic effect.
+         * 
+         * Currently fairly simple and only used by MDA. */
+        PROPHYLACTIC_DRUG_ACTION_MODEL,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };
@@ -230,42 +240,31 @@ namespace OM { namespace util {
     /// Encapsulation for "modelVersion" xml attribute
     class ModelOptions {
     public:
-	/** Return true if given option (from OptionCodes) is active. */
+	/** Return true if given option (from OptionCodes) is active.
+         * 
+         * Performance note: calling this a few times (e.g. during init) is
+         * fine, but code needing a value repeatedly should cache it locally.
+         */
 	static inline bool option(OptionCodes code) {
-	    return optArray[code];
-	}
-	/** Return true if any of TRANS_HET, COMORB_TRANS_HET, TRANS_TREAT_HET or
-	 * TRIPLE_HET are active. */
-	static inline bool anyTransHet () {
-            return optArray[TRANS_HET] || optArray[COMORB_TRANS_HET] ||
-                optArray[TRANS_TREAT_HET] || optArray[TRIPLE_HET];
+	    return options.test( code );
 	}
 	
-	/// Set options from XML file.
-        /// Relies on Global::init() already having been called.
-	static void init ();
+	/** Read options from the XML element. */
+	static void init (const scnXml::OptionSet& options);
         
     private:
         // Reset opts to default. Used by unit tests.
         static inline void reset() {
-            optArray.assign(NUM_OPTIONS, false);
-            optArray[MAX_DENS_CORRECTION] = true;
+            options.reset();
+            options.set( MAX_DENS_CORRECTION );
+            options.set( INNATE_MAX_DENS );
         }
         static inline void set(OptionCodes code) {
-            optArray[code] = true;
+            options.set( code );
         }
         
-	/** Model options.
-	 *
-	 * Default value set by init().
-         *
-         * Space-wise, using an int for each bit is very inefficient. But
-         * that's irrelevant compared to the size of the program!
-         * 
-         * TODO: performance is not as good as using a uint32_t (which is now
-         * too small). Maybe use uint64_t?
-         */
-	static vector<bool> optArray;
+	// The model options
+	static std::bitset<NUM_OPTIONS> options;
 	
 	friend class ::UnittestUtil;	// Note: class is in base namespace
     };

@@ -72,7 +72,7 @@ def findFile (*names):
             return newest
 
 class ElementHandler(xml.sax.handler.ContentHandler):
-    def ElementHandler():
+    def __init__(self):
         self.schema = None
     def startElement(self, name, attributes):
         if name == "scenario":
@@ -80,6 +80,12 @@ class ElementHandler(xml.sax.handler.ContentHandler):
                 self.schema = attributes["xsi:noNamespaceSchemaLocation"]
             except KeyError:
                 raise RunError("can't find noNamespaceSchemaLocation attribute")
+        elif name == "om:scenario":
+            try:
+                locationString = attributes["xsi:schemaLocation"]
+                self.schema = locationString.split(' ')[1]
+            except KeyError:
+                raise RunError("can't find schemaLocation attribute")
 
 def getSchemaName(scenarioFile):
     parser = xml.sax.make_parser()

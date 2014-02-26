@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,26 +19,30 @@
  */
 
 #include "Transmission/VectorModel.h"
-#include "inputData.h"
+#include "Population.h"
+#include "Host/Human.h"
+#include "WithinHost/WHInterface.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
+#include "util/SpeciesIndexChecker.h"
 
 #include <fstream>
 #include <map>
 #include <cmath>
+#include <set>
 
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-double VectorModel::meanPopAvail (const std::list<Host::Human>& population, int populationSize) {
+double VectorModel::meanPopAvail (const Population& population) {
     double sumRelativeAvailability = 0.0;
-    for (std::list<Host::Human>::const_iterator h = population.begin(); h != population.end(); ++h){
+    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
         sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
     }
-    if( populationSize > 0 ){
-        return sumRelativeAvailability / populationSize;     // mean-rel-avail
+    if( population.size() > 0 ){
+        return sumRelativeAvailability / population.size();     // mean-rel-avail
     }else{
         // value should be unimportant when no humans are available, though inf/nan is not acceptable
         return 1.0;
@@ -77,69 +81,65 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
         const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
-        for (Population::ConstHumanIter iter = population.getList().begin(),
-                end = population.getList().end(); iter != end; ++iter) {
+        for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
             total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears() );
         }
-        stream << '\t' << total / population.getSize();
+        stream << '\t' << total / population.size();
     }
 }
 void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
 	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
-        for (Population::ConstHumanIter iter = population.getList().begin(),
-                end = population.getList().end(); iter != end; ++iter) {
+        for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
             total += iter->perHostTransmission.probMosqBiting( params, i );
         }
-        stream << '\t' << total / population.getSize();
+        stream << '\t' << total / population.size();
     }
 }
 void VectorModel::ctsCbP_CD (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
 	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
-        for (Population::ConstHumanIter iter = population.getList().begin(),
-                end = population.getList().end(); iter != end; ++iter) {
+        for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
             total += iter->perHostTransmission.probMosqResting( params, i );
         }
-        stream << '\t' << total / population.getSize();
+        stream << '\t' << total / population.size();
     }
 }
 void VectorModel::ctsNetInsecticideContent (const Population& population, ostream& stream){
-    double meanVar = 0.0;
-    int n = 0;
-    for (Population::ConstHumanIter iter = population.getList().begin(),
-            end = population.getList().end(); iter != end; ++iter) {
-        if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
-            ++n;
-            meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
-        }
-    }
-    stream << '\t' << meanVar/n;
+//     double meanVar = 0.0;
+//     int n = 0;
+//     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//             ++n;
+//             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
+//         }
+//     }
+//     stream << '\t' << meanVar/n;
 }
 void VectorModel::ctsIRSInsecticideContent (const Population& population, ostream& stream) {
-    double totalInsecticide = 0.0;
-    for (Population::ConstHumanIter iter = population.getList().begin(),
-            end = population.getList().end(); iter != end; ++iter) {
-        totalInsecticide += iter->perHostTransmission.getIRS().getInsecticideContent(_IRSParams);
-    }
-    stream << '\t' << totalInsecticide / population.getSize();
+    //TODO(monitoring): work out how this applies when multiple IRS effects are allowed
+//     double totalInsecticide = 0.0;
+//     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
+//         totalInsecticide += iter->perHostTransmission.getIRS().getInsecticideContent(_IRSParams);
+//     }
+//     stream << '\t' << totalInsecticide / population.size();
 }
 void VectorModel::ctsIRSEffects (const Population& population, ostream& stream) {
-    for( size_t i = 0; i < numSpecies; ++i ){
-        const IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
-        double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
-        for (Population::ConstHumanIter iter = population.getList().begin(),
-                end = population.getList().end(); iter != end; ++iter) {
-            totalRA += iter->perHostTransmission.getIRS().relativeAttractiveness(params);
-            totalPrePSF += iter->perHostTransmission.getIRS().preprandialSurvivalFactor(params);
-            totalPostPSF += iter->perHostTransmission.getIRS().postprandialSurvivalFactor(params);
-        }
-        stream << '\t' << totalRA / population.getSize()
-            << '\t' << totalPrePSF / population.getSize()
-            << '\t' << totalPostPSF / population.getSize();
-    }
+    //TODO(monitoring): work out how this applies when multiple IRS effects are allowed
+//     for( size_t i = 0; i < numSpecies; ++i ){
+//         const interventions::IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
+//         double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
+//         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
+//             totalRA += iter->perHostTransmission.getIRS().relativeAttractiveness(params);
+//             totalPrePSF += iter->perHostTransmission.getIRS().preprandialSurvivalFactor(params);
+//             totalPostPSF += iter->perHostTransmission.getIRS().postprandialSurvivalFactor(params);
+//         }
+//         stream << '\t' << totalRA / population.size()
+//             << '\t' << totalPrePSF / population.size()
+//             << '\t' << totalPostPSF / population.size();
+//     }
 }
 
 void VectorModel::ctsCbResAvailability (ostream& stream) {
@@ -159,8 +159,10 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
-VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
-    : initIterations(0), numSpecies(0)
+VectorModel::VectorModel (const scnXml::EntoData& entoData,
+                          const scnXml::Vector vectorData, int populationSize) :
+    TransmissionModel( entoData ),
+    initIterations(0), numSpecies(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.
     // TransmissionModel::createTransmissionModel checks length of list >= 1.
@@ -175,7 +177,7 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, AnophelesModel(&_ITNParams, &_IRSParams));
+    species.resize (numSpecies, AnophelesModel());
 
     for (size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
@@ -236,18 +238,18 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
     Continuous.registerCallback( "alpha", ctsAlpha.str(), MakeDelegate( this, &VectorModel::ctsCbAlpha ) );
     Continuous.registerCallback( "P_B", ctsPB.str(), MakeDelegate( this, &VectorModel::ctsCbP_B ) );
     Continuous.registerCallback( "P_C*P_D", ctsPCD.str(), MakeDelegate( this, &VectorModel::ctsCbP_CD ) );
-    Continuous.registerCallback( "mean insecticide content",
-        "\tmean insecticide content",
-        MakeDelegate( this, &VectorModel::ctsNetInsecticideContent ) );
+//     Continuous.registerCallback( "mean insecticide content",
+//         "\tmean insecticide content",
+//         MakeDelegate( this, &VectorModel::ctsNetInsecticideContent ) );
     // Mean IRS insecticide across whole population
-    Continuous.registerCallback( "IRS insecticide content",
-        "\tIRS insecticide content",
-        MakeDelegate( this, &VectorModel::ctsIRSInsecticideContent ) );
+//     Continuous.registerCallback( "IRS insecticide content",
+//         "\tIRS insecticide content",
+//         MakeDelegate( this, &VectorModel::ctsIRSInsecticideContent ) );
     // Mean values of relative attractiveness, pre- and post-prandial survival
     // IRS-induced factors of mosquitoes (i.e. only the portion of deterrent
     // and killing effects attributable to IRS).
-    Continuous.registerCallback( "IRS effects", ctsIRSEffects.str(),
-        MakeDelegate( this, &VectorModel::ctsIRSEffects ) );
+//     Continuous.registerCallback( "IRS effects", ctsIRSEffects.str(),
+//         MakeDelegate( this, &VectorModel::ctsIRSEffects ) );
     Continuous.registerCallback( "resource availability", ctsRA.str(),
         MakeDelegate( this, &VectorModel::ctsCbResAvailability ) );
     Continuous.registerCallback( "resource requirements", ctsRR.str(),
@@ -256,26 +258,21 @@ VectorModel::VectorModel (const scnXml::Vector vectorData, int populationSize)
 VectorModel::~VectorModel () {
 }
 
-void VectorModel::init2 (const std::list<Host::Human>& population, int populationSize) {
-    double mPA = meanPopAvail(population, populationSize);
+void VectorModel::init2 (const Population& population) {
+    double mPA = meanPopAvail(population);
     for (size_t i = 0; i < numSpecies; ++i) {
-        species[i].init2 (i, population, populationSize, mPA);
+        species[i].init2 (i, population, mPA);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
-void VectorModel::initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance ) {
-    typedef scnXml::VectorPopIntervention::DescriptionType::AnophelesSequence AS;
-    const AS& as = elt.getAnopheles();
-    if( as.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "vectorPop.description: must have one element for each "
-            "mosquito species described in entomology"
-        );
+void VectorModel::initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name ) {
+    SpeciesIndexChecker checker( name, speciesIndex );
+    for( scnXml::VectorIntervention::DescriptionType::AnophelesConstIterator it = list.begin(); it != list.end(); ++it ){
+        const string& name = it->getMosquito();
+        species[checker.getIndex(name)].initVectorInterv ( *it, instance );
     }
-    for( AS::const_iterator it = as.begin(); it != as.end(); ++it ){
-        species[getSpeciesIndex(it->getMosquito())].initVectorPopInterv ( *it, instance );
-    }
+    checker.checkNoneMissed();
 }
 
 
@@ -355,7 +352,7 @@ TimeStep VectorModel::initIterate () {
 }
 
 double VectorModel::calculateEIR(PerHost& host, double ageYears) {
-    host.update(_ITNParams);
+    host.update();
     if (simulationMode == forcedEIR){
         return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
                * host.relativeAvailabilityHetAge (ageYears);
@@ -372,12 +369,19 @@ double VectorModel::calculateEIR(PerHost& host, double ageYears) {
 
 
 // Every Global::interval days:
-void VectorModel::vectorUpdate (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::vectorUpdate (const Population& population) {
+    vector<double> popProbTransmission;
+    popProbTransmission.reserve( population.size() );
+    for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h ){
+        popProbTransmission.push_back( h->withinHostModel->probTransmissionToMosquito(
+            h->getAgeInTimeSteps(),
+            h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
+    }
     for (size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, populationSize, i, simulationMode == dynamicEIR);
+        species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);
     }
 }
-void VectorModel::update (const std::list<Host::Human>& population, int populationSize) {
+void VectorModel::update( const Population& population ) {
     TransmissionModel::updateKappa( population );
 }
 
@@ -388,68 +392,9 @@ void VectorModel::checkSimMode() const{
     }
 }
 
-void VectorModel::setITNDescription (const scnXml::ITNDescription& elt){
-    checkSimMode();
-    double proportionUse = _ITNParams.init( elt );
-    typedef scnXml::ITNDescription::AnophelesParamsSequence AP;
-    const AP& ap = elt.getAnophelesParams();
-    if( ap.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "ITN.description.anophelesParams: must have one element for each "
-            "mosquito species described in entomology"
-        );
-    }
-    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ){
-        species[getSpeciesIndex(it->getMosquito())].setITNDescription (_ITNParams, *it, proportionUse);
-    }
-}
-void VectorModel::setIRSDescription (const scnXml::IRS& elt){
-    checkSimMode();
-    if( elt.getDescription().present() ){
-        _IRSParams.init( elt.getDescription().get() );
-        
-        typedef scnXml::IRSDescription_v1::AnophelesParamsSequence AP;
-        const AP& ap = elt.getDescription().get().getAnophelesParams();
-        if( ap.size() != numSpecies ){
-            throw util::xml_scenario_error(
-                "IRS.simpleDescription.anophelesParams: must have one element "
-                "for each mosquito species described in entomology"
-            );
-        }
-        for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-            species[getSpeciesIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
-        }
-    }else{
-        assert( elt.getDescription_v2().present() );   // choice: one or the other
-        _IRSParams.init( elt.getDescription_v2().get() );
-        
-        typedef scnXml::IRSDescription_v2::AnophelesParamsSequence AP;
-        const AP& ap = elt.getDescription_v2().get().getAnophelesParams();
-        if( ap.size() != numSpecies ){
-            throw util::xml_scenario_error(
-                "IRS.description.anophelesParams: must have one element for "
-                "each mosquito species described in entomology"
-            );
-        }
-        for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-            species[getSpeciesIndex(it->getMosquito())].setIRSDescription (_IRSParams, *it);
-        }
-    }
-}
-void VectorModel::setVADescription (const scnXml::VectorDeterrent& elt){
-    checkSimMode();
-    PerHost::setVADescription (elt);
-    typedef scnXml::VectorDeterrent::AnophelesParamsSequence AP;
-    const AP& ap = elt.getAnophelesParams();
-    if( ap.size() != numSpecies ){
-        throw util::xml_scenario_error(
-            "vectorDeterrent.anophelesParams: must have one element for each "
-            "mosquito species described in entomology"
-        );
-    }
-    for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[getSpeciesIndex(it->getMosquito())].setVADescription (*it);
-    }
+const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
+    checkSimMode();     //TODO: can probably eventually inline
+    return speciesIndex;
 }
 
 void VectorModel::deployVectorPopInterv (size_t instance) {
@@ -475,7 +420,7 @@ void VectorModel::summarize (Monitoring::Survey& survey) {
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
-    util::checkpoint::checkpoint (species, stream, AnophelesModel (&_ITNParams, &_IRSParams));
+    species & stream;
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);

@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -25,9 +25,9 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "Host/NeonatalMortality.h"
 
-#include "inputData.h"
 #include "Monitoring/Surveys.h"
 #include "util/ModelOptions.h"
+#include <schema/scenario.h>
 
 namespace OM { namespace Clinical {
 
@@ -35,27 +35,28 @@ vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;
 double ClinicalModel::_nonMalariaMortality;
 
+bool opt_event_scheduler = false;
 
 // -----  static methods  -----
 
-void ClinicalModel::init () {
-  infantDeaths.resize(TimeStep::stepsPerYear);
-  infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
-  _nonMalariaMortality=InputData.getParameter(Params::NON_MALARIA_INFANT_MORTALITY);
-  
-  Pathogenesis::PathogenesisModel::init();
-  Episode::init();
-  if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-    ClinicalEventScheduler::init();
-  else
-    ClinicalImmediateOutcomes::initParameters();
-  CaseManagementCommon::initCommon();
+void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem ) {
+    infantDeaths.resize(TimeStep::stepsPerYear);
+    infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
+    _nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
+    
+    Episode::init( model.getClinical().getHealthSystemMemory() );
+    if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
+        opt_event_scheduler = true;
+        ClinicalEventScheduler::init( parameters, model );
+    }else{
+        ClinicalImmediateOutcomes::initParameters();
+    }
+    CaseManagementCommon::initCommon( parameters, healthSystem );
 }
 void ClinicalModel::cleanup () {
-  CaseManagementCommon::cleanupCommon();
-    if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-	ClinicalEventScheduler::cleanup();
-    Pathogenesis::PathogenesisModel::cleanup ();
+    CaseManagementCommon::cleanupCommon();
+    if (opt_event_scheduler)
+        ClinicalEventScheduler::cleanup();
 }
 
 void ClinicalModel::staticCheckpoint (istream& stream) {
@@ -67,11 +68,11 @@ void ClinicalModel::staticCheckpoint (ostream& stream) {
     infantIntervalsAtRisk & stream;
 }
 
-ClinicalModel* ClinicalModel::createClinicalModel (double cF, double tSF) {
-  if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER))
-    return new ClinicalEventScheduler (cF, tSF);
+ClinicalModel* ClinicalModel::createClinicalModel (double tSF) {
+  if (opt_event_scheduler)
+    return new ClinicalEventScheduler (tSF);
   else
-    return new ClinicalImmediateOutcomes (cF, tSF);
+    return new ClinicalImmediateOutcomes (tSF);
 }
 
 
@@ -96,8 +97,7 @@ double ClinicalModel::infantAllCauseMort(){
 
 // -----  non-static construction, destruction and checkpointing  -----
 
-ClinicalModel::ClinicalModel (double cF) :
-    pathogenesisModel(Pathogenesis::PathogenesisModel::createPathogenesisModel(cF)),
+ClinicalModel::ClinicalModel () :
     _doomed(0)
 {}
 ClinicalModel::~ClinicalModel () {
@@ -121,14 +121,14 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
   
   //indirect death: if this human's about to die, don't worry about further episodes:
   if (_doomed <= -35) {	//clinical bout 6 intervals before
-     Monitoring::Surveys.getSurvey(human.getInCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
+     Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
     _doomed = DOOMED_INDIRECT;
     return;
   }
   if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
     // Chance of neonatal mortality:
     if (Host::NeonatalMortality::eventNeonatalMortality()) {
-      Monitoring::Surveys.getSurvey(human.getInCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
+      Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
       _doomed = DOOMED_NEONATAL;
       return;
     }
@@ -149,18 +149,12 @@ void ClinicalModel::updateInfantDeaths (TimeStep ageTimeSteps) {
   }
 }
 
-void ClinicalModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
-  pathogenesisModel->summarize (survey, ageGroup);
-}
-
 
 void ClinicalModel::checkpoint (istream& stream) {
-    (*pathogenesisModel) & stream;
     latestReport & stream;
     _doomed & stream;
 }
 void ClinicalModel::checkpoint (ostream& stream) {
-    (*pathogenesisModel) & stream;
     latestReport & stream;
     _doomed & stream;
 }

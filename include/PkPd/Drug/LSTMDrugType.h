@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -77,7 +77,7 @@ class LSTMDrugAllele {
     /// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
     double IC50_pow_slope;
     /// Maximal drug killing rate per day
-    double max_killing_rate;    //TODO: keep this and power?
+    double max_killing_rate;
     
 public:
     LSTMDrugAllele( const scnXml::Allele& allele, double elimination_rate_constant );

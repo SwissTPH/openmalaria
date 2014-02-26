@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,7 +26,9 @@
 #include <assert.h>
 
 namespace OM {
+namespace interventions {
     class InterventionManager;
+}
 namespace Monitoring {
     
 /** Class to collect surveys and write them out.
@@ -71,8 +73,7 @@ class SurveysType
     }
 
     /** Read in some params from XML and allocate memory. */
-    void init ();
-    void initCohortOnly(OM::InterventionManager& interventions);
+    void init (const scnXml::Monitoring& monitoring);
     
     //! It increments the survey period
     void incrementSurveyPeriod();

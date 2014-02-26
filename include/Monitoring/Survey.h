@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 #include <bitset>
 #include <map>
 
+namespace scnXml{ class Monitoring; }
 namespace OM { namespace Monitoring {
 
 /** Included for type-saftey: don't allow implicit double->int conversions.
@@ -64,7 +65,7 @@ class AgeGroup {
     size_t _i;
     
     /// Initialize _lowerbound and _upperbound
-    static void init ();
+    static void init (const scnXml::Monitoring& monitoring);
     
     //BEGIN Static parameters only set by init()
     /// Lower boundary of the youngest agegroup
@@ -85,7 +86,7 @@ class Survey {
   //@{
   private:
     /// Initialize static parameters.
-    static void init();
+    static void init(const scnXml::Monitoring& monitoring);
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
@@ -212,9 +213,9 @@ public:
 	_numMassIRS[ageGroup.i()] += val;
 	return *this;
     }
-    Survey& reportMassVA (AgeGroup ageGroup, int val) {
-	_numMassVA[ageGroup.i()] += val;
-	return *this;
+    Survey& reportMassGVI (AgeGroup ageGroup, int val) {
+        _numMassGVI[ageGroup.i()] += val;
+        return *this;
     }
     Survey& reportAddedToCohort (AgeGroup ageGroup, int val) {
         _numAddedToCohort[ageGroup.i()] += val;
@@ -338,7 +339,7 @@ public:
     _numMassITNs & stream;
     _numEPI_ITNs & stream;
     _numMassIRS & stream;
-    _numMassVA & stream;
+    _numMassGVI & stream;
     _numClinical_Microscopy & stream;
     _numAddedToCohort & stream;
     _numRemovedFromCohort & stream;
@@ -393,7 +394,7 @@ private:
   vector<int> _numMassITNs;
   vector<int> _numEPI_ITNs;
   vector<int> _numMassIRS;
-  vector<int> _numMassVA;
+  vector<int> _numMassGVI;
   vector<int> _numAddedToCohort;
   vector<int> _numRemovedFromCohort;
   vector<int> _numMDAs;

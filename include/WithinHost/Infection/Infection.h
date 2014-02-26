@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,6 +22,7 @@
 #define Hmod_Infection
 
 #include "Global.h"
+#include "Parameters.h"
 
 class UnittestUtil;
 
@@ -29,7 +30,7 @@ namespace OM { namespace WithinHost {
     
 class Infection {
 public:
-  static void init();
+  static void init( const OM::Parameters& parameters, int latentP );
   
   Infection (uint32_t protID) :
     _startdate(TimeStep::simulation),
@@ -64,8 +65,8 @@ public:
   double immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY);
   
   /// Resets immunity properties specific to the infection (should only be
-  /// called along with immuneSuppression() on within-host model).
-  inline void immuneSuppression(){
+  /// called along with clearImmunity() on within-host model).
+  inline void clearImmunity(){
       _cumulativeExposureJ = 0.0;
   }
   
@@ -96,8 +97,8 @@ public:
   /// pre-erythrocytic latent period, in time steps
   static TimeStep latentp;
   
-  static float cumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
-  static float cumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
+  static double invCumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
+  static double invCumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
   
 private:
   static double alpha_m; //!< Maternal protection at birth

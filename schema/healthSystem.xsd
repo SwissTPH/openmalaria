@@ -3,7 +3,9 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- HealthSystem & Clinical data -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
+           xmlns:om="http://openmalaria.org/schema/scenario_32"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="clinical">
     <xs:annotation>
@@ -24,7 +26,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Non-malaria fevers;</xs:appinfo>
           </xs:annotation>
           <xs:sequence>
-            <xs:element name="incidence" type="AgeGroupValues">
+            <xs:element name="incidence" type="om:AgeGroupValues">
               <xs:annotation>
                 <xs:documentation>
                   Probability that a non-malaria fever occurs given that no concurrent
@@ -33,7 +35,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:P(NMF); type:double;units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="prNeedTreatmentNMF" type="AgeGroupValues">
+            <xs:element name="prNeedTreatmentNMF" type="om:AgeGroupValues">
               <xs:annotation>
                 <xs:documentation>
                   Probability that a non-malarial fever requires treatment with
@@ -43,7 +45,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:P(need treatment | NMF);type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="prNeedTreatmentMF" type="AgeGroupValues">
+            <xs:element name="prNeedTreatmentMF" type="om:AgeGroupValues">
               <xs:annotation>
                 <xs:documentation>
                   Probability that a malaria fever needs treatment with
@@ -85,10 +87,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:annotation>
     <xs:sequence>
       <xs:choice>
-        <xs:element name="EventScheduler" type="HSEventScheduler" />
-        <xs:element name="ImmediateOutcomes" type="HSImmediateOutcomes" />
+        <xs:element name="EventScheduler" type="om:HSEventScheduler" />
+        <xs:element name="ImmediateOutcomes" type="om:HSImmediateOutcomes" />
       </xs:choice>
-      <xs:element name="CFR" type="AgeGroupValues">
+      <xs:element name="CFR" type="om:AgeGroupValues">
         <xs:annotation>
           <xs:documentation>
             Case fatality rate (probability of an inpatient fatality from a
@@ -97,7 +99,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>type: list of elements;name:Case fatality rate for inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSequelaeInpatient" type="AgeGroupValues">
+      <xs:element name="pSequelaeInpatient" type="om:AgeGroupValues">
         <xs:annotation>
           <xs:documentation>
             List of age-specific probabilities of sequelae in inpatients,
@@ -153,7 +155,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="initialACR" type="treatmentDetails">
+      <xs:element name="initialACR" type="om:treatmentDetails">
         <xs:annotation>
           <xs:documentation>
             Initial cure rate
@@ -162,7 +164,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             type:double;units:Dimensionless;min:0.0;max:1.0;name:Initial cure rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="compliance" type="treatmentDetails">
+      <xs:element name="compliance" type="om:treatmentDetails">
         <xs:annotation>
           <xs:documentation>
             Adherence to treatment
@@ -170,7 +172,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>type:double;units:Dimensionless;min:0.0;max:1.0;name:Adherence to treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="nonCompliersEffective" type="treatmentDetails">
+      <xs:element name="nonCompliersEffective" type="om:treatmentDetails">
         <xs:annotation>
           <xs:documentation>
             Effectiveness of treatment for non-compliant patients
@@ -179,7 +181,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             type:double;units:Dimensionless;min:0.0;max:1.0;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareUncomplicated1" type="inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with newly incident
@@ -190,7 +192,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSelfTreatUncomplicated" type="inputValue">
+      <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with uncomplicated
@@ -201,7 +203,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareUncomplicated2" type="inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated2" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with recurrence of
@@ -212,7 +214,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareSevere" type="inputValue">
+      <xs:element name="pSeekOfficialCareSevere" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with severe disease
@@ -235,13 +237,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="treatmentDetails">
     <xs:sequence>
-      <xs:element maxOccurs="1" minOccurs="0" name="CQ" type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="CQ" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>Chloroquine</xs:documentation>
           <xs:appinfo>type:list of elements;name:Chloroquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="SP" type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="SP" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Sulphadoxine-pyrimethamine
@@ -249,13 +251,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>type:list of elements;name:Sulphadoxine-pyrimethamine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="AQ" type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="AQ" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>Amodiaquine</xs:documentation>
           <xs:appinfo>type:list of elements;name:Amodiaquine</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="SPAQ" type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="SPAQ" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Sulphadoxine-pyrimethamine/Amodiaquine
@@ -263,7 +265,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>type:list of elements;name:Sulphadoxine-pyrimethamine/Amodiaquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="ACT" type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="ACT" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Artemisinine combination therapy
@@ -271,13 +273,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>type: list of elements; name: Artemisinine combination therapy</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="QN" type="inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="QN" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>Quinine</xs:documentation>
           <xs:appinfo>type:list of elements name:Quinine ;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="selfTreatment" type="inputValue">
+      <xs:element name="selfTreatment" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
             Probability of self-treatment
@@ -291,10 +293,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="HSEventScheduler">
     <xs:sequence>
-      <xs:element name="uncomplicated"    type="HSESCaseManagement"   />
-      <xs:element name="complicated"      type="HSESCaseManagement"   />
-      <xs:element name="ClinicalOutcomes" type="ClinicalOutcomes"     />
-      <xs:element name="NonMalariaFevers" type="HSESNMF" minOccurs="0"/>
+      <xs:element name="uncomplicated"    type="om:HSESCaseManagement"   />
+      <xs:element name="complicated"      type="om:HSESCaseManagement"   />
+      <xs:element name="ClinicalOutcomes" type="om:ClinicalOutcomes"     />
+      <xs:element name="NonMalariaFevers" type="om:HSESNMF" minOccurs="0"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSESCaseManagement">
@@ -305,8 +307,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>type:list of elements;name:Set of decisions;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="decisions"  type="HSESDecisions"   />
-      <xs:element name="treatments" type="HSESTreatments"  />
+      <xs:element name="decisions"  type="om:HSESDecisions"   />
+      <xs:element name="treatments" type="om:HSESTreatments"  />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSESDecisions">
@@ -338,7 +340,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Description of decisions;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="decision" type="HSESDecision" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="decision" type="om:HSESDecision" minOccurs="0" maxOccurs="unbounded" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSESDecision">
@@ -422,7 +424,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>type:string;name:List of treatment tables;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="treatment" type="HSESTreatment" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="treatment" type="om:HSESTreatment" minOccurs="0" maxOccurs="unbounded" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HSESTreatment">
@@ -434,8 +436,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>type:list of elements;name:Description of a base treatment schedule;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="schedule" type="HSESTreatmentSchedule" />
-      <xs:element name="modifier" type="HSESTreatmentModifier" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="schedule" type="om:HSESTreatmentSchedule" />
+      <xs:element name="modifier" type="om:HSESTreatmentModifier" minOccurs="0" maxOccurs="unbounded" />
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -454,7 +456,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>type:list of elements;name:Base schedule of drugs for this treatment;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="medicate" type="medicate" minOccurs="0" maxOccurs="unbounded" />
+      <xs:element name="medicate" type="om:medicate" minOccurs="0" maxOccurs="unbounded" />
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="medicate">
@@ -504,7 +506,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>units:Choice of elements;name:Treatment modifier;</xs:appinfo>
     </xs:annotation>
     <xs:choice>
-      <xs:element name="multiplyQty" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="multiplyQty" type="om:HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>
             Multiplies the quantity of active ingredients of drugs administered.
@@ -518,7 +520,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Comma-separated list of values;name:Active ingredient multipliers;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="delay" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="delay" type="om:HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>
             Delays administration of drugs listed in the base schedule by so many hours.
@@ -532,7 +534,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Comma-separated list of values;name:Active ingredient delays;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="selectTimeRange" type="HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="selectTimeRange" type="om:HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>
             Selects which drug doses to administer according to time of administration (before times
@@ -728,7 +730,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>type:double;name:Effect of informal provider;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="CFR" type="AgeGroupValues">
+      <xs:element name="CFR" type="om:AgeGroupValues">
         <xs:annotation>
           <xs:documentation>
             Base case fatality rate for non-malaria fevers (probability of
@@ -764,15 +766,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:complexContent>
-            <xs:extension base="inputValue">
-          <xs:attribute name="lowerbound" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Lower bound of age group
-              </xs:documentation>
-              <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
+            <xs:extension base="om:inputValue">
+              <xs:attribute name="lowerbound" type="xs:double" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Lower bound of age group
+                  </xs:documentation>
+                  <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
+                </xs:annotation>
+            </xs:attribute>
             </xs:extension>
           </xs:complexContent>
         </xs:complexType>
@@ -886,5 +888,86 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:element>
       </xs:choice>
     </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="DrugWithCompliance">
+    <xs:annotation>
+      <xs:documentation>
+        A simple description of the effect of a drug regime administration in
+        terms of clearance rates on administration and optionally for several
+        further timesteps (a simple model for prophylactic effects).
+      </xs:documentation>
+      <xs:appinfo>name:Drug regime effect</xs:appinfo>
+    </xs:annotation>
+    <xs:all>
+      <xs:element name="compliance">
+        <xs:annotation>
+          <xs:appinfo>name:Description of compliance;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="pCompliance" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Proportion of drug recipients who comply with the dosage regime.
+              </xs:documentation>
+              <xs:appinfo>name:Compliance;units:Dimensionless;min:0;max:1;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="nonCompliersMultiplier" type="xs:double" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Describes clearance probabilities for non-compliers in relation
+                to those for compliers: each probability of clearing infections
+                is multiplied by this value.
+              </xs:documentation>
+              <xs:appinfo>name:Clearance probability multiplier for non-compliers;units:Dimensionless;min:0;max:1;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="compliersEffective">
+        <xs:annotation>
+          <xs:documentation>
+            Description of clearance effects among compliant hosts
+          </xs:documentation>
+          <xs:appinfo>name:Clearance rates for compliant hosts;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="timestep" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  At least one instance of this element is required. The first
+                  element describes the probability of clearing infections on
+                  the timestep of deployment, the next the probability on the
+                  following timestep, and so on. There is no limit to how many
+                  timestep's effects and thus how long the prophylactic effect
+                  can be.
+                </xs:documentation>
+                <xs:appinfo>name:Per timestep effect;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="pClearance" use="required" type="xs:double">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The probability of clearing all infections on this timestep.
+                      The effect is, based on this probability, either to clear all
+                      current infections, or to do nothing. (This is more appropriate
+                      to modelling adherence/dosing problems than resistance. Model
+                      extensions to deal with resistance better may be desirable in
+                      the future.)
+                      
+                      Does not allow for entering adherence rates, so give the derived
+                      clearance rate (i.e. clearance_with_adherence * adherence_rate +
+                      clearance_bad_adherence * (1 - adherence_rate)).
+                    </xs:documentation>
+                    <xs:appinfo>name:Probability of clearance;type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:all>
   </xs:complexType>
 </xs:schema>

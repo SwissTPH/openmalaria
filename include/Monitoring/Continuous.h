@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,13 +22,15 @@
 #define Hmod_Output_Continuous
 
 #include "Global.h"
-#include "Population.h"
 #include <FastDelegate.h>
 #include <string>
 
 using fastdelegate::MakeDelegate;
 
-namespace OM { namespace Monitoring {
+namespace scnXml{ class Monitoring; }
+namespace OM {
+    class Population;
+namespace Monitoring {
     
     /** Class to deal with continuous output data.
      *
@@ -46,7 +48,7 @@ namespace OM { namespace Monitoring {
 	 * assume we shouldn't overwrite existing files for security reasons).
 	 * 
 	 * Callbacks should be registered before init() is called. */
-	void init (bool isCheckpoint);
+	void init (const scnXml::Monitoring& monitoring, bool isCheckpoint);
         
         /** When compiled in BOINC mode, this copies data to the final
          * compressing output file. Otherwise it does nothing. */

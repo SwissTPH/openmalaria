@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,6 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "Clinical/ImmediateOutcomes.h"
 #include "Clinical/ESCaseManagement.h"
-#include "inputData.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include <limits>
@@ -36,18 +35,18 @@ namespace OM { namespace Clinical {
     
     // -----  functions  -----
     
-    void CaseManagementCommon::initCommon (){
-	_oddsRatioThreshold = exp (InputData.getParameter (Params::LOG_ODDS_RATIO_CF_COMMUNITY));
+    void CaseManagementCommon::initCommon( const OM::Parameters& parameters, const scnXml::HealthSystem& healthSystem ){
+	_oddsRatioThreshold = exp (parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY]);
 	
-	changeHealthSystem(InputData().getHealthSystem());
+	changeHealthSystem( healthSystem );
     }
     void CaseManagementCommon::cleanupCommon (){
         AgeGroupInterpolation::freeObject( caseFatalityRate );
         AgeGroupInterpolation::freeObject( pSeqInpatient );
     }
     
-    void CaseManagementCommon::changeHealthSystem (const scnXml::HealthSystem& healthSystem) {
-	readCommon (healthSystem);
+    void CaseManagementCommon::changeHealthSystem( const scnXml::HealthSystem& healthSystem ){
+	readCommon( healthSystem );
 	
 	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
 	    ESCaseManagement::setHealthSystem(healthSystem);

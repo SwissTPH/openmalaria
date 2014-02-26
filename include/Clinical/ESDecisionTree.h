@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,24 +22,28 @@
 #define Hmod_ESDecisionTree
 
 #include "Global.h"
+#include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ESDecisionValue.h"
-#include "Pathogenesis/State.h"
-#include "WithinHost/WithinHostModel.h"
-#include "inputData.h"
+#include <schema/healthSystem.h>
 
 #include <map>
 #include <boost/unordered_map.hpp>
 
-namespace OM { namespace Clinical {
-    using WithinHost::WithinHostModel;
+namespace OM {
+namespace WithinHost {
+    class WHInterface;
+}
+namespace Clinical {
+    using WithinHost::WHInterface;
+#define WHPathogenesis WithinHost::Pathogenesis
     using boost::unordered_map;
 
 struct ESHostData {
-    ESHostData (double aY, WithinHostModel& wH, Pathogenesis::State pS) :
+    ESHostData (double aY, WHInterface& wH, WHPathogenesis::State pS) :
         ageYears(aY), withinHost(wH), pgState(pS) {}
     double ageYears;
-    WithinHostModel& withinHost;
-    Pathogenesis::State pgState;
+    WHInterface& withinHost;
+    WHPathogenesis::State pgState;
 };
 
 
@@ -99,7 +103,6 @@ class ESDecisionValueBase : public ESDecisionTree {
         // value (or 0) from each dependency) to a list of cumulative probabilities.
         // Indecies in this list map to the same index in values; last entry must be 1.0.
         // (Representation is primarily designed for random decisions.)
-        //NOTE: be interesting to compare performance between boost::unordered_map and std::map
         typedef unordered_map<ESDecisionValue,vector<double> > map_cum_p_t;
         map_cum_p_t map_cum_p;
         

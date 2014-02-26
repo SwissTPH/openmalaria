@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -22,7 +22,6 @@
 #include "Clinical/ESDecisionTree.h"
 #include "Clinical/EventScheduler.h"
 #include "Clinical/parser.h"
-#include "inputData.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 
@@ -347,11 +346,17 @@ inline ESDecisionValue treatmentGetValue (const ESDecisionValueMap::value_map_t&
 	throw xml_scenario_error((format("Treatment description given for treatment %1% which isn't an output of \"treatment\" decision") %value).str());
     return it->second;
 }
-void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeType treeType) {
-    // This function is also used to load a new health-system from intervention data; therefore clear old data:
-    dvMap.clear();
-    decisions.clear();
-    treatments.clear();
+void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeType treeType, bool reinitialise) {
+    if( reinitialise ){
+        // This function is also used to load a new health-system from intervention data; therefore clear old data:
+        dvMap.clear();
+        decisions.clear();
+        treatments.clear();
+    }else{
+        if( !dvMap.empty() || !decisions.empty() || !treatments.empty() )
+            // multiple MDA descriptions are probably the only thing that will cause this...
+            throw util::unimplemented_exception( "multiple MDA descriptions using 1-day TS decision tree" );
+    }
     
     // Construct processor & read from XML.
     // Fills dvMap (which must be done before evaluating treatments).
@@ -441,12 +446,12 @@ ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
 ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
 ESDecisionMap ESCaseManagement::mda;
 
-void ESCaseManagement::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
+void ESCaseManagement::setHealthSystem( const scnXml::HealthSystem& healthSystem) {
     if( !healthSystem.getEventScheduler().present() )
 	throw util::xml_scenario_error ("Expected EventScheduler section in healthSystem data (initial or intervention)");
     const scnXml::HSEventScheduler& esData = healthSystem.getEventScheduler().get();
-    uncomplicated.initialize (esData.getUncomplicated (), ESDecisionMap::Uncomplicated);
-    complicated.initialize (esData.getComplicated (), ESDecisionMap::Complicated);
+    uncomplicated.initialize (esData.getUncomplicated (), ESDecisionMap::Uncomplicated, true);
+    complicated.initialize (esData.getComplicated (), ESDecisionMap::Complicated, true);
     
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
@@ -473,8 +478,8 @@ pair<ESDecisionValue, bool> executeTree(
     return make_pair( outcome, schedule.anyTreatments() );
 }
 
-void ESCaseManagement::initMDA (const scnXml::MDA::DescriptionType& desc){
-    mda.initialize( desc, ESDecisionMap::MDA );
+void ESCaseManagement::initMDA (const scnXml::MDA1D& desc){
+    mda.initialize( desc, ESDecisionMap::MDA, false );
 }
 
 void ESCaseManagement::massDrugAdministration(
@@ -495,16 +500,16 @@ CMAuxOutput ESCaseManagement::execute (
         list<MedicateData>& medicateQueue,
         bool inCohort
 ) {
-    assert (hostData.pgState & Pathogenesis::SICK);
+    assert (hostData.pgState & WHPathogenesis::SICK);
     // We always remove any queued medications.
     medicateQueue.clear();
     
-    ESDecisionMap *map = (hostData.pgState & Pathogenesis::COMPLICATED) ? &complicated : &uncomplicated;
+    ESDecisionMap *map = (hostData.pgState & WHPathogenesis::COMPLICATED) ? &complicated : &uncomplicated;
     ESDecisionValue outcome = executeTree( map, hostData, medicateQueue, inCohort ).first;
     
     CMAuxOutput auxOut;
     auxOut.hospitalisation = CMAuxOutput::NONE;
-    if( hostData.pgState & Pathogenesis::COMPLICATED )
+    if( hostData.pgState & WHPathogenesis::COMPLICATED )
 	auxOut.hospitalisation = map->hospitalisation(outcome);
     auxOut.diagnostic = map->diagnostic(outcome);
     auxOut.AB_provider = map->AB_provider(outcome);

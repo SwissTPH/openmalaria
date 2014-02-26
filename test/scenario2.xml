@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" name="Navrongo IPTi treated" schemaVersion="31" wuID="53630539" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="801" name="Navrongo IPTi treated" schemaVersion="32" wuID="53630539" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="4" name="Navrongo" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="2.941827" upperbound="1"/>
@@ -67,18 +67,23 @@
     </ageGroup>
   </monitoring>
   <interventions name="Navrongo IPTi treated">
-    <IPT>
-      <description iptiEffect="12">
-        <infGenotype ACR="1.0" atten="1" freq="0.6" name="wt" proph="10" tolPeriod="4"/>
-        <infGenotype ACR="1.0" atten="1" freq="0.2" name="108" proph="2" tolPeriod="4"/>
-        <infGenotype ACR="0.5" atten="1" freq="0.2" name="triples" proph="0" tolPeriod="4"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.955" targetAgeYrs="0.25"/>
-        <deploy coverage="0.901" targetAgeYrs="0.75"/>
-        <deploy coverage="0.919" targetAgeYrs="1.25"/>
-      </continuous>
-    </IPT>
+    <human>
+      <effect id="IPT">
+        <IPT iptiEffect="12">
+          <infGenotype ACR="1.0" atten="1" freq="0.6" name="wt" proph="10" tolPeriod="4"/>
+          <infGenotype ACR="1.0" atten="1" freq="0.2" name="108" proph="2" tolPeriod="4"/>
+          <infGenotype ACR="0.5" atten="1" freq="0.2" name="triples" proph="0" tolPeriod="4"/>
+        </IPT>
+      </effect>
+      <intervention>
+        <effect id="IPT"/>
+        <continuous>
+          <deploy coverage="0.955" targetAgeYrs="0.25"/>
+          <deploy coverage="0.901" targetAgeYrs="0.75"/>
+          <deploy coverage="0.919" targetAgeYrs="1.25"/>
+        </continuous>
+      </intervention>
+    </human>
   </interventions>
   <!--data are scaled to give annual total of 418 inf bites (corresponds to Appawu et al,)-->
   <healthSystem>
@@ -562,4 +567,4 @@
       <parameter include="1" name="critical age for comorbidity" number="30" value="0.115906"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

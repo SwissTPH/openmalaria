@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,7 +21,7 @@
 #ifndef Hmod_WithinHost_Descriptive
 #define Hmod_WithinHost_Descriptive
 
-#include "WithinHost/WithinHostModel.h"
+#include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/DescriptiveInfection.h"
 
 using namespace std;
@@ -33,7 +33,7 @@ namespace OM { namespace WithinHost {
  * Note: this implementation has a few bugs with (hopefully) small effect
  * conditionally fixed (see MAX_DENS_CORRECTION and
  * INNATE_MAX_DENS). Thus results can be preserved. */
-class DescriptiveWithinHostModel : public WithinHostModel {
+class DescriptiveWithinHostModel : public WHFalciparum {
 public:
   /// Create a new WHM
   DescriptiveWithinHostModel();
@@ -42,21 +42,21 @@ public:
   virtual void importInfection();
   /// load an infection from a checkpoint
   virtual void loadInfection(istream& stream);
-  virtual void clearAllInfections();
-  virtual void immuneSuppression();
+  virtual void effectiveTreatment();
+  virtual void clearImmunity();
   
-  virtual void update(int nNewInfs, double ageInYears, double BSVEfficacy);
+  virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
+  
+  virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
   
 protected:
   virtual DescriptiveInfection* createInfection ();
-  virtual int countInfections (int& patentInfections);
+  virtual InfectionCount countInfections () const;
   
-  ///@brief IPT extensions − empty otherwise
-  //@{
+  /// IPT extension
   virtual bool eventSPClears (DescriptiveInfection* inf) { return false; }
-  virtual void IPTattenuateAsexualMinTotalDensity () {}
-  virtual void IPTattenuateAsexualDensity (DescriptiveInfection* inf) {}
-  //@}
+  
+  virtual void drugAction();    // for prophylactic effect;     //TODO(drug action)
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

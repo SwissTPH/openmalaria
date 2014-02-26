@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="31" wuID="12345" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="32" wuID="12345" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="80.389041096" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -637,18 +637,31 @@
         <EIRDaily origin="regression">0.00480</EIRDaily>
       </timedDeployment>
     </changeEIR>
-    <MDA>
-      <timed>
-        <deploy coverage="1" maxAge="999" minAge="0" time="0"/>
-        <deploy coverage="1" maxAge="999" minAge="0" time="14"/>
-        <deploy coverage="1" maxAge="999" minAge="0" time="28"/>
-        <deploy coverage="1" maxAge="999" minAge="0" time="42"/>
-        <deploy coverage="1" maxAge="999" minAge="0" time="56"/>
-        <deploy coverage="1" maxAge="999" minAge="0" time="70"/>
-        <deploy coverage="1" maxAge="999" minAge="0" time="84"/>
-        <deploy coverage="1" maxAge="999" minAge="0" time="98"/>
-      </timed>
-    </MDA>
+    <human>
+      <effect id="MDA">
+        <MDA>
+          <drugEffect>
+            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
+            <compliersEffective>
+              <timestep pClearance="1"/>
+            </compliersEffective>
+          </drugEffect>
+        </MDA>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy coverage="1" maxAge="999" minAge="0" time="0"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="14"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="28"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="42"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="56"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="70"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="84"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="98"/>
+        </timed>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="no Treatment no Mortality">
@@ -1264,4 +1277,4 @@
       <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

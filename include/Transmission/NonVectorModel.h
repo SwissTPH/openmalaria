@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -32,12 +32,12 @@ namespace OM { namespace Transmission {
 class NonVectorModel : public TransmissionModel { 
 public:
 
-  NonVectorModel(const scnXml::NonVector& nonVectorData);
+  NonVectorModel(const scnXml::EntoData& entoData, const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorModel();
   
-  virtual void init2 (const std::list<Host::Human>& population, int populationSize);
+  virtual void init2 (const Population& population);
   
-  virtual void initVectorPopInterv( const scnXml::VectorPopIntervention::DescriptionType& elt, size_t instance );
+  virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
@@ -60,15 +60,14 @@ public:
    * Similar calculation to that used during initialization. */
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
-  virtual void setITNDescription ( const scnXml::ITNDescription&);
-  virtual void setIRSDescription (const scnXml::IRS&);
-  virtual void setVADescription (const scnXml::VectorDeterrent&);
+  virtual const map<string,size_t>& getSpeciesIndexMap();
+  
   virtual void deployVectorPopInterv (size_t instance);
   
   virtual void uninfectVectors();
   
-  virtual void vectorUpdate (const std::list<Host::Human>& population, int populationSize) {}
-  virtual void update (const std::list<Host::Human>& population, int populationSize);
+  virtual void vectorUpdate (const Population& population) {}
+  virtual void update (const Population& population);
   virtual double calculateEIR(PerHost& perHost, double ageYears);
   
 private:

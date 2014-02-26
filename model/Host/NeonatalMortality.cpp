@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,8 @@
  */
 
 #include "Host/NeonatalMortality.h"
-#include "Host/Human.h"
+#include "Population.h"
+#include "WithinHost/WHInterface.h"
 #include "util/random.h"
 
 #include <cmath>
@@ -49,12 +50,12 @@ bool NeonatalMortality::eventNeonatalMortality() {
   return random::uniform_01() <= _riskFromMaternalInfection;
 }
 
-void NeonatalMortality::update (const list<Host::Human>& population) {
+void NeonatalMortality::update (const Population& population) {
   // For individuals in the age range 20-25, we sum:
   int nCounter=0;	// total number
   int pCounter=0;	// number with patent infections, needed for prev in 20-25y
   
-  for (std::list<Host::Human>::const_iterator iter = population.begin(); iter != population.end(); ++iter){
+  for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
     //NOTE: this is based on last time-step's parasite densities but this
     // time-step's age, which is a bit strange (though not very significant).
     double ageYears = iter->getAgeInYears();
@@ -64,10 +65,10 @@ void NeonatalMortality::update (const list<Host::Human>& population) {
     if(ageYears >= 25.0) continue;
     if (ageYears < 20.0) break;	// Not interested in younger individuals.
     
-    //TODO: detectibleInfection depends on a diagnostic; this outcome shouldn't
-    // be dependent on the diagnostic used!
+    //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
+    // reporting, but the one used should be that used to parameterise this model
     nCounter ++;
-    if (iter->detectibleInfection())
+    if (iter->withinHostModel->diagnosticDefault())
       pCounter ++;
   }
   

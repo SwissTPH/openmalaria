@@ -18,6 +18,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
 # -----  Compile options  -----
 
+# C++11 would be nice, but we have to compile for relatively old platforms
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
 IF( ${CMAKE_COMPILER_IS_GNUCXX} )
   # This doesn't show up in the cache, but it is passed to gcc:

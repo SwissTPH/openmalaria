@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -21,10 +21,10 @@
 #define Hmod_PerHost
 
 #include "Transmission/Anopheles/PerHost.h"
-#include "Transmission/ITN.h"
-#include "Transmission/IRS.h"
+#include "interventions/Interfaces.hpp"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
+#include <boost/ptr_container/ptr_list.hpp>
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
@@ -36,6 +36,73 @@ using util::DecayFunction;
 using util::DecayFuncHet;
 using boost::shared_ptr;
 
+class HumanVectorInterventionEffect;
+
+/**
+ * A base class for interventions affecting human-vector interaction.
+ * 
+ * The constructor should initialise the data to represent an intervention
+ * deployed at this time (TimeStep::simulation).
+ * 
+ * redeploy() should reset the intervention to a freshly deployed state. If
+ * necessary, PerHost::deployEffect can be updated to make it create a new
+ * instance instead of calling redeploy.
+ */
+class PerHostInterventionData {
+public:
+    /** Deploy an intervention. */
+    virtual void redeploy( const HumanVectorInterventionEffect& params ) =0;
+    
+    /** Per-timestep update. Used by ITNs to update hole decay. */
+    virtual void update() =0;
+    
+    /** Get effect of deterrencies of interventions, as an attractiveness multiplier.
+     * 
+     * @return a value describing effect on attractiveness. Must not be
+     * negative. 0 means mosquitoes are fully deterred, 1 that the intervention
+     * has no effect, 2 that the intervention attracts twice as many mosquitoes
+     * as would otherwise come. */
+    virtual double relativeAttractiveness(size_t speciesIndex) const =0;
+    /** Get the killing effect on mosquitoes before they've eaten as a survival
+     * multiplier. */
+    virtual double preprandialSurvivalFactor(size_t speciesIndex) const =0;
+    /** Get the killing effect on mosquitoes after they've eaten as a survival
+     * multiplier. */
+    virtual double postprandialSurvivalFactor(size_t speciesIndex) const =0;
+    
+    /// Index of effect describing the intervention
+    inline interventions::EffectId id() const { return m_id; }
+    
+    /// Checkpointing (write only)
+    void operator& (ostream& stream) {
+        m_id & stream; // must be first; read externally so that the correct
+                // makeHumanPart function can be found
+        checkpoint( stream );
+    }
+    
+protected:
+    /// Set the effect index
+    explicit PerHostInterventionData( interventions::EffectId id ) :
+            deployTime( TimeStep::simulation ),
+            m_id(id) {}
+    
+    /// Checkpointing: write
+    virtual void checkpoint( ostream& stream ) =0;
+    
+    TimeStep deployTime;        // time of deployment or TimeStep::never
+    interventions::EffectId m_id;       // effect index; don't change
+};
+
+/** A base class for human vector intervention parameters. */
+class HumanVectorInterventionEffect : public interventions::HumanInterventionEffect {
+public:
+    /** Create a new object to store human-specific details of deployment. */
+    virtual PerHostInterventionData* makeHumanPart() const =0;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::EffectId id ) const =0;
+protected:
+    explicit HumanVectorInterventionEffect(interventions::EffectId id) : HumanInterventionEffect(id) {}
+};
+
 /** Contains TransmissionModel parameters which need to be stored per host.
  *
  * Currently many members are public and directly accessed. */
@@ -45,11 +112,9 @@ public:
     /// @brief Static member functions
     //@{
     /** Static initialisation. */
-    static void init ();
+    static void init (const scnXml::AgeGroupValues& availabilityToMosquitoes);
     /** Static cleanup. */
     static void cleanup ();
-    
-    static void setVADescription (const scnXml::VectorDeterrent& elt);
     //@}
     
     ///@brief Initialisation / checkpionting
@@ -59,9 +124,7 @@ public:
     //@}
     
     /// Call once per timestep. Updates net holes.
-    inline void update(const ITNParams& params) {
-        net.update(params);
-    }
+    void update();
     
     ///@brief Intervention controls
     //@{
@@ -69,17 +132,8 @@ public:
         outsideTransmission = s;
     }
   
-    /// Give individual a new ITN as of time timeStep.
-    void setupITN (const TransmissionModel& tm);
-    /// Give individual a new IRS as of time timeStep.
-    void setupIRS (const TransmissionModel& tm);
-    /// Give individual a new VA intervention as of time timeStep.
-    void setupVA ();
-    
-    /// Is individual protected by a VA?
-    inline bool hasVAProtection(TimeStep maxInterventionAge)const{
-        return timestepVA + maxInterventionAge > TimeStep::simulation;
-    }
+    /// Deploy some intervention effect
+    void deployEffect( const HumanVectorInterventionEffect& params );
     //@}
     
     /** @brief Availability of host to mosquitoes */
@@ -167,15 +221,6 @@ public:
     
     ///@brief Miscellaneous
     //@{
-    /// Get a reference to the net
-    inline const ITN& getITN() const{
-        return net;
-    }
-    /// Get a reference to the IRS
-    inline const IRS& getIRS() const{
-        return irs;
-    }
-    
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
     static inline double adultAge() {
@@ -188,13 +233,14 @@ public:
         species & stream;
         _relativeAvailabilityHet & stream;
         outsideTransmission & stream;
-        timestepVA & stream;
-        net & stream;
-        irs & stream;
+        checkpointIntervs( stream );
     }
     //@}
     
 private:
+    void checkpointIntervs( ostream& stream );
+    void checkpointIntervs( istream& stream );
+    
     vector<Anopheles::PerHost> species;
     
     // Determines whether human is outside transmission
@@ -203,22 +249,11 @@ private:
     // Heterogeneity factor in availability; this is already multiplied into the
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
-    
-    // (TimeStep::simulation - timestepXXX) is the age of the intervention in
-    // the new time-step (that being updated).
-    // timestepXXX = TIMESTEP_NEVER means intervention has not been deployed.
-    TimeStep timestepVA;
-    
-    DecayFuncHet hetSampleVA;
 
-    ITN net;
-    IRS irs;
+    typedef boost::ptr_list<PerHostInterventionData> ListActiveEffects;
+    ListActiveEffects activeEffects;
     
     static AgeGroupInterpolation* relAvailAge;
-    
-    // descriptions of decay of interventions
-    // set if specific intervention is used
-    static shared_ptr<DecayFunction> VADecay;
 };
 
 }

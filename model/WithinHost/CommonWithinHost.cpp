@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
  */
 
 #include "WithinHost/CommonWithinHost.h"
-#include "inputData.h"
+#include "WithinHost/Diagnostic.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
@@ -36,12 +36,13 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 // -----  Initialization  -----
 
 CommonWithinHost::CommonWithinHost() :
-        WithinHostModel(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
+        WHFalciparum(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
-    assert( TimeStep::interval == 1 );
+    assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }
 
 CommonWithinHost::~CommonWithinHost() {
+    //TODO: this should all happen implicitly
     delete pkpdModel;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
@@ -50,7 +51,7 @@ CommonWithinHost::~CommonWithinHost() {
 
 // -----  Simple infection adders/removers  -----
 
-void CommonWithinHost::clearAllInfections() {
+void CommonWithinHost::effectiveTreatment() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
     }
@@ -63,9 +64,9 @@ void CommonWithinHost::clearAllInfections() {
 void CommonWithinHost::medicate(string drugName, double qty, double time, double duration, double bodyMass) {
     pkpdModel->medicate(drugName, qty, time, duration, bodyMass);
 }
-void CommonWithinHost::immuneSuppression() {
+void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        (*inf)->immuneSuppression();
+        (*inf)->clearImmunity();
     }
     _cumulativeh = 0.0;
     _cumulativeYlag = 0.0;
@@ -84,7 +85,10 @@ void CommonWithinHost::importInfection(){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficacy) {
+void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor) {
+    // Cache total density for infectiousness calculations
+    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
+    
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
     PopulationStats::totalInfections += nNewInfs;
@@ -109,23 +113,27 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
     _cumulativeh += nNewInfs;
 
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
-        double survivalFactor = (1.0-BSVEfficacy) * _innateImmSurvFact;
-        survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
+        double survivalFactor = bsvFactor * _innateImmSurvFact;
         survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY);
-
-        // We update the density, and if update() returns true (parasites extinct) then remove the infection.
-        if ((*inf)->update(survivalFactor)) {
-            delete *inf;
-            inf = infections.erase(inf);        // inf points to next infection now so don't increment with ++inf
-            --numInfs;
-            continue;   // infection no longer exists so skip the rest
+        survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
+        
+        for( int step = 0, steps = TimeStep::interval; step < steps; ++step ){
+            // We update the density, and if update() returns true (parasites extinct) then remove the infection.
+            if ((*inf)->update(survivalFactor)) {
+                delete *inf;
+                inf = infections.erase(inf);        // inf points to next infection now so don't increment with ++inf
+                --numInfs;
+                goto CONTINUE_OUTER;   // infection no longer exists so skip the rest
+            }
+            
+            double density = (*inf)->getDensity();
+            totalDensity += density;
+            timeStepMaxDensity = max(timeStepMaxDensity, density);
+            _cumulativeY += density;
         }
-
-        totalDensity += (*inf)->getDensity();
-        timeStepMaxDensity = max(timeStepMaxDensity, (*inf)->getDensity());
-        _cumulativeY += TimeStep::interval*(*inf)->getDensity();
-
+        
         ++inf;
+        CONTINUE_OUTER:; // yes, it's a hideous goto — but C++98 doesn't have another way of continuing the outer loop
     }
     util::streamValidate(totalDensity);
     assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
@@ -133,21 +141,27 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double BSVEfficac
     pkpdModel->decayDrugs ();
 }
 
+void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {
+    // this should actually be easy; it just isn't needed yet
+    throw util::unimplemented_exception( "prophylactic effects on 1-day timestep" );
+}
+
 
 // -----  Summarize  -----
 
-int CommonWithinHost::countInfections (int& patentInfections) {
-    if (infections.empty()) return 0;
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if ((*inf)->getDensity() > detectionLimit)
-            patentInfections++;
+WHInterface::InfectionCount CommonWithinHost::countInfections () const{
+    InfectionCount count;       // constructor initialises counts to 0
+    count.total = infections.size();
+    for (std::list<CommonInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+        if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
+            count.patent += 1;
     }
-    return infections.size();
+    return count;
 }
 
 
 void CommonWithinHost::checkpoint (istream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     (*pkpdModel) & stream;
     for (int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
@@ -156,7 +170,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {
-    WithinHostModel::checkpoint (stream);
+    WHFalciparum::checkpoint (stream);
     (*pkpdModel) & stream;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;

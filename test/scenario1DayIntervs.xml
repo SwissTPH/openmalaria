@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="examples of some interventions on 1-day TS" schemaVersion="31" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="examples of some interventions on 1-day TS" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -84,54 +84,62 @@
     </ageGroup>
   </monitoring>
   <interventions name="none">
-    <MDA>
-      <description>
-        <decisions>
-          <decision depends="result" name="treatment" values="MQ,none">
+    <human>
+      <effect id="MDA">
+        <MDA1D>
+          <decisions>
+            <decision depends="result" name="treatment" values="MQ,none">
             result(negative): none
             result(none): none
             result(positive): MQ
           </decision>
-          <decision depends="" name="test" values="none,microscopy,RDT">
+            <decision depends="" name="test" values="none,microscopy,RDT">
             RDT
           </decision>
-        </decisions>
-        <treatments>
-          <treatment name="MQ">
-            <schedule>
-              <medicate drug="MQ" hour="0" mg="1200"/>
-            </schedule>
-          </treatment>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-        </treatments>
-      </description>
-      <timed>
-        <deploy coverage="0.6" time="160"/>
-        <deploy coverage="0.6" time="860"/>
-        <deploy coverage="0.6" time="870"/>
-        <deploy coverage="0.6" time="1580"/>
-        <deploy coverage="0.6" time="1595"/>
-        <deploy coverage="0.6" time="1610"/>
-      </timed>
-    </MDA>
-    <vaccine>
-      <description vaccineType="PEV">
-        <decay L="5" function="exponential"/>
-        <efficacyB value="10"/>
-        <initialEfficacy value="0.512"/>
-        <initialEfficacy value="0.64"/>
-        <initialEfficacy value="0.8"/>
-      </description>
-      <continuous>
-        <deploy coverage="0.95" targetAgeYrs="0.0833"/>
-        <deploy coverage="0.95" targetAgeYrs="0.17"/>
-        <deploy coverage="0.99" targetAgeYrs="0.25"/>
-        <deploy coverage="0.99" targetAgeYrs="2"/>
-        <deploy coverage="0.99" targetAgeYrs="5"/>
-      </continuous>
-    </vaccine>
+          </decisions>
+          <treatments>
+            <treatment name="MQ">
+              <schedule>
+                <medicate drug="MQ" hour="0" mg="1200"/>
+              </schedule>
+            </treatment>
+            <treatment name="none">
+              <schedule/>
+            </treatment>
+          </treatments>
+        </MDA1D>
+      </effect>
+      <effect id="PEV">
+        <PEV>
+          <decay L="5" function="exponential"/>
+          <efficacyB value="10"/>
+          <initialEfficacy value="0.512"/>
+          <initialEfficacy value="0.64"/>
+          <initialEfficacy value="0.8"/>
+        </PEV>
+      </effect>
+      <intervention>
+        <effect id="MDA"/>
+        <timed>
+          <deploy coverage="0.6" time="160"/>
+          <deploy coverage="0.6" time="860"/>
+          <deploy coverage="0.6" time="870"/>
+          <deploy coverage="0.6" time="1580"/>
+          <deploy coverage="0.6" time="1595"/>
+          <deploy coverage="0.6" time="1610"/>
+        </timed>
+      </intervention>
+      <intervention>
+        <effect id="PEV"/>
+        <continuous>
+          <deploy coverage="0.95" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
+          <deploy coverage="0.95" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
+          <deploy coverage="0.99" targetAgeYrs="0.25" vaccMaxCumDoses="3" vaccMinPrevDoses="2"/>
+          <deploy coverage="0.99" targetAgeYrs="2" vaccMaxCumDoses="4" vaccMinPrevDoses="3"/>
+          <deploy coverage="0.99" targetAgeYrs="5" vaccMaxCumDoses="5" vaccMinPrevDoses="4"/>
+        </continuous>
+      </intervention>
+    </human>
   </interventions>
   <healthSystem>
     <EventScheduler>
@@ -1224,7 +1232,6 @@
       <option name="MOLINEAUX_WITHIN_HOST_MODEL" value="true"/>
       <option name="INCLUDES_PK_PD" value="true"/>
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
-      <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="14"/>
     <human>
@@ -1309,4 +1316,4 @@
       <parameter include="1" name="-log(alpha) in 'Case Fatality Rate proposal'" number="38" value="0.935351"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>

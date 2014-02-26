@@ -1,7 +1,7 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2013 Swiss Tropical and Public Health Institute 
- * Copyright (C) 2005-2013 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
  * 
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -39,6 +39,10 @@ DescriptiveIPTWithinHost::IPTiEffects DescriptiveIPTWithinHost::iptiEffect = NO_
 // -----  init  -----
 
 void DescriptiveIPTWithinHost::init (const scnXml::IPTDescription& xmlIPTI) {
+    if( iptiEffect != NO_IPT ){
+        throw util::unimplemented_exception( "multiple IPT interventions" );
+    }
+    
   if( !util::ModelOptions::option( IPTI_SP_MODEL ) ){
       throw util::xml_scenario_error ("IPTI interventions require IPT_SP_MODEL option");
   }
@@ -102,7 +106,7 @@ void DescriptiveIPTWithinHost::clearInfections (bool isSevere) {
     _lastSPDose=TimeStep::simulation+TimeStep(1);
     // SPAction will first act at the beginning of the next Global::interval
   }
-  clearAllInfections();
+  effectiveTreatment();
 }
 
 void DescriptiveIPTWithinHost::continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort) {
@@ -141,9 +145,6 @@ void DescriptiveIPTWithinHost::timedIPT (Monitoring::AgeGroup ageGroup, bool inC
     Monitoring::Surveys.getSurvey(inCohort).reportIPTDoses (ageGroup, 1);
   }
 }
-bool DescriptiveIPTWithinHost::hasIPTiProtection (TimeStep maxInterventionAge) const{
-    return _lastIptiOrPlacebo + maxInterventionAge > TimeStep::simulation;
-}
 
 
 // -----  update (from SPAction)  -----
@@ -152,30 +153,6 @@ bool DescriptiveIPTWithinHost::eventSPClears (DescriptiveInfection* inf){
   DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
   assert (iptInf != 0);	// code error if this is anything else
   return iptInf->eventSPClears(_lastSPDose);
-}
-
-// -----  density calculation  -----
-
-void DescriptiveIPTWithinHost::IPTattenuateAsexualMinTotalDensity () {
-  //Note: the _cumulativeInfections>0 check is probably unintended, but was extracted from other logic and put here to preserve results.
-  if (util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY) && _cumulativeh > 0) {
-    if (_SPattenuationt > TimeStep::simulation && totalDensity < 10) {
-      totalDensity = 10;
-      _cumulativeY += 10;
-    }
-  }
-}
-
-void DescriptiveIPTWithinHost::IPTattenuateAsexualDensity (DescriptiveInfection* inf) {
-  if (!(util::ModelOptions::option (util::ATTENUATION_ASEXUAL_DENSITY))) return;
-  
-  DescriptiveIPTInfection* iptInf = dynamic_cast<DescriptiveIPTInfection*> (inf);
-  assert (iptInf != 0);	// code error if this is anything else
-  if (iptInf->doSPAttenuation()) {
-    double attFact = iptInf->asexualAttenuation();
-    timeStepMaxDensity *= attFact;
-    _SPattenuationt = std::max(_SPattenuationt, iptInf->getAsexualAttenuationEndDate());
-  }
 }
 
 
