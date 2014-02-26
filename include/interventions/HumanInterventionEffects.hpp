@@ -163,40 +163,6 @@ public:
 private:
 };
 
-class VaccineEffect : public HumanInterventionEffect {
-public:
-    VaccineEffect( EffectId id, const scnXml::VaccineDescription& seq, Vaccine::Types type ) :
-            HumanInterventionEffect(id), type(type)
-    {
-        // TODO: these two classes can be combined
-        new Vaccine( seq, type, id );
-    }
-    
-    void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits )const{
-        human.getVaccine().possiblyVaccinate( human, method, id(), vaccLimits );
-    }
-    
-    virtual Effect::Type effectType() const{
-        if( type == Vaccine::PEV ) return Effect::PEV;
-        else if( type == Vaccine::BSV ) return Effect::BSV;
-        else if( type == Vaccine::TBV ) return Effect::TBV;
-        else throw SWITCH_DEFAULT_EXCEPTION;
-    }
-    
-    inline Vaccine::Types getVaccineType()const{ return type; }
-    
-#ifdef WITHOUT_BOINC
-    virtual void print_details( std::ostream& out )const{
-        out << id().id << "\t" <<
-            (type == Vaccine::PEV ? "PEV" : (type == Vaccine::BSV ? "BSV" : "TBV"))
-           ;
-    }
-#endif
-    
-private:
-    Vaccine::Types type;
-};
-
 class ClearImmunityEffect : public HumanInterventionEffect {
 public:
     ClearImmunityEffect( EffectId id ) : HumanInterventionEffect(id) {}

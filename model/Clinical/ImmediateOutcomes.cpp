@@ -90,10 +90,10 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
     }
 
     if( _tLastTreatment == TimeStep::simulation ){
-        human.removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_TREATMENT );
+        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_TREATMENT );
     }
     if( pgState & WHPathogenesis::SICK ){
-        human.removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_BOUT );
+        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_BOUT );
     }
 }
 

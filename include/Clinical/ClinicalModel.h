@@ -25,7 +25,10 @@
 #include "Episode.h"
 #include <memory>
 
-namespace scnXml{ class Model; }
+namespace scnXml{
+    class Model;
+    class HealthSystem;
+}
 namespace OM { namespace Clinical {
     using Host::Human;
 

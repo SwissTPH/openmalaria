@@ -31,6 +31,7 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
+#include "interventions/Cohort.h"
 #include <schema/scenario.h>
 
 namespace OM { namespace Host {
@@ -213,7 +214,7 @@ void Human::summarize() {
     infIncidence->summarize (survey, getMonitoringAgeGroup());
     
     if( patent ){
-        removeFromCohorts( interventions::CohortSelectionEffect::REMOVE_AT_FIRST_INFECTION );
+        removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_INFECTION );
     }
 }
 
@@ -236,7 +237,7 @@ void Human::removeFromCohort( interventions::EffectId id ){
         Monitoring::Surveys.current->reportRemovedFromCohort( getMonitoringAgeGroup(), 1 );
     }
 }
-void Human::removeFromCohorts( interventions::CohortSelectionEffect::RemoveAtCode code ){
+void Human::removeFromCohorts( interventions::Cohort::RemoveAtCode code ){
     const vector<interventions::EffectId>& removeAtList = interventions::CohortSelectionEffect::removeAtIds[code];
     for( vector<interventions::EffectId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
         removeFromCohort( *it );    // only does anything if in cohort

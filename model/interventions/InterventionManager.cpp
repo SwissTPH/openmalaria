@@ -26,6 +26,7 @@
 #include "interventions/GVI.h"
 #include "interventions/IRS.h"
 #include "interventions/ITN.h"
+#include"interventions/Vaccine.h"
 #include "interventions/HumanInterventionEffects.hpp"
 #include "interventions/Deployments.hpp"
 #include "WithinHost/Diagnostic.h"
@@ -99,7 +100,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 //TODO(monitoring): report
                 humanEffects.push_back( new MDA1DEffect( id, effect.getMDA1D().get() ) );
             }else if( effect.getPEV().present() ){
-                //TODO: allow multiple descriptions of each vaccine type
                 humanEffects.push_back( new VaccineEffect( id, effect.getPEV().get(), Vaccine::PEV ) );
             }else if( effect.getBSV().present() ){
                 humanEffects.push_back( new VaccineEffect( id, effect.getBSV().get(), Vaccine::BSV ) );

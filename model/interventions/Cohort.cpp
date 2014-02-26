@@ -23,19 +23,19 @@
 
 namespace OM { namespace interventions {
 
-vector<EffectId> CohortSelectionEffect::removeAtIds[CohortSelectionEffect::REMOVE_AT_NUM];
+vector<EffectId> CohortSelectionEffect::removeAtIds[Cohort::REMOVE_AT_NUM];
 
 CohortSelectionEffect::CohortSelectionEffect( EffectId id, const scnXml::Cohort& cohort ) :
         HumanInterventionEffect(id)
 {
     if( cohort.getFirstBoutOnly() ){
-        removeAtIds[REMOVE_AT_FIRST_BOUT].push_back( id );
+        removeAtIds[Cohort::REMOVE_AT_FIRST_BOUT].push_back( id );
     }
     if( cohort.getFirstInfectionOnly() ){
-        removeAtIds[REMOVE_AT_FIRST_INFECTION].push_back( id );
+        removeAtIds[Cohort::REMOVE_AT_FIRST_INFECTION].push_back( id );
     }
     if( cohort.getFirstTreatmentOnly() ){
-        removeAtIds[REMOVE_AT_FIRST_TREATMENT].push_back( id );
+        removeAtIds[Cohort::REMOVE_AT_FIRST_TREATMENT].push_back( id );
     }
 }
 

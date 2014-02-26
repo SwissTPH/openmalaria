@@ -20,12 +20,10 @@
 #ifndef Hmod_human
 #define Hmod_human
 #include "Global.h"
-#include "interventions/Vaccine.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
 #include "Monitoring/Surveys.h"
-#include "interventions/Vaccine.h"
-#include "interventions/Cohort.h"
+#include "interventions/HumanComponents.h"
 #include <set>
 
 namespace scnXml {
@@ -174,7 +172,7 @@ public:
   void removeFromCohort( interventions::EffectId );
   
   /** Act on remove-from-cohort-on-first-xyz events. */
-  void removeFromCohorts( interventions::CohortSelectionEffect::RemoveAtCode code );
+  void removeFromCohorts( interventions::Cohort::RemoveAtCode code );
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();

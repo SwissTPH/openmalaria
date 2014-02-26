@@ -21,7 +21,7 @@
 #define OM_INTERVENTIONS_COHORT
 
 // The includes here are more for documentation than required.
-#include "interventions/Interfaces.hpp"
+#include "interventions/HumanComponents.h"
 #include <schema/interventions.h>
 
 namespace OM { namespace interventions {
@@ -38,27 +38,9 @@ public:
     virtual void print_details( std::ostream& out )const;
 #endif
     
-    /** Identifiers for types of cohort removal option, followed by NUM in last
-     * place (as a counter).
-     * 
-     * REMOVE_AT_FIRST_BOUT: remove the human from the cohort at the start of
-     * each clinical event, if present in the cohort.
-     * 
-     * REMOVE_AT_FIRST_INFECTION: remove patent humans from the cohort during
-     * each survey.
-     * 
-     * REMOVE_AT_FIRST_TREATMENT: remove the human from the cohort when
-     * assigning each course of treatment, if present in the cohort.
-     */
-    enum RemoveAtCode {
-        REMOVE_AT_FIRST_BOUT,
-        REMOVE_AT_FIRST_INFECTION,
-        REMOVE_AT_FIRST_TREATMENT,
-        REMOVE_AT_NUM };
-    
     /** For each RemoveAtCode (excluding NUM), this is a list of all cohort Ids
      * for which the option is enabled. */
-    static vector<EffectId> removeAtIds[REMOVE_AT_NUM];
+    static vector<EffectId> removeAtIds[Cohort::REMOVE_AT_NUM];
 };
 
 } }

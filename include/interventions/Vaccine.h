@@ -17,13 +17,11 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
-#ifndef Hmod_Vaccine
-#define Hmod_Vaccine
+#ifndef Hmod_interventions_Vaccine
+#define Hmod_interventions_Vaccine
 
+#include "interventions/HumanComponents.h"
 #include "schema/interventions.h"
-#include "interventions/Interfaces.hpp"
-#include "Global.h"
-#include "util/DecayFunction.h"
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
@@ -31,9 +29,6 @@ namespace Host {
     class Human;
 }
 namespace interventions {
-    using util::DecayFunction;
-    using util::DecayFuncHet;
-    using boost::shared_ptr;
     
 /** Vaccine intervention parameters.
  *
@@ -43,13 +38,17 @@ namespace interventions {
  * way to determine which are used).
  *
  * All parameters (inc. non-static) are only set by initParameters(). */
-class Vaccine {
+class VaccineEffect : public HumanInterventionEffect {
 public:
-    enum Types { PEV, BSV, TBV, NumVaccineTypes };
-
-    Vaccine(const scnXml::VaccineDescription& vd, Types type, EffectId effect);
+    VaccineEffect( EffectId id, const scnXml::VaccineDescription& seq, Vaccine::Types type );
     
-    Types type;
+    void deploy( Host::Human& human, Deployment::Method method, VaccineLimits vaccLimits )const;
+    
+    virtual Effect::Type effectType() const;
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const;
+#endif
     
 private:
     /** Get the initial efficacy of the vaccine.
@@ -57,26 +56,16 @@ private:
      * @param numPrevDoses The number of prior vaccinations of the individual. */
     double getInitialEfficacy (size_t numPrevDoses) const;
 
-    inline static const Vaccine& getParams( EffectId effect ){
+    inline static const VaccineEffect& getParams( EffectId effect ){
         assert( effect.id >= 0 && effect.id < params.size() && params[effect.id] != 0 );
-        return *Vaccine::params[effect.id];
+        return *params[effect.id];
     }
     
-    /** @brief Vaccine static parameters
-     * 
-     * Each instance is either null or points to data for the vaccine effect
-     * with the given effect ID.
-     *
-     * No memory management (only leak is at exit which OS deals with). */
-    static vector<Vaccine*> params;
+    /// Vaccine effect type
+    Vaccine::Types type;
     
-    //TODO(monitoring):
-    /** Until the monitoring system is updated, only one type of vaccination
-     * delivery can be reported. This is whichever is first configured. */
-    static EffectId reportEffect;
-
     /// Function representing decay of effect
-    shared_ptr<DecayFunction> decayFunc;
+    boost::shared_ptr<util::DecayFunction> decayFunc;
 
     /* Vaccine type specific parameters
      * Initial mean efficacy, definition depends on vaccine type */
@@ -84,78 +73,21 @@ private:
     // Distribution of efficacies among individuals, parameter to sample from beta dist.
     double efficacyB;
 
+    /** @brief Vaccine static parameters
+     * 
+     * Each instance is either null or points to data for the vaccine effect
+     * with the given effect ID.
+     *
+     * No memory management (only leak is at exit which OS deals with). */
+    static vector<VaccineEffect*> params;
+    
+    //TODO(monitoring):
+    /** Until the monitoring system is updated, only one type of vaccination
+     * delivery can be reported. This is whichever is first configured. */
+    static EffectId reportEffect;
+
     friend class PerHumanVaccine;
     friend class PerEffectPerHumanVaccine;
-};
-
-/** Per vaccine effect (type), per human details. */
-class PerEffectPerHumanVaccine {
-public:
-    //Note: this constructor is only for checkpointing
-    PerEffectPerHumanVaccine();
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        effect & stream;
-        numDosesAdministered & stream;
-        timeLastDeployment & stream;
-        initialEfficacy & stream;
-        hetSample & stream;
-    }
-    
-private:
-    PerEffectPerHumanVaccine( EffectId id, const Vaccine& params );
-    
-    EffectId effect;      // id of effect (for finding parameters)
-    // Type of vaccine
-    /** Number of vaccine doses this individual has received.
-     *
-     * If an individual misses one EPI (continuous) vaccine dose, it's
-     * intentional that they also miss following EPI doses (unless a timed mass
-     * vaccination reintroduces them to the EPI schedule). */
-    uint32_t numDosesAdministered;
-    /// Timestep of last vaccination with this vaccine type
-    TimeStep timeLastDeployment;
-    /// Efficacy at last deployment (undecayed)
-    double initialEfficacy;
-    DecayFuncHet hetSample;
-    
-    friend class PerHumanVaccine;
-};
-
-/** Per-human vaccine code. */
-class PerHumanVaccine {
-public:
-    PerHumanVaccine() {}
-    
-    /** Get one minus the efficacy of the vaccine (1 for no effect, 0 for full effect). */
-    double getFactor( Vaccine::Types type )const;
-    
-    /** Vaccinate unless the passed VaccineLimits specify not to. */
-    void possiblyVaccinate( const Host::Human& human,
-                           Deployment::Method method, EffectId effectId,
-                           interventions::VaccineLimits vaccLimits );
-
-#if 0
-    /// Hack for R_0 experiment: make current human the infection source
-    inline void specialR_0(){
-        // At this point special TBV should have been given to everyone but the PEV to no-one
-        effects[R_0_PEV].initialEfficacy = 1.0;
-        effects[R_0_TBV].initialEfficacy = 0.0;
-    }
-#endif
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        effects & stream;
-    }
-
-private:
-    /// Details for each deployed vaccine for this human
-    typedef vector<PerEffectPerHumanVaccine> EffectList;
-    EffectList effects;
 };
 
 }
