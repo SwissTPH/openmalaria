@@ -102,16 +102,15 @@ PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
 {
 }
 
-PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( Vaccine::Types type ) :
+PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( const Vaccine& params ) :
         numDosesAdministered(0), initialEfficacy(0.0)
 {
-    if (Vaccine::params[type] != 0)
-        hetSample = Vaccine::params[type]->decayFunc->hetSample();
+    hetSample = params.decayFunc->hetSample();
 }
 
 double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
-    const PerEffectPerHumanVaccine& effect = types[type];
-    if( effect.initialEfficacy != effect.initialEfficacy ) return 1.0;        // never deployed
+    if( types[type] == 0 ) return 1.0;  // never deployed
+    const PerEffectPerHumanVaccine& effect = *types[type];
     TimeStep age = TimeStep::simulation - effect.timeLastDeployment;
     double decayFactor = Vaccine::getParams(type).decayFunc->eval( age, effect.hetSample );
     return 1.0 - effect.initialEfficacy * decayFactor;
@@ -121,21 +120,25 @@ void PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
                                  Deployment::Method method, Vaccine::Types type,
                                  interventions::VaccineLimits vaccLimits )
 {
-    PerEffectPerHumanVaccine& effect = types[type];
+    PerEffectPerHumanVaccine* effect = types[type];
     
-    if( effect.numDosesAdministered < vaccLimits.minPrevDoses ||
-        effect.numDosesAdministered >= vaccLimits.maxCumDoses )
+    uint32_t numDosesAdministered = (effect == 0) ? 0 : effect->numDosesAdministered;
+    if( numDosesAdministered < vaccLimits.minPrevDoses ||
+        numDosesAdministered >= vaccLimits.maxCumDoses )
         return;         // no vaccination (this replaces the old schedule for continuous doses)
     
-    // initialise now, if not previously done so
-    if( effect.initialEfficacy != effect.initialEfficacy )
-        effect = PerEffectPerHumanVaccine( static_cast<Vaccine::Types>( type ) );
+    const Vaccine& params = Vaccine::getParams( type );
     
-    effect.initialEfficacy = Vaccine::getParams(type).getInitialEfficacy(effect.numDosesAdministered);
-    util::streamValidate(effect.initialEfficacy);
+    if( effect == 0 ){
+        types[type] = new PerEffectPerHumanVaccine( params );
+        effect = types[type];
+    }
     
-    effect.numDosesAdministered += 1;
-    effect.timeLastDeployment = TimeStep::simulation;
+    effect->initialEfficacy = params.getInitialEfficacy(numDosesAdministered);
+    util::streamValidate(effect->initialEfficacy);
+    
+    effect->numDosesAdministered = numDosesAdministered + 1;
+    effect->timeLastDeployment = TimeStep::simulation;
     
     if( Vaccine::reportType == type ){
         if( method == Deployment::TIMED )

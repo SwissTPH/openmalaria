@@ -86,6 +86,8 @@ private:
 
 /** Per vaccine effect (type), per human details. */
 class PerEffectPerHumanVaccine {
+public:
+    //Note: this constructor is only for checkpointing
     PerEffectPerHumanVaccine();
     
     /// Checkpointing
@@ -98,7 +100,7 @@ class PerEffectPerHumanVaccine {
     }
     
 private:
-    PerEffectPerHumanVaccine(Vaccine::Types type );
+    PerEffectPerHumanVaccine( const Vaccine& params );
     
     /** Number of vaccine doses this individual has received.
      *
@@ -118,7 +120,14 @@ private:
 /** Per-human vaccine code. */
 class PerHumanVaccine {
 public:
-    PerHumanVaccine() {}
+    PerHumanVaccine() {
+        types[0] = types[1] = types[2] = 0;
+    }
+    ~PerHumanVaccine(){
+        for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i )
+            if( types[i] != 0 )
+                delete types[i];
+    }
     
     /** Get one minus the efficacy of the vaccine (1 for no effect, 0 for full effect). */
     double getFactor( Vaccine::Types type )const;
@@ -138,16 +147,32 @@ public:
 #endif
     
     /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
+    void operator& (ostream& stream) {
         for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i ){
-            types[i] & stream;
+            if( types[i] == 0 ){
+                false & stream;
+            }else{
+                true & stream;
+                (*types[i]) & stream;
+            }
+        }
+    }
+    void operator& (istream& stream) {
+        for( size_t i = 0; i < Vaccine::NumVaccineTypes; ++i ){
+            bool hasEffect;
+            hasEffect & stream;
+            if( hasEffect ){
+                types[i] = new PerEffectPerHumanVaccine();
+                (*types[i]) & stream;
+            }else{
+                types[i] = 0;
+            }
         }
     }
 
 private:
     /// Details for each vaccine type
-    PerEffectPerHumanVaccine types[Vaccine::NumVaccineTypes];
+    PerEffectPerHumanVaccine* types[Vaccine::NumVaccineTypes];
 };
 
 }
