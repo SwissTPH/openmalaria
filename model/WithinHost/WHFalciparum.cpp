@@ -72,9 +72,11 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
     if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
         densitybias = parameters[Parameters::DENSITY_BIAS_GARKI];
     } else {
-        int analysisNo = scenario.getAnalysisNo();
-        if ((analysisNo >= 22) && (analysisNo <= 30)) {
-            cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+        if( scenario.getAnalysisNo().present() ){
+            int analysisNo = scenario.getAnalysisNo().get();
+            if ((analysisNo >= 22) && (analysisNo <= 30)) {
+                cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+            }
         }
         densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
     }

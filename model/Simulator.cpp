@@ -72,7 +72,12 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
     interventions::InterventionManager::init( scenario.getInterventions(), *population );
     
-    workUnitIdentifier = scenario.getWuID();
+#ifndef WITHOUT_BOINC
+    // if not on BOINC we don't care about this
+    if( !scenario.getWuID().present() )
+        throw util::xml_scenario_error( "wuID required" );
+    workUnitIdentifier = scenario.getWuID().get();
+#endif
 }
 
 Simulator::~Simulator(){
@@ -359,7 +364,7 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         util::random::checkpoint (stream, checkpointNum);
         
         // Check scenario.xml and checkpoint files correspond:
-        int oldWUID(workUnitIdentifier);
+        int oldWUID = workUnitIdentifier;
         util::Checksum oldCksum(cksum);
         workUnitIdentifier & stream;
         cksum & stream;

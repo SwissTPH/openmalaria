@@ -219,8 +219,11 @@ public:
         TimedDeployment( TimeStep( mass.getTime() ) ),
         HumanDeploymentBase( mass, intervention, cohort ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
-        maxAge( TimeStep::fromYears( mass.getMaxAge() ) )
+        maxAge( TimeStep::future )
     {
+        if( mass.getMaxAge().present() )
+            maxAge = TimeStep::fromYears( mass.getMaxAge().get() );
+            
         if( minAge < TimeStep(0) || maxAge < minAge ){
             throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
         }

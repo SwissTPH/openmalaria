@@ -704,12 +704,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="maxAge" type="xs:double" default="100">
+        <xs:attribute name="maxAge" type="xs:double" use="optional">
           <xs:annotation>
             <xs:documentation>
-              Maximum age of eligible individuals (defaults to 100)
+              Maximum age of eligible individuals (defaults to no limit)
             </xs:documentation>
-            <xs:appinfo>units:Years;min:0;max:100;name:Maximum age of eligible individuals;</xs:appinfo>
+            <xs:appinfo>units:Years;min:0;name:Maximum age of eligible individuals;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="minAge" type="xs:double" default="0">
