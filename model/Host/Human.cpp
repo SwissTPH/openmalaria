@@ -87,8 +87,8 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
    * _treatmentSeekingFactor (stored in CaseManagementModel)
    * availabilityFactor (stored in Transmission::PerHost)
    */
-  double _comorbidityFactor = 1.0;
-  double _treatmentSeekingFactor = 1.0;
+  double comorbidityFactor = 1.0;
+  double treatmentSeekingFactor = 1.0;
   double availabilityFactor = 1.0;
   
   if (opt_trans_het) {
@@ -98,53 +98,52 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     }
   }
   if (opt_comorb_het) {
-    _comorbidityFactor=0.2;
+    comorbidityFactor=0.2;
     if (random::uniform_01() < 0.5) {
-      _comorbidityFactor=1.8;
+      comorbidityFactor=1.8;
     }   
   }
   if (opt_treat_het) {
-    _treatmentSeekingFactor=0.2;
+    treatmentSeekingFactor=0.2;
     if (random::uniform_01() < 0.5) {            
-      _treatmentSeekingFactor=1.8;
+      treatmentSeekingFactor=1.8;
     }   
   }
   if (opt_trans_treat_het) {
-    _treatmentSeekingFactor=0.2;
+    treatmentSeekingFactor=0.2;
     availabilityFactor=1.8;
     if (random::uniform_01()<0.5) {
-      _treatmentSeekingFactor=1.8;
+      treatmentSeekingFactor=1.8;
       availabilityFactor=0.2;
     }
   } else if (opt_comorb_treat_het) {
     if (random::uniform_01()<0.5) {
-      _comorbidityFactor=1.8;
-      _treatmentSeekingFactor=0.2;
+      comorbidityFactor=1.8;
+      treatmentSeekingFactor=0.2;
     } else {
-      _comorbidityFactor=0.2;
-      _treatmentSeekingFactor=1.8;
+      comorbidityFactor=0.2;
+      treatmentSeekingFactor=1.8;
     }
   } else if (opt_comorb_trans_het) {
     availabilityFactor=1.8;
-    _comorbidityFactor=1.8;
+    comorbidityFactor=1.8;
     if (random::uniform_01()<0.5) {
       availabilityFactor=0.2;
-      _comorbidityFactor=0.2;
+      comorbidityFactor=0.2;
     }
   } else if (opt_triple_het) {
     availabilityFactor=1.8;
-    _comorbidityFactor=1.8;
-    _treatmentSeekingFactor=0.2;
+    comorbidityFactor=1.8;
+    treatmentSeekingFactor=0.2;
     if (random::uniform_01()<0.5) {
       availabilityFactor=0.2;
-      _comorbidityFactor=0.2;
-      _treatmentSeekingFactor=1.8;
+      comorbidityFactor=0.2;
+      treatmentSeekingFactor=1.8;
     }
   }
-  withinHostModel = WithinHost::WHInterface::createWithinHostModel();
+  withinHostModel = WithinHost::WHInterface::createWithinHostModel( comorbidityFactor );
   perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
-  clinicalModel = Clinical::ClinicalModel::createClinicalModel (_treatmentSeekingFactor);
-  withinHostModel->setComorbidityFactor( _comorbidityFactor );
+  clinicalModel = Clinical::ClinicalModel::createClinicalModel (treatmentSeekingFactor);
 }
 
 void Human::destroy() {

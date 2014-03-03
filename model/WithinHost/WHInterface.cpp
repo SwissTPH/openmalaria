@@ -75,10 +75,10 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
     }
 }
 
-WHInterface* WHInterface::createWithinHostModel () {
-    if( opt_vivax_simple ) return new WHVivax();
-    if( opt_common_whm ) return new CommonWithinHost();
-    return new DescriptiveWithinHostModel();
+WHInterface* WHInterface::createWithinHostModel ( double comorbidityFactor ) {
+    if( opt_vivax_simple ) return new WHVivax( comorbidityFactor );
+    if( opt_common_whm ) return new CommonWithinHost( comorbidityFactor );
+    return new DescriptiveWithinHostModel( comorbidityFactor );
 }
 
 

@@ -35,8 +35,8 @@ CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
 // -----  Initialization  -----
 
-CommonWithinHost::CommonWithinHost() :
-        WHFalciparum(), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
+CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
+        WHFalciparum( comorbidityFactor ), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
     assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }

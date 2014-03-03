@@ -102,14 +102,11 @@ void WHVivax::init(){
     //TODO: read params from XML
 }
 
-WHVivax::WHVivax(){
+WHVivax::WHVivax( double comorbidityFactor ){
+    if( comorbidityFactor != 1.0 )
+        throw TRACED_EXCEPTION_DEFAULT( "This vivax model cannot be used with comorbidity heterogeneity" );
     //TODO: do we need to do anything here?
     throw xml_scenario_error( "vivax model code is not yet functional" );
-}
-
-void WHVivax::setComorbidityFactor(double factor){
-    if( factor != 1.0 )
-        throw TRACED_EXCEPTION_DEFAULT( "This vivax model cannot be used with comorbidity heterogeneity" );
 }
 
 WHVivax::~WHVivax(){

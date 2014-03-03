@@ -93,8 +93,7 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHVivax();
-    virtual void setComorbidityFactor( double factor );
+    WHVivax( double comorbidityFactor );
     virtual ~WHVivax();
     //@}
     

@@ -50,8 +50,7 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHFalciparum();
-    virtual void setComorbidityFactor( double factor );
+    WHFalciparum( double comorbidityFactor );
     virtual ~WHFalciparum();
     //@}
     

@@ -89,19 +89,15 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
 
 // -----  Non-static  -----
 
-WHFalciparum::WHFalciparum():
+WHFalciparum::WHFalciparum( double comorbidityFactor ):
     WHInterface(),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
-    totalDensity(0.0), timeStepMaxDensity(0.0)
+    totalDensity(0.0), timeStepMaxDensity(0.0),
+    pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
 {
     _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
     
     _ylag.assign (_ylagLen, 0.0);
-}
-void WHFalciparum::setComorbidityFactor(double factor)
-{
-    pathogenesisModel = auto_ptr<Pathogenesis::PathogenesisModel>(
-        Pathogenesis::PathogenesisModel::createPathogenesisModel(factor) );
 }
 
 WHFalciparum::~WHFalciparum()

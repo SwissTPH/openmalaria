@@ -48,7 +48,7 @@ public:
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
-        whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel() );
+        whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel( 1.0 ) );
         ETS_ASSERT( whm != 0 );
 	hd = new ESHostData( numeric_limits< double >::quiet_NaN(), *whm, NONE );
 

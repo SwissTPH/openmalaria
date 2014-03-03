@@ -36,7 +36,7 @@ namespace OM { namespace WithinHost {
 class DescriptiveWithinHostModel : public WHFalciparum {
 public:
   /// Create a new WHM
-  DescriptiveWithinHostModel();
+  DescriptiveWithinHostModel( double comorbidityFactor );
   virtual ~DescriptiveWithinHostModel();
   
   virtual void importInfection();

@@ -39,7 +39,7 @@ namespace OM { namespace WithinHost {
 class CommonWithinHost : public WHFalciparum
 {
 public:
-    CommonWithinHost();
+    CommonWithinHost( double comorbidityFactor );
     ~CommonWithinHost();
     
     
