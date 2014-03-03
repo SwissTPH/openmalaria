@@ -73,7 +73,6 @@ void Human::clear() {   // static clear
 // Create new human
 Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     perHostTransmission(tm),
-    withinHostModel(WithinHost::WHInterface::createWithinHostModel()),
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
     nextCtsDist(0)
@@ -142,6 +141,7 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
       _treatmentSeekingFactor=1.8;
     }
   }
+  withinHostModel = WithinHost::WHInterface::createWithinHostModel();
   perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
   clinicalModel = Clinical::ClinicalModel::createClinicalModel (_treatmentSeekingFactor);
   withinHostModel->setComorbidityFactor( _comorbidityFactor );
