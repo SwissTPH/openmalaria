@@ -42,6 +42,7 @@ namespace Deployment {
 /** Enumeration of all effects, in the order that these should be deployed in
  * within a single intervention. */
 namespace Effect { enum Type {
+    COHORT,     // cohort selection
     MDA,        // mass drug administration
     MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
     PEV,        // pre-erythrocytic vaccine
@@ -51,7 +52,6 @@ namespace Effect { enum Type {
     ITN,        // insecticide treated net
     IRS,        // indoor residual spraying
     GVI,        // generic vector intervention
-    COHORT,     // cohort selection
     CLEAR_IMMUNITY,     // reset accumulated immunity to zero
 }; }
 

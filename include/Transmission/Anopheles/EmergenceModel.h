@@ -135,7 +135,7 @@ public:
         forcedS_v & stream;
         initNvFromSv & stream;
         initOvFromSv & stream;
-        emergence & stream;
+        emergenceReduction & stream;
         emergenceSurvival & stream;
         checkpoint (stream);
     }
@@ -196,8 +196,8 @@ protected:
      * Would need to be checkpointed for main simulation; not used during
      * initialisation period (so could be reinitialised). */
     //@{
-    /// Description of killing effect on emerging pupae
-    vector<util::SimpleDecayingValue> emergence;
+    /// Description of intervention killing effects on emerging pupae
+    vector<util::SimpleDecayingValue> emergenceReduction;
     /// Cache parameter updated by update()
     double emergenceSurvival;   // survival with regards to intervention effects
     //@}
