@@ -175,8 +175,10 @@ bool WHVivax::diagnosticDefault() const{
     return false;
 }
 
-Pathogenesis::State WHVivax::determineMorbidity(double ageYears){
-    return morbidity;
+Pathogenesis::StatePair WHVivax::determineMorbidity(double ageYears){
+    Pathogenesis::StatePair result;     // no indirect mortality in the vivax model
+    result.state = morbidity;
+    return result;
 }
 
 void WHVivax::clearImmunity(){

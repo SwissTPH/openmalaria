@@ -126,7 +126,7 @@ public:
      * 
      * @param ageYears Age of human host in years
      */
-    virtual Pathogenesis::State determineMorbidity( double ageYears ) =0;
+    virtual Pathogenesis::StatePair determineMorbidity( double ageYears ) =0;
 
     ///@brief Only do anything when IPT is present:
     //@{

@@ -39,30 +39,19 @@ namespace OM { namespace WithinHost { namespace Pathogenesis {
     MALARIA		= 0x2,		///< Malaria sickness
     SEVERE		= 0x8,		///< Severe malaria case
     COINFECTION		= 0x4,		///< Malaria with a coinfection
-    /// Used by ClinicalEventScheduler to indicate a second bout of malarial sickness within the same episode (roughly)
-    SECOND_CASE		= 0x10,
     COMPLICATED		= 0x20,		///< Flag used to indicate SEVERE and/or COINFECTION
     
-    //NEED_ANTIBIOTIC     = 0x40,         ///< Flag indicates a non-malaria fever requires (antibiotic) treatment
-    
-    MORBIDITY_MASK	= 0x7F,		///< Mask coving all above states
-    
-    // Flag used by pathogenesis model to tell the clinical model that individual will die; not used for reporting:
-    INDIRECT_MORTALITY	= 0x800,	///< Death caused by indirect effects of malaria
-    
     // Flags for outcome reporting:
-    EVENT_IN_HOSPITAL	= 0x400,	///< Indicates recovery/sequelae/death event occurred in hospital − only set on one of these events (ImmediateOutcomes only)
-    DIRECT_DEATH	= 0x1000,	///< Used for reporting death (from COMPLICATED sickness)
-    SEQUELAE		= 0x2000,	///< Reporting recovered with sequelae (from COMPLICATED sickness)
-    RECOVERY		= 0x4000,	///< Report that individual fully recovered
-    EVENT_FIRST_DAY	= 0x8000,	///< Used in combination with DIRECT_DEATH to report death happens on first day (before treatment has effect)
-    RUN_CM_TREE	= 0x10000,	///< Flag to indicate that CM tree should be run now or after a delay
-    
     STATE_NMF           = SICK, ///< Alias: SICK
     //STATE_NMF_NEED_AB    = SICK | NEED_ANTIBIOTIC,       ///< Combination: SICK, NEED_ANTIBIOTIC
     STATE_MALARIA	= SICK | MALARIA,	///< Combination: SICK, MALARIA
     STATE_SEVERE	= STATE_MALARIA | COMPLICATED | SEVERE,	///< Combination: SICK, MALARIA, COMPLICATED, SEVERE
     STATE_COINFECTION	= STATE_MALARIA | COMPLICATED | COINFECTION,	///< Combination: SICK, MALARIA, COMPLICATED, COINFECTION
+  };
+  struct StatePair{
+      StatePair() : state(NONE), indirectMortality(false) {}
+      State state;
+      bool indirectMortality;   // implies death a little later on which may not be seen as a malaria death
   };
 
 } } }

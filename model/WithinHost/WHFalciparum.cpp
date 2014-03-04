@@ -155,12 +155,12 @@ bool WHFalciparum::diagnosticDefault() const{
     return Diagnostic::default_.isPositive( totalDensity );
 }
 
-Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
-    Pathogenesis::State state =
+Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
+    Pathogenesis::StatePair result =
             pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
     
     /* Note: this model can easily be re-enabled, but is not used and not considered to be a good model.
-    if( (state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){
+    if( (result.state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){
         // This does immunity penalisation:
         _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
         if (_cumulativeY < 0) {
@@ -168,7 +168,7 @@ Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
         }
     }*/
     
-    return state;
+    return result;
 }
 
 

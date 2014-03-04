@@ -58,7 +58,7 @@ public:
      *
      * May introduce severe or uncomplicated cases of malaria, as well as non-
      * malaria fevers. */
-    State determineState(double ageYears, double timeStepMaxDensity, double endDensity);
+    StatePair determineState(double ageYears, double timeStepMaxDensity, double endDensity);
     
     /** Summarize PathogenesisModel details
      *

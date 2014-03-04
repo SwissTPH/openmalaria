@@ -27,7 +27,6 @@
 
 namespace OM {
 namespace Clinical {
-#define WHPathogenesis WithinHost::Pathogenesis
 
 namespace Regimen {
 /** Regimen: UC / UC2 / SEVERE.
@@ -74,14 +73,14 @@ private:
     /** Called when a non-severe/complicated malaria sickness occurs.
      *
      * @returns True in case of effective or partially effective treatment, false otherwise. */
-    bool uncomplicatedEvent(WHPathogenesis::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
+    bool uncomplicatedEvent(Episode::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
 
     /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
      *
      * @returns True in case of effective or partially effective treatment, false otherwise.
      *
      * Note: sets doomed = 4 if patient dies. */
-    bool severeMalaria(double ageYears, Monitoring::AgeGroup ageGroup, int& doomed, bool inCohort);
+    bool severeMalaria(Episode::State pgState, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed, bool inCohort);
 
     /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
     TimeStep _tLastTreatment;
