@@ -623,11 +623,19 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         monitoring.removeAttribute("firstTreatmentOnly")
         monitoring.removeAttribute("firstInfectionOnly")
 
-        val survOpts = getChildElement(monitoring, "SurveyOptions");
+        val survOpts = getChildElement(monitoring, "SurveyOptions")
         for (opt in getChildElements(survOpts, "option")){
             if (opt.getAttribute("name") == "nMassVA")
-                opt.setAttribute("name", "nMassGVI");
+                opt.setAttribute("name", "nMassGVI")
         }
+        
+        val model = getChildElement(scenarioElement, "model")
+        val modelOpts = getChildElement(model, "ModelOptions")
+        val opt = scenarioDocument.createElement("option")!!
+        opt.setAttribute("name", "INDIRECT_MORTALITY_FIX")
+        // This option could affect parameterisation, best to leave the bug fix off by default
+        opt.setAttribute("value", "false")
+        modelOpts.appendChild(opt)
         
         // From version 32, we use an explicit namespace; delete the old here,
         // the new is set by translateAndValidate()

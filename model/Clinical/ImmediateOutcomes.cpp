@@ -73,7 +73,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
     if (pgState & Episode::MALARIA) {
         if (pgState & Episode::COMPLICATED)
             effectiveTreatment = severeMalaria (pgState, ageYears, human.getMonitoringAgeGroup(), _doomed, human.isInAnyCohort());
-        else if (!pg.indirectMortality) {
+        else if (indirectMortBug && !pg.indirectMortality) {
             // NOTE: the "not indirect mortality" bit is a historical accident.
             // Validity is debatable, but there's no point changing now.
             // (This does affect tests.)

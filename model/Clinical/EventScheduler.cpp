@@ -232,7 +232,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
     }
     
-    bool indirectMortality = false;     // to emulate the old behaviour; probably a bug
+    bool indirectMortality = indirectMortBug ?
+        false : pg.indirectMortality;     // to emulate the old buggy behaviour
     if ( newState & Episode::SICK ){
         // we have some new case: is it severe/complicated?
         if ( newState & Episode::COMPLICATED ){
@@ -269,7 +270,6 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             }
         }
         
-        //TODO: why is indirect mortality only selectively used in the above?
         if (indirectMortality && _doomed == 0)
             _doomed = -TimeStep::interval; // start indirect mortality countdown
     }

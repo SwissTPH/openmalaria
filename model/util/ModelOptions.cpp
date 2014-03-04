@@ -74,6 +74,7 @@ namespace OM { namespace util {
             codeMap["MOLINEAUX_PAIRWISE_SAMPLE"]=MOLINEAUX_PAIRWISE_SAMPLE;
             codeMap["PROPHYLACTIC_DRUG_ACTION_MODEL"]=PROPHYLACTIC_DRUG_ACTION_MODEL;
             codeMap["VIVAX_SIMPLE_MODEL"] = VIVAX_SIMPLE_MODEL;
+            codeMap["INDIRECT_MORTALITY_FIX"] = INDIRECT_MORTALITY_FIX;
 	}
 	
 	OptionCodes operator[] (const string s) {
@@ -108,6 +109,7 @@ namespace OM { namespace util {
 	bitset<NUM_OPTIONS> defaultOptSet;
 	defaultOptSet.set (MAX_DENS_CORRECTION);
         defaultOptSet.set (INNATE_MAX_DENS);
+        defaultOptSet.set (INDIRECT_MORTALITY_FIX);
 	
 	// Set options to defaults, then override any given in the XML file:
 	options = defaultOptSet;
