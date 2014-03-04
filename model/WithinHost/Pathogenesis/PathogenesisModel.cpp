@@ -94,10 +94,9 @@ PathogenesisModel::PathogenesisModel(double cF) :
         _comorbidityFactor(cF)
 {}
 
-Pathogenesis::State PathogenesisModel::determineState (double ageYears, double timeStepMaxDensity, double endDensity) {
+Pathogenesis::StatePair PathogenesisModel::determineState (double ageYears, double timeStepMaxDensity, double endDensity) {
     double prEpisode = getPEpisode(timeStepMaxDensity, endDensity);
-    
-    Pathogenesis::State ret = Pathogenesis::NONE;
+    StatePair result;
 
     //Decide whether a clinical episode occurs and if so, which type
     if ((random::uniform_01()) < prEpisode) {
@@ -106,15 +105,15 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, double t
         double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
 
         if (random::uniform_01() < prSevereEpisode)
-            ret = Pathogenesis::STATE_SEVERE;
+            result.state = STATE_SEVERE;
         else {
             double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
             pCoinfection*=_comorbidityFactor;
 
             if (random::uniform_01() < pCoinfection)
-                ret = Pathogenesis::STATE_COINFECTION;
+                result.state = STATE_COINFECTION;
             else
-                ret = Pathogenesis::STATE_MALARIA;
+                result.state = STATE_MALARIA;
         }
 
         /* Indirect mortality
@@ -123,14 +122,15 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, double t
         */
         double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
         indirectRisk*=_comorbidityFactor;
-        if (random::uniform_01() < indirectRisk)
-            ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
+        if (random::uniform_01() < indirectRisk){
+            result.indirectMortality = true;
+        }
     } else if ( NMF_incidence->isSet() ) {
         if( random::uniform_01() < NMF_incidence->eval( ageYears ) ){
-            ret = Pathogenesis::STATE_NMF;
+            result.state = STATE_NMF;
         }
     }
-    return ret;
+    return result;
 }
 
 

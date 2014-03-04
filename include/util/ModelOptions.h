@@ -232,6 +232,17 @@ namespace OM { namespace util {
          * Currently fairly simple and only used by MDA. */
         PROPHYLACTIC_DRUG_ACTION_MODEL,
         
+        /** Bug fixes:
+         * 
+         * Without this, the 5-day case management leaves uncomplicated cases
+         * with indirect mortality untreated, and the 1-day case management 
+         * forgets to apply indirect mortality if the sickness state doesn't
+         * change.
+         * 
+         * This option fixes both bugs (though only one would have any effect,
+         * depending on which case management model is used). */
+        INDIRECT_MORTALITY_FIX,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

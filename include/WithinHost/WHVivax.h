@@ -93,8 +93,7 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHVivax();
-    virtual void setComorbidityFactor( double factor );
+    WHVivax( double comorbidityFactor );
     virtual ~WHVivax();
     //@}
     
@@ -108,7 +107,7 @@ public:
     
     virtual bool diagnosticDefault() const;
 
-    virtual Pathogenesis::State determineMorbidity( double ageYears );
+    virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
     
     virtual void clearImmunity();
     

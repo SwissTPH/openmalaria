@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ESDecisionValue.h"
+#include "Clinical/Episode.h"
 #include <schema/healthSystem.h>
 
 #include <map>
@@ -35,15 +36,14 @@ namespace WithinHost {
 }
 namespace Clinical {
     using WithinHost::WHInterface;
-#define WHPathogenesis WithinHost::Pathogenesis
     using boost::unordered_map;
 
 struct ESHostData {
-    ESHostData (double aY, WHInterface& wH, WHPathogenesis::State pS) :
+    ESHostData (double aY, WHInterface& wH, Episode::State pS) :
         ageYears(aY), withinHost(wH), pgState(pS) {}
     double ageYears;
     WHInterface& withinHost;
-    WHPathogenesis::State pgState;
+    Episode::State pgState;
 };
 
 

@@ -52,16 +52,12 @@ public:
     static void init(const OM::Parameters& parameters, const scnXml::Scenario& scenario);
 
     /// Create an instance using the appropriate model
-    static WHInterface* createWithinHostModel ();
+    static WHInterface* createWithinHostModel( double comorbidityFactor );
     //@}
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
     WHInterface();
-    /** Second step of initialisation (could be combined with constructor, but
-     * for the moment separate to avoid changing the order of random number
-     * samples). */
-    virtual void setComorbidityFactor( double factor ) =0;
     virtual ~WHInterface();
 
     /// Checkpointing
@@ -130,7 +126,7 @@ public:
      * 
      * @param ageYears Age of human host in years
      */
-    virtual Pathogenesis::State determineMorbidity( double ageYears ) =0;
+    virtual Pathogenesis::StatePair determineMorbidity( double ageYears ) =0;
 
     ///@brief Only do anything when IPT is present:
     //@{

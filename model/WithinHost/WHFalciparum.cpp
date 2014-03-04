@@ -89,19 +89,15 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
 
 // -----  Non-static  -----
 
-WHFalciparum::WHFalciparum():
+WHFalciparum::WHFalciparum( double comorbidityFactor ):
     WHInterface(),
     _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
-    totalDensity(0.0), timeStepMaxDensity(0.0)
+    totalDensity(0.0), timeStepMaxDensity(0.0),
+    pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
 {
     _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
     
     _ylag.assign (_ylagLen, 0.0);
-}
-void WHFalciparum::setComorbidityFactor(double factor)
-{
-    pathogenesisModel = auto_ptr<Pathogenesis::PathogenesisModel>(
-        Pathogenesis::PathogenesisModel::createPathogenesisModel(factor) );
 }
 
 WHFalciparum::~WHFalciparum()
@@ -159,12 +155,12 @@ bool WHFalciparum::diagnosticDefault() const{
     return Diagnostic::default_.isPositive( totalDensity );
 }
 
-Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
-    Pathogenesis::State state =
+Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
+    Pathogenesis::StatePair result =
             pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
     
     /* Note: this model can easily be re-enabled, but is not used and not considered to be a good model.
-    if( (state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){
+    if( (result.state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){
         // This does immunity penalisation:
         _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
         if (_cumulativeY < 0) {
@@ -172,7 +168,7 @@ Pathogenesis::State WHFalciparum::determineMorbidity(double ageYears){
         }
     }*/
     
-    return state;
+    return result;
 }
 
 

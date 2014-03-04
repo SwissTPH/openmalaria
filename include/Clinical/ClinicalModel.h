@@ -161,6 +161,8 @@ protected:
    * population at the beginning of the next timestep. NOTE: why not
    * immediately? See above enum for positive values used. */
   int _doomed;
+  
+  static bool indirectMortBug;  // true if bug fix NOT enabled
 };
 
 } }

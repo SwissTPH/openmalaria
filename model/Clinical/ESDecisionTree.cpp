@@ -312,8 +312,8 @@ namespace OM { namespace Clinical {
 	UC2 = dvMap.get( decision, "UC2" );
     }
     ESDecisionValue ESDecisionUC2Test::determineImpl (const ESDecisionValue, const ESHostData& hostData) const {
-	assert (hostData.pgState & WHPathogenesis::SICK && !(hostData.pgState & WHPathogenesis::COMPLICATED));
-	if (hostData.pgState & WHPathogenesis::SECOND_CASE)
+	assert ((hostData.pgState & Episode::SICK) && !(hostData.pgState & Episode::COMPLICATED));
+	if (hostData.pgState & Episode::SECOND_CASE)
 	    return UC2;
 	else
 	    return UC1;

@@ -137,7 +137,7 @@ private:
     // have a vtable followed by 3 ints, a double and a list. Alignment probably
     // wastes some space.
     /// Current state of sickness
-    WHPathogenesis::State pgState;
+    Episode::State pgState;
 
     /** Set to when a bout should start. If TimeStep::simulation equals this, a bout
      * is started (UC & severe behaviour different).

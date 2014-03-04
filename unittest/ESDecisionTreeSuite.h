@@ -31,7 +31,6 @@
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
-using namespace OM::WithinHost::Pathogenesis;
 using namespace OM::WithinHost;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
@@ -48,9 +47,9 @@ public:
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
-        whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel() );
+        whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel( 1.0 ) );
         ETS_ASSERT( whm != 0 );
-	hd = new ESHostData( numeric_limits< double >::quiet_NaN(), *whm, NONE );
+	hd = new ESHostData( numeric_limits< double >::quiet_NaN(), *whm, Episode::NONE );
 
 	UnittestUtil::EmpiricalWHM_setup();
 	// could seed random-number-generator, but shouldn't affect outcomes
@@ -58,7 +57,7 @@ public:
 	
 	dvMap = new ESDecisionValueMap;
 	hd->ageYears = numeric_limits< double >::quiet_NaN();
-	hd->pgState = NONE;
+	hd->pgState = Episode::NONE;
     }
     void tearDown () {
 	delete dvMap;
@@ -126,7 +125,7 @@ public:
 	ESHostData hd(
 		numeric_limits< double >::quiet_NaN(),
 		*whm,
-		NONE
+		Episode::NONE
 	);
 	
 	// random decision
@@ -338,15 +337,15 @@ public:
     
     void testUC2Test () {
 	ESDecisionUC2Test d( *dvMap );
-	hd->pgState = STATE_MALARIA;
+	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
 	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), *hd ), dvMap->get( "case", "UC1" ) );
-	hd->pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
+	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA | Episode::SECOND_CASE );
 	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), *hd ), dvMap->get( "case", "UC2" ) );
     }
     
     void testParasiteTest () {
 	ESDecisionParasiteTest d( *dvMap );
-	hd->pgState = STATE_MALARIA;
+        hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
 	const int N = 20000;
 	const double LIM = .02;
 	double propPos;	// proportion positive
@@ -431,7 +430,7 @@ public:
 	dMap.initialize( xmlCM, ESDecisionMap::Uncomplicated, false );
 	
 	hd->ageYears = 2;
-	hd->pgState = static_cast<State>( STATE_MALARIA | SECOND_CASE );
+	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA | Episode::SECOND_CASE );
 	UnittestUtil::setTotalParasiteDensity( *whm, 4000. );	// lots of parasites
 	
 	const int N = 100000;	// number of times to sample

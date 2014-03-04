@@ -500,16 +500,16 @@ CMAuxOutput ESCaseManagement::execute (
         list<MedicateData>& medicateQueue,
         bool inCohort
 ) {
-    assert (hostData.pgState & WHPathogenesis::SICK);
+    assert (hostData.pgState & Episode::SICK);
     // We always remove any queued medications.
     medicateQueue.clear();
     
-    ESDecisionMap *map = (hostData.pgState & WHPathogenesis::COMPLICATED) ? &complicated : &uncomplicated;
+    ESDecisionMap *map = (hostData.pgState & Episode::COMPLICATED) ? &complicated : &uncomplicated;
     ESDecisionValue outcome = executeTree( map, hostData, medicateQueue, inCohort ).first;
     
     CMAuxOutput auxOut;
     auxOut.hospitalisation = CMAuxOutput::NONE;
-    if( hostData.pgState & WHPathogenesis::COMPLICATED )
+    if( hostData.pgState & Episode::COMPLICATED )
 	auxOut.hospitalisation = map->hospitalisation(outcome);
     auxOut.diagnostic = map->diagnostic(outcome);
     auxOut.AB_provider = map->AB_provider(outcome);

@@ -966,6 +966,7 @@
       <option name="PREDETERMINED_EPISODES" value="true"/>
       <option name="MAX_DENS_CORRECTION" value="false"/>
       <option name="INNATE_MAX_DENS" value="false"/>
+      <option name="INDIRECT_MORTALITY_FIX" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
     <human>

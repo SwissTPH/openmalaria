@@ -35,8 +35,8 @@ extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
 
 // -----  Initialization  -----
 
-DescriptiveWithinHostModel::DescriptiveWithinHostModel() :
-        WHFalciparum()
+DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor ) :
+        WHFalciparum( comorbidityFactor )
 {
     assert( TimeStep::interval == 5 );
 }

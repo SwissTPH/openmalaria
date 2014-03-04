@@ -50,8 +50,7 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHFalciparum();
-    virtual void setComorbidityFactor( double factor );
+    WHFalciparum( double comorbidityFactor );
     virtual ~WHFalciparum();
     //@}
     
@@ -63,7 +62,7 @@ public:
     
     virtual bool diagnosticDefault() const;
 
-    virtual Pathogenesis::State determineMorbidity( double ageYears );
+    virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
 
     inline double getCumulativeh() const {
         return _cumulativeh;

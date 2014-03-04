@@ -382,6 +382,7 @@
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
+      <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="6"/>
     <human>

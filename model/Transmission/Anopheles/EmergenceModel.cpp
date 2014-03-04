@@ -155,8 +155,8 @@ void EmergenceModel::scaleEIR( double factor ) {
 // Every TimeStep::interval days:
 void EmergenceModel::update () {
     emergenceSurvival = 1.0;
-    for( size_t i = 0; i < emergence.size(); ++i )
-        emergenceSurvival *= 1.0 - emergence[i].current_value( TimeStep::simulation );
+    for( size_t i = 0; i < emergenceReduction.size(); ++i )
+        emergenceSurvival *= 1.0 - emergenceReduction[i].current_value( TimeStep::simulation );
 }
 
 void EmergenceModel::checkpoint (istream& stream){ (*this) & stream; }
@@ -165,23 +165,23 @@ void EmergenceModel::checkpoint (ostream& stream){ (*this) & stream; }
 // -----  Summary and intervention functions  -----
 
 void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance ){
-    if( emergence.size() <= instance )
-        emergence.resize( instance+1 );
+    if( emergenceReduction.size() <= instance )
+        emergenceReduction.resize( instance+1 );
     
     if( elt.getEmergenceReduction().present() ){
         const scnXml::EmergenceReduction& elt2 = elt.getEmergenceReduction().get();
         if( elt2.getInitial() < 0.0 || elt2.getInitial() > 1.0 )
             throw util::xml_scenario_error( "emergenceReduction intervention: initial effect must be in range [0,1]" );
-        emergence[instance].set (elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
+        emergenceReduction[instance].set (elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
     }
 }
 
 void EmergenceModel::deployVectorPopInterv (size_t instance) {
-    assert( instance < emergence.size() );
+    assert( instance < emergenceReduction.size() );
     
     // Note: intervention acts first on time-step following (+1) deployment.
     // This at least is consistent with previous results and gives the correct number of time steps of deployment
-    emergence[instance].deploy( TimeStep::simulation + TimeStep(1) );
+    emergenceReduction[instance].deploy( TimeStep::simulation + TimeStep(1) );
 }
 
 

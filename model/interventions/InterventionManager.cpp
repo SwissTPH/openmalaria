@@ -21,12 +21,12 @@
 #include "interventions/InterventionManager.hpp"
 #include "Population.h"
 #include "util/random.h"
-#include <util/CommandLine.h>
+#include "util/CommandLine.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/GVI.h"
 #include "interventions/IRS.h"
 #include "interventions/ITN.h"
-#include"interventions/Vaccine.h"
+#include "interventions/Vaccine.h"
 #include "interventions/HumanInterventionEffects.hpp"
 #include "interventions/Deployments.hpp"
 #include "WithinHost/Diagnostic.h"
@@ -283,7 +283,8 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
 
     // lists must be sorted, increasing
     // For reproducability, we need to use stable_sort, not sort.
-    // NOTE: I'd rather use stable_sort, but it's not available. Results are
+    // NOTE: I'd rather use stable_sort, but it's not available. We also can't
+    // use std::stable_sort (from <algorithm>). Results are
     // the same without as with a hacked BOOST version including stable_sort.
     continuous.sort();
     timed.sort();
