@@ -889,37 +889,145 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="DrugWithCompliance">
+  <xs:complexType name="TreatmentDescription">
     <xs:annotation>
       <xs:documentation>
-        A simple description of the effect of a drug regime administration in
-        terms of clearance rates on administration and optionally for several
-        further timesteps (a simple model for prophylactic effects).
+        A description of a course of treatment.
+        
+        Treatments given according to the description will randomly select a
+        "compliance group" (these allow effects to differ based on factors
+        randomly chosen at the time of deployment such as compliance/adherence
+        and possibly drug quality), then apply the effects described for that
+        compliance group.
       </xs:documentation>
-      <xs:appinfo>name:Drug regime effect</xs:appinfo>
+      <xs:appinfo>name:Treatment description</xs:appinfo>
     </xs:annotation>
     <xs:all>
-      <xs:element name="compliance">
+      <xs:element name="group">
         <xs:annotation>
-          <xs:appinfo>name:Description of compliance;</xs:appinfo>
+          <xs:documentation>
+            Describes the effects of the treatment, assuming this
+            compliance/adherence/... group is selected. Effects are described
+            in terms of a list of options, each of which acts independently but
+            with all effects being activated simultaneously.
+          </xs:documentation>
+          <xs:appinfo>name:Group (for compliance/adherence/drug effect);</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
-          <xs:attribute name="pCompliance" type="xs:double" use="required">
+          <xs:sequence>
+            <xs:element name="effectiveTreatment" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  This is the old treatment action: clear everything or do
+                  nothing. Originally, this is what both the health system and
+                  MDA did, with immediate action and targeting both liver and
+                  blood stages.
+                  
+                  This revision allows delayed action and selection of which
+                  stages are targeted. It is a simple model but appropriate
+                  enough for use with the 5 day timestep when assuming no
+                  resistance and that drug failure is mainly caused by bad
+                  drugs or compliance.
+                </xs:documentation>
+                <xs:appinfo>name:Effective treatment;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="immediateAction" type="xs:boolean">
+                  <xs:annotation>
+                    <xs:documentation>
+                      If true, the effect occurs immediately. This is the old
+                      behaviour but not recommended.
+                      
+                      If false, action occurs at the next timestep. This means
+                      that (a) if multiple treatments happen during a single
+                      timestep and diagnostics are used, that diagnostic
+                      outcome will not depend on the order of treatment
+                      (instead parasite densities will remain unchanged until
+                      the following timestep) and (b) that infections starting
+                      on the next timestep will also be cleared.
+                    </xs:documentation>
+                    <xs:appinfo>name:Immediate action;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="stage">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Controls whether liver-stage or blood-stage infections
+                      are cleared, or both. The old behaviour (oddly
+                      considering the drugs it is meant to emulate) is to clear
+                      both stages, except for the IPT model which cleared only
+                      blood-stage infections.
+                    </xs:documentation>
+                    <xs:appinfo>name:Target stage;</xs:appinfo>
+                  </xs:annotation>
+                  <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                      <xs:enumeration value="liver"/>
+                      <xs:enumeration value="blood"/>
+                      <xs:enumeration value="both"/>
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="prophylacticTreatment" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  This introduces a prophylactic effect, lasting a given
+                  number of timesteps. Throughout the duration of action, this
+                  is fully effective (100% clearance). Using this with
+                  timesteps=1 is the same as using effectiveTreatment with
+                  immediateAction=false.
+                </xs:documentation>
+                <xs:appinfo>name:Prophylactic treatment;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="timesteps" type="xs:int">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The number of timesteps during which this action remains
+                      in effect (e.g. 2 means clear infections during the next
+                      two timestep updates).
+                    </xs:documentation>
+                    <xs:appinfo>name:Length of effect;units:Timesteps;min:1;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="stage">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Controls whether liver-stage or blood-stage infections
+                      are cleared, or both.
+                    </xs:documentation>
+                    <xs:appinfo>name:Target stage;</xs:appinfo>
+                  </xs:annotation>
+                  <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                      <xs:enumeration value="liver"/>
+                      <xs:enumeration value="blood"/>
+                      <xs:enumeration value="both"/>
+                    </xs:restriction>
+                  </xs:simpleType>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="name" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>
-                Proportion of drug recipients who comply with the dosage regime.
+                Describes what this compliance group represents (e.g.
+                "good compliance", "poor compliance with good drugs", ...).
               </xs:documentation>
-              <xs:appinfo>name:Compliance;units:Dimensionless;min:0;max:1;</xs:appinfo>
+              <xs:appinfo>name:Name;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="nonCompliersMultiplier" type="xs:double" use="required">
+          <xs:attribute name="pSelection" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
-                Describes clearance probabilities for non-compliers in relation
-                to those for compliers: each probability of clearing infections
-                is multiplied by this value.
+                Probability that this compliance group is selected. The sum of
+                probabilities of selection across all compliance groups should
+                equal one.
               </xs:documentation>
-              <xs:appinfo>name:Clearance probability multiplier for non-compliers;units:Dimensionless;min:0;max:1;</xs:appinfo>
+              <xs:appinfo>name:Probability of selection;units:Dimensionless;min:0;max:1;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>

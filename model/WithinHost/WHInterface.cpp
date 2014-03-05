@@ -39,6 +39,8 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
+
+TreatmentId TreatmentId::legacy( 0 );
  
 bool opt_vivax_simple = false,
         opt_dummy_whm = false, opt_empirical_whm = false,
@@ -72,6 +74,11 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;
     }
+}
+
+TreatmentId WHInterface::addTreatment(const scnXml::TreatmentDescription& desc){
+    //TODO
+    return TreatmentId( -1 );    // doesn't exist
 }
 
 WHInterface* WHInterface::createWithinHostModel ( double comorbidityFactor ) {

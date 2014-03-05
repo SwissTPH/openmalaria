@@ -41,9 +41,7 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor
     assert( TimeStep::interval == 5 );
 }
 
-DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
-    effectiveTreatment();       //TODO: this should happen implicitly
-}
+DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
 
 
 // -----  Simple infection adders/removers  -----
@@ -55,7 +53,8 @@ void DescriptiveWithinHostModel::loadInfection(istream& stream) {
     infections.push_back(new DescriptiveInfection(stream));
 }
 
-void DescriptiveWithinHostModel::effectiveTreatment() {
+void DescriptiveWithinHostModel::treatment( TreatmentId treatment ){
+    if( treatment != TreatmentId::legacy ) throw util::unimplemented_exception( "configurable treatments" );
     std::list<DescriptiveInfection*>::iterator inf;
     for (inf=infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;

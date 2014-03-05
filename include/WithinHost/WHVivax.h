@@ -113,7 +113,7 @@ public:
     
 protected:
     virtual InfectionCount countInfections () const;
-    virtual void effectiveTreatment();
+    virtual void treatment( TreatmentId treatment );
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

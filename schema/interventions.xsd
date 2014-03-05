@@ -420,7 +420,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo> name:Diagnostic (5-day);</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="drugEffect" type="om:DrugWithCompliance"/>
+            <xs:element name="effects" type="om:TreatmentDescription"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

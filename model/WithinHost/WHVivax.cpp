@@ -194,7 +194,8 @@ WHInterface::InfectionCount WHVivax::countInfections () const{
     }
     return count;
 }
-void WHVivax::effectiveTreatment(){
+void WHVivax::treatment( TreatmentId treatment ){
+    if( treatment != TreatmentId::legacy ) throw util::unimplemented_exception( "configurable vivax treatments" );
     // This means clear blood stage infection(s), and
     // possibly use Primaquine to clear some hypnozoites from the liver.
     

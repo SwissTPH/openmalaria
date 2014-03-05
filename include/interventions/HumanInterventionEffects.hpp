@@ -73,7 +73,11 @@ void HumanIntervention::print_details( std::ostream& out )const{
 
 class MDAEffect : public HumanInterventionEffect {
 public:
-    MDAEffect( EffectId id, const scnXml::MDA& mda ) : HumanInterventionEffect(id) {
+    MDAEffect( EffectId id, const scnXml::MDA& mda ) :
+        HumanInterventionEffect(id),
+        //TODO: treatment should probably only be referenced here and described elsewhere in the XML
+        treatId( WithinHost::WHInterface::addTreatment( mda.getEffects() ) )
+    {
         if( !mda.getDiagnostic().present() ){
             // Note: allow no description for now to avoid XML changes.
             //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
@@ -81,28 +85,6 @@ public:
         }else{
             diagnostic.setXml( mda.getDiagnostic().get() );
         }
-        const scnXml::DrugWithCompliance& drug = mda.getDrugEffect();
-        double pCompliance = drug.getCompliance().getPCompliance();
-        double nonComplierMult = drug.getCompliance().getNonCompliersMultiplier();
-        double mult = pCompliance + (1.0 - pCompliance) * nonComplierMult;
-        const scnXml::CompliersEffective::TimestepSequence& seq =
-                drug.getCompliersEffective().getTimestep();
-        size_t len = seq.size();
-        pClearanceByTime.resize(len);
-        for( size_t i = 0; i < len; ++i ){
-            double pCompliers = seq[i].getPClearance();
-            pClearanceByTime[i] = mult * pCompliers;
-        }
-        if( len < 1 ){
-            throw util::xml_scenario_error(
-                "interventions.human.effect.MDA.drugEffect: require at "
-                "least one timestep element" );
-        }
-        if( len > 1 ){
-            if( true /*model not implemented*/ )
-                throw util::xml_scenario_error(
-                    "MDA with prophylactic effect (unimplemented)" );
-        }   
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
@@ -115,15 +97,8 @@ public:
         }
         Monitoring::Surveys.getSurvey(human.isInAnyCohort())
                 .reportMDA(human.getMonitoringAgeGroup(), 1);
-	
-        double pClearance = pClearanceByTime[0];
-        if( pClearance >= 1.0 || util::random::bernoulli( pClearance ) ){
-            human.withinHostModel->effectiveTreatment();
-        }
-        if( pClearanceByTime.size() > 1 ){
-            //TODO:...
-//             human.withinHostModel->addProphylacticEffects( pClearanceByTime );
-        }
+        
+        human.withinHostModel->treatment( treatId );
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA; }
@@ -136,7 +111,7 @@ public:
     
 private:
     WithinHost::Diagnostic diagnostic;
-    vector<double> pClearanceByTime;
+    WithinHost::TreatmentId treatId;
 };
 
 class MDA1DEffect : public HumanInterventionEffect {

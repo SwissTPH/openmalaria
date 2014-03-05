@@ -88,7 +88,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         _doomed = -TimeStep::interval;
     
     if (effectiveTreatment) {
-        human.withinHostModel->effectiveTreatment();
+        human.withinHostModel->treatment( WithinHost::TreatmentId::legacy );
     }
 
     if( _tLastTreatment == TimeStep::simulation ){

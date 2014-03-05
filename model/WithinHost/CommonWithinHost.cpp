@@ -51,7 +51,8 @@ CommonWithinHost::~CommonWithinHost() {
 
 // -----  Simple infection adders/removers  -----
 
-void CommonWithinHost::effectiveTreatment() {
+void CommonWithinHost::treatment( TreatmentId treatment ){
+    if( treatment != TreatmentId::legacy ) throw util::unimplemented_exception( "configurable treatments" );
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         delete *inf;
     }

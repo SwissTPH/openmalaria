@@ -44,7 +44,7 @@ public:
     
     
     virtual void importInfection();
-    virtual void effectiveTreatment();
+    virtual void treatment( TreatmentId treatment );
     
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
     virtual void clearImmunity();
