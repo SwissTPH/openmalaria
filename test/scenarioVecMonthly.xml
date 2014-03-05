@@ -24,11 +24,6 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <continuous duringInit="false" period="1">
-      <option name="input EIR" value="true"/>
-      <option name="simulated EIR" value="true"/>
-      <option name="human infectiousness" value="true"/>
-    </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nExpectd" value="true"/>
@@ -45,6 +40,7 @@
       <option name="Vector_Sv" value="true"/>
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
+      <option name="annAvgK"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>6</surveyTime>
@@ -99,7 +95,52 @@
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="No interventions"/>
+  <interventions name="vector pop tests">
+    <vectorPop>
+      <intervention name="increase deaths">
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <seekingDeathRateIncrease initial="0.5">
+              <decay function="step" L="0.2"/>
+            </seekingDeathRateIncrease>
+            <probDeathOvipositing initial="0.8">
+              <decay function="exponential" L="0.05"/>
+            </probDeathOvipositing>
+          </anopheles>
+        </description>
+        <timed>
+          <deploy time="30"/>
+        </timed>
+      </intervention>
+      <intervention name="increase emergence">
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <emergenceReduction initial="-3">
+              <decay function="linear" L="0.3"/>
+            </emergenceReduction>
+          </anopheles>
+        </description>
+        <timed>
+          <deploy time="60"/>
+        </timed>
+      </intervention>
+      <intervention name="weird combo">
+        <description>
+          <anopheles mosquito="gambiae_ss">
+            <emergenceReduction initial="0.6">
+              <decay function="weibull" k="3" L="0.8"/>
+            </emergenceReduction>
+            <seekingDeathRateIncrease initial="-1">
+              <decay function="weibull" k="3" L="0.4"/>
+            </seekingDeathRateIncrease>
+          </anopheles>
+        </description>
+        <timed>
+          <deploy time="90"/>
+        </timed>
+      </intervention>
+    </vectorPop>
+  </interventions>
   <healthSystem>
     <ImmediateOutcomes name="TanzaniaSP 04">
       <drugRegimen firstLine="SP" inpatient="QN" secondLine="SP"/>
