@@ -482,14 +482,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Vaccines;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="IPT" minOccurs="0" type="om:IPTDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Description of IPT interventions.
-          </xs:documentation>
-          <xs:appinfo>name:Intermittent preventative treatment;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
       <xs:element name="ITN" minOccurs="0" type="om:ITNDescription">
         <xs:annotation>
           <xs:documentation>

@@ -88,7 +88,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         _doomed = -TimeStep::interval;
     
     if (effectiveTreatment) {
-        human.withinHostModel->clearInfections (latestReport.isComplicated());
+        human.withinHostModel->effectiveTreatment();
     }
 
     if( _tLastTreatment == TimeStep::simulation ){

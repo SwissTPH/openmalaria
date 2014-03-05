@@ -22,7 +22,7 @@
 
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
-#include "WithinHost/DescriptiveIPTWithinHost.h"        // only for summarizing
+#include "WithinHost/WHInterface.h"
 
 #include "Transmission/TransmissionModel.h"
 #include "Monitoring/Surveys.h"

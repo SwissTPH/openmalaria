@@ -87,8 +87,6 @@ public:
    */
   void update(bool inCohort, Monitoring::AgeGroup ageGroup, Episode::State newState);
   
-  bool isComplicated() const {return _state & COMPLICATED;};
-  
   /// Checkpointing
   void operator& (istream& stream);
   void operator& (ostream& stream);	///< ditto

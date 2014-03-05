@@ -32,7 +32,6 @@
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
 #include "WithinHost/Diagnostic.h"
-#include "WithinHost/DescriptiveIPTWithinHost.h"
 #include <schema/healthSystem.h>
 #include <schema/interventions.h>
 
@@ -119,7 +118,7 @@ public:
 	
         double pClearance = pClearanceByTime[0];
         if( pClearance >= 1.0 || util::random::bernoulli( pClearance ) ){
-            human.withinHostModel->clearInfections(false/*value doesn't matter*/);
+            human.withinHostModel->effectiveTreatment();
         }
         if( pClearanceByTime.size() > 1 ){
             //TODO:...

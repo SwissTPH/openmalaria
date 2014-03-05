@@ -81,14 +81,14 @@ public:
 
     /// Create a new infection within this human
     virtual void importInfection() =0;
-    /** Conditionally clears all infections. Not used with the PK/PD model.
-     *
-     * If IPT isn't present, this just calls effectiveTreatment().
-     * 
-     * When using the IPT model, this conditionally either does the above or
-     * does nothing.
+
+    /**
+     * Used with simple drug models where treatment is either effective or non-
+     * existant. This clears all blood-stage asexual parasites, and in the case
+     * of vivax may clear some liver stage as well as gametocytes (sexual
+     * stage).
      */
-    virtual void clearInfections (bool isSevere);
+    virtual void effectiveTreatment() =0;
 
     /** Medicate drugs (wraps drug's medicate).
      *
@@ -128,16 +128,6 @@ public:
      */
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears ) =0;
 
-    ///@brief Only do anything when IPT is present:
-    //@{
-    /// Continuous deployment for IPT
-    virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-    /// Timed deployment for IPT
-    virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-    /// Last IPTi dose recent enough to give protection?
-    virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
-    //@}
-    
     /// Special intervention: clears all immunity
     virtual void clearImmunity() =0;
     
@@ -164,17 +154,6 @@ protected:
      * @returns Number of infections, patent and total
      */
     virtual InfectionCount countInfections () const =0;
-
-    /**
-     * Used with simple drug models where treatment is either effective or non-
-     * existant. This clears all blood-stage asexual parasites, and in the case
-     * of vivax may clear some liver stage as well as gametocytes (sexual
-     * stage).
-     *
-     * Normally clearInfections() would be called instead, which, when IPT is not
-     * active, just calls this function (although this needs to be changed for
-     * PK_PD integration). */
-    virtual void effectiveTreatment() =0;
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

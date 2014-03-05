@@ -21,7 +21,6 @@
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
 #include "WithinHost/DescriptiveWithinHost.h"
-#include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
@@ -94,26 +93,12 @@ WHInterface::~WHInterface()
 }
 
 
-void WHInterface::clearInfections (bool) {
-    effectiveTreatment();
-}
-
 void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){
     throw TRACED_EXCEPTION( "should not call medicate() except with CommonWithinHost model", util::Error::WHFeatures );
 }
 
 double WHInterface::getTotalDensity() const{
     throw TRACED_EXCEPTION( "should not call getTotalDensity() with non-falciparum model", util::Error::WHFeatures );
-}
-
-void WHInterface::continuousIPT (Monitoring::AgeGroup, bool) {
-    throw util::xml_scenario_error (string ("Continuous IPT treatment when no IPT description is present in interventions"));
-}
-void WHInterface::timedIPT (Monitoring::AgeGroup, bool) {
-    throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
-}
-bool WHInterface::hasIPTiProtection (TimeStep maxInterventionAge) const {
-    throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 
 double WHInterface::getCumulativeh() const{
