@@ -86,8 +86,6 @@ void DescriptiveWithinHostModel::importInfection(){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::drugAction(){}
-
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor) {
     // Cache total density for infectiousness calculations
     _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
@@ -115,8 +113,6 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     double cumulativeY=_cumulativeY;
     _cumulativeh += nNewInfs;
     
-    drugAction();
-
     for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
         // CommonWithinHost.cpp, but a few changes would be needed:

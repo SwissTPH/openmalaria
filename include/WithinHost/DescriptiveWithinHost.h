@@ -56,8 +56,6 @@ protected:
   /// IPT extension
   virtual bool eventSPClears (DescriptiveInfection* inf) { return false; }
   
-  virtual void drugAction();    // for prophylactic effect;     //TODO(drug action)
-  
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
