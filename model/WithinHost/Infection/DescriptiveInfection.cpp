@@ -145,7 +145,8 @@ void DescriptiveInfection::determineDensities(double ageInYears,
                                               double innateImmSurvFact,
                                               double bsvFactor)
 {
-    // Age of blood stage infection (starts latentp intervals after inoculation):
+    // Age of patent blood stage infection. Note: liver stage is fixed at one
+    // 5-day timestep and prepatent blood stage is latentp - 1 timesteps.
     TimeStep infage = TimeStep::simulation - _startdate - latentp;
     if ( infage < TimeStep(0)) {
         _density = 0.0;

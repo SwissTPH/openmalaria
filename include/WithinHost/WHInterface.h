@@ -26,8 +26,6 @@
 #include "WithinHost/Pathogenesis/State.h"
 #include "Parameters.h"
 
-#include <list>
-
 using namespace std;
 
 namespace scnXml{
@@ -59,8 +57,6 @@ struct TreatmentId{
     inline bool operator==( const TreatmentId that ){ return id == that.id; }
     inline bool operator!=( const TreatmentId that ){ return id != that.id; }
     
-    // for internal (to WithinHost) use only:
-    explicit TreatmentId( uint32_t id ): id(id) {}
     uint32_t id;
 };
 

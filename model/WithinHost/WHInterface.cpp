@@ -26,6 +26,7 @@
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Infection/PennyInfection.h"
+#include "WithinHost/Treatments.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -40,8 +41,6 @@ namespace WithinHost {
 
 using namespace OM::util;
 
-TreatmentId TreatmentId::legacy( 0 );
- 
 bool opt_vivax_simple = false,
         opt_dummy_whm = false, opt_empirical_whm = false,
         opt_molineaux_whm = false, opt_penny_whm = false,
@@ -74,11 +73,11 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;
     }
+    Treatments::init();
 }
 
 TreatmentId WHInterface::addTreatment(const scnXml::TreatmentDescription& desc){
-    //TODO
-    return TreatmentId( -1 );    // doesn't exist
+    return Treatments::addTreatment( desc );
 }
 
 WHInterface* WHInterface::createWithinHostModel ( double comorbidityFactor ) {

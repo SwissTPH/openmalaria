@@ -45,6 +45,24 @@ public:
   inline TimeStep getStartDate() {
       return _startdate;
   }
+  /** Return true if infection is blood stage.
+   * 
+   * Note: infections are considered to be liver stage for one 5-day timestep.
+   * The remainder of the "latentP" (pre-patent) period is blood-stage, where
+   * blood-stage drugs do have an effect but parasites are not detectible.
+   * 
+   * Note 2: this gets called when deciding which infections to clear. If
+   * clearing while updating infections (delayed treatment effect), infections
+   * are liver-stage on the timestep they start and blood-stage on the next
+   * update, thus can be cleared the first timestep they are considered
+   * blood-stage. If clearing immediately (legacy health system and MDA
+   * effect), clearance of blood stage infections can only happen after their
+   * first update (though due to the latent period densities will still be
+   * low). */
+  inline bool bloodStage() const{
+      assert( TimeStep::interval == 5 );        // one timestep for liver stage not appropriate otherwise
+      return TimeStep::simulation - _startdate > TimeStep(1);
+  }
   //! Get proteome
   inline uint32_t get_proteome_ID() const {
     return proteome_ID;

@@ -41,23 +41,23 @@ CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
     assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }
 
-CommonWithinHost::~CommonWithinHost() {
-    //TODO: this should all happen implicitly
-    delete pkpdModel;
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        delete *inf;
-    }
-}
+CommonWithinHost::~CommonWithinHost() {}
 
 // -----  Simple infection adders/removers  -----
 
-void CommonWithinHost::treatment( TreatmentId treatment ){
-    if( treatment != TreatmentId::legacy ) throw util::unimplemented_exception( "configurable treatments" );
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        delete *inf;
+void CommonWithinHost::clearInfections( Treatments::Stages stage ){
+    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+        if( stage == Treatments::BOTH ||
+            (stage == Treatments::LIVER && !(*inf)->bloodStage()) ||
+            (stage == Treatments::BLOOD && (*inf)->bloodStage())
+        ){
+            delete *inf;
+            inf = infections.erase( inf );
+        }else{
+            ++inf;
+        }
     }
-    infections.clear();
-    numInfs=0;
+    numInfs = infections.size();
 }
 
 // -----  interventions -----
@@ -113,14 +113,25 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor)
     double cumulativeY=_cumulativeY;
     _cumulativeh += nNewInfs;
 
+    bool treatmentLiver = treatExpiryLiver >= TimeStep::simulation;
+    bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
+    bool treatmentBoth = treatmentLiver && treatmentBlood;
+    
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         double survivalFactor = bsvFactor * _innateImmSurvFact;
         survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY);
         survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
         
         for( int step = 0, steps = TimeStep::interval; step < steps; ++step ){
-            // We update the density, and if update() returns true (parasites extinct) then remove the infection.
-            if ((*inf)->update(survivalFactor)) {
+            // Note: this is only one treatment model; there is also the PK/PD model
+            bool expires = treatmentBoth /* effective treatment targeting both stages */ ||
+                (treatmentBlood && (*inf)->bloodStage()) /* blood stage treatment */ ||
+                (treatmentLiver && !(*inf)->bloodStage()) /* liver stage treatment */;
+            
+            if( !expires ) /* no expiry due to simple treatment model; do update */
+                expires = (*inf)->update(survivalFactor) /* returns true on expiry (due to PK/PD or self-termination) */;
+            
+            if( expires ){
                 delete *inf;
                 inf = infections.erase(inf);        // inf points to next infection now so don't increment with ++inf
                 --numInfs;

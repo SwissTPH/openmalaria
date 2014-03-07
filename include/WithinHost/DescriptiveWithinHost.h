@@ -42,7 +42,6 @@ public:
   virtual void importInfection();
   /// load an infection from a checkpoint
   virtual void loadInfection(istream& stream);
-  virtual void treatment( TreatmentId treatment );
   virtual void clearImmunity();
   
   virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
@@ -50,11 +49,10 @@ public:
   virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
   
 protected:
+  virtual void clearInfections( Treatments::Stages stage );
+  
   virtual DescriptiveInfection* createInfection ();
   virtual InfectionCount countInfections () const;
-  
-  /// IPT extension
-  virtual bool eventSPClears (DescriptiveInfection* inf) { return false; }
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

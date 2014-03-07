@@ -182,14 +182,20 @@
     <human>
       <effect id="MDA">
         <MDA>
+          <effects>
+            <option name="legacy effect" pSelection="1">
+              <treatment timesteps="-1" stage="both"/>
+            </option>
+          </effects>
+          <!--
           <drugEffect>
             <compliance nonCompliersMultiplier="1" pCompliance="1"/>
             <compliersEffective>
               <timestep pClearance="1"/>
-              <!--<timestep pClearance="0.5"/>
-              <timestep pClearance="0.1"/>-->
+              <!-<timestep pClearance="0.5"/>
+              <timestep pClearance="0.1"/>->
             </compliersEffective>
-          </drugEffect>
+            </drugEffect>-->
         </MDA>
       </effect>
       <effect id="PevDrug">

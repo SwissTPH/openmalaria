@@ -53,14 +53,19 @@ void DescriptiveWithinHostModel::loadInfection(istream& stream) {
     infections.push_back(new DescriptiveInfection(stream));
 }
 
-void DescriptiveWithinHostModel::treatment( TreatmentId treatment ){
-    if( treatment != TreatmentId::legacy ) throw util::unimplemented_exception( "configurable treatments" );
-    std::list<DescriptiveInfection*>::iterator inf;
-    for (inf=infections.begin(); inf != infections.end(); ++inf) {
-        delete *inf;
+void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
+    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+        if( stage == Treatments::BOTH ||
+            (stage == Treatments::LIVER && !(*inf)->bloodStage()) ||
+            (stage == Treatments::BLOOD && (*inf)->bloodStage())
+        ){
+            delete *inf;
+            inf = infections.erase( inf );
+        }else{
+            ++inf;
+        }
     }
-    infections.clear();
-    numInfs=0;
+    numInfs = infections.size();
 }
 
 // -----  Interventions  -----
@@ -113,6 +118,10 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     double cumulativeY=_cumulativeY;
     _cumulativeh += nNewInfs;
     
+    bool treatmentLiver = treatExpiryLiver >= TimeStep::simulation;
+    bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
+    bool treatmentBoth = treatmentLiver && treatmentBlood;
+    
     for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
         // CommonWithinHost.cpp, but a few changes would be needed:
@@ -121,9 +130,11 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // any more).
         // SP drug action and the PK/PD model would need to be abstracted
         // behind a common interface.
-        if ( (*inf)->expired() /* infection too old */
-                || eventSPClears(*inf) /* infection cleared by SP in IPT model */
-           ) {
+        if ( (*inf)->expired() /* infection has self-terminated */ ||
+            treatmentBoth /* effective treatment targeting both stages */ ||
+            (treatmentBlood && (*inf)->bloodStage()) /* blood stage treatment */ ||
+            (treatmentLiver && !(*inf)->bloodStage()) /* liver stage treatment */ )
+        {
             delete *inf;
             inf=infections.erase(inf);
             numInfs--;

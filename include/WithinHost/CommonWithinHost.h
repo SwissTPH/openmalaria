@@ -44,7 +44,6 @@ public:
     
     
     virtual void importInfection();
-    virtual void treatment( TreatmentId treatment );
     
     virtual void medicate (string drugName, double qty, double time, double duration, double bodyMass);
     virtual void clearImmunity();
@@ -65,6 +64,8 @@ public:
     //@}
     
 protected:
+    virtual void clearInfections( Treatments::Stages stage );
+    
     virtual InfectionCount countInfections () const;
     
     virtual void checkpoint (istream& stream);

@@ -27,6 +27,7 @@
 #include "WithinHost/Infection/PennyInfection.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Diagnostic.h"
+#include "WithinHost/Treatments.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -152,6 +153,34 @@ double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double t
 
 bool WHFalciparum::diagnosticDefault() const{
     return Diagnostic::default_.isPositive( totalDensity );
+}
+
+void WHFalciparum::treatment(TreatmentId treatId){
+    const Treatments& treat = Treatments::select( treatId );
+    for( vector<Treatments::Action>::const_iterator it =
+        treat.getEffects().begin(), end = treat.getEffects().end();
+        it != end; ++it )
+    {
+        if( it->timesteps == TimeStep(-1) ){
+            // act immediately
+            //TODO: which timestep to measure "is blood stage" by?
+            clearInfections( it->stage );
+        }else{
+            switch( it->stage ){
+                case Treatments::BOTH:
+                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
+                    // don't break; also do blood below:
+                case Treatments::BLOOD:
+                    treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + it->timesteps );
+                    break;
+                case Treatments::LIVER:
+                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
+                    break;
+                case Treatments::NONE:
+                    /*do nothing*/;
+            }
+        }
+    }
 }
 
 Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
