@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "schema/interventions.h"
 #include "util/SimpleDecayingValue.h"
+#include "util/checkpoint_containers.h"
 #include <vector>
 
 namespace OM {

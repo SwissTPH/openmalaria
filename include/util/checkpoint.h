@@ -65,15 +65,14 @@ virtual checkpoint (ostream& stream);
  * Although this needs to be implemented twice, in most cases one implementation will just be a copy
  * of the other with istream replaced with ostream as the argument type.
  * 
- * One should declare "using namespace OM::util::checkpoint" to use the operator& functions defined
- * here. */
+ * Checkpointing should be set up by including Global.h. Some more
+ * checkpointing functions (for handling containers) are available by including
+ * checkpoint_containers.h. */
 namespace OM {
 namespace interventions{
     struct EffectId;
 }
 namespace util {
-    class TimeStep;     // forward declare for a support function; don't really want another include here
-
 namespace checkpoint {
     
     const long DEFAULT_MAX_LENGTH = 2000;
@@ -162,99 +161,6 @@ namespace checkpoint {
     //@{
     void operator& (string x, ostream& stream);
     void operator& (string& x, istream& stream);
-    //@}
-    
-    ///@brief Operator& for stl containers
-    //@{
-    template<class T>
-    void operator& (vector<T> x, ostream& stream) {
-	x.size() & stream;
-	BOOST_FOREACH (T& y, x) {
-	    y & stream;
-	}
-    }
-    template<class T>
-    void operator& (vector<T>& x, istream& stream) {
-	size_t l;
-	l & stream;
-	validateListSize (l);
-	x.resize (l);
-	BOOST_FOREACH (T& y, x) {
-	    y & stream;
-	}
-    }
-    /// Version of above taking an element to initialize each element from.
-    template<class T>
-    void checkpoint (vector<T>& x, istream& stream, T templateInstance) {
-	size_t l;
-	l & stream;
-	validateListSize (l);
-	x.resize (l, templateInstance);
-	BOOST_FOREACH (T& y, x) {
-	    y & stream;
-	}
-    }
-    
-    template<class T>
-    void operator& (list<T> x, ostream& stream) {
-	x.size() & stream;
-	BOOST_FOREACH (T& y, x) {
-	    y & stream;
-	}
-    }
-    template<class T>
-    void operator& (list<T>& x, istream& stream) {
-	size_t l;
-	l & stream;
-	validateListSize (l);
-	x.resize (l);
-	BOOST_FOREACH (T& y, x) {
-	    y & stream;
-	}
-    }
-    
-    /* The following templates compile on gcc but don't appear to work when S is a string and T a double.
-    // Template templates:
-    template<class S, class T>
-    void operator& (map<S,T> x, ostream& stream) {
-        x.size() & stream;
-        for( typename map<S,T>::const_iterator it = x.begin(); it != x.end(); ++it ){
-            it->first & stream;
-            it->second & stream;
-        }
-        cerr<<"operator&(map<S,T> x, ostream&) where S="<<typeid(S).name()<<", T="<<typeid(T).name()<<", x.size()="<<x.size()<<endl;
-    }
-    template<class S, class T>
-    void operator& (map<S,T> x, istream& stream) {
-        size_t l;
-        l & stream;
-        validateListSize (l);
-        x.clear ();
-        typename map<S,T>::iterator pos = x.begin ();
-        for (size_t i = 0; i < l; ++i) {
-            S s;
-            T t;
-            s & stream;
-            t & stream;
-            pos = x.insert (pos, make_pair (s,t));
-        }
-    }
-    */
-    
-    void operator& (const set<interventions::EffectId>&x, ostream& stream);
-    void operator& (set<interventions::EffectId>& x, istream& stream);
-    
-    void operator& (const map<string,double>& x, ostream& stream);
-    void operator& (map<string, double >& x, istream& stream);
-    
-    void operator& (const map<double,double>& x, ostream& stream);
-    void operator& (map<double, double>& x, istream& stream);
-    
-    void operator& (const map<interventions::EffectId,TimeStep>& x, ostream& stream);
-    void operator& (map<interventions::EffectId,TimeStep>& x, istream& stream);
-    
-    void operator& (const multimap<double,double>& x, ostream& stream);
-    void operator& (multimap<double, double>& x, istream& stream);
     //@}
     
 } } }	// end of namespaces

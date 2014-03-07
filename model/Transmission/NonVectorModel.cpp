@@ -20,10 +20,11 @@
  */
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
+#include "Monitoring/Surveys.h" // sim-end timestep
 #include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
-#include "Monitoring/Surveys.h"	// sim-end timestep
+#include "util/checkpoint_containers.h"
 #include <limits>
 #include <cmath>
 

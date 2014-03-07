@@ -24,6 +24,7 @@
 #include "util/errors.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
+#include "util/checkpoint_containers.h"
 
 #include <iostream>
 #include <sstream>

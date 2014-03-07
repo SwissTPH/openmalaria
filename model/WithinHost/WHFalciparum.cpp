@@ -32,6 +32,7 @@
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
+#include "util/checkpoint_containers.h"
 #include "schema/scenario.h"
 
 #include <cmath>
