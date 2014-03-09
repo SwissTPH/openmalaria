@@ -118,25 +118,27 @@ bool ClinicalModel::isDead (TimeStep ageTimeSteps) {
 }
 
 void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps) {
-  if (_doomed < 0)	// Countdown to indirect mortality
-    _doomed -= TimeStep::interval;
-  
-  //indirect death: if this human's about to die, don't worry about further episodes:
-  if (_doomed <= -35) {	//clinical bout 6 intervals before
-     Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
-    _doomed = DOOMED_INDIRECT;
-    return;
-  }
-  if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
-    // Chance of neonatal mortality:
-    if (Host::NeonatalMortality::eventNeonatalMortality()) {
-      Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportIndirectDeaths (human.getMonitoringAgeGroup(), 1);
-      _doomed = DOOMED_NEONATAL;
-      return;
+    if (_doomed < 0)	// Countdown to indirect mortality
+        _doomed -= TimeStep::interval;
+    
+    //indirect death: if this human's about to die, don't worry about further episodes:
+    if (_doomed <= -35) {	//clinical bout 6 intervals before
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
+            Monitoring::Survey::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+        _doomed = DOOMED_INDIRECT;
+        return;
     }
-  }
-  
-  doClinicalUpdate (human, ageYears);
+    if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
+        // Chance of neonatal mortality:
+        if (Host::NeonatalMortality::eventNeonatalMortality()) {
+            Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
+                Monitoring::Survey::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+            _doomed = DOOMED_NEONATAL;
+            return;
+        }
+    }
+    
+    doClinicalUpdate (human, ageYears);
 }
 
 void ClinicalModel::updateInfantDeaths (TimeStep ageTimeSteps) {

@@ -111,7 +111,7 @@ private:
   /// Timestep of event (TIMESTEP_NEVER if no event).
   TimeStep _time;
   /// Survey during which the event occured
-  int _surveyPeriod;
+  size_t _surveyPeriod;
   /// Age group of the individual when the episode's first bout occurred
   Monitoring::AgeGroup _ageGroup;
   /// Descriptor of state, containing reporting info. Not all information will

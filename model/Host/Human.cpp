@@ -36,6 +36,7 @@
 
 namespace OM { namespace Host {
     using namespace OM::util;
+    using Monitoring::Survey;
     
     bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
             opt_trans_treat_het = false, opt_comorb_treat_het = false,
@@ -207,8 +208,8 @@ void Human::summarize() {
         return;
     }
     
-    Monitoring::Survey& survey( Monitoring::Surveys.getSurvey( isInAnyCohort() ) );
-    survey.reportHosts (getMonitoringAgeGroup(), 1);
+    Survey& survey = Monitoring::Surveys.getSurvey( isInAnyCohort() );
+    survey.addInt( Survey::MI_HOSTS, getMonitoringAgeGroup(), 1);
     bool patent = withinHostModel->summarize (survey, getMonitoringAgeGroup());
     infIncidence->summarize (survey, getMonitoringAgeGroup());
     
@@ -225,7 +226,8 @@ void Human::addToCohort (interventions::EffectId id){
     flushReports();
     cohorts.insert(id);
     //TODO(monitoring): reporting is inappropriate
-    Monitoring::Surveys.current->reportAddedToCohort( getMonitoringAgeGroup(), 1 );
+    Monitoring::Surveys.current->addInt( Survey::MI_NUM_ADDED_COHORT,
+                                         getMonitoringAgeGroup(), 1 );
 }
 void Human::removeFromCohort( interventions::EffectId id ){
     if( cohorts.count(id) > 0 ){
@@ -233,7 +235,8 @@ void Human::removeFromCohort( interventions::EffectId id ){
         flushReports();
         cohorts.erase( id );
         //TODO(monitoring): reporting
-        Monitoring::Surveys.current->reportRemovedFromCohort( getMonitoringAgeGroup(), 1 );
+    Monitoring::Surveys.current->addInt(Survey::MI_NUM_REMOVED_COHORT,
+                                        getMonitoringAgeGroup(), 1 );
     }
 }
 void Human::removeFromCohorts( interventions::Cohort::RemoveAtCode code ){

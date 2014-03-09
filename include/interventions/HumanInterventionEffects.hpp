@@ -37,6 +37,7 @@
 
 namespace OM { namespace interventions {
     using Host::Human;
+    using Monitoring::Survey;
 
 // ———  HumanInterventionEffect  ———
 
@@ -90,13 +91,14 @@ public:
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
         //TODO(monitoring): separate reports for mass and continuous deployments
         
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                .reportMassScreening(human.getMonitoringAgeGroup(), 1);
+        Survey& survey = Monitoring::Surveys.getSurvey(human.isInAnyCohort());
+        survey.addInt( (method == Deployment::TIMED) ? Survey::MI_SCREENING_TIMED :
+                       Survey::MI_SCREENING_CTS, human.getMonitoringAgeGroup(), 1 );
         if( !diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
             return;
         }
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                .reportMDA(human.getMonitoringAgeGroup(), 1);
+        survey.addInt( (method == Deployment::TIMED) ? Survey::MI_MDA_TIMED :
+                       Survey::MI_MDA_CTS, human.getMonitoringAgeGroup(), 1 );
         
         human.withinHostModel->treatment( treatId );
     }
@@ -123,7 +125,7 @@ public:
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        human.getClinicalModel().massDrugAdministration ( human );
+        human.getClinicalModel().massDrugAdministration( method, human );
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA_TS1D; }

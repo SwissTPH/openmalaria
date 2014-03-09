@@ -23,13 +23,19 @@
 
 #include "Monitoring/SurveyMeasure.h"
 #include "Global.h"
+#include "util/errors.h"
+#include <interventions/Interfaces.hpp>
 #include <bitset>
 #include <map>
+#include <boost/multi_array.hpp>
 
 namespace scnXml{ class Monitoring; }
-namespace OM { namespace Monitoring {
+namespace OM {
+namespace Monitoring {
+    using boost::multi_array;
 
-/** Included for type-saftey: don't allow implicit double->int conversions.
+/**
+ * Included for type-saftey: don't allow implicit double->int conversions.
  *
  * Incindentally, the constructor can be used implicitly for implicit
  * conversion doing the right thing.
@@ -37,7 +43,7 @@ namespace OM { namespace Monitoring {
  * Don't use _this_ class for other index/age-group types. */
 class AgeGroup {
   public:
-    AgeGroup () : _i(0) {}
+    AgeGroup () : index(0) {}
     
     /** Update age-group. Assumes age only increases (per instance).
      *
@@ -47,22 +53,23 @@ class AgeGroup {
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-	_i & stream;
+        index & stream;
     }
     
     /** Get the represented index. */
     inline size_t i () {
-      return _i;
+        return index;
     }
     
     /// Get the total number of age categories (inc. one for indivs. not in any
     /// category given in XML).
     static inline size_t getNumGroups () {
-      return _upperbound.size();
+        if( _upperbound.size() == 0 ) throw TRACED_EXCEPTION_DEFAULT( "not yet initialised" );
+        return _upperbound.size();
     }
     
-  private:
-    size_t _i;
+private:
+    size_t index;
     
     /// Initialize _lowerbound and _upperbound
     static void init (const scnXml::Monitoring& monitoring);
@@ -82,167 +89,112 @@ class AgeGroup {
 
 /// Data struct for a single survey.
 class Survey {
-  ///@brief Static members (options from XML). Parameters only set by init().
-  //@{
-  private:
+public:
+    // Constructor used by SurveysType. Call allocate() explicitly for allocation.
+    Survey();
+private:
+    
+    ///@brief Static members (options from XML). Parameters only set by init().
+    //@{
     /// Initialize static parameters.
     static void init(const scnXml::Monitoring& monitoring);
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
     static bitset<SM::NUM_SURVEY_OPTIONS> active;
-  //@}
+    //@}
   
 public:
-  /// @brief reportXXX functions to report val more of measure XXX within age-group ageGroup. Returns this allowing chain calling.
-  //Note: generate this list from variable definitions by regexp search-replacing using the following:
-  //Search: vector<(\w+)> _num(\w+)\;
-  //Replace: Survey& report\2 (AgeGroup ageGroup, \1 val) {\n        _num\2[ageGroup.i()] += val;\n        return *this;\n    }
-  //Search: vector<(\w+)> _sum(\w+)\;
-  //Replace: Survey& addTo\2 (AgeGroup ageGroup, \1 val) {\n        _sum\2[ageGroup.i()] += val;\n        return *this;\n    }
-  //@{
-    Survey& reportHosts (AgeGroup ageGroup, int val) {
-      _numHosts[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportInfectedHosts (AgeGroup ageGroup, int val) {
-      _numInfectedHosts[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportExpectedInfected (AgeGroup ageGroup, double val) {
-      _numExpectedInfected[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportPatentHosts (AgeGroup ageGroup, int val) {
-      _numPatentHosts[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& addToLogPyrogenicThreshold (AgeGroup ageGroup, double val) {
-      _sumLogPyrogenicThreshold[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& addToLogDensity (AgeGroup ageGroup, double val) {
-      _sumLogDensity[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& addToInfections (AgeGroup ageGroup, int val) {
-      _sumInfections[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& addToPatentInfections (AgeGroup ageGroup, int val) {
-      _sumPatentInfections[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& addToPyrogenicThreshold (AgeGroup ageGroup, double val) {
-      _sumPyrogenicThreshold[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportTreatments1 (AgeGroup ageGroup, int val) {
-      _numTreatments1[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportTreatments2 (AgeGroup ageGroup, int val) {
-      _numTreatments2[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportTreatments3 (AgeGroup ageGroup, int val) {
-      _numTreatments3[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportUncomplicatedEpisodes (AgeGroup ageGroup, int val) {
-      _numUncomplicatedEpisodes[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportSevereEpisodes (AgeGroup ageGroup, int val) {
-      _numSevereEpisodes[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportSequelae (AgeGroup ageGroup, int val) {
-      _numSequelae[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportHospitalDeaths (AgeGroup ageGroup, int val) {
-      _numHospitalDeaths[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportIndirectDeaths (AgeGroup ageGroup, int val) {
-      _numIndirectDeaths[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportDirectDeaths (AgeGroup ageGroup, int val) {
-      _numDirectDeaths[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportEPIVaccinations (AgeGroup ageGroup, int val) {
-      _numEPIVaccinations[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportMassVaccinations (AgeGroup ageGroup, int val) {
-      _numMassVaccinations[ageGroup.i()] += val;
-      return *this;
-    } 
-    Survey& reportHospitalRecoveries (AgeGroup ageGroup, int val) {
-      _numHospitalRecoveries[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportHospitalSequelae (AgeGroup ageGroup, int val) {
-      _numHospitalSequelae[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportIPTDoses (AgeGroup ageGroup, int val) {
-      _numIPTDoses[ageGroup.i()] += val;
-      return *this;
-    }
-    Survey& reportNonMalariaFevers (AgeGroup ageGroup, int val) {
-      _numNonMalariaFevers[ageGroup.i()] += val;
-      return *this;
-    } 
-    Survey& reportNewInfections (AgeGroup ageGroup, int val) {
-	_numNewInfections[ageGroup.i()] += val;
-	return *this;
-    }
-    Survey& reportMassITNs (AgeGroup ageGroup, int val) {
-	_numMassITNs[ageGroup.i()] += val;
-	return *this;
-    }
-    Survey& reportEPI_ITNs (AgeGroup ageGroup, int val) {
-	_numEPI_ITNs[ageGroup.i()] += val;
-	return *this;
-    }
-    Survey& reportMassIRS (AgeGroup ageGroup, int val) {
-	_numMassIRS[ageGroup.i()] += val;
-	return *this;
-    }
-    Survey& reportMassGVI (AgeGroup ageGroup, int val) {
-        _numMassGVI[ageGroup.i()] += val;
+    /** Measures which are reported as integers
+     * 
+     * Note: for timed/continuous deployment pairs, the continuous version
+     * is always the timed version + 1. */
+    enum IntReportMeasures{
+        MI_HOSTS,
+        MI_INFECTED_HOSTS,
+        MI_PATENT_HOSTS,
+        MI_INFECTIONS,
+        MI_PATENT_INFECTIONS,
+        MI_TREATMENTS_1,
+        MI_TREATMENTS_2,
+        MI_TREATMENTS_3,
+        MI_UNCOMPLICATED_EPISODES,
+        MI_SEVERE_EPISODES,
+        MI_SEQUELAE,
+        MI_HOSPITAL_DEATHS,
+        MI_INDIRECT_DEATHS,
+        MI_DIRECT_DEATHS,
+        MI_VACCINATION_TIMED,
+        MI_VACCINATION_CTS,
+        MI_HOSPITAL_RECOVERIES,
+        MI_HOSPITAL_SEQUELAE,
+        MI_NON_MALARIA_FEVERS,
+        MI_NEW_INFECTIONS,
+        MI_ITN_TIMED,
+        MI_ITN_CTS,
+        MI_IRS_TIMED,
+        MI_IRS_CTS,
+        MI_GVI_TIMED,
+        MI_GVI_CTS,
+        MI_MDA_TIMED,
+        MI_MDA_CTS /* "mass" drug administration via EPI/schools */,
+        MI_SCREENING_TIMED,
+        MI_SCREENING_CTS,
+        MI_NMF_DEATHS,
+        MI_NMF_TREATMENTS /* also known as antibiotics */,
+        MI_FIRST_DAY_DEATHS,
+        MI_HOSPITAL_FIRST_DAY_DEATHS,
+        //TODO: cohorts should be handled independently, not as "in cohort"/"not in a cohort"
+        MI_NUM_ADDED_COHORT,
+        MI_NUM_REMOVED_COHORT,
+        MI_NUM  // must be last; not a measure to report
+    };
+    /// Measures which are reported as doubles
+    enum DblReportMeasures{
+        MD_EXPECTED_INFECTED,
+        MD_LOG_PYROGENIC_THRESHOLD,
+        MD_LOG_DENSITY,
+        MD_PYROGENIC_THRESHOLD,
+        MD_NUM  // must be last; not a measure to report
+    };
+    
+    /**
+     * Report some integer number of events, adding the number to a total.
+     * 
+     * @param ageGroup Age group of host
+     * @param val Number of events (added to total)
+     * @returns (*this) object to allow chain calling
+     */
+    Survey& addInt( IntReportMeasures measure, AgeGroup ageGroup, int val ){
+        if( measure >= reportsIntAge.shape()[0] ||
+            ageGroup.i() >= reportsIntAge.shape()[1] ){
+            cout << "Index out of bounds:\n"
+                "survey\t" << static_cast<void*>(this)
+                << "\nalloc\t" << reportsIntAge.shape()[0] << "\t" << reportsIntAge.shape()[1]
+                << "\nindex\t" << measure << "\t" << ageGroup.i() << endl;
+        }
+        reportsIntAge[measure][ageGroup.i()] += val;
         return *this;
     }
-    Survey& reportAddedToCohort (AgeGroup ageGroup, int val) {
-        _numAddedToCohort[ageGroup.i()] += val;
+    /**
+     * Report some quantity (double), adding the quantity to a total.
+     * 
+     * @param ageGroup Age group of host
+     * @param val Quantity (added to total)
+     * @returns (*this) object to allow chain calling
+     */
+    Survey& addDouble( DblReportMeasures measure, AgeGroup ageGroup, double val ){
+        if( measure >= reportsDblAge.shape()[0] ||
+            ageGroup.i() >= reportsDblAge.shape()[1] ){
+            cout << "Index out of bounds:\n"
+                "survey\t" << static_cast<void*>(this)
+                << "\nalloc\t" << reportsDblAge.shape()[0] << "\t" << reportsDblAge.shape()[1]
+                << "\nindex\t" << measure << "\t" << ageGroup.i() << endl;
+        }
+        reportsDblAge[measure][ageGroup.i()] += val;
         return *this;
     }
-    Survey& reportRemovedFromCohort (AgeGroup ageGroup, int val) {
-        _numRemovedFromCohort[ageGroup.i()] += val;
-        return *this;
-    }
-    Survey& reportMDA (AgeGroup ageGroup, int val) {
-        _numMDAs[ageGroup.i()] += val;
-        return *this;
-    }
-    Survey& reportMassScreening (AgeGroup ageGroup, int val) {
-        _numMassScreenings[ageGroup.i()] += val;
-        return *this;
-    }
-    Survey& reportNmfDeaths (AgeGroup ageGroup, int val) {
-        _numNmfDeaths[ageGroup.i()] += val;
-        return *this;
-    }
-    Survey& reportAntibioticTreatments (AgeGroup ageGroup, int val) {
-        _numAntibioticTreatments[ageGroup.i()] += val;
-        return *this;
-    }
-  //@}
-  
+    
   void setAnnualAverageKappa(double kappa) {
     _annualAverageKappa = kappa;
   }
@@ -264,14 +216,6 @@ public:
       // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
       (*((_sumClinical_DrugUsageIV.insert(make_pair(abbrev, 0.0))).first)).second += qty;
   }
-  Survey& report_Clinical_FirstDayDeaths (AgeGroup ageGroup, int val) {
-      _numClinical_FirstDayDeaths[ageGroup.i()] += val;
-      return *this;
-  } 
-  Survey& report_Clinical_HospitalFirstDayDeaths (AgeGroup ageGroup, int val) {
-      _numClinical_HospitalFirstDayDeaths[ageGroup.i()] += val;
-      return *this;
-  } 
   void report_Clinical_Microscopy (int num) {
       _numClinical_Microscopy += num;
   }
@@ -297,32 +241,9 @@ public:
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {
-    _numHosts & stream;
-    _numInfectedHosts & stream;
-    _numExpectedInfected & stream;
-    _numPatentHosts & stream;
-    _sumLogPyrogenicThreshold & stream;
-    _sumLogDensity & stream;
-    _sumInfections & stream;
+      checkpoint( stream );
     _infectiousnessToMosq & stream;
-    _sumPatentInfections & stream;
-    _sumPyrogenicThreshold & stream;
-    _numTreatments1 & stream;
-    _numTreatments2 & stream;
-    _numTreatments3 & stream;
-    _numUncomplicatedEpisodes & stream;
-    _numSevereEpisodes & stream;
-    _numSequelae & stream;
-    _numHospitalDeaths & stream;
-    _numIndirectDeaths & stream;
-    _numDirectDeaths & stream;
-    _numEPIVaccinations & stream;
-    _numMassVaccinations & stream; 
-    _numHospitalRecoveries & stream;
-    _numHospitalSequelae & stream;
-    _numIPTDoses & stream;
     _annualAverageKappa & stream;
-    _numNonMalariaFevers & stream; 
     _inoculationsPerAgeGroup & stream;
     data_Vector_Nv0 & stream;
     data_Vector_Nv & stream;
@@ -333,24 +254,15 @@ public:
     _numClinical_RDTs & stream;
     _sumClinical_DrugUsage & stream;
     _sumClinical_DrugUsageIV & stream;
-    _numClinical_FirstDayDeaths & stream;
-    _numClinical_HospitalFirstDayDeaths & stream;
-    _numNewInfections & stream;
-    _numMassITNs & stream;
-    _numEPI_ITNs & stream;
-    _numMassIRS & stream;
-    _numMassGVI & stream;
     _numClinical_Microscopy & stream;
-    _numAddedToCohort & stream;
-    _numRemovedFromCohort & stream;
-    _numMDAs & stream;
-    _numMassScreenings & stream;
-    _numNmfDeaths & stream;
-    _numAntibioticTreatments & stream;
   }
   
 private:
-  /// Resize all vectors
+  /** Resizes all vectors, allocating memory.
+   * 
+   * This is a separate initialisation step to make allocation explicit and
+   * avoid accidental allocations when manipulating containers of Survey
+   * elements. */
   void allocate ();
   
   /** Write out arrays
@@ -362,45 +274,13 @@ private:
   double _infectiousnessToMosq;
   double _annualAverageKappa;
   
+  // first index is the measure (IntReportMeasures), second is age group:
+  typedef multi_array<int, 2> ReportsIntAgeT;
+  ReportsIntAgeT reportsIntAge;
+  typedef multi_array<double, 2> ReportsDblAgeT;
+  ReportsDblAgeT reportsDblAge;
   // data, per AgeGroup:
-  vector<int> _numHosts;
-  vector<int> _numInfectedHosts;
-  vector<double> _numExpectedInfected;
-  vector<int> _numPatentHosts;
-  vector<double> _sumLogPyrogenicThreshold;
-  vector<double> _sumLogDensity;
-  vector<int> _sumInfections;
-  vector<int> _sumPatentInfections;
-  vector<double> _sumPyrogenicThreshold;
-  vector<int> _numTreatments1;
-  vector<int> _numTreatments2;
-  vector<int> _numTreatments3;
-  vector<int> _numUncomplicatedEpisodes;
-  vector<int> _numSevereEpisodes;
-  vector<int> _numSequelae;
-  vector<int> _numHospitalDeaths;
-  vector<int> _numIndirectDeaths;
-  vector<int> _numDirectDeaths;
-  vector<int> _numEPIVaccinations;
-  vector<int> _numMassVaccinations; 
-  vector<int> _numHospitalRecoveries;
-  vector<int> _numHospitalSequelae;
-  vector<int> _numIPTDoses;
-  vector<int> _numNonMalariaFevers; 
   vector<double> _inoculationsPerAgeGroup;
-  vector<int> _numClinical_FirstDayDeaths;
-  vector<int> _numClinical_HospitalFirstDayDeaths;
-  vector<int> _numNewInfections;
-  vector<int> _numMassITNs;
-  vector<int> _numEPI_ITNs;
-  vector<int> _numMassIRS;
-  vector<int> _numMassGVI;
-  vector<int> _numAddedToCohort;
-  vector<int> _numRemovedFromCohort;
-  vector<int> _numMDAs;
-  vector<int> _numMassScreenings;
-  vector<int> _numNmfDeaths;
-  vector<int> _numAntibioticTreatments;
   
     // data, per vector species:
     map<string,double> data_Vector_Nv0;
@@ -415,7 +295,10 @@ private:
     map<string,double> _sumClinical_DrugUsageIV;
     int _numClinical_Microscopy;
     
-  friend class SurveysType;
+    void checkpoint( istream& stream );
+    void checkpoint( ostream& stream) const;
+    
+    friend class SurveysType;
 };
 
 /** Line end character. Use Unix line endings to save a little size. */

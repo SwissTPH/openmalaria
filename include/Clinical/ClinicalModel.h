@@ -102,7 +102,7 @@ public:
    * Only supported by immediate outcomes model. */
   virtual bool notAtRisk() =0;
   
-  virtual void massDrugAdministration(Human& human) =0;
+  virtual void massDrugAdministration( interventions::Deployment::Method method, Human& human) =0;
   
   /// Force all pending summaries to be reported. Should only be called when
   /// class is about to be destroyed anyway to avoid affecting output.

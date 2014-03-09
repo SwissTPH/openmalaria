@@ -44,6 +44,7 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
+using Monitoring::Survey;
 
 double WHFalciparum::sigma_i;
 double WHFalciparum::immPenalty_22;
@@ -224,15 +225,17 @@ bool WHFalciparum::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup a
     pathogenesisModel->summarize( survey, ageGroup );
     InfectionCount count = countInfections();
     if (count.total != 0) {
-        survey.reportInfectedHosts(ageGroup,1);
-        survey.addToInfections(ageGroup, count.total);
-        survey.addToPatentInfections(ageGroup, count.patent);
+        survey
+            .addInt( Survey::MI_INFECTED_HOSTS, ageGroup, 1 )
+            .addInt( Survey::MI_INFECTIONS, ageGroup, count.total )
+            .addInt( Survey::MI_PATENT_INFECTIONS, ageGroup, count.patent );
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
     if (diagnosticDefault()) {
-        survey.reportPatentHosts(ageGroup, 1);
-        survey.addToLogDensity(ageGroup, log(totalDensity));
+        survey
+            .addInt( Survey::MI_PATENT_HOSTS, ageGroup, 1)
+            .addDouble( Survey::MD_LOG_DENSITY, ageGroup, log(totalDensity) );
         return true;
     }
     return false;

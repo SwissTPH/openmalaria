@@ -27,6 +27,7 @@
 #include "Clinical/parser.h"
 #include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
+#include "interventions/Interfaces.hpp"
 
 #include <cassert>
 #include <list>
@@ -44,6 +45,7 @@ namespace scnXml{
 }
 namespace OM { namespace Clinical {
     using WithinHost::WHInterface;
+    using Monitoring::Survey;
     
 /// Auxilliary output from running case management
 struct CMAuxOutput {
@@ -260,6 +262,7 @@ class ESCaseManagement : public CaseManagementCommon {
         static void initMDA (const scnXml::MDA1D& desc);
         
         static void massDrugAdministration(
+            interventions::Deployment::Method method,
             const ESHostData& hostData,
             list<MedicateData>& medicateQueue,
             bool inCohort,

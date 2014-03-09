@@ -49,11 +49,10 @@ GVIEffect::GVIEffect( EffectId id, const scnXml::GVIDescription& elt,
 
 void GVIEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployEffect(*this);
-    if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassGVI( human.getMonitoringAgeGroup(), 1 );
-    }else if( method == interventions::Deployment::CTS ){
-        //TODO(monitoring): report
-    }else throw SWITCH_DEFAULT_EXCEPTION;
+    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
+        (method == interventions::Deployment::TIMED) ?
+            Monitoring::Survey::MI_GVI_TIMED : Monitoring::Survey::MI_GVI_CTS,
+        human.getMonitoringAgeGroup(), 1 );
 }
 
 Effect::Type GVIEffect::effectType()const{ return Effect::GVI; }

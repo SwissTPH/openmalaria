@@ -28,6 +28,7 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
+using Monitoring::Survey;
 
 //TODO: these parameters need to be initialised from XML, and possibly made
 // static members of VivaxInfection / WHVivax
@@ -121,15 +122,17 @@ double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvFact
     return probPatentInfectMosquitoes * tbvFactor;
 }
 
-bool WHVivax::summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup){
+bool WHVivax::summarize(Survey& survey, Monitoring::AgeGroup ageGroup){
     InfectionCount count = countInfections();
     if( count.total != 0 ){
-        survey.reportInfectedHosts(ageGroup, 1);
-        survey.addToInfections(ageGroup, count.total);
-        survey.addToPatentInfections(ageGroup, count.patent);
+        survey
+            .addInt( Survey::MI_INFECTED_HOSTS, ageGroup, 1 )
+            .addInt( Survey::MI_INFECTIONS, ageGroup, count.total )
+            .addInt( Survey::MI_PATENT_INFECTIONS, ageGroup, count.patent );
     }
     if( count.patent > 0 ){
-        survey.reportPatentHosts(ageGroup, 1);
+        survey
+            .addInt( Survey::MI_PATENT_HOSTS, ageGroup, 1 );
         return true;
     }
     return false;

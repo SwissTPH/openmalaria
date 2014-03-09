@@ -483,15 +483,19 @@ void ESCaseManagement::initMDA (const scnXml::MDA1D& desc){
 }
 
 void ESCaseManagement::massDrugAdministration(
+        interventions::Deployment::Method method,
         const ESHostData& hostData,
         list<MedicateData>& medicateQueue,
         bool inCohort,
         Monitoring::AgeGroup ageGroup
 ){
-    Monitoring::Surveys.getSurvey(inCohort).reportMassScreening(ageGroup, 1);
+    Monitoring::Survey& survey = Monitoring::Surveys.getSurvey(inCohort);
+    survey.addInt( (method == interventions::Deployment::TIMED) ?
+        Survey::MI_SCREENING_TIMED : Survey::MI_SCREENING_CTS, ageGroup, 1 );
     bool anyTreatment = executeTree( &mda, hostData, medicateQueue, inCohort ).second;
     if( anyTreatment ){
-        Monitoring::Surveys.getSurvey(inCohort).reportMDA(ageGroup, 1);
+        survey.addInt( (method == interventions::Deployment::TIMED) ?
+            Survey::MI_MDA_TIMED : Survey::MI_MDA_CTS, ageGroup, 1 );
     }
 }
 

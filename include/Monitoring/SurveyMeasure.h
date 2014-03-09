@@ -121,7 +121,7 @@ enum SurveyMeasure {
     /// sequelae in hospital
     nHospitalSeqs= 24,
     
-    /// number of IPT Doses
+    /// Number of IPT Doses; no longer used (IPT model has been removed)
     nIPTDoses= 25,
     
     /** Annual Average Kappa
@@ -242,6 +242,24 @@ enum SurveyMeasure {
      * it is insufficient now that multiple descriptions of any intervention
      * type are possible. */
     nMassGVI = 56,
+    
+    /** Number of IRS deployments via continuous deployment. */
+    nCtsIRS = 57,
+    
+    /** Number of GVI deployments via continuous deployment. */
+    nCtsGVI = 58,
+    
+    /** Number of "MDA" deployments via continuous deployment.
+     * 
+     * Note: MDA stands for mass drug administration, but the term has come to
+     * be used more flexibly by OpenMalaria, including optional screening and
+     * deployment through age-based systems. */
+    nCtsMDA = 59,
+    
+    /** Number of diagnostics used by "MDA" distribution through continuous
+     * methods. Can be higher than nCtsMDA since drugs are administered only
+     * when the diagnostic is positive. Also see nCtsMDA description. */
+    nCtsScreenings = 60,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
