@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/* NOTE: this code is not used any more.
+ * It is kept only to provide inspiration for a resistance model which
+ * similarly wants to give each infection a 'genotype'. */
+
 #ifndef Hmod_DescriptiveIPTInfection
 #define Hmod_DescriptiveIPTInfection
 #include "DescriptiveInfection.h"
@@ -49,7 +53,6 @@ public:
   //! Constructor
   /*! \param lastSPdose Time interval of last SP Dose. */
   DescriptiveIPTInfection(TimeStep lastSPdose);
-  DescriptiveIPTInfection (istream& stream);
   //@}
   
   /** The event that the last SP dose clears parasites. */
@@ -66,9 +69,6 @@ public:
     return _startdate + TimeStep(static_cast<int>((_duration.asInt() + 1) * genotypes[proteome_ID].atten));
   }
   
-protected:
-    virtual void checkpoint (ostream& stream);
-    
 private:
   //! IPTi parameter (indicator for attenuation).
   bool _SPattenuate;

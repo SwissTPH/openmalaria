@@ -874,69 +874,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="IPTDescription">
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="infGenotype">
-        <xs:complexType>
-          <xs:attribute name="name" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Name of age specific intervention
-              </xs:documentation>
-              <xs:appinfo>name:Age specific intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="freq" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Frequency of parasite genotype as a proportion (total of all genotypes
-                must add to 1).
-              </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Frequency;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="ACR" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Adequate clinical response (probability of effective cure)
-              </xs:documentation>
-              <xs:appinfo>units:dimensionless; min:0; max:1;name:ACR;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="proph" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Prophylactic period
-              </xs:documentation>
-              <xs:appinfo>units:time-step;name:Prophylactic period;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="tolPeriod" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Tolerance period
-              </xs:documentation>
-              <xs:appinfo>units:time steps;name:Tolerance period;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="atten" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Attenuation factor (i.e. divisor for density during period of effect)
-              </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:1;max:inf;name:Tolerance period;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="iptiEffect" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>Description of ipti effect</xs:documentation>
-        <xs:appinfo>type:list of elements;name:Description of ipti effect;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
   <xs:complexType name="ITNDescription">
     <xs:annotation>
       <xs:appinfo>name:Description</xs:appinfo>
