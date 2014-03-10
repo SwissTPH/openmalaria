@@ -61,6 +61,9 @@
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
       <option name="allCauseIMR"/>
+      <option name="nMDAs"/>
+      <option name="nCtsMDA"/>
+      <option name="nMassGVI"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime>1</surveyTime>
@@ -183,19 +186,12 @@
       <effect id="MDA">
         <MDA>
           <effects>
-            <option name="legacy effect" pSelection="1">
-              <treatment timesteps="-1" stage="both"/>
+            <option name="prophylactic blood and liver" pSelection="1">
+              <!-- this is a weird description, used only to test the model -->
+              <treatment timesteps="4" stage="blood"/>
+              <treatment timesteps="5" stage="liver"/>
             </option>
           </effects>
-          <!--
-          <drugEffect>
-            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
-            <compliersEffective>
-              <timestep pClearance="1"/>
-              <!-<timestep pClearance="0.5"/>
-              <timestep pClearance="0.1"/>->
-            </compliersEffective>
-            </drugEffect>-->
         </MDA>
       </effect>
       <effect id="PevDrug">
@@ -292,6 +288,7 @@
         </continuous>
         <timed>
           <deploy coverage="0.75" time="300"/>
+          <deploy coverage="0.8" time="780"/>
         </timed>
       </intervention>
       <intervention>
