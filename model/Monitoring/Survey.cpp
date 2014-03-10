@@ -102,6 +102,10 @@ public:
         codeMap["nMassScreenings"] = SM::nMassScreenings;
         codeMap["nNmfDeaths"] = SM::nNmfDeaths;
         codeMap["nAntibioticTreatments"] = SM::nAntibioticTreatments;
+        codeMap["nCtsIRS"] = SM::nCtsIRS;
+        codeMap["nCtsGVI"] = SM::nCtsGVI;
+        codeMap["nCtsMDA"] = SM::nCtsMDA;
+        codeMap["nCtsScreenings"] = SM::nCtsScreenings;
     }
     
     SM::SurveyMeasure operator[] (const string s) {
@@ -224,10 +228,6 @@ void Survey::allocate(){
     
     _numClinical_RDTs = 0;
     _numClinical_Microscopy = 0;
-    
-    std::cout << "Survey\t" << static_cast<void*>(this) << ": allocated length\t"
-    << reportsIntAge.shape()[0] << "\t" 
-        << reportsDblAge.shape()[0] << "\t" << reportsDblAge.shape()[1] << endl;
 }
 
 
