@@ -209,13 +209,13 @@ def runScenario(options,omOptions,name):
     newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%name)
     origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
     newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
-    copyCts = True
-    copyOut = True
+    haveCtsOut = os.path.isfile(ctsoutFile)
+    haveMainOut = os.path.isfile(outputFile)
     
     # Compare outputs:
     if ret == 0 and compare:
         # ctsout.txt (this output is optional):
-        if os.path.isfile(ctsoutFile):
+        if haveCtsOut:
             if os.path.isfile(origCtsout):
                 ctsret,ctsident = compareCtsout.main (origCtsout, ctsoutFile)
             else:
@@ -225,12 +225,12 @@ def runScenario(options,omOptions,name):
                 os.remove(ctsoutFile)
                 if os.path.isfile(newCtsout):
                     os.remove(newCtsout)
-                copyCts = False
+                haveCtsOut = False
         else:
             ctsret,ctsident = 0,True
         
         # output.txt (this output is required):
-        if os.path.isfile(outputFile):
+        if haveMainOut:
             if os.path.isfile(origOutput):
                 ret,ident = compareOutput.main (origOutput, outputFile, 0)
             else:
@@ -240,7 +240,7 @@ def runScenario(options,omOptions,name):
                 os.remove(outputFile)
                 if os.path.isfile(newOutput):
                     os.remove(newOutput)
-                copyOut = False
+                haveMainOut = False
         else:
             ret,ident = 1,False
             stderrFile=os.path.join(simDir,"stderr.txt")
@@ -255,11 +255,11 @@ def runScenario(options,omOptions,name):
         ret=max(ret,ctsret)
         ident=ident and ctsident
     
-    if copyCts:
+    if haveCtsOut:
         shutil.copy2(ctsoutFile, newCtsout)
         if options.diff:
             subprocess.call (["kdiff3",origCtsout,ctsoutFile])
-    if copyOut:
+    if haveMainOut:
         shutil.copy2(outputFile, newOutput)
         if options.diff:
             subprocess.call (["kdiff3",origOutput,outputFile])
