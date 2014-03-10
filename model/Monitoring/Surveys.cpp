@@ -27,6 +27,7 @@
 #include "util/errors.h"
 #include "util/CommandLine.h"
 #include "interventions/InterventionManager.hpp"
+#include "Simulator.h"
 #include "schema/monitoring.h"
 
 #include <gzstream/gzstream.h>
@@ -64,10 +65,12 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
 
   Survey::init( monitoring );
 
-  _survey.resize (_surveysTimeIntervals.size());
-  for (size_t i = 0; i < _survey.size(); ++i)
-    _survey[i].allocate();	// TODO: doesn't need to happen when loading a checkpoint
-  current = &_survey[0];
+  surveys.resize (_surveysTimeIntervals.size());
+  if( !Simulator::isCheckpoint() ){
+    for (size_t i = 0; i < surveys.size(); ++i)
+        surveys[i].allocate();
+  }
+  current = &surveys[0];
   
   if( monitoring.getCohortOnly().present() ){
       _cohortOnly = monitoring.getCohortOnly().get();
@@ -83,10 +86,10 @@ void SurveysType::incrementSurveyPeriod()
 {
   currentTimestep = _surveysTimeIntervals[_surveyPeriod];
   ++_surveyPeriod;
-  if (_surveyPeriod >= (int) _survey.size())
+  if (_surveyPeriod >= surveys.size())
     // In this case, currentTimestep gets set to -1 so no further surveys get taken
     _surveyPeriod = 0;
-  current = &_survey[_surveyPeriod];
+  current = &surveys[_surveyPeriod];
 }
 
 void SurveysType::writeSummaryArrays ()
@@ -111,8 +114,8 @@ void SurveysType::writeSummaryArrays ()
   //   outputFile.precision (6);
   //   outputFile << scientific;
 
-  for (size_t i = 1; i < _survey.size(); ++i)
-    _survey[i].writeSummaryArrays (outputFile, i);
+  for (size_t i = 1; i < surveys.size(); ++i)
+    surveys[i].writeSummaryArrays (outputFile, i);
 
   //Infant mortality rate is a single number, therefore treated separately
   // Note: Storing a single value instead of one per reporting period is inconsistent with other
@@ -129,16 +132,21 @@ void SurveysType::checkpoint (istream& stream) {
     currentTimestep & stream;
     _surveysTimeIntervals & stream;
     _surveyPeriod & stream;
-    // NOTE: don't actually need to checkpoint _survey[0], though in that case
-    // it's allocate() must be called.
-    _survey & stream;
-    current = &_survey[_surveyPeriod];
+    // read those surveys checkpointed, call allocate on the rest:
+    for( size_t i = 1; i <= _surveyPeriod; ++i )
+        surveys[i] & stream;
+    surveys[0].allocate();
+    for( size_t i = _surveyPeriod + 1; i < surveys.size(); ++i )
+        surveys[i].allocate();
+    current = &surveys[_surveyPeriod];
 }
 void SurveysType::checkpoint (ostream& stream) {
     currentTimestep & stream;
     _surveysTimeIntervals & stream;
     _surveyPeriod & stream;
-    _survey & stream;
+    // checkpoint only those surveys used; exclude 0 since that's a "write only DB"
+    for( size_t i = 1; i <= _surveyPeriod; ++i )
+        surveys[i] & stream;
 }
 
 } }

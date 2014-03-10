@@ -64,6 +64,7 @@ set (Model_CPP
   WithinHost/Pathogenesis/PathogenesisModel.cpp
   WithinHost/Pathogenesis/Submodels.cpp
   WithinHost/Diagnostic.cpp
+  WithinHost/Treatments.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp

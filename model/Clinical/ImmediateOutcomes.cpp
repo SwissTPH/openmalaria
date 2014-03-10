@@ -61,7 +61,9 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
+void ClinicalImmediateOutcomes::massDrugAdministration(
+    interventions::Deployment::Method method, Human& human)
+{
     assert(false);      // should never be called
 }
 
@@ -88,7 +90,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         _doomed = -TimeStep::interval;
     
     if (effectiveTreatment) {
-        human.withinHostModel->clearInfections (latestReport.isComplicated());
+        human.withinHostModel->treatment( WithinHost::TreatmentId::legacy );
     }
 
     if( _tLastTreatment == TimeStep::simulation ){
@@ -116,9 +118,11 @@ bool ClinicalImmediateOutcomes::uncomplicatedEvent (
     if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
         _tLastTreatment = TimeStep::simulation;
         if ( regimen == Regimen::UC )
-            Monitoring::Surveys.getSurvey(inCohort).reportTreatments1( ageGroup, 1 );
+            Monitoring::Surveys.getSurvey(inCohort).addInt(
+                Monitoring::Survey::MI_TREATMENTS_1, ageGroup, 1 );
         if ( regimen == Regimen::UC2 )
-            Monitoring::Surveys.getSurvey(inCohort).reportTreatments2( ageGroup, 1 );
+            Monitoring::Surveys.getSurvey(inCohort).addInt(
+                Monitoring::Survey::MI_TREATMENTS_2, ageGroup, 1 );
 
         if (probParasitesCleared[regimen] > random::uniform_01()) {
             // Could report Episode::RECOVERY to latestReport,
@@ -185,7 +189,8 @@ bool ClinicalImmediateOutcomes::severeMalaria (
 
     if (q[2] <= prandom) { // Patient gets in-hospital treatment
         _tLastTreatment = TimeStep::simulation;
-        Monitoring::Surveys.getSurvey(inCohort).reportTreatments3( ageGroup, 1 );
+        Monitoring::Surveys.getSurvey(inCohort).addInt(
+            Monitoring::Survey::MI_TREATMENTS_3, ageGroup, 1 );
 
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)

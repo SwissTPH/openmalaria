@@ -26,17 +26,39 @@
 #include "WithinHost/Pathogenesis/State.h"
 #include "Parameters.h"
 
-#include <list>
-
 using namespace std;
 
 namespace scnXml{
     class Scenario;
+    class TreatmentDescription;
 }
 class UnittestUtil;
 
 namespace OM {
 namespace WithinHost {
+
+/**
+ * Type used to select a treatment option.
+ * 
+ * Pass by value; it just hides an integer.
+ */
+struct TreatmentId{
+    /**
+     * The old treatment option.
+     * 
+     * For falciparum, this clears all blood- and liver-stage asexual
+     * parasites, but leaves gametocytes. For vivax, it clears blood-stage
+     * parasites (sexual and asexua) and may clear some liver stage parasites.
+     * 
+     * This is always available for backwards compatibility.
+     * TODO: migrate everything using it to use configured treatments. */
+    static TreatmentId legacy;
+    
+    inline bool operator==( const TreatmentId that ){ return id == that.id; }
+    inline bool operator!=( const TreatmentId that ){ return id != that.id; }
+    
+    uint32_t id;
+};
 
 /**
  * Interface to the within-host models. These models encapsulate the infections
@@ -50,6 +72,10 @@ public:
     //@{
     /// Initialise static parameters
     static void init(const OM::Parameters& parameters, const scnXml::Scenario& scenario);
+    
+    /** Configure a new treatment option, and return the code used to select
+     * that option later. */
+    static TreatmentId addTreatment( const scnXml::TreatmentDescription& desc );
 
     /// Create an instance using the appropriate model
     static WHInterface* createWithinHostModel( double comorbidityFactor );
@@ -81,14 +107,11 @@ public:
 
     /// Create a new infection within this human
     virtual void importInfection() =0;
-    /** Conditionally clears all infections. Not used with the PK/PD model.
-     *
-     * If IPT isn't present, this just calls effectiveTreatment().
-     * 
-     * When using the IPT model, this conditionally either does the above or
-     * does nothing.
+
+    /**
+     * Apply some treatment
      */
-    virtual void clearInfections (bool isSevere);
+    virtual void treatment( TreatmentId treatment ) =0;
 
     /** Medicate drugs (wraps drug's medicate).
      *
@@ -108,8 +131,11 @@ public:
      * @param bsvFactor Parasite survival factor for blood-stage vaccines */
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor) =0;
 
-    // TODO: these should not be exposed outsite the withinhost models,
-    // but must be until the 1-day time step case management models are updated
+    /** TODO: this should not need to be exposed
+     * 
+     * It is used by: MDA diagnostics, EventScheduler diagnostics, and a severe
+     * outcome (pDeath) model inside the EventScheduler "case management"
+     * model. */
     virtual double getTotalDensity() const;
     
     /** Simulate use of a diagnostic test, using the general detection limit.
@@ -128,20 +154,10 @@ public:
      */
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears ) =0;
 
-    ///@brief Only do anything when IPT is present:
-    //@{
-    /// Continuous deployment for IPT
-    virtual void continuousIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-    /// Timed deployment for IPT
-    virtual void timedIPT (Monitoring::AgeGroup ageGroup, bool inCohort);
-    /// Last IPTi dose recent enough to give protection?
-    virtual bool hasIPTiProtection (TimeStep maxInterventionAge) const;
-    //@}
-    
     /// Special intervention: clears all immunity
     virtual void clearImmunity() =0;
     
-    // TODO: these shouldn't have to be exposed (perhaps use summarize to report the data):
+    // TODO(monitoring): these shouldn't have to be exposed (perhaps use summarize to report the data):
     virtual double getCumulativeh() const;
     virtual double getCumulativeY() const;
 
@@ -164,17 +180,6 @@ protected:
      * @returns Number of infections, patent and total
      */
     virtual InfectionCount countInfections () const =0;
-
-    /**
-     * Used with simple drug models where treatment is either effective or non-
-     * existant. This clears all blood-stage asexual parasites, and in the case
-     * of vivax may clear some liver stage as well as gametocytes (sexual
-     * stage).
-     *
-     * Normally clearInfections() would be called instead, which, when IPT is not
-     * active, just calls this function (although this needs to be changed for
-     * PK_PD integration). */
-    virtual void effectiveTreatment() =0;
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

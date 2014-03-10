@@ -271,8 +271,8 @@ void AnophelesModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
     
     if( elt.getSeekingDeathRateIncrease().present() ){
         const scnXml::SeekingDeathRateIncrease& elt2 = elt.getSeekingDeathRateIncrease().get();
-        if( elt2.getInitial() < 0.0 )
-            throw util::xml_scenario_error( "seekingDeathRateIncrease intervention: initial effect must be non-negative" );
+        if( elt2.getInitial() < -1.0 )
+            throw util::xml_scenario_error( "seekingDeathRateIncrease intervention: initial effect must be ≥ -1" );
         seekingDeathRateIntervs[instance].set (elt2.getInitial(), elt2.getDecay(), "seekingDeathRateIncrease");
     }
     if( elt.getProbDeathOvipositing().present() ){

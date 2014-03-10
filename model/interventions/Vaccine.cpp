@@ -66,12 +66,9 @@ void VaccineEffect::deploy(Host::Human& human, Deployment::Method method, Vaccin
 {
     bool administered = human.getVaccine().possiblyVaccinate( human, id(), vaccLimits );
     if( administered && VaccineEffect::reportEffect == id() ){
-        if( method == Deployment::TIMED )
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                .reportMassVaccinations (human.getMonitoringAgeGroup(), 1);
-        else
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                .reportEPIVaccinations (human.getMonitoringAgeGroup(), 1);
+        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
+            (method == Deployment::TIMED) ? Monitoring::Survey::MI_VACCINATION_TIMED :
+                Monitoring::Survey::MI_VACCINATION_CTS, human.getMonitoringAgeGroup(), 1 );
     }
 }
 

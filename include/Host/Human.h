@@ -24,6 +24,7 @@
 #include "InfectionIncidenceModel.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/HumanComponents.h"
+#include "util/checkpoint_containers.h"
 #include <set>
 
 namespace scnXml {

@@ -46,24 +46,21 @@ public:
     //! Entry point to simulation.
     void start(const scnXml::Monitoring& monitoring);
     
+    /// Return true when this simulation started by loading a checkpoint
+    inline static bool isCheckpoint(){ return startedFromCheckpoint; }
+    
 private:
     /** @brief checkpointing functions
     *
     * readCheckpoint/writeCheckpoint prepare to read/write the file,
     * and read/write read and write the actual data. */
     //@{
-    //! This function reads the checkpoint from the file in which is written
-    /*! if it exists and initializes all the data return true if the workunit is
-    checkpointed and false otherwise */
-    bool isCheckpoint();
-    
     void writeCheckpoint();
     void readCheckpoint();
     
     void checkpoint (istream& stream, int checkpointNum);
     void checkpoint (ostream& stream, int checkpointNum);
     //@}
-    
     
     // Data
     TimeStep simPeriodEnd;
@@ -95,6 +92,8 @@ private:
     
     // Stored so that it can be verified across checkpoints
     util::Checksum cksum;
+    
+    static bool startedFromCheckpoint;
     
     friend class AnophelesModelSuite;
 };

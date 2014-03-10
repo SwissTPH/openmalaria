@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Treatments.h"
 
 #include <list>
 #include <memory>
@@ -61,7 +62,8 @@ public:
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
     virtual bool diagnosticDefault() const;
-
+    virtual void treatment( TreatmentId treatment );
+    
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
 
     inline double getCumulativeh() const {
@@ -72,6 +74,8 @@ public:
     }
     
 protected:
+    virtual void clearInfections( Treatments::Stages stage ) =0;
+    
     ///@brief Immunity model parameters
     //@{
     /** Updates for the immunity model − assumes _cumulativeh and _cumulativeY
@@ -110,6 +114,8 @@ protected:
     
     /// The PathogenesisModel introduces illness dependant on parasite density
     auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
+    
+    TimeStep treatExpiryLiver, treatExpiryBlood;
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

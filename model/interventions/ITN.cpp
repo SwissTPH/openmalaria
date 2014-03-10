@@ -64,11 +64,10 @@ ITNEffect::ITNEffect( EffectId id, const scnXml::ITNDescription& elt,
 
 void ITNEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployEffect( *this );
-    if( method == interventions::Deployment::TIMED ){
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportMassITNs( human.getMonitoringAgeGroup(), 1 );
-    }else if( method == interventions::Deployment::CTS ){
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).reportEPI_ITNs( human.getMonitoringAgeGroup(), 1 );
-    }else throw SWITCH_DEFAULT_EXCEPTION;
+    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
+        (method == interventions::Deployment::TIMED) ?
+            Monitoring::Survey::MI_ITN_TIMED : Monitoring::Survey::MI_ITN_CTS,
+        human.getMonitoringAgeGroup(), 1 );
 }
 
 Effect::Type ITNEffect::effectType() const{

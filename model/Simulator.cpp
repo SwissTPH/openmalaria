@@ -46,6 +46,10 @@ namespace OM {
     using Monitoring::Surveys;
     using interventions::InterventionManager;
 
+bool Simulator::startedFromCheckpoint;  // static
+
+const char* CHECKPOINT = "checkpoint";
+
 // -----  Set-up & tear-down  -----
 
 Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
@@ -78,6 +82,10 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
         throw util::xml_scenario_error( "wuID required" );
     workUnitIdentifier = scenario.getWuID().get();
 #endif
+    
+    ifstream checkpointFile(CHECKPOINT,ios::in);
+    // If not open, file doesn't exist (or is inaccessible)
+    startedFromCheckpoint = checkpointFile.is_open();
 }
 
 Simulator::~Simulator(){
@@ -236,13 +244,6 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
 
 // -----  checkpointing: set up read/write stream  -----
 
-const char* CHECKPOINT = "checkpoint";
-
-bool Simulator::isCheckpoint(){
-  ifstream checkpointFile(CHECKPOINT,ios::in);
-  // If not open, file doesn't exist (or is inaccessible)
-  return checkpointFile.is_open();
-}
 int readCheckpointNum () {
     ifstream checkpointFile;
     checkpointFile.open(CHECKPOINT, fstream::in);

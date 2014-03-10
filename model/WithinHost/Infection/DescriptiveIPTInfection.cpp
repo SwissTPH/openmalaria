@@ -18,6 +18,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+/* NOTE: this code is not used any more.
+ * It is kept only to provide inspiration for a resistance model which
+ * similarly wants to give each infection a 'genotype'. */
+
 #include "WithinHost/Infection/DescriptiveIPTInfection.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -111,17 +115,6 @@ double DescriptiveIPTInfection::asexualAttenuation () {
   double attFact = 1.0 / genotypes[proteome_ID].atten;
   _density *= attFact;
   return attFact;
-}
-
-
-DescriptiveIPTInfection::DescriptiveIPTInfection (istream& stream) :
-    DescriptiveInfection(stream)
-{
-  _SPattenuate & stream; 
-}
-void DescriptiveIPTInfection::checkpoint (ostream& stream) {
-    DescriptiveInfection::checkpoint (stream);
-    _SPattenuate & stream; 
 }
 
 } }

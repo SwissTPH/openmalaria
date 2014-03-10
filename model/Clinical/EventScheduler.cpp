@@ -186,12 +186,14 @@ bool ClinicalEventScheduler::notAtRisk() {
     throw TRACED_EXCEPTION_DEFAULT("notAtRisk: not supported by 1-day time-step models");
 }
 
-void ClinicalEventScheduler::massDrugAdministration(Human& human){
+void ClinicalEventScheduler::massDrugAdministration(
+    interventions::Deployment::Method method, Human& human )
+{
     // Note: we use the same medication method as with drugs as treatments, hence the actual
     // medication doesn't occur until the next timestep.
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
-    ESCaseManagement::massDrugAdministration (
+    ESCaseManagement::massDrugAdministration ( method,
         ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
         medicateQueue, human.isInAnyCohort(), human.getMonitoringAgeGroup()
     );
@@ -287,17 +289,17 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
-	    timeLastTreatment = TimeStep::simulation;
+            timeLastTreatment = TimeStep::simulation;
             if( pgState & Episode::COMPLICATED ){
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                    .reportTreatments3( human.getMonitoringAgeGroup(), 1 );
+                Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
+                    Monitoring::Survey::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
             }else{
                 if( pgState & Episode::SECOND_CASE ){
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                        .reportTreatments2( human.getMonitoringAgeGroup(), 1 );
+                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
+                        Monitoring::Survey::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
                 }else{
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                        .reportTreatments1( human.getMonitoringAgeGroup(), 1 );
+                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
+                        Monitoring::Survey::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
                 }
             }
         }
@@ -368,8 +370,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double treatmentEffectMult = 1.0;
                 
                 if( random::uniform_01() < pTreatment ){
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                        .reportAntibioticTreatments( human.getMonitoringAgeGroup(), 1 );
+                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
+                        Monitoring::Survey::MI_NMF_TREATMENTS, human.getMonitoringAgeGroup(), 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
                 }
                 

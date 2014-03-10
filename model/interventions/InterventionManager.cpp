@@ -105,10 +105,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 humanEffects.push_back( new VaccineEffect( id, effect.getBSV().get(), Vaccine::BSV ) );
             }else if( effect.getTBV().present() ){
                 humanEffects.push_back( new VaccineEffect( id, effect.getTBV().get(), Vaccine::TBV ) );
-            }else if( effect.getIPT().present() ){
-                // TODO: also remove XML elements from XSD in a later version; we keep it for now
-                // to allow the problem to be reported here (not some obscure validator error)
-                throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
             }else if( effect.getITN().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();

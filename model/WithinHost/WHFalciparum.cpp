@@ -20,7 +20,6 @@
 
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/DescriptiveWithinHost.h"
-#include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
@@ -28,10 +27,12 @@
 #include "WithinHost/Infection/PennyInfection.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Diagnostic.h"
+#include "WithinHost/Treatments.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
+#include "util/checkpoint_containers.h"
 #include "schema/scenario.h"
 
 #include <cmath>
@@ -43,6 +44,7 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
+using Monitoring::Survey;
 
 double WHFalciparum::sigma_i;
 double WHFalciparum::immPenalty_22;
@@ -155,6 +157,34 @@ bool WHFalciparum::diagnosticDefault() const{
     return Diagnostic::default_.isPositive( totalDensity );
 }
 
+void WHFalciparum::treatment(TreatmentId treatId){
+    const Treatments& treat = Treatments::select( treatId );
+    for( vector<Treatments::Action>::const_iterator it =
+        treat.getEffects().begin(), end = treat.getEffects().end();
+        it != end; ++it )
+    {
+        if( it->timesteps == TimeStep(-1) ){
+            // act immediately
+            //TODO: which timestep to measure "is blood stage" by?
+            clearInfections( it->stage );
+        }else{
+            switch( it->stage ){
+                case Treatments::BOTH:
+                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
+                    // don't break; also do blood below:
+                case Treatments::BLOOD:
+                    treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + it->timesteps );
+                    break;
+                case Treatments::LIVER:
+                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
+                    break;
+                case Treatments::NONE:
+                    /*do nothing*/;
+            }
+        }
+    }
+}
+
 Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
     Pathogenesis::StatePair result =
             pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
@@ -195,15 +225,17 @@ bool WHFalciparum::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup a
     pathogenesisModel->summarize( survey, ageGroup );
     InfectionCount count = countInfections();
     if (count.total != 0) {
-        survey.reportInfectedHosts(ageGroup,1);
-        survey.addToInfections(ageGroup, count.total);
-        survey.addToPatentInfections(ageGroup, count.patent);
+        survey
+            .addInt( Survey::MI_INFECTED_HOSTS, ageGroup, 1 )
+            .addInt( Survey::MI_INFECTIONS, ageGroup, count.total )
+            .addInt( Survey::MI_PATENT_INFECTIONS, ageGroup, count.patent );
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
     if (diagnosticDefault()) {
-        survey.reportPatentHosts(ageGroup, 1);
-        survey.addToLogDensity(ageGroup, log(totalDensity));
+        survey
+            .addInt( Survey::MI_PATENT_HOSTS, ageGroup, 1)
+            .addDouble( Survey::MD_LOG_DENSITY, ageGroup, log(totalDensity) );
         return true;
     }
     return false;

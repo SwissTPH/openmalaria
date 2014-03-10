@@ -61,7 +61,7 @@ public:
                 TimeStep::simulation-_tLastTreatment <= TimeStep(4));
     }
 
-    virtual void massDrugAdministration(Human& human);
+    virtual void massDrugAdministration( interventions::Deployment::Method method, Human& human);
 
 protected:
     virtual void doClinicalUpdate (Human& human, double ageYears);

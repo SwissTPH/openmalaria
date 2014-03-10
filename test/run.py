@@ -115,7 +115,7 @@ def linkOrCopy (src, dest):
 def runScenario(options,omOptions,name):
     scenarioSrc=os.path.abspath(os.path.join(testSrcDir,"scenario%s.xml" % name))
     tmpprefix=name
-    compare=True
+    compare=options.compare
     if not os.path.isfile(scenarioSrc):
         if os.path.isfile(name):
             scenarioSrc=os.path.abspath(name)
@@ -205,12 +205,17 @@ def runScenario(options,omOptions,name):
             if os.path.isfile(f):
                 os.remove(f)
     
+    origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%name)
+    newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%name)
+    origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
+    newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
+    copyCts = True
+    copyOut = True
+    
     # Compare outputs:
     if ret == 0 and compare:
         # ctsout.txt (this output is optional):
         if os.path.isfile(ctsoutFile):
-            origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%name)
-            newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%name)
             if os.path.isfile(origCtsout):
                 ctsret,ctsident = compareCtsout.main (origCtsout, ctsoutFile)
             else:
@@ -220,17 +225,12 @@ def runScenario(options,omOptions,name):
                 os.remove(ctsoutFile)
                 if os.path.isfile(newCtsout):
                     os.remove(newCtsout)
-            else:
-                shutil.copy2(ctsoutFile, newCtsout)
-                if options.diff:
-                    subprocess.call (["kdiff3",origCtsout,ctsoutFile])
+                copyCts = False
         else:
             ctsret,ctsident = 0,True
         
         # output.txt (this output is required):
         if os.path.isfile(outputFile):
-            origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
-            newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
             if os.path.isfile(origOutput):
                 ret,ident = compareOutput.main (origOutput, outputFile, 0)
             else:
@@ -240,10 +240,7 @@ def runScenario(options,omOptions,name):
                 os.remove(outputFile)
                 if os.path.isfile(newOutput):
                     os.remove(newOutput)
-            else:
-                shutil.copy2(outputFile, newOutput)
-                if options.diff:
-                    subprocess.call (["kdiff3",origOutput,outputFile])
+                copyOut = False
         else:
             ret,ident = 1,False
             stderrFile=os.path.join(simDir,"stderr.txt")
@@ -257,6 +254,15 @@ def runScenario(options,omOptions,name):
         
         ret=max(ret,ctsret)
         ident=ident and ctsident
+    
+    if copyCts:
+        shutil.copy2(ctsoutFile, newCtsout)
+        if options.diff:
+            subprocess.call (["kdiff3",origCtsout,ctsoutFile])
+    if copyOut:
+        shutil.copy2(outputFile, newOutput)
+        if options.diff:
+            subprocess.call (["kdiff3",origOutput,outputFile])
     
     try:
         os.rmdir(simDir)
@@ -291,6 +297,8 @@ You can pass options to openMalaria by first specifying -- (to end options passe
 		    help="Don't actually run openMalaria, just output the commandline.")
     parser.add_option("-c","--dont-cleanup", action="store_false", dest="cleanup", default=True,
 		    help="Don't clean up expected files from the temparary dir (checkpoint files, schema, etc.)")
+    parser.add_option("-C","--no-compare", action="store_false", dest="compare", default=True,
+                      help="Don't compare output after running; instead just copy outputs to test/outputXX.txt and test/ctsoutXX.txt")
     parser.add_option("-d","--diff", action="store_true", dest="diff", default=False,
             help="Launch a diff program (kdiff3) on the output if validation fails")
     parser.add_option("--valid","--validate",

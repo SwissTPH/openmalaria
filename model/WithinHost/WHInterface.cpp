@@ -21,12 +21,12 @@
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
 #include "WithinHost/DescriptiveWithinHost.h"
-#include "WithinHost/DescriptiveIPTWithinHost.h"
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Infection/PennyInfection.h"
+#include "WithinHost/Treatments.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -40,7 +40,7 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
- 
+
 bool opt_vivax_simple = false,
         opt_dummy_whm = false, opt_empirical_whm = false,
         opt_molineaux_whm = false, opt_penny_whm = false,
@@ -73,6 +73,11 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;
     }
+    Treatments::init();
+}
+
+TreatmentId WHInterface::addTreatment(const scnXml::TreatmentDescription& desc){
+    return Treatments::addTreatment( desc );
 }
 
 WHInterface* WHInterface::createWithinHostModel ( double comorbidityFactor ) {
@@ -94,26 +99,12 @@ WHInterface::~WHInterface()
 }
 
 
-void WHInterface::clearInfections (bool) {
-    effectiveTreatment();
-}
-
 void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){
     throw TRACED_EXCEPTION( "should not call medicate() except with CommonWithinHost model", util::Error::WHFeatures );
 }
 
 double WHInterface::getTotalDensity() const{
     throw TRACED_EXCEPTION( "should not call getTotalDensity() with non-falciparum model", util::Error::WHFeatures );
-}
-
-void WHInterface::continuousIPT (Monitoring::AgeGroup, bool) {
-    throw util::xml_scenario_error (string ("Continuous IPT treatment when no IPT description is present in interventions"));
-}
-void WHInterface::timedIPT (Monitoring::AgeGroup, bool) {
-    throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
-}
-bool WHInterface::hasIPTiProtection (TimeStep maxInterventionAge) const {
-    throw util::xml_scenario_error (string ("Timed IPT treatment when no IPT description is present in interventions"));
 }
 
 double WHInterface::getCumulativeh() const{

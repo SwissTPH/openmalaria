@@ -150,7 +150,7 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 }
 
 void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
-  survey.reportExpectedInfected(ageGroup, _pinfected);
+    survey.addDouble( Monitoring::Survey::MD_EXPECTED_INFECTED, ageGroup, _pinfected);
 }
 
 
@@ -225,7 +225,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
         // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
-    human.getSurvey().reportNewInfections(human.getMonitoringAgeGroup(), n);
+    human.getSurvey().addInt( Monitoring::Survey::MI_NEW_INFECTIONS, human.getMonitoringAgeGroup(), n );
     ctsNewInfections += n;
     return n;
   }

@@ -420,7 +420,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo> name:Diagnostic (5-day);</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="drugEffect" type="om:DrugWithCompliance"/>
+            <xs:element name="effects" type="om:TreatmentDescription"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -480,14 +480,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             probability of transmission to mosquitoes
           </xs:documentation>
           <xs:appinfo>name:Vaccines;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="IPT" minOccurs="0" type="om:IPTDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Description of IPT interventions.
-          </xs:documentation>
-          <xs:appinfo>name:Intermittent preventative treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="ITN" minOccurs="0" type="om:ITNDescription">
@@ -881,69 +873,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
       </xs:element>
     </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="IPTDescription">
-    <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="infGenotype">
-        <xs:complexType>
-          <xs:attribute name="name" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Name of age specific intervention
-              </xs:documentation>
-              <xs:appinfo>name:Age specific intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="freq" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Frequency of parasite genotype as a proportion (total of all genotypes
-                must add to 1).
-              </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Frequency;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="ACR" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Adequate clinical response (probability of effective cure)
-              </xs:documentation>
-              <xs:appinfo>units:dimensionless; min:0; max:1;name:ACR;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="proph" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Prophylactic period
-              </xs:documentation>
-              <xs:appinfo>units:time-step;name:Prophylactic period;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="tolPeriod" type="xs:int" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Tolerance period
-              </xs:documentation>
-              <xs:appinfo>units:time steps;name:Tolerance period;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="atten" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Attenuation factor (i.e. divisor for density during period of effect)
-              </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:1;max:inf;name:Tolerance period;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="iptiEffect" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>Description of ipti effect</xs:documentation>
-        <xs:appinfo>type:list of elements;name:Description of ipti effect;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ITNDescription">
     <xs:annotation>
@@ -1469,7 +1398,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Describe an effect on the increase in the death rate while host
             seeking (mu_vA) due to this intervention.
             
-            Enter the rate increase (i.e. if rate increases to 120% of normal, give 0.2).
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
            </xs:documentation>
           <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
         </xs:annotation>
@@ -1479,7 +1410,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
           <xs:attribute name="initial" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>units:dimensionless;min:0;max:inf;name:Initial proportion increase</xs:appinfo>
+              <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -1510,7 +1441,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Describe an effect on emergence of pupa into adults: this value is the
             proportion of emerging pupa which are killed by this intervention.
             
-            This can be used as a crude way of modelling larviciding.
+            This can be used as a crude way of modelling larviciding. It ca
+            also be used to increase emergence by giving a negative value.
+            The emergence rate is "old rate" × (1 - factor) where factor is the
+            value given here; thus, for example, using -1 will double emergence.
            </xs:documentation>
           <xs:appinfo>units:dimensionless;name:Proportion of emerging pupa killed;</xs:appinfo>
         </xs:annotation>
@@ -1520,11 +1454,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
           <xs:attribute name="initial" type="xs:double" use="required">
             <xs:annotation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial proportion reduction</xs:appinfo>
+              <xs:appinfo>units:dimensionless;min:-inf;max:1;name:Initial proportion reduction</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
-      </xs:element>
+      </xs:element> 
     </xs:all>
     <xs:attribute name="mosquito" type="xs:string" use="required">
       <xs:annotation>

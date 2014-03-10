@@ -47,7 +47,7 @@ class SurveysType
   public:
       SurveysType() : currentTimestep(TimeStep::never) {}
       
-    /** Points to _survey[_surveyPeriod] (the dummy element _survey[0] before
+    /** Points to surveys[_surveyPeriod] (the dummy element surveys[0] before
      * start of main sim and after completion of last survey).
      * This is for data being collected for the next survey. */
     Survey* current;
@@ -61,11 +61,11 @@ class SurveysType
      * the human is in the cohort and reporting mode. */
     inline Survey& getSurvey( bool inCohort ){
 	if( _cohortOnly && !inCohort )
-	    return _survey[0];	// output goes to dummy survey: is deleted
+	    return surveys[0];	// output goes to dummy survey: is deleted
 	else return *current;
     }
     /** As getSurvey(), except returns a number instead of a reference. */
-    inline int getSurveyNumber( bool inCohort ){
+    inline size_t getSurveyNumber( bool inCohort ){
         if( _cohortOnly && !inCohort )
             return 0;
         else
@@ -88,8 +88,8 @@ class SurveysType
      * Survey at n=0 is the junk-survey (not reported).
      * Checks n is valid in debug mode. */
     inline Survey& at (size_t n) {
-      assert (n < _survey.size());
-      return _survey[n];
+      assert (n < surveys.size());
+      return surveys[n];
     }
     
     /** Return timestep of the final survey.
@@ -99,7 +99,7 @@ class SurveysType
      * explicitly specified and has a small affect on
      * infantAllCauseMortality (survey 21) output. */
     inline TimeStep getFinalTimestep () {
-      return _surveysTimeIntervals[_survey.size()-2];	// final entry is a concatenated -1
+      return _surveysTimeIntervals[surveys.size()-2];	// final entry is a concatenated -1
     }
     //@}
     
@@ -117,14 +117,14 @@ class SurveysType
     vector<TimeStep> _surveysTimeIntervals;
     /** Index for the time dimention of the summary arrays
      * Index starts from 1 for used surveys; is 0 to write to dummy survey. */
-    int _surveyPeriod;
+    size_t _surveyPeriod;
     
     /// If true, many outputs only come from humans in the cohort.
     bool _cohortOnly;
 
-    /// Our collection of surveys. _survey[0] is a dummy container for data
+    /// Our collection of surveys. surveys[0] is a dummy container for data
     /// we're not interested in, in order to avoid having to check current is valid.
-    vector<Survey> _survey;
+    vector<Survey> surveys;
 };
 /// Data — entry-point for using Surveys. Checkpointed.
 extern SurveysType Surveys;

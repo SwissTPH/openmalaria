@@ -55,8 +55,11 @@ public:
 protected:
     /** Update: calculate new density.
     *
-    * @param survivalFactor Density multiplier to introduce drug & vaccine effects
-    * @param ageOfInfection Age of the blood-stage infection in timesteps (0 on first day)
+    * @param survivalFactor Density multiplier to introduce drug & vaccine
+    *   effects
+    * @param ageOfInfection Age of the patent blood-stage infection in
+    *   timesteps (0 on first day). Note that liver and pre-patent blood stages
+    *   occur before this, but this function is not called during those stages.
     * @returns True when the infection goes extinct. */
     virtual bool updateDensity (double survivalFactor, TimeStep ageOfInfection) =0;
 };

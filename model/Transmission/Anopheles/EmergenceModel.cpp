@@ -170,8 +170,8 @@ void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
     
     if( elt.getEmergenceReduction().present() ){
         const scnXml::EmergenceReduction& elt2 = elt.getEmergenceReduction().get();
-        if( elt2.getInitial() < 0.0 || elt2.getInitial() > 1.0 )
-            throw util::xml_scenario_error( "emergenceReduction intervention: initial effect must be in range [0,1]" );
+        if( elt2.getInitial() > 1.0 )
+            throw util::xml_scenario_error( "emergenceReduction intervention: initial effect must be ≤ 1" );
         emergenceReduction[instance].set (elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
     }
 }
