@@ -57,7 +57,7 @@ private:
     double getInitialEfficacy (size_t numPrevDoses) const;
 
     inline static const VaccineEffect& getParams( EffectId effect ){
-        assert( effect.id >= 0 && effect.id < params.size() && params[effect.id] != 0 );
+        assert( effect.id < params.size() && params[effect.id] != 0 );
         return *params[effect.id];
     }
     

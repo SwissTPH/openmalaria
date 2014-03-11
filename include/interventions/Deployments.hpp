@@ -362,8 +362,6 @@ public:
             msg << TimeStep::maxAgeIntervals * TimeStep::yearsPerInterval;
             throw util::xml_scenario_error( msg.str() );
         }
-        
-        if( elt.getVaccMinPrevDoses() );
     }
     
     /// For sorting

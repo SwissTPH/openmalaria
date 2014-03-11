@@ -60,7 +60,6 @@ set (Model_CPP
   WithinHost/Infection/EmpiricalInfection.cpp
   WithinHost/Infection/MolineauxInfection.cpp
   WithinHost/Infection/PennyInfection.cpp
-  WithinHost/WHVivax.cpp
   WithinHost/Pathogenesis/PathogenesisModel.cpp
   WithinHost/Pathogenesis/Submodels.cpp
   WithinHost/Diagnostic.cpp

@@ -87,6 +87,8 @@ static EffectId EffectId_pop = EffectId( boost::integer_traits<size_t>::const_ma
  * This is a base class. */
 class HumanInterventionEffect {
 public:
+    virtual ~HumanInterventionEffect() {}
+    
     /** Deploy the effect to a pre-selected human.
      * 
      * @param human Individual receiving the intervention

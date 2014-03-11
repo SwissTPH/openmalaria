@@ -48,7 +48,7 @@ public:
     
     /** Return the corresponding treatment description. */
     static inline const Treatments& select( TreatmentId treatId ){
-        assert( treatId.id >= 0 && treatId.id < treatments.size() );
+        assert( treatId.id < treatments.size() );
         return treatments[treatId.id];
     }
     //@}

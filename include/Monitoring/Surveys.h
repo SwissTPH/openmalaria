@@ -62,14 +62,13 @@ class SurveysType
     inline Survey& getSurvey( bool inCohort ){
 	if( _cohortOnly && !inCohort )
 	    return surveys[0];	// output goes to dummy survey: is deleted
-	else return *current;
+	return *current;
     }
     /** As getSurvey(), except returns a number instead of a reference. */
     inline size_t getSurveyNumber( bool inCohort ){
         if( _cohortOnly && !inCohort )
             return 0;
-        else
-            return _surveyPeriod;
+        return _surveyPeriod;
     }
 
     /** Read in some params from XML and allocate memory. */

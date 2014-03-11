@@ -80,10 +80,12 @@ Effect::Type VaccineEffect::effectType() const
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
+#ifdef WITHOUT_BOINC
 void VaccineEffect::print_details(ostream& out) const
 {
         out << id().id << "\t" << (type == Vaccine::PEV ? "PEV" : (type == Vaccine::BSV ? "BSV" : "TBV"));
 }
+#endif
 
 double VaccineEffect::getInitialEfficacy (size_t numPrevDoses) const
 {

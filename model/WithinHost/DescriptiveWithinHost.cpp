@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "Global.h"
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/Diagnostic.h"
 #include "util/ModelOptions.h"
@@ -157,7 +158,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         ++inf;
     }
     util::streamValidate( totalDensity );
-    assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
+    assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }
 
 void DescriptiveWithinHostModel::addProphylacticEffects(const vector<double>& pClearanceByTime) {

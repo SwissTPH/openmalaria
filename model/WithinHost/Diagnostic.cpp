@@ -27,7 +27,7 @@ namespace OM { namespace WithinHost {
 Diagnostic Diagnostic::default_;
 
 void Diagnostic::setDeterministic(double limit){
-    assert( density != density );       // multiple initialisations
+    assert( (boost::math::isnan)(density) );       // multiple initialisations
     specificity = numeric_limits<double>::quiet_NaN();
     density = limit;
 }
@@ -47,7 +47,7 @@ void Diagnostic::setXml( const scnXml::HSDiagnostic& elt ){
 }
 
 bool Diagnostic::isPositive( double x ) const {
-    if( specificity != specificity ){	// is NaN
+    if( (boost::math::isnan)(specificity) ){
         // use deterministic test
         return x >= density;
     }else{
