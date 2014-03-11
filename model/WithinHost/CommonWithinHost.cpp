@@ -148,7 +148,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor)
         CONTINUE_OUTER:; // yes, it's a hideous goto — but C++98 doesn't have another way of continuing the outer loop
     }
     util::streamValidate(totalDensity);
-    assert( totalDensity == totalDensity );        // inf probably wouldn't be a problem but NaN would be
+    assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 
     pkpdModel->decayDrugs ();
 }

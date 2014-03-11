@@ -20,10 +20,12 @@
 #ifndef Hmod_PerHost
 #define Hmod_PerHost
 
+#include "Global.h"
 #include "Transmission/Anopheles/PerHost.h"
 #include "interventions/Interfaces.hpp"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
+#include "util/checkpoint_containers.h"
 #include <boost/ptr_container/ptr_list.hpp>
 #include <boost/shared_ptr.hpp>
 
@@ -50,6 +52,8 @@ class HumanVectorInterventionEffect;
  */
 class PerHostInterventionData {
 public:
+    virtual ~PerHostInterventionData() {}
+    
     /** Deploy an intervention. */
     virtual void redeploy( const HumanVectorInterventionEffect& params ) =0;
     
@@ -96,6 +100,8 @@ protected:
 /** A base class for human vector intervention parameters. */
 class HumanVectorInterventionEffect : public interventions::HumanInterventionEffect {
 public:
+    virtual ~HumanVectorInterventionEffect() {}
+    
     /** Create a new object to store human-specific details of deployment. */
     virtual PerHostInterventionData* makeHumanPart() const =0;
     virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::EffectId id ) const =0;

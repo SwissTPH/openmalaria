@@ -24,6 +24,7 @@
 #include "Monitoring/SurveyMeasure.h"
 #include "Global.h"
 #include "util/errors.h"
+#include "util/checkpoint_containers.h"
 #include <interventions/Interfaces.hpp>
 #include <bitset>
 #include <map>
@@ -166,7 +167,7 @@ public:
      * @returns (*this) object to allow chain calling
      */
     Survey& addInt( IntReportMeasures measure, AgeGroup ageGroup, int val ){
-        if( measure >= reportsIntAge.shape()[0] ||
+        if( static_cast<size_t>(measure) >= reportsIntAge.shape()[0] ||
             ageGroup.i() >= reportsIntAge.shape()[1] ){
             cout << "Index out of bounds:\n"
                 "survey\t" << static_cast<void*>(this)
@@ -184,7 +185,7 @@ public:
      * @returns (*this) object to allow chain calling
      */
     Survey& addDouble( DblReportMeasures measure, AgeGroup ageGroup, double val ){
-        if( measure >= reportsDblAge.shape()[0] ||
+        if( static_cast<size_t>(measure) >= reportsDblAge.shape()[0] ||
             ageGroup.i() >= reportsDblAge.shape()[1] ){
             cout << "Index out of bounds:\n"
                 "survey\t" << static_cast<void*>(this)

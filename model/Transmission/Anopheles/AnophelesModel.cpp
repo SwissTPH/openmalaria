@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "Global.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/PerHost.h"
 #include "Population.h"
@@ -390,7 +391,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
 }
 
 double AnophelesModel::calculateEIR (size_t sIndex, OM::Transmission::PerHost& host ) {
-    if ( partialEIR != partialEIR ) {
+    if ( (boost::math::isnan)(partialEIR) ) {
         cerr<<"partialEIR is not a number; "<<sIndex<<endl;
     }
     /* Calculates EIR per individual (hence N_i == 1).

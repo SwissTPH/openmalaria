@@ -26,13 +26,18 @@
 
 #ifdef _MSC_VER
 #pragma warning(disable: 4290)  // disable some warnings on MSVC
-#define finite(x) _finite(x)
 // Avoid min/max as macros on windows (breaks numeric_limits<T>::max())
 #define NOMINMAX
 #endif
 
 // unit32_t and similar, mostly for compatibility with MSVC:
 #include <boost/cstdint.hpp>
+
+#include <boost/math/special_functions/fpclassify.hpp>
+// this provides: isfinite, isinf, isnan, isnormal
+// use these functions like this: (boost::math::isnan)(x)
+// extra brackets are necessary since isnan etc. may be defined as macros!
+// explicit namespace usage avoids confusion with std versions available sometimes
 
 // Checkpointing and time-step operations are used _everywhere_:
 #include "util/checkpoint.h"

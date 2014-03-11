@@ -18,7 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Global.h"
+// must be included first to avoid compiler error (incompatible with fpclassify which is included from Global.h?)
+#include <boost/math/nonfinite_num_facets.hpp>
+
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Survey.h"	// lineEnd
 #include "util/errors.h"
@@ -30,7 +32,6 @@
 #include <map>
 #include <fstream>
 #include <boost/format.hpp>
-#include <boost/math/nonfinite_num_facets.hpp>
 #include <gzstream/gzstream.h>
 
 namespace OM { namespace Monitoring {

@@ -65,6 +65,9 @@ if (MSVC)
   set (OM_COMPILE_FLAGS "${OM_COMPILE_FLAGS} /D_CRT_SECURE_NO_DEPRECATE")
 endif (MSVC)
 
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments")
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 # -----  Find dependencies  -----
 
@@ -182,6 +185,9 @@ target_link_libraries (openMalaria
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${BOINC_LIBRARIES}
+  # these need to be mentioned explicitly with Clang:
+  m
+  stdc++
 )
 
 if (MSVC)
