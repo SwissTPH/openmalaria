@@ -97,6 +97,14 @@
             <QN value="1"/>
             <selfTreatment value="1"/>
           </nonCompliersEffective>
+          <treatmentActions>
+            <AQ name="clear blood-stage infections">
+              <clearInfections stage="blood" timesteps="1"/>
+            </AQ>
+            <CQ name="clear blood-stage infections">
+              <clearInfections stage="blood" timesteps="1"/>
+            </CQ>
+          </treatmentActions>
           <pSeekOfficialCareUncomplicated1 value="1"/>
           <pSelfTreatUncomplicated value="0"/>
           <pSeekOfficialCareUncomplicated2 value="1"/>
@@ -148,6 +156,11 @@
         <QN value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <treatmentActions>
+        <CQ name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1"/>
+        </CQ>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0"/>
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0"/>

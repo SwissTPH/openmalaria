@@ -24,6 +24,7 @@
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
+#include "WithinHost/WHInterface.h"
 
 namespace OM {
 namespace Clinical {
@@ -70,17 +71,13 @@ protected:
     virtual void checkpoint (ostream& stream);
 
 private:
-    /** Called when a non-severe/complicated malaria sickness occurs.
-     *
-     * @returns True in case of effective or partially effective treatment, false otherwise. */
-    bool uncomplicatedEvent(Episode::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
+    /** Called when a non-severe/complicated malaria sickness occurs. */
+    void uncomplicatedEvent(Human& human, Episode::State pgState);
 
     /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
      *
-     * @returns True in case of effective or partially effective treatment, false otherwise.
-     *
      * Note: sets doomed = 4 if patient dies. */
-    bool severeMalaria(Episode::State pgState, double ageYears, Monitoring::AgeGroup ageGroup, int& doomed, bool inCohort);
+    void severeMalaria(Human& human, Episode::State pgState, double ageYears, int& doomed);
 
     /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
     TimeStep _tLastTreatment;
@@ -98,6 +95,7 @@ private:
     static double probGetsTreatment[Regimen::NUM];
     static double probParasitesCleared[Regimen::NUM];
     static double cureRate[Regimen::NUM];
+    static WithinHost::TreatmentId treatments[Regimen::NUM];
     //END
 };
 

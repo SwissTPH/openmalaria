@@ -81,11 +81,10 @@ public:
   
   /** Report an episode, its severity, and any outcomes it entails.
    *
-   * @param inCohort Whether or not individual is part of the cohort (if there is one)
-   * @param ageGroup Monitoring agegroup
+   * @param human The human whose info is being reported
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(bool inCohort, Monitoring::AgeGroup ageGroup, Episode::State newState);
+  void update(Host::Human& human, Episode::State newState);
   
   /// Checkpointing
   void operator& (istream& stream);

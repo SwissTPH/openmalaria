@@ -642,7 +642,7 @@
         <MDA>
           <effects>
             <option name="legacy effect" pSelection="1">
-              <treatment timesteps="-1" stage="both"/>
+              <clearInfections stage="both" timesteps="-1"/>
             </option>
           </effects>
         </MDA>
@@ -689,6 +689,11 @@
         <QN value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <treatmentActions>
+        <CQ name="simple (unused)">
+          <clearInfections stage="both" timesteps="1"/>
+        </CQ>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0"/>
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0"/>

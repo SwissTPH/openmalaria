@@ -30,7 +30,7 @@ using namespace std;
 
 namespace scnXml{
     class Scenario;
-    class TreatmentDescription;
+    class TreatmentOption;
 }
 class UnittestUtil;
 
@@ -43,21 +43,15 @@ namespace WithinHost {
  * Pass by value; it just hides an integer.
  */
 struct TreatmentId{
-    /**
-     * The old treatment option.
-     * 
-     * For falciparum, this clears all blood- and liver-stage asexual
-     * parasites, but leaves gametocytes. For vivax, it clears blood-stage
-     * parasites (sexual and asexua) and may clear some liver stage parasites.
-     * 
-     * This is always available for backwards compatibility.
-     * TODO: migrate everything using it to use configured treatments. */
-    static TreatmentId legacy;
-    
     inline bool operator==( const TreatmentId that ){ return id == that.id; }
     inline bool operator!=( const TreatmentId that ){ return id != that.id; }
     
+    /// Default constructor: construct to an initial value. Don't pass this value to WHInterface::treatment()!
+    TreatmentId() : id(numeric_limits<uint32_t>::max()) {}
+private:
+    explicit TreatmentId(uint32_t id) : id(id) {}
     uint32_t id;
+    friend class Treatments;
 };
 
 /**
@@ -75,7 +69,7 @@ public:
     
     /** Configure a new treatment option, and return the code used to select
      * that option later. */
-    static TreatmentId addTreatment( const scnXml::TreatmentDescription& desc );
+    static TreatmentId addTreatment( const scnXml::TreatmentOption& desc );
 
     /// Create an instance using the appropriate model
     static WHInterface* createWithinHostModel( double comorbidityFactor );
@@ -109,7 +103,7 @@ public:
     virtual void importInfection() =0;
 
     /**
-     * Apply some treatment
+     * Carry out the effects of some treatment option
      */
     virtual void treatment( TreatmentId treatment ) =0;
 

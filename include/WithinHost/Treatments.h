@@ -27,10 +27,6 @@
 
 using namespace std;
 
-namespace scnXml{
-    class TreatmentOption;
-}
-
 namespace OM {
 namespace WithinHost {
 
@@ -46,16 +42,15 @@ class Treatments {
 public:
     /// @brief Static methods
     //@{
-    /// Add the "legacy" option
-    static void init();
-    
     /** Configure a new treatment option, and return the code used to select
      * that option later. */
-    static TreatmentId addTreatment( const scnXml::TreatmentDescription& desc );
+    static TreatmentId addTreatment( const scnXml::TreatmentOption& desc );
     
-    /** Find an appropriate TreatmentGroup. If multiple groups exist for the
-     * given TreatmentId, this will randomly select one. */
-    static const Treatments& select( TreatmentId treatId );
+    /** Return the corresponding treatment description. */
+    static inline const Treatments& select( TreatmentId treatId ){
+        assert( treatId.id >= 0 && treatId.id < treatments.size() );
+        return treatments[treatId.id];
+    }
     //@}
     
     /// @brief Types used by the non-static methods
@@ -82,13 +77,11 @@ public:
     
 private:
     // static:
-    static boost::ptr_vector<std::vector<Treatments> > groups;
+    static boost::ptr_vector<Treatments> treatments;
     
     // non-static:
-    Treatments( double pCum );
-    Treatments( double pCum, const scnXml::TreatmentOption& elt );
+    Treatments( const scnXml::TreatmentOption& elt );
     
-    double pCum;        // cumulative probability of selection; last should be 1
     // we can have several effects; each applies independently but simultaneously
     vector<Action> effects;
     

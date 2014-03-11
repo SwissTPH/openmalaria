@@ -32,6 +32,7 @@
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
 #include "WithinHost/Diagnostic.h"
+#include "util/random.h"
 #include <schema/healthSystem.h>
 #include <schema/interventions.h>
 
@@ -75,9 +76,7 @@ void HumanIntervention::print_details( std::ostream& out )const{
 class MDAEffect : public HumanInterventionEffect {
 public:
     MDAEffect( EffectId id, const scnXml::MDA& mda ) :
-        HumanInterventionEffect(id),
-        //TODO: treatment should probably only be referenced here and described elsewhere in the XML
-        treatId( WithinHost::WHInterface::addTreatment( mda.getEffects() ) )
+        HumanInterventionEffect(id)
     {
         if( !mda.getDiagnostic().present() ){
             // Note: allow no description for now to avoid XML changes.
@@ -85,6 +84,26 @@ public:
             diagnostic.setDeterministic( 0.0 );
         }else{
             diagnostic.setXml( mda.getDiagnostic().get() );
+        }
+        
+        const scnXml::Effects::OptionSequence& options = mda.getEffects().getOption();
+        assert( options.size() >= 1 );
+        treatments.reserve( options.size() );
+        double cumP = 0.0;
+        for( scnXml::Effects::OptionConstIterator it = options.begin(),
+            end = options.end(); it != end; ++it )
+        {
+            cumP += it->getPSelection();
+            TreatOptions treatOpts( cumP, WithinHost::WHInterface::addTreatment( *it ) );
+            treatments.push_back( treatOpts );
+        }
+        
+        // we expect the prob. to be roughly one as an error check, but allow slight deviation
+        if( cumP < 0.99 || cumP > 1.01 ) throw util::xml_scenario_error( "sum of pSelection of a group of treatments is not 1" );
+        for( vector<TreatOptions>::iterator it = treatments.begin(),
+            end = treatments.end(); it != end; ++it )
+        {
+            it->cumProb /= cumP;
         }
     }
     
@@ -100,7 +119,7 @@ public:
         survey.addInt( (method == Deployment::TIMED) ? Survey::MI_MDA_TIMED :
                        Survey::MI_MDA_CTS, human.getMonitoringAgeGroup(), 1 );
         
-        human.withinHostModel->treatment( treatId );
+        human.withinHostModel->treatment( selectTreatment() );
     }
     
     virtual Effect::Type effectType() const{ return Effect::MDA; }
@@ -112,8 +131,27 @@ public:
 #endif
     
 private:
+    WithinHost::TreatmentId selectTreatment()const{
+        if( treatments.size() == 1 ) return treatments[0].treatId;
+        
+        double x = util::random::uniform_01();      // random sample: choose
+        for( vector<TreatOptions>::const_iterator it = treatments.begin(),
+            end = treatments.end(); it != end; ++it )
+        {
+            if( it->cumProb > x ) return it->treatId;
+        }
+        assert( false );    // last item should have pCum=1 and x<1 in theory
+        return treatments[0].treatId; // remain type safe
+    }
+    
     WithinHost::Diagnostic diagnostic;
-    WithinHost::TreatmentId treatId;
+    struct TreatOptions{
+        double cumProb;
+        WithinHost::TreatmentId treatId;
+        TreatOptions( double cumProb, WithinHost::TreatmentId treatId ):
+            cumProb(cumProb), treatId(treatId) {}
+    };
+    vector<TreatOptions> treatments;
 };
 
 class MDA1DEffect : public HumanInterventionEffect {

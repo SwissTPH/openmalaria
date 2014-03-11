@@ -81,12 +81,11 @@
     <human>
       <effect id="MDA">
         <MDA>
-          <drugEffect>
-            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
-            <compliersEffective>
-              <timestep pClearance="1"/>
-            </compliersEffective>
-          </drugEffect>
+          <effects>
+            <option name="clear blood-stage infections" pSelection="1">
+              <clearInfections stage="blood" timesteps="1"/>
+            </option>
+          </effects>
         </MDA>
       </effect>
       <effect id="PEV">
@@ -151,6 +150,14 @@
         <ACT value="0.2"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <treatmentActions>
+        <ACT name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </ACT>
+        <QN name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </QN>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.0"/>
       <pSelfTreatUncomplicated value="0.0"/>
       <pSeekOfficialCareUncomplicated2 value="0.0"/>

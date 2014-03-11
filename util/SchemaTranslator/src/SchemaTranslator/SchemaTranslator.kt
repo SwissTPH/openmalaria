@@ -65,6 +65,13 @@ Usage: schemaTranslator [options]:
 				Use ARG "replace" to replace old parameters with a new default
 				parameterisation, or "manual" if you will update by hand
 				(in the second case, you should use --no-validation).
+  --hsTreatmentTranslation ARG	Update 32: this is essentially a bug-fix/
+				compatibility option. Use ARG "SIMPLE" for a
+				sensible new version (treat only blood-stage
+				infections on the next update), "LEGACY" for a
+				backwards-compatible option (treat blood and
+				liver stages retrospectively) or "BLANK" for a
+				configurable template.
   --schema-folder		The schema folder, by default ../../schema
   --input-folder		The input folder, by default ./scenarios
   --output-folder		The output folder, by default ./translatedScenarios
@@ -142,6 +149,16 @@ fun processArgs(args: Array<String>, options: Options) {
                     "replace" -> ITN29ParameterTranslation.REPLACE
                     "manual" -> ITN29ParameterTranslation.MANUAL
                     else -> throw SetupException("--ITN-description received unexpected argument: ${args[i]}")
+                }
+            }
+            "--hsTreatmentTranslation" -> {
+                if( options.hsTreatmentTranslation != HSTreatmentOption.NONE )
+                    throw SetupException("--hsTreatmentTranslation given multiple times")
+                options.hsTreatmentTranslation = when (args[++i].toLowerCase()){
+                    "simple" -> HSTreatmentOption.SIMPLE
+                    "legacy" -> HSTreatmentOption.LEGACY
+                    "blank" -> HSTreatmentOption.BLANK
+                    else -> throw SetupException("--hsTreatmentTranslation received unexpected argument: ${args[i]}")
                 }
             }
             else -> throw SetupException("unknown option: ${arg}")

@@ -212,7 +212,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // Human dies this timestep (last day of risk of death)
 	    _doomed = DOOMED_COMPLICATED;
 	    
-	    latestReport.update (human.isInAnyCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (human, pgState);
         } else {
 	    if ( pgState & Episode::COMPLICATED ) {
 		if( random::uniform_01() < ESCaseManagement::pSequelaeInpatient( ageYears ) ){
@@ -224,7 +224,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 		pgState = Episode::State (pgState | Episode::RECOVERY);
             }
 	    // report bout, at conclusion of episode:
-	    latestReport.update (human.isInAnyCohort(), human.getMonitoringAgeGroup(), pgState);
+	    latestReport.update (human, pgState);
 	    
 	    // Individual recovers (and is immediately susceptible to new cases)
 	    pgState = Episode::NONE;	// recovery (reset to healthy state)

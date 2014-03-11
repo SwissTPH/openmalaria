@@ -181,6 +181,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             type:double;units:Dimensionless;min:0.0;max:1.0;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element name="treatmentActions">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="CQ" type="om:TreatmentOption" minOccurs="0"/>
+            <xs:element name="SP" type="om:TreatmentOption" minOccurs="0"/>
+            <xs:element name="AQ" type="om:TreatmentOption" minOccurs="0"/>
+            <xs:element name="SPAQ" type="om:TreatmentOption" minOccurs="0"/>
+            <xs:element name="ACT" type="om:TreatmentOption" minOccurs="0"/>
+            <xs:element name="QN" type="om:TreatmentOption" minOccurs="0"/>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
@@ -889,23 +901,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:choice>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="TreatmentDescription">
+  <!-- unused: we could use a list like this to describe all options
+  <xs:complexType name="TreatmentDescriptions">
     <xs:annotation>
       <xs:documentation>
-        A description of a course of treatment.
+        This describes a set of different treatments.
         
-        Treatments given according to the description will randomly select a
-        "compliance option" (these allow effects to differ based on factors
-        randomly chosen at the time of deployment such as compliance/adherence
-        and possibly drug quality), then apply the effects described for that
-        compliance option.
+        Currently it should contain descriptions of all 5-day timestep
+        treatment actions but does not include PK/PD model treatments.
       </xs:documentation>
-      <xs:appinfo>name:Treatment description</xs:appinfo>
+      <xs:appinfo>name:Description of treatments;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="option" maxOccurs="unbounded" type="om:TreatmentOption"/>
     </xs:sequence>
-  </xs:complexType>
+    </xs:complexType> -->
   <xs:complexType name="TreatmentOption">
     <xs:annotation>
       <xs:documentation>
@@ -917,12 +927,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Group (for compliance/adherence/drug effect);</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="treatment" minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="clearInfections" minOccurs="0" maxOccurs="unbounded">
         <xs:annotation>
           <xs:documentation>
-            This clears all infections according to several options. To have a
-            probability of no action add another treatment option and set
-            probabilities of selection appropriately.
+            This clears infections according to several options: it can clear
+            all blood stage infections, all liver stage infections or both, and
+            it can act on multiple timesteps. To have a probability of no
+            action add another treatment option (which does nothing) and set
+            the probabilities of selection appropriately.
             
             This allows immediate (legacy) or delayed action, a prophylactic
             period, and selection of which stages are targeted. It is a simple
@@ -1007,7 +1019,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
+    <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
           Describes what this compliance option represents (e.g.
@@ -1016,15 +1028,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="pSelection" type="xs:double" use="required">
+    <!-- an identifier may be useful (see other comments, in particular in how
+    this is used for MDA interventions)
+    <xs:attribute name="id" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Probability that this compliance option is selected. The sum of
-          probabilities of selection across all compliance groups should
-          equal one.
+          A textual identifier for this treatment option.
         </xs:documentation>
-        <xs:appinfo>name:Probability of selection;units:Dimensionless;min:0;max:1;</xs:appinfo>
+        <xs:appinfo>name:Identifier;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    -->
   </xs:complexType>
 </xs:schema>
