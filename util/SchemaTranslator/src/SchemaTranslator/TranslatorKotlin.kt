@@ -59,6 +59,9 @@ enum class IptiReportOnlyAtRiskBehaviour {
 enum class ITN29ParameterTranslation {
     NONE; REPLACE; MANUAL  // note: could add option to approximate old behaviour
 }
+enum class HSTreatmentOption {
+    NONE; SIMPLE; LEGACY; BLANK
+}
 class Options {
     var outputFolder = File("translatedScenarios")
     var inputFolder = File("scenarios")
@@ -81,6 +84,8 @@ class Options {
     var iptiROAR = IptiReportOnlyAtRiskBehaviour.NONE
 
     var ITN29Translation = ITN29ParameterTranslation.NONE;
+    
+    var hsTreatmentTranslation = HSTreatmentOption.NONE;
 }
 
 val transformerFactory = TransformerFactory.newInstance()!!
@@ -517,17 +522,16 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     interventions.removeChild(elt)
                 }else{
                     // no 1-day-TS description; add the new 5-day-TS drug description
-                    val drugEffect = scenarioDocument.createElement("drugEffect")!!
-                    elt.appendChild(drugEffect)
-                    val compliance = scenarioDocument.createElement("compliance")!!
-                    compliance.setAttribute("pCompliance", "1")
-                    compliance.setAttribute("nonCompliersMultiplier", "1")
-                    drugEffect.appendChild(compliance)
-                    val compliersEffective = scenarioDocument.createElement("compliersEffective")!!
-                    drugEffect.appendChild(compliersEffective)
-                    val timestep = scenarioDocument.createElement("timestep")!!
-                    timestep.setAttribute("pClearance","1")
-                    compliersEffective.appendChild(timestep)
+                    val effects = scenarioDocument.createElement("effects")!!
+                    elt.appendChild(effects)
+                    val option = scenarioDocument.createElement("option")!!
+                    effects.appendChild(option)
+                    option.setAttribute("name","clear blood-stage infections")
+                    option.setAttribute("pSelection","1")
+                    val clearInfections = scenarioDocument.createElement("clearInfections")!!
+                    option.appendChild(clearInfections)
+                    clearInfections.setAttribute("timesteps","1")
+                    clearInfections.setAttribute("stage","blood")
                     effect.appendChild(elt) // after removal of "continuous" and "timed" child elements
                 }
             }
@@ -578,6 +582,38 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 interventions.removeChild(elt)  // now defunct
             }
         }
+        
+        fun updateHSIO(immOut: Element){
+            val drugReg = getChildElement(immOut, "drugRegimen")
+            val drugs = TreeSet<String>()
+            drugs.add(drugReg.getAttribute("firstLine")!!)
+            drugs.add(drugReg.getAttribute("secondLine")!!)
+            drugs.add(drugReg.getAttribute("inpatient")!!)
+            val treatActions = scenarioDocument.createElement("treatmentActions")!!
+            for (drug in drugs){
+                val x = scenarioDocument.createElement(drug)!!
+                treatActions.appendChild(x)     //TODO: order
+                if (options.hsTreatmentTranslation == HSTreatmentOption.NONE){
+                    throw DocumentException("please re-run, setting the --hsTreatmentTranslation option")
+                }else if (options.hsTreatmentTranslation == HSTreatmentOption.BLANK){
+                    x.appendChild(scenarioDocument.createComment("<clearInfections .../>")!!)
+                }else if (options.hsTreatmentTranslation == HSTreatmentOption.LEGACY){
+                    x.setAttribute("name","legacy (emulate pre-32 treatment)")
+                    val clear = scenarioDocument.createElement("clearInfections")!!
+                    clear.setAttribute("timesteps","-1")
+                    clear.setAttribute("stage","both")
+                    x.appendChild(clear)
+                }else if (options.hsTreatmentTranslation == HSTreatmentOption.SIMPLE){
+                    x.setAttribute("name","clear blood-stage infections")
+                    val clear = scenarioDocument.createElement("clearInfections")!!
+                    clear.setAttribute("timesteps","1")
+                    clear.setAttribute("stage","blood")
+                    x.appendChild(clear)
+                }
+            }
+            immOut.insertBefore(treatActions,getChildElement(immOut,"pSeekOfficialCareUncomplicated1"))
+        }
+        
         updateMDA()
         updateVaccineElt()
         updateElt("IPT", "IPT", true) 
@@ -627,6 +663,17 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         for (opt in getChildElements(survOpts, "option")){
             if (opt.getAttribute("name") == "nMassVA")
                 opt.setAttribute("name", "nMassGVI")
+        }
+        
+        val healthSystem = getChildElement(scenarioElement, "healthSystem")
+        val immOut = getChildElementOpt(healthSystem, "ImmediateOutcomes")
+        if (immOut != null) updateHSIO( immOut )
+        val changeHS = getChildElementOpt(interventions, "changeHS")
+        if (changeHS != null){
+            for (deploys in getChildElements(changeHS, "timedDeployment")){
+                val immOut = getChildElementOpt(deploys, "ImmediateOutcomes")
+                if (immOut != null) updateHSIO( immOut )
+            }
         }
         
         val model = getChildElement(scenarioElement, "model")

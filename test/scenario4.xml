@@ -107,6 +107,14 @@
             <QN value="1"/>
             <selfTreatment value="1"/>
           </nonCompliersEffective>
+          <treatmentActions>
+            <AQ name="legacy (emulate pre-32 treatment)">
+              <clearInfections stage="both" timesteps="-1"/>
+            </AQ>
+            <CQ name="legacy (emulate pre-32 treatment)">
+              <clearInfections stage="both" timesteps="-1"/>
+            </CQ>
+          </treatmentActions>
           <pSeekOfficialCareUncomplicated1 value="1"/>
           <pSelfTreatUncomplicated value="0"/>
           <pSeekOfficialCareUncomplicated2 value="1"/>
@@ -158,6 +166,11 @@
         <QN value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <treatmentActions>
+        <CQ name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </CQ>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0"/>
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0"/>

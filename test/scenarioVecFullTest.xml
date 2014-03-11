@@ -188,8 +188,8 @@
           <effects>
             <option name="prophylactic blood and liver" pSelection="1">
               <!-- this is a weird description, used only to test the model -->
-              <treatment timesteps="4" stage="blood"/>
-              <treatment timesteps="5" stage="liver"/>
+              <clearInfections timesteps="4" stage="blood"/>
+              <clearInfections timesteps="5" stage="liver"/>
             </option>
           </effects>
         </MDA>
@@ -345,6 +345,14 @@
         <ACT value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <treatmentActions>
+        <ACT name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </ACT>
+        <QN name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </QN>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
       <pSelfTreatUncomplicated value="0.01"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>

@@ -20,6 +20,7 @@
 
 #include "Clinical/Episode.h"
 #include "Monitoring/Surveys.h"
+#include "Host/Human.h"
 
 namespace OM {
 namespace Clinical {
@@ -45,14 +46,14 @@ void Episode::flush() {
 }
 
 
-void Episode::update (bool inCohort, Monitoring::AgeGroup ageGroup, Episode::State newState)
+void Episode::update (Host::Human& human, Episode::State newState)
 {
     if (TimeStep::simulation > (_time + healthSystemMemory)) {
         report ();
 
         _time = TimeStep::simulation;
-        _surveyPeriod = Surveys.getSurveyNumber( inCohort );
-        _ageGroup = ageGroup;
+        _surveyPeriod = Surveys.getSurveyNumber( human.isInAnyCohort() );
+        _ageGroup = human.getMonitoringAgeGroup();
         _state = newState;
     } else {
         _state = Episode::State (_state | newState);

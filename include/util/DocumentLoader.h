@@ -39,7 +39,7 @@ public:
     /** Oldest which current code is potentially compatible with
     * (provided the scenario XML file references its schema version).
     */
-    static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 30;
+    static const int SCHEMA_VERSION_OLDEST_COMPATIBLE = 32;
     
     DocumentLoader () : documentChanged(false), scenario(NULL) {}
     

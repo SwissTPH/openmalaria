@@ -300,6 +300,14 @@
         <ACT value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <treatmentActions>
+        <ACT name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </ACT>
+        <QN name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </QN>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
       <pSelfTreatUncomplicated value="0.01"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>

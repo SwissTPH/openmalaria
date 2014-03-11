@@ -198,7 +198,10 @@ WHInterface::InfectionCount WHVivax::countInfections () const{
     return count;
 }
 void WHVivax::treatment( TreatmentId treatment ){
-    if( treatment != TreatmentId::legacy ) throw util::unimplemented_exception( "configurable vivax treatments" );
+    throw util::unimplemented_exception( "configurable vivax treatments" );
+    //TODO: should probably either make sure falciparum-compatible treatments
+    // are never described or implement stuff to work the same way.
+    
     // This means clear blood stage infection(s), and
     // possibly use Primaquine to clear some hypnozoites from the liver.
     
