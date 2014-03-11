@@ -29,6 +29,7 @@ namespace OM { namespace interventions {
 class CohortSelectionEffect : public HumanInterventionEffect {
 public:
     CohortSelectionEffect( EffectId, const scnXml::Cohort& cohort );
+    virtual ~CohortSelectionEffect() {}
     
     virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits ) const;
     
