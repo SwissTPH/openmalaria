@@ -21,6 +21,7 @@
 #ifndef UTIL_UNINITIALISED
 #define UTIL_UNINITIALISED
 
+#include "Global.h"
 #include "util/errors.h"
 
 namespace OM { namespace util {
@@ -40,12 +41,12 @@ public:
     Uninitialised () : initialised(false) {}
     Uninitialised (T var) : variable(var) {
         // don't consider setting to NaN initialisation
-        initialised = (var == var);
+        initialised = !(boost::math::isnan)(var);
     }
     
     inline void operator= (T var) {
         variable = var;
-        initialised = (var == var);
+        initialised = !(boost::math::isnan)(var);
     }
     
     // Implicit cast-to-T (should be invoked automatically on use): throw if uninitialised

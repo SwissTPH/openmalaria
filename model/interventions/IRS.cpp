@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "Global.h"
 #include "interventions/IRS.h"
 #include "Host/Human.h"
 #include "util/random.h"
@@ -124,7 +125,7 @@ void IRSEffect::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDete
         // Potentially warn about this... but not necessary since making humans
         // more attractive isn't really an issue.
 //     }
-    assert( lPF != lPF ); // double init
+    assert( (boost::math::isnan)(lPF) ); // double init
     lPF = log( PF );
 }
 IRSEffect::IRSAnopheles::SurvivalFactor::SurvivalFactor() :

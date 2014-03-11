@@ -232,7 +232,7 @@ double random::betaWithMean (double m, double b){
 }
 
 int random::poisson(double lambda){
-    if (!finite(lambda)) {
+    if( !(boost::math::isfinite)(lambda) ){
 	//This would lead to an inifinite loop in gsl_ran_poisson
 	throw TRACED_EXCEPTION( "lambda is inf", Error::InfLambda );
     }

@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "Global.h"
 #include "interventions/GVI.h"
 #include "Host/Human.h"
 #include "util/SpeciesIndexChecker.h"
@@ -72,7 +73,7 @@ PerHostInterventionData* GVIEffect::makeHumanPart( istream& stream, EffectId id 
 
 void GVIEffect::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt)
 {
-    assert( deterrency != deterrency ); // double init
+    assert( (boost::math::isnan)(deterrency) ); // double init
     deterrency = elt.getDeterrency().present() ? elt.getDeterrency().get().getValue() : 0.0;
     preprandialKilling = elt.getPreprandialKillingEffect().present() ? elt.getPreprandialKillingEffect().get().getValue() : 0.0;
     postprandialKilling = elt.getPostprandialKillingEffect().present() ? elt.getPostprandialKillingEffect().get().getValue() : 0.0;

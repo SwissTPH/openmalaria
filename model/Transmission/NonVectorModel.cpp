@@ -228,7 +228,7 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
       throw util::xml_scenario_error ("Invalid simulation mode");
   }
 #ifndef NDEBUG
-  if (!finite(eir)) {
+  if (!(boost::math::isfinite)(eir)) {
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
 	<< "\nlaggedKappa:\t"

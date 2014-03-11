@@ -303,7 +303,7 @@ inline bool similar( double x, double y, double tol ){
     if( x==y )  // handle 0,0 TODO: this addition is only needed for testing
         return true;
     double xy = x/y;
-    if( xy != xy ){
+    if( (boost::math::isnan)(xy) ){
         throw TRACED_EXCEPTION( "nan in closed simulation", Error::VectorFitting );
     }
     return xy < tol && (1.0/tol) < xy;
@@ -352,7 +352,7 @@ void ResourceFitter::sampler( const gsl_vector *x ){
     assert( target.size() > 0 );
     
     for( size_t i=0; i<x->size; ++i ){
-        if( !finite( gsl_vector_get( x, i ) ) ){
+        if( !(boost::math::isfinite)( gsl_vector_get( x, i ) ) ){
             throw TRACED_EXCEPTION( "non-finite value", Error::VectorFitting );
         }
     }
@@ -375,7 +375,7 @@ void ResourceFitter::sampler( const gsl_vector *x ){
         cerr << "Iteration has mean input "<<vectors::mean( x )<<", "<<vectors::mean(invLarvalResources)<<"; fitness "<<res<<endl;
     }
     
-    if( !finite(res) ){
+    if( !(boost::math::isfinite)(res) ){
         ostringstream msg;
         msg << "non-finite output with mean " << vectors::mean( samples );
         msg << "; mean input was " << vectors::mean( invLarvalResources );
