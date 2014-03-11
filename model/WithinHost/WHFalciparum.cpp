@@ -252,6 +252,8 @@ void WHFalciparum::checkpoint (istream& stream) {
     timeStepMaxDensity & stream;
     _ylag & stream;
     (*pathogenesisModel) & stream;
+    treatExpiryLiver & stream;
+    treatExpiryBlood & stream;
 }
 void WHFalciparum::checkpoint (ostream& stream) {
     WHInterface::checkpoint( stream );
@@ -263,6 +265,8 @@ void WHFalciparum::checkpoint (ostream& stream) {
     timeStepMaxDensity & stream;
     _ylag & stream;
     (*pathogenesisModel) & stream;
+    treatExpiryLiver & stream;
+    treatExpiryBlood & stream;
 }
 
 }

@@ -98,11 +98,11 @@
             <selfTreatment value="1"/>
           </nonCompliersEffective>
           <treatmentActions>
-            <AQ name="legacy (emulate pre-32 treatment)">
-              <clearInfections stage="both" timesteps="-1"/>
+            <AQ name="clear blood-stage infections">
+              <clearInfections stage="blood" timesteps="1"/>
             </AQ>
-            <CQ name="legacy (emulate pre-32 treatment)">
-              <clearInfections stage="both" timesteps="-1"/>
+            <CQ name="clear blood-stage infections">
+              <clearInfections stage="blood" timesteps="1"/>
             </CQ>
           </treatmentActions>
           <pSeekOfficialCareUncomplicated1 value="1"/>
@@ -157,8 +157,8 @@
         <selfTreatment value="0"/>
       </nonCompliersEffective>
       <treatmentActions>
-        <CQ name="legacy (emulate pre-32 treatment)">
-          <clearInfections stage="both" timesteps="-1"/>
+        <CQ name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1"/>
         </CQ>
       </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0"/>

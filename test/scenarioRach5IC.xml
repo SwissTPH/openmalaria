@@ -218,11 +218,11 @@
         <selfTreatment value="0"/>
       </nonCompliersEffective>
       <treatmentActions>
-        <ACT name="legacy (emulate pre-32 treatment)">
-          <clearInfections stage="both" timesteps="-1"/>
+        <ACT name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1"/>
         </ACT>
-        <QN name="legacy (emulate pre-32 treatment)">
-          <clearInfections stage="both" timesteps="-1"/>
+        <QN name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1"/>
         </QN>
       </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
