@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Rachuonyo 5-day Intervention cohort" schemaVersion="32" wuID="0" xsi:noNamespaceSchemaLocation="scenario_current.xsd">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Rachuonyo 5-day Intervention cohort" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="Rachuonyo" popSize="979">
     <ageGroup lowerbound="0">
       <group poppercent="2.6" upperbound="1"/>
@@ -104,12 +104,11 @@
     <human>
       <effect id="MDA">
         <MDA>
-          <drugEffect>
-            <compliance nonCompliersMultiplier="1" pCompliance="1"/>
-            <compliersEffective>
-              <timestep pClearance="1"/>
-            </compliersEffective>
-          </drugEffect>
+          <effects>
+            <option pSelection="1">
+              <clearInfections timesteps="-1" stage="both"/>
+            </option>
+          </effects>
         </MDA>
       </effect>
       <effect id="ITN" name="LLIN test">
@@ -244,6 +243,14 @@
         <ACT value="0.8544"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <treatmentActions>
+        <ACT name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </ACT>
+        <QN name="legacy (emulate pre-32 treatment)">
+          <clearInfections stage="both" timesteps="-1"/>
+        </QN>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
       <pSelfTreatUncomplicated value="0.0212"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>
@@ -370,4 +377,4 @@
       <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
     </parameters>
   </model>
-</scenario>
+</om:scenario>
