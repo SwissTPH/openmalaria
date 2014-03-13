@@ -32,11 +32,11 @@
 namespace OM { namespace interventions {
     using util::random::poisson;
 
-vector<IRSEffect*> IRSEffect::effectsByIndex;
+vector<IRSComponent*> IRSComponent::componentsByIndex;
 
-IRSEffect::IRSEffect( EffectId id, const scnXml::IRSDescription& elt,
+IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionEffect(id)
+        Transmission::HumanVectorInterventionComponent(id)
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
@@ -53,34 +53,34 @@ IRSEffect::IRSEffect( EffectId id, const scnXml::IRSDescription& elt,
     }
     checker.checkNoneMissed();
     
-    if( effectsByIndex.size() <= id.id ) effectsByIndex.resize( id.id+1, 0 );
-    effectsByIndex[id.id] = this;
+    if( componentsByIndex.size() <= id.id ) componentsByIndex.resize( id.id+1, 0 );
+    componentsByIndex[id.id] = this;
 }
 
-void IRSEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
-    human.perHostTransmission.deployEffect(*this);
+void IRSComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
+    human.perHostTransmission.deployComponent(*this);
     Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
         (method == interventions::Deployment::TIMED) ?
             Monitoring::Survey::MI_IRS_TIMED : Monitoring::Survey::MI_IRS_CTS,
         human.getMonitoringAgeGroup(), 1 );
 }
 
-Effect::Type IRSEffect::effectType()const{ return Effect::IRS; }
+Component::Type IRSComponent::componentType()const{ return Component::IRS; }
     
 #ifdef WITHOUT_BOINC
-void IRSEffect::print_details( std::ostream& out )const{
+void IRSComponent::print_details( std::ostream& out )const{
     out << id().id << "\tIRS";
 }
 #endif
 
-PerHostInterventionData* IRSEffect::makeHumanPart() const{
+PerHostInterventionData* IRSComponent::makeHumanPart() const{
     return new HumanIRS( *this );
 }
-PerHostInterventionData* IRSEffect::makeHumanPart( istream& stream, EffectId id ) const{
+PerHostInterventionData* IRSComponent::makeHumanPart( istream& stream, ComponentId id ) const{
     return new HumanIRS( stream, id );
 }
 
-void IRSEffect::IRSAnopheles::init(const scnXml::IRSDescription::AnophelesParamsType& elt,
+void IRSComponent::IRSAnopheles::init(const scnXml::IRSDescription::AnophelesParamsType& elt,
                                    double maxInsecticide)
 {
     _relativeAttractiveness.init( elt.getDeterrency() );
@@ -96,11 +96,11 @@ void IRSEffect::IRSAnopheles::init(const scnXml::IRSDescription::AnophelesParams
 inline bool inRange01( double x ){
     return x>=0.0 && x<= 1.0;
 }
-IRSEffect::IRSAnopheles::RelativeAttractiveness::RelativeAttractiveness() :
+IRSComponent::IRSAnopheles::RelativeAttractiveness::RelativeAttractiveness() :
     lPF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
 {}
-void IRSEffect::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDeterrency& elt){
+void IRSComponent::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDeterrency& elt){
     double PF = elt.getInsecticideFactor();
     insecticideScaling = elt.getInsecticideScalingFactor();
     if( !( PF > 0.0) ){
@@ -128,13 +128,13 @@ void IRSEffect::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSDete
     assert( (boost::math::isnan)(lPF) ); // double init
     lPF = log( PF );
 }
-IRSEffect::IRSAnopheles::SurvivalFactor::SurvivalFactor() :
+IRSComponent::IRSAnopheles::SurvivalFactor::SurvivalFactor() :
     BF( numeric_limits< double >::signaling_NaN() ),
     PF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() ),
     invBaseSurvival( numeric_limits< double >::signaling_NaN() )
 {}
-void IRSEffect::IRSAnopheles::SurvivalFactor::init(const scnXml::IRSKillingEffect& elt,
+void IRSComponent::IRSAnopheles::SurvivalFactor::init(const scnXml::IRSKillingEffect& elt,
                                                    bool postPrandial, double maxInsecticide){
     BF = elt.getBaseFactor();
     PF = elt.getInsecticideFactor();
@@ -187,7 +187,7 @@ void IRSEffect::IRSAnopheles::SurvivalFactor::init(const scnXml::IRSKillingEffec
         throw util::xml_scenario_error( msg.str() );
     }
 }
-double IRSEffect::IRSAnopheles::RelativeAttractiveness::relativeAttractiveness(
+double IRSComponent::IRSAnopheles::RelativeAttractiveness::relativeAttractiveness(
         double insecticideContent
 ) const {
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
@@ -195,7 +195,7 @@ double IRSEffect::IRSAnopheles::RelativeAttractiveness::relativeAttractiveness(
     assert( relAvail>=0.0 );
     return relAvail;
 }
-double IRSEffect::IRSAnopheles::SurvivalFactor::survivalFactor(
+double IRSComponent::IRSAnopheles::SurvivalFactor::survivalFactor(
         double insecticideContent
 ) const {
     double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
@@ -206,7 +206,7 @@ double IRSEffect::IRSAnopheles::SurvivalFactor::survivalFactor(
     return survivalFactor;
 }
 
-double IRSEffect::sampleInitialInsecticide() const{
+double IRSComponent::sampleInitialInsecticide() const{
     double sample = initialInsecticide.sample();
     if( sample < 0.0 )
         sample = 0.0;       // avoid negative samples
@@ -217,7 +217,7 @@ double IRSEffect::sampleInitialInsecticide() const{
 
 
 // ———  per-human data  ———
-HumanIRS::HumanIRS( const IRSEffect& params ) :
+HumanIRS::HumanIRS( const IRSComponent& params ) :
     PerHostInterventionData( params.id() ),
     initialInsecticide( params.sampleInitialInsecticide() )
 {
@@ -226,31 +226,31 @@ HumanIRS::HumanIRS( const IRSEffect& params ) :
     insecticideDecayHet = params.insecticideDecay->hetSample();
 }
 
-void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionEffect& params ) {
+void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionComponent& params ) {
     deployTime = TimeStep::simulation;
-    initialInsecticide = dynamic_cast<const IRSEffect*>(&params)->sampleInitialInsecticide();
+    initialInsecticide = dynamic_cast<const IRSComponent*>(&params)->sampleInitialInsecticide();
 }
 
 void HumanIRS::update(){
 }
 
 double HumanIRS::relativeAttractiveness(size_t speciesIndex) const{
-    const IRSEffect& params = *IRSEffect::effectsByIndex[m_id.id];
-    const IRSEffect::IRSAnopheles& anoph = params.species[speciesIndex];
+    const IRSComponent& params = *IRSComponent::componentsByIndex[m_id.id];
+    const IRSComponent::IRSAnopheles& anoph = params.species[speciesIndex];
     double effect = anoph.relativeAttractiveness( getInsecticideContent(params) );
     return anoph.byProtection( effect );
 }
 
 double HumanIRS::preprandialSurvivalFactor(size_t speciesIndex) const{
-    const IRSEffect& params = *IRSEffect::effectsByIndex[m_id.id];
-    const IRSEffect::IRSAnopheles& anoph = params.species[speciesIndex];
+    const IRSComponent& params = *IRSComponent::componentsByIndex[m_id.id];
+    const IRSComponent::IRSAnopheles& anoph = params.species[speciesIndex];
     double effect = anoph.preprandialSurvivalFactor( getInsecticideContent(params) );
     return anoph.byProtection( effect );
 }
 
 double HumanIRS::postprandialSurvivalFactor(size_t speciesIndex) const{
-    const IRSEffect& params = *IRSEffect::effectsByIndex[m_id.id];
-    const IRSEffect::IRSAnopheles& anoph = params.species[speciesIndex];
+    const IRSComponent& params = *IRSComponent::componentsByIndex[m_id.id];
+    const IRSComponent::IRSAnopheles& anoph = params.species[speciesIndex];
     double effect = anoph.postprandialSurvivalFactor( getInsecticideContent(params) );
     return anoph.byProtection( effect );
 }
@@ -260,7 +260,7 @@ void HumanIRS::checkpoint( ostream& stream ){
     initialInsecticide & stream;
     insecticideDecayHet & stream;
 }
-HumanIRS::HumanIRS( istream& stream, EffectId id ) : PerHostInterventionData( id )
+HumanIRS::HumanIRS( istream& stream, ComponentId id ) : PerHostInterventionData( id )
 {
     deployTime & stream;
     initialInsecticide & stream;

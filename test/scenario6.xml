@@ -167,7 +167,7 @@
   </monitoring>
   <interventions name="BSVPEVTBV Ref EPI modified modified">
     <human>
-      <effect id="TBV">
+      <component id="TBV">
         <TBV>
           <decay L="0.0" function="constant"/>
           <efficacyB value="10"/>
@@ -175,8 +175,8 @@
           <initialEfficacy value="1"/>
           <initialEfficacy value="1"/>
         </TBV>
-      </effect>
-      <effect id="BSV">
+      </component>
+      <component id="BSV">
         <BSV>
           <decay L="0.0" function="constant"/>
           <efficacyB value="10"/>
@@ -184,8 +184,8 @@
           <initialEfficacy value="1"/>
           <initialEfficacy value="1"/>
         </BSV>
-      </effect>
-      <effect id="PEV">
+      </component>
+      <component id="PEV">
         <PEV>
           <decay L="0.0" function="constant"/>
           <efficacyB value="10"/>
@@ -193,11 +193,11 @@
           <initialEfficacy value="1"/>
           <initialEfficacy value="1"/>
         </PEV>
-      </effect>
-      <intervention>
-        <effect id="TBV"/>
-        <effect id="BSV"/>
-        <effect id="PEV"/>
+      </component>
+      <deployment>
+        <component id="TBV"/>
+        <component id="BSV"/>
+        <component id="PEV"/>
         <continuous>
           <deploy coverage="1" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
           <deploy coverage="1" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
@@ -208,7 +208,7 @@
         <timed>
           <deploy coverage="1" maxAge="999" minAge="0" time="26"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

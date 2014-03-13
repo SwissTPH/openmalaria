@@ -68,21 +68,21 @@
   </monitoring>
   <interventions name="Navrongo IPTi treated">
     <human>
-      <effect id="IPT">
+      <component id="IPT">
         <IPT iptiEffect="12">
           <infGenotype ACR="1.0" atten="1" freq="0.6" name="wt" proph="10" tolPeriod="4"/>
           <infGenotype ACR="1.0" atten="1" freq="0.2" name="108" proph="2" tolPeriod="4"/>
           <infGenotype ACR="0.5" atten="1" freq="0.2" name="triples" proph="0" tolPeriod="4"/>
         </IPT>
-      </effect>
-      <intervention>
-        <effect id="IPT"/>
+      </component>
+      <deployment>
+        <component id="IPT"/>
         <continuous>
           <deploy coverage="0.955" targetAgeYrs="0.25"/>
           <deploy coverage="0.901" targetAgeYrs="0.75"/>
           <deploy coverage="0.919" targetAgeYrs="1.25"/>
         </continuous>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <!--data are scaled to give annual total of 418 inf bites (corresponds to Appawu et al,)-->

@@ -38,13 +38,13 @@ namespace interventions {
  * way to determine which are used).
  *
  * All parameters (inc. non-static) are only set by initParameters(). */
-class VaccineEffect : public HumanInterventionEffect {
+class VaccineComponent : public HumanInterventionComponent {
 public:
-    VaccineEffect( EffectId id, const scnXml::VaccineDescription& seq, Vaccine::Types type );
+    VaccineComponent( ComponentId id, const scnXml::VaccineDescription& seq, Vaccine::Types type );
     
     void deploy( Host::Human& human, Deployment::Method method, VaccineLimits vaccLimits )const;
     
-    virtual Effect::Type effectType() const;
+    virtual Component::Type componentType() const;
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
@@ -56,12 +56,12 @@ private:
      * @param numPrevDoses The number of prior vaccinations of the individual. */
     double getInitialEfficacy (size_t numPrevDoses) const;
 
-    inline static const VaccineEffect& getParams( EffectId effect ){
-        assert( effect.id < params.size() && params[effect.id] != 0 );
-        return *params[effect.id];
+    inline static const VaccineComponent& getParams( ComponentId component ){
+        assert( component.id < params.size() && params[component.id] != 0 );
+        return *params[component.id];
     }
     
-    /// Vaccine effect type
+    /// Vaccine component type
     Vaccine::Types type;
     
     /// Function representing decay of effect
@@ -75,16 +75,16 @@ private:
 
     /** @brief Vaccine static parameters
      * 
-     * Each instance is either null or points to data for the vaccine effect
-     * with the given effect ID.
+     * Each instance is either null or points to data for the vaccine component
+     * with the given component ID.
      *
      * No memory management (only leak is at exit which OS deals with). */
-    static vector<VaccineEffect*> params;
+    static vector<VaccineComponent*> params;
     
     //TODO(monitoring):
     /** Until the monitoring system is updated, only one type of vaccination
      * delivery can be reported. This is whichever is first configured. */
-    static EffectId reportEffect;
+    static ComponentId reportComponent;
 
     friend class PerHumanVaccine;
     friend class PerEffectPerHumanVaccine;

@@ -234,8 +234,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
     }
     
-    bool indirectMortality = indirectMortBug ?
-        false : pg.indirectMortality;     // to emulate the old buggy behaviour
+    // The bug fixed here is that indirectMortality was not set if no event occurred
+    bool indirectMortality = false;
+    if( indirectMortBugfix ) indirectMortality = pg.indirectMortality;
+    
     if ( newState & Episode::SICK ){
         // we have some new case: is it severe/complicated?
         if ( newState & Episode::COMPLICATED ){

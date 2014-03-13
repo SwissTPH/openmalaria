@@ -70,7 +70,7 @@ virtual checkpoint (ostream& stream);
  * checkpoint_containers.h. */
 namespace OM {
 namespace interventions{
-    struct EffectId;
+    struct ComponentId;
 }
 namespace util {
 namespace checkpoint {

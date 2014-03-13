@@ -184,7 +184,7 @@ class HumanDeploymentBase {
 protected:
     HumanDeploymentBase( const scnXml::DeploymentBase& deploy,
                          const HumanIntervention* intervention,
-                         EffectId cohort ) :
+                         ComponentId cohort ) :
             coverage( deploy.getCoverage() ),
             cohort( cohort ),
             intervention( intervention )
@@ -201,7 +201,7 @@ protected:
     
     double coverage;    // proportion coverage within group meeting above restrictions
     VaccineLimits vaccLimits;
-    EffectId cohort;      // EffectId_pop if no cohort
+    ComponentId cohort;      // ComponentId_pop if no cohort
     const HumanIntervention *intervention;
 };
 
@@ -215,7 +215,7 @@ public:
      * @param cohort The cohort to which to deploy, or max value */
     TimedHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           EffectId cohort ) :
+                           ComponentId cohort ) :
         TimedDeployment( TimeStep( mass.getTime() ) ),
         HumanDeploymentBase( mass, intervention, cohort ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
@@ -246,7 +246,7 @@ public:
     virtual void print_details( std::ostream& out )const{
         out << time << '\t'
             << minAge << '\t' << maxAge << '\t';
-        if( cohort == EffectId_pop ) out << "(none)";
+        if( cohort == ComponentId_pop ) out << "(none)";
         else out << cohort.id;
         out << '\t' << coverage << '\t';
         intervention->print_details( out );
@@ -266,13 +266,13 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param cohort Id of target cohort, or EffectId_pop
-     * @param cumCuvId Index of effect to test coverage for
-     * @param maxAge Maximum time-span to consider a deployed effect still to be effective */
+     * @param cohort Id of target cohort, or ComponentId_pop
+     * @param cumCuvId Id of component to test coverage for
+     * @param maxAge Maximum time-span to consider a deployed component still to be effective */
     TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           EffectId cohort,
-                           EffectId cumCuvId, TimeStep maxAge ) :
+                           ComponentId cohort,
+                           ComponentId cumCuvId, TimeStep maxAge ) :
         TimedHumanDeployment( mass, intervention, cohort ),
         cumCovInd( cumCuvId ), maxInterventionAge( maxAge )
     {
@@ -310,7 +310,7 @@ public:
     }
     
 protected:
-    EffectId cumCovInd;
+    ComponentId cumCovInd;
     // max age at which an intervention is considered not to need replacement
     TimeStep maxInterventionAge;
 };
@@ -340,7 +340,7 @@ class ContinuousHumanDeployment : protected HumanDeploymentBase {
 public:
     /// Create, passing deployment age
     ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
-                                 const HumanIntervention* intervention, EffectId cohort ) :
+                                 const HumanIntervention* intervention, ComponentId cohort ) :
             HumanDeploymentBase( elt, intervention, cohort ),
             begin( elt.getBegin() ),
             end( elt.getEnd() ),
@@ -397,7 +397,7 @@ public:
         if( end == TimeStep::future ) out << "(none)";
         else out << end;
         out << '\t' << deployAge << '\t';
-        if( cohort == EffectId_pop ) out << "(none)";
+        if( cohort == ComponentId_pop ) out << "(none)";
         else out << cohort.id;
         out << '\t' << coverage << '\t';
         intervention->print_details( out );

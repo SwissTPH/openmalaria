@@ -215,7 +215,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Removes all infections from mosquitoes -- resulting in zero EIR to
             humans, until such time that mosquitoes are re-infected and become
-            infectious. Only effectious in dynamic EIR mode (when changeEIR was
+            infectious. Only efficacious in dynamic EIR mode (when changeEIR was
             not used).
             
             Hypothetical, but potentially useful to simulate a setting starting
@@ -290,25 +290,27 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="HumanInterventions">
     <xs:sequence>
-      <xs:element name="effect" minOccurs="0" maxOccurs="unbounded" type="om:HumanInterventionEffect">
+      <xs:element name="component" minOccurs="0" maxOccurs="unbounded" type="om:HumanInterventionComponent">
         <xs:annotation>
           <xs:documentation>
-            A description of an effect achieved by an intervention.
-            (An intervention is described by a set of effects plus
-            deployments.)
+            A parameterisation of an effect achieved by one component of an
+            intervention. (An intervention is described as the effects of a set
+            of components plus deployments of those components. This describes
+            the components individually, not deployments or which components
+            comprise an intervention.)
             
-            Each effect describes one or more actions and how the effect of
-            these actions decays.
+            Each element describes one component: its effects, decay of the(se)
+            effect(s), and related stuff (e.g. description of indirect decay
+            and of usage levels).
             
-            Different interventions may deploy the same effect to the same
-            person, if the scenario configuration allows this. In most cases
-            this will just deploy a fresh instance (e.g. a new bed net will
-            replace the old (nobody uses multiple bed nets), or a new drug
-            dose will act independently of previous doses, or in the case of a
-            vaccine, effect depends on the total number of previous
+            Different interventions can deploy the same component to the same
+            perso. In most cases this will just deploy a fresh instance (e.g. a
+            new bed net will replace the old (nobody uses multiple bed nets),
+            or a new drug dose will act on top of previous doses, or in the
+            case of a vaccine, effect depends on the total number of previous
             inoculations (including from other interventions).
             
-            Where multiple effects of the same type (but with different ids)
+            Where multiple components of the same type (but with different ids)
             are deployed (whether within a single intervention or by multiple
             interventions), they act independently (e.g. two bed nets deployed
             to a single host would act to reduce attractiveness or survival of
@@ -316,36 +318,37 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             some novel vector intervention since the two nets may have separate
             parameters).
           </xs:documentation>
-          <xs:appinfo>name:Effect;</xs:appinfo>
+          <xs:appinfo>name:Component;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="intervention">
+      <xs:element maxOccurs="unbounded" minOccurs="0" name="deployment">
         <xs:annotation>
           <xs:documentation>
-            This element describes an intervention: a set of effects and
-            deployment (continuous or timed).
+            This element describes deployment of an intervention: which
+            components are deployed, how humans are selected for deployment
+            (via timed or age-based deployment) as well as a few additional
+            restrictions (e.g. vaccine dosing restrictions).
             
-            All effects deployed by this intervention are deployed to the same
-            sets of people (each timed or continuous deployment selects
-            recipients then applies all intervention effects to these
-            recipients).
+            All components deployed by this intervention are deployed to the
+            same people (each timed or continuous deployment selects recipients
+            and then gives each recipient all components of the intervention).
           </xs:documentation>
-          <xs:appinfo>name:Intervention;</xs:appinfo>
+          <xs:appinfo>name:Deployment;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="effect" maxOccurs="unbounded">
+            <xs:element name="component" maxOccurs="unbounded">
               <xs:annotation>
                 <xs:documentation>
-                  A list of elements defining all effects an intervention has.
+                  A list of elements defining all components an intervention has.
                 </xs:documentation>
-                <xs:appinfo>name:Effect;</xs:appinfo>
+                <xs:appinfo>name:Component to be deployed;</xs:appinfo>
               </xs:annotation>
               <xs:complexType>
                 <xs:attribute name="id" type="xs:string" use="required">
                   <xs:annotation>
                     <xs:documentation>
-                      The identifier (short name) of an effect.
+                      The identifier (short name) of an component.
                     </xs:documentation>
                     <xs:appinfo>name:Identifier;</xs:appinfo>
                   </xs:annotation>
@@ -386,7 +389,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="HumanInterventionEffect">
+  <xs:complexType name="HumanInterventionComponent">
     <xs:choice>
       <xs:element name="MDA">
         <xs:annotation>
@@ -477,7 +480,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="MDA1D">
+      <xs:element name="MDA1D" type="om:HSESCaseManagement">
         <xs:annotation>
           <xs:documentation>
             Description of a MDA/MSAT intervention (Mass Screen and Treat is
@@ -495,18 +498,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:documentation>
           <xs:appinfo>name:Mass drug administration (with decision tree and drug PK/PD model);</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:complexContent>
-            <xs:extension base="om:HSESCaseManagement">
-              <xs:attribute name="name" type="xs:string" use="optional">
-                <xs:annotation>
-                  <xs:documentation>Name of set of interventions</xs:documentation>
-                  <xs:appinfo>name:Intervention;</xs:appinfo>
-                </xs:annotation>
-              </xs:attribute>
-            </xs:extension>
-          </xs:complexContent>
-        </xs:complexType>
       </xs:element>
       <xs:element name="PEV" type="om:vaccineDescription">
         <xs:annotation>
@@ -560,9 +551,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             interventions) or other interventions such as mosquito repellant
             or ivermectin.
             
-            Note that all actions of this intervention "effect" will decay
+            Note that all actions of this intervention component will decay
             according to a single decay function. If independant decay is
-            wanted, separate "effect" elements can be used.
+            wanted, a separate component can be used for each action.
           </xs:documentation>
           <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
         </xs:annotation>
@@ -571,6 +562,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:annotation>
           <xs:documentation>
             Recruitment of cohort as a pseudo-intervention.
+            
+            Multiple cohorts are allowed, thus each must have a unique
+            identifier. The cohort identifier is the identifier of the
+            component used do recruit the cohort.
           </xs:documentation>
           <xs:appinfo>name:Cohort recruitment;</xs:appinfo>
         </xs:annotation>
@@ -637,18 +632,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="id" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          A short name or code identifying the intervention effect
-          (used to refer to this effect when describing an intervention).
+          A short name or code identifying the intervention component
+          (used to refer to this component when describing an intervention).
         </xs:documentation>
-        <xs:appinfo>name:Effect ID;</xs:appinfo>
+        <xs:appinfo>name:Component identifier;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
-          An informal name/description for the effect
+          An informal name/description for the component
         </xs:documentation>
-        <xs:appinfo>name:Name of effect;</xs:appinfo>
+        <xs:appinfo>name:Name of component;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -716,8 +711,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>
           Applies to vaccines only: vaccine doses are only deployed by this
-          deployment if the previous number of doses (for the effect deployed)
-          is at least this number.
+          deployment if the previous number of doses (for the component
+          deployed) is at least this number.
           
           For example, if this is the second deployment opportunity for this
           vaccine and this value is 1, then this deployment cannot deploy the
@@ -730,8 +725,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>
           Applies to vaccines only: vaccine doses are only deployed by this
-          deployment if the previous number of doses (for the effect deployed)
-          is less than this number.
+          deployment if the previous number of doses (for the component
+          deployed) is less than this number.
         </xs:documentation>
         <xs:appinfo>name:Vaccine max cumulative doses;units:inoculations;min:0;</xs:appinfo>
       </xs:annotation>
@@ -835,30 +830,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           people who then receive all interventions deployed by this campaign.
           
           Note that selection is stochastic so the final coverage level may not
-          be exactly that desired. Note also that the effect used when
-          selecting people need not actually be one of the effects deployed by
-          this intervention, although that is the intended use case.
+          be exactly that desired. Note also that the component used when
+          selecting people need not actually be one of the components deployed
+          by this intervention, although that is the intended use case.
           </xs:documentation>
           <xs:appinfo>name:Cumulative coverage;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
-          <xs:attribute name="effect" type="xs:string" use="required">
+          <xs:attribute name="component" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>
-                The identifier (short name) of the effect used when
+                The identifier (short name) of the component used when
                 selecting people.
               </xs:documentation>
-              <xs:appinfo>name:Effect identifier;</xs:appinfo>
+              <xs:appinfo>name:Component identifier;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="maxAgeYears" type="xs:double" use="required">
             <xs:annotation>
               <xs:documentation>
-                The maximum age at which the effect used when selecting
-                people is considered effective. Individuals are
-                considered covered when they previously received the
-                effect and the time since the last reception (in
-                years) is strictly less than this age.
+                The maximum age at which the component used when selecting
+                people is considered effective. Individuals are considered
+                covered when they previously received the component and the
+                time since the last reception (in years) is strictly less than
+                this age.
               </xs:documentation>
               <xs:appinfo>name:Maximum effective age of intervention;units:Years;</xs:appinfo>
             </xs:annotation>
@@ -882,9 +877,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>
           The identifier (short name) of the cohort (which is that of the
-          effect used to select the cohort).
+          component used to select the cohort).
         </xs:documentation>
-        <xs:appinfo>name:Identifier;</xs:appinfo>
+        <xs:appinfo>name:Cohort identifier;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

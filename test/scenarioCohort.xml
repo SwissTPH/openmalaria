@@ -79,7 +79,7 @@
   </monitoring>
   <interventions name="cohort selection">
     <human>
-      <effect id="MDA">
+      <component id="MDA">
         <MDA1D>
           <decisions>
             <decision depends="" name="treatment" values="1">1</decision>
@@ -93,25 +93,25 @@
             </treatment>
           </treatments>
         </MDA1D>
-      </effect>
-      <effect id="cohort">
+      </component>
+      <component id="cohort">
         <cohort/>
-      </effect>
-      <intervention>
-        <effect id="MDA"/>
+      </component>
+      <deployment>
+        <component id="MDA"/>
         <timed>
           <deploy coverage="0.6" time="730"/>
         </timed>
-      </intervention>
-      <intervention>
-        <effect id="cohort"/>
+      </deployment>
+      <deployment>
+        <component id="cohort"/>
         <continuous>
           <deploy coverage="0.05" targetAgeYrs="1.0"/>
         </continuous>
         <timed>
           <deploy coverage="0.4" time="0"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

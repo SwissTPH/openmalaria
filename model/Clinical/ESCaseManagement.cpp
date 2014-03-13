@@ -478,7 +478,7 @@ pair<ESDecisionValue, bool> executeTree(
     return make_pair( outcome, schedule.anyTreatments() );
 }
 
-void ESCaseManagement::initMDA (const scnXml::MDA1D& desc){
+void ESCaseManagement::initMDA (const scnXml::HSESCaseManagement& desc){
     mda.initialize( desc, ESDecisionMap::MDA, false );
 }
 

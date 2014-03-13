@@ -638,7 +638,7 @@
       </timedDeployment>
     </changeEIR>
     <human>
-      <effect id="MDA">
+      <component id="MDA">
         <MDA>
           <effects>
             <option name="legacy effect" pSelection="1">
@@ -646,9 +646,9 @@
             </option>
           </effects>
         </MDA>
-      </effect>
-      <intervention>
-        <effect id="MDA"/>
+      </component>
+      <deployment>
+        <component id="MDA"/>
         <timed>
           <deploy coverage="1" maxAge="999" minAge="0" time="0"/>
           <deploy coverage="1" maxAge="999" minAge="0" time="14"/>
@@ -659,7 +659,7 @@
           <deploy coverage="1" maxAge="999" minAge="0" time="84"/>
           <deploy coverage="1" maxAge="999" minAge="0" time="98"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

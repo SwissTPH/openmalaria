@@ -35,11 +35,11 @@ namespace OM {
 namespace interventions {
 using namespace OM::util;
 
-vector<VaccineEffect*> VaccineEffect::params;
-EffectId VaccineEffect::reportEffect = EffectId_pop;
+vector<VaccineComponent*> VaccineComponent::params;
+ComponentId VaccineComponent::reportComponent = ComponentId_pop;
 
-VaccineEffect::VaccineEffect( EffectId effect, const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
-        HumanInterventionEffect(effect),
+VaccineComponent::VaccineComponent( ComponentId component, const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
+        HumanInterventionComponent(component),
         type(type),
         decayFunc(DecayFunction::makeObject( vd.getDecay(), "decay" )),
         efficacyB(vd.getEfficacyB().getValue())
@@ -47,9 +47,9 @@ VaccineEffect::VaccineEffect( EffectId effect, const scnXml::VaccineDescription&
     if( type == Vaccine::BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
         throw util::unimplemented_exception( "blood stage vaccines (BSV) cannot be used with vivax model" );
     
-    if( reportEffect == EffectId_pop /* the initial value */ ){
+    if( reportComponent == ComponentId_pop /* the initial value */ ){
         // set to the first type described
-        reportEffect = effect;
+        reportComponent = component;
     }
 
     const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
@@ -57,37 +57,37 @@ VaccineEffect::VaccineEffect( EffectId effect, const scnXml::VaccineDescription&
     for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
         initialMeanEfficacy[i] = ies[i].getValue();
     
-    if( params.size() <= effect.id ) params.resize( effect.id + 1 );
-    assert( params[effect.id] == 0 );
-    params[effect.id] = this;
+    if( params.size() <= component.id ) params.resize( component.id + 1 );
+    assert( params[component.id] == 0 );
+    params[component.id] = this;
 }
 
-void VaccineEffect::deploy(Host::Human& human, Deployment::Method method, VaccineLimits vaccLimits) const
+void VaccineComponent::deploy(Host::Human& human, Deployment::Method method, VaccineLimits vaccLimits) const
 {
     bool administered = human.getVaccine().possiblyVaccinate( human, id(), vaccLimits );
-    if( administered && VaccineEffect::reportEffect == id() ){
+    if( administered && VaccineComponent::reportComponent == id() ){
         Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
             (method == Deployment::TIMED) ? Monitoring::Survey::MI_VACCINATION_TIMED :
                 Monitoring::Survey::MI_VACCINATION_CTS, human.getMonitoringAgeGroup(), 1 );
     }
 }
 
-Effect::Type VaccineEffect::effectType() const
+Component::Type VaccineComponent::componentType() const
 {
-    if( type == Vaccine::PEV ) return Effect::PEV;
-    else if( type == Vaccine::BSV ) return Effect::BSV;
-    else if( type == Vaccine::TBV ) return Effect::TBV;
+    if( type == Vaccine::PEV ) return Component::PEV;
+    else if( type == Vaccine::BSV ) return Component::BSV;
+    else if( type == Vaccine::TBV ) return Component::TBV;
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 #ifdef WITHOUT_BOINC
-void VaccineEffect::print_details(ostream& out) const
+void VaccineComponent::print_details(ostream& out) const
 {
         out << id().id << "\t" << (type == Vaccine::PEV ? "PEV" : (type == Vaccine::BSV ? "BSV" : "TBV"));
 }
 #endif
 
-double VaccineEffect::getInitialEfficacy (size_t numPrevDoses) const
+double VaccineComponent::getInitialEfficacy (size_t numPrevDoses) const
 {
     /* If initialMeanEfficacy.size or more doses have already been given, use
      * the last efficacy. */
@@ -126,14 +126,14 @@ void Vaccine::verifyEnabledForR_0 (){
 
 // this is only used for checkpointing; loaded values are unimportant
 PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
-    effect(EffectId_pop),
+    component(ComponentId_pop),
     numDosesAdministered(0),
     initialEfficacy( std::numeric_limits<double>::signaling_NaN() )
 {
 }
 
-PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( EffectId id, const VaccineEffect& params ) :
-    effect( id ), numDosesAdministered(0), initialEfficacy(0.0)
+PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( ComponentId id, const VaccineComponent& params ) :
+    component( id ), numDosesAdministered(0), initialEfficacy(0.0)
 {
     hetSample = params.decayFunc->hetSample();
 }
@@ -141,9 +141,10 @@ PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( EffectId id, const VaccineEf
 double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
     double factor = 1.0;
     for( EffectList::const_iterator effect = effects.begin(); effect != effects.end(); ++effect ){
-        if( VaccineEffect::getParams(effect->effect).type == type ){
+        if( VaccineComponent::getParams(effect->component).type == type ){
             TimeStep age = TimeStep::simulation - effect->timeLastDeployment;
-            double decayFactor = VaccineEffect::getParams(effect->effect).decayFunc->eval( age, effect->hetSample );
+            double decayFactor = VaccineComponent::getParams(effect->component)
+                .decayFunc->eval( age, effect->hetSample );
             factor *= 1.0 - effect->initialEfficacy * decayFactor;
         }
     }
@@ -151,11 +152,11 @@ double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
 }
 
 bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
-        EffectId effectId, interventions::VaccineLimits vaccLimits )
+        ComponentId componentId, interventions::VaccineLimits vaccLimits )
 {
     PerEffectPerHumanVaccine* effect = 0;
     for( EffectList::iterator it = effects.begin(); it != effects.end(); ++it ){
-        if( it->effect == effectId ){
+        if( it->component == componentId ){
             effect = &*it;
             break;
         }
@@ -166,10 +167,10 @@ bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
         numDosesAdministered >= vaccLimits.maxCumDoses )
         return false;   // no vaccination (this replaces the old schedule for continuous doses)
     
-    const VaccineEffect& params = VaccineEffect::getParams( effectId );
+    const VaccineComponent& params = VaccineComponent::getParams( componentId );
     
     if( effect == 0 ){
-        effects.push_back( PerEffectPerHumanVaccine( effectId, params ) );
+        effects.push_back( PerEffectPerHumanVaccine( componentId, params ) );
         effect = &effects.back();
     }
     

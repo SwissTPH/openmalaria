@@ -183,7 +183,7 @@
   </monitoring>
   <interventions name="Full Set">
     <human>
-      <effect id="MDA">
+      <component id="MDA">
         <MDA>
           <effects>
             <option name="prophylactic blood and liver" pSelection="1">
@@ -193,16 +193,16 @@
             </option>
           </effects>
         </MDA>
-      </effect>
-      <effect id="PevDrug">
+      </component>
+      <component id="PevDrug">
         <!-- this is a made-up short-effect pre-erythrocytic effect drug -->
         <PEV>
           <decay L="0.548" function="smooth-compact"/>
           <efficacyB value="1.5"/>
           <initialEfficacy value="0.5"/>
         </PEV>
-      </effect>
-      <effect id="TBV">
+      </component>
+      <component id="TBV">
         <TBV>
           <decay L="10.0" function="exponential"/>
           <efficacyB value="10"/>
@@ -210,8 +210,8 @@
           <initialEfficacy value="0.64"/>
           <initialEfficacy value="0.8"/>
         </TBV>
-      </effect>
-      <effect id="PEV">
+      </component>
+      <component id="PEV">
         <PEV>
           <decay L="10.0" function="exponential" mu="0" sigma="0.2"/>
           <efficacyB value="10"/>
@@ -219,8 +219,8 @@
           <initialEfficacy value="0.64"/>
           <initialEfficacy value="0.8"/>
         </PEV>
-      </effect>
-      <effect id="ITN" name="Extended ITNs">
+      </component>
+      <component id="ITN" name="Extended ITNs">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean=".9" sigma=".8"/>
@@ -245,8 +245,8 @@
             <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
           </anophelesParams>
         </ITN>
-      </effect>
-      <effect id="GVI" name="DDT test">
+      </component>
+      <component id="GVI" name="DDT test">
         <GVI>
           <decay L="0.5" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss" propActive="1">
@@ -265,8 +265,8 @@
             <postprandialKillingEffect value="0.24"/>
           </anophelesParams>
         </GVI>
-      </effect>
-      <effect id="vectorDeterrent" name="hypothetical deterrency">
+      </component>
+      <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
           <decay L="4" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
@@ -279,10 +279,10 @@
             <deterrency value="0.2"/>
           </anophelesParams>
         </GVI>
-      </effect>
-      <intervention>
-        <effect id="MDA"/>
-        <effect id="PevDrug"/>
+      </component>
+      <deployment>
+        <component id="MDA"/>
+        <component id="PevDrug"/>
         <continuous>
           <deploy coverage="0.15" targetAgeYrs="0.75"/>
         </continuous>
@@ -290,10 +290,10 @@
           <deploy coverage="0.75" time="300"/>
           <deploy coverage="0.8" time="780"/>
         </timed>
-      </intervention>
-      <intervention>
-        <effect id="TBV"/>
-        <effect id="PEV"/>
+      </deployment>
+      <deployment>
+        <component id="TBV"/>
+        <component id="PEV"/>
         <continuous>
           <deploy coverage="0.4" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
           <deploy coverage="0.4" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
@@ -305,28 +305,28 @@
           <deploy coverage="0.5" time="731" vaccMaxCumDoses="3"/>
           <deploy coverage="0.5" time="1096" vaccMaxCumDoses="3"/>
         </timed>
-      </intervention>
-      <intervention name="Extended ITNs">
-        <effect id="ITN"/>
+      </deployment>
+      <deployment name="Extended ITNs">
+        <component id="ITN"/>
         <continuous>
           <deploy coverage="0.5" targetAgeYrs="0.0833"/>
         </continuous>
         <timed>
           <deploy coverage="0.95" time="7"/>
         </timed>
-      </intervention>
-      <intervention name="DDT test">
-        <effect id="GVI"/>
+      </deployment>
+      <deployment name="DDT test">
+        <component id="GVI"/>
         <timed>
           <deploy coverage="0.7" time="80"/>
         </timed>
-      </intervention>
-      <intervention name="hypothetical deterrency">
-        <effect id="vectorDeterrent"/>
+      </deployment>
+      <deployment name="hypothetical deterrency">
+        <component id="vectorDeterrent"/>
         <timed>
           <deploy coverage="0.7" time="200"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

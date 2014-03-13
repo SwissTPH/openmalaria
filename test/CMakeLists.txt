@@ -15,29 +15,32 @@ configure_file (
 set (OM_BOXTEST_NAMES
   #disabled because of IPT:
   # 2 3 IPT VT
-  1DayIntervs Cohort MSAT
   1 4 5 6 9 10 11 12
+  1DayIntervs
+  2ITNs
+  Cohort
   EffectiveDrug
   Empirical
   ESCMTest
   ESTS
   IRS30
   Molineaux
+  MSAT
   # disabled due to test failure (TODO: since when?)
   # MultiVecPopInterventions
   NamawalaArabiensis
   NoInterv
   NoMPDLarviciding
   Penny
-  Rach5IC
   # model deactivated: R_0
+  Rach5IC
   SimpleMPDLarviciding
   SimpleMPDTest
-  VecTest
+  VecFullTest
   # disabled because the vector lifecycle model isn't yet done:
   # VecLCMonthly VecLCTest
   VecMonthly
-  VecFullTest
+  VecTest
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
