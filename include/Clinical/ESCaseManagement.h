@@ -259,7 +259,7 @@ class ESCaseManagement : public CaseManagementCommon {
         
         /** Set up MDA drug. Must be called if massDrugAdministration() is
          * ever used to deploy an MDA intervention. */
-        static void initMDA (const scnXml::MDA1D& desc);
+        static void initMDA (const scnXml::HSESCaseManagement& desc);
         
         static void massDrugAdministration(
             interventions::Deployment::Method method,

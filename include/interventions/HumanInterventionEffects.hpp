@@ -156,7 +156,7 @@ private:
 
 class MDA1DEffect : public HumanInterventionEffect {
 public:
-    MDA1DEffect( EffectId id, const scnXml::MDA1D& description ) : HumanInterventionEffect(id) {
+    MDA1DEffect( EffectId id, const scnXml::HSESCaseManagement& description ) : HumanInterventionEffect(id) {
 	if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
 	  throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
         Clinical::ESCaseManagement::initMDA( description );
