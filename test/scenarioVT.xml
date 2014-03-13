@@ -186,14 +186,14 @@
     </larviciding>
     -->
     <human>
-      <effect id="IPT">
+      <component id="IPT">
         <IPT iptiEffect="13">
           <infGenotype ACR="1" atten="1" freq="0.8" name="wt" proph="10" tolPeriod="4"/>
           <infGenotype ACR="1" atten="1" freq="0.1" name="108" proph="2" tolPeriod="4"/>
           <infGenotype ACR="0.5" atten="1" freq="0.1" name="triples" proph="0" tolPeriod="4"/>
         </IPT>
-      </effect>
-      <effect id="ITN" name="Extended ITNs">
+      </component>
+      <component id="ITN" name="Extended ITNs">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean=".9" sigma=".8"/>
@@ -218,8 +218,8 @@
             <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
           </anophelesParams>
         </ITN>
-      </effect>
-      <effect id="GVI" name="DDT test">
+      </component>
+      <component id="GVI" name="DDT test">
         <GVI>
           <decay L="0.5" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
@@ -238,8 +238,8 @@
             <postprandialKillingEffect value="0.24"/>
           </anophelesParams>
         </GVI>
-      </effect>
-      <effect id="vectorDeterrent" name="hypothetical deterrency">
+      </component>
+      <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
           <decay L="4" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
@@ -252,36 +252,36 @@
             <deterrency value="0.2"/>
           </anophelesParams>
         </GVI>
-      </effect>
-      <intervention>
-        <effect id="IPT"/>
+      </component>
+      <deployment>
+        <component id="IPT"/>
         <continuous>
           <deploy coverage="0.95" targetAgeYrs="0.17"/>
           <deploy coverage="0.95" targetAgeYrs="0.25"/>
           <deploy coverage="0.95" targetAgeYrs="0.75"/>
         </continuous>
-      </intervention>
-      <intervention name="Extended ITNs">
-        <effect id="ITN"/>
+      </deployment>
+      <deployment name="Extended ITNs">
+        <component id="ITN"/>
         <continuous>
           <deploy coverage="0.95" targetAgeYrs="0.0833"/>
         </continuous>
         <timed>
           <deploy coverage="0.9" time="7"/>
         </timed>
-      </intervention>
-      <intervention name="DDT test">
-        <effect id="GVI"/>
+      </deployment>
+      <deployment name="DDT test">
+        <component id="GVI"/>
         <timed>
           <deploy coverage="0.8" time="7"/>
         </timed>
-      </intervention>
-      <intervention name="hypothetical deterrency">
-        <effect id="vectorDeterrent"/>
+      </deployment>
+      <deployment name="hypothetical deterrency">
+        <component id="vectorDeterrent"/>
         <timed>
           <deploy coverage="0.7" time="7"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

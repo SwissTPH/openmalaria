@@ -56,15 +56,15 @@ void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
 }
 
 void PerHost::update(){
-    for( ListActiveEffects::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+    for( ListActiveComponents::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         it->update();
     }
 }
 
-void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
+void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
     // This adds per-host per-intervention details to the host's data set.
     // This data is never removed since it can contain per-host heterogeneity samples.
-    for( ListActiveEffects::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+    for( ListActiveComponents::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         if( it->id() == params.id() ){
             // already have a deployment for that description; just update it
             it->redeploy( params );
@@ -72,7 +72,7 @@ void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
         }
     }
     // no deployment for that description: must make a new one
-    activeEffects.push_back( params.makeHumanPart() );
+    activeComponents.push_back( params.makeHumanPart() );
 }
 
 
@@ -84,29 +84,29 @@ void PerHost::deployEffect( const HumanVectorInterventionEffect& params ){
 double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base,
                                 size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].getEntoAvailability();
-    for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         alpha_i *= it->relativeAttractiveness( speciesIndex );
     }
     return alpha_i;
 }
 double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].getProbMosqBiting();
-    for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
     }
     return P_B_i;
 }
 double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].getProbMosqRest();
-    for( ListActiveEffects::const_iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         pRest *= it->postprandialSurvivalFactor( speciesIndex );
     }
     return pRest;
 }
 
 void PerHost::checkpointIntervs( ostream& stream ){
-    activeEffects.size() & stream;
-    for( boost::ptr_list<PerHostInterventionData>::iterator it = activeEffects.begin(); it != activeEffects.end(); ++it ){
+    activeComponents.size() & stream;
+    for( boost::ptr_list<PerHostInterventionData>::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         *it & stream;
     }
 }
@@ -114,16 +114,18 @@ void PerHost::checkpointIntervs( istream& stream ){
     size_t l;
     l & stream;
     validateListSize(l);
-    activeEffects.clear();
+    activeComponents.clear();
     for( size_t i = 0; i < l; ++i ){
-        interventions::EffectId id( stream );
+        interventions::ComponentId id( stream );
         try{
-            const interventions::HumanInterventionEffect& gen_params = interventions::InterventionManager::getEffect( id );   // may throw
-            const HumanVectorInterventionEffect *params = dynamic_cast<const HumanVectorInterventionEffect*>( &gen_params );
+            const interventions::HumanInterventionComponent& gen_params =
+                interventions::InterventionManager::getComponent( id );   // may throw
+            const HumanVectorInterventionComponent *params =
+                dynamic_cast<const HumanVectorInterventionComponent*>( &gen_params );
             if( params == 0 )
                 throw util::base_exception( "" );       // see catch block below
             PerHostInterventionData *v = params->makeHumanPart( stream, id );
-            activeEffects.push_back( v );
+            activeComponents.push_back( v );
         }catch( util::base_exception e ){
             // two causes, both boil down to index being wrong
             throw util::checkpoint_error( "bad value in checkpoint file" );

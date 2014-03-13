@@ -162,7 +162,7 @@ protected:
    * immediately? See above enum for positive values used. */
   int _doomed;
   
-  static bool indirectMortBug;  // true if bug fix NOT enabled
+  static bool indirectMortBugfix;  // true if bug fix is enabled
 };
 
 } }

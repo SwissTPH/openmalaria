@@ -36,21 +36,21 @@ namespace interventions {
     using boost::shared_ptr;
     using Transmission::PerHostInterventionData;
 
-class ITNEffect : public Transmission::HumanVectorInterventionEffect {
+class ITNComponent : public Transmission::HumanVectorInterventionComponent {
 public:
-    ITNEffect( EffectId id, const scnXml::ITNDescription& elt,
+    ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
                const map< string, size_t >& species_name_map );
     
     virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
     
-    virtual Effect::Type effectType() const;
+    virtual Component::Type componentType() const;
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
 #endif
     
     virtual PerHostInterventionData* makeHumanPart() const;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, EffectId id ) const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, ComponentId id ) const;
     
     /** Per mosquito-species parameters for extended ITN model. */
     class ITNAnopheles {
@@ -174,9 +174,9 @@ public:
     shared_ptr<DecayFunction> attritionOfNets;
     vector<ITNAnopheles> species; // vector specific params
     
-    // This is sparse vector: only indexes corresponding to a IRS effect are used
-    // No memory management
-    static vector<ITNEffect*> effectsByIndex;
+    // This is sparse vector: only indexes corresponding to ITN components are
+    // used. No memory management.
+    static vector<ITNComponent*> componentsByIndex;
     
     friend class HumanITN;
 };
@@ -187,15 +187,15 @@ public:
  */
 class HumanITN : public PerHostInterventionData {
 public:
-    HumanITN( const ITNEffect& params );
-    HumanITN( istream& stream, EffectId id );
+    HumanITN( const ITNComponent& params );
+    HumanITN( istream& stream, ComponentId id );
     
-    virtual void redeploy(const Transmission::HumanVectorInterventionEffect& params);
+    virtual void redeploy(const Transmission::HumanVectorInterventionComponent& params);
     
     inline double getHoleIndex()const{
         return holeIndex;
     }
-    inline double getInsecticideContent(const ITNEffect& params)const{
+    inline double getInsecticideContent(const ITNComponent& params)const{
         double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
                                               insecticideDecayHet);
         return initialInsecticide * effectSurvival;

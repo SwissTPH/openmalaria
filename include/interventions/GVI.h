@@ -37,26 +37,26 @@ namespace OM { namespace interventions {
     using Transmission::PerHostInterventionData;
 
 /** Constant parameters for generic vector intervention model. */
-class GVIEffect : public Transmission::HumanVectorInterventionEffect {
+class GVIComponent : public Transmission::HumanVectorInterventionComponent {
 public:
     /** Initialise parameters
      * 
-     * @param elt Effect description from XML
+     * @param elt Component description from XML
      * @param species_name_map Map of species names to indices.
      */
-    GVIEffect( EffectId, const scnXml::GVIDescription& elt,
+    GVIComponent( ComponentId, const scnXml::GVIDescription& elt,
                const map<string,size_t>& species_name_map );
     
     void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
     
-    virtual Effect::Type effectType() const;
+    virtual Component::Type componentType() const;
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
 #endif
     
     virtual PerHostInterventionData* makeHumanPart() const;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, EffectId ) const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, ComponentId ) const;
     
 private:
     /** Per mosquito-species parameters for generic vector intervention model. */
@@ -88,9 +88,9 @@ private:
     shared_ptr<DecayFunction> decay;
     vector<GVIAnopheles> species;  // vector specific params
     
-    // This is sparse vector: only indexes corresponding to a GVI effect are used
+    // This is sparse vector: only indexes corresponding to a GVI component are used
     // No memory management
-    static vector<GVIEffect*> effectsByIndex;
+    static vector<GVIComponent*> componentsByIndex;
     
     friend class HumanGVI;
 };
@@ -102,13 +102,13 @@ private:
  */
 class HumanGVI : public PerHostInterventionData {
 public:
-    HumanGVI( const GVIEffect& params );
-    HumanGVI( istream& stream, EffectId );
+    HumanGVI( const GVIComponent& params );
+    HumanGVI( istream& stream, ComponentId );
     
-    virtual void redeploy( const Transmission::HumanVectorInterventionEffect& );
+    virtual void redeploy( const Transmission::HumanVectorInterventionComponent& );
     
     /** This is the survival factor of the effect. */
-    inline double getEffectSurvival(const GVIEffect& params)const{
+    inline double getEffectSurvival(const GVIComponent& params)const{
         return params.decay->eval (TimeStep::simulation - deployTime, decayHet);
     }
     

@@ -345,40 +345,40 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
     public fun translate31To32(){
         var changeIRSReportingToGVI = false
         val interventions = getChildElement(scenarioElement, "interventions")
-        val effectIdents : jet.MutableSet<String> = TreeSet<String>()
-        val humanEffects = ArrayList<Element>()
-        val humanInterventions = ArrayList<Element>()
-        fun effectIdent(suggestedIdent: String): String{
-            // find a unique effect identifier
+        val componentIdents : jet.MutableSet<String> = TreeSet<String>()
+        val humanComponents = ArrayList<Element>()
+        val humanDeployments = ArrayList<Element>()
+        fun componentIdent(suggestedIdent: String): String{
+            // find a unique component identifier
             var ident = suggestedIdent
             var app = 0
-            while (effectIdents.contains(ident)){
+            while (componentIdents.contains(ident)){
                 ident = suggestedIdent + app
                 app += 1
             }
             return ident
         }
-        fun newEffect(ident: String, desc: String?): Element{
-            val effect = scenarioDocument.createElement("effect")!!
-            if (effectIdents.contains(ident))
+        fun newComponent(ident: String, desc: String?): Element{
+            val component = scenarioDocument.createElement("component")!!
+            if (componentIdents.contains(ident))
                 // actually, SetupException isn't really the right choice, but it's not a DocumentException either...
-                throw SetupException("effect id is not unique")
-            effectIdents.add(ident)
-            effect.setAttribute("id",ident)
-            humanEffects.add(effect)
+                throw SetupException("component id is not unique")
+            componentIdents.add(ident)
+            component.setAttribute("id",ident)
+            humanComponents.add(component)
             if (desc != null)
-                effect.setAttribute("name",desc)
-            return effect
+                component.setAttribute("name",desc)
+            return component
         }
         
-        // move any deployment descriptions from elt to intervention, applying necessary transformations
-        fun processDeployments(effects: List<String>, elt: Element, cumCovEffectIdent: String,
+        // move any deployment descriptions from elt to deployment, applying necessary transformations
+        fun processDeployments(components: List<String>, elt: Element, cumCovComponentId: String,
             addVaccLimits: Boolean){
-            val intervention = scenarioDocument.createElement("intervention")!!
-            for (effect in effects){
-                val interventionEffect = scenarioDocument.createElement("effect")!!
-                interventionEffect.setAttribute("id",effect)
-                intervention.appendChild(interventionEffect)
+            val deployment = scenarioDocument.createElement("deployment")!!
+            for (component in components){
+                val deploymentComponent = scenarioDocument.createElement("component")!!
+                deploymentComponent.setAttribute("id",component)
+                deployment.appendChild(deploymentComponent)
             }
             
             fun extractBool(attr: Attr?, deploy: Element): Boolean {
@@ -407,7 +407,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                         if (ctsCohort == null) {
                             ctsCohort = scenarioDocument.createElement("continuous")!!
                             val rTC = scenarioDocument.createElement("restrictToCohort")!!
-                            rTC.setAttribute("id","cohort") // effect id _will_ be "cohort"
+                            rTC.setAttribute("id","cohort") // component id _will_ be "cohort"
                             ctsCohort!!.appendChild(rTC)
                         }
                         ctsCohort!!
@@ -422,8 +422,8 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 }
                 
                 elt.removeChild(cts)
-                if (ctsNonCohort != null) intervention.appendChild(ctsNonCohort!!)
-                if (ctsCohort != null) intervention.appendChild(ctsCohort!!)
+                if (ctsNonCohort != null) deployment.appendChild(ctsNonCohort!!)
+                if (ctsCohort != null) deployment.appendChild(ctsCohort!!)
             }
 
             val timed = getChildElementOpt(elt, "timed")
@@ -449,12 +449,12 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                         val tL = scenarioDocument.createElement("timed")!!
                         if (cohort){
                             val rTC = scenarioDocument.createElement("restrictToCohort")!!
-                            rTC.setAttribute("id","cohort") // effect id _will_ be "cohort"
+                            rTC.setAttribute("id","cohort") // component id _will_ be "cohort"
                             tL.appendChild(rTC)
                         }
                         if (cumAge != null){
                             val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
-                            cumCov.setAttribute("effect",cumCovEffectIdent) // effect is uniquely used in this case, so translation is exact
+                            cumCov.setAttribute("component",cumCovComponentId) // component is uniquely used in this case, so translation is exact
                             cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(cumAge))
                             tL.appendChild(cumCov)
                         }
@@ -467,42 +467,42 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 }
                 elt.removeChild(timed)
                 for (item in cumTimedLists){
-                    intervention.appendChild(item.component2())
+                    deployment.appendChild(item.component2())
                 }
             }
 
             val nameAttr = elt.getAttributeNode("name")
             if (nameAttr != null){
                 // move name attribute if it exists
-                intervention.setAttribute("name",nameAttr.getValue())
+                deployment.setAttribute("name",nameAttr.getValue())
                 elt.removeAttribute("name")
             }
             
-            if (getChildElements(intervention, "continuous").size +
-                getChildElements(intervention, "timed").size > 0)
+            if (getChildElements(deployment, "continuous").size +
+                getChildElements(deployment, "timed").size > 0)
             {
-                humanInterventions.add(intervention)
+                humanDeployments.add(deployment)
             }
         }
         
         fun updateElt(srcName: String, trgName: String, stripDescElt: Boolean): Element?{
             val elt = getChildElementOpt(interventions, srcName)
             if (elt != null){
-                val ident = effectIdent(srcName)
-                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
+                val ident = componentIdent(srcName)
+                val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
 
                 processDeployments(listOf(ident), elt, ident, false)
                 
                 if (stripDescElt){
                     val desc = getChildElement(elt,"description")
                     val renamed = scenarioDocument.renameNode(desc,"",trgName)!!
-                    effect.appendChild(renamed)
+                    component.appendChild(renamed)
                     interventions.removeChild(elt)  // now defunct
                 }else{
                     val renamed = scenarioDocument.renameNode(elt,"",trgName)!!
-                    effect.appendChild(renamed) // after removal of "continuous" and "timed" child elements
+                    component.appendChild(renamed) // after removal of "continuous" and "timed" child elements
                 }
-                return effect
+                return component
             }
             return null
         }
@@ -510,15 +510,15 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             val name = "MDA"
             val elt = getChildElementOpt(interventions, name)
             if (elt != null){
-                val ident = effectIdent(name)
-                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
+                val ident = componentIdent(name)
+                val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
 
                 processDeployments(listOf(ident), elt, ident, false)
                 
                 val desc1d = getChildElementOpt(elt, "description")
                 if (desc1d != null ){
                     val renamed = scenarioDocument.renameNode(desc1d, "", "MDA1D")!!
-                    effect.appendChild(renamed)
+                    component.appendChild(renamed)
                     interventions.removeChild(elt)
                 }else{
                     // no 1-day-TS description; add the new 5-day-TS drug description
@@ -532,7 +532,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     option.appendChild(clearInfections)
                     clearInfections.setAttribute("timesteps","1")
                     clearInfections.setAttribute("stage","blood")
-                    effect.appendChild(elt) // after removal of "continuous" and "timed" child elements
+                    component.appendChild(elt) // after removal of "continuous" and "timed" child elements
                 }
             }
         }
@@ -543,11 +543,11 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                 for (vacc in getChildElements(elt, "description")){
                     val vaccineType = vacc.getAttribute("vaccineType")!!
                     vacc.removeAttribute("vaccineType")
-                    val ident = effectIdent(vaccineType)
+                    val ident = componentIdent(vaccineType)
                     idents.add(ident)
-                    val effect = newEffect(ident, null)
+                    val component = newComponent(ident, null)
                     val renamed = scenarioDocument.renameNode(vacc,"",vaccineType)!!
-                    effect.appendChild(renamed)
+                    component.appendChild(renamed)
                 }
                 if (idents.size == 0){
                     // corner case: vaccine element with no children was allowed, but is useless
@@ -555,7 +555,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     return
                 }
 
-                // Use any identifier for cumCov since all effects are deployed simultaneously
+                // Use any identifier for cumCov since all components are deployed simultaneously
                 processDeployments(idents, elt, idents[0], true)
                 
                 interventions.removeChild(elt)  // now defunct
@@ -574,9 +574,9 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
                     val desc2 = getChildElement(elt,"description_v2")
                     scenarioDocument.renameNode(desc2,"",name)!!
                 }
-                val ident = effectIdent(name)
-                val effect = newEffect(ident, elt.getAttributeNode("name")?.getValue())
-                effect.appendChild(renamed)
+                val ident = componentIdent(name)
+                val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
+                component.appendChild(renamed)
                 
                 processDeployments(listOf(ident), elt, ident, false)
                 interventions.removeChild(elt)  // now defunct
@@ -623,13 +623,13 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         val cohortElt = updateElt("cohort", "cohort", false)
         updateElt("immuneSuppression", "clearImmunity", false)
         
-        if (humanEffects.size > 0){
+        if (humanComponents.size > 0){
             val human = scenarioDocument.createElement("human")!!
             interventions.appendChild(human)
-            for (effect in humanEffects)
-                human.appendChild(effect)
-            for (intervention in humanInterventions)
-                human.appendChild(intervention)
+            for (component in humanComponents)
+                human.appendChild(component)
+            for (deployment in humanDeployments)
+                human.appendChild(deployment)
         }
 
         val monitoring = getChildElement(scenarioElement, "monitoring")

@@ -29,7 +29,7 @@ namespace Host {
     class Human;
 }
 namespace interventions {
-    class VaccineEffect;
+    class VaccineComponent;
 
 // ———  cohorts  ———
 
@@ -68,7 +68,7 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        effect & stream;
+        component & stream;
         numDosesAdministered & stream;
         timeLastDeployment & stream;
         initialEfficacy & stream;
@@ -76,9 +76,9 @@ public:
     }
     
 private:
-    PerEffectPerHumanVaccine( EffectId id, const VaccineEffect& params );
+    PerEffectPerHumanVaccine( ComponentId id, const VaccineComponent& params );
     
-    EffectId effect;      // id of effect (for finding parameters)
+    ComponentId component;      // id of component (for finding parameters)
     // Type of vaccine
     /** Number of vaccine doses this individual has received.
      *
@@ -106,7 +106,7 @@ public:
     /** Vaccinate unless the passed VaccineLimits specify not to.
      * 
      * @returns true when the vaccine is administered */
-    bool possiblyVaccinate( const Host::Human& human, EffectId effectId,
+    bool possiblyVaccinate( const Host::Human& human, ComponentId componentId,
                            interventions::VaccineLimits vaccLimits );
 
 #if 0

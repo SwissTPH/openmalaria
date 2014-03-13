@@ -38,7 +38,7 @@ using util::DecayFunction;
 using util::DecayFuncHet;
 using boost::shared_ptr;
 
-class HumanVectorInterventionEffect;
+class HumanVectorInterventionComponent;
 
 /**
  * A base class for interventions affecting human-vector interaction.
@@ -47,7 +47,7 @@ class HumanVectorInterventionEffect;
  * deployed at this time (TimeStep::simulation).
  * 
  * redeploy() should reset the intervention to a freshly deployed state. If
- * necessary, PerHost::deployEffect can be updated to make it create a new
+ * necessary, PerHost::deployComponent can be updated to make it create a new
  * instance instead of calling redeploy.
  */
 class PerHostInterventionData {
@@ -55,7 +55,7 @@ public:
     virtual ~PerHostInterventionData() {}
     
     /** Deploy an intervention. */
-    virtual void redeploy( const HumanVectorInterventionEffect& params ) =0;
+    virtual void redeploy( const HumanVectorInterventionComponent& params ) =0;
     
     /** Per-timestep update. Used by ITNs to update hole decay. */
     virtual void update() =0;
@@ -75,7 +75,7 @@ public:
     virtual double postprandialSurvivalFactor(size_t speciesIndex) const =0;
     
     /// Index of effect describing the intervention
-    inline interventions::EffectId id() const { return m_id; }
+    inline interventions::ComponentId id() const { return m_id; }
     
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
@@ -85,8 +85,8 @@ public:
     }
     
 protected:
-    /// Set the effect index
-    explicit PerHostInterventionData( interventions::EffectId id ) :
+    /// Set the component id
+    explicit PerHostInterventionData( interventions::ComponentId id ) :
             deployTime( TimeStep::simulation ),
             m_id(id) {}
     
@@ -94,19 +94,19 @@ protected:
     virtual void checkpoint( ostream& stream ) =0;
     
     TimeStep deployTime;        // time of deployment or TimeStep::never
-    interventions::EffectId m_id;       // effect index; don't change
+    interventions::ComponentId m_id;       // component id; don't change
 };
 
 /** A base class for human vector intervention parameters. */
-class HumanVectorInterventionEffect : public interventions::HumanInterventionEffect {
+class HumanVectorInterventionComponent : public interventions::HumanInterventionComponent {
 public:
-    virtual ~HumanVectorInterventionEffect() {}
+    virtual ~HumanVectorInterventionComponent() {}
     
     /** Create a new object to store human-specific details of deployment. */
     virtual PerHostInterventionData* makeHumanPart() const =0;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::EffectId id ) const =0;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::ComponentId id ) const =0;
 protected:
-    explicit HumanVectorInterventionEffect(interventions::EffectId id) : HumanInterventionEffect(id) {}
+    explicit HumanVectorInterventionComponent(interventions::ComponentId id) : HumanInterventionComponent(id) {}
 };
 
 /** Contains TransmissionModel parameters which need to be stored per host.
@@ -138,8 +138,8 @@ public:
         outsideTransmission = s;
     }
   
-    /// Deploy some intervention effect
-    void deployEffect( const HumanVectorInterventionEffect& params );
+    /// Deploy some intervention component
+    void deployComponent( const HumanVectorInterventionComponent& params );
     //@}
     
     /** @brief Availability of host to mosquitoes */
@@ -256,8 +256,8 @@ private:
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
 
-    typedef boost::ptr_list<PerHostInterventionData> ListActiveEffects;
-    ListActiveEffects activeEffects;
+    typedef boost::ptr_list<PerHostInterventionData> ListActiveComponents;
+    ListActiveComponents activeComponents;
     
     static AgeGroupInterpolation* relAvailAge;
 };

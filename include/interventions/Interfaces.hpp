@@ -39,9 +39,9 @@ namespace Deployment {
     };
 }
 
-/** Enumeration of all effects, in the order that these should be deployed in
- * within a single intervention. */
-namespace Effect { enum Type {
+/** Enumeration of all available components, in the order that these should be
+ * deployed in within a single intervention. */
+namespace Component { enum Type {
     COHORT,     // cohort selection
     MDA,        // mass drug administration
     MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
@@ -67,29 +67,29 @@ struct VaccineLimits{
  * 
  * This class wraps the integer to guard against unintended conversions to or
  * from an integer (which could be mis-use). */
-struct EffectId{
-    explicit inline EffectId( size_t id ) : id(id) {}
-    explicit inline EffectId( istream& stream ){ id & stream; }
+struct ComponentId{
+    explicit inline ComponentId( size_t id ) : id(id) {}
+    explicit inline ComponentId( istream& stream ){ id & stream; }
     inline void operator& (istream& stream) { id & stream; }
     inline void operator& (ostream& stream) const{ id & stream; }
-    inline bool operator== (const EffectId that) const{ return id == that.id; }
-    inline bool operator< (const EffectId that) const{ return id < that.id; }
+    inline bool operator== (const ComponentId that) const{ return id == that.id; }
+    inline bool operator< (const ComponentId that) const{ return id < that.id; }
     size_t id;
 };
 // special value "whole population cohort" :
-static EffectId EffectId_pop = EffectId( boost::integer_traits<size_t>::const_max );
+static ComponentId ComponentId_pop = ComponentId( boost::integer_traits<size_t>::const_max );
 
-/** A description of one effect of a human intervention.
+/** A description of one component of a human intervention.
  * 
- * Note that one "effect" can have several "actions", but that deployment and
+ * Note that one component can have several "actions", but that deployment and
  * decay of these "actions" is usually related.
  * 
  * This is a base class. */
-class HumanInterventionEffect {
+class HumanInterventionComponent {
 public:
-    virtual ~HumanInterventionEffect() {}
+    virtual ~HumanInterventionComponent() {}
     
-    /** Deploy the effect to a pre-selected human.
+    /** Deploy the component to a pre-selected human.
      * 
      * @param human Individual receiving the intervention
      * @param method Channel of deployment (mass, continuous)
@@ -97,14 +97,14 @@ public:
     virtual void deploy( Host::Human& human, Deployment::Method method,
         VaccineLimits vaccLimits ) const =0;
     
-    /** Get the effect index. */
-    inline EffectId id()const{ return m_id; }
+    /** Get the component identifier. */
+    inline ComponentId id()const{ return m_id; }
     
-    /** Returns the appropriate descriptor from the EffectType enum.
+    /** Returns the appropriate descriptor from the Component::Type enum.
      * 
      * This is only used a small number of times during setup, so doesn't need
      * to be fast. */
-    virtual Effect::Type effectType() const=0;
+    virtual Component::Type componentType() const=0;
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const =0;
@@ -113,48 +113,48 @@ public:
 protected:
     /** Construct (from a derived class).
      * 
-     * @param id Effect index; used as an identifier for cumulative
+     * @param id Component identifier; used as an identifier for cumulative
      *  deployment as well as to match human-specific components to general
      *  parameters (i.e. objects of the class extending this one).
      */
-    explicit HumanInterventionEffect(EffectId id) : m_id(id) {}
+    explicit HumanInterventionComponent(ComponentId id) : m_id(id) {}
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
-    HumanInterventionEffect( const HumanInterventionEffect& );
+    HumanInterventionComponent( const HumanInterventionComponent& );
     
-    EffectId m_id;
+    ComponentId m_id;
 };
 
-/** A description of a human intervention (as a list of effects). */
+/** A description of a human intervention (as a list of components). */
 class HumanIntervention {
 public:
-    /** Add an effect. */
-    inline void addEffect( const HumanInterventionEffect *effect ){ effects.push_back( effect ); }
+    /** Add a component. */
+    inline void addComponent( const HumanInterventionComponent *component ){ components.push_back( component ); }
     
-    /** Deploy all effects to a pre-selected human. */
+    /** Deploy all components to a pre-selected human. */
     void deploy( Host::Human& human, Deployment::Method method,
         VaccineLimits vaccLimits ) const;
     
-    /** Sort effects according to a standard order.
+    /** Sort components according to a standard order.
      * 
      * The point of this is to make results repeatable even when users change
-     * the ordering of a list of intervention's effects (since getting
+     * the ordering of a list of intervention's components (since getting
      * repeatable results out of OpenMalaria is often a headache anyway, we
      * might as well at least remove this hurdle).
      * 
      * Note that when multiple interventions are deployed simultaneously, the
      * order of their deployments is still dependent on the order in the XML
      * file. */
-    void sortEffects();
+    void sortComponents();
     
 #ifdef WITHOUT_BOINC
     void print_details( std::ostream& out )const;
 #endif
     
 private:
-    // List of pointers to effects. Does not manage memory (InterventionManager::humanEffects does that).
-    vector<const HumanInterventionEffect*> effects;
+    // List of pointers to components. Does not manage memory (InterventionManager::humanComponents does that).
+    vector<const HumanInterventionComponent*> components;
 };
 
 } }

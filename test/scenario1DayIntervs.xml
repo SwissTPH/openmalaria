@@ -85,7 +85,7 @@
   </monitoring>
   <interventions name="none">
     <human>
-      <effect id="MDA">
+      <component id="MDA">
         <MDA1D>
           <decisions>
             <decision depends="result" name="treatment" values="MQ,none">
@@ -108,8 +108,8 @@
             </treatment>
           </treatments>
         </MDA1D>
-      </effect>
-      <effect id="PEV">
+      </component>
+      <component id="PEV">
         <PEV>
           <decay L="5" function="exponential"/>
           <efficacyB value="10"/>
@@ -117,9 +117,9 @@
           <initialEfficacy value="0.64"/>
           <initialEfficacy value="0.8"/>
         </PEV>
-      </effect>
-      <intervention>
-        <effect id="MDA"/>
+      </component>
+      <deployment>
+        <component id="MDA"/>
         <timed>
           <deploy coverage="0.6" time="160"/>
           <deploy coverage="0.6" time="860"/>
@@ -128,9 +128,9 @@
           <deploy coverage="0.6" time="1595"/>
           <deploy coverage="0.6" time="1610"/>
         </timed>
-      </intervention>
-      <intervention>
-        <effect id="PEV"/>
+      </deployment>
+      <deployment>
+        <component id="PEV"/>
         <continuous>
           <deploy coverage="0.95" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
           <deploy coverage="0.95" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
@@ -138,7 +138,7 @@
           <deploy coverage="0.99" targetAgeYrs="2" vaccMaxCumDoses="4" vaccMinPrevDoses="3"/>
           <deploy coverage="0.99" targetAgeYrs="5" vaccMaxCumDoses="5" vaccMinPrevDoses="4"/>
         </continuous>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>
