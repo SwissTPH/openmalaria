@@ -36,7 +36,7 @@ vector<int> ClinicalModel::infantDeaths;
 double ClinicalModel::_nonMalariaMortality;
 
 bool opt_event_scheduler = false;
-bool ClinicalModel::indirectMortBug;
+bool ClinicalModel::indirectMortBugfix;
 
 // -----  static methods  -----
 
@@ -44,7 +44,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
     infantDeaths.resize(TimeStep::stepsPerYear);
     infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
     _nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
-    indirectMortBug = !util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
+    indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
     
     Episode::init( model.getClinical().getHealthSystemMemory() );
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
