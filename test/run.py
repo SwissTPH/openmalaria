@@ -205,10 +205,10 @@ def runScenario(options,omOptions,name):
             if os.path.isfile(f):
                 os.remove(f)
     
-    origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%name)
-    newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%name)
-    origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%name)
-    newOutput = os.path.join(testBuildDir,"output%s.txt"%name)
+    origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%tmpprefix)
+    newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%tmpprefix)
+    origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%tmpprefix)
+    newOutput = os.path.join(testBuildDir,"output%s.txt"%tmpprefix)
     haveCtsOut = os.path.isfile(ctsoutFile)
     haveMainOut = os.path.isfile(outputFile)
     
