@@ -72,19 +72,19 @@ public:
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */
     static void deploy (OM::Population& population);
     
-    /** Get a constant reference to an effect class with a certain index.
+    /** Get a constant reference to a component class with a certain index.
      * 
      * @throws util::base_exception if the index is out-of-range */
-    inline static const HumanInterventionEffect& getEffect( EffectId id ){
-        if( id.id >= humanEffects.size() )
-            throw util::base_exception( "invalid effect id" );
-        return humanEffects[id.id];
+    inline static const HumanInterventionComponent& getComponent( ComponentId id ){
+        if( id.id >= humanComponents.size() )
+            throw util::base_exception( "invalid component id" );
+        return humanComponents[id.id];
     }
     
 private:
-    // All human intervention effects, indexed by a number. This list is used
+    // All human intervention components, indexed by a number. This list is used
     // during initialisation and thereafter only for memory management.
-    static boost::ptr_vector<HumanInterventionEffect> humanEffects;
+    static boost::ptr_vector<HumanInterventionComponent> humanComponents;
     // All human interventions. These are stored here for memory management
     // only (so that they are deleted when this class is destroyed).
     static boost::ptr_vector<HumanIntervention> humanInterventions;

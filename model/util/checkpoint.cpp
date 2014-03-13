@@ -220,17 +220,17 @@ namespace OM { namespace util { namespace checkpoint {
             throw checkpoint_error ("stream read error string");
     }
     
-    void operator& (const set<interventions::EffectId>&x, ostream& stream){
+    void operator& (const set<interventions::ComponentId>&x, ostream& stream){
         x.size() & stream;
-        for( set<interventions::EffectId>::const_iterator it = x.begin(); it != x.end(); ++it )
+        for( set<interventions::ComponentId>::const_iterator it = x.begin(); it != x.end(); ++it )
             *it & stream;
     }
-    void operator& (set<interventions::EffectId>& x, istream& stream){
+    void operator& (set<interventions::ComponentId>& x, istream& stream){
         size_t len;
         len & stream;
         validateListSize(len);
         for( size_t i = 0; i < len; ++i ){
-            interventions::EffectId id( stream );
+            interventions::ComponentId id( stream );
             x.insert( id );
         }
     }
@@ -279,21 +279,21 @@ namespace OM { namespace util { namespace checkpoint {
         }
     }
 
-    void operator& (const map<interventions::EffectId,TimeStep>& x, ostream& stream) {
+    void operator& (const map<interventions::ComponentId,TimeStep>& x, ostream& stream) {
         x.size() & stream;
-        for (map<interventions::EffectId,TimeStep>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+        for (map<interventions::ComponentId,TimeStep>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
             pos->second.asInt() & stream;
         }
     }
-    void operator& (map<interventions::EffectId,TimeStep>& x, istream& stream) {
+    void operator& (map<interventions::ComponentId,TimeStep>& x, istream& stream) {
         size_t l;
         l & stream;
         validateListSize (l);
         x.clear ();
-        map<interventions::EffectId,TimeStep>::iterator pos = x.begin ();
+        map<interventions::ComponentId,TimeStep>::iterator pos = x.begin ();
         for (size_t i = 0; i < l; ++i) {
-            interventions::EffectId s( stream );
+            interventions::ComponentId s( stream );
             TimeStep t;
             t & stream;
             pos = x.insert (pos, make_pair (s,t));

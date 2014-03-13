@@ -109,8 +109,8 @@ namespace checkpoint {
     }
     */
     
-    void operator& (const set<interventions::EffectId>&x, ostream& stream);
-    void operator& (set<interventions::EffectId>& x, istream& stream);
+    void operator& (const set<interventions::ComponentId>&x, ostream& stream);
+    void operator& (set<interventions::ComponentId>& x, istream& stream);
     
     void operator& (const map<string,double>& x, ostream& stream);
     void operator& (map<string, double >& x, istream& stream);
@@ -118,8 +118,8 @@ namespace checkpoint {
     void operator& (const map<double,double>& x, ostream& stream);
     void operator& (map<double, double>& x, istream& stream);
     
-    void operator& (const map<interventions::EffectId,TimeStep>& x, ostream& stream);
-    void operator& (map<interventions::EffectId,TimeStep>& x, istream& stream);
+    void operator& (const map<interventions::ComponentId,TimeStep>& x, ostream& stream);
+    void operator& (map<interventions::ComponentId,TimeStep>& x, istream& stream);
     
     void operator& (const multimap<double,double>& x, ostream& stream);
     void operator& (multimap<double, double>& x, istream& stream);

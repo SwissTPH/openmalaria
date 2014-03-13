@@ -79,7 +79,7 @@
       <timedDeployment time="146"/>
     </insertR_0Case>
     <human>
-      <effect id="MDA">
+      <component id="MDA">
         <MDA>
           <effects>
             <option name="clear blood-stage infections" pSelection="1">
@@ -87,26 +87,26 @@
             </option>
           </effects>
         </MDA>
-      </effect>
-      <effect id="PEV">
+      </component>
+      <component id="PEV">
         <PEV>
           <decay L="0.0" function="constant"/>
           <efficacyB value="0"/>
           <initialEfficacy value="0"/>
         </PEV>
-      </effect>
-      <effect id="TBV">
+      </component>
+      <component id="TBV">
         <TBV>
           <decay L="0.0" function="constant"/>
           <efficacyB value="1"/>
           <initialEfficacy value="1"/>
         </TBV>
-      </effect>
-      <effect id="immuneSuppression">
+      </component>
+      <component id="immuneSuppression">
         <clearImmunity/>
-      </effect>
-      <intervention>
-        <effect id="MDA"/>
+      </component>
+      <deployment>
+        <component id="MDA"/>
         <timed>
           <deploy coverage="1" time="73"/>
           <deploy coverage="1" time="74"/>
@@ -115,23 +115,23 @@
           <deploy coverage="1" time="77"/>
           <deploy coverage="1" time="78"/>
         </timed>
-      </intervention>
-      <intervention>
-        <effect id="PEV"/>
-        <effect id="TBV"/>
+      </deployment>
+      <deployment>
+        <component id="PEV"/>
+        <component id="TBV"/>
         <continuous>
           <deploy coverage="1" targetAgeYrs="0.0137" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
         </continuous>
         <timed>
           <deploy coverage="1" time="73"/>
         </timed>
-      </intervention>
-      <intervention>
-        <effect id="immuneSuppression"/>
+      </deployment>
+      <deployment>
+        <component id="immuneSuppression"/>
         <timed>
           <deploy coverage="1" time="78"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

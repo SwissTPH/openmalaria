@@ -40,32 +40,32 @@ namespace OM { namespace interventions {
     using Host::Human;
     using Monitoring::Survey;
 
-// ———  HumanInterventionEffect  ———
+// ———  HumanInterventionComponent  ———
 
 void HumanIntervention::deploy( Human& human, Deployment::Method method,
     VaccineLimits vaccLimits ) const
 {
-    for( vector<const HumanInterventionEffect*>::const_iterator it = effects.begin();
-            it != effects.end(); ++it )
+    for( vector<const HumanInterventionComponent*>::const_iterator it = components.begin();
+            it != components.end(); ++it )
     {
-        const interventions::HumanInterventionEffect& effect = **it;
-        effect.deploy( human, method, vaccLimits );
-        human.updateLastDeployed( effect.id() );
+        const interventions::HumanInterventionComponent& component = **it;
+        component.deploy( human, method, vaccLimits );
+        human.updateLastDeployed( component.id() );
     }
 }
 
-bool effectCmp(const HumanInterventionEffect *a, const HumanInterventionEffect *b){
-    return a->effectType() < b->effectType();
+bool componentCmp(const HumanInterventionComponent *a, const HumanInterventionComponent *b){
+    return a->componentType() < b->componentType();
 }
-void HumanIntervention::sortEffects(){
-    std::stable_sort( effects.begin(), effects.end(), effectCmp );
+void HumanIntervention::sortComponents(){
+    std::stable_sort( components.begin(), components.end(), componentCmp );
 }
 
 #ifdef WITHOUT_BOINC
 void HumanIntervention::print_details( std::ostream& out )const{
     out << "human:";
-    for( vector<const HumanInterventionEffect*>::const_iterator it =
-        effects.begin(); it != effects.end(); ++it ){
+    for( vector<const HumanInterventionComponent*>::const_iterator it =
+        components.begin(); it != components.end(); ++it ){
         out << '\t' << (*it)->id().id;
     }
 }
@@ -73,10 +73,10 @@ void HumanIntervention::print_details( std::ostream& out )const{
 
 // ———  Derivatives  ———
 
-class MDAEffect : public HumanInterventionEffect {
+class MDAComponent : public HumanInterventionComponent {
 public:
-    MDAEffect( EffectId id, const scnXml::MDA& mda ) :
-        HumanInterventionEffect(id)
+    MDAComponent( ComponentId id, const scnXml::MDA& mda ) :
+        HumanInterventionComponent(id)
     {
         if( !mda.getDiagnostic().present() ){
             // Note: allow no description for now to avoid XML changes.
@@ -122,7 +122,7 @@ public:
         human.withinHostModel->treatment( selectTreatment() );
     }
     
-    virtual Effect::Type effectType() const{ return Effect::MDA; }
+    virtual Component::Type componentType() const{ return Component::MDA; }
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -154,9 +154,9 @@ private:
     vector<TreatOptions> treatments;
 };
 
-class MDA1DEffect : public HumanInterventionEffect {
+class MDA1DComponent : public HumanInterventionComponent {
 public:
-    MDA1DEffect( EffectId id, const scnXml::HSESCaseManagement& description ) : HumanInterventionEffect(id) {
+    MDA1DComponent( ComponentId id, const scnXml::HSESCaseManagement& description ) : HumanInterventionComponent(id) {
 	if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
 	  throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
         Clinical::ESCaseManagement::initMDA( description );
@@ -166,7 +166,7 @@ public:
         human.getClinicalModel().massDrugAdministration( method, human );
     }
     
-    virtual Effect::Type effectType() const{ return Effect::MDA_TS1D; }
+    virtual Component::Type componentType() const{ return Component::MDA_TS1D; }
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -177,15 +177,15 @@ public:
 private:
 };
 
-class ClearImmunityEffect : public HumanInterventionEffect {
+class ClearImmunityComponent : public HumanInterventionComponent {
 public:
-    ClearImmunityEffect( EffectId id ) : HumanInterventionEffect(id) {}
+    ClearImmunityComponent( ComponentId id ) : HumanInterventionComponent(id) {}
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
         human.clearImmunity();
     }
     
-    virtual Effect::Type effectType() const{ return Effect::CLEAR_IMMUNITY; }
+    virtual Component::Type componentType() const{ return Component::CLEAR_IMMUNITY; }
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{

@@ -190,8 +190,8 @@ void Human::clearImmunity(){
     withinHostModel->clearImmunity();
 }
 
-bool Human::needsRedeployment( interventions::EffectId cumCovId, TimeStep maxAge ){
-    map<interventions::EffectId,TimeStep>::const_iterator it = lastDeployments.find( cumCovId );
+bool Human::needsRedeployment( interventions::ComponentId cumCovId, TimeStep maxAge ){
+    map<interventions::ComponentId,TimeStep>::const_iterator it = lastDeployments.find( cumCovId );
     if( it == lastDeployments.end() ){
         return true;  // no previous deployment
     }else{
@@ -218,7 +218,7 @@ void Human::summarize() {
     }
 }
 
-void Human::addToCohort (interventions::EffectId id){
+void Human::addToCohort (interventions::ComponentId id){
     if( cohorts.count(id) > 0 ) return;	// nothing to do
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,
@@ -229,7 +229,7 @@ void Human::addToCohort (interventions::EffectId id){
     Monitoring::Surveys.current->addInt( Survey::MI_NUM_ADDED_COHORT,
                                          getMonitoringAgeGroup(), 1 );
 }
-void Human::removeFromCohort( interventions::EffectId id ){
+void Human::removeFromCohort( interventions::ComponentId id ){
     if( cohorts.count(id) > 0 ){
         // Data should be flushed as with addToCohort().
         flushReports();
@@ -240,8 +240,8 @@ void Human::removeFromCohort( interventions::EffectId id ){
     }
 }
 void Human::removeFromCohorts( interventions::Cohort::RemoveAtCode code ){
-    const vector<interventions::EffectId>& removeAtList = interventions::CohortSelectionEffect::removeAtIds[code];
-    for( vector<interventions::EffectId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
+    const vector<interventions::ComponentId>& removeAtList = interventions::CohortSelectionComponent::removeAtIds[code];
+    for( vector<interventions::ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
         removeFromCohort( *it );    // only does anything if in cohort
     }
 }

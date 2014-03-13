@@ -35,21 +35,21 @@ namespace interventions {
     using boost::shared_ptr;
     using Transmission::PerHostInterventionData;
 
-class IRSEffect : public Transmission::HumanVectorInterventionEffect {
+class IRSComponent : public Transmission::HumanVectorInterventionComponent {
 public:
-    IRSEffect( EffectId id, const scnXml::IRSDescription& elt,
+    IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
         const map<string,size_t>& species_name_map );
     
     virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
     
-    virtual Effect::Type effectType() const;
+    virtual Component::Type componentType() const;
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
 #endif
     
     virtual PerHostInterventionData* makeHumanPart() const;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, EffectId ) const;
+    virtual PerHostInterventionData* makeHumanPart( istream& stream, ComponentId ) const;
     
 private:
     /** Per mosquito-species parameters for extended IRS model. */
@@ -140,9 +140,9 @@ private:
     shared_ptr<DecayFunction> insecticideDecay;
     vector<IRSAnopheles> species; // vector specific params
     
-    // This is sparse vector: only indexes corresponding to a IRS effect are used
+    // This is sparse vector: only indexes corresponding to a IRS component are used
     // No memory management
-    static vector<IRSEffect*> effectsByIndex;
+    static vector<IRSComponent*> componentsByIndex;
     
     friend class HumanIRS;
 };
@@ -153,13 +153,13 @@ private:
  */
 class HumanIRS : public PerHostInterventionData {
 public:
-    HumanIRS( const IRSEffect& params );
-    HumanIRS( istream& stream, EffectId id );
+    HumanIRS( const IRSComponent& params );
+    HumanIRS( istream& stream, ComponentId id );
     
-    virtual void redeploy(const Transmission::HumanVectorInterventionEffect& params);
+    virtual void redeploy(const Transmission::HumanVectorInterventionComponent& params);
     
     /// Get remaining insecticide content based on initial amount and decay.
-    inline double getInsecticideContent(const IRSEffect& params)const{
+    inline double getInsecticideContent(const IRSComponent& params)const{
         double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
                                               insecticideDecayHet);
         return initialInsecticide * effectSurvival;

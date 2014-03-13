@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="Rachuonyo 5-day Intervention cohort" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="test usage of multiple independent ITN descriptions alongside other vector interventions" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
   <demography maximumAgeYrs="90" name="Rachuonyo" popSize="979">
     <ageGroup lowerbound="0">
       <group poppercent="2.6" upperbound="1"/>
@@ -102,7 +102,7 @@
   </monitoring>
   <interventions name="Full Set">
     <human>
-      <effect id="MDA">
+      <component id="MDA">
         <MDA>
           <effects>
             <option pSelection="1">
@@ -110,8 +110,8 @@
             </option>
           </effects>
         </MDA>
-      </effect>
-      <effect id="ITN" name="LLIN test">
+      </component>
+      <component id="ITN" name="LLIN test">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean="0.9" sigma="0.8"/>
@@ -126,8 +126,8 @@
             <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
           </anophelesParams>
         </ITN>
-      </effect>
-      <effect id="ITN2" name="highly effective ITNs">
+      </component>
+      <component id="ITN2" name="highly effective ITNs">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean="0.9" sigma="0.8"/>
@@ -142,8 +142,8 @@
             <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
           </anophelesParams>
         </ITN>
-      </effect>
-      <effect id="IRS" name="new param">
+      </component>
+      <component id="IRS" name="new param">
         <IRS>
           <!-- Initial insecticide: units are μg/cm²; no variance here -->
           <initialInsecticide mu="118" sigma="0"/>
@@ -154,41 +154,41 @@
             <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
           </anophelesParams>
         </IRS>
-      </effect>
-      <effect id="vectorDeterrent" name="hypothetical deterrency">
+      </component>
+      <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
           <decay L="4" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency value="0"/>
           </anophelesParams>
         </GVI>
-      </effect>
-      <effect id="cohort">
+      </component>
+      <component id="cohort">
         <cohort/>
-      </effect>
-      <intervention>
-        <effect id="MDA"/>
+      </component>
+      <deployment>
+        <component id="MDA"/>
         <timed>
           <restrictToCohort id="cohort"/>
           <deploy coverage="1" time="30"/>
         </timed>
-      </intervention>
-      <intervention name="LLIN test">
-        <effect id="ITN"/>
+      </deployment>
+      <deployment name="LLIN test">
+        <component id="ITN"/>
         <continuous>
           <deploy coverage=".677" targetAgeYrs="0.0833"/>
         </continuous>
-      </intervention>
-      <intervention name="High-insecticide ITNs">
-        <effect id="ITN2"/>
+      </deployment>
+      <deployment name="High-insecticide ITNs">
+        <component id="ITN2"/>
         <timed>
           <deploy coverage="0.5" time="73"/>
         </timed>
-      </intervention>
-      <intervention name="new param">
-        <effect id="IRS"/>
+      </deployment>
+      <deployment name="new param">
+        <component id="IRS"/>
         <timed>
-          <cumulativeCoverage effect="IRS" maxAgeYears="36.0"/>
+          <cumulativeCoverage component="IRS" maxAgeYears="36.0"/>
           <deploy coverage="0.05775" time="18"/>
           <deploy coverage="0.1155" time="19"/>
           <deploy coverage="0.17325" time="20"/>
@@ -214,9 +214,9 @@
           <deploy coverage="0.63525" time="113"/>
           <deploy coverage="0.693" time="114"/>
         </timed>
-      </intervention>
-      <intervention>
-        <effect id="cohort"/>
+      </deployment>
+      <deployment>
+        <component id="cohort"/>
         <timed>
           <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
           <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>
@@ -224,7 +224,7 @@
           <deploy coverage="0.207164" maxAge="20" minAge="15" time="3"/>
           <deploy coverage="0.157818" maxAge="90" minAge="20" time="4"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

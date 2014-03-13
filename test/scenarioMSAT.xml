@@ -125,7 +125,7 @@
       </timed>
     </importedInfections>
     <human>
-      <effect id="MDA">
+      <component id="MDA">
         <MDA1D>
           <decisions>
             <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
@@ -171,8 +171,8 @@
             </treatment>
           </treatments>
         </MDA1D>
-      </effect>
-      <effect id="ITN" name="Extended ITNs">
+      </component>
+      <component id="ITN" name="Extended ITNs">
         <ITN>
           <usage value="0.8"/>
           <holeRate mean=".9" sigma=".8"/>
@@ -197,9 +197,9 @@
             <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
           </anophelesParams>
         </ITN>
-      </effect>
-      <intervention>
-        <effect id="MDA"/>
+      </component>
+      <deployment>
+        <component id="MDA"/>
         <timed>
           <deploy coverage="0.85" time="1484"/>
           <deploy coverage="0.85" time="1849"/>
@@ -210,16 +210,16 @@
           <deploy coverage="0.85" time="3674"/>
           <deploy coverage="0.85" time="4039"/>
         </timed>
-      </intervention>
-      <intervention name="Extended ITNs">
-        <effect id="ITN"/>
+      </deployment>
+      <deployment name="Extended ITNs">
+        <component id="ITN"/>
         <timed>
           <deploy coverage="0.20" time="146"/>
           <deploy coverage="0.20" time="438"/>
           <deploy coverage="0.20" time="730"/>
           <deploy coverage="0.20" time="1168"/>
         </timed>
-      </intervention>
+      </deployment>
     </human>
   </interventions>
   <healthSystem>

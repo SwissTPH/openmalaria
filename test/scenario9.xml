@@ -42,32 +42,32 @@
     </ageGroup>
   </monitoring>
   <interventions name="uninfect population">
-  <human>
-    <effect id="clearInfections">
-      <MDA>
-        <effects>
-          <option pSelection="1">
-            <clearInfections timesteps="5" stage="both"/>
-          </option>
-        </effects>
-      </MDA>
-    </effect>
-    <intervention name="clear human infections">
-      <effect id="clearInfections"/>
-      <timed>
-        <deploy coverage="1" time="73"/>
-      </timed>
-    </intervention>
-  </human>
-  <uninfectVectors name="clear mosquito infections">
-    <timedDeployment time="73"/>
-    <timedDeployment time="74"/>
-    <timedDeployment time="75"/>
-    <timedDeployment time="76"/>
-    <timedDeployment time="77"/>
-    <timedDeployment time="78"/>
-  </uninfectVectors>
-</interventions>
+    <human>
+      <component id="clearInfections">
+        <MDA>
+          <effects>
+            <option pSelection="1">
+              <clearInfections timesteps="5" stage="both"/>
+            </option>
+          </effects>
+        </MDA>
+      </component>
+      <deployment name="clear human infections">
+        <component id="clearInfections"/>
+        <timed>
+          <deploy coverage="1" time="73"/>
+        </timed>
+      </deployment>
+    </human>
+    <uninfectVectors name="clear mosquito infections">
+      <timedDeployment time="73"/>
+      <timedDeployment time="74"/>
+      <timedDeployment time="75"/>
+      <timedDeployment time="76"/>
+      <timedDeployment time="77"/>
+      <timedDeployment time="78"/>
+    </uninfectVectors>
+  </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Ironmal">
       <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>

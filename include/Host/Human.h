@@ -98,17 +98,17 @@ public:
   
   ///@brief Deploy "intervention" functions
   //@{
-  /** Mark a certain intervention effect as being deployed now. */
-  inline void updateLastDeployed( interventions::EffectId id ){
+  /** Mark a certain intervention component as being deployed now. */
+  inline void updateLastDeployed( interventions::ComponentId id ){
       lastDeployments[id] = TimeStep::simulation;
   }
   
-  /** Determines for the purposes of cumulative deployment whether an effect is
+  /** Determines for the purposes of cumulative deployment whether a component is
    * still current.
    * 
-   * @returns true if the intervention effect should be re-deployed (too old)
+   * @returns true if the intervention component should be re-deployed (too old)
    */
-  bool needsRedeployment( interventions::EffectId cumCuvId, TimeStep maxAge );
+  bool needsRedeployment( interventions::ComponentId cumCuvId, TimeStep maxAge );
   
   /// Resets immunity
   void clearImmunity();
@@ -135,8 +135,8 @@ public:
    * 
    * Note: the maximum value of size_t is considered to be the population, of
    * which every human is a member. */
-  inline bool isInCohort( interventions::EffectId id )const{
-      return id == interventions::EffectId_pop || cohorts.count( id ) > 0;
+  inline bool isInCohort( interventions::ComponentId id )const{
+      return id == interventions::ComponentId_pop || cohorts.count( id ) > 0;
   }
   /** Return true if human is a member of any cohort. */
   //TODO(monitoring): outputs per cohort, not simply any cohort or everyone
@@ -165,12 +165,12 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort ( interventions::EffectId );
+  void addToCohort ( interventions::ComponentId );
   
   /** Remove from a cohort. As with addToCohort, deals with reporting.
    *
    * Can be safely called when human is not in cohort. */
-  void removeFromCohort( interventions::EffectId );
+  void removeFromCohort( interventions::ComponentId );
   
   /** Act on remove-from-cohort-on-first-xyz events. */
   void removeFromCohorts( interventions::Cohort::RemoveAtCode code );
@@ -243,9 +243,9 @@ private:
   
   //TODO(performance): are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
   /// The set of cohorts (intervention indexes) to which this human is a member
-  set<interventions::EffectId> cohorts;
-  /// Last deployment times of intervention effects by effect index
-  map<interventions::EffectId,TimeStep> lastDeployments;
+  set<interventions::ComponentId> cohorts;
+  /// Last deployment times of intervention components by component id
+  map<interventions::ComponentId,TimeStep> lastDeployments;
 };
 
 } }

@@ -23,10 +23,10 @@
 
 namespace OM { namespace interventions {
 
-vector<EffectId> CohortSelectionEffect::removeAtIds[Cohort::REMOVE_AT_NUM];
+vector<ComponentId> CohortSelectionComponent::removeAtIds[Cohort::REMOVE_AT_NUM];
 
-CohortSelectionEffect::CohortSelectionEffect( EffectId id, const scnXml::Cohort& cohort ) :
-        HumanInterventionEffect(id)
+CohortSelectionComponent::CohortSelectionComponent( ComponentId id, const scnXml::Cohort& cohort ) :
+        HumanInterventionComponent(id)
 {
     if( cohort.getFirstBoutOnly() ){
         removeAtIds[Cohort::REMOVE_AT_FIRST_BOUT].push_back( id );
@@ -39,16 +39,16 @@ CohortSelectionEffect::CohortSelectionEffect( EffectId id, const scnXml::Cohort&
     }
 }
 
-void CohortSelectionEffect::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
+void CohortSelectionComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.addToCohort( id() );
 }
 
-Effect::Type CohortSelectionEffect::effectType() const{
-    return Effect::COHORT;
+Component::Type CohortSelectionComponent::componentType() const{
+    return Component::COHORT;
 }
     
 #ifdef WITHOUT_BOINC
-void CohortSelectionEffect::print_details( std::ostream& out )const{
+void CohortSelectionComponent::print_details( std::ostream& out )const{
     out << id().id << "\tcohort selection";
 }
 #endif
