@@ -23,17 +23,19 @@
 #include "util/errors.h"
 #include "util/SpeciesIndexChecker.h"
 #include "Host/Human.h"
+#include "Monitoring/Surveys.h"
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
     using util::random::poisson;
+    using namespace Monitoring;
 
 vector<ITNComponent*> ITNComponent::componentsByIndex;
 
 ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
         const map<string, size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id),
+        Transmission::HumanVectorInterventionComponent(id, Report::MI_ITN_CTS, Report::MI_ITN_TIMED),
         ripFactor( numeric_limits<double>::signaling_NaN() )
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
@@ -64,9 +66,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
 
 void ITNComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent( *this );
-    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
-        (method == interventions::Deployment::TIMED) ?
-            Monitoring::Survey::MI_ITN_TIMED : Monitoring::Survey::MI_ITN_CTS,
+    Surveys.getSurvey( human ).addInt( reportMeasure(method),
         human.getMonitoringAgeGroup(), 1 );
 }
 

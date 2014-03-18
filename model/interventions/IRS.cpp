@@ -31,12 +31,13 @@
 
 namespace OM { namespace interventions {
     using util::random::poisson;
+    using namespace Monitoring;
 
 vector<IRSComponent*> IRSComponent::componentsByIndex;
 
 IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id)
+        Transmission::HumanVectorInterventionComponent(id, Report::MI_IRS_CTS, Report::MI_IRS_TIMED)
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
@@ -59,9 +60,7 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
 
 void IRSComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
-        (method == interventions::Deployment::TIMED) ?
-            Monitoring::Survey::MI_IRS_TIMED : Monitoring::Survey::MI_IRS_CTS,
+    Surveys.getSurvey( human ).addInt( reportMeasure(method),
         human.getMonitoringAgeGroup(), 1 );
 }
 

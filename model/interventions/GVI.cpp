@@ -21,17 +21,19 @@
 #include "Global.h"
 #include "interventions/GVI.h"
 #include "Host/Human.h"
+#include "Monitoring/Surveys.h"
 #include "util/SpeciesIndexChecker.h"
 #include "util/errors.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
+    using namespace Monitoring;
 
 vector<GVIComponent*> GVIComponent::componentsByIndex;
 
 GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id)
+        Transmission::HumanVectorInterventionComponent(id, Report::MI_GVI_CTS, Report::MI_GVI_TIMED)
 {
     decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
     
@@ -50,9 +52,7 @@ GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
 
 void GVIComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
-        (method == interventions::Deployment::TIMED) ?
-            Monitoring::Survey::MI_GVI_TIMED : Monitoring::Survey::MI_GVI_CTS,
+    Surveys.getSurvey( human ).addInt(reportMeasure(method),
         human.getMonitoringAgeGroup(), 1 );
 }
 

@@ -62,7 +62,9 @@ public:
                 TimeStep::simulation-_tLastTreatment <= TimeStep(4));
     }
 
-    virtual void massDrugAdministration( interventions::Deployment::Method method, Human& human);
+    virtual void massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport );
 
 protected:
     virtual void doClinicalUpdate (Human& human, double ageYears);

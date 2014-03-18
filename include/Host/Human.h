@@ -22,7 +22,7 @@
 #include "Global.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "interventions/HumanComponents.h"
 #include "util/checkpoint_containers.h"
 #include <set>
@@ -151,12 +151,6 @@ public:
   }
   //@}
   
-  /// Return the current survey to use (depends on survey time and whether or
-  /// not individual is in the cohort).
-  Monitoring::Survey& getSurvey() const{
-      return Monitoring::Surveys.getSurvey( isInAnyCohort() );
-  }
-  
   //! Summarize the state of a human individual.
   void summarize();
   
@@ -165,7 +159,7 @@ public:
    * Also makes sure inter-survey stats will only be
    * summed from this point onwards (i.e. removes data accumulated between
    * last time human was reported or birth and now). */
-  void addToCohort ( interventions::ComponentId );
+  void addToCohort ( interventions::ComponentId, Monitoring::ReportMeasureI reportMeasure );
   
   /** Remove from a cohort. As with addToCohort, deals with reporting.
    *

@@ -21,14 +21,12 @@
 #define OM_INTERVENTIONS_INTERFACES
 
 #include "Global.h"
+#include "Monitoring/Survey.h"
 #include <boost/integer_traits.hpp>
 
 namespace scnXml{ class DeploymentBase; }
 
 namespace OM {
-    namespace Host {
-        class Human;
-    }
 
 namespace interventions {
 
@@ -116,14 +114,25 @@ protected:
      * @param id Component identifier; used as an identifier for cumulative
      *  deployment as well as to match human-specific components to general
      *  parameters (i.e. objects of the class extending this one).
+     * @param ctsMeasure Report measure to use for continuous deployment
+     * @param timedMeasure Report measure to use for timed deployment
      */
-    explicit HumanInterventionComponent(ComponentId id) : m_id(id) {}
+    explicit HumanInterventionComponent(ComponentId id,
+                                        Monitoring::ReportMeasureI ctsMeasure,
+                                        Monitoring::ReportMeasureI timedMeasure) :
+            m_id(id), m_measureCts( ctsMeasure ), m_measureTimed( timedMeasure ) {}
+    
+    /** Trivial helper function to get deployment measure. */
+    inline Monitoring::ReportMeasureI reportMeasure( Deployment::Method method )const{
+        return (method == Deployment::TIMED) ? m_measureTimed : m_measureCts;
+    }
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
     HumanInterventionComponent( const HumanInterventionComponent& );
     
     ComponentId m_id;
+    Monitoring::ReportMeasureI m_measureCts, m_measureTimed;
 };
 
 /** A description of a human intervention (as a list of components). */

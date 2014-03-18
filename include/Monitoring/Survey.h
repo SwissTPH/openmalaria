@@ -25,15 +25,83 @@
 #include "Global.h"
 #include "util/errors.h"
 #include "util/checkpoint_containers.h"
-#include <interventions/Interfaces.hpp>
 #include <bitset>
 #include <map>
 #include <boost/multi_array.hpp>
 
 namespace scnXml{ class Monitoring; }
 namespace OM {
+    namespace Host {
+        class Human;
+    }
 namespace Monitoring {
     using boost::multi_array;
+
+/// Encapsulate report measure codes
+namespace Report {
+    /** Measures which are reported as integers
+     * 
+     * Note: for timed/continuous deployment pairs, the continuous version
+     * is always the timed version + 1. */
+    enum IntReportMeasures{
+        MI_HOSTS,
+        MI_INFECTED_HOSTS,
+        MI_PATENT_HOSTS,
+        MI_INFECTIONS,
+        MI_PATENT_INFECTIONS,
+        MI_TREATMENTS_1,
+        MI_TREATMENTS_2,
+        MI_TREATMENTS_3,
+        MI_UNCOMPLICATED_EPISODES,
+        MI_SEVERE_EPISODES,
+        MI_SEQUELAE,
+        MI_HOSPITAL_DEATHS,
+        MI_INDIRECT_DEATHS,
+        MI_DIRECT_DEATHS,
+        MI_VACCINATION_TIMED,
+        MI_VACCINATION_CTS,
+        MI_HOSPITAL_RECOVERIES,
+        MI_HOSPITAL_SEQUELAE,
+        MI_NON_MALARIA_FEVERS,
+        MI_NEW_INFECTIONS,
+        MI_ITN_TIMED,
+        MI_ITN_CTS,
+        MI_IRS_TIMED,
+        MI_IRS_CTS,
+        MI_GVI_TIMED,
+        MI_GVI_CTS,
+        MI_MDA_TIMED,
+        MI_MDA_CTS /* "mass" drug administration via EPI/schools */,
+        MI_SCREENING_TIMED,
+        MI_SCREENING_CTS,
+        MI_NMF_DEATHS,
+        MI_NMF_TREATMENTS /* also known as antibiotics */,
+        MI_FIRST_DAY_DEATHS,
+        MI_HOSPITAL_FIRST_DAY_DEATHS,
+        //TODO: cohorts should be handled independently, not as "in cohort"/"not in a cohort"
+        MI_NUM_ADDED_COHORT,
+        MI_NUM_REMOVED_COHORT,
+        MI_NUM  // must be last; not a measure to report
+    };
+    /// Measures which are reported as doubles
+    enum DblReportMeasures{
+        MD_EXPECTED_INFECTED,
+        MD_LOG_PYROGENIC_THRESHOLD,
+        MD_LOG_DENSITY,
+        MD_PYROGENIC_THRESHOLD,
+        MD_NUM  // must be last; not a measure to report
+    };
+}
+/** Wrap an IntReportMeasures to enforce initialisation. */
+struct ReportMeasureI{
+    /* implicit */ ReportMeasureI( Report::IntReportMeasures m ) : code( m ) {}
+    Report::IntReportMeasures code;
+};
+/** Wrap an DblReportMeasures to enforce initialisation. */
+struct ReportMeasureD{
+    /* implicit */ ReportMeasureD( Report::DblReportMeasures m ) : code( m ) {}
+    Report::DblReportMeasures code;
+};
 
 /**
  * Included for type-saftey: don't allow implicit double->int conversions.
@@ -106,59 +174,6 @@ private:
     //@}
   
 public:
-    /** Measures which are reported as integers
-     * 
-     * Note: for timed/continuous deployment pairs, the continuous version
-     * is always the timed version + 1. */
-    enum IntReportMeasures{
-        MI_HOSTS,
-        MI_INFECTED_HOSTS,
-        MI_PATENT_HOSTS,
-        MI_INFECTIONS,
-        MI_PATENT_INFECTIONS,
-        MI_TREATMENTS_1,
-        MI_TREATMENTS_2,
-        MI_TREATMENTS_3,
-        MI_UNCOMPLICATED_EPISODES,
-        MI_SEVERE_EPISODES,
-        MI_SEQUELAE,
-        MI_HOSPITAL_DEATHS,
-        MI_INDIRECT_DEATHS,
-        MI_DIRECT_DEATHS,
-        MI_VACCINATION_TIMED,
-        MI_VACCINATION_CTS,
-        MI_HOSPITAL_RECOVERIES,
-        MI_HOSPITAL_SEQUELAE,
-        MI_NON_MALARIA_FEVERS,
-        MI_NEW_INFECTIONS,
-        MI_ITN_TIMED,
-        MI_ITN_CTS,
-        MI_IRS_TIMED,
-        MI_IRS_CTS,
-        MI_GVI_TIMED,
-        MI_GVI_CTS,
-        MI_MDA_TIMED,
-        MI_MDA_CTS /* "mass" drug administration via EPI/schools */,
-        MI_SCREENING_TIMED,
-        MI_SCREENING_CTS,
-        MI_NMF_DEATHS,
-        MI_NMF_TREATMENTS /* also known as antibiotics */,
-        MI_FIRST_DAY_DEATHS,
-        MI_HOSPITAL_FIRST_DAY_DEATHS,
-        //TODO: cohorts should be handled independently, not as "in cohort"/"not in a cohort"
-        MI_NUM_ADDED_COHORT,
-        MI_NUM_REMOVED_COHORT,
-        MI_NUM  // must be last; not a measure to report
-    };
-    /// Measures which are reported as doubles
-    enum DblReportMeasures{
-        MD_EXPECTED_INFECTED,
-        MD_LOG_PYROGENIC_THRESHOLD,
-        MD_LOG_DENSITY,
-        MD_PYROGENIC_THRESHOLD,
-        MD_NUM  // must be last; not a measure to report
-    };
-    
     /**
      * Report some integer number of events, adding the number to a total.
      * 
@@ -166,15 +181,15 @@ public:
      * @param val Number of events (added to total)
      * @returns (*this) object to allow chain calling
      */
-    Survey& addInt( IntReportMeasures measure, AgeGroup ageGroup, int val ){
-        if( static_cast<size_t>(measure) >= reportsIntAge.shape()[0] ||
+    Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, int val ){
+        if( static_cast<size_t>(measure.code) >= reportsIntAge.shape()[0] ||
             ageGroup.i() >= reportsIntAge.shape()[1] ){
             cout << "Index out of bounds:\n"
                 "survey\t" << static_cast<void*>(this)
                 << "\nalloc\t" << reportsIntAge.shape()[0] << "\t" << reportsIntAge.shape()[1]
-                << "\nindex\t" << measure << "\t" << ageGroup.i() << endl;
+                << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
         }
-        reportsIntAge[measure][ageGroup.i()] += val;
+        reportsIntAge[measure.code][ageGroup.i()] += val;
         return *this;
     }
     /**
@@ -184,15 +199,15 @@ public:
      * @param val Quantity (added to total)
      * @returns (*this) object to allow chain calling
      */
-    Survey& addDouble( DblReportMeasures measure, AgeGroup ageGroup, double val ){
-        if( static_cast<size_t>(measure) >= reportsDblAge.shape()[0] ||
+    Survey& addDouble( ReportMeasureD measure, AgeGroup ageGroup, double val ){
+        if( static_cast<size_t>(measure.code) >= reportsDblAge.shape()[0] ||
             ageGroup.i() >= reportsDblAge.shape()[1] ){
             cout << "Index out of bounds:\n"
                 "survey\t" << static_cast<void*>(this)
                 << "\nalloc\t" << reportsDblAge.shape()[0] << "\t" << reportsDblAge.shape()[1]
-                << "\nindex\t" << measure << "\t" << ageGroup.i() << endl;
+                << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
         }
-        reportsDblAge[measure][ageGroup.i()] += val;
+        reportsDblAge[measure.code][ageGroup.i()] += val;
         return *this;
     }
     

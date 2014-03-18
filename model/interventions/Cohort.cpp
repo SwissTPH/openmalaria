@@ -20,13 +20,15 @@
 
 #include "interventions/Cohort.h"
 #include "Host/Human.h"
+#include "Monitoring/Survey.h"
 
 namespace OM { namespace interventions {
+    using namespace Monitoring::Report;
 
 vector<ComponentId> CohortSelectionComponent::removeAtIds[Cohort::REMOVE_AT_NUM];
 
 CohortSelectionComponent::CohortSelectionComponent( ComponentId id, const scnXml::Cohort& cohort ) :
-        HumanInterventionComponent(id)
+        HumanInterventionComponent(id, MI_NUM_ADDED_COHORT, MI_NUM_ADDED_COHORT)
 {
     if( cohort.getFirstBoutOnly() ){
         removeAtIds[Cohort::REMOVE_AT_FIRST_BOUT].push_back( id );
@@ -40,7 +42,7 @@ CohortSelectionComponent::CohortSelectionComponent( ComponentId id, const scnXml
 }
 
 void CohortSelectionComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
-    human.addToCohort( id() );
+    human.addToCohort( id(), reportMeasure(method) );
 }
 
 Component::Type CohortSelectionComponent::componentType() const{

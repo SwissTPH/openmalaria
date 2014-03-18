@@ -32,6 +32,7 @@
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
+    using namespace Monitoring;
 
 TimeStep ClinicalEventScheduler::maxUCSeekingMemory(TimeStep::never);
 TimeStep ClinicalEventScheduler::uncomplicatedCaseDuration(TimeStep::never);
@@ -186,16 +187,17 @@ bool ClinicalEventScheduler::notAtRisk() {
     throw TRACED_EXCEPTION_DEFAULT("notAtRisk: not supported by 1-day time-step models");
 }
 
-void ClinicalEventScheduler::massDrugAdministration(
-    interventions::Deployment::Method method, Human& human )
+void ClinicalEventScheduler::massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport )
 {
     // Note: we use the same medication method as with drugs as treatments, hence the actual
     // medication doesn't occur until the next timestep.
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
-    ESCaseManagement::massDrugAdministration ( method,
+    ESCaseManagement::massDrugAdministration ( 
         ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
-        medicateQueue, human.isInAnyCohort(), human.getMonitoringAgeGroup()
+        medicateQueue, human, screeningReport, drugReport
     );
 }
 
@@ -287,21 +289,21 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.isInAnyCohort()
+	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, Surveys.getSurvey(human)
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
             timeLastTreatment = TimeStep::simulation;
             if( pgState & Episode::COMPLICATED ){
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                    Monitoring::Survey::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
+                Surveys.getSurvey(human).addInt(
+                    Report::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
             }else{
                 if( pgState & Episode::SECOND_CASE ){
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                        Monitoring::Survey::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
+                    Surveys.getSurvey(human).addInt(
+                        Report::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
                 }else{
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                        Monitoring::Survey::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
+                    Surveys.getSurvey(human).addInt(
+                        Report::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
                 }
             }
         }
@@ -372,8 +374,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double treatmentEffectMult = 1.0;
                 
                 if( random::uniform_01() < pTreatment ){
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                        Monitoring::Survey::MI_NMF_TREATMENTS, human.getMonitoringAgeGroup(), 1 );
+                    Surveys.getSurvey(human).addInt(
+                        Report::MI_NMF_TREATMENTS, human.getMonitoringAgeGroup(), 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
                 }
                 
@@ -450,10 +452,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             double bodyMass = ageToWeight( ageYears );
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
             if( it->duration > 0.0 ){
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
+                Surveys.getSurvey(human)
                 .report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
             }else{      // 0 or NaN
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
+                Surveys.getSurvey(human)
                 .report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
             }
 	    medicateQueue.erase (it);

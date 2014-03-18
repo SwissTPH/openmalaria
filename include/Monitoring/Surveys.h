@@ -23,6 +23,7 @@
 
 #include "Monitoring/Survey.h"
 #include "Global.h"
+#include "Host/Human.h"
 #include <assert.h>
 
 namespace OM {
@@ -57,16 +58,16 @@ class SurveysType
      * collected over a period, the period is from the timestep following the
      * previous survey (or the start of the main simulation) until this time. */
     TimeStep currentTimestep;
-    /** Get survey for a human -- switched depending on whether
-     * the human is in the cohort and reporting mode. */
-    inline Survey& getSurvey( bool inCohort ){
-	if( _cohortOnly && !inCohort )
+    /** Get survey for a human -- switched depending on cohorts the human is
+     * a member of and reporting mode. */
+    inline Survey& getSurvey( const Host::Human& human ){
+	if( _cohortOnly && !human.isInAnyCohort() )
 	    return surveys[0];	// output goes to dummy survey: is deleted
 	return *current;
     }
     /** As getSurvey(), except returns a number instead of a reference. */
-    inline size_t getSurveyNumber( bool inCohort ){
-        if( _cohortOnly && !inCohort )
+    inline size_t getSurveyNumber( const Host::Human& human ){
+        if( _cohortOnly && !human.isInAnyCohort() )
             return 0;
         return _surveyPeriod;
     }

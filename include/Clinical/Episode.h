@@ -84,7 +84,7 @@ public:
    * @param human The human whose info is being reported
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(Host::Human& human, Episode::State newState);
+  void update(const Host::Human& human, Episode::State newState);
   
   /// Checkpointing
   void operator& (istream& stream);

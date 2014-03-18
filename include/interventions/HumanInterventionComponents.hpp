@@ -38,7 +38,7 @@
 
 namespace OM { namespace interventions {
     using Host::Human;
-    using Monitoring::Survey;
+    using namespace Monitoring;
 
 // ———  HumanInterventionComponent  ———
 
@@ -73,10 +73,27 @@ void HumanIntervention::print_details( std::ostream& out )const{
 
 // ———  Derivatives  ———
 
-class MDAComponent : public HumanInterventionComponent {
+class MDAComponentBase : public HumanInterventionComponent {
+protected:
+    MDAComponentBase( ComponentId id ) :
+        HumanInterventionComponent(id, Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
+        m_screenMeasureCts(Report::MI_SCREENING_CTS),
+        m_screenMeasureTimed(Report::MI_SCREENING_TIMED)
+    {}
+    
+    /** Trivial helper function to get deployment measure. */
+    inline ReportMeasureI screeningMeasure( Deployment::Method method )const{
+        return (method == Deployment::TIMED) ? m_screenMeasureTimed : m_screenMeasureCts;
+    }
+    
+private:
+    ReportMeasureI m_screenMeasureCts, m_screenMeasureTimed;
+};
+
+class MDAComponent : public MDAComponentBase {
 public:
     MDAComponent( ComponentId id, const scnXml::MDA& mda ) :
-        HumanInterventionComponent(id)
+        MDAComponentBase(id)
     {
         if( !mda.getDiagnostic().present() ){
             // Note: allow no description for now to avoid XML changes.
@@ -110,14 +127,12 @@ public:
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
         //TODO(monitoring): separate reports for mass and continuous deployments
         
-        Survey& survey = Monitoring::Surveys.getSurvey(human.isInAnyCohort());
-        survey.addInt( (method == Deployment::TIMED) ? Survey::MI_SCREENING_TIMED :
-                       Survey::MI_SCREENING_CTS, human.getMonitoringAgeGroup(), 1 );
+        Survey& survey = Surveys.getSurvey(human);
+        survey.addInt( screeningMeasure(method), human.getMonitoringAgeGroup(), 1 );
         if( !diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
             return;
         }
-        survey.addInt( (method == Deployment::TIMED) ? Survey::MI_MDA_TIMED :
-                       Survey::MI_MDA_CTS, human.getMonitoringAgeGroup(), 1 );
+        survey.addInt( reportMeasure(method), human.getMonitoringAgeGroup(), 1 );
         
         human.withinHostModel->treatment( selectTreatment() );
     }
@@ -154,16 +169,18 @@ private:
     vector<TreatOptions> treatments;
 };
 
-class MDA1DComponent : public HumanInterventionComponent {
+class MDA1DComponent : public MDAComponentBase {
 public:
-    MDA1DComponent( ComponentId id, const scnXml::HSESCaseManagement& description ) : HumanInterventionComponent(id) {
-	if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
-	  throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
+    MDA1DComponent( ComponentId id, const scnXml::HSESCaseManagement& description ) :
+        MDAComponentBase(id)
+    {
+        if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
+            throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
         Clinical::ESCaseManagement::initMDA( description );
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        human.getClinicalModel().massDrugAdministration( method, human );
+        human.getClinicalModel().massDrugAdministration( human, screeningMeasure(method), reportMeasure(method) );
     }
     
     virtual Component::Type componentType() const{ return Component::MDA_TS1D; }
@@ -179,7 +196,8 @@ private:
 
 class ClearImmunityComponent : public HumanInterventionComponent {
 public:
-    ClearImmunityComponent( ComponentId id ) : HumanInterventionComponent(id) {}
+    ClearImmunityComponent( ComponentId id ) :
+        HumanInterventionComponent(id, Report::MI_NUM, Report::MI_NUM /*never reported*/) {}
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
         human.clearImmunity();

@@ -30,6 +30,7 @@
 #include <schema/scenario.h>
 
 namespace OM { namespace Clinical {
+    using namespace Monitoring;
 
 vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;
@@ -123,16 +124,16 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (_doomed <= -35) {	//clinical bout 6 intervals before
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-            Monitoring::Survey::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+        Surveys.getSurvey(human).addInt(
+            Report::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
         _doomed = DOOMED_INDIRECT;
         return;
     }
     if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
         if (Host::NeonatalMortality::eventNeonatalMortality()) {
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                Monitoring::Survey::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+            Surveys.getSurvey(human).addInt(
+                Report::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
             _doomed = DOOMED_NEONATAL;
             return;
         }

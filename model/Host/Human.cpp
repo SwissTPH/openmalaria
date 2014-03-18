@@ -36,7 +36,7 @@
 
 namespace OM { namespace Host {
     using namespace OM::util;
-    using Monitoring::Survey;
+    using namespace Monitoring;
     
     bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
             opt_trans_treat_het = false, opt_comorb_treat_het = false,
@@ -208,8 +208,8 @@ void Human::summarize() {
         return;
     }
     
-    Survey& survey = Monitoring::Surveys.getSurvey( isInAnyCohort() );
-    survey.addInt( Survey::MI_HOSTS, getMonitoringAgeGroup(), 1);
+    Survey& survey = Surveys.getSurvey( *this );
+    survey.addInt( Report::MI_HOSTS, getMonitoringAgeGroup(), 1);
     bool patent = withinHostModel->summarize (survey, getMonitoringAgeGroup());
     infIncidence->summarize (survey, getMonitoringAgeGroup());
     
@@ -218,7 +218,7 @@ void Human::summarize() {
     }
 }
 
-void Human::addToCohort (interventions::ComponentId id){
+void Human::addToCohort (interventions::ComponentId id, ReportMeasureI reportMeasure){
     if( cohorts.count(id) > 0 ) return;	// nothing to do
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,
@@ -226,8 +226,7 @@ void Human::addToCohort (interventions::ComponentId id){
     flushReports();
     cohorts.insert(id);
     //TODO(monitoring): reporting is inappropriate
-    Monitoring::Surveys.current->addInt( Survey::MI_NUM_ADDED_COHORT,
-                                         getMonitoringAgeGroup(), 1 );
+    Surveys.current->addInt( reportMeasure, getMonitoringAgeGroup(), 1 );
 }
 void Human::removeFromCohort( interventions::ComponentId id ){
     if( cohorts.count(id) > 0 ){
@@ -235,7 +234,7 @@ void Human::removeFromCohort( interventions::ComponentId id ){
         flushReports();
         cohorts.erase( id );
         //TODO(monitoring): reporting
-    Monitoring::Surveys.current->addInt(Survey::MI_NUM_REMOVED_COHORT,
+    Surveys.current->addInt(Report::MI_NUM_REMOVED_COHORT,
                                         getMonitoringAgeGroup(), 1 );
     }
 }

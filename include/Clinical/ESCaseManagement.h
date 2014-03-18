@@ -27,7 +27,6 @@
 #include "Clinical/parser.h"
 #include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
-#include "interventions/Interfaces.hpp"
 
 #include <cassert>
 #include <list>
@@ -262,11 +261,11 @@ class ESCaseManagement : public CaseManagementCommon {
         static void initMDA (const scnXml::HSESCaseManagement& desc);
         
         static void massDrugAdministration(
-            interventions::Deployment::Method method,
             const ESHostData& hostData,
             list<MedicateData>& medicateQueue,
-            bool inCohort,
-            Monitoring::AgeGroup ageGroup
+            const Host::Human& human,
+            Monitoring::ReportMeasureI screeningReport,
+            Monitoring::ReportMeasureI drugReport
         );
         
         /** Runs through case management decisions, selects treatments and
@@ -276,7 +275,7 @@ class ESCaseManagement : public CaseManagementCommon {
         static CMAuxOutput execute (
             const ESHostData& hostData,
             list<MedicateData>& medicateQueue,
-            bool inCohort
+            Survey& survey
         );
         
     private:

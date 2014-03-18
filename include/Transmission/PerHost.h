@@ -106,7 +106,10 @@ public:
     virtual PerHostInterventionData* makeHumanPart() const =0;
     virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::ComponentId id ) const =0;
 protected:
-    explicit HumanVectorInterventionComponent(interventions::ComponentId id) : HumanInterventionComponent(id) {}
+    explicit HumanVectorInterventionComponent(interventions::ComponentId id,
+                                        Monitoring::ReportMeasureI ctsMeasure,
+                                        Monitoring::ReportMeasureI timedMeasure) :
+                                        HumanInterventionComponent(id, ctsMeasure, timedMeasure) {}
 };
 
 /** Contains TransmissionModel parameters which need to be stored per host.

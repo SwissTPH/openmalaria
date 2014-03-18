@@ -24,6 +24,7 @@
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
+#include "Monitoring/Surveys.h"
 #include "util/errors.h"
 #include "WithinHost/WHInterface.h"
 #include "Parameters.h"
@@ -33,6 +34,7 @@
 
 namespace OM { namespace Host {
     using namespace OM::util;
+    using namespace Monitoring;
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 double InfectionIncidenceModel::InfectionrateShapeParam;
@@ -101,7 +103,6 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
         }
     }
     
-    using Monitoring::Continuous;
     Continuous.registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
 }
 
@@ -149,8 +150,8 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 		     BaselineAvailabilityShapeParam);
 }
 
-void InfectionIncidenceModel::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
-    survey.addDouble( Monitoring::Survey::MD_EXPECTED_INFECTED, ageGroup, _pinfected);
+void InfectionIncidenceModel::summarize (Survey& survey, AgeGroup ageGroup) {
+    survey.addDouble( Report::MD_EXPECTED_INFECTED, ageGroup, _pinfected);
 }
 
 
@@ -225,7 +226,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
         // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
-    human.getSurvey().addInt( Monitoring::Survey::MI_NEW_INFECTIONS, human.getMonitoringAgeGroup(), n );
+    Surveys.getSurvey( human ).addInt( Report::MI_NEW_INFECTIONS, human.getMonitoringAgeGroup(), n );
     ctsNewInfections += n;
     return n;
   }

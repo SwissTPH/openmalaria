@@ -21,6 +21,7 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "interventions/Cohort.h"
 #include "WithinHost/WHInterface.h"
+#include "Monitoring/Surveys.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -28,6 +29,7 @@
 namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
+using namespace Monitoring;
 
 double ClinicalImmediateOutcomes::probGetsTreatment[Regimen::NUM];
 double ClinicalImmediateOutcomes::probParasitesCleared[Regimen::NUM];
@@ -62,8 +64,9 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::massDrugAdministration(
-    interventions::Deployment::Method method, Human& human)
+void ClinicalImmediateOutcomes::massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport )
 {
     assert(false);      // should never be called
 }
@@ -113,11 +116,11 @@ void ClinicalImmediateOutcomes::uncomplicatedEvent (
     if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
         _tLastTreatment = TimeStep::simulation;
         if ( regimen == Regimen::UC )
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                Monitoring::Survey::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
+            Surveys.getSurvey(human).addInt(
+                Report::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
         if ( regimen == Regimen::UC2 )
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                Monitoring::Survey::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
+            Surveys.getSurvey(human).addInt(
+                Report::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
 
         if (probParasitesCleared[regimen] > random::uniform_01()) {
             // Could report Episode::RECOVERY to latestReport,
@@ -181,8 +184,8 @@ void ClinicalImmediateOutcomes::severeMalaria (
 
     if (q[2] <= prandom) { // Patient gets in-hospital treatment
         _tLastTreatment = TimeStep::simulation;
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-            Monitoring::Survey::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
+        Surveys.getSurvey(human).addInt(
+            Report::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
 
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
