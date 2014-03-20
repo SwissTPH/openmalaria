@@ -214,32 +214,31 @@ Survey::Survey(){}
 
 void Survey::allocate(){
     size_t numAgeGroups = AgeGroup::getNumGroups();
-    reportsIntAge.resize(boost::extents[Report::MI_NUM][numAgeGroups]);
-    reportsDblAge.resize(boost::extents[Report::MD_NUM][numAgeGroups]);
+    m_humanReportsInt.resize(boost::extents[Report::MI_NUM][numAgeGroups]);
+    m_humanReportsDouble.resize(boost::extents[Report::MD_NUM][numAgeGroups]);
     
-    _infectiousnessToMosq = numeric_limits<double>::signaling_NaN();
-    _annualAverageKappa = numeric_limits<double>::signaling_NaN();
+    m_nTransmit = numeric_limits<double>::signaling_NaN();
+    m_annAvgK = numeric_limits<double>::signaling_NaN();
     // These 3 are set as a whole and so don't require allocation:
 //   _innoculationsPerDayOfYear;
 //   _kappaPerDayOfYear;
 //   _innoculationsPerAgeGroup;
     
-    _inputEIR =numeric_limits<double>::signaling_NaN() ;
-    _simulatedEIR = numeric_limits<double>::signaling_NaN();
+    m_inputEIR =numeric_limits<double>::signaling_NaN() ;
+    m_simulatedEIR = numeric_limits<double>::signaling_NaN();
     
-    _numClinical_RDTs = 0;
-    _numClinical_Microscopy = 0;
+    m_Clinical_RDTs = 0;
+    m_Clinical_Microscopy = 0;
 }
-
 
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
-    size_t nAgeGroups = reportsIntAge.shape()[1] - 1;   // Don't write out last age-group
+    size_t nAgeGroups = m_humanReportsInt.shape()[1] - 1;   // Don't write out last age-group
     for( size_t intMeasure = 0; intMeasure < Report::MI_NUM; ++intMeasure ){
         if( active[intReportMappings[intMeasure]] ){
             for( size_t j = 0; j < nAgeGroups; ++j ){
                 outputFile << survey << "\t" << j + 1 << "\t" << intReportMappings[intMeasure];
-                outputFile << "\t" << reportsIntAge[intMeasure][j] << lineEnd;
+                outputFile << "\t" << m_humanReportsInt[intMeasure][j] << lineEnd;
             }
         }
     }
@@ -247,22 +246,22 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
         if( active[dblReportMappings[dblMeasure]] ){
             for( size_t j = 0; j < nAgeGroups; ++j ){
                 outputFile << survey << "\t" << j + 1 << "\t" << dblReportMappings[dblMeasure];
-                outputFile << "\t" << reportsDblAge[dblMeasure][j] << lineEnd;
+                outputFile << "\t" << m_humanReportsDouble[dblMeasure][j] << lineEnd;
             }
         }
     }
     
   if (active[SM::nTransmit]) {
-    writeValue (outputFile, SM::nTransmit, survey, _infectiousnessToMosq);
+    writeValue (outputFile, SM::nTransmit, survey, m_nTransmit);
   }
   if (active[SM::annAvgK]) {
-    writeValue (outputFile, SM::annAvgK, survey, _annualAverageKappa);
+    writeValue (outputFile, SM::annAvgK, survey, m_annAvgK);
   }
 
   if (active[SM::innoculationsPerAgeGroup]) {
-    for (int j = 0; j < (int) _inoculationsPerAgeGroup.size() - 1; ++j) { // Don't write out last age-group
+    for (int j = 0; j < (int) m_inoculationsPerAgeGroup.size() - 1; ++j) { // Don't write out last age-group
         outputFile << survey << "\t" << j + 1 << "\t" << SM::innoculationsPerAgeGroup;
-        outputFile << "\t" << _inoculationsPerAgeGroup[j] << lineEnd;
+        outputFile << "\t" << m_inoculationsPerAgeGroup[j] << lineEnd;
     }
   }
   
@@ -279,22 +278,22 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
     writeMap (outputFile, SM::Vector_Sv, survey, data_Vector_Sv);
   }
   if (active[SM::inputEIR]) {
-    writeValue (outputFile, SM::inputEIR, survey, _inputEIR);
+    writeValue (outputFile, SM::inputEIR, survey, m_inputEIR);
   }
   if (active[SM::simulatedEIR]) {
-    writeValue (outputFile, SM::simulatedEIR, survey, _simulatedEIR);
+    writeValue (outputFile, SM::simulatedEIR, survey, m_simulatedEIR);
   }
   if (active[SM::Clinical_RDTs]) {
-      writeValue (outputFile, SM::Clinical_RDTs, survey, _numClinical_RDTs);
+      writeValue (outputFile, SM::Clinical_RDTs, survey, m_Clinical_RDTs);
   }
   if (active[SM::Clinical_DrugUsage]) {
-      writeMap (outputFile, SM::Clinical_DrugUsage, survey, _sumClinical_DrugUsage);
+      writeMap (outputFile, SM::Clinical_DrugUsage, survey, m_Clinical_DrugUsage);
   }
   if (active[SM::Clinical_DrugUsageIV]) {
-      writeMap (outputFile, SM::Clinical_DrugUsageIV, survey, _sumClinical_DrugUsageIV);
+      writeMap (outputFile, SM::Clinical_DrugUsageIV, survey, m_Clinical_DrugUsageIV);
   }
   if (active[SM::Clinical_Microscopy]) {
-      writeValue (outputFile, SM::Clinical_Microscopy, survey, _numClinical_Microscopy);
+      writeValue (outputFile, SM::Clinical_Microscopy, survey, m_Clinical_Microscopy);
   }
 }
 
@@ -322,10 +321,10 @@ void Survey::checkpoint(istream& stream){
     len1 & stream;
     if( len0 != Report::MI_NUM || len1 != AgeGroup::getNumGroups() )
         throw util::checkpoint_error( "wrong survey data size" );
-    reportsIntAge.resize(boost::extents[len0][len1]);
+    m_humanReportsInt.resize(boost::extents[len0][len1]);
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsIntAge[i][j] & stream;
+            m_humanReportsInt[i][j] & stream;
         }
     }
     BOOST_STATIC_ASSERT( ReportsDblAgeT::dimensionality == 2 );
@@ -333,31 +332,31 @@ void Survey::checkpoint(istream& stream){
     len1 & stream;
     if( len0 != Report::MD_NUM || len1 != AgeGroup::getNumGroups() )
         throw util::checkpoint_error( "wrong survey data size" );
-    reportsDblAge.resize(boost::extents[len0][len1]);
+    m_humanReportsDouble.resize(boost::extents[len0][len1]);
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsDblAge[i][j] & stream;
+            m_humanReportsDouble[i][j] & stream;
         }
     }
 }
 
 void Survey::checkpoint(ostream& stream) const{
     BOOST_STATIC_ASSERT( ReportsIntAgeT::dimensionality == 2 );
-    size_t len0 = reportsIntAge.shape()[0], len1 = reportsIntAge.shape()[1];
+    size_t len0 = m_humanReportsInt.shape()[0], len1 = m_humanReportsInt.shape()[1];
     len0 & stream;
     len1 & stream;
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsIntAge[i][j] & stream;
+            m_humanReportsInt[i][j] & stream;
         }
     }
     BOOST_STATIC_ASSERT( ReportsDblAgeT::dimensionality == 2 );
-    len0 = reportsDblAge.shape()[0], len1 = reportsDblAge.shape()[1];
+    len0 = m_humanReportsDouble.shape()[0], len1 = m_humanReportsDouble.shape()[1];
     len0 & stream;
     len1 & stream;
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsDblAge[i][j] & stream;
+            m_humanReportsDouble[i][j] & stream;
         }
     }
 }

@@ -214,6 +214,7 @@ void Human::summarize() {
     infIncidence->summarize (survey, getMonitoringAgeGroup());
     
     if( patent ){
+        // this should happen after all other reporting!
         removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_INFECTION );
     }
 }

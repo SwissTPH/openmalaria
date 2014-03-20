@@ -60,8 +60,9 @@ enum SurveyMeasure {
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *
-     * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
-     * mosquitoes that get infected). Single value, not per age-group. */
+     * Number of hosts transmitting to mosquitoes (i.e. proportion of
+     * mosquitoes that get infected multiplied by human population size).
+     * Single value, not per age-group. */
     nTransmit= 7,
     /** The sum of all detectable infections (where blood stage parasite
      * density is above the detection limit) across all human hosts. */

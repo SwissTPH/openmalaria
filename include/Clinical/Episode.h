@@ -26,7 +26,11 @@
 #include "Monitoring/Survey.h"	//Monitoring::AgeGroup
 #include <ostream>
 
-namespace OM { namespace Clinical {
+namespace OM {
+namespace Host {
+    class Human;
+}
+namespace Clinical {
     
 /** Summary of clinical events during a caseManagementMemory period, in one individual.
  *

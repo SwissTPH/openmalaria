@@ -31,9 +31,6 @@
 
 namespace scnXml{ class Monitoring; }
 namespace OM {
-    namespace Host {
-        class Human;
-    }
 namespace Monitoring {
     using boost::multi_array;
 
@@ -174,6 +171,38 @@ private:
     //@}
   
 public:
+    ///@brief Set outputs without extra categorisation
+    //@{
+    /** Number of hosts transmitting to mosquitoes, reported as nTransmit. */
+    void setNumTransmittingHosts(double value) { m_nTransmit = value; }
+    /** Reported as annAvgK **/
+    void setAnnualAverageKappa(double kappa) { m_annAvgK = kappa; }
+    void setInputEIR (double v) { m_inputEIR = v; }
+    void setSimulatedEIR (double v) { m_simulatedEIR = v; }
+    void report_Clinical_RDTs (int num) { m_Clinical_RDTs += num; }
+    void report_Clinical_Microscopy (int num) { m_Clinical_Microscopy += num; }
+    //@}
+    
+    ///@brief Set outputs per vector species
+    //@{
+    void set_Vector_Nv0 (string key, double v) { data_Vector_Nv0[key] = v; }
+    void set_Vector_Nv (string key, double v) { data_Vector_Nv[key] = v; }
+    void set_Vector_Ov (string key, double v) { data_Vector_Ov[key] = v; }
+    void set_Vector_Sv (string key, double v) { data_Vector_Sv[key] = v; }
+    //@}
+    
+    ///@brief Set outputs per drug
+    //@{
+    void report_Clinical_DrugUsage (string abbrev, double qty) {
+        // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
+        (*((m_Clinical_DrugUsage.insert(make_pair(abbrev, 0.0))).first)).second += qty;
+    }
+    void report_Clinical_DrugUsageIV (string abbrev, double qty) {
+        // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
+        (*((m_Clinical_DrugUsageIV.insert(make_pair(abbrev, 0.0))).first)).second += qty;
+    }
+    //@}
+    
     /**
      * Report some integer number of events, adding the number to a total.
      * 
@@ -182,14 +211,14 @@ public:
      * @returns (*this) object to allow chain calling
      */
     Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, int val ){
-        if( static_cast<size_t>(measure.code) >= reportsIntAge.shape()[0] ||
-            ageGroup.i() >= reportsIntAge.shape()[1] ){
+        if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
+            ageGroup.i() >= m_humanReportsInt.shape()[1] ){
             cout << "Index out of bounds:\n"
                 "survey\t" << static_cast<void*>(this)
-                << "\nalloc\t" << reportsIntAge.shape()[0] << "\t" << reportsIntAge.shape()[1]
+                << "\nalloc\t" << m_humanReportsInt.shape()[0] << "\t" << m_humanReportsInt.shape()[1]
                 << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
         }
-        reportsIntAge[measure.code][ageGroup.i()] += val;
+        m_humanReportsInt[measure.code][ageGroup.i()] += val;
         return *this;
     }
     /**
@@ -200,116 +229,85 @@ public:
      * @returns (*this) object to allow chain calling
      */
     Survey& addDouble( ReportMeasureD measure, AgeGroup ageGroup, double val ){
-        if( static_cast<size_t>(measure.code) >= reportsDblAge.shape()[0] ||
-            ageGroup.i() >= reportsDblAge.shape()[1] ){
+        if( static_cast<size_t>(measure.code) >= m_humanReportsDouble.shape()[0] ||
+            ageGroup.i() >= m_humanReportsDouble.shape()[1] ){
             cout << "Index out of bounds:\n"
                 "survey\t" << static_cast<void*>(this)
-                << "\nalloc\t" << reportsDblAge.shape()[0] << "\t" << reportsDblAge.shape()[1]
+                << "\nalloc\t" << m_humanReportsDouble.shape()[0] << "\t" << m_humanReportsDouble.shape()[1]
                 << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
         }
-        reportsDblAge[measure.code][ageGroup.i()] += val;
+        m_humanReportsDouble[measure.code][ageGroup.i()] += val;
         return *this;
     }
     
-  void setAnnualAverageKappa(double kappa) {
-    _annualAverageKappa = kappa;
-  }
-  void setInfectiousnessToMosq(double value) {
-    _infectiousnessToMosq = value;
-  }
+    void setInoculationsPerAgeGroup (vector<double>& v) {
+        m_inoculationsPerAgeGroup = v;	// copies v, not just its reference
+    }
   
-  void setInoculationsPerAgeGroup (vector<double>& v) {
-    _inoculationsPerAgeGroup = v;	// copies v, not just its reference
-  }
-  void report_Clinical_RDTs (int num) {
-      _numClinical_RDTs += num;
-  }
-  void report_Clinical_DrugUsage (string abbrev, double qty) {
-      // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
-      (*((_sumClinical_DrugUsage.insert(make_pair(abbrev, 0.0))).first)).second += qty;
-  }
-  void report_Clinical_DrugUsageIV (string abbrev, double qty) {
-      // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
-      (*((_sumClinical_DrugUsageIV.insert(make_pair(abbrev, 0.0))).first)).second += qty;
-  }
-  void report_Clinical_Microscopy (int num) {
-      _numClinical_Microscopy += num;
-  }
-  void set_Vector_Nv0 (string key, double v) {
-    data_Vector_Nv0[key] = v;
-  }
-  void set_Vector_Nv (string key, double v) {
-    data_Vector_Nv[key] = v;
-  }
-  void set_Vector_Ov (string key, double v) {
-    data_Vector_Ov[key] = v;
-  }
-  void set_Vector_Sv (string key, double v) {
-    data_Vector_Sv[key] = v;
-  }
-  void setInputEIR (double v) {
-    _inputEIR = v;
-  }
-  void setSimulatedEIR (double v) {
-    _simulatedEIR = v;
-  }
-  
-  /// Checkpointing
-  template<class S>
-  void operator& (S& stream) {
-      checkpoint( stream );
-    _infectiousnessToMosq & stream;
-    _annualAverageKappa & stream;
-    _inoculationsPerAgeGroup & stream;
-    data_Vector_Nv0 & stream;
-    data_Vector_Nv & stream;
-    data_Vector_Ov & stream;
-    data_Vector_Sv & stream;
-    _inputEIR & stream;
-    _simulatedEIR & stream;
-    _numClinical_RDTs & stream;
-    _sumClinical_DrugUsage & stream;
-    _sumClinical_DrugUsageIV & stream;
-    _numClinical_Microscopy & stream;
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        m_nTransmit & stream;
+        m_annAvgK & stream;
+        m_inputEIR & stream;
+        m_simulatedEIR & stream;
+        m_Clinical_RDTs & stream;
+        m_Clinical_Microscopy & stream;
+        
+        data_Vector_Nv0 & stream;
+        data_Vector_Nv & stream;
+        data_Vector_Ov & stream;
+        data_Vector_Sv & stream;
+        
+        m_Clinical_DrugUsage & stream;
+        m_Clinical_DrugUsageIV & stream;
+        
+        checkpoint( stream );   // for m_humanReportsInt, m_humanReportsDouble
+        
+        m_inoculationsPerAgeGroup & stream;
   }
   
 private:
-  /** Resizes all vectors, allocating memory.
-   * 
-   * This is a separate initialisation step to make allocation explicit and
-   * avoid accidental allocations when manipulating containers of Survey
-   * elements. */
-  void allocate ();
-  
-  /** Write out arrays
-   * @param outputFile Stream to write to
-   * @param survey Survey number (starting from 1) */
-  void writeSummaryArrays (ostream& outputFile, int survey);
-  
-  // atomic data:
-  double _infectiousnessToMosq;
-  double _annualAverageKappa;
-  
-  // first index is the measure (IntReportMeasures), second is age group:
-  typedef multi_array<int, 2> ReportsIntAgeT;
-  ReportsIntAgeT reportsIntAge;
-  typedef multi_array<double, 2> ReportsDblAgeT;
-  ReportsDblAgeT reportsDblAge;
-  // data, per AgeGroup:
-  vector<double> _inoculationsPerAgeGroup;
-  
-    // data, per vector species:
+    /** Resizes all vectors, allocating memory.
+     * 
+     * This is a separate initialisation step to make allocation explicit and
+     * avoid accidental allocations when manipulating containers of Survey
+     * elements. */
+    void allocate ();
+    
+    /** Write out arrays
+     * @param outputFile Stream to write to
+     * @param survey Survey number (starting from 1) */
+    void writeSummaryArrays (ostream& outputFile, int survey);
+    
+    /// @brief Data stored for reporting; all of this is per survey
+    //@{
+    // no further categorisation:
+    double m_nTransmit;
+    double m_annAvgK;
+    double m_inputEIR;
+    double m_simulatedEIR;
+    int m_Clinical_RDTs;
+    int m_Clinical_Microscopy;
+    
+    // data categorised by vector species:
     map<string,double> data_Vector_Nv0;
     map<string,double> data_Vector_Nv;
     map<string,double> data_Vector_Ov;
     map<string,double> data_Vector_Sv;
-    double _inputEIR;
-    double _simulatedEIR;
     
-    int _numClinical_RDTs;
-    map<string,double> _sumClinical_DrugUsage;
-    map<string,double> _sumClinical_DrugUsageIV;
-    int _numClinical_Microscopy;
+    // data categorised by drug:
+    map<string,double> m_Clinical_DrugUsage;
+    map<string,double> m_Clinical_DrugUsageIV;
+    
+    // data categorised by human age group:
+    vector<double> m_inoculationsPerAgeGroup;
+    // first index is the measure (IntReportMeasures), second is age group:
+    typedef multi_array<int, 2> ReportsIntAgeT;
+    ReportsIntAgeT m_humanReportsInt;
+    typedef multi_array<double, 2> ReportsDblAgeT;
+    ReportsDblAgeT m_humanReportsDouble;
+    //@}
     
     void checkpoint( istream& stream );
     void checkpoint( ostream& stream) const;

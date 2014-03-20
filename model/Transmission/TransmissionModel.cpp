@@ -225,7 +225,7 @@ double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYea
 }
 
 void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setInfectiousnessToMosq(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
+  survey.setNumTransmittingHosts(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
   survey.setAnnualAverageKappa(_annualAverageKappa);
 
   survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.

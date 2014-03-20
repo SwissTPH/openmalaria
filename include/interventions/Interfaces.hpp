@@ -27,7 +27,9 @@
 namespace scnXml{ class DeploymentBase; }
 
 namespace OM {
-
+namespace Host {
+    class Human;
+}
 namespace interventions {
 
 namespace Deployment {
