@@ -38,10 +38,20 @@
 namespace OM { namespace Monitoring {
     
 SurveysType Surveys;
+size_t Survey::m_surveyNumber;
+Survey* Survey::m_current;
 
 void SurveysType::init( const scnXml::Monitoring& monitoring ){
-  _surveyPeriod = 0;
-  _cohortOnly = false;
+  Survey::m_surveyNumber = 0;
+  m_cohortOnly = false;
+  if( monitoring.getCohortOnly().present() ){
+      m_cohortOnly = monitoring.getCohortOnly().get();
+  } else {
+      // Trap potential bug in scenario design
+      if( interventions::InterventionManager::cohortEnabled() ){
+          throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
+      }
+  }
   
   const scnXml::Surveys::SurveyTimeSequence& survs = monitoring.getSurveys().getSurveyTime();
 
@@ -65,31 +75,31 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
 
   Survey::init( monitoring );
 
-  surveys.resize (_surveysTimeIntervals.size());
+  m_surveys.resize (_surveysTimeIntervals.size());
   if( !Simulator::isCheckpoint() ){
-    for (size_t i = 0; i < surveys.size(); ++i)
-        surveys[i].allocate();
+    for (size_t i = 0; i < m_surveys.size(); ++i)
+        m_surveys[i].allocate();
   }
-  current = &surveys[0];
+  Survey::m_current = &m_surveys[0];
   
-  if( monitoring.getCohortOnly().present() ){
-      _cohortOnly = monitoring.getCohortOnly().get();
-  } else {
-      // Trap potential bug in scenario design
-      if( interventions::InterventionManager::cohortEnabled() ){
-          throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
-      }
-  }
+}
+
+Survey& Survey::getSurvey(size_t n){
+    assert (n < Surveys.m_surveys.size());
+    return Surveys.m_surveys[n];
+}
+TimeStep Survey::getFinalTimestep () {
+    return Surveys._surveysTimeIntervals[Surveys.m_surveys.size()-2];   // final entry is a concatenated -1
 }
 
 void SurveysType::incrementSurveyPeriod()
 {
-  currentTimestep = _surveysTimeIntervals[_surveyPeriod];
-  ++_surveyPeriod;
-  if (_surveyPeriod >= surveys.size())
+  currentTimestep = _surveysTimeIntervals[Survey::m_surveyNumber];
+  ++Survey::m_surveyNumber;
+  if (Survey::m_surveyNumber >= m_surveys.size())
     // In this case, currentTimestep gets set to -1 so no further surveys get taken
-    _surveyPeriod = 0;
-  current = &surveys[_surveyPeriod];
+    Survey::m_surveyNumber = 0;
+  Survey::m_current = &m_surveys[Survey::m_surveyNumber];
 }
 
 void SurveysType::writeSummaryArrays ()
@@ -114,8 +124,8 @@ void SurveysType::writeSummaryArrays ()
   //   outputFile.precision (6);
   //   outputFile << scientific;
 
-  for (size_t i = 1; i < surveys.size(); ++i)
-    surveys[i].writeSummaryArrays (outputFile, i);
+  for (size_t i = 1; i < m_surveys.size(); ++i)
+    m_surveys[i].writeSummaryArrays (outputFile, i);
 
   //Infant mortality rate is a single number, therefore treated separately
   // Note: Storing a single value instead of one per reporting period is inconsistent with other
@@ -131,22 +141,22 @@ void SurveysType::writeSummaryArrays ()
 void SurveysType::checkpoint (istream& stream) {
     currentTimestep & stream;
     _surveysTimeIntervals & stream;
-    _surveyPeriod & stream;
+    Survey::m_surveyNumber & stream;
     // read those surveys checkpointed, call allocate on the rest:
-    for( size_t i = 1; i <= _surveyPeriod; ++i )
-        surveys[i] & stream;
-    surveys[0].allocate();
-    for( size_t i = _surveyPeriod + 1; i < surveys.size(); ++i )
-        surveys[i].allocate();
-    current = &surveys[_surveyPeriod];
+    for( size_t i = 1; i <= Survey::m_surveyNumber; ++i )
+        m_surveys[i] & stream;
+    m_surveys[0].allocate();
+    for( size_t i = Survey::m_surveyNumber + 1; i < m_surveys.size(); ++i )
+        m_surveys[i].allocate();
+    Survey::m_current = &m_surveys[Survey::m_surveyNumber];
 }
 void SurveysType::checkpoint (ostream& stream) {
     currentTimestep & stream;
     _surveysTimeIntervals & stream;
-    _surveyPeriod & stream;
+    Survey::m_surveyNumber & stream;
     // checkpoint only those surveys used; exclude 0 since that's a "write only DB"
-    for( size_t i = 1; i <= _surveyPeriod; ++i )
-        surveys[i] & stream;
+    for( size_t i = 1; i <= Survey::m_surveyNumber; ++i )
+        m_surveys[i] & stream;
 }
 
 } }

@@ -23,7 +23,7 @@
 #include "Host/Human.h"
 #include "util/random.h"
 #include "util/errors.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 
 #include "R_nmath/qnorm.h"
@@ -60,8 +60,7 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
 
 void IRSComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Surveys.getSurvey( human ).addInt( reportMeasure(method),
-        human.getMonitoringAgeGroup(), 1 );
+    Survey::current().addInt( reportMeasure(method), human, 1 );
 }
 
 Component::Type IRSComponent::componentType()const{ return Component::IRS; }

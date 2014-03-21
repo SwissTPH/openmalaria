@@ -21,7 +21,7 @@
 #include "Clinical/EventScheduler.h"
 #include "util/random.h"
 #include "WithinHost/WHInterface.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "interventions/Cohort.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -289,21 +289,18 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, Surveys.getSurvey(human)
+	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
             timeLastTreatment = TimeStep::simulation;
             if( pgState & Episode::COMPLICATED ){
-                Surveys.getSurvey(human).addInt(
-                    Report::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
+                Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
             }else{
                 if( pgState & Episode::SECOND_CASE ){
-                    Surveys.getSurvey(human).addInt(
-                        Report::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
+                    Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
                 }else{
-                    Surveys.getSurvey(human).addInt(
-                        Report::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
+                    Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
                 }
             }
         }
@@ -374,8 +371,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double treatmentEffectMult = 1.0;
                 
                 if( random::uniform_01() < pTreatment ){
-                    Surveys.getSurvey(human).addInt(
-                        Report::MI_NMF_TREATMENTS, human.getMonitoringAgeGroup(), 1 );
+                    Survey::current().addInt( Report::MI_NMF_TREATMENTS, human, 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
                 }
                 
@@ -452,11 +448,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             double bodyMass = ageToWeight( ageYears );
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
             if( it->duration > 0.0 ){
-                Surveys.getSurvey(human)
-                .report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
+                Survey::current().report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
             }else{      // 0 or NaN
-                Surveys.getSurvey(human)
-                .report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+                Survey::current().report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
             }
 	    medicateQueue.erase (it);
         } else {   // and decrement treatment seeking delay for the rest

@@ -26,7 +26,7 @@
 #include "util/ModelOptions.h"
 #include "schema/interventions.h"
 #include "util/StreamValidator.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 
 #include <limits>
 #include <cmath>
@@ -34,12 +34,13 @@
 namespace OM {
 namespace interventions {
 using namespace OM::util;
+using namespace Monitoring;
 
 vector<VaccineComponent*> VaccineComponent::params;
 ComponentId VaccineComponent::reportComponent = ComponentId_pop;
 
 VaccineComponent::VaccineComponent( ComponentId component, const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
-        HumanInterventionComponent(component),
+        HumanInterventionComponent(component, Report::MI_VACCINATION_CTS, Report::MI_VACCINATION_TIMED),
         type(type),
         decayFunc(DecayFunction::makeObject( vd.getDecay(), "decay" )),
         efficacyB(vd.getEfficacyB().getValue())
@@ -66,9 +67,7 @@ void VaccineComponent::deploy(Host::Human& human, Deployment::Method method, Vac
 {
     bool administered = human.getVaccine().possiblyVaccinate( human, id(), vaccLimits );
     if( administered && VaccineComponent::reportComponent == id() ){
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-            (method == Deployment::TIMED) ? Monitoring::Survey::MI_VACCINATION_TIMED :
-                Monitoring::Survey::MI_VACCINATION_CTS, human.getMonitoringAgeGroup(), 1 );
+        Survey::current().addInt( reportMeasure(method), human, 1 );
     }
 }
 

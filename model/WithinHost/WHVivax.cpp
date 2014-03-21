@@ -122,17 +122,18 @@ double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvFact
     return probPatentInfectMosquitoes * tbvFactor;
 }
 
-bool WHVivax::summarize(Survey& survey, AgeGroup ageGroup){
+bool WHVivax::summarize(const Host::Human& human) {
+    Survey& survey = Survey::current();
     InfectionCount count = countInfections();
     if( count.total != 0 ){
         survey
-            .addInt( Report::MI_INFECTED_HOSTS, ageGroup, 1 )
-            .addInt( Report::MI_INFECTIONS, ageGroup, count.total )
-            .addInt( Report::MI_PATENT_INFECTIONS, ageGroup, count.patent );
+            .addInt( Report::MI_INFECTED_HOSTS, human, 1 )
+            .addInt( Report::MI_INFECTIONS, human, count.total )
+            .addInt( Report::MI_PATENT_INFECTIONS, human, count.patent );
     }
     if( count.patent > 0 ){
         survey
-            .addInt( Report::MI_PATENT_HOSTS, ageGroup, 1 );
+            .addInt( Report::MI_PATENT_HOSTS, human, 1 );
         return true;
     }
     return false;

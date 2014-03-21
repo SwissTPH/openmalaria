@@ -65,7 +65,7 @@ public:
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();
   
-  virtual void summarize (Monitoring::Survey& survey);
+  virtual void summarize ();
   
 protected:
     virtual void checkpoint (istream& stream);

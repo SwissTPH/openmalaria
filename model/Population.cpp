@@ -19,7 +19,7 @@
  */
 
 #include "Population.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
@@ -350,7 +350,7 @@ void Population::newSurvey ()
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         iter->summarize();
     }
-    _transmissionModel->summarize( *Monitoring::Surveys.current );
+    _transmissionModel->summarize();
 }
 
 void Population::flushReports (){

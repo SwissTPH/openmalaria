@@ -117,6 +117,8 @@ private:
   size_t _surveyPeriod;
   /// Age group of the individual when the episode's first bout occurred
   Monitoring::AgeGroup _ageGroup;
+  /// Cohort membership
+  bool _inCohort;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).
   Episode::State _state;

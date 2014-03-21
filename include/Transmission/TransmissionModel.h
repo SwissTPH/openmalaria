@@ -104,7 +104,7 @@ public:
   /** Set some summary items.
    *
    * Overriding functions should call this base version too. */
-  virtual void summarize (Monitoring::Survey& survey);
+  virtual void summarize ();
   
   /** Scale the EIR used by the model.
    *

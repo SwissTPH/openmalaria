@@ -20,7 +20,7 @@
  */
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
-#include "Monitoring/Surveys.h" // sim-end timestep
+#include "Monitoring/Survey.h" // sim-end timestep
 #include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
@@ -152,9 +152,10 @@ void NonVectorModel::changeEIRIntervention (
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/TimeStep::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
-  if (daily.size() < static_cast<size_t>(Monitoring::Surveys.getFinalTimestep().inDays()+1)) {
+  size_t required_days = static_cast<size_t>(Monitoring::Survey::getFinalTimestep().inDays()+1);
+  if (daily.size() < required_days) {
     cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size()
-        << "\nRequired: " << Monitoring::Surveys.getFinalTimestep().inDays()+1 << endl;
+        << "\nRequired: " << required_days << endl;
     throw util::xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.

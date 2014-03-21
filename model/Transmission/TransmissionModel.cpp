@@ -224,26 +224,27 @@ double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYea
   return EIR;
 }
 
-void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setNumTransmittingHosts(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
-  survey.setAnnualAverageKappa(_annualAverageKappa);
+void TransmissionModel::summarize () {
+    Monitoring::Survey& survey = Monitoring::Survey::current();
+    survey.setNumTransmittingHosts(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
+    survey.setAnnualAverageKappa(_annualAverageKappa);
 
-  survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
-  inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
+    survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
+    inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
 
-  double duration = (TimeStep::simulation-lastSurveyTime).asInt();
-  if( duration == 0.0 ){
-      if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
-          throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
-      }
-      duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
-  }
-  survey.setInputEIR (surveyInputEIR / duration);
-  survey.setSimulatedEIR (surveySimulatedEIR / duration);
+    double duration = (TimeStep::simulation-lastSurveyTime).asInt();
+    if( duration == 0.0 ){
+        if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
+            throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
+        }
+        duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
+    }
+    survey.setInputEIR (surveyInputEIR / duration);
+    survey.setSimulatedEIR (surveySimulatedEIR / duration);
 
-  surveyInputEIR = 0.0;
-  surveySimulatedEIR = 0.0;
-  lastSurveyTime = TimeStep::simulation;
+    surveyInputEIR = 0.0;
+    surveySimulatedEIR = 0.0;
+    lastSurveyTime = TimeStep::simulation;
 }
 
 

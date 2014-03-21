@@ -23,6 +23,7 @@
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
 #include "Monitoring/Survey.h"
+#include "Monitoring/AgeGroup.h"
 #include "interventions/HumanComponents.h"
 #include "util/checkpoint_containers.h"
 #include <set>

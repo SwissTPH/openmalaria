@@ -19,7 +19,6 @@
  */
 
 #include "Clinical/Episode.h"
-#include "Monitoring/Surveys.h"
 #include "Host/Human.h"
 
 namespace OM {
@@ -51,8 +50,9 @@ void Episode::update (const Host::Human& human, Episode::State newState)
         report ();
 
         _time = TimeStep::simulation;
-        _surveyPeriod = Surveys.getSurveyNumber( human );
+        _surveyPeriod = Survey::getSurveyNumber();
         _ageGroup = human.getMonitoringAgeGroup();
+        _inCohort = human.isInAnyCohort();
         _state = newState;
     } else {
         _state = Episode::State (_state | newState);
@@ -62,58 +62,58 @@ void Episode::update (const Host::Human& human, Episode::State newState)
 void Episode::report () {
     if (_time == TimeStep::never)        // Nothing to report
         return;
+    
+    Survey& survey = Survey::getSurvey(_surveyPeriod);
 
     // Reports malarial/non-malarial UC fever dependent on cause, not diagnosis.
     if (_state & Episode::MALARIA) {
         // Malarial fevers: report bout
         if (_state & Episode::COMPLICATED) {
-            Surveys.at(_surveyPeriod)
-                .addInt( Report::MI_SEVERE_EPISODES, _ageGroup, 1) ;
+            survey.addInt( Report::MI_SEVERE_EPISODES, _ageGroup, _inCohort, 1) ;
         } else { // UC or UC2
-            Surveys.at(_surveyPeriod)
-                .addInt( Report::MI_UNCOMPLICATED_EPISODES, _ageGroup, 1 );
+            survey.addInt( Report::MI_UNCOMPLICATED_EPISODES, _ageGroup, _inCohort, 1 );
         }
 
         // Report outcomes of malarial fevers
         if (_state & Episode::EVENT_IN_HOSPITAL) {
             if (_state & Episode::DIRECT_DEATH) {
-                Surveys.at(_surveyPeriod)
-                    .addInt( Report::MI_DIRECT_DEATHS, _ageGroup, 1 )
-                    .addInt( Report::MI_HOSPITAL_DEATHS, _ageGroup, 1 );
+                survey
+                    .addInt( Report::MI_DIRECT_DEATHS, _ageGroup, _inCohort, 1 )
+                    .addInt( Report::MI_HOSPITAL_DEATHS, _ageGroup, _inCohort, 1 );
                 if (_state & Episode::EVENT_FIRST_DAY)
-                    Surveys.at(_surveyPeriod)
-                        .addInt( Report::MI_FIRST_DAY_DEATHS, _ageGroup, 1 )
-                        .addInt( Report::MI_HOSPITAL_FIRST_DAY_DEATHS, _ageGroup, 1 );
+                    survey
+                        .addInt( Report::MI_FIRST_DAY_DEATHS, _ageGroup, _inCohort, 1 )
+                        .addInt( Report::MI_HOSPITAL_FIRST_DAY_DEATHS, _ageGroup, _inCohort, 1 );
             }
             else if (_state & Episode::SEQUELAE) {
-                Surveys.at(_surveyPeriod)
-                    .addInt( Report::MI_SEQUELAE, _ageGroup, 1 )
-                    .addInt( Report::MI_HOSPITAL_SEQUELAE, _ageGroup, 1 );
+                survey
+                    .addInt( Report::MI_SEQUELAE, _ageGroup, _inCohort, 1 )
+                    .addInt( Report::MI_HOSPITAL_SEQUELAE, _ageGroup, _inCohort, 1 );
             }
             else if (_state & Episode::RECOVERY)
-                Surveys.at(_surveyPeriod)
-                    .addInt( Report::MI_HOSPITAL_RECOVERIES, _ageGroup, 1 );
+                survey
+                    .addInt( Report::MI_HOSPITAL_RECOVERIES, _ageGroup, _inCohort, 1 );
         } else {
             if (_state & Episode::DIRECT_DEATH) {
-                Surveys.at(_surveyPeriod)
-                    .addInt( Report::MI_DIRECT_DEATHS, _ageGroup, 1 );
+                survey
+                    .addInt( Report::MI_DIRECT_DEATHS, _ageGroup, _inCohort, 1 );
                 if (_state & Episode::EVENT_FIRST_DAY)
-                    Surveys.at(_surveyPeriod)
-                        .addInt( Report::MI_FIRST_DAY_DEATHS, _ageGroup, 1 );
+                    survey
+                        .addInt( Report::MI_FIRST_DAY_DEATHS, _ageGroup, _inCohort, 1 );
             }
             else if (_state & Episode::SEQUELAE)
-                Surveys.at(_surveyPeriod)
-                    .addInt( Report::MI_SEQUELAE, _ageGroup, 1 );
+                survey
+                    .addInt( Report::MI_SEQUELAE, _ageGroup, _inCohort, 1 );
             // Don't care about out-of-hospital recoveries
         }
     } else if (_state & Episode::SICK) {
         // Report non-malarial fever and outcomes
-        Surveys.at(_surveyPeriod)
-            .addInt( Report::MI_NON_MALARIA_FEVERS, _ageGroup, 1 );
+        survey
+            .addInt( Report::MI_NON_MALARIA_FEVERS, _ageGroup, _inCohort, 1 );
 
         if (_state & Episode::DIRECT_DEATH) {
-            Surveys.at(_surveyPeriod)
-                .addInt( Report::MI_NMF_DEATHS, _ageGroup, 1 );
+            survey
+                .addInt( Report::MI_NMF_DEATHS, _ageGroup, _inCohort, 1 );
         }
     }
 
@@ -124,6 +124,7 @@ void Episode::operator& (istream& stream) {
     if (_time != TimeStep::never) {
         _surveyPeriod & stream;
         _ageGroup & stream;
+        _inCohort & stream;
         int s;
         s & stream;
         _state = Episode::State(s);
@@ -134,6 +135,7 @@ void Episode::operator& (ostream& stream) {
     if (_time != TimeStep::never) {
         _surveyPeriod & stream;
         _ageGroup & stream;
+        _inCohort & stream;
         _state & stream;
     }
 }

@@ -22,7 +22,7 @@
 #include "Clinical/ESDecisionTree.h"
 #include "Clinical/EventScheduler.h"
 #include "Clinical/parser.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 
@@ -463,18 +463,17 @@ void ESCaseManagement::setHealthSystem( const scnXml::HealthSystem& healthSystem
 pair<ESDecisionValue, bool> executeTree(
         ESDecisionMap* map,
         const ESHostData& hostData,
-        list<MedicateData>& medicateQueue,
-        Survey& survey
+        list<MedicateData>& medicateQueue
 ){
     ESDecisionValue outcome = map->determine (hostData);
     ESTreatmentSchedule& schedule = map->getSchedule(outcome);
     schedule.apply (medicateQueue);
     
     if ( map->RDT_used(outcome) ) {
-        survey.report_Clinical_RDTs (1);
+        Survey::current().report_Clinical_RDTs (1);
     }
     if ( map->microscopy_used(outcome) ) {
-        survey.report_Clinical_Microscopy (1);
+        Survey::current().report_Clinical_Microscopy (1);
     }
     
     return make_pair( outcome, schedule.anyTreatments() );
@@ -491,25 +490,23 @@ void ESCaseManagement::massDrugAdministration(
         Monitoring::ReportMeasureI screeningReport,
         Monitoring::ReportMeasureI drugReport
 ){
-    Survey& survey = Surveys.getSurvey(human);
-    survey.addInt( screeningReport, human.getMonitoringAgeGroup(), 1 );
-    bool anyTreatment = executeTree( &mda, hostData, medicateQueue, survey ).second;
+    Survey::current().addInt( screeningReport, human, 1 );
+    bool anyTreatment = executeTree( &mda, hostData, medicateQueue ).second;
     if( anyTreatment ){
-        survey.addInt( drugReport, human.getMonitoringAgeGroup(), 1 );
+        Survey::current().addInt( drugReport, human, 1 );
     }
 }
 
 CMAuxOutput ESCaseManagement::execute (
         const ESHostData& hostData,
-        list<MedicateData>& medicateQueue,
-        Survey& survey
+        list<MedicateData>& medicateQueue
 ) {
     assert (hostData.pgState & Episode::SICK);
     // We always remove any queued medications.
     medicateQueue.clear();
     
     ESDecisionMap *map = (hostData.pgState & Episode::COMPLICATED) ? &complicated : &uncomplicated;
-    ESDecisionValue outcome = executeTree( map, hostData, medicateQueue, survey ).first;
+    ESDecisionValue outcome = executeTree( map, hostData, medicateQueue ).first;
     
     CMAuxOutput auxOut;
     auxOut.hospitalisation = CMAuxOutput::NONE;

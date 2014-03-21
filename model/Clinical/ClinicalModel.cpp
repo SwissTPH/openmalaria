@@ -25,7 +25,7 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "Host/NeonatalMortality.h"
 
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
 #include <schema/scenario.h>
 
@@ -124,16 +124,14 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (_doomed <= -35) {	//clinical bout 6 intervals before
-        Surveys.getSurvey(human).addInt(
-            Report::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+        Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
         _doomed = DOOMED_INDIRECT;
         return;
     }
     if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
         if (Host::NeonatalMortality::eventNeonatalMortality()) {
-            Surveys.getSurvey(human).addInt(
-                Report::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+            Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
             _doomed = DOOMED_NEONATAL;
             return;
         }

@@ -24,7 +24,7 @@
 // The includes here are more for documentation than required.
 #include "interventions/Interfaces.hpp"
 #include "interventions/Cohort.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
@@ -127,12 +127,11 @@ public:
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
         //TODO(monitoring): separate reports for mass and continuous deployments
         
-        Survey& survey = Surveys.getSurvey(human);
-        survey.addInt( screeningMeasure(method), human.getMonitoringAgeGroup(), 1 );
+        Survey::current().addInt( screeningMeasure(method), human, 1 );
         if( !diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
             return;
         }
-        survey.addInt( reportMeasure(method), human.getMonitoringAgeGroup(), 1 );
+        Survey::current().addInt( reportMeasure(method), human, 1 );
         
         human.withinHostModel->treatment( selectTreatment() );
     }

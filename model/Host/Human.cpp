@@ -25,7 +25,7 @@
 #include "WithinHost/WHInterface.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "PopulationStats.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -208,10 +208,9 @@ void Human::summarize() {
         return;
     }
     
-    Survey& survey = Surveys.getSurvey( *this );
-    survey.addInt( Report::MI_HOSTS, getMonitoringAgeGroup(), 1);
-    bool patent = withinHostModel->summarize (survey, getMonitoringAgeGroup());
-    infIncidence->summarize (survey, getMonitoringAgeGroup());
+    Survey::current().addInt( Report::MI_HOSTS, *this, 1);
+    bool patent = withinHostModel->summarize (*this);
+    infIncidence->summarize (*this);
     
     if( patent ){
         // this should happen after all other reporting!
@@ -221,23 +220,23 @@ void Human::summarize() {
 
 void Human::addToCohort (interventions::ComponentId id, ReportMeasureI reportMeasure){
     if( cohorts.count(id) > 0 ) return;	// nothing to do
+    
     // Data accumulated between reports should be flushed. Currently all this
     // data remembers which survey it should go to or is reported immediately,
     // although episode reports still need to be flushed.
     flushReports();
     cohorts.insert(id);
     //TODO(monitoring): reporting is inappropriate
-    Surveys.current->addInt( reportMeasure, getMonitoringAgeGroup(), 1 );
+    Survey::current().addInt( reportMeasure, *this, 1 );
 }
 void Human::removeFromCohort( interventions::ComponentId id ){
-    if( cohorts.count(id) > 0 ){
-        // Data should be flushed as with addToCohort().
-        flushReports();
-        cohorts.erase( id );
-        //TODO(monitoring): reporting
-    Surveys.current->addInt(Report::MI_NUM_REMOVED_COHORT,
-                                        getMonitoringAgeGroup(), 1 );
-    }
+    if( cohorts.count(id) <= 0 ) return;        // nothing to do
+    
+    // Data should be flushed as with addToCohort().
+    flushReports();
+    cohorts.erase( id );
+    //TODO(monitoring): reporting
+    Survey::current().addInt(Report::MI_NUM_REMOVED_COHORT, *this, 1 );
 }
 void Human::removeFromCohorts( interventions::Cohort::RemoveAtCode code ){
     const vector<interventions::ComponentId>& removeAtList = interventions::CohortSelectionComponent::removeAtIds[code];

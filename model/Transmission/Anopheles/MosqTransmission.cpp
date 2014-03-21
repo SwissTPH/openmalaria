@@ -279,11 +279,12 @@ double MosqTransmission::getLastVecStat ( VecStat vs ) const{
     }
     return val / TimeStep::interval;
 }
-void MosqTransmission::summarize (const string speciesName, Monitoring::Survey& survey) const{
-    survey.set_Vector_Nv0 (speciesName, getLastN_v0());
-    survey.set_Vector_Nv (speciesName, getLastVecStat(NV));
-    survey.set_Vector_Ov (speciesName, getLastVecStat(OV));
-    survey.set_Vector_Sv (speciesName, getLastVecStat(SV));
+void MosqTransmission::summarize (const string speciesName) const{
+    Monitoring::Survey::current()
+        .set_Vector_Nv0 (speciesName, getLastN_v0())
+        .set_Vector_Nv (speciesName, getLastVecStat(NV))
+        .set_Vector_Ov (speciesName, getLastVecStat(OV))
+        .set_Vector_Sv (speciesName, getLastVecStat(SV));
 }
 
 }

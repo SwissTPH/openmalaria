@@ -86,7 +86,7 @@ public:
   virtual double getAvailabilityFactor(double baseAvailability = 1.0);
   
   /// Output _pinfected to the summary
-  void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+  void summarize (const Host::Human& human);
   
   /** Calculate the number of new infections to introduce.
    * 

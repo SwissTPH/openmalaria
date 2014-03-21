@@ -45,32 +45,16 @@ namespace Monitoring {
  * but when exported to the database always considered a double). */
 class SurveysType
 {
-  public:
-      SurveysType() : currentTimestep(TimeStep::never) {}
-      
-    /** Points to surveys[_surveyPeriod] (the dummy element surveys[0] before
-     * start of main sim and after completion of last survey).
-     * This is for data being collected for the next survey. */
-    Survey* current;
+public:
+    SurveysType() : currentTimestep(TimeStep::never) {}
+    
     /** Timestep the current survey ends at.
      * 
      * For point-time surveys this is the time of the survey; where data is
      * collected over a period, the period is from the timestep following the
      * previous survey (or the start of the main simulation) until this time. */
     TimeStep currentTimestep;
-    /** Get survey for a human -- switched depending on cohorts the human is
-     * a member of and reporting mode. */
-    inline Survey& getSurvey( const Host::Human& human ){
-	if( _cohortOnly && !human.isInAnyCohort() )
-	    return surveys[0];	// output goes to dummy survey: is deleted
-	return *current;
-    }
-    /** As getSurvey(), except returns a number instead of a reference. */
-    inline size_t getSurveyNumber( const Host::Human& human ){
-        if( _cohortOnly && !human.isInAnyCohort() )
-            return 0;
-        return _surveyPeriod;
-    }
+    inline bool getCohortOnly()const{ return m_cohortOnly; }
 
     /** Read in some params from XML and allocate memory. */
     void init (const scnXml::Monitoring& monitoring);
@@ -81,50 +65,27 @@ class SurveysType
     //! Write all the summary arrays requested by summaryOption to output.txt
     void writeSummaryArrays();
 
-    ///@brief Getter functions
-    //@{
-    /** Return Survey number n (counting from 1).
-     *
-     * Survey at n=0 is the junk-survey (not reported).
-     * Checks n is valid in debug mode. */
-    inline Survey& at (size_t n) {
-      assert (n < surveys.size());
-      return surveys[n];
-    }
-    
-    /** Return timestep of the final survey.
-     *
-     * We use this to control when the simulation ends.
-     * This isn't quite the same as before when the simulation end was
-     * explicitly specified and has a small affect on
-     * infantAllCauseMortality (survey 21) output. */
-    inline TimeStep getFinalTimestep () {
-      return _surveysTimeIntervals[surveys.size()-2];	// final entry is a concatenated -1
-    }
-    //@}
-    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-	checkpoint (stream);
+        checkpoint (stream);
     }
     
-  private:
+private:
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
     
     //! Time intervals for all surveys specified in the XML, appended with -1
     vector<TimeStep> _surveysTimeIntervals;
-    /** Index for the time dimention of the summary arrays
-     * Index starts from 1 for used surveys; is 0 to write to dummy survey. */
-    size_t _surveyPeriod;
     
     /// If true, many outputs only come from humans in the cohort.
-    bool _cohortOnly;
+    bool m_cohortOnly;
 
-    /// Our collection of surveys. surveys[0] is a dummy container for data
+    /// Our collection of surveys. m_surveys[0] is a dummy container for data
     /// we're not interested in, in order to avoid having to check current is valid.
-    vector<Survey> surveys;
+    vector<Survey> m_surveys;
+    
+    friend class Survey;
 };
 /// Data — entry-point for using Surveys. Checkpointed.
 extern SurveysType Surveys;

@@ -24,7 +24,7 @@
 // The includes here are more for documentation than required.
 #include "util/errors.h"
 #include "util/TimeStep.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include <schema/interventions.h>
 #include "Clinical/CaseManagementCommon.h"
 #include "Population.h"
@@ -43,7 +43,7 @@ public:
     {
         if( deploymentTime < TimeStep(0) ){
             throw util::xml_scenario_error("timed intervention deployment: may not be negative");
-        }else if( deploymentTime >= Monitoring::Surveys.getFinalTimestep() ){
+        }else if( deploymentTime >= Monitoring::Survey::getFinalTimestep() ){
             cerr << "Warning: timed intervention deployment at time "<<deploymentTime.asInt();
             cerr << " happens after last survey" << endl;
         }

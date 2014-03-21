@@ -22,8 +22,8 @@
 #define Hmod_Survey
 
 #include "Monitoring/SurveyMeasure.h"
+#include "Monitoring/AgeGroup.h"        // only needed for special version of addInt() used by Episode
 #include "Global.h"
-#include "util/errors.h"
 #include "util/checkpoint_containers.h"
 #include <bitset>
 #include <map>
@@ -31,6 +31,9 @@
 
 namespace scnXml{ class Monitoring; }
 namespace OM {
+namespace Host {
+    class Human;
+}
 namespace Monitoring {
     using boost::multi_array;
 
@@ -100,64 +103,8 @@ struct ReportMeasureD{
     Report::DblReportMeasures code;
 };
 
-/**
- * Included for type-saftey: don't allow implicit double->int conversions.
- *
- * Incindentally, the constructor can be used implicitly for implicit
- * conversion doing the right thing.
- * 
- * Don't use _this_ class for other index/age-group types. */
-class AgeGroup {
-  public:
-    AgeGroup () : index(0) {}
-    
-    /** Update age-group. Assumes age only increases (per instance).
-     *
-     * If called regularly, should be O(1); worst case is O(_upperbound.size()). */
-    void update (double ageYears);
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        index & stream;
-    }
-    
-    /** Get the represented index. */
-    inline size_t i () {
-        return index;
-    }
-    
-    /// Get the total number of age categories (inc. one for indivs. not in any
-    /// category given in XML).
-    static inline size_t getNumGroups () {
-        if( _upperbound.size() == 0 ) throw TRACED_EXCEPTION_DEFAULT( "not yet initialised" );
-        return _upperbound.size();
-    }
-    
-private:
-    size_t index;
-    
-    /// Initialize _lowerbound and _upperbound
-    static void init (const scnXml::Monitoring& monitoring);
-    
-    //BEGIN Static parameters only set by init()
-    /// Lower boundary of the youngest agegroup
-    static double _lowerbound;
-    /** Upper boundary of agegroups, in years.
-     *
-     * These are age-groups given in XML plus one with no upper limit for
-     * individuals outside other bounds. */
-    static vector<double> _upperbound;
-    //END
-    
-    friend class Survey;
-};
-
 /// Data struct for a single survey.
 class Survey {
-public:
-    // Constructor used by SurveysType. Call allocate() explicitly for allocation.
-    Survey();
 private:
     
     ///@brief Static members (options from XML). Parameters only set by init().
@@ -171,6 +118,36 @@ private:
     //@}
   
 public:
+    // Constructor used by SurveysType. Call allocate() explicitly for allocation.
+    Survey();
+    
+    ///@brief Static access functions: these are here so that most users don't need to include Surveys.h
+    //@{
+    /** Get access to the current survey.
+     * 
+     * This is an inline function and should be very fast to look up.
+     * 
+     * Note: current() == getSurvey(getSurveyNumber()) */
+    inline static Survey& current(){ return *m_current; }
+    
+    /** Returns the number of the current survey. Use this to report
+     * retrospectively. */
+    inline static size_t getSurveyNumber(){ return m_surveyNumber; }
+    
+    /** Return Survey number n (counting from 1). Use this along with
+     * getSurveyNumber() to report retrospectively; in most cases this is not
+     * needed and current() can be used instead. */
+    static Survey& getSurvey(size_t n);
+    
+    /** Return timestep of the final survey.
+     *
+     * We use this to control when the simulation ends.
+     * This isn't quite the same as before when the simulation end was
+     * explicitly specified and has a small affect on
+     * infantAllCauseMortality (survey 21) output. */
+    static TimeStep getFinalTimestep ();
+    //@}
+    
     ///@brief Set outputs without extra categorisation
     //@{
     /** Number of hosts transmitting to mosquitoes, reported as nTransmit. */
@@ -185,10 +162,10 @@ public:
     
     ///@brief Set outputs per vector species
     //@{
-    void set_Vector_Nv0 (string key, double v) { data_Vector_Nv0[key] = v; }
-    void set_Vector_Nv (string key, double v) { data_Vector_Nv[key] = v; }
-    void set_Vector_Ov (string key, double v) { data_Vector_Ov[key] = v; }
-    void set_Vector_Sv (string key, double v) { data_Vector_Sv[key] = v; }
+    Survey& set_Vector_Nv0 (string key, double v) { data_Vector_Nv0[key] = v; return *this; }
+    Survey& set_Vector_Nv (string key, double v) { data_Vector_Nv[key] = v; return *this; }
+    Survey& set_Vector_Ov (string key, double v) { data_Vector_Ov[key] = v; return *this; }
+    Survey& set_Vector_Sv (string key, double v) { data_Vector_Sv[key] = v; return *this; }
     //@}
     
     ///@brief Set outputs per drug
@@ -206,39 +183,26 @@ public:
     /**
      * Report some integer number of events, adding the number to a total.
      * 
-     * @param ageGroup Age group of host
+     * @param measure Measure value being reported
+     * @param human The host whose data is being reported (used to get age
+     *          group and cohort set)
      * @param val Number of events (added to total)
      * @returns (*this) object to allow chain calling
      */
-    Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, int val ){
-        if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
-            ageGroup.i() >= m_humanReportsInt.shape()[1] ){
-            cout << "Index out of bounds:\n"
-                "survey\t" << static_cast<void*>(this)
-                << "\nalloc\t" << m_humanReportsInt.shape()[0] << "\t" << m_humanReportsInt.shape()[1]
-                << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
-        }
-        m_humanReportsInt[measure.code][ageGroup.i()] += val;
-        return *this;
-    }
+    Survey& addInt( ReportMeasureI measure, const Host::Human &human, int val );
     /**
      * Report some quantity (double), adding the quantity to a total.
      * 
-     * @param ageGroup Age group of host
+     * @param measure Measure value being reported
+     * @param human The host whose data is being reported (used to get age
+     *          group and cohort set)
      * @param val Quantity (added to total)
      * @returns (*this) object to allow chain calling
      */
-    Survey& addDouble( ReportMeasureD measure, AgeGroup ageGroup, double val ){
-        if( static_cast<size_t>(measure.code) >= m_humanReportsDouble.shape()[0] ||
-            ageGroup.i() >= m_humanReportsDouble.shape()[1] ){
-            cout << "Index out of bounds:\n"
-                "survey\t" << static_cast<void*>(this)
-                << "\nalloc\t" << m_humanReportsDouble.shape()[0] << "\t" << m_humanReportsDouble.shape()[1]
-                << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
-        }
-        m_humanReportsDouble[measure.code][ageGroup.i()] += val;
-        return *this;
-    }
+    Survey& addDouble( ReportMeasureD measure, const Host::Human &human, double val );
+    
+    /** Lower level version of addInt(). */
+    Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, bool inAnyCohort, int val );
     
     void setInoculationsPerAgeGroup (vector<double>& v) {
         m_inoculationsPerAgeGroup = v;	// copies v, not just its reference
@@ -262,9 +226,9 @@ public:
         m_Clinical_DrugUsage & stream;
         m_Clinical_DrugUsageIV & stream;
         
-        checkpoint( stream );   // for m_humanReportsInt, m_humanReportsDouble
-        
         m_inoculationsPerAgeGroup & stream;
+        
+        checkpoint( stream );   // for m_humanReportsInt, m_humanReportsDouble
   }
   
 private:
@@ -302,15 +266,29 @@ private:
     
     // data categorised by human age group:
     vector<double> m_inoculationsPerAgeGroup;
-    // first index is the measure (IntReportMeasures), second is age group:
-    typedef multi_array<int, 2> ReportsIntAgeT;
+    
+    // data categorised by human age group and cohort set:
+    // first index is the measure (IntReportMeasures), second is age group, third is cohort set:
+    typedef multi_array<int, 3> ReportsIntAgeT;
     ReportsIntAgeT m_humanReportsInt;
-    typedef multi_array<double, 2> ReportsDblAgeT;
+    typedef multi_array<double, 3> ReportsDblAgeT;
     ReportsDblAgeT m_humanReportsDouble;
     //@}
     
     void checkpoint( istream& stream );
     void checkpoint( ostream& stream) const;
+    
+    // ———  static members  ———
+    
+    /** Index for the time dimention of the summary arrays
+     * Index starts from 1 for used surveys; is 0 to write to dummy survey. */
+    static size_t m_surveyNumber;
+    
+    /** Points to SurveysType::surveys[m_surveyNumber] (or the dummy element 
+     * SurveysType::surveys[0] before the intervention period and after
+     * completion of last survey). This is for data being collected for the
+     * next survey. */
+    static Survey *m_current;
     
     friend class SurveysType;
 };

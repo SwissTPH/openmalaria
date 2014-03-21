@@ -23,7 +23,7 @@
 #include "util/errors.h"
 #include "util/SpeciesIndexChecker.h"
 #include "Host/Human.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
@@ -66,8 +66,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
 
 void ITNComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent( *this );
-    Surveys.getSurvey( human ).addInt( reportMeasure(method),
-        human.getMonitoringAgeGroup(), 1 );
+    Survey::current().addInt( reportMeasure(method), human, 1 );
 }
 
 Component::Type ITNComponent::componentType() const{

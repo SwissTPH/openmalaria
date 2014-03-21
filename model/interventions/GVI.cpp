@@ -21,7 +21,7 @@
 #include "Global.h"
 #include "interventions/GVI.h"
 #include "Host/Human.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 #include "util/errors.h"
 #include <cmath>
@@ -52,8 +52,7 @@ GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
 
 void GVIComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Surveys.getSurvey( human ).addInt(reportMeasure(method),
-        human.getMonitoringAgeGroup(), 1 );
+    Survey::current().addInt(reportMeasure(method), human, 1 );
 }
 
 Component::Type GVIComponent::componentType()const{ return Component::GVI; }

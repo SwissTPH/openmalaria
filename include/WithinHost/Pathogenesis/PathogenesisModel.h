@@ -64,7 +64,7 @@ public:
      *
      * Only PyrogenPathogenesis implements this; other models don't have anything
      * to add to the summary. */
-    virtual void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {}
+    virtual void summarize (const Host::Human& human) {}
 
     /// Checkpointing
     template<class S>

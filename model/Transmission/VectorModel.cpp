@@ -409,11 +409,11 @@ void VectorModel::uninfectVectors() {
         species[i].uninfectVectors();
 }
 
-void VectorModel::summarize (Monitoring::Survey& survey) {
-    TransmissionModel::summarize (survey);
+void VectorModel::summarize () {
+    TransmissionModel::summarize ();
 
     for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)
-        species[it->second].summarize (it->first, survey);
+        species[it->second].summarize (it->first);
 }
 
 

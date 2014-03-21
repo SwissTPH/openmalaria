@@ -171,8 +171,8 @@ public:
     }
 
     /// Write some per-species summary information.
-    inline void summarize (const string speciesName, Monitoring::Survey& survey) const {
-        transmission.summarize( speciesName, survey );
+    inline void summarize (const string speciesName) const {
+        transmission.summarize( speciesName );
     }
     //@}
     

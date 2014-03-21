@@ -221,21 +221,22 @@ void WHFalciparum::updateImmuneStatus() {
 
 // -----  Summarize  -----
 
-bool WHFalciparum::summarize (Survey& survey, AgeGroup ageGroup) {
-    pathogenesisModel->summarize( survey, ageGroup );
+bool WHFalciparum::summarize (const Host::Human& human) {
+    Survey& survey = Survey::current();
+    pathogenesisModel->summarize( human );
     InfectionCount count = countInfections();
     if (count.total != 0) {
         survey
-            .addInt( Report::MI_INFECTED_HOSTS, ageGroup, 1 )
-            .addInt( Report::MI_INFECTIONS, ageGroup, count.total )
-            .addInt( Report::MI_PATENT_INFECTIONS, ageGroup, count.patent );
+            .addInt( Report::MI_INFECTED_HOSTS, human, 1 )
+            .addInt( Report::MI_INFECTIONS, human, count.total )
+            .addInt( Report::MI_PATENT_INFECTIONS, human, count.patent );
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
     if (diagnosticDefault()) {
         survey
-            .addInt( Report::MI_PATENT_HOSTS, ageGroup, 1)
-            .addDouble( Report::MD_LOG_DENSITY, ageGroup, log(totalDensity) );
+            .addInt( Report::MI_PATENT_HOSTS, human, 1)
+            .addDouble( Report::MD_LOG_DENSITY, human, log(totalDensity) );
         return true;
     }
     return false;

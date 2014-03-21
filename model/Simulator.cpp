@@ -134,7 +134,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->_transmissionModel->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
-        + Surveys.getFinalTimestep() + TimeStep( 1 );
+        + Monitoring::Survey::getFinalTimestep() + TimeStep( 1 );
     
     if (isCheckpoint()) {
         Continuous.init( monitoring, true );
@@ -192,7 +192,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
                 // nothing to do: start main phase immediately
             }
             // adjust estimation of final time step: end of current period + length of main phase
-            totalSimDuration = simPeriodEnd + Surveys.getFinalTimestep() + TimeStep( 1 );
+            totalSimDuration = simPeriodEnd + Monitoring::Survey::getFinalTimestep() + TimeStep( 1 );
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;

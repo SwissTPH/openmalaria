@@ -97,7 +97,7 @@ public:
     virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const =0;
     
     /// @returns true if host has patent parasites
-    virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) =0;
+    virtual bool summarize(const Host::Human& human) =0;
 
     /// Create a new infection within this human
     virtual void importInfection() =0;

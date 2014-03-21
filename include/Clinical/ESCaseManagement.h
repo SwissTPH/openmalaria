@@ -274,8 +274,7 @@ class ESCaseManagement : public CaseManagementCommon {
          * Returns: some extra info (see CMAuxOutput definition). */
         static CMAuxOutput execute (
             const ESHostData& hostData,
-            list<MedicateData>& medicateQueue,
-            Survey& survey
+            list<MedicateData>& medicateQueue
         );
         
     private:

@@ -57,7 +57,7 @@ public:
     
     virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
     
-    virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+    virtual bool summarize(const Host::Human& human);
     
     virtual inline double getTotalDensity() const{ return totalDensity; }
     

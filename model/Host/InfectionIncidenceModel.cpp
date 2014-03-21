@@ -24,7 +24,7 @@
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "Monitoring/Continuous.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "WithinHost/WHInterface.h"
 #include "Parameters.h"
@@ -150,8 +150,8 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 		     BaselineAvailabilityShapeParam);
 }
 
-void InfectionIncidenceModel::summarize (Survey& survey, AgeGroup ageGroup) {
-    survey.addDouble( Report::MD_EXPECTED_INFECTED, ageGroup, _pinfected);
+void InfectionIncidenceModel::summarize (const Host::Human& human) {
+    Survey::current().addDouble( Report::MD_EXPECTED_INFECTED, human, _pinfected);
 }
 
 
@@ -226,7 +226,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
         // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
-    Surveys.getSurvey( human ).addInt( Report::MI_NEW_INFECTIONS, human.getMonitoringAgeGroup(), n );
+    Survey::current().addInt( Report::MI_NEW_INFECTIONS, human, n );
     ctsNewInfections += n;
     return n;
   }
