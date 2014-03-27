@@ -64,12 +64,10 @@ class AgeGroup {
 private:
     size_t index;
     
-    /// Initialize _lowerbound and _upperbound
+    /// Read age group bounds from XML data
     static void init (const scnXml::Monitoring& monitoring);
     
     //BEGIN Static parameters only set by init()
-    /// Lower boundary of the youngest agegroup
-    static double _lowerbound;
     /** Upper boundary of agegroups, in years.
      *
      * These are age-groups given in XML plus one with no upper limit for
