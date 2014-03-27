@@ -221,10 +221,11 @@ void Human::summarize() {
 void Human::addToCohort (interventions::ComponentId id, ReportMeasureI reportMeasure){
     if( cohorts.count(id) > 0 ) return;	// nothing to do
     
-    // Data accumulated between reports should be flushed. Currently all this
-    // data remembers which survey it should go to or is reported immediately,
-    // although episode reports still need to be flushed.
-    flushReports();
+    // Note: from the point of the cohort, it makes sense to reset
+    // healthSystemMemory. This was previously done by calling flushReports(),
+    // but this resets health system memory for all reports. Instead we do not
+    // reset, which is considered an acceptable approximation.
+    
     cohorts.insert(id);
     //TODO(monitoring): reporting is inappropriate
     Survey::current().addInt( reportMeasure, *this, 1 );
@@ -232,8 +233,11 @@ void Human::addToCohort (interventions::ComponentId id, ReportMeasureI reportMea
 void Human::removeFromCohort( interventions::ComponentId id ){
     if( cohorts.count(id) <= 0 ) return;        // nothing to do
     
-    // Data should be flushed as with addToCohort().
-    flushReports();
+    // Note: from the point of the cohort, it makes sense to reset
+    // healthSystemMemory. This was previously done by calling flushReports(),
+    // but this resets health system memory for all reports. Instead we do not
+    // reset, which is considered an acceptable approximation.
+    
     cohorts.erase( id );
     //TODO(monitoring): reporting
     Survey::current().addInt(Report::MI_NUM_REMOVED_COHORT, *this, 1 );
