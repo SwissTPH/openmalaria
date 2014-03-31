@@ -38,10 +38,6 @@ public:
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
 #endif
-    
-    /** For each RemoveAtCode (excluding NUM), this is a list of all cohort Ids
-     * for which the option is enabled. */
-    static vector<ComponentId> removeAtIds[Cohort::REMOVE_AT_NUM];
 };
 
 } }

@@ -162,13 +162,8 @@ public:
    * last time human was reported or birth and now). */
   void addToCohort ( interventions::ComponentId, Monitoring::ReportMeasureI reportMeasure );
   
-  /** Remove from a cohort. As with addToCohort, deals with reporting.
-   *
-   * Can be safely called when human is not in cohort. */
-  void removeFromCohort( interventions::ComponentId );
-  
-  /** Act on remove-from-cohort-on-first-xyz events. */
-  void removeFromCohorts( interventions::Cohort::RemoveAtCode code );
+  /** Act on "remove from sub-population on first ..." events. */
+  void removeFromSubPops( interventions::SubPopRemove::RemoveAtCode code );
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();

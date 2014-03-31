@@ -214,7 +214,7 @@ void Human::summarize() {
     
     if( patent ){
         // this should happen after all other reporting!
-        removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_INFECTION );
+        removeFromSubPops( interventions::SubPopRemove::ON_FIRST_INFECTION );
     }
 }
 
@@ -230,22 +230,21 @@ void Human::addToCohort (interventions::ComponentId id, ReportMeasureI reportMea
     //TODO(monitoring): reporting is inappropriate
     Survey::current().addInt( reportMeasure, *this, 1 );
 }
-void Human::removeFromCohort( interventions::ComponentId id ){
-    if( cohorts.count(id) <= 0 ) return;        // nothing to do
-    
-    // Note: from the point of the cohort, it makes sense to reset
-    // healthSystemMemory. This was previously done by calling flushReports(),
-    // but this resets health system memory for all reports. Instead we do not
-    // reset, which is considered an acceptable approximation.
-    
-    cohorts.erase( id );
-    //TODO(monitoring): reporting
-    Survey::current().addInt(Report::MI_NUM_REMOVED_COHORT, *this, 1 );
-}
-void Human::removeFromCohorts( interventions::Cohort::RemoveAtCode code ){
-    const vector<interventions::ComponentId>& removeAtList = interventions::CohortSelectionComponent::removeAtIds[code];
+void Human::removeFromSubPops( interventions::SubPopRemove::RemoveAtCode code ){
+    const vector<interventions::ComponentId>& removeAtList = interventions::removeAtIds[code];
     for( vector<interventions::ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        removeFromCohort( *it );    // only does anything if in cohort
+        if( cohorts.count(*it) > 0 ){
+            // Note: from the point of the cohort, it makes sense to reset
+            // healthSystemMemory. This was previously done by calling flushReports(),
+            // but this resets health system memory for all reports. Instead we do not
+            // reset, which is considered an acceptable approximation.
+            
+            //TODO(monitoring): reporting
+            // report before removing membership
+            Survey::current().addInt(Report::MI_NUM_REMOVED_COHORT, *this, 1 );
+            cohorts.erase( *it );       // for reporting
+        }
+        lastDeployments.erase( *it );      // for restrictToSubPop and cumulative deployment
     }
 }
 

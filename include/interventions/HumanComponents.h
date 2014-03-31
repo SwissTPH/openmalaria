@@ -31,27 +31,31 @@ namespace Host {
 namespace interventions {
     class VaccineComponent;
 
-// ———  cohorts  ———
+// ———  sub-population removal  ———
 
-namespace Cohort{
-    /** Identifiers for types of cohort removal option, followed by NUM in last
-     * place (as a counter).
+namespace SubPopRemove{
+    /** Identifiers for types of sub-population removal option, followed by NUM
+     * in last place (as a counter).
      * 
-     * REMOVE_AT_FIRST_BOUT: remove the human from the cohort at the start of
-     * each clinical event, if present in the cohort.
+     * ON_FIRST_BOUT: remove humans from some sub-populations at the start of
+     * their first clinical events following inclusion in the sub-population.
      * 
-     * REMOVE_AT_FIRST_INFECTION: remove patent humans from the cohort during
-     * each survey.
+     * ON_FIRST_INFECTION: remove patent humans from some sub-population(s)
+     * during each survey.
      * 
-     * REMOVE_AT_FIRST_TREATMENT: remove the human from the cohort when
-     * assigning each course of treatment, if present in the cohort.
+     * ON_FIRST_TREATMENT: remove humans from some sub-populations when
+     * assigning each course of treatment.
      */
     enum RemoveAtCode {
-        REMOVE_AT_FIRST_BOUT,
-        REMOVE_AT_FIRST_INFECTION,
-        REMOVE_AT_FIRST_TREATMENT,
-        REMOVE_AT_NUM };
+        ON_FIRST_BOUT,
+        ON_FIRST_INFECTION,
+        ON_FIRST_TREATMENT,
+        NUM };
 }
+
+/** For each RemoveAtCode (excluding NUM), this is a list of all sub-population
+ * identifiers for which the option is enabled. */
+static vector<ComponentId> removeAtIds[SubPopRemove::NUM];
 
 // ———  vaccines  ———
 

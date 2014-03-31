@@ -25,20 +25,9 @@
 namespace OM { namespace interventions {
     using namespace Monitoring::Report;
 
-vector<ComponentId> CohortSelectionComponent::removeAtIds[Cohort::REMOVE_AT_NUM];
-
 CohortSelectionComponent::CohortSelectionComponent( ComponentId id, const scnXml::Cohort& cohort ) :
         HumanInterventionComponent(id, MI_NUM_ADDED_COHORT, MI_NUM_ADDED_COHORT)
 {
-    if( cohort.getFirstBoutOnly() ){
-        removeAtIds[Cohort::REMOVE_AT_FIRST_BOUT].push_back( id );
-    }
-    if( cohort.getFirstInfectionOnly() ){
-        removeAtIds[Cohort::REMOVE_AT_FIRST_INFECTION].push_back( id );
-    }
-    if( cohort.getFirstTreatmentOnly() ){
-        removeAtIds[Cohort::REMOVE_AT_FIRST_TREATMENT].push_back( id );
-    }
 }
 
 void CohortSelectionComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
