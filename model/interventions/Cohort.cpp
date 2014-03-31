@@ -25,13 +25,32 @@
 namespace OM { namespace interventions {
     using namespace Monitoring::Report;
 
+std::set<ComponentId> cohortComponents;
+
+bool CohortSelectionComponent::inAnyCohort(const map< ComponentId, TimeStep >& components)
+{
+    for( map< ComponentId, TimeStep >::const_iterator it = components.begin(),
+        end = components.end(); it != end; ++it )
+    {
+        if( cohortComponents.count( it->first ) > 0 ) return true;
+    }
+    return false;
+}
+
 CohortSelectionComponent::CohortSelectionComponent( ComponentId id, const scnXml::Cohort& cohort ) :
         HumanInterventionComponent(id, MI_NUM_ADDED_COHORT, MI_NUM_ADDED_COHORT)
 {
+    cohortComponents.insert( id );
 }
 
 void CohortSelectionComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
-    human.addToCohort( id(), reportMeasure(method) );
+    // Note: from the point view of the cohort, it makes sense to reset
+    // healthSystemMemory. This was previously done by calling flushReports(),
+    // but this resets health system memory for all reports. Instead we do not
+    // reset, which is considered an acceptable approximation.
+    
+    //TODO(monitoring): reporting is inappropriate
+    Monitoring::Survey::current().addInt( reportMeasure(method), human, 1 );
 }
 
 Component::Type CohortSelectionComponent::componentType() const{

@@ -76,7 +76,8 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     perHostTransmission(tm),
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
-    nextCtsDist(0)
+    nextCtsDist(0),
+    m_inAnyCohort(false)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
   assert( _dateOfBirth == TimeStep::simulation ||
@@ -218,33 +219,26 @@ void Human::summarize() {
     }
 }
 
-void Human::addToCohort (interventions::ComponentId id, ReportMeasureI reportMeasure){
-    if( cohorts.count(id) > 0 ) return;	// nothing to do
-    
-    // Note: from the point of the cohort, it makes sense to reset
-    // healthSystemMemory. This was previously done by calling flushReports(),
-    // but this resets health system memory for all reports. Instead we do not
-    // reset, which is considered an acceptable approximation.
-    
-    cohorts.insert(id);
-    //TODO(monitoring): reporting is inappropriate
-    Survey::current().addInt( reportMeasure, *this, 1 );
+void Human::reportDeployment( interventions::ComponentId id ){
+    lastDeployments[id] = TimeStep::simulation;
+    m_inAnyCohort = interventions::CohortSelectionComponent::inAnyCohort( lastDeployments );
 }
 void Human::removeFromSubPops( interventions::SubPopRemove::RemoveAtCode code ){
     const vector<interventions::ComponentId>& removeAtList = interventions::removeAtIds[code];
     for( vector<interventions::ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        if( cohorts.count(*it) > 0 ){
-            // Note: from the point of the cohort, it makes sense to reset
-            // healthSystemMemory. This was previously done by calling flushReports(),
-            // but this resets health system memory for all reports. Instead we do not
-            // reset, which is considered an acceptable approximation.
+        if( lastDeployments.count(*it) > 0 ){
+            // Note: from the point of view of cohorts, it makes sense to reset
+            // healthSystemMemory if this is a cohort. This was previously done
+            // by calling flushReports(), but this resets health system memory
+            // for all reports. Instead we do not reset (considered acceptable).
             
             //TODO(monitoring): reporting
             // report before removing membership
             Survey::current().addInt(Report::MI_NUM_REMOVED_COHORT, *this, 1 );
-            cohorts.erase( *it );       // for reporting
+            // remove (affects reporting, restrictToSubPop and cumulative deployment):
+            lastDeployments.erase( *it );
+            m_inAnyCohort = interventions::CohortSelectionComponent::inAnyCohort( lastDeployments );
         }
-        lastDeployments.erase( *it );      // for restrictToSubPop and cumulative deployment
     }
 }
 

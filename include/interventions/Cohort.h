@@ -38,6 +38,12 @@ public:
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
 #endif
+    
+    /** Return whether or not any of the map of component identifiersr passed
+     * is a cohort identifier.
+     * 
+     * The map passed is just used like a set; its values are ignored. */
+    static bool inAnyCohort( const map<ComponentId,TimeStep>& components );
 };
 
 } }

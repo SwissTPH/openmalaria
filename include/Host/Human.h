@@ -83,7 +83,7 @@ public:
       _dateOfBirth & stream;
       _vaccine & stream;
       nextCtsDist & stream;
-      cohorts & stream;
+      m_inAnyCohort & stream;
       lastDeployments & stream;
   }
   //@}
@@ -100,9 +100,7 @@ public:
   ///@brief Deploy "intervention" functions
   //@{
   /** Mark a certain intervention component as being deployed now. */
-  inline void updateLastDeployed( interventions::ComponentId id ){
-      lastDeployments[id] = TimeStep::simulation;
-  }
+  void reportDeployment( interventions::ComponentId id );
   
   /** Determines for the purposes of cumulative deployment whether a component is
    * still current.
@@ -132,16 +130,13 @@ public:
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
   
-  /** Return true if human is a member of the cohort.
-   * 
-   * Note: the maximum value of size_t is considered to be the population, of
-   * which every human is a member. */
-  inline bool isInCohort( interventions::ComponentId id )const{
-      return id == interventions::ComponentId_pop || cohorts.count( id ) > 0;
+  /** Return true if human is a member of the sub-population. */
+  inline bool isInSubPop( interventions::ComponentId id )const{
+      return lastDeployments.count( id ) > 0;
   }
   /** Return true if human is a member of any cohort. */
   //TODO(monitoring): outputs per cohort, not simply any cohort or everyone
-  inline bool isInAnyCohort()const{ return cohorts.size() > 0; }
+  inline bool isInAnyCohort()const{ return m_inAnyCohort; }
   
   /// Return the index of next continuous intervention to be deployed
   inline uint32_t getNextCtsDist()const{ return nextCtsDist; }
@@ -154,13 +149,6 @@ public:
   
   //! Summarize the state of a human individual.
   void summarize();
-  
-  /** Add human to a cohort (assumes cohort mode is active).
-   *
-   * Also makes sure inter-survey stats will only be
-   * summed from this point onwards (i.e. removes data accumulated between
-   * last time human was reported or birth and now). */
-  void addToCohort ( interventions::ComponentId, Monitoring::ReportMeasureI reportMeasure );
   
   /** Act on "remove from sub-population on first ..." events. */
   void removeFromSubPops( interventions::SubPopRemove::RemoveAtCode code );
@@ -231,10 +219,10 @@ private:
   uint32_t nextCtsDist;
   
   
-  //TODO(performance): are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
-  /// The set of cohorts (intervention indexes) to which this human is a member
-  set<interventions::ComponentId> cohorts;
-  /// Last deployment times of intervention components by component id
+  /// Cache, updated when human is added to or removed from a sub-population
+  bool m_inAnyCohort;
+  /// This lists sub-populations of which the human is a member together with
+  /// the latest recruitment time (may be later than when the human was added).
   map<interventions::ComponentId,TimeStep> lastDeployments;
 };
 

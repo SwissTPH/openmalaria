@@ -49,8 +49,10 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method,
             it != components.end(); ++it )
     {
         const interventions::HumanInterventionComponent& component = **it;
+        // we must report first, since it can change cohort and sub-population
+        // which may affect what deployment does (at least in the case of reporting deployments)
+        human.reportDeployment( component.id() );
         component.deploy( human, method, vaccLimits );
-        human.updateLastDeployed( component.id() );
     }
 }
 

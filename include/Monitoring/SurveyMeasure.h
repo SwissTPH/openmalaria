@@ -217,7 +217,7 @@ enum SurveyMeasure {
     /** As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
     Clinical_DrugUsageIV = 49,
     
-    /// Number of individuals added to cohort
+    /// Number of cohort recruitments (note: recruitment doesn't imply human was not already a member)
     nAddedToCohort = 50,
     /// Number of individuals removed from cohort
     nRemovedFromCohort = 51,
