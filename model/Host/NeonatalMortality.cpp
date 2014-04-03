@@ -88,11 +88,10 @@ void NeonatalMortality::update (const Population& population) {
 }
 
 void NeonatalMortality::calculateRiskFromMaternalInfection (int nCounter, int pCounter) {
-    //default value for prev2025, for short simulations 
+    //default value for prev2025, for use when there are no 20-25 year olds
     double prev2025 = 0.25;
-    //TODO: fix when nCounter is zero
-//     if( nCounter > 0 )    // Note: this check was added after surrounding code was written; previously the 0.25 value was NEVER used
-    prev2025 = double(pCounter) / nCounter;
+    if( nCounter > 0 )
+        prev2025 = double(pCounter) / nCounter;
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
@@ -104,7 +103,7 @@ void NeonatalMortality::calculateRiskFromMaternalInfection (int nCounter, int pC
         }
     }
     
-    //equation (2) p 75 AJTMH 75 suppl 2
+    // equation (2) p 75 AJTMH 75 suppl 2
     double prevPG= maxPrev / (critPrevPrim + maxPrev);
     // equation (1) p 75 AJTMH 75 suppl 2 including 30% multiplier
     _riskFromMaternalInfection = y * (1.0-exp(prevPG * z));
