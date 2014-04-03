@@ -55,7 +55,7 @@ ESDecisionValue ESDecisionValueMap::add_decision_values (const string& decision,
 	
 	// Now we've got enough bits to represent all outcomes, starting at next_bit
 	// Zero always means "missing value", so text starts at our first non-zero value:
-	id_type next=0, step=(1<<next_bit);
+	id_type next=0, step=(static_cast<id_type>(1)<<next_bit);
 	BOOST_FOREACH ( const string& value, values ) {
 // 	    cout<<"ESDecisionValue: "<<decision<<'('<<value<<"): "<<next<<endl;
 	    valMap[value] = ESDecisionValue(next);

@@ -122,7 +122,7 @@ void EmpiricalInfection::init(){
     
     int day;
     csvNum1 >> day;
-    if (day >= _maximumDurationInDays)
+    if (day < 0 || day >= _maximumDurationInDays)
       throw TRACED_EXCEPTION_DEFAULT ("EmpiricalInfection::init(): invalid day");
     csvNum2 >> _mu_beta1[day];
     csvNum3 >> _sigma_beta1[day];
