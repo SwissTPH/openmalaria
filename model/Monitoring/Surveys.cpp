@@ -43,7 +43,6 @@ Survey* Survey::m_current;
 
 void SurveysType::init( const scnXml::Monitoring& monitoring ){
   Survey::m_surveyNumber = 0;
-  m_cohortOnly = false;
   if( monitoring.getCohortOnly().present() ){
       m_cohortOnly = monitoring.getCohortOnly().get();
   } else {

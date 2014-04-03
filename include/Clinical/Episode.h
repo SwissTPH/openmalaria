@@ -77,7 +77,13 @@ public:
     /** Set healthSystemMemory. */
     static void init( int hsMemory );
     
-  Episode() : _time(TimeStep::never), _ageGroup() {};
+    Episode() :
+            _time(TimeStep::never),
+            _surveyPeriod(0 /* dummy survey */),
+            _ageGroup(),
+            _inCohort(false),
+            _state(NONE)
+    {};
   ~Episode();
   
   /// Report anything pending, as on destruction

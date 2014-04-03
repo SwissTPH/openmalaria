@@ -42,7 +42,8 @@ void PerHost::cleanup () {
 // -----  PerHost non-static -----
 
 PerHost::PerHost (const Transmission::TransmissionModel& tm) :
-        outsideTransmission(false)
+        outsideTransmission(false),
+        _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
 }
 void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {

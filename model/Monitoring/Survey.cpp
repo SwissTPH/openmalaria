@@ -208,7 +208,14 @@ void AgeGroup::update (double ageYears) {
 // -----  Non-static members  -----
 
 
-Survey::Survey(){}
+Survey::Survey() :
+        m_nTransmit(numeric_limits<double>::signaling_NaN()),
+        m_annAvgK(numeric_limits<double>::signaling_NaN()),
+        m_inputEIR(numeric_limits<double>::signaling_NaN()),
+        m_simulatedEIR(numeric_limits<double>::signaling_NaN()),
+        m_Clinical_RDTs(numeric_limits<int>::min()),
+        m_Clinical_Microscopy(numeric_limits<int>::min())
+{}
 
 void Survey::allocate(){
     size_t numAgeGroups = AgeGroup::getNumGroups();

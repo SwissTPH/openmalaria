@@ -46,7 +46,10 @@ namespace Monitoring {
 class SurveysType
 {
 public:
-    SurveysType() : currentTimestep(TimeStep::never) {}
+    SurveysType() :
+            currentTimestep(TimeStep::never),
+            m_cohortOnly(false)
+            {}
     
     /** Timestep the current survey ends at.
      * 
