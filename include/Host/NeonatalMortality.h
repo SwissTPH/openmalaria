@@ -41,17 +41,6 @@ public:
   
   /** Calculate risk of a neonatal mortality based on humans 20-25 years old. */
   static void update (const Population& population);
-  
-private:
-  /** Calculates the risk of neonatal mortality. */
-  static void calculateRiskFromMaternalInfection(int nCounter, int pCounter);
-  
-  /** Probability for a newborn to die (indirect death) because the mother is
-   * infected. Depends on the prevalence of parasitaemia in mother at some
-   * previous t. */
-  static double _riskFromMaternalInfection;
-  //! array for stored prevalences 20-25 years for 5 months (for neonatal deaths)
-  static std::vector<double> _prevalenceByGestationalAge;
 };
 
 } }
