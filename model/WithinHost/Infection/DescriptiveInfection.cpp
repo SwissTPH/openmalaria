@@ -99,6 +99,11 @@ void DescriptiveInfection::init (const Parameters& parameters) {
         csvNum1 >> i;
         csvNum2 >> j;
         csvNum3 >> meanlogdens;
+        
+        if( i < 1 || i > numDurations || j < 1 || j > numDurations ){
+            throw util::base_exception( string("error in data file: ")
+                .append(densities_filename), Error::InputResource );
+        }
 
         //fill initial matrix
         meanLogParasiteCount[i-1][j-1]=meanlogdens;
