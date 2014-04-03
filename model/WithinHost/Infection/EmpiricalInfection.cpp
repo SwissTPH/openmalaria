@@ -166,7 +166,7 @@ bool EmpiricalInfection::updateDensity (double survivalFactor, TimeStep ageOfInf
   //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
   # define L _laggedLogDensities
   
-  if (ageOfInfection.asInt() > _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
+  if (ageOfInfection.asInt() >= _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
     return true;	// cut-off point
   
   // constraints to ensure the density is defined and not exploding
