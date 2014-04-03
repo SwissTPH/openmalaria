@@ -299,6 +299,7 @@ public:
             }
         }
         
+        if( total == 0 ) return;        // no humans to deploy to; avoid divide by zero
         double propProtected = static_cast<double>( total - unprotected.size() ) / static_cast<double>( total );
         if( propProtected < coverage ){
             // Proportion propProtected are already covered, so need to

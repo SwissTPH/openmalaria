@@ -31,10 +31,22 @@ namespace OM { namespace Host {
 double NeonatalMortality::_riskFromMaternalInfection = 0.0;
 std::vector<double> NeonatalMortality::_prevalenceByGestationalAge;
 
+//Goodman estimated for neonatal mortality due to malaria in pregnancy
+const double gEst = 0.011;
+//Critical value of Prev20-25 for neonatal mortality
+const double critPrev2025 = 0.25;
+//Critical value for estimating prevalence in primigravidae
+const double critPrevPrim = 0.19;
+//Proportion of births with primigravid mothers
+const double pBirthPrim = 0.3;
+// optimised constants:
+const double y = pBirthPrim * gEst;
+const double z = -1.0 / critPrev2025;
+
 
 void NeonatalMortality::init() {
-  TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
-  _prevalenceByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
+    TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
+    _prevalenceByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
@@ -76,32 +88,26 @@ void NeonatalMortality::update (const Population& population) {
 }
 
 void NeonatalMortality::calculateRiskFromMaternalInfection (int nCounter, int pCounter) {
-  //Goodman estimated for neonatal mortality due to malaria in pregnancy
-  const double gEst = 0.011;
-  //Critical value of Prev20-25 for neonatal mortality
-  const double critPrev2025 = 0.25;
-  //Critical value for estimating prevalence in primigravidae
-  const double critPrevPrim = 0.19;
-  //Proportion of births with primigravid mothers
-  const double pBirthPrim = 0.3;
-  //default value for prev2025, for short simulations 
-  double prev2025 = 0.25;
-  prev2025 = double(pCounter) / nCounter;  
-  double maxprev = prev2025;
-  //gestational age is in time steps for the last 5 months of pregnancy only
-  TimeStep timeStepsMinus1( 150 / TimeStep::interval - 1 );
-  //update the vector containing the prevalence by gestational age
-  for (TimeStep t(0); t < timeStepsMinus1; ++t) {
-    _prevalenceByGestationalAge[t.asInt()] = _prevalenceByGestationalAge[t.asInt()+1];
-    if (_prevalenceByGestationalAge[t.asInt()] > maxprev) {
-      maxprev = _prevalenceByGestationalAge[t.asInt()];
+    //default value for prev2025, for short simulations 
+    double prev2025 = 0.25;
+    //TODO: fix when nCounter is zero
+//     if( nCounter > 0 )    // Note: this check was added after surrounding code was written; previously the 0.25 value was NEVER used
+    prev2025 = double(pCounter) / nCounter;
+    
+    double maxPrev = prev2025;
+    //update the vector containing the prevalence by gestational age
+    size_t index = mod_nn(TimeStep::simulation, _prevalenceByGestationalAge.size());
+    _prevalenceByGestationalAge[index] = prev2025;
+    for (size_t i = 0; i < _prevalenceByGestationalAge.size(); ++i) {
+        if (_prevalenceByGestationalAge[i] > maxPrev) {
+            maxPrev = _prevalenceByGestationalAge[i];
+        }
     }
-  }
-  _prevalenceByGestationalAge[timeStepsMinus1.asInt()] = prev2025;
-  //equation (2) p 75 AJTMH 75 suppl 2
-  double prevpg= maxprev / (critPrevPrim + maxprev);
-  //equation (1) p 75 AJTMH 75 suppl 2
-  _riskFromMaternalInfection = gEst * pBirthPrim * (1.0-exp(-prevpg/critPrev2025));
+    
+    //equation (2) p 75 AJTMH 75 suppl 2
+    double prevPG= maxPrev / (critPrevPrim + maxPrev);
+    // equation (1) p 75 AJTMH 75 suppl 2 including 30% multiplier
+    _riskFromMaternalInfection = y * (1.0-exp(prevPG * z));
 }
 
 } }
