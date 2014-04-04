@@ -51,10 +51,6 @@
       <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="nSeq" value="true"/>
-      <option name="nHospitalDeaths" value="true"/>
-      <option name="nIndDeaths" value="true"/>
-      <option name="nDirDeaths" value="true"/>
       <option name="allCauseIMR" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="nNMFever" value="true"/>
@@ -73,9 +69,6 @@
       <option name="Clinical_DrugUsageIV" value="true"/>
       <option name="nMDAs" value="true"/>
       <option name="nMassScreenings" value="true"/>
-      <option name="nAddedToCohort" value="true"/>
-      <option name="nRemovedFromCohort" value="true"/>
-      <option name="nNmfDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <!-- we don't actually need many for testing -->

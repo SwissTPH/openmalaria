@@ -43,7 +43,6 @@
       <option name="Clinical_FirstDayDeaths" value="true"/>
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
       <option name="nAddedToCohort"/>
-      <option name="nRemovedFromCohort"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>730</surveyTime>
