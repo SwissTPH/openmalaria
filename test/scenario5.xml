@@ -34,7 +34,6 @@
       <option name="totalInfs" value="true"/>
       <option name="nTransmit" value="true"/>
       <option name="totalPatentInf" value="true"/>
-      <option name="contrib" value="true"/>
       <option name="sumPyrogenThresh" value="true"/>
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>

@@ -48,6 +48,7 @@ bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
 class SurveyMeasureMap {
     // Lookup table to translate the strings used in the XML file to the internal enumerated values:
     map<string,SM::SurveyMeasure> codeMap;
+    set<string> removedCodes;
     
 public:
     SurveyMeasureMap () {
@@ -60,7 +61,7 @@ public:
         codeMap["totalInfs"] = SM::totalInfs;
         codeMap["nTransmit"] = SM::nTransmit;
         codeMap["totalPatentInf"] = SM::totalPatentInf;
-        codeMap["contrib"] = SM::contrib;
+        removedCodes.insert("contrib");
         codeMap["sumPyrogenThresh"] = SM::sumPyrogenThresh;
         codeMap["nTreatments1"] = SM::nTreatments1;
         codeMap["nTreatments2"] = SM::nTreatments2;
@@ -76,7 +77,7 @@ public:
         codeMap["nMassVaccinations"] = SM::nMassVaccinations;
         codeMap["nHospitalRecovs"] = SM::nHospitalRecovs;
         codeMap["nHospitalSeqs"] = SM::nHospitalSeqs;
-        codeMap["nIPTDoses"] = SM::nIPTDoses;
+        removedCodes.insert("nIPTDoses");
         codeMap["annAvgK"] = SM::annAvgK;
         codeMap["nNMFever"] = SM::nNMFever;
         codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
@@ -98,7 +99,7 @@ public:
         codeMap["nMassGVI"] = SM::nMassGVI;
         codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
         codeMap["nAddedToCohort"] = SM::nAddedToCohort;
-        codeMap["nRemovedFromCohort"] = SM::nRemovedFromCohort;
+        removedCodes.insert("nRemovedFromCohort");
         codeMap["nMDAs"] = SM::nMDAs;
         codeMap["nMassScreenings"] = SM::nMassScreenings;
         codeMap["nNmfDeaths"] = SM::nNmfDeaths;
@@ -115,8 +116,9 @@ public:
         map<string,SM::SurveyMeasure>::iterator codeIt = codeMap.find (s);
         if (codeIt == codeMap.end()) {
             ostringstream msg;
-            msg << "Unrecognised survey option: \"";
-            msg << s << '"';
+            if( removedCodes.count(s) > 0 ) msg << "Removed";
+            else msg << "Unrecognised";
+            msg << " survey option: \"" << s << '"';
             throw util::xml_scenario_error(msg.str());
         }
         return codeIt->second;

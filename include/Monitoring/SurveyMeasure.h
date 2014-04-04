@@ -67,8 +67,8 @@ enum SurveyMeasure {
     /** The sum of all detectable infections (where blood stage parasite
      * density is above the detection limit) across all human hosts. */
     totalPatentInf= 8,
-    /// Contribution to immunity functions (output not used)
-    contrib= 9,
+//     /// Contribuion to immunity functions (removed)
+//     contrib= 9,
     /// Sum of the pyrogenic threshold
     sumPyrogenThresh = 10,
     
@@ -122,8 +122,8 @@ enum SurveyMeasure {
     /// sequelae in hospital
     nHospitalSeqs= 24,
     
-    /// Number of IPT Doses; no longer used (IPT model has been removed)
-    nIPTDoses= 25,
+//     /// Number of IPT Doses (removed together with IPT model)
+//     nIPTDoses= 25,
     
     /** Annual Average Kappa
      *
@@ -139,12 +139,12 @@ enum SurveyMeasure {
     innoculationsPerAgeGroup = 30,
     
     //BEGIN Per day-of-year data (removed)
-    /// Inoculations per human (all ages) per day of year, over the last year.
-    /// (Reporting removed.)
-    innoculationsPerDayOfYear = 28,
-    /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
-    /// (Reporting removed.)
-    kappaPerDayOfYear = 29,
+//     /// Inoculations per human (all ages) per day of year, over the last year.
+//     /// (Reporting removed.)
+//     innoculationsPerDayOfYear = 28,
+//     /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
+//     /// (Reporting removed.)
+//     kappaPerDayOfYear = 29,
     //END
     
     /** @brief Vector model parameters.
@@ -219,8 +219,8 @@ enum SurveyMeasure {
     
     /// Number of cohort recruitments (note: recruitment doesn't imply human was not already a member)
     nAddedToCohort = 50,
-    /// Number of individuals removed from cohort (obselete)
-    nRemovedFromCohort = 51,
+//     /// Number of individuals removed from cohort (removed)
+//     nRemovedFromCohort = 51,
     
     /** Number of people (per age group) treated by mass drug administration
      * campaign. (Note that in one day time-step model MDA can be configured
