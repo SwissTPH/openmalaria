@@ -134,6 +134,7 @@
             <postprandialKillingEffect value="0.2772"/>
           </anophelesParams>
         </GVI>
+        <subPopRemoval afterYears="36"/>
       </component>
       <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
@@ -162,7 +163,7 @@
       <deployment name="Pyreth">
         <component id="GVI"/>
         <timed>
-          <cumulativeCoverage component="GVI" maxAgeYears="36.0"/>
+          <cumulativeCoverage component="GVI"/>
           <deploy coverage="0.05775" time="18"/>
           <deploy coverage="0.1155" time="19"/>
           <deploy coverage="0.17325" time="20"/>

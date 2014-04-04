@@ -93,10 +93,10 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         _doomed = -TimeStep::interval;
     
     if( _tLastTreatment == TimeStep::simulation ){
-        human.removeFromSubPops( interventions::SubPopRemove::ON_FIRST_TREATMENT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
     }
     if( pgState & Episode::SICK ){
-        human.removeFromSubPops( interventions::SubPopRemove::ON_FIRST_BOUT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
     }
 }
 

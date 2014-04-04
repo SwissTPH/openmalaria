@@ -100,6 +100,9 @@ public:
     /** Get the component identifier. */
     inline ComponentId id()const{ return m_id; }
     
+    /** Get the duration. */
+    inline TimeStep duration()const{ return m_duration; }
+    
     /** Returns the appropriate descriptor from the Component::Type enum.
      * 
      * This is only used a small number of times during setup, so doesn't need
@@ -109,6 +112,11 @@ public:
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const =0;
 #endif
+    
+    // Only for use by InterventionManager:
+    inline void setExpireAfter( TimeStep duration ){
+        m_duration = duration;
+    }
     
 protected:
     /** Construct (from a derived class).
@@ -122,7 +130,8 @@ protected:
     explicit HumanInterventionComponent(ComponentId id,
                                         Monitoring::ReportMeasureI ctsMeasure,
                                         Monitoring::ReportMeasureI timedMeasure) :
-            m_id(id), m_measureCts( ctsMeasure ), m_measureTimed( timedMeasure ) {}
+            m_id(id),
+            m_measureCts( ctsMeasure ), m_measureTimed( timedMeasure ) {}
     
     /** Trivial helper function to get deployment measure. */
     inline Monitoring::ReportMeasureI reportMeasure( Deployment::Method method )const{
@@ -134,6 +143,7 @@ private:
     HumanInterventionComponent( const HumanInterventionComponent& );
     
     ComponentId m_id;
+    TimeStep m_duration;
     Monitoring::ReportMeasureI m_measureCts, m_measureTimed;
 };
 

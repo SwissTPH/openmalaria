@@ -25,17 +25,7 @@
 namespace OM { namespace interventions {
     using namespace Monitoring::Report;
 
-std::set<ComponentId> cohortComponents;
-
-bool CohortSelectionComponent::inAnyCohort(const map< ComponentId, TimeStep >& components)
-{
-    for( map< ComponentId, TimeStep >::const_iterator it = components.begin(),
-        end = components.end(); it != end; ++it )
-    {
-        if( cohortComponents.count( it->first ) > 0 ) return true;
-    }
-    return false;
-}
+std::set<ComponentId> CohortSelectionComponent::cohortComponents;
 
 CohortSelectionComponent::CohortSelectionComponent( ComponentId id, const scnXml::Cohort& cohort ) :
         HumanInterventionComponent(id, MI_NUM_ADDED_COHORT, MI_NUM_ADDED_COHORT)

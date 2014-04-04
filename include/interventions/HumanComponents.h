@@ -130,7 +130,7 @@ public:
 
 private:
     /// Details for each deployed vaccine for this human
-    typedef vector<PerEffectPerHumanVaccine> EffectList;
+    typedef std::vector<PerEffectPerHumanVaccine> EffectList;
     EffectList effects;
 };
 

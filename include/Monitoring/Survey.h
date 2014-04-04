@@ -80,7 +80,8 @@ namespace Report {
         MI_HOSPITAL_FIRST_DAY_DEATHS,
         //TODO: cohorts should be handled independently, not as "in cohort"/"not in a cohort"
         MI_NUM_ADDED_COHORT,
-        MI_NUM_REMOVED_COHORT,
+        MI_N_SP_REM_TOO_OLD,
+        MI_N_SP_REM_FIRST_EVENT,
         MI_NUM  // must be last; not a measure to report
     };
     /// Measures which are reported as doubles

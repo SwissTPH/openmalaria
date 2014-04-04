@@ -460,10 +460,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     }
     
     if( timeLastTreatment == TimeStep::simulation ){
-        human.removeFromSubPops( interventions::SubPopRemove::ON_FIRST_TREATMENT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
     }
     if( pgState & Episode::SICK ){
-        human.removeFromSubPops( interventions::SubPopRemove::ON_FIRST_BOUT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
     }
 }
 

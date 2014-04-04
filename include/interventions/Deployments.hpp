@@ -274,13 +274,13 @@ public:
      * @param intervention The HumanIntervention to deploy.
      * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
      * @param cumCuvId Id of component to test coverage for
-     * @param maxAge Maximum time-span to consider a deployed component still to be effective */
+     */
     TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
                            ComponentId subPop,
-                           ComponentId cumCuvId, TimeStep maxAge ) :
+                           ComponentId cumCuvId ) :
         TimedHumanDeployment( mass, intervention, subPop ),
-        cumCovInd( cumCuvId ), maxInterventionAge( maxAge )
+        cumCovInd( cumCuvId )
     {
     }
     
@@ -293,7 +293,7 @@ public:
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || iter->isInSubPop( subPop ) ){
                     total+=1;
-                    if( iter->needsRedeployment(cumCovInd, maxInterventionAge) )
+                    if( !iter->isInSubPop(cumCovInd) )
                         unprotected.push_back( &*iter );
                 }
             }
@@ -318,8 +318,6 @@ public:
     
 protected:
     ComponentId cumCovInd;
-    // max age at which an intervention is considered not to need replacement
-    TimeStep maxInterventionAge;
 };
 
 class TimedVectorDeployment : public TimedDeployment {

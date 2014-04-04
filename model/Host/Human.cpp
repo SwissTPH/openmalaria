@@ -37,6 +37,7 @@
 namespace OM { namespace Host {
     using namespace OM::util;
     using namespace Monitoring;
+    using interventions::ComponentId;
     
     bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
             opt_trans_treat_het = false, opt_comorb_treat_het = false,
@@ -75,9 +76,9 @@ void Human::clear() {   // static clear
 Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     perHostTransmission(tm),
     infIncidence(InfectionIncidenceModel::createModel()),
+    m_inAnyCohort(false),
     _dateOfBirth(dateOfBirth),
-    nextCtsDist(0),
-    m_inAnyCohort(false)
+    nextCtsDist(0)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
   assert( _dateOfBirth == TimeStep::simulation ||
@@ -157,6 +158,20 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
+// return true if now in any cohort
+bool checkInAnyCohort( const map<ComponentId,TimeStep>& subPopExp ){
+    const set<ComponentId>& cohortComponents = interventions::CohortSelectionComponent::getCohortComponents();
+    for( map<ComponentId, TimeStep>::const_iterator it = subPopExp.begin(), end = subPopExp.end(); it != end; ++it )
+    {
+        if( it->second >= TimeStep::simulation ){
+            if( cohortComponents.count( it->first ) > 0 ){
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
     ++PopulationStats::humanUpdateCalls;
@@ -171,6 +186,27 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         util::streamValidate( ageTimeSteps.asInt() );
         double ageYears = ageTimeSteps.inYears();
         monitoringAgeGroup.update( ageYears );
+        // check sub-pop expiry
+        bool anyRemoved = false;
+        for( map<ComponentId,TimeStep>::iterator expIt =
+            m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
+        {
+            //  We use >= to test membership, < is inverse (see comment on m_subPopExp)
+            if( expIt->second < TimeStep::simulation ){
+                // don't flush reports
+                // report removal due to expiry
+                Survey::current().addInt(Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
+                // erase element, but continue iteration (note: this is simpler in C++11)
+                map<ComponentId,TimeStep>::iterator toErase = expIt;
+                ++expIt;
+                m_subPopExp.erase( toErase );
+                anyRemoved = true;
+            }else{
+                ++expIt;
+            }
+        }
+        // update m_inAnyCohort (may go from true to false)
+        if( anyRemoved && m_inAnyCohort ) m_inAnyCohort = checkInAnyCohort( m_subPopExp );
         
         double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
@@ -191,15 +227,6 @@ void Human::clearImmunity(){
     withinHostModel->clearImmunity();
 }
 
-bool Human::needsRedeployment( interventions::ComponentId cumCovId, TimeStep maxAge ){
-    map<interventions::ComponentId,TimeStep>::const_iterator it = lastDeployments.find( cumCovId );
-    if( it == lastDeployments.end() ){
-        return true;  // no previous deployment
-    }else{
-        return it->second + maxAge <= TimeStep::simulation;
-    }
-}
-
 
 void Human::summarize() {
     // 5-day only, compatibility option:
@@ -215,31 +242,43 @@ void Human::summarize() {
     
     if( patent ){
         // this should happen after all other reporting!
-        removeFromSubPops( interventions::SubPopRemove::ON_FIRST_INFECTION );
+        removeFirstEvent( interventions::SubPopRemove::ON_FIRST_INFECTION );
     }
 }
 
-void Human::reportDeployment( interventions::ComponentId id ){
-    lastDeployments[id] = TimeStep::simulation;
-    m_inAnyCohort = interventions::CohortSelectionComponent::inAnyCohort( lastDeployments );
+void Human::reportDeployment( ComponentId id, TimeStep duration ){
+    if( duration <= TimeStep(0) ) return; // nothing to do
+    m_subPopExp[id] = TimeStep::simulation + duration;
+    // update m_inAnyCohort (may go from false to true)
+    if( interventions::CohortSelectionComponent::getCohortComponents().count( id ) > 0 )
+    {
+        m_inAnyCohort = true;
+    }
 }
-void Human::removeFromSubPops( interventions::SubPopRemove::RemoveAtCode code ){
-    const vector<interventions::ComponentId>& removeAtList = interventions::removeAtIds[code];
-    for( vector<interventions::ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        if( lastDeployments.count(*it) > 0 ){
-            // Note: from the point of view of cohorts, it makes sense to reset
-            // healthSystemMemory if this is a cohort. This was previously done
-            // by calling flushReports(), but this resets health system memory
-            // for all reports. Instead we do not reset (considered acceptable).
-            
-            //TODO(monitoring): reporting
-            // report before removing membership
-            Survey::current().addInt(Report::MI_NUM_REMOVED_COHORT, *this, 1 );
+void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
+    const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
+    bool anyRemoved = false;
+    for( vector<ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
+        map<ComponentId,TimeStep>::iterator expIt = m_subPopExp.find( *it );
+        if( expIt != m_subPopExp.end() ){
+            //  We use >= to test membership (see comment on m_subPopExp)
+            if( expIt->second >= TimeStep::simulation ){
+                // removeFirstEvent() is used for onFirstBout, onFirstTreatment
+                // and onFirstInfection cohort options. Health system memory must
+                // be reset for this to work properly; in theory the memory should
+                // be independent for each cohort, but this is a usable approximation.
+                flushReports();     // reset HS memory
+                
+                // report removal due to first infection/bout/treatment
+                Survey::current().addInt(Report::MI_N_SP_REM_FIRST_EVENT, *this, 1 );
+            }
             // remove (affects reporting, restrictToSubPop and cumulative deployment):
-            lastDeployments.erase( *it );
-            m_inAnyCohort = interventions::CohortSelectionComponent::inAnyCohort( lastDeployments );
+            m_subPopExp.erase( expIt );
+            anyRemoved = true;
         }
     }
+    // update m_inAnyCohort (may go from true to false)
+    if( anyRemoved && m_inAnyCohort ) m_inAnyCohort = checkInAnyCohort( m_subPopExp );
 }
 
 void Human::flushReports (){

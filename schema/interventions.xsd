@@ -290,7 +290,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="HumanInterventions">
     <xs:sequence>
-      <xs:element name="component" minOccurs="0" maxOccurs="unbounded" type="om:HumanInterventionComponent">
+      <xs:element name="component" minOccurs="1" maxOccurs="unbounded" type="om:HumanInterventionComponent">
         <xs:annotation>
           <xs:documentation>
             A parameterisation of an effect achieved by one component of an
@@ -391,203 +391,117 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="HumanInterventionComponent">
-    <xs:choice>
-      <xs:element name="MDA">
-        <xs:annotation>
-          <xs:documentation>
-            Description of a MDA/MSAT intervention (Mass Screen and Treat is
-            just Mass Drug Administration with a diagnostic).
-            
-            This MDA/MSAT model allows a diagnostic and drug action modelled
-            by direct clearance rates. For the 1-day timestep models, a more
-            detailed model of drug action and more flexible model of deployment
-            decisions are available; see MDA1D.
-            
-            The model of action of this intervention is (1) screen the patient
-            and, if the diagnostic outcome is positive, (2) select one option
-            from a list of treatment options (randomly when multiple are
-            available) and carry out the treatment option's actions (which may
-            be to do nothing). If the diagnostic outcome is negative no
-            treatment is given. If no diagnostic is described, treatment occurs
-            exactly as if a diagnostic was used and returned positive.
-            
-            Two reporting options correspond to this intervention for each mode
-            of deployment (i.e. four in total); a "screening" is reported each
-            time an individual is selected for deployment (even if no
-            diagnostic is configured), and an "MDA" deployment is reported
-            whenever the diagnostic outcome is positive (or no diagnostic is
-            configured; note that even if a treatment option which does nothing
-            is selected an "MDA" deployment is still reported, which makes
-            sense where such an option corresponds to drug failure or lack of
-            patient adherence rather than a decision not to treat).
-          </xs:documentation>
-          <xs:appinfo>name:Mass drug administration (simple);</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="diagnostic" type="om:HSDiagnostic" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
-                  Description of diagnostic used by mass treatment option
-                  of five-day case management model — may be used to model
-                  MDA without diagnostic or MSAT.
-                  
-                  The diagnostic is used on hosts selected by the coverage
-                  parameters, and drugs are administered whenever the test
-                  outcome is positive.
-                </xs:documentation>
-                <xs:appinfo> name:Diagnostic (5-day);</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="effects">
-              <xs:annotation>
-                <xs:documentation>
-                  A list of treatment options. When treatment is to be given,
-                  one option will be selected randomly (according to the
-                  "pSelection" probability of selection parameters given), and
-                  the actions of that option enacted.
-                  
-                  Multiple options are intended to allow simulation of drug
-                  failure and varying patient adherence. An option may do
-                  nothing.
-                </xs:documentation>
-                <xs:appinfo>name:Treatment options;</xs:appinfo>
-              </xs:annotation>
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="option" maxOccurs="unbounded">
-                    <xs:complexType>
-                      <!-- Note: it may in the future be preferable to define
-                      the option elsewhere and link to it via some identifier -->
-                      <xs:complexContent>
-                        <xs:extension base="om:TreatmentOption">
-                          <xs:attribute name="pSelection" type="xs:double" use="required">
-                            <xs:annotation>
-                              <xs:documentation>
-                                The probability of selection of this treatment
-                                option. The sum of probabilities of all options
-                                in the list should be 1.
-                              </xs:documentation>
-                              <xs:appinfo>name:Probability of selection;min:0;max:1;units:dimensionless;</xs:appinfo>
-                            </xs:annotation>
-                          </xs:attribute>
-                        </xs:extension>
-                      </xs:complexContent>
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="MDA1D" type="om:HSESCaseManagement">
-        <xs:annotation>
-          <xs:documentation>
-            Description of a MDA/MSAT intervention (Mass Screen and Treat is
-            just Mass Drug Administration with a diagnostic).
-            
-            This MDA/MSAT model piggy-backs the 1-day timestep case management
-            and drug models, and thus is only available when using a 1-day
-            timestep.
-            
-            Description of treatment type used by mass treatment option of
-            one-day case management model. Can be used to describe
-            one-size-fits-all mass drug dosing, age-based mass drug dosing and
-            screen-and-treat. Number of treatments given can be reported by
-            the nMDAs option.
-          </xs:documentation>
-          <xs:appinfo>name:Mass drug administration (with decision tree and drug PK/PD model);</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="PEV" type="om:vaccineDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Pre-erythrocytic vaccine (PEV): prevents a proportion of infections
-            from commencing.
-          </xs:documentation>
-          <xs:appinfo>name:Vaccines;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="BSV" type="om:vaccineDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Blood-stage vaccine (BSV): acts as a killing factor on blood-stage
-            parasites. Exact action depends on the within host model.
-          </xs:documentation>
-          <xs:appinfo>name:Vaccines;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="TBV" type="om:vaccineDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Transmission-blocking vaccine (TBV): one minus this scales the
-            probability of transmission to mosquitoes
-          </xs:documentation>
-          <xs:appinfo>name:Vaccines;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="ITN" minOccurs="0" type="om:ITNDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Description of bed-net interventions (ITNs, LLINs).
-          </xs:documentation>
-          <xs:appinfo>name:Bed nets;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="IRS" minOccurs="0" type="om:IRSDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Description of indoor residual spraying interventions.
-          </xs:documentation>
-          <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="GVI" minOccurs="0" type="om:GVIDescription">
-        <xs:annotation>
-          <xs:documentation>
-            Low-level description of intervention effects on vectors (i.e.
-            mosquitoes). Can be used to describe simple ITN or IRS
-            interventions (though more complex models are available for these
-            interventions) or other interventions such as mosquito repellant
-            or ivermectin.
-            
-            Note that all actions of this intervention component will decay
-            according to a single decay function. If independant decay is
-            wanted, a separate component can be used for each action.
-          </xs:documentation>
-          <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="cohort" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Recruitment of cohort as a pseudo-intervention.
-            
-            Multiple cohorts are allowed, thus each must have a unique
-            identifier. The cohort identifier is the identifier of the
-            component used do recruit the cohort.
-          </xs:documentation>
-          <xs:appinfo>name:Cohort recruitment;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="clearImmunity">
-        <xs:annotation>
-          <xs:documentation>
-            Removes all exposure-related immunitsy gained over time by hosts
-            without removing infections (or affecting the ability to gain
-            immunity through exposure).
-            
-            Hypothetical, but potentially useful to simulate scenarios with
-            unprotected humans.
-          </xs:documentation>
-          <xs:appinfo>name:Clear Immunity;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType/>
-      </xs:element>
-    </xs:choice>
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name="MDA" type="om:MDAComponent"/>
+        <xs:element name="MDA1D" type="om:HSESCaseManagement">
+          <xs:annotation>
+            <xs:documentation>
+              Description of a MDA/MSAT intervention (Mass Screen and Treat is
+              just Mass Drug Administration with a diagnostic).
+              
+              This MDA/MSAT model piggy-backs the 1-day timestep case management
+              and drug models, and thus is only available when using a 1-day
+              timestep.
+              
+              Description of treatment type used by mass treatment option of
+              one-day case management model. Can be used to describe
+              one-size-fits-all mass drug dosing, age-based mass drug dosing and
+              screen-and-treat. Number of treatments given can be reported by
+              the nMDAs option.
+            </xs:documentation>
+            <xs:appinfo>name:Mass drug administration (with decision tree and drug PK/PD model);</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="PEV" type="om:vaccineDescription">
+          <xs:annotation>
+            <xs:documentation>
+              Pre-erythrocytic vaccine (PEV): prevents a proportion of infections
+              from commencing.
+            </xs:documentation>
+            <xs:appinfo>name:Vaccines;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="BSV" type="om:vaccineDescription">
+          <xs:annotation>
+            <xs:documentation>
+              Blood-stage vaccine (BSV): acts as a killing factor on blood-stage
+              parasites. Exact action depends on the within host model.
+            </xs:documentation>
+            <xs:appinfo>name:Vaccines;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="TBV" type="om:vaccineDescription">
+          <xs:annotation>
+            <xs:documentation>
+              Transmission-blocking vaccine (TBV): one minus this scales the
+              probability of transmission to mosquitoes
+            </xs:documentation>
+            <xs:appinfo>name:Vaccines;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="ITN" type="om:ITNDescription">
+          <xs:annotation>
+            <xs:documentation>
+              Description of bed-net interventions (ITNs, LLINs).
+            </xs:documentation>
+            <xs:appinfo>name:Bed nets;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="IRS" type="om:IRSDescription">
+          <xs:annotation>
+            <xs:documentation>
+              Description of indoor residual spraying interventions.
+            </xs:documentation>
+            <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="GVI" type="om:GVIDescription">
+          <xs:annotation>
+            <xs:documentation>
+              Low-level description of intervention effects on vectors (i.e.
+              mosquitoes). Can be used to describe simple ITN or IRS
+              interventions (though more complex models are available for these
+              interventions) or other interventions such as mosquito repellant
+              or ivermectin.
+              
+              Note that all actions of this intervention component will decay
+              according to a single decay function. If independant decay is
+              wanted, a separate component can be used for each action.
+            </xs:documentation>
+            <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="cohort">
+          <xs:annotation>
+            <xs:documentation>
+              Recruitment of cohort as a pseudo-intervention.
+              
+              Multiple cohorts are allowed, thus each must have a unique
+              identifier. The cohort identifier is the identifier of the
+              component used do recruit the cohort.
+            </xs:documentation>
+            <xs:appinfo>name:Cohort recruitment;</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType/>
+        </xs:element>
+        <xs:element name="clearImmunity">
+          <xs:annotation>
+            <xs:documentation>
+              Removes all exposure-related immunitsy gained over time by hosts
+              without removing infections (or affecting the ability to gain
+              immunity through exposure).
+              
+              Hypothetical, but potentially useful to simulate scenarios with
+              unprotected humans.
+            </xs:documentation>
+            <xs:appinfo>name:Clear Immunity;</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType/>
+        </xs:element>
+      </xs:choice>
+      <xs:element name="subPopRemoval" minOccurs="0" type="om:SubPopRemoval"/>
+    </xs:sequence>
     <xs:attribute name="id" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -608,7 +522,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Name of component;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="firstBoutOnly" type="xs:boolean" use="optional">
+  </xs:complexType>
+  <xs:complexType name="SubPopRemoval">
+    <xs:annotation>
+      <xs:documentation>
+        Each human intervention component corresponds to a sub-population:
+        those who have received or are considered to be protected by the
+        intervention component. Humans automatically become members of this
+        sub-population when receiving an intervention component; this element
+        controls how humans are removed from the sub-population.
+        
+        Note that sub-populations do not directly correspond to an
+        intervention's effects: lack of effectiveness does not imply removal
+        from the sub-population (except as explicitly configured here) and
+        removal from the sub-population does not halt an intervention's
+        effects.
+        
+        Sub-populations may be used to define a cohort, to restrict deployment
+        of other interventions and to use cumulative deployment mode. A sub-
+        population may or may not correspond (roughly) to humans protected by
+        some intervention.
+      </xs:documentation>
+      <xs:appinfo>name:Remove from sub-population ...;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="onFirstBout" type="xs:boolean" default="false">
       <xs:annotation>
         <xs:documentation>
           If true, remove individuals from the sub-population at the start of
@@ -617,8 +554,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           studies which measure time to the first episode, using active
           case detection.
           
-          Reports are flushed when this happens regardless of the flushReports
-          setting.
+          Reports delayed due to health-system memory are forced out when this
+          occurs. Note that this can increase the number of uncomplicated cases
+          reported across the entire population; for this reason reports are
+          not forced on recruitment or most removal options.
           
           This does not prevent re-recruitment in the case that recruitment
           settings could conceivably recruit the same individual twice.
@@ -626,7 +565,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Time to first episode only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="firstTreatmentOnly" type="xs:boolean" use="optional">
+    <xs:attribute name="onFirstTreatment" type="xs:boolean" default="false">
       <xs:annotation>
         <xs:documentation>
           If true, remove individuals from the sub-population when they first
@@ -634,8 +573,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           is intended for cohort studies which measure the time to first
           episode, using passive case detection.
           
-          Reports are flushed when this happens regardless of the flushReports
-          setting.
+          Reports delayed due to health-system memory are forced out when this
+          occurs. Note that this can increase the number of uncomplicated cases
+          reported across the entire population; for this reason reports are
+          not forced on recruitment or most removal options.
           
           This does not prevent re-recruitment in the case that recruitment
           settings could conceivably recruit the same individual twice.
@@ -643,7 +584,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Time to first treatment only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="firstInfectionOnly" type="xs:boolean" use="optional">
+    <xs:attribute name="onFirstInfection" type="xs:boolean" default="false">
       <xs:annotation>
         <xs:documentation>
           If true, remove individuals from the sub-population at completion of
@@ -652,7 +593,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           studies which measure time to the first infection, using active
           case detection.
           
-          Reports are flushed when this happens regardless of the flushReports setting.
+          Reports delayed due to health-system memory are forced out when this
+          occurs. Note that this can increase the number of uncomplicated cases
+          reported across the entire population; for this reason reports are
+          not forced on recruitment or most removal options.
           
           This does not prevent re-recruitment in the case that recruitment settings could
           conceivably recruit the same individual twice.
@@ -660,6 +604,122 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Time to first infection only;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="afterYears" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          If given, membership to the sub-population of humans who have
+          received this intervention component expires after the given number of
+          years. Note that future deployments renew membership (e.g. if this
+          parameter is 4 years and the intervention is redeployed 3 years from
+          now, expiry happens after 7 years).
+          
+          This provides a crude way of modelling a cohort protected by some
+          intervention. A few interventions provide more detailed ways of
+          modelling expiry of protection. In any case, "expiry of protection"
+          is an abstract concept and does not imply that all protection has
+          ceased, even in the simulator.
+          
+          This may also be useful for cumulative deployment.
+          
+          Minimum duration is zero, which implies the human is effectively
+          never a member of the sub-population; a duration of one timestep
+          implies the human is a member of the sub-population while any futher
+          interventions are deployed on the same time as this human becomes a
+          member and on the next update of the human (including transmission
+          and health system events) but not beyond that. If this attribute is
+          not given, the simulated human is a member until death or some other
+          option triggers removal.
+        </xs:documentation>
+        <xs:appinfo>name:Remove from sub-population after;units:Years;min:0;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MDAComponent">
+     <xs:annotation>
+      <xs:documentation>
+        Description of a MDA/MSAT intervention (Mass Screen and Treat is
+        just Mass Drug Administration with a diagnostic).
+        
+        This MDA/MSAT model allows a diagnostic and drug action modelled
+        by direct clearance rates. For the 1-day timestep models, a more
+        detailed model of drug action and more flexible model of deployment
+        decisions are available; see MDA1D.
+        
+        The model of action of this intervention is (1) screen the patient
+        and, if the diagnostic outcome is positive, (2) select one option
+        from a list of treatment options (randomly when multiple are
+        available) and carry out the treatment option's actions (which may
+        be to do nothing). If the diagnostic outcome is negative no
+        treatment is given. If no diagnostic is described, treatment occurs
+        exactly as if a diagnostic was used and returned positive.
+        
+        Two reporting options correspond to this intervention for each mode
+        of deployment (i.e. four in total); a "screening" is reported each
+        time an individual is selected for deployment (even if no
+        diagnostic is configured), and an "MDA" deployment is reported
+        whenever the diagnostic outcome is positive (or no diagnostic is
+        configured; note that even if a treatment option which does nothing
+        is selected an "MDA" deployment is still reported, which makes
+        sense where such an option corresponds to drug failure or lack of
+        patient adherence rather than a decision not to treat).
+      </xs:documentation>
+      <xs:appinfo>name:Mass drug administration (simple);</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="diagnostic" type="om:HSDiagnostic" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            Description of diagnostic used by mass treatment option
+            of five-day case management model — may be used to model
+            MDA without diagnostic or MSAT.
+            
+            The diagnostic is used on hosts selected by the coverage
+            parameters, and drugs are administered whenever the test
+            outcome is positive.
+          </xs:documentation>
+          <xs:appinfo> name:Diagnostic (5-day);</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effects">
+        <xs:annotation>
+          <xs:documentation>
+            A list of treatment options. When treatment is to be given,
+            one option will be selected randomly (according to the
+            "pSelection" probability of selection parameters given), and
+            the actions of that option enacted.
+            
+            Multiple options are intended to allow simulation of drug
+            failure and varying patient adherence. An option may do
+            nothing.
+          </xs:documentation>
+          <xs:appinfo>name:Treatment options;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="option" maxOccurs="unbounded">
+              <xs:complexType>
+                <!-- Note: it may in the future be preferable to define
+                the option elsewhere and link to it via some identifier -->
+                <xs:complexContent>
+                  <xs:extension base="om:TreatmentOption">
+                    <xs:attribute name="pSelection" type="xs:double" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                          The probability of selection of this treatment
+                          option. The sum of probabilities of all options
+                          in the list should be 1.
+                        </xs:documentation>
+                        <xs:appinfo>name:Probability of selection;min:0;max:1;units:dimensionless;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="VectorIntervention">
     <xs:annotation>
@@ -835,10 +895,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           these people (regardless of previous coverage).
           
           If this attribute is specified, instead, the population is divided
-          into two sets: those who have received a certain intervention
-          component recently (or more generally, have been recruited into a
-          certain sub-population with last recruitment occurring recently), and
-          those who have not. If the proportion of people in the
+          into two sets: those who are a member of a certain sub-population and
+          those who are not (see "subPopRemoval" element).
+          If the proportion of people in the
           first set is less than the desired coverage, then the proportion of
           people from the second set needed to increase total coverage to the
           desired coverage is calculated. This proportion is then used as the
@@ -860,18 +919,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 selecting people.
               </xs:documentation>
               <xs:appinfo>name:Component identifier;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="maxAgeYears" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                The maximum age at which the component used when selecting
-                people is considered effective. Individuals are considered
-                covered when they previously received the component and the
-                time since the last reception (in years) is strictly less than
-                this age.
-              </xs:documentation>
-              <xs:appinfo>name:Maximum effective age of intervention;units:Years;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>

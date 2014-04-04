@@ -154,6 +154,7 @@
             <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
           </anophelesParams>
         </IRS>
+        <subPopRemoval afterYears="36"/>
       </component>
       <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
@@ -188,7 +189,7 @@
       <deployment name="new param">
         <component id="IRS"/>
         <timed>
-          <cumulativeCoverage component="IRS" maxAgeYears="36.0"/>
+          <cumulativeCoverage component="IRS"/>
           <deploy coverage="0.05775" time="18"/>
           <deploy coverage="0.1155" time="19"/>
           <deploy coverage="0.17325" time="20"/>

@@ -135,6 +135,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         + population->_transmissionModel->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
         + Monitoring::Survey::getFinalTimestep() + TimeStep( 1 );
+    assert( totalSimDuration < TimeStep::future );      // absurdly unlikely, and if it really could happen we should check for overflows too
     
     if (isCheckpoint()) {
         Continuous.init( monitoring, true );

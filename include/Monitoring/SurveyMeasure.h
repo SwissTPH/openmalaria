@@ -219,7 +219,7 @@ enum SurveyMeasure {
     
     /// Number of cohort recruitments (note: recruitment doesn't imply human was not already a member)
     nAddedToCohort = 50,
-    /// Number of individuals removed from cohort
+    /// Number of individuals removed from cohort (obselete)
     nRemovedFromCohort = 51,
     
     /** Number of people (per age group) treated by mass drug administration
@@ -261,6 +261,13 @@ enum SurveyMeasure {
      * methods. Can be higher than nCtsMDA since drugs are administered only
      * when the diagnostic is positive. Also see nCtsMDA description. */
     nCtsScreenings = 60,
+    
+    /** Number of removals from a sub-population due to expiry of duration of
+     * membership (e.g. intervention too old). */
+    nSubPopRemovalTooOld = 61,
+    /** Number of removals from a sub-population due to first
+     * infection/bout/treatment (see onFirstBout & co). */
+    nSubPopRemovalFirstEvent = 62,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

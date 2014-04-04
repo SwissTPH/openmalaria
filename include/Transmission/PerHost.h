@@ -109,7 +109,7 @@ protected:
     explicit HumanVectorInterventionComponent(interventions::ComponentId id,
                                         Monitoring::ReportMeasureI ctsMeasure,
                                         Monitoring::ReportMeasureI timedMeasure) :
-                                        HumanInterventionComponent(id, ctsMeasure, timedMeasure) {}
+            HumanInterventionComponent(id, ctsMeasure, timedMeasure) {}
 };
 
 /** Contains TransmissionModel parameters which need to be stored per host.

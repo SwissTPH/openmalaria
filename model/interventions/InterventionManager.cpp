@@ -95,49 +95,61 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             }
             ComponentId id( humanComponents.size() );        // i.e. index of next item
             identifierMap.insert( make_pair(component.getId(), id) );
+            
+            TimeStep expireAfter = TimeStep::future;
+            if( component.getSubPopRemoval().present() ){
+                const scnXml::SubPopRemoval& removeOpts = component.getSubPopRemoval().get();
+                if( removeOpts.getOnFirstBout() ){
+                    removeAtIds[SubPopRemove::ON_FIRST_BOUT].push_back( id );
+                }
+                if( removeOpts.getOnFirstTreatment() ){
+                    removeAtIds[SubPopRemove::ON_FIRST_INFECTION].push_back( id );
+                }
+                if( removeOpts.getOnFirstTreatment() ){
+                    removeAtIds[SubPopRemove::ON_FIRST_TREATMENT].push_back( id );
+                }
+                if( removeOpts.getAfterYears().present() ){
+                    expireAfter = TimeStep::fromYears( removeOpts.getAfterYears().get() );
+                }
+            }
+            
+            HumanInterventionComponent *hiComponent;
             if( component.getMDA().present() ){
                 //TODO(monitoring): report
-                humanComponents.push_back( new MDAComponent( id, component.getMDA().get() ) );
+                hiComponent = new MDAComponent( id, component.getMDA().get() );
             }else if( component.getMDA1D().present() ){
                 //TODO(monitoring): report
-                humanComponents.push_back( new MDA1DComponent( id, component.getMDA1D().get() ) );
+                hiComponent = new MDA1DComponent( id, component.getMDA1D().get() );
             }else if( component.getPEV().present() ){
-                humanComponents.push_back( new VaccineComponent( id, component.getPEV().get(), Vaccine::PEV ) );
+                hiComponent = new VaccineComponent( id, component.getPEV().get(), Vaccine::PEV );
             }else if( component.getBSV().present() ){
-                humanComponents.push_back( new VaccineComponent( id, component.getBSV().get(), Vaccine::BSV ) );
+                hiComponent = new VaccineComponent( id, component.getBSV().get(), Vaccine::BSV );
             }else if( component.getTBV().present() ){
-                humanComponents.push_back( new VaccineComponent( id, component.getTBV().get(), Vaccine::TBV ) );
+                hiComponent = new VaccineComponent( id, component.getTBV().get(), Vaccine::TBV );
             }else if( component.getITN().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanComponents.push_back( new ITNComponent( id, component.getITN().get(), *species_index_map ) );
+                hiComponent = new ITNComponent( id, component.getITN().get(), *species_index_map );
             }else if( component.getIRS().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanComponents.push_back( new IRSComponent( id, component.getIRS().get(), *species_index_map ) );
+                hiComponent = new IRSComponent( id, component.getIRS().get(), *species_index_map );
             }else if( component.getGVI().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanComponents.push_back( new GVIComponent( id, component.getGVI().get(), *species_index_map ) );
+                hiComponent = new GVIComponent( id, component.getGVI().get(), *species_index_map );
             }else if( component.getCohort().present() ){
-                humanComponents.push_back( new CohortSelectionComponent( id, component.getCohort().get() ) );
+                hiComponent = new CohortSelectionComponent( id, component.getCohort().get() );
                 _cohortEnabled = true;
             }else if( component.getClearImmunity().present() ){
-                humanComponents.push_back( new ClearImmunityComponent( id ) );
+                hiComponent = new ClearImmunityComponent( id );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.component element to have a "
                     "child, didn't find it (perhaps I need updating)" );
             }
-            if( component.getFirstBoutOnly() ){
-                removeAtIds[SubPopRemove::ON_FIRST_BOUT].push_back( id );
-            }
-            if( component.getFirstInfectionOnly() ){
-                removeAtIds[SubPopRemove::ON_FIRST_INFECTION].push_back( id );
-            }
-            if( component.getFirstTreatmentOnly() ){
-                removeAtIds[SubPopRemove::ON_FIRST_TREATMENT].push_back( id );
-            }
+            hiComponent->setExpireAfter( expireAfter );
+            humanComponents.push_back( hiComponent );
         }
         
         // 2. Read the list of deployments
@@ -184,12 +196,11 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 if( timedIt->getCumulativeCoverage().present() ){
                     const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
                     ComponentId component = getComponentId( identifierMap, cumCov.getComponent() );
-                    TimeStep maxAge = TimeStep::fromYears( cumCov.getMaxAgeYears() );
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
                     {
-                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, cohort, component, maxAge ) );
+                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, cohort, component ) );
                     }
                 }else{
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =

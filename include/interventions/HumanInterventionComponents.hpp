@@ -51,7 +51,7 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method,
         const interventions::HumanInterventionComponent& component = **it;
         // we must report first, since it can change cohort and sub-population
         // which may affect what deployment does (at least in the case of reporting deployments)
-        human.reportDeployment( component.id() );
+        human.reportDeployment( component.id(), component.duration() );
         component.deploy( human, method, vaccLimits );
     }
 }
@@ -78,7 +78,8 @@ void HumanIntervention::print_details( std::ostream& out )const{
 class MDAComponentBase : public HumanInterventionComponent {
 protected:
     MDAComponentBase( ComponentId id ) :
-        HumanInterventionComponent(id, Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
+        HumanInterventionComponent(id,
+                Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
         m_screenMeasureCts(Report::MI_SCREENING_CTS),
         m_screenMeasureTimed(Report::MI_SCREENING_TIMED)
     {}
@@ -94,7 +95,7 @@ private:
 
 class MDAComponent : public MDAComponentBase {
 public:
-    MDAComponent( ComponentId id, const scnXml::MDA& mda ) :
+    MDAComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
         MDAComponentBase(id)
     {
         if( !mda.getDiagnostic().present() ){

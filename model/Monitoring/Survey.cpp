@@ -107,6 +107,8 @@ public:
         codeMap["nCtsGVI"] = SM::nCtsGVI;
         codeMap["nCtsMDA"] = SM::nCtsMDA;
         codeMap["nCtsScreenings"] = SM::nCtsScreenings;
+        codeMap["nSubPopRemovalTooOld"] = SM::nSubPopRemovalTooOld;
+        codeMap["nSubPopRemovalFirstEvent"] = SM::nSubPopRemovalFirstEvent;
     }
     
     SM::SurveyMeasure operator[] (const string s) {
@@ -167,7 +169,8 @@ void Survey::init (const scnXml::Monitoring& monitoring) {
     intReportMappings[Report::MI_FIRST_DAY_DEATHS] = SM::Clinical_FirstDayDeaths;
     intReportMappings[Report::MI_HOSPITAL_FIRST_DAY_DEATHS] = SM::Clinical_HospitalFirstDayDeaths;
     intReportMappings[Report::MI_NUM_ADDED_COHORT] = SM::nAddedToCohort;
-    intReportMappings[Report::MI_NUM_REMOVED_COHORT] = SM::nRemovedFromCohort;
+    intReportMappings[Report::MI_N_SP_REM_TOO_OLD] = SM::nSubPopRemovalTooOld;
+    intReportMappings[Report::MI_N_SP_REM_FIRST_EVENT] = SM::nSubPopRemovalFirstEvent;
     
     dblReportMappings[Report::MD_EXPECTED_INFECTED] = SM::nExpectd;
     dblReportMappings[Report::MD_LOG_PYROGENIC_THRESHOLD] = SM::sumLogPyrogenThres;
