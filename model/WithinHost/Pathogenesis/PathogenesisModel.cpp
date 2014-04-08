@@ -90,16 +90,17 @@ PathogenesisModel::PathogenesisModel(double cF) :
 {}
 
 Pathogenesis::State PathogenesisModel::determineState (double ageYears, double timeStepMaxDensity, double endDensity) {
-    double prEpisode = getPEpisode(timeStepMaxDensity, endDensity);
+    double pMalariaFever = getPEpisode(timeStepMaxDensity, endDensity);
     
     Pathogenesis::State ret = Pathogenesis::NONE;
 
+    //TODO(performance): would using a single RNG sample and manipulating probabilities be faster?
     //Decide whether a clinical episode occurs and if so, which type
-    if ((random::uniform_01()) < prEpisode) {
+    if ((random::uniform_01()) < pMalariaFever) {
         //Fixed severe threshold
         double severeMalThreshold=sevMal_21+1;
-        double prSevereEpisode=1-1/(1+timeStepMaxDensity/severeMalThreshold);
-
+        double prSevereEpisode=timeStepMaxDensity / (timeStepMaxDensity + severeMalThreshold);
+        
         if (random::uniform_01() < prSevereEpisode)
             ret = Pathogenesis::STATE_SEVERE;
         else {
@@ -121,7 +122,8 @@ Pathogenesis::State PathogenesisModel::determineState (double ageYears, double t
         if (random::uniform_01() < indirectRisk)
             ret = Pathogenesis::State (ret | Pathogenesis::INDIRECT_MORTALITY);
     } else if ( NMF_incidence->isSet() ) {
-        if( random::uniform_01() < NMF_incidence->eval( ageYears ) ){
+        double pNMF = NMF_incidence->eval( ageYears );
+        if( random::uniform_01() < pNMF ){
             ret = Pathogenesis::STATE_NMF;
         }
     }

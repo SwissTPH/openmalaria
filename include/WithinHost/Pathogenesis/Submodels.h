@@ -31,68 +31,47 @@ namespace OM { namespace WithinHost { namespace Pathogenesis {
 /// Müller presentation model.
 class MuellerPathogenesis : public PathogenesisModel {
 public:
-  MuellerPathogenesis(double cF) :
-    PathogenesisModel(cF) {}
-  ~MuellerPathogenesis() {}
-  
-  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
+    MuellerPathogenesis(double cF) :
+        PathogenesisModel(cF) {}
+    ~MuellerPathogenesis() {}
+    
+    virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 
-  // Static:
-  static void init();
-
-private:
-  ///@brief static vars set by init()
-  //@{
-  static double rateMultiplier_31;
-  static double densityExponent_32;
-  //@}
+    /// Read parameters
+    static void init();
 };
 
 /// Pyrogenic threshold presentation model.
 class PyrogenPathogenesis : public PathogenesisModel {
 protected:
-  //!critical density for fever (clinical episodes)
-  double _pyrogenThres;
-   //! Determine the current pyrogenic threshold.
+    /// Critical density for fever (clinical episodes)
+    double _pyrogenThres;
+    /// Determine the current pyrogenic threshold.
     virtual void updatePyrogenThres(double totalDensity);
 
 public:
-  PyrogenPathogenesis(double cF);
-  virtual ~PyrogenPathogenesis() {}
-  virtual void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
-  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
-  
-  // Static:
-  static void init();
-  
+    PyrogenPathogenesis(double cF);
+    virtual ~PyrogenPathogenesis() {}
+    virtual void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+    virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
+    
+    /// Read parameters from XML
+    static void init();
+    
 protected:
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
-    
-private:
-  ///@brief Static vars set by init ()
-  //@{
-  // Ystar2: critical value in determining increase in pyrogenic threshold
-  static double Ystar2_13;
-  //alpha: factor determining increase in pyrogenic threshold
-  static double alpha14;
-  //Ystar1: critical value of parasite density in determing increase in pyrog t
-  static double Ystar1_26;
-  static double smuY;
-  //Pyrogenic threshold at birth (Y*0)
-  static double initPyroThres;
-  //@}
 };
 
 /// Predetermined episodes presentation model.
 class PredetPathogenesis : public PyrogenPathogenesis {
 public:
-  PredetPathogenesis (double cF) :
-    PyrogenPathogenesis(cF) {}
-  ~PredetPathogenesis() {}
-  
-  virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
+    PredetPathogenesis (double cF) :
+        PyrogenPathogenesis(cF) {}
+    ~PredetPathogenesis() {}
+    
+    virtual double getPEpisode(double timeStepMaxDensity, double totalDensity);
 };
 
 } } }
