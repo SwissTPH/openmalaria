@@ -74,7 +74,7 @@ private:
     /** Called when a non-severe/complicated malaria sickness occurs.
      *
      * @returns True in case of effective or partially effective treatment, false otherwise. */
-    bool uncomplicatedEvent(WHPathogenesis::State pgState, OM::Monitoring::AgeGroup ageGroup, bool inCohort);
+    void uncomplicatedEvent(Human& human, WHPathogenesis::State pgState);
 
     /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
      *

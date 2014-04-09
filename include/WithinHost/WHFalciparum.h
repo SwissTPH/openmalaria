@@ -59,6 +59,9 @@ public:
     
     virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
     
+    // No PQ treatment for falciparum in current models:
+    virtual bool optionalPqTreatment(){ return false; }
+    
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
     virtual bool diagnosticDefault() const;

@@ -89,7 +89,14 @@ public:
      * does nothing.
      */
     virtual void clearInfections (bool isSevere);
-
+    
+    /** Conditionally gives Primaquine as a treatment.
+     * 
+     * Returns true iff PQ is administered. Administered implies either fully
+     * effective or no effective, depending on another probability. Not
+     * administered implies no effect. */
+    virtual bool optionalPqTreatment() =0;
+    
     /** Medicate drugs (wraps drug's medicate).
      *
      * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)

@@ -21,90 +21,150 @@
 #include "WithinHost/WHVivax.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "inputData.h"
 #include <algorithm>
 #include <limits>
+#include <cmath>
 
 namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
 
+// ———  parameters  ———
+
+// Set from the parameters block:
+TimeStep latentp;       // attribute on parameters block
+
 //TODO: these parameters need to be initialised from XML, and possibly made
 // static members of VivaxInfection / WHVivax
-// Note: current values need replacing
-double meanNumberHypnozoites = 5;       // have no idea what value to use
-double meanTimeToHypReleaseInDays = 4;
-double meanDurationBloodStageDays = 8;
-double shapeParameterDurationBloodStage = 2;
-double probPatentInfectMosquitoes = 1;
-double probLiverStageTreatment = 0;
-double efficacyLiverStageTreatment = 1;
 
+// current values need replacing:
+double probPatentInfectMosquitoes = 1;
+double pHetNoPQ = 0;
+double pReceivePQ = 0;
+double pPqIsEffective = 0;
+
+// Parameters from Amanda:
+const int maxNumberHypnozoites = 11;  // chosen for convenience
+//TODO: all below need to go in XML
+const double baseNumberHypnozoites = 0.8;
+const double muReleaseHypnozoite = 2.92;
+const double sigmaReleaseHypnozoite = 0.956;
+const TimeStep minReleaseHypnozoite( 2 );
+const TimeStep bloodStageProtectionLatency( 2 );
+double bloodStageLengthWeibullScale = 23.01164;
+double bloodStageLengthWeibullShape = 2.331;
+
+
+// ———  individual models  ———
+
+// number of hypnozoites per brood:
+map<double,int> nHypnozoitesProbMap;
+void initNHypnozoites(){
+    double total = 0.0;
+    for( size_t n = 0; n <= maxNumberHypnozoites; ++n )
+        total += pow( baseNumberHypnozoites, n );
+    
+    double cumP = 0.0;
+    for( size_t n = 0; n <= maxNumberHypnozoites; ++n ){
+        cumP += pow( baseNumberHypnozoites, n ) / total;
+        // pair n with the cumulative probability of sampling n:
+        nHypnozoitesProbMap[cumP] = n;
+    }
+}
+int sampleNHypnozoites(){
+    double x = util::random::uniform_01();
+    // upper_bound finds the first key (cumulative probability) greater than x:
+    map<double,int>::const_iterator it = nHypnozoitesProbMap.upper_bound( x );
+    assert( it != nHypnozoitesProbMap.end() );  // i.e. that we did find a real key
+    return it->second;  // corresponding n
+}
+
+// time to hypnozoite release after initial release:
+TimeStep sampleReleaseDelay(){
+    TimeStep delay;
+    do{
+        delay = TimeStep::fromNearest( util::random::log_normal( muReleaseHypnozoite, sigmaReleaseHypnozoite ) );
+    }while( delay < minReleaseHypnozoite );
+    return delay;
+}
+
+
+// ———  per-brood code  ———
 
 struct TimeStepCompReverse{
     bool operator()( const TimeStep& a, const TimeStep& b ){
-        return a < b;
+        return b < a;
     }
 } timeStepCompR;
-VivaxBrood::VivaxBrood(){
-    int numberHypnozoites = random::poisson( meanNumberHypnozoites );
+VivaxBrood::VivaxBrood(){    
+    // primary blood stage plus hypnozoites (relapses)
+    releaseDates.push_back( TimeStep::simulation + latentp );
+    int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ++i ){
-        double timeToReleaseDays = random::exponential( meanTimeToHypReleaseInDays );
-        TimeStep timeToRelease = TimeStep::fromDaysNearest( timeToReleaseDays );
-        hypReleaseTimes.push_back( TimeStep::simulation + timeToRelease );
+        TimeStep timeToRelease = TimeStep::simulation + latentp + sampleReleaseDelay();
+        releaseDates.push_back( TimeStep::simulation + timeToRelease );
     }
     
-    // Sort by time to release, smallest (soonest) first. Explanation of code:
+    // Sort by time to release, smallest (soonest) last. Explanation of code:
     // http://www.cplusplus.com/reference/algorithm/sort/
-    sort( hypReleaseTimes.begin(), hypReleaseTimes.end(), timeStepCompR );
+    sort( releaseDates.begin(), releaseDates.end(), timeStepCompR );
 }
 
 bool VivaxBrood::update( bool& anyNewBloodStage ){
-    if( bloodStageClearTime == TimeStep::simulation )
-        bloodStageClearTime = TimeStep::never;
-    
-    while( hypReleaseTimes.back() == TimeStep::simulation ){
-        hypReleaseTimes.pop_back();
-        // note that hypnozoite release during an existing blood stage infection does nothing
-        if( isPatent() ) continue;
-        
-        anyNewBloodStage = true;
-        double lengthDays = random::weibull( meanDurationBloodStageDays, shapeParameterDurationBloodStage );
-        bloodStageClearTime = TimeStep::simulation + TimeStep::fromDaysNearest( lengthDays );
+    if( bloodStageClearDate == TimeStep::simulation ){
+        //NOTE: this effectively means that both asexual and sexual stage
+        // parasites self-terminate. It also means the immune system can
+        // protect against new blood-stage infections for a short time.
     }
     
-    bool isFinished = (!isPatent()) && (hypReleaseTimes.size() == 0);
+    while( releaseDates.back() == TimeStep::simulation ){
+        releaseDates.pop_back();
+        // an existing or recently terminated blood stage from the same brood
+        // protects against a newly released Hypnozoite
+        //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
+        if( bloodStageClearDate + bloodStageProtectionLatency
+            >= TimeStep::simulation ) continue;
+        
+        anyNewBloodStage = true;
+        double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
+        bloodStageClearDate = TimeStep::simulation + TimeStep::fromDaysNearest( lengthDays );
+        // Assume gametocytes emerge at the same time (they mature quickly and
+        // we have little data, thus assume coincedence of start)
+    }
+    
+    bool isFinished = (!isPatent()) && (releaseDates.size() == 0);
     return isFinished;
 }
 
-void VivaxBrood::treatment( double pClearEachHypnozoite ){
-    bloodStageClearTime = TimeStep::never;      // clear blood stage
+void VivaxBrood::treatmentBS(){
+    // Blood stage treatment: clear both asexual and sexual parasites from the
+    // blood. NOTE: we assume infections removed via treatment do not leave
+    // protective immunity since the patient was unable to self-clear.
+    bloodStageClearDate = TimeStep::never;
+}
+
+void VivaxBrood::treatmentLS(){
+    releaseDates.clear();       // 100% clearance
     
-    if( pClearEachHypnozoite <= 0 )
-        return;     // no liver stage effect
-    if( pClearEachHypnozoite >= 1 ){
-        hypReleaseTimes.clear();        // full liver stage clearance
-        return;
-    }
-    
-    // partial liver stage clearance:
-    vector<TimeStep> newVec;
-    newVec.reserve( hypReleaseTimes.size() );   // maximum size we need
-    for( vector<TimeStep>::const_iterator it = hypReleaseTimes.begin(); it != hypReleaseTimes.end(); ++it ){
+    /* partial clearance code, in case of need:
+    vector<TimeStep> survivingZoites;
+    survivingZoites.reserve( releaseDates.size() );   // maximum size we need
+    for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it ){
         if( !random::bernoulli( pClearEachHypnozoite ) ){
-            newVec.push_back( *it );    // copy            
+            survivingZoites.push_back( *it );    // copy            
         }
     }
-    swap( hypReleaseTimes, newVec );
+    swap( releaseDates, survivingZoites );
+    */
 }
 
-void WHVivax::init(){
-    //TODO: read params from XML
-}
+
+// ———  per-host code  ———
 
 WHVivax::WHVivax(){
-    //TODO: do we need to do anything here?
-    throw xml_scenario_error( "vivax model code is not yet functional" );
+    noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
 }
 
 void WHVivax::setComorbidityFactor(double factor){
@@ -113,15 +173,18 @@ void WHVivax::setComorbidityFactor(double factor){
 }
 
 WHVivax::~WHVivax(){
-
 }
 
 double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvEfficacy) const{
-    if( !diagnosticDefault() ) return 0;        // no blood stage infections: no transmission
-    
-    // Otherwise we have at least one blood stage. We use a simple model and
-    // ignore lag, the effect of Primaquine, exact densities, and recombination.
-    return probPatentInfectMosquitoes * (1.0 - tbvEfficacy );
+    for (std::list<VivaxBrood>::const_iterator inf = infections.begin();
+         inf != infections.end(); ++inf)
+    {
+        if( inf->isPatent() ){
+            // we have gametocytes from at least one brood
+            return probPatentInfectMosquitoes * (1.0 - tbvEfficacy );
+        }
+    }
+    return 0;   // no gametocytes
 }
 
 bool WHVivax::summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup){
@@ -148,7 +211,7 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
     infections.resize( infections.size() + nNewInfs );
     
     // update infections
-    // TODO: how do blood stage vaccines work?
+    // NOTE: currently no BSV model
     bool anyNewBloodStage = false;
     std::list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
@@ -158,13 +221,21 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
     }
     
     morbidity = Pathogenesis::NONE;
-    //TODO: does each hypnozoite release have a chance of causing morbidity or
-    // does this happen just once per timestep when at least one hypnozoite releases?
+    //NOTE: released hypnozoites blocked by immunity also don't cause fever
     if( anyNewBloodStage ){
-        //TODO: model?
-        double xyz = numeric_limits<double>::quiet_NaN();
-        if( random::bernoulli( xyz ) )
-            morbidity = Pathogenesis::SICK;  //TODO: or severe?
+        //TODO: 3 probabilities: for initial infection, 0 for relapse given no initial fever,
+        // another probability given initial fever
+        //TODO: also depends on number of broods ever seen by host (as with cumulativeh for Pf model)
+        //NOTE: currently we don't model co-infection or indirect deaths
+        /*
+        double x = random::uniform_01();
+        if( x < pSevMalaria )
+            morbidity = Pathogenesis::STATE_SEVERE;
+        else if( x < pSevPlusUC )
+            morbidity = Pathogenesis::STATE_MALARIA;
+        else if( x < pSevPlusUCPlusNMF )
+            morbidity = Pathogenesis::STATE_NMF;
+        */
     }
 }
 
@@ -186,7 +257,7 @@ Pathogenesis::State WHVivax::determineMorbidity(double ageYears){
 }
 
 void WHVivax::immuneSuppression(){
-    //TODO: reset all immunity (what do we have?)
+    throw TRACED_EXCEPTION_DEFAULT( "vivax model does not include immune suppression" );
 }
 
 WHInterface::InfectionCount WHVivax::countInfections () const{
@@ -199,24 +270,39 @@ WHInterface::InfectionCount WHVivax::countInfections () const{
     return count;
 }
 void WHVivax::effectiveTreatment(){
-    // This means clear blood stage infection(s), and
-    // possibly use Primaquine to clear some hypnozoites from the liver.
-    
-    double liverStageEfficacy = 0;
-    if( random::bernoulli( probLiverStageTreatment ) ){
-        liverStageEfficacy = efficacyLiverStageTreatment;
-    }
-    
+    // This means clear blood stage infection(s) but not liver stage.
     for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
-        it->treatment( liverStageEfficacy );
+        it->treatmentBS();
     }
 }
+bool WHVivax::optionalPqTreatment(){
+    // PQ clears liver stages. We don't worry about the effect of PQ on
+    // gametocytes, because these are always cleared by blood-stage drugs with
+    // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
+    if (pReceivePQ > 0.0 && !noPQ && random::bernoulli(pReceivePQ)){
+        if( random::bernoulli(pPqIsEffective) ){
+            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+                it->treatmentLS();
+            }
+        }
+        return true;    // chose to use PQ whether effective or not
+    }
+    return false;       // didn't use PQ
+}
+
+
+// ———  boring stuff: checkpointing and set-up  ———
 
 void WHVivax::checkpoint(istream& stream){
     WHInterface::checkpoint(stream);
 }
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
+}
+
+void WHVivax::init(){
+    latentp = TimeStep(InputData().getModel().getParameters().getLatentp());
+    initNHypnozoites();
 }
 
 }

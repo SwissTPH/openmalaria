@@ -60,28 +60,33 @@ public:
      */
     bool update( bool& anyNewBloodStage );
     
-    /** Equivalent to a blood stage existing. */
+    /** Equivalent to a blood stage existing. We do not model incidence of
+     * gametocytes independently, thus this also tests existance of
+     * gametocytes. */
     inline bool isPatent() const{
-        return bloodStageClearTime <= TimeStep::simulation;
+        return bloodStageClearDate > TimeStep::simulation;
     }
     
-    /**
-     * Fully clear the blood stage, and clear each hypnozoite according to the
-     * given probability.
-     */
-    void treatment( double pClearEachHypnozoite );
+    /** Fully clear blood stage parasites. */
+    void treatmentBS();
+    
+    /** Fully clear liver stage parasites. */
+    void treatmentLS();
     
 private:
-    // list of times at which hypnozoites release, ordered by time of release,
-    // soonest first (i.e. first element is next one to release)
-    vector<TimeStep> hypReleaseTimes;
+    // list of times at which the merozoite and hypnozoites release, ordered by
+    // time of release, soonest last (i.e. last element is next one to release)
+    vector<TimeStep> releaseDates;
     
-    // Either TimeStep::never or a date at which the blood stage will clear.
-    TimeStep bloodStageClearTime;
+    // Either TimeStep::never (no blood stage) or a date at which the blood stage will clear.
+    TimeStep bloodStageClearDate;
 };
 
 /**
  * Implementation of a very basic vivax model.
+ * 
+ * This is for tropical Vivax (low transmission) and where there is little
+ * immunity.
  */
 class WHVivax : public WHInterface {
 public:
@@ -116,11 +121,18 @@ public:
 protected:
     virtual InfectionCount countInfections () const;
     virtual void effectiveTreatment();
+    virtual bool optionalPqTreatment();
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
 private:
+    /* Is flagged as never getting PQ: this is a heteogeneity factor. Example:
+     * Set to zero if everyone can get PQ, 0.5 if females can't get PQ and
+     * males aren't tested (i.e. all can get it) or (1+p)/2 where p is the
+     * chance a male being tested and found to be G6PD deficient. */
+    bool noPQ;
+    
     list<VivaxBrood> infections;
     
     Pathogenesis::State morbidity;

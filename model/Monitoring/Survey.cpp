@@ -102,6 +102,7 @@ class SurveyMeasureMap {
             codeMap["nMassScreenings"] = SM::nMassScreenings;
             codeMap["nNmfDeaths"] = SM::nNmfDeaths;
             codeMap["nAntibioticTreatments"] = SM::nAntibioticTreatments;
+            codeMap["nPQTreatments"] = SM::nPQTreatments;
 	}
 	
 	SM::SurveyMeasure operator[] (const string s) {
@@ -216,6 +217,7 @@ void Survey::allocate ()
     _numMassScreenings.resize (numAgeGroups);
     _numNmfDeaths.resize (numAgeGroups);
     _numAntibioticTreatments.resize (numAgeGroups);
+    _numPQTreatments.resize (numAgeGroups);
 }
 
 
@@ -372,6 +374,9 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::nAntibioticTreatments]) {
     writePerAgeGroup (outputFile, SM::nAntibioticTreatments, survey, _numAntibioticTreatments);
+  }
+  if (active[SM::nPQTreatments]) {
+    writePerAgeGroup (outputFile, SM::nPQTreatments, survey, _numPQTreatments);
   }
 }
 

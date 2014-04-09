@@ -54,14 +54,14 @@ enum SurveyMeasure {
     sumlogDens= 5,
     
     /** The total number of infections in the population: includes both blood
-     * and liver stages. */
+     * and liver stages. Vivax: this is the number of broods. */
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *
      * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
      * mosquitoes that get infected). Single value, not per age-group. */
     nTransmit= 7,
-    /// Total patent infections
+    /// Total patent infections. Vivax: the number of broods with an active blood stage.
     totalPatentInf= 8,
     /// Contribution to immunity functions (output not used)
     contrib= 9,
@@ -216,6 +216,9 @@ enum SurveyMeasure {
     /** Report the number of screenings used in a mass screen-and-treat
      * operation. */
     nMassScreenings = 55,
+    
+    /** Report the number of Primaquine treatments given. */
+    nPQTreatments = 63,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

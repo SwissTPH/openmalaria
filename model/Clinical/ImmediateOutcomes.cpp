@@ -70,27 +70,25 @@ void ClinicalImmediateOutcomes::massDrugAdministration(Human& human) {
 }
 
 void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
-    bool effectiveTreatment = false;
     WHPathogenesis::State pgState = human.withinHostModel->determineMorbidity( ageYears );
 
     if (pgState & WHPathogenesis::MALARIA) {
-        if (pgState & WHPathogenesis::COMPLICATED)
-            effectiveTreatment = severeMalaria (ageYears, human.getMonitoringAgeGroup(), _doomed, human.getInCohort());
+        if (pgState & WHPathogenesis::COMPLICATED){
+            bool effectiveTreatment = severeMalaria (ageYears, human.getMonitoringAgeGroup(), _doomed, human.getInCohort());
+            if( effectiveTreatment )
+                human.withinHostModel->clearInfections (latestReport.getState() == WHPathogenesis::STATE_SEVERE);
+        }
         else if (pgState == WHPathogenesis::STATE_MALARIA) {
             // NOTE: if condition means this doesn't happen if INDIRECT_MORTALITY is
             // included. Validity is debatable, but there's no point changing now.
             // (This does affect tests.)
-            effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
+            uncomplicatedEvent (human, pgState);
         }
 
         if ((pgState & WHPathogenesis::INDIRECT_MORTALITY) && _doomed == 0)
             _doomed = -TimeStep::interval;
     } else if (pgState & WHPathogenesis::SICK) { // sick but not from malaria
-        effectiveTreatment = uncomplicatedEvent (pgState, human.getMonitoringAgeGroup(), human.getInCohort());
-    }
-
-    if (effectiveTreatment) {
-        human.withinHostModel->clearInfections (latestReport.getState() == WHPathogenesis::STATE_SEVERE);
+        uncomplicatedEvent (human, pgState);
     }
 
     if ( human.cohortFirstTreatmentOnly && _tLastTreatment == TimeStep::simulation ) {
@@ -104,11 +102,11 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
 
 // -----  private  -----
 
-bool ClinicalImmediateOutcomes::uncomplicatedEvent (
-    WHPathogenesis::State pgState,
-    Monitoring::AgeGroup ageGroup,
-    bool inCohort
+void ClinicalImmediateOutcomes::uncomplicatedEvent (
+    Host::Human& human, WHPathogenesis::State pgState
 ) {
+    Monitoring::AgeGroup ageGroup = human.getMonitoringAgeGroup();
+    bool inCohort = human.getInCohort();
     latestReport.update (inCohort, ageGroup,
                          WHPathogenesis::State( pgState & WHPathogenesis::STATE_MALARIA )   // mask to SICK and MALARIA flags
                         );
@@ -118,23 +116,25 @@ bool ClinicalImmediateOutcomes::uncomplicatedEvent (
                             ;
 
     if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
+        //TODO: report diagnostic
+        //TODO: use diagnostic; if negative no treatment
         _tLastTreatment = TimeStep::simulation;
         if ( regimen == Regimen::UC )
             Monitoring::Surveys.getSurvey(inCohort).reportTreatments1( ageGroup, 1 );
         if ( regimen == Regimen::UC2 )
             Monitoring::Surveys.getSurvey(inCohort).reportTreatments2( ageGroup, 1 );
-
+        
         if (probParasitesCleared[regimen] > random::uniform_01()) {
             // Could report WHPathogenesis::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
-            return true;        // successful treatment
+            human.withinHostModel->clearInfections (latestReport.getState() == WHPathogenesis::STATE_SEVERE);
         } else {
             // No change in parasitological status: treated outside of hospital
-            return false;
         }
+        if( human.withinHostModel->optionalPqTreatment() )
+            Monitoring::Surveys.getSurvey(inCohort).reportPQTreatments( ageGroup, 1 );
     } else {
         // No change in parasitological status: non-treated
-        return false;
     }
 }
 
@@ -186,6 +186,7 @@ bool ClinicalImmediateOutcomes::severeMalaria (
 
     double prandom = random::uniform_01();
 
+    //NOTE: no diagnostics or PQ here; for now we only have severe when the patient dies
     if (q[2] <= prandom) { // Patient gets in-hospital treatment
         _tLastTreatment = TimeStep::simulation;
         Monitoring::Surveys.getSurvey(inCohort).reportTreatments3( ageGroup, 1 );
