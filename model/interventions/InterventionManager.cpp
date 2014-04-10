@@ -136,8 +136,8 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
                 hiComponent = new GVIComponent( id, component.getGVI().get(), *species_index_map );
-            }else if( component.getCohort().present() ){
-                hiComponent = new CohortSelectionComponent( id, component.getCohort().get() );
+            }else if( component.getRecruitmentOnly().present() ){
+                hiComponent = new RecruitmentOnlyComponent( id );
                 _cohortEnabled = true;
             }else if( component.getClearImmunity().present() ){
                 hiComponent = new ClearImmunityComponent( id );

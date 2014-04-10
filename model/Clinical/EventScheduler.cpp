@@ -22,7 +22,6 @@
 #include "util/random.h"
 #include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
-#include "interventions/Cohort.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"

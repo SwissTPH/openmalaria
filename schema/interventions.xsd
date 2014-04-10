@@ -472,16 +472,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="cohort">
+        <xs:element name="recruitmentOnly" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
-              Recruitment of cohort as a pseudo-intervention.
+              Recruitment of a host into a sub-population.
               
-              Multiple cohorts are allowed, thus each must have a unique
-              identifier. The cohort identifier is the identifier of the
-              component used do recruit the cohort.
+              All human-targeting intervention deployments recruit simulated
+              humans into a sub-population which can be used for the purposes
+              of cumulative deployment, deployment only to a sub-population and
+              defining a cohort. This pseudo-intervention can be used to define
+              a sub-population without also deploying some intervention.
             </xs:documentation>
-            <xs:appinfo>name:Cohort recruitment;</xs:appinfo>
+            <xs:appinfo>name:Recruitment only;</xs:appinfo>
           </xs:annotation>
           <xs:complexType/>
         </xs:element>

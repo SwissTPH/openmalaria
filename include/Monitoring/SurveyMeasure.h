@@ -217,8 +217,8 @@ enum SurveyMeasure {
     /** As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
     Clinical_DrugUsageIV = 49,
     
-    /// Number of cohort recruitments (note: recruitment doesn't imply human was not already a member)
-    nAddedToCohort = 50,
+//     /// Number of cohort recruitments removed)
+//     nAddedToCohort = 50,
 //     /// Number of individuals removed from cohort (removed)
 //     nRemovedFromCohort = 51,
     
@@ -268,6 +268,11 @@ enum SurveyMeasure {
     /** Number of removals from a sub-population due to first
      * infection/bout/treatment (see onFirstBout & co). */
     nSubPopRemovalFirstEvent = 62,
+    
+    /** Number of "recruitment only" recruitments via timed deployment. */
+    nMassRecruitOnly = 65,
+    /** Number of "recruitment only" recruitments via age-based deployment. */
+    nCtsRecruitOnly = 66,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

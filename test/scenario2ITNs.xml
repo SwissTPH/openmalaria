@@ -164,13 +164,13 @@
           </anophelesParams>
         </GVI>
       </component>
-      <component id="cohort">
-        <cohort/>
+      <component id="mdaPop">
+        <recruitmentOnly/>
       </component>
       <deployment>
         <component id="MDA"/>
         <timed>
-          <restrictToSubPop id="cohort"/>
+          <restrictToSubPop id="mdaPop"/>
           <deploy coverage="1" time="30"/>
         </timed>
       </deployment>
@@ -217,7 +217,7 @@
         </timed>
       </deployment>
       <deployment>
-        <component id="cohort"/>
+        <component id="mdaPop"/>
         <timed>
           <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
           <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>

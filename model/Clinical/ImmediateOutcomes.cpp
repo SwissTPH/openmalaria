@@ -19,7 +19,6 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
-#include "interventions/Cohort.h"
 #include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
 #include "util/errors.h"

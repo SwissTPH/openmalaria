@@ -23,7 +23,6 @@
 
 // The includes here are more for documentation than required.
 #include "interventions/Interfaces.hpp"
-#include "interventions/Cohort.h"
 #include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
 #include "Clinical/ESCaseManagement.h"
@@ -74,6 +73,29 @@ void HumanIntervention::print_details( std::ostream& out )const{
 #endif
 
 // ———  Derivatives  ———
+
+class RecruitmentOnlyComponent : public HumanInterventionComponent {
+public:
+    RecruitmentOnlyComponent( ComponentId id ) :
+        HumanInterventionComponent(id, Report::MI_RECRUIT_CTS, Report::MI_RECRUIT_TIMED)
+    {}
+    virtual ~RecruitmentOnlyComponent() {}
+    
+    /// Reports to monitoring, nothing else
+    virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits ) const{
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+    }
+    
+    virtual Component::Type componentType() const{
+        return Component::RECRUIT_ONLY;
+    }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << id().id << "\tRecruit only";
+    }
+#endif
+};
 
 class MDAComponentBase : public HumanInterventionComponent {
 protected:

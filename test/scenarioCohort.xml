@@ -42,7 +42,8 @@
       <option name="Clinical_DrugUsage" value="true"/>
       <option name="Clinical_FirstDayDeaths" value="true"/>
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
-      <option name="nAddedToCohort"/>
+      <option name="nMassRecruitOnly"/>
+      <option name="nCtsRecruitOnly"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>730</surveyTime>
@@ -97,7 +98,7 @@
         </MDA1D>
       </component>
       <component id="cohort">
-        <cohort/>
+        <recruitmentOnly/>
       </component>
       <deployment>
         <component id="MDA"/>
