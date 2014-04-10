@@ -31,6 +31,9 @@ using namespace std;
 
 class UnittestUtil;
 
+namespace scnXml{
+    class Primaquine;
+}
 namespace OM {
 namespace WithinHost {
 namespace Pathogenesis {
@@ -94,6 +97,9 @@ public:
     //@{
     /// Initialise static parameters
     static void init();
+    
+    /** Set health system parameters (stored in this class for convenience). */
+    static void setHSParameters( const scnXml::Primaquine& );
     //@}
 
     /// @brief Constructors, destructors and checkpointing functions

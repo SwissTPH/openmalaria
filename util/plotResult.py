@@ -83,7 +83,8 @@ measureNames = {
     52 : 'nMDAs',
     53 : 'nNmfDeaths',
     54 : 'nAntibioticTreatments',
-    55 : 'nMassScreenings'
+    55 : 'nMassScreenings',
+    63 : 'nPQTreatments'
     }
 
 # List of measure groups. Each includes name, boolean (true if use log scale),
@@ -96,7 +97,7 @@ combinedMeasures = [
     ('total infections',[(6,'all','red'),(8,'patent','blue')]),
     ('transmitting humans',[(7,'sum(p(transmit))','green'),(26,'annual sum(p(transmit)) / annual EIR','blue')]),
     ('sum pyrog thres',[(10,'sum pyrogenic threshold','purple')]),
-    ('treatments',[(11,'first line','red'),(12,'second line','purple'),(13,'hospital','orange'),(54,'antibiotics','blue')]),
+    ('treatments',[(11,'first line','red'),(12,'second line','purple'),(13,'hospital','orange'),(54,'antibiotics','blue'),(63,'primaquine','darkblue')]),
     ('episodes',[(14,'UC','red'),(15,'severe','orange'),(27,'NMF','blue')]),
     ('sequelae',[(16,'all','red'),(24,'hospital','orange')]),
     ('deaths',[(17,'direct hospital','orange'),(18,'indirect','purple'),(19,'direct','red'),(41,'first day','brown'),(42,'first day hospital','green'),(53,'non-malaria fevers','blue')]),

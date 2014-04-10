@@ -223,6 +223,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element name="primaquine" minOccurs="0">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="pHumanCannotReceive" type="inputValue"/>
+            <xs:element name="pUseUncomplicated" type="inputValue"/>
+            <xs:element name="effectivenessOnUse" type="inputValue"/>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>

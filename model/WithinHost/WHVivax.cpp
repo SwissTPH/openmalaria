@@ -22,6 +22,7 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "inputData.h"
+#include <schema/healthSystem.h>
 #include <algorithm>
 #include <limits>
 #include <cmath>
@@ -36,25 +37,21 @@ using namespace OM::util;
 // Set from the parameters block:
 TimeStep latentp;       // attribute on parameters block
 
-//TODO: these parameters need to be initialised from XML, and possibly made
-// static members of VivaxInfection / WHVivax
+// Set from <vivax .../> element:
+double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
+int maxNumberHypnozoites = -1;
+double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
+double muReleaseHypnozoite = numeric_limits<double>::signaling_NaN();   // units: days
+double sigmaReleaseHypnozoite = numeric_limits<double>::signaling_NaN();
+double minReleaseHypnozoite;    // units: days
+TimeStep bloodStageProtectionLatency;
+double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
+double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
 
-// current values need replacing:
-double probPatentInfectMosquitoes = 1;
-double pHetNoPQ = 0;
-double pReceivePQ = 0;
-double pPqIsEffective = 0;
-
-// Parameters from Amanda:
-const int maxNumberHypnozoites = 11;  // chosen for convenience
-//TODO: all below need to go in XML
-const double baseNumberHypnozoites = 0.8;
-const double muReleaseHypnozoite = 2.92;
-const double sigmaReleaseHypnozoite = 0.956;
-const TimeStep minReleaseHypnozoite( 2 );
-const TimeStep bloodStageProtectionLatency( 2 );
-double bloodStageLengthWeibullScale = 23.01164;
-double bloodStageLengthWeibullShape = 2.331;
+// Set from healthSystem element:
+double pHetNoPQ = numeric_limits<double>::signaling_NaN();
+double pReceivePQ = numeric_limits<double>::signaling_NaN();
+double effectivenessPQ = numeric_limits<double>::signaling_NaN();
 
 
 // ———  individual models  ———
@@ -63,11 +60,11 @@ double bloodStageLengthWeibullShape = 2.331;
 map<double,int> nHypnozoitesProbMap;
 void initNHypnozoites(){
     double total = 0.0;
-    for( size_t n = 0; n <= maxNumberHypnozoites; ++n )
+    for( int n = 0; n <= maxNumberHypnozoites; ++n )
         total += pow( baseNumberHypnozoites, n );
     
     double cumP = 0.0;
-    for( size_t n = 0; n <= maxNumberHypnozoites; ++n ){
+    for( int n = 0; n <= maxNumberHypnozoites; ++n ){
         cumP += pow( baseNumberHypnozoites, n ) / total;
         // pair n with the cumulative probability of sampling n:
         nHypnozoitesProbMap[cumP] = n;
@@ -83,11 +80,11 @@ int sampleNHypnozoites(){
 
 // time to hypnozoite release after initial release:
 TimeStep sampleReleaseDelay(){
-    TimeStep delay;
+    double delay;       // in days
     do{
-        delay = TimeStep::fromNearest( util::random::log_normal( muReleaseHypnozoite, sigmaReleaseHypnozoite ) );
+        delay = util::random::log_normal( muReleaseHypnozoite, sigmaReleaseHypnozoite );
     }while( delay < minReleaseHypnozoite );
-    return delay;
+    return TimeStep::fromDaysNearest( delay );
 }
 
 
@@ -181,7 +178,7 @@ double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvEffi
     {
         if( inf->isPatent() ){
             // we have gametocytes from at least one brood
-            return probPatentInfectMosquitoes * (1.0 - tbvEfficacy );
+            return probBloodStageInfectiousToMosq * (1.0 - tbvEfficacy );
         }
     }
     return 0;   // no gametocytes
@@ -280,7 +277,7 @@ bool WHVivax::optionalPqTreatment(){
     // gametocytes, because these are always cleared by blood-stage drugs with
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
     if (pReceivePQ > 0.0 && !noPQ && random::bernoulli(pReceivePQ)){
-        if( random::bernoulli(pPqIsEffective) ){
+        if( random::bernoulli(effectivenessPQ) ){
             for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
@@ -302,7 +299,30 @@ void WHVivax::checkpoint(ostream& stream){
 
 void WHVivax::init(){
     latentp = TimeStep(InputData().getModel().getParameters().getLatentp());
+    if( !InputData().getModel().getVivax().present() )
+        throw util::xml_scenario_error( "no vivax model description in scenario XML" );
+    const scnXml::Vivax& elt = InputData().getModel().getVivax().get();
+    probBloodStageInfectiousToMosq = elt.getProbBloodStageInfectiousToMosq().getValue();
+    maxNumberHypnozoites = elt.getNumberHypnozoites().getMax();
+    baseNumberHypnozoites = elt.getNumberHypnozoites().getBase();
+    muReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMu();
+    sigmaReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getSigma();
+    minReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMin();
+    bloodStageProtectionLatency = TimeStep::fromDaysNearest( elt.getBloodStageProtectionLatency().getValue() );
+    bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
+    bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
+    
     initNHypnozoites();
+}
+void WHVivax::setHSParameters(const scnXml::Primaquine& elt){
+    if( pHetNoPQ != pHetNoPQ )// not set yet
+        pHetNoPQ = elt.getPHumanCannotReceive().getValue();
+    else{
+        if( pHetNoPQ != elt.getPHumanCannotReceive().getValue() )
+            throw util::xml_scenario_error( "changeHS cannot change pHumanCannotReceive value" );
+    }
+    pReceivePQ = elt.getPUseUncomplicated().getValue();
+    effectivenessPQ = elt.getEffectivenessOnUse().getValue();
 }
 
 }

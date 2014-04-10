@@ -20,6 +20,7 @@
 
 #include "Clinical/ImmediateOutcomes.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/WHVivax.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -340,6 +341,12 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
 
     //calculate probParasitesCleared 2 : cool :)
     probParasitesCleared[2] = 0;
+    
+    if( hsioData.getPrimaquine().present() ){
+        if( !ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
+            throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
+        WithinHost::WHVivax::setHSParameters( hsioData.getPrimaquine().get() );
+    }
 }
 
 
