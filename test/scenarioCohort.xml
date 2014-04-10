@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring cohortOnly="true" name="Test Moni">
+  <monitoring name="Test Moni">
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nExpectd" value="true"/>
@@ -75,6 +75,9 @@
       <group upperbound="60"/>
       <group upperbound="99"/>
     </ageGroup>
+    <cohorts>
+      <subPop id="cohort" number="1"/>
+    </cohorts>
   </monitoring>
   <interventions name="cohort selection">
     <human>

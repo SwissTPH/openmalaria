@@ -79,11 +79,11 @@ public:
       (*infIncidence) & stream;
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
-      monitoringAgeGroup & stream;
       _dateOfBirth & stream;
       _vaccine & stream;
+      monitoringAgeGroup & stream;
+      m_cohortSet & stream;
       nextCtsDist & stream;
-      m_inAnyCohort & stream;
       m_subPopExp & stream;
   }
   //@}
@@ -133,9 +133,8 @@ public:
       if( it == m_subPopExp.end() ) return false;       // no history of membership
       else return it->second > TimeStep::simulation;   // added: has expired?
   }
-  /** Return true if human is a member of any cohort. */
-  //TODO(monitoring): outputs per cohort, not simply any cohort or everyone
-  inline bool isInAnyCohort()const{ return m_inAnyCohort; }
+  /** Return the cohort set. */
+  inline uint32_t cohortSet()const{ return m_cohortSet; }
   
   /// Return the index of next continuous intervention to be deployed
   inline uint32_t getNextCtsDist()const{ return nextCtsDist; }
@@ -206,24 +205,23 @@ private:
   Clinical::ClinicalModel *clinicalModel;
   //@}
   
-  ///@brief Cached values used by monitoring
-  //@{
-  /// Made persistant to save a lookup each timestep (has a significant impact)
-  Monitoring::AgeGroup monitoringAgeGroup;
-  /// Cache, updated when human is added to or removed from a sub-population
-  bool m_inAnyCohort;
-  //@}
+  //!Date of birth, time step since start of warmup
+  TimeStep _dateOfBirth;
   
   /// Vaccines
   //TODO: could move TBV code to WHFalciparum, where the efficacy is now used
   interventions::PerHumanVaccine _vaccine;
   
-  //!Date of birth, time step since start of warmup
-  TimeStep _dateOfBirth;
+  ///@brief Cached values used by monitoring
+  //@{
+  /// Made persistant to save a lookup each timestep (has a significant impact)
+  Monitoring::AgeGroup monitoringAgeGroup;
+  /// Cache, updated when human is added to or removed from a sub-population
+  uint32_t m_cohortSet;;
+  //@}
   
   /// The next continuous distribution in the series
   uint32_t nextCtsDist;
-  
   
   /** This lists sub-populations of which the human is a member together with
    * expiry time.

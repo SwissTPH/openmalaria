@@ -81,7 +81,7 @@ public:
             _time(TimeStep::never),
             _surveyPeriod(0 /* dummy survey */),
             _ageGroup(),
-            _inCohort(false),
+            m_cohortSet(0),
             _state(NONE)
     {};
   ~Episode();
@@ -124,7 +124,7 @@ private:
   /// Age group of the individual when the episode's first bout occurred
   Monitoring::AgeGroup _ageGroup;
   /// Cohort membership
-  bool _inCohort;
+  uint32_t m_cohortSet;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).
   Episode::State _state;

@@ -37,6 +37,7 @@ namespace OM { namespace interventions {
 
 // static memory:
     
+std::map<std::string,ComponentId> InterventionManager::identifierMap;
 boost::ptr_vector<HumanInterventionComponent> InterventionManager::humanComponents;
 boost::ptr_vector<HumanIntervention> InterventionManager::humanInterventions;
 ptr_vector<ContinuousHumanDeployment> InterventionManager::continuous;
@@ -46,8 +47,6 @@ OM::Host::ImportedInfections InterventionManager::importedInfections;
 bool InterventionManager::_cohortEnabled;
 
 // static functions:
-
-ComponentId getComponentId(const map<string,ComponentId>& identifierMap, const string textId);
 
 void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Population& population){
     nextTimed = 0;
@@ -79,7 +78,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
     const map<string,size_t>* species_index_map = 0;
     if( intervElt.getHuman().present() ){
         const scnXml::HumanInterventions& human = intervElt.getHuman().get();
-        map<string,ComponentId> identifierMap;
         
         // 1. Read components
         for( scnXml::HumanInterventions::ComponentConstIterator it =
@@ -164,7 +162,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                     end2 = elt.getComponent().end(); it2 != end2; ++it2 )
             {
                 const HumanInterventionComponent* component =
-                    &humanComponents[getComponentId( identifierMap, it2->getId() ).id];
+                    &humanComponents[getComponentId( it2->getId() ).id];
                 intervention->addComponent( component );
             }
             intervention->sortComponents();
@@ -176,7 +174,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 ComponentId cohort = ComponentId_pop;
                 if( ctsIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = ctsIt->getRestrictToSubPop().get().getId();
-                    cohort = getComponentId( identifierMap, subPopStr );
+                    cohort = getComponentId( subPopStr );
                 }
                 const scnXml::ContinuousList::DeploySequence& ctsSeq = ctsIt->getDeploy();
                 for( scnXml::ContinuousList::DeployConstIterator it2 = ctsSeq.begin(),
@@ -191,11 +189,11 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 ComponentId cohort = ComponentId_pop;
                 if( timedIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = timedIt->getRestrictToSubPop().get().getId();
-                    cohort = getComponentId( identifierMap, subPopStr );
+                    cohort = getComponentId( subPopStr );
                 }
                 if( timedIt->getCumulativeCoverage().present() ){
                     const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
-                    ComponentId component = getComponentId( identifierMap, cumCov.getComponent() );
+                    ComponentId component = getComponentId( cumCov.getComponent() );
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
@@ -303,7 +301,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
 #endif
 }
 
-ComponentId getComponentId(const map<string,ComponentId>& identifierMap, const string textId)
+ComponentId InterventionManager::getComponentId( const string textId )
 {
     map<string,ComponentId>::const_iterator it = identifierMap.find( textId );
     if( it == identifierMap.end() ){

@@ -31,7 +31,6 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
-#include "interventions/Cohort.h"
 #include <schema/scenario.h>
 
 namespace OM { namespace Host {
@@ -76,8 +75,8 @@ void Human::clear() {   // static clear
 Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
     perHostTransmission(tm),
     infIncidence(InfectionIncidenceModel::createModel()),
-    m_inAnyCohort(false),
     _dateOfBirth(dateOfBirth),
+    m_cohortSet(0),
     nextCtsDist(0)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
@@ -158,20 +157,6 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
-// return true if now in any cohort
-bool checkInAnyCohort( const map<ComponentId,TimeStep>& subPopExp ){
-    const set<ComponentId>& cohortComponents = interventions::CohortSelectionComponent::getCohortComponents();
-    for( map<ComponentId, TimeStep>::const_iterator it = subPopExp.begin(), end = subPopExp.end(); it != end; ++it )
-    {
-        if( it->second >= TimeStep::simulation ){
-            if( cohortComponents.count( it->first ) > 0 ){
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
 bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
     ++PopulationStats::humanUpdateCalls;
@@ -187,7 +172,6 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         double ageYears = ageTimeSteps.inYears();
         monitoringAgeGroup.update( ageYears );
         // check sub-pop expiry
-        bool anyRemoved = false;
         for( map<ComponentId,TimeStep>::iterator expIt =
             m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
         {
@@ -196,18 +180,15 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 // don't flush reports
                 // report removal due to expiry
                 Survey::current().addInt(Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
+                m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
                 // erase element, but continue iteration (note: this is simpler in C++11)
                 map<ComponentId,TimeStep>::iterator toErase = expIt;
                 ++expIt;
                 m_subPopExp.erase( toErase );
-                anyRemoved = true;
             }else{
                 ++expIt;
             }
         }
-        // update m_inAnyCohort (may go from true to false)
-        if( anyRemoved && m_inAnyCohort ) m_inAnyCohort = checkInAnyCohort( m_subPopExp );
-        
         double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
@@ -249,15 +230,10 @@ void Human::summarize() {
 void Human::reportDeployment( ComponentId id, TimeStep duration ){
     if( duration <= TimeStep(0) ) return; // nothing to do
     m_subPopExp[id] = TimeStep::simulation + duration;
-    // update m_inAnyCohort (may go from false to true)
-    if( interventions::CohortSelectionComponent::getCohortComponents().count( id ) > 0 )
-    {
-        m_inAnyCohort = true;
-    }
+    m_cohortSet = Survey::updateCohortSet( m_cohortSet, id, true );
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
     const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
-    bool anyRemoved = false;
     for( vector<ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
         map<ComponentId,TimeStep>::iterator expIt = m_subPopExp.find( *it );
         if( expIt != m_subPopExp.end() ){
@@ -272,13 +248,11 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
                 // report removal due to first infection/bout/treatment
                 Survey::current().addInt(Report::MI_N_SP_REM_FIRST_EVENT, *this, 1 );
             }
+            m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
             // remove (affects reporting, restrictToSubPop and cumulative deployment):
             m_subPopExp.erase( expIt );
-            anyRemoved = true;
         }
     }
-    // update m_inAnyCohort (may go from true to false)
-    if( anyRemoved && m_inAnyCohort ) m_inAnyCohort = checkInAnyCohort( m_subPopExp );
 }
 
 void Human::flushReports (){

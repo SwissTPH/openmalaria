@@ -75,6 +75,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     Population::init( parameters, scenario );
     population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
     interventions::InterventionManager::init( scenario.getInterventions(), *population );
+    Surveys.init2( scenario.getMonitoring() );
     
 #ifndef WITHOUT_BOINC
     // if not on BOINC we don't care about this
@@ -164,7 +165,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // do reporting (continuous and surveys)
             Continuous.update( *population );
-            if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
+            if (TimeStep::interventionPeriod == Surveys.currentTimestep()) {
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }

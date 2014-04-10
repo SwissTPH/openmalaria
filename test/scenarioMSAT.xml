@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring cohortOnly="false" name="Quarterly Surveys">
+  <monitoring name="Quarterly Surveys">
     <continuous duringInit="false" period="6">
       <option name="recent births" value="true"/>
       <option name="S_v" value="true"/>
@@ -196,12 +196,13 @@
         <timed>
           <deploy coverage="0.85" time="1484"/>
           <deploy coverage="0.85" time="1849"/>
+          <!-- enable if extending the time span:
           <deploy coverage="0.85" time="2214"/>
           <deploy coverage="0.85" time="2579"/>
           <deploy coverage="0.85" time="2944"/>
           <deploy coverage="0.85" time="3309"/>
           <deploy coverage="0.85" time="3674"/>
-          <deploy coverage="0.85" time="4039"/>
+          <deploy coverage="0.85" time="4039"/> -->
         </timed>
       </deployment>
       <deployment name="Extended ITNs">

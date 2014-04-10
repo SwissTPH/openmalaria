@@ -147,6 +147,18 @@ public:
      * explicitly specified and has a small affect on
      * infantAllCauseMortality (survey 21) output. */
     static TimeStep getFinalTimestep ();
+    
+    /** Humans should store a "cohort set" identifier which is initially 0.
+     * Whenever a human gains or loses membership status in some
+     * sup-population, it should update that value with this function.
+     * 
+     * @param old       Old identifier value (initially 0)
+     * @param subPop    Sub-population to which membership status changed
+     * @param isMember  New membership status
+     * @returns         New identifier value
+     */
+    static uint32_t updateCohortSet( uint32_t old,
+        interventions::ComponentId subPop, bool isMember );
     //@}
     
     ///@brief Set outputs without extra categorisation
@@ -203,7 +215,7 @@ public:
     Survey& addDouble( ReportMeasureD measure, const Host::Human &human, double val );
     
     /** Lower level version of addInt(). */
-    Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, bool inAnyCohort, int val );
+    Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, uint32_t cohortSet, int val );
     
     void setInoculationsPerAgeGroup (vector<double>& v) {
         m_inoculationsPerAgeGroup = v;	// copies v, not just its reference

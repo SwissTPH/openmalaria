@@ -224,11 +224,7 @@ Survey::Survey() :
 
 void Survey::allocate(){
     size_t numAgeGroups = AgeGroup::getNumGroups();
-    size_t nCohortSets = 1;
-    if( Surveys.getCohortOnly() ){
-        nCohortSets = 2;
-        // first index is for non-members and is ignored, second is for cohort members
-    }
+    size_t nCohortSets = Surveys.numCohortSets();
     m_humanReportsInt.resize(boost::extents[Report::MI_NUM][numAgeGroups][nCohortSets]);
     m_humanReportsDouble.resize(boost::extents[Report::MD_NUM][numAgeGroups][nCohortSets]);
     
@@ -248,15 +244,19 @@ void Survey::allocate(){
 
 Survey& Survey::addInt( ReportMeasureI measure, const Host::Human &human, int val ){
     size_t ageIndex = human.getMonitoringAgeGroup().i();
+#ifndef NDEBUG
     if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
-        ageIndex >= m_humanReportsInt.shape()[1] ){
-        cout << "Index out of bounds:\n"
-            "survey\t" << static_cast<void*>(this)
-            << "\nalloc\t" << m_humanReportsInt.shape()[0] << "\t" << m_humanReportsInt.shape()[1]
-            << "\nindex\t" << measure.code << "\t" << ageIndex << endl;
+        ageIndex >= m_humanReportsInt.shape()[1] ||
+        human.cohortSet() >= m_humanReportsInt.shape()[2]
+    ){
+        cout << "Index out of bounds for survey:\t" << static_cast<void*>(this)
+            << "\nmeasure number\t" << measure.code << " of " << m_humanReportsInt.shape()[0]
+            << "\nage group\t" << ageIndex << " of " << m_humanReportsInt.shape()[1]
+            << "\ncohort set\t" << human.cohortSet() << " of " << m_humanReportsInt.shape()[2]
+            << endl;
     }
-    size_t cohortSet = Surveys.getCohortOnly() && human.isInAnyCohort() ? 1 : 0;
-    m_humanReportsInt[measure.code][ageIndex][cohortSet] += val;
+#endif
+    m_humanReportsInt[measure.code][ageIndex][human.cohortSet()] += val;
     return *this;
 }
 Survey& Survey::addDouble( ReportMeasureD measure, const Host::Human &human, double val ){
@@ -268,11 +268,10 @@ Survey& Survey::addDouble( ReportMeasureD measure, const Host::Human &human, dou
             << "\nalloc\t" << m_humanReportsDouble.shape()[0] << "\t" << m_humanReportsDouble.shape()[1]
             << "\nindex\t" << measure.code << "\t" << ageIndex << endl;
     }
-    size_t cohortSet = Surveys.getCohortOnly() && human.isInAnyCohort() ? 1 : 0;
-    m_humanReportsDouble[measure.code][ageIndex][cohortSet] += val;
+    m_humanReportsDouble[measure.code][ageIndex][human.cohortSet()] += val;
     return *this;
 }
-Survey& Survey::addInt( ReportMeasureI measure, AgeGroup ageGroup, bool isInAnyCohort, int val ){
+Survey& Survey::addInt( ReportMeasureI measure, AgeGroup ageGroup, uint32_t cohortSet, int val ){
     if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
         ageGroup.i() >= m_humanReportsInt.shape()[1] ){
         cout << "Index out of bounds:\n"
@@ -280,29 +279,34 @@ Survey& Survey::addInt( ReportMeasureI measure, AgeGroup ageGroup, bool isInAnyC
             << "\nalloc\t" << m_humanReportsInt.shape()[0] << "\t" << m_humanReportsInt.shape()[1]
             << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
     }
-    size_t cohortSet = Surveys.getCohortOnly() && isInAnyCohort ? 1 : 0;
     m_humanReportsInt[measure.code][ageGroup.i()][cohortSet] += val;
     return *this;
 }
 
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
-    size_t cohortSet = Surveys.getCohortOnly() ? 1 : 0; // TODO: currently we only output from cohort set
-    
     size_t nAgeGroups = m_humanReportsInt.shape()[1] - 1;   // Don't write out last age-group
+    size_t nCohortSets = m_humanReportsInt.shape()[2];
     for( size_t intMeasure = 0; intMeasure < Report::MI_NUM; ++intMeasure ){
         if( active[intReportMappings[intMeasure]] ){
-            for( size_t j = 0; j < nAgeGroups; ++j ){
-                outputFile << survey << "\t" << j + 1 << "\t" << intReportMappings[intMeasure];
-                outputFile << "\t" << m_humanReportsInt[intMeasure][j][cohortSet] << lineEnd;
+            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
+                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
+                    // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
+                    size_t ageCohortId = 1000 * Surveys.cohortSetOutputId( cohortSet ) + ageGroup + 1;
+                    outputFile << survey << "\t" << ageCohortId << "\t" << intReportMappings[intMeasure];
+                    outputFile << "\t" << m_humanReportsInt[intMeasure][ageGroup][cohortSet] << lineEnd;
+                }
             }
         }
     }
     for( size_t dblMeasure = 0; dblMeasure < Report::MD_NUM; ++dblMeasure ){
         if( active[dblReportMappings[dblMeasure]] ){
-            for( size_t j = 0; j < nAgeGroups; ++j ){
-                outputFile << survey << "\t" << j + 1 << "\t" << dblReportMappings[dblMeasure];
-                outputFile << "\t" << m_humanReportsDouble[dblMeasure][j][cohortSet] << lineEnd;
+            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
+                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
+                    size_t ageCohortId = 1000 * Surveys.cohortSetOutputId( cohortSet ) + ageGroup + 1;
+                    outputFile << survey << "\t" << ageCohortId << "\t" << dblReportMappings[dblMeasure];
+                    outputFile << "\t" << m_humanReportsDouble[dblMeasure][ageGroup][cohortSet] << lineEnd;
+                }
             }
         }
     }
@@ -315,9 +319,9 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
 
   if (active[SM::innoculationsPerAgeGroup]) {
-    for (int j = 0; j < (int) m_inoculationsPerAgeGroup.size() - 1; ++j) { // Don't write out last age-group
-        outputFile << survey << "\t" << j + 1 << "\t" << SM::innoculationsPerAgeGroup;
-        outputFile << "\t" << m_inoculationsPerAgeGroup[j] << lineEnd;
+    for (int ageGroup = 0; ageGroup < (int) m_inoculationsPerAgeGroup.size() - 1; ++ageGroup) { // Don't write out last age-group
+        outputFile << survey << "\t" << ageGroup + 1 << "\t" << SM::innoculationsPerAgeGroup;
+        outputFile << "\t" << m_inoculationsPerAgeGroup[ageGroup] << lineEnd;
     }
   }
   
@@ -377,7 +381,7 @@ void Survey::checkpoint(istream& stream){
     len1 & stream;
     len2 & stream;
     if( len0 != Report::MI_NUM || len1 != AgeGroup::getNumGroups() ||
-        len2 != (Surveys.getCohortOnly() ? 2 : 1) )
+        len2 != Surveys.numCohortSets() )
     {
         throw util::checkpoint_error( "wrong survey data size" );
     }
@@ -394,7 +398,7 @@ void Survey::checkpoint(istream& stream){
     len1 & stream;
     len2 & stream;
     if( len0 != Report::MD_NUM || len1 != AgeGroup::getNumGroups() ||
-        len2 != (Surveys.getCohortOnly() ? 2 : 1) )
+        len2 != Surveys.numCohortSets() )
     {
         throw util::checkpoint_error( "wrong survey data size" );
     }

@@ -93,6 +93,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>type:list of elements;name:Age groups;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element name="cohorts" minOccurs="0" type="om:Cohorts">
+        <xs:annotation>
+          <xs:documentation>
+            Allows the configuration of multiple cohorts (output segregated
+            according to membership within specific sub-populations).
+            
+            If this element is omitted, monitoring surveys cover the entire
+            simulated human population.
+            
+            It does not affect the "continuous" outputs (these never take
+            cohorts into account).
+          </xs:documentation>
+          <xs:appinfo>name:Cohorts;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -102,26 +117,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>type:string;name:Name of monitoring information;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="cohortOnly" type="xs:boolean" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-          If true, for many output measures, the output comes only from individuals
-          in the cohort; otherwise output is from the entire population.
-          
-          Does not need to be specified if no cohort-selecting "interventions"
-          are present.
-        </xs:documentation>
-        <xs:appinfo>name:Survey only cohort;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ageGroup">
-    <xs:annotation>
-      <xs:documentation>
-        List of age groups included in surveys
-      </xs:documentation>
-      <xs:appinfo>type:list of elements;name:list of age groups;</xs:appinfo>
-    </xs:annotation>
     <xs:sequence>
       <xs:element maxOccurs="unbounded" name="group" type="om:groupBounds" />
     </xs:sequence>
@@ -141,6 +138,58 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Upper bound of age group
         </xs:documentation>
         <xs:appinfo>type:double;units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="Cohorts">
+    <xs:sequence>
+      <xs:element name="subPop" maxOccurs="unbounded" type="om:CohortSubPop">
+        <xs:annotation>
+          <xs:documentation>
+            Consider a certain sup-population a cohort, and segregate outputs
+            according to membership. Where multiple sub-populations are listed,
+            segregate output according to all combinations of membership: e.g.
+            if sub-populations A and B are listed, there will be outputs for
+            "member of A and B", "member of A but not B", "B but not A" and
+            "not a member of A or B". Listing n sub-populations implies 2^n
+            sets of outputs (each is further segregated by age groups, survey
+            times and enabled output measures, which could lead to excessive
+            program memory usage and output file size).
+            
+            To identify outputs, each sub-population has a power of two number
+            as identifier (see "number" attribute). Each of the 2^n output sets
+            is identified by a number: the output set is the output from humans
+            who are members in some set of sub-populations (S1, S2, ...) and
+            not members in some others (T1, T2, ...); the number identifying
+            the set is the sum of the numbers identifying the sets S1, S2, etc.
+            
+            In the output file, the output set is identified by multiplying
+            this number by 1000 then adding it to the age group column.
+          </xs:documentation>
+          <xs:appinfo>name:Sub-population;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="CohortSubPop">
+    <xs:attribute name="id" use="required" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Textual identifier for the sub-population (i.e. for an intervention
+          component, since sub-populations are defined as the hosts an
+          intervention component is deployed to).
+        </xs:documentation>
+        <xs:appinfo>name:Sub-population identifier;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="number" type="xs:integer" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Number identifying a sub-population; used to define identifiers of
+          output sets. This number must be a power of 2 (i.e. 1, 2, 4, 8, ...).
+          See documentation of subPop element.
+        </xs:documentation>
+        <xs:appinfo>name:Sub-population number;units:dimensionless;min:1;max:2097152;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

@@ -36,21 +36,28 @@
 #include <algorithm>
 
 namespace OM { namespace Monitoring {
+    using interventions::ComponentId;
     
 SurveysType Surveys;
 size_t Survey::m_surveyNumber;
 Survey* Survey::m_current;
+uint32_t nCohortSets = 1;     // default: just the whole population
+vector<uint32_t> cohortSubPopNumbers;   // value is output number
+map<ComponentId,uint32_t> cohortSubPopIds;      // value is internal index (used above)
 
+bool notPowerOfTwo( uint32_t num ){
+    for( uint32_t i = 0; i <= 21; ++i ){
+        if( num == (static_cast<uint32_t>(1) << i) )
+            return false;
+    }
+    return true;
+}
 void SurveysType::init( const scnXml::Monitoring& monitoring ){
-  Survey::m_surveyNumber = 0;
-  if( monitoring.getCohortOnly().present() ){
-      m_cohortOnly = monitoring.getCohortOnly().get();
-  } else {
-      // Trap potential bug in scenario design
-      if( interventions::InterventionManager::cohortEnabled() ){
-          throw util::xml_scenario_error( "please specify cohortOnly=\"true/false\" in monitoring element" );
-      }
-  }
+    Survey::m_surveyNumber = 0;
+    if( monitoring.getCohorts().present() ){
+        // this needs to be set early, but we can't set cohortSubPopIds until after InterventionManager is initialised
+        nCohortSets = static_cast<uint32_t>(1) << monitoring.getCohorts().get().getSubPop().size();
+    }
   
   const scnXml::Surveys::SurveyTimeSequence& survs = monitoring.getSurveys().getSurveyTime();
 
@@ -70,7 +77,7 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
       sort( _surveysTimeIntervals.begin(), _surveysTimeIntervals.end() );
   }
   _surveysTimeIntervals.push_back( TimeStep::never );
-  currentTimestep = _surveysTimeIntervals[0];
+  m_currentTimestep = _surveysTimeIntervals[0];
 
   Survey::init( monitoring );
 
@@ -80,7 +87,31 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
         m_surveys[i].allocate();
   }
   Survey::m_current = &m_surveys[0];
-  
+}
+
+void SurveysType::init2( const scnXml::Monitoring& monitoring ){
+    if( monitoring.getCohorts().present() ){
+        const scnXml::Cohorts monCohorts = monitoring.getCohorts().get();
+        uint32_t nextId = 0;
+        for( scnXml::Cohorts::SubPopConstIterator it = monCohorts.getSubPop().begin(),
+            end = monCohorts.getSubPop().end(); it != end; ++it )
+        {
+            ComponentId compId = interventions::InterventionManager::getComponentId( it->getId() );
+            bool inserted = cohortSubPopIds.insert( make_pair(compId,nextId) ).second;
+            if( !inserted ){
+                throw util::xml_scenario_error(
+                    string("cohort specification uses sub-population \"").append(it->getId())
+                    .append("\" more than once") );
+            }
+            if( it->getNumber() < 0 || notPowerOfTwo( it->getNumber() ) ){
+                throw util::xml_scenario_error(
+                    string( "cohort specification assigns sub-population \"").append(it->getId())
+                    .append("\" a number which is not a power of 2 (up to 2^21)") );
+            }
+            cohortSubPopNumbers.push_back( it->getNumber() );
+            nextId += 1;
+        }
+    }
 }
 
 Survey& Survey::getSurvey(size_t n){
@@ -91,9 +122,31 @@ TimeStep Survey::getFinalTimestep () {
     return Surveys._surveysTimeIntervals[Surveys.m_surveys.size()-2];   // final entry is a concatenated -1
 }
 
+uint32_t SurveysType::numCohortSets()const{
+    return nCohortSets;
+}
+
+uint32_t Survey::updateCohortSet( uint32_t old, ComponentId subPop, bool isMember ){
+    map<ComponentId,uint32_t>::const_iterator it = cohortSubPopIds.find( subPop );
+    if( it == cohortSubPopIds.end() ) return old;       // sub-pop not used in cohorts
+    uint32_t subPopId = static_cast<uint32_t>(1) << it->second;        // 1 bit positive
+    return (old & ~subPopId) | (isMember ? subPopId : 0);
+}
+
+uint32_t SurveysType::cohortSetOutputId(uint32_t cohortSet) const{
+    uint32_t outNum = 0;
+    assert( (cohortSet >> cohortSubPopNumbers.size()) == 0 );
+    for( uint32_t i = 0; i < cohortSubPopNumbers.size(); ++i ){
+        if( cohortSet & (static_cast<uint32_t>(1) << i) ){
+            outNum += cohortSubPopNumbers[i];
+        }
+    }
+    return outNum;
+}
+
 void SurveysType::incrementSurveyPeriod()
 {
-  currentTimestep = _surveysTimeIntervals[Survey::m_surveyNumber];
+  m_currentTimestep = _surveysTimeIntervals[Survey::m_surveyNumber];
   ++Survey::m_surveyNumber;
   if (Survey::m_surveyNumber >= m_surveys.size())
     // In this case, currentTimestep gets set to -1 so no further surveys get taken
@@ -138,7 +191,7 @@ void SurveysType::writeSummaryArrays ()
 }
 
 void SurveysType::checkpoint (istream& stream) {
-    currentTimestep & stream;
+    m_currentTimestep & stream;
     _surveysTimeIntervals & stream;
     Survey::m_surveyNumber & stream;
     // read those surveys checkpointed, call allocate on the rest:
@@ -150,7 +203,7 @@ void SurveysType::checkpoint (istream& stream) {
     Survey::m_current = &m_surveys[Survey::m_surveyNumber];
 }
 void SurveysType::checkpoint (ostream& stream) {
-    currentTimestep & stream;
+    m_currentTimestep & stream;
     _surveysTimeIntervals & stream;
     Survey::m_surveyNumber & stream;
     // checkpoint only those surveys used; exclude 0 since that's a "write only DB"
