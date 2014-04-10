@@ -29,6 +29,7 @@ namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
 
+bool useDiagnosticUC = false;
 double ClinicalImmediateOutcomes::probGetsTreatment[3];
 double ClinicalImmediateOutcomes::probParasitesCleared[3];
 double ClinicalImmediateOutcomes::cureRate[3];
@@ -117,6 +118,11 @@ void ClinicalImmediateOutcomes::uncomplicatedEvent (
                             ;
 
     if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
+        if( useDiagnosticUC ){
+            Monitoring::Surveys.getSurvey(inCohort).reportTreatDiagnostics( ageGroup, 1 );
+            if( !human.withinHostModel->diagnosticDefault() )
+                return; // negative outcome: no treatment
+        }
         //TODO: report diagnostic
         //TODO: use diagnostic; if negative no treatment
         _tLastTreatment = TimeStep::simulation;
@@ -341,6 +347,8 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
 
     //calculate probParasitesCleared 2 : cool :)
     probParasitesCleared[2] = 0;
+    
+    useDiagnosticUC = hsioData.getUseDiagnosticUC();
     
     if( hsioData.getPrimaquine().present() ){
         if( !ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )

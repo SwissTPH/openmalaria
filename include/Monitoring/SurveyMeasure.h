@@ -220,6 +220,13 @@ enum SurveyMeasure {
     /** Report the number of Primaquine treatments given. */
     nPQTreatments = 63,
     
+    /** Report the number of diagnostics used during treatment.
+     * 
+     * This is not the same as Clinical_RDTs + Clinical_Microscopy: those
+     * outputs are used by the "event scheduler" 1-day timestep clinical model,
+     * whereas this output is used by the 5-day timestep model. */
+    nTreatDiagnostics = 64,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };

@@ -244,6 +244,10 @@ public:
         _numPQTreatments[ageGroup.i()] += val;
         return *this;
     }
+    Survey& reportTreatDiagnostics (AgeGroup ageGroup, int val) {
+        _numTreatDiagnostics[ageGroup.i()] += val;
+        return *this;
+    }
   //@}
   
   void setAnnualAverageKappa(double kappa) {
@@ -351,6 +355,7 @@ public:
     _numNmfDeaths & stream;
     _numAntibioticTreatments & stream;
     _numPQTreatments & stream;
+    _numTreatDiagnostics & stream;
   }
   
 private:
@@ -406,6 +411,7 @@ private:
   vector<int> _numNmfDeaths;
   vector<int> _numAntibioticTreatments;
   vector<int> _numPQTreatments;
+  vector<int> _numTreatDiagnostics;
   
     // data, per vector species:
     map<string,double> data_Vector_Nv0;

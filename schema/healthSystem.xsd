@@ -241,6 +241,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>type:string;name:Case Management model;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="useDiagnosticUC" type="xs:boolean" default="false"/>
   </xs:complexType>
   <xs:complexType name="treatmentDetails">
     <xs:sequence>

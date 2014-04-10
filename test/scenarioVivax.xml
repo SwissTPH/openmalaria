@@ -41,6 +41,7 @@
       <option name="nDirDeaths" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="nPQTreatments" value="true"/>
+      <option name="nTreatDiagnostics"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime>1</surveyTime>
@@ -161,7 +162,7 @@
   <interventions name="none">
   </interventions>
   <healthSystem>
-    <ImmediateOutcomes name="Tanzania ACT">
+    <ImmediateOutcomes name="Tanzania ACT" useDiagnosticUC="true">
       <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
       <initialACR>
         <ACT value="0.85"/>
