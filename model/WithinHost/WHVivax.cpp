@@ -90,23 +90,21 @@ TimeStep sampleReleaseDelay(){
 
 // ———  per-brood code  ———
 
-struct TimeStepCompReverse{
-    bool operator()( const TimeStep& a, const TimeStep& b ){
-        return b < a;
-    }
-} timeStepCompR;
-VivaxBrood::VivaxBrood(){    
+VivaxBrood::VivaxBrood(){
+    set<TimeStep> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
+    
     // primary blood stage plus hypnozoites (relapses)
-    releaseDates.push_back( TimeStep::simulation + latentp );
+    releases.insert( TimeStep::simulation + latentp );
     int numberHypnozoites = sampleNHypnozoites();
-    for( int i = 0; i < numberHypnozoites; ++i ){
+    for( int i = 0; i < numberHypnozoites; ){
         TimeStep timeToRelease = TimeStep::simulation + latentp + sampleReleaseDelay();
-        releaseDates.push_back( TimeStep::simulation + timeToRelease );
+        bool inserted = releases.insert( TimeStep::simulation + timeToRelease ).second;
+        if( inserted ) ++i;     // successful
+        // else: sample clash with an existing release date, so resample
     }
     
-    // Sort by time to release, smallest (soonest) last. Explanation of code:
-    // http://www.cplusplus.com/reference/algorithm/sort/
-    sort( releaseDates.begin(), releaseDates.end(), timeStepCompR );
+    // Copy times to the vector, backwards (smallest last):
+    releaseDates.insert( releaseDates.end(), releases.rbegin(), releases.rend() );
 }
 
 bool VivaxBrood::update( bool& anyNewBloodStage ){
