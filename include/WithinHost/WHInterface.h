@@ -106,7 +106,14 @@ public:
      * Carry out the effects of some treatment option
      */
     virtual void treatment( TreatmentId treatment ) =0;
-
+    
+    /** Conditionally gives Primaquine as a treatment.
+     * 
+     * Returns true iff PQ is administered. Administered implies either fully
+     * effective or no effective, depending on another probability. Not
+     * administered implies no effect. */
+    virtual bool optionalPqTreatment() =0;
+    
     /** Medicate drugs (wraps drug's medicate).
      *
      * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)

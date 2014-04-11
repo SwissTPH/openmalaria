@@ -51,7 +51,7 @@ bool opt_vivax_simple = false,
 void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ) {
     if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
         opt_vivax_simple = true;
-        WHVivax::init();
+        WHVivax::init( parameters, scenario );
     }else{
         WHFalciparum::init( parameters, scenario );
         

@@ -20,6 +20,7 @@
 
 #include "Clinical/ImmediateOutcomes.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/WHVivax.h"
 #include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
@@ -29,7 +30,7 @@ namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
 using namespace Monitoring;
-
+bool useDiagnosticUC = false;
 double ClinicalImmediateOutcomes::probGetsTreatment[Regimen::NUM];
 double ClinicalImmediateOutcomes::probParasitesCleared[Regimen::NUM];
 double ClinicalImmediateOutcomes::cureRate[Regimen::NUM];
@@ -113,6 +114,11 @@ void ClinicalImmediateOutcomes::uncomplicatedEvent (
                             ;
     
     if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
+        if( useDiagnosticUC ){
+            Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
+            if( !human.withinHostModel->diagnosticDefault() )
+                return; // negative outcome: no treatment
+        }
         _tLastTreatment = TimeStep::simulation;
         if ( regimen == Regimen::UC )
             Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
@@ -126,6 +132,8 @@ void ClinicalImmediateOutcomes::uncomplicatedEvent (
         } else {
             // No change in parasitological status: treated outside of hospital
         }
+        if( human.withinHostModel->optionalPqTreatment() )
+            Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
     } else {
         // No change in parasitological status: non-treated
     }
@@ -179,6 +187,7 @@ void ClinicalImmediateOutcomes::severeMalaria (
 
     double prandom = random::uniform_01();
 
+    //NOTE: no diagnostics or PQ here; for now we only have severe when the patient dies
     if (q[2] <= prandom) { // Patient gets in-hospital treatment
         _tLastTreatment = TimeStep::simulation;
         Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
@@ -361,6 +370,14 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
         treatments[Regimen::SEVERE] = treatments[Regimen::UC2];
     else
         treatments[Regimen::SEVERE] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), inpatient);
+    
+    useDiagnosticUC = hsioData.getUseDiagnosticUC();
+    
+    if( hsioData.getPrimaquine().present() ){
+        if( !ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
+            throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
+        WithinHost::WHVivax::setHSParameters( hsioData.getPrimaquine().get() );
+    }
 }
 
 

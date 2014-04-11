@@ -90,6 +90,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:element>
               <xs:element name="clinical" type="om:clinical" />
               <xs:element name="human" type="om:human"/>
+              <xs:element name="vivax" type="om:vivax" minOccurs="0"/>
               <xs:element name="parameters" type="om:parameters">
                 <xs:annotation>
                   <xs:documentation>
@@ -241,5 +242,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="vivax">
+    <xs:all>
+      <xs:element name="probBloodStageInfectiousToMosq" type="om:inputValue"/>
+      <xs:element name="numberHypnozoites">
+        <xs:complexType>
+          <xs:attribute type="xs:int" use="required" name="max"/>
+          <xs:attribute type="xs:double" use="required" name="base"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="hypnozoiteReleaseDelayDays">
+        <xs:complexType>
+          <xs:attribute type="xs:double" use="required" name="min"/>
+          <xs:attribute type="xs:double" use="required" name="mu"/>
+          <xs:attribute type="xs:double" use="required" name="sigma"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="bloodStageProtectionLatency" type="om:inputValue"/>
+      <xs:element name="bloodStageLengthDays">
+        <xs:complexType>
+          <xs:attribute type="xs:double" use="required" name="weibullScale"/>
+          <xs:attribute type="xs:double" use="required" name="weibullShape"/>
+        </xs:complexType>
+      </xs:element>
+    </xs:all>
   </xs:complexType>
 </xs:schema>

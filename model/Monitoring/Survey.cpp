@@ -110,6 +110,8 @@ public:
         codeMap["nCtsScreenings"] = SM::nCtsScreenings;
         codeMap["nSubPopRemovalTooOld"] = SM::nSubPopRemovalTooOld;
         codeMap["nSubPopRemovalFirstEvent"] = SM::nSubPopRemovalFirstEvent;
+        codeMap["nPQTreatments"] = SM::nPQTreatments;
+        codeMap["nTreatDiagnostics"] = SM::nTreatDiagnostics;
         codeMap["nMassRecruitOnly"] = SM::nMassRecruitOnly;
         codeMap["nCtsRecruitOnly"] = SM::nCtsRecruitOnly;
     }
@@ -174,6 +176,8 @@ void Survey::init (const scnXml::Monitoring& monitoring) {
     intReportMappings[Report::MI_HOSPITAL_FIRST_DAY_DEATHS] = SM::Clinical_HospitalFirstDayDeaths;
     intReportMappings[Report::MI_N_SP_REM_TOO_OLD] = SM::nSubPopRemovalTooOld;
     intReportMappings[Report::MI_N_SP_REM_FIRST_EVENT] = SM::nSubPopRemovalFirstEvent;
+    intReportMappings[Report::MI_PQ_TREATMENTS] = SM::nPQTreatments;
+    intReportMappings[Report::MI_TREAT_DIAGNOSTICS] = SM::nTreatDiagnostics;
     intReportMappings[Report::MI_RECRUIT_TIMED] = SM::nMassRecruitOnly;
     intReportMappings[Report::MI_RECRUIT_CTS] = SM::nCtsRecruitOnly;
     

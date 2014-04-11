@@ -80,6 +80,8 @@ namespace Report {
         MI_HOSPITAL_FIRST_DAY_DEATHS,
         MI_N_SP_REM_TOO_OLD,
         MI_N_SP_REM_FIRST_EVENT,
+        MI_PQ_TREATMENTS,
+        MI_TREAT_DIAGNOSTICS,
         MI_RECRUIT_TIMED,
         MI_RECRUIT_CTS,
         MI_NUM  // must be last; not a measure to report

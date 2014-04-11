@@ -59,6 +59,9 @@ public:
     
     virtual bool summarize(const Host::Human& human);
     
+    // No PQ treatment for falciparum in current models:
+    virtual bool optionalPqTreatment(){ return false; }
+    
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
     virtual bool diagnosticDefault() const;

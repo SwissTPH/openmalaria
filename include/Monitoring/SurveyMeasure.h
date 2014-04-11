@@ -56,7 +56,7 @@ enum SurveyMeasure {
     sumlogDens= 5,
     
     /** The total number of infections in the population: includes both blood
-     * and liver stages. */
+     * and liver stages. Vivax: this is the number of broods. */
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *
@@ -65,7 +65,8 @@ enum SurveyMeasure {
      * Single value, not per age-group. */
     nTransmit= 7,
     /** The sum of all detectable infections (where blood stage parasite
-     * density is above the detection limit) across all human hosts. */
+     * density is above the detection limit) across all human hosts.
+     * Vivax: the number of broods with an active blood stage. */
     totalPatentInf= 8,
 //     /// Contribuion to immunity functions (removed)
 //     contrib= 9,
@@ -268,6 +269,16 @@ enum SurveyMeasure {
     /** Number of removals from a sub-population due to first
      * infection/bout/treatment (see onFirstBout & co). */
     nSubPopRemovalFirstEvent = 62,
+    
+    /** Report the number of Primaquine treatments given. */
+    nPQTreatments = 63,
+    
+    /** Report the number of diagnostics used during treatment.
+     * 
+     * This is not the same as Clinical_RDTs + Clinical_Microscopy: those
+     * outputs are used by the "event scheduler" 1-day timestep clinical model,
+     * whereas this output is used by the 5-day timestep model. */
+    nTreatDiagnostics = 64,
     
     /** Number of "recruitment only" recruitments via timed deployment. */
     nMassRecruitOnly = 65,

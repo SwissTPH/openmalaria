@@ -237,6 +237,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element name="primaquine" minOccurs="0">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
+            <xs:element name="pUseUncomplicated" type="om:inputValue"/>
+            <xs:element name="effectivenessOnUse" type="om:inputValue"/>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -246,6 +255,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>type:string;name:Case Management model;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="useDiagnosticUC" type="xs:boolean" default="false"/>
   </xs:complexType>
   <xs:complexType name="treatmentDetails">
     <xs:sequence>

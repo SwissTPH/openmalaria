@@ -88,7 +88,9 @@ measureNames = {
     57 : 'nCtsIRS',
     58 : 'nCtsGVI',
     59 : 'nCtsMDA',
-    60 : 'nCtsScreenings'
+    60 : 'nCtsScreenings',
+    63 : 'nPQTreatments',
+    64 : 'nTreatDiagnostics'
     }
 
 # List of measure groups. Each includes name, boolean (true if use log scale),
@@ -103,7 +105,7 @@ combinedMeasures = [
     ('total infections',[(6,'all','red'),(8,'patent','blue')]),
     ('transmitting humans',[(7,'sum(p(transmit))','green'),(26,'annual sum(p(transmit)) / annual EIR','blue')]),
     ('sum pyrog thres',[(10,'sum pyrogenic threshold','purple')]),
-    ('treatments',[(11,'first line','red'),(12,'second line','purple'),(13,'hospital','orange'),(54,'antibiotics','blue')]),
+    ('treatments',[(11,'first line','red'),(12,'second line','purple'),(13,'hospital','orange'),(54,'antibiotics','blue'),(63,'primaquine','darkblue')]),
     ('episodes',[(14,'UC','red'),(15,'severe','orange'),(27,'NMF','blue')]),
     ('sequelae',[(16,'all','red'),(24,'hospital','orange')]),
     ('deaths',[(17,'direct hospital','orange'),(18,'indirect','purple'),(19,'direct','red'),(41,'first day','brown'),(42,'first day hospital','green'),(53,'non-malaria fevers','blue')]),
@@ -114,7 +116,7 @@ combinedMeasures = [
     ('inoculations',[(30,'all','red')]),
     ('feeding vectors',[(31,'emergence - N_v0','green'),(32,'all - N_v','blue'),(33,'infected - O_v','purple'),(34,'infectious - S_v','red')]),
     ('EIR (innocs/pers/year)',[(35,'requested','orange'),(36,'simulated','red')]),
-    ('diagnostics used',[(39,'RDTs','purple'),(48,'microscopy','brown'),(55,'MSAT (timed)','orange'),(60,'MSAT (cts)','darkred')]),
+    ('diagnostics used',[(39,'RDTs','purple'),(48,'microscopy','brown'),(55,'MSAT (timed)','orange'),(60,'MSAT (cts)','darkred'),(64,'treatment','brown')]),
     ('drug usage (mg)',[(40,'oral','blue'),(49,'intrevenous','orange')]),
     ('bed nets',[(44,'ITNs (timed)','darkgreen'),(45,'ITNs (cts)','green')]),
     ('IRS',[(46,'IRS (timed)','darkred'),(57,'IRS (cts)','red')]),
