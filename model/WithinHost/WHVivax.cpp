@@ -31,6 +31,7 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
+using boost::ptr_list;
 
 // ———  parameters  ———
 
@@ -52,6 +53,9 @@ double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
 double pHetNoPQ = numeric_limits<double>::signaling_NaN();
 double pReceivePQ = numeric_limits<double>::signaling_NaN();
 double effectivenessPQ = numeric_limits<double>::signaling_NaN();
+
+WHVivax *sampleHost = 0;
+VivaxBrood *sampleBrood = 0;
 
 
 // ———  individual models  ———
@@ -90,7 +94,7 @@ TimeStep sampleReleaseDelay(){
 
 // ———  per-brood code  ———
 
-VivaxBrood::VivaxBrood(){
+VivaxBrood::VivaxBrood( WHVivax *host ){
     set<TimeStep> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
     // primary blood stage plus hypnozoites (relapses)
@@ -98,13 +102,27 @@ VivaxBrood::VivaxBrood(){
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
         TimeStep timeToRelease = TimeStep::simulation + latentp + sampleReleaseDelay();
-        bool inserted = releases.insert( TimeStep::simulation + timeToRelease ).second;
+        bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
     }
     
     // Copy times to the vector, backwards (smallest last):
     releaseDates.insert( releaseDates.end(), releases.rbegin(), releases.rend() );
+    
+    if( sampleHost == host && sampleBrood == 0 ){
+        sampleBrood = this;
+//         cout << "New sample brood";
+//         for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+//             cout << '\t' << *it;
+//         cout << endl;
+    }
+}
+VivaxBrood::~VivaxBrood(){
+    if( sampleBrood == this ){
+        sampleBrood = 0;
+//         cout << "Brood terminated" << endl;
+    }
 }
 
 bool VivaxBrood::update( bool& anyNewBloodStage ){
@@ -116,6 +134,14 @@ bool VivaxBrood::update( bool& anyNewBloodStage ){
     
     while( releaseDates.back() == TimeStep::simulation ){
         releaseDates.pop_back();
+        
+        if( sampleBrood == this ){
+//             cout << "Time\t" << TimeStep::simulation;
+//             for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+//                 cout << '\t' << *it;
+//             cout << endl;
+        }
+        
         // an existing or recently terminated blood stage from the same brood
         // protects against a newly released Hypnozoite
         //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
@@ -160,6 +186,10 @@ void VivaxBrood::treatmentLS(){
 
 WHVivax::WHVivax(){
     noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
+    if( sampleHost == 0 ){
+        sampleHost = this;
+//         cout << "New host" << endl;
+    }
 }
 
 void WHVivax::setComorbidityFactor(double factor){
@@ -168,10 +198,14 @@ void WHVivax::setComorbidityFactor(double factor){
 }
 
 WHVivax::~WHVivax(){
+    if( this == sampleHost ){
+        sampleHost = 0;
+//         cout << "Host terminates" << endl;
+    }
 }
 
 double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvEfficacy) const{
-    for (std::list<VivaxBrood>::const_iterator inf = infections.begin();
+    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
@@ -198,17 +232,18 @@ bool WHVivax::summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGrou
 
 void WHVivax::importInfection(){
     // this means one new liver stage infection, which can result in multiple blood stages
-    infections.resize( infections.size() + 1 );
+    infections.push_back( new VivaxBrood( this ) );
 }
 
 void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
     // create new infections, letting the constructor do the initialisation work:
-    infections.resize( infections.size() + nNewInfs );
+    for( int i = 0; i < nNewInfs; ++i )
+        infections.push_back( new VivaxBrood( this ) );
     
     // update infections
     // NOTE: currently no BSV model
     bool anyNewBloodStage = false;
-    std::list<VivaxBrood>::iterator inf = infections.begin();
+    ptr_list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
         bool isFinished = inf->update( anyNewBloodStage );
         if( isFinished ) inf = infections.erase( inf );
@@ -235,7 +270,7 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
 }
 
 bool WHVivax::diagnosticDefault() const{
-    for (std::list<VivaxBrood>::const_iterator inf = infections.begin();
+    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if (inf->isPatent())
@@ -258,7 +293,7 @@ void WHVivax::immuneSuppression(){
 WHInterface::InfectionCount WHVivax::countInfections () const{
     InfectionCount count;       // constructor initialises counts to 0
     count.total = infections.size();
-    for (std::list<VivaxBrood>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         if (inf->isPatent())
             count.patent += 1;
     }
@@ -266,7 +301,7 @@ WHInterface::InfectionCount WHVivax::countInfections () const{
 }
 void WHVivax::effectiveTreatment(){
     // This means clear blood stage infection(s) but not liver stage.
-    for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+    for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
         it->treatmentBS();
     }
 }
@@ -276,7 +311,7 @@ bool WHVivax::optionalPqTreatment(){
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
     if (pReceivePQ > 0.0 && !noPQ && random::bernoulli(pReceivePQ)){
         if( random::bernoulli(effectivenessPQ) ){
-            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
         }

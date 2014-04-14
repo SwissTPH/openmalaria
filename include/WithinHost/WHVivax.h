@@ -26,6 +26,7 @@
 
 #include <list>
 #include <memory>
+#include <boost/ptr_container/ptr_list.hpp>
 
 using namespace std;
 
@@ -40,6 +41,7 @@ namespace Pathogenesis {
     class PathogenesisModel;
 }
 
+class WHVivax;
 /**
  * A brood is the set of hypnozoites resulting from an innoculation, plus a
  * combined blood stage.
@@ -51,7 +53,13 @@ namespace Pathogenesis {
  */
 class VivaxBrood{
 public:
-    VivaxBrood();
+    /** Create.
+     * 
+     * @param host      The host creating this. Not really needed, except to
+     * prevent VivaxBrood being default-constructed by its container.
+     */
+    VivaxBrood( WHVivax *host );
+    ~VivaxBrood();
     
     /**
      * Do per-timestep update: remove finished blood stage infections and act
@@ -77,6 +85,9 @@ public:
     void treatmentLS();
     
 private:
+    VivaxBrood() {}     // not default constructible
+    VivaxBrood( const VivaxBrood& ) {}  // not copy constructible
+    
     // list of times at which the merozoite and hypnozoites release, ordered by
     // time of release, soonest last (i.e. last element is next one to release)
     vector<TimeStep> releaseDates;
@@ -133,13 +144,16 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
+    WHVivax( const WHVivax& ) {}        // not copy constructible
+    
     /* Is flagged as never getting PQ: this is a heteogeneity factor. Example:
      * Set to zero if everyone can get PQ, 0.5 if females can't get PQ and
      * males aren't tested (i.e. all can get it) or (1+p)/2 where p is the
      * chance a male being tested and found to be G6PD deficient. */
     bool noPQ;
     
-    list<VivaxBrood> infections;
+    //TODO: shouldn't have to store by pointer (at least, if using C++11)
+    boost::ptr_list<VivaxBrood> infections;
     
     Pathogenesis::State morbidity;
 
