@@ -125,6 +125,16 @@ VivaxBrood::~VivaxBrood(){
     }
 }
 
+void VivaxBrood::checkpoint( ostream& stream ){
+    releaseDates & stream;
+    bloodStageClearDate & stream;
+}
+VivaxBrood::VivaxBrood( istream& stream ){
+    releaseDates & stream;
+    bloodStageClearDate & stream;
+}
+
+
 bool VivaxBrood::update( bool& anyNewBloodStage ){
     if( bloodStageClearDate == TimeStep::simulation ){
         //NOTE: this effectively means that both asexual and sexual stage
@@ -132,7 +142,7 @@ bool VivaxBrood::update( bool& anyNewBloodStage ){
         // protect against new blood-stage infections for a short time.
     }
     
-    while( releaseDates.back() == TimeStep::simulation ){
+    while( releaseDates.size() > 0 && releaseDates.back() == TimeStep::simulation ){
         releaseDates.pop_back();
         
         if( sampleBrood == this ){
@@ -325,9 +335,24 @@ bool WHVivax::optionalPqTreatment(){
 
 void WHVivax::checkpoint(istream& stream){
     WHInterface::checkpoint(stream);
+    noPQ & stream;
+    size_t len;
+    len & stream;
+    for( size_t i = 0; i < len; ++i ){
+        infections.push_back( new VivaxBrood( stream ) );
+    }
+    int morbidity_i;
+    morbidity_i & stream;
+    morbidity = static_cast<Pathogenesis::State>( morbidity_i );
 }
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
+    noPQ & stream;
+    infections.size() & stream;
+    for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+        it->checkpoint( stream );
+    }
+    static_cast<int>( morbidity ) & stream;
 }
 
 void WHVivax::init(){

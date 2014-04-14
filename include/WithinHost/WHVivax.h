@@ -60,6 +60,10 @@ public:
      */
     VivaxBrood( WHVivax *host );
     ~VivaxBrood();
+    /** Save a checkpoint. */
+    void checkpoint( ostream& stream );
+    /** Create from checkpoint. */
+    VivaxBrood( istream& stream );
     
     /**
      * Do per-timestep update: remove finished blood stage infections and act
