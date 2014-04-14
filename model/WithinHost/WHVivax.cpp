@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/WHVivax.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "inputData.h"
@@ -325,6 +326,7 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
     
     //NOTE: currently we don't model co-infection or indirect deaths
     if( morbidity == Pathogenesis::NONE ){
+        morbidity = Pathogenesis::PathogenesisModel::sampleNMF( ageInYears );
         /*TODO: if NMF {
             morbidity = Pathogenesis::STATE_NMF;
         }*/
@@ -425,6 +427,7 @@ void WHVivax::init(){
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
     
     initNHypnozoites();
+    Pathogenesis::PathogenesisModel::init( true );
 }
 void WHVivax::setHSParameters(const scnXml::Primaquine& elt){
     if( pHetNoPQ != pHetNoPQ )// not set yet

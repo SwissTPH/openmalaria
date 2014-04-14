@@ -62,7 +62,7 @@ void WHFalciparum::init() {
     _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
-    Pathogenesis::PathogenesisModel::init();
+    Pathogenesis::PathogenesisModel::init( false );
     
     /*
     The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
