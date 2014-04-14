@@ -327,9 +327,6 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
     //NOTE: currently we don't model co-infection or indirect deaths
     if( morbidity == Pathogenesis::NONE ){
         morbidity = Pathogenesis::PathogenesisModel::sampleNMF( ageInYears );
-        /*TODO: if NMF {
-            morbidity = Pathogenesis::STATE_NMF;
-        }*/
     }
 }
 
