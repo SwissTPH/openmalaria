@@ -54,8 +54,10 @@ double pHetNoPQ = numeric_limits<double>::signaling_NaN();
 double pReceivePQ = numeric_limits<double>::signaling_NaN();
 double effectivenessPQ = numeric_limits<double>::signaling_NaN();
 
+#ifdef WHVivaxSamples
 WHVivax *sampleHost = 0;
 VivaxBrood *sampleBrood = 0;
+#endif
 
 
 // ———  individual models  ———
@@ -110,19 +112,23 @@ VivaxBrood::VivaxBrood( WHVivax *host ){
     // Copy times to the vector, backwards (smallest last):
     releaseDates.insert( releaseDates.end(), releases.rbegin(), releases.rend() );
     
+#ifdef WHVivaxSamples
     if( sampleHost == host && sampleBrood == 0 ){
         sampleBrood = this;
-//         cout << "New sample brood";
-//         for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
-//             cout << '\t' << *it;
-//         cout << endl;
+        cout << "New sample brood";
+        for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+            cout << '\t' << *it;
+        cout << endl;
     }
+#endif
 }
 VivaxBrood::~VivaxBrood(){
+#ifdef WHVivaxSamples
     if( sampleBrood == this ){
         sampleBrood = 0;
-//         cout << "Brood terminated" << endl;
+        cout << "Brood terminated" << endl;
     }
+#endif
 }
 
 void VivaxBrood::checkpoint( ostream& stream ){
@@ -145,12 +151,14 @@ bool VivaxBrood::update( bool& anyNewBloodStage ){
     while( releaseDates.size() > 0 && releaseDates.back() == TimeStep::simulation ){
         releaseDates.pop_back();
         
+#ifdef WHVivaxSamples
         if( sampleBrood == this ){
-//             cout << "Time\t" << TimeStep::simulation;
-//             for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
-//                 cout << '\t' << *it;
-//             cout << endl;
+            cout << "Time\t" << TimeStep::simulation;
+            for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+                cout << '\t' << *it;
+            cout << endl;
         }
+#endif
         
         // an existing or recently terminated blood stage from the same brood
         // protects against a newly released Hypnozoite
@@ -196,10 +204,12 @@ void VivaxBrood::treatmentLS(){
 
 WHVivax::WHVivax(){
     noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
+#ifdef WHVivaxSamples
     if( sampleHost == 0 ){
         sampleHost = this;
-//         cout << "New host" << endl;
+        cout << "New host" << endl;
     }
+#endif
 }
 
 void WHVivax::setComorbidityFactor(double factor){
@@ -208,10 +218,12 @@ void WHVivax::setComorbidityFactor(double factor){
 }
 
 WHVivax::~WHVivax(){
+#ifdef WHVivaxSamples
     if( this == sampleHost ){
         sampleHost = 0;
-//         cout << "Host terminates" << endl;
+        cout << "Host terminates" << endl;
     }
+#endif
 }
 
 double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvEfficacy) const{
