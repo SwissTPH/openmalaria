@@ -701,6 +701,10 @@
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
       <bloodStageLengthDays weibullScale="115.0582" weibullShape="2.331"/>
+      <pEventPrimary a="0.9687" b="9.803"/>
+      <pEventSecondary a="0.2098" b="1.812"/>
+      <!-- probability of a clinical event being severe -->
+      <pEventIsSevere value="0.1"/>
     </vivax>
     <parameters interval="5" iseed="0" latentp="3">
       <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>

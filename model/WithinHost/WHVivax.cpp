@@ -49,9 +49,11 @@ double minReleaseHypnozoite;    // units: days
 TimeStep bloodStageProtectionLatency;
 double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
 double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
-double pEventPrimA = 0.9687, pEventPrimB = 9.803;
-double pEventSecA = 0.2098, pEventSecB = 1.812;
-double pEventIsSevere = 0.1;
+double pEventPrimA = numeric_limits<double>::signaling_NaN(),
+    pEventPrimB = numeric_limits<double>::signaling_NaN();
+double pEventSecA = numeric_limits<double>::signaling_NaN(),
+    pEventSecB = numeric_limits<double>::signaling_NaN();
+double pEventIsSevere = numeric_limits<double>::signaling_NaN();
 
 // Set from healthSystem element:
 double pHetNoPQ = numeric_limits<double>::signaling_NaN();
@@ -421,6 +423,12 @@ void WHVivax::init(){
     bloodStageProtectionLatency = TimeStep::fromDaysNearest( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
+    
+    pEventPrimA = elt.getPEventPrimary().getA();
+    pEventPrimB = elt.getPEventPrimary().getB();
+    pEventSecA = elt.getPEventSecondary().getA();
+    pEventSecB = elt.getPEventSecondary().getB();
+    pEventIsSevere = elt.getPEventIsSevere().getValue();
     
     initNHypnozoites();
     Pathogenesis::PathogenesisModel::init( true );
