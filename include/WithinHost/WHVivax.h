@@ -79,6 +79,9 @@ public:
      */
     UpdResult update();
     
+    inline void setHadEvent( bool hadEvent ){ this->hadEvent = hadEvent; }
+    inline bool hasHadEvent()const{ return hadEvent; }
+    
     /** Equivalent to a blood stage existing. We do not model incidence of
      * gametocytes independently, thus this also tests existance of
      * gametocytes. */
@@ -105,6 +108,9 @@ private:
     
     // Whether the primary blood stage infection has started
     bool primaryHasStarted;
+    
+    // Whether any clinical event has been triggered by this brood
+    bool hadEvent;
 };
 
 /**

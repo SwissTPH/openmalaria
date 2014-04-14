@@ -101,7 +101,8 @@ TimeStep sampleReleaseDelay(){
 // ———  per-brood code  ———
 
 VivaxBrood::VivaxBrood( WHVivax *host ) :
-        primaryHasStarted( false )
+        primaryHasStarted( false ),
+        hadEvent( false )
 {
     set<TimeStep> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
@@ -141,11 +142,13 @@ void VivaxBrood::checkpoint( ostream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
     primaryHasStarted & stream;
+    hadEvent & stream;
 }
 VivaxBrood::VivaxBrood( istream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
     primaryHasStarted & stream;
+    hadEvent & stream;
 }
 
 
@@ -289,14 +292,26 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
             // Sample for each new blood stage infection: the chance of some
             // clinical event.
             
-            // If the primary blood stage: oldCumInf wasn't updated yet,
-            // otherwise: subtract 1 to not count current brood in cum primary
-            // infections. Don't worry about coincident primiary infections.
-            double pEvent = ( result.newPrimaryBS ) ?
-                pEventPrimA * pEventPrimB / (pEventPrimB+oldCumInf) :
-                pEventSecA * pEventSecB / (pEventSecB + (oldCumInf-1));
+            bool clinicalEvent;
+            if( result.newPrimaryBS ){
+                // Blood stage is primary. oldCumInf wasn't updated yet.
+                double pEvent = pEventPrimA * pEventPrimB / (pEventPrimB+oldCumInf);
+                clinicalEvent = random::bernoulli( pEvent );
+                inf->setHadEvent( clinicalEvent );
+            }else{
+                // Subtract 1 from oldCumInf to not count the current brood in
+                // the number of cumulative primary infections.
+                if( inf->hasHadEvent() ){
+                    double pEvent = pEventSecA * pEventSecB / (pEventSecB + (oldCumInf-1));
+                    clinicalEvent = random::bernoulli( pEvent );
+                }else{
+                    // If the primary infection did not cause an event, there
+                    // is 0 chance of a secondary causing an event in our model.
+                    clinicalEvent = false;
+                }
+            }
             
-            if( random::bernoulli( pEvent ) ){
+            if( clinicalEvent ){
                 morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_MALARIA );
                 /*TODO: if severe...{
                     morbidity |= Pathogenesis::STATE_SEVERE;
