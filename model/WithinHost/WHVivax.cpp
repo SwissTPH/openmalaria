@@ -54,6 +54,10 @@ double pHetNoPQ = numeric_limits<double>::signaling_NaN();
 double pReceivePQ = numeric_limits<double>::signaling_NaN();
 double effectivenessPQ = numeric_limits<double>::signaling_NaN();
 
+//TODO: in XML, possibly rename
+double pEventPrimA = 0.9687, pEventPrimB = 9.803;
+double pEventSecA = 0.2098, pEventSecB = 1.812;
+
 #ifdef WHVivaxSamples
 WHVivax *sampleHost = 0;
 VivaxBrood *sampleBrood = 0;
@@ -145,21 +149,16 @@ VivaxBrood::VivaxBrood( istream& stream ){
 }
 
 
-VivaxBrood::UpdatePair VivaxBrood::update( bool& anyNewBloodStage ){
+VivaxBrood::UpdResult VivaxBrood::update(){
     if( bloodStageClearDate == TimeStep::simulation ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
         // protect against new blood-stage infections for a short time.
     }
     
-    UpdatePair result;
-    result.newPrimaryBS = false;
+    UpdResult result;
     while( releaseDates.size() > 0 && releaseDates.back() == TimeStep::simulation ){
         releaseDates.pop_back();
-        if( !primaryHasStarted ){
-            primaryHasStarted = true;
-            result.newPrimaryBS = true;
-        }
         
 #ifdef WHVivaxSamples
         if( sampleBrood == this ){
@@ -176,7 +175,12 @@ VivaxBrood::UpdatePair VivaxBrood::update( bool& anyNewBloodStage ){
         if( bloodStageClearDate + bloodStageProtectionLatency
             >= TimeStep::simulation ) continue;
         
-        anyNewBloodStage = true;
+        if( !primaryHasStarted ){
+            primaryHasStarted = true;
+            result.newPrimaryBS = true;
+        }
+        result.newBS = true;
+        
         double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
         bloodStageClearDate = TimeStep::simulation + TimeStep::fromDaysNearest( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
@@ -274,31 +278,41 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
     
     // update infections
     // NOTE: currently no BSV model
-    bool anyNewBloodStage = false;
+    morbidity = Pathogenesis::NONE;
+    uint32_t oldCumInf = cumPrimInf;
     ptr_list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
-        VivaxBrood::UpdatePair result = inf->update( anyNewBloodStage );
+        VivaxBrood::UpdResult result = inf->update();
         if( result.newPrimaryBS ) cumPrimInf += 1;
+        
+        if( result.newBS ){
+            // Sample for each new blood stage infection: the chance of some
+            // clinical event.
+            
+            // If the primary blood stage: oldCumInf wasn't updated yet,
+            // otherwise: subtract 1 to not count current brood in cum primary
+            // infections. Don't worry about coincident primiary infections.
+            double pEvent = ( result.newPrimaryBS ) ?
+                pEventPrimA * pEventPrimB / (pEventPrimB+oldCumInf) :
+                pEventSecA * pEventSecB / (pEventSecB + (oldCumInf-1));
+            
+            if( random::bernoulli( pEvent ) ){
+                morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_MALARIA );
+                /*TODO: if severe...{
+                    morbidity |= Pathogenesis::STATE_SEVERE;
+                }*/
+            }
+        }
+        
         if( result.isFinished ) inf = infections.erase( inf );
         else ++inf;
     }
     
-    morbidity = Pathogenesis::NONE;
-    //NOTE: released hypnozoites blocked by immunity also don't cause fever
-    if( anyNewBloodStage ){
-        //TODO: 3 probabilities: for initial infection, 0 for relapse given no initial fever,
-        // another probability given initial fever
-        //TODO: also depends on number of broods ever seen by host (as with cumulativeh for Pf model)
-        //NOTE: currently we don't model co-infection or indirect deaths
-        /*
-        double x = random::uniform_01();
-        if( x < pSevMalaria )
-            morbidity = Pathogenesis::STATE_SEVERE;
-        else if( x < pSevPlusUC )
-            morbidity = Pathogenesis::STATE_MALARIA;
-        else if( x < pSevPlusUCPlusNMF )
+    //NOTE: currently we don't model co-infection or indirect deaths
+    if( morbidity == Pathogenesis::NONE ){
+        /*TODO: if NMF {
             morbidity = Pathogenesis::STATE_NMF;
-        */
+        }*/
     }
 }
 

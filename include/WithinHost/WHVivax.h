@@ -65,20 +65,19 @@ public:
     /** Create from checkpoint. */
     VivaxBrood( istream& stream );
     
-    struct UpdatePair{
-        bool newPrimaryBS, isFinished;
+    struct UpdResult{
+        UpdResult() : newPrimaryBS(false), newBS(false) {}
+        bool newPrimaryBS, newBS, isFinished;
     };
     /**
      * Do per-timestep update: remove finished blood stage infections and act
      * on newly releasing hypnozoites.
      * 
-     * @param anyNewBloodStage  Set true if any hypnozoite release starts a
-     *  blood stage
      * @return pair describing whether the infection is finished (no more blood
      *  or liver stages) and whether a new primary blood-stage has started (to
      *  update cumPrimInf)
      */
-    UpdatePair update( bool& anyNewBloodStage );
+    UpdResult update();
     
     /** Equivalent to a blood stage existing. We do not model incidence of
      * gametocytes independently, thus this also tests existance of
