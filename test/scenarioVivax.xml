@@ -165,24 +165,25 @@
     <ImmediateOutcomes name="Tanzania ACT" useDiagnosticUC="true">
       <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
       <initialACR>
-        <ACT value="0.85"/>
-        <QN value="0.998"/>
-        <selfTreatment value="0.63"/>
+        <ACT value="0.85"/><!-- what is cure rate of blood-stage drugs? -->
+        <QN value="0"/><!-- no treatment for severe (can change so long as CFR=1) -->
+        <selfTreatment value="0"/>
       </initialACR>
       <compliance>
-        <ACT value="0.900"/>
-        <QN value="0.175"/>
-        <selfTreatment value="0.85"/>
+        <ACT value="1"/>
+        <QN value="1"/>
+        <selfTreatment value="1"/>
       </compliance>
       <nonCompliersEffective>
         <ACT value="0"/>
-        <QN value="0.2"/>
+        <QN value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
+      <!--set as desired... -->
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
-      <pSelfTreatUncomplicated value="0.01"/>
+      <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>
-      <pSeekOfficialCareSevere value="0.48"/>
+      <pSeekOfficialCareSevere value="1"/>
       <primaquine>
         <pHumanCannotReceive value="0.3"/>
         <pUseUncomplicated value="0.95"/>
@@ -190,20 +191,12 @@
       </primaquine>
     </ImmediateOutcomes>
     <CFR>
-      <group lowerbound="0" value="0.09189"/>
-      <group lowerbound="0.25" value="0.0810811"/>
-      <group lowerbound="0.75" value="0.0648649"/>
-      <group lowerbound="1.5" value="0.0689189"/>
-      <group lowerbound="2.5" value="0.0675676"/>
-      <group lowerbound="3.5" value="0.0297297"/>
-      <group lowerbound="4.5" value="0.0459459"/>
-      <group lowerbound="7.5" value="0.0945946"/>
-      <group lowerbound="12.5" value="0.1243243"/>
-      <group lowerbound="15" value="0.1378378"/>
+      <!-- CFR=1 so that all severe cases result in death -->
+      <group lowerbound="0" value="1"/>
     </CFR>
-    <pSequelaeInpatient interpolation="none">
-      <group lowerbound="0.0" value="0.0132"/>
-      <group lowerbound="5.0" value="0.005"/>
+    <pSequelaeInpatient>
+      <!-- no sequelae -->
+      <group lowerbound="0.0" value="0"/>
     </pSequelaeInpatient>
   </healthSystem>
   <entomology mode="dynamic" name="Namawala1_16*1.0">
@@ -716,7 +709,8 @@
       <parameter include="false" name="        Xstar_p " number="4" value="2801.485664"/>
       <parameter include="false" name="        gamma_p " number="5" value="2.061137"/>
       <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
-      <parameter include="false" name="        log oddsr CF community  " number="17" value="0.729208"/>
+      <!-- log odds 0 implies community CFR equals hospital CFR -->
+      <parameter include="false" name="        log oddsr CF community  " number="17" value="0"/>
       <parameter include="false" name="        Non-malaria infant mortality    " number="19" value="50.648162"/>
     </parameters>
   </model>

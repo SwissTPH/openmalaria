@@ -49,15 +49,14 @@ double minReleaseHypnozoite;    // units: days
 TimeStep bloodStageProtectionLatency;
 double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
 double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
+double pEventPrimA = 0.9687, pEventPrimB = 9.803;
+double pEventSecA = 0.2098, pEventSecB = 1.812;
+double pEventIsSevere = 0.1;
 
 // Set from healthSystem element:
 double pHetNoPQ = numeric_limits<double>::signaling_NaN();
 double pReceivePQ = numeric_limits<double>::signaling_NaN();
 double effectivenessPQ = numeric_limits<double>::signaling_NaN();
-
-//TODO: in XML, possibly rename
-double pEventPrimA = 0.9687, pEventPrimB = 9.803;
-double pEventSecA = 0.2098, pEventSecB = 1.812;
 
 #ifdef WHVivaxSamples
 WHVivax *sampleHost = 0;
@@ -313,10 +312,10 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
             }
             
             if( clinicalEvent ){
-                morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_MALARIA );
-                /*TODO: if severe...{
-                    morbidity |= Pathogenesis::STATE_SEVERE;
-                }*/
+                if( random::bernoulli( pEventIsSevere ) )
+                    morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_SEVERE );
+                else
+                    morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_MALARIA );
             }
         }
         

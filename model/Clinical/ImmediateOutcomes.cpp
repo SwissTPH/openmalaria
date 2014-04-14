@@ -175,7 +175,7 @@ bool ClinicalImmediateOutcomes::severeMalaria (
     // Community survival
     q[2] = q[1] + (1 - p2) * (1 - p5) * (1 - p7);
     // Parasitological failure deaths
-    q[3] = q[2] + p2 * p5 * (1 - p3);
+    q[3] = q[2] + p2 * (1 - p3) * p5;
     // Parasitological failure sequelae
     q[4] = q[3] + p2 * (1 - p3) * (1 - p5) * p7;
     // Parasitological failure survivors
