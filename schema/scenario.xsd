@@ -266,6 +266,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute type="xs:double" use="required" name="weibullShape"/>
         </xs:complexType>
       </xs:element>
+      <xs:element name="pEventPrimary" type="om:ProbVivaxEvent"/>
+      <xs:element name="pEventSecondary" type="om:ProbVivaxEvent"/>
+      <xs:element name="pEventIsSevere" type="om:inputValue"/>
     </xs:all>
+  </xs:complexType>
+  <xs:complexType name="ProbVivaxEvent">
+    <xs:attribute name="a" type="xs:double" use="required"/>
+    <xs:attribute name="b" type="xs:double" use="required"/>
   </xs:complexType>
 </xs:schema>

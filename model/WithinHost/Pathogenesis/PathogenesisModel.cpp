@@ -43,7 +43,16 @@ AgeGroupInterpolation* PathogenesisModel::NMF_incidence = AgeGroupInterpolation:
 bool opt_predetermined_episodes = false, opt_mueller_pres_model = false;
 
 
-void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinical& clinical ) {
+void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinical& clinical, bool nmfOnly ){
+    if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
+        if( !clinical.getNonMalariaFevers().present() ){
+            throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
+        }
+        const scnXml::Clinical::NonMalariaFeversType& nmfDesc = clinical.getNonMalariaFevers().get();
+        NMF_incidence = AgeGroupInterpolation::makeObject( nmfDesc.getIncidence(), "incidence" );
+    }
+    if( nmfOnly ) return;
+    
     indirRiskCoFactor_18=(1-exp(-parameters[Parameters::INDIRECT_RISK_COFACTOR]));
     sevMal_21=parameters[Parameters::SEVERE_MALARIA_THRESHHOLD];
     comorbintercept_24=1-exp(-parameters[Parameters::COMORBIDITY_INTERCEPT]);
@@ -60,14 +69,6 @@ void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinic
         }else{
             PyrogenPathogenesis::init( parameters );
         }
-    }
-    
-    if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
-        if( !clinical.getNonMalariaFevers().present() ){
-            throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
-        }
-        const scnXml::Clinical::NonMalariaFeversType& nmfDesc = clinical.getNonMalariaFevers().get();
-        NMF_incidence = AgeGroupInterpolation::makeObject( nmfDesc.getIncidence(), "incidence" );
     }
 }
 void PathogenesisModel::cleanup() {
@@ -97,21 +98,20 @@ PathogenesisModel::PathogenesisModel(double cF) :
 Pathogenesis::StatePair PathogenesisModel::determineState (double ageYears, double timeStepMaxDensity, double endDensity) {
     double pMalariaFever = getPEpisode(timeStepMaxDensity, endDensity);
     StatePair result;
-
     //TODO(performance): would using a single RNG sample and manipulating probabilities be faster?
     //Decide whether a clinical episode occurs and if so, which type
-    if ((random::uniform_01()) < pMalariaFever) {
+    if( random::bernoulli( pMalariaFever ) ){
         //Fixed severe threshold
         double severeMalThreshold=sevMal_21+1;
         double prSevereEpisode=timeStepMaxDensity / (timeStepMaxDensity + severeMalThreshold);
         
-        if (random::uniform_01() < prSevereEpisode)
+        if( random::bernoulli( prSevereEpisode ) )
             result.state = STATE_SEVERE;
         else {
             double pCoinfection=comorbintercept_24/(1+ageYears/critAgeComorb_30);
             pCoinfection*=_comorbidityFactor;
 
-            if (random::uniform_01() < pCoinfection)
+            if( random::bernoulli( pCoinfection ) )
                 result.state = STATE_COINFECTION;
             else
                 result.state = STATE_MALARIA;
@@ -123,16 +123,21 @@ Pathogenesis::StatePair PathogenesisModel::determineState (double ageYears, doub
         */
         double indirectRisk=indirRiskCoFactor_18/(1+ageYears/critAgeComorb_30);
         indirectRisk*=_comorbidityFactor;
-        if (random::uniform_01() < indirectRisk){
-            result.indirectMortality = true;
-        }
-    } else if ( NMF_incidence->isSet() ) {
-        double pNMF = NMF_incidence->eval( ageYears );
-        if( random::uniform_01() < pNMF ){
-            result.state = STATE_NMF;
-        }
+        if( random::bernoulli( indirectRisk ) )
+            result.indirectMortality = true;        
+    }else{
+        result.state = sampleNMF( ageYears );
     }
     return result;
+}
+
+Pathogenesis::State PathogenesisModel::sampleNMF( double ageYears ){
+    if ( NMF_incidence->isSet() ) {
+        double pNMF = NMF_incidence->eval( ageYears );
+        if( random::bernoulli( pNMF ) )
+            return Pathogenesis::STATE_NMF;
+    }
+    return Pathogenesis::NONE;
 }
 
 

@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/WHVivax.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include <schema/scenario.h>
@@ -31,6 +32,7 @@ namespace WithinHost {
 
 using namespace OM::util;
 using namespace Monitoring;
+using boost::ptr_list;
 
 // ———  parameters  ———
 
@@ -47,11 +49,21 @@ double minReleaseHypnozoite;    // units: days
 TimeStep bloodStageProtectionLatency;
 double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
 double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
+double pEventPrimA = numeric_limits<double>::signaling_NaN(),
+    pEventPrimB = numeric_limits<double>::signaling_NaN();
+double pEventSecA = numeric_limits<double>::signaling_NaN(),
+    pEventSecB = numeric_limits<double>::signaling_NaN();
+double pEventIsSevere = numeric_limits<double>::signaling_NaN();
 
 // Set from healthSystem element:
 double pHetNoPQ = numeric_limits<double>::signaling_NaN();
 double pReceivePQ = numeric_limits<double>::signaling_NaN();
 double effectivenessPQ = numeric_limits<double>::signaling_NaN();
+
+#ifdef WHVivaxSamples
+WHVivax *sampleHost = 0;
+VivaxBrood *sampleBrood = 0;
+#endif
 
 
 // ———  individual models  ———
@@ -90,49 +102,98 @@ TimeStep sampleReleaseDelay(){
 
 // ———  per-brood code  ———
 
-struct TimeStepCompReverse{
-    bool operator()( const TimeStep& a, const TimeStep& b ){
-        return b < a;
-    }
-} timeStepCompR;
-VivaxBrood::VivaxBrood(){    
+VivaxBrood::VivaxBrood( WHVivax *host ) :
+        primaryHasStarted( false ),
+        hadEvent( false )
+{
+    set<TimeStep> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
+    
     // primary blood stage plus hypnozoites (relapses)
-    releaseDates.push_back( TimeStep::simulation + latentp );
+    releases.insert( TimeStep::simulation + latentp );
     int numberHypnozoites = sampleNHypnozoites();
-    for( int i = 0; i < numberHypnozoites; ++i ){
+    for( int i = 0; i < numberHypnozoites; ){
         TimeStep timeToRelease = TimeStep::simulation + latentp + sampleReleaseDelay();
-        releaseDates.push_back( TimeStep::simulation + timeToRelease );
+        bool inserted = releases.insert( timeToRelease ).second;
+        if( inserted ) ++i;     // successful
+        // else: sample clash with an existing release date, so resample
     }
     
-    // Sort by time to release, smallest (soonest) last. Explanation of code:
-    // http://www.cplusplus.com/reference/algorithm/sort/
-    sort( releaseDates.begin(), releaseDates.end(), timeStepCompR );
+    // Copy times to the vector, backwards (smallest last):
+    releaseDates.insert( releaseDates.end(), releases.rbegin(), releases.rend() );
+    
+#ifdef WHVivaxSamples
+    if( sampleHost == host && sampleBrood == 0 ){
+        sampleBrood = this;
+        cout << "New sample brood";
+        for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+            cout << '\t' << *it;
+        cout << endl;
+    }
+#endif
+}
+VivaxBrood::~VivaxBrood(){
+#ifdef WHVivaxSamples
+    if( sampleBrood == this ){
+        sampleBrood = 0;
+        cout << "Brood terminated" << endl;
+    }
+#endif
 }
 
-bool VivaxBrood::update( bool& anyNewBloodStage ){
+void VivaxBrood::checkpoint( ostream& stream ){
+    releaseDates & stream;
+    bloodStageClearDate & stream;
+    primaryHasStarted & stream;
+    hadEvent & stream;
+}
+VivaxBrood::VivaxBrood( istream& stream ){
+    releaseDates & stream;
+    bloodStageClearDate & stream;
+    primaryHasStarted & stream;
+    hadEvent & stream;
+}
+
+
+VivaxBrood::UpdResult VivaxBrood::update(){
     if( bloodStageClearDate == TimeStep::simulation ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
         // protect against new blood-stage infections for a short time.
     }
     
-    while( releaseDates.back() == TimeStep::simulation ){
+    UpdResult result;
+    while( releaseDates.size() > 0 && releaseDates.back() == TimeStep::simulation ){
         releaseDates.pop_back();
+        
+#ifdef WHVivaxSamples
+        if( sampleBrood == this ){
+            cout << "Time\t" << TimeStep::simulation;
+            for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+                cout << '\t' << *it;
+            cout << endl;
+        }
+#endif
+        
         // an existing or recently terminated blood stage from the same brood
         // protects against a newly released Hypnozoite
         //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
         if( bloodStageClearDate + bloodStageProtectionLatency
             >= TimeStep::simulation ) continue;
         
-        anyNewBloodStage = true;
+        if( !primaryHasStarted ){
+            primaryHasStarted = true;
+            result.newPrimaryBS = true;
+        }
+        result.newBS = true;
+        
         double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
         bloodStageClearDate = TimeStep::simulation + TimeStep::fromDaysNearest( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
     }
     
-    bool isFinished = (!isPatent()) && (releaseDates.size() == 0);
-    return isFinished;
+    result.isFinished = (!isPatent()) && (releaseDates.size() == 0);
+    return result;
 }
 
 void VivaxBrood::treatmentBS(){
@@ -160,17 +221,29 @@ void VivaxBrood::treatmentLS(){
 
 // ———  per-host code  ———
 
-WHVivax::WHVivax( double comorbidityFactor ){
+WHVivax::WHVivax( double comorbidityFactor ) : cumPrimInf(0) {
     if( comorbidityFactor != 1.0 )
+#ifdef WHVivaxSamples
+    if( sampleHost == 0 ){
+        sampleHost = this;
+        cout << "New host" << endl;
+    }
+#endif
         throw TRACED_EXCEPTION_DEFAULT( "This vivax model cannot be used with comorbidity heterogeneity" );
     noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
 }
 
 WHVivax::~WHVivax(){
+#ifdef WHVivaxSamples
+    if( this == sampleHost ){
+        sampleHost = 0;
+        cout << "Host terminates" << endl;
+    }
+#endif
 }
 
 double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvFactor) const{
-    for (std::list<VivaxBrood>::const_iterator inf = infections.begin();
+    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
@@ -200,44 +273,66 @@ bool WHVivax::summarize(const Host::Human& human) {
 
 void WHVivax::importInfection(){
     // this means one new liver stage infection, which can result in multiple blood stages
-    infections.resize( infections.size() + 1 );
+    infections.push_back( new VivaxBrood( this ) );
 }
 
 void WHVivax::update(int nNewInfs, double ageInYears, double){
     // create new infections, letting the constructor do the initialisation work:
-    infections.resize( infections.size() + nNewInfs );
+    for( int i = 0; i < nNewInfs; ++i )
+        infections.push_back( new VivaxBrood( this ) );
     
     // update infections
     // NOTE: currently no BSV model
-    bool anyNewBloodStage = false;
-    std::list<VivaxBrood>::iterator inf = infections.begin();
+    morbidity = Pathogenesis::NONE;
+    uint32_t oldCumInf = cumPrimInf;
+    ptr_list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
-        bool isFinished = inf->update( anyNewBloodStage );
-        if( isFinished ) inf = infections.erase( inf );
+        VivaxBrood::UpdResult result = inf->update();
+        if( result.newPrimaryBS ) cumPrimInf += 1;
+        
+        if( result.newBS ){
+            // Sample for each new blood stage infection: the chance of some
+            // clinical event.
+            
+            bool clinicalEvent;
+            if( result.newPrimaryBS ){
+                // Blood stage is primary. oldCumInf wasn't updated yet.
+                double pEvent = pEventPrimA * pEventPrimB / (pEventPrimB+oldCumInf);
+                clinicalEvent = random::bernoulli( pEvent );
+                inf->setHadEvent( clinicalEvent );
+            }else{
+                // Subtract 1 from oldCumInf to not count the current brood in
+                // the number of cumulative primary infections.
+                if( inf->hasHadEvent() ){
+                    double pEvent = pEventSecA * pEventSecB / (pEventSecB + (oldCumInf-1));
+                    clinicalEvent = random::bernoulli( pEvent );
+                }else{
+                    // If the primary infection did not cause an event, there
+                    // is 0 chance of a secondary causing an event in our model.
+                    clinicalEvent = false;
+                }
+            }
+            
+            if( clinicalEvent ){
+                if( random::bernoulli( pEventIsSevere ) )
+                    morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_SEVERE );
+                else
+                    morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_MALARIA );
+            }
+        }
+        
+        if( result.isFinished ) inf = infections.erase( inf );
         else ++inf;
     }
     
-    morbidity = Pathogenesis::NONE;
-    //NOTE: released hypnozoites blocked by immunity also don't cause fever
-    if( anyNewBloodStage ){
-        //TODO: 3 probabilities: for initial infection, 0 for relapse given no initial fever,
-        // another probability given initial fever
-        //TODO: also depends on number of broods ever seen by host (as with cumulativeh for Pf model)
-        //NOTE: currently we don't model co-infection or indirect deaths
-        /*
-        double x = random::uniform_01();
-        if( x < pSevMalaria )
-            morbidity = Pathogenesis::STATE_SEVERE;
-        else if( x < pSevPlusUC )
-            morbidity = Pathogenesis::STATE_MALARIA;
-        else if( x < pSevPlusUCPlusNMF )
-            morbidity = Pathogenesis::STATE_NMF;
-        */
+    //NOTE: currently we don't model co-infection or indirect deaths
+    if( morbidity == Pathogenesis::NONE ){
+        morbidity = Pathogenesis::PathogenesisModel::sampleNMF( ageInYears );
     }
 }
 
 bool WHVivax::diagnosticDefault() const{
-    for (std::list<VivaxBrood>::const_iterator inf = infections.begin();
+    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if (inf->isPatent())
@@ -259,19 +354,19 @@ void WHVivax::clearImmunity(){
 WHInterface::InfectionCount WHVivax::countInfections () const{
     InfectionCount count;       // constructor initialises counts to 0
     count.total = infections.size();
-    for (std::list<VivaxBrood>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         if (inf->isPatent())
             count.patent += 1;
     }
     return count;
 }
 void WHVivax::treatment( TreatmentId treatment ){
-    throw util::unimplemented_exception( "configurable vivax treatments" );
-    //TODO: should probably either make sure falciparum-compatible treatments
-    // are never described or implement stuff to work the same way.
+    //TODO: something less ugly than this. Possibly we should revise code to
+    // make Pf and Pv treatment models work more similarly.
+    // For now we rely on the check in Treatments::Treatments(...).
     
     // This means clear blood stage infection(s) but not liver stage.
-    for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+    for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
         it->treatmentBS();
     }
 }
@@ -281,7 +376,7 @@ bool WHVivax::optionalPqTreatment(){
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
     if (pReceivePQ > 0.0 && !noPQ && random::bernoulli(pReceivePQ)){
         if( random::bernoulli(effectivenessPQ) ){
-            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
         }
@@ -295,9 +390,26 @@ bool WHVivax::optionalPqTreatment(){
 
 void WHVivax::checkpoint(istream& stream){
     WHInterface::checkpoint(stream);
+    size_t len;
+    len & stream;
+    for( size_t i = 0; i < len; ++i ){
+        infections.push_back( new VivaxBrood( stream ) );
+    }
+    noPQ & stream;
+    int morbidity_i;
+    morbidity_i & stream;
+    morbidity = static_cast<Pathogenesis::State>( morbidity_i );
+    cumPrimInf & stream;
 }
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
+    infections.size() & stream;
+    for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+        it->checkpoint( stream );
+    }
+    noPQ & stream;
+    static_cast<int>( morbidity ) & stream;
+    cumPrimInf & stream;
 }
 
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
@@ -315,7 +427,14 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& sc
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
     
+    pEventPrimA = elt.getPEventPrimary().getA();
+    pEventPrimB = elt.getPEventPrimary().getB();
+    pEventSecA = elt.getPEventSecondary().getA();
+    pEventSecB = elt.getPEventSecondary().getB();
+    pEventIsSevere = elt.getPEventIsSevere().getValue();
+    
     initNHypnozoites();
+    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical(), true );
 }
 void WHVivax::setHSParameters(const scnXml::Primaquine& elt){
     if( pHetNoPQ != pHetNoPQ )// not set yet

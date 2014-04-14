@@ -63,7 +63,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
     _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
-    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical() );
+    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical(), false );
     
     /*
     The detection limit (in parasites/ul) is currently the same for PCR and for microscopy

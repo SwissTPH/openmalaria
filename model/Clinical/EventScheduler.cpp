@@ -91,8 +91,14 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
         }
         const scnXml::Clinical::NonMalariaFeversType& nmfDesc2 =
             model.getClinical().getNonMalariaFevers().get();
-        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentNMF(), "prNeedTreatmentNMF" );
-        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentMF(), "prNeedTreatmentMF" );
+        if( !nmfDesc2.getPrNeedTreatmentMF().present() ||
+            !nmfDesc2.getPrNeedTreatmentNMF().present() ){
+            throw util::xml_scenario_error( "prNeedTreatmentMF and "
+                "prNeedTreatmentNMF elements required in model->clinical->"
+                "NonMalariaFevers" );
+        }
+        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentNMF().get(), "prNeedTreatmentNMF" );
+        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentMF().get(), "prNeedTreatmentMF" );
     }
 }
 
