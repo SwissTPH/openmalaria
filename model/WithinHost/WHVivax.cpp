@@ -96,7 +96,9 @@ TimeStep sampleReleaseDelay(){
 
 // ———  per-brood code  ———
 
-VivaxBrood::VivaxBrood( WHVivax *host ){
+VivaxBrood::VivaxBrood( WHVivax *host ) :
+        primaryHasStarted( false )
+{
     set<TimeStep> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
     // primary blood stage plus hypnozoites (relapses)
@@ -134,22 +136,30 @@ VivaxBrood::~VivaxBrood(){
 void VivaxBrood::checkpoint( ostream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
+    primaryHasStarted & stream;
 }
 VivaxBrood::VivaxBrood( istream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
+    primaryHasStarted & stream;
 }
 
 
-bool VivaxBrood::update( bool& anyNewBloodStage ){
+VivaxBrood::UpdatePair VivaxBrood::update( bool& anyNewBloodStage ){
     if( bloodStageClearDate == TimeStep::simulation ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
         // protect against new blood-stage infections for a short time.
     }
     
+    UpdatePair result;
+    result.newPrimaryBS = false;
     while( releaseDates.size() > 0 && releaseDates.back() == TimeStep::simulation ){
         releaseDates.pop_back();
+        if( !primaryHasStarted ){
+            primaryHasStarted = true;
+            result.newPrimaryBS = true;
+        }
         
 #ifdef WHVivaxSamples
         if( sampleBrood == this ){
@@ -173,8 +183,8 @@ bool VivaxBrood::update( bool& anyNewBloodStage ){
         // we have little data, thus assume coincedence of start)
     }
     
-    bool isFinished = (!isPatent()) && (releaseDates.size() == 0);
-    return isFinished;
+    result.isFinished = (!isPatent()) && (releaseDates.size() == 0);
+    return result;
 }
 
 void VivaxBrood::treatmentBS(){
@@ -202,7 +212,7 @@ void VivaxBrood::treatmentLS(){
 
 // ———  per-host code  ———
 
-WHVivax::WHVivax(){
+WHVivax::WHVivax() : cumPrimInf(0) {
     noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
 #ifdef WHVivaxSamples
     if( sampleHost == 0 ){
@@ -267,8 +277,9 @@ void WHVivax::update(int nNewInfs, double ageInYears, double BSVEfficacy){
     bool anyNewBloodStage = false;
     ptr_list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
-        bool isFinished = inf->update( anyNewBloodStage );
-        if( isFinished ) inf = infections.erase( inf );
+        VivaxBrood::UpdatePair result = inf->update( anyNewBloodStage );
+        if( result.newPrimaryBS ) cumPrimInf += 1;
+        if( result.isFinished ) inf = infections.erase( inf );
         else ++inf;
     }
     
@@ -347,24 +358,26 @@ bool WHVivax::optionalPqTreatment(){
 
 void WHVivax::checkpoint(istream& stream){
     WHInterface::checkpoint(stream);
-    noPQ & stream;
     size_t len;
     len & stream;
     for( size_t i = 0; i < len; ++i ){
         infections.push_back( new VivaxBrood( stream ) );
     }
+    noPQ & stream;
     int morbidity_i;
     morbidity_i & stream;
     morbidity = static_cast<Pathogenesis::State>( morbidity_i );
+    cumPrimInf & stream;
 }
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
-    noPQ & stream;
     infections.size() & stream;
     for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
         it->checkpoint( stream );
     }
+    noPQ & stream;
     static_cast<int>( morbidity ) & stream;
+    cumPrimInf & stream;
 }
 
 void WHVivax::init(){

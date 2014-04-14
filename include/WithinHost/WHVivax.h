@@ -65,15 +65,20 @@ public:
     /** Create from checkpoint. */
     VivaxBrood( istream& stream );
     
+    struct UpdatePair{
+        bool newPrimaryBS, isFinished;
+    };
     /**
      * Do per-timestep update: remove finished blood stage infections and act
      * on newly releasing hypnozoites.
      * 
      * @param anyNewBloodStage  Set true if any hypnozoite release starts a
      *  blood stage
-     * @return true if infection is finished (no more blood or liver stages)
+     * @return pair describing whether the infection is finished (no more blood
+     *  or liver stages) and whether a new primary blood-stage has started (to
+     *  update cumPrimInf)
      */
-    bool update( bool& anyNewBloodStage );
+    UpdatePair update( bool& anyNewBloodStage );
     
     /** Equivalent to a blood stage existing. We do not model incidence of
      * gametocytes independently, thus this also tests existance of
@@ -98,6 +103,9 @@ private:
     
     // Either TimeStep::never (no blood stage) or a date at which the blood stage will clear.
     TimeStep bloodStageClearDate;
+    
+    // Whether the primary blood stage infection has started
+    bool primaryHasStarted;
 };
 
 /**
@@ -150,16 +158,20 @@ protected:
 private:
     WHVivax( const WHVivax& ) {}        // not copy constructible
     
+    //TODO: shouldn't have to store by pointer (at least, if using C++11)
+    boost::ptr_list<VivaxBrood> infections;
+    
     /* Is flagged as never getting PQ: this is a heteogeneity factor. Example:
      * Set to zero if everyone can get PQ, 0.5 if females can't get PQ and
      * males aren't tested (i.e. all can get it) or (1+p)/2 where p is the
      * chance a male being tested and found to be G6PD deficient. */
     bool noPQ;
     
-    //TODO: shouldn't have to store by pointer (at least, if using C++11)
-    boost::ptr_list<VivaxBrood> infections;
-    
     Pathogenesis::State morbidity;
+    
+    // The number of primary blood stage infections to have started since this
+    // human was born.
+    uint32_t cumPrimInf;
 
     friend class ::UnittestUtil;
 };
