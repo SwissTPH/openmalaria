@@ -33,7 +33,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:P(NMF); type:double;units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="prNeedTreatmentNMF" type="AgeGroupValues">
+            <xs:element name="prNeedTreatmentNMF" type="AgeGroupValues" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                   Probability that a non-malarial fever requires treatment with
@@ -43,7 +43,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>name:P(need treatment | NMF);type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="prNeedTreatmentMF" type="AgeGroupValues">
+            <xs:element name="prNeedTreatmentMF" type="AgeGroupValues" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                   Probability that a malaria fever needs treatment with
