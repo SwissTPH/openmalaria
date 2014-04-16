@@ -113,8 +113,10 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             
             HumanInterventionComponent *hiComponent;
             if( component.getMDA().present() ){
-                //TODO(monitoring): report
-                hiComponent = new MDAComponent( id, component.getMDA().get() );
+                if( component.getMDA().get().getDiagnostic().present() )
+                    hiComponent = new MSATComponent( id, component.getMDA().get() );
+                else
+                    hiComponent = new MDAComponent( id, component.getMDA().get() );
             }else if( component.getMDA1D().present() ){
                 //TODO(monitoring): report
                 hiComponent = new MDA1DComponent( id, component.getMDA1D().get() );

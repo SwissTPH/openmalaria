@@ -97,6 +97,70 @@ public:
 #endif
 };
 
+/// Simple treatment: no PK/PD, just remove parasites
+class MDAComponent : public HumanInterventionComponent {
+public:
+    MDAComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
+        HumanInterventionComponent(id,
+                Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
+    {
+        const scnXml::Effects::OptionSequence& options = mda.getEffects().getOption();
+        assert( options.size() >= 1 );
+        treatments.reserve( options.size() );
+        double cumP = 0.0;
+        for( scnXml::Effects::OptionConstIterator it = options.begin(),
+            end = options.end(); it != end; ++it )
+        {
+            cumP += it->getPSelection();
+            TreatOptions treatOpts( cumP, WithinHost::WHInterface::addTreatment( *it ) );
+            treatments.push_back( treatOpts );
+        }
+        
+        // we expect the prob. to be roughly one as an error check, but allow slight deviation
+        if( cumP < 0.99 || cumP > 1.01 ) throw util::xml_scenario_error( "sum of pSelection of a group of treatments is not 1" );
+        for( vector<TreatOptions>::iterator it = treatments.begin(),
+            end = treatments.end(); it != end; ++it )
+        {
+            it->cumProb /= cumP;
+        }
+    }
+    
+    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+        human.withinHostModel->treatment( selectTreatment() );
+    }
+    
+    virtual Component::Type componentType() const{ return Component::MDA; }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << id().id << "\tTreat";
+    }
+#endif
+    
+private:
+    WithinHost::TreatmentId selectTreatment()const{
+        if( treatments.size() == 1 ) return treatments[0].treatId;
+        
+        double x = util::random::uniform_01();      // random sample: choose
+        for( vector<TreatOptions>::const_iterator it = treatments.begin(),
+            end = treatments.end(); it != end; ++it )
+        {
+            if( it->cumProb > x ) return it->treatId;
+        }
+        assert( false );    // last item should have pCum=1 and x<1 in theory
+        return treatments[0].treatId; // remain type safe
+    }
+    
+    struct TreatOptions{
+        double cumProb;
+        WithinHost::TreatmentId treatId;
+        TreatOptions( double cumProb, WithinHost::TreatmentId treatId ):
+            cumProb(cumProb), treatId(treatId) {}
+    };
+    vector<TreatOptions> treatments;
+};
+
 class MDAComponentBase : public HumanInterventionComponent {
 protected:
     MDAComponentBase( ComponentId id ) :
@@ -115,18 +179,13 @@ private:
     ReportMeasureI m_screenMeasureCts, m_screenMeasureTimed;
 };
 
-class MDAComponent : public MDAComponentBase {
+class MSATComponent : public MDAComponentBase {
 public:
-    MDAComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
+    MSATComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
         MDAComponentBase(id)
     {
-        if( !mda.getDiagnostic().present() ){
-            // Note: allow no description for now to avoid XML changes.
-            //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
-            diagnostic.setDeterministic( 0.0 );
-        }else{
-            diagnostic.setXml( mda.getDiagnostic().get() );
-        }
+        assert( mda.getDiagnostic().present() );
+        diagnostic.setXml( mda.getDiagnostic().get() );
         
         const scnXml::Effects::OptionSequence& options = mda.getEffects().getOption();
         assert( options.size() >= 1 );
@@ -150,8 +209,6 @@ public:
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        //TODO(monitoring): separate reports for mass and continuous deployments
-        
         Survey::current().addInt( screeningMeasure(method), human, 1 );
         if( !diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
             return;
