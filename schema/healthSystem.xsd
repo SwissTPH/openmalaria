@@ -936,118 +936,122 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
       <xs:appinfo>name:Group (for compliance/adherence/drug effect);</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
-      <xs:element name="clearInfections" minOccurs="0" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>
-            This clears infections according to several options: it can clear
-            all blood stage infections, all liver stage infections or both, and
-            it can act on multiple timesteps. To have a probability of no
-            action add another treatment option (which does nothing) and set
-            the probabilities of selection appropriately.
-            
-            This allows immediate (legacy) or delayed action, a prophylactic
-            period, and selection of which stages are targeted. It is a simple
-            model but appropriate enough for use with the five day timestep
-            when assuming no resistance and that drug
-            failure is mainly caused by bad drugs or compliance.
-            
-            The old treatment action for the five-day timestep model is
-            essentially this, with immediateAction (timesteps=-1) and
-            stage=both, except for the IPT model's SP action, which was more
-            like with timesteps>1 and stage=blood.
-          </xs:documentation>
-          <xs:appinfo>name:Prophylactic treatment;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="timesteps" type="xs:int" use="required">
+    <xs:complexContent>
+      <xs:extension base="om:TriggeredDeployments">
+        <xs:sequence>
+          <xs:element name="clearInfections" minOccurs="0" maxOccurs="unbounded">
             <xs:annotation>
               <xs:documentation>
-                The number of timesteps during which this action remains
-                in effect (e.g. 2 means clear infections during the next
-                two timestep updates). Full clearance of the targeted stages
-                occurs during this time.
+                This clears infections according to several options: it can clear
+                all blood stage infections, all liver stage infections or both, and
+                it can act on multiple timesteps. To have a probability of no
+                action add another treatment option (which does nothing) and set
+                the probabilities of selection appropriately.
                 
-                A special value of -1 means act immediately (retrospectively);
-                this the old behaviour. A value of 1 means act on the next
-                timestep only.
+                This allows immediate (legacy) or delayed action, a prophylactic
+                period, and selection of which stages are targeted. It is a simple
+                model but appropriate enough for use with the five day timestep
+                when assuming no resistance and that drug
+                failure is mainly caused by bad drugs or compliance.
                 
-                Both of these can be thought of as a model for short-acting
-                effective drug treatment; the main differences are that the
-                latter means parasite densities will remain high from the point
-                of view of surveys and diagnostics (i.e. mass screen and treat)
-                used before the next timestep and that the latter will also
-                remove infections starting the next timestep. Arguably the
-                latter is a better model, but the differences are perhaps
-                small, excepting where immediate treatment of fevers (i.e.
-                through the health system) can hide high parasite densities
-                from reporting and mass-screen-and-treat diagnostics. For
-                use by interventions, the latter model has nicer behaviour in
-                that the order of deployment of multiple interventions
-                deployed at the same time does not matter, and that the former
-                model retrospectively treats infections which may already have
-                caused fever, thus may have a lower health impact than it
-                should.
-                
-                It is recommended to use the new model (value 1, or greater
-                than 1 if prophylactic effect is desired) unless wanting to
-                emulate the old behaviour.
-                
-                Values of 0 or less than -1 are not allowed.
+                The old treatment action for the five-day timestep model is
+                essentially this, with immediateAction (timesteps=-1) and
+                stage=both, except for the IPT model's SP action, which was more
+                like with timesteps>1 and stage=blood.
               </xs:documentation>
-              <xs:appinfo>name:Length of effect;units:Timesteps;min:-1;</xs:appinfo>
+              <xs:appinfo>name:Prophylactic treatment;</xs:appinfo>
             </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="stage" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                Controls whether liver-stage or blood-stage infections
-                are cleared, or both.
-                
-                Infections are considered liver-stage for one 5-day timestep,
-                blood-stage but pre-patent for some number of timesteps
-                (latentp - 1), then start the patent blood stage. If stage is
-                set to "liver", infections are only cleared during their first
-                timestep; if stage is set to "blood", infections are cleared
-                during pre-patent and patent blood stages; if stage is set to
-                "both" all infections are cleared.
-                
-                The old behaviour (oddly considering the drugs it is meant to
-                emulate) is to clear both stages, except for the IPT model of
-                SP action, which cleared only patent blood-stage infections.
-              </xs:documentation>
-              <xs:appinfo>name:Target stage;</xs:appinfo>
-            </xs:annotation>
-            <xs:simpleType>
-              <xs:restriction base="xs:string">
-                <xs:enumeration value="liver"/>
-                <xs:enumeration value="blood"/>
-                <xs:enumeration value="both"/>
-              </xs:restriction>
-            </xs:simpleType>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-          Describes what this compliance option represents (e.g.
-          "good compliance", "poor compliance with good drugs", ...).
-        </xs:documentation>
-        <xs:appinfo>name:Name;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <!-- an identifier may be useful (see other comments, in particular in how
-    this is used for MDA interventions)
-    <xs:attribute name="id" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          A textual identifier for this treatment option.
-        </xs:documentation>
-        <xs:appinfo>name:Identifier;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    -->
+            <xs:complexType>
+              <xs:attribute name="timesteps" type="xs:int" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    The number of timesteps during which this action remains
+                    in effect (e.g. 2 means clear infections during the next
+                    two timestep updates). Full clearance of the targeted stages
+                    occurs during this time.
+                    
+                    A special value of -1 means act immediately (retrospectively);
+                    this the old behaviour. A value of 1 means act on the next
+                    timestep only.
+                    
+                    Both of these can be thought of as a model for short-acting
+                    effective drug treatment; the main differences are that the
+                    latter means parasite densities will remain high from the point
+                    of view of surveys and diagnostics (i.e. mass screen and treat)
+                    used before the next timestep and that the latter will also
+                    remove infections starting the next timestep. Arguably the
+                    latter is a better model, but the differences are perhaps
+                    small, excepting where immediate treatment of fevers (i.e.
+                    through the health system) can hide high parasite densities
+                    from reporting and mass-screen-and-treat diagnostics. For
+                    use by interventions, the latter model has nicer behaviour in
+                    that the order of deployment of multiple interventions
+                    deployed at the same time does not matter, and that the former
+                    model retrospectively treats infections which may already have
+                    caused fever, thus may have a lower health impact than it
+                    should.
+                    
+                    It is recommended to use the new model (value 1, or greater
+                    than 1 if prophylactic effect is desired) unless wanting to
+                    emulate the old behaviour.
+                    
+                    Values of 0 or less than -1 are not allowed.
+                  </xs:documentation>
+                  <xs:appinfo>name:Length of effect;units:Timesteps;min:-1;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+              <xs:attribute name="stage" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Controls whether liver-stage or blood-stage infections
+                    are cleared, or both.
+                    
+                    Infections are considered liver-stage for one 5-day timestep,
+                    blood-stage but pre-patent for some number of timesteps
+                    (latentp - 1), then start the patent blood stage. If stage is
+                    set to "liver", infections are only cleared during their first
+                    timestep; if stage is set to "blood", infections are cleared
+                    during pre-patent and patent blood stages; if stage is set to
+                    "both" all infections are cleared.
+                    
+                    The old behaviour (oddly considering the drugs it is meant to
+                    emulate) is to clear both stages, except for the IPT model of
+                    SP action, which cleared only patent blood-stage infections.
+                  </xs:documentation>
+                  <xs:appinfo>name:Target stage;</xs:appinfo>
+                </xs:annotation>
+                <xs:simpleType>
+                  <xs:restriction base="xs:string">
+                    <xs:enumeration value="liver"/>
+                    <xs:enumeration value="blood"/>
+                    <xs:enumeration value="both"/>
+                  </xs:restriction>
+                </xs:simpleType>
+              </xs:attribute>
+            </xs:complexType>
+          </xs:element>
+        </xs:sequence>
+        <xs:attribute name="name" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              Describes what this compliance option represents (e.g.
+              "good compliance", "poor compliance with good drugs", ...).
+            </xs:documentation>
+            <xs:appinfo>name:Name;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <!-- an identifier may be useful (see other comments, in particular in how
+        this is used for MDA interventions)
+        <xs:attribute name="id" type="xs:string" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              A textual identifier for this treatment option.
+            </xs:documentation>
+            <xs:appinfo>name:Identifier;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        -->
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 </xs:schema>

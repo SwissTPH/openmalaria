@@ -373,22 +373,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="Component">
-    <xs:annotation>
-      <xs:documentation>
-        The list of components deployed to eligible humans.
-      </xs:documentation>
-    <xs:appinfo>name:Component to be deployed;</xs:appinfo>
-    </xs:annotation>
-    <xs:attribute name="id" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          The identifier (short name) of a component.
-        </xs:documentation>
-        <xs:appinfo>name:Identifier;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
   <xs:complexType name="HumanInterventionComponent">
     <xs:sequence>
       <xs:choice>
@@ -662,57 +646,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Diagnostic;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="positive" type="om:TriggeredDeployment"/>
-      <xs:element name="negative" type="om:TriggeredDeployment"/>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="TriggeredDeployment">
-    <xs:annotation>
-      <xs:documentation>
-        Lists intervention components which are deployed according to some
-        external trigger (for example, screening with a negative patency
-        outcome or health-system treatment).
-        
-        Components are referenced from one or more sub-lists. Each of these
-        lists is deployed independently if and only if its age constraints are
-        met by the human host and a random sample with the given probability of
-        a positive outcome is positive.
-      </xs:documentation>
-      <xs:appinfo>name:Triggered intervention deployment;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="list" minOccurs="0" maxOccurs="unbounded">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
-          </xs:sequence>
-          <xs:attribute name="maxAge" type="xs:double" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Maximum age of eligible humans (defaults to no limit)
-              </xs:documentation>
-              <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="minAge" type="xs:double" default="0">
-            <xs:annotation>
-              <xs:documentation>
-                Minimum age of eligible humans (defaults to 0)
-              </xs:documentation>
-              <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="p" type="xs:double" default="1">
-            <xs:annotation>
-              <xs:documentation>
-                Probability of this list of components being deployed, given
-                that other constraints are met.
-              </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Probability of delivery to eligible humans;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="positive" type="om:TriggeredDeployments"/>
+      <xs:element name="negative" type="om:TriggeredDeployments"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="MDAComponent">

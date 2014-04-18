@@ -649,9 +649,9 @@
             <deterministic minDensity="20"/>
           </diagnostic>
           <positive>
-            <list>
+            <deploy>
               <component id="treat"/>
-            </list>
+            </deploy>
           </positive>
           <negative/>
         </screen>
@@ -676,26 +676,14 @@
       <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
       <initialACR>
         <CQ value="0"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
         <selfTreatment value="0"/>
       </initialACR>
       <compliance>
         <CQ value="0"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
         <selfTreatment value="0"/>
       </compliance>
       <nonCompliersEffective>
         <CQ value="0"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
       <treatmentActions>

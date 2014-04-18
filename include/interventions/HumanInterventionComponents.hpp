@@ -96,10 +96,10 @@ void HumanIntervention::print_details( std::ostream& out )const{
 
 class TriggeredDeployments {
 public:
-    TriggeredDeployments( const scnXml::TriggeredDeployment& elt ){
-        lists.reserve( elt.getList().size() );
-        for( scnXml::TriggeredDeployment::ListConstIterator it = elt.getList().begin(),
-            end = elt.getList().end(); it != end; ++it )
+    TriggeredDeployments( const scnXml::TriggeredDeployments& elt ){
+        lists.reserve( elt.getDeploy().size() );
+        for( scnXml::TriggeredDeployments::DeployConstIterator it = elt.getDeploy().begin(),
+            end = elt.getDeploy().end(); it != end; ++it )
         {
             lists.push_back( SubList( *it ) );
         }
@@ -115,7 +115,7 @@ public:
     
 private:
     struct SubList : protected HumanIntervention{
-        SubList( const scnXml::TriggeredDeployment::ListType& elt ) :
+        SubList( const scnXml::TriggeredDeployments::DeployType& elt ) :
             HumanIntervention( elt.getComponent() ),
             minAge( TimeStep::fromYears( elt.getMinAge() ) ),
             maxAge( TimeStep::future ),
