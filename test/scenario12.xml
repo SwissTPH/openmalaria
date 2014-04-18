@@ -634,17 +634,27 @@
       </timedDeployment>
     </changeEIR>
     <human>
-      <component id="MSAT">
+      <component id="treat">
         <MDA>
-          <diagnostic>
-            <deterministic minDensity="20"/>
-          </diagnostic>
           <effects>
             <option name="legacy effect" pSelection="1">
               <clearInfections stage="both" timesteps="-1"/>
             </option>
           </effects>
         </MDA>
+      </component>
+      <component id="MSAT">
+        <screen>
+          <diagnostic>
+            <deterministic minDensity="20"/>
+          </diagnostic>
+          <positive>
+            <list>
+              <component id="treat"/>
+            </list>
+          </positive>
+          <negative/>
+        </screen>
       </component>
       <deployment>
         <component id="MSAT"/>

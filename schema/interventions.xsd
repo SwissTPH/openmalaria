@@ -337,24 +337,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="component" maxOccurs="unbounded">
-              <xs:annotation>
-                <xs:documentation>
-                  A list of elements defining all components an intervention has.
-                </xs:documentation>
-                <xs:appinfo>name:Component to be deployed;</xs:appinfo>
-              </xs:annotation>
-              <xs:complexType>
-                <xs:attribute name="id" type="xs:string" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
-                      The identifier (short name) of an component.
-                    </xs:documentation>
-                    <xs:appinfo>name:Identifier;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-              </xs:complexType>
-            </xs:element>
+            <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
             <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="om:continuousList">
             <xs:annotation>
                 <xs:documentation>List of ages at which deployment takes place
@@ -390,9 +373,26 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+  <xs:complexType name="Component">
+    <xs:annotation>
+      <xs:documentation>
+        The list of components deployed to eligible humans.
+      </xs:documentation>
+    <xs:appinfo>name:Component to be deployed;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="id" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The identifier (short name) of a component.
+        </xs:documentation>
+        <xs:appinfo>name:Identifier;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
   <xs:complexType name="HumanInterventionComponent">
     <xs:sequence>
       <xs:choice>
+        <xs:element name="screen" type="om:Screen"/>
         <xs:element name="MDA" type="om:MDAComponent"/>
         <xs:element name="MDA1D" type="om:HSESCaseManagement">
           <xs:annotation>
@@ -636,52 +636,104 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="Screen">
+    <xs:annotation>
+      <xs:documentation>
+        This can be combined with MDA to achieve mass screen and treat (MSAT)
+        or other types of mass screening intervention.
+        
+        When deployed to a host, this simulates a test of patent malaria
+        (microscopy, RDT or some such), then triggers deployment of whichever
+        intervention components are configured (deployments for both positive
+        and negative test outcomes can be configured).
+        
+        The use of the screening itself is reported (if enabled), but not the
+        outcome. Deployment of interventions triggered by the screening may
+        be reported, however.
+      </xs:documentation>
+      <xs:appinfo>name:(Mass) screening;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="diagnostic" type="om:HSDiagnostic">
+        <xs:annotation>
+          <xs:documentation>
+            Description of the diagnostic test used by the screening.
+          </xs:documentation>
+          <xs:appinfo>name:Diagnostic;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="positive" type="om:TriggeredDeployment"/>
+      <xs:element name="negative" type="om:TriggeredDeployment"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="TriggeredDeployment">
+    <xs:annotation>
+      <xs:documentation>
+        Lists intervention components which are deployed according to some
+        external trigger (for example, screening with a negative patency
+        outcome or health-system treatment).
+        
+        Components are referenced from one or more sub-lists. Each of these
+        lists is deployed independently if and only if its age constraints are
+        met by the human host and a random sample with the given probability of
+        a positive outcome is positive.
+      </xs:documentation>
+      <xs:appinfo>name:Triggered intervention deployment;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="list" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
+          </xs:sequence>
+          <xs:attribute name="maxAge" type="xs:double" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Maximum age of eligible humans (defaults to no limit)
+              </xs:documentation>
+              <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="minAge" type="xs:double" default="0">
+            <xs:annotation>
+              <xs:documentation>
+                Minimum age of eligible humans (defaults to 0)
+              </xs:documentation>
+              <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="p" type="xs:double" default="1">
+            <xs:annotation>
+              <xs:documentation>
+                Probability of this list of components being deployed, given
+                that other constraints are met.
+              </xs:documentation>
+              <xs:appinfo>units:dimensionless;min:0;max:1;name:Probability of delivery to eligible humans;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+  </xs:complexType>
   <xs:complexType name="MDAComponent">
      <xs:annotation>
       <xs:documentation>
-        Description of a MDA/MSAT intervention (Mass Screen and Treat is
-        just Mass Drug Administration with a diagnostic).
+        Description of treatment deployed as an intervention (treatment is
+        usually a simple model of a drug's action, thus when deployed on mass
+        or via screening this becomes part of a mass drug administration (MDA)
+        or mass screen-and-treat (MSAT) intervention. For historical reasons
+        this is called "MDA" in the XML, not "treatment".
         
-        This MDA/MSAT model allows a diagnostic and drug action modelled
-        by direct clearance rates. For the 1-day timestep models, a more
-        detailed model of drug action and more flexible model of deployment
-        decisions are available; see MDA1D.
+        For the 1-day timestep models, a more detailed model of drug action and
+        more flexible model of deployment decisions are available; see MDA1D.
         
-        The model of action of this intervention is (1) screen the patient
-        and, if the diagnostic outcome is positive, (2) select one option
-        from a list of treatment options (randomly when multiple are
-        available) and carry out the treatment option's actions (which may
-        be to do nothing). If the diagnostic outcome is negative no
-        treatment is given. If no diagnostic is described, treatment occurs
-        exactly as if a diagnostic was used and returned positive.
-        
-        Two reporting options correspond to this intervention for each mode
-        of deployment (i.e. four in total); a "screening" is reported each
-        time an individual is selected for deployment (even if no
-        diagnostic is configured), and an "MDA" deployment is reported
-        whenever the diagnostic outcome is positive (or no diagnostic is
-        configured; note that even if a treatment option which does nothing
-        is selected an "MDA" deployment is still reported, which makes
-        sense where such an option corresponds to drug failure or lack of
-        patient adherence rather than a decision not to treat).
+        The model of action of this intervention is to select one option from a
+        list of treatment options (randomly when multiple are available) then
+        carry out the treatment option's actions (which may be to do nothing).
       </xs:documentation>
-      <xs:appinfo>name:Mass drug administration (simple);</xs:appinfo>
+      <xs:appinfo>name:Treatment / (mass) drug administration;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="diagnostic" type="om:HSDiagnostic" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            Description of diagnostic used by mass treatment option
-            of five-day case management model — may be used to model
-            MDA without diagnostic or MSAT.
-            
-            The diagnostic is used on hosts selected by the coverage
-            parameters, and drugs are administered whenever the test
-            outcome is positive.
-          </xs:documentation>
-          <xs:appinfo> name:Diagnostic (5-day);</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
       <xs:element name="effects">
         <xs:annotation>
           <xs:documentation>
@@ -833,7 +885,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Minimum age of eligible individuals (defaults to 0)
             </xs:documentation>
-            <xs:appinfo>units:Years;min:0;max:100;name:Minimum age of eligible individuals;</xs:appinfo>
+            <xs:appinfo>units:Years;min:0;name:Minimum age of eligible individuals;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>

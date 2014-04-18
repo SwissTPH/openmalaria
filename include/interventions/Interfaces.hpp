@@ -22,6 +22,7 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
+#include <schema/interventions.h>
 #include <boost/integer_traits.hpp>
 
 namespace scnXml{ class DeploymentBase; }
@@ -43,6 +44,7 @@ namespace Deployment {
  * deployed in within a single intervention. */
 namespace Component { enum Type {
     RECRUIT_ONLY,     // selection for a sub-population (without other effects)
+    SCREEN,     // screening, e.g. as part of MSAT
     MDA,        // mass drug administration
     MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
     PEV,        // pre-erythrocytic vaccine
@@ -150,30 +152,18 @@ private:
 /** A description of a human intervention (as a list of components). */
 class HumanIntervention {
 public:
-    /** Add a component. */
-    inline void addComponent( const HumanInterventionComponent *component ){ components.push_back( component ); }
+    /** Create from a list of XML elements: <component id="..."/> **/
+    explicit HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Component>& componentList );
     
     /** Deploy all components to a pre-selected human. */
     void deploy( Host::Human& human, Deployment::Method method,
         VaccineLimits vaccLimits ) const;
     
-    /** Sort components according to a standard order.
-     * 
-     * The point of this is to make results repeatable even when users change
-     * the ordering of a list of intervention's components (since getting
-     * repeatable results out of OpenMalaria is often a headache anyway, we
-     * might as well at least remove this hurdle).
-     * 
-     * Note that when multiple interventions are deployed simultaneously, the
-     * order of their deployments is still dependent on the order in the XML
-     * file. */
-    void sortComponents();
-    
 #ifdef WITHOUT_BOINC
     void print_details( std::ostream& out )const;
 #endif
     
-private:
+protected:
     // List of pointers to components. Does not manage memory (InterventionManager::humanComponents does that).
     vector<const HumanInterventionComponent*> components;
 };

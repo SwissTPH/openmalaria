@@ -25,10 +25,11 @@
 #include "util/errors.h"
 #include "util/TimeStep.h"
 #include "Monitoring/Survey.h"
-#include <schema/interventions.h>
 #include "Clinical/CaseManagementCommon.h"
 #include "Population.h"
 #include "Transmission/TransmissionModel.h"
+#include "util/random.h"
+#include <schema/interventions.h>
 
 namespace OM { namespace interventions {
 
@@ -237,10 +238,10 @@ public:
     
     virtual void deploy (OM::Population& population) {
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
+            TimeStep age = iter->getAgeInTimeSteps();
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || iter->isInSubPop( subPop ) ){
-                    if( util::random::uniform_01() < coverage ){
+                    if( util::random::bernoulli( coverage ) ){
                         deployToHuman( *iter, Deployment::TIMED );
                     }
                 }

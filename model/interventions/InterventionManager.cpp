@@ -112,11 +112,10 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             }
             
             HumanInterventionComponent *hiComponent;
-            if( component.getMDA().present() ){
-                if( component.getMDA().get().getDiagnostic().present() )
-                    hiComponent = new MSATComponent( id, component.getMDA().get() );
-                else
-                    hiComponent = new MDAComponent( id, component.getMDA().get() );
+            if( component.getScreen().present() ){
+                hiComponent = new ScreenComponent( id, component.getScreen().get() );
+            }else if( component.getMDA().present() ){
+                hiComponent = new MDAComponent( id, component.getMDA().get() );
             }else if( component.getMDA1D().present() ){
                 //TODO(monitoring): report
                 hiComponent = new MDA1DComponent( id, component.getMDA1D().get() );
@@ -159,15 +158,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         {
             const scnXml::Deployment& elt = *it;
             // 2.a intervention components
-            HumanIntervention *intervention = new HumanIntervention();
-            for( scnXml::Deployment::ComponentConstIterator it2 = elt.getComponent().begin(),
-                    end2 = elt.getComponent().end(); it2 != end2; ++it2 )
-            {
-                const HumanInterventionComponent* component =
-                    &humanComponents[getComponentId( it2->getId() ).id];
-                intervention->addComponent( component );
-            }
-            intervention->sortComponents();
+            HumanIntervention *intervention = new HumanIntervention( elt.getComponent() );
             
             // 2.b intervention deployments
             for( scnXml::Deployment::ContinuousConstIterator ctsIt = elt.getContinuous().begin();
@@ -309,7 +300,7 @@ ComponentId InterventionManager::getComponentId( const string textId )
     if( it == identifierMap.end() ){
         ostringstream msg;
         msg << "unable to find an intervention component with id \""
-            << textId << "\"";
+            << textId << "\" (wrong name, no definition or used before definition?)";
         throw util::xml_scenario_error( msg.str() );
     }
     return it->second;
