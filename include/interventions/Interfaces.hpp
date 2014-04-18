@@ -168,5 +168,27 @@ protected:
     vector<const HumanInterventionComponent*> components;
 };
 
+class TriggeredDeployments {
+public:
+    TriggeredDeployments( const scnXml::TriggeredDeployments& elt );
+    
+    void deploy( Host::Human& human, Deployment::Method method,
+            VaccineLimits vaccLimits )const;
+    
+private:
+    struct SubList : protected HumanIntervention{
+        SubList( const scnXml::TriggeredDeployments::DeployType& elt );
+        
+        void deploy( Host::Human& human, Deployment::Method method,
+            VaccineLimits vaccLimits )const;
+        
+        // Deployment restrictions:
+        TimeStep minAge, maxAge;
+        double coverage;
+    };
+    
+    vector<SubList> lists;
+};
+
 } }
 #endif

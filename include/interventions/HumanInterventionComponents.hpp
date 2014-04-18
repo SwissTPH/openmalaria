@@ -94,66 +94,53 @@ void HumanIntervention::print_details( std::ostream& out )const{
 
 // ———  Utilities  ———
 
-class TriggeredDeployments {
-public:
-    TriggeredDeployments( const scnXml::TriggeredDeployments& elt ){
-        lists.reserve( elt.getDeploy().size() );
-        for( scnXml::TriggeredDeployments::DeployConstIterator it = elt.getDeploy().begin(),
-            end = elt.getDeploy().end(); it != end; ++it )
-        {
-            lists.push_back( SubList( *it ) );
-        }
-    }
-    
-    void deploy( Host::Human& human, Deployment::Method method,
-            VaccineLimits vaccLimits )const
+TriggeredDeployments::TriggeredDeployments(const scnXml::TriggeredDeployments& elt){
+    lists.reserve( elt.getDeploy().size() );
+    for( scnXml::TriggeredDeployments::DeployConstIterator it = elt.getDeploy().begin(),
+        end = elt.getDeploy().end(); it != end; ++it )
     {
-        for( vector<SubList>::const_iterator it = lists.begin(); it != lists.end(); ++it ){
-            it->deploy( human, method, vaccLimits );
-        }
+        lists.push_back( SubList( *it ) );
+    }
+}
+void TriggeredDeployments::deploy(Human& human,
+        Deployment::Method method, VaccineLimits vaccLimits) const
+{
+    for( vector<SubList>::const_iterator it = lists.begin(); it != lists.end(); ++it ){
+        it->deploy( human, method, vaccLimits );
+    }
+}
+
+TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::DeployType& elt ) :
+        HumanIntervention( elt.getComponent() ),
+        minAge( TimeStep::fromYears( elt.getMinAge() ) ),
+        maxAge( TimeStep::future ),
+        coverage( elt.getP() )
+{
+    if( elt.getMaxAge().present() )
+        maxAge = TimeStep::fromYears( elt.getMaxAge().get() );
+    
+    if( minAge < TimeStep(0) || maxAge < minAge ){
+        throw util::xml_scenario_error("triggered intervention must have 0 <= minAge <= maxAge");
     }
     
-private:
-    struct SubList : protected HumanIntervention{
-        SubList( const scnXml::TriggeredDeployments::DeployType& elt ) :
-            HumanIntervention( elt.getComponent() ),
-            minAge( TimeStep::fromYears( elt.getMinAge() ) ),
-            maxAge( TimeStep::future ),
-            coverage( elt.getP() )
-        {
-            if( elt.getMaxAge().present() )
-                maxAge = TimeStep::fromYears( elt.getMaxAge().get() );
-            
-            if( minAge < TimeStep(0) || maxAge < minAge ){
-                throw util::xml_scenario_error("triggered intervention must have 0 <= minAge <= maxAge");
-            }
-            
-            if( coverage < 0.0 || coverage > 1.0 ){
-                throw util::xml_scenario_error( "triggered intervention must have 0 <= coverage <= 1" );
-            }
-            
-            // Zero coverage: optimise
-            if( coverage <= 0.0 || minAge >= maxAge ) components.clear();
-        }
-        
-        void deploy( Host::Human& human, Deployment::Method method,
-            VaccineLimits vaccLimits )const
-        {
-            TimeStep age = human.getAgeInTimeSteps();
-            if( age >= minAge && age < maxAge ){
-                if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
-                    HumanIntervention::deploy( human, method, vaccLimits );
-                }
-            }
-        }
-        
-        // Deployment restrictions:
-        TimeStep minAge, maxAge;
-        double coverage;
-    };
+    if( coverage < 0.0 || coverage > 1.0 ){
+        throw util::xml_scenario_error( "triggered intervention must have 0 <= coverage <= 1" );
+    }
     
-    vector<SubList> lists;
-};
+    // Zero coverage: optimise
+    if( coverage <= 0.0 || minAge >= maxAge ) components.clear();
+}
+void TriggeredDeployments::SubList::deploy( Host::Human& human,
+        Deployment::Method method, VaccineLimits vaccLimits )const
+{
+    TimeStep age = human.getAgeInTimeSteps();
+    if( age >= minAge && age < maxAge ){
+        if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
+            HumanIntervention::deploy( human, method, vaccLimits );
+        }
+    }
+}
+
 
 // ———  Derivatives of HumanInterventionComponent  ———
 

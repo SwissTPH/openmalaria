@@ -22,6 +22,7 @@
 #define Hmod_WithinHost_Treatments
 
 #include "WithinHost/WHInterface.h"
+#include "interventions/Interfaces.hpp"
 
 #include <boost/ptr_container/ptr_vector.hpp>
 
@@ -38,7 +39,7 @@ namespace WithinHost {
  * 
  * For use within WithinHost only.
  */
-class Treatments {
+class Treatments : public interventions::TriggeredDeployments {
 public:
     /// @brief Static methods
     //@{

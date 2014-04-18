@@ -48,6 +48,7 @@ Treatments::Stages stageFromString( const std::string& str ){
     throw util::xml_scenario_error( std::string("treatment action: stage must be liver, blood or both, not ").append(str) );
 }
 Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
+    TriggeredDeployments(elt),
     timestepsLiver(0), timestepsBlood(0)
 {
     for( scnXml::TreatmentOption::ClearInfectionsConstIterator it =
