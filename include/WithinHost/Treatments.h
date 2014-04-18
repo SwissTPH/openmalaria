@@ -57,22 +57,25 @@ public:
     //@{
     /// Stages effected
     enum Stages{
-        NONE /*i.e. no effect*/, LIVER, BLOOD, BOTH
-    };
-    /// Details of effects
-    struct Action{
-        Action(int len, Stages s): timesteps(len), stage(s) {}
-        util::TimeStep timesteps;
-        Stages stage;
+        NONE /*i.e. no effect*/,
+        LIVER = 1,
+        BLOOD = 2,
+        BOTH = LIVER | BLOOD
     };
     //@}
     
     /// @brief Non-static methods
     //@{
-    /** Get the list of actions.
-     * 
-     * There can be any number of actions; most likely are zero, one or two. */
-    inline const vector<Action>& getEffects() const{ return effects; }
+    /** Get the liver stage action.
+     *
+     * 0 implies no action, -1 implies retrospective action, and n>0 implies
+     * treatment for next n timesteps. */
+    inline util::TimeStep liverEffect()const{ return timestepsLiver; }
+    /** Get the blood stage action.
+     *
+     * 0 implies no action, -1 implies retrospective action, and n>0 implies
+     * treatment for next n timesteps. */
+    inline util::TimeStep bloodEffect()const{ return timestepsBlood; }
     //@}
     
 private:
@@ -82,8 +85,7 @@ private:
     // non-static:
     Treatments( const scnXml::TreatmentOption& elt );
     
-    // we can have several effects; each applies independently but simultaneously
-    vector<Action> effects;
+    util::TimeStep timestepsLiver, timestepsBlood;
     
     friend class ::UnittestUtil;
 };

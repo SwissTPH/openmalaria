@@ -44,10 +44,11 @@ TreatmentId Treatments::addTreatment( const scnXml::TreatmentOption& desc ){
 Treatments::Stages stageFromString( const std::string& str ){
     if( str == "liver" ) return Treatments::LIVER;
     if( str == "blood" ) return Treatments::BLOOD;
-    assert( str == "both" );
-    return Treatments::BOTH;
+    if( str == "both" ) return Treatments::BOTH;
+    throw util::xml_scenario_error( std::string("treatment action: stage must be liver, blood or both, not ").append(str) );
 }
-Treatments::Treatments( const scnXml::TreatmentOption& elt )
+Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
+    timestepsLiver(0), timestepsBlood(0)
 {
     for( scnXml::TreatmentOption::ClearInfectionsConstIterator it =
         elt.getClearInfections().begin(), end = elt.getClearInfections().end();
@@ -66,7 +67,16 @@ Treatments::Treatments( const scnXml::TreatmentOption& elt )
             throw util::unimplemented_exception(
                 "differentiation of infection stages for simple treatment (alternative: use the PK/PD model)" );
         }
-        effects.push_back( Action( len, stage ) );
+        if( stage & LIVER ){
+            if( timestepsLiver.asInt() != 0 )   // existing treatment configuration
+                throw util::xml_scenario_error( "treatment action: multiple specification of liver stage effect" );
+            timestepsLiver = TimeStep(len);
+        }
+        if( stage & BLOOD ){
+            if( timestepsBlood.asInt() != 0 )   // existing treatment configuration
+                throw util::xml_scenario_error( "treatment action: multiple specification of blood stage effect" );
+            timestepsBlood = TimeStep(len);
+        }
     }
 }
 

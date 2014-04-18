@@ -159,29 +159,17 @@ bool WHFalciparum::diagnosticDefault() const{
 
 void WHFalciparum::treatment(TreatmentId treatId){
     const Treatments& treat = Treatments::select( treatId );
-    for( vector<Treatments::Action>::const_iterator it =
-        treat.getEffects().begin(), end = treat.getEffects().end();
-        it != end; ++it )
-    {
-        if( it->timesteps == TimeStep(-1) ){
-            // act immediately
-            //TODO: which timestep to measure "is blood stage" by?
-            clearInfections( it->stage );
-        }else{
-            switch( it->stage ){
-                case Treatments::BOTH:
-                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
-                    // don't break; also do blood below:
-                case Treatments::BLOOD:
-                    treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + it->timesteps );
-                    break;
-                case Treatments::LIVER:
-                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
-                    break;
-                case Treatments::NONE:
-                    /*do nothing*/;
-            }
-        }
+    if( treat.liverEffect().asInt() != 0 ){
+        if( treat.liverEffect().asInt() == -1 )
+            clearInfections( Treatments::LIVER );
+        else
+            treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + treat.liverEffect() );
+    }
+    if( treat.bloodEffect().asInt() != 0 ){
+        if( treat.bloodEffect().asInt() == -1 )
+            clearInfections( Treatments::BLOOD );
+        else
+            treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + treat.bloodEffect() );
     }
 }
 
