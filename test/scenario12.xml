@@ -634,8 +634,11 @@
       </timedDeployment>
     </changeEIR>
     <human>
-      <component id="MDA">
+      <component id="MSAT">
         <MDA>
+          <diagnostic>
+            <deterministic minDensity="20"/>
+          </diagnostic>
           <effects>
             <option name="legacy effect" pSelection="1">
               <clearInfections stage="both" timesteps="-1"/>
@@ -644,16 +647,16 @@
         </MDA>
       </component>
       <deployment>
-        <component id="MDA"/>
+        <component id="MSAT"/>
         <timed>
-          <deploy coverage="1" maxAge="999" minAge="0" time="0"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="14"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="28"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="42"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="56"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="70"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="84"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="98"/>
+          <deploy coverage="1" time="0"/>
+          <deploy coverage="1" time="14"/>
+          <deploy coverage="1" time="28"/>
+          <deploy coverage="1" time="42"/>
+          <deploy coverage="1" time="56"/>
+          <deploy coverage="1" time="70"/>
+          <deploy coverage="1" time="84"/>
+          <deploy coverage="1" time="98"/>
         </timed>
       </deployment>
     </human>
