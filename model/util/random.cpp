@@ -184,7 +184,11 @@ double random::gauss (double mean, double std){
 //     util::streamValidate(result);
     return result;
 }
-
+double random::gauss (double std){
+    double result = gsl_ran_gaussian(rng.gsl_generator,std);
+//     util::streamValidate(result);
+    return result;
+}
 
 double random::gamma (double a, double b){
     double result = gsl_ran_gamma(rng.gsl_generator, a, b);

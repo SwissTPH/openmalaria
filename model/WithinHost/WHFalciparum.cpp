@@ -97,7 +97,11 @@ WHFalciparum::WHFalciparum( double comorbidityFactor ):
     totalDensity(0.0), timeStepMaxDensity(0.0),
     pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
 {
-    _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
+    // NOTE: negating a Gaussian sample with mean 0 is pointless — except that
+    // the individual samples change. In any case the overhead is negligible.
+    //FIXME: Should this be allowed to be greater than 1?
+    // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
+    _innateImmSurvFact = exp(-random::gauss(sigma_i));
     
     _ylag.assign (_ylagLen, 0.0);
 }
