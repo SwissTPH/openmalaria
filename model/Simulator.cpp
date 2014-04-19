@@ -24,6 +24,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "PopulationStats.h"
 #include "Parameters.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/InterventionManager.hpp"
@@ -59,23 +60,39 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     workUnitIdentifier(0),
     cksum(ck)
 {
+    // ———  Initialise static data  ———
+    
     const scnXml::Model& model = scenario.getModel();
     const scnXml::Demography& demography = scenario.getDemography();
     
-    Parameters parameters( model.getParameters() );
-    
+    // 1) elements with no dependencies on other elements initialised here:
     OM::TimeStep::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
-    
-    // Initialize input variables and allocate memory.
-    // We try to make initialization hierarchical (i.e. most classes initialise
-    // through Population::init).
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
+    
+    // 2) elements depending on only elements initialised in (1):
     Surveys.init( scenario.getMonitoring() );
+    
+    Parameters parameters( model.getParameters() );     // depends on nothing
     Population::init( parameters, scenario );
+    
+    // 3) elements depending on other elements; dependencies on (1) are not mentioned:
+    
+    // Transmission model initialisation depends on Transmission::PerHost (from
+    // Human, from Population::init()) and Monitoring::AgeGroup (from Surveys.init()):
+    // Note: PerHost dependency can be postponed; it is only used to set adultAge
     population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
+    
+    // Depends on transmission model (for species indexes):
+    // MDA1D may depend on health system (too complex to verify)
     interventions::InterventionManager::init( scenario.getInterventions(), *population );
+    
+    Clinical::CaseManagementCommon::changeHealthSystem( scenario.getHealthSystem() );
+    
+    // Depends on interventions:
     Surveys.init2( scenario.getMonitoring() );
+    
+    // ———  End of static data initialisation  ———
     
 #ifndef WITHOUT_BOINC
     // if not on BOINC we don't care about this

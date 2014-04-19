@@ -49,7 +49,7 @@ public:
   /// @brief Static functions
   //@{
   /// Initialise whichever model is in use.
-  static void init ( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem );
+  static void init ( const Parameters& parameters, const scnXml::Model& model );
   /// Cleanup on exit
   static void cleanup ();
   

@@ -35,10 +35,8 @@ namespace OM { namespace Clinical {
     
     // -----  functions  -----
     
-    void CaseManagementCommon::initCommon( const OM::Parameters& parameters, const scnXml::HealthSystem& healthSystem ){
+    void CaseManagementCommon::initCommon( const OM::Parameters& parameters ){
 	_oddsRatioThreshold = exp (parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY]);
-	
-	changeHealthSystem( healthSystem );
     }
     void CaseManagementCommon::cleanupCommon (){
         AgeGroupInterpolation::freeObject( caseFatalityRate );

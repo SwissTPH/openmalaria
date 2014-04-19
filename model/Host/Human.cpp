@@ -60,7 +60,7 @@ void Human::initHumanParameters( const Parameters& parameters, const scnXml::Sce
     Transmission::PerHost::init( model.getHuman().getAvailabilityToMosquitoes() );
     InfectionIncidenceModel::init( parameters );
     WithinHost::WHInterface::init( parameters, scenario );
-    Clinical::ClinicalModel::init( parameters, model, scenario.getHealthSystem() );
+    Clinical::ClinicalModel::init( parameters, model );
 }
 
 void Human::clear() {   // static clear

@@ -41,7 +41,7 @@ bool ClinicalModel::indirectMortBugfix;
 
 // -----  static methods  -----
 
-void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem ) {
+void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model ) {
     infantDeaths.resize(TimeStep::stepsPerYear);
     infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
     _nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
@@ -54,7 +54,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
     }else{
         ClinicalImmediateOutcomes::initParameters();
     }
-    CaseManagementCommon::initCommon( parameters, healthSystem );
+    CaseManagementCommon::initCommon( parameters );
 }
 void ClinicalModel::cleanup () {
     CaseManagementCommon::cleanupCommon();
