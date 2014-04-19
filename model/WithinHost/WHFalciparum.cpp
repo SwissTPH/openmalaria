@@ -157,7 +157,7 @@ bool WHFalciparum::diagnosticDefault() const{
     return Diagnostic::default_.isPositive( totalDensity );
 }
 
-void WHFalciparum::treatment(TreatmentId treatId){
+void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
     const Treatments& treat = Treatments::select( treatId );
     if( treat.liverEffect().asInt() != 0 ){
         if( treat.liverEffect().asInt() == -1 )
@@ -171,6 +171,11 @@ void WHFalciparum::treatment(TreatmentId treatId){
         else
             treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + treat.bloodEffect() );
     }
+    
+    // triggered intervention deployments:
+    treat.deploy( human,
+                  interventions::Deployment::TREAT,
+                  interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
 
 Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){

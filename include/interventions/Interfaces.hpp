@@ -36,7 +36,8 @@ namespace interventions {
 namespace Deployment {
     enum Method {
         TIMED,   // mass distribution campaign
-        CTS     // continuous deployment (EPI, etc.)
+        CTS,     // continuous deployment (EPI, etc.)
+        TREAT   // triggered by case management
     };
 }
 
@@ -137,7 +138,9 @@ protected:
     
     /** Trivial helper function to get deployment measure. */
     inline Monitoring::ReportMeasureI reportMeasure( Deployment::Method method )const{
-        return (method == Deployment::TIMED) ? m_measureTimed : m_measureCts;
+        return (method == Deployment::TIMED) ? m_measureTimed :
+            (method == Deployment::CTS) ? m_measureCts :
+            Monitoring::Report::MI_TREAT_DEPLOYMENTS;
     }
     
 private:

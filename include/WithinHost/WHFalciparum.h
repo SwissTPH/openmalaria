@@ -65,7 +65,7 @@ public:
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
     virtual bool diagnosticDefault() const;
-    virtual void treatment( TreatmentId treatment );
+    virtual void treatment( Host::Human& human, TreatmentId treatId );
     
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
 

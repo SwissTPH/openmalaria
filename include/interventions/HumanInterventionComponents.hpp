@@ -197,7 +197,7 @@ public:
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
         Survey::current().addInt( reportMeasure(method), human, 1 );
-        human.withinHostModel->treatment( selectTreatment() );
+        human.withinHostModel->treatment( human, selectTreatment() );
     }
     
     virtual Component::Type componentType() const{ return Component::MDA; }
@@ -292,7 +292,9 @@ public:
 private:
     /** Trivial helper function to get deployment measure. */
     inline ReportMeasureI screeningMeasure( Deployment::Method method )const{
-        return (method == Deployment::TIMED) ? m_screenMeasureTimed : m_screenMeasureCts;
+        return (method == Deployment::TIMED) ? m_screenMeasureTimed :
+            (method == Deployment::CTS) ? m_screenMeasureCts :
+            Report::MI_TREAT_DEPLOYMENTS;
     }
     ReportMeasureI m_screenMeasureCts, m_screenMeasureTimed;
 };

@@ -128,7 +128,7 @@ void ClinicalImmediateOutcomes::uncomplicatedEvent (
         if (probParasitesCleared[regimen] > random::uniform_01()) {
             // Could report Episode::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
-            human.withinHostModel->treatment( treatments[regimen] );
+            human.withinHostModel->treatment( human, treatments[regimen] );
         } else {
             // No change in parasitological status: treated outside of hospital
         }
@@ -194,7 +194,7 @@ void ClinicalImmediateOutcomes::severeMalaria (
 
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
-            human.withinHostModel->treatment( treatments[Regimen::SEVERE] );
+            human.withinHostModel->treatment( human, treatments[Regimen::SEVERE] );
             if (q[6] > prandom) {
                 latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
                 doomed  = 4;

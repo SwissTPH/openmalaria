@@ -87,6 +87,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // MDA1D may depend on health system (too complex to verify)
     interventions::InterventionManager::init( scenario.getInterventions(), *population );
     
+    // Depends on interventions:
     Clinical::CaseManagementCommon::changeHealthSystem( scenario.getHealthSystem() );
     
     // Depends on interventions:

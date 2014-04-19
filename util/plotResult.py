@@ -90,8 +90,11 @@ measureNames = {
     59 : 'nCtsMDA',
     60 : 'nCtsScreenings',
     63 : 'nPQTreatments',
-    64 : 'nTreatDiagnostics'
-    }
+    64 : 'nTreatDiagnostics',
+    65 : 'nMassRecruitOnly',
+    66 : 'nCtsRecruitOnly',
+    67 : 'nTreatDeployments'
+}
 
 # List of measure groups. Each includes name, boolean (true if use log scale),
 # and per-measure information. For each measure, list: id, name, colour
@@ -122,6 +125,8 @@ combinedMeasures = [
     ('IRS',[(46,'IRS (timed)','darkred'),(57,'IRS (cts)','red')]),
     ('GVI',[(47,'deterrents (timed)','brown'),(56,'GVI (timed)','darkblue'),(58,'GVI (cts)','blue')]),
     ('cohort delta',[(50,'added','orange'),(51,'removed','blue')]),
+    ('recruit only',[(65,'timed','purple'),(66,'cts','pink')]),
+    ('intervention deployments',[(67,'via CM','grey')])
 ]
 appendMeasureNumber=None
 def measureNumber(m):

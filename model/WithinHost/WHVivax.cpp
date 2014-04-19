@@ -20,6 +20,7 @@
 
 #include "WithinHost/WHVivax.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
+#include "WithinHost/Treatments.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include <schema/scenario.h>
@@ -360,7 +361,7 @@ WHInterface::InfectionCount WHVivax::countInfections () const{
     }
     return count;
 }
-void WHVivax::treatment( TreatmentId treatment ){
+void WHVivax::treatment( Host::Human& human, TreatmentId treatId ){
     //TODO: something less ugly than this. Possibly we should revise code to
     // make Pf and Pv treatment models work more similarly.
     // For now we rely on the check in Treatments::Treatments(...).
@@ -369,6 +370,12 @@ void WHVivax::treatment( TreatmentId treatment ){
     for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
         it->treatmentBS();
     }
+    
+    // triggered intervention deployments:
+    const Treatments& treat = Treatments::select( treatId );
+    treat.deploy( human,
+                  interventions::Deployment::TREAT,
+                  interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
 bool WHVivax::optionalPqTreatment(){
     // PQ clears liver stages. We don't worry about the effect of PQ on

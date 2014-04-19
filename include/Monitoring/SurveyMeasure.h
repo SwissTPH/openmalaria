@@ -285,6 +285,10 @@ enum SurveyMeasure {
     /** Number of "recruitment only" recruitments via age-based deployment. */
     nCtsRecruitOnly = 66,
     
+    /** Number of deployments (of all intervention components) triggered by
+     * treatment (case management). */
+    nTreatDeployments = 67,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };

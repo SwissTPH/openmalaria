@@ -114,6 +114,7 @@ public:
         codeMap["nTreatDiagnostics"] = SM::nTreatDiagnostics;
         codeMap["nMassRecruitOnly"] = SM::nMassRecruitOnly;
         codeMap["nCtsRecruitOnly"] = SM::nCtsRecruitOnly;
+        codeMap["nTreatDeployments"] = SM::nTreatDeployments;
     }
     
     SM::SurveyMeasure operator[] (const string s) {
@@ -180,6 +181,7 @@ void Survey::init (const scnXml::Monitoring& monitoring) {
     intReportMappings[Report::MI_TREAT_DIAGNOSTICS] = SM::nTreatDiagnostics;
     intReportMappings[Report::MI_RECRUIT_TIMED] = SM::nMassRecruitOnly;
     intReportMappings[Report::MI_RECRUIT_CTS] = SM::nCtsRecruitOnly;
+    intReportMappings[Report::MI_TREAT_DEPLOYMENTS] = SM::nTreatDeployments;
     
     dblReportMappings[Report::MD_EXPECTED_INFECTED] = SM::nExpectd;
     dblReportMappings[Report::MD_LOG_PYROGENIC_THRESHOLD] = SM::sumLogPyrogenThres;

@@ -105,7 +105,7 @@ public:
     /**
      * Carry out the effects of some treatment option
      */
-    virtual void treatment( TreatmentId treatment ) =0;
+    virtual void treatment( Host::Human& human, TreatmentId treatId ) =0;
     
     /** Conditionally gives Primaquine as a treatment.
      * 
