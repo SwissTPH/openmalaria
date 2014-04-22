@@ -1,0 +1,44 @@
+This file lists significant changes in OpenMalaria from the point of view of
+users. It is however far from complete. The more complete changelog is on the
+wiki: http://code.google.com/p/openmalaria/wiki/Changelog
+
+
+— 2014-04-22 — Schema 32 release candidate 3 —
+
+Cohorts / sub-populations:
+
+Concept of _cohorts_ partially replaced with _sub-populations_: intervention
+deployments are sub-population recruitments while cohorts are a derived
+concept only used in monitoring. Deployments can be restricted to
+sub-populations instead of cohorts and cumulative deployment mode uses
+sub-populations.
+
+Getting output from multiple cohorts and/or cohort complements independently is
+now possible.
+
+Sub-population removal of membership on age of intervention (time since
+deployment), first bout/infection/treatment event and ITN attrition.
+
+Health system memory resets (reporting events which could have a relapse) on
+remove-on-first-event sub-population removals (same as before), but not on
+recruitment (which did used to happen).
+
+Other:
+
+Case management can use diagnostics before treating patients.
+
+Case management can trigger deployment of any intervention.
+
+New 'screen' intervention component which uses a diagnostic, then deploys
+interventions from a list depending on outcome. Replaces MDA's diagnostic.
+
+Integration of vivax code from the separate development branch based on schema
+31.
+
+Bug fixes. Significant cleanup of monitoring code. More restrictive parsing of
+treatment descriptions (but not restricting anything actually useful).
+
+
+— Schema 31 —
+
+Replace "larviciding" intervention with far more generic "vectorPop" intervention.
