@@ -56,9 +56,9 @@ void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     }
 }
 
-void PerHost::update(){
+void PerHost::update(Host::Human& human){
     for( ListActiveComponents::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        it->update();
+        it->update(human);
     }
 }
 

@@ -189,7 +189,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 ++expIt;
             }
         }
-        double EIR = transmissionModel->getEIR( perHostTransmission, ageYears, monitoringAgeGroup );
+        double EIR = transmissionModel->getEIR( *this, ageYears, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
         withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV));

@@ -206,12 +206,12 @@ double TransmissionModel::updateKappa (const Population& population) {
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
    * availability. */
-  double EIR = calculateEIR (host, ageYears);
+  double EIR = calculateEIR (human, ageYears);
 
   //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
   timeStepEntoInocs[ageGroup.i()] += EIR;

@@ -518,6 +518,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         sub-population when receiving an intervention component; this element
         controls how humans are removed from the sub-population.
         
+        ITN attrition also removes humans from sub-populations.
+        
         Note that sub-populations do not directly correspond to an
         intervention's effects: lack of effectiveness does not imply removal
         from the sub-population (except as explicitly configured here) and
@@ -1078,6 +1080,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           (where a large number of nets are distributed at the same time), the
           proportion of nets remaining in use should match this decay function
           over time.
+          
+          Humans are removed from the intervention component's sub-population
+          on disposal (attrition) of their nets. Currently this event is not 
+          reported.
         </xs:documentation>
           <xs:appinfo>units:dimensionless;name:Attrition of nets;</xs:appinfo>
         </xs:annotation>

@@ -351,8 +351,9 @@ TimeStep VectorModel::initIterate () {
         return TimeStep::fromYears( 1 );
 }
 
-double VectorModel::calculateEIR(PerHost& host, double ageYears) {
-    host.update();
+double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
+    PerHost& host = human.perHostTransmission;
+    host.update( human );
     if (simulationMode == forcedEIR){
         return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
                * host.relativeAvailabilityHetAge (ageYears);

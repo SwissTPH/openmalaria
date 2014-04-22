@@ -20,6 +20,7 @@
  */
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
+#include "Host/Human.h"
 #include "Monitoring/Survey.h" // sim-end timestep
 #include "util/random.h"
 #include "util/vectors.h"
@@ -202,7 +203,7 @@ void NonVectorModel::update (const Population& population) {
 }
 
 
-double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
+double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {
@@ -240,7 +241,7 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
     throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
   }
 #endif
-  return eir * perHost.relativeAvailabilityHetAge (ageYears);
+  return eir * human.perHostTransmission.relativeAvailabilityHetAge (ageYears);
 }
 
 

@@ -28,7 +28,6 @@
 #include <cmath>
 
 namespace OM { namespace interventions {
-    using util::random::poisson;
     using namespace Monitoring;
 
 vector<ITNComponent*> ITNComponent::componentsByIndex;
@@ -513,17 +512,22 @@ void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionComponent
         initialInsecticide = params.maxInsecticide;
 }
 
-void HumanITN::update(){
+void HumanITN::update(Host::Human& human){
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     if( deployTime != TimeStep::never ){
         // First use is at age 1, so don't remove until *after* disposalTime to
         // get use over the full duration given by sampleAgeOfDecay().
         if( TimeStep::simulation > disposalTime ){
             deployTime = TimeStep::never;
+            human.removeFromSubPop(id());
+            // mimic previous random number generator calls:
+            util::random::poisson( holeRate );
+            util::random::poisson( nHoles * ripRate );
+            return;
         }
-        int newHoles = poisson( holeRate );
+        int newHoles = util::random::poisson( holeRate );
         nHoles += newHoles;
-        holeIndex += newHoles + params.ripFactor * poisson( nHoles * ripRate );
+        holeIndex += newHoles + params.ripFactor * util::random::poisson( nHoles * ripRate );
     }
 }
 

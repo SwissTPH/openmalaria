@@ -231,7 +231,7 @@ void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionComponen
     initialInsecticide = irsParams->sampleInitialInsecticide();
 }
 
-void HumanIRS::update(){
+void HumanIRS::update(Host::Human& human){
 }
 
 double HumanIRS::relativeAttractiveness(size_t speciesIndex) const{

@@ -26,7 +26,7 @@
 #include "Monitoring/AgeGroup.h"
 #include "interventions/HumanComponents.h"
 #include "util/checkpoint_containers.h"
-#include <set>
+#include <map>
 
 namespace scnXml {
     class Scenario;
@@ -102,6 +102,10 @@ public:
   /** Add the human to an intervention component's sub-population for the given
    * duration. A duration of zero implies no effect. */
   void reportDeployment( interventions::ComponentId id, TimeStep duration );
+  
+  inline void removeFromSubPop( interventions::ComponentId id ){
+      m_subPopExp.erase( id );
+  }
   
   /// Resets immunity
   void clearImmunity();
@@ -234,7 +238,7 @@ private:
    * happens at the end of a timestep and we want a duration of 1 timestep to
    * mean 1 intervention deployment (that where the human becomes a member) and
    * 1 human update (the next). */
-  map<interventions::ComponentId,TimeStep> m_subPopExp;
+  std::map<interventions::ComponentId,TimeStep> m_subPopExp;
 };
 
 } }

@@ -112,7 +112,7 @@ public:
         return params.decay->eval (TimeStep::simulation - deployTime, decayHet);
     }
     
-    virtual void update();
+    virtual void update(Host::Human& human);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     virtual double relativeAttractiveness(size_t speciesIndex) const;

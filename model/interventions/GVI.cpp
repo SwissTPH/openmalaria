@@ -97,7 +97,7 @@ void HumanGVI::redeploy(const Transmission::HumanVectorInterventionComponent&) {
     deployTime = TimeStep::simulation;
 }
 
-void HumanGVI::update(){
+void HumanGVI::update(Host::Human& human){
 }
 
 double HumanGVI::relativeAttractiveness(size_t speciesIndex) const{

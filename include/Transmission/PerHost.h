@@ -58,7 +58,7 @@ public:
     virtual void redeploy( const HumanVectorInterventionComponent& params ) =0;
     
     /** Per-timestep update. Used by ITNs to update hole decay. */
-    virtual void update() =0;
+    virtual void update(Host::Human& human) =0;
     
     /** Get effect of deterrencies of interventions, as an attractiveness multiplier.
      * 
@@ -133,7 +133,7 @@ public:
     //@}
     
     /// Call once per timestep. Updates net holes.
-    void update();
+    void update(Host::Human& human);
     
     ///@brief Intervention controls
     //@{
