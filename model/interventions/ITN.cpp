@@ -520,11 +520,9 @@ void HumanITN::update(Host::Human& human){
         if( TimeStep::simulation > disposalTime ){
             deployTime = TimeStep::never;
             human.removeFromSubPop(id());
-            // mimic previous random number generator calls:
-            util::random::poisson( holeRate );
-            util::random::poisson( nHoles * ripRate );
             return;
         }
+        
         int newHoles = util::random::poisson( holeRate );
         nHoles += newHoles;
         holeIndex += newHoles + params.ripFactor * util::random::poisson( nHoles * ripRate );
