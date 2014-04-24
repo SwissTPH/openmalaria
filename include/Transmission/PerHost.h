@@ -36,7 +36,6 @@ class TransmissionModel;
 using util::AgeGroupInterpolation;
 using util::DecayFunction;
 using util::DecayFuncHet;
-using boost::shared_ptr;
 
 class HumanVectorInterventionComponent;
 

@@ -33,7 +33,6 @@ namespace interventions {
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
-    using boost::shared_ptr;
     using Transmission::PerHostInterventionData;
 
 class ITNComponent : public Transmission::HumanVectorInterventionComponent {
@@ -158,7 +157,7 @@ public:
         };
         double proportionProtected;
         double proportionUnprotected;
-        shared_ptr<RelativeAttractiveness> _relativeAttractiveness;
+        boost::shared_ptr<RelativeAttractiveness> _relativeAttractiveness;
         SurvivalFactor _preprandialKillingEffect;
         SurvivalFactor _postprandialKillingEffect;
         
@@ -170,8 +169,8 @@ public:
     LognormalSampler ripRate;	// rips per hole per annum
     double maxInsecticide;		// maximum initial insecticide
     double ripFactor;			// factor expressing how significant rips are in comparison to holes
-    shared_ptr<DecayFunction> insecticideDecay;
-    shared_ptr<DecayFunction> attritionOfNets;
+    boost::shared_ptr<DecayFunction> insecticideDecay;
+    boost::shared_ptr<DecayFunction> attritionOfNets;
     vector<ITNAnopheles> species; // vector specific params
     
     // This is sparse vector: only indexes corresponding to ITN components are

@@ -92,11 +92,11 @@ void ITNComponent::ITNAnopheles::init(
 {
     assert( _relativeAttractiveness.get() == 0 );       // double init
     if (elt.getDeterrency().present())
-        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(
+        _relativeAttractiveness = boost::shared_ptr<RelativeAttractiveness>(
             new RADeterrency( elt.getDeterrency().get(), maxInsecticide ));
     else{
         assert (elt.getTwoStageDeterrency().present());
-        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(
+        _relativeAttractiveness = boost::shared_ptr<RelativeAttractiveness>(
             new RATwoStageDeterrency( elt.getTwoStageDeterrency().get(), maxInsecticide ));
     }
     _preprandialKillingEffect.init( elt.getPreprandialKillingEffect(),

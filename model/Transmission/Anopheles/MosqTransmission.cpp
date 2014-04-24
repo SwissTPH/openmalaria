@@ -62,7 +62,7 @@ void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOpti
             throw util::xml_scenario_error(
                 "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
                 "model parameters for each anopheles species");
-        emergence = shared_ptr<EmergenceModel>( new LCEmergence() );
+        emergence = boost::shared_ptr<EmergenceModel>( new LCEmergence() );
         emergence->initLifeCycle( lcOpt.get() );
         */
     }else if (util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL )){
@@ -70,9 +70,9 @@ void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOpti
             throw util::xml_scenario_error(
                 "VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
                 "model parameters for each anopheles species");
-        emergence = shared_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get()) );
+        emergence = boost::shared_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get()) );
     }else
-        emergence = shared_ptr<EmergenceModel>( new FixedEmergence() );
+        emergence = boost::shared_ptr<EmergenceModel>( new FixedEmergence() );
     
     
     // -----  Set model variables  -----
