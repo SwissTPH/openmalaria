@@ -125,7 +125,7 @@ target_link_libraries (unittest
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${BOINC_LIBRARIES}
-  m stdc++
+  ${OM_STD_LIBS}
 )
 
 if (MSVC)
