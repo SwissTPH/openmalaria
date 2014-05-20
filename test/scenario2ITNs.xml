@@ -33,6 +33,9 @@
       <option name="immunity Y" value="true"/>
       <option name="hosts" value="false"/>
       <option name="recent births" value="true"/>
+      <option name="ITN coverage"/>
+      <option name="IRS coverage"/>
+      <option name="GVI coverage"/>
       <!--<option name="IRS insecticide content" value="true"/>
       <option name="IRS effects" value="true"/>-->
     </continuous>
@@ -154,7 +157,7 @@
             <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
           </anophelesParams>
         </IRS>
-        <subPopRemoval afterYears="36"/>
+        <subPopRemoval afterYears="0.5"/>
       </component>
       <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
@@ -176,6 +179,7 @@
       </deployment>
       <deployment name="LLIN test">
         <component id="ITN"/>
+        <component id="vectorDeterrent"/>
         <continuous>
           <deploy coverage=".677" targetAgeYrs="0.0833"/>
         </continuous>

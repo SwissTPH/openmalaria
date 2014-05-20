@@ -76,6 +76,9 @@ public:
     /// Index of effect describing the intervention
     inline interventions::ComponentId id() const { return m_id; }
     
+    /// Return true if this component is deployed (i.e. currently active)
+    inline bool isDeployed() const{ return deployTime != TimeStep::never; }
+    
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
         m_id & stream; // must be first; read externally so that the correct
@@ -234,6 +237,12 @@ public:
     static inline double adultAge() {
         return relAvailAge->firstGlobalMaximum();
     }
+    
+    /** Get whether the user has any active deployments of interventions of
+     * the given type, where type is one of those interventions deriving the
+     * PerHostInterventionData class (in other cases this will always return
+     * false). */
+    bool hasActiveInterv( interventions::Component::Type type ) const;
     
     /// Checkpointing
     template<class S>

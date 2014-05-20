@@ -107,6 +107,13 @@ Population::Population(const scnXml::EntoData& entoData, size_t populationSize)
     Continuous.registerCallback( "human age availability",
         "\thuman age availability",
         MakeDelegate( this, &Population::ctsMeanAgeAvailEffect ) );
+    Continuous.registerCallback( "ITN coverage", "\tITN coverage",
+        MakeDelegate( this, &Population::ctsITNCoverage ) );
+    Continuous.registerCallback( "IRS coverage", "\tIRS coverage",
+        MakeDelegate( this, &Population::ctsIRSCoverage ) );
+    Continuous.registerCallback( "GVI coverage", "\tGVI coverage",
+        MakeDelegate( this, &Population::ctsGVICoverage ) );
+    // "nets owned" replaced by "ITN coverage"
 //     Continuous.registerCallback( "nets owned", "\tnets owned",
 //         MakeDelegate( this, &Population::ctsNetsOwned ) );
 //     Continuous.registerCallback( "mean hole index", "\tmean hole index",
@@ -325,15 +332,31 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     }
     stream << '\t' << avail/nHumans;
 }
-void Population::ctsNetsOwned (ostream& stream){
-//     int nNets = 0;
-//     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) )
-//             ++nNets;
-//     }
-//     stream << '\t' << nNets;
+void Population::ctsITNCoverage (ostream& stream){
+    int nActive = 0;
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
+        nActive += iter->perHostTransmission.hasActiveInterv( interventions::Component::ITN );
+    }
+    double coverage = static_cast<double>(nActive) / populationSize;
+    stream << '\t' << coverage;
 }
-void Population::ctsNetHoleIndex (ostream& stream){
+void Population::ctsIRSCoverage (ostream& stream){
+    int nActive = 0;
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
+        nActive += iter->perHostTransmission.hasActiveInterv( interventions::Component::IRS );
+    }
+    double coverage = static_cast<double>(nActive) / populationSize;
+    stream << '\t' << coverage;
+}
+void Population::ctsGVICoverage (ostream& stream){
+    int nActive = 0;
+    for (Iter iter = population.begin(); iter != population.end(); ++iter) {
+        nActive += iter->perHostTransmission.hasActiveInterv( interventions::Component::GVI );
+    }
+    double coverage = static_cast<double>(nActive) / populationSize;
+    stream << '\t' << coverage;
+}
+// void Population::ctsNetHoleIndex (ostream& stream){
 //     double meanVar = 0.0;
 //     int nNets = 0;
 //     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
@@ -343,7 +366,7 @@ void Population::ctsNetHoleIndex (ostream& stream){
 //         }
 //     }
 //     stream << '\t' << meanVar/nNets;
-}
+// }
 
 void Population::newSurvey ()
 {
