@@ -134,7 +134,7 @@
             <postprandialKillingEffect value="0.2772"/>
           </anophelesParams>
         </GVI>
-        <subPopRemoval afterYears="36"/>
+        <subPopRemoval afterYears="0.5"/>
       </component>
       <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
