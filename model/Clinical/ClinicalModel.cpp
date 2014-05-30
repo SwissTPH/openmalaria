@@ -25,11 +25,12 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "Host/NeonatalMortality.h"
 
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
 #include <schema/scenario.h>
 
 namespace OM { namespace Clinical {
+    using namespace Monitoring;
 
 vector<int> ClinicalModel::infantIntervalsAtRisk;
 vector<int> ClinicalModel::infantDeaths;
@@ -40,7 +41,7 @@ bool ClinicalModel::indirectMortBugfix;
 
 // -----  static methods  -----
 
-void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem ) {
+void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model ) {
     infantDeaths.resize(TimeStep::stepsPerYear);
     infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
     _nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
@@ -53,7 +54,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
     }else{
         ClinicalImmediateOutcomes::initParameters();
     }
-    CaseManagementCommon::initCommon( parameters, healthSystem );
+    CaseManagementCommon::initCommon( parameters );
 }
 void ClinicalModel::cleanup () {
     CaseManagementCommon::cleanupCommon();
@@ -123,16 +124,14 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (_doomed <= -35) {	//clinical bout 6 intervals before
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-            Monitoring::Survey::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+        Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
         _doomed = DOOMED_INDIRECT;
         return;
     }
     if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
         if (Host::NeonatalMortality::eventNeonatalMortality()) {
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                Monitoring::Survey::MI_INDIRECT_DEATHS, human.getMonitoringAgeGroup(), 1 );
+            Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
             _doomed = DOOMED_NEONATAL;
             return;
         }

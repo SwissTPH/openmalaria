@@ -68,7 +68,7 @@ public:
   
   virtual void vectorUpdate (const Population& population) {}
   virtual void update (const Population& population);
-  virtual double calculateEIR(PerHost& perHost, double ageYears);
+  virtual double calculateEIR(Host::Human& human, double ageYears);
   
 private:
 

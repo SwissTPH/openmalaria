@@ -22,6 +22,7 @@
 #include "Clinical/ESDecisionTree.h"
 #include "Clinical/EventScheduler.h"
 #include "Clinical/parser.h"
+#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 
@@ -33,6 +34,7 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
     using namespace boost::assign;
+    using namespace Monitoring;
     using boost::format;
     using parser::SymbolValueMap;
     using parser::SymbolRangeMap;
@@ -461,18 +463,17 @@ void ESCaseManagement::setHealthSystem( const scnXml::HealthSystem& healthSystem
 pair<ESDecisionValue, bool> executeTree(
         ESDecisionMap* map,
         const ESHostData& hostData,
-        list<MedicateData>& medicateQueue,
-        bool inCohort
+        list<MedicateData>& medicateQueue
 ){
     ESDecisionValue outcome = map->determine (hostData);
     ESTreatmentSchedule& schedule = map->getSchedule(outcome);
     schedule.apply (medicateQueue);
     
     if ( map->RDT_used(outcome) ) {
-        Monitoring::Surveys.getSurvey(inCohort).report_Clinical_RDTs (1);
+        Survey::current().report_Clinical_RDTs (1);
     }
     if ( map->microscopy_used(outcome) ) {
-        Monitoring::Surveys.getSurvey(inCohort).report_Clinical_Microscopy (1);
+        Survey::current().report_Clinical_Microscopy (1);
     }
     
     return make_pair( outcome, schedule.anyTreatments() );
@@ -483,33 +484,29 @@ void ESCaseManagement::initMDA (const scnXml::HSESCaseManagement& desc){
 }
 
 void ESCaseManagement::massDrugAdministration(
-        interventions::Deployment::Method method,
         const ESHostData& hostData,
         list<MedicateData>& medicateQueue,
-        bool inCohort,
-        Monitoring::AgeGroup ageGroup
+        const Host::Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport
 ){
-    Monitoring::Survey& survey = Monitoring::Surveys.getSurvey(inCohort);
-    survey.addInt( (method == interventions::Deployment::TIMED) ?
-        Survey::MI_SCREENING_TIMED : Survey::MI_SCREENING_CTS, ageGroup, 1 );
-    bool anyTreatment = executeTree( &mda, hostData, medicateQueue, inCohort ).second;
+    Survey::current().addInt( screeningReport, human, 1 );
+    bool anyTreatment = executeTree( &mda, hostData, medicateQueue ).second;
     if( anyTreatment ){
-        survey.addInt( (method == interventions::Deployment::TIMED) ?
-            Survey::MI_MDA_TIMED : Survey::MI_MDA_CTS, ageGroup, 1 );
+        Survey::current().addInt( drugReport, human, 1 );
     }
 }
 
 CMAuxOutput ESCaseManagement::execute (
         const ESHostData& hostData,
-        list<MedicateData>& medicateQueue,
-        bool inCohort
+        list<MedicateData>& medicateQueue
 ) {
     assert (hostData.pgState & Episode::SICK);
     // We always remove any queued medications.
     medicateQueue.clear();
     
     ESDecisionMap *map = (hostData.pgState & Episode::COMPLICATED) ? &complicated : &uncomplicated;
-    ESDecisionValue outcome = executeTree( map, hostData, medicateQueue, inCohort ).first;
+    ESDecisionValue outcome = executeTree( map, hostData, medicateQueue ).first;
     
     CMAuxOutput auxOut;
     auxOut.hospitalisation = CMAuxOutput::NONE;

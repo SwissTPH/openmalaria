@@ -23,6 +23,7 @@
 
 #include "Monitoring/Survey.h"
 #include "Global.h"
+#include "Host/Human.h"
 #include <assert.h>
 
 namespace OM {
@@ -44,35 +45,17 @@ namespace Monitoring {
  * but when exported to the database always considered a double). */
 class SurveysType
 {
-  public:
-      SurveysType() : currentTimestep(TimeStep::never) {}
-      
-    /** Points to surveys[_surveyPeriod] (the dummy element surveys[0] before
-     * start of main sim and after completion of last survey).
-     * This is for data being collected for the next survey. */
-    Survey* current;
-    /** Timestep the current survey ends at.
-     * 
-     * For point-time surveys this is the time of the survey; where data is
-     * collected over a period, the period is from the timestep following the
-     * previous survey (or the start of the main simulation) until this time. */
-    TimeStep currentTimestep;
-    /** Get survey for a human -- switched depending on whether
-     * the human is in the cohort and reporting mode. */
-    inline Survey& getSurvey( bool inCohort ){
-	if( _cohortOnly && !inCohort )
-	    return surveys[0];	// output goes to dummy survey: is deleted
-	return *current;
-    }
-    /** As getSurvey(), except returns a number instead of a reference. */
-    inline size_t getSurveyNumber( bool inCohort ){
-        if( _cohortOnly && !inCohort )
-            return 0;
-        return _surveyPeriod;
-    }
-
+public:
+    ///@brief Init, output, checkpointing functions
+    //@{
+    SurveysType() :
+            m_currentTimestep(TimeStep::never)
+            {}
+    
     /** Read in some params from XML and allocate memory. */
     void init (const scnXml::Monitoring& monitoring);
+    /** Second initialisation step: must happen after the InterventionManager is set up. */
+    void init2 (const scnXml::Monitoring& monitoring);
     
     //! It increments the survey period
     void incrementSurveyPeriod();
@@ -80,50 +63,45 @@ class SurveysType
     //! Write all the summary arrays requested by summaryOption to output.txt
     void writeSummaryArrays();
 
-    ///@brief Getter functions
-    //@{
-    /** Return Survey number n (counting from 1).
-     *
-     * Survey at n=0 is the junk-survey (not reported).
-     * Checks n is valid in debug mode. */
-    inline Survey& at (size_t n) {
-      assert (n < surveys.size());
-      return surveys[n];
-    }
-    
-    /** Return timestep of the final survey.
-     *
-     * We use this to control when the simulation ends.
-     * This isn't quite the same as before when the simulation end was
-     * explicitly specified and has a small affect on
-     * infantAllCauseMortality (survey 21) output. */
-    inline TimeStep getFinalTimestep () {
-      return _surveysTimeIntervals[surveys.size()-2];	// final entry is a concatenated -1
-    }
-    //@}
-    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-	checkpoint (stream);
+        checkpoint (stream);
     }
+    //@}
     
-  private:
+    ///@brief Simple getters
+    //@{
+    /** Timestep the current survey ends at.
+     * 
+     * For point-time surveys this is the time of the survey; where data is
+     * collected over a period, the period is from the timestep following the
+     * previous survey (or the start of the main simulation) until this time. */
+    inline TimeStep currentTimestep()const{ return m_currentTimestep; }
+    
+    /** Get the number of cohort sets (i.e. two to the power of the number of
+     * sub-populations considered cohorts). */
+    uint32_t numCohortSets()const;
+    
+    /** Get the output cohort set numeric identifier given the internal one
+     * (as returned by Survey::updateCohortSet()). */
+    uint32_t cohortSetOutputId( uint32_t cohortSet )const;
+    //@}
+    
+private:
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
     
+    TimeStep m_currentTimestep;
+    
     //! Time intervals for all surveys specified in the XML, appended with -1
     vector<TimeStep> _surveysTimeIntervals;
-    /** Index for the time dimention of the summary arrays
-     * Index starts from 1 for used surveys; is 0 to write to dummy survey. */
-    size_t _surveyPeriod;
     
-    /// If true, many outputs only come from humans in the cohort.
-    bool _cohortOnly;
-
-    /// Our collection of surveys. surveys[0] is a dummy container for data
+    /// Our collection of surveys. m_surveys[0] is a dummy container for data
     /// we're not interested in, in order to avoid having to check current is valid.
-    vector<Survey> surveys;
+    vector<Survey> m_surveys;
+    
+    friend class Survey;
 };
 /// Data — entry-point for using Surveys. Checkpointed.
 extern SurveysType Surveys;

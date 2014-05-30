@@ -58,7 +58,9 @@ public:
     
     virtual bool notAtRisk();
 
-    virtual void massDrugAdministration( interventions::Deployment::Method method, Human& human);
+    virtual void massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport );
 
 protected:
     virtual void doClinicalUpdate (Human& human, double ageYears);

@@ -40,7 +40,7 @@ class CommonWithinHost : public WHFalciparum
 {
 public:
     CommonWithinHost( double comorbidityFactor );
-    ~CommonWithinHost();
+    virtual ~CommonWithinHost();
     
     
     virtual void importInfection();

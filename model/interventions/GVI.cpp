@@ -21,17 +21,19 @@
 #include "Global.h"
 #include "interventions/GVI.h"
 #include "Host/Human.h"
+#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 #include "util/errors.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
+    using namespace Monitoring;
 
 vector<GVIComponent*> GVIComponent::componentsByIndex;
 
 GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id)
+        Transmission::HumanVectorInterventionComponent(id, Report::MI_GVI_CTS, Report::MI_GVI_TIMED)
 {
     decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
     
@@ -50,10 +52,7 @@ GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
 
 void GVIComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
-        (method == interventions::Deployment::TIMED) ?
-            Monitoring::Survey::MI_GVI_TIMED : Monitoring::Survey::MI_GVI_CTS,
-        human.getMonitoringAgeGroup(), 1 );
+    Survey::current().addInt(reportMeasure(method), human, 1 );
 }
 
 Component::Type GVIComponent::componentType()const{ return Component::GVI; }
@@ -98,7 +97,7 @@ void HumanGVI::redeploy(const Transmission::HumanVectorInterventionComponent&) {
     deployTime = TimeStep::simulation;
 }
 
-void HumanGVI::update(){
+void HumanGVI::update(Host::Human& human){
 }
 
 double HumanGVI::relativeAttractiveness(size_t speciesIndex) const{

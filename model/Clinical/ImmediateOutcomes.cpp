@@ -19,8 +19,9 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
-#include "interventions/Cohort.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/WHVivax.h"
+#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -28,7 +29,8 @@
 namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
-
+using namespace Monitoring;
+bool useDiagnosticUC = false;
 double ClinicalImmediateOutcomes::probGetsTreatment[Regimen::NUM];
 double ClinicalImmediateOutcomes::probParasitesCleared[Regimen::NUM];
 double ClinicalImmediateOutcomes::cureRate[Regimen::NUM];
@@ -62,8 +64,9 @@ ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
 
 // -----  other methods  -----
 
-void ClinicalImmediateOutcomes::massDrugAdministration(
-    interventions::Deployment::Method method, Human& human)
+void ClinicalImmediateOutcomes::massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport )
 {
     assert(false);      // should never be called
 }
@@ -90,10 +93,10 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         _doomed = -TimeStep::interval;
     
     if( _tLastTreatment == TimeStep::simulation ){
-        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_TREATMENT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
     }
     if( pgState & Episode::SICK ){
-        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_BOUT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
     }
 }
 
@@ -111,21 +114,26 @@ void ClinicalImmediateOutcomes::uncomplicatedEvent (
                             ;
     
     if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
+        if( useDiagnosticUC ){
+            Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
+            if( !human.withinHostModel->diagnosticDefault() )
+                return; // negative outcome: no treatment
+        }
         _tLastTreatment = TimeStep::simulation;
         if ( regimen == Regimen::UC )
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                Monitoring::Survey::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
+            Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
         if ( regimen == Regimen::UC2 )
-            Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                Monitoring::Survey::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
+            Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
 
         if (probParasitesCleared[regimen] > random::uniform_01()) {
             // Could report Episode::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
-            human.withinHostModel->treatment( treatments[regimen] );
+            human.withinHostModel->treatment( human, treatments[regimen] );
         } else {
             // No change in parasitological status: treated outside of hospital
         }
+        if( human.withinHostModel->optionalPqTreatment() )
+            Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
     } else {
         // No change in parasitological status: non-treated
     }
@@ -161,7 +169,7 @@ void ClinicalImmediateOutcomes::severeMalaria (
     // Community survival
     q[2] = q[1] + (1 - p2) * (1 - p5) * (1 - p7);
     // Parasitological failure deaths
-    q[3] = q[2] + p2 * p5 * (1 - p3);
+    q[3] = q[2] + p2 * (1 - p3) * p5;
     // Parasitological failure sequelae
     q[4] = q[3] + p2 * (1 - p3) * (1 - p5) * p7;
     // Parasitological failure survivors
@@ -179,14 +187,14 @@ void ClinicalImmediateOutcomes::severeMalaria (
 
     double prandom = random::uniform_01();
 
+    //NOTE: no diagnostics or PQ here; for now we only have severe when the patient dies
     if (q[2] <= prandom) { // Patient gets in-hospital treatment
         _tLastTreatment = TimeStep::simulation;
-        Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-            Monitoring::Survey::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
+        Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
 
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
-            human.withinHostModel->treatment( treatments[Regimen::SEVERE] );
+            human.withinHostModel->treatment( human, treatments[Regimen::SEVERE] );
             if (q[6] > prandom) {
                 latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
                 doomed  = 4;
@@ -362,6 +370,14 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
         treatments[Regimen::SEVERE] = treatments[Regimen::UC2];
     else
         treatments[Regimen::SEVERE] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), inpatient);
+    
+    useDiagnosticUC = hsioData.getUseDiagnosticUC();
+    
+    if( hsioData.getPrimaquine().present() ){
+        if( !ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
+            throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
+        WithinHost::WHVivax::setHSParameters( hsioData.getPrimaquine().get() );
+    }
 }
 
 

@@ -23,6 +23,31 @@
 #include "Clinical/parser.h"
 #include "util/errors.h"
 
+#if __cplusplus > 199711
+
+/*
+ * This is here to workaround a problem: the Boost::Spirit code apparently
+ * needs some changes to work with C++ > C++98 (which more recent versions of
+ * Visual Studio _always_ use). Side effect: the 1-day case management
+ * configuration can't read its configuation (thus 1-day timestep simulations
+ * are impossible).
+ */
+namespace OM { namespace Clinical { namespace parser {
+SymbolList parseSymbolList (const string& s, const string& errObj){
+    throw util::unimplemented_exception( "1-day Case Management unavailable in this build" );
+}
+Outcome parseTree (const string& s, const string& errObj){
+    throw util::unimplemented_exception( "1-day Case Management unavailable in this build" );
+}
+SymbolValueMap parseSymbolValueMap (const string& s, const string& errObj){
+    throw util::unimplemented_exception( "1-day Case Management unavailable in this build" );
+}
+SymbolRangeMap parseSymbolRangeMap (const string& s, const string& errObj){
+    throw util::unimplemented_exception( "1-day Case Management unavailable in this build" );
+}
+} } }
+#else
+
 #include <sstream>
 
 #include <boost/spirit/include/version.hpp>
@@ -31,6 +56,9 @@
 #elif SPIRIT_VERSION < 0x2010
 #error "Spirit version 2.1 or later required!"
 #endif
+
+// this may be required (when using C++11?)
+// #define BOOST_SPIRIT_USE_PHOENIX_V3 1
 
 #include <boost/fusion/include/adapt_struct.hpp>
 #include <boost/spirit/include/qi.hpp>
@@ -319,3 +347,4 @@ namespace OM { namespace Clinical {
 	return ret;
     }
 } }
+#endif

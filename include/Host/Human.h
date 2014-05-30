@@ -22,10 +22,11 @@
 #include "Global.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
+#include "Monitoring/AgeGroup.h"
 #include "interventions/HumanComponents.h"
 #include "util/checkpoint_containers.h"
-#include <set>
+#include <map>
 
 namespace scnXml {
     class Scenario;
@@ -78,12 +79,12 @@ public:
       (*infIncidence) & stream;
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
-      monitoringAgeGroup & stream;
       _dateOfBirth & stream;
       _vaccine & stream;
+      monitoringAgeGroup & stream;
+      m_cohortSet & stream;
       nextCtsDist & stream;
-      cohorts & stream;
-      lastDeployments & stream;
+      m_subPopExp & stream;
   }
   //@}
   
@@ -98,17 +99,13 @@ public:
   
   ///@brief Deploy "intervention" functions
   //@{
-  /** Mark a certain intervention component as being deployed now. */
-  inline void updateLastDeployed( interventions::ComponentId id ){
-      lastDeployments[id] = TimeStep::simulation;
-  }
+  /** Add the human to an intervention component's sub-population for the given
+   * duration. A duration of zero implies no effect. */
+  void reportDeployment( interventions::ComponentId id, TimeStep duration );
   
-  /** Determines for the purposes of cumulative deployment whether a component is
-   * still current.
-   * 
-   * @returns true if the intervention component should be re-deployed (too old)
-   */
-  bool needsRedeployment( interventions::ComponentId cumCuvId, TimeStep maxAge );
+  inline void removeFromSubPop( interventions::ComponentId id ){
+      m_subPopExp.erase( id );
+  }
   
   /// Resets immunity
   void clearImmunity();
@@ -131,16 +128,17 @@ public:
   //! Returns the date of birth
   inline TimeStep getDateOfBirth() {return _dateOfBirth;}
   
-  /** Return true if human is a member of the cohort.
+  /** Return true if human is a member of the sub-population.
    * 
-   * Note: the maximum value of size_t is considered to be the population, of
-   * which every human is a member. */
-  inline bool isInCohort( interventions::ComponentId id )const{
-      return id == interventions::ComponentId_pop || cohorts.count( id ) > 0;
+   * This is only for use during intervention deployment (see comment on
+   * m_subPopExp). */
+  inline bool isInSubPop( interventions::ComponentId id )const{
+      map<interventions::ComponentId,TimeStep>::const_iterator it = m_subPopExp.find( id );
+      if( it == m_subPopExp.end() ) return false;       // no history of membership
+      else return it->second > TimeStep::simulation;   // added: has expired?
   }
-  /** Return true if human is a member of any cohort. */
-  //TODO(monitoring): outputs per cohort, not simply any cohort or everyone
-  inline bool isInAnyCohort()const{ return cohorts.size() > 0; }
+  /** Return the cohort set. */
+  inline uint32_t cohortSet()const{ return m_cohortSet; }
   
   /// Return the index of next continuous intervention to be deployed
   inline uint32_t getNextCtsDist()const{ return nextCtsDist; }
@@ -151,29 +149,13 @@ public:
   }
   //@}
   
-  /// Return the current survey to use (depends on survey time and whether or
-  /// not individual is in the cohort).
-  Monitoring::Survey& getSurvey() const{
-      return Monitoring::Surveys.getSurvey( isInAnyCohort() );
-  }
-  
   //! Summarize the state of a human individual.
   void summarize();
   
-  /** Add human to a cohort (assumes cohort mode is active).
+  /** Act on "remove from sub-population on first ..." events.
    *
-   * Also makes sure inter-survey stats will only be
-   * summed from this point onwards (i.e. removes data accumulated between
-   * last time human was reported or birth and now). */
-  void addToCohort ( interventions::ComponentId );
-  
-  /** Remove from a cohort. As with addToCohort, deals with reporting.
-   *
-   * Can be safely called when human is not in cohort. */
-  void removeFromCohort( interventions::ComponentId );
-  
-  /** Act on remove-from-cohort-on-first-xyz events. */
-  void removeFromCohorts( interventions::Cohort::RemoveAtCode code );
+   * This is only for use during a human update. */
+  void removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code );
   
   /// Flush any information pending reporting. Should only be called at destruction.
   void flushReports ();
@@ -227,25 +209,36 @@ private:
   Clinical::ClinicalModel *clinicalModel;
   //@}
   
-  /// Made persistant to save a lookup each timestep (has a significant impact)
-  Monitoring::AgeGroup monitoringAgeGroup;
+  //!Date of birth, time step since start of warmup
+  TimeStep _dateOfBirth;
   
   /// Vaccines
   //TODO: could move TBV code to WHFalciparum, where the efficacy is now used
   interventions::PerHumanVaccine _vaccine;
   
-  //!Date of birth, time step since start of warmup
-  TimeStep _dateOfBirth;
+  ///@brief Cached values used by monitoring
+  //@{
+  /// Made persistant to save a lookup each timestep (has a significant impact)
+  Monitoring::AgeGroup monitoringAgeGroup;
+  /// Cache, updated when human is added to or removed from a sub-population
+  uint32_t m_cohortSet;;
+  //@}
   
   /// The next continuous distribution in the series
   uint32_t nextCtsDist;
   
-  
-  //TODO(performance): are dynamic maps/sets the best approach or is using vector or boost::dynamic_bitset better?
-  /// The set of cohorts (intervention indexes) to which this human is a member
-  set<interventions::ComponentId> cohorts;
-  /// Last deployment times of intervention components by component id
-  map<interventions::ComponentId,TimeStep> lastDeployments;
+  /** This lists sub-populations of which the human is a member together with
+   * expiry time.
+   * 
+   * Definition: a human is in a sub-population if that sub-population is
+   * listed here, and, at time of intervention deployment the expiry time given
+   * here is greater than the current timestep, or during human update the
+   * expiry time given here is greater than or equal to the current timestep.
+   * NOTE: this discrepancy is because intervention deployment effectively
+   * happens at the end of a timestep and we want a duration of 1 timestep to
+   * mean 1 intervention deployment (that where the human becomes a member) and
+   * 1 human update (the next). */
+  std::map<interventions::ComponentId,TimeStep> m_subPopExp;
 };
 
 } }

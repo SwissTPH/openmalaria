@@ -351,8 +351,9 @@ TimeStep VectorModel::initIterate () {
         return TimeStep::fromYears( 1 );
 }
 
-double VectorModel::calculateEIR(PerHost& host, double ageYears) {
-    host.update();
+double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
+    PerHost& host = human.perHostTransmission;
+    host.update( human );
     if (simulationMode == forcedEIR){
         return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
                * host.relativeAvailabilityHetAge (ageYears);
@@ -409,11 +410,11 @@ void VectorModel::uninfectVectors() {
         species[i].uninfectVectors();
 }
 
-void VectorModel::summarize (Monitoring::Survey& survey) {
-    TransmissionModel::summarize (survey);
+void VectorModel::summarize () {
+    TransmissionModel::summarize ();
 
     for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)
-        species[it->second].summarize (it->first, survey);
+        species[it->second].summarize (it->first);
 }
 
 

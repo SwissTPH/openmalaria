@@ -24,11 +24,12 @@
 // The includes here are more for documentation than required.
 #include "util/errors.h"
 #include "util/TimeStep.h"
-#include "Monitoring/Surveys.h"
-#include <schema/interventions.h>
+#include "Monitoring/Survey.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Population.h"
 #include "Transmission/TransmissionModel.h"
+#include "util/random.h"
+#include <schema/interventions.h>
 
 namespace OM { namespace interventions {
 
@@ -43,7 +44,7 @@ public:
     {
         if( deploymentTime < TimeStep(0) ){
             throw util::xml_scenario_error("timed intervention deployment: may not be negative");
-        }else if( deploymentTime >= Monitoring::Surveys.getFinalTimestep() ){
+        }else if( deploymentTime >= Monitoring::Survey::getFinalTimestep() ){
             cerr << "Warning: timed intervention deployment at time "<<deploymentTime.asInt();
             cerr << " happens after last survey" << endl;
         }
@@ -182,11 +183,16 @@ void VaccineLimits::set( const scnXml::DeploymentBase& deploy ){
 /// Base class for TimedHumanDeployment and ContinuousHumanDeployment
 class HumanDeploymentBase {
 protected:
+    /**
+     * @param deploy XML element describing deployment
+     * @param intervention The intervention to deploy (list of components)
+     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     */
     HumanDeploymentBase( const scnXml::DeploymentBase& deploy,
                          const HumanIntervention* intervention,
-                         ComponentId cohort ) :
+                         ComponentId subPop ) :
             coverage( deploy.getCoverage() ),
-            cohort( cohort ),
+            subPop( subPop ),
             intervention( intervention )
     {
         if( !(coverage >= 0.0 && coverage <= 1.0) ){
@@ -201,7 +207,7 @@ protected:
     
     double coverage;    // proportion coverage within group meeting above restrictions
     VaccineLimits vaccLimits;
-    ComponentId cohort;      // ComponentId_pop if no cohort
+    ComponentId subPop;      // ComponentId_pop if deployment is not restricted to a sub-population
     const HumanIntervention *intervention;
 };
 
@@ -212,12 +218,13 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param cohort The cohort to which to deploy, or max value */
+     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     */
     TimedHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           ComponentId cohort ) :
+                           ComponentId subPop ) :
         TimedDeployment( TimeStep( mass.getTime() ) ),
-        HumanDeploymentBase( mass, intervention, cohort ),
+        HumanDeploymentBase( mass, intervention, subPop ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
         maxAge( TimeStep::future )
     {
@@ -231,10 +238,10 @@ public:
     
     virtual void deploy (OM::Population& population) {
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
+            TimeStep age = iter->getAgeInTimeSteps();
             if( age >= minAge && age < maxAge ){
-                if( iter->isInCohort( cohort ) ){
-                    if( util::random::uniform_01() < coverage ){
+                if( subPop == interventions::ComponentId_pop || iter->isInSubPop( subPop ) ){
+                    if( util::random::bernoulli( coverage ) ){
                         deployToHuman( *iter, Deployment::TIMED );
                     }
                 }
@@ -246,8 +253,8 @@ public:
     virtual void print_details( std::ostream& out )const{
         out << time << '\t'
             << minAge << '\t' << maxAge << '\t';
-        if( cohort == ComponentId_pop ) out << "(none)";
-        else out << cohort.id;
+        if( subPop == ComponentId_pop ) out << "(none)";
+        else out << subPop.id;
         out << '\t' << coverage << '\t';
         intervention->print_details( out );
     }
@@ -266,33 +273,34 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param cohort Id of target cohort, or ComponentId_pop
+     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
      * @param cumCuvId Id of component to test coverage for
-     * @param maxAge Maximum time-span to consider a deployed component still to be effective */
+     */
     TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           ComponentId cohort,
-                           ComponentId cumCuvId, TimeStep maxAge ) :
-        TimedHumanDeployment( mass, intervention, cohort ),
-        cumCovInd( cumCuvId ), maxInterventionAge( maxAge )
+                           ComponentId subPop,
+                           ComponentId cumCuvId ) :
+        TimedHumanDeployment( mass, intervention, subPop ),
+        cumCovInd( cumCuvId )
     {
     }
     
     virtual void deploy (OM::Population& population) {
         // Cumulative case: bring target group's coverage up to target coverage
         vector<Host::Human*> unprotected;
-        size_t total = 0;       // number of humans within age bound and optionally cohort
+        size_t total = 0;       // number of humans within age bound and optionally subPop
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
-                if( iter->isInCohort( cohort ) ){
+                if( subPop == interventions::ComponentId_pop || iter->isInSubPop( subPop ) ){
                     total+=1;
-                    if( iter->needsRedeployment(cumCovInd, maxInterventionAge) )
+                    if( !iter->isInSubPop(cumCovInd) )
                         unprotected.push_back( &*iter );
                 }
             }
         }
         
+        if( total == 0 ) return;        // no humans to deploy to; avoid divide by zero
         double propProtected = static_cast<double>( total - unprotected.size() ) / static_cast<double>( total );
         if( propProtected < coverage ){
             // Proportion propProtected are already covered, so need to
@@ -311,8 +319,6 @@ public:
     
 protected:
     ComponentId cumCovInd;
-    // max age at which an intervention is considered not to need replacement
-    TimeStep maxInterventionAge;
 };
 
 class TimedVectorDeployment : public TimedDeployment {
@@ -340,8 +346,8 @@ class ContinuousHumanDeployment : protected HumanDeploymentBase {
 public:
     /// Create, passing deployment age
     ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
-                                 const HumanIntervention* intervention, ComponentId cohort ) :
-            HumanDeploymentBase( elt, intervention, cohort ),
+                                 const HumanIntervention* intervention, ComponentId subPop ) :
+            HumanDeploymentBase( elt, intervention, subPop ),
             begin( elt.getBegin() ),
             end( elt.getEnd() ),
             deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) )
@@ -382,7 +388,7 @@ public:
         }else if( deployAge == age ){
             if( begin <= TimeStep::interventionPeriod &&
                 TimeStep::interventionPeriod < end &&
-                ( human.isInCohort( cohort ) ) &&
+                ( subPop == interventions::ComponentId_pop || human.isInSubPop( subPop ) ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
             {
                 deployToHuman( human, Deployment::CTS );
@@ -397,8 +403,8 @@ public:
         if( end == TimeStep::future ) out << "(none)";
         else out << end;
         out << '\t' << deployAge << '\t';
-        if( cohort == ComponentId_pop ) out << "(none)";
-        else out << cohort.id;
+        if( subPop == ComponentId_pop ) out << "(none)";
+        else out << subPop.id;
         out << '\t' << coverage << '\t';
         intervention->print_details( out );
     }

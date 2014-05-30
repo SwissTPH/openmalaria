@@ -41,7 +41,14 @@ CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
     assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
 }
 
-CommonWithinHost::~CommonWithinHost() {}
+CommonWithinHost::~CommonWithinHost() {
+    delete pkpdModel;
+    pkpdModel = 0;
+    for( list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf ){
+        delete *inf;
+    }
+    infections.clear();
+}
 
 // -----  Simple infection adders/removers  -----
 

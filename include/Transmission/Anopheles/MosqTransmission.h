@@ -29,8 +29,6 @@
 #include <limits>
 #include <boost/shared_ptr.hpp>
 
-using boost::shared_ptr;
-
 class MosqLifeCycleSuite;
 
 namespace OM {
@@ -121,7 +119,7 @@ public:
     }
     
     /// Write some per-species summary information.
-    void summarize (const string speciesName, Monitoring::Survey& survey) const;
+    void summarize (const string speciesName) const;
     //@}
     
     
@@ -147,7 +145,7 @@ public:
     /** @brief Emergence model
      * 
      * Code to calculate emergence of mosquitoes from water bodies goes here. */
-    shared_ptr<EmergenceModel> emergence;
+    boost::shared_ptr<EmergenceModel> emergence;
     
 private:
     // -----  parameters (constant after initialisation)  -----

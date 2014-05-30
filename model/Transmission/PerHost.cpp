@@ -42,7 +42,8 @@ void PerHost::cleanup () {
 // -----  PerHost non-static -----
 
 PerHost::PerHost (const Transmission::TransmissionModel& tm) :
-        outsideTransmission(false)
+        outsideTransmission(false),
+        _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
 }
 void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
@@ -55,9 +56,9 @@ void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     }
 }
 
-void PerHost::update(){
+void PerHost::update(Host::Human& human){
     for( ListActiveComponents::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        it->update();
+        it->update(human);
     }
 }
 
@@ -102,6 +103,16 @@ double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t spec
         pRest *= it->postprandialSurvivalFactor( speciesIndex );
     }
     return pRest;
+}
+
+bool PerHost::hasActiveInterv(interventions::Component::Type type) const{
+    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+        if( it->isDeployed() ){
+            if( interventions::InterventionManager::getComponent( it->id() ).componentType() == type )
+                return true;
+        }
+    }
+    return false;
 }
 
 void PerHost::checkpointIntervs( ostream& stream ){

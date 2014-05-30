@@ -42,7 +42,12 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor
     assert( TimeStep::interval == 5 );
 }
 
-DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
+DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
+    for( list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf ){
+        delete *inf;
+    }
+    infections.clear();
+}
 
 
 // -----  Simple infection adders/removers  -----

@@ -206,12 +206,12 @@ double TransmissionModel::updateKappa (const Population& population) {
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
    * availability. */
-  double EIR = calculateEIR (host, ageYears);
+  double EIR = calculateEIR (human, ageYears);
 
   //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
   timeStepEntoInocs[ageGroup.i()] += EIR;
@@ -224,26 +224,27 @@ double TransmissionModel::getEIR (OM::Transmission::PerHost& host, double ageYea
   return EIR;
 }
 
-void TransmissionModel::summarize (Monitoring::Survey& survey) {
-  survey.setInfectiousnessToMosq(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
-  survey.setAnnualAverageKappa(_annualAverageKappa);
+void TransmissionModel::summarize () {
+    Monitoring::Survey& survey = Monitoring::Survey::current();
+    survey.setNumTransmittingHosts(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
+    survey.setAnnualAverageKappa(_annualAverageKappa);
 
-  survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
-  inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
+    survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
+    inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
 
-  double duration = (TimeStep::simulation-lastSurveyTime).asInt();
-  if( duration == 0.0 ){
-      if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
-          throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
-      }
-      duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
-  }
-  survey.setInputEIR (surveyInputEIR / duration);
-  survey.setSimulatedEIR (surveySimulatedEIR / duration);
+    double duration = (TimeStep::simulation-lastSurveyTime).asInt();
+    if( duration == 0.0 ){
+        if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
+            throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
+        }
+        duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
+    }
+    survey.setInputEIR (surveyInputEIR / duration);
+    survey.setSimulatedEIR (surveySimulatedEIR / duration);
 
-  surveyInputEIR = 0.0;
-  surveySimulatedEIR = 0.0;
-  lastSurveyTime = TimeStep::simulation;
+    surveyInputEIR = 0.0;
+    surveySimulatedEIR = 0.0;
+    lastSurveyTime = TimeStep::simulation;
 }
 
 

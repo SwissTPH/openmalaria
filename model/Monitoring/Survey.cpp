@@ -18,8 +18,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Monitoring/Survey.h"
+#include "Monitoring/Surveys.h"
+#include "Monitoring/AgeGroup.h"
 #include "util/errors.h"
+#include "Host/Human.h"
 #include "schema/monitoring.h"
 
 #include <boost/static_assert.hpp>
@@ -34,12 +36,11 @@ void writeValue(ostream& file, int measure, int survey, T& value);
 
 void writeMap (ostream& file, int measure, int survey, map<string,double>& data);
 
-size_t intReportMappings[Survey::MI_NUM];
-size_t dblReportMappings[Survey::MD_NUM];
+size_t intReportMappings[Report::MI_NUM];
+size_t dblReportMappings[Report::MD_NUM];
 
 // -----  Static members  -----
 
-double AgeGroup::_lowerbound;
 vector<double> AgeGroup::_upperbound;
 bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
 
@@ -47,6 +48,7 @@ bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
 class SurveyMeasureMap {
     // Lookup table to translate the strings used in the XML file to the internal enumerated values:
     map<string,SM::SurveyMeasure> codeMap;
+    set<string> removedCodes;
     
 public:
     SurveyMeasureMap () {
@@ -59,7 +61,7 @@ public:
         codeMap["totalInfs"] = SM::totalInfs;
         codeMap["nTransmit"] = SM::nTransmit;
         codeMap["totalPatentInf"] = SM::totalPatentInf;
-        codeMap["contrib"] = SM::contrib;
+        removedCodes.insert("contrib");
         codeMap["sumPyrogenThresh"] = SM::sumPyrogenThresh;
         codeMap["nTreatments1"] = SM::nTreatments1;
         codeMap["nTreatments2"] = SM::nTreatments2;
@@ -75,7 +77,7 @@ public:
         codeMap["nMassVaccinations"] = SM::nMassVaccinations;
         codeMap["nHospitalRecovs"] = SM::nHospitalRecovs;
         codeMap["nHospitalSeqs"] = SM::nHospitalSeqs;
-        codeMap["nIPTDoses"] = SM::nIPTDoses;
+        removedCodes.insert("nIPTDoses");
         codeMap["annAvgK"] = SM::annAvgK;
         codeMap["nNMFever"] = SM::nNMFever;
         codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
@@ -96,8 +98,8 @@ public:
         codeMap["nMassIRS"] = SM::nMassIRS;
         codeMap["nMassGVI"] = SM::nMassGVI;
         codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
-        codeMap["nAddedToCohort"] = SM::nAddedToCohort;
-        codeMap["nRemovedFromCohort"] = SM::nRemovedFromCohort;
+        removedCodes.insert("nAddedToCohort");
+        removedCodes.insert("nRemovedFromCohort");
         codeMap["nMDAs"] = SM::nMDAs;
         codeMap["nMassScreenings"] = SM::nMassScreenings;
         codeMap["nNmfDeaths"] = SM::nNmfDeaths;
@@ -106,14 +108,22 @@ public:
         codeMap["nCtsGVI"] = SM::nCtsGVI;
         codeMap["nCtsMDA"] = SM::nCtsMDA;
         codeMap["nCtsScreenings"] = SM::nCtsScreenings;
+        codeMap["nSubPopRemovalTooOld"] = SM::nSubPopRemovalTooOld;
+        codeMap["nSubPopRemovalFirstEvent"] = SM::nSubPopRemovalFirstEvent;
+        codeMap["nPQTreatments"] = SM::nPQTreatments;
+        codeMap["nTreatDiagnostics"] = SM::nTreatDiagnostics;
+        codeMap["nMassRecruitOnly"] = SM::nMassRecruitOnly;
+        codeMap["nCtsRecruitOnly"] = SM::nCtsRecruitOnly;
+        codeMap["nTreatDeployments"] = SM::nTreatDeployments;
     }
     
     SM::SurveyMeasure operator[] (const string s) {
         map<string,SM::SurveyMeasure>::iterator codeIt = codeMap.find (s);
         if (codeIt == codeMap.end()) {
             ostringstream msg;
-            msg << "Unrecognised survey option: \"";
-            msg << s << '"';
+            if( removedCodes.count(s) > 0 ) msg << "Removed";
+            else msg << "Unrecognised";
+            msg << " survey option: \"" << s << '"';
             throw util::xml_scenario_error(msg.str());
         }
         return codeIt->second;
@@ -131,47 +141,52 @@ public:
 
 
 void Survey::init (const scnXml::Monitoring& monitoring) {
-    intReportMappings[MI_HOSTS] = SM::nHost;
-    intReportMappings[MI_INFECTED_HOSTS] = SM::nInfect;
-    intReportMappings[MI_PATENT_HOSTS] = SM::nPatent;
-    intReportMappings[MI_INFECTIONS] = SM::totalInfs;
-    intReportMappings[MI_PATENT_INFECTIONS] = SM::totalPatentInf;
-    intReportMappings[MI_TREATMENTS_1] = SM::nTreatments1;
-    intReportMappings[MI_TREATMENTS_2] = SM::nTreatments2;
-    intReportMappings[MI_TREATMENTS_3] = SM::nTreatments3;
-    intReportMappings[MI_UNCOMPLICATED_EPISODES] = SM::nUncomp;
-    intReportMappings[MI_SEVERE_EPISODES] = SM::nSevere;
-    intReportMappings[MI_SEQUELAE] = SM::nSeq;
-    intReportMappings[MI_HOSPITAL_DEATHS] = SM::nHospitalDeaths;
-    intReportMappings[MI_INDIRECT_DEATHS] = SM::nIndDeaths;
-    intReportMappings[MI_DIRECT_DEATHS] = SM::nDirDeaths;
-    intReportMappings[MI_VACCINATION_TIMED] = SM::nMassVaccinations;
-    intReportMappings[MI_VACCINATION_CTS] = SM::nEPIVaccinations;
-    intReportMappings[MI_HOSPITAL_RECOVERIES] = SM::nHospitalRecovs;
-    intReportMappings[MI_HOSPITAL_SEQUELAE] = SM::nHospitalSeqs;
-    intReportMappings[MI_NON_MALARIA_FEVERS] = SM::nNMFever;
-    intReportMappings[MI_NEW_INFECTIONS] = SM::nNewInfections;
-    intReportMappings[MI_ITN_TIMED] = SM::nMassITNs;
-    intReportMappings[MI_ITN_CTS] = SM::nEPI_ITNs;
-    intReportMappings[MI_IRS_TIMED] = SM::nMassIRS;
-    intReportMappings[MI_IRS_CTS] = SM::nCtsIRS;
-    intReportMappings[MI_GVI_TIMED] = SM::nMassGVI;
-    intReportMappings[MI_GVI_CTS] = SM::nCtsGVI;
-    intReportMappings[MI_MDA_TIMED] = SM::nMDAs;
-    intReportMappings[MI_MDA_CTS] = SM::nCtsMDA;
-    intReportMappings[MI_SCREENING_TIMED] = SM::nMassScreenings;
-    intReportMappings[MI_SCREENING_CTS] = SM::nCtsScreenings;
-    intReportMappings[MI_NMF_DEATHS] = SM::nNmfDeaths;
-    intReportMappings[MI_NMF_TREATMENTS] = SM::nAntibioticTreatments;
-    intReportMappings[MI_FIRST_DAY_DEATHS] = SM::Clinical_FirstDayDeaths;
-    intReportMappings[MI_HOSPITAL_FIRST_DAY_DEATHS] = SM::Clinical_HospitalFirstDayDeaths;
-    intReportMappings[MI_NUM_ADDED_COHORT] = SM::nAddedToCohort;
-    intReportMappings[MI_NUM_REMOVED_COHORT] = SM::nRemovedFromCohort;
+    intReportMappings[Report::MI_HOSTS] = SM::nHost;
+    intReportMappings[Report::MI_INFECTED_HOSTS] = SM::nInfect;
+    intReportMappings[Report::MI_PATENT_HOSTS] = SM::nPatent;
+    intReportMappings[Report::MI_INFECTIONS] = SM::totalInfs;
+    intReportMappings[Report::MI_PATENT_INFECTIONS] = SM::totalPatentInf;
+    intReportMappings[Report::MI_TREATMENTS_1] = SM::nTreatments1;
+    intReportMappings[Report::MI_TREATMENTS_2] = SM::nTreatments2;
+    intReportMappings[Report::MI_TREATMENTS_3] = SM::nTreatments3;
+    intReportMappings[Report::MI_UNCOMPLICATED_EPISODES] = SM::nUncomp;
+    intReportMappings[Report::MI_SEVERE_EPISODES] = SM::nSevere;
+    intReportMappings[Report::MI_SEQUELAE] = SM::nSeq;
+    intReportMappings[Report::MI_HOSPITAL_DEATHS] = SM::nHospitalDeaths;
+    intReportMappings[Report::MI_INDIRECT_DEATHS] = SM::nIndDeaths;
+    intReportMappings[Report::MI_DIRECT_DEATHS] = SM::nDirDeaths;
+    intReportMappings[Report::MI_VACCINATION_TIMED] = SM::nMassVaccinations;
+    intReportMappings[Report::MI_VACCINATION_CTS] = SM::nEPIVaccinations;
+    intReportMappings[Report::MI_HOSPITAL_RECOVERIES] = SM::nHospitalRecovs;
+    intReportMappings[Report::MI_HOSPITAL_SEQUELAE] = SM::nHospitalSeqs;
+    intReportMappings[Report::MI_NON_MALARIA_FEVERS] = SM::nNMFever;
+    intReportMappings[Report::MI_NEW_INFECTIONS] = SM::nNewInfections;
+    intReportMappings[Report::MI_ITN_TIMED] = SM::nMassITNs;
+    intReportMappings[Report::MI_ITN_CTS] = SM::nEPI_ITNs;
+    intReportMappings[Report::MI_IRS_TIMED] = SM::nMassIRS;
+    intReportMappings[Report::MI_IRS_CTS] = SM::nCtsIRS;
+    intReportMappings[Report::MI_GVI_TIMED] = SM::nMassGVI;
+    intReportMappings[Report::MI_GVI_CTS] = SM::nCtsGVI;
+    intReportMappings[Report::MI_MDA_TIMED] = SM::nMDAs;
+    intReportMappings[Report::MI_MDA_CTS] = SM::nCtsMDA;
+    intReportMappings[Report::MI_SCREENING_TIMED] = SM::nMassScreenings;
+    intReportMappings[Report::MI_SCREENING_CTS] = SM::nCtsScreenings;
+    intReportMappings[Report::MI_NMF_DEATHS] = SM::nNmfDeaths;
+    intReportMappings[Report::MI_NMF_TREATMENTS] = SM::nAntibioticTreatments;
+    intReportMappings[Report::MI_FIRST_DAY_DEATHS] = SM::Clinical_FirstDayDeaths;
+    intReportMappings[Report::MI_HOSPITAL_FIRST_DAY_DEATHS] = SM::Clinical_HospitalFirstDayDeaths;
+    intReportMappings[Report::MI_N_SP_REM_TOO_OLD] = SM::nSubPopRemovalTooOld;
+    intReportMappings[Report::MI_N_SP_REM_FIRST_EVENT] = SM::nSubPopRemovalFirstEvent;
+    intReportMappings[Report::MI_PQ_TREATMENTS] = SM::nPQTreatments;
+    intReportMappings[Report::MI_TREAT_DIAGNOSTICS] = SM::nTreatDiagnostics;
+    intReportMappings[Report::MI_RECRUIT_TIMED] = SM::nMassRecruitOnly;
+    intReportMappings[Report::MI_RECRUIT_CTS] = SM::nCtsRecruitOnly;
+    intReportMappings[Report::MI_TREAT_DEPLOYMENTS] = SM::nTreatDeployments;
     
-    dblReportMappings[MD_EXPECTED_INFECTED] = SM::nExpectd;
-    dblReportMappings[MD_LOG_PYROGENIC_THRESHOLD] = SM::sumLogPyrogenThres;
-    dblReportMappings[MD_LOG_DENSITY] = SM::sumlogDens;
-    dblReportMappings[MD_PYROGENIC_THRESHOLD] = SM::sumPyrogenThresh;
+    dblReportMappings[Report::MD_EXPECTED_INFECTED] = SM::nExpectd;
+    dblReportMappings[Report::MD_LOG_PYROGENIC_THRESHOLD] = SM::sumLogPyrogenThres;
+    dblReportMappings[Report::MD_LOG_DENSITY] = SM::sumlogDens;
+    dblReportMappings[Report::MD_PYROGENIC_THRESHOLD] = SM::sumPyrogenThresh;
     
     AgeGroup::init (monitoring);
     
@@ -186,22 +201,20 @@ void Survey::init (const scnXml::Monitoring& monitoring) {
 }
 void AgeGroup::init (const scnXml::Monitoring& monitoring) {
     const scnXml::AgeGroup::GroupSequence& groups = monitoring.getAgeGroup().getGroup();
-    /* note that the last age group includes individuals who are        *
-    * either younger than Lowerbound or older than the last Upperbound */
+    if (!(monitoring.getAgeGroup().getLowerbound() <= 0.0))
+        throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
+    
+    // The last age group includes individuals too old for reporting
     _upperbound.resize (groups.size() + 1);
-    _lowerbound = monitoring.getAgeGroup().getLowerbound();
-    if (!(_lowerbound <= 0.0))
-	throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
-
     for (size_t i = 0;i < groups.size(); ++i) {
-	_upperbound[i] = groups[i].getUpperbound();
+        _upperbound[i] = groups[i].getUpperbound();
     }
     _upperbound[groups.size()] = numeric_limits<double>::infinity();
 }
 
 void AgeGroup::update (double ageYears) {
     while (ageYears > _upperbound[index]){
-	++index;
+        ++index;
     }
 }
 
@@ -209,59 +222,115 @@ void AgeGroup::update (double ageYears) {
 // -----  Non-static members  -----
 
 
-Survey::Survey(){}
+Survey::Survey() :
+        m_nTransmit(numeric_limits<double>::signaling_NaN()),
+        m_annAvgK(numeric_limits<double>::signaling_NaN()),
+        m_inputEIR(numeric_limits<double>::signaling_NaN()),
+        m_simulatedEIR(numeric_limits<double>::signaling_NaN()),
+        m_Clinical_RDTs(numeric_limits<int>::min()),
+        m_Clinical_Microscopy(numeric_limits<int>::min())
+{}
 
 void Survey::allocate(){
     size_t numAgeGroups = AgeGroup::getNumGroups();
-    reportsIntAge.resize(boost::extents[MI_NUM][numAgeGroups]);
-    reportsDblAge.resize(boost::extents[MD_NUM][numAgeGroups]);
+    size_t nCohortSets = Surveys.numCohortSets();
+    m_humanReportsInt.resize(boost::extents[Report::MI_NUM][numAgeGroups][nCohortSets]);
+    m_humanReportsDouble.resize(boost::extents[Report::MD_NUM][numAgeGroups][nCohortSets]);
     
-    _infectiousnessToMosq = numeric_limits<double>::signaling_NaN();
-    _annualAverageKappa = numeric_limits<double>::signaling_NaN();
+    m_nTransmit = numeric_limits<double>::signaling_NaN();
+    m_annAvgK = numeric_limits<double>::signaling_NaN();
     // These 3 are set as a whole and so don't require allocation:
 //   _innoculationsPerDayOfYear;
 //   _kappaPerDayOfYear;
 //   _innoculationsPerAgeGroup;
     
-    _inputEIR =numeric_limits<double>::signaling_NaN() ;
-    _simulatedEIR = numeric_limits<double>::signaling_NaN();
+    m_inputEIR =numeric_limits<double>::signaling_NaN() ;
+    m_simulatedEIR = numeric_limits<double>::signaling_NaN();
     
-    _numClinical_RDTs = 0;
-    _numClinical_Microscopy = 0;
+    m_Clinical_RDTs = 0;
+    m_Clinical_Microscopy = 0;
 }
 
+Survey& Survey::addInt( ReportMeasureI measure, const Host::Human &human, int val ){
+    size_t ageIndex = human.getMonitoringAgeGroup().i();
+#ifndef NDEBUG
+    if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
+        ageIndex >= m_humanReportsInt.shape()[1] ||
+        human.cohortSet() >= m_humanReportsInt.shape()[2]
+    ){
+        cout << "Index out of bounds for survey:\t" << static_cast<void*>(this)
+            << "\nmeasure number\t" << measure.code << " of " << m_humanReportsInt.shape()[0]
+            << "\nage group\t" << ageIndex << " of " << m_humanReportsInt.shape()[1]
+            << "\ncohort set\t" << human.cohortSet() << " of " << m_humanReportsInt.shape()[2]
+            << endl;
+    }
+#endif
+    m_humanReportsInt[measure.code][ageIndex][human.cohortSet()] += val;
+    return *this;
+}
+Survey& Survey::addDouble( ReportMeasureD measure, const Host::Human &human, double val ){
+    size_t ageIndex = human.getMonitoringAgeGroup().i();
+    if( static_cast<size_t>(measure.code) >= m_humanReportsDouble.shape()[0] ||
+        ageIndex >= m_humanReportsDouble.shape()[1] ){
+        cout << "Index out of bounds:\n"
+            "survey\t" << static_cast<void*>(this)
+            << "\nalloc\t" << m_humanReportsDouble.shape()[0] << "\t" << m_humanReportsDouble.shape()[1]
+            << "\nindex\t" << measure.code << "\t" << ageIndex << endl;
+    }
+    m_humanReportsDouble[measure.code][ageIndex][human.cohortSet()] += val;
+    return *this;
+}
+Survey& Survey::addInt( ReportMeasureI measure, AgeGroup ageGroup, uint32_t cohortSet, int val ){
+    if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
+        ageGroup.i() >= m_humanReportsInt.shape()[1] ){
+        cout << "Index out of bounds:\n"
+            "survey\t" << static_cast<void*>(this)
+            << "\nalloc\t" << m_humanReportsInt.shape()[0] << "\t" << m_humanReportsInt.shape()[1]
+            << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
+    }
+    m_humanReportsInt[measure.code][ageGroup.i()][cohortSet] += val;
+    return *this;
+}
 
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
-    size_t nAgeGroups = reportsIntAge.shape()[1] - 1;   // Don't write out last age-group
-    for( size_t intMeasure = 0; intMeasure < MI_NUM; ++intMeasure ){
+    size_t nAgeGroups = m_humanReportsInt.shape()[1] - 1;   // Don't write out last age-group
+    size_t nCohortSets = m_humanReportsInt.shape()[2];
+    for( size_t intMeasure = 0; intMeasure < Report::MI_NUM; ++intMeasure ){
         if( active[intReportMappings[intMeasure]] ){
-            for( size_t j = 0; j < nAgeGroups; ++j ){
-                outputFile << survey << "\t" << j + 1 << "\t" << intReportMappings[intMeasure];
-                outputFile << "\t" << reportsIntAge[intMeasure][j] << lineEnd;
+            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
+                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
+                    // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
+                    size_t ageCohortId = 1000 * Surveys.cohortSetOutputId( cohortSet ) + ageGroup + 1;
+                    outputFile << survey << "\t" << ageCohortId << "\t" << intReportMappings[intMeasure];
+                    outputFile << "\t" << m_humanReportsInt[intMeasure][ageGroup][cohortSet] << lineEnd;
+                }
             }
         }
     }
-    for( size_t dblMeasure = 0; dblMeasure < MD_NUM; ++dblMeasure ){
+    for( size_t dblMeasure = 0; dblMeasure < Report::MD_NUM; ++dblMeasure ){
         if( active[dblReportMappings[dblMeasure]] ){
-            for( size_t j = 0; j < nAgeGroups; ++j ){
-                outputFile << survey << "\t" << j + 1 << "\t" << dblReportMappings[dblMeasure];
-                outputFile << "\t" << reportsDblAge[dblMeasure][j] << lineEnd;
+            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
+                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
+                    size_t ageCohortId = 1000 * Surveys.cohortSetOutputId( cohortSet ) + ageGroup + 1;
+                    outputFile << survey << "\t" << ageCohortId << "\t" << dblReportMappings[dblMeasure];
+                    outputFile << "\t" << m_humanReportsDouble[dblMeasure][ageGroup][cohortSet] << lineEnd;
+                }
             }
         }
     }
     
   if (active[SM::nTransmit]) {
-    writeValue (outputFile, SM::nTransmit, survey, _infectiousnessToMosq);
+    writeValue (outputFile, SM::nTransmit, survey, m_nTransmit);
   }
   if (active[SM::annAvgK]) {
-    writeValue (outputFile, SM::annAvgK, survey, _annualAverageKappa);
+    writeValue (outputFile, SM::annAvgK, survey, m_annAvgK);
   }
 
   if (active[SM::innoculationsPerAgeGroup]) {
-    for (int j = 0; j < (int) _inoculationsPerAgeGroup.size() - 1; ++j) { // Don't write out last age-group
-        outputFile << survey << "\t" << j + 1 << "\t" << SM::innoculationsPerAgeGroup;
-        outputFile << "\t" << _inoculationsPerAgeGroup[j] << lineEnd;
+    for (int ageGroup = 0; ageGroup < (int) m_inoculationsPerAgeGroup.size() - 1; ++ageGroup) { // Don't write out last age-group
+        outputFile << survey << "\t" << ageGroup + 1 << "\t" << SM::innoculationsPerAgeGroup;
+        outputFile << "\t" << m_inoculationsPerAgeGroup[ageGroup] << lineEnd;
     }
   }
   
@@ -278,22 +347,22 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
     writeMap (outputFile, SM::Vector_Sv, survey, data_Vector_Sv);
   }
   if (active[SM::inputEIR]) {
-    writeValue (outputFile, SM::inputEIR, survey, _inputEIR);
+    writeValue (outputFile, SM::inputEIR, survey, m_inputEIR);
   }
   if (active[SM::simulatedEIR]) {
-    writeValue (outputFile, SM::simulatedEIR, survey, _simulatedEIR);
+    writeValue (outputFile, SM::simulatedEIR, survey, m_simulatedEIR);
   }
   if (active[SM::Clinical_RDTs]) {
-      writeValue (outputFile, SM::Clinical_RDTs, survey, _numClinical_RDTs);
+      writeValue (outputFile, SM::Clinical_RDTs, survey, m_Clinical_RDTs);
   }
   if (active[SM::Clinical_DrugUsage]) {
-      writeMap (outputFile, SM::Clinical_DrugUsage, survey, _sumClinical_DrugUsage);
+      writeMap (outputFile, SM::Clinical_DrugUsage, survey, m_Clinical_DrugUsage);
   }
   if (active[SM::Clinical_DrugUsageIV]) {
-      writeMap (outputFile, SM::Clinical_DrugUsageIV, survey, _sumClinical_DrugUsageIV);
+      writeMap (outputFile, SM::Clinical_DrugUsageIV, survey, m_Clinical_DrugUsageIV);
   }
   if (active[SM::Clinical_Microscopy]) {
-      writeValue (outputFile, SM::Clinical_Microscopy, survey, _numClinical_Microscopy);
+      writeValue (outputFile, SM::Clinical_Microscopy, survey, m_Clinical_Microscopy);
   }
 }
 
@@ -315,48 +384,70 @@ void writeMap (ostream& file, int measure, int survey, map<string,double>& data)
 
 
 void Survey::checkpoint(istream& stream){
-    BOOST_STATIC_ASSERT( ReportsIntAgeT::dimensionality == 2 );
-    size_t len0, len1;
+    BOOST_STATIC_ASSERT( ReportsIntAgeT::dimensionality == 3 );
+    size_t len0, len1, len2;
     len0 & stream;
     len1 & stream;
-    if( len0 != MI_NUM || len1 != AgeGroup::getNumGroups() )
+    len2 & stream;
+    if( len0 != Report::MI_NUM || len1 != AgeGroup::getNumGroups() ||
+        len2 != Surveys.numCohortSets() )
+    {
         throw util::checkpoint_error( "wrong survey data size" );
-    reportsIntAge.resize(boost::extents[len0][len1]);
+    }
+    m_humanReportsInt.resize(boost::extents[len0][len1][len2]);
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsIntAge[i][j] & stream;
+            for( size_t k = 0; k < len2; ++k ){
+                m_humanReportsInt[i][j][k] & stream;
+            }
         }
     }
-    BOOST_STATIC_ASSERT( ReportsDblAgeT::dimensionality == 2 );
+    BOOST_STATIC_ASSERT( ReportsDblAgeT::dimensionality == 3 );
     len0 & stream;
     len1 & stream;
-    if( len0 != MD_NUM || len1 != AgeGroup::getNumGroups() )
+    len2 & stream;
+    if( len0 != Report::MD_NUM || len1 != AgeGroup::getNumGroups() ||
+        len2 != Surveys.numCohortSets() )
+    {
         throw util::checkpoint_error( "wrong survey data size" );
-    reportsDblAge.resize(boost::extents[len0][len1]);
+    }
+    m_humanReportsDouble.resize(boost::extents[len0][len1][len2]);
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsDblAge[i][j] & stream;
+            for( size_t k = 0; k < len2; ++k ){
+                m_humanReportsDouble[i][j][k] & stream;
+            }
         }
     }
 }
 
 void Survey::checkpoint(ostream& stream) const{
-    BOOST_STATIC_ASSERT( ReportsIntAgeT::dimensionality == 2 );
-    size_t len0 = reportsIntAge.shape()[0], len1 = reportsIntAge.shape()[1];
+    BOOST_STATIC_ASSERT( ReportsIntAgeT::dimensionality == 3 );
+    size_t len0 = m_humanReportsInt.shape()[0],
+        len1 = m_humanReportsInt.shape()[1],
+        len2 = m_humanReportsInt.shape()[2];
     len0 & stream;
     len1 & stream;
+    len2 & stream;
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsIntAge[i][j] & stream;
+            for( size_t k = 0; k < len2; ++k ){
+                m_humanReportsInt[i][j][k] & stream;
+            }
         }
     }
-    BOOST_STATIC_ASSERT( ReportsDblAgeT::dimensionality == 2 );
-    len0 = reportsDblAge.shape()[0], len1 = reportsDblAge.shape()[1];
+    BOOST_STATIC_ASSERT( ReportsDblAgeT::dimensionality == 3 );
+    len0 = m_humanReportsDouble.shape()[0],
+        len1 = m_humanReportsDouble.shape()[1],
+        len2 = m_humanReportsDouble.shape()[2];
     len0 & stream;
     len1 & stream;
+    len2 & stream;
     for( size_t i = 0; i < len0; ++i ){
         for( size_t j = 0; j < len1; ++j ){
-            reportsDblAge[i][j] & stream;
+            for( size_t k = 0; k < len2; ++k ){
+                m_humanReportsDouble[i][j][k] & stream;
+            }
         }
     }
 }

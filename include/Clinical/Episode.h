@@ -26,7 +26,11 @@
 #include "Monitoring/Survey.h"	//Monitoring::AgeGroup
 #include <ostream>
 
-namespace OM { namespace Clinical {
+namespace OM {
+namespace Host {
+    class Human;
+}
+namespace Clinical {
     
 /** Summary of clinical events during a caseManagementMemory period, in one individual.
  *
@@ -73,7 +77,13 @@ public:
     /** Set healthSystemMemory. */
     static void init( int hsMemory );
     
-  Episode() : _time(TimeStep::never), _ageGroup() {};
+    Episode() :
+            _time(TimeStep::never),
+            _surveyPeriod(0 /* dummy survey */),
+            _ageGroup(),
+            m_cohortSet(0),
+            _state(NONE)
+    {};
   ~Episode();
   
   /// Report anything pending, as on destruction
@@ -84,7 +94,7 @@ public:
    * @param human The human whose info is being reported
    * @param newState The severity (diagnosis) and outcome.
    */
-  void update(Host::Human& human, Episode::State newState);
+  void update(const Host::Human& human, Episode::State newState);
   
   /// Checkpointing
   void operator& (istream& stream);
@@ -113,6 +123,8 @@ private:
   size_t _surveyPeriod;
   /// Age group of the individual when the episode's first bout occurred
   Monitoring::AgeGroup _ageGroup;
+  /// Cohort membership
+  uint32_t m_cohortSet;
   /// Descriptor of state, containing reporting info. Not all information will
   /// be reported (e.g. indirect deaths are reported independantly).
   Episode::State _state;

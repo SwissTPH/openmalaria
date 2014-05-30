@@ -23,8 +23,8 @@
 
 // The includes here are more for documentation than required.
 #include "interventions/Interfaces.hpp"
-#include "interventions/Cohort.h"
-#include "Monitoring/Surveys.h"
+#include "interventions/InterventionManager.hpp"
+#include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
@@ -38,9 +38,35 @@
 
 namespace OM { namespace interventions {
     using Host::Human;
-    using Monitoring::Survey;
+    using namespace Monitoring;
 
-// ———  HumanInterventionComponent  ———
+// ———  HumanIntervention  ———
+
+bool componentCmp(const HumanInterventionComponent *a, const HumanInterventionComponent *b){
+    return a->componentType() < b->componentType();
+}
+HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Component>& componentList ){
+    components.reserve( componentList.size() );
+    for( xsd::cxx::tree::sequence<scnXml::Component>::const_iterator it = componentList.begin(),
+        end = componentList.end(); it != end; ++it )
+    {
+        ComponentId id = InterventionManager::getComponentId( it->getId() );
+        const HumanInterventionComponent* component = &InterventionManager::getComponent( id );
+        components.push_back( component );
+    }
+    
+    /** Sort components according to a standard order.
+     * 
+     * The point of this is to make results repeatable even when users change
+     * the ordering of a list of intervention's components (since getting
+     * repeatable results out of OpenMalaria is often a headache anyway, we
+     * might as well at least remove this hurdle).
+     * 
+     * Note that when multiple interventions are deployed simultaneously, the
+     * order of their deployments is still dependent on the order in the XML
+     * file. */
+    std::stable_sort( components.begin(), components.end(), componentCmp );
+}
 
 void HumanIntervention::deploy( Human& human, Deployment::Method method,
     VaccineLimits vaccLimits ) const
@@ -49,16 +75,11 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method,
             it != components.end(); ++it )
     {
         const interventions::HumanInterventionComponent& component = **it;
+        // we must report first, since it can change cohort and sub-population
+        // which may affect what deployment does (at least in the case of reporting deployments)
+        human.reportDeployment( component.id(), component.duration() );
         component.deploy( human, method, vaccLimits );
-        human.updateLastDeployed( component.id() );
     }
-}
-
-bool componentCmp(const HumanInterventionComponent *a, const HumanInterventionComponent *b){
-    return a->componentType() < b->componentType();
-}
-void HumanIntervention::sortComponents(){
-    std::stable_sort( components.begin(), components.end(), componentCmp );
 }
 
 #ifdef WITHOUT_BOINC
@@ -71,21 +92,88 @@ void HumanIntervention::print_details( std::ostream& out )const{
 }
 #endif
 
-// ———  Derivatives  ———
+// ———  Utilities  ———
 
+TriggeredDeployments::TriggeredDeployments(const scnXml::TriggeredDeployments& elt){
+    lists.reserve( elt.getDeploy().size() );
+    for( scnXml::TriggeredDeployments::DeployConstIterator it = elt.getDeploy().begin(),
+        end = elt.getDeploy().end(); it != end; ++it )
+    {
+        lists.push_back( SubList( *it ) );
+    }
+}
+void TriggeredDeployments::deploy(Human& human,
+        Deployment::Method method, VaccineLimits vaccLimits) const
+{
+    for( vector<SubList>::const_iterator it = lists.begin(); it != lists.end(); ++it ){
+        it->deploy( human, method, vaccLimits );
+    }
+}
+
+TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::DeployType& elt ) :
+        HumanIntervention( elt.getComponent() ),
+        minAge( TimeStep::fromYears( elt.getMinAge() ) ),
+        maxAge( TimeStep::future ),
+        coverage( elt.getP() )
+{
+    if( elt.getMaxAge().present() )
+        maxAge = TimeStep::fromYears( elt.getMaxAge().get() );
+    
+    if( minAge < TimeStep(0) || maxAge < minAge ){
+        throw util::xml_scenario_error("triggered intervention must have 0 <= minAge <= maxAge");
+    }
+    
+    if( coverage < 0.0 || coverage > 1.0 ){
+        throw util::xml_scenario_error( "triggered intervention must have 0 <= coverage <= 1" );
+    }
+    
+    // Zero coverage: optimise
+    if( coverage <= 0.0 || minAge >= maxAge ) components.clear();
+}
+void TriggeredDeployments::SubList::deploy( Host::Human& human,
+        Deployment::Method method, VaccineLimits vaccLimits )const
+{
+    TimeStep age = human.getAgeInTimeSteps();
+    if( age >= minAge && age < maxAge ){
+        if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
+            HumanIntervention::deploy( human, method, vaccLimits );
+        }
+    }
+}
+
+
+// ———  Derivatives of HumanInterventionComponent  ———
+
+class RecruitmentOnlyComponent : public HumanInterventionComponent {
+public:
+    RecruitmentOnlyComponent( ComponentId id ) :
+        HumanInterventionComponent(id, Report::MI_RECRUIT_CTS, Report::MI_RECRUIT_TIMED)
+    {}
+    virtual ~RecruitmentOnlyComponent() {}
+    
+    /// Reports to monitoring, nothing else
+    virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits ) const{
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+    }
+    
+    virtual Component::Type componentType() const{
+        return Component::RECRUIT_ONLY;
+    }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << id().id << "\tRecruit only";
+    }
+#endif
+};
+
+/// Simple treatment: no PK/PD, just remove parasites
 class MDAComponent : public HumanInterventionComponent {
 public:
-    MDAComponent( ComponentId id, const scnXml::MDA& mda ) :
-        HumanInterventionComponent(id)
+    MDAComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
+        HumanInterventionComponent(id,
+                Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
     {
-        if( !mda.getDiagnostic().present() ){
-            // Note: allow no description for now to avoid XML changes.
-            //throw util::xml_scenario_error( "error: interventions.MDA.diagnostic element required for MDA with 5-day timestep" );
-            diagnostic.setDeterministic( 0.0 );
-        }else{
-            diagnostic.setXml( mda.getDiagnostic().get() );
-        }
-        
         const scnXml::Effects::OptionSequence& options = mda.getEffects().getOption();
         assert( options.size() >= 1 );
         treatments.reserve( options.size() );
@@ -108,25 +196,15 @@ public:
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        //TODO(monitoring): separate reports for mass and continuous deployments
-        
-        Survey& survey = Monitoring::Surveys.getSurvey(human.isInAnyCohort());
-        survey.addInt( (method == Deployment::TIMED) ? Survey::MI_SCREENING_TIMED :
-                       Survey::MI_SCREENING_CTS, human.getMonitoringAgeGroup(), 1 );
-        if( !diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
-            return;
-        }
-        survey.addInt( (method == Deployment::TIMED) ? Survey::MI_MDA_TIMED :
-                       Survey::MI_MDA_CTS, human.getMonitoringAgeGroup(), 1 );
-        
-        human.withinHostModel->treatment( selectTreatment() );
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+        human.withinHostModel->treatment( human, selectTreatment() );
     }
     
     virtual Component::Type componentType() const{ return Component::MDA; }
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << id().id << "\tMDA";
+        out << id().id << "\tTreat";
     }
 #endif
     
@@ -144,7 +222,6 @@ private:
         return treatments[0].treatId; // remain type safe
     }
     
-    WithinHost::Diagnostic diagnostic;
     struct TreatOptions{
         double cumProb;
         WithinHost::TreatmentId treatId;
@@ -154,16 +231,54 @@ private:
     vector<TreatOptions> treatments;
 };
 
+class ScreenComponent : public HumanInterventionComponent {
+public:
+    ScreenComponent( ComponentId id, const scnXml::Screen& elt ) :
+        HumanInterventionComponent(id,
+                Report::MI_SCREENING_CTS, Report::MI_SCREENING_TIMED),
+        positive( elt.getPositive() ),
+        negative( elt.getNegative() )
+    {
+        diagnostic.setXml( elt.getDiagnostic() );
+    }
+    
+    void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits ) const{
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+        if( diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
+            positive.deploy( human, method, vaccLimits );
+        }else{
+            negative.deploy( human, method, vaccLimits );
+        }
+    }
+    
+    virtual Component::Type componentType() const{ return Component::SCREEN; }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << id().id << "\tScreen";
+    }
+#endif
+    
+private:
+    WithinHost::Diagnostic diagnostic;
+    TriggeredDeployments positive, negative;
+};
+
 class MDA1DComponent : public HumanInterventionComponent {
 public:
-    MDA1DComponent( ComponentId id, const scnXml::HSESCaseManagement& description ) : HumanInterventionComponent(id) {
-	if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
-	  throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
+    MDA1DComponent( ComponentId id, const scnXml::HSESCaseManagement& description ) :
+        HumanInterventionComponent(id,
+                Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
+        m_screenMeasureCts(Report::MI_SCREENING_CTS),
+        m_screenMeasureTimed(Report::MI_SCREENING_TIMED)
+    {
+        if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
+            throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
         Clinical::ESCaseManagement::initMDA( description );
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        human.getClinicalModel().massDrugAdministration( method, human );
+        human.getClinicalModel().massDrugAdministration( human, screeningMeasure(method), reportMeasure(method) );
     }
     
     virtual Component::Type componentType() const{ return Component::MDA_TS1D; }
@@ -175,11 +290,19 @@ public:
 #endif
     
 private:
+    /** Trivial helper function to get deployment measure. */
+    inline ReportMeasureI screeningMeasure( Deployment::Method method )const{
+        return (method == Deployment::TIMED) ? m_screenMeasureTimed :
+            (method == Deployment::CTS) ? m_screenMeasureCts :
+            Report::MI_TREAT_DEPLOYMENTS;
+    }
+    ReportMeasureI m_screenMeasureCts, m_screenMeasureTimed;
 };
 
 class ClearImmunityComponent : public HumanInterventionComponent {
 public:
-    ClearImmunityComponent( ComponentId id ) : HumanInterventionComponent(id) {}
+    ClearImmunityComponent( ComponentId id ) :
+        HumanInterventionComponent(id, Report::MI_NUM, Report::MI_NUM /*never reported*/) {}
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
         human.clearImmunity();

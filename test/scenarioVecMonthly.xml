@@ -41,6 +41,7 @@
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
       <option name="annAvgK"/>
+      <option name="nTreatDeployments"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
       <surveyTime>6</surveyTime>
@@ -96,6 +97,17 @@
     </ageGroup>
   </monitoring>
   <interventions name="vector pop tests">
+    <human>
+      <component id="treat">
+        <MDA>
+          <effects>
+            <option name="simple treatment" pSelection="1">
+              <clearInfections timesteps="1" stage="blood"/>
+            </option>
+          </effects>
+        </MDA>
+      </component>
+    </human>
     <vectorPop>
       <intervention name="increase deaths">
         <description>
@@ -145,26 +157,17 @@
     <ImmediateOutcomes name="TanzaniaSP 04">
       <drugRegimen firstLine="SP" inpatient="QN" secondLine="SP"/>
       <initialACR>
-        <CQ value="0"/>
         <SP value="1"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
         <QN value="0"/>
         <selfTreatment value="0"/>
       </initialACR>
       <compliance>
-        <CQ value="0"/>
         <SP value="1"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
         <QN value="0"/>
         <selfTreatment value="0"/>
       </compliance>
       <nonCompliersEffective>
-        <CQ value="0"/>
         <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
         <QN value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
@@ -173,7 +176,13 @@
           <clearInfections stage="blood" timesteps="1"/>
         </QN>
         <SP name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
+          <!-- <clearInfections stage="blood" timesteps="1"/> -->
+          <deploy>
+            <!-- this uses "MDA" deployment as treatment to test triggered
+              deployments: it is exactly equivalent to the clearInfections line
+              commented out above -->
+            <component id="treat"/>
+          </deploy>
         </SP>
       </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>

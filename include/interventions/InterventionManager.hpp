@@ -81,7 +81,14 @@ public:
         return humanComponents[id.id];
     }
     
+    /** Get a numeric ComponentId from the textual identifier used in the XML.
+     * 
+     * If textId is unknown, an xml_scenario_error is thrown. */
+    static ComponentId getComponentId( const std::string textId );
+    
 private:
+    // Map of textual identifiers to numeric identifiers for components
+    static std::map<std::string,ComponentId> identifierMap;
     // All human intervention components, indexed by a number. This list is used
     // during initialisation and thereafter only for memory management.
     static boost::ptr_vector<HumanInterventionComponent> humanComponents;

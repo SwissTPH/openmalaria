@@ -37,7 +37,10 @@ const double NaN = numeric_limits<double>::quiet_NaN();
 class LSTMPkPdSuite : public CxxTest::TestSuite
 {
 public:
-    LSTMPkPdSuite(){
+    LSTMPkPdSuite() :
+            proxy(0)
+    {
+        proteome_ID = 0;                // 0 should work; we definitely don't want random allocation
         // This is what a previously-used weight distribution gave us,
         // and is good enough for testing purposes:
         massAt21 = 55.4993;
@@ -46,7 +49,6 @@ public:
     void setUp () {
 	UnittestUtil::PkPdSuiteSetup(PkPdModel::LSTM_PKPD);
 	proxy = new LSTMPkPdModel ();
-	proteome_ID = 0;		// 0 should work; we definitely don't want random allocation
     }
     void tearDown () {
 	delete proxy;

@@ -57,12 +57,15 @@ public:
     
     virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
     
-    virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+    virtual bool summarize(const Host::Human& human);
+    
+    // No PQ treatment for falciparum in current models:
+    virtual bool optionalPqTreatment(){ return false; }
     
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
     virtual bool diagnosticDefault() const;
-    virtual void treatment( TreatmentId treatment );
+    virtual void treatment( Host::Human& human, TreatmentId treatId );
     
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
 

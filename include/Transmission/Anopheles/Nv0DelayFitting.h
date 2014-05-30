@@ -23,7 +23,15 @@
 
 #include <boost/foreach.hpp>
 #include <boost/math/tools/roots.hpp>
+
+/* does boost::math::tuple work everywhere or do we need to use tr1 for older
+ * boost versions?
 #include <boost/tr1/tuple.hpp>  // import for compatibility with both boost 1.42 and 1.45
+#define OM_tuple std::tr1::tuple
+#define OM_make_tuple std::tr1::make_tuple
+*/
+#define OM_tuple boost::math::tuple
+#define OM_make_tuple boost::math::make_tuple
 
 #include "util/errors.h"
 #include "Global.h"
@@ -50,7 +58,7 @@ struct eDFunctor
     }
   }
   
-  std::tr1::tuple<T, T, T> operator()(T const& d)
+  OM_tuple<T, T, T> operator()(T const& d)
   {
     T f = 0.0, df = 0.0, ddf = 0.0;
     
@@ -80,7 +88,7 @@ struct eDFunctor
 //       cout << t << "\t"<< val << "\t" << logSamples[t] << "\t" << diff*diff << "\t" <<2*diff * (dval - 0.0) << "\t" << 2*dval*dval + 2*diff*ddval << endl;
     }
     
-    return std::tr1::make_tuple(f, df, ddf);
+    return OM_make_tuple(f, df, ddf);
   }
   private:
     size_t p, fn;

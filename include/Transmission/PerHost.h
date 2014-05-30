@@ -36,7 +36,6 @@ class TransmissionModel;
 using util::AgeGroupInterpolation;
 using util::DecayFunction;
 using util::DecayFuncHet;
-using boost::shared_ptr;
 
 class HumanVectorInterventionComponent;
 
@@ -58,7 +57,7 @@ public:
     virtual void redeploy( const HumanVectorInterventionComponent& params ) =0;
     
     /** Per-timestep update. Used by ITNs to update hole decay. */
-    virtual void update() =0;
+    virtual void update(Host::Human& human) =0;
     
     /** Get effect of deterrencies of interventions, as an attractiveness multiplier.
      * 
@@ -76,6 +75,9 @@ public:
     
     /// Index of effect describing the intervention
     inline interventions::ComponentId id() const { return m_id; }
+    
+    /// Return true if this component is deployed (i.e. currently active)
+    inline bool isDeployed() const{ return deployTime != TimeStep::never; }
     
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
@@ -106,7 +108,10 @@ public:
     virtual PerHostInterventionData* makeHumanPart() const =0;
     virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::ComponentId id ) const =0;
 protected:
-    explicit HumanVectorInterventionComponent(interventions::ComponentId id) : HumanInterventionComponent(id) {}
+    explicit HumanVectorInterventionComponent(interventions::ComponentId id,
+                                        Monitoring::ReportMeasureI ctsMeasure,
+                                        Monitoring::ReportMeasureI timedMeasure) :
+            HumanInterventionComponent(id, ctsMeasure, timedMeasure) {}
 };
 
 /** Contains TransmissionModel parameters which need to be stored per host.
@@ -130,7 +135,7 @@ public:
     //@}
     
     /// Call once per timestep. Updates net holes.
-    void update();
+    void update(Host::Human& human);
     
     ///@brief Intervention controls
     //@{
@@ -232,6 +237,12 @@ public:
     static inline double adultAge() {
         return relAvailAge->firstGlobalMaximum();
     }
+    
+    /** Get whether the user has any active deployments of interventions of
+     * the given type, where type is one of those interventions deriving the
+     * PerHostInterventionData class (in other cases this will always return
+     * false). */
+    bool hasActiveInterv( interventions::Component::Type type ) const;
     
     /// Checkpointing
     template<class S>

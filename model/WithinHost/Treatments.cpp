@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/Treatments.h"
+#include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/random.h"
 #include "schema/healthSystem.h"
@@ -43,10 +44,12 @@ TreatmentId Treatments::addTreatment( const scnXml::TreatmentOption& desc ){
 Treatments::Stages stageFromString( const std::string& str ){
     if( str == "liver" ) return Treatments::LIVER;
     if( str == "blood" ) return Treatments::BLOOD;
-    assert( str == "both" );
-    return Treatments::BOTH;
+    if( str == "both" ) return Treatments::BOTH;
+    throw util::xml_scenario_error( std::string("treatment action: stage must be liver, blood or both, not ").append(str) );
 }
-Treatments::Treatments( const scnXml::TreatmentOption& elt )
+Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
+    TriggeredDeployments(elt),
+    timestepsLiver(0), timestepsBlood(0)
 {
     for( scnXml::TreatmentOption::ClearInfectionsConstIterator it =
         elt.getClearInfections().begin(), end = elt.getClearInfections().end();
@@ -57,11 +60,24 @@ Treatments::Treatments( const scnXml::TreatmentOption& elt )
             throw util::xml_scenario_error( "prophylacticTreatment: timesteps: must be ≥ 1 or have special value -1" );
         }
         Stages stage = stageFromString( it->getStage() );
-        if( TimeStep::interval != 5 && stage != BOTH ){
+        if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+            if( stage != BLOOD || len != -1 )
+                throw util::unimplemented_exception( "vivax model requires treatments configured as blood-stage with timesteps=-1" );
+            // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
+        }else if( TimeStep::interval != 5 && stage != BOTH ){
             throw util::unimplemented_exception(
                 "differentiation of infection stages for simple treatment (alternative: use the PK/PD model)" );
         }
-        effects.push_back( Action( len, stage ) );
+        if( stage & LIVER ){
+            if( timestepsLiver.asInt() != 0 )   // existing treatment configuration
+                throw util::xml_scenario_error( "treatment action: multiple specification of liver stage effect" );
+            timestepsLiver = TimeStep(len);
+        }
+        if( stage & BLOOD ){
+            if( timestepsBlood.asInt() != 0 )   // existing treatment configuration
+                throw util::xml_scenario_error( "treatment action: multiple specification of blood stage effect" );
+            timestepsBlood = TimeStep(len);
+        }
     }
 }
 

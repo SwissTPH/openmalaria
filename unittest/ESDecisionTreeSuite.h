@@ -37,10 +37,10 @@ using namespace boost::assign; // bring 'operator+=()' into scope
 class ESDecisionTreeSuite : public CxxTest::TestSuite
 {
 public:
-    ESDecisionTreeSuite () {
-    }
-    ~ESDecisionTreeSuite () {
-    }
+    ESDecisionTreeSuite () :
+            dvMap(0), whm(0), hd(0)
+    {}
+    ~ESDecisionTreeSuite () {}
     
     void setUp () {
 	// Note: cannot create whm in constructor, since it uses random number
