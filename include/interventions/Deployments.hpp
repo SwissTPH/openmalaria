@@ -187,12 +187,15 @@ protected:
      * @param deploy XML element describing deployment
      * @param intervention The intervention to deploy (list of components)
      * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     * @param complement Whether to take the complement of the sub-population
+     *  to which deployment will be restricted
      */
     HumanDeploymentBase( const scnXml::DeploymentBase& deploy,
                          const HumanIntervention* intervention,
-                         ComponentId subPop ) :
+                         ComponentId subPop, bool complement ) :
             coverage( deploy.getCoverage() ),
             subPop( subPop ),
+            complement( complement ),
             intervention( intervention )
     {
         if( !(coverage >= 0.0 && coverage <= 1.0) ){
@@ -208,6 +211,7 @@ protected:
     double coverage;    // proportion coverage within group meeting above restrictions
     VaccineLimits vaccLimits;
     ComponentId subPop;      // ComponentId_pop if deployment is not restricted to a sub-population
+    bool complement;
     const HumanIntervention *intervention;
 };
 
@@ -222,9 +226,9 @@ public:
      */
     TimedHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           ComponentId subPop ) :
+                           ComponentId subPop, bool complement ) :
         TimedDeployment( TimeStep( mass.getTime() ) ),
-        HumanDeploymentBase( mass, intervention, subPop ),
+        HumanDeploymentBase( mass, intervention, subPop, complement ),
         minAge( TimeStep::fromYears( mass.getMinAge() ) ),
         maxAge( TimeStep::future )
     {
@@ -240,7 +244,7 @@ public:
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = iter->getAgeInTimeSteps();
             if( age >= minAge && age < maxAge ){
-                if( subPop == interventions::ComponentId_pop || iter->isInSubPop( subPop ) ){
+                if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
                     if( util::random::bernoulli( coverage ) ){
                         deployToHuman( *iter, Deployment::TIMED );
                     }
@@ -255,7 +259,7 @@ public:
             << minAge << '\t' << maxAge << '\t';
         if( subPop == ComponentId_pop ) out << "(none)";
         else out << subPop.id;
-        out << '\t' << coverage << '\t';
+        out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );
     }
 #endif
@@ -278,9 +282,9 @@ public:
      */
     TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
-                           ComponentId subPop,
+                           ComponentId subPop, bool complement,
                            ComponentId cumCuvId ) :
-        TimedHumanDeployment( mass, intervention, subPop ),
+        TimedHumanDeployment( mass, intervention, subPop, complement ),
         cumCovInd( cumCuvId )
     {
     }
@@ -292,7 +296,7 @@ public:
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             TimeStep age = TimeStep::simulation - iter->getDateOfBirth();
             if( age >= minAge && age < maxAge ){
-                if( subPop == interventions::ComponentId_pop || iter->isInSubPop( subPop ) ){
+                if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
                     total+=1;
                     if( !iter->isInSubPop(cumCovInd) )
                         unprotected.push_back( &*iter );
@@ -346,8 +350,9 @@ class ContinuousHumanDeployment : protected HumanDeploymentBase {
 public:
     /// Create, passing deployment age
     ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
-                                 const HumanIntervention* intervention, ComponentId subPop ) :
-            HumanDeploymentBase( elt, intervention, subPop ),
+                                 const HumanIntervention* intervention,
+                                 ComponentId subPop, bool complement ) :
+            HumanDeploymentBase( elt, intervention, subPop, complement ),
             begin( elt.getBegin() ),
             end( elt.getEnd() ),
             deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) )
@@ -388,7 +393,7 @@ public:
         }else if( deployAge == age ){
             if( begin <= TimeStep::interventionPeriod &&
                 TimeStep::interventionPeriod < end &&
-                ( subPop == interventions::ComponentId_pop || human.isInSubPop( subPop ) ) &&
+                ( subPop == interventions::ComponentId_pop || (human.isInSubPop( subPop ) != complement) ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
             {
                 deployToHuman( human, Deployment::CTS );
@@ -405,7 +410,7 @@ public:
         out << '\t' << deployAge << '\t';
         if( subPop == ComponentId_pop ) out << "(none)";
         else out << subPop.id;
-        out << '\t' << coverage << '\t';
+        out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );
     }
 #endif
