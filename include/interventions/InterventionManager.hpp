@@ -59,11 +59,6 @@ public:
      * interventions have been used. */
     static void loadFromCheckpoint( OM::Population& population, OM::util::TimeStep interventionTime );
     
-    /// Returns true if any cohort selection "intervention" is active
-    inline static bool cohortEnabled(){
-        return _cohortEnabled;
-    }
-    
     /** @brief Deploy interventions
      *
      * Timed interventions are deployed for this timestep.
@@ -104,7 +99,6 @@ private:
     // imported infections are not really interventions, and handled by a separate class
     // (but are grouped here for convenience and due toassociation in schema)
     static OM::Host::ImportedInfections importedInfections;
-    static bool _cohortEnabled;
 };
 
 } }

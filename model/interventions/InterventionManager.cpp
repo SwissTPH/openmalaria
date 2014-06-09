@@ -44,13 +44,11 @@ ptr_vector<ContinuousHumanDeployment> InterventionManager::continuous;
 ptr_vector<TimedDeployment> InterventionManager::timed;
 uint32_t InterventionManager::nextTimed;
 OM::Host::ImportedInfections InterventionManager::importedInfections;
-bool InterventionManager::_cohortEnabled;
 
 // static functions:
 
 void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Population& population){
     nextTimed = 0;
-    _cohortEnabled = false;
     
     if( intervElt.getChangeHS().present() ){
         const scnXml::ChangeHS& chs = intervElt.getChangeHS().get();
@@ -139,7 +137,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 hiComponent = new GVIComponent( id, component.getGVI().get(), *species_index_map );
             }else if( component.getRecruitmentOnly().present() ){
                 hiComponent = new RecruitmentOnlyComponent( id );
-                _cohortEnabled = true;
             }else if( component.getClearImmunity().present() ){
                 hiComponent = new ClearImmunityComponent( id );
             }else{
@@ -164,41 +161,45 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             for( scnXml::Deployment::ContinuousConstIterator ctsIt = elt.getContinuous().begin();
                 ctsIt != elt.getContinuous().end(); ++ctsIt )
             {
-                ComponentId cohort = ComponentId_pop;
+                ComponentId subPop = ComponentId_pop;
+                bool complement = false;
                 if( ctsIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = ctsIt->getRestrictToSubPop().get().getId();
-                    cohort = getComponentId( subPopStr );
+                    subPop = getComponentId( subPopStr );
+                    complement = ctsIt->getRestrictToSubPop().get().getComplement();
                 }
                 const scnXml::ContinuousList::DeploySequence& ctsSeq = ctsIt->getDeploy();
                 for( scnXml::ContinuousList::DeployConstIterator it2 = ctsSeq.begin(),
                     end2 = ctsSeq.end(); it2 != end2; ++it2 )
                 {
-                    continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, cohort ) );
+                    continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, subPop, complement ) );
                 }
             }
             for( scnXml::Deployment::TimedConstIterator timedIt = elt.getTimed().begin();
                 timedIt != elt.getTimed().end(); ++timedIt )
             {
-                ComponentId cohort = ComponentId_pop;
+                ComponentId subPop = ComponentId_pop;
+                bool complement = false;
                 if( timedIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = timedIt->getRestrictToSubPop().get().getId();
-                    cohort = getComponentId( subPopStr );
+                    subPop = getComponentId( subPopStr );
+                    complement = timedIt->getRestrictToSubPop().get().getComplement();
                 }
                 if( timedIt->getCumulativeCoverage().present() ){
                     const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
-                    ComponentId component = getComponentId( cumCov.getComponent() );
+                    ComponentId cumCovComponent = getComponentId( cumCov.getComponent() );
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
                     {
-                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, cohort, component ) );
+                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, subPop, complement, cumCovComponent ) );
                     }
                 }else{
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
                     {
-                        timed.push_back( new TimedHumanDeployment( *it2, intervention, cohort ) );
+                        timed.push_back( new TimedHumanDeployment( *it2, intervention, subPop, complement ) );
                     }
                 }
             }
@@ -271,14 +272,14 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
 #ifdef WITHOUT_BOINC
     if( util::CommandLine::option( util::CommandLine::PRINT_INTERVENTIONS ) ){
         cout << "Continuous deployments:" << endl
-            << "begin\tend\tage\tcohort\tcoverag\tcomponents" << endl;
+            << "begin\tend\tage\tsub pop\tcompl\tcoverag\tcomponents" << endl;
         for( ptr_vector<ContinuousHumanDeployment>::const_iterator it =
             continuous.begin(); it != continuous.end(); ++it ){
             it->print_details( std::cout );
             cout << endl;
         }
         cout << "Timed deployments:" << endl
-            << "time\tmin age\tmax age\tcohort\tcoverag\tcomponents" << endl;
+            << "time\tmin age\tmax age\tsub pop\tcompl\tcoverag\tcomponents" << endl;
         for( ptr_vector<TimedDeployment>::const_iterator it =
             timed.begin(); it != timed.end(); ++it ){
             it->print_details( std::cout );
