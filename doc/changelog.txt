@@ -3,15 +3,15 @@ users. It is however far from complete. The more complete changelog is on the
 wiki: http://code.google.com/p/openmalaria/wiki/Changelog
 
 
-— 2014-04-22 — Schema 32 release candidate 3 —
+— 2014-04-22 — Schema 32 —
 
 Cohorts / sub-populations:
 
 Concept of _cohorts_ partially replaced with _sub-populations_: intervention
 deployments are sub-population recruitments while cohorts are a derived
 concept only used in monitoring. Deployments can be restricted to
-sub-populations instead of cohorts and cumulative deployment mode uses
-sub-populations.
+sub-populations (and their complements) instead of cohorts and cumulative
+deployment mode uses sub-populations.
 
 Getting output from multiple cohorts and/or cohort complements independently is
 now possible.
