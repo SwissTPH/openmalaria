@@ -2814,9 +2814,21 @@
       <xs:annotation>
         <xs:documentation>
           The identifier (short name) of the sub-population (i.e. the &quot;id&quot; of
-          some intervention component).
+          some intervention component). Also see the &quot;complement&quot; attribute.
         </xs:documentation>
         <xs:appinfo>name:Sub-population identifier;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute default="false" name="complement" type="xs:boolean">
+      <xs:annotation>
+        <xs:documentation>
+          If this is not specified or is false, deployment is restricted to the
+          sub-population of people protected by the intervention component
+          who's id is given. If complement is set to true, deployment is
+          instead restricted to the complement of that sub-population, i.e. to
+          those <i>not</i> protected by the intervention component.
+        </xs:documentation>
+        <xs:appinfo>name:Complement;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
