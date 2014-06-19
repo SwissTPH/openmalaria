@@ -76,6 +76,8 @@ endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 # -----  Find dependencies  -----
 
+set (CMAKE_LIBRARY_PATH /usr/lib64)
+
 find_package (XSD)
 find_package (XERCESC)
 find_package (GSL)
