@@ -21,17 +21,20 @@
 #ifndef Hmod_VectorNv0DelayFitting
 #define Hmod_VectorNv0DelayFitting
 
+#include <boost/version.hpp>
 #include <boost/foreach.hpp>
 #include <boost/math/tools/roots.hpp>
 
-/* does boost::math::tuple work everywhere or do we need to use tr1 for older
- * boost versions?
-#include <boost/tr1/tuple.hpp>  // import for compatibility with both boost 1.42 and 1.45
-#define OM_tuple std::tr1::tuple
-#define OM_make_tuple std::tr1::make_tuple
-*/
+// boost::math::tuple doesn't work prior to Boost 1.42
+#if BOOST_VERSION > 104100
 #define OM_tuple boost::math::tuple
 #define OM_make_tuple boost::math::make_tuple
+#else
+// we don't ever actually need this:
+//#include <boost/tr1/tuple.hpp>  // import for compatibility with both boost 1.42 and 1.45
+#define OM_tuple std::tr1::tuple
+#define OM_make_tuple std::tr1::make_tuple
+#endif
 
 #include "util/errors.h"
 #include "Global.h"
