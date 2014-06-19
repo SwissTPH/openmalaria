@@ -24,16 +24,12 @@
     </ageGroup>
   </demography>
   <monitoring name="Matsari Intervention">
-    <continuous period="1">
-      <option name="recent births" value="true"/>
-      <option name="input EIR" value="true"/>
-      <option name="simulated EIR" value="true"/>
-      <option name="human infectiousness" value="true"/>
-    </continuous>
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>
       <option name="sumlogDens" value="true"/>
+      <option name="nUncomp"/>
+      <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2">
       <surveyTime>14</surveyTime>
@@ -638,7 +634,7 @@
       </timedDeployment>
     </changeEIR>
     <human>
-      <component id="MDA">
+      <component id="treat">
         <MDA>
           <effects>
             <option name="legacy effect" pSelection="1">
@@ -647,17 +643,30 @@
           </effects>
         </MDA>
       </component>
+      <component id="MSAT">
+        <screen>
+          <diagnostic>
+            <deterministic minDensity="20"/>
+          </diagnostic>
+          <positive>
+            <deploy>
+              <component id="treat"/>
+            </deploy>
+          </positive>
+          <negative/>
+        </screen>
+      </component>
       <deployment>
-        <component id="MDA"/>
+        <component id="MSAT"/>
         <timed>
-          <deploy coverage="1" maxAge="999" minAge="0" time="0"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="14"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="28"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="42"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="56"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="70"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="84"/>
-          <deploy coverage="1" maxAge="999" minAge="0" time="98"/>
+          <deploy coverage="1" time="0"/>
+          <deploy coverage="1" time="14"/>
+          <deploy coverage="1" time="28"/>
+          <deploy coverage="1" time="42"/>
+          <deploy coverage="1" time="56"/>
+          <deploy coverage="1" time="70"/>
+          <deploy coverage="1" time="84"/>
+          <deploy coverage="1" time="98"/>
         </timed>
       </deployment>
     </human>
@@ -667,26 +676,14 @@
       <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
       <initialACR>
         <CQ value="0"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
         <selfTreatment value="0"/>
       </initialACR>
       <compliance>
         <CQ value="0"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
         <selfTreatment value="0"/>
       </compliance>
       <nonCompliersEffective>
         <CQ value="0"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
         <selfTreatment value="0"/>
       </nonCompliersEffective>
       <treatmentActions>

@@ -26,17 +26,22 @@
 
 #include <list>
 #include <memory>
+#include <boost/ptr_container/ptr_list.hpp>
 
 using namespace std;
 
 class UnittestUtil;
 
+namespace scnXml{
+    class Primaquine;
+}
 namespace OM {
 namespace WithinHost {
 namespace Pathogenesis {
     class PathogenesisModel;
 }
 
+class WHVivax;
 /**
  * A brood is the set of hypnozoites resulting from an innoculation, plus a
  * combined blood stage.
@@ -48,47 +53,81 @@ namespace Pathogenesis {
  */
 class VivaxBrood{
 public:
-    VivaxBrood();
+    /** Create.
+     * 
+     * @param host      The host creating this. Not really needed, except to
+     * prevent VivaxBrood being default-constructed by its container.
+     */
+    VivaxBrood( WHVivax *host );
+    ~VivaxBrood();
+    /** Save a checkpoint. */
+    void checkpoint( ostream& stream );
+    /** Create from checkpoint. */
+    VivaxBrood( istream& stream );
     
+    struct UpdResult{
+        UpdResult() : newPrimaryBS(false), newBS(false) {}
+        bool newPrimaryBS, newBS, isFinished;
+    };
     /**
      * Do per-timestep update: remove finished blood stage infections and act
      * on newly releasing hypnozoites.
      * 
-     * @param anyNewBloodStage  Set true if any hypnozoite release starts a
-     *  blood stage
-     * @return true if infection is finished (no more blood or liver stages)
+     * @return pair describing whether the infection is finished (no more blood
+     *  or liver stages) and whether a new primary blood-stage has started (to
+     *  update cumPrimInf)
      */
-    bool update( bool& anyNewBloodStage );
+    UpdResult update();
     
-    /** Equivalent to a blood stage existing. */
+    inline void setHadEvent( bool hadEvent ){ this->hadEvent = hadEvent; }
+    inline bool hasHadEvent()const{ return hadEvent; }
+    
+    /** Equivalent to a blood stage existing. We do not model incidence of
+     * gametocytes independently, thus this also tests existance of
+     * gametocytes. */
     inline bool isPatent() const{
-        return bloodStageClearTime <= TimeStep::simulation;
+        return bloodStageClearDate > TimeStep::simulation;
     }
     
-    /**
-     * Fully clear the blood stage, and clear each hypnozoite according to the
-     * given probability.
-     */
-    void treatment( double pClearEachHypnozoite );
+    /** Fully clear blood stage parasites. */
+    void treatmentBS();
+    
+    /** Fully clear liver stage parasites. */
+    void treatmentLS();
     
 private:
-    // list of times at which hypnozoites release, ordered by time of release,
-    // soonest first (i.e. first element is next one to release)
-    vector<TimeStep> hypReleaseTimes;
+    VivaxBrood() {}     // not default constructible
+    VivaxBrood( const VivaxBrood& ) {}  // not copy constructible
     
-    // Either TimeStep::never or a date at which the blood stage will clear.
-    TimeStep bloodStageClearTime;
+    // list of times at which the merozoite and hypnozoites release, ordered by
+    // time of release, soonest last (i.e. last element is next one to release)
+    vector<TimeStep> releaseDates;
+    
+    // Either TimeStep::never (no blood stage) or a date at which the blood stage will clear.
+    TimeStep bloodStageClearDate;
+    
+    // Whether the primary blood stage infection has started
+    bool primaryHasStarted;
+    
+    // Whether any clinical event has been triggered by this brood
+    bool hadEvent;
 };
 
 /**
  * Implementation of a very basic vivax model.
+ * 
+ * This is for tropical Vivax (low transmission) and where there is little
+ * immunity.
  */
 class WHVivax : public WHInterface {
 public:
     /// @brief Static methods
     //@{
     /// Initialise static parameters
-    static void init();
+    static void init(const OM::Parameters& parameters, const scnXml::Scenario& scenario);
+    
+    /** Set health system parameters (stored in this class for convenience). */
+    static void setHSParameters( const scnXml::Primaquine& );
     //@}
 
     /// @brief Constructors, destructors and checkpointing functions
@@ -99,7 +138,7 @@ public:
     
     virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
     
-    virtual bool summarize(Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup);
+    virtual bool summarize(const Host::Human& human);
     
     virtual void importInfection();
     
@@ -113,15 +152,29 @@ public:
     
 protected:
     virtual InfectionCount countInfections () const;
-    virtual void treatment( TreatmentId treatment );
+    virtual void treatment( Host::Human& human, TreatmentId treatId );
+    virtual bool optionalPqTreatment();
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
 private:
-    list<VivaxBrood> infections;
+    WHVivax( const WHVivax& ) {}        // not copy constructible
+    
+    //TODO: shouldn't have to store by pointer (at least, if using C++11)
+    boost::ptr_list<VivaxBrood> infections;
+    
+    /* Is flagged as never getting PQ: this is a heteogeneity factor. Example:
+     * Set to zero if everyone can get PQ, 0.5 if females can't get PQ and
+     * males aren't tested (i.e. all can get it) or (1+p)/2 where p is the
+     * chance a male being tested and found to be G6PD deficient. */
+    bool noPQ;
     
     Pathogenesis::State morbidity;
+    
+    // The number of primary blood stage infections to have started since this
+    // human was born.
+    uint32_t cumPrimInf;
 
     friend class ::UnittestUtil;
 };

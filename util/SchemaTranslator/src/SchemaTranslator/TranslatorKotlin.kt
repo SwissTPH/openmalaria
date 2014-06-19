@@ -344,245 +344,266 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
      * problems and the scenarios look valid. */
     public fun translate31To32(){
         var changeIRSReportingToGVI = false
-        val interventions = getChildElement(scenarioElement, "interventions")
-        val componentIdents : jet.MutableSet<String> = TreeSet<String>()
-        val humanComponents = ArrayList<Element>()
-        val humanDeployments = ArrayList<Element>()
-        fun componentIdent(suggestedIdent: String): String{
-            // find a unique component identifier
-            var ident = suggestedIdent
-            var app = 0
-            while (componentIdents.contains(ident)){
-                ident = suggestedIdent + app
-                app += 1
-            }
-            return ident
-        }
-        fun newComponent(ident: String, desc: String?): Element{
-            val component = scenarioDocument.createElement("component")!!
-            if (componentIdents.contains(ident))
-                // actually, SetupException isn't really the right choice, but it's not a DocumentException either...
-                throw SetupException("component id is not unique")
-            componentIdents.add(ident)
-            component.setAttribute("id",ident)
-            humanComponents.add(component)
-            if (desc != null)
-                component.setAttribute("name",desc)
-            return component
-        }
-        
-        // move any deployment descriptions from elt to deployment, applying necessary transformations
-        fun processDeployments(components: List<String>, elt: Element, cumCovComponentId: String,
-            addVaccLimits: Boolean){
-            val deployment = scenarioDocument.createElement("deployment")!!
-            for (component in components){
-                val deploymentComponent = scenarioDocument.createElement("component")!!
-                deploymentComponent.setAttribute("id",component)
-                deployment.appendChild(deploymentComponent)
-            }
-            
-            fun extractBool(attr: Attr?, deploy: Element): Boolean {
-                if (attr == null) return false
-                else{
-                    val result = java.lang.Boolean.parseBoolean(attr.getValue())
-                    deploy.removeAttributeNode(attr)
-                    return result
+        var cohortElt : Element? = null
+        val interventions = getChildElementOpt(scenarioElement, "interventions")
+        if (interventions != null){
+            val componentIdents : jet.MutableSet<String> = TreeSet<String>()
+            val humanComponents = ArrayList<Element>()
+            val humanDeployments = ArrayList<Element>()
+            fun componentIdent(suggestedIdent: String): String{
+                // find a unique component identifier
+                var ident = suggestedIdent
+                var app = 0
+                while (componentIdents.contains(ident)){
+                    ident = suggestedIdent + app
+                    app += 1
                 }
+                return ident
             }
-
-            val cts = getChildElementOpt(elt, "continuous")
-            if (cts != null) {
-                var ctsNonCohort: Element? = null
-                var ctsCohort: Element? = null
-                
-                var n : Int = 0
-                for (deploy in getChildElements(cts, "deploy")){
-                    if (addVaccLimits){
-                        deploy.setAttribute("vaccMinPrevDoses", Integer.toString(n))
-                        deploy.setAttribute("vaccMaxCumDoses", Integer.toString(n+1))
-                    }
-                    
-                    val cohort : Boolean = extractBool(deploy.getAttributeNode("cohort"), deploy)
-                    val list: Element = if (cohort){
-                        if (ctsCohort == null) {
-                            ctsCohort = scenarioDocument.createElement("continuous")!!
-                            val rTC = scenarioDocument.createElement("restrictToCohort")!!
-                            rTC.setAttribute("id","cohort") // component id _will_ be "cohort"
-                            ctsCohort!!.appendChild(rTC)
-                        }
-                        ctsCohort!!
-                    }else{
-                        if (ctsNonCohort == null) {
-                            ctsNonCohort = scenarioDocument.createElement("continuous")!!
-                        }
-                        ctsNonCohort!!
-                    }
-                    list.appendChild(deploy)
-                    n += 1
-                }
-                
-                elt.removeChild(cts)
-                if (ctsNonCohort != null) deployment.appendChild(ctsNonCohort!!)
-                if (ctsCohort != null) deployment.appendChild(ctsCohort!!)
-            }
-
-            val timed = getChildElementOpt(elt, "timed")
-            if (timed != null){
-                // Note: type change from massList or massCumList to massListWithCum
-                // Map of "cumulative max age" to "timed element"
-                val cumTimedLists = TreeMap<TimedKey,Element>()
-                for (deploy in getChildElements(timed, "deploy")){
-                    fun extractDoubleOpt(attr: Attr?): Double? {
-                        if (attr == null) return null
-                        else{
-                            val result = java.lang.Double.parseDouble(attr.getValue())
-                            deploy.removeAttributeNode(attr)
-                            return result
-                        }
-                    }
-
-                    val cohort : Boolean = extractBool(deploy.getAttributeNode("cohort"), deploy)
-                    val cumAge : Double? = extractDoubleOpt(deploy.getAttributeNode("cumulativeWithMaxAge"))
-                    val key = TimedKey(cohort, cumAge)
-
-                    fun makeTimedList(): Element {
-                        val tL = scenarioDocument.createElement("timed")!!
-                        if (cohort){
-                            val rTC = scenarioDocument.createElement("restrictToCohort")!!
-                            rTC.setAttribute("id","cohort") // component id _will_ be "cohort"
-                            tL.appendChild(rTC)
-                        }
-                        if (cumAge != null){
-                            val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
-                            cumCov.setAttribute("component",cumCovComponentId) // component is uniquely used in this case, so translation is exact
-                            cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(cumAge))
-                            tL.appendChild(cumCov)
-                        }
-                        cumTimedLists.put(key, tL)
-                        return tL
-                    }
-                    val timedList : Element = cumTimedLists.get( key ) ?: makeTimedList()
-                    deploy.removeAttribute("cumulativeWithMaxAge")
-                    timedList.appendChild(deploy)
-                }
-                elt.removeChild(timed)
-                for (item in cumTimedLists){
-                    deployment.appendChild(item.component2())
-                }
-            }
-
-            val nameAttr = elt.getAttributeNode("name")
-            if (nameAttr != null){
-                // move name attribute if it exists
-                deployment.setAttribute("name",nameAttr.getValue())
-                elt.removeAttribute("name")
-            }
-            
-            if (getChildElements(deployment, "continuous").size +
-                getChildElements(deployment, "timed").size > 0)
-            {
-                humanDeployments.add(deployment)
-            }
-        }
-        
-        fun updateElt(srcName: String, trgName: String, stripDescElt: Boolean): Element?{
-            val elt = getChildElementOpt(interventions, srcName)
-            if (elt != null){
-                val ident = componentIdent(srcName)
-                val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
-
-                processDeployments(listOf(ident), elt, ident, false)
-                
-                if (stripDescElt){
-                    val desc = getChildElement(elt,"description")
-                    val renamed = scenarioDocument.renameNode(desc,"",trgName)!!
-                    component.appendChild(renamed)
-                    interventions.removeChild(elt)  // now defunct
-                }else{
-                    val renamed = scenarioDocument.renameNode(elt,"",trgName)!!
-                    component.appendChild(renamed) // after removal of "continuous" and "timed" child elements
-                }
+            fun newComponent(ident: String, desc: String?): Element{
+                val component = scenarioDocument.createElement("component")!!
+                if (componentIdents.contains(ident))
+                    // actually, SetupException isn't really the right choice, but it's not a DocumentException either...
+                    throw SetupException("component id is not unique")
+                componentIdents.add(ident)
+                component.setAttribute("id",ident)
+                humanComponents.add(component)
+                if (desc != null)
+                    component.setAttribute("name",desc)
                 return component
             }
-            return null
-        }
-        fun updateMDA(){
-            val name = "MDA"
-            val elt = getChildElementOpt(interventions, name)
-            if (elt != null){
-                val ident = componentIdent(name)
-                val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
-
-                processDeployments(listOf(ident), elt, ident, false)
+            
+            // move any deployment descriptions from elt to deployment, applying necessary transformations
+            fun processDeployments(components: List<String>, elt: Element, cumCovComponentId: String,
+                addVaccLimits: Boolean){
+                val deployment = scenarioDocument.createElement("deployment")!!
+                for (component in components){
+                    val deploymentComponent = scenarioDocument.createElement("component")!!
+                    deploymentComponent.setAttribute("id",component)
+                    deployment.appendChild(deploymentComponent)
+                }
                 
-                val desc1d = getChildElementOpt(elt, "description")
-                if (desc1d != null ){
-                    val renamed = scenarioDocument.renameNode(desc1d, "", "MDA1D")!!
-                    component.appendChild(renamed)
-                    interventions.removeChild(elt)
-                }else{
-                    // no 1-day-TS description; add the new 5-day-TS drug description
-                    val effects = scenarioDocument.createElement("effects")!!
-                    elt.appendChild(effects)
-                    val option = scenarioDocument.createElement("option")!!
-                    effects.appendChild(option)
-                    option.setAttribute("name","clear blood-stage infections")
-                    option.setAttribute("pSelection","1")
-                    val clearInfections = scenarioDocument.createElement("clearInfections")!!
-                    option.appendChild(clearInfections)
-                    clearInfections.setAttribute("timesteps","1")
-                    clearInfections.setAttribute("stage","blood")
-                    component.appendChild(elt) // after removal of "continuous" and "timed" child elements
-                }
-            }
-        }
-        fun updateVaccineElt(){
-            val elt = getChildElementOpt(interventions, "vaccine")
-            if (elt != null){
-                val idents = ArrayList<String>()
-                for (vacc in getChildElements(elt, "description")){
-                    val vaccineType = vacc.getAttribute("vaccineType")!!
-                    vacc.removeAttribute("vaccineType")
-                    val ident = componentIdent(vaccineType)
-                    idents.add(ident)
-                    val component = newComponent(ident, null)
-                    val renamed = scenarioDocument.renameNode(vacc,"",vaccineType)!!
-                    component.appendChild(renamed)
-                }
-                if (idents.size == 0){
-                    // corner case: vaccine element with no children was allowed, but is useless
-                    interventions.removeChild(elt)
-                    return
+                fun extractBool(attr: Attr?, deploy: Element): Boolean {
+                    if (attr == null) return false
+                    else{
+                        val result = java.lang.Boolean.parseBoolean(attr.getValue())
+                        deploy.removeAttributeNode(attr)
+                        return result
+                    }
                 }
 
-                // Use any identifier for cumCov since all components are deployed simultaneously
-                processDeployments(idents, elt, idents[0], true)
-                
-                interventions.removeChild(elt)  // now defunct
-            }
-        }
-        fun updateIRS(){
-            var name = "IRS"
-            val elt = getChildElementOpt(interventions, name)
-            if (elt != null){
-                val desc = getChildElementOpt(elt,"description")
-                val renamed = if (desc != null){
-                    changeIRSReportingToGVI = true
-                    name = "GVI"
-                    scenarioDocument.renameNode(desc,"",name)!!
-                }else{
-                    val desc2 = getChildElement(elt,"description_v2")
-                    scenarioDocument.renameNode(desc2,"",name)!!
+                val cts = getChildElementOpt(elt, "continuous")
+                if (cts != null) {
+                    var ctsNonCohort: Element? = null
+                    var ctsCohort: Element? = null
+                    
+                    var n : Int = 0
+                    for (deploy in getChildElements(cts, "deploy")){
+                        if (addVaccLimits){
+                            deploy.setAttribute("vaccMinPrevDoses", Integer.toString(n))
+                            deploy.setAttribute("vaccMaxCumDoses", Integer.toString(n+1))
+                        }
+                        
+                        val cohort : Boolean = extractBool(deploy.getAttributeNode("cohort"), deploy)
+                        val list: Element = if (cohort){
+                            if (ctsCohort == null) {
+                                ctsCohort = scenarioDocument.createElement("continuous")!!
+                                val rTC = scenarioDocument.createElement("restrictToCohort")!!
+                                rTC.setAttribute("id","cohort") // component id _will_ be "cohort"
+                                ctsCohort!!.appendChild(rTC)
+                            }
+                            ctsCohort!!
+                        }else{
+                            if (ctsNonCohort == null) {
+                                ctsNonCohort = scenarioDocument.createElement("continuous")!!
+                            }
+                            ctsNonCohort!!
+                        }
+                        list.appendChild(deploy)
+                        n += 1
+                    }
+                    
+                    elt.removeChild(cts)
+                    if (ctsNonCohort != null) deployment.appendChild(ctsNonCohort!!)
+                    if (ctsCohort != null) deployment.appendChild(ctsCohort!!)
                 }
-                val ident = componentIdent(name)
-                val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
-                component.appendChild(renamed)
+
+                val timed = getChildElementOpt(elt, "timed")
+                if (timed != null){
+                    // Note: type change from massList or massCumList to massListWithCum
+                    // Map of "cumulative max age" to "timed element"
+                    val cumTimedLists = TreeMap<TimedKey,Element>()
+                    for (deploy in getChildElements(timed, "deploy")){
+                        fun extractDoubleOpt(attr: Attr?): Double? {
+                            if (attr == null) return null
+                            else{
+                                val result = java.lang.Double.parseDouble(attr.getValue())
+                                deploy.removeAttributeNode(attr)
+                                return result
+                            }
+                        }
+
+                        val cohort : Boolean = extractBool(deploy.getAttributeNode("cohort"), deploy)
+                        val cumAge : Double? = extractDoubleOpt(deploy.getAttributeNode("cumulativeWithMaxAge"))
+                        val key = TimedKey(cohort, cumAge)
+
+                        fun makeTimedList(): Element {
+                            val tL = scenarioDocument.createElement("timed")!!
+                            if (cohort){
+                                val rTC = scenarioDocument.createElement("restrictToCohort")!!
+                                rTC.setAttribute("id","cohort") // component id _will_ be "cohort"
+                                tL.appendChild(rTC)
+                            }
+                            if (cumAge != null){
+                                val cumCov = scenarioDocument.createElement("cumulativeCoverage")!!
+                                cumCov.setAttribute("component",cumCovComponentId) // component is uniquely used in this case, so translation is exact
+                                cumCov.setAttribute("maxAgeYears",java.lang.Double.toString(cumAge))
+                                tL.appendChild(cumCov)
+                            }
+                            cumTimedLists.put(key, tL)
+                            return tL
+                        }
+                        val timedList : Element = cumTimedLists.get( key ) ?: makeTimedList()
+                        deploy.removeAttribute("cumulativeWithMaxAge")
+                        timedList.appendChild(deploy)
+                    }
+                    elt.removeChild(timed)
+                    for (item in cumTimedLists){
+                        deployment.appendChild(item.component2())
+                    }
+                }
+
+                val nameAttr = elt.getAttributeNode("name")
+                if (nameAttr != null){
+                    // move name attribute if it exists
+                    deployment.setAttribute("name",nameAttr.getValue())
+                    elt.removeAttribute("name")
+                }
                 
-                processDeployments(listOf(ident), elt, ident, false)
-                interventions.removeChild(elt)  // now defunct
+                if (getChildElements(deployment, "continuous").size +
+                    getChildElements(deployment, "timed").size > 0)
+                {
+                    humanDeployments.add(deployment)
+                }
+            }
+            
+            fun updateElt(srcName: String, trgName: String, stripDescElt: Boolean): Element?{
+                val elt = getChildElementOpt(interventions, srcName)
+                if (elt != null){
+                    val ident = componentIdent(srcName)
+                    val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
+
+                    processDeployments(listOf(ident), elt, ident, false)
+                    
+                    if (stripDescElt){
+                        val desc = getChildElement(elt,"description")
+                        val renamed = scenarioDocument.renameNode(desc,"",trgName)!!
+                        component.appendChild(renamed)
+                        interventions.removeChild(elt)  // now defunct
+                    }else{
+                        val renamed = scenarioDocument.renameNode(elt,"",trgName)!!
+                        component.appendChild(renamed) // after removal of "continuous" and "timed" child elements
+                    }
+                    return component
+                }
+                return null
+            }
+            fun updateMDA(){
+                val name = "MDA"
+                val elt = getChildElementOpt(interventions, name)
+                if (elt != null){
+                    val ident = componentIdent(name)
+                    val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
+
+                    processDeployments(listOf(ident), elt, ident, false)
+                    
+                    val desc1d = getChildElementOpt(elt, "description")
+                    if (desc1d != null ){
+                        val renamed = scenarioDocument.renameNode(desc1d, "", "MDA1D")!!
+                        component.appendChild(renamed)
+                        interventions.removeChild(elt)
+                    }else{
+                        // no 1-day-TS description; add the new 5-day-TS drug description
+                        val effects = scenarioDocument.createElement("effects")!!
+                        elt.appendChild(effects)
+                        val option = scenarioDocument.createElement("option")!!
+                        effects.appendChild(option)
+                        option.setAttribute("name","clear blood-stage infections")
+                        option.setAttribute("pSelection","1")
+                        val clearInfections = scenarioDocument.createElement("clearInfections")!!
+                        option.appendChild(clearInfections)
+                        clearInfections.setAttribute("timesteps","1")
+                        clearInfections.setAttribute("stage","blood")
+                        component.appendChild(elt) // after removal of "continuous" and "timed" child elements
+                    }
+                }
+            }
+            fun updateVaccineElt(){
+                val elt = getChildElementOpt(interventions, "vaccine")
+                if (elt != null){
+                    val idents = ArrayList<String>()
+                    for (vacc in getChildElements(elt, "description")){
+                        val vaccineType = vacc.getAttribute("vaccineType")!!
+                        vacc.removeAttribute("vaccineType")
+                        val ident = componentIdent(vaccineType)
+                        idents.add(ident)
+                        val component = newComponent(ident, null)
+                        val renamed = scenarioDocument.renameNode(vacc,"",vaccineType)!!
+                        component.appendChild(renamed)
+                    }
+                    if (idents.size == 0){
+                        // corner case: vaccine element with no children was allowed, but is useless
+                        interventions.removeChild(elt)
+                        return
+                    }
+
+                    // Use any identifier for cumCov since all components are deployed simultaneously
+                    processDeployments(idents, elt, idents[0], true)
+                    
+                    interventions.removeChild(elt)  // now defunct
+                }
+            }
+            fun updateIRS(){
+                var name = "IRS"
+                val elt = getChildElementOpt(interventions, name)
+                if (elt != null){
+                    val desc = getChildElementOpt(elt,"description")
+                    val renamed = if (desc != null){
+                        changeIRSReportingToGVI = true
+                        name = "GVI"
+                        scenarioDocument.renameNode(desc,"",name)!!
+                    }else{
+                        val desc2 = getChildElement(elt,"description_v2")
+                        scenarioDocument.renameNode(desc2,"",name)!!
+                    }
+                    val ident = componentIdent(name)
+                    val component = newComponent(ident, elt.getAttributeNode("name")?.getValue())
+                    component.appendChild(renamed)
+                    
+                    processDeployments(listOf(ident), elt, ident, false)
+                    interventions.removeChild(elt)  // now defunct
+                }
+            }
+            
+            updateMDA()
+            updateVaccineElt()
+            updateElt("IPT", "IPT", true) 
+            updateElt("ITN", "ITN", true)
+            updateIRS()
+            updateElt("vectorDeterrent", "GVI", false)
+            cohortElt = updateElt("cohort", "cohort", false)
+            updateElt("immuneSuppression", "clearImmunity", false)
+            
+            if (humanComponents.size > 0){
+                val human = scenarioDocument.createElement("human")!!
+                interventions.appendChild(human)
+                for (component in humanComponents)
+                    human.appendChild(component)
+                for (deployment in humanDeployments)
+                    human.appendChild(deployment)
             }
         }
-        
+
         fun updateHSIO(immOut: Element){
             val drugReg = getChildElement(immOut, "drugRegimen")
             val drugs = TreeSet<String>()
@@ -614,65 +635,52 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
             immOut.insertBefore(treatActions,getChildElement(immOut,"pSeekOfficialCareUncomplicated1"))
         }
         
-        updateMDA()
-        updateVaccineElt()
-        updateElt("IPT", "IPT", true) 
-        updateElt("ITN", "ITN", true)
-        updateIRS()
-        updateElt("vectorDeterrent", "GVI", false)
-        val cohortElt = updateElt("cohort", "cohort", false)
-        updateElt("immuneSuppression", "clearImmunity", false)
-        
-        if (humanComponents.size > 0){
-            val human = scenarioDocument.createElement("human")!!
-            interventions.appendChild(human)
-            for (component in humanComponents)
-                human.appendChild(component)
-            for (deployment in humanDeployments)
-                human.appendChild(deployment)
-        }
-
-        val monitoring = getChildElement(scenarioElement, "monitoring")
-
-        if (changeIRSReportingToGVI){
-            val survOpts = getChildElement(monitoring, "SurveyOptions")
-            for (opt in getChildElements(survOpts, "option")){
-                if (opt.getAttribute("name").equals("nMassIRS"))
-                    // replace the name (IRS won't be used so don't need both opts)
-                    opt.setAttribute("name","nMassGVI")
-            }
-        }
-        
-        if (cohortElt != null){
-            fun copyAttr(attrName: String){
-                val attr = monitoring.getAttributeNode(attrName)
-                if (attr != null){
-                    cohortElt.setAttribute(attrName, attr.getValue())
+        val monitoring = getChildElementOpt(scenarioElement, "monitoring")
+        if (monitoring != null){
+            if (changeIRSReportingToGVI){
+                val survOpts = getChildElement(monitoring, "SurveyOptions")
+                for (opt in getChildElements(survOpts, "option")){
+                    if (opt.getAttribute("name").equals("nMassIRS"))
+                        // replace the name (IRS won't be used so don't need both opts)
+                        opt.setAttribute("name","nMassGVI")
                 }
             }
-            copyAttr("firstBoutOnly")
-            copyAttr("firstTreatmentOnly")
-            copyAttr("firstInfectionOnly")
-        }
-        // these we need to do even if cohortElt == null:
-        monitoring.removeAttribute("firstBoutOnly")
-        monitoring.removeAttribute("firstTreatmentOnly")
-        monitoring.removeAttribute("firstInfectionOnly")
+            
+            if (cohortElt != null){
+                fun copyAttr(attrName: String){
+                    val attr = monitoring.getAttributeNode(attrName)
+                    if (attr != null){
+                        cohortElt!!.setAttribute(attrName, attr.getValue())
+                    }
+                }
+                copyAttr("firstBoutOnly")
+                copyAttr("firstTreatmentOnly")
+                copyAttr("firstInfectionOnly")
+            }
+            // these we need to do even if cohortElt == null:
+            monitoring.removeAttribute("firstBoutOnly")
+            monitoring.removeAttribute("firstTreatmentOnly")
+            monitoring.removeAttribute("firstInfectionOnly")
 
-        val survOpts = getChildElement(monitoring, "SurveyOptions")
-        for (opt in getChildElements(survOpts, "option")){
-            if (opt.getAttribute("name") == "nMassVA")
-                opt.setAttribute("name", "nMassGVI")
+            val survOpts = getChildElement(monitoring, "SurveyOptions")
+            for (opt in getChildElements(survOpts, "option")){
+                if (opt.getAttribute("name") == "nMassVA")
+                    opt.setAttribute("name", "nMassGVI")
+            }
         }
         
-        val healthSystem = getChildElement(scenarioElement, "healthSystem")
-        val immOut = getChildElementOpt(healthSystem, "ImmediateOutcomes")
-        if (immOut != null) updateHSIO( immOut )
-        val changeHS = getChildElementOpt(interventions, "changeHS")
-        if (changeHS != null){
-            for (deploys in getChildElements(changeHS, "timedDeployment")){
-                val immOut = getChildElementOpt(deploys, "ImmediateOutcomes")
-                if (immOut != null) updateHSIO( immOut )
+        val healthSystem = getChildElementOpt(scenarioElement, "healthSystem")
+        if (healthSystem != null){
+            val immOut = getChildElementOpt(healthSystem, "ImmediateOutcomes")
+            if (immOut != null) updateHSIO( immOut )
+        }
+        if (interventions != null){
+            val changeHS = getChildElementOpt(interventions, "changeHS")
+            if (changeHS != null){
+                for (deploys in getChildElements(changeHS, "timedDeployment")){
+                    val immOut = getChildElementOpt(deploys, "ImmediateOutcomes")
+                    if (immOut != null) updateHSIO( immOut )
+                }
             }
         }
         

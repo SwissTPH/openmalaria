@@ -32,7 +32,6 @@ namespace interventions {
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
-    using boost::shared_ptr;
     using Transmission::PerHostInterventionData;
 
 class IRSComponent : public Transmission::HumanVectorInterventionComponent {
@@ -137,7 +136,7 @@ private:
     
     NormalSampler initialInsecticide;
     double maxInsecticide;              // maximum initial insecticide
-    shared_ptr<DecayFunction> insecticideDecay;
+    boost::shared_ptr<DecayFunction> insecticideDecay;
     vector<IRSAnopheles> species; // vector specific params
     
     // This is sparse vector: only indexes corresponding to a IRS component are used
@@ -166,7 +165,7 @@ public:
     }
     
     /// Call once per timestep to update holes
-    virtual void update();
+    virtual void update(Host::Human& human);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     virtual double relativeAttractiveness(size_t speciesIndex) const;

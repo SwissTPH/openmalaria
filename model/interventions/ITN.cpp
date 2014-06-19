@@ -23,17 +23,18 @@
 #include "util/errors.h"
 #include "util/SpeciesIndexChecker.h"
 #include "Host/Human.h"
+#include "Monitoring/Survey.h"
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
-    using util::random::poisson;
+    using namespace Monitoring;
 
 vector<ITNComponent*> ITNComponent::componentsByIndex;
 
 ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
         const map<string, size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id),
+        Transmission::HumanVectorInterventionComponent(id, Report::MI_ITN_CTS, Report::MI_ITN_TIMED),
         ripFactor( numeric_limits<double>::signaling_NaN() )
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
@@ -64,10 +65,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
 
 void ITNComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent( *this );
-    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
-        (method == interventions::Deployment::TIMED) ?
-            Monitoring::Survey::MI_ITN_TIMED : Monitoring::Survey::MI_ITN_CTS,
-        human.getMonitoringAgeGroup(), 1 );
+    Survey::current().addInt( reportMeasure(method), human, 1 );
 }
 
 Component::Type ITNComponent::componentType() const{
@@ -94,11 +92,11 @@ void ITNComponent::ITNAnopheles::init(
 {
     assert( _relativeAttractiveness.get() == 0 );       // double init
     if (elt.getDeterrency().present())
-        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(
+        _relativeAttractiveness = boost::shared_ptr<RelativeAttractiveness>(
             new RADeterrency( elt.getDeterrency().get(), maxInsecticide ));
     else{
         assert (elt.getTwoStageDeterrency().present());
-        _relativeAttractiveness = shared_ptr<RelativeAttractiveness>(
+        _relativeAttractiveness = boost::shared_ptr<RelativeAttractiveness>(
             new RATwoStageDeterrency( elt.getTwoStageDeterrency().get(), maxInsecticide ));
     }
     _preprandialKillingEffect.init( elt.getPreprandialKillingEffect(),
@@ -514,17 +512,20 @@ void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionComponent
         initialInsecticide = params.maxInsecticide;
 }
 
-void HumanITN::update(){
+void HumanITN::update(Host::Human& human){
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     if( deployTime != TimeStep::never ){
         // First use is at age 1, so don't remove until *after* disposalTime to
         // get use over the full duration given by sampleAgeOfDecay().
         if( TimeStep::simulation > disposalTime ){
             deployTime = TimeStep::never;
+            human.removeFromSubPop(id());
+            return;
         }
-        int newHoles = poisson( holeRate );
+        
+        int newHoles = util::random::poisson( holeRate );
         nHoles += newHoles;
-        holeIndex += newHoles + params.ripFactor * poisson( nHoles * ripRate );
+        holeIndex += newHoles + params.ripFactor * util::random::poisson( nHoles * ripRate );
     }
 }
 

@@ -41,6 +41,7 @@ set (OM_BOXTEST_NAMES
   # VecLCMonthly VecLCTest
   VecMonthly
   VecTest
+  Vivax
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

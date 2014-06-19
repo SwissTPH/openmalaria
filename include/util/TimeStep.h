@@ -111,7 +111,8 @@ public:
      * but since (x - never >= y) is often checked, x - never must not overflow
      * for any timestep x (int represents down to -0x7FFFFFFF).
      * 
-     * We must also always have ( simulation < future ). */
+     * We must also always have ( simulation < future ) and simulation + future
+     * must not overflow. */
     static const TimeStep never, future;
     
     /** Initialize to never. */

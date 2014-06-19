@@ -21,6 +21,8 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 # C++11 would be nice, but we have to compile for relatively old platforms
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
 
+set (OM_STD_LIBS )
+
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
 IF( ${CMAKE_COMPILER_IS_GNUCXX} )
   # This doesn't show up in the cache, but it is passed to gcc:
@@ -67,6 +69,9 @@ endif (MSVC)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments")
+  # these need to be mentioned explicitly for Clang, but shouldn't be for MSVC:
+  # (they can optionally be mentitoned for GCC)
+  set (OM_STD_LIBS m stdc++)
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
 # -----  Find dependencies  -----
@@ -185,9 +190,7 @@ target_link_libraries (openMalaria
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
   ${BOINC_LIBRARIES}
-  # these need to be mentioned explicitly with Clang:
-  m
-  stdc++
+  ${OM_STD_LIBS}
 )
 
 if (MSVC)

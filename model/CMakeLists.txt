@@ -89,7 +89,6 @@ set (Model_CPP
   interventions/ITN.cpp
   interventions/IRS.cpp
   interventions/GVI.cpp
-  interventions/Cohort.cpp
   interventions/Vaccine.cpp
 )
 

@@ -35,7 +35,10 @@ using namespace std;
 namespace OM { namespace PkPd {
 
 LSTMDrugAllele::Cache::Cache( double c, double d, double r ) :
-    C0(c), duration(d), rate(r) {
+    C0(c), duration(d), rate(r),
+    C1(numeric_limits<double>::signaling_NaN()),
+    drugFactor(numeric_limits<double>::signaling_NaN())
+{
     // Generate hash using XOR and boost::hash
     boost::hash<double> hasher;
     hash = hasher(c) ^ hasher(d) ^ hasher(r);

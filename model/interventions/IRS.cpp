@@ -23,7 +23,7 @@
 #include "Host/Human.h"
 #include "util/random.h"
 #include "util/errors.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 
 #include "R_nmath/qnorm.h"
@@ -31,12 +31,13 @@
 
 namespace OM { namespace interventions {
     using util::random::poisson;
+    using namespace Monitoring;
 
 vector<IRSComponent*> IRSComponent::componentsByIndex;
 
 IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id)
+        Transmission::HumanVectorInterventionComponent(id, Report::MI_IRS_CTS, Report::MI_IRS_TIMED)
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
@@ -59,10 +60,7 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
 
 void IRSComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Monitoring::Surveys.getSurvey( human.isInAnyCohort() ).addInt(
-        (method == interventions::Deployment::TIMED) ?
-            Monitoring::Survey::MI_IRS_TIMED : Monitoring::Survey::MI_IRS_CTS,
-        human.getMonitoringAgeGroup(), 1 );
+    Survey::current().addInt( reportMeasure(method), human, 1 );
 }
 
 Component::Type IRSComponent::componentType()const{ return Component::IRS; }
@@ -228,10 +226,12 @@ HumanIRS::HumanIRS( const IRSComponent& params ) :
 
 void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionComponent& params ) {
     deployTime = TimeStep::simulation;
-    initialInsecticide = dynamic_cast<const IRSComponent*>(&params)->sampleInitialInsecticide();
+    const IRSComponent* irsParams = dynamic_cast<const IRSComponent*>(&params);
+    assert( irsParams != 0 );   // code error if this fails
+    initialInsecticide = irsParams->sampleInitialInsecticide();
 }
 
-void HumanIRS::update(){
+void HumanIRS::update(Host::Human& human){
 }
 
 double HumanIRS::relativeAttractiveness(size_t speciesIndex) const{

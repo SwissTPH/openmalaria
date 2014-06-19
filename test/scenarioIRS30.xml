@@ -23,7 +23,7 @@
       <group poppercent="0.1" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring cohortOnly="false" name="Monthly Surveys">
+  <monitoring name="Monthly Surveys">
     <continuous duringInit="false" period="1">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
@@ -138,6 +138,7 @@
             <postprandialKillingEffect baseFactor="0.01" insecticideFactor="0.5" insecticideScalingFactor="0.006"/>
           </anophelesParams>
         </IRS>
+        <subPopRemoval afterYears="0.5"/>
       </component>
       <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
@@ -147,13 +148,13 @@
           </anophelesParams>
         </GVI>
       </component>
-      <component id="cohort">
-        <cohort/>
+      <component id="mdaPop">
+        <recruitmentOnly/>
       </component>
       <deployment>
         <component id="MDA"/>
         <timed>
-          <restrictToCohort id="cohort"/>
+          <restrictToSubPop id="mdaPop"/>
           <deploy coverage="1" time="30"/>
         </timed>
       </deployment>
@@ -166,7 +167,7 @@
       <deployment name="new param">
         <component id="IRS"/>
         <timed>
-          <cumulativeCoverage component="IRS" maxAgeYears="36.0"/>
+          <cumulativeCoverage component="IRS"/>
           <deploy coverage="0.05775" time="18"/>
           <deploy coverage="0.1155" time="19"/>
           <deploy coverage="0.17325" time="20"/>
@@ -194,7 +195,7 @@
         </timed>
       </deployment>
       <deployment>
-        <component id="cohort"/>
+        <component id="mdaPop"/>
         <timed>
           <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
           <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>

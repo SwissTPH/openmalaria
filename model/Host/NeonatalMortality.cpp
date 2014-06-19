@@ -28,80 +28,87 @@
 namespace OM { namespace Host {
     using namespace OM::util;
 
-double NeonatalMortality::_riskFromMaternalInfection = 0.0;
-std::vector<double> NeonatalMortality::_prevalenceByGestationalAge;
+//Goodman estimated for neonatal mortality due to malaria in pregnancy
+const double gEst = 0.011;
+//Critical value of Prev20-25 for neonatal mortality
+const double critPrev2025 = 0.25;
+//Critical value for estimating prevalence in primigravidae
+const double critPrevPrim = 0.19;
+//Proportion of births with primigravid mothers
+const double pBirthPrim = 0.3;
+
+// optimised constants:
+const double y = pBirthPrim * gEst;
+const double z = -1.0 / critPrev2025;
+
+/// Probability for a newborn to die (indirect death) because the mother is infected.
+/// Depends on the prevalence of parasitaemia in mother at some previous t.
+double riskFromMaternalInfection = 0.0;
+/// Array of stored prevalences of mothers over last 5 months
+std::vector<double> prevByGestationalAge;
 
 
 void NeonatalMortality::init() {
-  TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
-  _prevalenceByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
+    TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
+    prevByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
-    _riskFromMaternalInfection & stream;
-    _prevalenceByGestationalAge & stream;
+    riskFromMaternalInfection & stream;
+    prevByGestationalAge & stream;
 }
 void NeonatalMortality::staticCheckpoint (ostream& stream) {
-    _riskFromMaternalInfection & stream;
-    _prevalenceByGestationalAge & stream;
+    riskFromMaternalInfection & stream;
+    prevByGestationalAge & stream;
 }
 
 bool NeonatalMortality::eventNeonatalMortality() {
-  return random::uniform_01() <= _riskFromMaternalInfection;
+  return random::uniform_01() <= riskFromMaternalInfection;
 }
 
 void NeonatalMortality::update (const Population& population) {
-  // For individuals in the age range 20-25, we sum:
-  int nCounter=0;	// total number
-  int pCounter=0;	// number with patent infections, needed for prev in 20-25y
-  
-  for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
-    //NOTE: this is based on last time-step's parasite densities but this
-    // time-step's age, which is a bit strange (though not very significant).
-    double ageYears = iter->getAgeInYears();
-    // Note: since we're using a linked list, we have to iterate until we reach
-    // the individuals we're interested in. Due to population structure, it's
-    // probably quickest to start iterating from the oldest.
-    if(ageYears >= 25.0) continue;
-    if (ageYears < 20.0) break;	// Not interested in younger individuals.
+    // ———  find potential mothers and their prevalence  ———
+    // For individuals in the age range 20-25, we sum:
+    int nCounter=0;	// total number
+    int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
-    //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
-    // reporting, but the one used should be that used to parameterise this model
-    nCounter ++;
-    if (iter->withinHostModel->diagnosticDefault())
-      pCounter ++;
-  }
-  
-  NeonatalMortality::calculateRiskFromMaternalInfection(nCounter, pCounter);
-}
-
-void NeonatalMortality::calculateRiskFromMaternalInfection (int nCounter, int pCounter) {
-  //Goodman estimated for neonatal mortality due to malaria in pregnancy
-  const double gEst = 0.011;
-  //Critical value of Prev20-25 for neonatal mortality
-  const double critPrev2025 = 0.25;
-  //Critical value for estimating prevalence in primigravidae
-  const double critPrevPrim = 0.19;
-  //Proportion of births with primigravid mothers
-  const double pBirthPrim = 0.3;
-  //default value for prev2025, for short simulations 
-  double prev2025 = 0.25;
-  prev2025 = double(pCounter) / nCounter;  
-  double maxprev = prev2025;
-  //gestational age is in time steps for the last 5 months of pregnancy only
-  TimeStep timeStepsMinus1( 150 / TimeStep::interval - 1 );
-  //update the vector containing the prevalence by gestational age
-  for (TimeStep t(0); t < timeStepsMinus1; ++t) {
-    _prevalenceByGestationalAge[t.asInt()] = _prevalenceByGestationalAge[t.asInt()+1];
-    if (_prevalenceByGestationalAge[t.asInt()] > maxprev) {
-      maxprev = _prevalenceByGestationalAge[t.asInt()];
+    for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
+        //NOTE: this is based on last time-step's parasite densities but this
+        // time-step's age, which is a bit strange (though not very significant).
+        double ageYears = iter->getAgeInYears();
+        // Note: since we're using a linked list, we have to iterate until we reach
+        // the individuals we're interested in. Due to population structure, it's
+        // probably quickest to start iterating from the oldest.
+        if(ageYears >= 25.0) continue;
+        if (ageYears < 20.0) break;	// Not interested in younger individuals.
+        
+        //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
+        // reporting, but the one used should be that used to parameterise this model
+        nCounter ++;
+        if (iter->withinHostModel->diagnosticDefault())
+        pCounter ++;
     }
-  }
-  _prevalenceByGestationalAge[timeStepsMinus1.asInt()] = prev2025;
-  //equation (2) p 75 AJTMH 75 suppl 2
-  double prevpg= maxprev / (critPrevPrim + maxprev);
-  //equation (1) p 75 AJTMH 75 suppl 2
-  _riskFromMaternalInfection = gEst * pBirthPrim * (1.0-exp(-prevpg/critPrev2025));
+    
+    // ———  calculate risk of neonatal mortality  ———
+    //default value for prev2025, for use when there are no 20-25 year olds
+    double prev2025 = 0.25;
+    if( nCounter > 0 )
+        prev2025 = double(pCounter) / nCounter;
+    
+    double maxPrev = prev2025;
+    //update the vector containing the prevalence by gestational age
+    size_t index = mod_nn(TimeStep::simulation, prevByGestationalAge.size());
+    prevByGestationalAge[index] = prev2025;
+    for (size_t i = 0; i < prevByGestationalAge.size(); ++i) {
+        if (prevByGestationalAge[i] > maxPrev) {
+            maxPrev = prevByGestationalAge[i];
+        }
+    }
+    
+    // equation (2) p 75 AJTMH 75 suppl 2
+    double prevPG= maxPrev / (critPrevPrim + maxPrev);
+    // equation (1) p 75 AJTMH 75 suppl 2 including 30% multiplier
+    riskFromMaternalInfection = y * (1.0-exp(prevPG * z));
 }
 
 } }

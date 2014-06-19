@@ -36,6 +36,7 @@ namespace OM {
     class Population;
 namespace Transmission {
 namespace Anopheles {
+    using std::numeric_limits;
 
 /** Per-species part for vector transmission model.
  *
@@ -58,6 +59,9 @@ public:
     ///@brief Initialisation and destruction
     //@{
     AnophelesModel () :
+            mosqSeekingDuration(numeric_limits<double>::signaling_NaN()),
+            mosqSeekingDeathRate(numeric_limits<double>::signaling_NaN()),
+            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
             partialEIR(0.0)
     {}
     
@@ -171,8 +175,8 @@ public:
     }
 
     /// Write some per-species summary information.
-    inline void summarize (const string speciesName, Monitoring::Survey& survey) const {
-        transmission.summarize( speciesName, survey );
+    inline void summarize (const string speciesName) const {
+        transmission.summarize( speciesName );
     }
     //@}
     

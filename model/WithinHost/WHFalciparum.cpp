@@ -44,7 +44,7 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
-using Monitoring::Survey;
+using namespace Monitoring;
 
 double WHFalciparum::sigma_i;
 double WHFalciparum::immPenalty_22;
@@ -63,7 +63,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
     _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
-    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical() );
+    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical(), false );
     
     /*
     The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
@@ -97,7 +97,11 @@ WHFalciparum::WHFalciparum( double comorbidityFactor ):
     totalDensity(0.0), timeStepMaxDensity(0.0),
     pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
 {
-    _innateImmSurvFact = exp(-random::gauss(0, sigma_i));
+    // NOTE: negating a Gaussian sample with mean 0 is pointless — except that
+    // the individual samples change. In any case the overhead is negligible.
+    //FIXME: Should this be allowed to be greater than 1?
+    // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
+    _innateImmSurvFact = exp(-random::gauss(sigma_i));
     
     _ylag.assign (_ylagLen, 0.0);
 }
@@ -157,32 +161,25 @@ bool WHFalciparum::diagnosticDefault() const{
     return Diagnostic::default_.isPositive( totalDensity );
 }
 
-void WHFalciparum::treatment(TreatmentId treatId){
+void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
     const Treatments& treat = Treatments::select( treatId );
-    for( vector<Treatments::Action>::const_iterator it =
-        treat.getEffects().begin(), end = treat.getEffects().end();
-        it != end; ++it )
-    {
-        if( it->timesteps == TimeStep(-1) ){
-            // act immediately
-            //TODO: which timestep to measure "is blood stage" by?
-            clearInfections( it->stage );
-        }else{
-            switch( it->stage ){
-                case Treatments::BOTH:
-                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
-                    // don't break; also do blood below:
-                case Treatments::BLOOD:
-                    treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + it->timesteps );
-                    break;
-                case Treatments::LIVER:
-                    treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + it->timesteps );
-                    break;
-                case Treatments::NONE:
-                    /*do nothing*/;
-            }
-        }
+    if( treat.liverEffect().asInt() != 0 ){
+        if( treat.liverEffect().asInt() == -1 )
+            clearInfections( Treatments::LIVER );
+        else
+            treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + treat.liverEffect() );
     }
+    if( treat.bloodEffect().asInt() != 0 ){
+        if( treat.bloodEffect().asInt() == -1 )
+            clearInfections( Treatments::BLOOD );
+        else
+            treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + treat.bloodEffect() );
+    }
+    
+    // triggered intervention deployments:
+    treat.deploy( human,
+                  interventions::Deployment::TREAT,
+                  interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
 
 Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
@@ -221,21 +218,22 @@ void WHFalciparum::updateImmuneStatus() {
 
 // -----  Summarize  -----
 
-bool WHFalciparum::summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {
-    pathogenesisModel->summarize( survey, ageGroup );
+bool WHFalciparum::summarize (const Host::Human& human) {
+    Survey& survey = Survey::current();
+    pathogenesisModel->summarize( human );
     InfectionCount count = countInfections();
     if (count.total != 0) {
         survey
-            .addInt( Survey::MI_INFECTED_HOSTS, ageGroup, 1 )
-            .addInt( Survey::MI_INFECTIONS, ageGroup, count.total )
-            .addInt( Survey::MI_PATENT_INFECTIONS, ageGroup, count.patent );
+            .addInt( Report::MI_INFECTED_HOSTS, human, 1 )
+            .addInt( Report::MI_INFECTIONS, human, count.total )
+            .addInt( Report::MI_PATENT_INFECTIONS, human, count.patent );
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
     if (diagnosticDefault()) {
         survey
-            .addInt( Survey::MI_PATENT_HOSTS, ageGroup, 1)
-            .addDouble( Survey::MD_LOG_DENSITY, ageGroup, log(totalDensity) );
+            .addInt( Report::MI_PATENT_HOSTS, human, 1)
+            .addDouble( Report::MD_LOG_DENSITY, human, log(totalDensity) );
         return true;
     }
     return false;

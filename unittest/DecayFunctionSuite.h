@@ -60,6 +60,8 @@ public:
         dHet = df->hetSample();
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(730), dHet ), 1.0 );
+        // Third test: time of decay (age plus now) should always be in the future
+        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), TimeStep::future );
     }
     
     void testStep () {
@@ -71,6 +73,7 @@ public:
         TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), TimeStep::fromYears(10) );
     }
     
     void testLinear () {

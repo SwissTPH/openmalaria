@@ -41,15 +41,13 @@ using util::AgeGroupInterpolation;
 class PathogenesisModel {
 public:
     /// Calls static init on correct PathogenesisModel.
-    static void init( const Parameters& parameters, const scnXml::Clinical& clinical );
+    static void init( const Parameters& parameters, const scnXml::Clinical& clinical, bool nmfOnly );
     static void cleanup();
 
     /** Create a sub-class instance, dependant on global options.
     *
     * @param cF = Comorbidity factor (currently set in Human). */
     static PathogenesisModel* createPathogenesisModel(double cF);
-    /** Create a sub-class instance, loading from a checkpoint. */
-    static PathogenesisModel* createPathogenesisModel(istream& in);
 
     
     virtual ~PathogenesisModel() {}
@@ -60,11 +58,15 @@ public:
      * malaria fevers. */
     StatePair determineState(double ageYears, double timeStepMaxDensity, double endDensity);
     
+    /** For Vivax: determine the chance of a NMF and sample, returning either
+     * NONE or STATE_NMF. */
+    static Pathogenesis::State sampleNMF( double ageYears );
+    
     /** Summarize PathogenesisModel details
      *
      * Only PyrogenPathogenesis implements this; other models don't have anything
      * to add to the summary. */
-    virtual void summarize (Monitoring::Survey& survey, Monitoring::AgeGroup ageGroup) {}
+    virtual void summarize (const Host::Human& human) {}
 
     /// Checkpointing
     template<class S>

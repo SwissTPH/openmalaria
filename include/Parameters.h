@@ -29,7 +29,7 @@ namespace OM {
 class Parameters {
 public:
     enum Parameter {
-        /// @b Used in NoVectorControl
+        /// @b Infection incidence model parameters
         //@{
         NEG_LOG_ONE_MINUS_SINF = 1,
         E_STAR = 2,
@@ -37,9 +37,9 @@ public:
         X_STAR_P = 4,
         GAMMA_P = 5,
         //@}
-        SIGMA_I_SQ = 6,                     ///< Used in WithinHostModel
-        /// @b Used in Infection
+        /// @b Immunity parameters, mostly on infections
         //@{
+        SIGMA_I_SQ = 6,                 ///< Host (not infection) parameter
         CUMULATIVE_Y_STAR = 7,
         CUMULATIVE_H_STAR = 8,
         NEG_LOG_ONE_MINUS_ALPHA_M = 9,

@@ -196,8 +196,8 @@ bool LSTMDrug::updateConcentration () {
     // Keys are read-only, so we have to create a copy.
     DoseMap newDoses;
     for (DoseMap::const_iterator dose = doses.begin(); dose!=doses.end(); ++dose) {
-	// tomorrow's dose; decrease time counter by a day
-	newDoses.insert( make_pair<double,DoseParams>( dose->first - 1.0, dose->second ) );
+        // tomorrow's dose; decrease time counter by a day
+        newDoses.insert( make_pair( dose->first - 1.0, dose->second ) );
     }
     doses.swap( newDoses );	// assign it modified doses (swap may be faster than assign)
     

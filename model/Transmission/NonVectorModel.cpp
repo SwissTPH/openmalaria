@@ -20,7 +20,8 @@
  */
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
-#include "Monitoring/Surveys.h" // sim-end timestep
+#include "Host/Human.h"
+#include "Monitoring/Survey.h" // sim-end timestep
 #include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
@@ -152,9 +153,10 @@ void NonVectorModel::changeEIRIntervention (
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/TimeStep::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
-  if (daily.size() < static_cast<size_t>(Monitoring::Surveys.getFinalTimestep().inDays()+1)) {
+  size_t required_days = static_cast<size_t>(Monitoring::Survey::getFinalTimestep().inDays()+1);
+  if (daily.size() < required_days) {
     cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size()
-        << "\nRequired: " << Monitoring::Surveys.getFinalTimestep().inDays()+1 << endl;
+        << "\nRequired: " << required_days << endl;
     throw util::xml_scenario_error ("Insufficient intervention phase EIR values provided");
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
@@ -201,7 +203,7 @@ void NonVectorModel::update (const Population& population) {
 }
 
 
-double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
+double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
   // where the full model, with estimates of human mosquito transmission is in use, use this:
   double eir;
   switch (simulationMode) {
@@ -239,21 +241,23 @@ double NonVectorModel::calculateEIR(PerHost& perHost, double ageYears){
     throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
   }
 #endif
-  return eir * perHost.relativeAvailabilityHetAge (ageYears);
+  return eir * human.perHostTransmission.relativeAvailabilityHetAge (ageYears);
 }
 
 
 // -----   Private functs ------
 
 double NonVectorModel::averageEIR (const scnXml::NonVector& nonVectorData) {
-  // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
-  double valaverageEIR=0.0;
-  size_t i = 0;
-  for (const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
-       i < daily.size(); ++i) {
-    valaverageEIR += (double)daily[i];
-  }
-  return valaverageEIR / i;
+    // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
+    double valaverageEIR=0.0;
+    size_t i = 0;
+    for (const scnXml::NonVector::EIRDailySequence& daily =
+        nonVectorData.getEIRDaily(); i < daily.size(); ++i)
+    {
+        valaverageEIR += (double)daily[i];
+    }
+    if( i == 0 ) throw util::xml_scenario_error( "no EIRDaily values given" );  // pedantic check
+    return valaverageEIR / i;
 }
 
 

@@ -34,7 +34,9 @@ using namespace OM::util;
 
 // -----  Initialisation of model, done before human warmup  ------
 
-FixedEmergence::FixedEmergence() {
+FixedEmergence::FixedEmergence() :
+        initNv0FromSv(numeric_limits<double>::signaling_NaN())
+{
     quinquennialS_v.assign (TimeStep::fromYears(5).inDays(), 0.0);
     mosqEmergeRate.resize (TimeStep::DAYS_IN_YEAR); // Only needs to be done here if loading from checkpoint
 }

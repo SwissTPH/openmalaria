@@ -22,7 +22,7 @@
 #include "Population.h"
 #include "util/random.h"
 #include "util/CommandLine.h"
-#include "Monitoring/Surveys.h"
+#include "Monitoring/Survey.h"
 #include "interventions/GVI.h"
 #include "interventions/IRS.h"
 #include "interventions/ITN.h"
@@ -37,19 +37,18 @@ namespace OM { namespace interventions {
 
 // static memory:
     
+std::map<std::string,ComponentId> InterventionManager::identifierMap;
 boost::ptr_vector<HumanInterventionComponent> InterventionManager::humanComponents;
 boost::ptr_vector<HumanIntervention> InterventionManager::humanInterventions;
 ptr_vector<ContinuousHumanDeployment> InterventionManager::continuous;
 ptr_vector<TimedDeployment> InterventionManager::timed;
 uint32_t InterventionManager::nextTimed;
 OM::Host::ImportedInfections InterventionManager::importedInfections;
-bool InterventionManager::_cohortEnabled;
 
 // static functions:
 
 void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Population& population){
     nextTimed = 0;
-    _cohortEnabled = false;
     
     if( intervElt.getChangeHS().present() ){
         const scnXml::ChangeHS& chs = intervElt.getChangeHS().get();
@@ -77,7 +76,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
     const map<string,size_t>* species_index_map = 0;
     if( intervElt.getHuman().present() ){
         const scnXml::HumanInterventions& human = intervElt.getHuman().get();
-        map<string,ComponentId> identifierMap;
         
         // 1. Read components
         for( scnXml::HumanInterventions::ComponentConstIterator it =
@@ -87,46 +85,67 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             const scnXml::HumanInterventionComponent& component = *it;
             if( identifierMap.count( component.getId() ) > 0 ){
                 ostringstream msg;
-                msg << "The id attribute of intervention.human.component elements must be unique; found \""
+                msg << "The id attribute of interventions.human.component elements must be unique; found \""
                         << component.getId() << "\" twice.";
                 throw util::xml_scenario_error( msg.str() );
             }
             ComponentId id( humanComponents.size() );        // i.e. index of next item
             identifierMap.insert( make_pair(component.getId(), id) );
-            if( component.getMDA().present() ){
-                //TODO(monitoring): report
-                humanComponents.push_back( new MDAComponent( id, component.getMDA().get() ) );
+            
+            TimeStep expireAfter = TimeStep::future;
+            if( component.getSubPopRemoval().present() ){
+                const scnXml::SubPopRemoval& removeOpts = component.getSubPopRemoval().get();
+                if( removeOpts.getOnFirstBout() ){
+                    removeAtIds[SubPopRemove::ON_FIRST_BOUT].push_back( id );
+                }
+                if( removeOpts.getOnFirstTreatment() ){
+                    removeAtIds[SubPopRemove::ON_FIRST_INFECTION].push_back( id );
+                }
+                if( removeOpts.getOnFirstTreatment() ){
+                    removeAtIds[SubPopRemove::ON_FIRST_TREATMENT].push_back( id );
+                }
+                if( removeOpts.getAfterYears().present() ){
+                    expireAfter = TimeStep::fromYears( removeOpts.getAfterYears().get() );
+                }
+            }
+            
+            HumanInterventionComponent *hiComponent;
+            if( component.getScreen().present() ){
+                hiComponent = new ScreenComponent( id, component.getScreen().get() );
+            }else if( component.getMDA().present() ){
+                hiComponent = new MDAComponent( id, component.getMDA().get() );
             }else if( component.getMDA1D().present() ){
                 //TODO(monitoring): report
-                humanComponents.push_back( new MDA1DComponent( id, component.getMDA1D().get() ) );
+                hiComponent = new MDA1DComponent( id, component.getMDA1D().get() );
             }else if( component.getPEV().present() ){
-                humanComponents.push_back( new VaccineComponent( id, component.getPEV().get(), Vaccine::PEV ) );
+                hiComponent = new VaccineComponent( id, component.getPEV().get(), Vaccine::PEV );
             }else if( component.getBSV().present() ){
-                humanComponents.push_back( new VaccineComponent( id, component.getBSV().get(), Vaccine::BSV ) );
+                hiComponent = new VaccineComponent( id, component.getBSV().get(), Vaccine::BSV );
             }else if( component.getTBV().present() ){
-                humanComponents.push_back( new VaccineComponent( id, component.getTBV().get(), Vaccine::TBV ) );
+                hiComponent = new VaccineComponent( id, component.getTBV().get(), Vaccine::TBV );
             }else if( component.getITN().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanComponents.push_back( new ITNComponent( id, component.getITN().get(), *species_index_map ) );
+                hiComponent = new ITNComponent( id, component.getITN().get(), *species_index_map );
             }else if( component.getIRS().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanComponents.push_back( new IRSComponent( id, component.getIRS().get(), *species_index_map ) );
+                hiComponent = new IRSComponent( id, component.getIRS().get(), *species_index_map );
             }else if( component.getGVI().present() ){
                 if( species_index_map == 0 )
                     species_index_map = &transmission.getSpeciesIndexMap();
-                humanComponents.push_back( new GVIComponent( id, component.getGVI().get(), *species_index_map ) );
-            }else if( component.getCohort().present() ){
-                humanComponents.push_back( new CohortSelectionComponent( id, component.getCohort().get() ) );
-                _cohortEnabled = true;
+                hiComponent = new GVIComponent( id, component.getGVI().get(), *species_index_map );
+            }else if( component.getRecruitmentOnly().present() ){
+                hiComponent = new RecruitmentOnlyComponent( id );
             }else if( component.getClearImmunity().present() ){
-                humanComponents.push_back( new ClearImmunityComponent( id ) );
+                hiComponent = new ClearImmunityComponent( id );
             }else{
                 throw util::xml_scenario_error(
                     "expected intervention.human.component element to have a "
                     "child, didn't find it (perhaps I need updating)" );
             }
+            hiComponent->setExpireAfter( expireAfter );
+            humanComponents.push_back( hiComponent );
         }
         
         // 2. Read the list of deployments
@@ -136,90 +155,51 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         {
             const scnXml::Deployment& elt = *it;
             // 2.a intervention components
-            HumanIntervention *intervention = new HumanIntervention();
-            for( scnXml::Deployment::ComponentConstIterator it2 = elt.getComponent().begin(),
-                    end2 = elt.getComponent().end(); it2 != end2; ++it2 )
-            {
-                map<string,ComponentId>::const_iterator result = identifierMap.find( it2->getId() );
-                if( result == identifierMap.end() ){
-                    ostringstream msg;
-                    msg << "human intervention references component with id \""
-                        << it2->getId()
-                        << "\", but no component with this id was found";
-                    throw util::xml_scenario_error( msg.str() );
-                }
-                const HumanInterventionComponent* component = &humanComponents[result->second.id];
-                intervention->addComponent( component );
-            }
-            intervention->sortComponents();
+            HumanIntervention *intervention = new HumanIntervention( elt.getComponent() );
             
             // 2.b intervention deployments
             for( scnXml::Deployment::ContinuousConstIterator ctsIt = elt.getContinuous().begin();
                 ctsIt != elt.getContinuous().end(); ++ctsIt )
             {
-                ComponentId cohort = ComponentId_pop;
-                if( ctsIt->getRestrictToCohort().present() ){
-                    const string& cohortName = ctsIt->getRestrictToCohort().get().getId();
-                    map<string,ComponentId>::const_iterator comp_it = identifierMap.find( cohortName );
-                    if( comp_it == identifierMap.end() ){
-                        ostringstream msg;
-                        msg << "interventions.human.intervention.continuous."
-                                "restrictToCohort: element refers to cohort "
-                                "component with identifier \"" << cohortName
-                                << "\" but no component with this id was found";
-                        throw util::xml_scenario_error( msg.str() );
-                    }
-                    cohort = comp_it->second;
+                ComponentId subPop = ComponentId_pop;
+                bool complement = false;
+                if( ctsIt->getRestrictToSubPop().present() ){
+                    const string& subPopStr = ctsIt->getRestrictToSubPop().get().getId();
+                    subPop = getComponentId( subPopStr );
+                    complement = ctsIt->getRestrictToSubPop().get().getComplement();
                 }
                 const scnXml::ContinuousList::DeploySequence& ctsSeq = ctsIt->getDeploy();
                 for( scnXml::ContinuousList::DeployConstIterator it2 = ctsSeq.begin(),
                     end2 = ctsSeq.end(); it2 != end2; ++it2 )
                 {
-                    continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, cohort ) );
+                    continuous.push_back( new ContinuousHumanDeployment( *it2, intervention, subPop, complement ) );
                 }
             }
             for( scnXml::Deployment::TimedConstIterator timedIt = elt.getTimed().begin();
                 timedIt != elt.getTimed().end(); ++timedIt )
             {
-                ComponentId cohort = ComponentId_pop;
-                if( timedIt->getRestrictToCohort().present() ){
-                    const string& cohortName = timedIt->getRestrictToCohort().get().getId();
-                    map<string,ComponentId>::const_iterator comp_it = identifierMap.find( cohortName );
-                    if( comp_it == identifierMap.end() ){
-                        ostringstream msg;
-                        msg << "interventions.human.intervention.timed."
-                                "restrictToCohort: element refers to cohort "
-                                "component with identifier \"" << cohortName
-                                << "\" but no component with this id was found";
-                        throw util::xml_scenario_error( msg.str() );
-                    }
-                    cohort = comp_it->second;
+                ComponentId subPop = ComponentId_pop;
+                bool complement = false;
+                if( timedIt->getRestrictToSubPop().present() ){
+                    const string& subPopStr = timedIt->getRestrictToSubPop().get().getId();
+                    subPop = getComponentId( subPopStr );
+                    complement = timedIt->getRestrictToSubPop().get().getComplement();
                 }
                 if( timedIt->getCumulativeCoverage().present() ){
                     const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
-                    map<string,ComponentId>::const_iterator comp_it = identifierMap.find( cumCov.getComponent() );
-                    if( comp_it == identifierMap.end() ){
-                        ostringstream msg;
-                        msg << "interventions.human.intervention.timed."
-                                "cumulativeCoverage: element refers to component identifier \""
-                                << cumCov.getComponent()
-                                << "\" but no component with this id was found";
-                        throw util::xml_scenario_error( msg.str() );
-                    }
-                    ComponentId component = comp_it->second;
-                    TimeStep maxAge = TimeStep::fromYears( cumCov.getMaxAgeYears() );
+                    ComponentId cumCovComponent = getComponentId( cumCov.getComponent() );
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
                     {
-                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, cohort, component, maxAge ) );
+                        timed.push_back( new TimedCumulativeHumanDeployment( *it2, intervention, subPop, complement, cumCovComponent ) );
                     }
                 }else{
                     for( scnXml::MassListWithCum::DeployConstIterator it2 =
                             timedIt->getDeploy().begin(), end2 =
                             timedIt->getDeploy().end(); it2 != end2; ++it2 )
                     {
-                        timed.push_back( new TimedHumanDeployment( *it2, intervention, cohort ) );
+                        timed.push_back( new TimedHumanDeployment( *it2, intervention, subPop, complement ) );
                     }
                 }
             }
@@ -292,14 +272,14 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
 #ifdef WITHOUT_BOINC
     if( util::CommandLine::option( util::CommandLine::PRINT_INTERVENTIONS ) ){
         cout << "Continuous deployments:" << endl
-            << "begin\tend\tage\tcohort\tcoverag\tcomponents" << endl;
+            << "begin\tend\tage\tsub pop\tcompl\tcoverag\tcomponents" << endl;
         for( ptr_vector<ContinuousHumanDeployment>::const_iterator it =
             continuous.begin(); it != continuous.end(); ++it ){
             it->print_details( std::cout );
             cout << endl;
         }
         cout << "Timed deployments:" << endl
-            << "time\tmin age\tmax age\tcohort\tcoverag\tcomponents" << endl;
+            << "time\tmin age\tmax age\tsub pop\tcompl\tcoverag\tcomponents" << endl;
         for( ptr_vector<TimedDeployment>::const_iterator it =
             timed.begin(); it != timed.end(); ++it ){
             it->print_details( std::cout );
@@ -313,6 +293,18 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         }
     }
 #endif
+}
+
+ComponentId InterventionManager::getComponentId( const string textId )
+{
+    map<string,ComponentId>::const_iterator it = identifierMap.find( textId );
+    if( it == identifierMap.end() ){
+        ostringstream msg;
+        msg << "unable to find an intervention component with id \""
+            << textId << "\" (wrong name, no definition or used before definition?)";
+        throw util::xml_scenario_error( msg.str() );
+    }
+    return it->second;
 }
 
 void InterventionManager::loadFromCheckpoint( OM::Population& population, TimeStep interventionTime ){

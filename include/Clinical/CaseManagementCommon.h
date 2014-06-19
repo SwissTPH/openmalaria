@@ -40,7 +40,7 @@ namespace OM { namespace Clinical {
 	/** Initialisation - reads fatality rates, etc.
 	 * Both derived case management systems have their own init function;
 	 * this is named "initCommon" to avoid confusion over which is called. */
-	static void initCommon( const Parameters& parameters, const scnXml::HealthSystem& healthSystem );
+	static void initCommon( const Parameters& parameters );
         /// Free memory
         static void cleanupCommon ();
         

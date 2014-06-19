@@ -32,7 +32,7 @@ double NormalSample::asLognormal( double mu, double sigma )const{
     return exp( sigma*x + mu );
 }
 NormalSample NormalSample::generate() {
-    return NormalSample( random::gauss(0.0, 1.0) );
+    return NormalSample( random::gauss(1.0) );
 }
 
 void NormalSampler::setParams( double m, double s ){

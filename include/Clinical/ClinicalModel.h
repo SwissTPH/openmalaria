@@ -49,7 +49,7 @@ public:
   /// @brief Static functions
   //@{
   /// Initialise whichever model is in use.
-  static void init ( const Parameters& parameters, const scnXml::Model& model, const scnXml::HealthSystem& healthSystem );
+  static void init ( const Parameters& parameters, const scnXml::Model& model );
   /// Cleanup on exit
   static void cleanup ();
   
@@ -102,7 +102,9 @@ public:
    * Only supported by immediate outcomes model. */
   virtual bool notAtRisk() =0;
   
-  virtual void massDrugAdministration( interventions::Deployment::Method method, Human& human) =0;
+    virtual void massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport ) =0;
   
   /// Force all pending summaries to be reported. Should only be called when
   /// class is about to be destroyed anyway to avoid affecting output.

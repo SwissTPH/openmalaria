@@ -42,7 +42,8 @@ TimeStep TimeStep::intervalsPerYear( TimeStep::never );
 TimeStep TimeStep::maxAgeIntervals( TimeStep::never );
 TimeStep::ReadOnly<int> TimeStep::stepsPerYear;
 
-const TimeStep TimeStep::never, TimeStep::future(0x7FFFFFFF);
+const TimeStep TimeStep::never; // default value
+const TimeStep TimeStep::future(0x3FFFFFFF);
 
 TimeStep TimeStep::simulation( TimeStep::never );
 TimeStep TimeStep::interventionPeriod( TimeStep::never );

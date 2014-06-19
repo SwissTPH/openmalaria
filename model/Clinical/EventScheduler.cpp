@@ -21,8 +21,7 @@
 #include "Clinical/EventScheduler.h"
 #include "util/random.h"
 #include "WithinHost/WHInterface.h"
-#include "Monitoring/Surveys.h"
-#include "interventions/Cohort.h"
+#include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
@@ -32,6 +31,7 @@
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
+    using namespace Monitoring;
 
 TimeStep ClinicalEventScheduler::maxUCSeekingMemory(TimeStep::never);
 TimeStep ClinicalEventScheduler::uncomplicatedCaseDuration(TimeStep::never);
@@ -91,8 +91,14 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
         }
         const scnXml::Clinical::NonMalariaFeversType& nmfDesc2 =
             model.getClinical().getNonMalariaFevers().get();
-        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentNMF(), "prNeedTreatmentNMF" );
-        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentMF(), "prNeedTreatmentMF" );
+        if( !nmfDesc2.getPrNeedTreatmentMF().present() ||
+            !nmfDesc2.getPrNeedTreatmentNMF().present() ){
+            throw util::xml_scenario_error( "prNeedTreatmentMF and "
+                "prNeedTreatmentNMF elements required in model->clinical->"
+                "NonMalariaFevers" );
+        }
+        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentNMF().get(), "prNeedTreatmentNMF" );
+        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentMF().get(), "prNeedTreatmentMF" );
     }
 }
 
@@ -186,16 +192,17 @@ bool ClinicalEventScheduler::notAtRisk() {
     throw TRACED_EXCEPTION_DEFAULT("notAtRisk: not supported by 1-day time-step models");
 }
 
-void ClinicalEventScheduler::massDrugAdministration(
-    interventions::Deployment::Method method, Human& human )
+void ClinicalEventScheduler::massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport )
 {
     // Note: we use the same medication method as with drugs as treatments, hence the actual
     // medication doesn't occur until the next timestep.
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
-    ESCaseManagement::massDrugAdministration ( method,
+    ESCaseManagement::massDrugAdministration ( 
         ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
-        medicateQueue, human.isInAnyCohort(), human.getMonitoringAgeGroup()
+        medicateQueue, human, screeningReport, drugReport
     );
 }
 
@@ -287,21 +294,18 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue, human.isInAnyCohort()
+	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
             timeLastTreatment = TimeStep::simulation;
             if( pgState & Episode::COMPLICATED ){
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                    Monitoring::Survey::MI_TREATMENTS_3, human.getMonitoringAgeGroup(), 1 );
+                Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
             }else{
                 if( pgState & Episode::SECOND_CASE ){
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                        Monitoring::Survey::MI_TREATMENTS_2, human.getMonitoringAgeGroup(), 1 );
+                    Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
                 }else{
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                        Monitoring::Survey::MI_TREATMENTS_1, human.getMonitoringAgeGroup(), 1 );
+                    Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
                 }
             }
         }
@@ -372,8 +376,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double treatmentEffectMult = 1.0;
                 
                 if( random::uniform_01() < pTreatment ){
-                    Monitoring::Surveys.getSurvey(human.isInAnyCohort()).addInt(
-                        Monitoring::Survey::MI_NMF_TREATMENTS, human.getMonitoringAgeGroup(), 1 );
+                    Survey::current().addInt( Report::MI_NMF_TREATMENTS, human, 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
                 }
                 
@@ -450,11 +453,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             double bodyMass = ageToWeight( ageYears );
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
             if( it->duration > 0.0 ){
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                .report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
+                Survey::current().report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
             }else{      // 0 or NaN
-                Monitoring::Surveys.getSurvey(human.isInAnyCohort())
-                .report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
+                Survey::current().report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
             }
 	    medicateQueue.erase (it);
         } else {   // and decrement treatment seeking delay for the rest
@@ -464,10 +465,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     }
     
     if( timeLastTreatment == TimeStep::simulation ){
-        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_TREATMENT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
     }
     if( pgState & Episode::SICK ){
-        human.removeFromCohorts( interventions::Cohort::REMOVE_AT_FIRST_BOUT );
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
     }
 }
 

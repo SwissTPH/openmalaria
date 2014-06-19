@@ -56,18 +56,20 @@ enum SurveyMeasure {
     sumlogDens= 5,
     
     /** The total number of infections in the population: includes both blood
-     * and liver stages. */
+     * and liver stages. Vivax: this is the number of broods. */
     totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *
-     * Number of hosts transmitting to mosquitoes (i.e. sum of proportion of
-     * mosquitoes that get infected). Single value, not per age-group. */
+     * Number of hosts transmitting to mosquitoes (i.e. proportion of
+     * mosquitoes that get infected multiplied by human population size).
+     * Single value, not per age-group. */
     nTransmit= 7,
     /** The sum of all detectable infections (where blood stage parasite
-     * density is above the detection limit) across all human hosts. */
+     * density is above the detection limit) across all human hosts.
+     * Vivax: the number of broods with an active blood stage. */
     totalPatentInf= 8,
-    /// Contribution to immunity functions (output not used)
-    contrib= 9,
+//     /// Contribuion to immunity functions (removed)
+//     contrib= 9,
     /// Sum of the pyrogenic threshold
     sumPyrogenThresh = 10,
     
@@ -121,8 +123,8 @@ enum SurveyMeasure {
     /// sequelae in hospital
     nHospitalSeqs= 24,
     
-    /// Number of IPT Doses; no longer used (IPT model has been removed)
-    nIPTDoses= 25,
+//     /// Number of IPT Doses (removed together with IPT model)
+//     nIPTDoses= 25,
     
     /** Annual Average Kappa
      *
@@ -138,12 +140,12 @@ enum SurveyMeasure {
     innoculationsPerAgeGroup = 30,
     
     //BEGIN Per day-of-year data (removed)
-    /// Inoculations per human (all ages) per day of year, over the last year.
-    /// (Reporting removed.)
-    innoculationsPerDayOfYear = 28,
-    /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
-    /// (Reporting removed.)
-    kappaPerDayOfYear = 29,
+//     /// Inoculations per human (all ages) per day of year, over the last year.
+//     /// (Reporting removed.)
+//     innoculationsPerDayOfYear = 28,
+//     /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
+//     /// (Reporting removed.)
+//     kappaPerDayOfYear = 29,
     //END
     
     /** @brief Vector model parameters.
@@ -216,10 +218,10 @@ enum SurveyMeasure {
     /** As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
     Clinical_DrugUsageIV = 49,
     
-    /// Number of individuals added to cohort
-    nAddedToCohort = 50,
-    /// Number of individuals removed from cohort
-    nRemovedFromCohort = 51,
+//     /// Number of cohort recruitments removed)
+//     nAddedToCohort = 50,
+//     /// Number of individuals removed from cohort (removed)
+//     nRemovedFromCohort = 51,
     
     /** Number of people (per age group) treated by mass drug administration
      * campaign. (Note that in one day time-step model MDA can be configured
@@ -260,6 +262,32 @@ enum SurveyMeasure {
      * methods. Can be higher than nCtsMDA since drugs are administered only
      * when the diagnostic is positive. Also see nCtsMDA description. */
     nCtsScreenings = 60,
+    
+    /** Number of removals from a sub-population due to expiry of duration of
+     * membership (e.g. intervention too old). */
+    nSubPopRemovalTooOld = 61,
+    /** Number of removals from a sub-population due to first
+     * infection/bout/treatment (see onFirstBout & co). */
+    nSubPopRemovalFirstEvent = 62,
+    
+    /** Report the number of Primaquine treatments given. */
+    nPQTreatments = 63,
+    
+    /** Report the number of diagnostics used during treatment.
+     * 
+     * This is not the same as Clinical_RDTs + Clinical_Microscopy: those
+     * outputs are used by the "event scheduler" 1-day timestep clinical model,
+     * whereas this output is used by the 5-day timestep model. */
+    nTreatDiagnostics = 64,
+    
+    /** Number of "recruitment only" recruitments via timed deployment. */
+    nMassRecruitOnly = 65,
+    /** Number of "recruitment only" recruitments via age-based deployment. */
+    nCtsRecruitOnly = 66,
+    
+    /** Number of deployments (of all intervention components) triggered by
+     * treatment (case management). */
+    nTreatDeployments = 67,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

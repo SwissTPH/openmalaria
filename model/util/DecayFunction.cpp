@@ -81,7 +81,7 @@ public:
         return 1.0;
     }
     TimeStep sampleAgeOfDecay () const{
-        return TimeStep::never;
+        return TimeStep::future;        // decay occurs "in the future" (don't use TimeStep::never because that is interpreted as being in the past)
     }
 };
 

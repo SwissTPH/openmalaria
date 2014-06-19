@@ -24,6 +24,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "PopulationStats.h"
 #include "Parameters.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/InterventionManager.hpp"
@@ -59,22 +60,40 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     workUnitIdentifier(0),
     cksum(ck)
 {
+    // ———  Initialise static data  ———
+    
     const scnXml::Model& model = scenario.getModel();
     const scnXml::Demography& demography = scenario.getDemography();
     
-    Parameters parameters( model.getParameters() );
-    
+    // 1) elements with no dependencies on other elements initialised here:
     OM::TimeStep::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
-    
-    // Initialize input variables and allocate memory.
-    // We try to make initialization hierarchical (i.e. most classes initialise
-    // through Population::init).
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
+    
+    // 2) elements depending on only elements initialised in (1):
     Surveys.init( scenario.getMonitoring() );
+    
+    Parameters parameters( model.getParameters() );     // depends on nothing
     Population::init( parameters, scenario );
+    
+    // 3) elements depending on other elements; dependencies on (1) are not mentioned:
+    
+    // Transmission model initialisation depends on Transmission::PerHost (from
+    // Human, from Population::init()) and Monitoring::AgeGroup (from Surveys.init()):
+    // Note: PerHost dependency can be postponed; it is only used to set adultAge
     population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
+    
+    // Depends on transmission model (for species indexes):
+    // MDA1D may depend on health system (too complex to verify)
     interventions::InterventionManager::init( scenario.getInterventions(), *population );
+    
+    // Depends on interventions:
+    Clinical::CaseManagementCommon::changeHealthSystem( scenario.getHealthSystem() );
+    
+    // Depends on interventions:
+    Surveys.init2( scenario.getMonitoring() );
+    
+    // ———  End of static data initialisation  ———
     
 #ifndef WITHOUT_BOINC
     // if not on BOINC we don't care about this
@@ -134,7 +153,8 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->_transmissionModel->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
-        + Surveys.getFinalTimestep() + TimeStep( 1 );
+        + Monitoring::Survey::getFinalTimestep() + TimeStep( 1 );
+    assert( totalSimDuration < TimeStep::future );      // absurdly unlikely, and if it really could happen we should check for overflows too
     
     if (isCheckpoint()) {
         Continuous.init( monitoring, true );
@@ -163,7 +183,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // do reporting (continuous and surveys)
             Continuous.update( *population );
-            if (TimeStep::interventionPeriod == Surveys.currentTimestep) {
+            if (TimeStep::interventionPeriod == Surveys.currentTimestep()) {
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }
@@ -192,7 +212,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
                 // nothing to do: start main phase immediately
             }
             // adjust estimation of final time step: end of current period + length of main phase
-            totalSimDuration = simPeriodEnd + Surveys.getFinalTimestep() + TimeStep( 1 );
+            totalSimDuration = simPeriodEnd + Monitoring::Survey::getFinalTimestep() + TimeStep( 1 );
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;

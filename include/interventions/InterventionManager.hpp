@@ -59,11 +59,6 @@ public:
      * interventions have been used. */
     static void loadFromCheckpoint( OM::Population& population, OM::util::TimeStep interventionTime );
     
-    /// Returns true if any cohort selection "intervention" is active
-    inline static bool cohortEnabled(){
-        return _cohortEnabled;
-    }
-    
     /** @brief Deploy interventions
      *
      * Timed interventions are deployed for this timestep.
@@ -81,7 +76,14 @@ public:
         return humanComponents[id.id];
     }
     
+    /** Get a numeric ComponentId from the textual identifier used in the XML.
+     * 
+     * If textId is unknown, an xml_scenario_error is thrown. */
+    static ComponentId getComponentId( const std::string textId );
+    
 private:
+    // Map of textual identifiers to numeric identifiers for components
+    static std::map<std::string,ComponentId> identifierMap;
     // All human intervention components, indexed by a number. This list is used
     // during initialisation and thereafter only for memory management.
     static boost::ptr_vector<HumanInterventionComponent> humanComponents;
@@ -97,7 +99,6 @@ private:
     // imported infections are not really interventions, and handled by a separate class
     // (but are grouped here for convenience and due toassociation in schema)
     static OM::Host::ImportedInfections importedInfections;
-    static bool _cohortEnabled;
 };
 
 } }

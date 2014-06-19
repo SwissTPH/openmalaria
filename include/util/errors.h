@@ -85,6 +85,7 @@ namespace OM { namespace util {
         NotImplemented,
         WHFeatures,     // these are probably all code errors
         SwitchDefault,
+        InputResource,
         Max
     }; }
     namespace Messages {

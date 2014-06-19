@@ -33,7 +33,6 @@ namespace OM { namespace interventions {
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
-    using boost::shared_ptr;
     using Transmission::PerHostInterventionData;
 
 /** Constant parameters for generic vector intervention model. */
@@ -85,7 +84,7 @@ private:
         friend class HumanGVI;
     };
     
-    shared_ptr<DecayFunction> decay;
+    boost::shared_ptr<DecayFunction> decay;
     vector<GVIAnopheles> species;  // vector specific params
     
     // This is sparse vector: only indexes corresponding to a GVI component are used
@@ -112,7 +111,7 @@ public:
         return params.decay->eval (TimeStep::simulation - deployTime, decayHet);
     }
     
-    virtual void update();
+    virtual void update(Host::Human& human);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
     virtual double relativeAttractiveness(size_t speciesIndex) const;

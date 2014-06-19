@@ -21,28 +21,31 @@
 #define OM_INTERVENTIONS_INTERFACES
 
 #include "Global.h"
+#include "Monitoring/Survey.h"
+#include <schema/interventions.h>
 #include <boost/integer_traits.hpp>
 
 namespace scnXml{ class DeploymentBase; }
 
 namespace OM {
-    namespace Host {
-        class Human;
-    }
-
+namespace Host {
+    class Human;
+}
 namespace interventions {
 
 namespace Deployment {
     enum Method {
         TIMED,   // mass distribution campaign
-        CTS     // continuous deployment (EPI, etc.)
+        CTS,     // continuous deployment (EPI, etc.)
+        TREAT   // triggered by case management
     };
 }
 
 /** Enumeration of all available components, in the order that these should be
  * deployed in within a single intervention. */
 namespace Component { enum Type {
-    COHORT,     // cohort selection
+    RECRUIT_ONLY,     // selection for a sub-population (without other effects)
+    SCREEN,     // screening, e.g. as part of MSAT
     MDA,        // mass drug administration
     MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
     PEV,        // pre-erythrocytic vaccine
@@ -100,6 +103,9 @@ public:
     /** Get the component identifier. */
     inline ComponentId id()const{ return m_id; }
     
+    /** Get the duration. */
+    inline TimeStep duration()const{ return m_duration; }
+    
     /** Returns the appropriate descriptor from the Component::Type enum.
      * 
      * This is only used a small number of times during setup, so doesn't need
@@ -110,51 +116,81 @@ public:
     virtual void print_details( std::ostream& out )const =0;
 #endif
     
+    // Only for use by InterventionManager:
+    inline void setExpireAfter( TimeStep duration ){
+        m_duration = duration;
+    }
+    
 protected:
     /** Construct (from a derived class).
      * 
      * @param id Component identifier; used as an identifier for cumulative
      *  deployment as well as to match human-specific components to general
      *  parameters (i.e. objects of the class extending this one).
+     * @param ctsMeasure Report measure to use for continuous deployment
+     * @param timedMeasure Report measure to use for timed deployment
      */
-    explicit HumanInterventionComponent(ComponentId id) : m_id(id) {}
+    explicit HumanInterventionComponent(ComponentId id,
+                                        Monitoring::ReportMeasureI ctsMeasure,
+                                        Monitoring::ReportMeasureI timedMeasure) :
+            m_id(id),
+            m_measureCts( ctsMeasure ), m_measureTimed( timedMeasure ) {}
+    
+    /** Trivial helper function to get deployment measure. */
+    inline Monitoring::ReportMeasureI reportMeasure( Deployment::Method method )const{
+        return (method == Deployment::TIMED) ? m_measureTimed :
+            (method == Deployment::CTS) ? m_measureCts :
+            Monitoring::Report::MI_TREAT_DEPLOYMENTS;
+    }
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
     HumanInterventionComponent( const HumanInterventionComponent& );
     
     ComponentId m_id;
+    TimeStep m_duration;
+    Monitoring::ReportMeasureI m_measureCts, m_measureTimed;
 };
 
 /** A description of a human intervention (as a list of components). */
 class HumanIntervention {
 public:
-    /** Add a component. */
-    inline void addComponent( const HumanInterventionComponent *component ){ components.push_back( component ); }
+    /** Create from a list of XML elements: <component id="..."/> **/
+    explicit HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Component>& componentList );
     
     /** Deploy all components to a pre-selected human. */
     void deploy( Host::Human& human, Deployment::Method method,
         VaccineLimits vaccLimits ) const;
     
-    /** Sort components according to a standard order.
-     * 
-     * The point of this is to make results repeatable even when users change
-     * the ordering of a list of intervention's components (since getting
-     * repeatable results out of OpenMalaria is often a headache anyway, we
-     * might as well at least remove this hurdle).
-     * 
-     * Note that when multiple interventions are deployed simultaneously, the
-     * order of their deployments is still dependent on the order in the XML
-     * file. */
-    void sortComponents();
-    
 #ifdef WITHOUT_BOINC
     void print_details( std::ostream& out )const;
 #endif
     
-private:
+protected:
     // List of pointers to components. Does not manage memory (InterventionManager::humanComponents does that).
     vector<const HumanInterventionComponent*> components;
+};
+
+class TriggeredDeployments {
+public:
+    TriggeredDeployments( const scnXml::TriggeredDeployments& elt );
+    
+    void deploy( Host::Human& human, Deployment::Method method,
+            VaccineLimits vaccLimits )const;
+    
+private:
+    struct SubList : protected HumanIntervention{
+        SubList( const scnXml::TriggeredDeployments::DeployType& elt );
+        
+        void deploy( Host::Human& human, Deployment::Method method,
+            VaccineLimits vaccLimits )const;
+        
+        // Deployment restrictions:
+        TimeStep minAge, maxAge;
+        double coverage;
+    };
+    
+    vector<SubList> lists;
 };
 
 } }

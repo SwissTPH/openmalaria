@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring cohortOnly="false" name="Quarterly Surveys">
+  <monitoring name="Quarterly Surveys">
     <continuous duringInit="false" period="6">
       <option name="recent births" value="true"/>
       <option name="S_v" value="true"/>
@@ -51,10 +51,6 @@
       <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="nSeq" value="true"/>
-      <option name="nHospitalDeaths" value="true"/>
-      <option name="nIndDeaths" value="true"/>
-      <option name="nDirDeaths" value="true"/>
       <option name="allCauseIMR" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="nNMFever" value="true"/>
@@ -73,9 +69,6 @@
       <option name="Clinical_DrugUsageIV" value="true"/>
       <option name="nMDAs" value="true"/>
       <option name="nMassScreenings" value="true"/>
-      <option name="nAddedToCohort" value="true"/>
-      <option name="nRemovedFromCohort" value="true"/>
-      <option name="nNmfDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <!-- we don't actually need many for testing -->
@@ -203,12 +196,13 @@
         <timed>
           <deploy coverage="0.85" time="1484"/>
           <deploy coverage="0.85" time="1849"/>
+          <!-- enable if extending the time span:
           <deploy coverage="0.85" time="2214"/>
           <deploy coverage="0.85" time="2579"/>
           <deploy coverage="0.85" time="2944"/>
           <deploy coverage="0.85" time="3309"/>
           <deploy coverage="0.85" time="3674"/>
-          <deploy coverage="0.85" time="4039"/>
+          <deploy coverage="0.85" time="4039"/> -->
         </timed>
       </deployment>
       <deployment name="Extended ITNs">

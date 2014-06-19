@@ -99,6 +99,11 @@ void DescriptiveInfection::init (const Parameters& parameters) {
         csvNum1 >> i;
         csvNum2 >> j;
         csvNum3 >> meanlogdens;
+        
+        if( i < 1 || i > numDurations || j < 1 || j > numDurations ){
+            throw util::base_exception( string("error in data file: ")
+                .append(densities_filename), Error::InputResource );
+        }
 
         //fill initial matrix
         meanLogParasiteCount[i-1][j-1]=meanlogdens;
@@ -197,17 +202,19 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         }
         _density = min(_density, maxDens);
         timeStepMaxDensity = min(timeStepMaxDensity, maxDens);
+        
+        //Compute the proportion of parasites remaining after innate blood stage effect
+        _density *= innateImmSurvFact;
+        
+        //Include here the effect of blood stage vaccination
+        _density *= bsvFactor;
+        
+        _cumulativeExposureJ += TimeStep::interval * _density;
     }
     
-    //Compute the proportion of parasites remaining after innate blood stage effect
-    _density *= innateImmSurvFact;
+    //TODO: when bugfix_max_dens is required, this can go into the infage >= 0 part
     if (bugfix_innate_max_dens) timeStepMaxDensity *= innateImmSurvFact;
-    
-    //Include here the effect of blood stage vaccination
-    _density *= bsvFactor;
     timeStepMaxDensity *= bsvFactor;
-    
-    _cumulativeExposureJ += TimeStep::interval * _density;
 }
 
 
