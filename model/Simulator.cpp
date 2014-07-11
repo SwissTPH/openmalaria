@@ -95,12 +95,10 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     
     // ———  End of static data initialisation  ———
     
-#ifndef WITHOUT_BOINC
-    // if not on BOINC we don't care about this
-    if( !scenario.getWuID().present() )
-        throw util::xml_scenario_error( "wuID required" );
-    workUnitIdentifier = scenario.getWuID().get();
-#endif
+    // Set work unit identifier, if we have one.
+    // TODO: remove this from the schema completely — it's not useful now we verify the checksum.
+    if( scenario.getWuID().present() )
+        workUnitIdentifier = scenario.getWuID().get();
     
     ifstream checkpointFile(CHECKPOINT,ios::in);
     // If not open, file doesn't exist (or is inaccessible)
