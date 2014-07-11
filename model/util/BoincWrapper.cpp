@@ -55,7 +55,7 @@ namespace BoincWrapper {
   void init () {
     cout << "BoincWrapper: not using BOINC" << endl;
   }
-  void finish(int err = 0) {
+  void finish(int err) {
       cout << '\r' << flush;	// clean last line of progress-output
     exit(err);	// doesn't return
   }
@@ -112,7 +112,7 @@ namespace BoincWrapper {
     
     SharedGraphics::init();
   }
-  void finish(int err = 0) {
+  void finish(int err) {
     boinc_finish(err);	// doesn't return
   }
   

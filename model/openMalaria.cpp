@@ -110,7 +110,10 @@ int main(int argc, char* argv[]) {
     if( errno != 0 )
         std::perror( "OpenMalaria" );
     
-    // In case an exception was thrown, we call boinc_finish here:
-    util::BoincWrapper::finish(exitStatus);	// Never returns
-    return exitStatus;  // isn't actually reached, but avoids compiler warning
+    // In case of fatal error, we call boinc_finish here:
+    if( exitStatus != 0 )
+        util::BoincWrapper::finish(exitStatus);	// Never returns
+    // In a few cases (e.g. stopping due to the --checkpoint option), we exit
+    // here. In this case we shouldn't call boinc_finish (it breaks tests).
+    return exitStatus;
 }
