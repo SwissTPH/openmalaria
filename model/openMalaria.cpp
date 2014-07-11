@@ -55,11 +55,12 @@ int main(int argc, char* argv[]) {
         // Save changes to the document if any occurred.
         documentLoader.saveDocument();
         
-        // Write scenario checksum, only if simulation completed.
-        cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
-        
         if ( !util::CommandLine::option(util::CommandLine::SKIP_SIMULATION) )
             simulator.start(documentLoader.document().getMonitoring());
+        
+        // Write scenario checksum, only if simulation completed.
+        // Writing it earlier breaks checkpointing.
+        cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
         
         // We call boinc_finish before cleanup since it should help ensure
         // app isn't killed between writing output.txt and calling boinc_finish,
