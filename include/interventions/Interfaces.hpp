@@ -46,7 +46,8 @@ namespace Deployment {
 namespace Component { enum Type {
     RECRUIT_ONLY,     // selection for a sub-population (without other effects)
     SCREEN,     // screening, e.g. as part of MSAT
-    MDA,        // mass drug administration
+    SIMPLE_TREAT,       // treatment using the simple model (e.g. for MDA)
+    P_S_TREAT,  // probabilistic choice of some simple treatment configuration
     MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
     PEV,        // pre-erythrocytic vaccine
     BSV,        // blood-stage vaccine

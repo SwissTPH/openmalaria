@@ -113,7 +113,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             if( component.getScreen().present() ){
                 hiComponent = new ScreenComponent( id, component.getScreen().get() );
             }else if( component.getMDA().present() ){
-                hiComponent = new MDAComponent( id, component.getMDA().get() );
+                hiComponent = createSimpleTreatComponent( id, component.getMDA().get() );
             }else if( component.getMDA1D().present() ){
                 //TODO(monitoring): report
                 hiComponent = new MDA1DComponent( id, component.getMDA1D().get() );

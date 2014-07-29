@@ -168,9 +168,40 @@ public:
 };
 
 /// Simple treatment: no PK/PD, just remove parasites
-class MDAComponent : public HumanInterventionComponent {
+class SimpleTreatComponent : public HumanInterventionComponent {
 public:
-    MDAComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
+    SimpleTreatComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
+        HumanInterventionComponent(id,
+                Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
+    {
+        const scnXml::Effects::OptionSequence& options = mda.getEffects().getOption();
+        assert( options.size() == 1 );
+        if( options[0].getPSelection() != 1.0 )
+            throw util::xml_scenario_error( "sum of pSelection of a group of treatments is not 1" );
+        treatId = WithinHost::WHInterface::addTreatment( options[0] );
+    }
+    
+    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+        human.withinHostModel->treatment( human, treatId );
+    }
+    
+    virtual Component::Type componentType() const{ return Component::SIMPLE_TREAT; }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << id().id << "\tTreat";
+    }
+#endif
+    
+private:
+    WithinHost::TreatmentId treatId;
+};
+
+/// As SimpleTreatComponent, but with a probabilistic choice
+class ProbSimpleTreatComponent : public HumanInterventionComponent {
+public:
+    ProbSimpleTreatComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
         HumanInterventionComponent(id,
                 Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
     {
@@ -200,7 +231,7 @@ public:
         human.withinHostModel->treatment( human, selectTreatment() );
     }
     
-    virtual Component::Type componentType() const{ return Component::MDA; }
+    virtual Component::Type componentType() const{ return Component::P_S_TREAT; }
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -230,6 +261,15 @@ private:
     };
     vector<TreatOptions> treatments;
 };
+
+HumanInterventionComponent* createSimpleTreatComponent( ComponentId id,
+                                                        const scnXml::MDAComponent& mda )
+{
+    if( mda.getEffects().getOption().size() == 1 )
+        return new SimpleTreatComponent( id, mda );
+    else
+        return new ProbSimpleTreatComponent( id, mda );
+}
 
 class ScreenComponent : public HumanInterventionComponent {
 public:
