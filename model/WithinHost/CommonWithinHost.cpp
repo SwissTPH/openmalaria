@@ -122,42 +122,39 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor)
 
     bool treatmentLiver = treatExpiryLiver >= TimeStep::simulation;
     bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
-    bool treatmentBoth = treatmentLiver && treatmentBlood;
+    double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
-        double survivalFactor = bsvFactor * _innateImmSurvFact;
-        survivalFactor *= (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY);
-        survivalFactor *= pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
-        
-        for( int step = 0, steps = TimeStep::interval; step < steps; ++step ){
+    for( int step = 0, steps = TimeStep::interval; step < steps; ++step ){
+        // every day, update each infection, then decay drugs
+        for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
             // Note: this is only one treatment model; there is also the PK/PD model
-            bool expires = treatmentBoth /* effective treatment targeting both stages */ ||
-                (treatmentBlood && (*inf)->bloodStage()) /* blood stage treatment */ ||
-                (treatmentLiver && !(*inf)->bloodStage()) /* liver stage treatment */;
+            bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);
             
-            if( !expires ) /* no expiry due to simple treatment model; do update */
-                expires = (*inf)->update(survivalFactor) /* returns true on expiry (due to PK/PD or self-termination) */;
+            if( !expires ){     /* no expiry due to simple treatment model; do update */
+                double survivalFactor = survivalFactor_part *
+                    (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY) *
+                    pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
+                // update, may result in termination of infection:
+                expires = (*inf)->update(survivalFactor);
+            }
             
             if( expires ){
                 delete *inf;
                 inf = infections.erase(inf);        // inf points to next infection now so don't increment with ++inf
                 --numInfs;
-                goto CONTINUE_OUTER;   // infection no longer exists so skip the rest
+            } else {
+                double density = (*inf)->getDensity();
+                totalDensity += density;
+                timeStepMaxDensity = max(timeStepMaxDensity, density);
+                _cumulativeY += density;
+                ++inf;
             }
-            
-            double density = (*inf)->getDensity();
-            totalDensity += density;
-            timeStepMaxDensity = max(timeStepMaxDensity, density);
-            _cumulativeY += density;
         }
-        
-        ++inf;
-        CONTINUE_OUTER:; // yes, it's a hideous goto — but C++98 doesn't have another way of continuing the outer loop
+        pkpdModel->decayDrugs ();
     }
+    
     util::streamValidate(totalDensity);
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
-
-    pkpdModel->decayDrugs ();
 }
 
 void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {

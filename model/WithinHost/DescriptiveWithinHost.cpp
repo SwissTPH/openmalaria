@@ -126,7 +126,6 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     
     bool treatmentLiver = treatExpiryLiver >= TimeStep::simulation;
     bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
-    bool treatmentBoth = treatmentLiver && treatmentBlood;
     
     for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
@@ -137,9 +136,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // SP drug action and the PK/PD model would need to be abstracted
         // behind a common interface.
         if ( (*inf)->expired() /* infection has self-terminated */ ||
-            treatmentBoth /* effective treatment targeting both stages */ ||
-            (treatmentBlood && (*inf)->bloodStage()) /* blood stage treatment */ ||
-            (treatmentLiver && !(*inf)->bloodStage()) /* liver stage treatment */ )
+            ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver) )
         {
             delete *inf;
             inf=infections.erase(inf);
