@@ -109,7 +109,7 @@ public:
   
   enum ActiveModel {
       NON_PKPD = 0,
-      HOSHEN_PKPD,
+//       HOSHEN_PKPD,   note: this code is no longer maintained or enabled
       LSTM_PKPD
   };
   

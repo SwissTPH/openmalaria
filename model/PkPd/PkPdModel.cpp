@@ -44,37 +44,38 @@ PkPdModel::ActiveModel PkPdModel::activeModel = PkPdModel::NON_PKPD;
 
 void PkPdModel::init( const scnXml::Scenario& scenario ){
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-	if (scenario.getPharmacology().present()) {
-	    activeModel = LSTM_PKPD;
-	    LSTMDrugType::init(scenario.getPharmacology().get ());
-	} else {
-	    activeModel = HOSHEN_PKPD;
+        if (scenario.getPharmacology().present()) {
+            activeModel = LSTM_PKPD;
+            LSTMDrugType::init(scenario.getPharmacology().get ());
+        } else {
+            throw util::xml_scenario_error( "pharmacology element required in XML" );
+        }
+        /* if ... {
             // Hoshen model has been removed.
-            throw util::xml_scenario_error( "drugDescription element required in XML" );
-// 	    ProteomeManager::init ();
-// 	    HoshenDrugType::init();
-	}
+            activeModel = HOSHEN_PKPD;
+            ProteomeManager::init ();
+            HoshenDrugType::init();
+        } */
     }
 }
 void PkPdModel::cleanup () {
     if (activeModel == LSTM_PKPD) {
-	LSTMDrugType::cleanup();
-    } else if (activeModel == HOSHEN_PKPD) {
+        LSTMDrugType::cleanup();
+    } /* else if (activeModel == HOSHEN_PKPD) {
         assert( false );
-// 	HoshenDrugType::cleanup();
-// 	ProteomeManager::cleanup ();
-    }
+        HoshenDrugType::cleanup();
+        ProteomeManager::cleanup ();
+    } */
 }
 
 PkPdModel* PkPdModel::createPkPdModel () {
     if (activeModel == NON_PKPD) {
-	return new VoidPkPdModel();
+        return new VoidPkPdModel();
     } else if (activeModel == LSTM_PKPD) {
-	return new LSTMPkPdModel ();
-    } else if (activeModel == HOSHEN_PKPD) {
-        
-// 	return new HoshenPkPdModel ();
-    }
+        return new LSTMPkPdModel ();
+    } /* else if (activeModel == HOSHEN_PKPD) {
+        return new HoshenPkPdModel ();
+    } */
     throw TRACED_EXCEPTION_DEFAULT("bad PKPD model");
 }
 

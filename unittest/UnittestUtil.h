@@ -71,22 +71,20 @@ public:
 	    dd.getDrug().push_back (drug);
 	    
 	    PkPd::LSTMDrugType::init (dd);
-	} else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
-            assert( false );
-// 	    PkPd::ProteomeManager::init ();
-// 	    PkPd::HoshenDrugType::init();
-	} else {
+	} /*else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
+	    PkPd::ProteomeManager::init ();
+	    PkPd::HoshenDrugType::init();
+	} */else {
 	    assert (false);
 	}
     }
     static void PkPdSuiteTearDown () {
 	if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::LSTM_PKPD) {
 	    PkPd::LSTMDrugType::cleanup();
-	} else if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::HOSHEN_PKPD) {
-            assert( false );
-// 	    PkPd::HoshenDrugType::cleanup();
-// 	    PkPd::ProteomeManager::cleanup();
-	}
+	} /*else if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::HOSHEN_PKPD) {
+	    PkPd::HoshenDrugType::cleanup();
+	    PkPd::ProteomeManager::cleanup();
+	} */
     }
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
