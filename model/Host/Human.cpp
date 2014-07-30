@@ -63,11 +63,6 @@ void Human::initHumanParameters( const Parameters& parameters, const scnXml::Sce
     Clinical::ClinicalModel::init( parameters, model );
 }
 
-void Human::clear() {   // static clear
-  Clinical::ClinicalModel::cleanup();
-  Transmission::PerHost::cleanup();
-}
-
 
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 

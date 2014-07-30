@@ -19,6 +19,7 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
 #include "Monitoring/Survey.h"
@@ -153,11 +154,11 @@ void ClinicalImmediateOutcomes::severeMalaria (
     // Probability of getting cured after getting treatment:
     p3 = cureRate[regimen];
     // p4 is the hospital case-fatality rate from Tanzania
-    p4 = caseFatality (ageYears);
+    p4 = caseFatalityRate.eval (ageYears);
     // p5 here is the community threshold case-fatality rate
-    p5 = getCommunityCaseFatalityRate (p4);
+    p5 = getCommunityCFR (p4);
     // p6 is P(seq) for treated patients
-    p6 = pSequelaeInpatient (ageYears);
+    p6 = pSequelaeInpatient.eval (ageYears);
     // p7 is P(seq) when parasites aren't cleared
     p7 = p6;
 

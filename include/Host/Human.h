@@ -184,8 +184,6 @@ public:
   ///@name static public
   //@{
   static void initHumanParameters (const OM::Parameters& parameters, const scnXml::Scenario& scenario);
-  
-  static void clear();
   //@}
     
 public:

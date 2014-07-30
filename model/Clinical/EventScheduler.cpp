@@ -19,6 +19,7 @@
  */
 
 #include "Clinical/EventScheduler.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "util/random.h"
 #include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
@@ -43,7 +44,7 @@ double ClinicalEventScheduler::alpha;
 
 double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
-AgeGroupInterpolation* ClinicalEventScheduler::weight = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolator ClinicalEventScheduler::weight;
 
 double ClinicalEventScheduler::logOddsAbBase = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbNegTest = std::numeric_limits<double>::signaling_NaN();
@@ -51,12 +52,12 @@ double ClinicalEventScheduler::logOddsAbPosTest = std::numeric_limits<double>::s
 double ClinicalEventScheduler::logOddsAbNeed = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbInformal = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::oneMinusEfficacyAb = std::numeric_limits<double>::signaling_NaN();
-AgeGroupInterpolation* ClinicalEventScheduler::severeNmfMortality = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolator ClinicalEventScheduler::severeNmfMortality;
 
 bool opt_non_malaria_fevers = false;
 
-AgeGroupInterpolation* ClinicalEventScheduler::NMF_need_antibiotic = AgeGroupInterpolation::dummyObject();
-AgeGroupInterpolation* ClinicalEventScheduler::MF_need_antibiotic = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolator ClinicalEventScheduler::NMF_need_antibiotic;
+AgeGroupInterpolator ClinicalEventScheduler::MF_need_antibiotic;
 
 // -----  static init  -----
 
@@ -73,10 +74,10 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
     if( !human.getWeight().present() ){
         throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
     }
-    weight = AgeGroupInterpolation::makeObject( human.getWeight().get(), "weight" );
+    weight.set( human.getWeight().get(), "weight" );
     hetWeightMultStdDev = human.getWeight().get().getMultStdDev();
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
-    minHetWeightMult = 0.5 / weight->eval( 0.0 );
+    minHetWeightMult = 0.5 / weight.eval( 0.0 );
     
     alpha = exp( -parameters[Parameters::CFR_NEG_LOG_ALPHA] );
     if( !(0.0<=alpha && alpha<=1.0) ){
@@ -97,8 +98,8 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
                 "prNeedTreatmentNMF elements required in model->clinical->"
                 "NonMalariaFevers" );
         }
-        NMF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentNMF().get(), "prNeedTreatmentNMF" );
-        MF_need_antibiotic = AgeGroupInterpolation::makeObject( nmfDesc2.getPrNeedTreatmentMF().get(), "prNeedTreatmentMF" );
+        NMF_need_antibiotic.set( nmfDesc2.getPrNeedTreatmentNMF().get(), "prNeedTreatmentNMF" );
+        MF_need_antibiotic.set( nmfDesc2.getPrNeedTreatmentMF().get(), "prNeedTreatmentMF" );
     }
 }
 
@@ -130,7 +131,7 @@ void ClinicalEventScheduler::setParameters(const scnXml::HSEventScheduler& esDat
     }
     cumDailyPrImmUCTS.back() = 1.0;
     
-    CaseManagementCommon::scaleCaseFatalityRate( alpha );
+    caseFatalityRate.scale( alpha );
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
         if( !esData.getNonMalariaFevers().present() ){
@@ -145,14 +146,8 @@ void ClinicalEventScheduler::setParameters(const scnXml::HSEventScheduler& esDat
         logOddsAbNeed = log(nmfDesc.getEffectNeed());
         logOddsAbInformal = log(nmfDesc.getEffectInformal());
         oneMinusEfficacyAb = 1.0 - nmfDesc.getTreatmentEfficacy();
-        severeNmfMortality = AgeGroupInterpolation::makeObject( nmfDesc.getCFR(), "CFR" );
+        severeNmfMortality.set( nmfDesc.getCFR(), "CFR" );
     }
-}
-
-void ClinicalEventScheduler::cleanup () {
-    AgeGroupInterpolation::freeObject( weight );
-    AgeGroupInterpolation::freeObject( NMF_need_antibiotic );
-    AgeGroupInterpolation::freeObject( MF_need_antibiotic );
 }
 
 
@@ -180,9 +175,6 @@ ClinicalEventScheduler::ClinicalEventScheduler (double tSF) :
         ++counter;
 #endif
     } while( hetWeightMultiplier < minHetWeightMult );
-}
-ClinicalEventScheduler::~ClinicalEventScheduler() {
-    AgeGroupInterpolation::freeObject( severeNmfMortality );
 }
 
 
@@ -222,7 +214,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    latestReport.update (human, pgState);
         } else {
 	    if ( pgState & Episode::COMPLICATED ) {
-		if( random::uniform_01() < ESCaseManagement::pSequelaeInpatient( ageYears ) ){
+		if( random::uniform_01() < pSequelaeInpatient.eval( ageYears ) ){
 		    pgState = Episode::State (pgState | Episode::SEQUELAE);
                 }else{
 		    pgState = Episode::State (pgState | Episode::RECOVERY);
@@ -322,10 +314,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if( (pgState & Episode::COMPLICATED)
 	    && !(pgState & Episode::DIRECT_DEATH)
 	) {
-	    double pDeath = CaseManagementCommon::caseFatality( ageYears );
+	    double pDeath = caseFatalityRate.eval( ageYears );
 	    // community fatality rate when not in hospital or delayed hospital entry
 	    if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
-                pDeath = CaseManagementCommon::getCommunityCaseFatalityRate( pDeath );
+                pDeath = getCommunityCFR( pDeath );
 	    if (random::uniform_01() < pDeath) {
 		pgState = Episode::State (pgState | Episode::DIRECT_DEATH | Episode::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
@@ -342,8 +334,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                  * treatment. */
                 bool isMalarial = pgState & Episode::MALARIA;
                 double pNeedTreat = isMalarial ?
-                        MF_need_antibiotic->eval( ageYears ) :
-                        NMF_need_antibiotic->eval( ageYears );
+                        MF_need_antibiotic.eval( ageYears ) :
+                        NMF_need_antibiotic.eval( ageYears );
                 bool needTreat = random::bernoulli(pNeedTreat);
                 
                 // Calculate chance of antibiotic administration:
@@ -383,7 +375,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 // In a severe NMF case (only when not malarial), there is a
                 // chance of death:
                 if( needTreat ){
-                    double pDeath = severeNmfMortality->eval( ageYears ) * treatmentEffectMult;
+                    double pDeath = severeNmfMortality.eval( ageYears ) * treatmentEffectMult;
                     if( random::uniform_01() < pDeath ){
                         pgState = Episode::State (pgState | Episode::DIRECT_DEATH);
                     }
@@ -409,7 +401,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 		double pDeath = 1.0 - exp( neg_v * parasiteReductionEffect );
 		// community fatality rate when not in hospital
 		if( !(pgState & Episode::EVENT_IN_HOSPITAL) )
-		    pDeath = CaseManagementCommon::getCommunityCaseFatalityRate( pDeath );
+		    pDeath = getCommunityCFR( pDeath );
 		if (random::uniform_01() < pDeath) {
 		    pgState = Episode::State (pgState | Episode::DIRECT_DEATH);
 		    // Human is killed at end of time at risk

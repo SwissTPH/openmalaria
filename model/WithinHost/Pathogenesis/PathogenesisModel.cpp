@@ -38,7 +38,7 @@ double PathogenesisModel::sevMal_21;
 double PathogenesisModel::comorbintercept_24;
 double PathogenesisModel::critAgeComorb_30;
 
-AgeGroupInterpolation* PathogenesisModel::NMF_incidence = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolator PathogenesisModel::NMF_incidence;
 
 bool opt_predetermined_episodes = false, opt_mueller_pres_model = false;
 
@@ -49,7 +49,7 @@ void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinic
             throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
         }
         const scnXml::Clinical::NonMalariaFeversType& nmfDesc = clinical.getNonMalariaFevers().get();
-        NMF_incidence = AgeGroupInterpolation::makeObject( nmfDesc.getIncidence(), "incidence" );
+        NMF_incidence.set( nmfDesc.getIncidence(), "incidence" );
     }
     if( nmfOnly ) return;
     
@@ -70,9 +70,6 @@ void PathogenesisModel::init( const Parameters& parameters, const scnXml::Clinic
             PyrogenPathogenesis::init( parameters );
         }
     }
-}
-void PathogenesisModel::cleanup() {
-    AgeGroupInterpolation::freeObject( NMF_incidence );
 }
 
 PathogenesisModel* PathogenesisModel::createPathogenesisModel(double cF) {
@@ -132,8 +129,8 @@ Pathogenesis::StatePair PathogenesisModel::determineState (double ageYears, doub
 }
 
 Pathogenesis::State PathogenesisModel::sampleNMF( double ageYears ){
-    if ( NMF_incidence->isSet() ) {
-        double pNMF = NMF_incidence->eval( ageYears );
+    if ( NMF_incidence.isSet() ) {
+        double pNMF = NMF_incidence.eval( ageYears );
         if( random::bernoulli( pNMF ) )
             return Pathogenesis::STATE_NMF;
     }

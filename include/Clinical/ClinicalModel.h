@@ -50,8 +50,11 @@ public:
   //@{
   /// Initialise whichever model is in use.
   static void init ( const Parameters& parameters, const scnXml::Model& model );
-  /// Cleanup on exit
-  static void cleanup ();
+  
+    /** Set data for a new health system.
+     * 
+     */
+    static void changeHS (const scnXml::HealthSystem& healthSystem);
   
   /// Static checkpointing
   static void staticCheckpoint (istream& stream);

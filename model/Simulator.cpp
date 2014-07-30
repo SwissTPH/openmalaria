@@ -24,7 +24,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "PopulationStats.h"
 #include "Parameters.h"
-#include "Clinical/CaseManagementCommon.h"
+#include "Clinical/ClinicalModel.h"
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/InterventionManager.hpp"
@@ -88,7 +88,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     interventions::InterventionManager::init( scenario.getInterventions(), *population );
     
     // Depends on interventions:
-    Clinical::CaseManagementCommon::changeHealthSystem( scenario.getHealthSystem() );
+    Clinical::ClinicalModel::changeHS( scenario.getHealthSystem() );
     
     // Depends on interventions:
     Surveys.init2( scenario.getMonitoring() );

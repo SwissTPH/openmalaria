@@ -37,7 +37,7 @@ namespace scnXml {
 namespace OM {
 namespace Clinical {
 
-using util::AgeGroupInterpolation;
+using util::AgeGroupInterpolator;
 
 /** Tracks clinical status (sickness), triggers case management for new events,
  * medicates treatment, determines patient recovery, death and sequelae.
@@ -51,10 +51,8 @@ class ClinicalEventScheduler : public ClinicalModel
 public:
     static void init (const OM::Parameters& parameters, const scnXml::Model& model);
     static void setParameters (const scnXml::HSEventScheduler& esData);
-    static void cleanup ();
 
     ClinicalEventScheduler (double tSF);
-    ~ClinicalEventScheduler ();
     
     virtual bool notAtRisk();
 
@@ -95,12 +93,12 @@ private:
      * @param ageYears Age in years
      * @returns Mass in kg */
     inline double ageToWeight (double ageYears) {
-        return weight->eval( ageYears ) * hetWeightMultiplier;
+        return weight.eval( ageYears ) * hetWeightMultiplier;
     }
     
     static double hetWeightMultStdDev;
     static double minHetWeightMult;
-    static AgeGroupInterpolation* weight;
+    static AgeGroupInterpolator weight;
     
     /** Base log odds of treatment of non-malarial fevers in absense of a
      * malaria diagnostic and irrespective of whether treatment is needed.
@@ -125,15 +123,15 @@ private:
     static double oneMinusEfficacyAb;
     /** Case fatality rate of non-malaria fevers requiring treatment given that
      * the case is not treated. */
-    static AgeGroupInterpolation* severeNmfMortality;
+    static AgeGroupInterpolator severeNmfMortality;
     
     /// Probability that an NMF needs antibiotic treatment and could lead to death.
-    static AgeGroupInterpolation* NMF_need_antibiotic;
+    static AgeGroupInterpolator NMF_need_antibiotic;
     /** Probability that a malarial fever classified as uncomplicated requires
      * antibiotic treatment (and death could occur from non-malarial causes).
      * Unclear whether using this at the same time as comorbidity parameters
      * makes any sense. */
-    static AgeGroupInterpolation* MF_need_antibiotic;
+    static AgeGroupInterpolator MF_need_antibiotic;
     
     // Note on memory usage: Pathogenesis::State is and enum (an int), so we
     // have a vtable followed by 3 ints, a double and a list. Alignment probably

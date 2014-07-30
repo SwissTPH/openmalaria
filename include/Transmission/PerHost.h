@@ -33,7 +33,7 @@ namespace OM {
 namespace Transmission {
     
 class TransmissionModel;
-using util::AgeGroupInterpolation;
+using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::DecayFuncHet;
 
@@ -124,8 +124,6 @@ public:
     //@{
     /** Static initialisation. */
     static void init (const scnXml::AgeGroupValues& availabilityToMosquitoes);
-    /** Static cleanup. */
-    static void cleanup ();
     //@}
     
     ///@brief Initialisation / checkpionting
@@ -170,7 +168,7 @@ public:
      * Also has a switch to put individuals entirely outside transmission. */
     inline double relativeAvailabilityAge (double ageYears) const {
         return outsideTransmission ? 0.0 :
-            relAvailAge->eval( ageYears );
+            relAvailAge.eval( ageYears );
     }
     
     /** Relative availability of host to mosquitoes excluding age factor.
@@ -235,7 +233,7 @@ public:
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
     static inline double adultAge() {
-        return relAvailAge->firstGlobalMaximum();
+        return relAvailAge.firstGlobalMaximum();
     }
     
     /** Get whether the user has any active deployments of interventions of
@@ -270,7 +268,7 @@ private:
     typedef boost::ptr_list<PerHostInterventionData> ListActiveComponents;
     ListActiveComponents activeComponents;
     
-    static AgeGroupInterpolation* relAvailAge;
+    static AgeGroupInterpolator relAvailAge;
 };
 
 }

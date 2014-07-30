@@ -30,13 +30,10 @@ using namespace OM::util;
 
 // -----  PerHost static  -----
 
-AgeGroupInterpolation* PerHost::relAvailAge = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolator PerHost::relAvailAge;
 
 void PerHost::init ( const scnXml::AgeGroupValues& availabilityToMosquitoes ) {
-    relAvailAge = AgeGroupInterpolation::makeObject( availabilityToMosquitoes, "availabilityToMosquitoes" );
-}
-void PerHost::cleanup () {
-    AgeGroupInterpolation::freeObject( relAvailAge );
+    relAvailAge.set( availabilityToMosquitoes, "availabilityToMosquitoes" );
 }
 
 // -----  PerHost non-static -----

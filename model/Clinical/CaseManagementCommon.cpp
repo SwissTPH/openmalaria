@@ -27,46 +27,20 @@
 #include <boost/format.hpp>
 
 namespace OM { namespace Clinical {
-    using util::AgeGroupInterpolation;
-    
-    util::AgeGroupInterpolation* CaseManagementCommon::caseFatalityRate = AgeGroupInterpolation::dummyObject();
-    double CaseManagementCommon::_oddsRatioThreshold;
-    util::AgeGroupInterpolation* CaseManagementCommon::pSeqInpatient = AgeGroupInterpolation::dummyObject();
-    
-    // -----  functions  -----
-    
-    void CaseManagementCommon::initCommon( const OM::Parameters& parameters ){
-	_oddsRatioThreshold = exp (parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY]);
-    }
-    void CaseManagementCommon::cleanupCommon (){
-        AgeGroupInterpolation::freeObject( caseFatalityRate );
-        AgeGroupInterpolation::freeObject( pSeqInpatient );
-    }
-    
-    void CaseManagementCommon::changeHealthSystem( const scnXml::HealthSystem& healthSystem ){
-	readCommon( healthSystem );
-	
-	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
-	    ESCaseManagement::setHealthSystem(healthSystem);
-        }else{
-	    ClinicalImmediateOutcomes::setHealthSystem(healthSystem);
-        }
-    }
-    
-    void CaseManagementCommon::readCommon (const scnXml::HealthSystem& healthSystem)
-    {
-	// -----  case fatality rates  -----
-        AgeGroupInterpolation::freeObject( caseFatalityRate );
-	caseFatalityRate = AgeGroupInterpolation::makeObject( healthSystem.getCFR(), "CFR" );
-	
-	// -----  sequelae  -----
-        AgeGroupInterpolation::freeObject( pSeqInpatient );
-        pSeqInpatient = AgeGroupInterpolation::makeObject( healthSystem.getPSequelaeInpatient(), "pSequelaeInpatient" );
-    }
-    
-    double CaseManagementCommon::getCommunityCaseFatalityRate (double caseFatalityRatio)
-    {
-	double x = caseFatalityRatio * _oddsRatioThreshold;
-	return x / (1 - caseFatalityRatio + x);
-    }
+
+//log odds ratio of case-fatality in community compared to hospital
+double oddsRatioThreshold;
+
+void initCommunityCFR( const OM::Parameters& parameters ){
+    oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
+}
+
+double getCommunityCFR (double caseFatalityRatio){
+    double x = caseFatalityRatio * oddsRatioThreshold;
+    return x / (1 - caseFatalityRatio + x);
+}
+
+util::AgeGroupInterpolator caseFatalityRate;
+util::AgeGroupInterpolator pSequelaeInpatient;
+
 } }

@@ -23,7 +23,6 @@
 
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "WithinHost/WHInterface.h"
 
 namespace OM {
@@ -44,7 +43,7 @@ enum Type {
 /** This implementation of the model is intended to use the old case-management
  * model with immediate outcomes of clinical events (immediate recovery with
  * total parasite clearance or immediate death). */
-class ClinicalImmediateOutcomes : public ClinicalModel, CaseManagementCommon
+class ClinicalImmediateOutcomes : public ClinicalModel
 {
 public:
     /** Initialises parameters, loading from XML data. */

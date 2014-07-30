@@ -33,7 +33,7 @@ namespace scnXml{
 }
 
 namespace OM { namespace WithinHost { namespace Pathogenesis {
-using util::AgeGroupInterpolation;
+using util::AgeGroupInterpolator;
 
 /*! PathogenesisModel abstract base class.
  *
@@ -42,7 +42,6 @@ class PathogenesisModel {
 public:
     /// Calls static init on correct PathogenesisModel.
     static void init( const Parameters& parameters, const scnXml::Clinical& clinical, bool nmfOnly );
-    static void cleanup();
 
     /** Create a sub-class instance, dependant on global options.
     *
@@ -93,7 +92,7 @@ private:
     /// Comorbidity prevalence at birth as a risk factor for severe
     static double comorbintercept_24;
     /// Rate of Non-Malaria Fever incidence by age. Non-seasonal.
-    static AgeGroupInterpolation* NMF_incidence;
+    static AgeGroupInterpolator NMF_incidence;
     //@}
 
 protected:

@@ -32,6 +32,22 @@
 */
 
 namespace OM { namespace util {
+
+// ———  AgeGroupInterpolation derivatives  ———
+    
+    void AgeGroupInterpolation::outputSamples( const string name ){
+#ifdef WITHOUT_BOINC
+        if( !util::CommandLine::option(util::CommandLine::SAMPLE_INTERPOLATIONS) ){
+            return;
+        }
+        ofstream fstream( (name+".csv").c_str() );
+        
+        double max = TimeStep::maxAgeIntervals.inYears();
+        for( double age = 0.0; age < max; age += 0.1 ){
+            fstream << age << "," << this->eval( age ) << endl;
+        }
+#endif
+    }
     
     /** Dummy object, for initialization. Potentially makes code safer.
      ********************************************/
@@ -279,43 +295,33 @@ namespace OM { namespace util {
     */
     
     
-    // -----  interface / static functions  -----
+    // -----  AgeGroupInterpolator  -----
     
-    AgeGroupInterpolation* AgeGroupInterpolation::dummyObject(){
-        return &AgeGroupDummy::singleton;
-    }
-    AgeGroupInterpolation* AgeGroupInterpolation::makeObject(
+    AgeGroupInterpolator::AgeGroupInterpolator() :
+        obj(&AgeGroupDummy::singleton) {}
+    
+    void AgeGroupInterpolator::set(
         const scnXml::AgeGroupValues& ageGroups, const char* eltName
     ){
+        reset();
         // Type mostly equivalent to a std::string:
         const scnXml::AgeGroupValues::InterpolationOptional& interp = ageGroups.getInterpolation();
         if( !interp.present() || interp.get() == "linear" ){
-            return new AgeGroupPiecewiseLinear( ageGroups, eltName );
+            obj = new AgeGroupPiecewiseLinear( ageGroups, eltName );
         }else if( interp.get() == "none" ){
-            return new AgeGroupPiecewiseConstant( ageGroups, eltName );
+            obj = new AgeGroupPiecewiseConstant( ageGroups, eltName );
         }else{
             throw util::xml_scenario_error( (boost::format( "age group interpolation %1% not implemented" ) %interp).str() );
         }
     }
-    void AgeGroupInterpolation::freeObject( AgeGroupInterpolation* obj ){
+    void AgeGroupInterpolator::reset(){
         assert( obj != NULL );  // should not do that
         if( obj != &AgeGroupDummy::singleton ){
             delete obj;
             obj = &AgeGroupDummy::singleton;
         }
     }
-    
-    void AgeGroupInterpolation::outputSamples( const string name ){
-#ifdef WITHOUT_BOINC
-        if( !util::CommandLine::option(util::CommandLine::SAMPLE_INTERPOLATIONS) ){
-            return;
-        }
-        ofstream fstream( (name+".csv").c_str() );
-        
-        double max = TimeStep::maxAgeIntervals.inYears();
-        for( double age = 0.0; age < max; age += 0.1 ){
-            fstream << age << "," << this->eval( age ) << endl;
-        }
-#endif
+    bool AgeGroupInterpolator::isSet()    {
+        return obj != &AgeGroupDummy::singleton;
     }
 } }

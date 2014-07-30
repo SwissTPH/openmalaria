@@ -25,7 +25,7 @@
 #include "util/errors.h"
 #include "util/TimeStep.h"
 #include "Monitoring/Survey.h"
-#include "Clinical/CaseManagementCommon.h"
+#include "Clinical/ClinicalModel.h"
 #include "Population.h"
 #include "Transmission/TransmissionModel.h"
 #include "util/random.h"
@@ -91,7 +91,7 @@ public:
         newHS( hs._clone() )
     {}
     virtual void deploy (OM::Population& population) {
-        Clinical::CaseManagementCommon::changeHealthSystem( *newHS );
+        Clinical::ClinicalModel::changeHS( *newHS );
         delete newHS;
         newHS = 0;
     }

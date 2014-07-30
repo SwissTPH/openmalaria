@@ -54,12 +54,17 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
     }else{
         ClinicalImmediateOutcomes::initParameters();
     }
-    CaseManagementCommon::initCommon( parameters );
+    initCommunityCFR( parameters );
 }
-void ClinicalModel::cleanup () {
-    CaseManagementCommon::cleanupCommon();
-    if (opt_event_scheduler)
-        ClinicalEventScheduler::cleanup();
+
+void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
+    caseFatalityRate.set( healthSystem.getCFR(), "CFR" );
+    pSequelaeInpatient.set( healthSystem.getPSequelaeInpatient(), "pSequelaeInpatient" );
+    if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
+        ESCaseManagement::setHealthSystem(healthSystem);
+    }else{
+        ClinicalImmediateOutcomes::setHealthSystem(healthSystem);
+    }
 }
 
 void ClinicalModel::staticCheckpoint (istream& stream) {

@@ -27,7 +27,7 @@
 #include "ExtraAsserts.h"
 #include "util/AgeGroupInterpolation.h"
 
-using util::AgeGroupInterpolation;
+using util::AgeGroupInterpolator;
 
 class AgeGroupInterpolationSuite : public CxxTest::TestSuite
 {
@@ -52,27 +52,26 @@ public:
     }
     
     void testDummy() {
-        AgeGroupInterpolation *o = AgeGroupInterpolation::dummyObject();
-        TS_ASSERT_THROWS( o->eval(5.7), const std::exception& );
-        AgeGroupInterpolation::freeObject(o);
+        AgeGroupInterpolator o;
+        TS_ASSERT_THROWS( o.eval(5.7), const std::exception& );
     }
     
     void testPiecewiseConst () {
         agvElt->setInterpolation( "none" );
-        AgeGroupInterpolation *o = AgeGroupInterpolation::makeObject( *agvElt, "testPiecewiseConst" );
+        AgeGroupInterpolator o;
+        o.set( *agvElt, "testPiecewiseConst" );
         for( size_t i = 0; i < testLen; ++i ){
-            TS_ASSERT_APPROX( o->eval( testAges[ i ] ), piecewiseConstValues[ i ] );
+            TS_ASSERT_APPROX( o.eval( testAges[ i ] ), piecewiseConstValues[ i ] );
         }
-        AgeGroupInterpolation::freeObject(o);
     }
     
     void testLinearInterp () {
         agvElt->setInterpolation( "linear" );
-        AgeGroupInterpolation *o = AgeGroupInterpolation::makeObject( *agvElt, "testLinearInterp" );
+        AgeGroupInterpolator o;
+        o.set( *agvElt, "testLinearInterp" );
         for( size_t i = 0; i < testLen; ++i ){
-            TS_ASSERT_APPROX( o->eval( testAges[ i ] ), linearInterpValues[ i ] );
+            TS_ASSERT_APPROX( o.eval( testAges[ i ] ), linearInterpValues[ i ] );
         }
-        AgeGroupInterpolation::freeObject(o);
     }
     
 private:

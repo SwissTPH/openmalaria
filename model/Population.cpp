@@ -60,7 +60,6 @@ void Population::init( const Parameters& parameters, const scnXml::Scenario& sce
 void Population::clear()
 {
     PkPd::PkPdModel::cleanup ();
-    Host::Human::clear();
 }
 
 void Population::staticCheckpoint (istream& stream)
