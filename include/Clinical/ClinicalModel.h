@@ -56,26 +56,10 @@ public:
      */
     static void changeHS (const scnXml::HealthSystem& healthSystem);
   
-  /// Static checkpointing
-  static void staticCheckpoint (istream& stream);
-  static void staticCheckpoint (ostream& stream);
-  
   /** Return a new ClinicalModel.
    *
    * @param tSF	treatment seeking factor, passed to CaseManagementModel */
   static ClinicalModel* createClinicalModel (double tSF);
-  
-  static void initMainSimulation ();
-  
-  /** Calculate infant mortality as deaths/1000 livebirths for the whole main-
-   * simulation period (not as deaths/1000 years-at-risk per survey).
-   * 
-   * This mimicks field data on all-cause mortality in infants.
-   * Uses the kaplan-meier method because the demography was set up to provide
-   * a stable age-distribution but unfortunately does not accurately describe
-   * death rates. The kaplan-meier estimate is the product of the proportion of
-   * infants survivng at each interval. */
-  static double infantAllCauseMort();
   //@}
   
   /// Destructor
@@ -120,17 +104,6 @@ public:
   void operator& (S& stream) {
       checkpoint (stream);
   }
-  
-private:
-    ///@brief Infant death summaries (checkpointed).
-    //@{
-    static vector<int> infantDeaths;
-    static vector<int> infantIntervalsAtRisk;
-    //@}
-    
-    /// Non-malaria mortality in under 1year olds.
-    /// Set by init ()
-    static double _nonMalariaMortality;
   
 protected:
   /// Constructor.

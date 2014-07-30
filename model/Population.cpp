@@ -66,14 +66,14 @@ void Population::staticCheckpoint (istream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::ClinicalModel::staticCheckpoint (stream);
+    Clinical::staticCheckpointCMCommon (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
 }
 void Population::staticCheckpoint (ostream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::ClinicalModel::staticCheckpoint (stream);
+    Clinical::staticCheckpointCMCommon (stream);
     PkPd::PkPdModel::staticCheckpoint (stream);
 }
 
@@ -156,7 +156,7 @@ void Population::checkpoint (ostream& stream)
 void Population::preMainSimInit ()
 {
     Host::InfectionIncidenceModel::initMainSimulation();
-    Clinical::ClinicalModel::initMainSimulation();
+    Clinical::mainSimInitCMCommon();
     recentBirths = 0;
 }
 

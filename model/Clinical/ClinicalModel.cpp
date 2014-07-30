@@ -32,19 +32,13 @@
 namespace OM { namespace Clinical {
     using namespace Monitoring;
 
-vector<int> ClinicalModel::infantIntervalsAtRisk;
-vector<int> ClinicalModel::infantDeaths;
-double ClinicalModel::_nonMalariaMortality;
-
 bool opt_event_scheduler = false;
 bool ClinicalModel::indirectMortBugfix;
 
 // -----  static methods  -----
 
 void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model ) {
-    infantDeaths.resize(TimeStep::stepsPerYear);
-    infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
-    _nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
+    initCMCommon( parameters );
     indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
     
     Episode::init( model.getClinical().getHealthSystemMemory() );
@@ -54,7 +48,6 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
     }else{
         ClinicalImmediateOutcomes::initParameters();
     }
-    initCommunityCFR( parameters );
 }
 
 void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
@@ -67,39 +60,12 @@ void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
     }
 }
 
-void ClinicalModel::staticCheckpoint (istream& stream) {
-    infantDeaths & stream;
-    infantIntervalsAtRisk & stream;
-}
-void ClinicalModel::staticCheckpoint (ostream& stream) {
-    infantDeaths & stream;
-    infantIntervalsAtRisk & stream;
-}
-
 ClinicalModel* ClinicalModel::createClinicalModel (double tSF) {
-  if (opt_event_scheduler)
-    return new ClinicalEventScheduler (tSF);
-  else
-    return new ClinicalImmediateOutcomes (tSF);
-}
-
-
-void ClinicalModel::initMainSimulation () {
-    for (TimeStep i(0);i<TimeStep::intervalsPerYear; ++i) {
-	Clinical::ClinicalModel::infantIntervalsAtRisk[i.asInt()]=0;
-	Clinical::ClinicalModel::infantDeaths[i.asInt()]=0;
+    if (opt_event_scheduler){
+        return new ClinicalEventScheduler (tSF);
+    }else{
+        return new ClinicalImmediateOutcomes (tSF);
     }
-}
-
-double ClinicalModel::infantAllCauseMort(){
-  double infantPropSurviving=1.0;	// use to calculate proportion surviving
-  for (TimeStep i(0);i<TimeStep::intervalsPerYear; ++i) {
-    // multiply by proportion of infants surviving at each interval
-    infantPropSurviving *= double(ClinicalModel::infantIntervalsAtRisk[i.asInt()]-ClinicalModel::infantDeaths[i.asInt()])
-      / double(ClinicalModel::infantIntervalsAtRisk[i.asInt()]);
-  }
-  // Child deaths due to malaria (per 1000), plus non-malaria child deaths. Deaths per 1000 births is the return unit.
-  return (1.0 - infantPropSurviving) * 1000.0 + _nonMalariaMortality;
 }
 
 
@@ -145,16 +111,16 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
     doClinicalUpdate (human, ageYears);
 }
 
-void ClinicalModel::updateInfantDeaths (TimeStep ageTimeSteps) {
-  // update array for the infant death rates
-  if (ageTimeSteps <= TimeStep::intervalsPerYear){
-    ++infantIntervalsAtRisk[ageTimeSteps.asInt()-1];
-    // Testing _doomed == -30 gives very slightly different results than
-    // testing _doomed == DOOMED_INDIRECT (due to above if(..))
-    if (_doomed == DOOMED_COMPLICATED || _doomed == -30 || _doomed == DOOMED_NEONATAL){
-      ++infantDeaths[ageTimeSteps.asInt()-1];
+void ClinicalModel::updateInfantDeaths( TimeStep ageTimeSteps ){
+    // update array for the infant death rates
+    if (ageTimeSteps <= TimeStep::intervalsPerYear){
+        infantIntervalsAtRisk[ageTimeSteps.asInt()-1] += 1;     // baseline
+        // Testing _doomed == -30 gives very slightly different results than
+        // testing _doomed == DOOMED_INDIRECT (due to above if(..))
+        if( _doomed == DOOMED_COMPLICATED || _doomed == -30 || _doomed == DOOMED_NEONATAL ){
+            infantDeaths[ageTimeSteps.asInt()-1] += 1;  // deaths
+        }
     }
-  }
 }
 
 

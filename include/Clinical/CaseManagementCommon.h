@@ -26,14 +26,22 @@
 #include "Global.h"
 #include "util/AgeGroupInterpolation.h"
 #include "Parameters.h"
+#include <vector>
 
 namespace OM { namespace Clinical {
 
+/** Read community CFR ratio parameter. */
+void initCMCommon( const Parameters& parameters );
+
+void mainSimInitCMCommon ();
+
+/// Static checkpointing
+void staticCheckpointCMCommon (istream& stream);
+void staticCheckpointCMCommon (ostream& stream);
+
+
 ///@brief Case fatality and sequelae "rate" data
 //@{
-/** Read community CFR ratio parameter. */
-void initCommunityCFR( const Parameters& parameters );
-
 /** Calculate the case fatality "rate" in the community as a function of
  * that in hospitals. */
 double getCommunityCFR(double caseFatalityRatio);
@@ -43,6 +51,22 @@ extern util::AgeGroupInterpolator caseFatalityRate;
 /// Age-specific in-hospital rates of sequelae given a severe malaria bout
 /// Note: out-patients have currently have the same probabilities of sequelae
 extern util::AgeGroupInterpolator pSequelaeInpatient;
+//@}
+
+/** Calculate infant mortality as deaths/1000 livebirths for the whole main-
+ * simulation period (not as deaths/1000 years-at-risk per survey).
+ * 
+ * This mimicks field data on all-cause mortality in infants.
+ * Uses the kaplan-meier method because the demography was set up to provide
+ * a stable age-distribution but unfortunately does not accurately describe
+ * death rates. The kaplan-meier estimate is the product of the proportion of
+ * infants survivng at each interval. */
+double infantAllCauseMort();
+
+///@brief Statistics, updated directly by ClinicalModel::updateInfantDeaths
+//@{
+extern std::vector<int> infantDeaths;
+extern std::vector<int> infantIntervalsAtRisk;
 //@}
 
 } }

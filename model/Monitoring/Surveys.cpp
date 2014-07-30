@@ -22,7 +22,7 @@
 #include <boost/math/nonfinite_num_facets.hpp>
 
 #include "Monitoring/Surveys.h"
-#include "Clinical/ClinicalModel.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
@@ -184,7 +184,7 @@ void SurveysType::writeSummaryArrays ()
   // reporting, but I believe required for parameterisation.
   if (Survey::active[SM::allCauseIMR]) {
     outputFile << 1 << "\t" << 1 << "\t" << SM::allCauseIMR;
-    outputFile << "\t" << Clinical::ClinicalModel::infantAllCauseMort() << lineEnd;
+    outputFile << "\t" << Clinical::infantAllCauseMort() << lineEnd;
   }
 
   outputFile.close();
