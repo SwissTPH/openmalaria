@@ -70,7 +70,7 @@ ClinicalModel* ClinicalModel::createClinicalModel (double tSF) {
 // -----  non-static construction, destruction and checkpointing  -----
 
 ClinicalModel::ClinicalModel () :
-    _doomed(0)
+    doomed(NOT_DOOMED)
 {}
 ClinicalModel::~ClinicalModel () {
   // latestReport is reported, if any, by destructor
@@ -80,28 +80,28 @@ ClinicalModel::~ClinicalModel () {
 // -----  other non-static methods  -----
 
 bool ClinicalModel::isDead (TimeStep ageTimeSteps) {
-  if (ageTimeSteps > TimeStep::maxAgeIntervals)	// too old (reached age limit)
-    _doomed = DOOMED_TOO_OLD;
-  if (_doomed > 0)	// killed by some means
-    return true;	// remove from population
-  return false;
+    if (ageTimeSteps > TimeStep::maxAgeIntervals)	// too old (reached age limit)
+        doomed = DOOMED_TOO_OLD;
+    if (doomed > NOT_DOOMED)	// killed by some means
+        return true;	// remove from population
+    return false;
 }
 
 void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps) {
-    if (_doomed < 0)	// Countdown to indirect mortality
-        _doomed -= TimeStep::interval;
+    if (doomed < NOT_DOOMED)	// Countdown to indirect mortality
+        doomed -= TimeStep::interval;
     
     //indirect death: if this human's about to die, don't worry about further episodes:
-    if (_doomed <= -35) {	//clinical bout 6 intervals before
+    if (doomed <= DOOMED_EXPIRED) {	//clinical bout 6 intervals before
         Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
-        _doomed = DOOMED_INDIRECT;
+        doomed = DOOMED_INDIRECT;
         return;
     }
     if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
         if (Host::NeonatalMortality::eventNeonatalMortality()) {
             Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
-            _doomed = DOOMED_NEONATAL;
+            doomed = DOOMED_NEONATAL;
             return;
         }
     }
@@ -113,9 +113,9 @@ void ClinicalModel::updateInfantDeaths( TimeStep ageTimeSteps ){
     // update array for the infant death rates
     if (ageTimeSteps <= TimeStep::intervalsPerYear){
         infantIntervalsAtRisk[ageTimeSteps.asInt()-1] += 1;     // baseline
-        // Testing _doomed == -30 gives very slightly different results than
-        // testing _doomed == DOOMED_INDIRECT (due to above if(..))
-        if( _doomed == DOOMED_COMPLICATED || _doomed == -30 || _doomed == DOOMED_NEONATAL ){
+        // Testing doomed == DOOMED_NEXT_TS gives very slightly different results than
+        // testing doomed == DOOMED_INDIRECT (due to above if(..))
+        if( doomed == DOOMED_COMPLICATED || doomed == DOOMED_NEXT_TS || doomed == DOOMED_NEONATAL ){
             infantDeaths[ageTimeSteps.asInt()-1] += 1;  // deaths
         }
     }
@@ -124,11 +124,11 @@ void ClinicalModel::updateInfantDeaths( TimeStep ageTimeSteps ){
 
 void ClinicalModel::checkpoint (istream& stream) {
     latestReport & stream;
-    _doomed & stream;
+    doomed & stream;
 }
 void ClinicalModel::checkpoint (ostream& stream) {
     latestReport & stream;
-    _doomed & stream;
+    doomed & stream;
 }
 
 } }

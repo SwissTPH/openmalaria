@@ -78,7 +78,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
 
     if (pgState & Episode::MALARIA) {
         if (pgState & Episode::COMPLICATED){
-            severeMalaria (human, pgState, ageYears, _doomed);
+            severeMalaria (human, pgState, ageYears, doomed);
         }else if (indirectMortBugfix || !pg.indirectMortality) {
             // NOTE: the "not indirect mortality" bit is a historical accident.
             // Validity is debatable, but there's no point changing now.
@@ -90,8 +90,8 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
         uncomplicatedEvent (human, pgState);
     }
     
-    if (pg.indirectMortality && _doomed == 0)
-        _doomed = -TimeStep::interval;
+    if (pg.indirectMortality && doomed == NOT_DOOMED)
+        doomed = -TimeStep::interval;
     
     if( _tLastTreatment == TimeStep::simulation ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
@@ -198,7 +198,7 @@ void ClinicalImmediateOutcomes::severeMalaria (
             human.withinHostModel->treatment( human, treatments[Regimen::SEVERE] );
             if (q[6] > prandom) {
                 latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
-                doomed  = 4;
+                doomed  = DOOMED_COMPLICATED;
             } else if (q[7] > prandom) { // Patient recovers, but with sequelae (don't report full recovery)
                 latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
             } else { /*if (q[8] > prandom)*/
@@ -207,7 +207,7 @@ void ClinicalImmediateOutcomes::severeMalaria (
         } else { // Treated but parasites not cleared (in hospital)
             if (q[3] > prandom) {
                 latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
-                doomed  = 4;
+                doomed  = DOOMED_COMPLICATED;
             } else if (q[4] > prandom) { // sequelae without parasite clearance
                 latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
             } else { /*if (q[5] > prandom)*/
@@ -218,7 +218,7 @@ void ClinicalImmediateOutcomes::severeMalaria (
     } else { // Not treated
         if (q[0] > prandom) {
             latestReport.update (human, Episode::State (pgState | Episode::DIRECT_DEATH));
-            doomed  = 4;
+            doomed  = DOOMED_COMPLICATED;
         } else if (q[1] > prandom) {
             latestReport.update (human, Episode::State (pgState | Episode::SEQUELAE));
         } else { /*if (q[2] > prandom)*/

@@ -57,8 +57,8 @@ public:
     ~ClinicalImmediateOutcomes ();
 
     virtual bool notAtRisk() {
-        return (TimeStep::simulation-_tLastTreatment >= TimeStep(1) &&
-                TimeStep::simulation-_tLastTreatment <= TimeStep(4));
+        int ageLastTreatment = (TimeStep::simulation - _tLastTreatment).inDays();
+        return ageLastTreatment > 0 && ageLastTreatment <= 20;
     }
 
     virtual void massDrugAdministration( Human& human,

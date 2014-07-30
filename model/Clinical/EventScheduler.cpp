@@ -209,7 +209,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     if ( TimeStep::simulation == timeOfRecovery ) {
 	if( pgState & Episode::DIRECT_DEATH ){
 	    // Human dies this timestep (last day of risk of death)
-	    _doomed = DOOMED_COMPLICATED;
+	    doomed = DOOMED_COMPLICATED;
 	    
 	    latestReport.update (human, pgState);
         } else {
@@ -273,8 +273,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             }
         }
         
-        if (indirectMortality && _doomed == 0)
-            _doomed = -TimeStep::interval; // start indirect mortality countdown
+        if (indirectMortality && doomed == NOT_DOOMED)
+            doomed = -TimeStep::interval; // start indirect mortality countdown
     }
     
     if ( (caseStartTime == TimeStep::simulation) && (pgState & Episode::RUN_CM_TREE) ){

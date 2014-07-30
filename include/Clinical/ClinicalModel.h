@@ -46,99 +46,103 @@ namespace OM { namespace Clinical {
 class ClinicalModel
 {
 public:
-  /// @brief Static functions
-  //@{
-  /// Initialise whichever model is in use.
-  static void init ( const Parameters& parameters, const scnXml::Model& model );
+    /// @brief Static functions
+    //@{
+    /// Initialise whichever model is in use.
+    static void init ( const Parameters& parameters, const scnXml::Model& model );
   
     /** Set data for a new health system.
      * 
      */
     static void changeHS (const scnXml::HealthSystem& healthSystem);
-  
-  /** Return a new ClinicalModel.
-   *
-   * @param tSF	treatment seeking factor, passed to CaseManagementModel */
-  static ClinicalModel* createClinicalModel (double tSF);
-  //@}
-  
-  /// Destructor
-  virtual ~ClinicalModel ();
-  
-  /** Kills the human if ageTimeSteps reaches the simulation age limit.
-   *
-   * @returns True if the human has been killed by some means. The clinical
-   *	model now tracks this status. */
-  bool isDead (TimeStep ageTimeSteps);
-  
-  /** Run main part of the model: determine the sickness status and any
-   * treatment for the human.
-   * 
-   * @param ageYears Age of human.
-   * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
-  void update (Human& human, double ageYears, TimeStep ageTimeSteps);
-  
-  /** For infants, updates the infantIntervalsAtRisk and potentially
-   * infantDeaths arrays. */
-  void updateInfantDeaths (TimeStep ageTimeSteps);
-  
-  /** Used with IPT within host model to potentially avoid further reports:
-   * The four timesteps after a bout are not at risk of a further bout since
-   * if one occured it would be considered the same bout.
-   *
-   * Only supported by immediate outcomes model. */
-  virtual bool notAtRisk() =0;
-  
+    
+    /** Return a new ClinicalModel.
+     *
+     * @param tSF	treatment seeking factor, passed to CaseManagementModel */
+    static ClinicalModel* createClinicalModel (double tSF);
+    //@}
+    
+    /// Destructor
+    virtual ~ClinicalModel ();
+    
+    /** Kills the human if ageTimeSteps reaches the simulation age limit.
+     *
+     * @returns True if the human has been killed by some means. The clinical
+     *	model now tracks this status. */
+    bool isDead (TimeStep ageTimeSteps);
+    
+    /** Run main part of the model: determine the sickness status and any
+     * treatment for the human.
+     * 
+     * @param ageYears Age of human.
+     * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
+    void update (Human& human, double ageYears, TimeStep ageTimeSteps);
+    
+    /** For infants, updates the infantIntervalsAtRisk and potentially
+     * infantDeaths arrays. */
+    void updateInfantDeaths (TimeStep ageTimeSteps);
+    
+    /** Used with IPT within host model to potentially avoid further reports:
+     * The four timesteps after a bout are not at risk of a further bout since
+     * if one occured it would be considered the same bout.
+     *
+     * Only supported by immediate outcomes model. */
+    virtual bool notAtRisk() =0;
+    
     virtual void massDrugAdministration( Human& human,
         Monitoring::ReportMeasureI screeningReport,
         Monitoring::ReportMeasureI drugReport ) =0;
-  
-  /// Force all pending summaries to be reported. Should only be called when
-  /// class is about to be destroyed anyway to avoid affecting output.
-  inline void flushReports (){
-      latestReport.flush();
-  }
-  
-  /// Checkpointing
-  template<class S>
-  void operator& (S& stream) {
-      checkpoint (stream);
-  }
-  
+    
+    /// Force all pending summaries to be reported. Should only be called when
+    /// class is about to be destroyed anyway to avoid affecting output.
+    inline void flushReports (){
+        latestReport.flush();
+    }
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        checkpoint (stream);
+    }
+    
 protected:
-  /// Constructor.
-  ClinicalModel ();
-  
-  /** Update for clinical model - new pathogenesis status, treatment, etc.
-   *
-   * @param withinHostModel WithinHostModel of human.
-   * @param hostTransmission per-host transmission data of human.
-   * @param ageYears Age of human.
-   * @param ageGroup Survey age group of human. */
-  virtual void doClinicalUpdate (Human& human, double ageYears) =0;
-  
-  virtual void checkpoint (istream& stream);
-  virtual void checkpoint (ostream& stream);
-  
-  /** Last episode; report to survey pending a new episode or human's death. */
-  Episode latestReport;
-  
-  /** @brief Positive values of _doomed variable (codes). */
-  enum {
-    DOOMED_TOO_OLD = 1,		///< died because reached age limit
-    DOOMED_COMPLICATED = 4,	///< died from severe malaria or malaria with a coinfection
-    DOOMED_NEONATAL = 6,	///< died due to mother's malaria infection
-    DOOMED_INDIRECT = 7,	///< died indirectly from malaria (after a delay)
-  };
-  
-  /** Can indicate that the individual is dead or about to die.
-   *
-   * If _doomed < 0, the individual is doomed to die.
-   * 
-   * If _doomed > 0, the individual is dead, and will be removed from the
-   * population at the beginning of the next timestep. NOTE: why not
-   * immediately? See above enum for positive values used. */
-  int _doomed;
+    /// Constructor.
+    ClinicalModel ();
+    
+    /** Update for clinical model - new pathogenesis status, treatment, etc.
+     *
+     * @param withinHostModel WithinHostModel of human.
+     * @param hostTransmission per-host transmission data of human.
+     * @param ageYears Age of human.
+     * @param ageGroup Survey age group of human. */
+    virtual void doClinicalUpdate (Human& human, double ageYears) =0;
+    
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
+    /** Last episode; report to survey pending a new episode or human's death. */
+    Episode latestReport;
+    
+    /** @brief Positive values of _doomed variable (codes). */
+    enum {
+        DOOMED_EXPIRED = -35,   // codes less than or equal to this mean "dead now"
+        DOOMED_NEXT_TS = -30,   // will expire at next timestep
+        DOOMED_START_TIMER = -1,        // set on start of doomed timer
+        NOT_DOOMED = 0, // all codes greater than this mean "already dead"; codes less than this mean a count-down to death has started
+        DOOMED_TOO_OLD = 1,		///< died because reached age limit
+        DOOMED_COMPLICATED = 4,	///< died from severe malaria or malaria with a coinfection
+        DOOMED_NEONATAL = 6,	///< died due to mother's malaria infection
+        DOOMED_INDIRECT = 7,	///< died indirectly from malaria (after a delay)
+    };
+    
+    /** Can indicate that the individual is dead or about to die.
+     *
+     * If _doomed < 0, the individual is doomed to die.
+     * 
+     * If _doomed > 0, the individual is dead, and will be removed from the
+     * population at the beginning of the next timestep. NOTE: why not
+     * immediately? See above enum for positive values used. */
+    int doomed;
 };
 
 } }
