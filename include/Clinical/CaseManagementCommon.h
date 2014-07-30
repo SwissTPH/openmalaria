@@ -39,6 +39,9 @@ void mainSimInitCMCommon ();
 void staticCheckpointCMCommon (istream& stream);
 void staticCheckpointCMCommon (ostream& stream);
 
+/// True if bug-fix is enabled; do not set externally
+extern bool indirectMortBugfix;
+
 
 ///@brief Case fatality and sequelae "rate" data
 //@{

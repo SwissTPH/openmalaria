@@ -33,13 +33,11 @@ namespace OM { namespace Clinical {
     using namespace Monitoring;
 
 bool opt_event_scheduler = false;
-bool ClinicalModel::indirectMortBugfix;
 
 // -----  static methods  -----
 
 void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model ) {
     initCMCommon( parameters );
-    indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
     
     Episode::init( model.getClinical().getHealthSystemMemory() );
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){

@@ -20,8 +20,11 @@
 
 #include "Clinical/CaseManagementCommon.h"
 #include "util/checkpoint_containers.h"
+#include "util/ModelOptions.h"
 
 namespace OM { namespace Clinical {
+
+bool indirectMortBugfix;
 
 //log odds ratio of case-fatality in community compared to hospital
 double oddsRatioThreshold;
@@ -41,6 +44,7 @@ double nonMalariaMortality;
 
 
 void initCMCommon( const OM::Parameters& parameters ){
+    indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
     oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
     infantDeaths.resize(TimeStep::stepsPerYear);
     infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
