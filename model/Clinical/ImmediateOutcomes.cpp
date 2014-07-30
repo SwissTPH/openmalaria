@@ -110,7 +110,7 @@ void ClinicalImmediateOutcomes::uncomplicatedEvent (
 ) {
     latestReport.update (human, Episode::State( pgState ) );
 
-    Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
+    Regimen::Type regimen = (_tLastTreatment + healthSystemMemory > TimeStep::simulation)
                             ? Regimen::UC2 : Regimen::UC
                             ;
     

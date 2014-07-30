@@ -30,8 +30,8 @@
 
 namespace OM { namespace Clinical {
 
-/** Read community CFR ratio parameter. */
-void initCMCommon( const Parameters& parameters );
+/** Initialise parameters. */
+void initCMCommon( const Parameters& parameters, int hsMemory );
 
 void mainSimInitCMCommon ();
 
@@ -41,6 +41,13 @@ void staticCheckpointCMCommon (ostream& stream);
 
 /// True if bug-fix is enabled; do not set externally
 extern bool indirectMortBugfix;
+
+/** The maximum age, in timesteps, of when a sickness bout occurred, for
+ * another bout to be considered part of the same episode.
+ * 
+ * Used by both the clinical models in roughly the same way, but will have
+ * different values in each to match Global::interval. */
+extern TimeStep healthSystemMemory;
 
 
 ///@brief Case fatality and sequelae "rate" data

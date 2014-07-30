@@ -74,60 +74,50 @@ public:
         RUN_CM_TREE = 0x10000,      ///< Flag to indicate that CM tree should be run now or after a delay
     };
     
-    /** Set healthSystemMemory. */
-    static void init( int hsMemory );
-    
     Episode() :
-            _time(TimeStep::never),
-            _surveyPeriod(0 /* dummy survey */),
-            _ageGroup(),
-            m_cohortSet(0),
-            _state(NONE)
+            time(TimeStep::never),
+            surveyPeriod(0 /* dummy survey */),
+            ageGroup(),
+            cohortSet(0),
+            state(NONE)
     {};
   ~Episode();
-  
-  /// Report anything pending, as on destruction
-  void flush();
-  
-  /** Report an episode, its severity, and any outcomes it entails.
-   *
-   * @param human The human whose info is being reported
-   * @param newState The severity (diagnosis) and outcome.
-   */
-  void update(const Host::Human& human, Episode::State newState);
-  
-  /// Checkpointing
-  void operator& (istream& stream);
-  void operator& (ostream& stream);	///< ditto
-  
-  
-  /** The maximum age, in timesteps, of when a sickness bout occurred, for
-   * another bout to be considered part of the same episode.
-   * 
-   * Used by both the clinical models in roughly the same way, but will have
-   * different values in each to match Global::interval. */
-  static TimeStep healthSystemMemory;
-  
+    
+    /// Report anything pending, as on destruction
+    void flush();
+    
+    /** Report an episode, its severity, and any outcomes it entails.
+     *
+     * @param human The human whose info is being reported
+     * @param newState The severity (diagnosis) and outcome.
+     */
+    void update(const Host::Human& human, Episode::State newState);
+    
+    /// Checkpointing
+    void operator& (istream& stream);
+    void operator& (ostream& stream);	///< ditto
+    
+    
 private:
-  /** Report a clinical episode.
-   *
-   * From _state, an episode is reported based on severity (SICK,
-   * MALARIA or COMPLICATED), and any outcomes are reported: RECOVERY (in
-   * hospital, i.e. with EVENT_IN_HOSPITAL, only), SEQUELAE and DIRECT_DEATH
-   * (both in and out of hospital). */
-  void report();
-  
-  /// Timestep of event (TIMESTEP_NEVER if no event).
-  TimeStep _time;
-  /// Survey during which the event occured
-  size_t _surveyPeriod;
-  /// Age group of the individual when the episode's first bout occurred
-  Monitoring::AgeGroup _ageGroup;
-  /// Cohort membership
-  uint32_t m_cohortSet;
-  /// Descriptor of state, containing reporting info. Not all information will
-  /// be reported (e.g. indirect deaths are reported independantly).
-  Episode::State _state;
+    /** Report a clinical episode.
+     *
+     * From _state, an episode is reported based on severity (SICK,
+     * MALARIA or COMPLICATED), and any outcomes are reported: RECOVERY (in
+     * hospital, i.e. with EVENT_IN_HOSPITAL, only), SEQUELAE and DIRECT_DEATH
+     * (both in and out of hospital). */
+    void report();
+    
+    /// Timestep of event (TIMESTEP_NEVER if no event).
+    TimeStep time;
+    /// Survey during which the event occured
+    size_t surveyPeriod;
+    /// Age group of the individual when the episode's first bout occurred
+    Monitoring::AgeGroup ageGroup;
+    /// Cohort membership
+    uint32_t cohortSet;
+    /// Descriptor of state, containing reporting info. Not all information will
+    /// be reported (e.g. indirect deaths are reported independantly).
+    Episode::State state;
 };
 
 } }

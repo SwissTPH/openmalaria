@@ -282,7 +282,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
         pgState = Episode::State (pgState & ~Episode::RUN_CM_TREE);
         
 	// If last treatment prescribed was in recent memory, consider second line.
-	if (timeLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
+	if (timeLastTreatment + healthSystemMemory > TimeStep::simulation)
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
 	CMAuxOutput auxOut = ESCaseManagement::execute(

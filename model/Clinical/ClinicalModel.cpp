@@ -37,9 +37,8 @@ bool opt_event_scheduler = false;
 // -----  static methods  -----
 
 void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& model ) {
-    initCMCommon( parameters );
+    initCMCommon( parameters, model.getClinical().getHealthSystemMemory() );
     
-    Episode::init( model.getClinical().getHealthSystemMemory() );
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
         opt_event_scheduler = true;
         ClinicalEventScheduler::init( parameters, model );
