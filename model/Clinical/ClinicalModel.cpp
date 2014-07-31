@@ -43,7 +43,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Model& mod
         opt_event_scheduler = true;
         ClinicalEventScheduler::init( parameters, model );
     }else{
-        ClinicalImmediateOutcomes::initParameters();
+        Params5Day::initParameters();
     }
 }
 
@@ -53,7 +53,7 @@ void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
         ESCaseManagement::setHealthSystem(healthSystem);
     }else{
-        ClinicalImmediateOutcomes::setHealthSystem(healthSystem);
+        Params5Day::setHealthSystem(healthSystem);
     }
 }
 
@@ -61,7 +61,7 @@ ClinicalModel* ClinicalModel::createClinicalModel (double tSF) {
     if (opt_event_scheduler){
         return new ClinicalEventScheduler (tSF);
     }else{
-        return new ClinicalImmediateOutcomes (tSF);
+        return new ImmediateOutcomes (tSF);
     }
 }
 

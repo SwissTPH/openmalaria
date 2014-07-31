@@ -32,202 +32,14 @@ namespace Clinical {
 using namespace ::OM::util;
 using namespace Monitoring;
 bool useDiagnosticUC = false;
-double ClinicalImmediateOutcomes::probGetsTreatment[Regimen::NUM];
-double ClinicalImmediateOutcomes::probParasitesCleared[Regimen::NUM];
-double ClinicalImmediateOutcomes::cureRate[Regimen::NUM];
-WithinHost::TreatmentId ClinicalImmediateOutcomes::treatments[Regimen::NUM];
+
+double Params5Day::probGetsTreatment[Regimen::NUM];
+double Params5Day::probParasitesCleared[Regimen::NUM];
+double Params5Day::cureRate[Regimen::NUM];
+WithinHost::TreatmentId Params5Day::treatments[Regimen::NUM];
 
 
-// -----  static init  -----
-
-void ClinicalImmediateOutcomes::initParameters () {
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-        throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
-}
-
-void ClinicalImmediateOutcomes::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
-    if ( !healthSystem.getImmediateOutcomes().present() )
-        throw util::xml_scenario_error ("Expected ImmediateOutcomes section in healthSystem data (initial or intervention)");
-
-    setParasiteCaseParameters (healthSystem.getImmediateOutcomes().get());
-}
-
-
-// -----  construction and destruction  -----
-
-ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double tSF) :
-        _tLastTreatment (TimeStep::never),
-        _treatmentSeekingFactor (tSF)
-{}
-ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
-}
-
-
-// -----  other methods  -----
-
-void ClinicalImmediateOutcomes::massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport )
-{
-    assert(false);      // should never be called
-}
-
-void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
-    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( ageYears );
-    Episode::State pgState = static_cast<Episode::State>( pg.state );
-
-    if (pgState & Episode::MALARIA) {
-        if (pgState & Episode::COMPLICATED){
-            severeMalaria (human, pgState, ageYears, doomed);
-        }else if (indirectMortBugfix || !pg.indirectMortality) {
-            // NOTE: the "not indirect mortality" bit is a historical accident.
-            // Validity is debatable, but there's no point changing now.
-            // (This does affect tests.)
-            uncomplicatedEvent (human, pgState);
-        }
-
-    } else if (pgState & Episode::SICK) { // sick but not from malaria
-        uncomplicatedEvent (human, pgState);
-    }
-    
-    if (pg.indirectMortality && doomed == NOT_DOOMED)
-        doomed = -TimeStep::interval;
-    
-    if( _tLastTreatment == TimeStep::simulation ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
-    }
-    if( pgState & Episode::SICK ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
-    }
-}
-
-
-// -----  private  -----
-
-void ClinicalImmediateOutcomes::uncomplicatedEvent (
-    Human& human,
-    Episode::State pgState
-) {
-    latestReport.update (human, Episode::State( pgState ) );
-
-    Regimen::Type regimen = (_tLastTreatment + healthSystemMemory > TimeStep::simulation)
-                            ? Regimen::UC2 : Regimen::UC
-                            ;
-    
-    if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
-        if( useDiagnosticUC ){
-            Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
-            if( !human.withinHostModel->diagnosticDefault() )
-                return; // negative outcome: no treatment
-        }
-        _tLastTreatment = TimeStep::simulation;
-        if ( regimen == Regimen::UC )
-            Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
-        if ( regimen == Regimen::UC2 )
-            Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
-
-        if (probParasitesCleared[regimen] > random::uniform_01()) {
-            // Could report Episode::RECOVERY to latestReport,
-            // but we don't report out-of-hospital recoveries anyway.
-            human.withinHostModel->treatment( human, treatments[regimen] );
-        } else {
-            // No change in parasitological status: treated outside of hospital
-        }
-        if( human.withinHostModel->optionalPqTreatment() )
-            Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
-    } else {
-        // No change in parasitological status: non-treated
-    }
-}
-
-void ClinicalImmediateOutcomes::severeMalaria (
-    Human &human,
-    Episode::State pgState,
-    double ageYears,
-    int& doomed
-) {
-    Regimen::Type regimen = Regimen::SEVERE;
-
-    double p2, p3, p4, p5, p6, p7;
-    // Probability of getting treatment (only part which is case managment):
-    p2 = probGetsTreatment[regimen] * _treatmentSeekingFactor;
-    // Probability of getting cured after getting treatment:
-    p3 = cureRate[regimen];
-    // p4 is the hospital case-fatality rate from Tanzania
-    p4 = caseFatalityRate.eval (ageYears);
-    // p5 here is the community threshold case-fatality rate
-    p5 = getCommunityCFR (p4);
-    // p6 is P(seq) for treated patients
-    p6 = pSequelaeInpatient.eval (ageYears);
-    // p7 is P(seq) when parasites aren't cleared
-    p7 = p6;
-
-    double q[9];
-    // Community deaths
-    q[0] = (1 - p2) * p5;
-    // Community sequelae
-    q[1] = q[0] + (1 - p2) * (1 - p5) * p7;
-    // Community survival
-    q[2] = q[1] + (1 - p2) * (1 - p5) * (1 - p7);
-    // Parasitological failure deaths
-    q[3] = q[2] + p2 * (1 - p3) * p5;
-    // Parasitological failure sequelae
-    q[4] = q[3] + p2 * (1 - p3) * (1 - p5) * p7;
-    // Parasitological failure survivors
-    q[5] = q[4] + p2 * (1 - p3) * (1 - p5) * (1 - p7);
-    // Parasitological success deaths
-    q[6] = q[5] + p2 * p3 * p4;
-    // Parasitological success sequelae
-    q[7] = q[6] + p2 * p3 * (1 - p4) * p6;
-    // Parasitological success survival
-    q[8] = q[7] + p2 * p3 * (1 - p4) * (1 - p6);
-    /*
-    if (q(5).lt.1) stop
-    NOT TREATED
-    */
-
-    double prandom = random::uniform_01();
-
-    //NOTE: no diagnostics or PQ here; for now we only have severe when the patient dies
-    if (q[2] <= prandom) { // Patient gets in-hospital treatment
-        _tLastTreatment = TimeStep::simulation;
-        Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
-
-        Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
-        if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
-            human.withinHostModel->treatment( human, treatments[Regimen::SEVERE] );
-            if (q[6] > prandom) {
-                latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
-                doomed  = DOOMED_COMPLICATED;
-            } else if (q[7] > prandom) { // Patient recovers, but with sequelae (don't report full recovery)
-                latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
-            } else { /*if (q[8] > prandom)*/
-                latestReport.update (human, Episode::State (stateTreated | Episode::RECOVERY));
-            }
-        } else { // Treated but parasites not cleared (in hospital)
-            if (q[3] > prandom) {
-                latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
-                doomed  = DOOMED_COMPLICATED;
-            } else if (q[4] > prandom) { // sequelae without parasite clearance
-                latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
-            } else { /*if (q[5] > prandom)*/
-                // No change in parasitological status: in-hospital patients
-                latestReport.update (human, pgState);
-            }
-        }
-    } else { // Not treated
-        if (q[0] > prandom) {
-            latestReport.update (human, Episode::State (pgState | Episode::DIRECT_DEATH));
-            doomed  = DOOMED_COMPLICATED;
-        } else if (q[1] > prandom) {
-            latestReport.update (human, Episode::State (pgState | Episode::SEQUELAE));
-        } else { /*if (q[2] > prandom)*/
-            // No change in parasitological status: non-treated
-            latestReport.update (human, pgState);
-        }
-    }
-}
-
+// ———  static, utility functions  ———
 
 double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, const string& drug)
 {
@@ -276,8 +88,20 @@ WithinHost::TreatmentId getHealthSystemTreatmentByName( const scnXml::TreatmentA
     return WithinHost::WHInterface::addTreatment( elt.get() );
 }
 
-void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& hsioData)
-{
+
+// ———  static, init  ———
+
+void Params5Day::initParameters () {
+    //TODO: make this compatible
+    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
+        throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
+}
+
+void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
+    if ( !healthSystem.getImmediateOutcomes().present() )
+        throw util::xml_scenario_error ("Expected ImmediateOutcomes section in healthSystem data (initial or intervention)");
+    const scnXml::HSImmediateOutcomes& hsioData = healthSystem.getImmediateOutcomes().get();
+    
     const string &firstLine = hsioData.getDrugRegimen().getFirstLine(),
         &secondLine = hsioData.getDrugRegimen().getSecondLine(),
         &inpatient = hsioData.getDrugRegimen().getInpatient();
@@ -382,14 +206,187 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
 }
 
 
-// -----  protected  -----
+// ———  per-human, construction and destruction  ———
 
-void ClinicalImmediateOutcomes::checkpoint (istream& stream) {
+ImmediateOutcomes::ImmediateOutcomes (double tSF) :
+        _tLastTreatment (TimeStep::never),
+        _treatmentSeekingFactor (tSF)
+{}
+ImmediateOutcomes::~ImmediateOutcomes() {
+}
+
+
+// ———  per-human, update  ———
+
+void ImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
+    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( ageYears );
+    Episode::State pgState = static_cast<Episode::State>( pg.state );
+
+    if (pgState & Episode::MALARIA) {
+        if (pgState & Episode::COMPLICATED){
+            severeMalaria (human, pgState, ageYears, doomed);
+        }else if (indirectMortBugfix || !pg.indirectMortality) {
+            // NOTE: the "not indirect mortality" bit is a historical accident.
+            // Validity is debatable, but there's no point changing now.
+            // (This does affect tests.)
+            uncomplicatedEvent (human, pgState);
+        }
+
+    } else if (pgState & Episode::SICK) { // sick but not from malaria
+        uncomplicatedEvent (human, pgState);
+    }
+    
+    if (pg.indirectMortality && doomed == NOT_DOOMED)
+        doomed = -TimeStep::interval;
+    
+    if( _tLastTreatment == TimeStep::simulation ){
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
+    }
+    if( pgState & Episode::SICK ){
+        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
+    }
+}
+
+void ImmediateOutcomes::uncomplicatedEvent (
+    Human& human,
+    Episode::State pgState
+) {
+    latestReport.update (human, Episode::State( pgState ) );
+
+    Regimen::Type regimen = (_tLastTreatment + healthSystemMemory > TimeStep::simulation)
+                            ? Regimen::UC2 : Regimen::UC
+                            ;
+    
+    if ( Params5Day::probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
+        if( useDiagnosticUC ){
+            Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
+            if( !human.withinHostModel->diagnosticDefault() )
+                return; // negative outcome: no treatment
+        }
+        _tLastTreatment = TimeStep::simulation;
+        if ( regimen == Regimen::UC )
+            Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
+        if ( regimen == Regimen::UC2 )
+            Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
+
+        if (Params5Day::probParasitesCleared[regimen] > random::uniform_01()) {
+            // Could report Episode::RECOVERY to latestReport,
+            // but we don't report out-of-hospital recoveries anyway.
+            human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );
+        } else {
+            // No change in parasitological status: treated outside of hospital
+        }
+        if( human.withinHostModel->optionalPqTreatment() )
+            Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
+    } else {
+        // No change in parasitological status: non-treated
+    }
+}
+
+void ImmediateOutcomes::severeMalaria (
+    Human &human,
+    Episode::State pgState,
+    double ageYears,
+    int& doomed
+) {
+    Regimen::Type regimen = Regimen::SEVERE;
+
+    double p2, p3, p4, p5, p6, p7;
+    // Probability of getting treatment (only part which is case managment):
+    p2 = Params5Day::probGetsTreatment[regimen] * _treatmentSeekingFactor;
+    // Probability of getting cured after getting treatment:
+    p3 = Params5Day::cureRate[regimen];
+    // p4 is the hospital case-fatality rate from Tanzania
+    p4 = caseFatalityRate.eval (ageYears);
+    // p5 here is the community threshold case-fatality rate
+    p5 = getCommunityCFR (p4);
+    // p6 is P(seq) for treated patients
+    p6 = pSequelaeInpatient.eval (ageYears);
+    // p7 is P(seq) when parasites aren't cleared
+    p7 = p6;
+
+    double q[9];
+    // Community deaths
+    q[0] = (1 - p2) * p5;
+    // Community sequelae
+    q[1] = q[0] + (1 - p2) * (1 - p5) * p7;
+    // Community survival
+    q[2] = q[1] + (1 - p2) * (1 - p5) * (1 - p7);
+    // Parasitological failure deaths
+    q[3] = q[2] + p2 * (1 - p3) * p5;
+    // Parasitological failure sequelae
+    q[4] = q[3] + p2 * (1 - p3) * (1 - p5) * p7;
+    // Parasitological failure survivors
+    q[5] = q[4] + p2 * (1 - p3) * (1 - p5) * (1 - p7);
+    // Parasitological success deaths
+    q[6] = q[5] + p2 * p3 * p4;
+    // Parasitological success sequelae
+    q[7] = q[6] + p2 * p3 * (1 - p4) * p6;
+    // Parasitological success survival
+    q[8] = q[7] + p2 * p3 * (1 - p4) * (1 - p6);
+    /*
+    if (q(5).lt.1) stop
+    NOT TREATED
+    */
+
+    double prandom = random::uniform_01();
+
+    //NOTE: no diagnostics or PQ here; for now we only have severe when the patient dies
+    if (q[2] <= prandom) { // Patient gets in-hospital treatment
+        _tLastTreatment = TimeStep::simulation;
+        Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
+
+        Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
+        if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
+            human.withinHostModel->treatment( human, Params5Day::treatments[Regimen::SEVERE] );
+            if (q[6] > prandom) {
+                latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
+                doomed  = DOOMED_COMPLICATED;
+            } else if (q[7] > prandom) { // Patient recovers, but with sequelae (don't report full recovery)
+                latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
+            } else { /*if (q[8] > prandom)*/
+                latestReport.update (human, Episode::State (stateTreated | Episode::RECOVERY));
+            }
+        } else { // Treated but parasites not cleared (in hospital)
+            if (q[3] > prandom) {
+                latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
+                doomed  = DOOMED_COMPLICATED;
+            } else if (q[4] > prandom) { // sequelae without parasite clearance
+                latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
+            } else { /*if (q[5] > prandom)*/
+                // No change in parasitological status: in-hospital patients
+                latestReport.update (human, pgState);
+            }
+        }
+    } else { // Not treated
+        if (q[0] > prandom) {
+            latestReport.update (human, Episode::State (pgState | Episode::DIRECT_DEATH));
+            doomed  = DOOMED_COMPLICATED;
+        } else if (q[1] > prandom) {
+            latestReport.update (human, Episode::State (pgState | Episode::SEQUELAE));
+        } else { /*if (q[2] > prandom)*/
+            // No change in parasitological status: non-treated
+            latestReport.update (human, pgState);
+        }
+    }
+}
+
+
+// ———  per-human, intervention & checkpointing  ———
+
+void ImmediateOutcomes::massDrugAdministration( Human& human,
+        Monitoring::ReportMeasureI screeningReport,
+        Monitoring::ReportMeasureI drugReport )
+{
+    assert(false);      // should never be called
+}
+
+void ImmediateOutcomes::checkpoint (istream& stream) {
     ClinicalModel::checkpoint (stream);
     _tLastTreatment & stream;
     _treatmentSeekingFactor & stream;
 }
-void ClinicalImmediateOutcomes::checkpoint (ostream& stream) {
+void ImmediateOutcomes::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
     _tLastTreatment & stream;
     _treatmentSeekingFactor & stream;

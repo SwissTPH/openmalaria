@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_ClinicalImmediateOutcomes
-#define Hmod_ClinicalImmediateOutcomes
+#ifndef Hmod_ImmediateOutcomes
+#define Hmod_ImmediateOutcomes
 
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
@@ -40,21 +40,34 @@ enum Type {
 };
 }
 
-/** This implementation of the model is intended to use the old case-management
- * model with immediate outcomes of clinical events (immediate recovery with
- * total parasite clearance or immediate death). */
-class ClinicalImmediateOutcomes : public ClinicalModel
-{
-public:
+/** A container for all the "static" data required by this model. */
+struct Params5Day {
     /** Initialises parameters, loading from XML data. */
     static void initParameters ();
 
     /** Load health system data from initial data or an intervention's data (both from XML).
      * (Re)loads all data affected by this healthSystem element. */
     static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
+    
+private:
+    // These parameters are reset via a setHealthSystem call on checkpoint
+    // load rather than checkpointed.
+    static double probGetsTreatment[Regimen::NUM];
+    static double probParasitesCleared[Regimen::NUM];
+    static double cureRate[Regimen::NUM];
+    static WithinHost::TreatmentId treatments[Regimen::NUM];
+    
+    friend class ImmediateOutcomes;
+};
 
-    ClinicalImmediateOutcomes (double tSF);
-    ~ClinicalImmediateOutcomes ();
+/** This implementation of the model is intended to use the old case-management
+ * model with immediate outcomes of clinical events (immediate recovery with
+ * total parasite clearance or immediate death). */
+class ImmediateOutcomes : public ClinicalModel
+{
+public:
+    ImmediateOutcomes (double tSF);
+    ~ImmediateOutcomes ();
 
     virtual bool notAtRisk() {
         int ageLastTreatment = (TimeStep::simulation - _tLastTreatment).inDays();
@@ -85,19 +98,6 @@ private:
 
     //! treatment seeking for heterogeneity
     double _treatmentSeekingFactor;
-    
-    /// Calculate _probGetsTreatment, _probParasitesCleared and _cureRate.
-    static void setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& healthSystem);
-
-    //BEGIN Static parameters, set by setHealthSystem()
-    // These parameters are reset via a setHealthSystem call on checkpoint
-    // load rather than checkpointed.
-
-    static double probGetsTreatment[Regimen::NUM];
-    static double probParasitesCleared[Regimen::NUM];
-    static double cureRate[Regimen::NUM];
-    static WithinHost::TreatmentId treatments[Regimen::NUM];
-    //END
 };
 
 }
