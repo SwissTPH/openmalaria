@@ -53,7 +53,7 @@ private:
     // These parameters are reset via a setHealthSystem call on checkpoint
     // load rather than checkpointed.
     static double probGetsTreatment[Regimen::NUM];
-    static double probParasitesCleared[Regimen::NUM];
+    static double probParasitesCleared[Regimen::NUM-1];
     static double cureRate[Regimen::NUM];
     static WithinHost::TreatmentId treatments[Regimen::NUM];
     

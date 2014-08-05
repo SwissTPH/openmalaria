@@ -34,7 +34,7 @@ using namespace Monitoring;
 bool useDiagnosticUC = false;
 
 double Params5Day::probGetsTreatment[Regimen::NUM];
-double Params5Day::probParasitesCleared[Regimen::NUM];
+double Params5Day::probParasitesCleared[Regimen::NUM-1];
 double Params5Day::cureRate[Regimen::NUM];
 WithinHost::TreatmentId Params5Day::treatments[Regimen::NUM];
 
@@ -108,6 +108,7 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
     
     // --- calculate cureRate ---
     
+    //TODO: cureRate[UC,UC2] are never used
     //We get the ACR depending on the name of firstLineDrug.
     cureRate[Regimen::UC] = getHealthSystemACRByName (hsioData.getInitialACR(), firstLine);
     
@@ -175,14 +176,11 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
     } else {
         probParasitesCleared[Regimen::UC] = 0;
     }
-
+    
     //calculate probParasitesCleared 1
     probParasitesCleared[Regimen::UC2] = complianceSecondLine * cureRateSecondLine
                               + (1 - complianceSecondLine)
                               * nonCompliersEffectiveSecondLine;
-
-    //calculate probParasitesCleared 2 : cool :)
-    probParasitesCleared[Regimen::SEVERE] = 0;
     
     treatments[Regimen::UC] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), firstLine);
     if( secondLine == firstLine )
@@ -254,22 +252,20 @@ void ImmediateOutcomes::uncomplicatedEvent (
     latestReport.update (human, Episode::State( pgState ) );
 
     Regimen::Type regimen = (_tLastTreatment + healthSystemMemory > TimeStep::simulation)
-                            ? Regimen::UC2 : Regimen::UC
-                            ;
+                            ? Regimen::UC2 : Regimen::UC ;
     
-    if ( Params5Day::probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
+    if( random::bernoulli( Params5Day::probGetsTreatment[regimen] * _treatmentSeekingFactor )){
         if( useDiagnosticUC ){
             Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
             if( !human.withinHostModel->diagnosticDefault() )
                 return; // negative outcome: no treatment
         }
+        
         _tLastTreatment = TimeStep::simulation;
-        if ( regimen == Regimen::UC )
-            Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
-        if ( regimen == Regimen::UC2 )
-            Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
-
-        if (Params5Day::probParasitesCleared[regimen] > random::uniform_01()) {
+        ReportMeasureI measure = regimen == Regimen::UC ? Report::MI_TREATMENTS_1 : Report::MI_TREATMENTS_2;
+        Survey::current().addInt( measure, human, 1 );
+        
+        if( random::bernoulli( Params5Day::probParasitesCleared[regimen] )){
             // Could report Episode::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
             human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );
