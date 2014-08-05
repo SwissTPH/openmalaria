@@ -54,7 +54,7 @@ private:
     // load rather than checkpointed.
     static double probGetsTreatment[Regimen::NUM];
     static double probParasitesCleared[Regimen::NUM-1];
-    static double cureRate[Regimen::NUM];
+    static double cureRateSevere;
     static WithinHost::TreatmentId treatments[Regimen::NUM];
     
     friend class ImmediateOutcomes;

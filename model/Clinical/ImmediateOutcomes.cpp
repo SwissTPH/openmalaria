@@ -35,7 +35,7 @@ bool useDiagnosticUC = false;
 
 double Params5Day::probGetsTreatment[Regimen::NUM];
 double Params5Day::probParasitesCleared[Regimen::NUM-1];
-double Params5Day::cureRate[Regimen::NUM];
+double Params5Day::cureRateSevere;
 WithinHost::TreatmentId Params5Day::treatments[Regimen::NUM];
 
 
@@ -106,27 +106,9 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
         &secondLine = hsioData.getDrugRegimen().getSecondLine(),
         &inpatient = hsioData.getDrugRegimen().getInpatient();
     
-    // --- calculate cureRate ---
-    
-    //TODO: cureRate[UC,UC2] are never used
-    //We get the ACR depending on the name of firstLineDrug.
-    cureRate[Regimen::UC] = getHealthSystemACRByName (hsioData.getInitialACR(), firstLine);
-    
-    //Calculate curerate 0
     const double pSeekOfficialCareUncomplicated1 = hsioData.getPSeekOfficialCareUncomplicated1().getValue();
     const double pSelfTreatment = hsioData.getPSelfTreatUncomplicated().getValue();
-    if (pSeekOfficialCareUncomplicated1 + pSelfTreatment > 0) {
-        double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
-
-        cureRate[Regimen::UC] = (cureRate[Regimen::UC] * pSeekOfficialCareUncomplicated1
-                       + cureRateSelfTreatment * pSelfTreatment)
-                      / (pSeekOfficialCareUncomplicated1 + pSelfTreatment);
-    }
-
-    cureRate[Regimen::UC2] = getHealthSystemACRByName (hsioData.getInitialACR(), secondLine);
-
-    cureRate[Regimen::SEVERE] = getHealthSystemACRByName (hsioData.getInitialACR(), inpatient);
-
+    
 
     // --- calculate probGetsTreatment ---
 
@@ -182,6 +164,8 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
                               + (1 - complianceSecondLine)
                               * nonCompliersEffectiveSecondLine;
     
+    cureRateSevere = getHealthSystemACRByName (hsioData.getInitialACR(), inpatient);
+
     treatments[Regimen::UC] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), firstLine);
     if( secondLine == firstLine )
         treatments[Regimen::UC2] = treatments[Regimen::UC];
@@ -285,13 +269,11 @@ void ImmediateOutcomes::severeMalaria (
     double ageYears,
     int& doomed
 ) {
-    Regimen::Type regimen = Regimen::SEVERE;
-
     double p2, p3, p4, p5, p6, p7;
     // Probability of getting treatment (only part which is case managment):
-    p2 = Params5Day::probGetsTreatment[regimen] * _treatmentSeekingFactor;
+    p2 = Params5Day::probGetsTreatment[Regimen::SEVERE] * _treatmentSeekingFactor;
     // Probability of getting cured after getting treatment:
-    p3 = Params5Day::cureRate[regimen];
+    p3 = Params5Day::cureRateSevere;
     // p4 is the hospital case-fatality rate from Tanzania
     p4 = caseFatalityRate.eval (ageYears);
     // p5 here is the community threshold case-fatality rate
