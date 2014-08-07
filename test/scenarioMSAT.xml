@@ -120,49 +120,12 @@
     <human>
       <component id="MDA">
         <MDA1D>
-          <decisions>
-            <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
-            age(0-3): 0_3
-            age(3-9): 3_9
-            age(9-15): 9_15
-            age(15-inf): 15_inf
-          </decision>
-            <decision depends="" name="test" values="none,microscopy,RDT">
-             RDT
-          </decision>
-            <decision depends="result" name="treatment" values="none,AL_treat">
-              result(negative): none
-              result(positive): AL_treat
-              result(none): none
-          </decision>
-          </decisions>
-          <treatments>
-            <treatment name="AL_treat">
-              <schedule>
-                <medicate drug="AR" hour="0" mg="20"/>
-                <medicate drug="LU" hour="0" mg="120"/>
-                <medicate drug="AR" hour="8" mg="20"/>
-                <medicate drug="LU" hour="8" mg="120"/>
-                <medicate drug="AR" hour="24" mg="20"/>
-                <medicate drug="LU" hour="24" mg="120"/>
-                <medicate drug="AR" hour="36" mg="20"/>
-                <medicate drug="LU" hour="36" mg="120"/>
-                <medicate drug="AR" hour="48" mg="20"/>
-                <medicate drug="LU" hour="48" mg="120"/>
-                <medicate drug="AR" hour="60" mg="20"/>
-                <medicate drug="LU" hour="60" mg="120"/>
-              </schedule>
-              <modifier decision="age_AL">
-                <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
-                <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
-                <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
-                <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
-              </modifier>
-            </treatment>
-            <treatment name="none">
-              <schedule/>
-            </treatment>
-          </treatments>
+          <diagnostic type="RDT">
+            <positive>
+              <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
+            </positive>
+            <negative/>
+          </diagnostic>
         </MDA1D>
       </component>
       <component id="ITN" name="Extended ITNs">
@@ -216,242 +179,155 @@
       </deployment>
     </human>
   </interventions>
+  <caseManagement>
+    <schedule name="AL_treat">
+      <medicate drug="AR" hour="0" mg="20"/>
+      <medicate drug="LU" hour="0" mg="120"/>
+      <medicate drug="AR" hour="8" mg="20"/>
+      <medicate drug="LU" hour="8" mg="120"/>
+      <medicate drug="AR" hour="24" mg="20"/>
+      <medicate drug="LU" hour="24" mg="120"/>
+      <medicate drug="AR" hour="36" mg="20"/>
+      <medicate drug="LU" hour="36" mg="120"/>
+      <medicate drug="AR" hour="48" mg="20"/>
+      <medicate drug="LU" hour="48" mg="120"/>
+      <medicate drug="AR" hour="60" mg="20"/>
+      <medicate drug="LU" hour="60" mg="120"/>
+    </schedule>
+    <schedule name="AL_treat_miss_last">
+      <medicate drug="AR" hour="0" mg="20"/>
+      <medicate drug="LU" hour="0" mg="120"/>
+      <medicate drug="AR" hour="8" mg="20"/>
+      <medicate drug="LU" hour="8" mg="120"/>
+      <medicate drug="AR" hour="24" mg="20"/>
+      <medicate drug="LU" hour="24" mg="120"/>
+      <medicate drug="AR" hour="36" mg="20"/>
+      <medicate drug="LU" hour="36" mg="120"/>
+    </schedule>
+    <schedule name="AS_treat">
+      <medicate drug="AS" hour="0" mg="1"/>
+      <medicate drug="AS" hour="12" mg="1"/>
+      <medicate drug="AS" hour="24" mg="1"/>
+      <medicate drug="AS" hour="48" mg="1"/>
+      <medicate drug="AS" hour="72" mg="1"/>
+    </schedule>
+    <dosages name="AS_dosages">
+      <age lb="0" ub="1" dose_mult="22"/>
+      <age lb="1" ub="4" dose_mult="29"/>
+      <age lb="4" ub="6" dose_mult="43"/>
+      <age lb="6" ub="9" dose_mult="50"/>
+      <age lb="9" ub="12" dose_mult="72"/>
+      <age lb="12" ub="15" dose_mult="101"/>
+      <age lb="15" ub="17" dose_mult="130"/>
+      <age lb="17" dose_mult="144"/>
+    </dosages>
+    <dosages name="AL_dosages">
+      <age lb="0" ub="3" dose_mult="1"/>
+      <age lb="3" ub="9" dose_mult="2"/>
+      <age lb="9" ub="15" dose_mult="3"/>
+      <age lb="15" dose_mult="4"/>
+    </dosages>
+  </caseManagement>
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
-        <decisions>
-          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
-            age(0-3): 0_3
-            age(3-9): 3_9
-            age(9-15): 9_15
-            age(15-inf): 15_inf
-          </decision>
-          <decision depends="p" name="provider" values="formal, none">
-            p(0.2): formal
-            p(0.8): none 
-          </decision>
-          <decision depends="provider,p" name="test" values="none,microscopy,RDT">
-            provider(formal){
-              p(.82): none
-              p(0): microscopy
-              p(.18): RDT
-            }
-            provider(none){
-              none
-            }
-          </decision>
-          <decision depends="case,provider,result,p" name="treatment" values="AL_treat, AL_treat_miss_last, none">
-            case(UC1){
-              provider(formal){
-                result(none){
-                  p(.5){
-                    p(.9): AL_treat
-                    p(.1): AL_treat_miss_last
-                  }
-                  p(0.5): none
-                }
-                result(positive){
-                  p(.85){
-                    p(.9): AL_treat
-                    p(.1): AL_treat_miss_last
-                  }
-                  p(0.15): none
-                }
-                result(negative){
-                  p(.15){
-                    p(.9): AL_treat
-                    p(.1): AL_treat_miss_last
-                  }
-                  p(0.85): none
-                }
-              }
-              provider(none){
-                none
-              }
-            }
-            case(UC2){
-              provider(formal){
-                p(.15){
-                    p(.9): AL_treat
-                    p(.1): AL_treat_miss_last
-                  }
-                p(0.85): none
-              }
-              provider(none){
-                none
-              }
-            }
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-          <treatment name="AL_treat">
-            <schedule>
-              <medicate drug="AR" hour="0" mg="20"/>
-              <medicate drug="LU" hour="0" mg="120"/>
-              <medicate drug="AR" hour="8" mg="20"/>
-              <medicate drug="LU" hour="8" mg="120"/>
-              <medicate drug="AR" hour="24" mg="20"/>
-              <medicate drug="LU" hour="24" mg="120"/>
-              <medicate drug="AR" hour="36" mg="20"/>
-              <medicate drug="LU" hour="36" mg="120"/>
-              <medicate drug="AR" hour="48" mg="20"/>
-              <medicate drug="LU" hour="48" mg="120"/>
-              <medicate drug="AR" hour="60" mg="20"/>
-              <medicate drug="LU" hour="60" mg="120"/>
-            </schedule>
-            <modifier decision="age_AL">
-              <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
-              <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
-              <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
-              <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
-            </modifier>
-          </treatment>
-          <treatment name="AL_treat_miss_last">
-            <schedule>
-              <medicate drug="AR" hour="0" mg="20"/>
-              <medicate drug="LU" hour="0" mg="120"/>
-              <medicate drug="AR" hour="8" mg="20"/>
-              <medicate drug="LU" hour="8" mg="120"/>
-              <medicate drug="AR" hour="24" mg="20"/>
-              <medicate drug="LU" hour="24" mg="120"/>
-              <medicate drug="AR" hour="36" mg="20"/>
-              <medicate drug="LU" hour="36" mg="120"/>
-            </schedule>
-            <modifier decision="age_AL">
-              <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
-              <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
-              <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
-              <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
-            </modifier>
-          </treatment>
-        </treatments>
+        <probabilistic name="provider">
+          <outcome p="0.2" name="formal">
+            <caseType>
+              <firstLine>
+                <probabilistic name="test">
+                  <outcome p="0.82" name="no test">
+                    <probabilistic name="prob treatment">
+                      <outcome p="0.5" name="treatment">
+                        <probabilistic name="adherence">
+                          <outcome p="0.9" name="full adherence">
+                            <treat schedule="AL_treat" dosage="AL_dosages"/>
+                          </outcome>
+                          <outcome p="0.1" name="miss last dose">
+                            <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                          </outcome>
+                        </probabilistic> 
+                      </outcome>
+                      <outcome p="0.5"/>
+                    </probabilistic>
+                  </outcome>
+                  <outcome p="0.18" name="RDT">
+                    <diagnostic type="RDT">
+                      <positive>
+                        <probabilistic name="prob treatment">
+                          <outcome p="0.85" name="treatment">
+                            <probabilistic name="adherence">
+                              <outcome p="0.9" name="full adherence">
+                                <treat schedule="AL_treat" dosage="AL_dosages"/>
+                              </outcome>
+                              <outcome p="0.1" name="miss last dose">
+                                <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                              </outcome>
+                            </probabilistic> 
+                          </outcome>
+                          <outcome p="0.15"/>
+                        </probabilistic>
+                      </positive>
+                      <negative>
+                        <probabilistic name="prob treatment">
+                          <outcome p="0.15" name="treatment">
+                            <probabilistic name="adherence">
+                              <outcome p="0.9" name="full adherence">
+                                <treat schedule="AL_treat" dosage="AL_dosages"/>
+                              </outcome>
+                              <outcome p="0.1" name="miss last dose">
+                                <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                              </outcome>
+                            </probabilistic> 
+                          </outcome>
+                          <outcome p="0.85"/>
+                        </probabilistic>
+                      </negative>
+                    </diagnostic>
+                  </outcome>
+                </probabilistic>
+              </firstLine>
+              <secondLine>
+                <probabilistic name="prob treatment">
+                  <outcome p="0.15" name="treatment">
+                    <probabilistic name="adherence">
+                      <outcome p="0.9" name="full adherence">
+                        <treat schedule="AL_treat" dosage="AL_dosages"/>
+                      </outcome>
+                      <outcome p="0.1" name="miss last dose">
+                        <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                      </outcome>
+                    </probabilistic> 
+                  </outcome>
+                  <outcome p="0.85"/>
+                </probabilistic>
+              </secondLine>
+            </caseType>
+          </outcome>
+          <outcome p="0.8" name="no treatment provider"/>
+        </probabilistic>
       </uncomplicated>
       <complicated>
-        <decisions>
-          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
-            age(0-3): 0_3
-            age(3-9): 3_9
-            age(9-15): 9_15
-            age(15-inf): 15_inf
-          </decision>
-          <decision depends="age" name="age_AS" values="0_1, 1_4, 4_6, 6_9, 9_12, 12_15, 15_17, 17_inf">
-            age(0-1): 0_1
-            age(1-4): 1_4
-            age(4-6): 4_6
-            age(6-9): 6_9
-            age(9-12): 9_12
-            age(12-15): 12_15
-            age(15-17): 15_17
-            age(17-inf): 17_inf
-          </decision>
-          <decision depends="p" name="initial_provider" values="hospital, lower_level, none">
-             p(0.48): hospital
-             p(0): lower_level
-             p(0.52): none
-        </decision>
-          <decision depends="initial_provider,p" name="test" values="none,RDT,microscopy">
-             initial_provider(hospital){
-              p(0): none
-              p(0.75): RDT
-              p(0.25): microscopy
-              }
-             initial_provider(lower_level){
-              p(0.5): none
-              p(0.5): RDT
-              p(0): microscopy
-              }
-             initial_provider(none){
-              none
-              }
-        </decision>
-          <decision depends="initial_provider, p" name="referral" values="immediate, delayed, none">
-             initial_provider(hospital){
-              none
-              }
-              initial_provider(lower_level){
-              p(0.5): immediate
-              p(0.3): delayed
-              p(0.2): none
-              }
-              initial_provider(none){
-              none
-              }
-        </decision>
-          <decision depends="initial_provider, referral" name="hospitalisation" values="none, delayed, immediate">
-             initial_provider(hospital){
-              immediate
-              }
-              initial_provider(lower_level){
-                referral(none): none
-                referral(immediate): immediate
-                referral(delayed): delayed
-              }
-              initial_provider(none){
-              none
-              }
-        </decision>
-          <decision depends="hospitalisation,test" name="treatment" values="AS_sev,none">
-            hospitalisation(immediate){
-             AS_sev
-            }
-            hospitalisation(delayed){
-             AS_sev
-            }
-            hospitalisation(none){
-            none
-            }
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-          <treatment name="AS_sev">
-            <schedule>
-              <medicate drug="AS" hour="0" mg="1"/>
-              <medicate drug="AS" hour="12" mg="1"/>
-              <medicate drug="AS" hour="24" mg="1"/>
-              <medicate drug="AS" hour="48" mg="1"/>
-              <medicate drug="AS" hour="72" mg="1"/>
-              <medicate drug="AR" hour="84" mg="20"/>
-              <medicate drug="LU" hour="84" mg="120"/>
-              <medicate drug="AR" hour="96" mg="20"/>
-              <medicate drug="LU" hour="96" mg="120"/>
-              <medicate drug="AR" hour="108" mg="20"/>
-              <medicate drug="LU" hour="108" mg="120"/>
-              <medicate drug="AR" hour="120" mg="20"/>
-              <medicate drug="LU" hour="120" mg="120"/>
-              <medicate drug="AR" hour="132" mg="20"/>
-              <medicate drug="LU" hour="132" mg="120"/>
-              <medicate drug="AR" hour="144" mg="20"/>
-              <medicate drug="LU" hour="144" mg="120"/>
-            </schedule>
-            <modifier decision="age_AL">
-              <multiplyQty effect="AR(1.0), LU(1.0), AS(1)" value="0_3"/>
-              <multiplyQty effect="AR(2.0), LU(2.0), AS(1)" value="3_9"/>
-              <multiplyQty effect="AR(3.0), LU(3.0), AS(1)" value="9_15"/>
-              <multiplyQty effect="AR(4.0), LU(4.0), AS(1)" value="15_inf"/>
-            </modifier>
-            <modifier decision="age_AS">
-              <multiplyQty effect="AR(1), LU(1), AS(22)" value="0_1"/>
-              <multiplyQty effect="AR(1), LU(1), AS(29)" value="1_4"/>
-              <multiplyQty effect="AR(1), LU(1), AS(43)" value="4_6"/>
-              <multiplyQty effect="AR(1), LU(1), AS(50)" value="6_9"/>
-              <multiplyQty effect="AR(1), LU(1), AS(72)" value="9_12"/>
-              <multiplyQty effect="AR(1), LU(1), AS(101)" value="12_15"/>
-              <multiplyQty effect="AR(1), LU(1), AS(130)" value="15_17"/>
-              <multiplyQty effect="AR(1), LU(1), AS(144)" value="17_inf"/>
-            </modifier>
-            <modifier decision="hospitalisation">
-              <delay effect="AR(0),LU(0),AS(0)" value="none"/>
-              <delay effect="AR(0),LU(0),AS(0)" value="immediate"/>
-              <delay effect="AR(24),LU(24),AS(24)" value="delayed"/>
-            </modifier>
-          </treatment>
-        </treatments>
+        <probabilistic name="initial provider">
+          <outcome p="0.48" name="hospital">
+            <treat schedule="AS_treat" dosage="AS_dosages"/>
+            <treat schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
+          </outcome>
+          <outcome p="0.0" name="lower level">
+            <probabilistic name="referral">
+              <outcome p="0.5" name="immediate">
+                <treat schedule="AS_treat" dosage="AS_dosages"/>
+                <treat schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
+              </outcome>
+              <outcome p="0.3" name="delayed">
+                <treat schedule="AS_treat" dosage="AS_dosages" delay_h="24"/>
+                <treat schedule="AL_treat" dosage="AL_dosages" delay_h="108"/>
+              </outcome>
+              <outcome p="0.2" name="no referral"/>
+            </probabilistic>
+          </outcome>
+          <outcome p="0.52" name="no initial provider"/>
+        </probabilistic>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>
