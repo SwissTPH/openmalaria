@@ -522,7 +522,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         A modifier for this treatment, according to the outputs of a decision.
         
         The "decision" attribute must be the name of a known decision. Then, there must be a set of
-        multipyQty, delay or selectTimeRange sub-elements, each of which corresponds to one value
+        multipyQty and/or delay sub-elements, each of which corresponds to one value
         output of the decision.
       </xs:documentation>
       <xs:appinfo>units:Choice of elements;name:Treatment modifier;</xs:appinfo>
@@ -554,22 +554,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             in the base schedule while drug B is administered 6 hours later than specified.
           </xs:documentation>
           <xs:appinfo>units:Comma-separated list of values;name:Active ingredient delays;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="selectTimeRange" type="om:HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>
-            Selects which drug doses to administer according to time of administration (before times
-            are modified by delays). Half-open interval: [x,y)
-            
-            The "drugs" attribute is a comma-separated list of all active ingredients administered in
-            the base schedule (each must be listed once) and the content of this element is a comma-
-            separated list of time-ranges (in hours) for each active ingredient, listed in the same
-            order as in the "drugs" attribute. The time-ranges should be of the form x-y and are
-            interpreted as the half-open interval [x,y); that is a drug listed with time t will only be
-            administered if <![CDATA[x <= t < y]]>.
-          </xs:documentation>
-          <xs:appinfo>type:Comma-separated list of values;name:Active ingredient time-ranges;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:choice>

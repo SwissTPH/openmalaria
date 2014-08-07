@@ -76,24 +76,6 @@ void ESTreatmentSchedule::delay (const SymbolValueMap& m, const string& errObj) 
 	med->time += it->second / 24.0;	// convert to days
     }
 }
-void ESTreatmentSchedule::selectTimeRange (const SymbolRangeMap& m, bool affectsCost, const string& errObj) {
-    for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ){
-	SymbolRangeMap::const_iterator it = m.find( med->abbrev );
-	if( it == m.end() )
-	    throw xml_scenario_error( (boost::format("%1%: no effect described for drug (ingredient) %2%") %errObj %med->abbrev).str() );
-	double timeH = med->time * 24.0;	// convert back to hours for comparisons
-	if( it->second.first <= timeH && timeH < it->second.second )
-	    ++med;
-	else {
-	    if( affectsCost )
-		med = medications.erase( med );	// NOTE: inefficient on a vector... not very important here though
-	    else {
-		med->qty = 0.0;	// zero effect treatment, but still has cost (cost_qty)
-		++med;
-	    }
-	}
-    }
-}
 
 
 // -----  ESTreatment  -----
@@ -118,35 +100,25 @@ ESDecisionValue modGetESDecVal( value_map_t& decVals, const scnXml::HSESTreatmen
 }
 
 ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTreatment& elt, list<string>& required) {
-    // We need to apply all select-time-range modifiers before any delay
-    // modifiers. The easiest solution is to reorder the list:
-    list<const scnXml::HSESTreatmentModifier*> modifierList;
-    BOOST_FOREACH( const scnXml::HSESTreatmentModifier& modifier, elt.getModifier() ){
-	if( modifier.getSelectTimeRange().size() )
-	    modifierList.push_front( &modifier );
-	else
-	    modifierList.push_back( &modifier );
-    }
-    
     ESDecisionValue zero;       // "insert" has no support for anonymous objects, so can't declare inline
     schedules.insert( zero, new ESTreatmentSchedule( elt.getSchedule() ) );
     Schedules startSchedules;
     
-    BOOST_FOREACH( const scnXml::HSESTreatmentModifier* modifier, modifierList ){
+    BOOST_FOREACH( const scnXml::HSESTreatmentModifier& modifier, elt.getModifier() ){
 	schedules.swap( startSchedules );
 	schedules.clear();
 	
-	required.push_back( modifier->getDecision() );	// make sure this decision isn't optimised out
-	tuple<ESDecisionValue, const value_map_t&> decPair = dvMap.getDecision( modifier->getDecision() );
+	required.push_back( modifier.getDecision() );	// make sure this decision isn't optimised out
+	tuple<ESDecisionValue, const value_map_t&> decPair = dvMap.getDecision( modifier.getDecision() );
 	schedulesMask |= decPair.get<0>();
 	value_map_t decVals = decPair.get<1>();	// copy
         schedules.rehash( (std::size_t)std::ceil(decVals.size() / schedules.max_load_factor()) );
 	
-	if( modifier->getMultiplyQty().size() ) {
-	    assert( modifier->getDelay().size() == 0 );
-	    assert( modifier->getSelectTimeRange().size() == 0 );
-	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getMultiplyQty() ){
-		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
+	if( modifier.getMultiplyQty().size() ) {
+	    assert( modifier.getDelay().size() == 0 );
+	    assert( modifier.getSelectTimeRange().size() == 0 );
+	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier.getMultiplyQty() ){
+		string errObj = modFormatErrMsg( elt.getName(), modifier.getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
 		const SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
 		bool affectsCost = mod.getAffectsCost().present() ? mod.getAffectsCost().get() : true;
@@ -158,10 +130,10 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 		    schedules.insert( key, ts );
 		}
 	    }
-	} else if( modifier->getDelay().size() ) {
-	    assert( modifier->getSelectTimeRange().size() == 0 );
-	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getDelay() ){
-		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
+	} else if( modifier.getDelay().size() ) {
+	    assert( modifier.getSelectTimeRange().size() == 0 );
+	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier.getDelay() ){
+		string errObj = modFormatErrMsg( elt.getName(), modifier.getDecision(), mod.getValue() );
 		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
 		const SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
 		
@@ -172,24 +144,10 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
                     schedules.insert( key, ts );
 		}
 	    }
-	} else if( modifier->getSelectTimeRange().size() ) {
-	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier->getSelectTimeRange() ){
-		string errObj = modFormatErrMsg( elt.getName(), modifier->getDecision(), mod.getValue() );
-		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
-		const SymbolRangeMap& m = parser::parseSymbolRangeMap( mod.getEffect(), errObj );
-		bool affectsCost = mod.getAffectsCost().present() ? mod.getAffectsCost().get() : true;
-		
-		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
-		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
-		    ts->selectTimeRange( m, affectsCost, errObj );
-                    ESDecisionValue key = s->first | val;
-                    schedules.insert( key, ts );
-		}
-	    }
 	} else {
 	    ostringstream msg;
 	    msg << "treatment \""<<elt.getName()
-		<<"\" modifier for decision "<<modifier->getDecision()
+		<<"\" modifier for decision "<<modifier.getDecision()
 		<<" has no sub-elements";
 	    throw xml_scenario_error( msg.str() );
 	}
@@ -197,7 +155,7 @@ ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTrea
 	if( !decVals.empty() ){
 	    ostringstream msg;
 	    msg << "modifier for treatment \""<<elt.getName()
-		<< "\" by decision "<<modifier->getDecision()
+		<< "\" by decision "<<modifier.getDecision()
 		<<": effect not described for values:";
 	    for( value_map_t::iterator it = decVals.begin(); it != decVals.end(); ++it )
 		msg<<' '<<it->first;

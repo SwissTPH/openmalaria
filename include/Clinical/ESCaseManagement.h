@@ -92,8 +92,6 @@ struct ESTreatmentSchedule {
     void multiplyQty (const parser::SymbolValueMap&, bool affectsCost, const string& errObj);
     /// Delay the time of each medication based on the value of this map, in hours.
     void delay (const parser::SymbolValueMap&, const string& errObj);
-    /// Remove medications not in time range (in hours) described by this map.
-    void selectTimeRange (const parser::SymbolRangeMap&, bool affectsCost, const string& errObj);
     
     /// Add medications into medicate queue
     inline void apply (list<MedicateData>& medicateQueue) const {

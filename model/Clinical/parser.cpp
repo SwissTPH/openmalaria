@@ -328,23 +328,5 @@ namespace OM { namespace Clinical {
 	    errObj
 	);
     }
-    
-    parser::SymbolRangeMap parser::parseSymbolRangeMap (const string& s, const string& errObj) {
-	SymbolRangeList list = parseInternal<
-	    parser::SymbolRangeList_grammar<iter_t>,
-	    SymbolRangeList
-	>(
-	    s,
-	    "failed to parse comma-separated ranges for ",
-	    errObj
-	);
-	
-	// Now convert to a map (filling directly didn't work):
-	SymbolRangeMap ret;
-	for( SymbolRangeList::const_iterator it = list.begin(); it != list.end(); ++it )
-	    ret[it->first] = it->second;
-	
-	return ret;
-    }
 } }
 #endif

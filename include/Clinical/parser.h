@@ -86,10 +86,6 @@ namespace OM { namespace Clinical {
 	/** Parse s as a comma-separated list of symbol-value pairs of the form
 	 * SYMBOL(VALUE), where symbol is as above and value is a number. */
 	SymbolValueMap parseSymbolValueMap (const string& s, const string& errObj);
-	
-	/** Similar to parseSymbolValueMap, but value is a double pair of the
-	 * form A-B. */
-	SymbolRangeMap parseSymbolRangeMap (const string& s, const string& errObj);
 	//@}
     }
 } }
