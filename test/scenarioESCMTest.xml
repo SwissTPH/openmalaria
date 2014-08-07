@@ -98,32 +98,26 @@
             age(0-5): under5
             age(5-inf): over5
          </decision>
-          <decision depends="age5" name="treatment" values="MF_treat">
-            age5(under5): MF_treat
-            age5(over5): MF_treat
+          <decision depends="age5,p" name="treatment" values="MF_treat,MF_treat_poor_adherence">
+            p(.7): MF_treat
+            p(.3): MF_treat_poor_adherence
           </decision>
-          <decision depends="treatment,age5,result" name="doseSize" values="0,1,10,100">
-            treatment(MF_treat){
-              age5(under5){
-                result(none): 100
-                result(negative): 0
-                result(positive): 10
-              }
-              age5(over5){
-                result(none): 1
-                result(negative): 0
-                result(positive): 100
-              }
+          <decision depends="age5,result" name="doseSize" values="0,1,10,100">
+            age5(under5){
+              result(none): 100
+              result(negative): 0
+              result(positive): 10
+            }
+            age5(over5){
+              result(none): 1
+              result(negative): 0
+              result(positive): 100
             }
           </decision>
           <decision depends="test" name="quality" values="full,half">
             test(none): half
             test(microscopy): full
             test(RDT): full
-          </decision>
-          <decision depends="p" name="adherence" values="full,missFirstDose">
-            p(.7): full
-            p(.3): missFirstDose
           </decision>
           <decision depends="p" name="delay" values="0,1,2">
             p(.6): 0
@@ -132,6 +126,26 @@
           </decision>
         </decisions>
         <treatments>
+          <treatment name="MF_treat_poor_adherence">
+            <schedule>
+              <medicate drug="MF" hour="12" mg="3000"/>
+            </schedule>
+            <modifier decision="quality">
+              <multiplyQty effect="MF(0.5)" value="half"/>
+              <multiplyQty effect="MF(1.0)" value="full"/>
+            </modifier>
+            <modifier decision="doseSize">
+              <multiplyQty effect="MF(0)" value="0"/>
+              <multiplyQty effect="MF(1.0)" value="1"/>
+              <multiplyQty effect="MF(10)" value="10"/>
+              <multiplyQty effect="MF(100)" value="100"/>
+            </modifier>
+            <modifier decision="delay">
+              <delay effect="MF(0)" value="0"/>
+              <delay effect="MF(24)" value="1"/>
+              <delay effect="MF(48)" value="2"/>
+            </modifier>
+          </treatment>
           <treatment name="MF_treat">
             <schedule>
               <medicate drug="MF" hour="0" mg="3000"/>
@@ -146,10 +160,6 @@
               <multiplyQty effect="MF(1.0)" value="1"/>
               <multiplyQty effect="MF(10)" value="10"/>
               <multiplyQty effect="MF(100)" value="100"/>
-            </modifier>
-            <modifier decision="adherence">
-              <selectTimeRange affectsCost="false" effect="MF(0-13)" value="full"/>
-              <selectTimeRange affectsCost="false" effect="MF(1-13)" value="missFirstDose"/>
             </modifier>
             <modifier decision="delay">
               <delay effect="MF(0)" value="0"/>

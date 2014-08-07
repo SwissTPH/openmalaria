@@ -220,43 +220,18 @@
     <EventScheduler>
       <uncomplicated>
         <decisions>
-          <decision depends="age" name="age5" values="under5,over5">
-            age(0-5): under5
-            age(5-inf): over5
-         </decision>
           <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
             age(0-3): 0_3
             age(3-9): 3_9
             age(9-15): 9_15
             age(15-inf): 15_inf
           </decision>
-          <decision depends="case,p" name="provider" values="formal, community_health_worker, informal, none">
-            case(UC1){
-              p(0.2): formal
-              p(0): community_health_worker
-              p(0): informal
-              p(0.8): none 
-            }
-            case(UC2){
-              p(0.2): formal
-              p(0): community_health_worker
-              p(0): informal
-              p(0.8): none
-            }
+          <decision depends="p" name="provider" values="formal, none">
+            p(0.2): formal
+            p(0.8): none 
           </decision>
-          <decision depends="age5,provider,p" name="test" values="none,microscopy,RDT">
-            age5(under5){
+          <decision depends="provider,p" name="test" values="none,microscopy,RDT">
             provider(formal){
-              p(.82): none
-              p(0): microscopy
-              p(.18): RDT
-            }
-            provider(community_health_worker){
-              p(.82): none
-              p(0): microscopy
-              p(.18): RDT
-            }
-            provider(informal){
               p(.82): none
               p(0): microscopy
               p(.18): RDT
@@ -264,282 +239,48 @@
             provider(none){
               none
             }
-            }
-            age5(over5){
-            provider(formal){
-              p(.82): none
-              p(0): microscopy
-              p(.18): RDT
-            }
-            provider(community_health_worker){
-              p(.82): none
-              p(0): microscopy
-              p(.18): RDT
-            }
-            provider(informal){
-              p(.82): none
-              p(0): microscopy
-              p(.18): RDT
-            }
-            provider(none){
-              none
-            }
-            }
           </decision>
-          <decision depends="case,provider,result,p" name="treatment" values="AL_treat, none">
+          <decision depends="case,provider,result,p" name="treatment" values="AL_treat, AL_treat_miss_last, none">
             case(UC1){
               provider(formal){
                 result(none){
-                  p(.5): AL_treat
-                  p(0.5): none
-            }
-                result(positive){
-                  p(.85): AL_treat
-                  p(0.15): none
-            }
-                result(negative){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-            }
-            provider(community_health_worker){
-                result(none){
-                  p(.5): AL_treat
-                  p(0.5): none
-            }
-                result(positive){
-                  p(.85): AL_treat
-                  p(0.15): none
-            }
-                result(negative){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-            }
-            provider(informal){
-                result(none){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(positive){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(negative){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-            }
-            provider(none){
-                  none
-            }
-            }
-            case(UC2){
-            provider(formal){
-                result(none){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(positive){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(negative){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-            }
-            provider(community_health_worker){
-                result(none){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(positive){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(negative){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-            }
-            provider(informal){
-                result(none){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(positive){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-                result(negative){
-                  p(.15): AL_treat
-                  p(0.85): none
-            }
-            }
-            provider(none){
-                  none
-            }
-            }
-          </decision>
-          <decision depends="treatment,provider,test,result,p" name="adherence" values="full,missFirstDose,missLastDay">
-            treatment(AL_treat){
-              provider(formal){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(community_health_worker){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(informal){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(none):full
+                  p(.5){
+                    p(.9): AL_treat
+                    p(.1): AL_treat_miss_last
                   }
-            treatment(none): full
-          </decision>
-          <decision depends="provider,p" name="quality" values="good, medium, poor">
-            provider(formal){
-              p(1.0): good
-              p(0): medium
-              p(0): poor
+                  p(0.5): none
+                }
+                result(positive){
+                  p(.85){
+                    p(.9): AL_treat
+                    p(.1): AL_treat_miss_last
+                  }
+                  p(0.15): none
+                }
+                result(negative){
+                  p(.15){
+                    p(.9): AL_treat
+                    p(.1): AL_treat_miss_last
+                  }
+                  p(0.85): none
+                }
+              }
+              provider(none){
+                none
+              }
             }
-            provider(community_health_worker){
-              p(1.0): good
-              p(0): medium
-              p(0): poor
+            case(UC2){
+              provider(formal){
+                p(.15){
+                    p(.9): AL_treat
+                    p(.1): AL_treat_miss_last
+                  }
+                p(0.85): none
+              }
+              provider(none){
+                none
+              }
             }
-            provider(informal){
-              p(1.0): good
-              p(0): medium
-              p(0): poor
-            }
-            provider(none): good
           </decision>
         </decisions>
         <treatments>
@@ -561,16 +302,24 @@
               <medicate drug="AR" hour="60" mg="20"/>
               <medicate drug="LU" hour="60" mg="120"/>
             </schedule>
-            <modifier decision="quality">
-              <multiplyQty effect="AR(1.0),LU(1.0)" value="good"/>
-              <multiplyQty effect="AR(0.6), LU(0.6)" value="medium"/>
-              <multiplyQty effect="AR(0.3), LU(0.3)" value="poor"/>
+            <modifier decision="age_AL">
+              <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
+              <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
+              <multiplyQty effect="AR(3.0), LU(3.0)" value="9_15"/>
+              <multiplyQty effect="AR(4.0), LU(4.0)" value="15_inf"/>
             </modifier>
-            <modifier decision="adherence">
-              <selectTimeRange effect="AR(0-61),LU(0-61)" value="full"/>
-              <selectTimeRange effect="AR(1-61),LU(1-61)" value="missFirstDose"/>
-              <selectTimeRange effect="AR(0-47),LU(0-47)" value="missLastDay"/>
-            </modifier>
+          </treatment>
+          <treatment name="AL_treat_miss_last">
+            <schedule>
+              <medicate drug="AR" hour="0" mg="20"/>
+              <medicate drug="LU" hour="0" mg="120"/>
+              <medicate drug="AR" hour="8" mg="20"/>
+              <medicate drug="LU" hour="8" mg="120"/>
+              <medicate drug="AR" hour="24" mg="20"/>
+              <medicate drug="LU" hour="24" mg="120"/>
+              <medicate drug="AR" hour="36" mg="20"/>
+              <medicate drug="LU" hour="36" mg="120"/>
+            </schedule>
             <modifier decision="age_AL">
               <multiplyQty effect="AR(1.0),LU(1.0)" value="0_3"/>
               <multiplyQty effect="AR(2.0), LU(2.0)" value="3_9"/>
