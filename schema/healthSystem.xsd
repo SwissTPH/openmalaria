@@ -63,21 +63,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element name="treatmentsPKPD" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
-            A library of drug deployment schedules and dosages for the PK/PD
-            model.
-          </xs:documentation>
-          <xs:appinfo>name:Treatments library (PK/PD model);</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="schedule" type="om:PKPDSchedule" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="dosages" type="om:PKPDDosages" minOccurs="0" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
     </xs:sequence>
     <xs:attribute name="healthSystemMemory" type="xs:int" use="required">
       <xs:annotation>
@@ -505,96 +490,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:sequence>
   </xs:complexType>
   
-  <!-- case management PK/PD data -->
-  <xs:complexType name="PKPDSchedule">
-    <xs:annotation>
-      <xs:documentation>
-        A schedule for the administration of drugs in a course of treatment.
-        Note that dose sizes are multiplied by some multiplier (see dosages)
-        and the times of all doses may be delayed.
-      </xs:documentation>
-      <xs:appinfo>type:list of elements;name:Schedule of doses taken as a course of treatment;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="medicate" type="om:PKPDMedication" minOccurs="0" maxOccurs="unbounded" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="PKPDMedication">
-    <xs:attribute name="drug" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-      Abbreviated name of drug compound
-        </xs:documentation>
-        <xs:appinfo>type:string;name:drug;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="mg" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>Quantity of drug compound</xs:documentation>
-        <xs:appinfo>type:double;units:mg;name:drug dose;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="hour" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-        Number of hours past start of timestep this drug dose is administered
-        at (first dose should be at hour 0).
-      </xs:documentation>
-        <xs:appinfo>units:Hours;min:0;name:Time of administration;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="duration" type="xs:double" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-        If this attribute is given, use IV administration instead of orally.
-        
-        Specifies the number of hours during which the dose is administered.
-      </xs:documentation>
-        <xs:appinfo>type:double;units:Hours;min:0;name:Duration of administration;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="PKPDDosages">
-    <xs:annotation>
-      <xs:documentation>
-        A table for selecting a dose size given an age.
-      </xs:documentation>
-      <xs:appinfo>name:Dosage table;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="age" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>
-            Gives a dose multiplier for an age range.
-          </xs:documentation>
-          <xs:appinfo>name:Age range;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="lb" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:Lower bound (inclusive);min:0;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="ub" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:Upper bound (exclusive);min:0;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="dose_mult" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                The dose size given in the schedule (in mg) is multiplied by
-                this value for patients falling into this age range when this
-                dosage table is used.
-              </xs:documentation>
-              <xs:appinfo>name:Dose multiplier;min:0;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  
   <!-- decision trees -->
   <xs:complexType name="DecisionTree">
     <xs:annotation>
@@ -612,7 +507,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="diagnostic" type="om:DTDiagnostic"/>
       <xs:element name="probabilistic" type="om:DTProbabilistic"/>
       <xs:sequence>
-        <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
+        <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded" minOccurs="0"/>
       </xs:sequence>
     </xs:choice>
     <xs:attribute name="name" type="xs:string" use="optional">

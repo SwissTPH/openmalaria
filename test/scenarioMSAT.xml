@@ -179,55 +179,6 @@
       </deployment>
     </human>
   </interventions>
-  <caseManagement>
-    <schedule name="AL_treat">
-      <medicate drug="AR" hour="0" mg="20"/>
-      <medicate drug="LU" hour="0" mg="120"/>
-      <medicate drug="AR" hour="8" mg="20"/>
-      <medicate drug="LU" hour="8" mg="120"/>
-      <medicate drug="AR" hour="24" mg="20"/>
-      <medicate drug="LU" hour="24" mg="120"/>
-      <medicate drug="AR" hour="36" mg="20"/>
-      <medicate drug="LU" hour="36" mg="120"/>
-      <medicate drug="AR" hour="48" mg="20"/>
-      <medicate drug="LU" hour="48" mg="120"/>
-      <medicate drug="AR" hour="60" mg="20"/>
-      <medicate drug="LU" hour="60" mg="120"/>
-    </schedule>
-    <schedule name="AL_treat_miss_last">
-      <medicate drug="AR" hour="0" mg="20"/>
-      <medicate drug="LU" hour="0" mg="120"/>
-      <medicate drug="AR" hour="8" mg="20"/>
-      <medicate drug="LU" hour="8" mg="120"/>
-      <medicate drug="AR" hour="24" mg="20"/>
-      <medicate drug="LU" hour="24" mg="120"/>
-      <medicate drug="AR" hour="36" mg="20"/>
-      <medicate drug="LU" hour="36" mg="120"/>
-    </schedule>
-    <schedule name="AS_treat">
-      <medicate drug="AS" hour="0" mg="1"/>
-      <medicate drug="AS" hour="12" mg="1"/>
-      <medicate drug="AS" hour="24" mg="1"/>
-      <medicate drug="AS" hour="48" mg="1"/>
-      <medicate drug="AS" hour="72" mg="1"/>
-    </schedule>
-    <dosages name="AS_dosages">
-      <age lb="0" ub="1" dose_mult="22"/>
-      <age lb="1" ub="4" dose_mult="29"/>
-      <age lb="4" ub="6" dose_mult="43"/>
-      <age lb="6" ub="9" dose_mult="50"/>
-      <age lb="9" ub="12" dose_mult="72"/>
-      <age lb="12" ub="15" dose_mult="101"/>
-      <age lb="15" ub="17" dose_mult="130"/>
-      <age lb="17" dose_mult="144"/>
-    </dosages>
-    <dosages name="AL_dosages">
-      <age lb="0" ub="3" dose_mult="1"/>
-      <age lb="3" ub="9" dose_mult="2"/>
-      <age lb="9" ub="15" dose_mult="3"/>
-      <age lb="15" dose_mult="4"/>
-    </dosages>
-  </caseManagement>
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
@@ -241,10 +192,10 @@
                       <outcome p="0.5" name="treatment">
                         <probabilistic name="adherence">
                           <outcome p="0.9" name="full adherence">
-                            <treat schedule="AL_treat" dosage="AL_dosages"/>
+                            <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                           </outcome>
                           <outcome p="0.1" name="miss last dose">
-                            <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                            <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                           </outcome>
                         </probabilistic> 
                       </outcome>
@@ -258,10 +209,10 @@
                           <outcome p="0.85" name="treatment">
                             <probabilistic name="adherence">
                               <outcome p="0.9" name="full adherence">
-                                <treat schedule="AL_treat" dosage="AL_dosages"/>
+                                <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                               </outcome>
                               <outcome p="0.1" name="miss last dose">
-                                <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                                <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                               </outcome>
                             </probabilistic> 
                           </outcome>
@@ -273,10 +224,10 @@
                           <outcome p="0.15" name="treatment">
                             <probabilistic name="adherence">
                               <outcome p="0.9" name="full adherence">
-                                <treat schedule="AL_treat" dosage="AL_dosages"/>
+                                <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                               </outcome>
                               <outcome p="0.1" name="miss last dose">
-                                <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                                <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                               </outcome>
                             </probabilistic> 
                           </outcome>
@@ -292,10 +243,10 @@
                   <outcome p="0.15" name="treatment">
                     <probabilistic name="adherence">
                       <outcome p="0.9" name="full adherence">
-                        <treat schedule="AL_treat" dosage="AL_dosages"/>
+                        <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                       </outcome>
                       <outcome p="0.1" name="miss last dose">
-                        <treat schedule="AL_treat_miss_last" dosage="AL_dosages"/>
+                        <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                       </outcome>
                     </probabilistic> 
                   </outcome>
@@ -310,18 +261,18 @@
       <complicated>
         <probabilistic name="initial provider">
           <outcome p="0.48" name="hospital">
-            <treat schedule="AS_treat" dosage="AS_dosages"/>
-            <treat schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
+            <treatPKPD schedule="AS_treat" dosage="AS_dosages"/>
+            <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
           </outcome>
           <outcome p="0.0" name="lower level">
             <probabilistic name="referral">
               <outcome p="0.5" name="immediate">
-                <treat schedule="AS_treat" dosage="AS_dosages"/>
-                <treat schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
+                <treatPKPD schedule="AS_treat" dosage="AS_dosages"/>
+                <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
               </outcome>
               <outcome p="0.3" name="delayed">
-                <treat schedule="AS_treat" dosage="AS_dosages" delay_h="24"/>
-                <treat schedule="AL_treat" dosage="AL_dosages" delay_h="108"/>
+                <treatPKPD schedule="AS_treat" dosage="AS_dosages" delay_h="24"/>
+                <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="108"/>
               </outcome>
               <outcome p="0.2" name="no referral"/>
             </probabilistic>
@@ -443,111 +394,162 @@
     </vector>
   </entomology>
   <pharmacology>
-    <drug abbrev="AR">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4</max_killing_rate>
-          <IC50>0.0023</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000023</negligible_concentration>
-        <half_life>0.175</half_life>
-        <vol_dist>17.4</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="AS">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4.6</max_killing_rate>
-          <IC50>0.0016</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000016</negligible_concentration>
-        <half_life>0.042</half_life>
-        <vol_dist>2.75</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="DHQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4.6</max_killing_rate>
-          <IC50>0.0009</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000016</negligible_concentration>
-        <half_life>0.035</half_life>
-        <vol_dist>8</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="CQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.02</IC50>
-          <slope>1.6</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.00036</negligible_concentration>
-        <half_life>30.006</half_life>
-        <vol_dist>300</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="LU">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.100</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.001</negligible_concentration>
-        <half_life>4.332</half_life>
-        <vol_dist>21</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="MQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.027</IC50>
-          <slope>5</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.005</negligible_concentration>
-        <half_life>13.078</half_life>
-        <vol_dist>20.8</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="PQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.088</IC50>
-          <slope>6</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.005</negligible_concentration>
-        <half_life>23.105</half_life>
-        <vol_dist>150</vol_dist>
-      </PK>
-    </drug>
+    <treatments>
+      <schedule name="AL_treat">
+        <medicate drug="AR" hour="0" mg="20"/>
+        <medicate drug="LU" hour="0" mg="120"/>
+        <medicate drug="AR" hour="8" mg="20"/>
+        <medicate drug="LU" hour="8" mg="120"/>
+        <medicate drug="AR" hour="24" mg="20"/>
+        <medicate drug="LU" hour="24" mg="120"/>
+        <medicate drug="AR" hour="36" mg="20"/>
+        <medicate drug="LU" hour="36" mg="120"/>
+        <medicate drug="AR" hour="48" mg="20"/>
+        <medicate drug="LU" hour="48" mg="120"/>
+        <medicate drug="AR" hour="60" mg="20"/>
+        <medicate drug="LU" hour="60" mg="120"/>
+      </schedule>
+      <schedule name="AL_treat_miss_last">
+        <medicate drug="AR" hour="0" mg="20"/>
+        <medicate drug="LU" hour="0" mg="120"/>
+        <medicate drug="AR" hour="8" mg="20"/>
+        <medicate drug="LU" hour="8" mg="120"/>
+        <medicate drug="AR" hour="24" mg="20"/>
+        <medicate drug="LU" hour="24" mg="120"/>
+        <medicate drug="AR" hour="36" mg="20"/>
+        <medicate drug="LU" hour="36" mg="120"/>
+      </schedule>
+      <schedule name="AS_treat">
+        <medicate drug="AS" hour="0" mg="1"/>
+        <medicate drug="AS" hour="12" mg="1"/>
+        <medicate drug="AS" hour="24" mg="1"/>
+        <medicate drug="AS" hour="48" mg="1"/>
+        <medicate drug="AS" hour="72" mg="1"/>
+      </schedule>
+      <dosages name="AS_dosages">
+        <age lb="0" ub="1" dose_mult="22"/>
+        <age lb="1" ub="4" dose_mult="29"/>
+        <age lb="4" ub="6" dose_mult="43"/>
+        <age lb="6" ub="9" dose_mult="50"/>
+        <age lb="9" ub="12" dose_mult="72"/>
+        <age lb="12" ub="15" dose_mult="101"/>
+        <age lb="15" ub="17" dose_mult="130"/>
+        <age lb="17" dose_mult="144"/>
+      </dosages>
+      <dosages name="AL_dosages">
+        <age lb="0" ub="3" dose_mult="1"/>
+        <age lb="3" ub="9" dose_mult="2"/>
+        <age lb="9" ub="15" dose_mult="3"/>
+        <age lb="15" dose_mult="4"/>
+      </dosages>
+    </treatments>
+    <drugs>
+      <drug abbrev="AR">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>4</max_killing_rate>
+            <IC50>0.0023</IC50>
+            <slope>4</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000023</negligible_concentration>
+          <half_life>0.175</half_life>
+          <vol_dist>17.4</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="AS">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>4.6</max_killing_rate>
+            <IC50>0.0016</IC50>
+            <slope>4</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000016</negligible_concentration>
+          <half_life>0.042</half_life>
+          <vol_dist>2.75</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="DHQ">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>4.6</max_killing_rate>
+            <IC50>0.0009</IC50>
+            <slope>4</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000016</negligible_concentration>
+          <half_life>0.035</half_life>
+          <vol_dist>8</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="CQ">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.02</IC50>
+            <slope>1.6</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.00036</negligible_concentration>
+          <half_life>30.006</half_life>
+          <vol_dist>300</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="LU">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.100</IC50>
+            <slope>4</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.001</negligible_concentration>
+          <half_life>4.332</half_life>
+          <vol_dist>21</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="MQ">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.027</IC50>
+            <slope>5</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.005</negligible_concentration>
+          <half_life>13.078</half_life>
+          <vol_dist>20.8</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="PQ">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.088</IC50>
+            <slope>6</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.005</negligible_concentration>
+          <half_life>23.105</half_life>
+          <vol_dist>150</vol_dist>
+        </PK>
+      </drug>
+    </drugs>
   </pharmacology>
   <model>
     <ModelOptions>
