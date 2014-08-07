@@ -378,7 +378,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:choice>
         <xs:element name="screen" type="om:Screen"/>
         <xs:element name="MDA" type="om:MDAComponent"/>
-        <xs:element name="MDA1D" type="om:HSESCaseManagement">
+        <xs:element name="MDA1D" type="om:DecisionTree">
           <xs:annotation>
             <xs:documentation>
               Description of a MDA/MSAT intervention (Mass Screen and Treat is
