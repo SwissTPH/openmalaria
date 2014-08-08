@@ -19,11 +19,9 @@ set (Model_CPP
   Clinical/CaseManagementCommon.cpp
   Clinical/EventScheduler.cpp
   Clinical/ESCaseManagement.cpp
-  Clinical/ESDecisionTree.cpp
-  Clinical/ESDecisionValue.cpp
+  Clinical/CMDecisionTree.cpp
   Clinical/ImmediateOutcomes.cpp
   Clinical/Episode.cpp
-  Clinical/parser.cpp
   
   PkPd/PkPdModel.cpp
   #PkPd/HoshenPkPdModel.cpp
