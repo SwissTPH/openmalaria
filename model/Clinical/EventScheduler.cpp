@@ -193,7 +193,7 @@ void ClinicalEventScheduler::massDrugAdministration( Human& human,
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration ( 
-        ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
+        CMHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
         medicateQueue, human, screeningReport, drugReport
     );
 }
@@ -285,8 +285,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if (timeLastTreatment + healthSystemMemory > TimeStep::simulation)
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
-	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue
+	/*CMAuxOutput auxOut =*/ ESCaseManagement::execute(
+	    CMHostData( ageYears, withinHostModel, pgState ), medicateQueue
 	);
 	
         if( medicateQueue.size() ){	// I.E. some treatment was given
@@ -302,11 +302,11 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             }
         }
 	
-	if ( auxOut.hospitalisation != CMAuxOutput::NONE ) {	// in hospital
+	if ( true /*FIXME auxOut.hospitalisation != CMAuxOutput::NONE*/ ) {	// in hospital
 	    pgState = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
 	    
-	    if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
-		++caseStartTime;
+	    /*FIXME if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
+		++caseStartTime;*/
 	}
 	
 	// Case fatality rate (first day of illness)
@@ -316,8 +316,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	) {
 	    double pDeath = caseFatalityRate.eval( ageYears );
 	    // community fatality rate when not in hospital or delayed hospital entry
-	    if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
-                pDeath = getCommunityCFR( pDeath );
+	    /*FIXME if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
+                pDeath = getCommunityCFR( pDeath );*/
 	    if (random::uniform_01() < pDeath) {
 		pgState = Episode::State (pgState | Episode::DIRECT_DEATH | Episode::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
@@ -339,11 +339,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 bool needTreat = random::bernoulli(pNeedTreat);
                 
                 // Calculate chance of antibiotic administration:
-                double pTreatment;
-                if( auxOut.AB_provider == CMAuxOutput::NO_AB ){
-                    // No treatment seeking
-                    pTreatment = 0.0;
-                }else{
+                double pTreatment = 0.0;
+                /*FIXME
+                if( auxOut.AB_provider != CMAuxOutput::NO_AB ){
                     // Treatment seeking; may be at a health facility or from
                     // the informal sector.
                     double logOddsAb = logOddsAbBase - logOddsAbNeed * pNeedTreat;
@@ -363,7 +361,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                     
                     double oddsTreatment = exp( logOddsAb );
                     pTreatment = oddsTreatment / (1.0 + oddsTreatment);
-                }
+                }*/
                 
                 double treatmentEffectMult = 1.0;
                 
@@ -444,11 +442,6 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
         if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
             double bodyMass = ageToWeight( ageYears );
 	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
-            if( it->duration > 0.0 ){
-                Survey::current().report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
-            }else{      // 0 or NaN
-                Survey::current().report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
-            }
 	    medicateQueue.erase (it);
         } else {   // and decrement treatment seeking delay for the rest
             it->time -= 1.0;

@@ -505,7 +505,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:choice>
       <xs:element name="caseType" type="om:DTCaseType"/>
       <xs:element name="diagnostic" type="om:DTDiagnostic"/>
-      <xs:element name="probabilistic" type="om:DTProbabilistic"/>
+      <xs:element name="random" type="om:DTRandom"/>
       <xs:sequence>
         <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded" minOccurs="0"/>
       </xs:sequence>
@@ -575,10 +575,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="DTProbabilistic">
+  <xs:complexType name="DTRandom">
     <xs:annotation>
       <xs:documentation>
-        A switch which choses a branch probabilistically.
+        A switch which choses a branch randomly.
+        
+        Each branch must be listed with a probability; the sum of all these
+        probabilities must equal 1.
       </xs:documentation>
       <xs:appinfo>name:Switch (probabilistic);</xs:appinfo>
     </xs:annotation>

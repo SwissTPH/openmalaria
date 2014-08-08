@@ -19,9 +19,8 @@
  */
 
 #include "Clinical/ESCaseManagement.h"
-#include "Clinical/ESDecisionTree.h"
+#include "Clinical/CMDecisionTree.h"
 #include "Clinical/EventScheduler.h"
-#include "Clinical/parser.h"
 #include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
@@ -36,13 +35,11 @@ namespace OM { namespace Clinical {
     using namespace boost::assign;
     using namespace Monitoring;
     using boost::format;
-    using parser::SymbolValueMap;
-    using parser::SymbolRangeMap;
 
 // -----  ESTreatmentSchedule  -----
 
-ESTreatmentSchedule::ESTreatmentSchedule (const scnXml::HSESTreatmentSchedule& sched) {
-    const ::scnXml::HSESTreatmentSchedule::MedicateSequence& mSeq = sched.getMedicate();
+ESTreatmentSchedule::ESTreatmentSchedule (const scnXml::PKPDSchedule& sched) {
+    const ::scnXml::PKPDSchedule::MedicateSequence& mSeq = sched.getMedicate();
     medications.resize (mSeq.size ());
     for (size_t j = 0; j < mSeq.size(); ++j) {
 	medications[j].abbrev = mSeq[j].getDrug();
@@ -58,130 +55,6 @@ ESTreatmentSchedule::ESTreatmentSchedule (const scnXml::HSESTreatmentSchedule& s
     }
 }
 
-void ESTreatmentSchedule::multiplyQty (const SymbolValueMap& m, bool affectsCost, const string& errObj) {
-    for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ++med ){
-	SymbolValueMap::const_iterator it = m.find( med->abbrev );
-	if( it == m.end() )
-	    throw xml_scenario_error( (boost::format("%1%: no effect described for drug (ingredient) %2%") %errObj %med->abbrev).str() );
-	med->qty *= it->second;
-	if( affectsCost )
-	    med->cost_qty *= it->second;
-    }
-}
-void ESTreatmentSchedule::delay (const SymbolValueMap& m, const string& errObj) {
-    for( vector<MedicateData>::iterator med = medications.begin(); med != medications.end(); ++med ){
-	SymbolValueMap::const_iterator it = m.find( med->abbrev );
-	if( it == m.end() )
-	    throw xml_scenario_error( (boost::format("%1%: no effect described for drug (ingredient) %2%") %errObj %med->abbrev).str() );
-	med->time += it->second / 24.0;	// convert to days
-    }
-}
-
-
-// -----  ESTreatment  -----
-
-typedef ESDecisionValueMap::value_map_t value_map_t;
-
-// functions extracted just to avoid repeating this 3 times:
-string modFormatErrMsg( const string& elt, const string& dec, const string& val ){
-    // Formats an error-message to pass to sub-functions (due to way it's passed, needs to be generated anyway)
-    ostringstream msg;
-    msg << "treatment \""<<elt
-	<<"\" modifier for decision value "<<dec<<'('<<val<<')';
-    return msg.str();
-}
-ESDecisionValue modGetESDecVal( value_map_t& decVals, const scnXml::HSESTreatmentModifierEffect& mod, const string& errObj ){
-    value_map_t::iterator it = decVals.find( mod.getValue() );
-    if( it == decVals.end() )
-	throw xml_scenario_error( errObj+": value doesn't exist" );
-    ESDecisionValue val = it->second;
-    decVals.erase( it );
-    return val;
-}
-
-ESTreatment::ESTreatment(const ESDecisionValueMap& dvMap, const scnXml::HSESTreatment& elt, list<string>& required) {
-    ESDecisionValue zero;       // "insert" has no support for anonymous objects, so can't declare inline
-    schedules.insert( zero, new ESTreatmentSchedule( elt.getSchedule() ) );
-    Schedules startSchedules;
-    
-    BOOST_FOREACH( const scnXml::HSESTreatmentModifier& modifier, elt.getModifier() ){
-	schedules.swap( startSchedules );
-	schedules.clear();
-	
-	required.push_back( modifier.getDecision() );	// make sure this decision isn't optimised out
-	tuple<ESDecisionValue, const value_map_t&> decPair = dvMap.getDecision( modifier.getDecision() );
-	schedulesMask |= decPair.get<0>();
-	value_map_t decVals = decPair.get<1>();	// copy
-        schedules.rehash( (std::size_t)std::ceil(decVals.size() / schedules.max_load_factor()) );
-	
-	if( modifier.getMultiplyQty().size() ) {
-	    assert( modifier.getDelay().size() == 0 );
-	    assert( modifier.getSelectTimeRange().size() == 0 );
-	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier.getMultiplyQty() ){
-		string errObj = modFormatErrMsg( elt.getName(), modifier.getDecision(), mod.getValue() );
-		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
-		const SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
-		bool affectsCost = mod.getAffectsCost().present() ? mod.getAffectsCost().get() : true;
-		
-		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
-		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
-		    ts->multiplyQty( m, affectsCost, errObj );
-                    ESDecisionValue key = s->first | val;
-		    schedules.insert( key, ts );
-		}
-	    }
-	} else if( modifier.getDelay().size() ) {
-	    assert( modifier.getSelectTimeRange().size() == 0 );
-	    BOOST_FOREACH( const scnXml::HSESTreatmentModifierEffect& mod, modifier.getDelay() ){
-		string errObj = modFormatErrMsg( elt.getName(), modifier.getDecision(), mod.getValue() );
-		ESDecisionValue val = modGetESDecVal( decVals, mod, errObj );
-		const SymbolValueMap& m = parser::parseSymbolValueMap( mod.getEffect(), errObj );
-		
-		for( Schedules::iterator s = startSchedules.begin(); s != startSchedules.end(); ++s ){
-		    ESTreatmentSchedule *ts = new ESTreatmentSchedule( *s->second );
-		    ts->delay( m, errObj );
-                    ESDecisionValue key = s->first | val;
-                    schedules.insert( key, ts );
-		}
-	    }
-	} else {
-	    ostringstream msg;
-	    msg << "treatment \""<<elt.getName()
-		<<"\" modifier for decision "<<modifier.getDecision()
-		<<" has no sub-elements";
-	    throw xml_scenario_error( msg.str() );
-	}
-	
-	if( !decVals.empty() ){
-	    ostringstream msg;
-	    msg << "modifier for treatment \""<<elt.getName()
-		<< "\" by decision "<<modifier.getDecision()
-		<<": effect not described for values:";
-	    for( value_map_t::iterator it = decVals.begin(); it != decVals.end(); ++it )
-		msg<<' '<<it->first;
-	    throw xml_scenario_error( msg.str() );
-	}
-    }
-    
-    /*
-    cout<<"schedules for "<<elt.getName()<<":";
-    for( Schedules::iterator it = schedules.begin(); it != schedules.end(); ++it ) {
-	cout<<" "<<it->first<<" ["<<dvMap.format( it->first )<<"];";
-    }
-    cout<<"\nmask: "<<schedulesMask<<endl;
-    */
-}
-
-ESTreatment::~ESTreatment() {
-}
-
-ESTreatmentSchedule* ESTreatment::getSchedule (ESDecisionValue& outcome) {
-    outcome = outcome & schedulesMask;
-    Schedules::iterator it = schedules.find (outcome);
-    if (it == schedules.end ())
-	return NULL;
-    return it->second;
-}
 
 // -----  ESDecisionMap  -----
 
@@ -191,14 +64,14 @@ class ESDecisionMapProcessor {
     
     // Collection of all decisions not yet added into decisions or culled.
     // Filled by constructor, emptied by process().
-    typedef map<string,ESDecisionTree*> DecisionList;
+    typedef map<string,CMDecisionTree*> DecisionList;
     DecisionList pending;
     
     // Set of all tests required. Filled by process().
-    set<ESDecisionTree*> required;
+    set<CMDecisionTree*> required;
     
     // Add by key "decision", and return true if added
-    bool addToPending( ESDecisionTree* d ){
+    bool addToPending( CMDecisionTree* d ){
 	return pending.insert( make_pair(d->decision, d) ).second;
     }
     void addRequires (const string& x){
@@ -224,7 +97,7 @@ class ESDecisionMapProcessor {
 	}	// else it was already considered
     }
     
-    inline bool hasAllDependencies (const ESDecisionTree* decision, const set<string>& dependencies) {
+    inline bool hasAllDependencies (const CMDecisionTree* decision, const set<string>& dependencies) {
 	BOOST_FOREACH ( const string& n, decision->depends ) {
 	    if (dependencies.count(n) == 0) {
 		return false;
@@ -242,11 +115,11 @@ public:
     {
 	// Assemble a list of all tests we might need to add
 	if ( treeType == ESDecisionMap::Uncomplicated ) {
-	    addToPending (new ESDecisionUC2Test (dvMap));	// this test only makes sense for UC case
+	    addToPending (new CMDTCaseType (dvMap));	// this test only makes sense for UC case
 	}
 	addToPending (new ESDecisionParasiteTest (dvMap));	// optimised away if not used
 	BOOST_FOREACH ( const ::scnXml::HSESDecision& xmlDc, xmlCM.getDecisions().getDecision() ) {
-	    if( !addToPending (ESDecisionTree::create (dvMap, xmlDc)) )
+	    if( !addToPending (CMDecisionTree::create (dvMap, xmlDc)) )
 		throw xml_scenario_error((format("Case management: decision %1% described twice") %xmlDc.getName()).str());
 	}
     }
@@ -374,7 +247,7 @@ void ESDecisionMap::initialize (const ::scnXml::HSESCaseManagement& xmlCM, TreeT
 ESDecisionMap::~ESDecisionMap () {
 }
 
-ESDecisionValue ESDecisionMap::determine (const OM::Clinical::ESHostData& hostData) const {
+ESDecisionValue ESDecisionMap::determine (const OM::Clinical::CMHostData& hostData) const {
     ESDecisionValue outcomes;	// initialized to 0
     // At this point, decisions is ordered such that all dependencies should be
     // met if evaluated in order, so we just do that.
@@ -405,6 +278,7 @@ ESTreatmentSchedule& ESDecisionMap::getSchedule (ESDecisionValue outcome) {
 
 ESDecisionMap ESCaseManagement::uncomplicated, ESCaseManagement::complicated;
 ESDecisionMap ESCaseManagement::mda;
+// ESDecisionMap decisionsUC, decisionsSev, decisionsMDA;
 
 void ESCaseManagement::setHealthSystem( const scnXml::HealthSystem& healthSystem) {
     if( !healthSystem.getEventScheduler().present() )
@@ -420,20 +294,10 @@ void ESCaseManagement::setHealthSystem( const scnXml::HealthSystem& healthSystem
 
 pair<ESDecisionValue, bool> executeTree(
         ESDecisionMap* map,
-        const ESHostData& hostData,
+        const CMHostData& hostData,
         list<MedicateData>& medicateQueue
 ){
-    ESDecisionValue outcome = map->determine (hostData);
-    ESTreatmentSchedule& schedule = map->getSchedule(outcome);
-    schedule.apply (medicateQueue);
-    
-    if ( map->RDT_used(outcome) ) {
-        Survey::current().report_Clinical_RDTs (1);
-    }
-    if ( map->microscopy_used(outcome) ) {
-        Survey::current().report_Clinical_Microscopy (1);
-    }
-    
+    map->execute (hostData);
     return make_pair( outcome, schedule.anyTreatments() );
 }
 
@@ -442,7 +306,7 @@ void ESCaseManagement::initMDA (const scnXml::HSESCaseManagement& desc){
 }
 
 void ESCaseManagement::massDrugAdministration(
-        const ESHostData& hostData,
+        const CMHostData& hostData,
         list<MedicateData>& medicateQueue,
         const Host::Human& human,
         Monitoring::ReportMeasureI screeningReport,
@@ -456,7 +320,7 @@ void ESCaseManagement::massDrugAdministration(
 }
 
 CMAuxOutput ESCaseManagement::execute (
-        const ESHostData& hostData,
+        const CMHostData& hostData,
         list<MedicateData>& medicateQueue
 ) {
     assert (hostData.pgState & Episode::SICK);

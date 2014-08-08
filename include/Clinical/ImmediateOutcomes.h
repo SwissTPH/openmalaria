@@ -60,9 +60,20 @@ private:
     friend class ImmediateOutcomes;
 };
 
-/** This implementation of the model is intended to use the old case-management
- * model with immediate outcomes of clinical events (immediate recovery with
- * total parasite clearance or immediate death). */
+/**
+ * This models case management at a 5-day timestep with optional PK/PD modeling
+ * for uncomplicated cases.
+ * 
+ * Uncomplicated cases: access, otherwise known as "seeking any type of
+ * treatment", is determined by a fixed-function decision, which may be
+ * modified by a treatment-seeking factor. Treatment decisions (type of
+ * treatment, use of diagnostics, effectiveness) are determined by a
+ * programmable decision tree.
+ * 
+ * Severe cases: all decisions and outcomes are calculated via a fixed-function
+ * probability tree, using the same logic for handling severe cases as has long
+ * been used.
+ */
 class ImmediateOutcomes : public ClinicalModel
 {
 public:

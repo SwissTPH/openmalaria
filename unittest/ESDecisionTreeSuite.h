@@ -49,7 +49,7 @@ public:
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
         whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel( 1.0 ) );
         ETS_ASSERT( whm != 0 );
-	hd = new ESHostData( numeric_limits< double >::quiet_NaN(), *whm, Episode::NONE );
+	hd = new CMHostData( numeric_limits< double >::quiet_NaN(), *whm, Episode::NONE );
 
 	UnittestUtil::EmpiricalWHM_setup();
 	// could seed random-number-generator, but shouldn't affect outcomes
@@ -112,7 +112,7 @@ public:
     /* Runs d.determine( input, hd ) N times
      * returns the proportion of these runs where the output equalled expectedOutput
      */
-    double determineNTimes (int N, const ESDecisionTree* d, const ESDecisionValue input, const ESHostData& hd, const ESDecisionValue expectedOutput) {
+    double determineNTimes (int N, const CMDecisionTree* d, const ESDecisionValue input, const CMHostData& hd, const ESDecisionValue expectedOutput) {
 	int nExpected = 0;
 	for (int i = 0; i < N; ++i) {
 	    if( d->determine( input, hd ) == expectedOutput )
@@ -122,7 +122,7 @@ public:
     }
     
     void testRandomP () {
-	ESHostData hd(
+	CMHostData hd(
 		numeric_limits< double >::quiet_NaN(),
 		*whm,
 		Episode::NONE
@@ -142,7 +142,7 @@ public:
 	    "p",	// depends
 	    "a,b"	// values
 	);
-	ESDecisionTree* ut_r = ESDecisionTree::create( *dvMap, ut_r_xml );
+	CMDecisionTree* ut_r = CMDecisionTree::create( *dvMap, ut_r_xml );
 	
 	const int N = 10000;
 	const double LIM = .02;
@@ -167,7 +167,7 @@ public:
 	    "i",	// depends
 	    "b,a"	// values
 	);
-	ESDecisionTree* ut_d = ESDecisionTree::create( *dvMap, ut_d_xml );
+	CMDecisionTree* ut_d = CMDecisionTree::create( *dvMap, ut_d_xml );
 	
 	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "1" ), *hd ), dvMap->get( "ut_d", "a" ) );
 	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "2" ), *hd ), dvMap->get( "ut_d", "b" ) );
@@ -268,7 +268,7 @@ public:
 	    "age",	// depends
 	    "under5,over5"	// values
 	);
-	ESDecisionTree* d = ESDecisionTree::create( *dvMap, ut_age5_xml );
+	CMDecisionTree* d = CMDecisionTree::create( *dvMap, ut_age5_xml );
 	
 	hd->ageYears = 4.99;	// under
 	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), *hd ), dvMap->get( "age5", "under5" ) );
@@ -336,7 +336,7 @@ public:
     }
     
     void testUC2Test () {
-	ESDecisionUC2Test d( *dvMap );
+	CMDTCaseType d( *dvMap );
 	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
 	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), *hd ), dvMap->get( "case", "UC1" ) );
 	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA | Episode::SECOND_CASE );
@@ -462,7 +462,7 @@ public:
 private:
     ESDecisionValueMap* dvMap;
     WHFalciparum* whm;
-    ESHostData* hd;
+    CMHostData* hd;
 };
 
 #endif
