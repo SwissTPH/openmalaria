@@ -36,7 +36,7 @@ using namespace std;
 
 namespace scnXml{
     class Pharmacology;
-    class Drug;
+    class PKPDDrug;
     class Allele;
 }
 namespace OM { namespace PkPd {
@@ -144,7 +144,7 @@ public:
      * @param drugData Scenario data for this drug (PK params, PD params per allele)
      * @param bit_start Next bit of infection's proteome_id available (see allele_rshift).
      */
-    LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start);
+    LSTMDrugType (const scnXml::PKPDDrug& drugData, uint32_t& bit_start);
     ~LSTMDrugType ();
     
     inline const string& getAbbreviation() const{

@@ -105,9 +105,10 @@ private:
         }
     }
     
-    const double dens_50;     // parasite density giving 50% chance of positive outcome
-    const double specificity; // chance of a negative outcome given no parasites
-    const bool isRDT;   // for reporting
+    //NOTE: could be const if constructed differently:
+    double dens_50;     // parasite density giving 50% chance of positive outcome
+    double specificity; // chance of a negative outcome given no parasites
+    bool isRDT;   // for reporting
     
     const auto_ptr<CMDecisionTree> positive;
     const auto_ptr<CMDecisionTree> negative;
@@ -130,11 +131,12 @@ protected:
     
 private:
     CMDTRandom( ptr_map<double,CMDecisionTree>& branches ){
-        this.branches.swap( branches );
+        this->branches.swap( branches );
     }
     
     // keys are cumulative probabilities; last entry should equal 1
-    const ptr_map<double,CMDecisionTree> branches;
+    //NOTE: could be const if initialised differently
+    ptr_map<double,CMDecisionTree> branches;
 };
 
 
@@ -148,29 +150,29 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
 }
 
 auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node ){
-    return new CMDTCaseType(
+    return auto_ptr<CMDecisionTree>( new CMDTCaseType(
         CMDecisionTree::create( node.getFirstLine() ),
         CMDecisionTree::create( node.getSecondLine() )
-    );
+    ) );
 }
 
 auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& node ){
-    return new CMDTDiagnostic(
+    return auto_ptr<CMDecisionTree>( new CMDTDiagnostic(
+        node.getType(),
         CMDecisionTree::create( node.getPositive() ),
         CMDecisionTree::create( node.getNegative() )
-    );
+    ) );
 }
 
-auto_ptr< CMDecisionTree > CMDTRandom::create( const scnXml::DTRandom& node ){
-    vector<double> cumProbs;
-    cumProbs.reserve( node.getOutcome().size() );
-    ptr_vector<CMDecisionTree> branches;
-    branches.reserve( node.getOutcome().size() );
+auto_ptr< CMDecisionTree > CMDTRandom::create(
+    const scnXml::DTRandom& node )
+{
+    ptr_map<double,CMDecisionTree> branches;
     
     double cum_p = 0.0;
     BOOST_FOREACH( const scnXml::Outcome& outcome, node.getOutcome() ){
         cum_p += outcome.getP();
-        branches.push_back( CMDecisionTree::create( outcome ) );
+        branches.insert( cum_p, CMDecisionTree::create( outcome ) );
     }
     
     // Test cum_p is approx. 1.0 in case the input tree is wrong. In any case,
@@ -184,9 +186,11 @@ auto_ptr< CMDecisionTree > CMDTRandom::create( const scnXml::DTRandom& node ){
     // In theory if the last value is exactly 1 it should always be greater
     // than a uniform_01() sample; this just gives us a stronger guarantee of
     // the same thing.
-    cumProbs.back() = numeric_limits<double>::infinity();
+    //TODO: set index for last entry to something > 1
+//     branches.back()->first = numeric_limits<double>::infinity();
 
-    return new CMDTRandom( cumProbs, branches );
+    return auto_ptr<CMDecisionTree>(
+        new CMDTRandom( cumProbs, branches ) );
 }
 
 } }

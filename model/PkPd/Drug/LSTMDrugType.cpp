@@ -39,8 +39,12 @@ LSTMDrugType::Available LSTMDrugType::available;
 void LSTMDrugType::init (const scnXml::Pharmacology& data) {
     uint32_t start_bit = 0;
 
-    for (scnXml::Pharmacology::DrugConstIterator drug = data.getDrug().begin(); drug != data.getDrug().end(); ++drug) {
-        LSTMDrugType::addDrug (auto_ptr<LSTMDrugType>(new LSTMDrugType (*drug, start_bit)));
+    for (scnXml::Pharmacology::DrugsType::DrugConstIterator drug =
+            data.getDrugs().getDrug().begin(), end =
+            data.getDrugs().getDrug().end(); drug != end; ++drug)
+    {
+        LSTMDrugType::addDrug (
+            auto_ptr<LSTMDrugType>(new LSTMDrugType (*drug, start_bit)));
     }
 }
 void LSTMDrugType::cleanup () {

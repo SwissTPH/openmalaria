@@ -37,9 +37,7 @@ class ESCaseManagementSuite;
 class ESDecisionTreeSuite;
 
 namespace scnXml{
-    class HSESTreatmentSchedule;
-    class HSESTreatment;
-    class HSESCaseManagement;
+    
 }
 namespace OM { namespace Clinical {
     using WithinHost::WHInterface;
@@ -126,12 +124,12 @@ class ESDecisionMap {
          * @param reinitialise If true, clear any previously initialised data
          * (e.g. for replacement health system); if false, throw an exception
          * if the map was previously initialised. */
-        void initialize (const ::scnXml::HSESCaseManagement& cm, TreeType treeType, bool reinitialise);
+        void initialize (const ::scnXml::DecisionTree& cm, TreeType treeType, bool reinitialise);
         
         /** Run decision tree to arrive at an outcome.
          *
          * @returns An outcome as a binary-or'd list of decision values. */
-        void execute (const OM::Clinical::CMHostData& hostData) const;
+        void execute( CMHostData hostData ) const;
         
         typedef boost::ptr_vector<CMDecisionTree> Decisions;
     private:
@@ -144,20 +142,6 @@ class ESDecisionMap {
         
 //         typedef boost::ptr_unordered_map<ESDecisionValue,ESTreatment> Treatments;
 //         Treatments treatments;
-        // Used to mask ESDecisionValues before lookup in treatments:
-        /*
-        ESDecisionValue treatmentsMask;
-        ESDecisionValue hospitalisation_mask,
-                                    hospitalisation_immediate,
-                                    hospitalisation_delayed;
-        ESDecisionValue test_mask, test_RDT, test_microscopy;
-        ESDecisionValue diagnostic_mask,
-                                    diagnostic_positive,
-                                    diagnostic_negative;
-        ESDecisionValue AB_provider_mask,
-                                    AB_provider_facility,
-                                    AB_provider_informal;
-                                    */
         
         friend class ::ESCaseManagementSuite;   // unittests
         friend class ::ESDecisionTreeSuite;
@@ -175,7 +159,7 @@ public:
     
     /** Set up MDA drug. Must be called if massDrugAdministration() is
         * ever used to deploy an MDA intervention. */
-    static void initMDA (const scnXml::HSESCaseManagement& desc);
+    static void initMDA (const scnXml::DecisionTree& desc);
     
     static void massDrugAdministration(
         const CMHostData& hostData,
