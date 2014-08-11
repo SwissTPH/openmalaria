@@ -68,11 +68,13 @@ public:
     /* Runs d.determine( input, hd ) N times
      * returns the proportion of these runs where the output equalled expectedOutput
      */
-    double determineNTimes (int N, const CMDecisionTree* d, const CMHostData& hd) {
+    double determineNTimes (int N, const scnXml::DecisionTree& dt, const CMHostData& hd) {
+        auto_ptr<CMDecisionTree> cmdt = CMDecisionTree::create( dt );
+        
 	int nExpected = 0;
 	for (int i = 0; i < N; ++i) {
             //TODO: "exec" here should do something specific; we need to test whether it does what's expected
-	    d->exec( hd );
+	    cmdt->exec( hd );
 //             if(...)
 // 		++nExpected;
 	}
@@ -87,41 +89,36 @@ public:
 	);
 	
 	// random decision
-        scnXml::Outcome o1r1;
-        o1r1.setP( 0.5 );
+        //TODO: these should have labels a, b respectively
+        scnXml::Outcome o1r2( 0.9 ), o2r2( 0.1 );
+        scnXml::DTRandom r2;
+        r2.getOutcome().push_back( o1r2 );
+        r2.getOutcome().push_back( o2r2 );
         
-        scnXml::Outcome o2r1;
-        o2r1.setP( 0.5 );
+        //TODO: these should have labels a, b respectively
+        scnXml::Outcome o1r3( 0.7 ), o2r3( 0.3 );
+        scnXml::DTRandom r3;
+        r3.getOutcome().push_back( o1r3 );
+        r3.getOutcome().push_back( o2r3 );
+        
+        scnXml::Outcome o1r1( 0.5 ), o2r1( 0.5 );
+        o1r1.setRandom( r2 );
+        o2r1.setRandom( r3 );
         
         scnXml::DTRandom r1;
         r1.getOutcome().push_back( o1r1 );
         r1.getOutcome().push_back( o2r1 );
         
         scnXml::DecisionTree dt;
-        dt.setRandom(r1);
-	scnXml::HSESDecision ut_r_xml ("\
-		p(.5) {\
-		    p(.9): a\
-		    p(.1): b\
-		}\
-		p(.5) {\
-		    p(.7): a\
-		    p(.3): b\
-		}",
-	    "myR",	// decision
-	    "p",	// depends
-	    "a,b"	// values
-	);
-	CMDecisionTree* ut_r = CMDecisionTree::create( *dvMap, ut_r_xml );
+        dt.setRandom( r1 );
 	
 	const int N = 10000;
 	const double LIM = .02;
 	double propPos;	// proportion positive
 	
-	// test that ut_r.decide produces a 80% of the time and b 20%:
-	propPos = determineNTimes( N, ut_r, ESDecisionValue(), hd, dvMap->get( "myR", "a" ) );
+	// test that dt.exec chooses a 80% of the time and b 20%:
+	propPos = determineNTimes( N, dt, hd );
 	TS_ASSERT_DELTA( propPos, .8, LIM );
-	delete ut_r;
     }
     
     void testRandomDeterministic () {
