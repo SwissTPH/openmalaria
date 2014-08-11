@@ -63,10 +63,8 @@
       <option name="simulatedEIR" value="true"/>
       <option name="nNewInfections" value="true"/>
       <option name="Clinical_RDTs" value="true"/>
-      <option name="Clinical_DrugUsage" value="true"/>
       <option name="nMassITNs" value="true"/>
       <option name="Clinical_Microscopy" value="true"/>
-      <option name="Clinical_DrugUsageIV" value="true"/>
       <option name="nMDAs" value="true"/>
       <option name="nMassScreenings" value="true"/>
     </SurveyOptions>
@@ -182,90 +180,90 @@
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
-        <probabilistic name="provider">
+        <random name="provider">
           <outcome p="0.2" name="formal">
             <caseType>
               <firstLine>
-                <probabilistic name="test">
+                <random name="test">
                   <outcome p="0.82" name="no test">
-                    <probabilistic name="prob treatment">
+                    <random name="prob treatment">
                       <outcome p="0.5" name="treatment">
-                        <probabilistic name="adherence">
+                        <random name="adherence">
                           <outcome p="0.9" name="full adherence">
                             <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                           </outcome>
                           <outcome p="0.1" name="miss last dose">
                             <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                           </outcome>
-                        </probabilistic> 
+                        </random> 
                       </outcome>
                       <outcome p="0.5"/>
-                    </probabilistic>
+                    </random>
                   </outcome>
                   <outcome p="0.18" name="RDT">
                     <diagnostic type="RDT">
                       <positive>
-                        <probabilistic name="prob treatment">
+                        <random name="prob treatment">
                           <outcome p="0.85" name="treatment">
-                            <probabilistic name="adherence">
+                            <random name="adherence">
                               <outcome p="0.9" name="full adherence">
                                 <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                               </outcome>
                               <outcome p="0.1" name="miss last dose">
                                 <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                               </outcome>
-                            </probabilistic> 
+                            </random> 
                           </outcome>
                           <outcome p="0.15"/>
-                        </probabilistic>
+                        </random>
                       </positive>
                       <negative>
-                        <probabilistic name="prob treatment">
+                        <random name="prob treatment">
                           <outcome p="0.15" name="treatment">
-                            <probabilistic name="adherence">
+                            <random name="adherence">
                               <outcome p="0.9" name="full adherence">
                                 <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                               </outcome>
                               <outcome p="0.1" name="miss last dose">
                                 <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                               </outcome>
-                            </probabilistic> 
+                            </random> 
                           </outcome>
                           <outcome p="0.85"/>
-                        </probabilistic>
+                        </random>
                       </negative>
                     </diagnostic>
                   </outcome>
-                </probabilistic>
+                </random>
               </firstLine>
               <secondLine>
-                <probabilistic name="prob treatment">
+                <random name="prob treatment">
                   <outcome p="0.15" name="treatment">
-                    <probabilistic name="adherence">
+                    <random name="adherence">
                       <outcome p="0.9" name="full adherence">
                         <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
                       </outcome>
                       <outcome p="0.1" name="miss last dose">
                         <treatPKPD schedule="AL_treat_miss_last" dosage="AL_dosages"/>
                       </outcome>
-                    </probabilistic> 
+                    </random> 
                   </outcome>
                   <outcome p="0.85"/>
-                </probabilistic>
+                </random>
               </secondLine>
             </caseType>
           </outcome>
           <outcome p="0.8" name="no treatment provider"/>
-        </probabilistic>
+        </random>
       </uncomplicated>
       <complicated>
-        <probabilistic name="initial provider">
+        <random name="initial provider">
           <outcome p="0.48" name="hospital">
             <treatPKPD schedule="AS_treat" dosage="AS_dosages"/>
             <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
           </outcome>
           <outcome p="0.0" name="lower level">
-            <probabilistic name="referral">
+            <random name="referral">
               <outcome p="0.5" name="immediate">
                 <treatPKPD schedule="AS_treat" dosage="AS_dosages"/>
                 <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="84"/>
@@ -275,10 +273,10 @@
                 <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="108"/>
               </outcome>
               <outcome p="0.2" name="no referral"/>
-            </probabilistic>
+            </random>
           </outcome>
           <outcome p="0.52" name="no initial provider"/>
-        </probabilistic>
+        </random>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>
