@@ -88,8 +88,6 @@ public:
         codeMap["inputEIR"] = SM::inputEIR;
         codeMap["simulatedEIR"] = SM::simulatedEIR;
         codeMap["Clinical_RDTs"] = SM::Clinical_RDTs;
-        codeMap["Clinical_DrugUsage"] = SM::Clinical_DrugUsage;
-        codeMap["Clinical_DrugUsageIV"] = SM::Clinical_DrugUsageIV;
         codeMap["Clinical_FirstDayDeaths"] = SM::Clinical_FirstDayDeaths;
         codeMap["Clinical_HospitalFirstDayDeaths"] = SM::Clinical_HospitalFirstDayDeaths;
         codeMap["nNewInfections"] = SM::nNewInfections;
@@ -354,12 +352,6 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::Clinical_RDTs]) {
       writeValue (outputFile, SM::Clinical_RDTs, survey, m_Clinical_RDTs);
-  }
-  if (active[SM::Clinical_DrugUsage]) {
-      writeMap (outputFile, SM::Clinical_DrugUsage, survey, m_Clinical_DrugUsage);
-  }
-  if (active[SM::Clinical_DrugUsageIV]) {
-      writeMap (outputFile, SM::Clinical_DrugUsageIV, survey, m_Clinical_DrugUsageIV);
   }
   if (active[SM::Clinical_Microscopy]) {
       writeValue (outputFile, SM::Clinical_Microscopy, survey, m_Clinical_Microscopy);

@@ -33,6 +33,8 @@
 using namespace OM::Clinical;
 using namespace boost::assign;
 
+#if 0
+TODO: replace this test suite
 class ESCaseManagementSuite : public CxxTest::TestSuite
 {
 public:
@@ -225,5 +227,6 @@ public:
 private:
     ESDecisionMap dMap;
 };
+#endif
 
 #endif

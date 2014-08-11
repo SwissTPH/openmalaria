@@ -75,8 +75,8 @@ set (OM_CXXTEST_HEADERS
   EmpiricalInfectionSuite.h
   InfectionImmunitySuite.h
   #DescriptiveInfectionSuite.h
-  ESCaseManagementSuite.h
-  ESDecisionTreeSuite.h
+  #ESCaseManagementSuite.h
+  #ESDecisionTreeSuite.h
   AgeGroupInterpolationSuite.h
   DecayFunctionSuite.h
   PennyInfectionSuite.h

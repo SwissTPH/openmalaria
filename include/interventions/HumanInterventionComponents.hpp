@@ -306,7 +306,7 @@ private:
 
 class MDA1DComponent : public HumanInterventionComponent {
 public:
-    MDA1DComponent( ComponentId id, const scnXml::HSESCaseManagement& description ) :
+    MDA1DComponent( ComponentId id, const scnXml::DecisionTree& description ) :
         HumanInterventionComponent(id,
                 Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
         m_screenMeasureCts(Report::MI_SCREENING_CTS),

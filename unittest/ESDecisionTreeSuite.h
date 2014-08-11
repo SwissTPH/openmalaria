@@ -34,6 +34,8 @@ using namespace OM::Clinical;
 using namespace OM::WithinHost;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
+#if 0
+TODO: replace this test suite
 class ESDecisionTreeSuite : public CxxTest::TestSuite
 {
 public:
@@ -464,5 +466,6 @@ private:
     WHFalciparum* whm;
     CMHostData* hd;
 };
+#endif
 
 #endif

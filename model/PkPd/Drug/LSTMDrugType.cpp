@@ -96,7 +96,7 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 
 // -----  Non-static LSTMDrugType functions  -----
 
-LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
+LSTMDrugType::LSTMDrugType (const scnXml::PKPDDrug& drugData, uint32_t& bit_start) :
         abbreviation (drugData.getAbbrev()),
         allele_rshift (bit_start)
 {

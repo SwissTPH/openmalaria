@@ -146,7 +146,7 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
     if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get() );
     if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get() );
     if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get() );
-    assert(false);
+    throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node ){
@@ -190,7 +190,7 @@ auto_ptr< CMDecisionTree > CMDTRandom::create(
 //     branches.back()->first = numeric_limits<double>::infinity();
 
     return auto_ptr<CMDecisionTree>(
-        new CMDTRandom( cumProbs, branches ) );
+        new CMDTRandom( branches ) );
 }
 
 } }

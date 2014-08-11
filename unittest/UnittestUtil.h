@@ -65,10 +65,12 @@ public:
 	    
 	    scnXml::PK pk ( 0.006654 /* negligible_concentration */, 19.254 /* half_life */, 20.8 /* vol_dist */ );
 	    
-	    scnXml::Drug drug ( pd, pk, "MF" /* abbrev */ );
+	    scnXml::PKPDDrug drug ( pd, pk, "MF" /* abbrev */ );
 	    
-	    scnXml::Pharmacology dd;
-	    dd.getDrug().push_back (drug);
+            auto_ptr<scnXml::Treatments> treatments( new scnXml::Treatments() );
+            auto_ptr<scnXml::Drugs> drugs( new scnXml::Drugs() );
+	    scnXml::Pharmacology dd( treatments, drugs );
+	    dd.getDrugs().getDrug().push_back (drug);
 	    
 	    PkPd::LSTMDrugType::init (dd);
 	} /*else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
