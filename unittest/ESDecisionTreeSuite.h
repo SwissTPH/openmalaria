@@ -34,13 +34,11 @@ using namespace OM::Clinical;
 using namespace OM::WithinHost;
 using namespace boost::assign; // bring 'operator+=()' into scope
 
-#if 0
-TODO: replace this test suite
 class ESDecisionTreeSuite : public CxxTest::TestSuite
 {
 public:
     ESDecisionTreeSuite () :
-            dvMap(0), whm(0), hd(0)
+            whm(0), hd(0)
     {}
     ~ESDecisionTreeSuite () {}
     
@@ -57,68 +55,26 @@ public:
 	// could seed random-number-generator, but shouldn't affect outcomes
 	UnittestUtil::PkPdSuiteSetup (PkPd::PkPdModel::LSTM_PKPD);
 	
-	dvMap = new ESDecisionValueMap;
 	hd->ageYears = numeric_limits< double >::quiet_NaN();
 	hd->pgState = Episode::NONE;
     }
     void tearDown () {
-	delete dvMap;
 	UnittestUtil::PkPdSuiteTearDown ();
 
 	delete hd;
 	delete whm;
     }
     
-    void testESDecisionValue () {
-	vector<string> vals;
-	vals += "1", "2", "3";
-	dvMap->add_decision_values( "a", vals );
-	
-	// Assert getting unknown values/decisions fails:
-	TS_ASSERT_THROWS_EQUALS( dvMap->get( "b", "1" ), const std::runtime_error &e, string(e.what()), "ESDecisionValueMap::get(): no decision b" );
-	TS_ASSERT_THROWS_EQUALS( dvMap->get( "a", "4" ), const std::runtime_error &e, string(e.what()), "ESDecisionValueMap::get(): no value a(4)" );
-	
-	// check we can re-add the same decision, even when values are reordered:
-	vals[0] = "3";
-	vals[2] = "1";
-	TS_ASSERT_THROWS_NOTHING( dvMap->add_decision_values( "a", vals ) );
-	// but not if it's different:
-	vals[1] = "5";
-	TS_ASSERT_THROWS_EQUALS( dvMap->add_decision_values( "a", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision a's values don't match; expected value: 2" );
-	vals += "2", "6";	// now "3", "5", "1", "2", "6"
-	TS_ASSERT_THROWS_EQUALS( dvMap->add_decision_values( "a", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision a's values don't match; unexpected values: 5 6" );
-	
-	// Check a value can't occur twice:
-	vals.clear();
-	vals.resize(2,"9");	// "9","9"
-	TS_ASSERT_THROWS_EQUALS( dvMap->add_decision_values( "c", vals ), const std::runtime_error &e, string(e.what()), "CaseManagement: decision c's value 9 in value list twice!" );
-	
-	vals[1] = "A";	// "9", "A"
-	dvMap->add_decision_values( "c", vals );
-	
-	// check what outcomes we get:
-	typedef ESDecisionValue::id_type id_type;
-	// a should have values 0, 1, 2
-	TS_ASSERT_EQUALS( dvMap->get( "a", "1" ).id, static_cast<id_type>(0) );
-	TS_ASSERT_EQUALS( dvMap->get( "a", "2" ).id, static_cast<id_type>(1) );
-	TS_ASSERT_EQUALS( dvMap->get( "a", "3" ).id, static_cast<id_type>(2) );
-	// c should have values 0, 4
-	TS_ASSERT_EQUALS( dvMap->get( "c", "9" ).id, static_cast<id_type>(0) );
-	TS_ASSERT_EQUALS( dvMap->get( "c", "A" ).id, static_cast<id_type>(4) );
-	
-	ostringstream val_string;
-	val_string << dvMap->format( dvMap->get( "a", "1" ) | dvMap->get( "c", "9" ) );
-	TS_ASSERT_EQUALS( val_string.str(), "a(1), c(9)" );
-    }
-    
     /* Runs d.determine( input, hd ) N times
      * returns the proportion of these runs where the output equalled expectedOutput
      */
-    double determineNTimes (int N, const CMDecisionTree* d, const ESDecisionValue input, const CMHostData& hd, const ESDecisionValue expectedOutput) {
+    double determineNTimes (int N, const CMDecisionTree* d, const CMHostData& hd) {
 	int nExpected = 0;
 	for (int i = 0; i < N; ++i) {
-	    if( d->determine( input, hd ) == expectedOutput )
-		++nExpected;
+            //TODO: "exec" here should do something specific; we need to test whether it does what's expected
+	    d->exec( hd );
+//             if(...)
+// 		++nExpected;
 	}
 	return double(nExpected) / double(N);
     }
@@ -131,6 +87,18 @@ public:
 	);
 	
 	// random decision
+        scnXml::Outcome o1r1;
+        o1r1.setP( 0.5 );
+        
+        scnXml::Outcome o2r1;
+        o2r1.setP( 0.5 );
+        
+        scnXml::DTRandom r1;
+        r1.getOutcome().push_back( o1r1 );
+        r1.getOutcome().push_back( o2r1 );
+        
+        scnXml::DecisionTree dt;
+        dt.setRandom(r1);
 	scnXml::HSESDecision ut_r_xml ("\
 		p(.5) {\
 		    p(.9): a\
@@ -462,10 +430,8 @@ public:
     }
     
 private:
-    ESDecisionValueMap* dvMap;
     WHFalciparum* whm;
     CMHostData* hd;
 };
-#endif
 
 #endif

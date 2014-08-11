@@ -135,8 +135,6 @@ class ESDecisionMap {
     private:
         // All data here should be set by ESCaseManagement::init(); don't checkpoint.
         
-//         ESDecisionValueMap dvMap;
-        
         // Currently we walk through all decisions, required or not
         Decisions decisions;
         
