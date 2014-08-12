@@ -119,18 +119,15 @@ public:
     //@{
     /** Initialise the drug model. Called at start of simulation. */
     static void init (const scnXml::Pharmacology& data);
-    /// Remove set-up drugs. (Must be called before init can be re-called.)
-    static void cleanup ();
     
-    /** Adds a new drug type to the list. This function becomes responsible
-     * for deleting the object on exit. */
-    static void addDrug(auto_ptr<LSTMDrugType> drug);
-    
-    /** Find a DrugType by its abbreviation, and create a new Drug from that.
+    /** Find a DrugType by its abbreviation, and returns its index.
      *
      * Throws if the drug isn't found, so you can rely on it returning a valid
-     * drug if it returns (doesn't throw). */
-    static const LSTMDrugType& getDrug(string abbreviation);
+     * index if it doesn't throw. */
+    static size_t findDrug(string abbreviation);
+    
+    /** Get a drug by its index. */
+    static const LSTMDrugType& getDrug( size_t index ); //TODO: inline?
     
     /// Return a new proteome ID
     static uint32_t new_proteome_ID ();
@@ -173,12 +170,8 @@ private:
     // non-copyable (due to allocation of members of drugAllele)
     LSTMDrugType( const LSTMDrugType& );
     
-    // The list of available drugs. Not checkpointed; should be set up by init().
-    typedef map<const string,const LSTMDrugType*> Available;
-    static Available available;
-    
     //! The drug abbreviated name, used for registry lookups.
-    string abbreviation;
+    //TODO string abbreviation;
     
     /** Allele information is stored as a uint32_t in infection. Denote this p_id,
      * then we use ((p_id >> allele_rshift) & allele_mask) as an index in

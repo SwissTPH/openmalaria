@@ -44,6 +44,10 @@
 #include "util/mod.h"
 #include "util/TimeStep.h"
 
+// foreach "keyword"
+#include <boost/foreach.hpp>
+#define foreach BOOST_FOREACH
+
 namespace OM {
 
 using boost::uint32_t;
