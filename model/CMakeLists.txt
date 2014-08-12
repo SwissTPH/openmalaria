@@ -31,6 +31,7 @@ set (Model_CPP
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/Drug/LSTMDrugAllele.cpp
+  PkPd/LSTMTreatments.cpp
   #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp
