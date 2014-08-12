@@ -27,12 +27,14 @@
 #include "Clinical/ESCaseManagement.h"
 #include "util/random.h"
 #include "UnittestUtil.h"
+#include "WHMock.h"
 #include <limits>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
 using namespace OM::WithinHost;
 using namespace boost::assign; // bring 'operator+=()' into scope
+using UnitTest::WHMock;
 
 class ESDecisionTreeSuite : public CxxTest::TestSuite
 {
@@ -47,9 +49,9 @@ public:
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
-        whm = dynamic_cast<WHFalciparum*>( WHInterface::createWithinHostModel( 1.0 ) );
-        ETS_ASSERT( whm != 0 );
-	hd = new CMHostData( numeric_limits< double >::quiet_NaN(), *whm, Episode::NONE );
+        whm.reset( new WHMock() );
+        ETS_ASSERT( whm->get() != 0 );
+	hd.reset( new CMHostData( numeric_limits< double >::quiet_NaN(), whm->get(), Episode::NONE ) );
 
 	UnittestUtil::EmpiricalWHM_setup();
 	// could seed random-number-generator, but shouldn't affect outcomes
@@ -60,9 +62,6 @@ public:
     }
     void tearDown () {
 	UnittestUtil::PkPdSuiteTearDown ();
-
-	delete hd;
-	delete whm;
     }
     
     /* Runs d.determine( input, hd ) N times
@@ -427,8 +426,8 @@ public:
     }
     
 private:
-    WHFalciparum* whm;
-    CMHostData* hd;
+    auto_ptr<WHMock> whm;
+    auto_ptr<CMHostData> hd;
 };
 
 #endif

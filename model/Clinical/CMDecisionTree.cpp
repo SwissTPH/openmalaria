@@ -139,6 +139,42 @@ private:
     ptr_map<double,CMDecisionTree> branches;
 };
 
+/**
+ * Deliver one or more treatments via the PK/PD model.
+ * 
+ * TODO: should the "multiple" bit (i.e. the point at which a branch may have
+ * more than one child) be here?
+ */
+class CMDTTreatPKPD : public CMDecisionTree {
+public:
+    static auto_ptr<CMDecisionTree> create(
+        const ::scnXml::DecisionTree::TreatPKPDSequence& seq );
+    
+protected:
+    virtual void exec( CMHostData hostData ) const{
+        ...;
+    }
+    
+private:
+    CMDTTreatPKPD( const scnXml::DecisionTree::TreatPKPDSequence& seq ){
+        treatments.reserve( seq.size() );
+        BOOST_FOREACH( scnXml::DTTreatPKPD& treatElt, seq ){
+            treatments.push_back( TreatInfo{
+                treatElt.getSchedule(),
+                treatElt.getDosage(),
+                treatElt.getDelay_h()
+            } );
+        }
+    }
+    
+    struct TreatInfo{
+        string schedule;        // name of the schedule
+        string dosage;          // name of the dosage table
+        double delay_h;         // delay in hours
+    };
+    vector<TreatInfo> treatments;
+};
+
 
 // ———  static functions  ———
 
@@ -162,6 +198,12 @@ auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& nod
         CMDecisionTree::create( node.getPositive() ),
         CMDecisionTree::create( node.getNegative() )
     ) );
+}
+
+auto_ptr<CMDecisionTree> CMDTTreatPKPD::create(
+    const scnXml::DecisionTree::TreatPKPDSequence& seq )
+{
+    return auto_ptr<CMDTTreatPKPD>( new CMDTTreatPKPD( seq ) );
 }
 
 auto_ptr< CMDecisionTree > CMDTRandom::create(

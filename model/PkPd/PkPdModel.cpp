@@ -46,7 +46,8 @@ void PkPdModel::init( const scnXml::Scenario& scenario ){
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
         if (scenario.getPharmacology().present()) {
             activeModel = LSTM_PKPD;
-            LSTMDrugType::init(scenario.getPharmacology().get ());
+            LSTMDrugType::init(scenario.getPharmacology().get().getDrugs());
+            LSTMTreatments::init(scenario.getPharmacology().get().getTreatments());
         } else {
             throw util::xml_scenario_error( "pharmacology element required in XML" );
         }

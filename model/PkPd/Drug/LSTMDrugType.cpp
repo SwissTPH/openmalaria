@@ -36,16 +36,17 @@ using namespace OM::util;
 LSTMDrugType::Available LSTMDrugType::available;
 
 
-void LSTMDrugType::init (const scnXml::Pharmacology& data) {
+void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
     uint32_t start_bit = 0;
-
+    
     for (scnXml::Pharmacology::DrugsType::DrugConstIterator drug =
-            data.getDrugs().getDrug().begin(), end =
-            data.getDrugs().getDrug().end(); drug != end; ++drug)
+            drugData.getDrug().begin(), end =
+            drugData.getDrug().end(); drug != end; ++drug)
     {
         LSTMDrugType::addDrug (
             auto_ptr<LSTMDrugType>(new LSTMDrugType (*drug, start_bit)));
     }
+    
 }
 void LSTMDrugType::cleanup () {
     for ( Available::const_iterator it = available.begin(); it != available.end(); ++it ) {
