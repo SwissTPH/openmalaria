@@ -419,6 +419,13 @@ void WHVivax::checkpoint(ostream& stream){
     cumPrimInf & stream;
 }
 
+char const*const not_impl = "feature not available in Vivax model";
+void WHVivax::medicate(size_t drug, double qty, double time, double duration, double bodyMass){
+    throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getTotalDensity() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getCumulativeh() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getCumulativeY() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
     latentp = TimeStep(  scenario.getModel().getParameters().getLatentp());
     if( !scenario.getModel().getVivax().present() )

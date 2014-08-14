@@ -30,6 +30,7 @@
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "PkPd/VoidPkPdModel.h"
+#include "PkPd/LSTMTreatments.h"
 
 #include <assert.h>
 #include <stdexcept>
@@ -59,15 +60,16 @@ void PkPdModel::init( const scnXml::Scenario& scenario ){
         } */
     }
 }
+
+/*
 void PkPdModel::cleanup () {
-    if (activeModel == LSTM_PKPD) {
-        LSTMDrugType::cleanup();
-    } /* else if (activeModel == HOSHEN_PKPD) {
+    if (activeModel == HOSHEN_PKPD) {
         assert( false );
         HoshenDrugType::cleanup();
         ProteomeManager::cleanup ();
-    } */
+    }
 }
+*/
 
 PkPdModel* PkPdModel::createPkPdModel () {
     if (activeModel == NON_PKPD) {

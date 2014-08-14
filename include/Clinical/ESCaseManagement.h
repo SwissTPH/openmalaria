@@ -56,51 +56,6 @@ struct CMAuxOutput {
     } AB_provider;
 };
 
-/// Data used for a withinHostModel->medicate() call
-struct MedicateData {
-    MedicateData () :
-        qty(numeric_limits< double >::signaling_NaN()),
-        cost_qty(numeric_limits< double >::signaling_NaN()),
-        time(numeric_limits< double >::signaling_NaN()),
-        duration(numeric_limits< double >::quiet_NaN())
-    {}
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        abbrev & stream;
-        qty & stream;
-        cost_qty & stream;
-        time & stream;
-        duration & stream;
-    }
-    
-    string abbrev;      /// Drug abbreviation
-    double qty;         /// Quantity of drug prescribed (mg?)
-    double cost_qty;    /// Effective quantity prescribed, with respect to costs
-    double time;        /// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
-    double duration;    /// Duration for IV purposes (use IV admin if a number, oral if is NaN)
-};
-
-/** A final treatment schedule (after application of applicable modifiers). */
-struct ESTreatmentSchedule {
-    ESTreatmentSchedule (const scnXml::PKPDSchedule& sched);
-    
-    /// Add medications into medicate queue
-    inline void apply (list<MedicateData>& medicateQueue) const {
-        for (vector<MedicateData>::const_iterator it = medications.begin(); it != medications.end(); ++it)
-            medicateQueue.push_back (*it);
-    }
-    /// Does this contain a positive number of treatments?
-    inline bool anyTreatments () const {
-        return !medications.empty();
-    }
-    
-    private:
-        /// Data for each medicate() call.
-        std::vector<MedicateData> medications;
-};
-
 /** Decision trees representation, mapping inputs to a ESTreatmentSchedule pointer.
  *
  * Used to represent a UC/UC2 or severe decision tree.
@@ -161,20 +116,12 @@ public:
     
     static void massDrugAdministration(
         const CMHostData& hostData,
-        list<MedicateData>& medicateQueue,
         const Host::Human& human,
         Monitoring::ReportMeasureI screeningReport,
         Monitoring::ReportMeasureI drugReport
     );
     
-    /** Runs through case management decisions, selects treatments and
-        * applies them to the passed medicateQueue.
-        * 
-        * Returns: some extra info (see CMAuxOutput definition). */
-    static CMAuxOutput execute (
-        const CMHostData& hostData,
-        list<MedicateData>& medicateQueue
-    );
+    static CMAuxOutput execute( const CMHostData& hostData );
     
 private:
     

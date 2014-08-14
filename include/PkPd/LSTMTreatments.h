@@ -37,6 +37,7 @@ using namespace std;
 
 namespace scnXml{
     class Treatments;
+    class PKPDMedication;
 }
 namespace OM { namespace PkPd {
     
@@ -48,11 +49,65 @@ namespace OM { namespace PkPd {
  * dosages are selected). */
 class LSTMTreatments {
 public:
-    /** Load treatment data from XML. */
+    /** Load treatment data from XML.
+     * 
+     * Load drug data (LSTMDrugType::init()) first. */
     static void init (const scnXml::Treatments& data);
     
 private:
-    LSTMDrugType() =0;  // not constructible
+    LSTMTreatments();  // not constructible
+};
+
+// for internal use only
+struct MedicateData {
+    MedicateData () :
+        drug(0),
+        qty(numeric_limits< double >::signaling_NaN()),
+        time(numeric_limits< double >::signaling_NaN()),
+        duration(numeric_limits< double >::quiet_NaN())
+    {}
+    
+private:
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        drug & stream;
+        qty & stream;
+        time & stream;
+        duration & stream;
+    }
+    
+    void load( const scnXml::PKPDMedication& med );
+    
+    size_t drug;      /// Drug type index
+    double qty;         /// Quantity of drug prescribed (mg?)
+    double time;        /// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
+    double duration;    /// Duration for IV purposes (use IV admin if a number, oral if is NaN)
+    
+    friend class Schedule;
+    friend class LSTMMedications;
+};
+
+/** A class representing PkPd medications allocated but not yet taken (i.e.
+ * future doses). Poor adherence is not modeled here, but may be modeled by
+ * reducing the number "allocated". */
+struct LSTMMedications {
+    /// Are there any pending medications?
+    inline bool haveMedications(){ return !medicateQueue.empty(); }
+    
+    /// Call if there are any pending medications.
+    void doUpdate( double bodyMass );
+    
+    //FIXME: call this
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        medicateQueue & stream;
+    }
+    
+private:
+    /// All pending medications
+    list<MedicateData> medicateQueue;
 };
 
 } }

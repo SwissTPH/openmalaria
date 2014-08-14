@@ -67,26 +67,16 @@ public:
 	    
 	    scnXml::PKPDDrug drug ( pd, pk, "MF" /* abbrev */ );
 	    
-            auto_ptr<scnXml::Treatments> treatments( new scnXml::Treatments() );
-            auto_ptr<scnXml::Drugs> drugs( new scnXml::Drugs() );
-	    scnXml::Pharmacology dd( treatments, drugs );
-	    dd.getDrugs().getDrug().push_back (drug);
+            scnXml::Drugs drugs;
+            drugs.getDrug().push_back (drug);
 	    
-	    PkPd::LSTMDrugType::init (dd);
+	    PkPd::LSTMDrugType::init (drugs);
 	} /*else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
 	    PkPd::ProteomeManager::init ();
 	    PkPd::HoshenDrugType::init();
 	} */else {
 	    assert (false);
 	}
-    }
-    static void PkPdSuiteTearDown () {
-	if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::LSTM_PKPD) {
-	    PkPd::LSTMDrugType::cleanup();
-	} /*else if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::HOSHEN_PKPD) {
-	    PkPd::HoshenDrugType::cleanup();
-	    PkPd::ProteomeManager::cleanup();
-	} */
     }
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
@@ -131,11 +121,6 @@ public:
     static void MosqLifeCycle_init() {
         ModelOptions::reset();
         ModelOptions::set(util::VECTOR_LIFE_CYCLE_MODEL);
-    }
-    
-    // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes
-    static void setTotalParasiteDensity (WHFalciparum& whm, double density) {
-	whm.totalDensity = density;
     }
 };
 

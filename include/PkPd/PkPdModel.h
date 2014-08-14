@@ -50,7 +50,6 @@ public:
   ///@brief Static functions
   //@{
   static void init ( const scnXml::Scenario& scenario );
-  static void cleanup ();
   
   // checkpointing of static data: not required since all data is set up by init
   static void staticCheckpoint (istream& stream) {}
@@ -80,7 +79,7 @@ public:
   /** Medicate drugs to an individual, which act on infections the following
    * timesteps, until rendered ineffective by decayDrugs().
    *
-   * \param drugAbbrev The drug abbreviation.
+   * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
    * \param qty The quantity in mg.
    * \param time Time in days since start of this time step to medicate at
    * \param duration  Duration in days. 0 or an NaN indicates no duration.
@@ -93,7 +92,7 @@ public:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) =0;
+  virtual void medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass) =0;
   
   /// Called each timestep immediately after the drug acts on any infections.
   virtual void decayDrugs () =0;

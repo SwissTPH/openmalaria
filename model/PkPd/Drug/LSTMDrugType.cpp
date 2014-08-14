@@ -44,19 +44,24 @@ map<string,size_t> drugTypeNames;
 void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
     uint32_t start_bit = 0;
     
-    foreach( scnXml::PKPDDrug& drug, drugData.getDrug() ){
+    foreach( const scnXml::PKPDDrug& drug, drugData.getDrug() ){
         const string& abbrev = drug.getAbbrev();
         // Check drug doesn't already exist
-        if (drugTypeNames.find (abbrev) != drugTypes.end())
+        if (drugTypeNames.find (abbrev) != drugTypeNames.end())
             throw TRACED_EXCEPTION_DEFAULT (string ("Drug added twice: ").append(abbrev));
         
         size_t i = drugTypes.size();
-        drugTypes.push_back( new LSTMDrugType (*drug, start_bit) );
+        drugTypes.push_back( new LSTMDrugType (i, drug, start_bit) );
         drugTypeNames[abbrev] = i;
     }
 }
+void LSTMDrugType::clear()
+{
+    drugTypes.clear();
+    drugTypeNames.clear();
+}
 
-size_t LSTMDrugType::getDrug(string _abbreviation) {
+size_t LSTMDrugType::findDrug(string _abbreviation) {
     map<string,size_t>::const_iterator it = drugTypeNames.find (_abbreviation);
     if (it == drugTypeNames.end())
         throw util::xml_scenario_error (string ("attempt to use drug without description: ").append(_abbreviation));
@@ -92,8 +97,8 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 
 // -----  Non-static LSTMDrugType functions  -----
 
-LSTMDrugType::LSTMDrugType (const scnXml::PKPDDrug& drugData, uint32_t& bit_start) :
-        abbreviation (drugData.getAbbrev()),
+LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData, uint32_t& bit_start) :
+        index (index),
         allele_rshift (bit_start)
 {
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();

@@ -158,6 +158,12 @@ protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
+    // None of these do anything in this model:
+    virtual void medicate(size_t drug, double qty, double time, double duration, double bodyMass);
+    virtual double getTotalDensity() const;
+    virtual double getCumulativeh() const;
+    virtual double getCumulativeY() const;
+    
 private:
     WHVivax( const WHVivax& ) {}        // not copy constructible
     

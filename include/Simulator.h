@@ -41,7 +41,6 @@ class Simulator{
 public: 
     //!  Inititalise all step specific constants and variables.
     Simulator( util::Checksum ck, const scnXml::Scenario& scenario );
-    ~Simulator();
     
     //! Entry point to simulation.
     void start(const scnXml::Monitoring& monitoring);

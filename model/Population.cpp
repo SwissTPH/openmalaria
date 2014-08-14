@@ -57,11 +57,6 @@ void Population::init( const Parameters& parameters, const scnXml::Scenario& sce
     AgeStructure::init( scenario.getDemography() );
 }
 
-void Population::clear()
-{
-    PkPd::PkPdModel::cleanup ();
-}
-
 void Population::staticCheckpoint (istream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);

@@ -37,6 +37,9 @@ using namespace OM::util;
 using namespace boost::assign;
 using boost::ptr_map;
 
+
+// ———  branching nodes  ———
+
 /**
  * Should the patient recieve first or second line treatment?
  */
@@ -139,6 +142,14 @@ private:
     ptr_map<double,CMDecisionTree> branches;
 };
 
+// ———  action nodes  ———
+
+/** Do nothing. **/
+class CMDTNoAction : public CMDecisionTree {
+protected:
+    virtual void exec( CMHostData hostData ) const{}
+};
+
 /**
  * Deliver one or more treatments via the PK/PD model.
  * 
@@ -152,22 +163,24 @@ public:
     
 protected:
     virtual void exec( CMHostData hostData ) const{
-        ...;
+        //FIXME medicate treatments
     }
     
 private:
     CMDTTreatPKPD( const scnXml::DecisionTree::TreatPKPDSequence& seq ){
         treatments.reserve( seq.size() );
-        BOOST_FOREACH( scnXml::DTTreatPKPD& treatElt, seq ){
-            treatments.push_back( TreatInfo{
+        foreach( const scnXml::DTTreatPKPD& treatElt, seq ){
+            treatments.push_back( TreatInfo(
                 treatElt.getSchedule(),
                 treatElt.getDosage(),
                 treatElt.getDelay_h()
-            } );
+            ) );
         }
     }
     
     struct TreatInfo{
+        TreatInfo( const string& s, const string& d, double h ) :
+            schedule(s), dosage(d), delay_h(h) {}
         string schedule;        // name of the schedule
         string dosage;          // name of the dosage table
         double delay_h;         // delay in hours
@@ -179,10 +192,14 @@ private:
 // ———  static functions  ———
 
 auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& node ){
+    // branching nodes
     if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get() );
     if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get() );
     if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get() );
-    throw SWITCH_DEFAULT_EXCEPTION;
+    // action nodes
+    if( node.getNoAction().present() ) return auto_ptr<CMDecisionTree>( new CMDTNoAction() );
+    if( node.getTreatPKPD().size() ) return CMDTTreatPKPD::create( node.getTreatPKPD() );
+    throw xml_scenario_error( "unterminated decision tree" );
 }
 
 auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node ){
@@ -203,7 +220,7 @@ auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& nod
 auto_ptr<CMDecisionTree> CMDTTreatPKPD::create(
     const scnXml::DecisionTree::TreatPKPDSequence& seq )
 {
-    return auto_ptr<CMDTTreatPKPD>( new CMDTTreatPKPD( seq ) );
+    return auto_ptr<CMDecisionTree>( new CMDTTreatPKPD( seq ) );
 }
 
 auto_ptr< CMDecisionTree > CMDTRandom::create(

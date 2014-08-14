@@ -114,15 +114,16 @@ public:
      * administered implies no effect. */
     virtual bool optionalPqTreatment() =0;
     
+    //TODO: expose something higher-level instead
     /** Medicate drugs (wraps drug's medicate).
      *
-     * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)
+     * @param drug	index of drug
      * @param qty		Quantity of drug to administer in mg
      * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
      * @param duration Duration in days. 0 or NaN indicate oral treatment.
      * @param bodyMass	Weight of human in kg
      */
-    virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass);
+    virtual void medicate(size_t drug, double qty, double time, double duration, double bodyMass) =0;
 
     /** Add new infections and update the parasite densities of existing
      * infections. Also update immune status.
@@ -137,7 +138,7 @@ public:
      * It is used by: MDA diagnostics, EventScheduler diagnostics, and a severe
      * outcome (pDeath) model inside the EventScheduler "case management"
      * model. */
-    virtual double getTotalDensity() const;
+    virtual double getTotalDensity() const =0;
     
     /** Simulate use of a diagnostic test, using the general detection limit.
      * Does not report for costing purposes.
@@ -159,8 +160,8 @@ public:
     virtual void clearImmunity() =0;
     
     // TODO(monitoring): these shouldn't have to be exposed (perhaps use summarize to report the data):
-    virtual double getCumulativeh() const;
-    virtual double getCumulativeY() const;
+    virtual double getCumulativeh() const =0;
+    virtual double getCumulativeY() const =0;
 
     /** The maximum number of infections a human can have. The only real reason
      * for this limit is to prevent incase bad input from causing the number of

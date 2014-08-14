@@ -194,7 +194,7 @@ void ClinicalEventScheduler::massDrugAdministration( Human& human,
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration ( 
         CMHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
-        medicateQueue, human, screeningReport, drugReport
+            human, screeningReport, drugReport
     );
 }
 
@@ -286,10 +286,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
 	/*CMAuxOutput auxOut =*/ ESCaseManagement::execute(
-	    CMHostData( ageYears, withinHostModel, pgState ), medicateQueue
-	);
+	    CMHostData( ageYears, withinHostModel, pgState ) );
 	
-        if( medicateQueue.size() ){	// I.E. some treatment was given
+        if( true /*FIXME medicateQueue.size()*/ ){	// I.E. some treatment was given
             timeLastTreatment = TimeStep::simulation;
             if( pgState & Episode::COMPLICATED ){
                 Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
@@ -435,19 +434,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     }
     
     
-    // Process pending medications (in interal queue) and apply/update:
-    for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
-	list<MedicateData>::iterator next = it;
-	++next;
-        if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
-            double bodyMass = ageToWeight( ageYears );
-	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
-	    medicateQueue.erase (it);
-        } else {   // and decrement treatment seeking delay for the rest
-            it->time -= 1.0;
-        }
-	it = next;
-    }
+    //FIXME: update medicate queue
     
     if( timeLastTreatment == TimeStep::simulation ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
@@ -468,7 +455,6 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     timeLastTreatment & stream;
     previousDensity & stream;
     hetWeightMultiplier & stream;
-    medicateQueue & stream;
 }
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
@@ -478,7 +464,6 @@ void ClinicalEventScheduler::checkpoint (ostream& stream) {
     timeLastTreatment & stream;
     previousDensity & stream;
     hetWeightMultiplier & stream;
-    medicateQueue & stream;
 }
 
 } }

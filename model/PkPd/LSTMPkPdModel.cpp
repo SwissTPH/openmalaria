@@ -37,9 +37,9 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
     numDrugs & stream;
     validateListSize (numDrugs);
     for (size_t i=0; i<numDrugs; ++i) {
-	string abbrev;
-	abbrev & stream;
-	_drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(abbrev)));
+	size_t index;
+        index & stream;
+	_drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(index)));
 	_drugs.back() & stream;
     }
 }
@@ -47,7 +47,7 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
 void LSTMPkPdModel::checkpoint (ostream& stream) {
     _drugs.size() & stream;
     for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); ++it) {
-	it->getAbbreviation() & stream;
+	it->getIndex() & stream;
 	(*it) & stream;
     }
 }
@@ -55,15 +55,15 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 // -----  non-static simulation time functions  -----
 
-void LSTMPkPdModel::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) {
+void LSTMPkPdModel::medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass) {
     list<LSTMDrug>::iterator drug = _drugs.begin();
     while (drug != _drugs.end()) {
-        if (drug->getAbbreviation() == drugAbbrev)
+        if (drug->getIndex() == typeIndex)
         goto medicateGotDrug;
         ++drug;
     }
     // No match, so insert one:
-    _drugs.push_front (LSTMDrug(LSTMDrugType::getDrug(drugAbbrev)));
+    _drugs.push_front (LSTMDrug(LSTMDrugType::getDrug(typeIndex)));
     drug = _drugs.begin();	// the drug we just added
     
     medicateGotDrug:

@@ -28,8 +28,6 @@ class UnittestUtil;
 namespace OM {
 namespace UnitTest {
 
-WHMock::WHMock(){}
-
 WHMock::~WHMock() {}
 
 double WHMock::probTransmissionToMosquito( TimeStep ageTimeSteps,
@@ -42,7 +40,19 @@ bool WHMock::summarize(const Host::Human& human){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
+void WHMock::importInfection(){
+    throw util::unimplemented_exception( "not needed in unit test" );
+}
+
 bool WHMock::optionalPqTreatment(){
+    throw util::unimplemented_exception( "not needed in unit test" );
+}
+
+void WHMock::medicate(size_t drug, double qty, double time, double duration, double bodyMass){
+    throw util::unimplemented_exception( "not needed in unit test" );
+}
+
+void WHMock::update(int nNewInfs, double ageInYears, double bsvFactor){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
@@ -55,10 +65,26 @@ bool WHMock::diagnosticDefault() const{
 }
 
 void WHMock::treatment( Host::Human& human, TreatmentId treatId ){
-    throw util::unimplemented_exception( "not needed in unit test" );
+    nTreatments += 1;
 }
 
 Pathogenesis::StatePair WHMock::determineMorbidity( double ageYears ){
+    throw util::unimplemented_exception( "not needed in unit test" );
+}
+
+void WHMock::clearImmunity(){
+    throw util::unimplemented_exception( "not needed in unit test" );
+}
+
+double WHMock::getCumulativeh() const{
+    throw util::unimplemented_exception( "not needed in unit test" );
+}
+
+double WHMock::getCumulativeY() const{
+    throw util::unimplemented_exception( "not needed in unit test" );
+}
+
+WHInterface::InfectionCount WHMock::countInfections() const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 

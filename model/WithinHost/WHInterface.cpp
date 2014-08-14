@@ -98,22 +98,6 @@ WHInterface::~WHInterface()
 }
 
 
-void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){
-    throw TRACED_EXCEPTION( "should not call medicate() except with CommonWithinHost model", util::Error::WHFeatures );
-}
-
-double WHInterface::getTotalDensity() const{
-    throw TRACED_EXCEPTION( "should not call getTotalDensity() with non-falciparum model", util::Error::WHFeatures );
-}
-
-double WHInterface::getCumulativeh() const{
-    throw TRACED_EXCEPTION( "should not call getCumulativeh() with non-falciparum model", util::Error::WHFeatures );
-}
-double WHInterface::getCumulativeY() const{
-    throw TRACED_EXCEPTION( "should not call getCumulativeY() with non-falciparum model", util::Error::WHFeatures );
-}
-
-
 void WHInterface::checkpoint (istream& stream) {
     numInfs & stream;
 

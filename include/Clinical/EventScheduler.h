@@ -86,8 +86,8 @@ private:
     /// Parameter
     static double alpha;
     
-    /** Weight model. Currently looks up a weight dependant on age from a table
-     * in an entirely deterministic way.
+    /** Weight model. Selects average body mass dependant on age, then
+     * multiplies by a heterogeneity factor (which is set at birth).
      *
      * @param ageGroupData Age group for weight data
      * @param ageYears Age in years
@@ -158,9 +158,6 @@ private:
     /// Multiplies the mean weight for age.
     /// Within PkPd class simply because it's not used elsewhere.
     double hetWeightMultiplier;
-    
-    /// All pending medications
-    list<MedicateData> medicateQueue;
 };
 
 }

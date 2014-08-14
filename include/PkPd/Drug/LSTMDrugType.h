@@ -35,7 +35,7 @@
 using namespace std;
 
 namespace scnXml{
-    class Pharmacology;
+    class Drugs;
     class PKPDDrug;
     class Allele;
 }
@@ -118,7 +118,9 @@ public:
     ///@brief Static functions
     //@{
     /** Initialise the drug model. Called at start of simulation. */
-    static void init (const scnXml::Pharmacology& data);
+    static void init (const scnXml::Drugs& data);
+    /** Clear previous data. Only needed for testing. */
+    static void clear();
     
     /** Find a DrugType by its abbreviation, and returns its index.
      *
@@ -138,14 +140,15 @@ public:
     //@{
     /** Create a new DrugType.
      *
+     * @param index     Index of drug in internal list
      * @param drugData Scenario data for this drug (PK params, PD params per allele)
      * @param bit_start Next bit of infection's proteome_id available (see allele_rshift).
      */
-    LSTMDrugType (const scnXml::PKPDDrug& drugData, uint32_t& bit_start);
+    LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData, uint32_t& bit_start);
     ~LSTMDrugType ();
     
-    inline const string& getAbbreviation() const{
-        return abbreviation;
+    inline size_t getIndex() const {
+        return index;
     }
     inline double getVolumeOfDistribution() const{
         return vol_dist;
@@ -170,8 +173,9 @@ private:
     // non-copyable (due to allocation of members of drugAllele)
     LSTMDrugType( const LSTMDrugType& );
     
-    //! The drug abbreviated name, used for registry lookups.
-    //TODO string abbreviation;
+    /** The drug index. Stored here since LTSMDrug stores a pointer to this
+     * struct object, not the index. */
+    size_t index;
     
     /** Allele information is stored as a uint32_t in infection. Denote this p_id,
      * then we use ((p_id >> allele_rshift) & allele_mask) as an index in

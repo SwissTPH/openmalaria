@@ -503,11 +503,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Decision tree;</xs:appinfo>
     </xs:annotation>
     <xs:choice>
+      <!-- branching points -->
       <xs:element name="caseType" type="om:DTCaseType"/>
       <xs:element name="diagnostic" type="om:DTDiagnostic"/>
       <xs:element name="random" type="om:DTRandom"/>
+      <!-- actions -->
+      <xs:element name="noAction" type="om:DTNoAction"/>
       <xs:sequence>
-        <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded" minOccurs="0"/>
+        <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
       </xs:sequence>
     </xs:choice>
     <xs:attribute name="name" type="xs:string" use="optional">
@@ -604,6 +607,23 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+    <xs:complexType name="DTNoAction">
+    <xs:annotation>
+      <xs:documentation>
+        An end node doing nothing. The point of this is to prevent trees from
+        accidentally being left incomplete.
+      </xs:documentation>
+      <xs:appinfo>name:No action;</xs:appinfo>
+    </xs:annotation>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>

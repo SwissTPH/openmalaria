@@ -41,23 +41,31 @@ using namespace WithinHost;
  */
 class WHMock : public WHInterface {
 public:
-    WHMock();
+    WHMock() : totalDensity(0.0), nTreatments(0) {}
     virtual ~WHMock();
     
     virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
-    
     virtual bool summarize(const Host::Human& human);
-    
-    virtual bool optionalPqTreatment();
-    
-    virtual inline double getTotalDensity() const;
-    
-    virtual bool diagnosticDefault() const;
+    virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    
+    virtual bool optionalPqTreatment();
+    virtual void medicate(size_t drug, double qty, double time, double duration, double bodyMass);
+    virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
+    virtual double getTotalDensity() const;
+    virtual bool diagnosticDefault() const;
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
+    virtual void clearImmunity();
+    virtual double getCumulativeh() const;
+    virtual double getCumulativeY() const;
+
+    // This mock class does not have actual infections. Just set this as you please.
+    double totalDensity;
+    
+    // This mock class counts the number of times treatment() was called. Read/write this as you like.
+    int nTreatments;
 
 protected:
+    virtual InfectionCount countInfections () const;
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
 };

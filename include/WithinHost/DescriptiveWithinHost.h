@@ -57,6 +57,9 @@ protected:
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
   
+  // Doesn't do anything in this model:
+  virtual void medicate(size_t drug, double qty, double time, double duration, double bodyMass);
+  
   /** The list of all infections this human has.
    * 
    * Since infection models and within host models are very much intertwined,

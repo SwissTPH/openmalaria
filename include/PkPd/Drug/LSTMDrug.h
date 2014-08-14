@@ -71,11 +71,11 @@ class LSTMDrug {
 public:
     /** Create a new instance. */
     LSTMDrug (const LSTMDrugType&);
-
-    inline const string& getAbbreviation() const {
-        return typeData->getAbbreviation();
+    
+    inline size_t getIndex() const {
+        return typeData.getIndex();
     }
-
+    
     /** Indicate a new medication this timestep.
      *
      * Converts qty in mg to concentration, and stores along with time (delay past
@@ -122,7 +122,7 @@ protected:
     void check_split_IV( DoseMap::iterator lastInserted );
 
     /// Always links a drug instance to its drug-type data
-    const LSTMDrugType* typeData;
+    const LSTMDrugType& typeData;
 
     double concentration;
 

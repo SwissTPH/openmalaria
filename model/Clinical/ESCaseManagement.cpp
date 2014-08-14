@@ -36,25 +36,6 @@ namespace OM { namespace Clinical {
     using namespace Monitoring;
     using boost::format;
 
-// -----  ESTreatmentSchedule  -----
-
-ESTreatmentSchedule::ESTreatmentSchedule (const scnXml::PKPDSchedule& sched) {
-    const ::scnXml::PKPDSchedule::MedicateSequence& mSeq = sched.getMedicate();
-    medications.resize (mSeq.size ());
-    for (size_t j = 0; j < mSeq.size(); ++j) {
-	medications[j].abbrev = mSeq[j].getDrug();
-	medications[j].qty = mSeq[j].getMg();
-	medications[j].cost_qty = medications[j].qty;	// effective quantity w.r.t. cost starts off equal to quantity
-	medications[j].time = mSeq[j].getHour() / 24.0;	// convert from hours to days
-	if( mSeq[j].getDuration().present() ){
-	    if( !(mSeq[j].getDuration().get() > 0.0) ){
-		throw util::xml_scenario_error( "duration of an IV dose must be some positive amount of time" );
-	    }
-	    medications[j].duration = mSeq[j].getDuration().get() / 24.0;
-	}
-    }
-}
-
 
 // -----  ESDecisionMap  -----
 
@@ -101,7 +82,6 @@ void ESCaseManagement::initMDA (const scnXml::DecisionTree& desc){
 
 void ESCaseManagement::massDrugAdministration(
         const CMHostData& hostData,
-        list<MedicateData>& medicateQueue,
         const Host::Human& human,
         Monitoring::ReportMeasureI screeningReport,
         Monitoring::ReportMeasureI drugReport
@@ -114,12 +94,11 @@ void ESCaseManagement::massDrugAdministration(
 }
 
 CMAuxOutput ESCaseManagement::execute (
-        const CMHostData& hostData,
-        list<MedicateData>& medicateQueue
+        const CMHostData& hostData
 ) {
     assert (hostData.pgState & Episode::SICK);
     // We always remove any queued medications.
-    medicateQueue.clear();
+    //FIXME medicateQueue.clear();
     
     ESDecisionMap *map = (hostData.pgState & Episode::COMPLICATED) ?
         &complicated : &uncomplicated;
