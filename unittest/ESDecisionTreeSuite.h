@@ -61,6 +61,8 @@ public:
 	hd->pgState = Episode::NONE;
     }
     void tearDown () {
+        PkPd::LSTMDrugType::clear();
+        PkPd::LSTMTreatments::clear();
     }
     
     /* Runs the decision tree N times
@@ -120,196 +122,29 @@ public:
 	propPos = propTreatmentsNReps( N, dt, hd );
 	TS_ASSERT_DELTA( propPos, 0.8, LIM );
     }
-#if 0
-    void xtestRandomDeterministic () {
-	// deterministic decision
-	vector<string> vals;
-	vals += "1","2";
-	dvMap->add_decision_values( "i", vals );
-	
-	scnXml::HSESDecision ut_d_xml ("\
-		i(1)	:a\
-		i ( 2 )	{ b }",
-	    "ut_d",	// decision
-	    "i",	// depends
-	    "b,a"	// values
-	);
-	CMDecisionTree* ut_d = CMDecisionTree::create( *dvMap, ut_d_xml );
-	
-	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "1" ), *hd ), dvMap->get( "ut_d", "a" ) );
-	TS_ASSERT_EQUALS( ut_d->determine( dvMap->get( "i", "2" ), *hd ), dvMap->get( "ut_d", "b" ) );
-	delete ut_d;
-    }
     
-    void xtestRandomErrors () {
-	vector<string> vals;
-	vals += "1","2";
-	dvMap->add_decision_values( "i", vals );
-	dvMap->add_decision_values( "j", vals );
-	
-	scnXml::HSESDecision ut_no_p_xml ("\
-		p(.9): a\
-		p(.1): b",
-	    "no_p",	// decision
-	    "",	// depends
-	    "a,b"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_no_p_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "decision tree no_p: p not listed as a dependency"
-	);
-	
-	scnXml::HSESDecision ut_bad_decis_xml ("\
-		i(1): a\
-		j(2): b",	// decision changes here (illegal & non-sensical)
-	    "bad_decis",	// decision
-	    "i",	// depends
-	    "a,b"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_bad_decis_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "failed to parse tree for bad_decis; expecting: \"i\" here: \"j(2): b\""
-	);
-	
-	scnXml::HSESDecision ut_unknown_input_value_xml ("\
-		i(1): a\
-		i(2): b\
-		i(3): b",		// depending on an unknown input value is illegal
-	    "unknown_input_value",	// decision
-	    "i",	// depends
-	    "a,b"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_unknown_input_value_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "decision tree unknown_input_value: i(3) encountered: 3 is not an outcome of i"
-	);
-	
-	scnXml::HSESDecision ut_undeclared_output_xml ("\
-		i(1): a\
-		i(2): b",		// output not declared (illegal)
-	    "undeclared_output",	// decision
-	    "i",	// depends
-	    "a"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_undeclared_output_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "ESDecisionValueMap::get(): no value undeclared_output(b)"
-	);
-	
-	scnXml::HSESDecision ut_nondepends_xml ("\
-		i(1) {\
-		    j(1): a\
-		    j(2): b\
-		}\
-		i(2) {\
-		    j(1): b\
-		    j(2): a\
-		}\
-	    ",
-	    "nondepends",	// decision
-	    "i",	// error: dependency j not listed
-	    "a,b"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_nondepends_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "decision tree nondepends: j not listed as a dependency"
-	);
-    }
+    //TODO: test dosing is correct
     
-    void xtestAgeDecision () {
-	scnXml::HSESDecision ut_age5_xml ("\
-		age(0-5): under5\
-		age(5-inf): over5\
-	    ",
-	    "age5",	// decision
-	    "age",	// depends
-	    "under5,over5"	// values
-	);
-	CMDecisionTree* d = CMDecisionTree::create( *dvMap, ut_age5_xml );
-	
-	hd->ageYears = 4.99;	// under
-	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), *hd ), dvMap->get( "age5", "under5" ) );
-	hd->ageYears = 5.0;		// boundary
-	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), *hd ), dvMap->get( "age5", "over5" ) );
-	hd->ageYears = (numeric_limits<double>::max)();
-	TS_ASSERT_EQUALS( d->determine( ESDecisionValue(), *hd ), dvMap->get( "age5", "over5" ) );
-	
-	scnXml::HSESDecision ut_age_deep_xml ("\
-		age(0-10){\
-		    age(0-5): a\
-		    age(5-12): b\
-		}\
-		age(10-inf): c\
-	    ",
-	    "age_deep",	// decision
-	    "age",	// depends
-	    "a,b,c"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_age_deep_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "decision tree age_deep: age-branches within age-branches not supported"
-	);
-	
-	
-	scnXml::HSESDecision ut_age_no_depends_xml ("\
-		age(0-5): a\
-		age(5-inf): b\
-	    ",
-	    "age_no_depends",	// decision
-	    "",	// error: age not listed
-	    "a,b"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_age_no_depends_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "decision tree age_no_depends: age not listed as a dependency"
-	);
-	
-	vector<string> vals;
-	vals += "1","2";
-	dvMap->add_decision_values( "i", vals );
-	
-	scnXml::HSESDecision ut_age_combined_xml ("\
-		i(1) {\
-		    age(0-inf): a\
-		}\
-		i(2) {\
-		    age(0-inf): b\
-		}\
-	    ",
-	    "age_combined",	// decision
-	    "i,age",	// error: age may not be combined with other dependencies
-	    "a,b"	// values
-	);
-	TS_ASSERT_THROWS_EQUALS(
-	    ESDecisionTree::create( *dvMap, ut_age_combined_xml ),
-	    const std::runtime_error &e,
-	    string(e.what()),
-	    "decision tree age_combined: a decision depending on \"age\" may not depend on anything else"
-	);
-    }
-    
-    void xtestUC2Test () {
-	CMDTCaseType d( *dvMap );
+    void testUC2Test () {
+        scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
+        scnXml::DecisionTree simpleTreat;
+        simpleTreat.getTreatPKPD().push_back( treat1 );
+        scnXml::DecisionTree noAction;
+        noAction.setNoAction( scnXml::DTNoAction() );
+        
+        scnXml::DTCaseType ct( simpleTreat,  // first line: simple treatment
+                            noAction );     // second line: no action
+        scnXml::DecisionTree dt;
+        dt.setCaseType( ct );
+        
 	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), *hd ), dvMap->get( "case", "UC1" ) );
-	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA | Episode::SECOND_CASE );
-	TS_ASSERT_EQUALS( d.determine( ESDecisionValue(), *hd ), dvMap->get( "case", "UC2" ) );
+	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 1 );
+	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA |
+                Episode::SECOND_CASE );
+	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 0 );
     }
     
+#if 0
     void xtestParasiteTest () {
 	ESDecisionParasiteTest d( *dvMap );
         hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );

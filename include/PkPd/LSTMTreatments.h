@@ -53,6 +53,8 @@ public:
      * 
      * Load drug data (LSTMDrugType::init()) first. */
     static void init (const scnXml::Treatments& data);
+    /** Clear previous data. Only needed for testing. */
+    static void clear();
     
     /** Get the index of a named schedule. */
     static size_t findSchedule( const string& name );

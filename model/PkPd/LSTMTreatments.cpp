@@ -96,6 +96,13 @@ void LSTMTreatments::init(const scnXml::Treatments& data)
     }
 }
 
+void LSTMTreatments::clear(){
+    schedules.clear();
+    scheduleNames.clear();
+    dosages.clear();
+    dosagesNames.clear();
+}
+
 size_t LSTMTreatments::findSchedule(const string& name){
     map<string,size_t>::const_iterator it = scheduleNames.find( name );
     if( it == scheduleNames.end() ){
