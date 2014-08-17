@@ -43,16 +43,6 @@ void MedicateData::load( const scnXml::PKPDMedication& med ){
 }
 
 struct Schedule {
-//     /// Add medications into medicate queue
-//     inline void apply (list<MedicateData>& medicateQueue) const {
-//         for (vector<MedicateData>::const_iterator it = medications.begin(); it != medications.end(); ++it)
-//             medicateQueue.push_back (*it);
-//     }
-//     /// Does this contain a positive number of treatments?
-//     inline bool anyTreatments () const {
-//         return !medications.empty();
-//     }
-    
     void load( const scnXml::PKPDSchedule::MedicateSequence& seq ){
         medications.resize( seq.size() );
         size_t i = 0;
@@ -70,8 +60,31 @@ map<string,size_t> scheduleNames;
 
 struct DosageTable {
     void load( const scnXml::PKPDDosages::AgeSequence& seq ){
-        //FIXME
+        double lastMult = 0.0, lastAge = numeric_limits<double>::quiet_NaN();
+        foreach( const scnXml::Age& age, seq ){
+            if( lastAge != lastAge ){
+                if( age.getLb() != 0.0 )
+                    throw util::xml_scenario_error( "dosage table must have first lower bound equal 0" );
+            }else{
+                if( age.getLb() <= lastAge ){
+                    throw util::xml_scenario_error( "dosage table must list age groups in increasing order" );
+                }
+                table[age.getLb()] = lastMult;
+            }
+            lastMult = age.getDose_mult();
+            lastAge = age.getLb();
+        }
+        table[numeric_limits<double>::infinity()] = lastMult;
     }
+    
+    double getMultiplier( double age ){
+        map<double,double>::const_iterator it = table.upper_bound( age );
+        if( it == table.end() )
+            throw TRACED_EXCEPTION( "bad age/dosage table", util::Error::PkPd );
+        return it->second;
+    }
+    
+    map<double,double> table;
 };
 
 vector<DosageTable> dosages;
@@ -124,6 +137,13 @@ size_t LSTMTreatments::findDosages(const string& name){
 
 //FIXME: call
 // double bodyMass = ageToWeight( ageYears );
+void LSTMMedications::prescribeTreatment(size_t schedule, size_t dosage, double age){
+    double doseMult = dosages[dosage].getMultiplier( age );
+    foreach( MedicateData& medicateData, schedules[schedule].medications ){
+        medicateQueue.push_back( medicateData.multiplied(doseMult) );
+    }
+}
+
 void LSTMMedications::doUpdate(double bodyMass){
     // Process pending medications (in interal queue) and apply/update:
     for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {

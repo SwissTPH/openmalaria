@@ -35,6 +35,7 @@
 
 using namespace std;
 
+class UnittestUtil;
 namespace scnXml{
     class Treatments;
     class PKPDMedication;
@@ -87,6 +88,12 @@ private:
     
     void load( const scnXml::PKPDMedication& med );
     
+    inline MedicateData multiplied( double doseMult ){
+        MedicateData r( *this );
+        r.qty *= doseMult;
+        return r;
+    }
+    
     size_t drug;      /// Drug type index
     double qty;         /// Quantity of drug prescribed (mg?)
     double time;        /// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
@@ -94,17 +101,24 @@ private:
     
     friend class Schedule;
     friend class LSTMMedications;
+    friend class ::UnittestUtil;
 };
 
 /** A class representing PkPd medications allocated but not yet taken (i.e.
  * future doses). Poor adherence is not modeled here, but may be modeled by
  * reducing the number "allocated". */
 struct LSTMMedications {
+    /// Prescibe, via configured treatment schedule and dosages
+    void prescribeTreatment( size_t schedule, size_t dosages, double age );
+    
     /// Are there any pending medications?
     inline bool haveMedications(){ return !medicateQueue.empty(); }
     
     /// Call if there are any pending medications.
     void doUpdate( double bodyMass );
+    
+    /// Remove all pending medications (i.e. drugs prescibed but not yet taken)
+    inline void clear(){ medicateQueue.clear(); }
     
     //FIXME: call this
     /// Checkpointing
@@ -116,6 +130,8 @@ struct LSTMMedications {
 private:
     /// All pending medications
     list<MedicateData> medicateQueue;
+    
+    friend class ::UnittestUtil;
 };
 
 } }

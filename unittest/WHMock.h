@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "WithinHost/WHInterface.h"
+#include "PkPd/LSTMTreatments.h"
 
 using namespace std;
 
@@ -41,7 +42,7 @@ using namespace WithinHost;
  */
 class WHMock : public WHInterface {
 public:
-    WHMock() : totalDensity(0.0), nTreatments(0) {}
+    WHMock();
     virtual ~WHMock();
     
     virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
@@ -58,11 +59,17 @@ public:
     virtual double getCumulativeh() const;
     virtual double getCumulativeY() const;
 
+    // The age of the host, for use in tests.
+    double age;
+    
     // This mock class does not have actual infections. Just set this as you please.
     double totalDensity;
     
     // This mock class counts the number of times treatment() was called. Read/write this as you like.
     int nTreatments;
+    
+    // List of medications
+    PkPd::LSTMMedications medications;
 
 protected:
     virtual InfectionCount countInfections () const;

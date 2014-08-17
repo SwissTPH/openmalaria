@@ -88,10 +88,12 @@ public:
             // Treatments
             scnXml::PKPDSchedule sched1("sched1");
             sched1.getMedicate().push_back(
-                scnXml::PKPDMedication("MF", 1 /*mg*/, 0 /*hour*/));
+                scnXml::PKPDMedication("MF", 6 /*mg*/, 0 /*hour*/));
             
+            // a very basic dosage table, so that we can test it does what's expected
             scnXml::PKPDDosages dosage1("dosage1");
             dosage1.getAge().push_back(scnXml::Age(0 /*age lb*/,1 /*mult*/));
+            dosage1.getAge().push_back(scnXml::Age(5 /*age lb*/,5 /*mult*/));
             
             scnXml::Treatments treatments;
             treatments.getSchedule().push_back(sched1);
@@ -147,6 +149,14 @@ public:
     static void MosqLifeCycle_init() {
         ModelOptions::reset();
         ModelOptions::set(util::VECTOR_LIFE_CYCLE_MODEL);
+    }
+    
+    static double getPrescribedMg( const PkPd::LSTMMedications& medications ){
+        double r = 0.0;
+        foreach( const PkPd::MedicateData& md, medications.medicateQueue ){
+            r += md.qty;
+        }
+        return r;
     }
 };
 

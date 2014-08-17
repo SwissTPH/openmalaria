@@ -123,8 +123,6 @@ public:
 	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt, hd ), 0.8, LIM );
     }
     
-    //TODO: test dosing is correct
-    
     void testUC2Test () {
         scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
         scnXml::DecisionTree simpleTreat;
@@ -180,94 +178,24 @@ public:
         TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt, *hd ), 0.99702, LIM );
     }
     
-#if 0
-    void xtestESDecisionMap () {
-	// Tests using multiple decisions and ESDecisionMap::determine()
-	// We basially test all tree-execution behaviour at once here.
-	
-	xsd::cxx::tree::sequence<scnXml::HSESDecision, false> decisionSeq;
-	decisionSeq.push_back(
-	    scnXml::HSESDecision( "\
-		age(0-5): under5\
-		age(5-inf): over5",	// tree
-		"age5",	// decision
-		"age",	// depends
-		"under5,over5"	// values
-	    )
-	);
-	decisionSeq.push_back(
-	    scnXml::HSESDecision( "\
-		p(.1): none\
-		p(.9){\
-		    age5(under5){p(.8):RDT p(.2):microscopy}\
-		    age5(over5){p(.5):RDT p(.5):microscopy}\
-		}",	// tree
-		"test",	// decision
-		"age5,p",	// depends
-		"none,RDT,microscopy"	// values
-	    )
-	);
-	decisionSeq.push_back(
-	    scnXml::HSESDecision( "\
-		test(none){ case(UC2):second case(UC1):normal }\
-		test(microscopy){\
-		    result(positive){ case(UC2):second case(UC1):normal }\
-		    result(negative): minor\
-		    result(none): error\
-		}\
-		test(RDT){\
-		    result(positive){ case(UC2):second case(UC1):normal }\
-		    result(negative): minor\
-		    result(none): error\
-		}\
-		",	// tree
-		"treatment",	// decision
-		"test,result,case",	// depends
-		"minor,normal,second,error"	// values
-	    )
-	);
-	scnXml::HSESDecisions decisions;
-	decisions.setDecision( decisionSeq );
-	
-	scnXml::HSESTreatments treatments;	// empty treatment list
-	
-	// Final CaseManagement element
-	::scnXml::HSESCaseManagement xmlCM( decisions, treatments );
-	
-	// use uncomplicated tree with its extra tests
-	ESDecisionMap dMap;
-	dMap.initialize( xmlCM, ESDecisionMap::Uncomplicated, false );
-	
-	hd->ageYears = 2;
-	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA | Episode::SECOND_CASE );
-	whm->totalDensity = 4000.0;	// lots of parasites
-	
-	const int N = 100000;	// number of times to sample
-	const double LIM = .002;	// answer expected to be accurate to this limit
-	// Note: LIM=.002 is on the verge of what worked; it may need to be increased.
-	
-	int nMinor = 0, nNormal = 0, nSecond = 0;
-	ESDecisionValue mask = dMap.dvMap.getDecisionMask( "treatment" );
-	ESDecisionValue minor = dMap.dvMap.get( "treatment", "minor" );
-	ESDecisionValue normal = dMap.dvMap.get( "treatment", "normal" );
-	ESDecisionValue second = dMap.dvMap.get( "treatment", "second" );
-	
-	for (int i = 0; i < N; ++i) {
-	    ESDecisionValue outcome = mask & dMap.determine( *hd );
-	    if( outcome == minor ) nMinor++;
-	    else if( outcome == normal ) nNormal++;
-	    else if( outcome == second ) nSecond++;
-	    else TS_FAIL( "unexpected treatment output (error?)" );
-	}
-	
-	// route: tested & (RDT | microscopy) & positive
-	TS_ASSERT_DELTA( nMinor / double(N), 0.9 * (0.8*0.012 + 0.2*0.004), LIM );
-	// impossible
-	TS_ASSERT_EQUALS( nNormal, 0 );
-	// route: not tested | (tested & (RDT | microscopy) & positive)
-	TS_ASSERT_DELTA( nSecond / double(N), 0.1 + 0.9 * (0.8*0.988 + 0.2*0.996), LIM );
+    double testMgPrescribed( scnXml::DecisionTree& dt, double age ){
+        whm->age = age;
+        whm->medications.clear();
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 1 );
+        return UnittestUtil::getPrescribedMg( whm->medications );
     }
-#endif
+    
+    void testDosing(){
+        scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
+        scnXml::DecisionTree simpleTreat;
+        simpleTreat.getTreatPKPD().push_back( treat1 );
+        
+        // Test our dosing table. Set with a multiplier of 1 below 5 and 5 from 5.
+        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 0 ), 6, 1e-8 );
+        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 4.9 ), 6, 1e-8 );
+        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 5 ), 30, 1e-8 );
+        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 99 ), 30, 1e-8 );
+    }
     
 private:
     auto_ptr<WHMock> whm;

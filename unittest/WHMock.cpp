@@ -19,6 +19,7 @@
  */
 
 #include "WHMock.h"
+#include "UnittestUtil.h"
 #include "util/errors.h"
 
 using namespace std;
@@ -28,6 +29,11 @@ class UnittestUtil;
 namespace OM {
 namespace UnitTest {
 
+WHMock::WHMock() :
+    age(20 /*must be a valid age*/),
+    totalDensity(numeric_limits<double>::quiet_NaN()),
+    nTreatments(0)
+{}
 WHMock::~WHMock() {}
 
 double WHMock::probTransmissionToMosquito( TimeStep ageTimeSteps,
@@ -50,7 +56,7 @@ bool WHMock::optionalPqTreatment(){
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages){
     nTreatments += 1;
-    //FIXME: should do more
+    medications.prescribeTreatment( schedule, dosages, age );
 }
 
 void WHMock::update(int nNewInfs, double ageInYears, double bsvFactor){
