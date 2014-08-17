@@ -114,16 +114,15 @@ public:
      * administered implies no effect. */
     virtual bool optionalPqTreatment() =0;
     
-    //TODO: expose something higher-level instead
-    /** Medicate drugs (wraps drug's medicate).
+    /** Give a patient a course of drugs, via the Pk/Pd model
+     * 
+     * Note: doses sizes are modified according to age via the dosage
+     * table given at the time this function is called.
      *
-     * @param drug	index of drug
-     * @param qty		Quantity of drug to administer in mg
-     * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
-     * @param duration Duration in days. 0 or NaN indicate oral treatment.
-     * @param bodyMass	Weight of human in kg
+     * @param schedule Index of a treatment schedule
+     * @param dosages Index of a dosage table
      */
-    virtual void medicate(size_t drug, double qty, double time, double duration, double bodyMass) =0;
+    virtual void treatPkPd(size_t schedule, size_t dosages) =0;
 
     /** Add new infections and update the parasite densities of existing
      * infections. Also update immune status.

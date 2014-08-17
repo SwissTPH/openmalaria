@@ -20,6 +20,7 @@
 
 #include "Clinical/CMDecisionTree.h"
 #include "WithinHost/WHInterface.h"
+#include "PkPd/LSTMTreatments.h"
 #include "util/random.h"
 #include "Monitoring/Survey.h"
 #include "util/errors.h"
@@ -152,9 +153,6 @@ protected:
 
 /**
  * Deliver one or more treatments via the PK/PD model.
- * 
- * TODO: should the "multiple" bit (i.e. the point at which a branch may have
- * more than one child) be here?
  */
 class CMDTTreatPKPD : public CMDecisionTree {
 public:
@@ -163,7 +161,9 @@ public:
     
 protected:
     virtual void exec( CMHostData hostData ) const{
-        //FIXME medicate treatments
+        foreach( const TreatInfo& treatment, treatments ){
+            hostData.withinHost.treatPkPd( treatment.schedule, treatment.dosage );
+        }
     }
     
 private:
@@ -180,9 +180,11 @@ private:
     
     struct TreatInfo{
         TreatInfo( const string& s, const string& d, double h ) :
-            schedule(s), dosage(d), delay_h(h) {}
-        string schedule;        // name of the schedule
-        string dosage;          // name of the dosage table
+            schedule(PkPd::LSTMTreatments::findSchedule(s)),
+            dosage(PkPd::LSTMTreatments::findDosages(d)),
+            delay_h(h) {}
+        size_t schedule;        // index of the schedule
+        size_t dosage;          // name of the dosage table
         double delay_h;         // delay in hours
     };
     vector<TreatInfo> treatments;

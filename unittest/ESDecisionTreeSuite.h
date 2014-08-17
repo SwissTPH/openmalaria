@@ -118,7 +118,7 @@ public:
 	
 	// test that dt.exec chooses to treat 80% and no action 20% of the time:
 	propPos = propTreatmentsNReps( N, dt, hd );
-	TS_ASSERT_DELTA( propPos, .8, LIM );
+	TS_ASSERT_DELTA( propPos, 0.8, LIM );
     }
 #if 0
     void xtestRandomDeterministic () {

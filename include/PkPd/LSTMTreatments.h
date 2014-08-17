@@ -54,6 +54,12 @@ public:
      * Load drug data (LSTMDrugType::init()) first. */
     static void init (const scnXml::Treatments& data);
     
+    /** Get the index of a named schedule. */
+    static size_t findSchedule( const string& name );
+    
+    /** Get the index of a named dosage table. */
+    static size_t findDosages( const string& name );
+    
 private:
     LSTMTreatments();  // not constructible
 };

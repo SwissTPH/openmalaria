@@ -198,7 +198,7 @@ void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
 }
 
 char const*const not_impl = "feature not available with the \"descriptive\" within-host model";
-void DescriptiveWithinHostModel::medicate(size_t drug, double qty, double time, double duration, double bodyMass){
+void DescriptiveWithinHostModel::treatPkPd(size_t schedule, size_t dosages){
     throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
 }

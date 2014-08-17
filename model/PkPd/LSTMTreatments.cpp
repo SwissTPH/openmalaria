@@ -96,6 +96,24 @@ void LSTMTreatments::init(const scnXml::Treatments& data)
     }
 }
 
+size_t LSTMTreatments::findSchedule(const string& name){
+    map<string,size_t>::const_iterator it = scheduleNames.find( name );
+    if( it == scheduleNames.end() ){
+        throw util::xml_scenario_error(string("no treatment schedule with this name: ")
+            .append(name));
+    }
+    return it->second;
+}
+
+size_t LSTMTreatments::findDosages(const string& name){
+    map<string,size_t>::const_iterator it = dosagesNames.find( name );
+    if( it == dosagesNames.end() ){
+        throw util::xml_scenario_error(string("no dosage table with this name: ")
+            .append(name));
+    }
+    return it->second;
+}
+
 
 //FIXME: call
 // double bodyMass = ageToWeight( ageYears );

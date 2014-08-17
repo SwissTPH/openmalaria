@@ -49,7 +49,7 @@ public:
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool optionalPqTreatment();
-    virtual void medicate(size_t drug, double qty, double time, double duration, double bodyMass);
+    virtual void treatPkPd(size_t schedule, size_t dosages);
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;
     virtual bool diagnosticDefault() const;

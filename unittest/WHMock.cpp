@@ -48,8 +48,9 @@ bool WHMock::optionalPqTreatment(){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::medicate(size_t drug, double qty, double time, double duration, double bodyMass){
-    throw util::unimplemented_exception( "not needed in unit test" );
+void WHMock::treatPkPd(size_t schedule, size_t dosages){
+    nTreatments += 1;
+    //FIXME: should do more
 }
 
 void WHMock::update(int nNewInfs, double ageInYears, double bsvFactor){

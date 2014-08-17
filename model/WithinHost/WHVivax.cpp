@@ -420,7 +420,7 @@ void WHVivax::checkpoint(ostream& stream){
 }
 
 char const*const not_impl = "feature not available in Vivax model";
-void WHVivax::medicate(size_t drug, double qty, double time, double duration, double bodyMass){
+void WHVivax::treatPkPd(size_t schedule, size_t dosages){
     throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 double WHVivax::getTotalDensity() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 double WHVivax::getCumulativeh() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }

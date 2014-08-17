@@ -45,7 +45,7 @@ public:
     
     virtual void importInfection();
     
-    virtual void medicate (size_t drug, double qty, double time, double duration, double bodyMass);
+    virtual void treatPkPd(size_t schedule, size_t dosages);
     virtual void clearImmunity();
     
     virtual void update (int nNewInfs, double ageInYears, double bsvFactor);
