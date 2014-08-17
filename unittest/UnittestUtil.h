@@ -30,6 +30,7 @@
 #include "PkPd/PkPdModel.h"
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMTreatments.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"
 
@@ -58,6 +59,7 @@ public:
 	
 	PkPd::PkPdModel::activeModel = modelID;
 	if (modelID == PkPd::PkPdModel::LSTM_PKPD) {
+            // Drugs
  	    scnXml::Allele allele ( 1.0 /* initial_frequency */, 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */, "sensitive" /* name */ );
 	    
 	    scnXml::PD pd;
@@ -71,6 +73,19 @@ public:
             drugs.getDrug().push_back (drug);
 	    
 	    PkPd::LSTMDrugType::init (drugs);
+            
+            // Treatments
+            scnXml::PKPDSchedule sched1("sched1");
+            sched1.getMedicate().push_back(
+                scnXml::PKPDMedication("MF", 1 /*mg*/, 0 /*hour*/));
+            
+            scnXml::PKPDDosages dosage1("dosage1");
+            dosage1.getAge().push_back(scnXml::Age(0 /*age lb*/,1 /*mult*/));
+            
+            scnXml::Treatments treatments;
+            treatments.getSchedule().push_back(sched1);
+            treatments.getDosages().push_back(dosage1);
+            PkPd::LSTMTreatments::init(treatments);
 	} /*else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
 	    PkPd::ProteomeManager::init ();
 	    PkPd::HoshenDrugType::init();
