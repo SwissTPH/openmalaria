@@ -58,7 +58,7 @@ void WHMock::update(int nNewInfs, double ageInYears, double bsvFactor){
 }
 
 inline double WHMock::getTotalDensity() const{
-    throw util::unimplemented_exception( "not needed in unit test" );
+    return totalDensity;
 }
 
 bool WHMock::diagnosticDefault() const{

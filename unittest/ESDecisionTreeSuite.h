@@ -41,7 +41,9 @@ class ESDecisionTreeSuite : public CxxTest::TestSuite
 public:
     ESDecisionTreeSuite () :
             whm(0), hd(0)
-    {}
+    {
+        UnittestUtil::initSurveys();
+    }
     ~ESDecisionTreeSuite () {}
     
     void setUp () {
@@ -116,11 +118,9 @@ public:
 	
 	const int N = 10000;
 	const double LIM = .02;
-	double propPos;	// proportion positive
 	
-	// test that dt.exec chooses to treat 80% and no action 20% of the time:
-	propPos = propTreatmentsNReps( N, dt, hd );
-	TS_ASSERT_DELTA( propPos, 0.8, LIM );
+        // test that dt.exec chooses to treat 80% and no action 20% of the time:
+	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt, hd ), 0.8, LIM );
     }
     
     //TODO: test dosing is correct
@@ -144,36 +144,43 @@ public:
 	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 0 );
     }
     
-#if 0
-    void xtestParasiteTest () {
-	ESDecisionParasiteTest d( *dvMap );
+    void testParasiteTest () {
+        scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
+        scnXml::DecisionTree simpleTreat;
+        simpleTreat.getTreatPKPD().push_back( treat1 );
+        scnXml::DecisionTree noAction;
+        noAction.setNoAction( scnXml::DTNoAction() );
+        
+        scnXml::DTDiagnostic microscopy( simpleTreat,  // positive: simple treatment
+                            noAction,     // negative: no action
+                            "microscopy" );     // type of diagnostic
+        scnXml::DecisionTree dt_mic;
+        dt_mic.setDiagnostic( microscopy );
+        
+        scnXml::DTDiagnostic rdt( simpleTreat,  // positive: simple treatment
+                            noAction,     // negative: no action
+                            "RDT" );     // type of diagnostic
+        scnXml::DecisionTree dt_rdt;
+        dt_rdt.setDiagnostic( rdt );
+        
         hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
 	const int N = 20000;
 	const double LIM = .02;
-	double propPos;	// proportion positive
 	
 	whm->totalDensity = 0.0;	// no parasites (so we test specificity)
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), *hd, dvMap->get( "result", "negative" ) );
-	TS_ASSERT_DELTA ( propPos, .75, LIM );
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), *hd, dvMap->get( "result", "negative" ) );
-	TS_ASSERT_DELTA ( propPos, .942, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), *hd ), dvMap->get( "result", "none" ) );
+	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic, *hd ), 1 - 0.75, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt, *hd ), 1 - 0.942, LIM );
 	
         whm->totalDensity = 80.0;	// a few parasites
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), *hd, dvMap->get( "result", "positive" ) );
-	TS_ASSERT_DELTA ( propPos, .85, LIM );
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), *hd, dvMap->get( "result", "positive" ) );
-	TS_ASSERT_DELTA ( propPos, .63769, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), *hd ), dvMap->get( "result", "none" ) );
+	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic, *hd ), 0.85, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt, *hd ), 0.63769, LIM );
 	
         whm->totalDensity = 2000.0;	// lots of parasites
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "microscopy" ), *hd, dvMap->get( "result", "positive" ) );
-	TS_ASSERT_DELTA ( propPos, .99257, LIM );
-	propPos = determineNTimes( N, &d, dvMap->get( "test", "RDT" ), *hd, dvMap->get( "result", "positive" ) );
-	TS_ASSERT_DELTA ( propPos, .99702, LIM );
-	TS_ASSERT_EQUALS( d.determine( dvMap->get( "test", "none" ), *hd ), dvMap->get( "result", "none" ) );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic, *hd ), 0.99257, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt, *hd ), 0.99702, LIM );
     }
     
+#if 0
     void xtestESDecisionMap () {
 	// Tests using multiple decisions and ESDecisionMap::determine()
 	// We basially test all tree-execution behaviour at once here.

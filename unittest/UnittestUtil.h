@@ -33,8 +33,10 @@
 #include "PkPd/LSTMTreatments.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"
+#include "Monitoring/Surveys.h"
 
 #include "schema/pharmacology.h"
+#include "schema/monitoring.h"
 
 using namespace OM;
 using namespace WithinHost;
@@ -49,6 +51,15 @@ namespace OM {
 
 class UnittestUtil {
 public:
+    // Initialise surveys, to the minimum required not to crash
+    static void initSurveys(){
+        scnXml::OptionSet opts;
+        scnXml::Surveys surveys( numeric_limits<double>::quiet_NaN() /* detection limit */);
+        scnXml::AgeGroup ageGroups( 0.0 /* lower bound */ );
+        scnXml::Monitoring mon( opts, surveys, ageGroups, "no monitoring" );
+        Monitoring::Surveys.init( mon );
+    }
+    
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	TimeStep::init( 1, 90.0 );	// I think the drug model is always going to be used with an interval of 1 day.
 	ModelOptions::reset();
