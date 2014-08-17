@@ -122,7 +122,9 @@
             <positive>
               <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
             </positive>
-            <negative/>
+            <negative>
+              <noAction/>
+            </negative>
           </diagnostic>
         </MDA1D>
       </component>
@@ -197,7 +199,9 @@
                           </outcome>
                         </random> 
                       </outcome>
-                      <outcome p="0.5"/>
+                      <outcome p="0.5">
+                        <noAction/>
+                      </outcome>
                     </random>
                   </outcome>
                   <outcome p="0.18" name="RDT">
@@ -214,7 +218,9 @@
                               </outcome>
                             </random> 
                           </outcome>
-                          <outcome p="0.15"/>
+                          <outcome p="0.15">
+                            <noAction/>
+                          </outcome>
                         </random>
                       </positive>
                       <negative>
@@ -229,7 +235,9 @@
                               </outcome>
                             </random> 
                           </outcome>
-                          <outcome p="0.85"/>
+                          <outcome p="0.85">
+                            <noAction/>
+                          </outcome>
                         </random>
                       </negative>
                     </diagnostic>
@@ -248,12 +256,16 @@
                       </outcome>
                     </random> 
                   </outcome>
-                  <outcome p="0.85"/>
+                  <outcome p="0.85">
+                    <noAction/>
+                  </outcome>
                 </random>
               </secondLine>
             </caseType>
           </outcome>
-          <outcome p="0.8" name="no treatment provider"/>
+          <outcome p="0.8" name="no treatment provider">
+            <noAction/>
+          </outcome>
         </random>
       </uncomplicated>
       <complicated>
@@ -272,10 +284,14 @@
                 <treatPKPD schedule="AS_treat" dosage="AS_dosages" delay_h="24"/>
                 <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="108"/>
               </outcome>
-              <outcome p="0.2" name="no referral"/>
+              <outcome p="0.2" name="no referral">
+                <noAction/>
+              </outcome>
             </random>
           </outcome>
-          <outcome p="0.52" name="no initial provider"/>
+          <outcome p="0.52" name="no initial provider">
+            <noAction/>
+          </outcome>
         </random>
       </complicated>
       <ClinicalOutcomes>
