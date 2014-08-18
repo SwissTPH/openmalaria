@@ -32,10 +32,11 @@ namespace OM { namespace PkPd {
     */
     class VoidPkPdModel : public PkPdModel {
         virtual void prescribe(size_t schedule, size_t dosages, double age) {}
-        virtual void decayDrugs () {}
+        virtual void medicate(double age) {};
         virtual double getDrugFactor (uint32_t proteome_ID) {
             return 1.0;
         }
+        virtual void decayDrugs () {}
         virtual uint32_t new_proteome_ID () {
             return 0xFFFFFFFF;
         }

@@ -49,12 +49,14 @@ public:
     static auto_ptr<CMDecisionTree> create( const ::scnXml::DTCaseType& node );
     
 protected:
-    virtual void exec( CMHostData hostData ) const{
+    virtual CMDTOut exec( CMHostData hostData ) const{
         //TODO: clarify whether or not this works for complicated cases. Currently probably not.
         assert( (hostData.pgState & Episode::SICK) && !(hostData.pgState & Episode::COMPLICATED) );
         
         if( hostData.pgState & Episode::SECOND_CASE ) secondLine->exec( hostData );
         else firstLine->exec( hostData );
+        
+        return CMDTOut(false);
     }
     
 private:
@@ -75,7 +77,7 @@ public:
     static auto_ptr<CMDecisionTree> create( const ::scnXml::DTDiagnostic& node );
     
 protected:
-    virtual void exec( CMHostData hostData ) const{
+    virtual CMDTOut exec( CMHostData hostData ) const{
         if( isRDT )     Survey::current().report_Clinical_RDTs (1);
         else            Survey::current().report_Clinical_Microscopy (1);
         
@@ -83,6 +85,8 @@ protected:
         double pPositive = 1.0 + specificity * (dens / (dens + dens_50) - 1.0);
         if( random::bernoulli(pPositive) ) positive->exec( hostData );
         else negative->exec( hostData );
+        
+        return CMDTOut(false);
     }
     
 private:
@@ -129,8 +133,10 @@ public:
     static auto_ptr<CMDecisionTree> create( const ::scnXml::DTRandom& node );
     
 protected:
-    virtual void exec( CMHostData hostData ) const{
+    virtual CMDTOut exec( CMHostData hostData ) const{
         branches.upper_bound( random::uniform_01() )->second->exec( hostData );
+        
+        return CMDTOut(false);
     }
     
 private:
@@ -148,7 +154,9 @@ private:
 /** Do nothing. **/
 class CMDTNoAction : public CMDecisionTree {
 protected:
-    virtual void exec( CMHostData hostData ) const{}
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        return CMDTOut(false);
+    }
 };
 
 /**
@@ -160,10 +168,11 @@ public:
         const ::scnXml::DecisionTree::TreatPKPDSequence& seq );
     
 protected:
-    virtual void exec( CMHostData hostData ) const{
+    virtual CMDTOut exec( CMHostData hostData ) const{
         foreach( const TreatInfo& treatment, treatments ){
             hostData.withinHost.treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears );
         }
+        return CMDTOut(true);
     }
     
 private:
@@ -176,6 +185,7 @@ private:
                 treatElt.getDelay_h()
             ) );
         }
+        assert( treatments.size() > 0 );        // CMDTTreatPKPD should not be used in this case
     }
     
     struct TreatInfo{

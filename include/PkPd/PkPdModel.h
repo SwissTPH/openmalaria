@@ -40,10 +40,10 @@ namespace OM { namespace PkPd {
  * overriding all abstract virtual functions will be abstract and can not be
  * instantiated (i.e. used to create objects).
  * 
- * Calling order within a timestep (see doc for medicate for details):
+ * Calling order each day:
+ *  * medicateDrugs()
  *  * getDrugFactor() for each infection
  *  * decayDrugs()
- *  * medicate()
  */
 class PkPdModel {
 public:
@@ -86,16 +86,29 @@ public:
      * @param age Age of human in years
      */
     virtual void prescribe(size_t schedule, size_t dosages, double age) =0;
-
-  /// Called each timestep immediately after the drug acts on any infections.
-  virtual void decayDrugs () =0;
-  
-  /** This is how drugs act on infections.
-   *
-   * Each timestep, on each infection, the parasite density is multiplied by
-   * the return value of this infection. The WithinHostModels are responsible
-   * for clearing infections once the parasite density is negligible. */
-  virtual double getDrugFactor (uint32_t proteome_ID) =0;
+    
+    /** Medicate drugs: human takes prescribed drugs which are to be taken this
+     * day.
+     * 
+     * @param age Age of human in years
+     * 
+     * Note: poor adherence on the part of the patient is not modeled here; to
+     * model, prescribe with a "poor adherence" schedule.
+     */
+    virtual void medicate(double age) =0;
+    
+    /** This is how drugs act on infections.
+     *
+     * Each timestep, on each infection, the parasite density is multiplied by
+     * the return value of this infection. The WithinHostModels are responsible
+     * for clearing infections once the parasite density is negligible. */
+    virtual double getDrugFactor (uint32_t proteome_ID) =0;
+    
+    /** After any resident infections have been reduced by getDrugFactor(),
+     * this function is called to update drug levels to their effective level
+     * at the end of the day, as well as clear data once drug concentrations
+     * become negligible. */
+    virtual void decayDrugs () =0;
   
   virtual uint32_t new_proteome_ID () =0;
   

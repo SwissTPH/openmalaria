@@ -161,7 +161,7 @@ public:
     
     static void medicate(PkPd::LSTMPkPdModel& pkpd, size_t typeIndex, double qty,
                          double time, double duration, double bodyMass){
-        pkpd.medicate(typeIndex, qty, time, duration, bodyMass);
+        pkpd.medicateDrug(typeIndex, qty, time, duration, bodyMass);
     }
     
     static void clearMedicateQueue( PkPd::LSTMPkPdModel& pkpd ){

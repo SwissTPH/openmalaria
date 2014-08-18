@@ -133,11 +133,9 @@ public:
      * @param bsvFactor Parasite survival factor for blood-stage vaccines */
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor) =0;
 
-    /** TODO: this should not need to be exposed
-     * 
-     * It is used by: MDA diagnostics, EventScheduler diagnostics, and a severe
-     * outcome (pDeath) model inside the EventScheduler "case management"
-     * model. */
+    /** TODO: this should not need to be exposed. It is currently used by a
+     * severe outcome (pDeath) model inside the EventScheduler "case
+     * management" model, and case management diagnostics. */
     virtual double getTotalDensity() const =0;
     
     /** Simulate use of a diagnostic test, using the general detection limit.

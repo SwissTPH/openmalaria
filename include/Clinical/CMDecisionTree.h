@@ -43,6 +43,11 @@ struct CMHostData {
     WHInterface& withinHost;
     Episode::State pgState;
 };
+/** All output data from the decision tree. */
+struct CMDTOut {
+    CMDTOut(bool t) : treated(t) {}
+    bool treated;       // true iff some treatment was administered
+};
 
 
 /**
@@ -59,7 +64,7 @@ public:
     static auto_ptr<CMDecisionTree> create( const ::scnXml::DecisionTree& node );
     
     /** Run the decision tree. */
-    virtual void exec( CMHostData hostData ) const =0;
+    virtual CMDTOut exec( CMHostData hostData ) const =0;
 };
 
 } }

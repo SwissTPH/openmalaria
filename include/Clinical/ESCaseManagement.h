@@ -40,65 +40,8 @@ namespace scnXml{
     
 }
 namespace OM { namespace Clinical {
-    using WithinHost::WHInterface;
-    using Monitoring::Survey;
-    
-/// Auxilliary output from running case management
-struct CMAuxOutput {
-    enum Hospitalisation {
-        NONE=0, IMMEDIATE, DELAYED
-    } hospitalisation;  ///< was case hospitalised immediately, after a delay, or not at all?
-    enum Diagnostic {
-        NO_TEST=0, POSITIVE, NEGATIVE
-    } diagnostic;        ///< Was a malaria-parasite diagnostic used, and if so what was the outcome?
-    enum AB_provider_T {
-        NO_AB=0, FACILITY, INFORMAL
-    } AB_provider;
-};
-
-/** Decision trees representation, mapping inputs to a ESTreatmentSchedule pointer.
- *
- * Used to represent a UC/UC2 or severe decision tree.
- *****************************************************************************/
-class ESDecisionMap {
-    public:
-        enum TreeType {
-            MDA,
-            Uncomplicated,
-            Complicated
-        };
-        
-        /// Constructor. Element is created statically, so initialize later
-        ESDecisionMap () {}
-        ~ESDecisionMap();
-        /** Read decision trees from an XML element.
-         *
-         * @param cm XML element describing probabilistic decisions and treatments
-         * @param complicated Determines whether hard-coded decisions for the
-         * uncomplicated or complicated case are added.
-         * @param reinitialise If true, clear any previously initialised data
-         * (e.g. for replacement health system); if false, throw an exception
-         * if the map was previously initialised. */
-        void initialize (const ::scnXml::DecisionTree& cm, TreeType treeType, bool reinitialise);
-        
-        /** Run decision tree to arrive at an outcome.
-         *
-         * @returns An outcome as a binary-or'd list of decision values. */
-        void execute( CMHostData hostData ) const;
-        
-        typedef boost::ptr_vector<CMDecisionTree> Decisions;
-    private:
-        // All data here should be set by ESCaseManagement::init(); don't checkpoint.
-        
-        // Currently we walk through all decisions, required or not
-        Decisions decisions;
-        
-//         typedef boost::ptr_unordered_map<ESDecisionValue,ESTreatment> Treatments;
-//         Treatments treatments;
-        
-        friend class ::ESCaseManagementSuite;   // unittests
-        friend class ::ESDecisionTreeSuite;
-};
+using WithinHost::WHInterface;
+using Monitoring::Survey;
 
 
 /** Tracks clinical status (sickness), does case management for new events,
@@ -121,16 +64,10 @@ public:
         Monitoring::ReportMeasureI drugReport
     );
     
-    static CMAuxOutput execute( const CMHostData& hostData );
+    static CMDTOut execute( const CMHostData& hostData );
     
 private:
-    
-    //BEGIN Static parameters — set by init()
-    static ESDecisionMap uncomplicated, complicated;
-    
-    /// MDA description
-    static ESDecisionMap mda;
-    //END
+    static auto_ptr<CMDecisionTree> uncomplicated, complicated, mda;
 };
 
 } }

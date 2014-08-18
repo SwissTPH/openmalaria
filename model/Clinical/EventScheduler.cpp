@@ -262,10 +262,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if (timeLastTreatment + healthSystemMemory > TimeStep::simulation)
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
-	/*CMAuxOutput auxOut =*/ ESCaseManagement::execute(
-	    CMHostData( ageYears, withinHostModel, pgState ) );
+	CMDTOut auxOut = ESCaseManagement::execute(
+	    CMHostData( ageYears, *human.withinHostModel, pgState ) );
 	
-        if( true /*FIXME medicateQueue.size()*/ ){	// I.E. some treatment was given
+        if( auxOut.treated ){	// I.E. some treatment was given
             timeLastTreatment = TimeStep::simulation;
             if( pgState & Episode::COMPLICATED ){
                 Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );

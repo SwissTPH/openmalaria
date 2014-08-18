@@ -37,26 +37,11 @@ namespace OM { namespace Clinical {
     using boost::format;
 
 
-// -----  ESDecisionMap  -----
-
-void ESDecisionMap::initialize (const ::scnXml::DecisionTree& xmlCM, TreeType treeType, bool reinitialise) {
-    //TODO: set up decisions
-}
-
-ESDecisionMap::~ESDecisionMap () {
-}
-
-void ESDecisionMap::execute( CMHostData hostData ) const{
-    //TODO
-}
-
-
 // -----  ESCaseManagement  -----
 
-ESDecisionMap ESCaseManagement::uncomplicated,
-    ESCaseManagement::complicated;
-ESDecisionMap ESCaseManagement::mda;
-// ESDecisionMap decisionsUC, decisionsSev, decisionsMDA;
+auto_ptr<CMDecisionTree> ESCaseManagement::uncomplicated,
+    ESCaseManagement::complicated,
+    ESCaseManagement::mda;
 
 void ESCaseManagement::setHealthSystem(
     const scnXml::HealthSystem& healthSystem)
@@ -66,10 +51,9 @@ void ESCaseManagement::setHealthSystem(
         "healthSystem data (initial or intervention)");
     const scnXml::HSEventScheduler& esData =
         healthSystem.getEventScheduler().get();
-    uncomplicated.initialize (esData.getUncomplicated (),
-                              ESDecisionMap::Uncomplicated, true);
-    complicated.initialize (esData.getComplicated (),
-                            ESDecisionMap::Complicated, true);
+    
+    uncomplicated = CMDecisionTree::create( esData.getUncomplicated () );
+    complicated = CMDecisionTree::create( esData.getComplicated() );
     
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
@@ -77,7 +61,7 @@ void ESCaseManagement::setHealthSystem(
 }
 
 void ESCaseManagement::initMDA (const scnXml::DecisionTree& desc){
-    mda.initialize( desc, ESDecisionMap::MDA, false );
+    mda = CMDecisionTree::create( desc );
 }
 
 void ESCaseManagement::massDrugAdministration(
@@ -87,32 +71,23 @@ void ESCaseManagement::massDrugAdministration(
         Monitoring::ReportMeasureI drugReport
 ){
     Survey::current().addInt( screeningReport, human, 1 );
-    mda.execute( hostData );
-    if( true /*FIXME anyTreatment*/ ){
+    CMDTOut out = mda->exec( hostData );
+    if( out.treated ){
         Survey::current().addInt( drugReport, human, 1 );
     }
 }
 
-CMAuxOutput ESCaseManagement::execute (
+CMDTOut ESCaseManagement::execute (
         const CMHostData& hostData
 ) {
     assert (hostData.pgState & Episode::SICK);
-    // We always remove any queued medications.
-    //FIXME medicateQueue.clear();
+    //TODO: should we remove any existing prescriptions?
+    //TODO: Note that these trees do both "access" and "case management" decisions.
+    //TODO: medicateQueue.clear();
     
-    ESDecisionMap *map = (hostData.pgState & Episode::COMPLICATED) ?
-        &complicated : &uncomplicated;
-    map->execute( hostData );
-    
-    CMAuxOutput auxOut;
-    auxOut.hospitalisation = CMAuxOutput::NONE;
-    /*FIXME
-    if( hostData.pgState & Episode::COMPLICATED )
-	auxOut.hospitalisation = map->hospitalisation(outcome);
-    auxOut.diagnostic = map->diagnostic(outcome);
-    auxOut.AB_provider = map->AB_provider(outcome);
-    */
-    return auxOut;
+    CMDecisionTree& tree = (hostData.pgState & Episode::COMPLICATED) ?
+        *complicated : *uncomplicated;
+    return tree.exec( hostData );
 }
 
 } }

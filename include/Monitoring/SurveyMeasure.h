@@ -43,8 +43,8 @@ enum SurveyMeasure {
     nInfect = 1,
     /** Expected number of infected hosts
      * 
-     * This is the sum of the probabilities of each host having had at least
-     * one infection in his/her lifetime. */
+     * This is the sum of the probabilities across all timesteps since the last
+     * survey of each host becoming infected on that timestep. */
     nExpectd= 2,
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */

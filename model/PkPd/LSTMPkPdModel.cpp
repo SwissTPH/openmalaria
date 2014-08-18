@@ -92,7 +92,7 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 // ———  non-static simulation time functions  ———
 
-void LSTMPkPdModel::doUpdate(double age){
+void LSTMPkPdModel::medicate(double age){
     if( medicateQueue.empty() ) return;
     
     // Body mass is calculated from age with a simple heterogeneity factor
@@ -102,7 +102,7 @@ void LSTMPkPdModel::doUpdate(double age){
     list<MedicateData>::iterator it = medicateQueue.begin();
     while( it != medicateQueue.end() ){
         if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
-            medicate (it->drug, it->qty, it->time, it->duration, bodyMass);     //TODO: inline?
+            medicateDrug (it->drug, it->qty, it->time, it->duration, bodyMass);     //TODO: inline?
             it = medicateQueue.erase (it);
         } else {   // and decrement treatment seeking delay for the rest
             it->time -= 1.0;
@@ -111,7 +111,7 @@ void LSTMPkPdModel::doUpdate(double age){
     }
 }
 
-void LSTMPkPdModel::medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass) {
+void LSTMPkPdModel::medicateDrug(size_t typeIndex, double qty, double time, double duration, double bodyMass) {
     list<LSTMDrug>::iterator drug = _drugs.begin();
     while (drug != _drugs.end()) {
         if (drug->getIndex() == typeIndex)
@@ -130,6 +130,16 @@ void LSTMPkPdModel::medicate(size_t typeIndex, double qty, double time, double d
     }
 }
 
+double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID) {
+    double factor = 1.0; //no effect
+    
+    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); ++it) {
+        double drugFactor = it->calculateDrugFactor(proteome_ID);
+        factor *= drugFactor;
+    }
+    return factor;
+}
+
 // This may look complicated but its just some machinery to call updateConcentration() and return its result
 class DecayPredicate {
 public:
@@ -140,16 +150,6 @@ public:
 void LSTMPkPdModel::decayDrugs () {
   // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
   _drugs.remove_if (DecayPredicate());
-}
-
-double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID) {
-    double factor = 1.0; //no effect
-    
-    for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); ++it) {
-	double drugFactor = it->calculateDrugFactor(proteome_ID);
-	factor *= drugFactor;
-    }
-    return factor;
 }
 
 uint32_t LSTMPkPdModel::new_proteome_ID () {

@@ -125,7 +125,8 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor)
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
     for( int step = 0, steps = TimeStep::interval; step < steps; ++step ){
-        // every day, update each infection, then decay drugs
+        // every day, medicate drugs, update each infection, then decay drugs
+        pkpdModel->medicate( ageInYears );
         for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
             // Note: this is only one treatment model; there is also the PK/PD model
             bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);

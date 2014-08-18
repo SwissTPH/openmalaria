@@ -129,7 +129,7 @@ public:
     static size_t findDrug(string abbreviation);
     
     /** Get a drug by its index. */
-    static const LSTMDrugType& getDrug( size_t index ); //TODO: inline?
+    static const LSTMDrugType& getDrug( size_t index );
     
     /// Return a new proteome ID
     static uint32_t new_proteome_ID ();

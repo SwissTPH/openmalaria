@@ -48,16 +48,9 @@ public:
     virtual void checkpoint (ostream& stream);
     
     virtual void prescribe(size_t schedule, size_t dosages, double age);
-    
-    //TODO: call (per day? how does the timing work with interventions?)
-    /** Call this each day, after any possible prescription of new drugs.
-     * 
-     * @param age Age of human in years.
-     */
-    void doUpdate( double age );
-    
-    virtual void decayDrugs ();
+    virtual void medicate(double age);
     virtual double getDrugFactor (uint32_t proteome_ID);
+    virtual void decayDrugs ();
     
     virtual uint32_t new_proteome_ID ();
     
@@ -78,7 +71,7 @@ private:
    * new infection densities) happens first; hence medicate() will always be
    * called after getDrugFactor in a timestep, and a time of zero means the
    * dose has effect from the start of the following timestep. */
-  void medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass);
+  void medicateDrug(size_t typeIndex, double qty, double time, double duration, double bodyMass);
     
     /// Drugs with non-zero blood concentrations:
     list<LSTMDrug> _drugs;
