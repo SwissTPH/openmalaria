@@ -50,7 +50,7 @@ public:
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool optionalPqTreatment();
-    virtual void treatPkPd(size_t schedule, size_t dosages);
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;
     virtual bool diagnosticDefault() const;
@@ -59,9 +59,6 @@ public:
     virtual double getCumulativeh() const;
     virtual double getCumulativeY() const;
 
-    // The age of the host, for use in tests.
-    double age;
-    
     // This mock class does not have actual infections. Just set this as you please.
     double totalDensity;
     

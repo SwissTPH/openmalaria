@@ -39,7 +39,6 @@ using std::auto_ptr;
 struct CMHostData {
     CMHostData (double aY, WHInterface& wH, Episode::State pS) :
         ageYears(aY), withinHost(wH), pgState(pS) {}
-    //TODO: do we need age here?
     double ageYears;
     WHInterface& withinHost;
     Episode::State pgState;

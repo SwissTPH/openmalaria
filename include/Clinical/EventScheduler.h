@@ -86,20 +86,6 @@ private:
     /// Parameter
     static double alpha;
     
-    /** Weight model. Selects average body mass dependant on age, then
-     * multiplies by a heterogeneity factor (which is set at birth).
-     *
-     * @param ageGroupData Age group for weight data
-     * @param ageYears Age in years
-     * @returns Mass in kg */
-    inline double ageToWeight (double ageYears) {
-        return weight.eval( ageYears ) * hetWeightMultiplier;
-    }
-    
-    static double hetWeightMultStdDev;
-    static double minHetWeightMult;
-    static AgeGroupInterpolator weight;
-    
     /** Base log odds of treatment of non-malarial fevers in absense of a
      * malaria diagnostic and irrespective of whether treatment is needed.
      * 
@@ -154,10 +140,6 @@ private:
 
     /// Total parasite density at previous timestep (used during a bout).
     double previousDensity;
-    
-    /// Multiplies the mean weight for age.
-    /// Within PkPd class simply because it's not used elsewhere.
-    double hetWeightMultiplier;
 };
 
 }

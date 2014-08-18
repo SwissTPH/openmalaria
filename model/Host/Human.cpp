@@ -31,7 +31,7 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
-#include <schema/scenario.h>
+#include "schema/scenario.h"
 
 namespace OM { namespace Host {
     using namespace OM::util;

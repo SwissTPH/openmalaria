@@ -30,7 +30,6 @@ namespace OM {
 namespace UnitTest {
 
 WHMock::WHMock() :
-    age(20 /*must be a valid age*/),
     totalDensity(numeric_limits<double>::quiet_NaN()),
     nTreatments(0)
 {}
@@ -54,7 +53,7 @@ bool WHMock::optionalPqTreatment(){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::treatPkPd(size_t schedule, size_t dosages){
+void WHMock::treatPkPd(size_t schedule, size_t dosages, double age){
     nTreatments += 1;
     pkpd.prescribe( schedule, dosages, age );
 }

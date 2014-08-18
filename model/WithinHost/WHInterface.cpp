@@ -30,6 +30,8 @@
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "PkPd/LSTMPkPdModel.h"
+#include "schema/scenario.h"
 //using namespace std;
 
 #include <cmath>
@@ -72,6 +74,10 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
         }
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;
+        
+        if( opt_common_whm ){
+            PkPd::LSTMPkPdModel::init( scenario.getModel() );
+        }
     }
 }
 

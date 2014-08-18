@@ -69,8 +69,8 @@ void CommonWithinHost::clearInfections( Treatments::Stages stage ){
 
 // -----  interventions -----
 
-void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages){
-    //FIXME pkpdModel->medicate(drug, qty, time, duration, bodyMass);
+void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages, double age){
+    pkpdModel->prescribe( schedule, dosages, age );
 }
 void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {

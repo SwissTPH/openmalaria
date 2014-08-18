@@ -53,14 +53,12 @@ public:
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
         whm.reset( new WHMock() );
         ETS_ASSERT( whm.get() != 0 );
-	hd.reset( new CMHostData( numeric_limits< double >::quiet_NaN(), *whm.get(), Episode::NONE ) );
+	hd.reset( new CMHostData( 21 /* any real age will do for most tests */,
+                                  *whm.get(), Episode::NONE ) );
 
 	UnittestUtil::EmpiricalWHM_setup();
 	// could seed random-number-generator, but shouldn't affect outcomes
 	UnittestUtil::PkPdSuiteSetup (PkPd::PkPdModel::LSTM_PKPD);
-	
-	hd->ageYears = numeric_limits< double >::quiet_NaN();
-	hd->pgState = Episode::NONE;
     }
     void tearDown () {
         PkPd::LSTMDrugType::clear();
@@ -70,23 +68,17 @@ public:
     /* Runs the decision tree N times
      * returns the proportion of these runs where the output was any treatment
      */
-    double propTreatmentsNReps (int N, const scnXml::DecisionTree& dt, const CMHostData& hd) {
+    double propTreatmentsNReps (int N, const scnXml::DecisionTree& dt) {
         auto_ptr<CMDecisionTree> cmdt = CMDecisionTree::create( dt );
         
 	whm->nTreatments = 0;
 	for (int i = 0; i < N; ++i) {
-	    cmdt->exec( hd );
+	    cmdt->exec( *hd );
 	}
 	return double(whm->nTreatments) / double(N);
     }
     
     void testRandomP () {
-	CMHostData hd(
-		numeric_limits< double >::quiet_NaN(),
-		*whm,
-		Episode::NONE
-	);
-	
 	// random decision
         // option (a) is to treat, option (b) is to do nothing
         scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
@@ -120,7 +112,7 @@ public:
 	const double LIM = .02;
 	
         // test that dt.exec chooses to treat 80% and no action 20% of the time:
-	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt, hd ), 0.8, LIM );
+	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt ), 0.8, LIM );
     }
     
     void testUC2Test () {
@@ -136,10 +128,10 @@ public:
         dt.setCaseType( ct );
         
 	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA );
-	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 1 );
+	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
 	hd->pgState = static_cast<Episode::State>( Pathogenesis::STATE_MALARIA |
                 Episode::SECOND_CASE );
-	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 0 );
+	TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 0 );
     }
     
     void testParasiteTest () {
@@ -166,22 +158,22 @@ public:
 	const double LIM = .02;
 	
 	whm->totalDensity = 0.0;	// no parasites (so we test specificity)
-	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic, *hd ), 1 - 0.75, LIM );
-        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt, *hd ), 1 - 0.942, LIM );
+	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic ), 1 - 0.75, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 1 - 0.942, LIM );
 	
         whm->totalDensity = 80.0;	// a few parasites
-	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic, *hd ), 0.85, LIM );
-        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt, *hd ), 0.63769, LIM );
+	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic ), 0.85, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.63769, LIM );
 	
         whm->totalDensity = 2000.0;	// lots of parasites
-        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic, *hd ), 0.99257, LIM );
-        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt, *hd ), 0.99702, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic ), 0.99257, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.99702, LIM );
     }
     
     double testMgPrescribed( scnXml::DecisionTree& dt, double age ){
-        whm->age = age;
+        hd->ageYears = age;
         UnittestUtil::clearMedicateQueue( whm->pkpd );
-        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 1 );
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
         return UnittestUtil::getPrescribedMg( whm->pkpd );
     }
     

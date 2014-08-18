@@ -162,7 +162,7 @@ public:
 protected:
     virtual void exec( CMHostData hostData ) const{
         foreach( const TreatInfo& treatment, treatments ){
-            hostData.withinHost.treatPkPd( treatment.schedule, treatment.dosage );
+            hostData.withinHost.treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears );
         }
     }
     

@@ -25,6 +25,9 @@
 #include "PkPd/Drug/LSTMDrug.h"
 #include "PkPd/LSTMTreatments.h"
 
+namespace scnXml{
+    class Model;
+}
 namespace OM { namespace PkPd {
     
 /** Pharmacokinetic and pharmacodynamics interface, used by each human's
@@ -36,6 +39,8 @@ namespace OM { namespace PkPd {
  * body. */
 class LSTMPkPdModel : public PkPdModel {
 public:
+    static void init(const scnXml::Model& model);
+    
     LSTMPkPdModel ();
     virtual ~LSTMPkPdModel ();
     
@@ -44,9 +49,12 @@ public:
     
     virtual void prescribe(size_t schedule, size_t dosages, double age);
     
-    //TODO: call
-    /// Call if there are any pending medications.
-    void doUpdate( double bodyMass );
+    //TODO: call (per day? how does the timing work with interventions?)
+    /** Call this each day, after any possible prescription of new drugs.
+     * 
+     * @param age Age of human in years.
+     */
+    void doUpdate( double age );
     
     virtual void decayDrugs ();
     virtual double getDrugFactor (uint32_t proteome_ID);
@@ -77,6 +85,9 @@ private:
     
     /// All pending medications
     list<MedicateData> medicateQueue;
+    
+    /// Multiplies the mean mass (for this age) as a heterogeneity factor.
+    double hetMassMultiplier;
     
     friend class ::UnittestUtil;
 };

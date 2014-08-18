@@ -42,10 +42,6 @@ vector<double> ClinicalEventScheduler::cumDailyPrImmUCTS;
 double ClinicalEventScheduler::neg_v;
 double ClinicalEventScheduler::alpha;
 
-double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
-double ClinicalEventScheduler::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
-AgeGroupInterpolator ClinicalEventScheduler::weight;
-
 double ClinicalEventScheduler::logOddsAbBase = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbNegTest = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbPosTest = std::numeric_limits<double>::signaling_NaN();
@@ -69,15 +65,6 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
     opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
-    
-    const scnXml::Human human = model.getHuman();
-    if( !human.getWeight().present() ){
-        throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
-    }
-    weight.set( human.getWeight().get(), "weight" );
-    hetWeightMultStdDev = human.getWeight().get().getMultStdDev();
-    // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
-    minHetWeightMult = 0.5 / weight.eval( 0.0 );
     
     alpha = exp( -parameters[Parameters::CFR_NEG_LOG_ALPHA] );
     if( !(0.0<=alpha && alpha<=1.0) ){
@@ -165,16 +152,6 @@ ClinicalEventScheduler::ClinicalEventScheduler (double tSF) :
 	// don't have a way of modifying it.
 	throw xml_scenario_error("treatment seeking heterogeneity not supported");
     }
-#ifndef NDEBUG
-    int counter = 0;
-#endif
-    do {
-        hetWeightMultiplier = util::random::gauss( 1.0, hetWeightMultStdDev );
-#ifndef NDEBUG
-        assert( counter < 100 );        // too many resamples: resamples should rarely be needed...
-        ++counter;
-#endif
-    } while( hetWeightMultiplier < minHetWeightMult );
 }
 
 
@@ -454,7 +431,6 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     timeOfRecovery & stream;
     timeLastTreatment & stream;
     previousDensity & stream;
-    hetWeightMultiplier & stream;
 }
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
@@ -463,7 +439,6 @@ void ClinicalEventScheduler::checkpoint (ostream& stream) {
     timeOfRecovery & stream;
     timeLastTreatment & stream;
     previousDensity & stream;
-    hetWeightMultiplier & stream;
 }
 
 } }

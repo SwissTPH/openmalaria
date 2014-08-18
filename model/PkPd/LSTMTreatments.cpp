@@ -136,8 +136,6 @@ size_t LSTMTreatments::findDosages(const string& name){
 }
 
 
-//FIXME: call
-// double bodyMass = ageToWeight( ageYears );
 void LSTMPkPdModel::prescribe(size_t schedule, size_t dosage, double age){
     double doseMult = dosages[dosage].getMultiplier( age );
     foreach( MedicateData& medicateData, schedules[schedule].medications ){

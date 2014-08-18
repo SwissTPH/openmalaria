@@ -159,7 +159,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
     // None of these do anything in this model:
-    virtual void treatPkPd(size_t schedule, size_t dosages);
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual double getTotalDensity() const;
     virtual double getCumulativeh() const;
     virtual double getCumulativeY() const;
