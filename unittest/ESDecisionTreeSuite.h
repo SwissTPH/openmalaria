@@ -180,9 +180,9 @@ public:
     
     double testMgPrescribed( scnXml::DecisionTree& dt, double age ){
         whm->age = age;
-        whm->medications.clear();
+        UnittestUtil::clearMedicateQueue( whm->pkpd );
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt, *hd ), 1 );
-        return UnittestUtil::getPrescribedMg( whm->medications );
+        return UnittestUtil::getPrescribedMg( whm->pkpd );
     }
     
     void testDosing(){

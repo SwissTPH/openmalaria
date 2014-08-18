@@ -20,6 +20,7 @@
 
 #include "PkPd/LSTMPkPdModel.h"
 #include "util/random.h"
+#include "util/checkpoint_containers.h"
 
 #include <cassert>
 
@@ -42,6 +43,7 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
 	_drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(index)));
 	_drugs.back() & stream;
     }
+    medicateQueue & stream;
 }
 
 void LSTMPkPdModel::checkpoint (ostream& stream) {
@@ -50,10 +52,24 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 	it->getIndex() & stream;
 	(*it) & stream;
     }
+    medicateQueue & stream;
 }
 
 
 // -----  non-static simulation time functions  -----
+
+void LSTMPkPdModel::doUpdate(double bodyMass){
+    // Process pending medications (in interal queue) and apply/update:
+    for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
+        if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
+            medicate (it->drug, it->qty, it->time, it->duration, bodyMass);     //TODO: inline
+            it = medicateQueue.erase (it);
+        } else {   // and decrement treatment seeking delay for the rest
+            it->time -= 1.0;
+            ++it;
+        }
+    }
+}
 
 void LSTMPkPdModel::medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass) {
     list<LSTMDrug>::iterator drug = _drugs.begin();

@@ -56,7 +56,7 @@ bool WHMock::optionalPqTreatment(){
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages){
     nTreatments += 1;
-    medications.prescribeTreatment( schedule, dosages, age );
+    pkpd.prescribe( schedule, dosages, age );
 }
 
 void WHMock::update(int nNewInfs, double ageInYears, double bsvFactor){

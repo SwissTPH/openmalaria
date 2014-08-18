@@ -151,12 +151,21 @@ public:
         ModelOptions::set(util::VECTOR_LIFE_CYCLE_MODEL);
     }
     
-    static double getPrescribedMg( const PkPd::LSTMMedications& medications ){
+    static double getPrescribedMg( const PkPd::LSTMPkPdModel& pkpd ){
         double r = 0.0;
-        foreach( const PkPd::MedicateData& md, medications.medicateQueue ){
+        foreach( const PkPd::MedicateData& md, pkpd.medicateQueue ){
             r += md.qty;
         }
         return r;
+    }
+    
+    static void medicate(PkPd::LSTMPkPdModel& pkpd, size_t typeIndex, double qty,
+                         double time, double duration, double bodyMass){
+        pkpd.medicate(typeIndex, qty, time, duration, bodyMass);
+    }
+    
+    static void clearMedicateQueue( PkPd::LSTMPkPdModel& pkpd ){
+        pkpd.medicateQueue.clear();
     }
 };
 

@@ -21,6 +21,7 @@
 
 #include "PkPd/LSTMTreatments.h"
 #include "PkPd/Drug/LSTMDrugType.h"
+#include "PkPd/LSTMPkPdModel.h"
 #include "util/errors.h"
 
 #include "schema/pharmacology.h"
@@ -137,25 +138,10 @@ size_t LSTMTreatments::findDosages(const string& name){
 
 //FIXME: call
 // double bodyMass = ageToWeight( ageYears );
-void LSTMMedications::prescribeTreatment(size_t schedule, size_t dosage, double age){
+void LSTMPkPdModel::prescribe(size_t schedule, size_t dosage, double age){
     double doseMult = dosages[dosage].getMultiplier( age );
     foreach( MedicateData& medicateData, schedules[schedule].medications ){
         medicateQueue.push_back( medicateData.multiplied(doseMult) );
-    }
-}
-
-void LSTMMedications::doUpdate(double bodyMass){
-    // Process pending medications (in interal queue) and apply/update:
-    for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
-        list<MedicateData>::iterator next = it;
-        ++next;
-        if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
-            //FIXME withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
-            medicateQueue.erase (it);
-        } else {   // and decrement treatment seeking delay for the rest
-            it->time -= 1.0;
-        }
-        it = next;
     }
 }
 

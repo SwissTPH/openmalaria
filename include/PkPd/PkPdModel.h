@@ -76,24 +76,17 @@ public:
   }
   //@}
   
-  /** Medicate drugs to an individual, which act on infections the following
-   * timesteps, until rendered ineffective by decayDrugs().
-   *
-   * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
-   * \param qty The quantity in mg.
-   * \param time Time in days since start of this time step to medicate at
-   * \param duration  Duration in days. 0 or an NaN indicates no duration.
-   * \param bodyMass Weight of human in kg
-   * 
-   * Due to the fact we're using a discrete timestep model, the case-management
-   * update (calling medicate) and within-host model update (calling
-   * getDrugFactor) cannot [easily] have immediate effects on each other. The
-   * implementation we use is that the within-host model update (calculating
-   * new infection densities) happens first; hence medicate() will always be
-   * called after getDrugFactor in a timestep, and a time of zero means the
-   * dose has effect from the start of the following timestep. */
-  virtual void medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass) =0;
-  
+    /** Prescribe a patient a course of drugs, via the Pk/Pd model
+     * 
+     * Note: doses sizes are modified according to age via the dosage
+     * table given at the time this function is called.
+     *
+     * @param schedule Index of a treatment schedule
+     * @param dosages Index of a dosage table
+     * @param age Age of human in years
+     */
+    virtual void prescribe(size_t schedule, size_t dosages, double age) =0;
+
   /// Called each timestep immediately after the drug acts on any infections.
   virtual void decayDrugs () =0;
   

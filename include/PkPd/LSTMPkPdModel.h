@@ -23,30 +23,62 @@
 
 #include "PkPd/PkPdModel.h"
 #include "PkPd/Drug/LSTMDrug.h"
+#include "PkPd/LSTMTreatments.h"
 
 namespace OM { namespace PkPd {
     
 /** Pharmacokinetic and pharmacodynamics interface, used by each human's
  * within-host model.
  *
- * Some of the implementation is contained in the drug.h/drug.cpp files. */
+ * Some of the implementation is contained in the drug.h/drug.cpp files.
+ * 
+ * This class holds per-human data: prescribed medications and drugs in the
+ * body. */
 class LSTMPkPdModel : public PkPdModel {
 public:
-  LSTMPkPdModel ();
-  virtual ~LSTMPkPdModel ();
-  
-  virtual void checkpoint (istream& stream);
-  virtual void checkpoint (ostream& stream);
-  
-  virtual void medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass);
-  virtual void decayDrugs ();
-  virtual double getDrugFactor (uint32_t proteome_ID);
-  
-  virtual uint32_t new_proteome_ID ();
-  
+    LSTMPkPdModel ();
+    virtual ~LSTMPkPdModel ();
+    
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
+    virtual void prescribe(size_t schedule, size_t dosages, double age);
+    
+    //TODO: call
+    /// Call if there are any pending medications.
+    void doUpdate( double bodyMass );
+    
+    virtual void decayDrugs ();
+    virtual double getDrugFactor (uint32_t proteome_ID);
+    
+    virtual uint32_t new_proteome_ID ();
+    
 private:
-    // Per-individual variables:
-  list<LSTMDrug> _drugs;
+  /** Medicate drugs to an individual, which act on infections the following
+   * timesteps, until rendered ineffective by decayDrugs().
+   *
+   * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
+   * \param qty The quantity in mg.
+   * \param time Time in days since start of this time step to medicate at
+   * \param duration  Duration in days. 0 or an NaN indicates no duration.
+   * \param bodyMass Weight of human in kg
+   * 
+   * Due to the fact we're using a discrete timestep model, the case-management
+   * update (calling medicate) and within-host model update (calling
+   * getDrugFactor) cannot [easily] have immediate effects on each other. The
+   * implementation we use is that the within-host model update (calculating
+   * new infection densities) happens first; hence medicate() will always be
+   * called after getDrugFactor in a timestep, and a time of zero means the
+   * dose has effect from the start of the following timestep. */
+  void medicate(size_t typeIndex, double qty, double time, double duration, double bodyMass);
+    
+    /// Drugs with non-zero blood concentrations:
+    list<LSTMDrug> _drugs;
+    
+    /// All pending medications
+    list<MedicateData> medicateQueue;
+    
+    friend class ::UnittestUtil;
 };
 
 } }

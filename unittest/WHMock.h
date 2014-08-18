@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "WithinHost/WHInterface.h"
-#include "PkPd/LSTMTreatments.h"
+#include "PkPd/LSTMPkPdModel.h"
 
 using namespace std;
 
@@ -68,8 +68,8 @@ public:
     // This mock class counts the number of times treatment() was called. Read/write this as you like.
     int nTreatments;
     
-    // List of medications
-    PkPd::LSTMMedications medications;
+    // Lists medications and drugs in the body
+    PkPd::LSTMPkPdModel pkpd;
 
 protected:
     virtual InfectionCount countInfections () const;

@@ -76,7 +76,6 @@ struct MedicateData {
         duration(numeric_limits< double >::quiet_NaN())
     {}
     
-private:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
@@ -86,6 +85,7 @@ private:
         duration & stream;
     }
     
+private:
     void load( const scnXml::PKPDMedication& med );
     
     inline MedicateData multiplied( double doseMult ){
@@ -100,37 +100,7 @@ private:
     double duration;    /// Duration for IV purposes (use IV admin if a number, oral if is NaN)
     
     friend class Schedule;
-    friend class LSTMMedications;
-    friend class ::UnittestUtil;
-};
-
-/** A class representing PkPd medications allocated but not yet taken (i.e.
- * future doses). Poor adherence is not modeled here, but may be modeled by
- * reducing the number "allocated". */
-struct LSTMMedications {
-    /// Prescibe, via configured treatment schedule and dosages
-    void prescribeTreatment( size_t schedule, size_t dosages, double age );
-    
-    /// Are there any pending medications?
-    inline bool haveMedications(){ return !medicateQueue.empty(); }
-    
-    /// Call if there are any pending medications.
-    void doUpdate( double bodyMass );
-    
-    /// Remove all pending medications (i.e. drugs prescibed but not yet taken)
-    inline void clear(){ medicateQueue.clear(); }
-    
-    //FIXME: call this
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        medicateQueue & stream;
-    }
-    
-private:
-    /// All pending medications
-    list<MedicateData> medicateQueue;
-    
+    friend class LSTMPkPdModel;
     friend class ::UnittestUtil;
 };
 
