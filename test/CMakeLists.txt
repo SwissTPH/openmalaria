@@ -16,7 +16,6 @@ set (OM_BOXTEST_NAMES
   #disabled because of IPT:
   # 2 3 IPT VT
   1 4 5 6 9 10 11 12
-  1DayIntervs
   2ITNs
   Cohort
   EffectiveDrug
