@@ -81,6 +81,8 @@
         <!-- An example to show decisions, and how they select and modify a treatment schedule.
           This is not intended to be at all realistic, but just to test what the model can do.
           It might eliminate malaria, but might kill patients with drug-overdoses too! -->
+        <!-- NOTE Aug 2014: This can't be converted to the new representation
+        due to (a) the weird doseSize decision and (b) the delay. -->
         <decisions>
           <decision depends="case,p" name="test" values="none,microscopy,RDT">
             case(UC1){
@@ -98,7 +100,7 @@
             age(0-5): under5
             age(5-inf): over5
          </decision>
-          <decision depends="age5,p" name="treatment" values="MF_treat,MF_treat_poor_adherence">
+          <decision depends="p" name="treatment" values="MF_treat,MF_treat_poor_adherence">
             p(.7): MF_treat
             p(.3): MF_treat_poor_adherence
           </decision>
@@ -1076,21 +1078,23 @@
     </nonVector>
   </entomology>
   <pharmacology>
-    <drug abbrev="MF">
-      <PD>
-        <allele name="sensitive (rename)">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.6654</IC50>
-          <slope>2.5</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.006654</negligible_concentration>
-        <half_life>19.254</half_life>
-        <vol_dist>20.8</vol_dist>
-      </PK>
-    </drug>
+    <drugs>
+      <drug abbrev="MF">
+        <PD>
+          <allele name="sensitive (rename)">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.6654</IC50>
+            <slope>2.5</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>0.006654</negligible_concentration>
+          <half_life>19.254</half_life>
+          <vol_dist>20.8</vol_dist>
+        </PK>
+      </drug>
+    </drugs>
   </pharmacology>
   <model>
     <ModelOptions>

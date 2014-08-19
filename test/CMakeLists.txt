@@ -20,7 +20,7 @@ set (OM_BOXTEST_NAMES
   Cohort
   EffectiveDrug
   Empirical
-  ESCMTest
+  # ESCMTest (cannot be updated to new format due to dropped features and weirdness)
   ESTS
   IRS30
   Molineaux
