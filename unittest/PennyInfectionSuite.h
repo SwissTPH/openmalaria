@@ -74,10 +74,11 @@ public:
         bool extinct = false;
         int iterations=0;
         do{
-            extinct = infection->update(1.0);
+            extinct = infection->update(1.0, 0);
+            int ageDays = (TimeStep::simulation - infection->_startdate - infection->latentp).inDays() + 0;
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
             TS_ASSERT_APPROX( infection->getDensity(), cirDens[iterations] );
-            TS_ASSERT_APPROX( infection->seqDensity(), seqDens[iterations] );
+            TS_ASSERT_APPROX( infection->seqDensity(ageDays), seqDens[iterations] );
             TimeStep::simulation += TimeStep(1);
             iterations+=1;
         }while(!extinct);

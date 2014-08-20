@@ -110,7 +110,7 @@ WHFalciparum::~WHFalciparum()
 {
 }
 
-double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const{
+double WHFalciparum::probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const{
     /* This model (often referred to as the gametocyte model) was designed for
     5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
     for 1-day timesteps to avoid having to design and analyse a new model.
@@ -120,7 +120,9 @@ double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double t
      * Primaquine). Apparently Primaquine is not commonly used in P falciparum
      * treatment, but for vivax the effect may be important. */
     
-    if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20){
+    //NOTE: this seems totally pointless to me. If _ylag is initialised to zero
+    // then calculations should work correctly anyway.
+    if (ageOfHuman.inDays() <= 20 || TimeStep::simulation.inDays() <= 20){
         // We need at least 20 days history (_ylag) to calculate infectiousness;
         // assume no infectiousness if we don't have this history.
         // Note: human not updated on DOB so age must be >20 days.

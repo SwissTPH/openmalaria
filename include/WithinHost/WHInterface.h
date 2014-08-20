@@ -89,12 +89,14 @@ public:
 
     /** Return the infectiousness of this human to biting mosquitoes.
      * 
-     * @param ageTimeSteps Age of the human
+     * @param ageOfHuman Age of the human
+     * @param tbvFactor Probability that transmission is not blocked by a
+     *  "transmission blocking vaccine".
      * 
      * Calculates the value during the call, which is expensive (cache externally
      * if the value is needed multiple times). */
     //TODO: per genotype? (for LSTM's spread of resistance modelling)
-    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const =0;
+    virtual double probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const =0;
     
     /// @returns true if host has patent parasites
     virtual bool summarize(const Host::Human& human) =0;

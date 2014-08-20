@@ -47,7 +47,10 @@ public:
   }
   /** Return true if infection is blood stage.
    * 
-   * Note: infections are considered to be liver stage for one 5-day timestep.
+   * Note: infections are considered to be liver stage for 5 days. This is
+   * hard-coded since it is convenient in a 5-day timestep model (and was one
+   * of the reasons a 5-day timestep was originally used) (TS).
+   * 
    * The remainder of the "latentP" (pre-patent) period is blood-stage, where
    * blood-stage drugs do have an effect but parasites are not detectible.
    * 
@@ -59,10 +62,9 @@ public:
    * effect), clearance of blood stage infections can only happen after their
    * first update (though due to the latent period densities will still be
    * low). */
-  inline bool bloodStage() const{
-      assert( TimeStep::interval == 5 );        // one timestep for liver stage not appropriate otherwise
-      return TimeStep::simulation - _startdate > TimeStep(1);
-  }
+    inline bool bloodStage() const{
+        return TimeStep::simulation - _startdate > TimeStep::intervalsPer5Days;
+    }
   //! Get proteome
   inline uint32_t get_proteome_ID() const {
     return proteome_ID;
@@ -112,7 +114,7 @@ protected:
   /// @brief Static data set by init
   //@{
 public:
-  /// pre-erythrocytic latent period, in time steps
+  /// pre-erythrocytic latent period
   static TimeStep latentp;
   
   static double invCumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)

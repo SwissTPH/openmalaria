@@ -271,7 +271,7 @@ void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double 
     }
 }
 
-void MolineauxInfection::updateGrowthRateMultiplier() {
+void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
     // The immune responses are represented by the variables
     // Sc (probability that a parasite escapes control by innate and variant-transcending immune response)
     // Sm (                        "                      acquired and variant-transcending immune response)
@@ -283,7 +283,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
 
     //double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta
     //optimization: Since kappa_m = 1, we don't use pow.
-    double Sm = ((1.0-beta)/(1.0+(getVariantTranscendingSummation()/Pstar_m)))+beta;
+    double Sm = ((1.0-beta)/(1.0+(getVariantTranscendingSummation(ageDays)/Pstar_m)))+beta;
     double S[v];
 
     double sigma_Qi_Si=0.0;
@@ -294,7 +294,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
 	if( i < variants.size() ){
 	    // As above, confirm exponent:
 	    BOOST_STATIC_ASSERT( kappa_v == 3 );
-	    double base = variants[i].getVariantSpecificSummation() / Pstar_v;
+	    double base = variants[i].getVariantSpecificSummation(ageDays) / Pstar_v;
 	    S[i] = 1.0 / (1.0 + base*base*base);
 	}
         sigma_Qi_Si+= qPow[i]*S[i];
@@ -337,7 +337,7 @@ void MolineauxInfection::updateGrowthRateMultiplier() {
     }
 }
 
-double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeStep ageOfInfection) {
+double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ageDays) {
     // growthRate:
     // p(t+1) = p(t) * sqrt(p(t+2)/p(t))
     // p(t+2) = p(t+1) * sqrt(p(t+2)/p(t))
@@ -350,7 +350,7 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeSt
 
     // if t+2: The new variant is now expressed. For already extinct
     // variants this doesn't matter, since initP = 0 for those variants.
-    if (P==0 && mod_nn(ageOfInfection, 2)==0)
+    if (P==0 && mod_nn(ageDays, 2)==0)
     {
         P = initP;
     }
@@ -364,48 +364,39 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, TimeSt
     return P;
 }
 
-bool MolineauxInfection::updateDensity(double survivalFactor, TimeStep ageOfInfection) {
-    if (ageOfInfection == TimeStep(0))
-    {
+bool MolineauxInfection::updateDensity(double survivalFactor, int ageDays) {
+    if (ageDays == 0){
         _density = variants[0].P;
-    }
-    else
-    {
+    }else{
         double newDensity = 0.0;
-
-        for (size_t i=0;i<variants.size();i++)
-        {
-            newDensity += variants[i].updateDensity( survivalFactor, ageOfInfection );
+        for (size_t i=0;i<variants.size();i++){
+            newDensity += variants[i].updateDensity( survivalFactor, ageDays );
         }
-
         _density = newDensity;
     }
 
-    _cumulativeExposureJ += TimeStep::interval * _density;
+    // Note: normally this is multiplied by the 
+    _cumulativeExposureJ += _density;
 
-    if (_density>1.0e-5)
-    {
-        // if the infection isn't extinct and t = t+2
-        // then the growthRateMultiplier is adapted for t+3 and t+4
-        if (mod_nn(ageOfInfection, 2)==0)
-        {
-            updateGrowthRateMultiplier();
-        }
-        return false;
+    if( _density <= 1.0e-5 ){
+        return true;    // infection goes extinct
     }
-    else
-    {
-        return true;
+    
+    // if the infection isn't extinct and t = t+2
+    // then the growthRateMultiplier is adapted for t+3 and t+4
+    if( mod_nn(ageDays, 2) == 0 ){
+        updateGrowthRateMultiplier(ageDays);
     }
+    return false;
 }
 
-double MolineauxInfection::Variant::getVariantSpecificSummation() {
+double MolineauxInfection::Variant::getVariantSpecificSummation(int ageDays) {
     //The effective exposure is computed by adding in the 8-day lagged parasite density (i.e. 4 time steps)
     //and decaying the previous value for the effective exposure with decay parameter 2*sigma (the 2 arises because
     //the time steps are two days and the unit of sigma is per day. (reasoning: rearrangment of Molineaux paper equation 6)
 
     //Molineaux paper equation 6
-    size_t index = mod_nn(TimeStep::simulation, 8)/2;	// 8 days ago has same index as today
+    size_t index = mod_nn(ageDays, 8)/2;	// 8 days ago has same index as today
     //note: sigma_decay = exp(-2*sigma)
     variantSpecificSummation = static_cast<float>((variantSpecificSummation * sigma_decay)+laggedP[index]);
     laggedP[index] = P;
@@ -413,10 +404,10 @@ double MolineauxInfection::Variant::getVariantSpecificSummation() {
     return variantSpecificSummation;
 }
 
-double MolineauxInfection::getVariantTranscendingSummation() {
+double MolineauxInfection::getVariantTranscendingSummation(int ageDays) {
 
     //Molineaux paper equation 5
-    size_t index = mod_nn(TimeStep::simulation, 8)/2;	// 8 days ago has same index as today
+    size_t index = mod_nn(ageDays, 8)/2;	// 8 days ago has same index as today
     //Note: rho is zero, so the decay here is unnecessary:
     variantTranscendingSummation = (variantTranscendingSummation /* * exp(-2.0*rho) */)+laggedPc[index];
 

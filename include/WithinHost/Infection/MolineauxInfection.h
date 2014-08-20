@@ -38,14 +38,14 @@ public:
 
 	virtual ~MolineauxInfection () {};
 	static void init(const OM::Parameters& parameters);
-	virtual bool updateDensity(double survivalFactor, TimeStep ageOfInfection);
+	virtual bool updateDensity(double survivalFactor, int ageDays);
 
 protected:
     virtual void checkpoint (ostream& stream);
 
 private:
     double getVariantSpecificSummation(int i, double P_current);
-    double getVariantTranscendingSummation();
+    double getVariantTranscendingSummation(int ageDays);
 
     /**This function adapt the growth rate.
      * We can't use the Molineaux as it, since
@@ -53,7 +53,7 @@ private:
      * the density p(t+1) is then extrapolated.
      *
      */
-    void updateGrowthRateMultiplier();
+    void updateGrowthRateMultiplier(int ageDays);
 
 	// v: number of variants per clone (one infection = one new clone)
 	static const size_t v = 50;
@@ -89,6 +89,7 @@ private:
 	float m[v];
         // variantTranscendingSummation: See Molineaux paper, equation 7
         float variantTranscendingSummation;
+        // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
         float laggedPc[taus];
         /* Pstar_c, Pstar_m: two host-specific critical densities...
          * Those two values depend on the first local maximum or the difference
@@ -103,6 +104,7 @@ private:
             float variantSpecificSummation;
             // initP[i]: Density of in t+2 emerging variant i
             float initP;
+            // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
 	    float laggedP[taus];
 	    
 	    Variant ();
@@ -112,8 +114,8 @@ private:
 	    void operator& (istream& stream);
 	    
 	    void updateGrowthRateMultiplier( double pd, double immune_response_escape );
-	    double updateDensity (double survivalFactor, TimeStep ageOfInfection);
-	    double getVariantSpecificSummation();
+	    double updateDensity (double survivalFactor, int ageDays /* age of infection in days */);
+	    double getVariantSpecificSummation(int ageDays);
 	};
 	vector<Variant> variants;
 };

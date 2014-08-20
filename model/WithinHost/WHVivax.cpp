@@ -243,7 +243,7 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvFactor) const{
+double WHVivax::probTransmissionToMosquito(TimeStep ageOfHuman, double tbvFactor) const{
     for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {

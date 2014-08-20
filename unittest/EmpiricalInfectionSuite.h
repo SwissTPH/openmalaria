@@ -51,49 +51,49 @@ public:
     
     // Parasite growth is stochastic, so there's not a lot we can test, except for reproducability
     void testUpdatedInf () {
-	infection->update (1.0);
+	infection->update (1.0, 0);
 	TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
     }
     void testUpdated2Inf () {
-	infection->update (1.0);
+	infection->update (1.0, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (1.0);
+	infection->update (1.0, 0);
 	TS_ASSERT_APPROX (infection->getDensity(), 4.94261787639103382);
     }
     void testUpdated3Inf () {
-	infection->update (1.0);
+	infection->update (1.0, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (1.0);
+	infection->update (1.0, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (1.0);
+	infection->update (1.0, 0);
 	TS_ASSERT_APPROX (infection->getDensity(), 162.62062791268144860);
     }
     void testUpdated4Inf () {
-	infection->update (1.0);
+	infection->update (1.0, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (1.0);
+	infection->update (1.0, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (1.0);
+	infection->update (1.0, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (1.0);
+	infection->update (1.0, 0);
 	TS_ASSERT_APPROX (infection->getDensity(), 6.10393200785528424);
     }
     void testUpdatedInf1 () {
-	infection->update (1.0);
+	infection->update (1.0, 0);
 	TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
     }
     
     void testUpdatedReducedInf () {
-	infection->update (1.0);
+	infection->update (1.0, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (0.1);
+	infection->update (0.1, 0);
 	// This is, as expected, 1/10th of that in testUpdated2Inf
 	TS_ASSERT_APPROX (infection->getDensity(), 0.49426178763910338);
     }
     void testUpdatedReducedInf2 () {
-	infection->update (0.1);
+	infection->update (0.1, 0);
         TimeStep::simulation += TimeStep(1);
-	infection->update (1.0);
+	infection->update (1.0, 0);
 	// This is completely different due to stochasitic effects
 	TS_ASSERT_APPROX (infection->getDensity(), 1.97582432565095644);
     }

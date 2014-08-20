@@ -53,14 +53,14 @@ public:
   /// This was used for independant parameterization.
   void setPatentGrowthRateMultiplier(double multiplier);
   
-  virtual bool updateDensity (double survivalFactor, TimeStep ageOfInfection);
+  virtual bool updateDensity (double survivalFactor, int ageDays);
   
 protected:
     virtual void checkpoint (ostream& stream);
     
 private:
   double getInflatedDensity(double nonInflatedDensity);
-  double sigma_noise(int ageOfInfection);
+  double sigma_noise(int ageDays);
   double samplePatentValue(double mu, double sigma, double lowerBound);
   double sampleSubPatentValue(double mu, double sigma, double upperBound);
   

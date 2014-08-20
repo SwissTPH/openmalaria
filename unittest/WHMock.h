@@ -45,7 +45,7 @@ public:
     WHMock();
     virtual ~WHMock();
     
-    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
+    virtual double probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const;
     virtual bool summarize(const Host::Human& human);
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );

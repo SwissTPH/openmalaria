@@ -30,15 +30,15 @@ double Infection::invCumulativeYstar;
 double Infection::invCumulativeHstar;
 double Infection::alpha_m;
 double Infection::decayM;
-TimeStep Infection::latentp( TimeStep::never );
+TimeStep Infection::latentp;
 
 void Infection::init (const OM::Parameters& parameters, int latentP) {
-  latentp=TimeStep(latentP);
-  // calculate inverses here, so we can use multiplication later (faster):
-  invCumulativeYstar = 1.0 / parameters[Parameters::CUMULATIVE_Y_STAR];
-  invCumulativeHstar = 1.0 / parameters[Parameters::CUMULATIVE_H_STAR];
-  alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
-  decayM = parameters[Parameters::DECAY_M];
+    latentp = TimeStep(latentP);
+    // calculate inverses here, so we can use multiplication later (faster):
+    invCumulativeYstar = 1.0 / parameters[Parameters::CUMULATIVE_Y_STAR];
+    invCumulativeHstar = 1.0 / parameters[Parameters::CUMULATIVE_H_STAR];
+    alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
+    decayM = parameters[Parameters::DECAY_M];
 }
 
 

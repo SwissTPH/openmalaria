@@ -42,11 +42,11 @@ public:
     /// Destructor
     virtual ~PennyInfection () {};
     
-    virtual bool updateDensity(double survivalFactor, TimeStep ageOfInfection);
+    virtual bool updateDensity(double survivalFactor, int ageDays);
     
     /** Get the density of sequestered parasites. */
-    inline double seqDensity(){
-        size_t todayV = mod_nn(TimeStep::simulation, delta_V);
+    inline double seqDensity(int ageDays){
+        size_t todayV = mod_nn(ageDays, delta_V);
         return seqDensities[todayV];
     }
 
@@ -55,9 +55,9 @@ protected:
 
 private:
     // function to obtain the summation component of variant specific immunity
-    double getVariantSpecificSummation();
+    double getVariantSpecificSummation(int ageDays);
     // function to obtain the summation component of clonal immunity
-    double getClonalSummation();
+    double getClonalSummation(int ageDays);
     
     // delta_C := delay to clonal antibody response (days) (value 7.2038 round to 7)  
     static const int delta_C=7;
@@ -67,8 +67,8 @@ private:
     static bool immune_threshold_gamma;
     static bool update_density_gamma;
     
-    // Circulating densities, 1 to delta_C timesteps ago.
-    // index (time mod delta_C) corresponds to delta_C timesteps ago.
+    // Circulating densities, 1 to delta_C days ago.
+    // index (age mod delta_C) corresponds to delta_C days ago.
     double cirDensities[delta_C];
     // as above, but length delta_V
     double seqDensities[delta_V];
