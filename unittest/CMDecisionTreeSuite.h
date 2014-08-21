@@ -20,11 +20,11 @@
 */
 // Unittest for the EventScheduler case management
 
-#ifndef Hmod_ESDecisionTreeSuite
-#define Hmod_ESDecisionTreeSuite
+#ifndef Hmod_CMDecisionTreeSuite
+#define Hmod_CMDecisionTreeSuite
 
 #include <cxxtest/TestSuite.h>
-#include "Clinical/ESCaseManagement.h"
+#include "Clinical/CMDecisionTree.h"
 #include "util/random.h"
 #include "UnittestUtil.h"
 #include "WHMock.h"
@@ -36,15 +36,15 @@ using namespace OM::WithinHost;
 using namespace boost::assign; // bring 'operator+=()' into scope
 using UnitTest::WHMock;
 
-class ESDecisionTreeSuite : public CxxTest::TestSuite
+class CMDecisionTreeSuite : public CxxTest::TestSuite
 {
 public:
-    ESDecisionTreeSuite () :
+    CMDecisionTreeSuite () :
             whm(0), hd(0)
     {
         UnittestUtil::initSurveys();
     }
-    ~ESDecisionTreeSuite () {}
+    ~CMDecisionTreeSuite () {}
     
     void setUp () {
 	// Note: cannot create whm in constructor, since it uses random number
