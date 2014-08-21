@@ -171,6 +171,27 @@ public:
         TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.99702, LIM );
     }
     
+    void testSimpleTreat(){
+        TS_ASSERT_EQUALS( whm->lastTimestepsLiver, TimeStep::never );
+        TS_ASSERT_EQUALS( whm->lastTimestepsBlood, TimeStep::never );
+        
+        scnXml::DTTreatSimple treat1( 0, 1 );
+        scnXml::DecisionTree dt1;
+        dt1.setTreatSimple( treat1 );
+        
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt1 ), 1 );
+        TS_ASSERT_EQUALS( whm->lastTimestepsLiver.asInt(), 0 );
+        TS_ASSERT_EQUALS( whm->lastTimestepsBlood.asInt(), 1 );
+        
+        scnXml::DTTreatSimple treat2( 3, -1 );
+        scnXml::DecisionTree dt2;
+        dt2.setTreatSimple( treat2 );
+        
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt2 ), 1 );
+        TS_ASSERT_EQUALS( whm->lastTimestepsLiver.asInt(), 3 );
+        TS_ASSERT_EQUALS( whm->lastTimestepsBlood.asInt(), -1 );
+    }
+    
     double runAndGetMgPrescribed( scnXml::DecisionTree& dt, double age ){
         hd->ageYears = age;
         UnittestUtil::clearMedicateQueue( whm->pkpd );

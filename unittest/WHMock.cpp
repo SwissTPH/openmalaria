@@ -54,7 +54,9 @@ bool WHMock::optionalPqTreatment(){
 }
 
 void WHMock::treatSimple(TimeStep tsLiver, TimeStep tsBlood){
-    throw util::unimplemented_exception( "not needed in unit test" );
+    nTreatments += 1;
+    lastTimestepsLiver = tsLiver;
+    lastTimestepsBlood = tsBlood;
 }
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages, double age){

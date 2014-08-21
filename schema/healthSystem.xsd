@@ -511,7 +511,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <!-- actions -->
       <xs:element name="noAction" type="om:DTNoAction"/>
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
-      <xs:element name="treatSimple" type="om:DTTreatSimple" maxOccurs="unbounded"/>
+      <xs:element name="treatSimple" type="om:DTTreatSimple"/>
     </xs:choice>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
@@ -543,7 +543,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
       <!-- actions -->
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" minOccurs="0" maxOccurs="unbounded"/>
-      <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>

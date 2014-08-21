@@ -66,6 +66,9 @@ public:
     // This mock class counts the number of times treatment() was called. Read/write this as you like.
     int nTreatments;
     
+    // The last treatment time-spans used by the simple treatment model. TimeStep::never if not used.
+    TimeStep lastTimestepsLiver, lastTimestepsBlood;
+    
     // Lists medications and drugs in the body
     PkPd::LSTMPkPdModel pkpd;
 

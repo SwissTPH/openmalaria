@@ -168,12 +168,9 @@ protected:
     }
     
 private:
-    CMDTRandom( ptr_map<double,CMDecisionTree>& branches ){
-        this->branches.swap( branches );
-    }
+    CMDTRandom(){}
     
     // keys are cumulative probabilities; last entry should equal 1
-    //NOTE: could be const if initialised differently
     ptr_map<double,CMDecisionTree> branches;
 };
 
@@ -192,18 +189,6 @@ protected:
  */
 class CMDTTreatPKPD : public CMDecisionTree {
 public:
-    static auto_ptr<CMDecisionTree> create(
-        const ::scnXml::DecisionTree::TreatPKPDSequence& seq );
-    
-protected:
-    virtual CMDTOut exec( CMHostData hostData ) const{
-        foreach( const TreatInfo& treatment, treatments ){
-            hostData.withinHost.treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears );
-        }
-        return CMDTOut(true);
-    }
-    
-private:
     CMDTTreatPKPD( const scnXml::DecisionTree::TreatPKPDSequence& seq ){
         treatments.reserve( seq.size() );
         foreach( const scnXml::DTTreatPKPD& treatElt, seq ){
@@ -216,6 +201,15 @@ private:
         assert( treatments.size() > 0 );        // CMDTTreatPKPD should not be used in this case
     }
     
+protected:
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        foreach( const TreatInfo& treatment, treatments ){
+            hostData.withinHost.treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears );
+        }
+        return CMDTOut(true);
+    }
+    
+private:
     struct TreatInfo{
         TreatInfo( const string& s, const string& d, double h ) :
             schedule(PkPd::LSTMTreatments::findSchedule(s)),
@@ -233,34 +227,19 @@ private:
  */
 class CMDTTreatSimple : public CMDecisionTree {
 public:
-    static auto_ptr<CMDecisionTree> create(
-        const ::scnXml::DecisionTree::TreatSimpleSequence& seq );
+    CMDTTreatSimple( const scnXml::DTTreatSimple& elt ) :
+        tsLiver(elt.getTimestepsLiver()),
+        tsBlood(elt.getTimestepsBlood())
+    {}
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
-        foreach( const TreatInfo& treatment, treatments ){
-            hostData.withinHost.treatSimple( treatment.tsLiver, treatment.tsBlood );
-        }
+        hostData.withinHost.treatSimple( tsLiver, tsBlood );
         return CMDTOut(true);
     }
     
 private:
-    CMDTTreatSimple( const scnXml::DecisionTree::TreatSimpleSequence& seq ){
-        treatments.reserve( seq.size() );
-        foreach( const scnXml::DTTreatSimple& treatElt, seq ){
-            treatments.push_back( TreatInfo(
-                treatElt.getTimestepsLiver(), treatElt.getTimestepsBlood()
-            ) );
-        }
-        assert( treatments.size() > 0 );        // CMDTTreatPKPD should not be used in this case
-    }
-    
-    struct TreatInfo{
-        TreatInfo( int timestepsLiver, int timestepsBlood ) :
-            tsLiver(timestepsLiver), tsBlood(timestepsBlood) {}
-        TimeStep tsLiver, tsBlood;
-    };
-    vector<TreatInfo> treatments;
+    TimeStep tsLiver, tsBlood;
 };
 
 
@@ -273,7 +252,10 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
     if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get() );
     // action nodes
     if( node.getNoAction().present() ) return auto_ptr<CMDecisionTree>( new CMDTNoAction() );
-    if( node.getTreatPKPD().size() ) return CMDTTreatPKPD::create( node.getTreatPKPD() );
+    if( node.getTreatPKPD().size() ) return auto_ptr<CMDecisionTree>(
+        new CMDTTreatPKPD( node.getTreatPKPD() ) );
+    if( node.getTreatSimple().present() ) return auto_ptr<CMDecisionTree>(
+        new CMDTTreatSimple( node.getTreatSimple().get() ) );
     throw xml_scenario_error( "unterminated decision tree" );
 }
 
@@ -289,7 +271,10 @@ auto_ptr<CMDecisionTree> CMDTMultiple::create( const scnXml::DTMultiple& node ){
         self->children.push_back( CMDTRandom::create(sn).release() );
     }
     if( node.getTreatPKPD().size() ){
-        self->children.push_back( CMDTTreatPKPD::create(node.getTreatPKPD()).release() );
+        self->children.push_back( new CMDTTreatPKPD(node.getTreatPKPD()) );
+    }
+    if( node.getTreatSimple().present() ){
+        self->children.push_back( new CMDTTreatSimple( node.getTreatSimple().get() ) );
     }
     return auto_ptr<CMDecisionTree>( self.release() );
 }
@@ -309,21 +294,15 @@ auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& nod
     ) );
 }
 
-auto_ptr<CMDecisionTree> CMDTTreatPKPD::create(
-    const scnXml::DecisionTree::TreatPKPDSequence& seq )
-{
-    return auto_ptr<CMDecisionTree>( new CMDTTreatPKPD( seq ) );
-}
-
 auto_ptr< CMDecisionTree > CMDTRandom::create(
     const scnXml::DTRandom& node )
 {
-    ptr_map<double,CMDecisionTree> branches;
+    auto_ptr<CMDTRandom> result( new CMDTRandom() );
     
     double cum_p = 0.0;
     BOOST_FOREACH( const scnXml::Outcome& outcome, node.getOutcome() ){
         cum_p += outcome.getP();
-        branches.insert( cum_p, CMDecisionTree::create( outcome ) );
+        result->branches.insert( cum_p, CMDecisionTree::create( outcome ) );
     }
     
     // Test cum_p is approx. 1.0 in case the input tree is wrong. In any case,
@@ -338,10 +317,8 @@ auto_ptr< CMDecisionTree > CMDTRandom::create(
     // than a uniform_01() sample; this just gives us a stronger guarantee of
     // the same thing.
     //TODO: set index for last entry to something > 1
-//     branches.back()->first = numeric_limits<double>::infinity();
-
-    return auto_ptr<CMDecisionTree>(
-        new CMDTRandom( branches ) );
+//     result->branches.back()->first = numeric_limits<double>::infinity();
+    return auto_ptr<CMDecisionTree>( result.release() );
 }
 
 } }
