@@ -62,7 +62,7 @@ map<string,size_t> scheduleNames;
 struct DosageTable {
     void load( const scnXml::PKPDDosages::AgeSequence& seq ){
         double lastMult = 0.0, lastAge = numeric_limits<double>::quiet_NaN();
-        foreach( const scnXml::Age& age, seq ){
+        foreach( const scnXml::PKPDAgeDosage& age, seq ){
             if( lastAge != lastAge ){
                 if( age.getLb() != 0.0 )
                     throw util::xml_scenario_error( "dosage table must have first lower bound equal 0" );

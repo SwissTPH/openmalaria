@@ -1347,10 +1347,10 @@
         <medicate drug="LU" hour="168" mg="120"/>
       </schedule>
       <dosages name="AL">
-        <age lb="0" ub="3" dose_mult="1"/>
-        <age lb="3" ub="9" dose_mult="2"/>
-        <age lb="9" ub="15" dose_mult="3"/>
-        <age lb="15" ub="30" dose_mult="4"/>
+        <age lb="0" dose_mult="1"/>
+        <age lb="3" dose_mult="2"/>
+        <age lb="9" dose_mult="3"/>
+        <age lb="15" dose_mult="4"/>
         <age lb="30" dose_mult="4"/>
       </dosages>
       <dosages name="AS">

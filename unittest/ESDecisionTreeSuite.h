@@ -55,8 +55,7 @@ public:
         ETS_ASSERT( whm.get() != 0 );
 	hd.reset( new CMHostData( 21 /* any real age will do for most tests */,
                                   *whm.get(), Episode::NONE ) );
-
-	UnittestUtil::EmpiricalWHM_setup();
+        
 	// could seed random-number-generator, but shouldn't affect outcomes
 	UnittestUtil::PkPdSuiteSetup (PkPd::PkPdModel::LSTM_PKPD);
     }
@@ -170,7 +169,7 @@ public:
         TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.99702, LIM );
     }
     
-    double testMgPrescribed( scnXml::DecisionTree& dt, double age ){
+    double runAndGetMgPrescribed( scnXml::DecisionTree& dt, double age ){
         hd->ageYears = age;
         UnittestUtil::clearMedicateQueue( whm->pkpd );
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
@@ -179,14 +178,22 @@ public:
     
     void testDosing(){
         scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
-        scnXml::DecisionTree simpleTreat;
-        simpleTreat.getTreatPKPD().push_back( treat1 );
+        scnXml::DecisionTree dt1;
+        dt1.getTreatPKPD().push_back( treat1 );
         
         // Test our dosing table. Set with a multiplier of 1 below 5 and 5 from 5.
-        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 0 ), 6, 1e-8 );
-        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 4.9 ), 6, 1e-8 );
-        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 5 ), 30, 1e-8 );
-        TS_ASSERT_DELTA( testMgPrescribed( simpleTreat, 99 ), 30, 1e-8 );
+        TS_ASSERT_DELTA( runAndGetMgPrescribed( dt1, 0 ), 6, 1e-8 );
+        TS_ASSERT_DELTA( runAndGetMgPrescribed( dt1, 4.9 ), 6, 1e-8 );
+        TS_ASSERT_DELTA( runAndGetMgPrescribed( dt1, 5 ), 30, 1e-8 );
+        TS_ASSERT_DELTA( runAndGetMgPrescribed( dt1, 99 ), 30, 1e-8 );
+        
+        scnXml::DTTreatPKPD treat2( "sched2", "dosage1" );
+        scnXml::DecisionTree dt2;
+        dt2.getTreatPKPD().push_back( treat2 );
+        
+        // Test our dosing table. Set with a multiplier of 1 below 5 and 5 from 5.
+        TS_ASSERT_DELTA( runAndGetMgPrescribed( dt2, 0 ), 7, 1e-8 );
+        TS_ASSERT_DELTA( runAndGetMgPrescribed( dt2, 99 ), 35, 1e-8 );
     }
     
 private:

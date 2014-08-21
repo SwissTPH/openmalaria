@@ -90,13 +90,20 @@ public:
             sched1.getMedicate().push_back(
                 scnXml::PKPDMedication("MF", 6 /*mg*/, 0 /*hour*/));
             
+            scnXml::PKPDSchedule sched2("sched2");
+            sched2.getMedicate().push_back(
+                scnXml::PKPDMedication("MF", 2 /*mg*/, 0 /*hour*/));
+            sched2.getMedicate().push_back(
+                scnXml::PKPDMedication("MF", 5 /*mg*/, 12 /*hour*/));
+            
             // a very basic dosage table, so that we can test it does what's expected
             scnXml::PKPDDosages dosage1("dosage1");
-            dosage1.getAge().push_back(scnXml::Age(0 /*age lb*/,1 /*mult*/));
-            dosage1.getAge().push_back(scnXml::Age(5 /*age lb*/,5 /*mult*/));
+            dosage1.getAge().push_back(scnXml::PKPDAgeDosage(0 /*age lb*/,1 /*mult*/));
+            dosage1.getAge().push_back(scnXml::PKPDAgeDosage(5 /*age lb*/,5 /*mult*/));
             
             scnXml::Treatments treatments;
             treatments.getSchedule().push_back(sched1);
+            treatments.getSchedule().push_back(sched2);
             treatments.getDosages().push_back(dosage1);
             PkPd::LSTMTreatments::init(treatments);
 	} /*else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {

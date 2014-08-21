@@ -106,44 +106,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:annotation>
       <xs:documentation>
         A table for selecting a dose size given an age.
+        
+        Categories must uniquely cover all ages from birth, with no upper
+        bound. Categories must be listed in order of age, increasing; the first
+        must have lower bound 0. Upper bounds are equal to the lower bound of
+        the next category, (but are exclusive where lower bounds are
+        inclusive); the last category has no upper bound.
       </xs:documentation>
       <xs:appinfo>name:Dosage table;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="age" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>
-            Gives a dose multiplier for an age range.
-          </xs:documentation>
-          <xs:appinfo>name:Age range;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="lb" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>name:Lower bound (inclusive);min:0;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="ub" type="xs:double" use="optional">
-            <xs:annotation>
-              <xs:documentation>
-                Upper bound on this age category. Should be omitted for the
-                category with no maximum age.
-              </xs:documentation>
-              <xs:appinfo>name:Upper bound (exclusive);min:0;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="dose_mult" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                The dose size given in the schedule (in mg) is multiplied by
-                this value for patients falling into this age range when this
-                dosage table is used.
-              </xs:documentation>
-              <xs:appinfo>name:Dose multiplier;min:0;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="age" type="om:PKPDAgeDosage" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -151,6 +124,29 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Name for referring to this dosage table
         </xs:documentation>
         <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PKPDAgeDosage">
+    <xs:annotation>
+      <xs:documentation>
+        Gives a dose multiplier for an age range.
+      </xs:documentation>
+      <xs:appinfo>name:Age range;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="lb" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>name:Lower bound (inclusive);min:0;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="dose_mult" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The dose size given in the schedule (in mg) is multiplied by
+          this value for patients falling into this age range when this
+          dosage table is used.
+        </xs:documentation>
+        <xs:appinfo>name:Dose multiplier;min:0;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

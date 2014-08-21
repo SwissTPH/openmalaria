@@ -1111,8 +1111,8 @@
         <medicate drug="AS" hour="54" mg="2.4"/>
       </schedule>
       <dosages name="std_dosage">
-        <age lb="0" ub="2" dose_mult="5"/>
-        <age lb="2" ub="6" dose_mult="20"/>
+        <age lb="0" dose_mult="5"/>
+        <age lb="2" dose_mult="20"/>
         <age lb="6" dose_mult="60"/>
       </dosages>
     </treatments>
