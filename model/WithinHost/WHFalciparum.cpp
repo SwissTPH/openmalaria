@@ -183,6 +183,20 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
                   interventions::Deployment::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
+void WHFalciparum::treatSimple(TimeStep tsLiver, TimeStep tsBlood){
+    if( tsLiver.asInt() != 0 ){
+        if( tsLiver.asInt() == -1 )
+            clearInfections( Treatments::LIVER );
+        else
+            treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + tsLiver );
+    }
+    if( tsBlood.asInt() != 0 ){
+        if( tsBlood.asInt() == -1 )
+            clearInfections( Treatments::BLOOD );
+        else
+            treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + tsBlood );
+    }
+}
 
 Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
     Pathogenesis::StatePair result =

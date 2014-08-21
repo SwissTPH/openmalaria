@@ -153,6 +153,7 @@ public:
 protected:
     virtual InfectionCount countInfections () const;
     virtual void treatment( Host::Human& human, TreatmentId treatId );
+    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood);
     virtual bool optionalPqTreatment();
     
     virtual void checkpoint (istream& stream);

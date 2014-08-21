@@ -107,6 +107,7 @@ public:
     /**
      * Carry out the effects of some treatment option
      */
+    //TODO: remove this (use treatSimple instead)
     virtual void treatment( Host::Human& human, TreatmentId treatId ) =0;
     
     /** Conditionally gives Primaquine as a treatment.
@@ -115,6 +116,9 @@ public:
      * effective or no effective, depending on another probability. Not
      * administered implies no effect. */
     virtual bool optionalPqTreatment() =0;
+    
+    /** Treat a patient via the simple treatment model. */
+    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood) =0;
     
     /** Give a patient a course of drugs, via the Pk/Pd model
      * 

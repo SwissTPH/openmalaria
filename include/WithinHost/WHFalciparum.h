@@ -66,6 +66,7 @@ public:
     
     virtual bool diagnosticDefault() const;
     virtual void treatment( Host::Human& human, TreatmentId treatId );
+    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood);
     
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
 

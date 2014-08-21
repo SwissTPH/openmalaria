@@ -50,6 +50,7 @@ public:
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool optionalPqTreatment();
+    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood);
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;

@@ -56,7 +56,7 @@ protected:
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
-  
+    
   // Doesn't do anything in this model:
   virtual void treatPkPd(size_t schedule, size_t dosages, double age);
   

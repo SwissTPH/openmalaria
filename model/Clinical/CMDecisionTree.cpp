@@ -231,6 +231,41 @@ private:
     vector<TreatInfo> treatments;
 };
 
+/**
+ * Deliver one or more simple treatments
+ */
+class CMDTTreatSimple : public CMDecisionTree {
+public:
+    static auto_ptr<CMDecisionTree> create(
+        const ::scnXml::DecisionTree::TreatSimpleSequence& seq );
+    
+protected:
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        foreach( const TreatInfo& treatment, treatments ){
+            hostData.withinHost.treatSimple( treatment.tsLiver, treatment.tsBlood );
+        }
+        return CMDTOut(true);
+    }
+    
+private:
+    CMDTTreatSimple( const scnXml::DecisionTree::TreatSimpleSequence& seq ){
+        treatments.reserve( seq.size() );
+        foreach( const scnXml::DTTreatSimple& treatElt, seq ){
+            treatments.push_back( TreatInfo(
+                treatElt.getTimestepsLiver(), treatElt.getTimestepsBlood()
+            ) );
+        }
+        assert( treatments.size() > 0 );        // CMDTTreatPKPD should not be used in this case
+    }
+    
+    struct TreatInfo{
+        TreatInfo( int timestepsLiver, int timestepsBlood ) :
+            tsLiver(timestepsLiver), tsBlood(timestepsBlood) {}
+        TimeStep tsLiver, tsBlood;
+    };
+    vector<TreatInfo> treatments;
+};
+
 
 // ———  static functions  ———
 

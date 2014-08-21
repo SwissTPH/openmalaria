@@ -511,6 +511,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <!-- actions -->
       <xs:element name="noAction" type="om:DTNoAction"/>
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
+      <xs:element name="treatSimple" type="om:DTTreatSimple" maxOccurs="unbounded"/>
     </xs:choice>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
@@ -542,6 +543,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
       <!-- actions -->
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
@@ -696,6 +698,56 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           are delayed by this number of hours.
         </xs:documentation>
         <xs:appinfo>name:Delay (hours);</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTTreatSimple">
+    <xs:annotation>
+      <xs:documentation>
+        Simple treatment model, targetting liver- and/or blood-stage
+        infections. This is all-or-nothing treatment which, when deploymed,
+        completely clears all infections of the targetted stages. This makes it
+        unsuitable for modeling resistance, but suitable for use with simple
+        infection models.
+        
+        Infections are considered liver-stage when less than five days old and
+        blood-stage after that. Effects are described independently for the two
+        stages.
+      </xs:documentation>
+      <xs:appinfo>name:Simple treatment;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="timestepsLiver" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Controls action on liver-stage infections. 0 means no action, -1 is
+          a compatibility option to act like treatment before schema version 32
+          (which removed infections retrospectively), 1 or any n>0 means clear
+          liver-stage infections found on the next 1 or n timesteps.
+          
+          Note on -1 compatibility option: the main difference to 1 (clearing
+          on the next timestep) is that parasite densities will be reduced
+          immediately, and thus from the point of view of surveys and mass
+          screen and treat interventions a peak in density which is immediately
+          treated through case management will not be seen.
+        </xs:documentation>
+        <xs:appinfo>name:Length of liver-stage effect;units:Timesteps;min:-1;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="timestepsBlood" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Controls action on blood-stage infections. 0 means no action, -1 is
+          a compatibility option to act like treatment before schema version 32
+          (which removed infections retrospectively), 1 or any n>0 means clear
+          blood-stage infections found on the next 1 or n timesteps.
+          
+          Note on -1 compatibility option: the main difference to 1 (clearing
+          on the next timestep) is that parasite densities will be reduced
+          immediately, and thus from the point of view of surveys and mass
+          screen and treat interventions a peak in density which is immediately
+          treated through case management will not be seen.
+        </xs:documentation>
+        <xs:appinfo>name:Length of blood-stage effect;units:Timesteps;min:-1;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

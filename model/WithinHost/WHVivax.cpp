@@ -391,6 +391,33 @@ bool WHVivax::optionalPqTreatment(){
     }
     return false;       // didn't use PQ
 }
+void WHVivax::treatSimple(TimeStep tsLiver, TimeStep tsBlood){
+    //TODO: this should be implemented properly (allowing effects on next
+    // update instead of now)
+    
+    // liver-stage treatment is probably via "Primaquine" option, if at all
+    if( tsLiver.asInt() != 0 ){
+        if( pReceivePQ > 0.0 ){
+            throw util::xml_scenario_error("simple treatment for vivax liver "
+            "stages is incompatible with case-management Primaquine option");
+        }
+        if( tsLiver.asInt() != -1 )
+            throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
+        for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            it->treatmentLS();
+        }
+    }
+    
+    // there probably will be blood-stage treatment
+    if( tsBlood.asInt() == -1 ){
+        for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            it->treatmentBS();
+        }
+    }else{
+        if( tsBlood.asInt() != 0 )
+            throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
+    }
+}
 
 
 // ———  boring stuff: checkpointing and set-up  ———
