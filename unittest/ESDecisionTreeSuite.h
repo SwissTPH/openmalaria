@@ -71,9 +71,11 @@ public:
         auto_ptr<CMDecisionTree> cmdt = CMDecisionTree::create( dt );
         
 	whm->nTreatments = 0;
+        int secondCounter = 0;
 	for (int i = 0; i < N; ++i) {
-	    cmdt->exec( *hd );
+	    secondCounter += (cmdt->exec( *hd ).treated ? 1 : 0);
 	}
+	TS_ASSERT_EQUALS( whm->nTreatments, secondCounter );
 	return double(whm->nTreatments) / double(N);
     }
     

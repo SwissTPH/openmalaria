@@ -84,10 +84,8 @@ protected:
         //TODO: clarify whether or not this works for complicated cases. Currently probably not.
         assert( (hostData.pgState & Episode::SICK) && !(hostData.pgState & Episode::COMPLICATED) );
         
-        if( hostData.pgState & Episode::SECOND_CASE ) secondLine->exec( hostData );
-        else firstLine->exec( hostData );
-        
-        return CMDTOut(false);
+        if( hostData.pgState & Episode::SECOND_CASE ) return secondLine->exec( hostData );
+        else return firstLine->exec( hostData );
     }
     
 private:
@@ -114,10 +112,8 @@ protected:
         
         double dens = hostData.withinHost.getTotalDensity ();
         double pPositive = 1.0 + specificity * (dens / (dens + dens_50) - 1.0);
-        if( random::bernoulli(pPositive) ) positive->exec( hostData );
-        else negative->exec( hostData );
-        
-        return CMDTOut(false);
+        if( random::bernoulli(pPositive) ) return positive->exec( hostData );
+        else return negative->exec( hostData );
     }
     
 private:
@@ -165,9 +161,10 @@ public:
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
-        branches.upper_bound( random::uniform_01() )->second->exec( hostData );
-        
-        return CMDTOut(false);
+        ptr_map<double,CMDecisionTree>::const_iterator it =
+            branches.upper_bound( random::uniform_01() );
+        assert( it != branches.end() );
+        return it->second->exec( hostData );
     }
     
 private:
