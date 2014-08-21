@@ -171,6 +171,35 @@ public:
         TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.99702, LIM );
     }
     
+    void testAgeSwitch(){
+        scnXml::DTTreatPKPD treat1( "sched1", "dosage1" );
+        scnXml::DTAge ageSwitch;
+        
+        scnXml::Age treatYoung( 0.0 );  // ages 0 to 2.5
+        treatYoung.getTreatPKPD().push_back( treat1 );
+        ageSwitch.getAge().push_back( treatYoung );
+        
+        scnXml::Age noTreat( 2.5 );     // ages 2.5 to 50
+        noTreat.setNoAction( scnXml::DTNoAction() );
+        ageSwitch.getAge().push_back( noTreat );
+        
+        scnXml::Age treatOlder( 50.0 );  // ages 50+
+        treatOlder.getTreatPKPD().push_back( treat1 );
+        ageSwitch.getAge().push_back( treatOlder );
+        
+        scnXml::DecisionTree dt;
+        dt.setAge( ageSwitch );
+        
+        hd->ageYears = 1;
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
+        hd->ageYears = 2.5;
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 0 );
+        hd->ageYears = 50;
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
+        hd->ageYears = 1e6;     // there is no upper bound, so this should work!
+        TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt ), 1 );
+    }
+    
     void testSimpleTreat(){
         TS_ASSERT_EQUALS( whm->lastTimestepsLiver, TimeStep::never );
         TS_ASSERT_EQUALS( whm->lastTimestepsBlood, TimeStep::never );

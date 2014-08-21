@@ -174,6 +174,29 @@ private:
     ptr_map<double,CMDecisionTree> branches;
 };
 
+/**
+ * Choose what to do based on the patient's age.
+ */
+class CMDTAge : public CMDecisionTree {
+public:
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTAge& node );
+    
+protected:
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        ptr_map<double,CMDecisionTree>::const_iterator it = branches.upper_bound( hostData.ageYears );
+        if( it == branches.end() )
+            throw TRACED_EXCEPTION( "bad age-based decision tree switch", util::Error::PkPd );
+        return it->second->exec( hostData );
+    }
+    
+private:
+    CMDTAge() {}
+    
+    // keys are upper bounds of age categories
+    ptr_map<double,CMDecisionTree> branches;
+};
+
+
 // ———  action nodes  ———
 
 /** Do nothing. **/
@@ -250,6 +273,7 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
     if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get() );
     if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get() );
     if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get() );
+    if( node.getAge().present() ) return CMDTAge::create( node.getAge().get() );
     // action nodes
     if( node.getNoAction().present() ) return auto_ptr<CMDecisionTree>( new CMDTNoAction() );
     if( node.getTreatPKPD().size() ) return auto_ptr<CMDecisionTree>(
@@ -269,6 +293,9 @@ auto_ptr<CMDecisionTree> CMDTMultiple::create( const scnXml::DTMultiple& node ){
     }
     foreach( const scnXml::DTRandom& sn, node.getRandom() ){
         self->children.push_back( CMDTRandom::create(sn).release() );
+    }
+    foreach( const scnXml::DTAge& sn, node.getAge() ){
+        self->children.push_back( CMDTAge::create(sn).release() );
     }
     if( node.getTreatPKPD().size() ){
         self->children.push_back( new CMDTTreatPKPD(node.getTreatPKPD()) );
@@ -318,6 +345,31 @@ auto_ptr< CMDecisionTree > CMDTRandom::create(
     // the same thing.
     //TODO: set index for last entry to something > 1
 //     result->branches.back()->first = numeric_limits<double>::infinity();
+    return auto_ptr<CMDecisionTree>( result.release() );
+}
+
+auto_ptr< CMDecisionTree > CMDTAge::create(const scnXml::DTAge& node){
+    auto_ptr<CMDTAge> result( new CMDTAge() );
+    
+    double lastAge = numeric_limits<double>::quiet_NaN();
+    auto_ptr<CMDecisionTree> lastNode;
+    foreach( const scnXml::Age& age, node.getAge() ){
+        if( lastAge != lastAge ){
+            if( age.getLb() != 0.0 )
+                throw util::xml_scenario_error( "decision tree age switch must have first lower bound equal 0" );
+        }else{
+            if( age.getLb() <= lastAge ){
+                throw util::xml_scenario_error( "decision tree age switch must list age groups in increasing order" );
+            }
+            double lb = age.getLb();
+            result->branches.insert( lb, lastNode.release() );
+        }
+        lastNode.reset( CMDecisionTree::create(age).release() );
+        lastAge = age.getLb();
+    }
+    double noLb = numeric_limits<double>::infinity();
+    result->branches.insert( noLb, lastNode.release() );
+    
     return auto_ptr<CMDecisionTree>( result.release() );
 }
 

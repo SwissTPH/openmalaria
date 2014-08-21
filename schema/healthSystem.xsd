@@ -508,6 +508,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="caseType" type="om:DTCaseType"/>
       <xs:element name="diagnostic" type="om:DTDiagnostic"/>
       <xs:element name="random" type="om:DTRandom"/>
+      <xs:element name="age" type="om:DTAge"/>
       <!-- actions -->
       <xs:element name="noAction" type="om:DTNoAction"/>
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
@@ -541,6 +542,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="age" type="om:DTAge" minOccurs="0" maxOccurs="unbounded"/>
       <!-- actions -->
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0"/>
@@ -632,6 +634,50 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     probabilities across all outcomes must be 1.
                   </xs:documentation>
                   <xs:appinfo>units:None;min:0;max:1;name:Probability;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTAge">
+    <xs:annotation>
+      <xs:documentation>
+        A switch which choses a branch deterministically, based on the
+        patient's age (in years).
+        
+        Categories must uniquely cover all ages from birth, with no upper
+        bound. Categories must be listed in order of age, increasing; the first
+        must have lower bound 0. Upper bounds are equal to the lower bound of
+        the next category, (but are exclusive where lower bounds are
+        inclusive); the last category has no upper bound.
+      </xs:documentation>
+      <xs:appinfo>name:Switch (age of patient);</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="age" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Describes a branch, selected for patients of a certain age.
+          </xs:documentation>
+          <xs:appinfo>name:Age range;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="om:DecisionTree">
+              <xs:attribute name="lb" type="xs:double" use="required">
+                <xs:annotation>
+                  <xs:appinfo>name:Lower bound (inclusive);min:0;</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
             </xs:extension>
