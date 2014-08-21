@@ -40,7 +40,7 @@ public:
         TimeStep::init( 1, 90.0 );
         UnittestUtil::Infection_init_1day ();
         PennyInfection::init();
-        TimeStep::simulation = TimeStep(7);     // value shouldn't be important
+        TimeStep::simulation = TimeStep(0);     // value shouldn't be important
         util::random::seed( 1095 );
         infection = new PennyInfection (0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
@@ -76,6 +76,7 @@ public:
         do{
             extinct = infection->update(1.0, 0);
             int ageDays = (TimeStep::simulation - infection->_startdate - infection->latentp).inDays() + 0;
+            while( ageDays < 0 ) ageDays += infection->delta_V; // special case encountered by unit test
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
             TS_ASSERT_APPROX( infection->getDensity(), cirDens[iterations] );
             TS_ASSERT_APPROX( infection->seqDensity(ageDays), seqDens[iterations] );
