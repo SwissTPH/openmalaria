@@ -503,16 +503,46 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Decision tree;</xs:appinfo>
     </xs:annotation>
     <xs:choice>
+      <xs:element name="multiple" type="om:DTMultiple"/>
       <!-- branching points -->
       <xs:element name="caseType" type="om:DTCaseType"/>
       <xs:element name="diagnostic" type="om:DTDiagnostic"/>
       <xs:element name="random" type="om:DTRandom"/>
       <!-- actions -->
       <xs:element name="noAction" type="om:DTNoAction"/>
-      <xs:sequence>
-        <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
-      </xs:sequence>
+      <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
     </xs:choice>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTMultiple">
+    <xs:annotation>
+      <xs:documentation>
+        A special node allowing multiple sub-trees to be evaluated.
+        
+        This is different from an ordinary decision tree node in that:
+        
+        a) multiple types of child can occur simultaneously (e.g. multiple
+        types of treatment or treatment plus a 'random' sub-tree)
+        
+        b) the 'noAction' node is not allowed
+      </xs:documentation>
+      <xs:appinfo>name:Decision tree;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <!-- branching points -->
+      <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
+      <!-- actions -->
+      <xs:element name="treatPKPD" type="om:DTTreatPKPD" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
@@ -616,7 +646,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-    <xs:complexType name="DTNoAction">
+  <xs:complexType name="DTNoAction">
     <xs:annotation>
       <xs:documentation>
         An end node doing nothing. The point of this is to prevent trees from

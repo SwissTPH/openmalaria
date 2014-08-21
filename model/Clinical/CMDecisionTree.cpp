@@ -29,6 +29,7 @@
 #include <list>
 #include <boost/format.hpp>
 #include <boost/assign/std/vector.hpp> // for 'operator+=()'
+#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/ptr_container/ptr_map.hpp>
 
 namespace OM { namespace Clinical {
@@ -36,8 +37,38 @@ namespace OM { namespace Clinical {
 using Monitoring::Survey;
 using namespace OM::util;
 using namespace boost::assign;
+using boost::ptr_vector;
 using boost::ptr_map;
 
+
+// ———  special 'multiple' node  ———
+
+/**
+ * Branch out to multiple descendants.
+ */
+class CMDTMultiple : public CMDecisionTree {
+public:
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTMultiple& node );
+    
+protected:
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        CMDTOut result(false);
+        for( ptr_vector<CMDecisionTree>::const_iterator it = children.begin(),
+            end = children.end(); it != end; ++it )
+        {
+            CMDTOut r2 = it->exec( hostData );
+            result.treated = result.treated || r2.treated;
+        }
+        return result;
+    }
+    
+private:
+    CMDTMultiple( /*size_t capacity*/ ){
+//         children.reserve( capacity );
+    }
+    
+    ptr_vector<CMDecisionTree> children;
+};
 
 // ———  branching nodes  ———
 
@@ -212,6 +243,23 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
     if( node.getNoAction().present() ) return auto_ptr<CMDecisionTree>( new CMDTNoAction() );
     if( node.getTreatPKPD().size() ) return CMDTTreatPKPD::create( node.getTreatPKPD() );
     throw xml_scenario_error( "unterminated decision tree" );
+}
+
+auto_ptr<CMDecisionTree> CMDTMultiple::create( const scnXml::DTMultiple& node ){
+    auto_ptr<CMDTMultiple> self( new CMDTMultiple() );
+    foreach( const scnXml::DTCaseType& sn, node.getCaseType() ){
+        self->children.push_back( CMDTCaseType::create(sn).release() );
+    }
+    foreach( const scnXml::DTDiagnostic& sn, node.getDiagnostic() ){
+        self->children.push_back( CMDTDiagnostic::create(sn).release() );
+    }
+    foreach( const scnXml::DTRandom& sn, node.getRandom() ){
+        self->children.push_back( CMDTRandom::create(sn).release() );
+    }
+    if( node.getTreatPKPD().size() ){
+        self->children.push_back( CMDTTreatPKPD::create(node.getTreatPKPD()).release() );
+    }
+    return auto_ptr<CMDecisionTree>( self.release() );
 }
 
 auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node ){
