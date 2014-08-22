@@ -85,6 +85,8 @@ namespace Report {
         MI_RECRUIT_TIMED,
         MI_RECRUIT_CTS,
         MI_TREAT_DEPLOYMENTS,
+        MI_TREAT_SUCCESS_1,
+        MI_TREAT_SUCCESS_2,
         MI_NUM  // must be last; not a measure to report
     };
     /// Measures which are reported as doubles

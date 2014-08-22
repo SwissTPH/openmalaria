@@ -126,7 +126,8 @@ combinedMeasures = [
     ('GVI',[(47,'deterrents (timed)','brown'),(56,'GVI (timed)','darkblue'),(58,'GVI (cts)','blue')]),
     ('cohort delta',[(50,'added','orange'),(51,'removed','blue')]),
     ('recruit only',[(65,'timed','purple'),(66,'cts','pink')]),
-    ('intervention deployments',[(67,'via CM','grey')])
+    ('intervention deployments',[(67,'via CM','grey')]),
+    ('user defined',[(90,'90','red'),(91,'91','brown'),(92,'92','green')])
 ]
 appendMeasureNumber=None
 def measureNumber(m):

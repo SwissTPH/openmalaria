@@ -64,7 +64,10 @@ public:
     /// Create a user-configured decision from an XML node.
     static auto_ptr<CMDecisionTree> create( const ::scnXml::DecisionTree& node );
     
-    /** Run the decision tree. */
+    /** Run the decision tree.
+     * 
+     * Reporting: use of diagnostics is reported. Treatment is not, but the
+     * output may be used to determine whether any treatment took place. */
     virtual CMDTOut exec( CMHostData hostData ) const =0;
 };
 

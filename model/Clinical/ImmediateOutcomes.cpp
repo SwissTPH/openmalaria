@@ -35,8 +35,14 @@ bool useDiagnosticUC = false;
 
 double Params5Day::probGetsTreatment[Regimen::NUM];
 double Params5Day::probParasitesCleared[Regimen::NUM-1];
+double Params5Day::probClearedUcOnly;
 double Params5Day::cureRateSevere;
 WithinHost::TreatmentId Params5Day::treatments[Regimen::NUM];
+ReportMeasureI measures[] = {
+    Report::MI_TREATMENTS_1,    // first line official
+    Report::MI_TREATMENTS_2,    // second line official
+    Report::MI_TREATMENTS_1     // first line self treat
+};
 
 
 // ———  static, utility functions  ———
@@ -112,6 +118,7 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
 
     // --- calculate probGetsTreatment ---
 
+    probGetsTreatment[Regimen::SELF] = hsioData.getPSelfTreatUncomplicated().getValue();
     probGetsTreatment[Regimen::UC] = hsioData.getPSeekOfficialCareUncomplicated1().getValue() +
             hsioData.getPSelfTreatUncomplicated().getValue();
     probGetsTreatment[Regimen::UC2] = hsioData.getPSeekOfficialCareUncomplicated2().getValue();
@@ -159,10 +166,13 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
         probParasitesCleared[Regimen::UC] = 0;
     }
     
-    //calculate probParasitesCleared 1
+    //calculate probParasitesCleared for uncomplicated cases
+    probClearedUcOnly = complianceFirstLine * cureRateFirstLine
+            + (1 - complianceFirstLine) * nonCompliersEffectiveFirstLine;
     probParasitesCleared[Regimen::UC2] = complianceSecondLine * cureRateSecondLine
-                              + (1 - complianceSecondLine)
-                              * nonCompliersEffectiveSecondLine;
+            + (1 - complianceSecondLine) * nonCompliersEffectiveSecondLine;
+    probParasitesCleared[Regimen::SELF] = complianceSelfTreatment * cureRateSelfTreatment
+            + (1 - complianceSelfTreatment) * nonCompliersEffectiveFirstLine;
     
     cureRateSevere = getHealthSystemACRByName (hsioData.getInitialACR(), inpatient);
 
@@ -171,6 +181,7 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
         treatments[Regimen::UC2] = treatments[Regimen::UC];
     else
         treatments[Regimen::UC2] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), secondLine);
+    treatments[Regimen::SELF] = treatments[Regimen::UC];
     if( inpatient == firstLine )
         treatments[Regimen::SEVERE] = treatments[Regimen::UC];
     else if( inpatient == secondLine )
@@ -238,7 +249,11 @@ void ImmediateOutcomes::uncomplicatedEvent (
     Regimen::Type regimen = (_tLastTreatment + healthSystemMemory > TimeStep::simulation)
                             ? Regimen::UC2 : Regimen::UC ;
     
-    if( random::bernoulli( Params5Day::probGetsTreatment[regimen] * _treatmentSeekingFactor )){
+    double x = random::uniform_01();
+    if( x < Params5Day::probGetsTreatment[regimen] * _treatmentSeekingFactor ){
+        // UC1: official care OR self treatment
+        // UC2: official care only
+        
         if( useDiagnosticUC ){
             Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
             if( !human.withinHostModel->diagnosticDefault() )
@@ -246,16 +261,28 @@ void ImmediateOutcomes::uncomplicatedEvent (
         }
         
         _tLastTreatment = TimeStep::simulation;
-        ReportMeasureI measure = regimen == Regimen::UC ? Report::MI_TREATMENTS_1 : Report::MI_TREATMENTS_2;
-        Survey::current().addInt( measure, human, 1 );
+        Survey::current().addInt( measures[regimen], human, 1 );
         
-        if( random::bernoulli( Params5Day::probParasitesCleared[regimen] )){
+        double y = random::uniform_01();
+        if( y < Params5Day::probParasitesCleared[regimen] ){
             // Could report Episode::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
             human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );
+            if( regimen == Regimen::UC ){
+                Survey::current().addInt( Report::MI_TREAT_SUCCESS_1, human, 1 );
+            }
         } else {
             // No change in parasitological status: treated outside of hospital
         }
+        if( regimen == Regimen::UC ){
+            double p = x < Params5Day::probGetsTreatment[Regimen::SELF] ?
+                Params5Day::probParasitesCleared[Regimen::SELF] :
+                Params5Day::probClearedUcOnly;
+            if( y < p ){
+                Survey::current().addInt( Report::MI_TREAT_SUCCESS_2, human, 1 );
+            }
+        }
+        
         if( human.withinHostModel->optionalPqTreatment() )
             Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
     } else {

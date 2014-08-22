@@ -35,8 +35,9 @@ namespace Regimen {
 enum Type {
     UC = 0,         // first line
     UC2 = 1,                // second line
-    SEVERE = 2,     // third line
-    NUM = 3,
+    SELF = 2,           // self treatment (implies first line)
+    SEVERE =3,     // third line
+    NUM = 4,
 };
 }
 
@@ -52,9 +53,16 @@ struct Params5Day {
 private:
     // These parameters are reset via a setHealthSystem call on checkpoint
     // load rather than checkpointed.
+    // probGetsTreatment[UC]: probability or official OR self treatment for first line case
+    // probGetsTreatment[UC2]: prob official care 2nd line
+    // probGetsTreatment[SELF]: prob self-treating in first line case
+    // probGetsTreatment[SEVERE]: prob official care for severe
     static double probGetsTreatment[Regimen::NUM];
+    // probability of success in clearing parasites (here UC is for official care 1st line only)
     static double probParasitesCleared[Regimen::NUM-1];
+    static double probClearedUcOnly;
     static double cureRateSevere;
+    // treatment to administer, when it is successful
     static WithinHost::TreatmentId treatments[Regimen::NUM];
     
     friend class ImmediateOutcomes;
