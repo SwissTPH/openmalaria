@@ -21,9 +21,7 @@
 #ifndef Hmod_DecisionTree5Day
 #define Hmod_DecisionTree5Day
 
-#include "WithinHost/Pathogenesis/State.h"
-#include "Clinical/ClinicalModel.h"
-#include "WithinHost/WHInterface.h"
+#include "Clinical/CM5DayCommon.h"
 
 namespace OM {
 namespace Clinical {
@@ -42,44 +40,17 @@ namespace Clinical {
  * probability tree, using the same logic for handling severe cases as has long
  * been used.
  */
-class DecisionTree5Day : public ClinicalModel
+class DecisionTree5Day : public CM5DayCommon
 {
 public:
     /** Load health system data from initial data or an intervention's data (both from XML).
      * (Re)loads all data affected by this healthSystem element. */
     static void setHealthSystem (const scnXml::HSDT5Day& hsDescription);
     
-    DecisionTree5Day (double tSF);
+    DecisionTree5Day (double tSF) : CM5DayCommon(tSF) {}
     
-    virtual bool notAtRisk() {
-        int ageLastTreatment = (TimeStep::simulation - m_tLastTreatment).inDays();
-        return ageLastTreatment > 0 && ageLastTreatment <= 20;
-    }
-    
-    virtual void massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport );
-
 protected:
-    virtual void doClinicalUpdate (Human& human, double ageYears);
-
-    virtual void checkpoint (istream& stream);
-    virtual void checkpoint (ostream& stream);
-
-private:
-    /** Called when a non-severe/complicated malaria sickness occurs. */
-    void uncomplicatedEvent(Human& human, Episode::State pgState);
-
-    /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
-     *
-     * Note: sets doomed = 4 if patient dies. */
-    void severeMalaria(Human& human, Episode::State pgState, double ageYears, int& doomed);
-
-    /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
-    TimeStep m_tLastTreatment;
-
-    //! treatment seeking for heterogeneity
-    double m_treatmentSeekingFactor;
+    virtual void uncomplicatedEvent(Human& human, Episode::State pgState);
 };
 
 }

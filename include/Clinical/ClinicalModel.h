@@ -89,6 +89,7 @@ public:
      * Only supported by immediate outcomes model. */
     virtual bool notAtRisk() =0;
     
+    /** One way to do mass drug administation. Only for EventScheduler model. */
     virtual void massDrugAdministration( Human& human,
         Monitoring::ReportMeasureI screeningReport,
         Monitoring::ReportMeasureI drugReport ) =0;

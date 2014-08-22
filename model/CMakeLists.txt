@@ -23,6 +23,7 @@ set (Model_CPP
   Clinical/ImmediateOutcomes.cpp
   Clinical/Episode.cpp
   Clinical/DecisionTree5Day.cpp
+  Clinical/CM5DayCommon.cpp
   
   PkPd/PkPdModel.cpp
   #PkPd/HoshenPkPdModel.cpp

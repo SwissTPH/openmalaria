@@ -21,9 +21,7 @@
 #ifndef Hmod_ImmediateOutcomes
 #define Hmod_ImmediateOutcomes
 
-#include "WithinHost/Pathogenesis/State.h"
-#include "Clinical/ClinicalModel.h"
-#include "WithinHost/WHInterface.h"
+#include "Clinical/CM5DayCommon.h"
 
 namespace OM {
 namespace Clinical {
@@ -41,44 +39,24 @@ namespace Clinical {
  * probability tree, using the same logic for handling severe cases as has long
  * been used.
  */
-class ImmediateOutcomes : public ClinicalModel
+class ImmediateOutcomes : public CM5DayCommon
 {
 public:
     /** Load health system data from initial data or an intervention's data (both from XML).
      * (Re)loads all data affected by this healthSystem element. */
     static void setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData);
     
-    ImmediateOutcomes (double tSF);
-
-    virtual bool notAtRisk() {
-        int ageLastTreatment = (TimeStep::simulation - _tLastTreatment).inDays();
-        return ageLastTreatment > 0 && ageLastTreatment <= 20;
-    }
-
-    virtual void massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport );
-
+    ImmediateOutcomes (double tSF) : CM5DayCommon(tSF) {}
+    
 protected:
-    virtual void doClinicalUpdate (Human& human, double ageYears);
-
-    virtual void checkpoint (istream& stream);
-    virtual void checkpoint (ostream& stream);
-
-private:
     /** Called when a non-severe/complicated malaria sickness occurs. */
-    void uncomplicatedEvent(Human& human, Episode::State pgState);
-
-    /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
-     *
-     * Note: sets doomed = 4 if patient dies. */
-    void severeMalaria(Human& human, Episode::State pgState, double ageYears, int& doomed);
-
-    /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
-    TimeStep _tLastTreatment;
-
-    //! treatment seeking for heterogeneity
-    double _treatmentSeekingFactor;
+    virtual void uncomplicatedEvent(Human& human, Episode::State pgState);
+    
+private:
+    static double cureRateUCOfficial[CM5DayCommon::NumCaseTypes];
+    static double cureRateUCSelfTreat[CM5DayCommon::NumCaseTypes];
+    static WithinHost::TreatmentId treatmentUC[CM5DayCommon::NumCaseTypes];
+    static bool useDiagnosticUC;
 };
 
 }
