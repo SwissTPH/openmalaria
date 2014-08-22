@@ -37,8 +37,6 @@
       <option name="IRS effects" value="true"/>-->
     </continuous>
     <SurveyOptions>
-      <option name="nTreatSuccess1"/>
-      <option name="nTreatSuccess2"/>
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>
       <option name="sumlogDens" value="true"/>

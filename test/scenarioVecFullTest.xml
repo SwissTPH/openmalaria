@@ -43,8 +43,6 @@
       <option name="P_C*P_D" value="false"/>
     </continuous>
     <SurveyOptions>
-      <option name="nTreatSuccess1"/>
-      <option name="nTreatSuccess2"/>
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>
       <option name="sumlogDens" value="true"/>

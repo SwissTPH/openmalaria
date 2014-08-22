@@ -266,7 +266,6 @@ void ImmediateOutcomes::uncomplicatedEvent (
         double y = random::uniform_01();
         if( y < Params5Day::probParasitesCleared[regimen] ){
             if( regimen == Regimen::UC ){
-                Survey::current().addInt( Report::MI_TREAT_SUCCESS_1, human, 1 );
             }else{
                 // Could report Episode::RECOVERY to latestReport,
                 // but we don't report out-of-hospital recoveries anyway.
@@ -280,7 +279,6 @@ void ImmediateOutcomes::uncomplicatedEvent (
                 Params5Day::probParasitesCleared[Regimen::SELF] :
                 Params5Day::probClearedUcOnly;
             if( y < p ){
-                Survey::current().addInt( Report::MI_TREAT_SUCCESS_2, human, 1 );
                 // Could report Episode::RECOVERY to latestReport,
                 // but we don't report out-of-hospital recoveries anyway.
                 human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );

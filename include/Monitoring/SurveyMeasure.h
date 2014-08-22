@@ -291,9 +291,6 @@ enum SurveyMeasure {
      * treatment (case management). */
     nTreatDeployments = 67,
     
-    nTreatSuccess1 = 91,
-    nTreatSuccess2 = 92,
-    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };
