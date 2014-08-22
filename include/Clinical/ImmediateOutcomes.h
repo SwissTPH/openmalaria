@@ -43,12 +43,9 @@ enum Type {
 
 /** A container for all the "static" data required by this model. */
 struct Params5Day {
-    /** Initialises parameters, loading from XML data. */
-    static void initParameters ();
-
     /** Load health system data from initial data or an intervention's data (both from XML).
      * (Re)loads all data affected by this healthSystem element. */
-    static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
+    static void setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData);
     
 private:
     // These parameters are reset via a setHealthSystem call on checkpoint

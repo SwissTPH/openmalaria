@@ -29,11 +29,6 @@
 #include <boost/unordered_map.hpp>
 #include <list>
 
-namespace scnXml {
-    class HSEventScheduler;
-    class Model;
-}
-
 namespace OM {
 namespace Clinical {
 
@@ -49,7 +44,7 @@ using util::AgeGroupInterpolator;
 class ClinicalEventScheduler : public ClinicalModel
 {
 public:
-    static void init (const OM::Parameters& parameters, const scnXml::Model& model);
+    static void init (const OM::Parameters& parameters, const scnXml::Clinical& clinical);
     static void setParameters (const scnXml::HSEventScheduler& esData);
 
     ClinicalEventScheduler (double tSF);

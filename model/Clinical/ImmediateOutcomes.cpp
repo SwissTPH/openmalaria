@@ -96,16 +96,9 @@ WithinHost::TreatmentId getHealthSystemTreatmentByName( const scnXml::TreatmentA
 
 // ———  static, init  ———
 
-void Params5Day::initParameters () {
-    //TODO: make this compatible
+void Params5Day::setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData) {
     if (util::ModelOptions::option (util::INCLUDES_PK_PD))
         throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
-}
-
-void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
-    if ( !healthSystem.getImmediateOutcomes().present() )
-        throw util::xml_scenario_error ("Expected ImmediateOutcomes section in healthSystem data (initial or intervention)");
-    const scnXml::HSImmediateOutcomes& hsioData = healthSystem.getImmediateOutcomes().get();
     
     const string &firstLine = hsioData.getDrugRegimen().getFirstLine(),
         &secondLine = hsioData.getDrugRegimen().getSecondLine(),

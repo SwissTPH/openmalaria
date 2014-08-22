@@ -43,15 +43,7 @@ auto_ptr<CMDecisionTree> ESCaseManagement::uncomplicated,
     ESCaseManagement::complicated,
     ESCaseManagement::mda;
 
-void ESCaseManagement::setHealthSystem(
-    const scnXml::HealthSystem& healthSystem)
-{
-    if( !healthSystem.getEventScheduler().present() )
-	throw util::xml_scenario_error ("Expected EventScheduler section in "
-        "healthSystem data (initial or intervention)");
-    const scnXml::HSEventScheduler& esData =
-        healthSystem.getEventScheduler().get();
-    
+void ESCaseManagement::setHealthSystem(const scnXml::HSEventScheduler& esData){
     uncomplicated = CMDecisionTree::create( esData.getUncomplicated () );
     complicated = CMDecisionTree::create( esData.getComplicated() );
     

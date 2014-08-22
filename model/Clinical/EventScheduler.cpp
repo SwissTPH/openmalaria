@@ -57,7 +57,7 @@ AgeGroupInterpolator ClinicalEventScheduler::MF_need_antibiotic;
 
 // -----  static init  -----
 
-void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Model& model )
+void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Clinical& clinical )
 {
     if (TimeStep::interval != 1)
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
@@ -74,11 +74,11 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
     neg_v = -parameters[Parameters::CFR_SCALE_FACTOR];
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
-        if( !model.getClinical().getNonMalariaFevers().present() ){
+        if( !clinical.getNonMalariaFevers().present() ){
             throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
         }
         const scnXml::Clinical::NonMalariaFeversType& nmfDesc2 =
-            model.getClinical().getNonMalariaFevers().get();
+            clinical.getNonMalariaFevers().get();
         if( !nmfDesc2.getPrNeedTreatmentMF().present() ||
             !nmfDesc2.getPrNeedTreatmentNMF().present() ){
             throw util::xml_scenario_error( "prNeedTreatmentMF and "

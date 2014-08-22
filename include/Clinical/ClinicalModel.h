@@ -26,7 +26,7 @@
 #include <memory>
 
 namespace scnXml{
-    class Model;
+    class Scenario;
     class HealthSystem;
 }
 namespace OM { namespace Clinical {
@@ -48,12 +48,12 @@ class ClinicalModel
 public:
     /// @brief Static functions
     //@{
-    /// Initialise whichever model is in use.
-    static void init ( const Parameters& parameters, const scnXml::Model& model );
+    /// First stage of initialisation
+    static void init ( const Parameters& parameters, const scnXml::Scenario& model );
   
-    /** Set data for a new health system.
+    /** Second stage of initialisation, done after interventions are configured
      * 
-     */
+     * Also done when a certain intervention is deployed. */
     static void changeHS (const scnXml::HealthSystem& healthSystem);
     
     /** Return a new ClinicalModel.

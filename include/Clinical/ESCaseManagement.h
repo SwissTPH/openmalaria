@@ -33,12 +33,6 @@
 #include <boost/ptr_container/ptr_unordered_map.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
-class ESCaseManagementSuite;
-class ESDecisionTreeSuite;
-
-namespace scnXml{
-    
-}
 namespace OM { namespace Clinical {
 using WithinHost::WHInterface;
 using Monitoring::Survey;
@@ -51,7 +45,7 @@ class ESCaseManagement {
 public:
     /** Load health system data from initial data or an intervention's data (both from XML).
     * (Re)loads all data affected by this healthSystem element. */
-    static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
+    static void setHealthSystem (const scnXml::HSEventScheduler& esData);
     
     /** Set up MDA drug. Must be called if massDrugAdministration() is
         * ever used to deploy an MDA intervention. */

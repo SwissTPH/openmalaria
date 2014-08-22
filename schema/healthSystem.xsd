@@ -93,6 +93,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:choice>
         <xs:element name="EventScheduler" type="om:HSEventScheduler" />
         <xs:element name="ImmediateOutcomes" type="om:HSImmediateOutcomes" />
+        <xs:element name="DecisionTree5Day" type="om:HSDT5Day"/>
       </xs:choice>
       <xs:element name="CFR" type="om:AgeGroupValues">
         <xs:annotation>
@@ -253,12 +254,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
+    <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
           Name of health system
         </xs:documentation>
-        <xs:appinfo>type:string;name:Case Management model;</xs:appinfo>
+        <xs:appinfo>name:Name of case management parameterisation;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="useDiagnosticUC" type="xs:boolean" default="false"/>
@@ -318,6 +319,85 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
       </xs:element>
     </xs:sequence>
+  </xs:complexType>
+  
+  <!-- health system: 5-day with flexible case management -->
+  
+  <xs:complexType name="HSDT5Day">
+    <xs:annotation>
+      <xs:documentation>
+        Description of the health system using the 5-day timestep with decision
+        tree model: access is configured as in the Tediosi et al case
+        management model (Case management as described in AJTMH 75 (suppl 2)
+        pp90-103) while treatment decisions are configured via decision trees.
+        
+        Besides greater flexibility, this allows treatment via PK/PD models.
+      </xs:documentation>
+      <xs:appinfo>name:Case Management (Tediosi et al with programmable decision trees);</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with newly incident
+            uncomplicated disease seeks official care
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with uncomplicated
+            disease will self-treat
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pSeekOfficialCareUncomplicated2" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with recurrence of
+            uncomplicated disease seeks official care
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pSeekOfficialCareSevere" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with severe disease
+            obtains appropriate care
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="primaquine" minOccurs="0">
+        <xs:complexType>
+          <xs:all>
+            <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
+            <xs:element name="pUseUncomplicated" type="om:inputValue"/>
+            <xs:element name="effectivenessOnUse" type="om:inputValue"/>
+          </xs:all>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Name of health system
+        </xs:documentation>
+        <xs:appinfo>name:Name of case management parameterisation;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   
   <!-- healthSystem: 1-day model -->
