@@ -513,6 +513,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="noAction" type="om:DTNoAction"/>
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
       <xs:element name="treatSimple" type="om:DTTreatSimple"/>
+      <xs:element name="deploy" type="om:DTDeploy" maxOccurs="unbounded"/>
     </xs:choice>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
@@ -546,6 +547,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <!-- actions -->
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" minOccurs="0" maxOccurs="unbounded"/>
       <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0"/>
+      <xs:element name="deploy" type="om:DTDeploy" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
@@ -797,6 +799,22 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="DTDeploy">
+    <xs:annotation>
+      <xs:documentation>
+        Deploy one or more intervention components.
+      </xs:documentation>
+      <xs:appinfo>name:Deploy intervention;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="component" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The identifier (short name) of a component.
+        </xs:documentation>
+        <xs:appinfo>name:Component identifier;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
   
   <!-- diagnostics and treatments -->
   <xs:complexType name="HSDiagnostic">
@@ -812,7 +830,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               Specify that an artificial deterministic test is used: drugs are
               administered if parasite density is at least the minimum given.
             </xs:documentation>
-            <xs:appinfo>name:Deterministic detection</xs:appinfo>
+            <xs:appinfo>name:Deterministic detection;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:attribute name="minDensity" type="xs:double" use="required">

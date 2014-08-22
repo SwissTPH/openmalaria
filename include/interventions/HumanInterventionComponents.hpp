@@ -67,6 +67,28 @@ HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Com
      * file. */
     std::stable_sort( components.begin(), components.end(), componentCmp );
 }
+HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTDeploy>& componentList ){
+    components.reserve( componentList.size() );
+    for( xsd::cxx::tree::sequence<scnXml::DTDeploy>::const_iterator it = componentList.begin(),
+        end = componentList.end(); it != end; ++it )
+    {
+        ComponentId id = InterventionManager::getComponentId( it->getComponent() );
+        const HumanInterventionComponent* component = &InterventionManager::getComponent( id );
+        components.push_back( component );
+    }
+    
+    /** Sort components according to a standard order.
+     * 
+     * The point of this is to make results repeatable even when users change
+     * the ordering of a list of intervention's components (since getting
+     * repeatable results out of OpenMalaria is often a headache anyway, we
+     * might as well at least remove this hurdle).
+     * 
+     * Note that when multiple interventions are deployed simultaneously, the
+     * order of their deployments is still dependent on the order in the XML
+     * file. */
+    std::stable_sort( components.begin(), components.end(), componentCmp );
+}
 
 void HumanIntervention::deploy( Human& human, Deployment::Method method,
     VaccineLimits vaccLimits ) const

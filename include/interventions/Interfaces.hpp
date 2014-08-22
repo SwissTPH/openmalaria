@@ -158,6 +158,8 @@ class HumanIntervention {
 public:
     /** Create from a list of XML elements: <component id="..."/> **/
     explicit HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Component>& componentList );
+    /** Create from a list of XML elements: <deploy component="..."/> **/
+    explicit HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTDeploy>& componentList );
     
     /** Deploy all components to a pre-selected human. */
     void deploy( Host::Human& human, Deployment::Method method,

@@ -21,7 +21,7 @@
 #ifndef Hmod_ESDecisionTree
 #define Hmod_ESDecisionTree
 
-#include "Global.h"
+#include "Host/Human.h"
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/Episode.h"
 #include <schema/healthSystem.h>
@@ -36,12 +36,13 @@ using WithinHost::WHInterface;
 using std::auto_ptr;
 
 /** All data which needs to be passed to the decision tree evaluators. */
-struct CMHostData {
-    CMHostData (double aY, WHInterface& wH, Episode::State pS) :
-        ageYears(aY), withinHost(wH), pgState(pS) {}
-    double ageYears;
-    WHInterface& withinHost;
+struct  CMHostData {
+    CMHostData (Host::Human& h, double aY, Episode::State pS) :
+        human(h), ageYears(aY), pgState(pS) {}
+    Host::Human& human;
+    double ageYears;    // only cached to save recalculating
     Episode::State pgState;
+    inline WHInterface& withinHost(){ return *human.withinHostModel; }
 };
 /** All output data from the decision tree. */
 struct CMDTOut {

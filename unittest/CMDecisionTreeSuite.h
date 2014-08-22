@@ -50,16 +50,24 @@ public:
 	// Note: cannot create whm in constructor, since it uses random number
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
+        
 	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
         whm.reset( new WHMock() );
         ETS_ASSERT( whm.get() != 0 );
-	hd.reset( new CMHostData( 21 /* any real age will do for most tests */,
-                                  *whm.get(), Episode::NONE ) );
+        
+        human.reset( UnittestUtil::createHuman(TimeStep(0)).release() );
+        ETS_ASSERT( human.get() != 0 );
+        UnittestUtil::setHumanWH( *human, whm.get() );
+        
+	hd.reset( new CMHostData( *human, 21 /* any real age will do for most tests */,
+                                  Episode::NONE ) );
         
 	// could seed random-number-generator, but shouldn't affect outcomes
 	UnittestUtil::PkPdSuiteSetup (PkPd::PkPdModel::LSTM_PKPD);
     }
     void tearDown () {
+        human.reset();
+        whm.reset();
         PkPd::LSTMDrugType::clear();
         PkPd::LSTMTreatments::clear();
     }
@@ -249,6 +257,7 @@ public:
     }
     
 private:
+    auto_ptr<Host::Human> human;
     auto_ptr<WHMock> whm;
     auto_ptr<CMHostData> hd;
 };

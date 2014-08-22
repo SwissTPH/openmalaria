@@ -170,7 +170,7 @@ void ClinicalEventScheduler::massDrugAdministration( Human& human,
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration ( 
-        CMHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
+        CMHostData( human, human.getAgeInYears(), pgState ),
             human, screeningReport, drugReport
     );
 }
@@ -263,7 +263,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
 	CMDTOut auxOut = ESCaseManagement::execute(
-	    CMHostData( ageYears, *human.withinHostModel, pgState ) );
+	    CMHostData( human, ageYears, pgState ) );
 	
         if( auxOut.treated ){	// I.E. some treatment was given
             timeLastTreatment = TimeStep::simulation;

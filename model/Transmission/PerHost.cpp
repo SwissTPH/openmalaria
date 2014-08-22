@@ -38,7 +38,7 @@ void PerHost::init ( const scnXml::AgeGroupValues& availabilityToMosquitoes ) {
 
 // -----  PerHost non-static -----
 
-PerHost::PerHost (const Transmission::TransmissionModel& tm) :
+PerHost::PerHost () :
         outsideTransmission(false),
         _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {

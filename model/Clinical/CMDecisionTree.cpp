@@ -24,6 +24,7 @@
 #include "util/random.h"
 #include "Monitoring/Survey.h"
 #include "util/errors.h"
+#include "interventions/Interfaces.hpp"
 
 #include <limits>
 #include <list>
@@ -110,7 +111,7 @@ protected:
         if( isRDT )     Survey::current().report_Clinical_RDTs (1);
         else            Survey::current().report_Clinical_Microscopy (1);
         
-        double dens = hostData.withinHost.getTotalDensity ();
+        double dens = hostData.withinHost().getTotalDensity ();
         double pPositive = 1.0 + specificity * (dens / (dens + dens_50) - 1.0);
         if( random::bernoulli(pPositive) ) return positive->exec( hostData );
         else return negative->exec( hostData );
@@ -227,7 +228,7 @@ public:
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
         foreach( const TreatInfo& treatment, treatments ){
-            hostData.withinHost.treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears );
+            hostData.withinHost().treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears );
         }
         return CMDTOut(true);
     }
@@ -257,12 +258,33 @@ public:
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
-        hostData.withinHost.treatSimple( tsLiver, tsBlood );
+        hostData.withinHost().treatSimple( tsLiver, tsBlood );
         return CMDTOut(true);
     }
     
 private:
     TimeStep tsLiver, tsBlood;
+};
+
+/**
+ * Deploy one or more interventions
+ */
+class CMDTDeploy : public CMDecisionTree, interventions::HumanIntervention {
+public:
+    CMDTDeploy( const scnXml::DecisionTree::DeploySequence& seq ) :
+        HumanIntervention(seq) {}
+    
+protected:
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        deploy( hostData.human,
+                  interventions::Deployment::TREAT,
+                  interventions::VaccineLimits(/*default initialise: no limits*/) );
+        
+        //NOTE: it's not intuitively obvious what value should be returned here
+        // in the case of intervention deployment. This at least means that
+        // repeat seekers get second-line treatment.
+        return CMDTOut(true);
+    }
 };
 
 

@@ -174,6 +174,13 @@ public:
     static void clearMedicateQueue( PkPd::LSTMPkPdModel& pkpd ){
         pkpd.medicateQueue.clear();
     }
+    
+    static auto_ptr<Host::Human> createHuman(TimeStep dateOfBirth){
+        return auto_ptr<Host::Human>( new Host::Human(dateOfBirth) );
+    }
+    static void setHumanWH(Host::Human& human, WithinHost::WHInterface *wh){
+        human.withinHostModel = wh;
+    }
 };
 
 #endif
