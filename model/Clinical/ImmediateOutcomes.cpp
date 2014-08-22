@@ -35,7 +35,6 @@ bool useDiagnosticUC = false;
 
 double Params5Day::probGetsTreatment[Regimen::NUM];
 double Params5Day::probParasitesCleared[Regimen::NUM-1];
-double Params5Day::probClearedUcOnly;
 double Params5Day::cureRateSevere;
 WithinHost::TreatmentId Params5Day::treatments[Regimen::NUM];
 ReportMeasureI measures[] = {
@@ -153,21 +152,8 @@ void Params5Day::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
     }
     
     
-    //calculate probParasitesCleared 0
-    if ( (pSeekOfficialCareUncomplicated1 + pSelfTreatment) > 0) {
-        probParasitesCleared[Regimen::UC] = (pSeekOfficialCareUncomplicated1
-                                   * (complianceFirstLine * cureRateFirstLine
-                                      + (1 - complianceFirstLine) * nonCompliersEffectiveFirstLine)
-                                   + pSelfTreatment
-                                   * (complianceSelfTreatment * cureRateSelfTreatment
-                                      + (1 - complianceSelfTreatment) * nonCompliersEffectiveFirstLine))
-                                  / (pSeekOfficialCareUncomplicated1 + pSelfTreatment);
-    } else {
-        probParasitesCleared[Regimen::UC] = 0;
-    }
-    
     //calculate probParasitesCleared for uncomplicated cases
-    probClearedUcOnly = complianceFirstLine * cureRateFirstLine
+    probParasitesCleared[Regimen::UC] = complianceFirstLine * cureRateFirstLine
             + (1 - complianceFirstLine) * nonCompliersEffectiveFirstLine;
     probParasitesCleared[Regimen::UC2] = complianceSecondLine * cureRateSecondLine
             + (1 - complianceSecondLine) * nonCompliersEffectiveSecondLine;
@@ -253,6 +239,8 @@ void ImmediateOutcomes::uncomplicatedEvent (
     if( x < Params5Day::probGetsTreatment[regimen] * _treatmentSeekingFactor ){
         // UC1: official care OR self treatment
         // UC2: official care only
+        if( regimen == Regimen::UC && x < Params5Day::probGetsTreatment[Regimen::SELF] )
+            regimen = Regimen::SELF;
         
         if( useDiagnosticUC ){
             Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
@@ -263,26 +251,12 @@ void ImmediateOutcomes::uncomplicatedEvent (
         _tLastTreatment = TimeStep::simulation;
         Survey::current().addInt( measures[regimen], human, 1 );
         
-        double y = random::uniform_01();
-        if( y < Params5Day::probParasitesCleared[regimen] ){
-            if( regimen == Regimen::UC ){
-            }else{
-                // Could report Episode::RECOVERY to latestReport,
-                // but we don't report out-of-hospital recoveries anyway.
-                human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );
-            }
+        if( random::bernoulli(Params5Day::probParasitesCleared[regimen]) ){
+            // Could report Episode::RECOVERY to latestReport,
+            // but we don't report out-of-hospital recoveries anyway.
+            human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );
         } else {
             // No change in parasitological status: treated outside of hospital
-        }
-        if( regimen == Regimen::UC ){
-            double p = x < Params5Day::probGetsTreatment[Regimen::SELF] ?
-                Params5Day::probParasitesCleared[Regimen::SELF] :
-                Params5Day::probClearedUcOnly;
-            if( y < p ){
-                // Could report Episode::RECOVERY to latestReport,
-                // but we don't report out-of-hospital recoveries anyway.
-                human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );
-            }
         }
         
         if( human.withinHostModel->optionalPqTreatment() )

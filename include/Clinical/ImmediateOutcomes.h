@@ -60,7 +60,6 @@ private:
     static double probGetsTreatment[Regimen::NUM];
     // probability of success in clearing parasites (here UC is for official care 1st line only)
     static double probParasitesCleared[Regimen::NUM-1];
-    static double probClearedUcOnly;
     static double cureRateSevere;
     // treatment to administer, when it is successful
     static WithinHost::TreatmentId treatments[Regimen::NUM];
