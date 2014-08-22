@@ -31,12 +31,33 @@ namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
 using namespace Monitoring;
+
+namespace Regimen {
+    /** Regimen: UC / UC2 / SEVERE.
+    *
+    * Note: values used in array lookups, so are important. */
+    enum Type {
+        UC = 0,         // first line
+        UC2 = 1,                // second line
+        SELF = 2,           // self treatment (implies first line)
+        SEVERE =3,     // third line
+        NUM = 4,
+    };
+}
+
+// These parameters are set by setHealthSystem() and do not need checkpointing.
+// probGetsTreatment[UC]: probability or official OR self treatment for first line case
+// probGetsTreatment[UC2]: prob official care 2nd line
+// probGetsTreatment[SELF]: prob self-treating in first line case
+// probGetsTreatment[SEVERE]: prob official care for severe
+static double probGetsTreatment[Regimen::NUM];
+// probability of success in clearing parasites (here UC is for official care 1st line only)
+static double probParasitesCleared[Regimen::NUM-1];
+static double cureRateSevere;
+// treatment to administer, when it is successful
+static WithinHost::TreatmentId treatments[Regimen::NUM];
 bool useDiagnosticUC = false;
 
-double Params5Day::probGetsTreatment[Regimen::NUM];
-double Params5Day::probParasitesCleared[Regimen::NUM-1];
-double Params5Day::cureRateSevere;
-WithinHost::TreatmentId Params5Day::treatments[Regimen::NUM];
 ReportMeasureI measures[] = {
     Report::MI_TREATMENTS_1,    // first line official
     Report::MI_TREATMENTS_2,    // second line official
@@ -96,10 +117,7 @@ WithinHost::TreatmentId getHealthSystemTreatmentByName( const scnXml::TreatmentA
 
 // ———  static, init  ———
 
-void Params5Day::setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData) {
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-        throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
-    
+void ImmediateOutcomes::setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData) {
     const string &firstLine = hsioData.getDrugRegimen().getFirstLine(),
         &secondLine = hsioData.getDrugRegimen().getSecondLine(),
         &inpatient = hsioData.getDrugRegimen().getInpatient();
@@ -110,9 +128,8 @@ void Params5Day::setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData) {
 
     // --- calculate probGetsTreatment ---
 
-    probGetsTreatment[Regimen::SELF] = hsioData.getPSelfTreatUncomplicated().getValue();
-    probGetsTreatment[Regimen::UC] = hsioData.getPSeekOfficialCareUncomplicated1().getValue() +
-            hsioData.getPSelfTreatUncomplicated().getValue();
+    probGetsTreatment[Regimen::SELF] = pSelfTreatment;
+    probGetsTreatment[Regimen::UC] = pSeekOfficialCareUncomplicated1 + pSelfTreatment;
     probGetsTreatment[Regimen::UC2] = hsioData.getPSeekOfficialCareUncomplicated2().getValue();
     probGetsTreatment[Regimen::SEVERE] = hsioData.getPSeekOfficialCareSevere().getValue();
     if( !(
@@ -184,8 +201,6 @@ ImmediateOutcomes::ImmediateOutcomes (double tSF) :
         _tLastTreatment (TimeStep::never),
         _treatmentSeekingFactor (tSF)
 {}
-ImmediateOutcomes::~ImmediateOutcomes() {
-}
 
 
 // ———  per-human, update  ———
@@ -229,10 +244,10 @@ void ImmediateOutcomes::uncomplicatedEvent (
                             ? Regimen::UC2 : Regimen::UC ;
     
     double x = random::uniform_01();
-    if( x < Params5Day::probGetsTreatment[regimen] * _treatmentSeekingFactor ){
+    if( x < probGetsTreatment[regimen] * _treatmentSeekingFactor ){
         // UC1: official care OR self treatment
         // UC2: official care only
-        if( regimen == Regimen::UC && x < Params5Day::probGetsTreatment[Regimen::SELF] )
+        if( regimen == Regimen::UC && x < probGetsTreatment[Regimen::SELF] * _treatmentSeekingFactor )
             regimen = Regimen::SELF;
         
         if( useDiagnosticUC ){
@@ -244,10 +259,10 @@ void ImmediateOutcomes::uncomplicatedEvent (
         _tLastTreatment = TimeStep::simulation;
         Survey::current().addInt( measures[regimen], human, 1 );
         
-        if( random::bernoulli(Params5Day::probParasitesCleared[regimen]) ){
+        if( random::bernoulli(probParasitesCleared[regimen]) ){
             // Could report Episode::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
-            human.withinHostModel->treatment( human, Params5Day::treatments[regimen] );
+            human.withinHostModel->treatment( human, treatments[regimen] );
         } else {
             // No change in parasitological status: treated outside of hospital
         }
@@ -267,9 +282,9 @@ void ImmediateOutcomes::severeMalaria (
 ) {
     double p2, p3, p4, p5, p6, p7;
     // Probability of getting treatment (only part which is case managment):
-    p2 = Params5Day::probGetsTreatment[Regimen::SEVERE] * _treatmentSeekingFactor;
+    p2 = probGetsTreatment[Regimen::SEVERE] * _treatmentSeekingFactor;
     // Probability of getting cured after getting treatment:
-    p3 = Params5Day::cureRateSevere;
+    p3 = cureRateSevere;
     // p4 is the hospital case-fatality rate from Tanzania
     p4 = caseFatalityRate.eval (ageYears);
     // p5 here is the community threshold case-fatality rate
@@ -312,7 +327,7 @@ void ImmediateOutcomes::severeMalaria (
 
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
-            human.withinHostModel->treatment( human, Params5Day::treatments[Regimen::SEVERE] );
+            human.withinHostModel->treatment( human, treatments[Regimen::SEVERE] );
             if (q[6] > prandom) {
                 latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
                 doomed  = DOOMED_COMPLICATED;

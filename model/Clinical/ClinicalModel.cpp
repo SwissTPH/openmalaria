@@ -23,7 +23,7 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "Clinical/EventScheduler.h"
 #include "Clinical/ImmediateOutcomes.h"
-// #include "Clinical/DecisionTree5Day.h"
+#include "Clinical/DecisionTree5Day.h"
 #include "Host/NeonatalMortality.h"
 
 #include "Monitoring/Survey.h"
@@ -48,8 +48,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& 
     }else{
         if( scenario.getHealthSystem().getImmediateOutcomes().present() )
             opt_imm_outcomes = true;
-        else
-            throw util::unimplemented_exception("decision tree 5 day");
+        // else: decision tree 5 day
     }
 }
 
@@ -58,8 +57,8 @@ void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
     pSequelaeInpatient.set( healthSystem.getPSequelaeInpatient(), "pSequelaeInpatient" );
     if( opt_event_scheduler ){
         if( !healthSystem.getEventScheduler().present() ){
-            throw util::xml_scenario_error ("Expected EventScheduler section "
-                "in healthSystem data (initial or intervention)");
+            throw util::xml_scenario_error ("Expected EventScheduler "
+                "section in healthSystem data (initial or intervention)");
         }
         ESCaseManagement::setHealthSystem(healthSystem.getEventScheduler().get());
     }else if( opt_imm_outcomes ){
@@ -67,9 +66,13 @@ void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
             throw util::xml_scenario_error ("Expected ImmediateOutcomes "
                 "section in healthSystem data (initial or intervention)");
         }
-        Params5Day::setHealthSystem(healthSystem.getImmediateOutcomes().get());
+        ImmediateOutcomes::setHealthSystem(healthSystem.getImmediateOutcomes().get());
     }else{
-            throw util::unimplemented_exception("decision tree 5 day");
+        if( !healthSystem.getDecisionTree5Day().present() ){
+            throw util::xml_scenario_error ("Expected DecisionTree5Day "
+                "section in healthSystem data (initial or intervention)");
+        }
+        DecisionTree5Day::setHealthSystem(healthSystem.getDecisionTree5Day().get());
     }
 }
 

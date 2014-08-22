@@ -115,6 +115,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:complexType name="Primaquine">
+    <xs:all>
+      <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
+      <xs:element name="pUseUncomplicated" type="om:inputValue"/>
+      <xs:element name="effectivenessOnUse" type="om:inputValue"/>
+    </xs:all>
+  </xs:complexType>
   
   <!-- healthSystem: 5-day model -->
   <xs:complexType name="HSImmediateOutcomes">
@@ -126,7 +134,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
       <xs:appinfo>type: list of elements;name:Case Management (Tediosi et al);</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
+    <xs:all>
       <xs:element name="drugRegimen">
         <xs:annotation>
           <xs:documentation>
@@ -200,6 +208,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:all>
         </xs:complexType>
       </xs:element>
+      <!-- begin elements in common with DecisionTree5Day -->
+      <!-- note: we cannot use class extension without reordering existing XMLs -->
       <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
@@ -214,8 +224,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
-            Probability that a patient with uncomplicated
-            disease will self-treat
+            Probability that a patient with uncomplicated disease without
+            recent history of disease (i.e. first line) will self-treat.
+            
+            Note that in second line cases there is no probability of self-treatment.
           </xs:documentation>
           <xs:appinfo>
             type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
@@ -244,16 +256,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="primaquine" minOccurs="0">
-        <xs:complexType>
-          <xs:all>
-            <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
-            <xs:element name="pUseUncomplicated" type="om:inputValue"/>
-            <xs:element name="effectivenessOnUse" type="om:inputValue"/>
-          </xs:all>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
+      <xs:element name="primaquine" type="om:Primaquine" minOccurs="0"/>
+    </xs:all>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
@@ -322,7 +326,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   
   <!-- health system: 5-day with flexible case management -->
-  
   <xs:complexType name="HSDT5Day">
     <xs:annotation>
       <xs:documentation>
@@ -335,7 +338,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
       <xs:appinfo>name:Case Management (Tediosi et al with programmable decision trees);</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
+    <xs:all>
+      <!-- begin elements in common with DecisionTree5Day -->
+      <!-- note: we cannot use class extension without reordering existing XMLs -->
       <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
@@ -350,8 +355,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
-            Probability that a patient with uncomplicated
-            disease will self-treat
+            Probability that a patient with uncomplicated disease without
+            recent history of disease (i.e. first line) will self-treat.
+            
+            Note that in second line cases there is no probability of self-treatment.
           </xs:documentation>
           <xs:appinfo>
             type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
@@ -380,16 +387,20 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="primaquine" minOccurs="0">
-        <xs:complexType>
-          <xs:all>
-            <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
-            <xs:element name="pUseUncomplicated" type="om:inputValue"/>
-            <xs:element name="effectivenessOnUse" type="om:inputValue"/>
-          </xs:all>
-        </xs:complexType>
+      <xs:element name="primaquine" type="om:Primaquine" minOccurs="0"/>
+      <xs:element name="treeUCOfficial" type="om:DecisionTree"/>
+      <xs:element name="treeUCSelfTreat" type="om:DecisionTree"/>
+      <xs:element name="cureRateSevere" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            The probability of clearing parasites given access to
+            appropriate (hospital) care, for a severe case.
+          </xs:documentation>
+          <xs:appinfo>name:Cure rate (severe cases);min:0;max:1;</xs:appinfo>
+        </xs:annotation>
       </xs:element>
-    </xs:sequence>
+      <xs:element name="treatmentSevere" type="om:TreatmentOption"/>
+    </xs:all>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>

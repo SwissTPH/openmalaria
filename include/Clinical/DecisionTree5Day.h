@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_ImmediateOutcomes
-#define Hmod_ImmediateOutcomes
+#ifndef Hmod_DecisionTree5Day
+#define Hmod_DecisionTree5Day
 
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
@@ -29,32 +29,33 @@ namespace OM {
 namespace Clinical {
 
 /**
- * This models case management at a 5-day timestep with all-or-nothing
- * treatment.
+ * This models case management at a 5-day timestep with optional PK/PD modeling
+ * for uncomplicated cases.
  * 
  * Uncomplicated cases: access, otherwise known as "seeking any type of
  * treatment", is determined by a fixed-function decision, which may be
- * modified by a treatment-seeking factor. Treatment decisions are also fixed
- * function.
+ * modified by a treatment-seeking factor. Treatment decisions (type of
+ * treatment, use of diagnostics, effectiveness) are determined by a
+ * programmable decision tree.
  * 
  * Severe cases: all decisions and outcomes are calculated via a fixed-function
  * probability tree, using the same logic for handling severe cases as has long
  * been used.
  */
-class ImmediateOutcomes : public ClinicalModel
+class DecisionTree5Day : public ClinicalModel
 {
 public:
     /** Load health system data from initial data or an intervention's data (both from XML).
      * (Re)loads all data affected by this healthSystem element. */
-    static void setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData);
+    static void setHealthSystem (const scnXml::HSDT5Day& hsDescription);
     
-    ImmediateOutcomes (double tSF);
-
+    DecisionTree5Day (double tSF);
+    
     virtual bool notAtRisk() {
-        int ageLastTreatment = (TimeStep::simulation - _tLastTreatment).inDays();
+        int ageLastTreatment = (TimeStep::simulation - m_tLastTreatment).inDays();
         return ageLastTreatment > 0 && ageLastTreatment <= 20;
     }
-
+    
     virtual void massDrugAdministration( Human& human,
         Monitoring::ReportMeasureI screeningReport,
         Monitoring::ReportMeasureI drugReport );
@@ -75,10 +76,10 @@ private:
     void severeMalaria(Human& human, Episode::State pgState, double ageYears, int& doomed);
 
     /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
-    TimeStep _tLastTreatment;
+    TimeStep m_tLastTreatment;
 
     //! treatment seeking for heterogeneity
-    double _treatmentSeekingFactor;
+    double m_treatmentSeekingFactor;
 };
 
 }
