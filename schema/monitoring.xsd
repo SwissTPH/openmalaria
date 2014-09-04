@@ -108,6 +108,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Cohorts;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element name="statDump" minOccurs="0" maxOccurs="unbounded">
+        <xs:complexType>
+          <xs:attribute name="time" type="xs:int" use="required"/>
+          <xs:attribute name="filename" type="xs:string" use="required"/>
+        </xs:complexType>
+      </xs:element>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>

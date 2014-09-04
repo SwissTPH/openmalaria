@@ -71,7 +71,7 @@ void ClinicalImmediateOutcomes::massDrugAdministration( Human& human,
     assert(false);      // should never be called
 }
 
-void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
+Episode::State ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
     WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( ageYears );
     Episode::State pgState = static_cast<Episode::State>( pg.state );
 
@@ -98,6 +98,7 @@ void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears)
     if( pgState & Episode::SICK ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
     }
+    return pgState;
 }
 
 

@@ -94,7 +94,7 @@ public:
    * @param doUpdate If false, returns immediately after is-dead check.
    * @returns True if the individual is dead (too old or otherwise killed).
    */
-  bool update(OM::Transmission::TransmissionModel* transmissionModel, bool doUpdate);
+  bool update(OM::Transmission::TransmissionModel* transmissionModel, bool doUpdate, ofstream& statDump);
   //@}
   
   ///@brief Deploy "intervention" functions

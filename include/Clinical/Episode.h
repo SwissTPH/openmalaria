@@ -72,6 +72,8 @@ public:
         RECOVERY            = 0x4000,       ///< Report that individual fully recovered
         EVENT_FIRST_DAY     = 0x8000,       ///< Used in combination with DIRECT_DEATH to report death happens on first day (before treatment has effect)
         RUN_CM_TREE = 0x10000,      ///< Flag to indicate that CM tree should be run now or after a delay
+        INDIRECT_DEATH = 0x20000,
+        NEONATAL_DEATH = 0x40000,
     };
     
     /** Set healthSystemMemory. */

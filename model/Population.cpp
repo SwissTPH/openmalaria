@@ -48,6 +48,13 @@ namespace OM
 
 // -----  Population: static data / methods  -----
 
+struct StatDumpTime{
+    TimeStep time;
+    string fname;
+};
+vector<StatDumpTime> dumpTimes;
+size_t nextDumpTimeIndex;
+
 void Population::init( const Parameters& parameters, const scnXml::Scenario& scenario )
 {
     Host::Human::initHumanParameters( parameters, scenario );
@@ -55,6 +62,14 @@ void Population::init( const Parameters& parameters, const scnXml::Scenario& sce
     PkPd::PkPdModel::init( scenario );
     
     AgeStructure::init( scenario.getDemography() );
+    
+    dumpTimes.reserve( scenario.getMonitoring().getStatDump().size() );
+    BOOST_FOREACH( const scnXml::StatDump& elt, scenario.getMonitoring().getStatDump() ){
+        StatDumpTime x;
+        x.time = TimeStep(elt.getTime());
+        x.fname = elt.getFilename();
+        dumpTimes.push_back( x );
+    }
 }
 
 void Population::clear()
@@ -197,6 +212,21 @@ void Population::newHuman (TimeStep dob)
 
 void Population::update1()
 {
+    ofstream statDump;
+    if( nextDumpTimeIndex < dumpTimes.size() && dumpTimes[nextDumpTimeIndex].time == TimeStep::interventionPeriod ){
+        statDump.open( dumpTimes[nextDumpTimeIndex].fname.c_str() );
+        statDump
+            << "time\t"
+            << "age ts\t"
+            << "dens\t"
+            << "EIR\t"
+            << "nNewInfs\t"
+            << "rel availability\t"
+            << "prob transmission\t"
+            << "state" << endl;
+        nextDumpTimeIndex += 1;
+    }
+    
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
@@ -224,7 +254,8 @@ void Population::update1()
 		/* Only include humans who can survive until vector init.
 		Note: we could exclude more humans due to age distribution,
 		but how many extra to leave due to deaths isn't obvious. */
-		TimeStep::intervalsPerYear + iter->getDateOfBirth() > TimeStep(0)
+		TimeStep::intervalsPerYear + iter->getDateOfBirth() > TimeStep(0),
+                statDump
 	    )) {
             iter->destroy();
             iter = population.erase (iter);

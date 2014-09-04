@@ -206,7 +206,7 @@ void ClinicalEventScheduler::massDrugAdministration( Human& human,
     );
 }
 
-void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
+Episode::State ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     WHInterface& withinHostModel = *human.withinHostModel;
     // Run pathogenesisModel
     // Note: we use Episode::COMPLICATED instead of Episode::SEVERE.
@@ -470,6 +470,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     if( pgState & Episode::SICK ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
     }
+    
+    return pgState;
 }
 
 

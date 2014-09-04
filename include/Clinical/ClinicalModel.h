@@ -89,7 +89,7 @@ public:
    * 
    * @param ageYears Age of human.
    * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
-  void update (Human& human, double ageYears, TimeStep ageTimeSteps);
+  Episode::State update (Human& human, double ageYears, TimeStep ageTimeSteps);
   
   /** For infants, updates the infantIntervalsAtRisk and potentially
    * infantDeaths arrays. */
@@ -139,7 +139,7 @@ protected:
    * @param hostTransmission per-host transmission data of human.
    * @param ageYears Age of human.
    * @param ageGroup Survey age group of human. */
-  virtual void doClinicalUpdate (Human& human, double ageYears) =0;
+  virtual Episode::State doClinicalUpdate (Human& human, double ageYears) =0;
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

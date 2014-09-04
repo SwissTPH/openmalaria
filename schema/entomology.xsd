@@ -51,7 +51,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:complexType>
         </xs:element>
       </xs:choice>
-      <xs:element name="statDump" type="om:StatDump" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -89,11 +88,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Infectious bites per adult per year;name:Override annual EIR;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexType>
-  
-  <xs:complexType name="StatDump">
-    <xs:attribute name="time" type="xs:int" use="required"/>
-    <xs:attribute name="filename" type="xs:string" use="required"/>
   </xs:complexType>
   
   <xs:complexType name="nonVector">

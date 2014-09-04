@@ -67,7 +67,7 @@ public:
         Monitoring::ReportMeasureI drugReport );
 
 protected:
-    virtual void doClinicalUpdate (Human& human, double ageYears);
+    Episode::State doClinicalUpdate (OM::Host::Human& human, double ageYears);
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

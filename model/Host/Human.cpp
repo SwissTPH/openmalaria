@@ -37,6 +37,7 @@ namespace OM { namespace Host {
     using namespace OM::util;
     using namespace Monitoring;
     using interventions::ComponentId;
+    using Clinical::Episode;
     
     bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
             opt_trans_treat_het = false, opt_comorb_treat_het = false,
@@ -157,7 +158,7 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-timestep update  -----
 
-bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
+bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate, ofstream& statDump) {
 #ifdef WITHOUT_BOINC
     ++PopulationStats::humanUpdateCalls;
     if( doUpdate )
@@ -194,8 +195,22 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         
         withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV));
         
-        clinicalModel->update (*this, ageYears, ageTimeSteps);
+        Episode::State state = clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);
+        
+        if( statDump.is_open() ){
+            statDump << TimeStep::simulation << '\t';
+            statDump << ageTimeSteps << '\t';
+            statDump << withinHostModel->getTotalDensity() << '\t';
+            statDump << EIR << '\t';
+            statDump << nNewInfs << '\t';
+            double weighting = perHostTransmission.relativeAvailabilityHetAge(ageYears);
+            statDump << weighting << '\t';
+            double vaccFactor = getVaccine().getFactor( interventions::Vaccine::TBV );
+            double probTransmission = withinHostModel->probTransmissionToMosquito( ageTimeSteps, vaccFactor );
+            statDump << probTransmission << '\t';
+            statDump << state << endl;
+        }
     }
     return false;
 }

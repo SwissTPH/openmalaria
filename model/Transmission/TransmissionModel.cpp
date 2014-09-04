@@ -89,13 +89,6 @@ void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
 }
 
 
-struct StatDumpTime{
-    TimeStep time;
-    string fname;
-};
-vector<StatDumpTime> dumpTimes;
-size_t nextDumpTimeIndex;
-
 SimulationMode readMode(const string& str){
     if(str=="forced")
         return forcedEIR;
@@ -135,29 +128,12 @@ TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
   Continuous.registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
   Continuous.registerCallback( "human infectiousness", "\thuman infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );
   Continuous.registerCallback( "num transmitting humans", "\tnum transmitting humans", MakeDelegate( this, &TransmissionModel::ctsCbNumTransmittingHumans ) );
-  
-  dumpTimes.reserve( entoData.getStatDump().size() );
-  BOOST_FOREACH( const scnXml::StatDump& elt, entoData.getStatDump() ){
-      StatDumpTime x;
-      x.time = TimeStep(elt.getTime());
-      x.fname = elt.getFilename();
-      dumpTimes.push_back( x );
-  }
 }
 
 TransmissionModel::~TransmissionModel () {
 }
 
 double TransmissionModel::updateKappa (const Population& population) {
-    bool statDump = false;
-    ofstream stats;
-    if( nextDumpTimeIndex < dumpTimes.size() && dumpTimes[nextDumpTimeIndex].time == TimeStep::interventionPeriod ){
-        statDump = true;
-        stats.open( dumpTimes[nextDumpTimeIndex].fname.c_str() );
-        stats << "time" << '\t' << "age ts" << '\t' << "dens" << '\t' << "rel availability" << '\t' << "prob transmission" << endl;
-        nextDumpTimeIndex += 1;
-    }
-    
     // We calculate kappa for output and non-vector model, and kappaByAge for
     // the shared graphics.
 
@@ -181,14 +157,6 @@ double TransmissionModel::updateKappa (const Population& population) {
         Monitoring::AgeGroup ag = h->getMonitoringAgeGroup();
         kappaByAge[ag.i()] += prod;
         ++nByAge[ag.i()];
-        
-        if( statDump ){
-            stats << TimeStep::simulation << '\t';
-            stats << h->getAgeInTimeSteps() << '\t';
-            stats << h->getWithinHostModel().getTotalDensity() << '\t';
-            stats << weighting << '\t';
-            stats << probTransmission << endl;
-        }
     }
 
 
