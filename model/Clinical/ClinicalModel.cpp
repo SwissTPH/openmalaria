@@ -81,10 +81,8 @@ ClinicalModel* ClinicalModel::createClinicalModel (double tSF) {
         return new ClinicalEventScheduler (tSF);
     }else if( opt_imm_outcomes ){
         return new ImmediateOutcomes (tSF);
-//     }else{
-//         return new ...;
     }else{
-        throw SWITCH_DEFAULT_EXCEPTION;
+        return new DecisionTree5Day( tSF );
     }
 }
 

@@ -74,7 +74,7 @@
   <interventions name="Change to monitoring HS">
     <changeHS>
       <timedDeployment time="0">
-        <ImmediateOutcomes name="Test HS">
+        <!-- ImmediateOutcomes name="Test HS">
           <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
           <initialACR>
             <CQ value="1"/>
@@ -109,7 +109,27 @@
           <pSelfTreatUncomplicated value="0"/>
           <pSeekOfficialCareUncomplicated2 value="1"/>
           <pSeekOfficialCareSevere value="1"/>
-        </ImmediateOutcomes>
+        </ImmediateOutcomes -->
+        <DecisionTree5Day name="Test HS">
+          <pSeekOfficialCareUncomplicated1 value="1"/>
+          <pSelfTreatUncomplicated value="0"/>
+          <pSeekOfficialCareUncomplicated2 value="1"/>
+          <pSeekOfficialCareSevere value="1"/>
+          <treeUCOfficial>
+            <random name="extra random number to closely model old behaviour">
+              <outcome p="1">
+                <treatSimple timestepsLiver="0" timestepsBlood="1"/>
+              </outcome>
+            </random>
+          </treeUCOfficial>
+          <treeUCSelfTreat>
+            <noAction/>
+          </treeUCSelfTreat>
+          <cureRateSevere value="1"/>
+          <treatmentSevere>
+            <clearInfections stage="blood" timesteps="1"/>
+          </treatmentSevere>
+        </DecisionTree5Day>
         <CFR>
           <group lowerbound="0" value="0.09189"/>
           <group lowerbound="0.25" value="0.0810811"/>
@@ -130,7 +150,7 @@
     </changeHS>
   </interventions>
   <healthSystem>
-    <ImmediateOutcomes name="no Treatment no Mortality">
+    <!-- ImmediateOutcomes name="no Treatment no Mortality">
       <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
       <initialACR>
         <CQ value="0"/>
@@ -165,7 +185,23 @@
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0"/>
       <pSeekOfficialCareSevere value="0"/>
-    </ImmediateOutcomes>
+    </ImmediateOutcomes -->
+    <DecisionTree5Day name="no Treatment no Mortality">
+      <pSeekOfficialCareUncomplicated1 value="0"/>
+      <pSelfTreatUncomplicated value="0"/>
+      <pSeekOfficialCareUncomplicated2 value="0"/>
+      <pSeekOfficialCareSevere value="0"/>
+      <treeUCOfficial>
+        <noAction/>
+      </treeUCOfficial>
+      <treeUCSelfTreat>
+        <noAction/>
+      </treeUCSelfTreat>
+      <cureRateSevere value="0"/>
+      <treatmentSevere>
+        <clearInfections stage="blood" timesteps="1"/>
+      </treatmentSevere>
+    </DecisionTree5Day>
     <CFR>
       <group lowerbound="0" value="0"/>
     </CFR>
