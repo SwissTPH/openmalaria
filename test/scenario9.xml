@@ -69,42 +69,29 @@
     </uninfectVectors>
   </interventions>
   <healthSystem>
-    <ImmediateOutcomes name="Ironmal">
-      <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
-      <initialACR>
-        <CQ value="0.6"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
-        <selfTreatment value="0"/>
-      </initialACR>
-      <compliance>
-        <CQ value="1"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
-        <selfTreatment value="0"/>
-      </compliance>
-      <nonCompliersEffective>
-        <CQ value="0"/>
-        <SP value="0"/>
-        <AQ value="0"/>
-        <ACT value="0"/>
-        <QN value="0"/>
-        <selfTreatment value="0"/>
-      </nonCompliersEffective>
-      <treatmentActions>
-        <CQ name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
-        </CQ>
-      </treatmentActions>
+    <DecisionTree5Day name="Ironmal">
       <pSeekOfficialCareUncomplicated1 value="0.64"/>
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0.64"/>
       <pSeekOfficialCareSevere value="0.48"/>
-    </ImmediateOutcomes>
+      <treeUCOfficial>
+        <random name="p cure">
+          <outcome p="0.6" name="60% chance cure">
+            <treatSimple timestepsLiver="0" timestepsBlood="1"/>
+          </outcome>
+          <outcome p="0.4">
+            <noAction/>
+          </outcome>
+        </random>
+      </treeUCOfficial>
+      <treeUCSelfTreat>
+        <noAction/>
+      </treeUCSelfTreat>
+      <cureRateSevere value="0.60"/>
+      <treatmentSevere>
+        <clearInfections stage="blood" timesteps="1"/>
+      </treatmentSevere>
+    </DecisionTree5Day>
     <CFR>
       <group lowerbound="0" value="0.09189"/>
       <group lowerbound="0.25" value="0.0810811"/>
