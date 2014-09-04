@@ -44,8 +44,8 @@ auto_ptr<CMDecisionTree> ESCaseManagement::uncomplicated,
     ESCaseManagement::mda;
 
 void ESCaseManagement::setHealthSystem(const scnXml::HSEventScheduler& esData){
-    uncomplicated = CMDecisionTree::create( esData.getUncomplicated () );
-    complicated = CMDecisionTree::create( esData.getComplicated() );
+    uncomplicated = CMDecisionTree::create( esData.getUncomplicated(), true );
+    complicated = CMDecisionTree::create( esData.getComplicated(), false );
     
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
@@ -53,7 +53,7 @@ void ESCaseManagement::setHealthSystem(const scnXml::HSEventScheduler& esData){
 }
 
 void ESCaseManagement::initMDA (const scnXml::DecisionTree& desc){
-    mda = CMDecisionTree::create( desc );
+    mda = CMDecisionTree::create( desc, true );
 }
 
 void ESCaseManagement::massDrugAdministration(

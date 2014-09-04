@@ -41,6 +41,11 @@ namespace WithinHost {
  * Type used to select a treatment option.
  * 
  * Pass by value; it just hides an integer.
+ * 
+ * TODO: this struct and the Treatments class are no longer strictly necessary.
+ * Ideally, one would remove this, firstly by replacing usages of
+ * om:TreatmentOption in healthSystem.xsd with om:DecisionTree (requires an
+ * XML updator algorithm), then optionally removing ImmediateOutcomes.
  */
 struct TreatmentId{
     inline bool operator==( const TreatmentId that ){ return id == that.id; }

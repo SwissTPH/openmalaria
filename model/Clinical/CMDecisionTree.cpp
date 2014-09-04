@@ -49,7 +49,7 @@ using boost::ptr_map;
  */
 class CMDTMultiple : public CMDecisionTree {
 public:
-    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTMultiple& node );
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTMultiple& node, bool isUC );
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
@@ -78,11 +78,11 @@ private:
  */
 class CMDTCaseType : public CMDecisionTree {
 public:
-    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTCaseType& node );
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTCaseType& node, bool isUC );
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
-        //TODO: clarify whether or not this works for complicated cases. Currently probably not.
+        // Uses of this in complicated cases should trigger an exception during initialisation.
         assert( (hostData.pgState & Episode::SICK) && !(hostData.pgState & Episode::COMPLICATED) );
         
         if( hostData.pgState & Episode::SECOND_CASE ) return secondLine->exec( hostData );
@@ -104,7 +104,7 @@ private:
  */
 class CMDTDiagnostic : public CMDecisionTree {
 public:
-    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTDiagnostic& node );
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTDiagnostic& node, bool isUC );
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
@@ -158,7 +158,7 @@ private:
  */
 class CMDTRandom : public CMDecisionTree {
 public:
-    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTRandom& node );
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTRandom& node, bool isUC );
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
@@ -180,7 +180,7 @@ private:
  */
 class CMDTAge : public CMDecisionTree {
 public:
-    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTAge& node );
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DTAge& node, bool isUC );
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
@@ -298,12 +298,12 @@ protected:
 
 // ———  static functions  ———
 
-auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& node ){
+auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& node, bool isUC ){
     // branching nodes
-    if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get() );
-    if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get() );
-    if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get() );
-    if( node.getAge().present() ) return CMDTAge::create( node.getAge().get() );
+    if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get(), isUC );
+    if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get(), isUC );
+    if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get(), isUC );
+    if( node.getAge().present() ) return CMDTAge::create( node.getAge().get(), isUC );
     // action nodes
     if( node.getNoTreatment().present() ) return auto_ptr<CMDecisionTree>( new CMDTNoTreatment() );
     if( node.getTreatFailure().present() ) return auto_ptr<CMDecisionTree>( new CMDTTreatFailure() );
@@ -314,19 +314,19 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
     throw xml_scenario_error( "unterminated decision tree" );
 }
 
-auto_ptr<CMDecisionTree> CMDTMultiple::create( const scnXml::DTMultiple& node ){
+auto_ptr<CMDecisionTree> CMDTMultiple::create( const scnXml::DTMultiple& node, bool isUC ){
     auto_ptr<CMDTMultiple> self( new CMDTMultiple() );
     foreach( const scnXml::DTCaseType& sn, node.getCaseType() ){
-        self->children.push_back( CMDTCaseType::create(sn).release() );
+        self->children.push_back( CMDTCaseType::create(sn, isUC).release() );
     }
     foreach( const scnXml::DTDiagnostic& sn, node.getDiagnostic() ){
-        self->children.push_back( CMDTDiagnostic::create(sn).release() );
+        self->children.push_back( CMDTDiagnostic::create(sn, isUC).release() );
     }
     foreach( const scnXml::DTRandom& sn, node.getRandom() ){
-        self->children.push_back( CMDTRandom::create(sn).release() );
+        self->children.push_back( CMDTRandom::create(sn, isUC).release() );
     }
     foreach( const scnXml::DTAge& sn, node.getAge() ){
-        self->children.push_back( CMDTAge::create(sn).release() );
+        self->children.push_back( CMDTAge::create(sn, isUC).release() );
     }
     if( node.getTreatPKPD().size() ){
         self->children.push_back( new CMDTTreatPKPD(node.getTreatPKPD()) );
@@ -337,30 +337,33 @@ auto_ptr<CMDecisionTree> CMDTMultiple::create( const scnXml::DTMultiple& node ){
     return auto_ptr<CMDecisionTree>( self.release() );
 }
 
-auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node ){
+auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node, bool isUC ){
+    if( !isUC ){
+        throw util::xml_scenario_error( "decision tree: caseType can only be used for uncomplicated cases" );
+    }
     return auto_ptr<CMDecisionTree>( new CMDTCaseType(
-        CMDecisionTree::create( node.getFirstLine() ),
-        CMDecisionTree::create( node.getSecondLine() )
+        CMDecisionTree::create( node.getFirstLine(), isUC ),
+        CMDecisionTree::create( node.getSecondLine(), isUC )
     ) );
 }
 
-auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& node ){
+auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& node, bool isUC ){
     return auto_ptr<CMDecisionTree>( new CMDTDiagnostic(
         node.getType(),
-        CMDecisionTree::create( node.getPositive() ),
-        CMDecisionTree::create( node.getNegative() )
+        CMDecisionTree::create( node.getPositive(), isUC ),
+        CMDecisionTree::create( node.getNegative(), isUC )
     ) );
 }
 
 auto_ptr< CMDecisionTree > CMDTRandom::create(
-    const scnXml::DTRandom& node )
+    const scnXml::DTRandom& node, bool isUC )
 {
     auto_ptr<CMDTRandom> result( new CMDTRandom() );
     
     double cum_p = 0.0;
     BOOST_FOREACH( const scnXml::Outcome& outcome, node.getOutcome() ){
         cum_p += outcome.getP();
-        result->branches.insert( cum_p, CMDecisionTree::create( outcome ) );
+        result->branches.insert( cum_p, CMDecisionTree::create( outcome, isUC ) );
     }
     
     // Test cum_p is approx. 1.0 in case the input tree is wrong. In any case,
@@ -379,7 +382,7 @@ auto_ptr< CMDecisionTree > CMDTRandom::create(
     return auto_ptr<CMDecisionTree>( result.release() );
 }
 
-auto_ptr< CMDecisionTree > CMDTAge::create(const scnXml::DTAge& node){
+auto_ptr< CMDecisionTree > CMDTAge::create(const scnXml::DTAge& node, bool isUC){
     auto_ptr<CMDTAge> result( new CMDTAge() );
     
     double lastAge = numeric_limits<double>::quiet_NaN();
@@ -395,7 +398,7 @@ auto_ptr< CMDecisionTree > CMDTAge::create(const scnXml::DTAge& node){
             double lb = age.getLb();
             result->branches.insert( lb, lastNode.release() );
         }
-        lastNode.reset( CMDecisionTree::create(age).release() );
+        lastNode.reset( CMDecisionTree::create(age, isUC).release() );
         lastAge = age.getLb();
     }
     double noLb = numeric_limits<double>::infinity();

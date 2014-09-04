@@ -62,7 +62,7 @@ public:
     virtual ~CMDecisionTree() {}
     
     /// Create a user-configured decision from an XML node.
-    static auto_ptr<CMDecisionTree> create( const ::scnXml::DecisionTree& node );
+    static auto_ptr<CMDecisionTree> create( const ::scnXml::DecisionTree& node, bool isUC );
     
     /** Run the decision tree.
      * 

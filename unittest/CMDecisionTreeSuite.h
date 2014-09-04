@@ -76,7 +76,7 @@ public:
      * returns the proportion of these runs where the output was any treatment
      */
     double propTreatmentsNReps (int N, const scnXml::DecisionTree& dt) {
-        auto_ptr<CMDecisionTree> cmdt = CMDecisionTree::create( dt );
+        auto_ptr<CMDecisionTree> cmdt = CMDecisionTree::create( dt, true );
         
 	whm->nTreatments = 0;
         int secondCounter = 0;

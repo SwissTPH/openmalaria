@@ -38,6 +38,8 @@ namespace Clinical {
  * Severe cases: all decisions and outcomes are calculated via a fixed-function
  * probability tree, using the same logic for handling severe cases as has long
  * been used.
+ * 
+ * NOTE: this provides a strict subset of the functionality of DecisionTree5Day.
  */
 class ImmediateOutcomes : public CM5DayCommon
 {

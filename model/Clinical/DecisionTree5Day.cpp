@@ -61,8 +61,8 @@ void DecisionTree5Day::setHealthSystem(const scnXml::HSDT5Day& hsDescription){
             "be in range [0,1]");
     }
     
-    treeUCOfficial.reset( CMDecisionTree::create( hsDescription.getTreeUCOfficial() ).release() );
-    treeUCSelfTreat.reset( CMDecisionTree::create( hsDescription.getTreeUCSelfTreat() ).release() );
+    treeUCOfficial.reset( CMDecisionTree::create( hsDescription.getTreeUCOfficial(), true ).release() );
+    treeUCSelfTreat.reset( CMDecisionTree::create( hsDescription.getTreeUCSelfTreat(), true ).release() );
     
     cureRateSevere = hsDescription.getCureRateSevere().getValue();
     treatmentSevere = WHInterface::addTreatment( hsDescription.getTreatmentSevere() );

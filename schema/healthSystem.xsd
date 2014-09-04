@@ -655,6 +655,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:documentation>
         A switch which choses a branch deterministically, based on whether the
         patient was treated recently (second line) or not (first line).
+        
+        For uncomplicated cases only.
       </xs:documentation>
       <xs:appinfo>name:Switch (first/second line);</xs:appinfo>
     </xs:annotation>
