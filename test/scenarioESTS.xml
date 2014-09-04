@@ -138,7 +138,7 @@
             </random>
           </outcome>
           <outcome p="0.5" name="none">
-            <noAction/>
+            <noTreatment/>
           </outcome>
         </random>
       </uncomplicated>
@@ -247,7 +247,7 @@
                         </random>
                       </outcome>
                       <outcome p="0.2" name="no referral">
-                        <noAction/>
+                        <noTreatment/>
                       </outcome>
                     </random>
                   </positive>
@@ -315,7 +315,7 @@
                         </random>
                       </outcome>
                       <outcome p="0.2" name="no referral">
-                        <noAction/>
+                        <noTreatment/>
                       </outcome>
                     </random>
                   </negative>
@@ -385,14 +385,14 @@
                     </random>
                   </outcome>
                   <outcome p="0.2" name="no referral">
-                    <noAction/>
+                    <noTreatment/>
                   </outcome>
                 </random>
               </outcome>
             </random>
           </outcome>
           <outcome p="0.5" name="no provider">
-            <noAction/>
+            <noTreatment/>
           </outcome>
         </random>
       </complicated>

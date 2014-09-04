@@ -94,14 +94,14 @@ public:
         
         scnXml::Outcome o1r2( 0.9 ), o2r2( 0.1 );
         o1r2.getTreatPKPD().push_back( treat1 );
-        o2r2.setNoAction( scnXml::DTNoAction() );
+        o2r2.setNoTreatment( scnXml::DTNoTreatment() );
         scnXml::DTRandom r2;
         r2.getOutcome().push_back( o1r2 );
         r2.getOutcome().push_back( o2r2 );
         
         scnXml::Outcome o1r3( 0.7 ), o2r3( 0.3 );
         o1r3.getTreatPKPD().push_back( treat1 );
-        o2r3.setNoAction( scnXml::DTNoAction() );
+        o2r3.setNoTreatment( scnXml::DTNoTreatment() );
         scnXml::DTRandom r3;
         r3.getOutcome().push_back( o1r3 );
         r3.getOutcome().push_back( o2r3 );
@@ -129,7 +129,7 @@ public:
         scnXml::DecisionTree simpleTreat;
         simpleTreat.getTreatPKPD().push_back( treat1 );
         scnXml::DecisionTree noAction;
-        noAction.setNoAction( scnXml::DTNoAction() );
+        noAction.setNoTreatment( scnXml::DTNoTreatment() );
         
         scnXml::DTCaseType ct( simpleTreat,  // first line: simple treatment
                             noAction );     // second line: no action
@@ -148,7 +148,7 @@ public:
         scnXml::DecisionTree simpleTreat;
         simpleTreat.getTreatPKPD().push_back( treat1 );
         scnXml::DecisionTree noAction;
-        noAction.setNoAction( scnXml::DTNoAction() );
+        noAction.setNoTreatment( scnXml::DTNoTreatment() );
         
         scnXml::DTDiagnostic microscopy( simpleTreat,  // positive: simple treatment
                             noAction,     // negative: no action
@@ -188,7 +188,7 @@ public:
         ageSwitch.getAge().push_back( treatYoung );
         
         scnXml::Age noTreat( 2.5 );     // ages 2.5 to 50
-        noTreat.setNoAction( scnXml::DTNoAction() );
+        noTreat.setNoTreatment( scnXml::DTNoTreatment() );
         ageSwitch.getAge().push_back( noTreat );
         
         scnXml::Age treatOlder( 50.0 );  // ages 50+

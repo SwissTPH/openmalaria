@@ -71,10 +71,10 @@
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
-        <noAction/>
+        <noTreatment/>
       </uncomplicated>
       <complicated>
-        <noAction/>
+        <noTreatment/>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>

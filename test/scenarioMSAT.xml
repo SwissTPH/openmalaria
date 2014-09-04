@@ -123,7 +123,7 @@
               <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
             </positive>
             <negative>
-              <noAction/>
+              <noTreatment/>
             </negative>
           </diagnostic>
         </MDA1D>
@@ -200,7 +200,7 @@
                         </random> 
                       </outcome>
                       <outcome p="0.5">
-                        <noAction/>
+                        <noTreatment/>
                       </outcome>
                     </random>
                   </outcome>
@@ -219,7 +219,7 @@
                             </random> 
                           </outcome>
                           <outcome p="0.15">
-                            <noAction/>
+                            <noTreatment/>
                           </outcome>
                         </random>
                       </positive>
@@ -236,7 +236,7 @@
                             </random> 
                           </outcome>
                           <outcome p="0.85">
-                            <noAction/>
+                            <noTreatment/>
                           </outcome>
                         </random>
                       </negative>
@@ -257,14 +257,14 @@
                     </random> 
                   </outcome>
                   <outcome p="0.85">
-                    <noAction/>
+                    <noTreatment/>
                   </outcome>
                 </random>
               </secondLine>
             </caseType>
           </outcome>
           <outcome p="0.8" name="no treatment provider">
-            <noAction/>
+            <noTreatment/>
           </outcome>
         </random>
       </uncomplicated>
@@ -285,12 +285,12 @@
                 <treatPKPD schedule="AL_treat" dosage="AL_dosages" delay_h="108"/>
               </outcome>
               <outcome p="0.2" name="no referral">
-                <noAction/>
+                <noTreatment/>
               </outcome>
             </random>
           </outcome>
           <outcome p="0.52" name="no initial provider">
-            <noAction/>
+            <noTreatment/>
           </outcome>
         </random>
       </complicated>

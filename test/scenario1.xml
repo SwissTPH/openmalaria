@@ -123,7 +123,7 @@
             </random>
           </treeUCOfficial>
           <treeUCSelfTreat>
-            <noAction/>
+            <noTreatment/>
           </treeUCSelfTreat>
           <cureRateSevere value="1"/>
           <treatmentSevere>
@@ -192,10 +192,10 @@
       <pSeekOfficialCareUncomplicated2 value="0"/>
       <pSeekOfficialCareSevere value="0"/>
       <treeUCOfficial>
-        <noAction/>
+        <noTreatment/>
       </treeUCOfficial>
       <treeUCSelfTreat>
-        <noAction/>
+        <noTreatment/>
       </treeUCSelfTreat>
       <cureRateSevere value="0"/>
       <treatmentSevere>

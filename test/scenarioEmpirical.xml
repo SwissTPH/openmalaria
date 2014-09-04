@@ -83,7 +83,7 @@
                 <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
               </outcome>
               <outcome p="0.25" name="no test, no treatment">
-                <noAction/>
+                <noTreatment/>
               </outcome>
               <outcome p="0.3" name="microscopy test">
                 <diagnostic type="microscopy">
@@ -93,12 +93,12 @@
                         <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
                       </outcome>
                       <outcome p="0.1">
-                        <noAction/>
+                        <treatFailure/>
                       </outcome>
                     </random>
                   </positive>
                   <negative>
-                    <noAction/>
+                    <noTreatment/>
                   </negative>
                 </diagnostic>
               </outcome><!-- microscopy -->
@@ -110,12 +110,12 @@
                         <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
                       </outcome>
                       <outcome p="0.1">
-                        <noAction/>
+                        <treatFailure/>
                       </outcome>
                     </random>
                   </positive>
                   <negative>
-                    <noAction/>
+                    <noTreatment/>
                   </negative>
                 </diagnostic>
               </outcome><!-- RDT -->
@@ -127,7 +127,7 @@
                 <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
               </outcome>
               <outcome p="0.2" name="no test, no treatment">
-                <noAction/>
+                <noTreatment/>
               </outcome>
               <outcome p="0.3" name="microscopy test">
                 <diagnostic type="microscopy">
@@ -137,12 +137,12 @@
                         <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
                       </outcome>
                       <outcome p="0.1">
-                        <noAction/>
+                        <treatFailure/>
                       </outcome>
                     </random>
                   </positive>
                   <negative>
-                    <noAction/>
+                    <noTreatment/>
                   </negative>
                 </diagnostic>
               </outcome><!-- microscopy -->
@@ -154,12 +154,12 @@
                         <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
                       </outcome>
                       <outcome p="0.1">
-                        <noAction/>
+                        <treatFailure/>
                       </outcome>
                     </random>
                   </positive>
                   <negative>
-                    <noAction/>
+                    <noTreatment/>
                   </negative>
                 </diagnostic>
               </outcome><!-- RDT -->
@@ -170,7 +170,7 @@
       <complicated>
         <random>
           <outcome p="0.3" name="no diagnostic">
-            <noAction/>
+            <noTreatment/>
             <!-- TODO: hospitalise -->
           </outcome>
           <outcome p="0.5" name="RDT">
@@ -182,13 +182,13 @@
                     <!-- TODO: hospitalise -->
                   </outcome>
                   <outcome p="0.1">
-                    <noAction/>
+                    <treatFailure/>
                     <!-- TODO: hospitalise -->
                   </outcome>
                 </random>
               </positive>
               <negative>
-                <noAction/>
+                <noTreatment/>
                 <!-- TODO: hospitalise -->
               </negative>
             </diagnostic>
@@ -202,13 +202,13 @@
                     <!-- TODO: hospitalise -->
                   </outcome>
                   <outcome p="0.1">
-                    <noAction/>
+                    <treatFailure/>
                     <!-- TODO: hospitalise -->
                   </outcome>
                 </random>
               </positive>
               <negative>
-                <noAction/>
+                <noTreatment/>
                 <!-- TODO: hospitalise -->
               </negative>
             </diagnostic>

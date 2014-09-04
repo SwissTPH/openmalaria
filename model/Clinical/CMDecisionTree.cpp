@@ -201,10 +201,18 @@ private:
 // ———  action nodes  ———
 
 /** Do nothing. **/
-class CMDTNoAction : public CMDecisionTree {
+class CMDTNoTreatment : public CMDecisionTree {
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
         return CMDTOut(false);
+    }
+};
+
+/** Report treament without affecting parasites. **/
+class CMDTTreatFailure : public CMDecisionTree {
+protected:
+    virtual CMDTOut exec( CMHostData hostData ) const{
+        return CMDTOut(true /*report treatment*/);
     }
 };
 
@@ -297,7 +305,8 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
     if( node.getRandom().present() ) return CMDTRandom::create( node.getRandom().get() );
     if( node.getAge().present() ) return CMDTAge::create( node.getAge().get() );
     // action nodes
-    if( node.getNoAction().present() ) return auto_ptr<CMDecisionTree>( new CMDTNoAction() );
+    if( node.getNoTreatment().present() ) return auto_ptr<CMDecisionTree>( new CMDTNoTreatment() );
+    if( node.getTreatFailure().present() ) return auto_ptr<CMDecisionTree>( new CMDTTreatFailure() );
     if( node.getTreatPKPD().size() ) return auto_ptr<CMDecisionTree>(
         new CMDTTreatPKPD( node.getTreatPKPD() ) );
     if( node.getTreatSimple().present() ) return auto_ptr<CMDecisionTree>(

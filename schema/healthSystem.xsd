@@ -601,7 +601,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="random" type="om:DTRandom"/>
       <xs:element name="age" type="om:DTAge"/>
       <!-- actions -->
-      <xs:element name="noAction" type="om:DTNoAction"/>
+      <xs:element name="noTreatment" type="om:DTNoTreatment"/>
+      <xs:element name="treatFailure" type="om:DTTreatFailure"/>
       <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
       <xs:element name="treatSimple" type="om:DTTreatSimple"/>
       <xs:element name="deploy" type="om:DTDeploy" maxOccurs="unbounded"/>
@@ -625,7 +626,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         a) multiple types of child can occur simultaneously (e.g. multiple
         types of treatment or treatment plus a 'random' sub-tree)
         
-        b) the 'noAction' node is not allowed
+        b) the 'noTreatment' and 'treatFailure' nodes are not allowed
       </xs:documentation>
       <xs:appinfo>name:Decision tree;</xs:appinfo>
     </xs:annotation>
@@ -787,13 +788,31 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="DTNoAction">
+  <xs:complexType name="DTNoTreatment">
     <xs:annotation>
       <xs:documentation>
-        An end node doing nothing. The point of this is to prevent trees from
-        accidentally being left incomplete.
+        An end node doing nothing. This exists to explicitly state that no
+        treatment happens and to prevent trees from accidentally being left
+        incomplete.
       </xs:documentation>
-      <xs:appinfo>name:No action;</xs:appinfo>
+      <xs:appinfo>name:No treatment;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTTreatFailure">
+    <xs:annotation>
+      <xs:documentation>
+        An end node which reports treatment but does not change parasitalogical
+        status. This allows correct labelling of second-line cases.
+      </xs:documentation>
+      <xs:appinfo>name:Failed treatment;</xs:appinfo>
     </xs:annotation>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>

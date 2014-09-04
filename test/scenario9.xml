@@ -80,12 +80,12 @@
             <treatSimple timestepsLiver="0" timestepsBlood="1"/>
           </outcome>
           <outcome p="0.4">
-            <noAction/>
+            <treatFailure/>
           </outcome>
         </random>
       </treeUCOfficial>
       <treeUCSelfTreat>
-        <noAction/>
+        <noTreatment/>
       </treeUCSelfTreat>
       <cureRateSevere value="0.60"/>
       <treatmentSevere>
