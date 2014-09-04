@@ -625,6 +625,8 @@
       <EIRDaily origin="Namawala Pre">0.0053461925</EIRDaily>
       <EIRDaily origin="Namawala Pre">0.0042975824</EIRDaily>
     </nonVector>
+    <statDump time="10" filename="dump1.txt"/>
+    <statDump time="100" filename="dump10.txt"/>
   </entomology>
   <model>
     <ModelOptions>
