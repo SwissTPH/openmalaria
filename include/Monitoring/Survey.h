@@ -184,18 +184,6 @@ public:
     Survey& set_Vector_Sv (string key, double v) { data_Vector_Sv[key] = v; return *this; }
     //@}
     
-    ///@brief Set outputs per drug
-    //@{
-    void report_Clinical_DrugUsage (string abbrev, double qty) {
-        // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
-        (*((m_Clinical_DrugUsage.insert(make_pair(abbrev, 0.0))).first)).second += qty;
-    }
-    void report_Clinical_DrugUsageIV (string abbrev, double qty) {
-        // Insert the pair (abbrev, 0.0) if not there, get an iterator to it, and increment it's second param (quantity) by qty
-        (*((m_Clinical_DrugUsageIV.insert(make_pair(abbrev, 0.0))).first)).second += qty;
-    }
-    //@}
-    
     /**
      * Report some integer number of events, adding the number to a total.
      * 
@@ -239,9 +227,6 @@ public:
         data_Vector_Ov & stream;
         data_Vector_Sv & stream;
         
-        m_Clinical_DrugUsage & stream;
-        m_Clinical_DrugUsageIV & stream;
-        
         m_inoculationsPerAgeGroup & stream;
         
         checkpoint( stream );   // for m_humanReportsInt, m_humanReportsDouble
@@ -275,10 +260,6 @@ private:
     map<string,double> data_Vector_Nv;
     map<string,double> data_Vector_Ov;
     map<string,double> data_Vector_Sv;
-    
-    // data categorised by drug:
-    map<string,double> m_Clinical_DrugUsage;
-    map<string,double> m_Clinical_DrugUsageIV;
     
     // data categorised by human age group:
     vector<double> m_inoculationsPerAgeGroup;

@@ -7,6 +7,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
            xmlns:om="http://openmalaria.org/schema/scenario_32"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
+  
+  <!-- root element for clinical data outside the healthSystem element -->
   <xs:complexType name="clinical">
     <xs:annotation>
       <xs:documentation>
@@ -72,6 +74,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  
+  <!-- the healthSystem element -->
   <xs:complexType name="healthSystem">
     <xs:annotation>
       <xs:documentation>
@@ -89,6 +93,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:choice>
         <xs:element name="EventScheduler" type="om:HSEventScheduler" />
         <xs:element name="ImmediateOutcomes" type="om:HSImmediateOutcomes" />
+        <xs:element name="DecisionTree5Day" type="om:HSDT5Day"/>
       </xs:choice>
       <xs:element name="CFR" type="om:AgeGroupValues">
         <xs:annotation>
@@ -110,6 +115,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+
+  <xs:complexType name="Primaquine">
+    <xs:all>
+      <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
+      <xs:element name="pUseUncomplicated" type="om:inputValue"/>
+      <xs:element name="effectivenessOnUse" type="om:inputValue"/>
+    </xs:all>
+  </xs:complexType>
+  
+  <!-- healthSystem: 5-day model -->
   <xs:complexType name="HSImmediateOutcomes">
     <xs:annotation>
       <xs:documentation>
@@ -119,7 +134,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
       <xs:appinfo>type: list of elements;name:Case Management (Tediosi et al);</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
+    <xs:all>
       <xs:element name="drugRegimen">
         <xs:annotation>
           <xs:documentation>
@@ -193,6 +208,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:all>
         </xs:complexType>
       </xs:element>
+      <!-- begin elements in common with DecisionTree5Day -->
+      <!-- note: we cannot use class extension without reordering existing XMLs -->
       <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
@@ -207,8 +224,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>
-            Probability that a patient with uncomplicated
-            disease will self-treat
+            Probability that a patient with uncomplicated disease without
+            recent history of disease (i.e. first line) will self-treat.
+            
+            Note that in second line cases there is no probability of self-treatment.
           </xs:documentation>
           <xs:appinfo>
             type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
@@ -237,22 +256,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="primaquine" minOccurs="0">
-        <xs:complexType>
-          <xs:all>
-            <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
-            <xs:element name="pUseUncomplicated" type="om:inputValue"/>
-            <xs:element name="effectivenessOnUse" type="om:inputValue"/>
-          </xs:all>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:element name="primaquine" type="om:Primaquine" minOccurs="0"/>
+    </xs:all>
+    <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
           Name of health system
         </xs:documentation>
-        <xs:appinfo>type:string;name:Case Management model;</xs:appinfo>
+        <xs:appinfo>name:Name of case management parameterisation;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="useDiagnosticUC" type="xs:boolean" default="false"/>
@@ -313,289 +324,101 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
+  
+  <!-- health system: 5-day with flexible case management -->
+  <xs:complexType name="HSDT5Day">
+    <xs:annotation>
+      <xs:documentation>
+        Description of the health system using the 5-day timestep with decision
+        tree model: access is configured as in the Tediosi et al case
+        management model (Case management as described in AJTMH 75 (suppl 2)
+        pp90-103) while treatment decisions are configured via decision trees.
+        
+        Besides greater flexibility, this allows treatment via PK/PD models.
+      </xs:documentation>
+      <xs:appinfo>name:Case Management (Tediosi et al with programmable decision trees);</xs:appinfo>
+    </xs:annotation>
+    <xs:all>
+      <!-- begin elements in common with DecisionTree5Day -->
+      <!-- note: we cannot use class extension without reordering existing XMLs -->
+      <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with newly incident
+            uncomplicated disease seeks official care
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with uncomplicated disease without
+            recent history of disease (i.e. first line) will self-treat.
+            
+            Note that in second line cases there is no probability of self-treatment.
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pSeekOfficialCareUncomplicated2" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with recurrence of
+            uncomplicated disease seeks official care
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pSeekOfficialCareSevere" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            Probability that a patient with severe disease
+            obtains appropriate care
+          </xs:documentation>
+          <xs:appinfo>
+            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
+          </xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="primaquine" type="om:Primaquine" minOccurs="0"/>
+      <xs:element name="treeUCOfficial" type="om:DecisionTree"/>
+      <xs:element name="treeUCSelfTreat" type="om:DecisionTree"/>
+      <xs:element name="cureRateSevere" type="om:inputValue">
+        <xs:annotation>
+          <xs:documentation>
+            The probability of clearing parasites given access to
+            appropriate (hospital) care, for a severe case.
+          </xs:documentation>
+          <xs:appinfo>name:Cure rate (severe cases);min:0;max:1;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="treatmentSevere" type="om:TreatmentOption"/>
+    </xs:all>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Name of health system
+        </xs:documentation>
+        <xs:appinfo>name:Name of case management parameterisation;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <!-- healthSystem: 1-day model -->
   <xs:complexType name="HSEventScheduler">
     <xs:sequence>
-      <xs:element name="uncomplicated"    type="om:HSESCaseManagement"   />
-      <xs:element name="complicated"      type="om:HSESCaseManagement"   />
+      <xs:element name="uncomplicated"    type="om:DecisionTree"   />
+      <xs:element name="complicated"      type="om:DecisionTree"   />
       <xs:element name="ClinicalOutcomes" type="om:ClinicalOutcomes"     />
       <xs:element name="NonMalariaFevers" type="om:HSESNMF" minOccurs="0"/>
     </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="HSESCaseManagement">
-    <xs:annotation>
-      <xs:documentation>
-        A set of decisions and a set of treatments.
-      </xs:documentation>
-      <xs:appinfo>type:list of elements;name:Set of decisions;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="decisions"  type="om:HSESDecisions"   />
-      <xs:element name="treatments" type="om:HSESTreatments"  />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="HSESDecisions">
-    <xs:annotation>
-      <xs:documentation>
-        Description of decisions for a case management tree. A generic view
-        of this tree would be that each decision is deterministic, or based on probabilities which
-        may depend on other decisions. Probabilistic decisions are described here.
-        
-        In general, each decision has a name, a defined set of outcome values, and a set of
-        dependent decisions mentioned by name. The following decisions, with their associated
-        outcomes, are provided by the code (and may not be included here):
-        
-        * case (uncomplicated only): Returns "UC1" if there is no recent history
-          of a malarial case, or "UC2" if there is.
-        * result: Dependent on decision "test", this
-          performs a parasite density test. Output is one of "none" (no test
-          performed), "positive", "negative".
-        
-        The following decisions must be described here:
-        
-        * test (uncomplicated only): Outputs must be "none", "microscopy" or
-          "RDT" to describe which test the "result" decision uses.
-        * treatment: Describes which treatment to use. Values aren't restricted
-          but must match up with a treatment described in the corresponding
-          "treatments" section.
-        * hospitalisation (complicated only): none, immediate or delayed.
-      </xs:documentation>
-      <xs:appinfo>name:Description of decisions;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="decision" type="om:HSESDecision" minOccurs="0" maxOccurs="unbounded" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="HSESDecision">
-    <xs:annotation>
-      <xs:documentation>
-        A decision describes rules for choosing between a set of values.
-        
-        Lexically, it can contain symbols matching "[_\.a-zA-Z0-9]+", round brackets: (),
-        braces: {} and colons. Whitespace is ignored except to separate symbols.
-        
-        Syntactically, it must match one TREE, where SYMBOL is a symbol described above.
-        (Here, "x|y" means x or y, "x+" means x occurs once or more, brackets show grouping.)
-        TREE := BRANCH_SET | OUTCOME
-        BRANCH_SET := BRANCH+
-        BRANCH := DECISION '(' VALUE ')' ( ':' OUTCOME | '{' TREE '}' )
-        OUTCOME, DECISION, VALUE := SYMBOL
-        
-        For each BRANCH_SET each BRANCH must result in the same DECISION. The
-        DECISION must be one of the dependencies mentioned in "depends". This
-        may be:
-        * another decision, in which case the VALUE immediately following in
-          brackets must correspond to one of its output values. The BRANCH_SET immediately
-          containing this BRANCH must represent each output value of the same decision
-          exactly once, and no parent BRANCH_SET may be for the same DECISION.
-        * "p": this entry indicates a probabilistic decision. Where the value is a
-          probability, the sum of all values for the BRANCH_SET must be 1 and the decision
-          must be associated directly with OUTCOMEs (not sub-TREEs).
-        * "age": this entry indicates an age-test. The VALUE must have the form "a-b",
-          indicating that this branch will be taken for individuals aged such
-          that <![CDATA[a <= age < b]]>, where a,b are non-negative real numbers
-          or the special value "inf", and <![CDATA[a <= b]]>. All VALUEs in the
-          BRANCH_SET must cover all possible (non-negative real) ages, with no
-          overlap (hence, smallest a must be 0 and greatest b must be inf).
-        
-        Semantically, each OUTCOME must be one of the values associated with this decision.
-      </xs:documentation>
-      <xs:appinfo>name:Help-seeking decision;</xs:appinfo>
-    </xs:annotation>
-    <xs:simpleContent>
-      <xs:extension base="xs:string">
-        <xs:attribute name="name" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              The name of this decision. The name must match the regular expression
-              "[_a-zA-Z0-9]+"; that is it can only contain letters, digits and _ characters
-              (no spaces, punctuation, etc.).
-            </xs:documentation>
-            <xs:appinfo>type:string;name:Name of decision;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="depends" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              A comma-separated list of decisions that must have already been evaluated before
-              the current decision can be evaluated. May be empty. Each decision must be hard-coded or
-              described here. Can include the special decisions "p" and "age",
-              though "age" cannot be combined with any other dependency.
-            </xs:documentation>
-            <xs:appinfo>type: comma-separated list of elements; name:Preceding decisions;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="values" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
-              A comma-separated list of outcome values this decision may have.
-              The name of each value must be of the same form as decision names (i.e.
-              only contain letters, digits and _ characters).
-            </xs:documentation>
-            <xs:appinfo>type: comma-separated list of elements; name:Outcome values;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:simpleContent>
-  </xs:complexType>
-  <xs:complexType name="HSESTreatments">
-    <xs:annotation>
-      <xs:documentation>
-        A list of drug treatment tables. Each should have a name corresponding to
-        one of the "drug" decision's values.
-      </xs:documentation>
-      <xs:appinfo>type:string;name:List of treatment tables;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="treatment" type="om:HSESTreatment" minOccurs="0" maxOccurs="unbounded" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="HSESTreatment">
-    <xs:annotation>
-      <xs:documentation>
-        A description of a base treatment schedule that includes modifiers to handle
-        delays, quality variations, etc.
-      </xs:documentation>
-      <xs:appinfo>type:list of elements;name:Description of a base treatment schedule;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="schedule" type="om:HSESTreatmentSchedule" />
-      <xs:element name="modifier" type="om:HSESTreatmentModifier" minOccurs="0" maxOccurs="unbounded" />
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Name corresponding to one of the drug decision's output values.
-        </xs:documentation>
-        <xs:appinfo>units:string;name:Treatment administered;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="HSESTreatmentSchedule">
-    <xs:annotation>
-      <xs:documentation>
-        The base (unmodified)schedule of drugs administered for this treatment.
-      </xs:documentation>
-      <xs:appinfo>type:list of elements;name:Base schedule of drugs for this treatment;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="medicate" type="om:medicate" minOccurs="0" maxOccurs="unbounded" />
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="medicate">
-    <xs:attribute name="drug" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-      Abbreviated name of drug compound
-        </xs:documentation>
-        <xs:appinfo>type:string;name:drug;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="mg" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>Quantity of drug compound</xs:documentation>
-        <xs:appinfo>type:double;units:mg;name:drug dose;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="hour" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-        Number of hours past start of timestep this drug dose is administered
-        at (first dose should be at hour 0).
-      </xs:documentation>
-        <xs:appinfo>units:Hours;min:0;name:Time of administration;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="duration" type="xs:double" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-        If this attribute is given, use IV administration instead of orally.
-        
-        Specifies the number of hours during which the dose is administered.
-      </xs:documentation>
-        <xs:appinfo>type:double;units:Hours;min:0;name:Duration of administration;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="HSESTreatmentModifier">
-    <xs:annotation>
-      <xs:documentation>
-        A modifier for this treatment, according to the outputs of a decision.
-        
-        The "decision" attribute must be the name of a known decision. Then, there must be a set of
-        multipyQty and/or delay sub-elements, each of which corresponds to one value
-        output of the decision.
-      </xs:documentation>
-      <xs:appinfo>units:Choice of elements;name:Treatment modifier;</xs:appinfo>
-    </xs:annotation>
-    <xs:choice>
-      <xs:element name="multiplyQty" type="om:HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>
-            Multiplies the quantity of active ingredients of drugs administered.
-            
-            The "drugs" attribute is a comma-separated list of all active ingredients administered in
-            the base schedule (each must be listed once) and the content of this element is a comma-
-            separated list of multipliers for each active ingredient, listed in the same order as in
-            the "drugs" attribute. For example, with drugs="A,B" and content="0.5,1" the quantity of drug A is
-            halved while that of B is unchanged.
-          </xs:documentation>
-          <xs:appinfo>units:Comma-separated list of values;name:Active ingredient multipliers;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="delay" type="om:HSESTreatmentModifierEffect" minOccurs="0" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>
-            Delays administration of drugs listed in the base schedule by so many hours.
-            
-            The "drugs" attribute is a comma-separated list of all active ingredients administered in
-            the base schedule (each must be listed once) and the content of this element is a comma-
-            separated list of delays (in hours) for each active ingredient, listed in the same order as in
-            the "drugs" attribute. E.g. with drugs="A,B" and content "0,6", drug A is administered as
-            in the base schedule while drug B is administered 6 hours later than specified.
-          </xs:documentation>
-          <xs:appinfo>units:Comma-separated list of values;name:Active ingredient delays;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:choice>
-    <xs:attribute name="decision" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Specifies the decision that this modifier acts on.
-        </xs:documentation>
-        <xs:appinfo>units:string;name:Decision</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="HSESTreatmentModifierEffect">
-    <xs:attribute name="value" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Specifies a value of the decision to act on.
-        </xs:documentation>
-        <xs:appinfo>type:string;name:Value of decision;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="effect" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Comma-separated list of the effect the modifier has on each drug, in
-          the form DRUG1(EFFECT1),DRUG2(EFFECT2), etc.
-        </xs:documentation>
-            <xs:appinfo>type:comma-separated list of strings;name:List of drugs affected;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="affectsCost" type="xs:boolean" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-          Does this affect the cost? If false, the effective drug usage (w.r.t.
-          cost)is unaffected by this modifier; if true it is. Defaults to true
-          (if omitted).
-          
-          Is meaningless for delays.
-        </xs:documentation>
-        <xs:appinfo>type:boolean;units:None;name:Affects cost?;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ClinicalOutcomes">
     <xs:annotation>
@@ -757,70 +580,355 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="AgeGroupValues">
+  
+  <!-- decision trees -->
+  <xs:complexType name="DecisionTree">
+    <xs:annotation>
+      <xs:documentation>
+        Describes how "decisions" are made, both probabilistically and
+        deterministically, and what actions are carried out.
+        
+        Quantities may also be reported as a side effect of decisions made in
+        the tree, for example the number of diagnostics used.
+      </xs:documentation>
+      <xs:appinfo>name:Decision tree;</xs:appinfo>
+    </xs:annotation>
+    <xs:choice>
+      <xs:element name="multiple" type="om:DTMultiple"/>
+      <!-- branching points -->
+      <xs:element name="caseType" type="om:DTCaseType"/>
+      <xs:element name="diagnostic" type="om:DTDiagnostic"/>
+      <xs:element name="random" type="om:DTRandom"/>
+      <xs:element name="age" type="om:DTAge"/>
+      <!-- actions -->
+      <xs:element name="noTreatment" type="om:DTNoTreatment"/>
+      <xs:element name="treatFailure" type="om:DTTreatFailure"/>
+      <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
+      <xs:element name="treatSimple" type="om:DTTreatSimple"/>
+      <xs:element name="deploy" type="om:DTDeploy" maxOccurs="unbounded"/>
+    </xs:choice>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTMultiple">
+    <xs:annotation>
+      <xs:documentation>
+        A special node allowing multiple sub-trees to be evaluated.
+        
+        This is different from an ordinary decision tree node in that:
+        
+        a) multiple types of child can occur simultaneously (e.g. multiple
+        types of treatment or treatment plus a 'random' sub-tree)
+        
+        b) the 'noTreatment' and 'treatFailure' nodes are not allowed
+      </xs:documentation>
+      <xs:appinfo>name:Decision tree;</xs:appinfo>
+    </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group">
-        <xs:annotation>
-          <xs:documentation>
-            A series of values according to age groups, each specified with
-            a lower-bound and a value. The first lower-bound specified must be
-            zero; a final upper-bound of infinity is added to complete the last
-            age group. At least one age group is required. Normally these are
-            interpolated by a continuous function (see interpolation attribute).
-          </xs:documentation>
-          <xs:appinfo>name:age group;</xs:appinfo>
-        </xs:annotation>
+      <!-- branching points -->
+      <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="random" type="om:DTRandom" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="age" type="om:DTAge" minOccurs="0" maxOccurs="unbounded"/>
+      <!-- actions -->
+      <xs:element name="treatPKPD" type="om:DTTreatPKPD" minOccurs="0" maxOccurs="unbounded"/>
+      <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0"/>
+      <xs:element name="deploy" type="om:DTDeploy" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTCaseType">
+    <xs:annotation>
+      <xs:documentation>
+        A switch which choses a branch deterministically, based on whether the
+        patient was treated recently (second line) or not (first line).
+        
+        For uncomplicated cases only.
+      </xs:documentation>
+      <xs:appinfo>name:Switch (first/second line);</xs:appinfo>
+    </xs:annotation>
+    <xs:all>
+      <xs:element name="firstLine" type="om:DecisionTree"/>
+      <xs:element name="secondLine" type="om:DecisionTree"/>
+    </xs:all>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTDiagnostic">
+    <xs:annotation>
+      <xs:documentation>
+        A switch which choses a branch deterministically, based on the outcome
+        of some type of diagnostic.
+      </xs:documentation>
+      <xs:appinfo>name:Switch (diagnostic);</xs:appinfo>
+    </xs:annotation>
+    <xs:all>
+      <xs:element name="positive" type="om:DecisionTree"/>
+      <xs:element name="negative" type="om:DecisionTree"/>
+    </xs:all>
+    <xs:attribute name="type" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The type of diagnostic used. Supported: RDT, microscopy.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Type of diagnostic;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="microscopy" />
+          <xs:enumeration value="RDT" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTRandom">
+    <xs:annotation>
+      <xs:documentation>
+        A switch which choses a branch randomly.
+        
+        Each branch must be listed with a probability; the sum of all these
+        probabilities must equal 1.
+      </xs:documentation>
+      <xs:appinfo>name:Switch (probabilistic);</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="outcome" minOccurs="1" maxOccurs="unbounded">
         <xs:complexType>
           <xs:complexContent>
-            <xs:extension base="om:inputValue">
-              <xs:attribute name="lowerbound" type="xs:double" use="required">
+            <xs:extension base="om:DecisionTree">
+              <xs:attribute name="p" type="xs:double" use="required">
                 <xs:annotation>
                   <xs:documentation>
-                    Lower bound of age group
+                    Probability of selecting this outcome. The sum of
+                    probabilities across all outcomes must be 1.
                   </xs:documentation>
-                  <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
+                  <xs:appinfo>units:None;min:0;max:1;name:Probability;</xs:appinfo>
                 </xs:annotation>
-            </xs:attribute>
+              </xs:attribute>
             </xs:extension>
           </xs:complexContent>
         </xs:complexType>
       </xs:element>
     </xs:sequence>
-    <!-- NOTE: would specify default="linear" except for a possible bug in Code
-    Synthesis' XSD associated with creating blank AgeGroupValues elements -->
-    <xs:attribute name="interpolation" use="optional">
+    <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
-          Interpolation algorithm. Normally it is desirable for age-based
-          values to be continuous w.r.t. age. By default linear interpolation
-          is used.
-          
-          With all algorithms except "none", the age groups are converted to a
-          set of points centred within each age range. Extra
-          points are added at each end (zero and infinity) to keep value
-          constant at both ends of the function. A zero-length age group may
-          be used as a kind of barrier to adjust the distribution; e.g. with
-          age group boundaries at 15, 20 and 25 years, a (linear) spline would
-          be drawn between ages 17.5 and 22.5, whereas with boundaries at
-          15, 20 and 20 years, a spline would be drawn between ages 17.5 and 20
-          years (may be desired if individuals are assumed to reach adult size
-          at 20).
-          
-          Algorithms:
-          1. none: input values are used directly
-          2. linear: straight lines (on an age vs. value graph) are used to
-          interpolate data points.
+          An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>name:interpolation;</xs:appinfo>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
       </xs:annotation>
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="none" />
-          <xs:enumeration value="linear" />
-        </xs:restriction>
-      </xs:simpleType>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="DTAge">
+    <xs:annotation>
+      <xs:documentation>
+        A switch which choses a branch deterministically, based on the
+        patient's age (in years).
+        
+        Categories must uniquely cover all ages from birth, with no upper
+        bound. Categories must be listed in order of age, increasing; the first
+        must have lower bound 0. Upper bounds are equal to the lower bound of
+        the next category, (but are exclusive where lower bounds are
+        inclusive); the last category has no upper bound.
+      </xs:documentation>
+      <xs:appinfo>name:Switch (age of patient);</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="age" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Describes a branch, selected for patients of a certain age.
+          </xs:documentation>
+          <xs:appinfo>name:Age range;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="om:DecisionTree">
+              <xs:attribute name="lb" type="xs:double" use="required">
+                <xs:annotation>
+                  <xs:appinfo>name:Lower bound (inclusive);min:0;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTNoTreatment">
+    <xs:annotation>
+      <xs:documentation>
+        An end node doing nothing. This exists to explicitly state that no
+        treatment happens and to prevent trees from accidentally being left
+        incomplete.
+      </xs:documentation>
+      <xs:appinfo>name:No treatment;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTTreatFailure">
+    <xs:annotation>
+      <xs:documentation>
+        An end node which reports treatment but does not change parasitalogical
+        status. This allows correct labelling of second-line cases.
+      </xs:documentation>
+      <xs:appinfo>name:Failed treatment;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional piece of documentation attached to this node.
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTTreatPKPD">
+    <xs:annotation>
+      <xs:documentation>
+        A command to administer drugs according to a given schedule and
+        dosage table, optionally with a delay.
+      </xs:documentation>
+      <xs:appinfo>name:Treatment (PK/PD model);</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="schedule" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The name of a schedule to use for treatment.
+        </xs:documentation>
+        <xs:appinfo>name:Name of treatment schedule;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="dosage" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The name of a dosage table to use for treatment.
+        </xs:documentation>
+        <xs:appinfo>name:Name of dosage table;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="delay_h" type="xs:double" default="0">
+      <xs:annotation>
+        <xs:documentation>
+          Optionally, this can be given to delay the start of treatment by a
+          given number of hours. If not specified, treatment is not delayed. If
+          a delay is given, all medications within the treatment schedule used
+          are delayed by this number of hours.
+        </xs:documentation>
+        <xs:appinfo>name:Delay (hours);</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTTreatSimple">
+    <xs:annotation>
+      <xs:documentation>
+        Simple treatment model, targetting liver- and/or blood-stage
+        infections. This is all-or-nothing treatment which, when deploymed,
+        completely clears all infections of the targetted stages. This makes it
+        unsuitable for modeling resistance, but suitable for use with simple
+        infection models.
+        
+        Infections are considered liver-stage when less than five days old and
+        blood-stage after that. Effects are described independently for the two
+        stages.
+      </xs:documentation>
+      <xs:appinfo>name:Simple treatment;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="timestepsLiver" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Controls action on liver-stage infections. 0 means no action, -1 is
+          a compatibility option to act like treatment before schema version 32
+          (which removed infections retrospectively), 1 or any n>0 means clear
+          liver-stage infections found on the next 1 or n timesteps.
+          
+          Note on -1 compatibility option: the main difference to 1 (clearing
+          on the next timestep) is that parasite densities will be reduced
+          immediately, and thus from the point of view of surveys and mass
+          screen and treat interventions a peak in density which is immediately
+          treated through case management will not be seen.
+        </xs:documentation>
+        <xs:appinfo>name:Length of liver-stage effect;units:Timesteps;min:-1;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="timestepsBlood" type="xs:int" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Controls action on blood-stage infections. 0 means no action, -1 is
+          a compatibility option to act like treatment before schema version 32
+          (which removed infections retrospectively), 1 or any n>0 means clear
+          blood-stage infections found on the next 1 or n timesteps.
+          
+          Note on -1 compatibility option: the main difference to 1 (clearing
+          on the next timestep) is that parasite densities will be reduced
+          immediately, and thus from the point of view of surveys and mass
+          screen and treat interventions a peak in density which is immediately
+          treated through case management will not be seen.
+        </xs:documentation>
+        <xs:appinfo>name:Length of blood-stage effect;units:Timesteps;min:-1;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DTDeploy">
+    <xs:annotation>
+      <xs:documentation>
+        Deploy one or more intervention components.
+      </xs:documentation>
+      <xs:appinfo>name:Deploy intervention;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="component" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The identifier (short name) of a component.
+        </xs:documentation>
+        <xs:appinfo>name:Component identifier;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <!-- diagnostics and treatments -->
   <xs:complexType name="HSDiagnostic">
     <!-- Description of a generic parasitaemia diagnostic. -->
     <!-- Garki/non-Garki measurement biases are not taken into account by this
@@ -834,7 +942,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               Specify that an artificial deterministic test is used: drugs are
               administered if parasite density is at least the minimum given.
             </xs:documentation>
-            <xs:appinfo>name:Deterministic detection</xs:appinfo>
+            <xs:appinfo>name:Deterministic detection;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:attribute name="minDensity" type="xs:double" use="required">

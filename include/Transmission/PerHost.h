@@ -128,7 +128,7 @@ public:
     
     ///@brief Initialisation / checkpionting
     //@{
-    PerHost (const Transmission::TransmissionModel& tm);
+    PerHost ();
     void initialise (TransmissionModel& tm, double availabilityFactor);
     //@}
     

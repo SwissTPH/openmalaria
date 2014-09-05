@@ -6,106 +6,246 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
            xmlns:om="http://openmalaria.org/schema/scenario_32"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <!-- root element -->
   <xs:complexType name="pharmacology">
+    <xs:annotation>
+      <xs:documentation>
+        A library of drug related data for the PK/PD model.
+      </xs:documentation>
+      <xs:appinfo>name:Pharmacology library;</xs:appinfo>
+    </xs:annotation>
     <xs:sequence>
-      <xs:element name="drug" maxOccurs="unbounded">
+      <xs:element name="treatments">
         <xs:annotation>
           <xs:documentation>
-            Sequence of drug descriptions forming a library of drug parameters.
-            </xs:documentation>
-          <xs:appinfo>name:Library of drug parameters;</xs:appinfo>
+            A library of drug deployment schedules and dosages.
+          </xs:documentation>
+          <xs:appinfo>name:Treatments library;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="PD">
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="allele" minOccurs="1" maxOccurs="unbounded">
-                    <xs:annotation>
-                      <xs:documentation>
-                          PD parameters per allele, plus initial frequency of each allele.
-                          
-                          Note: we assume a one-to-one correspondance of drugs to loci, hence each
-                          drug has an independent set of alleles here.
-                            </xs:documentation>
-                      <xs:appinfo>name:PD parameters per allele;</xs:appinfo>
-                    </xs:annotation>
-                    <xs:complexType>
-                      <xs:sequence>
-                        <xs:element name="initial_frequency" type="xs:double">
-                          <xs:annotation>
-                            <xs:documentation>
-                                Frequency, relative to the total frequency of all alleles for this drug/locus.
-                              </xs:documentation>
-                            <xs:appinfo>type:double; units:dimensionless;min:0;name:Relative frequency;</xs:appinfo>
-                          </xs:annotation>
-                        </xs:element>
-                        <xs:element name="max_killing_rate" type="xs:double">
-                          <xs:annotation>
-                            <xs:documentation>
-                                k1 — Maximal parasite killing rate.
-                              </xs:documentation>
-                            <xs:appinfo>type:double;units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
-                          </xs:annotation>
-                        </xs:element>
-                        <xs:element name="IC50" type="xs:double">
-                          <xs:annotation>
-                            <xs:documentation>
-                                Half maximal effect concentration.
-                              </xs:documentation>
-                            <xs:appinfo>type:double;units:mg/l;min:0;name:IC50;</xs:appinfo>
-                          </xs:annotation>
-                        </xs:element>
-                        <xs:element name="slope" type="xs:double">
-                          <xs:annotation>
-                            <xs:documentation>
-                                n — Slope of the concentration effect curve
-                              </xs:documentation>
-                            <xs:appinfo>type:double:units:dimensionless;name:Slope of effect curve;</xs:appinfo>
-                          </xs:annotation>
-                        </xs:element>
-                      </xs:sequence>
-                      <xs:attribute name="name" use="required" type="xs:string" />
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
-            <xs:element name="PK">
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="negligible_concentration" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          Concentration below which drug's effects are deemed negligible and can
-                          be removed from simulation.
-                        </xs:documentation>
-                      <xs:appinfo>type:double;units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                  <xs:element name="half_life" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          Used to calculate elimination rate (which is: ln(2) / half_life).
-                        </xs:documentation>
-                      <xs:appinfo>type:double;units:days;min:0;name:drug half-life;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                  <xs:element name="vol_dist" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          Volume of Distribution
-                        </xs:documentation>
-                      <xs:appinfo>type:double;units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                </xs:sequence>
-              </xs:complexType>
-            </xs:element>
+            <xs:element name="schedule" type="om:PKPDSchedule" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="dosages" type="om:PKPDDosages" minOccurs="0" maxOccurs="unbounded"/>
           </xs:sequence>
-          <xs:attribute name="abbrev" use="required" type="xs:string" />
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="drugs">
+        <xs:annotation>
+          <xs:documentation>
+            A library of drug PK/PD data.
+          </xs:documentation>
+          <xs:appinfo>name:Drug library;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="drug" type="om:PKPDDrug" minOccurs="0" maxOccurs="unbounded"/>
+          </xs:sequence>
         </xs:complexType>
       </xs:element>
     </xs:sequence>
+  </xs:complexType>
+  
+  <!-- drug deployment params -->
+  <xs:complexType name="PKPDSchedule">
+    <xs:annotation>
+      <xs:documentation>
+        A schedule for the administration of drugs in a course of treatment.
+        Note that dose sizes are multiplied by some multiplier (see dosages)
+        and the times of all doses may be delayed.
+      </xs:documentation>
+      <xs:appinfo>type:list of elements;name:Schedule of doses taken as a course of treatment;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="medicate" type="om:PKPDMedication" minOccurs="0" maxOccurs="unbounded" />
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name for referring to this deployment schedule
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PKPDMedication">
+    <xs:attribute name="drug" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+      Abbreviated name of drug compound
+        </xs:documentation>
+        <xs:appinfo>type:string;name:drug;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="mg" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>Quantity of drug compound</xs:documentation>
+        <xs:appinfo>type:double;units:mg;name:drug dose;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="hour" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+        Number of hours past start of timestep this drug dose is administered
+        at (first dose should be at hour 0).
+      </xs:documentation>
+        <xs:appinfo>units:Hours;min:0;name:Time of administration;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="duration" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+        If this attribute is given, use IV administration instead of orally.
+        
+        Specifies the number of hours during which the dose is administered.
+      </xs:documentation>
+        <xs:appinfo>type:double;units:Hours;min:0;name:Duration of administration;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PKPDDosages">
+    <xs:annotation>
+      <xs:documentation>
+        A table for selecting a dose size given an age.
+        
+        Categories must uniquely cover all ages from birth, with no upper
+        bound. Categories must be listed in order of age, increasing; the first
+        must have lower bound 0. Upper bounds are equal to the lower bound of
+        the next category, (but are exclusive where lower bounds are
+        inclusive); the last category has no upper bound.
+      </xs:documentation>
+      <xs:appinfo>name:Dosage table;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="age" type="om:PKPDAgeDosage" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name for referring to this dosage table
+        </xs:documentation>
+        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="PKPDAgeDosage">
+    <xs:annotation>
+      <xs:documentation>
+        Gives a dose multiplier for an age range.
+      </xs:documentation>
+      <xs:appinfo>name:Age range;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="lb" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>name:Lower bound (inclusive);min:0;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="dose_mult" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The dose size given in the schedule (in mg) is multiplied by
+          this value for patients falling into this age range when this
+          dosage table is used.
+        </xs:documentation>
+        <xs:appinfo>name:Dose multiplier;min:0;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <!-- drug intrinsic (PK/PD) params -->
+  <xs:complexType name="PKPDDrug">
+    <xs:annotation>
+      <xs:documentation>
+        A drug description with PK/PD parameters.
+      </xs:documentation>
+      <xs:appinfo>name:Drug parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="PD">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="allele" minOccurs="1" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                    PD parameters per allele, plus initial frequency of each allele.
+                    
+                    Note: we assume a one-to-one correspondance of drugs to loci, hence each
+                    drug has an independent set of alleles here.
+                      </xs:documentation>
+                <xs:appinfo>name:PD parameters per allele;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:sequence>
+                  <xs:element name="initial_frequency" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Frequency, relative to the total frequency of all alleles for this drug/locus.
+                        </xs:documentation>
+                      <xs:appinfo>type:double; units:dimensionless;min:0;name:Relative frequency;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="max_killing_rate" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          k1 — Maximal parasite killing rate.
+                        </xs:documentation>
+                      <xs:appinfo>type:double;units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="IC50" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Half maximal effect concentration.
+                        </xs:documentation>
+                      <xs:appinfo>type:double;units:mg/l;min:0;name:IC50;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="slope" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                          n — Slope of the concentration effect curve
+                        </xs:documentation>
+                      <xs:appinfo>type:double:units:dimensionless;name:Slope of effect curve;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:sequence>
+                <xs:attribute name="name" use="required" type="xs:string" />
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="PK">
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="negligible_concentration" type="xs:double">
+              <xs:annotation>
+                <xs:documentation>
+                    Concentration below which drug's effects are deemed negligible and can
+                    be removed from simulation.
+                  </xs:documentation>
+                <xs:appinfo>type:double;units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="half_life" type="xs:double">
+              <xs:annotation>
+                <xs:documentation>
+                    Used to calculate elimination rate (which is: ln(2) / half_life).
+                  </xs:documentation>
+                <xs:appinfo>type:double;units:days;min:0;name:drug half-life;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="vol_dist" type="xs:double">
+              <xs:annotation>
+                <xs:documentation>
+                    Volume of Distribution
+                  </xs:documentation>
+                <xs:appinfo>type:double;units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="abbrev" use="required" type="xs:string" />
   </xs:complexType>
 </xs:schema>

@@ -35,7 +35,7 @@ using namespace std;
 namespace OM { namespace PkPd {
     
 LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
-    typeData (&type),
+    typeData(type),
     concentration (0.0)
 {}
 
@@ -47,7 +47,7 @@ LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
 // Overlapping IV doses are not supported.
 
 void LSTMDrug::medicate (double time, double qty, double bodyMass) {
-    double conc = qty / (typeData->getVolumeOfDistribution() * bodyMass);
+    double conc = qty / (typeData.getVolumeOfDistribution() * bodyMass);
     // multimap insertion: is ordered
     DoseMap::iterator lastInserted =
     doses.insert (doses.end(), make_pair (time, DoseParams( conc, 0 )));
@@ -118,7 +118,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
     // function may be called multiple times (or not at all) in a day.
     double concentration_today = concentration;
     
-    const LSTMDrugAllele& drugAllele = typeData->getAllele(proteome_ID);
+    const LSTMDrugAllele& drugAllele = typeData.getAllele(proteome_ID);
     
     // Make sure we have a dose at both time 0 and time 1
     //TODO: analyse efficiency of this method
@@ -139,12 +139,12 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             // Oral dose
             concentration_today += dose->second.qty;
             
-            totalFactor *= drugAllele.calcFactor( *typeData, concentration_today, time_to_next );
+            totalFactor *= drugAllele.calcFactor( typeData, concentration_today, time_to_next );
         } else {
             // IV dose
             assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
             
-            totalFactor *= drugAllele.calcFactorIV( *typeData, concentration_today, time_to_next, dose->second.qty );
+            totalFactor *= drugAllele.calcFactorIV( typeData, concentration_today, time_to_next, dose->second.qty );
         }
         
         dose = next_dose;
@@ -174,12 +174,12 @@ bool LSTMDrug::updateConcentration () {
         if( dose->second.duration == 0.0 ){
             // Oral dose
             concentration += dose->second.qty;
-            typeData->updateConcentration( concentration, time_to_next );
+            typeData.updateConcentration( concentration, time_to_next );
         } else {
             // IV dose
             assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
             
-            typeData->updateConcentrationIV( concentration, time_to_next, dose->second.qty );
+            typeData.updateConcentrationIV( concentration, time_to_next, dose->second.qty );
         }
         
         dose = next_dose;
@@ -204,7 +204,7 @@ bool LSTMDrug::updateConcentration () {
     util::streamValidate( concentration );
     
     // return true when concentration is no longer significant:
-    return concentration < typeData->getNegligibleConcentration();
+    return concentration < typeData.getNegligibleConcentration();
 }
 
 }

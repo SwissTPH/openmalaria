@@ -21,83 +21,44 @@
 #ifndef Hmod_ImmediateOutcomes
 #define Hmod_ImmediateOutcomes
 
-#include "WithinHost/Pathogenesis/State.h"
-#include "Clinical/ClinicalModel.h"
-#include "WithinHost/WHInterface.h"
+#include "Clinical/CM5DayCommon.h"
 
 namespace OM {
 namespace Clinical {
 
-namespace Regimen {
-/** Regimen: UC / UC2 / SEVERE.
- *
- * Note: values used in array lookups, so are important. */
-enum Type {
-    UC = 0,         // first line
-    UC2 = 1,                // second line
-    SEVERE = 2,     // third line
-    NUM = 3,
-};
-}
-
-/** A container for all the "static" data required by this model. */
-struct Params5Day {
-    /** Initialises parameters, loading from XML data. */
-    static void initParameters ();
-
-    /** Load health system data from initial data or an intervention's data (both from XML).
-     * (Re)loads all data affected by this healthSystem element. */
-    static void setHealthSystem (const scnXml::HealthSystem& healthSystem);
-    
-private:
-    // These parameters are reset via a setHealthSystem call on checkpoint
-    // load rather than checkpointed.
-    static double probGetsTreatment[Regimen::NUM];
-    static double probParasitesCleared[Regimen::NUM-1];
-    static double cureRateSevere;
-    static WithinHost::TreatmentId treatments[Regimen::NUM];
-    
-    friend class ImmediateOutcomes;
-};
-
-/** This implementation of the model is intended to use the old case-management
- * model with immediate outcomes of clinical events (immediate recovery with
- * total parasite clearance or immediate death). */
-class ImmediateOutcomes : public ClinicalModel
+/**
+ * This models case management at a 5-day timestep with all-or-nothing
+ * treatment.
+ * 
+ * Uncomplicated cases: access, otherwise known as "seeking any type of
+ * treatment", is determined by a fixed-function decision, which may be
+ * modified by a treatment-seeking factor. Treatment decisions are also fixed
+ * function.
+ * 
+ * Severe cases: all decisions and outcomes are calculated via a fixed-function
+ * probability tree, using the same logic for handling severe cases as has long
+ * been used.
+ * 
+ * NOTE: this provides a strict subset of the functionality of DecisionTree5Day.
+ */
+class ImmediateOutcomes : public CM5DayCommon
 {
 public:
-    ImmediateOutcomes (double tSF);
-    ~ImmediateOutcomes ();
-
-    virtual bool notAtRisk() {
-        int ageLastTreatment = (TimeStep::simulation - _tLastTreatment).inDays();
-        return ageLastTreatment > 0 && ageLastTreatment <= 20;
-    }
-
-    virtual void massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport );
-
+    /** Load health system data from initial data or an intervention's data (both from XML).
+     * (Re)loads all data affected by this healthSystem element. */
+    static void setHealthSystem (const scnXml::HSImmediateOutcomes& hsioData);
+    
+    ImmediateOutcomes (double tSF) : CM5DayCommon(tSF) {}
+    
 protected:
-    virtual void doClinicalUpdate (Human& human, double ageYears);
-
-    virtual void checkpoint (istream& stream);
-    virtual void checkpoint (ostream& stream);
-
-private:
     /** Called when a non-severe/complicated malaria sickness occurs. */
-    void uncomplicatedEvent(Human& human, Episode::State pgState);
-
-    /** Called when a severe/complicated (with co-infection) malaria sickness occurs.
-     *
-     * Note: sets doomed = 4 if patient dies. */
-    void severeMalaria(Human& human, Episode::State pgState, double ageYears, int& doomed);
-
-    /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
-    TimeStep _tLastTreatment;
-
-    //! treatment seeking for heterogeneity
-    double _treatmentSeekingFactor;
+    virtual void uncomplicatedEvent(Human& human, Episode::State pgState);
+    
+private:
+    static double cureRateUCOfficial[CM5DayCommon::NumCaseTypes];
+    static double cureRateUCSelfTreat[CM5DayCommon::NumCaseTypes];
+    static WithinHost::TreatmentId treatmentUC[CM5DayCommon::NumCaseTypes];
+    static bool useDiagnosticUC;
 };
 
 }

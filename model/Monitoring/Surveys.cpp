@@ -72,7 +72,7 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
         last = cur;
     }
   }
-  if( last == TimeStep::future ){
+  if( last == TimeStep::future && survs.size() > 0 ){
       cerr << "Warning: survey times are not listed in increasing order; will be reordered" << endl;
       sort( _surveysTimeIntervals.begin(), _surveysTimeIntervals.end() );
   }

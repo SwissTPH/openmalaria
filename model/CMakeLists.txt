@@ -19,11 +19,11 @@ set (Model_CPP
   Clinical/CaseManagementCommon.cpp
   Clinical/EventScheduler.cpp
   Clinical/ESCaseManagement.cpp
-  Clinical/ESDecisionTree.cpp
-  Clinical/ESDecisionValue.cpp
+  Clinical/CMDecisionTree.cpp
   Clinical/ImmediateOutcomes.cpp
   Clinical/Episode.cpp
-  Clinical/parser.cpp
+  Clinical/DecisionTree5Day.cpp
+  Clinical/CM5DayCommon.cpp
   
   PkPd/PkPdModel.cpp
   #PkPd/HoshenPkPdModel.cpp
@@ -33,6 +33,7 @@ set (Model_CPP
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/Drug/LSTMDrugAllele.cpp
+  PkPd/LSTMTreatments.cpp
   #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp

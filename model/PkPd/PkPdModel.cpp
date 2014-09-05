@@ -30,6 +30,7 @@
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "PkPd/VoidPkPdModel.h"
+#include "PkPd/LSTMTreatments.h"
 
 #include <assert.h>
 #include <stdexcept>
@@ -46,7 +47,8 @@ void PkPdModel::init( const scnXml::Scenario& scenario ){
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
         if (scenario.getPharmacology().present()) {
             activeModel = LSTM_PKPD;
-            LSTMDrugType::init(scenario.getPharmacology().get ());
+            LSTMDrugType::init(scenario.getPharmacology().get().getDrugs());
+            LSTMTreatments::init(scenario.getPharmacology().get().getTreatments());
         } else {
             throw util::xml_scenario_error( "pharmacology element required in XML" );
         }
@@ -58,15 +60,16 @@ void PkPdModel::init( const scnXml::Scenario& scenario ){
         } */
     }
 }
+
+/*
 void PkPdModel::cleanup () {
-    if (activeModel == LSTM_PKPD) {
-        LSTMDrugType::cleanup();
-    } /* else if (activeModel == HOSHEN_PKPD) {
+    if (activeModel == HOSHEN_PKPD) {
         assert( false );
         HoshenDrugType::cleanup();
         ProteomeManager::cleanup ();
-    } */
+    }
 }
+*/
 
 PkPdModel* PkPdModel::createPkPdModel () {
     if (activeModel == NON_PKPD) {

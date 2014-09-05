@@ -75,8 +75,8 @@ set (OM_CXXTEST_HEADERS
   EmpiricalInfectionSuite.h
   InfectionImmunitySuite.h
   #DescriptiveInfectionSuite.h
-  ESCaseManagementSuite.h
-  ESDecisionTreeSuite.h
+  #ESCaseManagementSuite.h
+  CMDecisionTreeSuite.h
   AgeGroupInterpolationSuite.h
   DecayFunctionSuite.h
   PennyInfectionSuite.h
@@ -112,6 +112,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_OvipositingAdultsPeriodicRA.txt
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_PeriodicResourceAvailability.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable (unittest
+  WHMock.cpp
   tests.cpp
   ${OM_CXXTEST_HEADERS} # for IDEs
 )

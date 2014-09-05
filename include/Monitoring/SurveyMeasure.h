@@ -43,8 +43,8 @@ enum SurveyMeasure {
     nInfect = 1,
     /** Expected number of infected hosts
      * 
-     * This is the sum of the probabilities of each host having had at least
-     * one infection in his/her lifetime. */
+     * This is the sum of the probabilities across all timesteps since the last
+     * survey of each host becoming infected on that timestep. */
     nExpectd= 2,
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */
@@ -181,12 +181,14 @@ enum SurveyMeasure {
     //@{
     /// Number of Rapid Diagnostic Tests used
     Clinical_RDTs = 39,
-    /** Effective total quanty of each drug used orally, in mg.
+    /* Effective total quanty of each drug used orally, in mg.
      * (Per active ingredient abbreviation.)
      * 
      * The quantity is efffective with respect to the cost (see treatment
-     * schedule definition). */
-    Clinical_DrugUsage = 40,
+     * schedule definition).
+     * 
+     * Reporting removed. */
+    //Clinical_DrugUsage = 40,
     /// Direct death on first day of CM (before treatment takes effect)
     Clinical_FirstDayDeaths = 41,
     /// Direct death on first day of CM (before treatment takes effect); hospital only
@@ -215,8 +217,8 @@ enum SurveyMeasure {
     
     /// Number of malarial tests via microscopy used
     Clinical_Microscopy = 48,
-    /** As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
-    Clinical_DrugUsageIV = 49,
+    /* As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
+    //Clinical_DrugUsageIV = 49,
     
 //     /// Number of cohort recruitments removed)
 //     nAddedToCohort = 50,

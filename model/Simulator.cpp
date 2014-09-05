@@ -105,11 +105,6 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     startedFromCheckpoint = checkpointFile.is_open();
 }
 
-Simulator::~Simulator(){
-    //free memory
-    Population::clear();
-}
-
 
 // -----  run simulations  -----
 enum Phase {

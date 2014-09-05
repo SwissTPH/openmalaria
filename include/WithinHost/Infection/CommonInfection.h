@@ -24,7 +24,13 @@
 #include "WithinHost/Infection/Infection.h"
 
 namespace OM { namespace WithinHost {
-    
+
+/** Represent infections used by CommonWithinHost.
+ * 
+ * All these use a 1-day time-step, however CommonWithinHost also allows them
+ * to be used where the simulation timestep is set to 5 days, therefore
+ * implementors should not assume TimeStep::interval is one and should be
+ * careful when using TimeStep::simulation. */
 class CommonInfection : public Infection {
 public:
     /// @brief Construction and destruction
@@ -40,28 +46,32 @@ public:
     virtual ~CommonInfection() {}
     //@}
     
-    /** Update: calculate new density.
-    *
-    * @param survivalFactor Density multiplier to introduce drug & vaccine effects
-    * @returns True when the infection goes extinct. */
-    inline bool update (double survivalFactor){
-	TimeStep ageOfInfection = TimeStep::simulation - _startdate - latentp;	// age in days
-	if( ageOfInfection < TimeStep(0) )
+    /** Update: calculate new density. Call this once per day.
+     * 
+     * @param survivalFactor Density multiplier to introduce drug & vaccine effects
+     * @param day Where TimeStep::interval is 1, this should be 0. Where a
+     *  timestep is more than one day long (and thus this function is called
+     *  multiple times per timestep), day should be the call number, 0, 1, ...
+     *  up to TimeStep::interval - 1.
+     * @returns True when the infection goes extinct. */
+    inline bool update (double survivalFactor, int day){
+	TimeStep ageTS = TimeStep::simulation - _startdate - latentp;	// age of post-latent-period blood stage
+	if( ageTS < TimeStep(0) )
 	    return false;	// latent period (liver stage) — don't do anything
 	else
-	    return updateDensity( survivalFactor, ageOfInfection );
+	    return updateDensity( survivalFactor, ageTS.inDays() + day );
     }
     
 protected:
     /** Update: calculate new density.
-    *
-    * @param survivalFactor Density multiplier to introduce drug & vaccine
-    *   effects
-    * @param ageOfInfection Age of the patent blood-stage infection in
-    *   timesteps (0 on first day). Note that liver and pre-patent blood stages
-    *   occur before this, but this function is not called during those stages.
-    * @returns True when the infection goes extinct. */
-    virtual bool updateDensity (double survivalFactor, TimeStep ageOfInfection) =0;
+     *
+     * @param survivalFactor Density multiplier to introduce drug & vaccine
+     *   effects
+     * @param ageDays Age of the patent blood-stage infection in
+     *   days (0 on first day). Note that liver and pre-patent blood stages
+     *   occur before this, but this function is not called during those stages.
+     * @returns True when the infection goes extinct. */
+    virtual bool updateDensity (double survivalFactor, int ageDays) =0;
 };
 
 } }

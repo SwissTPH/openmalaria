@@ -136,7 +136,7 @@ public:
     virtual ~WHVivax();
     //@}
     
-    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const;
+    virtual double probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const;
     
     virtual bool summarize(const Host::Human& human);
     
@@ -153,10 +153,17 @@ public:
 protected:
     virtual InfectionCount countInfections () const;
     virtual void treatment( Host::Human& human, TreatmentId treatId );
+    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood);
     virtual bool optionalPqTreatment();
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
+    
+    // None of these do anything in this model:
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age);
+    virtual double getTotalDensity() const;
+    virtual double getCumulativeh() const;
+    virtual double getCumulativeY() const;
     
 private:
     WHVivax( const WHVivax& ) {}        // not copy constructible

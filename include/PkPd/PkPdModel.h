@@ -40,17 +40,17 @@ namespace OM { namespace PkPd {
  * overriding all abstract virtual functions will be abstract and can not be
  * instantiated (i.e. used to create objects).
  * 
- * Calling order within a timestep (see doc for medicate for details):
+ * Calling order each day:
+ *  * prescribe()
+ *  * medicate()
  *  * getDrugFactor() for each infection
  *  * decayDrugs()
- *  * medicate()
  */
 class PkPdModel {
 public:
   ///@brief Static functions
   //@{
   static void init ( const scnXml::Scenario& scenario );
-  static void cleanup ();
   
   // checkpointing of static data: not required since all data is set up by init
   static void staticCheckpoint (istream& stream) {}
@@ -77,33 +77,39 @@ public:
   }
   //@}
   
-  /** Medicate drugs to an individual, which act on infections the following
-   * timesteps, until rendered ineffective by decayDrugs().
-   *
-   * \param drugAbbrev The drug abbreviation.
-   * \param qty The quantity in mg.
-   * \param time Time in days since start of this time step to medicate at
-   * \param duration  Duration in days. 0 or an NaN indicates no duration.
-   * \param bodyMass Weight of human in kg
-   * 
-   * Due to the fact we're using a discrete timestep model, the case-management
-   * update (calling medicate) and within-host model update (calling
-   * getDrugFactor) cannot [easily] have immediate effects on each other. The
-   * implementation we use is that the within-host model update (calculating
-   * new infection densities) happens first; hence medicate() will always be
-   * called after getDrugFactor in a timestep, and a time of zero means the
-   * dose has effect from the start of the following timestep. */
-  virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass) =0;
-  
-  /// Called each timestep immediately after the drug acts on any infections.
-  virtual void decayDrugs () =0;
-  
-  /** This is how drugs act on infections.
-   *
-   * Each timestep, on each infection, the parasite density is multiplied by
-   * the return value of this infection. The WithinHostModels are responsible
-   * for clearing infections once the parasite density is negligible. */
-  virtual double getDrugFactor (uint32_t proteome_ID) =0;
+    /** Prescribe a patient a course of drugs, via the Pk/Pd model
+     * 
+     * Note: doses sizes are modified according to age via the dosage
+     * table given at the time this function is called.
+     *
+     * @param schedule Index of a treatment schedule
+     * @param dosages Index of a dosage table
+     * @param age Age of human in years
+     */
+    virtual void prescribe(size_t schedule, size_t dosages, double age) =0;
+    
+    /** Medicate drugs: human takes prescribed drugs which are to be taken this
+     * day.
+     * 
+     * @param age Age of human in years
+     * 
+     * Note: poor adherence on the part of the patient is not modeled here; to
+     * model, prescribe with a "poor adherence" schedule.
+     */
+    virtual void medicate(double age) =0;
+    
+    /** This is how drugs act on infections.
+     *
+     * Each timestep, on each infection, the parasite density is multiplied by
+     * the return value of this infection. The WithinHostModels are responsible
+     * for clearing infections once the parasite density is negligible. */
+    virtual double getDrugFactor (uint32_t proteome_ID) =0;
+    
+    /** After any resident infections have been reduced by getDrugFactor(),
+     * this function is called to update drug levels to their effective level
+     * at the end of the day, as well as clear data once drug concentrations
+     * become negligible. */
+    virtual void decayDrugs () =0;
   
   virtual uint32_t new_proteome_ID () =0;
   

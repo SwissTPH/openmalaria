@@ -69,8 +69,8 @@ void CommonWithinHost::clearInfections( Treatments::Stages stage ){
 
 // -----  interventions -----
 
-void CommonWithinHost::medicate(string drugName, double qty, double time, double duration, double bodyMass) {
-    pkpdModel->medicate(drugName, qty, time, duration, bodyMass);
+void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages, double age){
+    pkpdModel->prescribe( schedule, dosages, age );
 }
 void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
@@ -124,8 +124,9 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor)
     bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
-    for( int step = 0, steps = TimeStep::interval; step < steps; ++step ){
-        // every day, update each infection, then decay drugs
+    for( int day = 0, days = TimeStep::interval; day < days; ++day ){
+        // every day, medicate drugs, update each infection, then decay drugs
+        pkpdModel->medicate( ageInYears );
         for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
             // Note: this is only one treatment model; there is also the PK/PD model
             bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);
@@ -135,7 +136,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor)
                     (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY) *
                     pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
                 // update, may result in termination of infection:
-                expires = (*inf)->update(survivalFactor);
+                expires = (*inf)->update(survivalFactor, day);
             }
             
             if( expires ){

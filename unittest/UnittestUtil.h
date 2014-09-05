@@ -30,10 +30,13 @@
 #include "PkPd/PkPdModel.h"
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMTreatments.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"
+#include "Monitoring/Surveys.h"
 
 #include "schema/pharmacology.h"
+#include "schema/monitoring.h"
 
 using namespace OM;
 using namespace WithinHost;
@@ -48,6 +51,15 @@ namespace OM {
 
 class UnittestUtil {
 public:
+    // Initialise surveys, to the minimum required not to crash
+    static void initSurveys(){
+        scnXml::OptionSet opts;
+        scnXml::Surveys surveys( numeric_limits<double>::quiet_NaN() /* detection limit */);
+        scnXml::AgeGroup ageGroups( 0.0 /* lower bound */ );
+        scnXml::Monitoring mon( opts, surveys, ageGroups, "no monitoring" );
+        Monitoring::Surveys.init( mon );
+    }
+    
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	TimeStep::init( 1, 90.0 );	// I think the drug model is always going to be used with an interval of 1 day.
 	ModelOptions::reset();
@@ -58,6 +70,7 @@ public:
 	
 	PkPd::PkPdModel::activeModel = modelID;
 	if (modelID == PkPd::PkPdModel::LSTM_PKPD) {
+            // Drugs
  	    scnXml::Allele allele ( 1.0 /* initial_frequency */, 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */, "sensitive" /* name */ );
 	    
 	    scnXml::PD pd;
@@ -65,26 +78,40 @@ public:
 	    
 	    scnXml::PK pk ( 0.006654 /* negligible_concentration */, 19.254 /* half_life */, 20.8 /* vol_dist */ );
 	    
-	    scnXml::Drug drug ( pd, pk, "MF" /* abbrev */ );
+	    scnXml::PKPDDrug drug ( pd, pk, "MF" /* abbrev */ );
 	    
-	    scnXml::Pharmacology dd;
-	    dd.getDrug().push_back (drug);
+            scnXml::Drugs drugs;
+            drugs.getDrug().push_back (drug);
 	    
-	    PkPd::LSTMDrugType::init (dd);
+	    PkPd::LSTMDrugType::init (drugs);
+            
+            // Treatments
+            scnXml::PKPDSchedule sched1("sched1");
+            sched1.getMedicate().push_back(
+                scnXml::PKPDMedication("MF", 6 /*mg*/, 0 /*hour*/));
+            
+            scnXml::PKPDSchedule sched2("sched2");
+            sched2.getMedicate().push_back(
+                scnXml::PKPDMedication("MF", 2 /*mg*/, 0 /*hour*/));
+            sched2.getMedicate().push_back(
+                scnXml::PKPDMedication("MF", 5 /*mg*/, 12 /*hour*/));
+            
+            // a very basic dosage table, so that we can test it does what's expected
+            scnXml::PKPDDosages dosage1("dosage1");
+            dosage1.getAge().push_back(scnXml::PKPDAgeDosage(0 /*age lb*/,1 /*mult*/));
+            dosage1.getAge().push_back(scnXml::PKPDAgeDosage(5 /*age lb*/,5 /*mult*/));
+            
+            scnXml::Treatments treatments;
+            treatments.getSchedule().push_back(sched1);
+            treatments.getSchedule().push_back(sched2);
+            treatments.getDosages().push_back(dosage1);
+            PkPd::LSTMTreatments::init(treatments);
 	} /*else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
 	    PkPd::ProteomeManager::init ();
 	    PkPd::HoshenDrugType::init();
 	} */else {
 	    assert (false);
 	}
-    }
-    static void PkPdSuiteTearDown () {
-	if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::LSTM_PKPD) {
-	    PkPd::LSTMDrugType::cleanup();
-	} /*else if (PkPd::PkPdModel::activeModel == PkPd::PkPdModel::HOSHEN_PKPD) {
-	    PkPd::HoshenDrugType::cleanup();
-	    PkPd::ProteomeManager::cleanup();
-	} */
     }
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
@@ -131,9 +158,28 @@ public:
         ModelOptions::set(util::VECTOR_LIFE_CYCLE_MODEL);
     }
     
-    // only point of this function is that we give UnittestUtil "friend" status, not all unittest classes
-    static void setTotalParasiteDensity (WHFalciparum& whm, double density) {
-	whm.totalDensity = density;
+    static double getPrescribedMg( const PkPd::LSTMPkPdModel& pkpd ){
+        double r = 0.0;
+        foreach( const PkPd::MedicateData& md, pkpd.medicateQueue ){
+            r += md.qty;
+        }
+        return r;
+    }
+    
+    static void medicate(PkPd::LSTMPkPdModel& pkpd, size_t typeIndex, double qty,
+                         double time, double duration, double bodyMass){
+        pkpd.medicateDrug(typeIndex, qty, time, duration, bodyMass);
+    }
+    
+    static void clearMedicateQueue( PkPd::LSTMPkPdModel& pkpd ){
+        pkpd.medicateQueue.clear();
+    }
+    
+    static auto_ptr<Host::Human> createHuman(TimeStep dateOfBirth){
+        return auto_ptr<Host::Human>( new Host::Human(dateOfBirth) );
+    }
+    static void setHumanWH(Host::Human& human, WithinHost::WHInterface *wh){
+        human.withinHostModel = wh;
     }
 };
 

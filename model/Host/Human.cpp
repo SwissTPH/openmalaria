@@ -31,7 +31,7 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
-#include <schema/scenario.h>
+#include "schema/scenario.h"
 
 namespace OM { namespace Host {
     using namespace OM::util;
@@ -60,7 +60,7 @@ void Human::initHumanParameters( const Parameters& parameters, const scnXml::Sce
     Transmission::PerHost::init( model.getHuman().getAvailabilityToMosquitoes() );
     InfectionIncidenceModel::init( parameters );
     WithinHost::WHInterface::init( parameters, scenario );
-    Clinical::ClinicalModel::init( parameters, model );
+    Clinical::ClinicalModel::init( parameters, scenario );
 }
 
 
@@ -68,7 +68,6 @@ void Human::initHumanParameters( const Parameters& parameters, const scnXml::Sce
 
 // Create new human
 Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
-    perHostTransmission(tm),
     infIncidence(InfectionIncidenceModel::createModel()),
     _dateOfBirth(dateOfBirth),
     m_cohortSet(0),
@@ -142,6 +141,15 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
   perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
   clinicalModel = Clinical::ClinicalModel::createClinicalModel (treatmentSeekingFactor);
 }
+
+Human::Human(TimeStep dateOfBirth) :
+    withinHostModel(0),
+    infIncidence(0),
+    clinicalModel(0),
+    _dateOfBirth(dateOfBirth),
+    m_cohortSet(0),
+    nextCtsDist(0)
+{}
 
 void Human::destroy() {
   delete infIncidence;

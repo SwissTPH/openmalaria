@@ -28,6 +28,7 @@
 #include "util/checkpoint_containers.h"
 #include <map>
 
+class UnittestUtil;
 namespace scnXml {
     class Scenario;
 }
@@ -198,6 +199,9 @@ public:
   WithinHost::WHInterface *withinHostModel;
   
 private:
+  /// Hacky constructor for use in testing. Test code must do further initialisation as necessary.
+  Human(OM::util::TimeStep dateOfBirth);
+  
   /// The InfectionIncidenceModel translates per-host EIR into new infections
   InfectionIncidenceModel *infIncidence;
   
@@ -219,7 +223,7 @@ private:
   /// Made persistant to save a lookup each timestep (has a significant impact)
   Monitoring::AgeGroup monitoringAgeGroup;
   /// Cache, updated when human is added to or removed from a sub-population
-  uint32_t m_cohortSet;;
+  uint32_t m_cohortSet;
   //@}
   
   /// The next continuous distribution in the series
@@ -237,6 +241,8 @@ private:
    * mean 1 intervention deployment (that where the human becomes a member) and
    * 1 human update (the next). */
   std::map<interventions::ComponentId,TimeStep> m_subPopExp;
+  
+  friend class ::UnittestUtil;
 };
 
 } }

@@ -37,17 +37,10 @@ public:
     DummyInfection (uint32_t protID);
     
     virtual ~DummyInfection () {}
-  
-  static void init ();
-  
-  //! Get the last timestep before the infection is cleared.
-  /*!
-    \return The interval before clearance.
-  */
-  int getEndDate();
-
-  
-  virtual bool updateDensity (double survivalFactor, TimeStep ageOfInfection);
+    
+    static void init ();
+    
+    virtual bool updateDensity (double survivalFactor, int ageDays);
 };
 
 } }

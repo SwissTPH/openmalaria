@@ -24,6 +24,7 @@
 #include <schema/pharmacology.h>
 
 #include <cmath>
+#include <boost/ptr_container/ptr_vector.hpp>
 
 using namespace std;
 
@@ -33,45 +34,49 @@ using namespace OM::util;
 
 // -----  Static variables and functions  -----
 
-LSTMDrugType::Available LSTMDrugType::available;
+// The list of drugTypes drugs. Not checkpointed.
+//TODO: do we need to store by pointer?
+typedef boost::ptr_vector<LSTMDrugType> DrugTypesT;
+DrugTypesT drugTypes;
+map<string,size_t> drugTypeNames;
 
 
-void LSTMDrugType::init (const scnXml::Pharmacology& data) {
+void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
     uint32_t start_bit = 0;
-
-    for (scnXml::Pharmacology::DrugConstIterator drug = data.getDrug().begin(); drug != data.getDrug().end(); ++drug) {
-        LSTMDrugType::addDrug (auto_ptr<LSTMDrugType>(new LSTMDrugType (*drug, start_bit)));
+    
+    foreach( const scnXml::PKPDDrug& drug, drugData.getDrug() ){
+        const string& abbrev = drug.getAbbrev();
+        // Check drug doesn't already exist
+        if (drugTypeNames.find (abbrev) != drugTypeNames.end())
+            throw TRACED_EXCEPTION_DEFAULT (string ("Drug added twice: ").append(abbrev));
+        
+        size_t i = drugTypes.size();
+        drugTypes.push_back( new LSTMDrugType (i, drug, start_bit) );
+        drugTypeNames[abbrev] = i;
     }
 }
-void LSTMDrugType::cleanup () {
-    for ( Available::const_iterator it = available.begin(); it != available.end(); ++it ) {
-        delete it->second;
-    }
-    available.clear ();
+void LSTMDrugType::clear()
+{
+    drugTypes.clear();
+    drugTypeNames.clear();
 }
 
-void LSTMDrugType::addDrug(auto_ptr<LSTMDrugType> drug) {
-    const string& abbrev = drug->abbreviation;
-    // Check drug doesn't already exist
-    if (available.find (abbrev) != available.end())
-        throw TRACED_EXCEPTION_DEFAULT (string ("Drug already in registry: ").append(abbrev));
-
-    available[ abbrev ] = drug.release();
+size_t LSTMDrugType::findDrug(string _abbreviation) {
+    map<string,size_t>::const_iterator it = drugTypeNames.find (_abbreviation);
+    if (it == drugTypeNames.end())
+        throw util::xml_scenario_error (string ("attempt to use drug without description: ").append(_abbreviation));
+    
+    return it->second;
 }
 
-const LSTMDrugType& LSTMDrugType::getDrug(string _abbreviation) {
-    Available::const_iterator i = available.find (_abbreviation);
-    if (i == available.end())
-        throw util::xml_scenario_error (string ("prescribed non-existant drug ").append(_abbreviation));
-
-    return *i->second;
+const LSTMDrugType& LSTMDrugType::getDrug(size_t index) {
+    return drugTypes[index];
 }
 
 uint32_t LSTMDrugType::new_proteome_ID () {
     uint32_t id = 0;    // proteome / genotype identifier
     // for each drug / locus,
-    for (Available::const_iterator it = available.begin(); it != available.end(); ++it) {
-        const LSTMDrugType& dt = *it->second;
+    foreach( const LSTMDrugType& dt, drugTypes ){
         double sample = random::uniform_01();
         for (size_t i = 0; i < dt.drugAllele.size(); ++i) {
             // we randomly pick an allele according to its initial frequency
@@ -92,8 +97,8 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 
 // -----  Non-static LSTMDrugType functions  -----
 
-LSTMDrugType::LSTMDrugType (const scnXml::Drug& drugData, uint32_t& bit_start) :
-        abbreviation (drugData.getAbbrev()),
+LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData, uint32_t& bit_start) :
+        index (index),
         allele_rshift (bit_start)
 {
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();

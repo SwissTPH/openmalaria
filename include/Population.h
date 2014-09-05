@@ -42,9 +42,6 @@ public:
     /// Call static inits of sub-models
     static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
 
-    /// Calls static clear on sub-models to free memory
-    static void clear();
-
     /// Checkpointing for static data members
     static void staticCheckpoint (istream& stream);
     static void staticCheckpoint (ostream& stream); ///< ditto

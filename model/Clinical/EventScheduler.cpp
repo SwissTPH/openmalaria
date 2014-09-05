@@ -42,10 +42,6 @@ vector<double> ClinicalEventScheduler::cumDailyPrImmUCTS;
 double ClinicalEventScheduler::neg_v;
 double ClinicalEventScheduler::alpha;
 
-double ClinicalEventScheduler::hetWeightMultStdDev = std::numeric_limits<double>::signaling_NaN();
-double ClinicalEventScheduler::minHetWeightMult = std::numeric_limits<double>::signaling_NaN();
-AgeGroupInterpolator ClinicalEventScheduler::weight;
-
 double ClinicalEventScheduler::logOddsAbBase = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbNegTest = std::numeric_limits<double>::signaling_NaN();
 double ClinicalEventScheduler::logOddsAbPosTest = std::numeric_limits<double>::signaling_NaN();
@@ -61,7 +57,7 @@ AgeGroupInterpolator ClinicalEventScheduler::MF_need_antibiotic;
 
 // -----  static init  -----
 
-void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Model& model )
+void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Clinical& clinical )
 {
     if (TimeStep::interval != 1)
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day timestep.");
@@ -69,15 +65,6 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
     opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
-    
-    const scnXml::Human human = model.getHuman();
-    if( !human.getWeight().present() ){
-        throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
-    }
-    weight.set( human.getWeight().get(), "weight" );
-    hetWeightMultStdDev = human.getWeight().get().getMultStdDev();
-    // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
-    minHetWeightMult = 0.5 / weight.eval( 0.0 );
     
     alpha = exp( -parameters[Parameters::CFR_NEG_LOG_ALPHA] );
     if( !(0.0<=alpha && alpha<=1.0) ){
@@ -87,11 +74,11 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::M
     neg_v = -parameters[Parameters::CFR_SCALE_FACTOR];
     
     if( util::ModelOptions::option( util::NON_MALARIA_FEVERS ) ){
-        if( !model.getClinical().getNonMalariaFevers().present() ){
+        if( !clinical.getNonMalariaFevers().present() ){
             throw util::xml_scenario_error("NonMalariaFevers element of model->clinical required");
         }
         const scnXml::Clinical::NonMalariaFeversType& nmfDesc2 =
-            model.getClinical().getNonMalariaFevers().get();
+            clinical.getNonMalariaFevers().get();
         if( !nmfDesc2.getPrNeedTreatmentMF().present() ||
             !nmfDesc2.getPrNeedTreatmentNMF().present() ){
             throw util::xml_scenario_error( "prNeedTreatmentMF and "
@@ -165,16 +152,6 @@ ClinicalEventScheduler::ClinicalEventScheduler (double tSF) :
 	// don't have a way of modifying it.
 	throw xml_scenario_error("treatment seeking heterogeneity not supported");
     }
-#ifndef NDEBUG
-    int counter = 0;
-#endif
-    do {
-        hetWeightMultiplier = util::random::gauss( 1.0, hetWeightMultStdDev );
-#ifndef NDEBUG
-        assert( counter < 100 );        // too many resamples: resamples should rarely be needed...
-        ++counter;
-#endif
-    } while( hetWeightMultiplier < minHetWeightMult );
 }
 
 
@@ -193,8 +170,8 @@ void ClinicalEventScheduler::massDrugAdministration( Human& human,
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration ( 
-        ESHostData( human.getAgeInYears(), *human.withinHostModel, pgState ),
-        medicateQueue, human, screeningReport, drugReport
+        CMHostData( human, human.getAgeInYears(), pgState ),
+            human, screeningReport, drugReport
     );
 }
 
@@ -285,11 +262,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if (timeLastTreatment + healthSystemMemory > TimeStep::simulation)
 	    pgState = Episode::State (pgState | Episode::SECOND_CASE);
 	
-	CMAuxOutput auxOut = ESCaseManagement::execute(
-	    ESHostData( ageYears, withinHostModel, pgState ), medicateQueue
-	);
+	CMDTOut auxOut = ESCaseManagement::execute(
+	    CMHostData( human, ageYears, pgState ) );
 	
-        if( medicateQueue.size() ){	// I.E. some treatment was given
+        if( auxOut.treated ){	// I.E. some treatment was given
             timeLastTreatment = TimeStep::simulation;
             if( pgState & Episode::COMPLICATED ){
                 Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
@@ -302,11 +278,11 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             }
         }
 	
-	if ( auxOut.hospitalisation != CMAuxOutput::NONE ) {	// in hospital
+	if ( true /*FIXME auxOut.hospitalisation != CMAuxOutput::NONE*/ ) {	// in hospital
 	    pgState = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
 	    
-	    if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
-		++caseStartTime;
+	    /*FIXME if( auxOut.hospitalisation == CMAuxOutput::DELAYED )
+		++caseStartTime;*/
 	}
 	
 	// Case fatality rate (first day of illness)
@@ -316,8 +292,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	) {
 	    double pDeath = caseFatalityRate.eval( ageYears );
 	    // community fatality rate when not in hospital or delayed hospital entry
-	    if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
-                pDeath = getCommunityCFR( pDeath );
+	    /*FIXME if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
+                pDeath = getCommunityCFR( pDeath );*/
 	    if (random::uniform_01() < pDeath) {
 		pgState = Episode::State (pgState | Episode::DIRECT_DEATH | Episode::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
@@ -339,11 +315,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 bool needTreat = random::bernoulli(pNeedTreat);
                 
                 // Calculate chance of antibiotic administration:
-                double pTreatment;
-                if( auxOut.AB_provider == CMAuxOutput::NO_AB ){
-                    // No treatment seeking
-                    pTreatment = 0.0;
-                }else{
+                double pTreatment = 0.0;
+                /*FIXME
+                if( auxOut.AB_provider != CMAuxOutput::NO_AB ){
                     // Treatment seeking; may be at a health facility or from
                     // the informal sector.
                     double logOddsAb = logOddsAbBase - logOddsAbNeed * pNeedTreat;
@@ -363,7 +337,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                     
                     double oddsTreatment = exp( logOddsAb );
                     pTreatment = oddsTreatment / (1.0 + oddsTreatment);
-                }
+                }*/
                 
                 double treatmentEffectMult = 1.0;
                 
@@ -436,26 +410,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
     }
     
-    
-    // Process pending medications (in interal queue) and apply/update:
-    for (list<MedicateData>::iterator it = medicateQueue.begin(); it != medicateQueue.end();) {
-	list<MedicateData>::iterator next = it;
-	++next;
-        if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
-            double bodyMass = ageToWeight( ageYears );
-	    withinHostModel.medicate (it->abbrev, it->qty, it->time, it->duration, bodyMass);
-            if( it->duration > 0.0 ){
-                Survey::current().report_Clinical_DrugUsageIV (it->abbrev, it->cost_qty * bodyMass);
-            }else{      // 0 or NaN
-                Survey::current().report_Clinical_DrugUsage (it->abbrev, it->cost_qty);
-            }
-	    medicateQueue.erase (it);
-        } else {   // and decrement treatment seeking delay for the rest
-            it->time -= 1.0;
-        }
-	it = next;
-    }
-    
+    // Remove on first models...
     if( timeLastTreatment == TimeStep::simulation ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
     }
@@ -474,8 +429,6 @@ void ClinicalEventScheduler::checkpoint (istream& stream) {
     timeOfRecovery & stream;
     timeLastTreatment & stream;
     previousDensity & stream;
-    hetWeightMultiplier & stream;
-    medicateQueue & stream;
 }
 void ClinicalEventScheduler::checkpoint (ostream& stream) {
     ClinicalModel::checkpoint (stream);
@@ -484,8 +437,6 @@ void ClinicalEventScheduler::checkpoint (ostream& stream) {
     timeOfRecovery & stream;
     timeLastTreatment & stream;
     previousDensity & stream;
-    hetWeightMultiplier & stream;
-    medicateQueue & stream;
 }
 
 } }

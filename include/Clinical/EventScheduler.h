@@ -29,11 +29,6 @@
 #include <boost/unordered_map.hpp>
 #include <list>
 
-namespace scnXml {
-    class HSEventScheduler;
-    class Model;
-}
-
 namespace OM {
 namespace Clinical {
 
@@ -49,7 +44,7 @@ using util::AgeGroupInterpolator;
 class ClinicalEventScheduler : public ClinicalModel
 {
 public:
-    static void init (const OM::Parameters& parameters, const scnXml::Model& model);
+    static void init (const OM::Parameters& parameters, const scnXml::Clinical& clinical);
     static void setParameters (const scnXml::HSEventScheduler& esData);
 
     ClinicalEventScheduler (double tSF);
@@ -85,20 +80,6 @@ private:
     static double neg_v;
     /// Parameter
     static double alpha;
-    
-    /** Weight model. Currently looks up a weight dependant on age from a table
-     * in an entirely deterministic way.
-     *
-     * @param ageGroupData Age group for weight data
-     * @param ageYears Age in years
-     * @returns Mass in kg */
-    inline double ageToWeight (double ageYears) {
-        return weight.eval( ageYears ) * hetWeightMultiplier;
-    }
-    
-    static double hetWeightMultStdDev;
-    static double minHetWeightMult;
-    static AgeGroupInterpolator weight;
     
     /** Base log odds of treatment of non-malarial fevers in absense of a
      * malaria diagnostic and irrespective of whether treatment is needed.
@@ -154,13 +135,6 @@ private:
 
     /// Total parasite density at previous timestep (used during a bout).
     double previousDensity;
-    
-    /// Multiplies the mean weight for age.
-    /// Within PkPd class simply because it's not used elsewhere.
-    double hetWeightMultiplier;
-    
-    /// All pending medications
-    list<MedicateData> medicateQueue;
 };
 
 }

@@ -47,17 +47,17 @@ DummyInfection::DummyInfection (uint32_t protID) :
     _density=16;	// increased by DH to avoid zeros in initialKappa
 }
 
-bool DummyInfection::updateDensity(double survivalFactor, TimeStep ageOfInfection) {
+bool DummyInfection::updateDensity(double survivalFactor, int ageDays) {
     const double GROWTH_RATE = 8.0;
     const double PARASITE_THRESHOLD = 1;
     
     _density = (mod_nn(int(_density*GROWTH_RATE), 20000)) * survivalFactor;
-    _cumulativeExposureJ += TimeStep::interval * _density;
+    _cumulativeExposureJ += _density;
     
     if (_density < PARASITE_THRESHOLD) {
-	return true;
+        return true;
     } else {
-	return false;
+        return false;
     }
 }
 

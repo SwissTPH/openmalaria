@@ -243,7 +243,7 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito(TimeStep ageTimeSteps, double tbvFactor) const{
+double WHVivax::probTransmissionToMosquito(TimeStep ageOfHuman, double tbvFactor) const{
     for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
@@ -391,6 +391,33 @@ bool WHVivax::optionalPqTreatment(){
     }
     return false;       // didn't use PQ
 }
+void WHVivax::treatSimple(TimeStep tsLiver, TimeStep tsBlood){
+    //TODO: this should be implemented properly (allowing effects on next
+    // update instead of now)
+    
+    // liver-stage treatment is probably via "Primaquine" option, if at all
+    if( tsLiver.asInt() != 0 ){
+        if( pReceivePQ > 0.0 ){
+            throw util::xml_scenario_error("simple treatment for vivax liver "
+            "stages is incompatible with case-management Primaquine option");
+        }
+        if( tsLiver.asInt() != -1 )
+            throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
+        for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            it->treatmentLS();
+        }
+    }
+    
+    // there probably will be blood-stage treatment
+    if( tsBlood.asInt() == -1 ){
+        for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            it->treatmentBS();
+        }
+    }else{
+        if( tsBlood.asInt() != 0 )
+            throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
+    }
+}
 
 
 // ———  boring stuff: checkpointing and set-up  ———
@@ -418,6 +445,13 @@ void WHVivax::checkpoint(ostream& stream){
     static_cast<int>( morbidity ) & stream;
     cumPrimInf & stream;
 }
+
+char const*const not_impl = "feature not available in Vivax model";
+void WHVivax::treatPkPd(size_t schedule, size_t dosages, double age){
+    throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getTotalDensity() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getCumulativeh() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getCumulativeY() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
     latentp = TimeStep(  scenario.getModel().getParameters().getLatentp());

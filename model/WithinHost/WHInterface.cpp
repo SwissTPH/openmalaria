@@ -30,6 +30,8 @@
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "PkPd/LSTMPkPdModel.h"
+#include "schema/scenario.h"
 //using namespace std;
 
 #include <cmath>
@@ -72,6 +74,10 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
         }
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;
+        
+        if( opt_common_whm ){
+            PkPd::LSTMPkPdModel::init( scenario.getModel() );
+        }
     }
 }
 
@@ -95,22 +101,6 @@ WHInterface::WHInterface () :
 
 WHInterface::~WHInterface()
 {
-}
-
-
-void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){
-    throw TRACED_EXCEPTION( "should not call medicate() except with CommonWithinHost model", util::Error::WHFeatures );
-}
-
-double WHInterface::getTotalDensity() const{
-    throw TRACED_EXCEPTION( "should not call getTotalDensity() with non-falciparum model", util::Error::WHFeatures );
-}
-
-double WHInterface::getCumulativeh() const{
-    throw TRACED_EXCEPTION( "should not call getCumulativeh() with non-falciparum model", util::Error::WHFeatures );
-}
-double WHInterface::getCumulativeY() const{
-    throw TRACED_EXCEPTION( "should not call getCumulativeY() with non-falciparum model", util::Error::WHFeatures );
 }
 
 

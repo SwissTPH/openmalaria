@@ -63,37 +63,11 @@
       <timedDeployment time="91">
         <EventScheduler>
           <uncomplicated>
-            <decisions>
-              <decision depends="" name="treatment" values="effective_treat,none">effective_treat</decision>
-              <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
-            </decisions>
-            <treatments>
-              <treatment name="effective_treat">
-                <schedule>
-                  <medicate drug="effective" hour="0" mg="1"/>
-                </schedule>
-              </treatment>
-              <treatment name="none">
-                <schedule/>
-              </treatment>
-            </treatments>
+            <treatPKPD schedule="effective" dosage="effective"/>
           </uncomplicated>
           <complicated>
-            <decisions>
-              <decision depends="" name="treatment" values="effective_treat,none">effective_treat</decision>
-              <decision depends="" name="hospitalisation" values="none,delayed,immediate">immediate</decision>
-              <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
-            </decisions>
-            <treatments>
-              <treatment name="effective_treat">
-                <schedule>
-                  <medicate drug="effective" hour="0" mg="1"/>
-                </schedule>
-              </treatment>
-              <treatment name="none">
-                <schedule/>
-              </treatment>
-            </treatments>
+            <!--TODO hospitalisation -->
+            <treatPKPD schedule="effective" dosage="effective"/>
           </complicated>
           <ClinicalOutcomes>
             <maxUCSeekingMemory>3</maxUCSeekingMemory>
@@ -125,37 +99,10 @@
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
-        <decisions>
-          <decision depends="" name="treatment" values="effective_treat,none">none</decision>
-          <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
-        </decisions>
-        <treatments>
-          <treatment name="effective_treat">
-            <schedule>
-              <medicate drug="effective" hour="0" mg="1"/>
-            </schedule>
-          </treatment>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-        </treatments>
+        <noTreatment/>
       </uncomplicated>
       <complicated>
-        <decisions>
-          <decision depends="" name="treatment" values="effective_treat,none">none</decision>
-          <decision depends="" name="hospitalisation" values="none,delayed,immediate">none</decision>
-          <decision depends="" name="test" values="none,microscopy,RDT">none</decision>
-        </decisions>
-        <treatments>
-          <treatment name="effective_treat">
-            <schedule>
-              <medicate drug="effective" hour="0" mg="1"/>
-            </schedule>
-          </treatment>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-        </treatments>
+        <noTreatment/>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>
@@ -1032,21 +979,31 @@
     </nonVector>
   </entomology>
   <pharmacology>
-    <drug abbrev="effective">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>1e7</max_killing_rate>
-          <IC50>1</IC50>
-          <slope>1</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>1e-5</negligible_concentration>
-        <half_life>0.00069</half_life>
-        <vol_dist>0.01667</vol_dist>
-      </PK>
-    </drug>
+    <treatments>
+      <schedule name="effective">
+        <medicate drug="effective" hour="0" mg="1"/>
+      </schedule>
+      <dosages name="effective">
+        <age lb="0" dose_mult="1"/>
+      </dosages>
+    </treatments>
+    <drugs>
+      <drug abbrev="effective">
+        <PD>
+          <allele name="sensitive">
+            <initial_frequency>1</initial_frequency>
+            <max_killing_rate>1e7</max_killing_rate>
+            <IC50>1</IC50>
+            <slope>1</slope>
+          </allele>
+        </PD>
+        <PK>
+          <negligible_concentration>1e-5</negligible_concentration>
+          <half_life>0.00069</half_life>
+          <vol_dist>0.01667</vol_dist>
+        </PK>
+      </drug>
+    </drugs>
   </pharmacology>
   <model>
     <ModelOptions>

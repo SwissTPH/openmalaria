@@ -41,6 +41,11 @@ namespace WithinHost {
  * Type used to select a treatment option.
  * 
  * Pass by value; it just hides an integer.
+ * 
+ * TODO: this struct and the Treatments class are no longer strictly necessary.
+ * Ideally, one would remove this, firstly by replacing usages of
+ * om:TreatmentOption in healthSystem.xsd with om:DecisionTree (requires an
+ * XML updator algorithm), then optionally removing ImmediateOutcomes.
  */
 struct TreatmentId{
     inline bool operator==( const TreatmentId that ){ return id == that.id; }
@@ -89,12 +94,14 @@ public:
 
     /** Return the infectiousness of this human to biting mosquitoes.
      * 
-     * @param ageTimeSteps Age of the human
+     * @param ageOfHuman Age of the human
+     * @param tbvFactor Probability that transmission is not blocked by a
+     *  "transmission blocking vaccine".
      * 
      * Calculates the value during the call, which is expensive (cache externally
      * if the value is needed multiple times). */
     //TODO: per genotype? (for LSTM's spread of resistance modelling)
-    virtual double probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const =0;
+    virtual double probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const =0;
     
     /// @returns true if host has patent parasites
     virtual bool summarize(const Host::Human& human) =0;
@@ -105,24 +112,29 @@ public:
     /**
      * Carry out the effects of some treatment option
      */
+    //TODO: remove this (use treatSimple instead)
     virtual void treatment( Host::Human& human, TreatmentId treatId ) =0;
     
     /** Conditionally gives Primaquine as a treatment.
      * 
      * Returns true iff PQ is administered. Administered implies either fully
-     * effective or no effective, depending on another probability. Not
+     * effective or no effect, depending on another probability. Not
      * administered implies no effect. */
     virtual bool optionalPqTreatment() =0;
     
-    /** Medicate drugs (wraps drug's medicate).
+    /** Treat a patient via the simple treatment model. */
+    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood) =0;
+    
+    /** Give a patient a course of drugs, via the Pk/Pd model
+     * 
+     * Note: doses sizes are modified according to age via the dosage
+     * table given at the time this function is called.
      *
-     * @param drugAbbrev	abbrevation of drug name (e.g. CQ, MF)
-     * @param qty		Quantity of drug to administer in mg
-     * @param time		Time relative to beginning of timestep to medicate at, in days (less than 1 day)
-     * @param duration Duration in days. 0 or NaN indicate oral treatment.
-     * @param bodyMass	Weight of human in kg
+     * @param schedule Index of a treatment schedule
+     * @param dosages Index of a dosage table
+     * @param age Age of human in years
      */
-    virtual void medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass);
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age) =0;
 
     /** Add new infections and update the parasite densities of existing
      * infections. Also update immune status.
@@ -132,12 +144,10 @@ public:
      * @param bsvFactor Parasite survival factor for blood-stage vaccines */
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor) =0;
 
-    /** TODO: this should not need to be exposed
-     * 
-     * It is used by: MDA diagnostics, EventScheduler diagnostics, and a severe
-     * outcome (pDeath) model inside the EventScheduler "case management"
-     * model. */
-    virtual double getTotalDensity() const;
+    /** TODO: this should not need to be exposed. It is currently used by a
+     * severe outcome (pDeath) model inside the EventScheduler "case
+     * management" model, and case management diagnostics. */
+    virtual double getTotalDensity() const =0;
     
     /** Simulate use of a diagnostic test, using the general detection limit.
      * Does not report for costing purposes.
@@ -159,8 +169,8 @@ public:
     virtual void clearImmunity() =0;
     
     // TODO(monitoring): these shouldn't have to be exposed (perhaps use summarize to report the data):
-    virtual double getCumulativeh() const;
-    virtual double getCumulativeY() const;
+    virtual double getCumulativeh() const =0;
+    virtual double getCumulativeY() const =0;
 
     /** The maximum number of infections a human can have. The only real reason
      * for this limit is to prevent incase bad input from causing the number of

@@ -212,34 +212,36 @@
     </vectorPop>
   </interventions>
   <healthSystem>
-    <ImmediateOutcomes name="Tanzania ACT">
-      <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
-      <initialACR>
-        <ACT value="0.85"/>
-        <QN value="0.998"/>
-        <selfTreatment value="0.63"/>
-      </initialACR>
-      <compliance>
-        <ACT value="0.9"/>
-        <selfTreatment value="0.85"/>
-      </compliance>
-      <nonCompliersEffective>
-        <ACT value="0"/>
-        <selfTreatment value="0"/>
-      </nonCompliersEffective>
-      <treatmentActions>
-        <ACT name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
-        </ACT>
-        <QN name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
-        </QN>
-      </treatmentActions>
+    <DecisionTree5Day name="Tanzania ACT">
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
       <pSelfTreatUncomplicated value="0.01"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>
       <pSeekOfficialCareSevere value="0.48"/>
-    </ImmediateOutcomes>
+      <treeUCOfficial>
+        <random name="p cure">
+          <outcome p="0.765" name="90% compliance, 85% chance cure">
+            <treatSimple timestepsLiver="0" timestepsBlood="1"/>
+          </outcome>
+          <outcome p="0.235">
+            <treatFailure/>
+          </outcome>
+        </random>
+      </treeUCOfficial>
+      <treeUCSelfTreat>
+        <random name="p cure">
+          <outcome p="0.5355" name="85% compliance, 63% chance cure">
+            <treatSimple timestepsLiver="0" timestepsBlood="1"/>
+          </outcome>
+          <outcome p="0.4645">
+            <treatFailure/>
+          </outcome>
+        </random>
+      </treeUCSelfTreat>
+      <cureRateSevere value="0.998"/>
+      <treatmentSevere>
+        <clearInfections stage="blood" timesteps="1"/>
+      </treatmentSevere>
+    </DecisionTree5Day>
     <CFR>
       <group lowerbound="0" value="0.09189"/>
       <group lowerbound="0.25" value="0.0810811"/>
