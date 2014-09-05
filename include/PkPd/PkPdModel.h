@@ -77,6 +77,16 @@ public:
   }
   //@}
   
+    /** HACK to report drug concentrations.
+     * 
+     * Gives the drug concentrations at the start of the day (before medication,
+     * where drugs are medicated at hour 0).
+     * 
+     * @concentrations Table; entries of the form ("LU",0.1) are set for all
+     *  modeled drugs (i.e. none unless drugs were recently medicated).
+     */
+    virtual void getConcentrations(map<string,double>& concentrations) const =0;
+  
     /** Prescribe a patient a course of drugs, via the Pk/Pd model
      * 
      * Note: doses sizes are modified according to age via the dosage

@@ -142,7 +142,7 @@ public:
     
     virtual void importInfection();
     
-    virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
+    virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
     
     virtual bool diagnosticDefault() const;
 

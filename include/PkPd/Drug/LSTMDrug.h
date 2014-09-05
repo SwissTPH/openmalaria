@@ -132,6 +132,8 @@ protected:
      * Used in calculateDrugFactor temporarily,
      * and in updateConcentration() to update concentration. */
     DoseMap doses;
+    
+    friend class LSTMPkPdModel; //HACK(drug mon)
 };
 
 }

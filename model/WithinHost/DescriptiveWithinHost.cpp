@@ -97,7 +97,7 @@ void DescriptiveWithinHostModel::importInfection(){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor) {
+void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
     _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
     

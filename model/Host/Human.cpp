@@ -31,6 +31,7 @@
 #include "util/random.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
+#include "interventions/InterventionManager.hpp"
 #include "schema/scenario.h"
 
 namespace OM { namespace Host {
@@ -42,6 +43,10 @@ namespace OM { namespace Host {
             opt_trans_treat_het = false, opt_comorb_treat_het = false,
             opt_comorb_trans_het = false, opt_triple_het = false,
             opt_report_only_at_risk = false;
+    
+    //HACK(drug mon)
+    ofstream monDrug, monFake;
+    ComponentId drugMonId(0 /*lazy initialisation*/);
 
 // -----  Static functions  -----
 
@@ -61,6 +66,11 @@ void Human::initHumanParameters( const Parameters& parameters, const scnXml::Sce
     InfectionIncidenceModel::init( parameters );
     WithinHost::WHInterface::init( parameters, scenario );
     Clinical::ClinicalModel::init( parameters, scenario );
+    
+    if( scenario.getMonitoring().getDrugConcentration().present() ){
+        monDrug.open( scenario.getMonitoring().getDrugConcentration().get().getFile().c_str(), ios::out );
+        drugMonId = interventions::InterventionManager::getComponentId( scenario.getMonitoring().getDrugConcentration().get().getCohort() );
+    }
 }
 
 
@@ -195,7 +205,8 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         double EIR = transmissionModel->getEIR( *this, ageYears, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
-        withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV));
+        ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
+        withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV), mon);
         
         clinicalModel->update (*this, ageYears, ageTimeSteps);
         clinicalModel->updateInfantDeaths (ageTimeSteps);

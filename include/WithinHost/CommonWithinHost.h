@@ -25,6 +25,7 @@
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/CommonInfection.h"
 #include "PkPd/PkPdModel.h"
+#include <schema/monitoring.h>
 
 using namespace std;
 
@@ -39,6 +40,8 @@ namespace OM { namespace WithinHost {
 class CommonWithinHost : public WHFalciparum
 {
 public:
+    static void init(const scnXml::DrugConcentration& elt);     //HACK(drug mon)
+    
     CommonWithinHost( double comorbidityFactor );
     virtual ~CommonWithinHost();
     
@@ -48,7 +51,7 @@ public:
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual void clearImmunity();
     
-    virtual void update (int nNewInfs, double ageInYears, double bsvFactor);
+    virtual void update (int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     

@@ -99,7 +99,8 @@ uint32_t LSTMDrugType::new_proteome_ID () {
 
 LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData, uint32_t& bit_start) :
         index (index),
-        allele_rshift (bit_start)
+        allele_rshift (bit_start),
+        name(drugData.getAbbrev())
 {
     const scnXml::PD::AlleleSequence& alleles = drugData.getPD().getAllele();
     if (alleles.size() < 1)

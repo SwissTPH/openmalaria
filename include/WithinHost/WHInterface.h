@@ -141,8 +141,10 @@ public:
      *
      * @param nNewInfs Number of inoculations this time-step
      * @param ageInYears Age of human
-     * @param bsvFactor Parasite survival factor for blood-stage vaccines */
-    virtual void update(int nNewInfs, double ageInYears, double bsvFactor) =0;
+     * @param bsvFactor Parasite survival factor for blood-stage vaccines
+     * @param drugMon HACK(drug mon)
+     */
+    virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) =0;
 
     /** TODO: this should not need to be exposed. It is currently used by a
      * severe outcome (pDeath) model inside the EventScheduler "case

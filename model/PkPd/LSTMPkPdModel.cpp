@@ -91,6 +91,12 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 
 // ———  non-static simulation time functions  ———
+void LSTMPkPdModel::getConcentrations(map< string, double >& concentrations)const{
+    foreach( const LSTMDrug& drug, _drugs ){
+        concentrations[drug.typeData.getName()] = drug.concentration;
+    }
+}
+
 
 void LSTMPkPdModel::medicate(double age){
     if( medicateQueue.empty() ) return;

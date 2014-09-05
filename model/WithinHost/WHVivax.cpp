@@ -277,7 +277,7 @@ void WHVivax::importInfection(){
     infections.push_back( new VivaxBrood( this ) );
 }
 
-void WHVivax::update(int nNewInfs, double ageInYears, double){
+void WHVivax::update(int nNewInfs, double ageInYears, double, ofstream& drugMon){
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )
         infections.push_back( new VivaxBrood( this ) );

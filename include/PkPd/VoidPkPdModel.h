@@ -31,6 +31,7 @@ namespace OM { namespace PkPd {
     * empty implementation in this class.
     */
     class VoidPkPdModel : public PkPdModel {
+        virtual void getConcentrations(map<string,double>& concentrations) const{}
         virtual void prescribe(size_t schedule, size_t dosages, double age) {}
         virtual void medicate(double age) {};
         virtual double getDrugFactor (uint32_t proteome_ID) {

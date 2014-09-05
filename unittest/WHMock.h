@@ -52,7 +52,7 @@ public:
     virtual bool optionalPqTreatment();
     virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood);
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
-    virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
+    virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
     virtual double getTotalDensity() const;
     virtual bool diagnosticDefault() const;
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );

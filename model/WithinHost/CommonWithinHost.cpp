@@ -24,6 +24,8 @@
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std;
 
 namespace OM {
@@ -32,8 +34,14 @@ namespace WithinHost {
 CommonInfection* (* CommonWithinHost::createInfection) (uint32_t protID);
 CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
+vector<string> drugMonCodes;
+
 
 // -----  Initialization  -----
+
+void CommonWithinHost::init(const scnXml::DrugConcentration& elt){
+    boost::split( drugMonCodes, elt.getDrugCodes(), boost::is_any_of("," ) );
+}
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
         WHFalciparum( comorbidityFactor ), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
@@ -93,7 +101,7 @@ void CommonWithinHost::importInfection(){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor) {
+void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
     _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
     
@@ -125,8 +133,19 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor)
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
     for( int day = 0, days = TimeStep::interval; day < days; ++day ){
+        if( drugMon.is_open() && TimeStep::interventionPeriod >= TimeStep(0) ){
+            drugMon << TimeStep::interventionPeriod << '\t' << day;
+            map<string,double> concentrations;
+            pkpdModel->getConcentrations( concentrations );
+            foreach( string& drugCode, drugMonCodes ){
+                drugMon << '\t' << concentrations[drugCode];
+            }
+            drugMon << endl;
+        }
+        
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel->medicate( ageInYears );
+        
         for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
             // Note: this is only one treatment model; there is also the PK/PD model
             bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);

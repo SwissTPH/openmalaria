@@ -44,7 +44,7 @@ public:
   virtual void loadInfection(istream& stream);
   virtual void clearImmunity();
   
-  virtual void update(int nNewInfs, double ageInYears, double bsvFactor);
+  virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
   
   virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
   
