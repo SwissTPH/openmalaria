@@ -93,6 +93,7 @@ namespace Report {
         MD_LOG_PYROGENIC_THRESHOLD,
         MD_LOG_DENSITY,
         MD_PYROGENIC_THRESHOLD,
+        MD_AGE,
         MD_NUM  // must be last; not a measure to report
     };
 }

@@ -220,7 +220,8 @@ void Human::summarize() {
         return;
     }
     
-    Survey::current().addInt( Report::MI_HOSTS, *this, 1);
+    Survey::current().addInt( Report::MI_HOSTS, *this, 1)
+        .addDouble( Report::MD_AGE, *this, getAgeInYears() );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     

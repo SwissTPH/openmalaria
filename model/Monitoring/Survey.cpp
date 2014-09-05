@@ -113,6 +113,7 @@ public:
         codeMap["nMassRecruitOnly"] = SM::nMassRecruitOnly;
         codeMap["nCtsRecruitOnly"] = SM::nCtsRecruitOnly;
         codeMap["nTreatDeployments"] = SM::nTreatDeployments;
+        codeMap["sumAge"] = SM::sumAge;
     }
     
     SM::SurveyMeasure operator[] (const string s) {
@@ -185,6 +186,7 @@ void Survey::init (const scnXml::Monitoring& monitoring) {
     dblReportMappings[Report::MD_LOG_PYROGENIC_THRESHOLD] = SM::sumLogPyrogenThres;
     dblReportMappings[Report::MD_LOG_DENSITY] = SM::sumlogDens;
     dblReportMappings[Report::MD_PYROGENIC_THRESHOLD] = SM::sumPyrogenThresh;
+    dblReportMappings[Report::MD_AGE] = SM::sumAge;
     
     AgeGroup::init (monitoring);
     

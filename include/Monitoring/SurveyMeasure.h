@@ -291,6 +291,10 @@ enum SurveyMeasure {
      * treatment (case management). */
     nTreatDeployments = 67,
     
+    /** Report the total age of all humans in this a group (sum across humans,
+     * in years). Divide by nHost to get the average age. */
+    sumAge = 68,
+    
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	
 };
