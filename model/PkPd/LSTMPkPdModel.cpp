@@ -102,7 +102,7 @@ void LSTMPkPdModel::medicate(double age){
     list<MedicateData>::iterator it = medicateQueue.begin();
     while( it != medicateQueue.end() ){
         if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
-            medicateDrug (it->drug, it->qty, it->time, it->duration, bodyMass);     //TODO: inline?
+            medicateDrug (it->drug, it->qty, it->time, it->duration, bodyMass);     // could be inlined, except for testing
             it = medicateQueue.erase (it);
         } else {   // and decrement treatment seeking delay for the rest
             it->time -= 1.0;

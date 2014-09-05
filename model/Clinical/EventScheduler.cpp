@@ -410,9 +410,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	}
     }
     
-    
-    //FIXME: update medicate queue
-    
+    // Remove on first models...
     if( timeLastTreatment == TimeStep::simulation ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
     }

@@ -41,7 +41,8 @@ namespace OM { namespace PkPd {
  * instantiated (i.e. used to create objects).
  * 
  * Calling order each day:
- *  * medicateDrugs()
+ *  * prescribe()
+ *  * medicate()
  *  * getDrugFactor() for each infection
  *  * decayDrugs()
  */

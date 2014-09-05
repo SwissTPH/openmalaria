@@ -366,19 +366,16 @@ auto_ptr< CMDecisionTree > CMDTRandom::create(
         result->branches.insert( cum_p, CMDecisionTree::create( outcome, isUC ) );
     }
     
-    // Test cum_p is approx. 1.0 in case the input tree is wrong. In any case,
-    // we force probabilities to add to 1.0. At least one branch is required!
-    if (cum_p < 0.999 || cum_p > 1.001){
+    // Test cum_p is approx. 1.0 in case the input tree is wrong. We require no
+    // less than one to make sure generated random numbers are not greater than
+    // the last option.
+    if (cum_p < 1.0 || cum_p > 1.001){
         throw util::xml_scenario_error ( (
             boost::format("decision tree (random node): expected probability sum to be 1.0 but found %2%")
             %cum_p
         ).str() );
     }
-    // In theory if the last value is exactly 1 it should always be greater
-    // than a uniform_01() sample; this just gives us a stronger guarantee of
-    // the same thing.
-    //TODO: set index for last entry to something > 1
-//     result->branches.back()->first = numeric_limits<double>::infinity();
+    
     return auto_ptr<CMDecisionTree>( result.release() );
 }
 
