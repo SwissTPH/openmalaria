@@ -85,8 +85,9 @@ private:
     
     auto_ptr<Population> population;
     
-    /** Some identifier is needed to prevent checkpoint cheats. Ideally a unique identifier per
-     * workunit, but a random integer number should do the job. */
+    /** This was used to prevent checksum cheats; now it is obseleted by cksum.
+     * NOTE: could be removed, but there's little point and could be
+     * complications for the BOINC server. */
     int workUnitIdentifier;
     
     // Stored so that it can be verified across checkpoints

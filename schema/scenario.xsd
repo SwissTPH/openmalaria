@@ -132,10 +132,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:attribute name="wuID" type="xs:int" use="optional">
         <xs:annotation>
           <xs:documentation>
-            Work unit ID. Only used to validate checkpointing, to prevent checkpoint cheats.
+            Work unit ID. Obselete and no longer required.
           </xs:documentation>
           <xs:appinfo>
-            units:Number;min:1;max:100000000;name:Work unit identifier;exposed:false;
+            units:Number;name:Work unit identifier;exposed:false;
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>

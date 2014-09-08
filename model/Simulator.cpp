@@ -99,7 +99,6 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // ———  End of static data initialisation  ———
     
     // Set work unit identifier, if we have one.
-    // TODO: remove this from the schema completely — it's not useful now we verify the checksum.
     if( scenario.getWuID().present() )
         workUnitIdentifier = scenario.getWuID().get();
     
