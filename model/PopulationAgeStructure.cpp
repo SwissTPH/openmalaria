@@ -21,7 +21,7 @@
 #include "PopulationAgeStructure.h"
 #include "Global.h"
 #include "util/errors.h"
-#include <schema/demography.h>
+#include "schema/demography.h"
 
 #include <cmath>
 #include <gsl_vector_double.h>
