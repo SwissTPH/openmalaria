@@ -346,7 +346,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 A sub-population restriction may be added as a property of the
                 list of continuous deployments.
                 </xs:documentation>
-                <xs:appinfo>type:list of elements;name:Age-based (continuous) deployment;</xs:appinfo>
+                <xs:appinfo>name:Age-based (continuous) deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="om:massListWithCum">
@@ -738,7 +738,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             List of timed vector population intervention deployment
           </xs:documentation>
-          <xs:appinfo>type:list of elements;name:Vector population intervention deployment;</xs:appinfo>
+          <xs:appinfo>name:Vector population intervention deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>

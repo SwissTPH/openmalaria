@@ -17,9 +17,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:documentation>
                     Number of timesteps between reports.
                   </xs:documentation>
-                  <xs:appinfo>
-                    type:integer;units:Days;min:1;max:unbounded;name:Days between reports;
-                  </xs:appinfo>
+                  <xs:appinfo>units:Days;min:1;max:unbounded;name:Days between reports;</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
               <xs:attribute name="duringInit" type="xs:boolean" use="optional">
@@ -34,9 +32,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     column (in addition to 'timestep'), since 'timestep' is dis-
                     continuous across the start of the intervention period.
                   </xs:documentation>
-                  <xs:appinfo>
-                    type:boolean;units:Days;min:1;max:unbounded;name:During initialization;
-                  </xs:appinfo>
+                  <xs:appinfo>units:Days;min:1;max:unbounded;name:During initialization;</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
             </xs:extension>
@@ -49,7 +45,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             List of all active survey options. See include/Survey.h for a list of
             supported outputs. Should also be on the wiki.
           </xs:documentation>
-          <xs:appinfo>type:list of elements;name:Name of quantity;</xs:appinfo>
+          <xs:appinfo>name:Name of quantity;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="surveys">
@@ -69,7 +65,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   over the previous year(data from previous timesteps-per-year period).
                   Simulation will end immediately after last survey is taken.
                 </xs:documentation>
-                <xs:appinfo>type:integer;units:Number;min:0;name:Survey time;</xs:appinfo>
+                <xs:appinfo>units:Number;min:0;name:Survey time;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -78,9 +74,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Limit above which a human's infection is reported as patent.
               </xs:documentation>
-              <xs:appinfo>
-                type:double;units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;
-              </xs:appinfo>
+              <xs:appinfo>units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -90,7 +84,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             List of age groups included in demography or surveys
           </xs:documentation>
-          <xs:appinfo>type:list of elements;name:Age groups;</xs:appinfo>
+          <xs:appinfo>name:Age groups;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="cohorts" minOccurs="0" type="om:Cohorts">
@@ -121,7 +115,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Name of monitoring data
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name of monitoring information;</xs:appinfo>
+        <xs:appinfo>name:Name of monitoring information;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -134,7 +128,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Lower bound of age group
         </xs:documentation>
-        <xs:appinfo>type:double;units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
+        <xs:appinfo>units:Years;min:0;max:100;name:lower bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -144,7 +138,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Upper bound of age group
         </xs:documentation>
-        <xs:appinfo>type:double;units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
+        <xs:appinfo>units:Years;min:0;max:100;name:upper bound of age group</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

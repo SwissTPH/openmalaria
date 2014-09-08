@@ -15,7 +15,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         Description of clinical parameters that are related to the health-system description, but which contain data
         that cannot be changed as part of an intervention and that are not restricted to treatment.
       </xs:documentation>
-      <xs:appinfo>type:list of elements;name:Description of clinical parameters;</xs:appinfo>
+      <xs:appinfo>name:Description of clinical parameters;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="NonMalariaFevers" minOccurs="0">
@@ -34,7 +34,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Probability that a non-malaria fever occurs given that no concurrent
                   malaria fever occurs.
                 </xs:documentation>
-                <xs:appinfo>name:P(NMF); type:double;units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
+                <xs:appinfo>name:P(NMF); units:Dimensionless;min:0.0;max:1.0;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="prNeedTreatmentNMF" type="om:AgeGroupValues" minOccurs="0">
@@ -44,7 +44,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   antibiotics (assuming fever is not induced by malaria, although
                   concurrent parasites may be present).
                 </xs:documentation>
-                <xs:appinfo>name:P(need treatment | NMF);type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(need treatment | NMF);units:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="prNeedTreatmentMF" type="om:AgeGroupValues" minOccurs="0">
@@ -57,7 +57,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Meaning partially overlaps with separate model for comorbidity
                   given malaria.
                 </xs:documentation>
-                <xs:appinfo>name:P(need treatment | MF);type:double;units:Dimensionless;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>name:P(need treatment | MF);units:Dimensionless;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -70,7 +70,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Follow-up period during which a recurrence is
           considered to be a treatment failure
         </xs:documentation>
-        <xs:appinfo>type: integer; units:Time steps;min:1;max:100;name:Follow-up period during which recurrence is treated as a failure;</xs:appinfo>
+        <xs:appinfo> units:Time steps;min:1;max:100;name:Follow-up period during which recurrence is treated as a failure;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -87,7 +87,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         Health system data is here defined as data used to decide on a treatment
         strategy, given a case requiring treatment.
       </xs:documentation>
-      <xs:appinfo>type: list of elements;name:Case management system;</xs:appinfo>
+      <xs:appinfo>name:Case management system;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:choice>
@@ -101,7 +101,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Case fatality rate (probability of an inpatient fatality from a
             bout of severe malaria, per age-group).
           </xs:documentation>
-          <xs:appinfo>type: list of elements;name:Case fatality rate for inpatients;</xs:appinfo>
+          <xs:appinfo>name:Case fatality rate for inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="pSequelaeInpatient" type="om:AgeGroupValues">
@@ -110,7 +110,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             List of age-specific probabilities of sequelae in inpatients,
             during a severe bout of malaria.
           </xs:documentation>
-          <xs:appinfo>type: list of elements;units:Dimensionless;name:Probabilities of sequelae in inpatients;</xs:appinfo>
+          <xs:appinfo>units:Dimensionless;name:Probabilities of sequelae in inpatients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -132,7 +132,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         Tediosi et al case management model (Case management as
         described in AJTMH 75 (suppl 2) pp90-103).
       </xs:documentation>
-      <xs:appinfo>type: list of elements;name:Case Management (Tediosi et al);</xs:appinfo>
+      <xs:appinfo>name:Case Management (Tediosi et al);</xs:appinfo>
     </xs:annotation>
     <xs:all>
       <xs:element name="drugRegimen">
@@ -140,7 +140,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Description of drug regimen.
           </xs:documentation>
-          <xs:appinfo>type: list of elements;name:Description of drug regimen;</xs:appinfo>
+          <xs:appinfo>name:Description of drug regimen;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:attribute name="firstLine" type="xs:string" use="required">
@@ -148,7 +148,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Code for first line drug
               </xs:documentation>
-              <xs:appinfo>type:string;units:Drug code;name:First line drug;</xs:appinfo>
+              <xs:appinfo>units:Drug code;name:First line drug;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="secondLine" type="xs:string" use="required">
@@ -156,7 +156,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:documentation>
                 Code for second line drug
               </xs:documentation>
-              <xs:appinfo>type:string;units:Drug code;name:Second line drug;</xs:appinfo>
+              <xs:appinfo>units:Drug code;name:Second line drug;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="inpatient" type="xs:string" use="required">
@@ -165,7 +165,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Code for drug used for treating
                 inpatients
               </xs:documentation>
-              <xs:appinfo>type:string;units:Drug code;name:Drug use for treating inpatients;</xs:appinfo>
+              <xs:appinfo>units:Drug code;name:Drug use for treating inpatients;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
@@ -176,7 +176,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Initial cure rate
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Initial cure rate;</xs:appinfo>
+            units:Dimensionless;min:0.0;max:1.0;name:Initial cure rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="compliance" type="om:treatmentDetails">
@@ -184,7 +184,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Adherence to treatment
           </xs:documentation>
-          <xs:appinfo>type:double;units:Dimensionless;min:0.0;max:1.0;name:Adherence to treatment;</xs:appinfo>
+          <xs:appinfo>units:Dimensionless;min:0.0;max:1.0;name:Adherence to treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="nonCompliersEffective" type="om:treatmentDetails">
@@ -193,7 +193,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Effectiveness of treatment for non-compliant patients
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
+            units:Dimensionless;min:0.0;max:1.0;name:Effectiveness of treatment in non-adherent patients;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="treatmentActions">
@@ -217,7 +217,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -230,7 +230,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Note that in second line cases there is no probability of self-treatment.
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -241,7 +241,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -252,7 +252,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             obtains appropriate care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -273,7 +273,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element maxOccurs="1" minOccurs="0" name="CQ" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>Chloroquine</xs:documentation>
-          <xs:appinfo>type:list of elements;name:Chloroquine;</xs:appinfo>
+          <xs:appinfo>name:Chloroquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="SP" type="om:inputValue">
@@ -281,13 +281,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Sulphadoxine-pyrimethamine
           </xs:documentation>
-          <xs:appinfo>type:list of elements;name:Sulphadoxine-pyrimethamine;</xs:appinfo>
+          <xs:appinfo>name:Sulphadoxine-pyrimethamine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="AQ" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>Amodiaquine</xs:documentation>
-          <xs:appinfo>type:list of elements;name:Amodiaquine</xs:appinfo>
+          <xs:appinfo>name:Amodiaquine</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="SPAQ" type="om:inputValue">
@@ -295,7 +295,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Sulphadoxine-pyrimethamine/Amodiaquine
           </xs:documentation>
-          <xs:appinfo>type:list of elements;name:Sulphadoxine-pyrimethamine/Amodiaquine;</xs:appinfo>
+          <xs:appinfo>name:Sulphadoxine-pyrimethamine/Amodiaquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="ACT" type="om:inputValue">
@@ -303,13 +303,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Artemisinine combination therapy
           </xs:documentation>
-          <xs:appinfo>type: list of elements; name: Artemisinine combination therapy</xs:appinfo>
+          <xs:appinfo>name:Artemisinine based combination therapy;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element maxOccurs="1" minOccurs="0" name="QN" type="om:inputValue">
         <xs:annotation>
           <xs:documentation>Quinine</xs:documentation>
-          <xs:appinfo>type:list of elements name:Quinine ;</xs:appinfo>
+          <xs:appinfo>name:Quinine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="selfTreatment" type="om:inputValue">
@@ -318,7 +318,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Probability of self-treatment
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0;max:1name:P(self-treat);
+            units:Dimensionless;min:0;max:1name:P(self-treat);
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -348,7 +348,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease seeks official care immediately.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -361,7 +361,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Note that in second line cases there is no probability of self-treatment.
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with uncomplicated disease will self-treat.
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -372,7 +372,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             uncomplicated disease seeks official care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a recurring patient seeks official care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -383,7 +383,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             obtains appropriate care
           </xs:documentation>
           <xs:appinfo>
-            type:double;units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
+            units:Dimensionless;min:0.0;max:1.0;name:Probability that a patient with severe disease obtains appropriate care;
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
@@ -434,7 +434,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Maximum number of timesteps (including first day of case) that an individual with an uncomplicated case of
             malaria will remember he/she was sick before resetting. 
           </xs:documentation>
-          <xs:appinfo>type:integer;name:Max UC treatment-seeking memory;units:Days;min:0;max:unbounded</xs:appinfo>
+          <xs:appinfo>name:Max UC treatment-seeking memory;units:Days;min:0;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="uncomplicatedCaseDuration" type="xs:int">
@@ -444,7 +444,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             sickness (from treatment seeking until return to life-as-usual).
             Usually 3.
           </xs:documentation>
-          <xs:appinfo>type:integer;name:Uncomplicated case duration;units:Days;min:1;max:unbounded</xs:appinfo>
+          <xs:appinfo>name:Uncomplicated case duration;units:Days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="complicatedCaseDuration" type="xs:int">
@@ -453,7 +453,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Fixed length of a complicated or severe case of malaria
             (from treatment seeking until return to life-as-usual).
           </xs:documentation>
-          <xs:appinfo>type:integer;name:Complicated case duration;units:Days;min:1;max:unbounded</xs:appinfo>
+          <xs:appinfo>name:Complicated case duration;units:Days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="complicatedRiskDuration" type="xs:int">
@@ -463,7 +463,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             or complicated case of malaria. Cannot be greater than the duration
             of a complicated case or less than 1 day.
           </xs:documentation>
-          <xs:appinfo>type:integer;name:Complicated risk duration;units:Days;min:1;max:unbounded</xs:appinfo>
+          <xs:appinfo>name:Complicated risk duration;units:Days;min:1;max:unbounded</xs:appinfo>
         </xs:annotation>
       </xs:element>
        <xs:element name="dailyPrImmUCTS" type="xs:double" maxOccurs="unbounded">
@@ -483,7 +483,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             
             For no delay, use one element with a value of 1.
           </xs:documentation>
-          <xs:appinfo>type:double;name:Daily probability of immediate treatment seeking for uncomplicated cases;units:Dimensionless;min:0.0;max:1.0</xs:appinfo>
+          <xs:appinfo>name:Daily probability of immediate treatment seeking for uncomplicated cases;units:Dimensionless;min:0.0;max:1.0</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -556,7 +556,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             a provider untrained in NMF diagnosis) on the odds ratio of
             receiving antibiotics. Symbol: exp(β₄)
           </xs:documentation>
-          <xs:appinfo>type:double;name:Effect of informal provider;</xs:appinfo>
+          <xs:appinfo>name:Effect of informal provider;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element name="CFR" type="om:AgeGroupValues">
@@ -575,7 +575,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Probability that treatment would prevent a death (i.e. CFR is
             multiplied by one minus this when treatment occurs).
           </xs:documentation>
-          <xs:appinfo>type:double;units:Dimensionless;name:Treatment efficacy;min:0.0;max:1.0;</xs:appinfo>
+          <xs:appinfo>units:Dimensionless;name:Treatment efficacy;min:0.0;max:1.0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -612,7 +612,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -646,7 +646,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -669,7 +669,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -690,7 +690,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           The type of diagnostic used. Supported: RDT, microscopy.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Type of diagnostic;</xs:appinfo>
+        <xs:appinfo>name:Type of diagnostic;</xs:appinfo>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
@@ -704,7 +704,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -742,7 +742,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -786,7 +786,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -804,7 +804,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -821,7 +821,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional piece of documentation attached to this node.
         </xs:documentation>
-        <xs:appinfo>type:string;name:Name;</xs:appinfo>
+        <xs:appinfo>name:Name;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -951,7 +951,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   The minimum density at which parasites can be detected. If 0,
                   the test outcome is always positive.
                 </xs:documentation>
-                <xs:appinfo>type:double;name:Minimum detectible density;units:parasites/microlitre;min:0;</xs:appinfo>
+                <xs:appinfo>name:Minimum detectible density;units:parasites/microlitre;min:0;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
           </xs:complexType>
@@ -987,7 +987,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:documentation>
                   The density at which the test outcome has a 50% chance of being positive.
                 </xs:documentation>
-                <xs:appinfo>type:double;name:Density 50;units:parasites/microlitre;min:0;</xs:appinfo>
+                <xs:appinfo>name:Density 50;units:parasites/microlitre;min:0;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
             <xs:attribute name="specificity" type="xs:double" use="required">
@@ -995,7 +995,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:documentation>
                   The probability of a positive test outcome in the absense of parasites.
                 </xs:documentation>
-                <xs:appinfo>type:double;units:Dimensionless;name:Specificity;min:0;max:1;</xs:appinfo>
+                <xs:appinfo>units:Dimensionless;name:Specificity;min:0;max:1;</xs:appinfo>
               </xs:annotation>
             </xs:attribute>
           </xs:complexType>

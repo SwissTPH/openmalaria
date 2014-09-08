@@ -13,7 +13,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:element name="scenario">
     <xs:annotation>
       <xs:documentation>Description of scenario</xs:documentation>
-      <xs:appinfo>type:list of elements;name:Scenario;</xs:appinfo>
+      <xs:appinfo>name:Scenario;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
       <xs:all>
@@ -22,7 +22,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of demography
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Human age distribution;</xs:appinfo>
+            <xs:appinfo>name:Human age distribution;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="monitoring" type="om:monitoring">
@@ -30,7 +30,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of surveys
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Measures to be reported;</xs:appinfo>
+            <xs:appinfo>name:Measures to be reported;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="interventions" type="om:interventions">
@@ -41,7 +41,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               continuous-time distribution targetting individuals when they
               reach a certain age.
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Preventative interventions;</xs:appinfo>
+            <xs:appinfo>name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="healthSystem" type="om:healthSystem">
@@ -49,7 +49,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of health system.
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Health system description;</xs:appinfo>
+            <xs:appinfo>name:Health system description;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="entomology" type="om:entoData">
@@ -57,7 +57,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Description of entomological data
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Transmission and vector bionomics;</xs:appinfo>
+            <xs:appinfo>name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="pharmacology" type="om:pharmacology" minOccurs="0">
@@ -65,7 +65,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:documentation>
               Drug model parameters
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
+            <xs:appinfo>name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="model">
@@ -74,7 +74,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Encapsulation of all parameters which describe the model according
             to which fitting is done.
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Model options and parameters;</xs:appinfo>
+            <xs:appinfo>name:Model options and parameters;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:all>
@@ -85,7 +85,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     The list of recognised options can be found in the code at:
                     include/util/ModelOptions.h and should also be in the wiki.
                   </xs:documentation>
-                  <xs:appinfo>type:list of elements;name:Model Options;</xs:appinfo>
+                  <xs:appinfo>name:Model Options;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
               <xs:element name="clinical" type="om:clinical" />
@@ -96,7 +96,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:documentation>
                     Parameters of the epidemiological model
                   </xs:documentation>
-                  <xs:appinfo>type:list of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
+                  <xs:appinfo>name:Parameters of the model of epidemiology;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:all>
@@ -117,7 +117,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Unique identifier of scenario
           </xs:documentation>
-          <xs:appinfo>type:integer; units: Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
+          <xs:appinfo>units: Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
@@ -126,7 +126,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Name of intervention
           </xs:documentation>
-          <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+          <xs:appinfo>name:Name of intervention;</xs:appinfo>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="wuID" type="xs:int" use="optional">
@@ -154,7 +154,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Reference number of input parameter
         </xs:documentation>
-        <xs:appinfo>type:boolean;units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
+        <xs:appinfo>units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="value" type="xs:double" use="required">
@@ -169,7 +169,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           True if parameter is to be sampled in optimization
           runs. Not used in simulator app.
         </xs:documentation>
-        <xs:appinfo>type:Boolean;units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
+        <xs:appinfo>units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -234,7 +234,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     A standard deviation of zero for no heterogeneity is valid; a rough
                     value from Tanzanian data is 0.14.
                   </xs:documentation>
-                  <xs:appinfo>type:double;name:Standard deviation;units:None;min:0</xs:appinfo>
+                  <xs:appinfo>name:Standard deviation;units:None;min:0</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
             </xs:extension>
