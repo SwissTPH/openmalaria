@@ -184,7 +184,8 @@ public:
   
   ///@name static public
   //@{
-  static void initHumanParameters (const OM::Parameters& parameters, const scnXml::Scenario& scenario);
+  static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
+  static void init2( const scnXml::Monitoring& monitoring );    // HACK(drug mon)
   //@}
     
 public:

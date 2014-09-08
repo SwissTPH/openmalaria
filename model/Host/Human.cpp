@@ -50,7 +50,7 @@ namespace OM { namespace Host {
 
 // -----  Static functions  -----
 
-void Human::initHumanParameters( const Parameters& parameters, const scnXml::Scenario& scenario ) {    // static
+void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario ){    // static
     opt_trans_het = util::ModelOptions::option (util::TRANS_HET);
     opt_comorb_het = util::ModelOptions::option (util::COMORB_HET);
     opt_treat_het = util::ModelOptions::option (util::TREAT_HET);
@@ -66,10 +66,12 @@ void Human::initHumanParameters( const Parameters& parameters, const scnXml::Sce
     InfectionIncidenceModel::init( parameters );
     WithinHost::WHInterface::init( parameters, scenario );
     Clinical::ClinicalModel::init( parameters, scenario );
-    
-    if( scenario.getMonitoring().getDrugConcentration().present() ){
-        monDrug.open( scenario.getMonitoring().getDrugConcentration().get().getFile().c_str(), ios::out );
-        drugMonId = interventions::InterventionManager::getComponentId( scenario.getMonitoring().getDrugConcentration().get().getCohort() );
+}
+
+void Human::init2( const scnXml::Monitoring& monitoring ){
+    if( monitoring.getDrugConcentration().present() ){
+        monDrug.open( monitoring.getDrugConcentration().get().getFile().c_str(), ios::out );
+        drugMonId = interventions::InterventionManager::getComponentId( monitoring.getDrugConcentration().get().getCohort() );
     }
 }
 

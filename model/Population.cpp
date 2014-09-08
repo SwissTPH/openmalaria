@@ -50,7 +50,7 @@ namespace OM
 
 void Population::init( const Parameters& parameters, const scnXml::Scenario& scenario )
 {
-    Host::Human::initHumanParameters( parameters, scenario );
+    Host::Human::init( parameters, scenario );
     Host::NeonatalMortality::init();
     PkPd::PkPdModel::init( scenario );
     

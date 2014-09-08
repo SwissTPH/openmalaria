@@ -93,6 +93,9 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // Depends on interventions:
     Surveys.init2( scenario.getMonitoring() );
     
+    // Depends on interventions:
+    Host::Human::init2( scenario.getMonitoring() );
+    
     // ———  End of static data initialisation  ———
     
     // Set work unit identifier, if we have one.
