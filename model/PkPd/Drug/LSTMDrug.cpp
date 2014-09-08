@@ -47,7 +47,7 @@ LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
 // Overlapping IV doses are not supported.
 
 void LSTMDrug::medicate (double time, double qty, double bodyMass) {
-    double conc = qty / (typeData.getVolumeOfDistribution() * bodyMass);
+    double conc = qty / (typeData.getVolumeOfDistribution() * bodyMass);        // mg / l
     // multimap insertion: is ordered
     DoseMap::iterator lastInserted =
     doses.insert (doses.end(), make_pair (time, DoseParams( conc, 0 )));
@@ -116,7 +116,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
     
     // Make a copy of concetration and use that over today. Don't adjust concentration because this
     // function may be called multiple times (or not at all) in a day.
-    double concentration_today = concentration;
+    double concentration_today = concentration; // mg / l
     
     const LSTMDrugAllele& drugAllele = typeData.getAllele(proteome_ID);
     

@@ -46,12 +46,12 @@ namespace PkPd {
  * in mg/kg/day.
  *
  * If duration = 0, describes an oral dose. qty refers to the concentration
- * in mg/kg.
+ * in mg/l.
  */
 struct DoseParams {
     DoseParams() : qty(0.0), duration(0.0) {}
     DoseParams( double r, double d ): qty(r), duration(d) {}
-    double qty;               // infusion rate or dose size
+    double qty;               // infusion rate (mg/kg/day) or dose size (mg/l)
     //NOTE: duration is now only needed when checking for overlapping doses
     // and not within factor/concentration calculation code.
     double duration;  // units: days
@@ -79,14 +79,21 @@ public:
     /** Indicate a new medication this timestep.
      *
      * Converts qty in mg to concentration, and stores along with time (delay past
-     * the start of the current timestep) in the doses container. */
+     * the start of the current timestep) in the doses container.
+     * 
+     * @param time Time of administration, in days (should be at least 0 and
+     *  less than 1).
+     * @param qty Amount of active ingredient, in mg
+     * @param bodyMass Body mass of patient, in kg
+     */
     void medicate (double time, double qty, double bodyMass);
     /** Indicate a new medication via IV this timestep.
      *
-     * @param time Time of start of administration in days. Should be less than
-     * 1 (although time+duration may be greater than 1).
-     * @param duration Duration in days.
-     * @param qty Mg/kg
+     * @param time Time of start of administration, in days (should be at least
+     *  0 and less than 1 (although time+duration may be greater than 1).
+     * @param duration Duration of IV, in days. Drug is assumed to be
+     *  administered at a constant rate of this duration.
+     * @param qty Quantity of active ingredient, in mg/kg
      */
     void medicateIV (double time, double duration, double qty);
 

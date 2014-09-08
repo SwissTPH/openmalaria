@@ -76,7 +76,7 @@ class LSTMDrugAllele {
     double power;
     /// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
     double IC50_pow_slope;
-    /// Maximal drug killing rate per day
+    /// Maximal drug killing rate per day (units: 1/days)
     double max_killing_rate;
     
 public:
@@ -88,8 +88,9 @@ public:
      * 
      * @param drug Reference to per-drug data
      * @param C0 Concentration of drug in blood at start of period. Will be
-     *  updated to correct concentration at end of period.
+     *  updated to correct concentration at end of period. Units: mg/l
      * @param duration Length of IV in days.
+     * @return survival factor (unitless)
      */
     double calcFactor( const LSTMDrugType& drug, double& C0, double duration ) const;
     
@@ -98,9 +99,10 @@ public:
      *
      * @param drug Reference to per-drug data
      * @param C0 Concentration of drug in blood at start of IV. Will be
-     *  updated to correct concentration at end of IV.
+     *  updated to correct concentration at end of IV. Units: mg/l
      * @param duration Length of IV in days.
      * @param rate Rate of drug administration (mg/kg/day)
+     * @return survival factor (unitless)
      */
     double calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const;
 };

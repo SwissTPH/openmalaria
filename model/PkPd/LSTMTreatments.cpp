@@ -40,7 +40,7 @@ void MedicateData::load( const scnXml::PKPDMedication& med ){
             throw util::xml_scenario_error( "duration of an IV dose must be some positive amount of time" );
         }
         duration = med.getDuration().get() / 24.0;
-    }
+    } // else: duration is left as initialised (NaN)
 }
 
 struct Schedule {

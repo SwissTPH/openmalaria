@@ -95,9 +95,9 @@ private:
     }
     
     size_t drug;      /// Drug type index
-    double qty;         /// Quantity of drug prescribed (mg?)
-    double time;        /// Time to medicate at (days from start of timestep, may be >= 1 (not this timestep))
-    double duration;    /// Duration for IV purposes (use IV admin if a number, oral if is NaN)
+    double qty;         /// Quantity of drug prescribed (mg when oral, mg/kg when IV)
+    double time;        /// Time to medicate at, in days (0 means start of timestep, may be >= 1 (thus not today))
+    double duration;    /// Duration for IV purposes, in days (use 0 or NaN to indicate oral dose)
     
     friend class Schedule;
     friend class LSTMPkPdModel;

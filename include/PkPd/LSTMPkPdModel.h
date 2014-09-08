@@ -60,7 +60,7 @@ private:
    * timesteps, until rendered ineffective by decayDrugs().
    *
    * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
-   * \param qty The quantity in mg.
+   * \param qty The quantity in either mg (if oral dose) or mg/kg (if IV).
    * \param time Time in days since start of this time step to medicate at
    * \param duration  Duration in days. 0 or an NaN indicates no duration.
    * \param bodyMass Weight of human in kg

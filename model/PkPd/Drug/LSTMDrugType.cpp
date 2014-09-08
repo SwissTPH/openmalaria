@@ -148,10 +148,14 @@ const LSTMDrugAllele& LSTMDrugType::getAllele( uint32_t proteome_ID ) const {
 }
 
 void LSTMDrugType::updateConcentration( double& C0, double duration ) const {
+    // exponential decay of drug concentration
     C0 *= exp(neg_elimination_rate_constant * duration);
 }
 void LSTMDrugType::updateConcentrationIV( double& C0, double duration, double rate ) const {
+    // exponential decay of drug concentration
     C0 *= exp(neg_elimination_rate_constant * duration);
+    // TODO: explain this
+    // TODO: why not adjust rate by neg_elimination_rate_constant and/or vol_dist earlier?
     C0 += rate
           * (1.0 - exp(neg_elimination_rate_constant * duration) )
           / ( -neg_elimination_rate_constant * vol_dist );

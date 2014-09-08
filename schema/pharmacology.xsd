@@ -46,10 +46,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   
   <!-- drug deployment params -->
+  <!--TODO: how to handle IV doses?
+   1) as now (caveats: qty is called mg but is actually mg/kg, a dosages table
+    must be given for treatment but is not actually relevant)
+   2) separate type of schedule
+   3) direct administration (no schedule)
+  -->
   <xs:complexType name="PKPDSchedule">
     <xs:annotation>
       <xs:documentation>
         A schedule for the administration of drugs in a course of treatment.
+        
         Note that dose sizes are multiplied by some multiplier (see dosages)
         and the times of all doses may be delayed.
       </xs:documentation>
@@ -78,8 +85,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
     <xs:attribute name="mg" type="xs:double" use="required">
       <xs:annotation>
-        <xs:documentation>Quantity of drug compound</xs:documentation>
-        <xs:appinfo>type:double;units:mg;name:drug dose;</xs:appinfo>
+        <xs:documentation>
+          Quantity of drug compound. For oral doses, this should be given in
+          mg, using a separate dosage table to adjust for age/weight. For IV
+          treatment, this should be given in mg/kg without a dosage table.
+        </xs:documentation>
+        <xs:appinfo>type:double;units:mg or mg/kg;name:Drug dose;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="hour" type="xs:double" use="required">
