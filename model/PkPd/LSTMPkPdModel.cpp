@@ -40,7 +40,7 @@ util::AgeGroupInterpolator massByAge;
 void LSTMPkPdModel::init(const scnXml::Model& model){
     const scnXml::Human human = model.getHuman();
     if( !human.getWeight().present() ){
-        throw util::xml_scenario_error( "model->human->weight element required by 1-day timestep model" );
+        throw util::xml_scenario_error( "model->human->weight element required by PK/PD model" );
     }
     massByAge.set( human.getWeight().get(), "weight" );
     hetMassMultStdDev = human.getWeight().get().getMultStdDev();

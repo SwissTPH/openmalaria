@@ -142,31 +142,6 @@ void MolineauxInfection::init( const Parameters& parameters ){
     CommonWithinHost::createInfection = &createMolineauxInfection;
     CommonWithinHost::checkpointedInfection = &checkpointedMolineauxInfection;
     
-    mean_shape_first_local_max = parameters[Parameters::MEAN_LOCAL_MAX_DENSITY];
-    sd_scale_first_local_max = parameters[Parameters::SD_LOCAL_MAX_DENSITY];
-    
-    mean_shape_diff_pos_days = parameters[Parameters::MEAN_DIFF_POS_DAYS];
-    sd_scale_diff_pos_days = parameters[Parameters::SD_DIFF_POS_DAYS];
-    
-    
-    // with gamma distribution shape and scale parameters has to be recalculated 
-    if (util::ModelOptions::option (util::FIRST_LOCAL_MAXIMUM_GAMMA)) {
-	first_local_maximum_gamma = true;
-	mean_shape_first_local_max = pow(mean_shape_first_local_max,2)/pow(sd_scale_first_local_max,2);
-	sd_scale_first_local_max = pow(sd_scale_first_local_max,2)/mean_shape_first_local_max;
-    } else {
-        first_local_maximum_gamma = false;
-    }
-    
-    // with gamma distribution shape and scale parameters has to be recalculated
-    if(util::ModelOptions::option (util::MEAN_DURATION_GAMMA)) {
-	mean_duration_gamma = true;
-	mean_shape_diff_pos_days = pow(mean_shape_diff_pos_days,2)/pow(sd_scale_diff_pos_days,2);
-	sd_scale_diff_pos_days = pow(sd_scale_diff_pos_days,2)/mean_shape_diff_pos_days;
-    } else {
-	mean_duration_gamma = false;
-    }
-    
     if(util::ModelOptions::option (util::PARASITE_REPLICATION_GAMMA)) {
 	multi_factor_gamma = true;
     } else {
@@ -174,7 +149,32 @@ void MolineauxInfection::init( const Parameters& parameters ){
     }
     
     pairwise_PStar_sample = util::ModelOptions::option( util::MOLINEAUX_PAIRWISE_SAMPLE );
-    assert( !pairwise_PStar_sample || ( !first_local_maximum_gamma && !mean_duration_gamma ) );
+    if( !pairwise_PStar_sample ){
+        mean_shape_first_local_max = parameters[Parameters::MEAN_LOCAL_MAX_DENSITY];
+        sd_scale_first_local_max = parameters[Parameters::SD_LOCAL_MAX_DENSITY];
+        
+        mean_shape_diff_pos_days = parameters[Parameters::MEAN_DIFF_POS_DAYS];
+        sd_scale_diff_pos_days = parameters[Parameters::SD_DIFF_POS_DAYS];
+        
+        
+        // with gamma distribution shape and scale parameters has to be recalculated 
+        if (util::ModelOptions::option (util::FIRST_LOCAL_MAXIMUM_GAMMA)) {
+            first_local_maximum_gamma = true;
+            mean_shape_first_local_max = pow(mean_shape_first_local_max,2)/pow(sd_scale_first_local_max,2);
+            sd_scale_first_local_max = pow(sd_scale_first_local_max,2)/mean_shape_first_local_max;
+        } else {
+            first_local_maximum_gamma = false;
+        }
+        
+        // with gamma distribution shape and scale parameters has to be recalculated
+        if(util::ModelOptions::option (util::MEAN_DURATION_GAMMA)) {
+            mean_duration_gamma = true;
+            mean_shape_diff_pos_days = pow(mean_shape_diff_pos_days,2)/pow(sd_scale_diff_pos_days,2);
+            sd_scale_diff_pos_days = pow(sd_scale_diff_pos_days,2)/mean_shape_diff_pos_days;
+        } else {
+            mean_duration_gamma = false;
+        }
+    }
 
    for(int i=0;i<50;i++)
    {

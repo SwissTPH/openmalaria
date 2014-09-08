@@ -24,6 +24,7 @@
 #include "util/random.h"
 #include "Monitoring/Survey.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 #include "interventions/Interfaces.hpp"
 
 #include <limits>
@@ -222,6 +223,9 @@ protected:
 class CMDTTreatPKPD : public CMDecisionTree {
 public:
     CMDTTreatPKPD( const scnXml::DecisionTree::TreatPKPDSequence& seq ){
+        if( !util::ModelOptions::option( util::INCLUDES_PK_PD ) ){
+            throw util::xml_scenario_error( "treatPKPD: requires INCLUDES_PK_PD model option" );
+        }
         treatments.reserve( seq.size() );
         foreach( const scnXml::DTTreatPKPD& treatElt, seq ){
             treatments.push_back( TreatInfo(

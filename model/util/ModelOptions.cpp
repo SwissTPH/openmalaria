@@ -248,11 +248,7 @@ namespace OM { namespace util {
         if( TimeStep::interval == 5 ){
             bitset<NUM_OPTIONS> require1DayTS;
             require1DayTS
-                .set( DUMMY_WITHIN_HOST_MODEL )
-                .set( INCLUDES_PK_PD )
-                .set( CLINICAL_EVENT_SCHEDULER )
-                .set( EMPIRICAL_WITHIN_HOST_MODEL )
-                .set( PENNY_WITHIN_HOST_MODEL );
+                .set( CLINICAL_EVENT_SCHEDULER );
             
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (options [i] && require1DayTS[i]) {

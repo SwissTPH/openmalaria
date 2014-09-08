@@ -40,6 +40,9 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor
         WHFalciparum( comorbidityFactor )
 {
     assert( TimeStep::interval == 5 );
+    if( util::ModelOptions::option( util::INCLUDES_PK_PD ) ){
+        throw util::xml_scenario_error( "descriptive within-host model is not compatible with INCLUDES_PK_PD option" );
+    }
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {

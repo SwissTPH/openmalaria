@@ -75,8 +75,7 @@ void DosageTable::load( const xsd::cxx::tree::sequence<scnXml::PKPDDosageRange>&
 vector<DosageTable> dosages;
 map<string,size_t> dosagesNames;
 
-void LSTMTreatments::init(const scnXml::Treatments& data)
-{
+void LSTMTreatments::init(const scnXml::Treatments& data){
     schedules.resize( data.getSchedule().size() );
     size_t i = 0;
     BOOST_FOREACH( const scnXml::PKPDSchedule& schedule, data.getSchedule() ){
