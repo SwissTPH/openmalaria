@@ -1005,7 +1005,7 @@
         <medicate drug="effective" hour="0" mg="1"/>
       </schedule>
       <dosages name="one">
-        <age lb="0" dose_mult="1"/>
+        <age lowerbound="0" dose_mult="1"/>
       </dosages>
     </treatments>
     <drugs>

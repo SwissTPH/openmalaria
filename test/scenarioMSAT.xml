@@ -441,20 +441,20 @@
         <medicate drug="AS" hour="72" mg="1"/>
       </schedule>
       <dosages name="AS_dosages">
-        <age lb="0" dose_mult="22"/>
-        <age lb="1" dose_mult="29"/>
-        <age lb="4" dose_mult="43"/>
-        <age lb="6" dose_mult="50"/>
-        <age lb="9" dose_mult="72"/>
-        <age lb="12" dose_mult="101"/>
-        <age lb="15" dose_mult="130"/>
-        <age lb="17" dose_mult="144"/>
+        <age lowerbound="0" dose_mult="22"/>
+        <age lowerbound="1" dose_mult="29"/>
+        <age lowerbound="4" dose_mult="43"/>
+        <age lowerbound="6" dose_mult="50"/>
+        <age lowerbound="9" dose_mult="72"/>
+        <age lowerbound="12" dose_mult="101"/>
+        <age lowerbound="15" dose_mult="130"/>
+        <age lowerbound="17" dose_mult="144"/>
       </dosages>
       <dosages name="AL_dosages">
-        <age lb="0" dose_mult="1"/>
-        <age lb="3" dose_mult="2"/>
-        <age lb="9" dose_mult="3"/>
-        <age lb="15" dose_mult="4"/>
+        <age lowerbound="0" dose_mult="1"/>
+        <age lowerbound="3" dose_mult="2"/>
+        <age lowerbound="9" dose_mult="3"/>
+        <age lowerbound="15" dose_mult="4"/>
       </dosages>
     </treatments>
     <drugs>

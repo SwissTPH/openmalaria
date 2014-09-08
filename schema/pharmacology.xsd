@@ -127,7 +127,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Dosage table;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="age" type="om:PKPDAgeDosage" maxOccurs="unbounded"/>
+      <xs:choice>
+        <xs:element name="age" type="om:PKPDDosageRange" maxOccurs="unbounded"/>
+        <xs:element name="bodymass" type="om:PKPDDosageRange" maxOccurs="unbounded"/>
+      </xs:choice>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
@@ -138,16 +141,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="PKPDAgeDosage">
+  <xs:complexType name="PKPDDosageRange">
     <xs:annotation>
       <xs:documentation>
-        Gives a dose multiplier for an age range.
+        Gives a dose multiplier for an age or body mass range.
       </xs:documentation>
       <xs:appinfo>name:Age range;</xs:appinfo>
     </xs:annotation>
-    <xs:attribute name="lb" type="xs:double" use="required">
+    <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>name:Lower bound (inclusive);min:0;</xs:appinfo>
+        <xs:appinfo>name:Lower bound (inclusive);min:0;units:years;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="dose_mult" type="xs:double" use="required">

@@ -19,6 +19,7 @@
  */
 
 #include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMMedicate.h"
 #include "util/random.h"
 #include "util/checkpoint_containers.h"
 #include "util/AgeGroupInterpolation.h"
@@ -91,12 +92,21 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 
 
 // ———  non-static simulation time functions  ———
+
 void LSTMPkPdModel::getConcentrations(map< string, double >& concentrations)const{
     foreach( const LSTMDrug& drug, _drugs ){
         concentrations[drug.typeData.getName()] = drug.concentration;
     }
 }
 
+void LSTMPkPdModel::prescribe(size_t schedule, size_t dosage, double age){
+    const DosageTable& table = dosages[dosage];
+    double key = table.useMass ? massByAge.eval( age ) * hetMassMultiplier : age;
+    double doseMult = dosages[dosage].getMultiplier( key );
+    foreach( MedicateData& medicateData, schedules[schedule].medications ){
+        medicateQueue.push_back( medicateData.multiplied(doseMult) );
+    }
+}
 
 void LSTMPkPdModel::medicate(double age){
     if( medicateQueue.empty() ) return;

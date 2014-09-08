@@ -98,8 +98,8 @@ public:
             
             // a very basic dosage table, so that we can test it does what's expected
             scnXml::PKPDDosages dosage1("dosage1");
-            dosage1.getAge().push_back(scnXml::PKPDAgeDosage(0 /*age lb*/,1 /*mult*/));
-            dosage1.getAge().push_back(scnXml::PKPDAgeDosage(5 /*age lb*/,5 /*mult*/));
+            dosage1.getAge().push_back(scnXml::PKPDDosageRange(0 /*age lb*/,1 /*mult*/));
+            dosage1.getAge().push_back(scnXml::PKPDDosageRange(5 /*age lb*/,5 /*mult*/));
             
             scnXml::Treatments treatments;
             treatments.getSchedule().push_back(sched1);

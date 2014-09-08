@@ -23,13 +23,49 @@
 
 #include "PkPd/PkPdModel.h"
 #include "PkPd/Drug/LSTMDrug.h"
-#include "PkPd/LSTMTreatments.h"
 
 namespace scnXml{
     class Model;
+    class PKPDMedication;
 }
 namespace OM { namespace PkPd {
+
+struct MedicateData {
+    MedicateData () :
+        drug(0),
+        qty(numeric_limits< double >::signaling_NaN()),
+        time(numeric_limits< double >::signaling_NaN()),
+        duration(numeric_limits< double >::quiet_NaN())
+    {}
     
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        drug & stream;
+        qty & stream;
+        time & stream;
+        duration & stream;
+    }
+    
+private:
+    void load( const scnXml::PKPDMedication& med );
+    
+    inline MedicateData multiplied( double doseMult ){
+        MedicateData r( *this );
+        r.qty *= doseMult;
+        return r;
+    }
+    
+    size_t drug;      /// Drug type index
+    double qty;         /// Quantity of drug prescribed (mg when oral, mg/kg when IV)
+    double time;        /// Time to medicate at, in days (0 means start of timestep, may be >= 1 (thus not today))
+    double duration;    /// Duration for IV purposes, in days (use 0 or NaN to indicate oral dose)
+    
+    friend class Schedule;
+    friend class LSTMPkPdModel;
+    friend class ::UnittestUtil;
+};
+
 /** Pharmacokinetic and pharmacodynamics interface, used by each human's
  * within-host model.
  *
