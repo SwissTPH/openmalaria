@@ -93,7 +93,8 @@ measureNames = {
     64 : 'nTreatDiagnostics',
     65 : 'nMassRecruitOnly',
     66 : 'nCtsRecruitOnly',
-    67 : 'nTreatDeployments'
+    67 : 'nTreatDeployments',
+    68 : 'sumAge'
 }
 
 # List of measure groups. Each includes name, boolean (true if use log scale),
@@ -127,6 +128,7 @@ combinedMeasures = [
     ('cohort delta',[(50,'added','orange'),(51,'removed','blue')]),
     ('recruit only',[(65,'timed','purple'),(66,'cts','pink')]),
     ('intervention deployments',[(67,'via CM','grey')]),
+    ('host age',[(68,'sum','darkred')]),
     ('user defined',[(90,'90','red'),(91,'91','brown'),(92,'92','green')])
 ]
 appendMeasureNumber=None
@@ -399,6 +401,7 @@ class Plotter(object):
                         print "Bad plot values (script error):"
                         print "x:",x
                         print "y:",y
+                        print "colour:",colour
                 
                 if self.showLegends and (am or len(plotted)>1):
                     plots=[p[0] for p in plotted]
