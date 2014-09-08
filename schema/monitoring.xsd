@@ -57,7 +57,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="surveyTime" type="xs:int" maxOccurs="unbounded">
+            <xs:element name="surveyTime" maxOccurs="unbounded">
               <xs:annotation>
                 <xs:documentation>
                   Survey time; 0 means just before start of main sim and is a valid survey-point.
@@ -67,6 +67,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:documentation>
                 <xs:appinfo>units:Number;min:0;name:Survey time;</xs:appinfo>
               </xs:annotation>
+              <xs:complexType>
+                <!--NOTE: this is an extension of xs:int for backwards compatibility.-->
+                <xs:simpleContent>
+                  <xs:extension base="xs:int">
+                    <xs:attribute name="repeatStep" type="xs:int" use="optional"/>
+                    <xs:attribute name="repeatEnd" type="xs:int" use="optional">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Either both repeatStep and repeatEnd should be present
+                          or neither. If present, the survey is repeated every
+                          repeatStep timesteps (i.e. at initial_step,
+                          initial_step+repeatStep, ...), ending before repeatEnd
+                          (no survey occurs on this step).
+                        </xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:simpleContent>
+              </xs:complexType>
             </xs:element>
           </xs:sequence>
           <xs:attribute name="detectionLimit" type="xs:double" use="required">

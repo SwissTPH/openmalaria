@@ -58,35 +58,42 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
         // this needs to be set early, but we can't set cohortSubPopIds until after InterventionManager is initialised
         nCohortSets = static_cast<uint32_t>(1) << monitoring.getCohorts().get().getSubPop().size();
     }
-  
-  const scnXml::Surveys::SurveyTimeSequence& survs = monitoring.getSurveys().getSurveyTime();
+    
+    const scnXml::Surveys::SurveyTimeSequence& survs = monitoring.getSurveys().getSurveyTime();
 
-  _surveysTimeIntervals.reserve (survs.size() + 1);
-  TimeStep last( TimeStep::never );
-  for (size_t i = 0; i < survs.size(); ++i) {
-      TimeStep cur(survs[i]);
-    _surveysTimeIntervals.push_back( cur );
-    if( last >= cur ){
-        last = TimeStep::future;
-    }else{
-        last = cur;
+    _surveysTimeIntervals.reserve (survs.size() + 1);
+    for (size_t i = 0; i < survs.size(); ++i) {
+        const scnXml::SurveyTime& surv = survs[i];
+        TimeStep cur(surv);
+        if( surv.getRepeatStep().present() != surv.getRepeatEnd().present() ){
+            throw util::xml_scenario_error( "surveyTime: use of repeatStep or repeatEnd without other" );
+        }
+        if( surv.getRepeatStep().present() ){
+            TimeStep step( surv.getRepeatStep().get() );
+            if( step.asInt() < 1 ){
+                throw util::xml_scenario_error( "surveyTime: repeatStep must be >= 1" );
+            }
+            TimeStep end( surv.getRepeatEnd().get() );
+            while(cur < end){
+                _surveysTimeIntervals.push_back( cur );
+                cur += step;
+            }
+        }else{
+            _surveysTimeIntervals.push_back( cur );
+        }
     }
-  }
-  if( last == TimeStep::future && survs.size() > 0 ){
-      cerr << "Warning: survey times are not listed in increasing order; will be reordered" << endl;
-      sort( _surveysTimeIntervals.begin(), _surveysTimeIntervals.end() );
-  }
-  _surveysTimeIntervals.push_back( TimeStep::never );
-  m_currentTimestep = _surveysTimeIntervals[0];
+    sort( _surveysTimeIntervals.begin(), _surveysTimeIntervals.end() );
+    _surveysTimeIntervals.push_back( TimeStep::never );
+    m_currentTimestep = _surveysTimeIntervals[0];
 
-  Survey::init( monitoring );
+    Survey::init( monitoring );
 
-  m_surveys.resize (_surveysTimeIntervals.size());
-  if( !Simulator::isCheckpoint() ){
-    for (size_t i = 0; i < m_surveys.size(); ++i)
-        m_surveys[i].allocate();
-  }
-  Survey::m_current = &m_surveys[0];
+    m_surveys.resize (_surveysTimeIntervals.size());
+    if( !Simulator::isCheckpoint() ){
+        for (size_t i = 0; i < m_surveys.size(); ++i)
+            m_surveys[i].allocate();
+    }
+    Survey::m_current = &m_surveys[0];
 }
 
 void SurveysType::init2( const scnXml::Monitoring& monitoring ){
