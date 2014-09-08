@@ -64,30 +64,7 @@
     </SurveyOptions>
     <surveys detectionLimit="200">
       <surveyTime>1</surveyTime>
-      <surveyTime>6</surveyTime>
-      <surveyTime>12</surveyTime>
-      <surveyTime>18</surveyTime>
-      <surveyTime>24</surveyTime>
-      <surveyTime>30</surveyTime>
-      <surveyTime>36</surveyTime>
-      <surveyTime>42</surveyTime>
-      <surveyTime>48</surveyTime>
-      <surveyTime>54</surveyTime>
-      <surveyTime>60</surveyTime>
-      <surveyTime>66</surveyTime>
-      <surveyTime>72</surveyTime>
-      <surveyTime>78</surveyTime>
-      <surveyTime>84</surveyTime>
-      <surveyTime>90</surveyTime>
-      <surveyTime>96</surveyTime>
-      <surveyTime>102</surveyTime>
-      <surveyTime>108</surveyTime>
-      <surveyTime>114</surveyTime>
-      <surveyTime>120</surveyTime>
-      <surveyTime>126</surveyTime>
-      <surveyTime>132</surveyTime>
-      <surveyTime>138</surveyTime>
-      <surveyTime>144</surveyTime>
+      <surveyTime repeatStep="6" repeatEnd="150">6</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>

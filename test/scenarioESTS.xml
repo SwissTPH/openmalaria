@@ -49,33 +49,7 @@
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
-      <surveyTime> 0 </surveyTime>
-      <surveyTime> 14 </surveyTime>
-      <surveyTime> 28 </surveyTime>
-      <surveyTime> 42 </surveyTime>
-      <surveyTime> 56 </surveyTime>
-      <surveyTime> 70 </surveyTime>
-      <surveyTime> 84 </surveyTime>
-      <surveyTime> 98 </surveyTime>
-      <surveyTime> 112 </surveyTime>
-      <surveyTime> 126 </surveyTime>
-      <surveyTime> 140 </surveyTime>
-      <surveyTime> 154 </surveyTime>
-      <surveyTime> 168 </surveyTime>
-      <surveyTime> 182 </surveyTime>
-      <surveyTime> 196 </surveyTime>
-      <surveyTime> 210 </surveyTime>
-      <surveyTime> 224 </surveyTime>
-      <surveyTime> 238 </surveyTime>
-      <surveyTime> 252 </surveyTime>
-      <surveyTime> 266 </surveyTime>
-      <surveyTime> 280 </surveyTime>
-      <surveyTime> 294 </surveyTime>
-      <surveyTime> 308 </surveyTime>
-      <surveyTime> 322 </surveyTime>
-      <surveyTime> 336 </surveyTime>
-      <surveyTime> 350 </surveyTime>
-      <surveyTime> 364 </surveyTime>
+      <surveyTime repeatStep="14" repeatEnd="365"> 0 </surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
