@@ -133,18 +133,10 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
     for( int day = 0, days = TimeStep::interval; day < days; ++day ){
-        if( drugMon.is_open() && TimeStep::interventionPeriod >= TimeStep(0) ){
-            drugMon << TimeStep::interventionPeriod << '\t' << day;
-            map<string,double> concentrations;
-            pkpdModel->getConcentrations( concentrations );
-            foreach( string& drugCode, drugMonCodes ){
-                drugMon << '\t' << concentrations[drugCode];
-            }
-            drugMon << endl;
-        }
-        
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel->medicate( ageInYears );
+        
+        double sumLogDens = 0.0;
         
         for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
             // Note: this is only one treatment model; there is also the PK/PD model
@@ -167,10 +159,22 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
                 totalDensity += density;
                 timeStepMaxDensity = max(timeStepMaxDensity, density);
                 _cumulativeY += density;
+                sumLogDens += log(density);
                 ++inf;
             }
         }
         pkpdModel->decayDrugs ();
+        
+        if( drugMon.is_open() && TimeStep::interventionPeriod >= TimeStep(0) ){
+            drugMon << TimeStep::interventionPeriod.inDays() + day;
+            drugMon << '\t' << sumLogDens;
+            map<string,double> concentrations;
+            pkpdModel->getConcentrations( concentrations );
+            foreach( string& drugCode, drugMonCodes ){
+                drugMon << '\t' << concentrations[drugCode];
+            }
+            drugMon << endl;
+        }
     }
     
     util::streamValidate(totalDensity);

@@ -311,6 +311,7 @@ public:
             // additionally cover the proportion (coverage - propProtected),
             // selected from the list unprotected.
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
+            cerr << "cum deployment: prop protected " << propProtected << "; additionalCoverage " << additionalCoverage << "; total " << total << endl;
             for (vector<Host::Human*>::iterator iter = unprotected.begin();
                  iter != unprotected.end(); ++iter)
             {

@@ -171,10 +171,10 @@ class ValDict (object):
     
     def read(self,fileName,filterExpr,exprDebug):
         """Read from fileName. If measures is non-empty, only read these measures."""
-        def filterFun(f,m,s,g):
+        def filterFun(f,m,s,g,c):
             r=eval(filterExpr)
             if exprDebug:
-                print "f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g)+":",r
+                print "f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g),"c="+str(c)+":",r
             return r
         aKS = Keys.SURVEY in self.aggregateKeys
         aKG = Keys.GROUP in self.aggregateKeys
@@ -199,7 +199,12 @@ class ValDict (object):
             m=int(items[2])
             s=int(items[0])
             g=items[1]
-            if not filterFun(fileName,m,s,g):
+            c=0 # cohort group
+            try:
+                c = int(g) / 1000
+            except:
+                pass
+            if not filterFun(fileName,m,s,g,c):
                 continue
             if aKS:
                 s=0

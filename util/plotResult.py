@@ -260,10 +260,12 @@ class Plotter(object):
         self.showYLabel = None
         self.horizSubBars = None
         self.scale=None
+    
     def read(self,fileName,filterExpr,debugFilter):
         self.values.read(fileName,filterExpr,debugFilter)
         if len(self.values.getMeasures())==0:
             raise Exception("No data to plot (after filtering)!")
+    
     def plot(self,am,s,g,f):
         x_axis=Keys.NONE
         x_label=""
@@ -510,7 +512,7 @@ If no key is set to the x-axis, the first unassigned of survey, group, file will
 assigned to the x-axis.""",version="%prog 0.1")
     
     parser.add_option("-e","--filter", action="store", type="string", dest="filterExpr", default="m!=0",
-            help="Filter entries read according to this rule (i.e. values are included when this returns true). Parameters available: f, m, s, g. Examples: 'True', 'm!=0' (default), 'm in [11,12,13]', 's > 73 and m!=0'.")
+            help="Filter entries read according to this rule (i.e. values are included when this returns true). Parameters available: f, m, s, g, c. Examples: 'True', 'm!=0' (default), 'm in [11,12,13]', 's > 73 and m!=0'.")
     parser.add_option("--debug-filter", action="store_true", dest="debugFilter", default=False,
             help="Each time FILTEREXPR is called, print input values and output. Warning: will print a lot of data!")
     parser.add_option("-a","--no-auto-measures", action="store_false", dest="am", default=True,
