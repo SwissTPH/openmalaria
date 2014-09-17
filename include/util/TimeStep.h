@@ -194,11 +194,11 @@ public:
     }
     
     /// Get value in days
-    inline int inDays() {
+    inline int inDays() const {
         return _ts * interval;
     }
     /// Get value in years
-    inline double inYears() {
+    inline double inYears() const{
         return _ts * yearsPerInterval;
     }
     /// Get value in time steps as an integer (marginally faster than inDays() and inYears())

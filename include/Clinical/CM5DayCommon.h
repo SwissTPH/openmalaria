@@ -43,8 +43,8 @@ public:
     CM5DayCommon (double tSF);
 
     virtual bool notAtRisk() {
-        TimeStep ageLastTreatment = TimeStep::simulation - m_tLastTreatment;
-        return ageLastTreatment > TimeStep(0) && ageLastTreatment <= TimeStep::fromDays(20);
+        SimTime ageLastTreatment = sim::now() - sim::fromTS(m_tLastTreatment);
+        return ageLastTreatment > sim::zero() && ageLastTreatment <= sim::fromDays(20);
     }
     
     virtual void massDrugAdministration( Human& human,

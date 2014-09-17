@@ -42,7 +42,9 @@
 // Checkpointing and time-step operations are used _everywhere_:
 #include "util/checkpoint.h"
 #include "util/mod.h"
+//TODO: transition from TimeStep to SimTime
 #include "util/TimeStep.h"
+#include "SimTime.h"
 
 // foreach "keyword"
 #include <boost/foreach.hpp>
