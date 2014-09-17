@@ -82,7 +82,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
     
     // If last treatment prescribed was in recent memory, consider second line.
     CaseType regimen = FirstLine;
-    if (m_tLastTreatment + healthSystemMemory > TimeStep::simulation){
+    if (m_tLastTreatment + healthSystemMemory > sim::now()){
         pgState = Episode::State (pgState | Episode::SECOND_CASE);
         regimen = SecondLine;
     }
@@ -97,7 +97,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
             treeUCOfficial->exec( hostData );
         
         if( output.treated ){   // if any treatment or intervention deployed
-            m_tLastTreatment = TimeStep::simulation;
+            m_tLastTreatment = sim::now();
             Survey::current().addInt( measures[regimen], human, 1 );
         }
         

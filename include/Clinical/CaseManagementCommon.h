@@ -31,7 +31,7 @@
 namespace OM { namespace Clinical {
 
 /** Initialise parameters. */
-void initCMCommon( const Parameters& parameters, int hsMemory );
+void initCMCommon( const Parameters& parameters, SimTime hsMemory );
 
 void mainSimInitCMCommon ();
 
@@ -47,7 +47,7 @@ extern bool indirectMortBugfix;
  * 
  * Used by both the clinical models in roughly the same way, but will have
  * different values in each to match Global::interval. */
-extern TimeStep healthSystemMemory;
+extern SimTime healthSystemMemory;
 
 
 ///@brief Case fatality and sequelae "rate" data

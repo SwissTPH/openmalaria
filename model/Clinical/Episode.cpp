@@ -40,7 +40,7 @@ void Episode::flush() {
 
 void Episode::update (const Host::Human& human, Episode::State newState)
 {
-    if (TimeStep::simulation > (time + healthSystemMemory)) {
+    if (TimeStep::simulation > (time + healthSystemMemory.ts())) {
         report ();
 
         time = TimeStep::simulation;

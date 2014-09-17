@@ -115,8 +115,9 @@ public:
     static inline SimTime zero(){ return SimTime(0); }
     
     /** Special value representing a time point always in the past, such that
-     * the following is always true: never() + now() < zero() . Additionally,
-     * x - never() is guaranteed not to overflow for any SimTime x >= 0. */
+     * never() + x < zero() and x - never() will not to overflow for all valid
+     * simulation times x (including any value now() may take as well as
+     * never() and future()). */
     static inline SimTime never(){
         return SimTime(-0x3FFFFFFF);
     }

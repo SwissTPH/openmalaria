@@ -27,7 +27,7 @@ namespace OM { namespace Clinical {
 
 bool indirectMortBugfix;
 
-TimeStep healthSystemMemory( TimeStep::never );
+SimTime healthSystemMemory( sim::never() );
 
 //log odds ratio of case-fatality in community compared to hospital
 double oddsRatioThreshold;
@@ -46,9 +46,9 @@ vector<int> infantIntervalsAtRisk;
 double nonMalariaMortality;
 
 
-void initCMCommon( const OM::Parameters& parameters, int hsMemory ){
+void initCMCommon( const OM::Parameters& parameters, SimTime hsMemory ){
     indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
-    healthSystemMemory = TimeStep( hsMemory );
+    healthSystemMemory = hsMemory;
     oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
     infantDeaths.resize(TimeStep::stepsPerYear);
     infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
