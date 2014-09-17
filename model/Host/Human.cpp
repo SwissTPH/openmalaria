@@ -179,7 +179,8 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         ++PopulationStats::humanUpdates;
 #endif
     TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
-    if (clinicalModel->isDead(ageTimeSteps))
+    SimTime age = sim::fromTS(ageTimeSteps);
+    if (clinicalModel->isDead(age))
         return true;
     
     if (doUpdate){
@@ -210,8 +211,8 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
         withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV), mon);
         
-        clinicalModel->update (*this, ageYears, sim::fromTS(ageTimeSteps) == sim::oneTS());
-        clinicalModel->updateInfantDeaths (ageTimeSteps);
+        clinicalModel->update( *this, ageYears, age == sim::oneTS() );
+        clinicalModel->updateInfantDeaths( age );
     }
     return false;
 }

@@ -42,7 +42,7 @@ void staticCheckpointCMCommon (ostream& stream);
 /// True if bug-fix is enabled; do not set externally
 extern bool indirectMortBugfix;
 
-/** The maximum age, in timesteps, of when a sickness bout occurred, for
+/** The maximum age of a sickness bout, for
  * another bout to be considered part of the same episode.
  * 
  * Used by both the clinical models in roughly the same way, but will have

@@ -80,6 +80,8 @@ double getCommunityCFR (double caseFatalityRatio){
 
 
 double infantAllCauseMort(){
+    //TODO: check this is really doing what is advertised, and probably change it to report per survey.
+    
     double infantPropSurviving=1.0;       // use to calculate proportion surviving
     for (TimeStep i(0);i<TimeStep::intervalsPerYear; ++i) {
         // multiply by proportion of infants surviving at each interval

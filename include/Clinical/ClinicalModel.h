@@ -65,25 +65,25 @@ public:
     /// Destructor
     virtual ~ClinicalModel ();
     
-    /** Kills the human if ageTimeSteps reaches the simulation age limit.
-     *
-     * @returns True if the human has been killed by some means. The clinical
-     *	model now tracks this status. */
-    bool isDead (TimeStep ageTimeSteps);
+    /** Returns true if the human has been killed by some means.
+     * 
+     * Also kills the human if he/she reaches the simulation age limit.
+     */
+    bool isDead( SimTime age );
     
     /** Run main part of the model: determine the sickness status and any
      * treatment for the human.
      * 
      * @param ageYears Age of human.
-     * @param newBorn True if human age is one timestep */
+     * @param newBorn True if human age is one time step old */
     void update (Human& human, double ageYears, bool newBorn);
     
     /** For infants, updates the infantIntervalsAtRisk and potentially
      * infantDeaths arrays. */
-    void updateInfantDeaths (TimeStep ageTimeSteps);
+    void updateInfantDeaths( SimTime age );
     
     /** Used with IPT within host model to potentially avoid further reports:
-     * The four timesteps after a bout are not at risk of a further bout since
+     * The four time steps after a bout are not at risk of a further bout since
      * if one occured it would be considered the same bout.
      *
      * Only supported by immediate outcomes model. */
@@ -127,7 +127,7 @@ protected:
     /** @brief Positive values of _doomed variable (codes). */
     enum {
         DOOMED_EXPIRED = -35,   // codes less than or equal to this mean "dead now"
-        DOOMED_NEXT_TS = -30,   // will expire at next timestep
+        DOOMED_NEXT_TS = -30,   // will expire on next time step
         DOOMED_START_TIMER = -1,        // set on start of doomed timer
         NOT_DOOMED = 0, // all codes greater than this mean "already dead"; codes less than this mean a count-down to death has started
         DOOMED_TOO_OLD = 1,		///< died because reached age limit
@@ -138,11 +138,11 @@ protected:
     
     /** Can indicate that the individual is dead or about to die.
      *
-     * If _doomed < 0, the individual is doomed to die.
+     * If doomed < 0, the individual is doomed to die.
      * 
-     * If _doomed > 0, the individual is dead, and will be removed from the
-     * population at the beginning of the next timestep. NOTE: why not
-     * immediately? See above enum for positive values used. */
+     * If doomed > 0, the individual is dead, and will be removed from the
+     * population at the beginning of the next time step. NOTE:
+     * updateInfantDeaths() counts deaths after the fact, thus cannot remove immediately. */
     int doomed;
 };
 

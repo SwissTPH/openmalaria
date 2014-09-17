@@ -80,6 +80,13 @@ public:
     }
     //@}
     
+    ///@brief Array indices
+    //@{
+    inline size_t indexTS() const{
+        return d / util::TimeStep::interval;
+    }
+    //@}
+    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
@@ -107,6 +114,8 @@ public:
      * initialisation period). The following is always true: now() >= zero().
      */
     static inline SimTime now(){ return fromTS(util::TimeStep::simulation); }
+    
+    static inline SimTime maxHumanAge(){ return fromTS(util::TimeStep::maxAgeIntervals); }
     //@}
     
     ///@brief Constructors, for convenience
@@ -116,6 +125,9 @@ public:
     
     /** One time step (currently either one or five days). */
     static inline SimTime oneTS(){ return SimTime(util::TimeStep::interval); }
+    
+    /** One year. This is defined as 365 days in the simulator. */
+    static inline SimTime oneYear(){ return SimTime(365); }
     
     /** Special value representing a time point always in the past, such that
      * never() + x < zero() and x - never() will not to overflow for all valid
