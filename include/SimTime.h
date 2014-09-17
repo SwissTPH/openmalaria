@@ -134,7 +134,7 @@ public:
     /** Get the time now (i.e. duration since start of simulation, including
      * initialisation period). The following is always true: now() >= zero().
      */
-    static inline SimTime now(){ return fromTS(util::TimeStep::simulation); }
+    static inline SimTime now(){ return sim_time; }
     
     static inline SimTime maxHumanAge(){ return fromTS(util::TimeStep::maxAgeIntervals); }
     //@}
