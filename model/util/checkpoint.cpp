@@ -279,22 +279,22 @@ namespace OM { namespace util { namespace checkpoint {
         }
     }
 
-    void operator& (const map<interventions::ComponentId,TimeStep>& x, ostream& stream) {
+    void operator& (const map<interventions::ComponentId,SimTime>& x, ostream& stream) {
         x.size() & stream;
-        for (map<interventions::ComponentId,TimeStep>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+        for (map<interventions::ComponentId,SimTime>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
-            pos->second.asInt() & stream;
+            pos->second.raw() & stream;
         }
     }
-    void operator& (map<interventions::ComponentId,TimeStep>& x, istream& stream) {
+    void operator& (map<interventions::ComponentId,SimTime>& x, istream& stream) {
         size_t l;
         l & stream;
         validateListSize (l);
         x.clear ();
-        map<interventions::ComponentId,TimeStep>::iterator pos = x.begin ();
+        map<interventions::ComponentId,SimTime>::iterator pos = x.begin ();
         for (size_t i = 0; i < l; ++i) {
             interventions::ComponentId s( stream );
-            TimeStep t;
+            SimTime t;
             t & stream;
             pos = x.insert (pos, make_pair (s,t));
         }

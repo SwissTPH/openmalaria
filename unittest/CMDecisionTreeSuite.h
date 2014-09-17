@@ -55,7 +55,7 @@ public:
         whm.reset( new WHMock() );
         ETS_ASSERT( whm.get() != 0 );
         
-        human.reset( UnittestUtil::createHuman(TimeStep(0)).release() );
+        human.reset( UnittestUtil::createHuman(sim::zero()).release() );
         ETS_ASSERT( human.get() != 0 );
         UnittestUtil::setHumanWH( *human, whm.get() );
         

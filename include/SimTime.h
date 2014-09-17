@@ -42,8 +42,25 @@ class SimTime {
     explicit SimTime( int32_t days ) : d(days) {}
     
 public:
+    /** Default construction; same as sim::never(). */
+    SimTime() : d(-0x3FFFFFFF) {}
+    
+    ///@brief Conversions to other types/units
+    //@{
+    /// Get raw value (currently days; not guaranteed not to change). Same value as checkpointed.
+    inline int32_t raw() const{ return d; }
+    
     /// Convert to TimeStep
     inline util::TimeStep ts() const{ return util::TimeStep::fromDays(d); }
+    
+    /// Convert to years
+    inline double inYears() const{ return d * (1.0 / 365); }
+    
+    /// Get array index in time steps (for dense arrays, involves conversion)
+    inline size_t indexTS() const{
+        return d / util::TimeStep::interval;
+    }
+    //@}
     
     ///@brief Simple arithmatic modifiers (all return a copy)
     //@{
@@ -84,13 +101,6 @@ public:
     }
     inline bool operator<=( const SimTime rhs )const {
         return  d <= rhs.d;
-    }
-    //@}
-    
-    ///@brief Array indices
-    //@{
-    inline size_t indexTS() const{
-        return d / util::TimeStep::interval;
     }
     //@}
     
@@ -141,7 +151,7 @@ public:
      * simulation times x (including any value now() may take as well as
      * never() and future()). */
     static inline SimTime never(){
-        return SimTime(-0x3FFFFFFF);
+        return SimTime();
     }
     
     /** Duration in days. Should be fast (currently no conversion required). */

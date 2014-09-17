@@ -79,15 +79,14 @@ void Human::init2( const scnXml::Monitoring& monitoring ){
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
+Human::Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
-    _dateOfBirth(dateOfBirth),
+    m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
-  assert( _dateOfBirth == TimeStep::simulation ||
-      (TimeStep::simulation == TimeStep(0) && _dateOfBirth < TimeStep::simulation));
+  assert( m_DOB == sim::now() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
   
   
   /* Human heterogeneity; affects:
@@ -154,11 +153,11 @@ Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
   clinicalModel = Clinical::ClinicalModel::createClinicalModel (treatmentSeekingFactor);
 }
 
-Human::Human(TimeStep dateOfBirth) :
+Human::Human(SimTime dateOfBirth) :
     withinHostModel(0),
     infIncidence(0),
     clinicalModel(0),
-    _dateOfBirth(dateOfBirth),
+    m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
 {}
@@ -170,7 +169,7 @@ void Human::destroy() {
 }
 
 
-// -----  Non-static functions: per-timestep update  -----
+// -----  Non-static functions: per-time-step update  -----
 
 bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
@@ -178,27 +177,26 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
     if( doUpdate )
         ++PopulationStats::humanUpdates;
 #endif
-    TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
-    SimTime age = sim::fromTS(ageTimeSteps);
+    SimTime age = getAge();
     if (clinicalModel->isDead(age))
         return true;
     
     if (doUpdate){
-        util::streamValidate( ageTimeSteps.asInt() );
-        double ageYears = ageTimeSteps.inYears();
+        util::streamValidate( age.raw() );
+        double ageYears = age.inYears();
         monitoringAgeGroup.update( ageYears );
         // check sub-pop expiry
-        for( map<ComponentId,TimeStep>::iterator expIt =
+        for( map<ComponentId,SimTime>::iterator expIt =
             m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
         {
             //  We use >= to test membership, < is inverse (see comment on m_subPopExp)
-            if( expIt->second < TimeStep::simulation ){
+            if( expIt->second < sim::now() ){
                 // don't flush reports
                 // report removal due to expiry
                 Survey::current().addInt(Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
                 m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
                 // erase element, but continue iteration (note: this is simpler in C++11)
-                map<ComponentId,TimeStep>::iterator toErase = expIt;
+                map<ComponentId,SimTime>::iterator toErase = expIt;
                 ++expIt;
                 m_subPopExp.erase( toErase );
             }else{
@@ -245,18 +243,18 @@ void Human::summarize() {
     }
 }
 
-void Human::reportDeployment( ComponentId id, TimeStep duration ){
-    if( duration <= TimeStep(0) ) return; // nothing to do
-    m_subPopExp[id] = TimeStep::simulation + duration;
+void Human::reportDeployment( ComponentId id, SimTime duration ){
+    if( duration <= sim::zero() ) return; // nothing to do
+    m_subPopExp[id] = sim::now() + duration;
     m_cohortSet = Survey::updateCohortSet( m_cohortSet, id, true );
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
     const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
     for( vector<ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        map<ComponentId,TimeStep>::iterator expIt = m_subPopExp.find( *it );
+        SubPopT::iterator expIt = m_subPopExp.find( *it );
         if( expIt != m_subPopExp.end() ){
             //  We use >= to test membership (see comment on m_subPopExp)
-            if( expIt->second >= TimeStep::simulation ){
+            if( expIt->second >= sim::now() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment
                 // and onFirstInfection cohort options. Health system memory must
                 // be reset for this to work properly; in theory the memory should

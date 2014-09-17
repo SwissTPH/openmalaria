@@ -99,7 +99,7 @@ void HumanIntervention::deploy( Human& human, Deployment::Method method,
         const interventions::HumanInterventionComponent& component = **it;
         // we must report first, since it can change cohort and sub-population
         // which may affect what deployment does (at least in the case of reporting deployments)
-        human.reportDeployment( component.id(), component.duration() );
+        human.reportDeployment( component.id(), sim::fromTS(component.duration()) );
         component.deploy( human, method, vaccLimits );
     }
 }
@@ -155,7 +155,7 @@ TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::Depl
 void TriggeredDeployments::SubList::deploy( Host::Human& human,
         Deployment::Method method, VaccineLimits vaccLimits )const
 {
-    TimeStep age = human.getAgeInTimeSteps();
+    TimeStep age = human.getAge().ts();
     if( age >= minAge && age < maxAge ){
         if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
             HumanIntervention::deploy( human, method, vaccLimits );

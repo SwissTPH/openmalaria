@@ -118,8 +118,8 @@ namespace checkpoint {
     void operator& (const map<double,double>& x, ostream& stream);
     void operator& (map<double, double>& x, istream& stream);
     
-    void operator& (const map<interventions::ComponentId,TimeStep>& x, ostream& stream);
-    void operator& (map<interventions::ComponentId,TimeStep>& x, istream& stream);
+    void operator& (const map<interventions::ComponentId,SimTime>& x, ostream& stream);
+    void operator& (map<interventions::ComponentId,SimTime>& x, istream& stream);
     
     void operator& (const multimap<double,double>& x, ostream& stream);
     void operator& (multimap<double, double>& x, istream& stream);

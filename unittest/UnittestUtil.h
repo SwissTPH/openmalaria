@@ -175,7 +175,7 @@ public:
         pkpd.medicateQueue.clear();
     }
     
-    static auto_ptr<Host::Human> createHuman(TimeStep dateOfBirth){
+    static auto_ptr<Host::Human> createHuman(SimTime dateOfBirth){
         return auto_ptr<Host::Human>( new Host::Human(dateOfBirth) );
     }
     static void setHumanWH(Host::Human& human, WithinHost::WHInterface *wh){

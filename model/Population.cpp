@@ -134,7 +134,7 @@ void Population::checkpoint (istream& stream)
     for (size_t i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( new Host::Human (*_transmissionModel, TimeStep(0)) );
+        population.push_back( new Host::Human (*_transmissionModel, sim::zero()) );
         population.back() & stream;
     }
     if (population.size() != popSize)
@@ -185,7 +185,7 @@ void Population::createInitialHumans ()
 void Population::newHuman (TimeStep dob)
 {
     util::streamValidate( dob.asInt() );
-    population.push_back( new Host::Human (*_transmissionModel, dob) );
+    population.push_back( new Host::Human (*_transmissionModel, sim::fromTS(dob)) );
     ++recentBirths;
 }
 
@@ -218,7 +218,8 @@ void Population::update1()
 		/* Only include humans who can survive until vector init.
 		Note: we could exclude more humans due to age distribution,
 		but how many extra to leave due to deaths isn't obvious. */
-		TimeStep::intervalsPerYear + iter->getDateOfBirth() > TimeStep(0)
+                //FIXME: vector init is not exactly one year, previous warmup is not exactly one lifespan minus vector init
+		TimeStep::intervalsPerYear + iter->getDateOfBirth().ts() > TimeStep(0)
 	    )) {
             iter->destroy();
             iter = population.erase (iter);
@@ -227,11 +228,10 @@ void Population::update1()
 
         //BEGIN Population size & age structure
         ++cumPop;
-        TimeStep age = (TimeStep::simulation - iter->getDateOfBirth());
 
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
-        if (cumPop > AgeStructure::targetCumPop (age, targetPop)) {
+        if (cumPop > AgeStructure::targetCumPop (iter->getAge().ts(), targetPop)) {
             --cumPop;
             iter->destroy();
             iter = population.erase (iter);

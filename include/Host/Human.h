@@ -56,10 +56,9 @@ public:
   /** Initialise all variables of a human datatype.
    * 
    * \param tm Transmission model reference (to initialize TM code)
-   * \param dateOfBirth date of birth in time steps (equal to TimeStep::simulation,
-   *	except for initial population set up)
-   */
-  Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth);
+   * \param dateOfBirth date of birth (set to sim::now() except when creating
+   * initial population) */
+  Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth);
 
   /** Destructor
    * 
@@ -80,7 +79,7 @@ public:
       (*infIncidence) & stream;
       (*withinHostModel) & stream;
       (*clinicalModel) & stream;
-      _dateOfBirth & stream;
+      m_DOB & stream;
       _vaccine & stream;
       monitoringAgeGroup & stream;
       m_cohortSet & stream;
@@ -102,7 +101,7 @@ public:
   //@{
   /** Add the human to an intervention component's sub-population for the given
    * duration. A duration of zero implies no effect. */
-  void reportDeployment( interventions::ComponentId id, TimeStep duration );
+  void reportDeployment( interventions::ComponentId id, SimTime duration );
   
   inline void removeFromSubPop( interventions::ComponentId id ){
       m_subPopExp.erase( id );
@@ -117,26 +116,25 @@ public:
   
   /// @brief Small functions
   //@{
-    /** Get the age in time steps, based on current TimeStep::simulation. */
-    inline TimeStep getAgeInTimeSteps() const{
-        return TimeStep::simulation - _dateOfBirth;
+    /** Get the human's age now. */
+    inline SimTime getAge() const{
+        return sim::now() - m_DOB;
     }
-    /** Get the age in years, based on current TimeStep::simulation. */
+    /** Get the age in years. */
     inline double getAgeInYears() const{
-        return (TimeStep::simulation - _dateOfBirth).inYears();
+        return getAge().inYears();
     }
-  
-  //! Returns the date of birth
-  inline TimeStep getDateOfBirth() {return _dateOfBirth;}
+    /** Date of birth. */
+    inline SimTime getDateOfBirth() const{ return m_DOB; }
   
   /** Return true if human is a member of the sub-population.
    * 
    * This is only for use during intervention deployment (see comment on
    * m_subPopExp). */
   inline bool isInSubPop( interventions::ComponentId id )const{
-      map<interventions::ComponentId,TimeStep>::const_iterator it = m_subPopExp.find( id );
+      map<interventions::ComponentId,SimTime>::const_iterator it = m_subPopExp.find( id );
       if( it == m_subPopExp.end() ) return false;       // no history of membership
-      else return it->second > TimeStep::simulation;   // added: has expired?
+      else return it->second > sim::now();   // added: has expired?
   }
   /** Return the cohort set. */
   inline uint32_t cohortSet()const{ return m_cohortSet; }
@@ -201,7 +199,7 @@ public:
   
 private:
   /// Hacky constructor for use in testing. Test code must do further initialisation as necessary.
-  Human(OM::util::TimeStep dateOfBirth);
+  Human(SimTime dateOfBirth);
   
   /// The InfectionIncidenceModel translates per-host EIR into new infections
   InfectionIncidenceModel *infIncidence;
@@ -212,8 +210,7 @@ private:
   Clinical::ClinicalModel *clinicalModel;
   //@}
   
-  //!Date of birth, time step since start of warmup
-  TimeStep _dateOfBirth;
+  SimTime m_DOB;        // date of birth
   
   /// Vaccines
   //TODO: could move TBV code to WHFalciparum, where the efficacy is now used
@@ -221,7 +218,7 @@ private:
   
   ///@brief Cached values used by monitoring
   //@{
-  /// Made persistant to save a lookup each timestep (has a significant impact)
+  /// Made persistant to save a lookup each time step (significant performance improvement)
   Monitoring::AgeGroup monitoringAgeGroup;
   /// Cache, updated when human is added to or removed from a sub-population
   uint32_t m_cohortSet;
@@ -230,18 +227,19 @@ private:
   /// The next continuous distribution in the series
   uint32_t nextCtsDist;
   
+  typedef std::map<interventions::ComponentId,SimTime> SubPopT;
   /** This lists sub-populations of which the human is a member together with
    * expiry time.
    * 
    * Definition: a human is in a sub-population if that sub-population is
    * listed here, and, at time of intervention deployment the expiry time given
-   * here is greater than the current timestep, or during human update the
-   * expiry time given here is greater than or equal to the current timestep.
+   * here is greater than the current time, or during human update the
+   * expiry time given here is greater than or equal to the current time.
    * NOTE: this discrepancy is because intervention deployment effectively
-   * happens at the end of a timestep and we want a duration of 1 timestep to
+   * happens at the end of a time step and we want a duration of 1 time step to
    * mean 1 intervention deployment (that where the human becomes a member) and
    * 1 human update (the next). */
-  std::map<interventions::ComponentId,TimeStep> m_subPopExp;
+  SubPopT m_subPopExp;
   
   friend class ::UnittestUtil;
 };
