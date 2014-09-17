@@ -75,7 +75,7 @@ public:
     };
     
     Episode() :
-            time(TimeStep::never),
+            time(sim::never()),
             surveyPeriod(0 /* dummy survey */),
             ageGroup(),
             cohortSet(0),
@@ -107,8 +107,8 @@ private:
      * (both in and out of hospital). */
     void report();
     
-    /// Timestep of event (TIMESTEP_NEVER if no event).
-    TimeStep time;
+    /// Time of event, potentially never
+    SimTime time;
     /// Survey during which the event occured
     size_t surveyPeriod;
     /// Age group of the individual when the episode's first bout occurred

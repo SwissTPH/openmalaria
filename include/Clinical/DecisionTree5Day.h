@@ -27,8 +27,8 @@ namespace OM {
 namespace Clinical {
 
 /**
- * This models case management at a 5-day timestep with optional PK/PD modeling
- * for uncomplicated cases.
+ * This models case management with 5-day time steps, optionally including
+ * PK/PD modeling for uncomplicated cases.
  * 
  * Uncomplicated cases: access, otherwise known as "seeking any type of
  * treatment", is determined by a fixed-function decision, which may be
