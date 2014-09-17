@@ -215,8 +215,6 @@ void Population::update1( SimTime firstVecInitTS ){
         // We only need to update humans who will survive past the end of the
         // "one life span" init phase (this is an optimisation).
         SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
-        //FIXME: this is to match the old criterion (which was wrong due to changes in init length)
-        firstVecInitTS = sim::maxHumanAge() - sim::oneYear() + sim::oneTS();
         bool updateHuman = lastPossibleTS >= firstVecInitTS;
         bool isDead = iter->update(_transmissionModel, updateHuman);
         if( isDead ){
