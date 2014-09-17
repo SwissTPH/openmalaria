@@ -163,14 +163,14 @@ void Population::createInitialHumans ()
     until vector init, which saves computation and memory (no infections). */
     
     int cumulativePop = 0;
-    for (TimeStep iage = AgeStructure::getMaxTimestepsPerLife() - TimeStep(1);
-         iage >= TimeStep(0); --iage )
+    for (size_t iage_prev = AgeStructure::getMaxTStepsPerLife(), iage = iage_prev - 1;
+         iage_prev > 0; iage_prev = iage, iage -= 1 )
     {
-	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
-	while (cumulativePop < targetPop) {
-	    newHuman (-iage);
-	    ++cumulativePop;
-	}
+        int targetPop = AgeStructure::targetCumPop( iage, populationSize );
+        while (cumulativePop < targetPop) {
+            newHuman( sim::zero() - sim::fromTS(iage) );
+            ++cumulativePop;
+        }
     }
     
     // Vector setup dependant on human population structure (we *want* to
@@ -182,10 +182,9 @@ void Population::createInitialHumans ()
 
 // -----  non-static methods: simulation loop  -----
 
-void Population::newHuman (TimeStep dob)
-{
-    util::streamValidate( dob.asInt() );
-    population.push_back( new Host::Human (*_transmissionModel, sim::fromTS(dob)) );
+void Population::newHuman( SimTime dob ){
+    util::streamValidate( dob.raw() );
+    population.push_back( new Host::Human (*_transmissionModel, dob) );
     ++recentBirths;
 }
 
@@ -225,13 +224,13 @@ void Population::update1()
             iter = population.erase (iter);
             continue;
         }
-
+        
         //BEGIN Population size & age structure
         ++cumPop;
 
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
-        if (cumPop > AgeStructure::targetCumPop (iter->getAge().ts(), targetPop)) {
+        if( cumPop > AgeStructure::targetCumPop(iter->getAge().indexTS(), targetPop) ){
             --cumPop;
             iter->destroy();
             iter = population.erase (iter);
@@ -243,7 +242,7 @@ void Population::update1()
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman (TimeStep::simulation);
+        newHuman( sim::now() );
         //++nCounter;
         ++cumPop;
     }

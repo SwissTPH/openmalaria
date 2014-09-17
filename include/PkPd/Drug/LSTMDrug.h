@@ -76,10 +76,10 @@ public:
         return typeData.getIndex();
     }
     
-    /** Indicate a new medication this timestep.
+    /** Indicate a new medication this time step.
      *
      * Converts qty in mg to concentration, and stores along with time (delay past
-     * the start of the current timestep) in the doses container.
+     * the start of the current time step) in the doses container.
      * 
      * @param time Time of administration, in days (should be at least 0 and
      *  less than 1).
@@ -87,7 +87,7 @@ public:
      * @param bodyMass Body mass of patient, in kg
      */
     void medicate (double time, double qty, double bodyMass);
-    /** Indicate a new medication via IV this timestep.
+    /** Indicate a new medication via IV this time step.
      *
      * @param time Time of start of administration, in days (should be at least
      *  0 and less than 1 (although time+duration may be greater than 1).
@@ -103,7 +103,7 @@ public:
      * reflect the drug action of all drugs in one day.
      *
      * This doesn't adjust concentration because this function may be called
-     * several times (for each infection) per timestep, or not at all. */
+     * several times (for each infection) per time step, or not at all. */
     double calculateDrugFactor(uint32_t proteome_ID);
 
     /** Updates concentration variable and clears day's doses.

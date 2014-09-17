@@ -121,7 +121,7 @@ private:
     /*!
        \param dob date of birth (usually current time)
     */
-    void newHuman (TimeStep dob);
+    void newHuman( SimTime dob );
     
     /// Delegate to print the number of hosts
     void ctsHosts (ostream& stream);

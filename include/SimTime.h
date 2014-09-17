@@ -159,6 +159,9 @@ public:
     
     /** Convert. */
     static inline SimTime fromTS(const util::TimeStep ts){ return SimTime(ts.inDays()); }
+    
+    /** Convert. */
+    static inline SimTime fromTS(size_t ts){ return fromTS(util::TimeStep(ts)); }
     //@}
     
 private:

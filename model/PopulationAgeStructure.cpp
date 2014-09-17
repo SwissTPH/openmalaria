@@ -52,9 +52,9 @@ void AgeStructure::init( const scnXml::Demography& demography ){
     calcCumAgeProp();
 }
 
-int AgeStructure::targetCumPop (TimeStep ageTSteps, int targetPop)
-{
-    return (int) floor (cumAgeProp[cumAgeProp.size()-1-ageTSteps.asInt()] * targetPop + 0.5);
+int AgeStructure::targetCumPop( size_t ageTSteps, int targetPop ){
+    size_t index = cumAgeProp.size() - 1 - ageTSteps;
+    return (int) floor (cumAgeProp[index] * targetPop + 0.5);
 }
 
 
