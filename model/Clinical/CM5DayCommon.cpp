@@ -48,7 +48,7 @@ WithinHost::TreatmentId CM5DayCommon::treatmentSevere;
 // ———  per-human, construction and destruction  ———
 
 CM5DayCommon::CM5DayCommon (double tSF) :
-        m_tLastTreatment (TimeStep::never),
+        m_tLastTreatment (sim::never().ts()),
         m_treatmentSeekingFactor (tSF)
 {}
 

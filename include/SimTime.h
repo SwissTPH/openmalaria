@@ -39,9 +39,12 @@ namespace OM {
  *****************************************************************************/
 class SimTime {
     /** Construct, from a time in days. */
-    explicit SimTime( int days ) : d(days) {}
+    explicit SimTime( int32_t days ) : d(days) {}
     
 public:
+    /// Convert to TimeStep
+    inline util::TimeStep ts() const{ return util::TimeStep::fromDays(d); }
+    
     ///@brief Simple arithmatic modifiers (all return a copy)
     //@{
     inline SimTime operator-()const {
@@ -85,10 +88,15 @@ public:
     }
     
 private:
-    uint32_t d;      // time in days
+    int32_t d;      // time in days
     
+    friend std::ostream& operator<<( std::ostream&, const SimTime );
     friend class sim;
 };
+
+inline std::ostream& operator<<( std::ostream& stream, const SimTime time ){
+    return( stream << time.d );
+}
 
 /** Encapsulation of SimTime static members. */
 class sim {
@@ -110,12 +118,11 @@ public:
      * the following is always true: never() + now() < zero() . Additionally,
      * x - never() is guaranteed not to overflow for any SimTime x >= 0. */
     static inline SimTime never(){
-        //TODO: this implies a maximum value for now()
         return SimTime(-0x3FFFFFFF);
     }
     
     /** Duration in days. Should be fast (currently no conversion required). */
-    static inline SimTime fromDays(int days){ return SimTime(days); }
+    static inline SimTime fromDays(int32_t days){ return SimTime(days); }
     
     /** Convert. */
     static inline SimTime fromTS(const util::TimeStep ts){ return SimTime(ts.inDays()); }
