@@ -75,8 +75,8 @@ public:
      * treatment for the human.
      * 
      * @param ageYears Age of human.
-     * @param ageTimeSteps Age of human (used to test if 1 timestep old) */
-    void update (Human& human, double ageYears, TimeStep ageTimeSteps);
+     * @param newBorn True if human age is one timestep */
+    void update (Human& human, double ageYears, bool newBorn);
     
     /** For infants, updates the infantIntervalsAtRisk and potentially
      * infantDeaths arrays. */

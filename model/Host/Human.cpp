@@ -210,7 +210,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
         withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV), mon);
         
-        clinicalModel->update (*this, ageYears, ageTimeSteps);
+        clinicalModel->update (*this, ageYears, sim::fromTS(ageTimeSteps) == sim::oneTS());
         clinicalModel->updateInfantDeaths (ageTimeSteps);
     }
     return false;

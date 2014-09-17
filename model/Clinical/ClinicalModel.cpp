@@ -109,7 +109,7 @@ bool ClinicalModel::isDead (TimeStep ageTimeSteps) {
     return false;
 }
 
-void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps) {
+void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     if (doomed < NOT_DOOMED)	// Countdown to indirect mortality
         doomed -= TimeStep::interval;
     
@@ -119,7 +119,7 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
         doomed = DOOMED_INDIRECT;
         return;
     }
-    if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
+    if(newBorn /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
         if (Host::NeonatalMortality::eventNeonatalMortality()) {
             Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );

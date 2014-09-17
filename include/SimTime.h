@@ -114,6 +114,9 @@ public:
     /** Duration zero. */
     static inline SimTime zero(){ return SimTime(0); }
     
+    /** One time step (currently either one or five days). */
+    static inline SimTime oneTS(){ return SimTime(util::TimeStep::interval); }
+    
     /** Special value representing a time point always in the past, such that
      * never() + x < zero() and x - never() will not to overflow for all valid
      * simulation times x (including any value now() may take as well as
