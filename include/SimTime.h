@@ -58,6 +58,13 @@ public:
     }
     //@}
     
+    ///@brief Self-modifying arithmatic
+    //@{
+    inline void operator+=( const SimTime rhs ) {
+        d += rhs.d;
+    }
+    //@}
+    
     ///@brief Comparators between two SimTimes (all return a boolean)
     //@{
     inline bool operator==( const SimTime rhs )const {
