@@ -189,7 +189,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             // update
             ++TimeStep::simulation;
             ++TimeStep::interventionPeriod;
-            population->update1();
+            population->update1( sim::fromTS(humanWarmupLength) );
             
             util::BoincWrapper::reportProgress (
                 double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());

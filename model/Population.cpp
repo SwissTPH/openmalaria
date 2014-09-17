@@ -188,8 +188,7 @@ void Population::newHuman( SimTime dob ){
     ++recentBirths;
 }
 
-void Population::update1()
-{
+void Population::update1( SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
@@ -212,14 +211,15 @@ void Population::update1()
     Iter last = population.end();
     --last;
     for (Iter iter = population.begin(); iter != population.end();) {
-        // Update human, and remove if too old:
-        if (iter->update (_transmissionModel,
-		/* Only include humans who can survive until vector init.
-		Note: we could exclude more humans due to age distribution,
-		but how many extra to leave due to deaths isn't obvious. */
-                //FIXME: vector init is not exactly one year, previous warmup is not exactly one lifespan minus vector init
-		TimeStep::intervalsPerYear + iter->getDateOfBirth().ts() > TimeStep(0)
-	    )) {
+        // Update human, and remove if too old.
+        // We only need to update humans who will survive past the end of the
+        // "one life span" init phase (this is an optimisation).
+        SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
+        //FIXME: this is to match the old criterion (which was wrong due to changes in init length)
+        firstVecInitTS = sim::maxHumanAge() - sim::oneYear() + sim::oneTS();
+        bool updateHuman = lastPossibleTS >= firstVecInitTS;
+        bool isDead = iter->update(_transmissionModel, updateHuman);
+        if( isDead ){
             iter->destroy();
             iter = population.erase (iter);
             continue;
