@@ -73,6 +73,10 @@ public:
     inline SimTime operator+( const SimTime rhs )const {
         return SimTime( d + rhs.d );
     }
+    // scale by a double, rounding to nearest
+    inline SimTime operator*( double scalar )const {
+        return SimTime( static_cast<int32_t>(d * scalar + 0.5) );
+    }
     //@}
     
     ///@brief Self-modifying arithmatic
@@ -157,6 +161,9 @@ public:
     /** Duration in days. Should be fast (currently no conversion required). */
     static inline SimTime fromDays(int32_t days){ return SimTime(days); }
     
+    /** Convert from years. */
+    static inline SimTime fromYears(double years){ return fromTS(util::TimeStep::fromYears(years)); }
+    
     /** Convert. */
     static inline SimTime fromTS(const util::TimeStep ts){ return SimTime(ts.inDays()); }
     
@@ -165,7 +172,9 @@ public:
     //@}
     
 private:
-//     static SimTime m_now;
+    static SimTime sim_time;
+    
+    friend class Simulator;
 };
 
 }

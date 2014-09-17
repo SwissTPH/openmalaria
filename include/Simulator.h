@@ -62,8 +62,8 @@ private:
     //@}
     
     // Data
-    TimeStep simPeriodEnd;
-    TimeStep totalSimDuration;
+    SimTime simPeriodEnd;
+    SimTime totalSimDuration;
     enum Phase {
 	STARTING_PHASE = 0,
 	/*! Run the simulation using the equilibrium inoculation rates over one complete
