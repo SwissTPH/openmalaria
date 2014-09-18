@@ -150,7 +150,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + sim::fromTS(population->_transmissionModel->expectedInitDuration())
         // plus MAIN_PHASE: survey period plus one TS for last survey
-        + sim::fromTS(Monitoring::Survey::getFinalTimestep()) + sim::oneTS();
+        + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
     assert( totalSimDuration.ts() < TimeStep::future && totalSimDuration.ts() + TimeStep::never < TimeStep(0) );
     assert( totalSimDuration + sim::never() < sim::zero() );
     
@@ -168,7 +168,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     SimTime testCheckpointDieTime = testCheckpointTime;        // kill program at same time
     
     // phase loop
-    while (true){ 
+    while (true){
         // loop for steps within a phase
         while (sim::now() < simPeriodEnd){
             // checkpoint
@@ -182,7 +182,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // do reporting (continuous and surveys)
             Continuous.update( *population );
-            if (TimeStep::interventionPeriod == Surveys.currentTimestep()) {
+            if (TimeStep::interventionPeriod == Surveys.nextSurveyTime().ts()) {
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }
@@ -213,7 +213,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
                 // nothing to do: start main phase immediately
             }
             // adjust estimation of final time step: end of current period + length of main phase
-            totalSimDuration = simPeriodEnd + sim::fromTS(Monitoring::Survey::getFinalTimestep()) + sim::oneTS();
+            totalSimDuration = simPeriodEnd + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;

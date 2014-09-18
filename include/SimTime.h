@@ -29,13 +29,15 @@
 namespace OM {
 
 /******************************************************************************
- * Class encapsulating simulation time.
+ * Class encapsulating simulation time (as in days and dates, not time-of-day).
  * 
  * Time steps, days and dates are derived from this. The values and units of
  * internal variables are an implementation detail (i.e. code outside this
  * class should not need to know).
  * 
- * Type represents both times (from some epoch) and durations.
+ * Type represents relative times (durations) and absolute times (duration
+ * since start of the simulation or since the start of the intervention
+ * period).
  *****************************************************************************/
 class SimTime {
     /** Construct, from a time in days. */
@@ -46,12 +48,17 @@ public:
     SimTime() : d(-0x3FFFFFFF) {}
     
     ///@brief Conversions to other types/units
+    //NOTE: these methods provide good documentation of the types of things
+    //one does with SimTimes (besides comparing with other SimTimes).
     //@{
     /// Get raw value (currently days; not guaranteed not to change). Same value as checkpointed.
     inline int32_t raw() const{ return d; }
     
     /// Convert to TimeStep
     inline util::TimeStep ts() const{ return util::TimeStep::fromDays(d); }
+    
+    /// Get length of time in days. Currently this is simple no-op get.
+    inline int32_t inDays() const{ return d; }
     
     /// Convert to years
     inline double inYears() const{ return d * (1.0 / 365); }

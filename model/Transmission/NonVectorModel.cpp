@@ -153,7 +153,7 @@ void NonVectorModel::changeEIRIntervention (
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays ((daily.size()-1)/TimeStep::interval + 1, 0);
   interventionEIR.assign (nDays.size(), 0.0);
-  size_t required_days = static_cast<size_t>(Monitoring::Survey::getFinalTimestep().inDays()+1);
+  size_t required_days = static_cast<size_t>(Monitoring::Survey::getLastSurveyTime().inDays()+1);
   if (daily.size() < required_days) {
     cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size()
         << "\nRequired: " << required_days << endl;

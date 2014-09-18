@@ -49,7 +49,7 @@ public:
     ///@brief Init, output, checkpointing functions
     //@{
     SurveysType() :
-            m_currentTimestep(TimeStep::never)
+            m_nextSurveyTime(sim::never())
             {}
     
     /** Read in some params from XML and allocate memory. */
@@ -72,12 +72,12 @@ public:
     
     ///@brief Simple getters
     //@{
-    /** Timestep the current survey ends at.
+    /** Time the current (next) survey ends at.
      * 
      * For point-time surveys this is the time of the survey; where data is
-     * collected over a period, the period is from the timestep following the
+     * collected over a period, the period is from the time step following the
      * previous survey (or the start of the main simulation) until this time. */
-    inline TimeStep currentTimestep()const{ return m_currentTimestep; }
+    inline SimTime nextSurveyTime()const{ return m_nextSurveyTime; }
     
     /** Get the number of cohort sets (i.e. two to the power of the number of
      * sub-populations considered cohorts). */
@@ -92,10 +92,11 @@ private:
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
     
-    TimeStep m_currentTimestep;
+    /// Time of the next survey, i.e. the one we're currently gathering data for
+    SimTime m_nextSurveyTime;
     
-    //! Time intervals for all surveys specified in the XML, appended with -1
-    vector<TimeStep> _surveysTimeIntervals;
+    /// Times of all surveys specified in the XML, appended with sim::never()
+    vector<SimTime> m_surveysTimeIntervals;
     
     /// Our collection of surveys. m_surveys[0] is a dummy container for data
     /// we're not interested in, in order to avoid having to check current is valid.
