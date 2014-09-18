@@ -30,20 +30,22 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     if( tElt.getPeriod() < 0 ){
         throw util::xml_scenario_error( "interventions.importedInfections.timed.period cannot be negative" );
     }
-    period = TimeStep( tElt.getPeriod() );
+    //FIXME(schema): use days in schema (or something completely different)
+    period = sim::fromTS(tElt.getPeriod());
     rate.reserve( tElt.getRate().size() );
     for( scnXml::ImportedInfections::TimedType::RateSequence::const_iterator it = tElt.getRate().begin(); it != tElt.getRate().end(); ++it ){
-        TimeStep time( it->getTime() );
-        if( period != TimeStep(0) && time >= period ){
+        //FIXME(schema): use days in schema (or something completely different)
+        SimTime time = sim::fromTS( it->getTime() );
+        if( period != sim::zero() && time >= period ){
             throw util::xml_scenario_error( "interventions.importedInfections.timed: time cannot be greater than period when period is not zero" );
         }
-        // convert to per-timestep, per-person
-        double rateVal = it->getValue() / TimeStep::intervalsPerYear.asInt() / 1000.0;
+        // convert to per-time-step, per-person
+        double rateVal = it->getValue() / (sim::oneYear() / sim::oneTS()) / 1000.0;
         rate.push_back( Rate( time, rateVal ) );
     }
     sort( rate.begin(), rate.end() );
     if( rate.size() > 0 ){
-        if( period != TimeStep(0) && rate[0].time != TimeStep( 0 ) ){
+        if( period != sim::zero() && rate[0].time != sim::zero() ){
             throw util::xml_scenario_error( "interventions.importedInfections.timed: must specify rate at time zero when period is not zero" );
         }
         // remove useless repeated entries from list
@@ -62,8 +64,8 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
 void ImportedInfections::import( Population& population ){
     if( rate.size() == 0 ) return;      // no imported infections
     assert( TimeStep::interventionPeriod >= TimeStep(0) );
-    TimeStep now = TimeStep::interventionPeriod;
-    if( period > TimeStep(0) ){
+    SimTime now = sim::fromTS(TimeStep::interventionPeriod);
+    if( period > sim::zero() ){
         now = mod_nn(now, period);
     }
     if( rate[lastIndex].time > now ){

@@ -32,7 +32,7 @@ namespace Host {
 
     class ImportedInfections {
     public:
-        ImportedInfections() : period(0), lastIndex(0) {}
+        ImportedInfections() : period(sim::zero()), lastIndex(0) {}
         
         /** Initialise, passing intervention description
          * 
@@ -61,11 +61,11 @@ namespace Host {
         }
         
     private:
-        TimeStep period;
+        SimTime period;
         uint32_t lastIndex;
         struct Rate {
-            Rate( TimeStep t, double v ): time(t), value(v) {}
-            TimeStep time;
+            Rate( SimTime t, double v ): time(t), value(v) {}
+            SimTime time;
             double value;
             inline bool operator< (const Rate& that) const{
                 return time < that.time;

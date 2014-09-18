@@ -77,6 +77,10 @@ public:
     inline SimTime operator*( double scalar )const {
         return SimTime( static_cast<int32_t>(d * scalar + 0.5) );
     }
+    // Divide by another SimTime; result is unitless. Note integer result.
+    inline int operator/( const SimTime rhs )const{
+        return d / rhs.d;
+    }
     //@}
     
     ///@brief Self-modifying arithmatic
@@ -119,11 +123,15 @@ private:
     int32_t d;      // time in days
     
     friend std::ostream& operator<<( std::ostream&, const SimTime );
+    friend SimTime mod_nn( const SimTime, const SimTime );
     friend class sim;
 };
 
 inline std::ostream& operator<<( std::ostream& stream, const SimTime time ){
     return( stream << time.d );
+}
+inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
+    return SimTime(util::mod_nn(lhs.d, rhs.d));
 }
 
 /** Encapsulation of SimTime static members. */
