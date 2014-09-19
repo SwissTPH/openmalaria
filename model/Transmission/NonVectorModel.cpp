@@ -175,8 +175,7 @@ void NonVectorModel::changeEIRIntervention (
   }
   // divide by number of records assigned to each interval (usually one per day)
   for (size_t i = 0; i < interventionEIR.size(); ++i){
-      //FIXME: is this using integer division?
-    interventionEIR[i] *= sim::oneTS().inDays() / nDays[i];
+    interventionEIR[i] *= sim::oneTS().inDays() / static_cast<double>(nDays[i]);
   }
   
   // I've no idea what this should be, so until someone asks it can be NaN.
