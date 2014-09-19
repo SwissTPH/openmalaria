@@ -27,8 +27,8 @@ namespace OM { namespace WithinHost {
 // Max duration of sample data for an infection in intervals. Simulated
 // infections may last longer; in this case the last sample data is repeated
 // until the infection terminates.
-const size_t maxDurationTS = 83;
-const int numDurations = 84;    // Above plus one (include a category for 0)
+const int32_t maxDurationTS = 83;
+const int32_t numDurations = 84;    // Above plus one (include a category for 0)
 
 //The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.
 // NOTE: should this be enforced before or after attenuation (BSV, immunity, IPT)? Was enforced in both places.

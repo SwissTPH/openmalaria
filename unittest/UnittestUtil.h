@@ -51,9 +51,10 @@ namespace OM {
 
 class UnittestUtil {
 public:
-    static void initTime(){
+    static void initTime(int daysPerStep){
+        sim::one_step = sim::fromDays(daysPerStep);
         // we could just use zero, but we may spot more errors by using some weird number
-        sim::sim_time = sim::fromYears(83.2591);
+        sim::sim_time = sim::fromYearsN(83.2591);
     }
     // Initialise surveys, to the minimum required not to crash
     static void initSurveys(){

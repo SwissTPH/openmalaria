@@ -312,10 +312,10 @@ SimTime VectorModel::minPreinitDuration () {
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return sim::fromYears( 55 );
+    return sim::fromYearsI( 55 );
 }
 SimTime VectorModel::expectedInitDuration (){
-    return sim::fromYears( 1 );
+    return sim::oneYear();
 }
 
 SimTime VectorModel::initIterate () {
@@ -346,9 +346,9 @@ SimTime VectorModel::initIterate () {
     // to be enough (but I may be wrong).
     if( needIterate )
         // stabilization + 5 years data-collection time:
-        return sim::fromYears( 1 ) + sim::fromYears(5);
+        return sim::oneYear() + sim::fromYearsI(5);
     else
-        return sim::fromYears( 1 );
+        return sim::oneYear();
 }
 
 double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
@@ -375,7 +375,7 @@ void VectorModel::vectorUpdate (const Population& population) {
     popProbTransmission.reserve( population.size() );
     for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h ){
         popProbTransmission.push_back( h->withinHostModel->probTransmissionToMosquito(
-            h->getAge().ts(), h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
+            h->getAge(), h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
     }
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);

@@ -35,7 +35,7 @@ WHMock::WHMock() :
 {}
 WHMock::~WHMock() {}
 
-double WHMock::probTransmissionToMosquito( TimeStep ageOfHuman,
+double WHMock::probTransmissionToMosquito( SimTime ageOfHuman,
                                            double tbvFactor ) const
 {
     throw util::unimplemented_exception( "not needed in unit test" );
@@ -53,10 +53,10 @@ bool WHMock::optionalPqTreatment(){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::treatSimple(TimeStep tsLiver, TimeStep tsBlood){
+void WHMock::treatSimple(SimTime timeLiver, SimTime timeBlood){
     nTreatments += 1;
-    lastTimestepsLiver = tsLiver;
-    lastTimestepsBlood = tsBlood;
+    lastTimeLiver = timeLiver;
+    lastTimeBlood = timeBlood;
 }
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages, double age){
@@ -88,11 +88,11 @@ void WHMock::clearImmunity(){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-double WHMock::getCumulativeh() const{
+double WHMock::getCumulative_h() const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-double WHMock::getCumulativeY() const{
+double WHMock::getCumulative_Y() const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 

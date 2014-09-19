@@ -48,13 +48,13 @@ Treatments::Stages stageFromString( const std::string& str ){
     throw util::xml_scenario_error( std::string("treatment action: stage must be liver, blood or both, not ").append(str) );
 }
 Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
-    TriggeredDeployments(elt),
-    timestepsLiver(0), timestepsBlood(0)
+    TriggeredDeployments(elt), timeLiver(sim::zero()), timeBlood(sim::zero())
 {
     for( scnXml::TreatmentOption::ClearInfectionsConstIterator it =
         elt.getClearInfections().begin(), end = elt.getClearInfections().end();
         it != end; ++it )
     {
+        //FIXME(schema): input should not be in time steps
         int len = it->getTimesteps();
         if( len < -1 || len == 0 ){ 
             throw util::xml_scenario_error( "prophylacticTreatment: timesteps: must be ≥ 1 or have special value -1" );
@@ -64,19 +64,16 @@ Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
             if( stage != BLOOD || len != -1 )
                 throw util::unimplemented_exception( "vivax model requires treatments configured as blood-stage with timesteps=-1" );
             // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
-        }else if( TimeStep::interval != 5 && stage != BOTH ){
-            throw util::unimplemented_exception(
-                "differentiation of infection stages for simple treatment (alternative: use the PK/PD model)" );
         }
         if( stage & LIVER ){
-            if( timestepsLiver.asInt() != 0 )   // existing treatment configuration
+            if( timeLiver != sim::zero() )   // existing treatment configuration
                 throw util::xml_scenario_error( "treatment action: multiple specification of liver stage effect" );
-            timestepsLiver = TimeStep(len);
+            timeLiver = sim::fromTS(len);
         }
         if( stage & BLOOD ){
-            if( timestepsBlood.asInt() != 0 )   // existing treatment configuration
+            if( timeBlood != sim::zero() )   // existing treatment configuration
                 throw util::xml_scenario_error( "treatment action: multiple specification of blood stage effect" );
-            timestepsBlood = TimeStep(len);
+            timeBlood = sim::fromTS(len);
         }
     }
 }

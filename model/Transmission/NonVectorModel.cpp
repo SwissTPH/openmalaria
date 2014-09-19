@@ -73,7 +73,7 @@ NonVectorModel::NonVectorModel(const scnXml::EntoData& entoData, const scnXml::N
         annualEIR += initialisationEIR[indTS];
     }
     
-    initialKappa.assign( sim::fromYears(nYearsWarmupData).indexTS(), 0.0 );
+    initialKappa.assign( sim::fromYearsI(nYearsWarmupData).indexTS(), 0.0 );
 }
 
 NonVectorModel::~NonVectorModel () {}
@@ -112,7 +112,7 @@ SimTime NonVectorModel::minPreinitDuration (){
         return sim::zero();
     }
     // nYearsWarmupData years for data collection, 50 years stabilization
-    return sim::fromYears(50) + sim::fromYears(nYearsWarmupData);
+    return sim::fromYearsI(50) + sim::fromYearsI(nYearsWarmupData);
 }
 SimTime NonVectorModel::expectedInitDuration (){
     return sim::zero();

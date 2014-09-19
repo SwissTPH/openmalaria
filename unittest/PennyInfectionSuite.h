@@ -38,7 +38,7 @@ class PennyInfectionSuite : public CxxTest::TestSuite
 public:
     void setUp () {
         TimeStep::init( 1, 90.0 );
-        UnittestUtil::initTime();
+        UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_1day ();
         PennyInfection::init();
         util::random::seed( 1095 );

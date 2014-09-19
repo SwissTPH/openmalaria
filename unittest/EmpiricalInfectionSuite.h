@@ -34,7 +34,7 @@ class EmpiricalInfectionSuite : public CxxTest::TestSuite
 {
 public:
     void setUp () {
-        UnittestUtil::initTime();
+        UnittestUtil::initTime(1);
         now = sim::now();
 	UnittestUtil::Infection_init_NaN ();
 	EmpiricalInfection::init();

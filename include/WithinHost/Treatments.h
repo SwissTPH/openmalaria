@@ -69,14 +69,14 @@ public:
     //@{
     /** Get the liver stage action.
      *
-     * 0 implies no action, -1 implies retrospective action, and n>0 implies
-     * treatment for next n timesteps. */
-    inline util::TimeStep liverEffect()const{ return timestepsLiver; }
+     * 0 implies no action, <0 implies retrospective action, and n>0
+     * implies treatment for next n time steps. */
+    inline SimTime liverEffect()const{ return timeLiver; }
     /** Get the blood stage action.
      *
-     * 0 implies no action, -1 implies retrospective action, and n>0 implies
-     * treatment for next n timesteps. */
-    inline util::TimeStep bloodEffect()const{ return timestepsBlood; }
+     * 0 implies no action, <0 implies retrospective action, and n>0
+     * implies treatment for next n time steps. */
+    inline SimTime bloodEffect()const{ return timeBlood; }
     //@}
     
 private:
@@ -86,7 +86,7 @@ private:
     // non-static:
     Treatments( const scnXml::TreatmentOption& elt );
     
-    util::TimeStep timestepsLiver, timestepsBlood;
+    SimTime timeLiver, timeBlood;
     
     friend class ::UnittestUtil;
 };

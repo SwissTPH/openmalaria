@@ -147,7 +147,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
         sumWeight += t;
-        t *= h->withinHostModel->probTransmissionToMosquito( h->getAge().ts(),
+        t *= h->withinHostModel->probTransmissionToMosquito( h->getAge(),
                                                              h->getVaccine().getFactor( interventions::Vaccine::TBV ) );
         sumWt_kappa += t;
         if( t > 0.0 )

@@ -283,7 +283,7 @@ void Population::ctsPatentHosts (ostream& stream){
 void Population::ctsImmunityh (ostream& stream){
     double x = 0.0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        x += iter->getWithinHostModel().getCumulativeh();
+        x += iter->getWithinHostModel().getCumulative_h();
     }
     x /= populationSize;
     stream << '\t' << x;
@@ -291,7 +291,7 @@ void Population::ctsImmunityh (ostream& stream){
 void Population::ctsImmunityY (ostream& stream){
     double x = 0.0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        x += iter->getWithinHostModel().getCumulativeY();
+        x += iter->getWithinHostModel().getCumulative_Y();
     }
     x /= populationSize;
     stream << '\t' << x;
@@ -300,7 +300,7 @@ void Population::ctsMedianImmunityY (ostream& stream){
     vector<double> list;
     list.reserve( populationSize );
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        list.push_back( iter->getWithinHostModel().getCumulativeY() );
+        list.push_back( iter->getWithinHostModel().getCumulative_Y() );
     }
     sort( list.begin(), list.end() );
     double x;

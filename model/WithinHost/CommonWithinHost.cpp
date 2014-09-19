@@ -84,14 +84,14 @@ void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (*inf)->clearImmunity();
     }
-    _cumulativeh = 0.0;
-    _cumulativeYlag = 0.0;
+    m_cumulative_h = 0.0;
+    m_cumulative_Y_lag = 0.0;
 }
 void CommonWithinHost::importInfection(){
     PopulationStats::totalInfections += 1;
     if( numInfs < MAX_INFECTIONS ){
         PopulationStats::allowedInfections += 1;
-        _cumulativeh += 1;
+        m_cumulative_h += 1;
         numInfs += 1;
         infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
     }
@@ -103,7 +103,7 @@ void CommonWithinHost::importInfection(){
 
 void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
+    m_y_lag[mod_nn(TimeStep::simulation.asInt(),y_lag_len)] = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -122,14 +122,14 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     totalDensity = 0.0;
     timeStepMaxDensity = 0.0;
     
-    // As in AJTMH p22, cumulativeh (X_h + 1) doesn't include infections added
-    // this time-step and cumulativeY only includes past densities.
-    double cumulativeh=_cumulativeh;
-    double cumulativeY=_cumulativeY;
-    _cumulativeh += nNewInfs;
+    // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
+    // this time-step and cumulative_Y only includes past densities.
+    double cumulative_h=m_cumulative_h;
+    double cumulative_Y=m_cumulative_Y;
+    m_cumulative_h += nNewInfs;
 
-    bool treatmentLiver = treatExpiryLiver >= TimeStep::simulation;
-    bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
+    bool treatmentLiver = treatExpiryLiver >= sim::now();
+    bool treatmentBlood = treatExpiryBlood >= sim::now();
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
     for( SimTime now = sim::now(), end = sim::now() + sim::oneTS(); now < end; now += sim::oneDay() ){
@@ -144,7 +144,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
             
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 double survivalFactor = survivalFactor_part *
-                    (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY) *
+                    (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y) *
                     pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
                 // update, may result in termination of infection:
                 expires = (*inf)->update(survivalFactor, now);
@@ -158,7 +158,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
                 double density = (*inf)->getDensity();
                 totalDensity += density;
                 timeStepMaxDensity = max(timeStepMaxDensity, density);
-                _cumulativeY += density;
+                m_cumulative_Y += density;
                 if( density > 0 ){
                     //NOTE: this is a provisional output. It should not, however, add log(0)=-inf to the sum.
                     sumLogDens += log(density);

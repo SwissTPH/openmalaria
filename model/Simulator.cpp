@@ -51,7 +51,11 @@ bool Simulator::startedFromCheckpoint;  // static
 
 const char* CHECKPOINT = "checkpoint";
 
+// ———  SimTime stuff  ———
+
 SimTime sim::sim_time;
+SimTime sim::one_step;
+
 
 // -----  Set-up & tear-down  -----
 
@@ -69,6 +73,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     
     // 1) elements with no dependencies on other elements initialised here:
     OM::TimeStep::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
+    sim::one_step = sim::fromDays( model.getParameters().getInterval() );
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
     
@@ -145,7 +150,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
         humanWarmupLength = population->_transmissionModel->minPreinitDuration();
     }
-    humanWarmupLength = sim::fromYears( ceil(humanWarmupLength.inYears()) );
+    humanWarmupLength = sim::fromYearsI( ceil(humanWarmupLength.inYears()) );
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->_transmissionModel->expectedInitDuration()

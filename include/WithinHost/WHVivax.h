@@ -70,7 +70,7 @@ public:
         bool newPrimaryBS, newBS, isFinished;
     };
     /**
-     * Do per-timestep update: remove finished blood stage infections and act
+     * Do per time step update: remove finished blood stage infections and act
      * on newly releasing hypnozoites.
      * 
      * @return pair describing whether the infection is finished (no more blood
@@ -86,7 +86,7 @@ public:
      * gametocytes independently, thus this also tests existance of
      * gametocytes. */
     inline bool isPatent() const{
-        return bloodStageClearDate > TimeStep::simulation;
+        return bloodStageClearDate > sim::now();
     }
     
     /** Fully clear blood stage parasites. */
@@ -101,10 +101,10 @@ private:
     
     // list of times at which the merozoite and hypnozoites release, ordered by
     // time of release, soonest last (i.e. last element is next one to release)
-    vector<TimeStep> releaseDates;
+    vector<SimTime> releaseDates;
     
-    // Either TimeStep::never (no blood stage) or a date at which the blood stage will clear.
-    TimeStep bloodStageClearDate;
+    // Either sim::never() (no blood stage) or a date at which the blood stage will clear.
+    SimTime bloodStageClearDate;
     
     // Whether the primary blood stage infection has started
     bool primaryHasStarted;
@@ -136,7 +136,7 @@ public:
     virtual ~WHVivax();
     //@}
     
-    virtual double probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const;
+    virtual double probTransmissionToMosquito( SimTime ageOfHuman, double tbvFactor ) const;
     
     virtual bool summarize(const Host::Human& human);
     
@@ -153,7 +153,7 @@ public:
 protected:
     virtual InfectionCount countInfections () const;
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood);
+    virtual void treatSimple(SimTime timeLiver, SimTime timeBlood);
     virtual bool optionalPqTreatment();
     
     virtual void checkpoint (istream& stream);
@@ -162,8 +162,8 @@ protected:
     // None of these do anything in this model:
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual double getTotalDensity() const;
-    virtual double getCumulativeh() const;
-    virtual double getCumulativeY() const;
+    virtual double getCumulative_h() const;
+    virtual double getCumulative_Y() const;
     
 private:
     WHVivax( const WHVivax& ) {}        // not copy constructible

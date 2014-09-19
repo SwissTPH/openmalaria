@@ -46,6 +46,9 @@ class SimTime {
     explicit SimTime( int32_t days ) : d(days) {}
     
 public:
+    /// Number of days in a year; defined as 365 (leap years are not simulated).
+    enum { DAYS_IN_YEAR = 365 };
+    
     /** Default construction; same as sim::never(). */
     SimTime() : d(-0x3FFFFFFF) {}
     
@@ -63,10 +66,10 @@ public:
     inline int32_t inDays() const{ return d; }
     
     /// Convert to years
-    inline double inYears() const{ return d * (1.0 / 365); }
+    inline double inYears() const{ return d * (1.0 / DAYS_IN_YEAR); }
     
     /// Get array index in time steps (for dense arrays, involves conversion)
-    inline size_t indexTS() const{
+    inline int32_t indexTS() const{
         return d / util::TimeStep::interval;
     }
     //@}
@@ -81,6 +84,10 @@ public:
     }
     inline SimTime operator+( const SimTime rhs )const {
         return SimTime( d + rhs.d );
+    }
+    // scale by an integer
+    inline SimTime operator*( int32_t scalar )const {
+        return SimTime( d * scalar );
     }
     // scale by a double, rounding to nearest
     inline SimTime operator*( double scalar )const {
@@ -153,7 +160,9 @@ public:
      */
     static inline SimTime now(){ return sim_time; }
     
-    static inline SimTime maxHumanAge(){ return fromTS(util::TimeStep::maxAgeIntervals); }
+    static inline SimTime maxHumanAge(){
+        return fromTS(util::TimeStep::maxAgeIntervals);
+    }
     //@}
     
     ///@brief Constructors, for convenience
@@ -165,34 +174,47 @@ public:
     static inline SimTime oneDay(){ return SimTime(1); }
     
     /** One time step (currently either one or five days). */
-    static inline SimTime oneTS(){ return SimTime(util::TimeStep::interval); }
+    static inline SimTime oneTS(){ return one_step; }
     
-    /** One year. This is defined as 365 days in the simulator. */
-    static inline SimTime oneYear(){ return SimTime(365); }
+    /** One year. See SimTime::DAYS_IN_YEAR. */
+    static inline SimTime oneYear(){ return SimTime(SimTime::DAYS_IN_YEAR); }
     
     /** Special value representing a time point always in the past, such that
      * never() + x < zero() and x - never() will not to overflow for all valid
      * simulation times x (including any value now() may take as well as
      * never() and future()). */
-    static inline SimTime never(){
-        return SimTime();
-    }
+    static inline SimTime never(){ return SimTime(); }
     
     /** Duration in days. Should be fast (currently no conversion required). */
     static inline SimTime fromDays(int32_t days){ return SimTime(days); }
     
-    /** Convert from years. */
-    static inline SimTime fromYears(double years){ return fromTS(util::TimeStep::fromYears(years)); }
+    /** Convert from a whole number of years. */
+    static inline SimTime fromYearsI(int32_t years){
+        return SimTime(SimTime::DAYS_IN_YEAR * years);
+    }
+    
+    /** Convert from years to nearest time step. */
+    static inline SimTime fromYearsN(double years){
+        return roundToTSFromDays(SimTime::DAYS_IN_YEAR * years);
+    }
     
     /** Convert. */
-    static inline SimTime fromTS(const util::TimeStep ts){ return SimTime(ts.inDays()); }
+    static inline SimTime fromTS(const util::TimeStep ts){
+        return SimTime(ts.inDays());
+    }
     
     /** Convert. */
-    static inline SimTime fromTS(size_t ts){ return fromTS(util::TimeStep(ts)); }
+    static inline SimTime fromTS(int32_t ts){ return one_step * ts; }
+    
+    /** Round to the nearest time-step, where input is in days. */
+    static inline SimTime roundToTSFromDays(double days){
+        return fromTS(std::floor( days / one_step.d + 0.5 ));
+    }
     //@}
     
 private:
     static SimTime sim_time;
+    static SimTime one_step;
     
     friend class Simulator;
     friend class ::UnittestUtil;

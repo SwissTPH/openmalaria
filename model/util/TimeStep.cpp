@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "util/errors.h"
+#include "SimTime.h"
 
 namespace OM {
 namespace util {

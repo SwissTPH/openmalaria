@@ -83,14 +83,14 @@ void DescriptiveWithinHostModel::clearImmunity() {
     for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (*inf)->clearImmunity();
     }
-    _cumulativeh = 0.0;
-    _cumulativeYlag = 0.0;
+    m_cumulative_h = 0.0;
+    m_cumulative_Y_lag = 0.0;
 }
 void DescriptiveWithinHostModel::importInfection(){
     PopulationStats::totalInfections += 1;
     if( numInfs < MAX_INFECTIONS ){
         PopulationStats::allowedInfections += 1;
-        _cumulativeh += 1;
+        m_cumulative_h += 1;
         numInfs += 1;
         infections.push_back(createInfection());
     }
@@ -102,7 +102,7 @@ void DescriptiveWithinHostModel::importInfection(){
 
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
+    m_y_lag[mod_nn(TimeStep::simulation.asInt(),y_lag_len)] = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -121,14 +121,14 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     totalDensity = 0.0;
     timeStepMaxDensity = 0.0;
 
-    // As in AJTMH p22, cumulativeh (X_h + 1) doesn't include infections added
-    // this time-step and cumulativeY only includes past densities.
-    double cumulativeh=_cumulativeh;
-    double cumulativeY=_cumulativeY;
-    _cumulativeh += nNewInfs;
+    // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
+    // this time-step and cumulative_Y only includes past densities.
+    double cumulative_h=m_cumulative_h;
+    double cumulative_Y=m_cumulative_Y;
+    m_cumulative_h += nNewInfs;
     
-    bool treatmentLiver = treatExpiryLiver >= TimeStep::simulation;
-    bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
+    bool treatmentLiver = treatExpiryLiver >= sim::now();
+    bool treatmentBlood = treatExpiryBlood >= sim::now();
     
     for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
@@ -150,7 +150,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // Should be: infStepMaxDens = 0.0, but has some history.
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
-        (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, bsvFactor);
+        (*inf)->determineDensities(ageInYears, cumulative_h, cumulative_Y, infStepMaxDens, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
@@ -158,7 +158,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
 
         double density = (*inf)->getDensity();
         totalDensity += density;
-        _cumulativeY += TimeStep::interval * density;
+        m_cumulative_Y += TimeStep::interval * density;
 
         ++inf;
     }

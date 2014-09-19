@@ -38,7 +38,7 @@ using boost::ptr_list;
 // ———  parameters  ———
 
 // Set from the parameters block:
-TimeStep latentp;       // attribute on parameters block
+SimTime latentP;       // attribute on parameters block
 
 // Set from <vivax .../> element:
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
@@ -47,7 +47,7 @@ double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
 double muReleaseHypnozoite = numeric_limits<double>::signaling_NaN();   // units: days
 double sigmaReleaseHypnozoite = numeric_limits<double>::signaling_NaN();
 double minReleaseHypnozoite;    // units: days
-TimeStep bloodStageProtectionLatency;
+SimTime bloodStageProtectionLatency;
 double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
 double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
 double pEventPrimA = numeric_limits<double>::signaling_NaN(),
@@ -92,12 +92,12 @@ int sampleNHypnozoites(){
 }
 
 // time to hypnozoite release after initial release:
-TimeStep sampleReleaseDelay(){
+SimTime sampleReleaseDelay(){
     double delay;       // in days
     do{
         delay = util::random::log_normal( muReleaseHypnozoite, sigmaReleaseHypnozoite );
     }while( delay < minReleaseHypnozoite );
-    return TimeStep::fromDaysNearest( delay );
+    return sim::roundToTSFromDays( delay );
 }
 
 
@@ -107,13 +107,13 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
         primaryHasStarted( false ),
         hadEvent( false )
 {
-    set<TimeStep> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
+    set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
     // primary blood stage plus hypnozoites (relapses)
-    releases.insert( TimeStep::simulation + latentp );
+    releases.insert( sim::now() + latentP );
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
-        TimeStep timeToRelease = TimeStep::simulation + latentp + sampleReleaseDelay();
+        SimTime timeToRelease = sim::now() + latentP + sampleReleaseDelay();
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
@@ -126,7 +126,7 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     if( sampleHost == host && sampleBrood == 0 ){
         sampleBrood = this;
         cout << "New sample brood";
-        for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+        for( vector<SimTime>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
             cout << '\t' << *it;
         cout << endl;
     }
@@ -156,20 +156,20 @@ VivaxBrood::VivaxBrood( istream& stream ){
 
 
 VivaxBrood::UpdResult VivaxBrood::update(){
-    if( bloodStageClearDate == TimeStep::simulation ){
+    if( bloodStageClearDate == sim::now() ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
         // protect against new blood-stage infections for a short time.
     }
     
     UpdResult result;
-    while( releaseDates.size() > 0 && releaseDates.back() == TimeStep::simulation ){
+    while( releaseDates.size() > 0 && releaseDates.back() == sim::now() ){
         releaseDates.pop_back();
         
 #ifdef WHVivaxSamples
         if( sampleBrood == this ){
-            cout << "Time\t" << TimeStep::simulation;
-            for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+            cout << "Time\t" << sim::now();
+            for( vector<SimTime>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
                 cout << '\t' << *it;
             cout << endl;
         }
@@ -179,7 +179,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         // protects against a newly released Hypnozoite
         //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
         if( bloodStageClearDate + bloodStageProtectionLatency
-            >= TimeStep::simulation ) continue;
+            >= sim::now() ) continue;
         
         if( !primaryHasStarted ){
             primaryHasStarted = true;
@@ -188,7 +188,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         result.newBS = true;
         
         double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
-        bloodStageClearDate = TimeStep::simulation + TimeStep::fromDaysNearest( lengthDays );
+        bloodStageClearDate = sim::now() + sim::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
     }
@@ -201,16 +201,16 @@ void VivaxBrood::treatmentBS(){
     // Blood stage treatment: clear both asexual and sexual parasites from the
     // blood. NOTE: we assume infections removed via treatment do not leave
     // protective immunity since the patient was unable to self-clear.
-    bloodStageClearDate = TimeStep::never;
+    bloodStageClearDate = sim::never();
 }
 
 void VivaxBrood::treatmentLS(){
     releaseDates.clear();       // 100% clearance
     
     /* partial clearance code, in case of need:
-    vector<TimeStep> survivingZoites;
+    vector<SimTime> survivingZoites;
     survivingZoites.reserve( releaseDates.size() );   // maximum size we need
-    for( vector<TimeStep>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it ){
+    for( vector<SimTime>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it ){
         if( !random::bernoulli( pClearEachHypnozoite ) ){
             survivingZoites.push_back( *it );    // copy            
         }
@@ -243,7 +243,7 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito(TimeStep ageOfHuman, double tbvFactor) const{
+double WHVivax::probTransmissionToMosquito(SimTime ageOfHuman, double tbvFactor) const{
     for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
@@ -391,17 +391,17 @@ bool WHVivax::optionalPqTreatment(){
     }
     return false;       // didn't use PQ
 }
-void WHVivax::treatSimple(TimeStep tsLiver, TimeStep tsBlood){
+void WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
     //TODO: this should be implemented properly (allowing effects on next
     // update instead of now)
     
-    // liver-stage treatment is probably via "Primaquine" option, if at all
-    if( tsLiver.asInt() != 0 ){
+    // liver-stage treatment is only via "Primaquine" option, if at all
+    if( timeLiver != sim::zero() ){
         if( pReceivePQ > 0.0 ){
             throw util::xml_scenario_error("simple treatment for vivax liver "
             "stages is incompatible with case-management Primaquine option");
         }
-        if( tsLiver.asInt() != -1 )
+        if( timeLiver >= sim::zero() )
             throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
         for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
             it->treatmentLS();
@@ -409,12 +409,12 @@ void WHVivax::treatSimple(TimeStep tsLiver, TimeStep tsBlood){
     }
     
     // there probably will be blood-stage treatment
-    if( tsBlood.asInt() == -1 ){
+    if( timeBlood < sim::zero() ){
         for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
             it->treatmentBS();
         }
     }else{
-        if( tsBlood.asInt() != 0 )
+        if( timeBlood != sim::zero() )
             throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
     }
 }
@@ -450,11 +450,12 @@ char const*const not_impl = "feature not available in Vivax model";
 void WHVivax::treatPkPd(size_t schedule, size_t dosages, double age){
     throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 double WHVivax::getTotalDensity() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
-double WHVivax::getCumulativeh() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
-double WHVivax::getCumulativeY() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getCumulative_h() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
+double WHVivax::getCumulative_Y() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
-    latentp = TimeStep(  scenario.getModel().getParameters().getLatentp());
+    //FIXME(schema): should be entered in days
+    latentP = sim::fromTS(  scenario.getModel().getParameters().getLatentp() );
     if( !scenario.getModel().getVivax().present() )
         throw util::xml_scenario_error( "no vivax model description in scenario XML" );
     const scnXml::Vivax& elt = scenario.getModel().getVivax().get();
@@ -464,7 +465,7 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& sc
     muReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMu();
     sigmaReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getSigma();
     minReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMin();
-    bloodStageProtectionLatency = TimeStep::fromDaysNearest( elt.getBloodStageProtectionLatency().getValue() );
+    bloodStageProtectionLatency = sim::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
     
