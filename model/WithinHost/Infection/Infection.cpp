@@ -30,10 +30,10 @@ double Infection::invCumulativeYstar;
 double Infection::invCumulativeHstar;
 double Infection::alpha_m;
 double Infection::decayM;
-TimeStep Infection::latentp;
+SimTime Infection::latentP;
 
-void Infection::init (const OM::Parameters& parameters, int latentP) {
-    latentp = TimeStep(latentP);
+void Infection::init (const OM::Parameters& parameters, SimTime latP) {
+    latentP = latP;
     // calculate inverses here, so we can use multiplication later (faster):
     invCumulativeYstar = 1.0 / parameters[Parameters::CUMULATIVE_Y_STAR];
     invCumulativeHstar = 1.0 / parameters[Parameters::CUMULATIVE_H_STAR];
@@ -56,7 +56,7 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
     dH=1.0;
   } else {
     dH=1.0 / (1.0 + (cumulativeh-1.0) * invCumulativeHstar);
-    dY=1.0 / (1.0 + (cumulativeY-_cumulativeExposureJ) * invCumulativeYstar);
+    dY=1.0 / (1.0 + (cumulativeY - m_cumulativeExposureJ) * invCumulativeYstar);
   }
   dA = 1.0 - alpha_m * exp(-decayM * ageInYears);
   double ret = std::min(dY*dH*dA, 1.0);
@@ -65,17 +65,17 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
 }
 
 
-Infection::Infection (istream& stream) : _startdate(TimeStep::never) {
-    _startdate & stream;
-    proteome_ID & stream;
-    _density & stream;
-    _cumulativeExposureJ & stream; 
+Infection::Infection (istream& stream) : m_startDate(sim::never()) {
+    m_startDate & stream;
+    m_proteome_ID & stream;
+    m_density & stream;
+    m_cumulativeExposureJ & stream;
 }
 void Infection::checkpoint (ostream& stream) {
-    _startdate & stream;
-    proteome_ID & stream;
-    _density & stream;
-    _cumulativeExposureJ & stream; 
+    m_startDate & stream;
+    m_proteome_ID & stream;
+    m_density & stream;
+    m_cumulativeExposureJ & stream;
 }
 
 } }

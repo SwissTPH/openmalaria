@@ -26,6 +26,8 @@
 #include <iostream>
 #include <cassert>
 
+class UnittestUtil;
+
 namespace OM {
 
 /******************************************************************************
@@ -193,6 +195,7 @@ private:
     static SimTime sim_time;
     
     friend class Simulator;
+    friend class ::UnittestUtil;
 };
 
 }

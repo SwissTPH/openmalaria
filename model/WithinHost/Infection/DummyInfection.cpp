@@ -44,17 +44,17 @@ void DummyInfection::init () {
 DummyInfection::DummyInfection (uint32_t protID) :
     CommonInfection(protID)
 {
-    _density=16;	// increased by DH to avoid zeros in initialKappa
+    m_density=16;	// increased by DH to avoid zeros in initialKappa
 }
 
-bool DummyInfection::updateDensity(double survivalFactor, int ageDays) {
+bool DummyInfection::updateDensity( double survivalFactor, SimTime bsAge ){
     const double GROWTH_RATE = 8.0;
     const double PARASITE_THRESHOLD = 1;
     
-    _density = (mod_nn(int(_density*GROWTH_RATE), 20000)) * survivalFactor;
-    _cumulativeExposureJ += _density;
+    m_density = (mod_nn(int(m_density*GROWTH_RATE), 20000)) * survivalFactor;
+    m_cumulativeExposureJ += m_density;
     
-    if (_density < PARASITE_THRESHOLD) {
+    if (m_density < PARASITE_THRESHOLD) {
         return true;
     } else {
         return false;

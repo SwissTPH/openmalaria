@@ -278,7 +278,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
     // S[i] (                      "                      acquired and variant-specific immune response)
     // We're using multiplication instead of power for speed here. Confirm exponent:
     BOOST_STATIC_ASSERT( kappa_c == 3 );
-    double base = _density/Pstar_c;
+    double base = m_density/Pstar_c;
     double Sc = 1.0 / (1.0 + base*base*base);
 
     //double Sm = ((1-beta)/(1+pow(getVariantTranscendingSummation()/Pstar_m, kappa_m)))+beta
@@ -313,7 +313,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
 	
 	if( i < variants.size() ){
             double immune_response_escape = m[i]*S[i]*Sc*Sm;
-	    variants[i].updateGrowthRateMultiplier( p_i*_density, immune_response_escape );
+	    variants[i].updateGrowthRateMultiplier( p_i*m_density, immune_response_escape );
 	} else {
 	    // Molineaux paper equation 1
 	    // newPi: Variant density at t = t + 2
@@ -321,7 +321,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
 	    // which will not switch to another variant + the ones from other
 	    // variants switching to this variant) * this variant multiplication
 	    // factor * the probability that the parasites escape control by immune response.
-	    double newPi = ( sProb*p_i*_density )*m[i]*S[i]*Sc*Sm;
+	    double newPi = ( sProb*p_i*m_density )*m[i]*S[i]*Sc*Sm;
 
 	    // Molineaux paper equation 2
 	    if (newPi<1.0e-5)
@@ -364,28 +364,28 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ag
     return P;
 }
 
-bool MolineauxInfection::updateDensity(double survivalFactor, int ageDays) {
-    if (ageDays == 0){
-        _density = variants[0].P;
+bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge ){
+    if (bsAge == sim::zero()){
+        m_density = variants[0].P;
     }else{
         double newDensity = 0.0;
         for (size_t i=0;i<variants.size();i++){
-            newDensity += variants[i].updateDensity( survivalFactor, ageDays );
+            newDensity += variants[i].updateDensity( survivalFactor, bsAge.inDays() );
         }
-        _density = newDensity;
+        m_density = newDensity;
     }
 
     // Note: normally this is multiplied by the 
-    _cumulativeExposureJ += _density;
+    m_cumulativeExposureJ += m_density;
 
-    if( _density <= 1.0e-5 ){
+    if( m_density <= 1.0e-5 ){
         return true;    // infection goes extinct
     }
     
     // if the infection isn't extinct and t = t+2
     // then the growthRateMultiplier is adapted for t+3 and t+4
-    if( mod_nn(ageDays, 2) == 0 ){
-        updateGrowthRateMultiplier(ageDays);
+    if( mod_nn(bsAge.inDays(), 2) == 0 ){
+        updateGrowthRateMultiplier(bsAge.inDays());
     }
     return false;
 }
@@ -413,7 +413,7 @@ double MolineauxInfection::getVariantTranscendingSummation(int ageDays) {
 
     //Molineaux paper equation 8
     //We could use min here, but it seems that min has problems with static const double C
-    laggedPc[index] = static_cast<float>(_density < C ? _density:C);
+    laggedPc[index] = static_cast<float>(m_density < C ? m_density:C);
 
     return variantTranscendingSummation;
 }

@@ -85,7 +85,9 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
     double detectionLimit=scenario.getMonitoring().getSurveys().getDetectionLimit()*densitybias;
     Diagnostic::default_.setDeterministic( detectionLimit );
     
-    Infection::init( parameters, scenario.getModel().getParameters().getLatentp() );
+    //FIXME(schema): input should be in days
+    SimTime latentP = sim::fromTS(scenario.getModel().getParameters().getLatentp());
+    Infection::init( parameters, latentP );
 }
 
 

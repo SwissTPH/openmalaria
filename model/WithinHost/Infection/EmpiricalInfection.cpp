@@ -159,17 +159,18 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
 
 // TODO: TS needs to improve documentation of this function.
 const int EI_MAX_SAMPLES = 10;
-bool EmpiricalInfection::updateDensity (double survivalFactor, int ageDays) {
+bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge ){
   //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
   # define L _laggedLogDensities
   
-  if (ageDays >= _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
+  if (bsAge.inDays() >= _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
     return true;	// cut-off point
   
   // constraints to ensure the density is defined and not exploding
   double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
   double amplificationPerCycle;
   double localDensity;	// density before scaling by _overallMultiplier
+  size_t ageDays = bsAge.inDays();
   for (int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
     double logDensity;
     for (int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
@@ -211,11 +212,11 @@ bool EmpiricalInfection::updateDensity (double survivalFactor, int ageDays) {
   _laggedLogDensities[1]=_laggedLogDensities[0];
   _laggedLogDensities[0]=log(localDensity);
   
-  _density = localDensity;
-  _cumulativeExposureJ += _density;
+  m_density = localDensity;
+  m_cumulativeExposureJ += m_density;
   
-  // Note: here use a positive test for survival, since if _density became an NaN tests against it will return false:
-  if (_density > _extinctionLevel)
+  // Note: here use a positive test for survival, since if m_density became an NaN tests against it will return false:
+  if (m_density > _extinctionLevel)
     return false;	// Still parasites; infection didn't go extinct
   else
     return true;	// parasites are extinct; infection will be removed from model

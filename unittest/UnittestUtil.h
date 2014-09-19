@@ -51,6 +51,10 @@ namespace OM {
 
 class UnittestUtil {
 public:
+    static void initTime(){
+        // we could just use zero, but we may spot more errors by using some weird number
+        sim::sim_time = sim::fromYears(83.2591);
+    }
     // Initialise surveys, to the minimum required not to crash
     static void initSurveys(){
         scnXml::OptionSet opts;
@@ -116,7 +120,7 @@ public:
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     static void Infection_init_NaN () {
-	Infection::latentp = TimeStep(0);
+	Infection::latentP = sim::zero();
 	Infection::invCumulativeYstar = numeric_limits<double>::quiet_NaN();
 	Infection::invCumulativeHstar = numeric_limits<double>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
@@ -124,7 +128,7 @@ public:
     }
     static void Infection_init_5day () {
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
-	Infection::latentp = TimeStep(3);
+	Infection::latentP = sim::fromDays(15);
 	Infection::invCumulativeYstar = 1.0 / 68564384.7102;
 	Infection::invCumulativeHstar = 1.0 / 71.676733;
 	Infection::alpha_m = 1.0 - exp(- 2.411434);
@@ -133,7 +137,7 @@ public:
     static void Infection_init_1day () {
         // don't set immunity vars: currently they're not used by unittest
         Infection_init_NaN();
-        Infection::latentp = TimeStep(15);      // probably 15 days is not correct, but it'll do
+        Infection::latentP = sim::fromDays(15);
     }
     
     static void DescriptiveInfection_init () {

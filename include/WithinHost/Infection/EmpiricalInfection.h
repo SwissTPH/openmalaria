@@ -53,7 +53,7 @@ public:
   /// This was used for independant parameterization.
   void setPatentGrowthRateMultiplier(double multiplier);
   
-  virtual bool updateDensity (double survivalFactor, int ageDays);
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
   
 protected:
     virtual void checkpoint (ostream& stream);

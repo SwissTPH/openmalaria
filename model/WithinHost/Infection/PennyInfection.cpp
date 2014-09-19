@@ -193,8 +193,9 @@ PennyInfection::PennyInfection(uint32_t protID):
 }
 
 
-bool PennyInfection::updateDensity(double survivalFactor, int ageDays) {
-    if( ageDays == 0 ){
+bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge ){
+    int ageDays = bsAge.inDays();       // lazy
+    if( bsAge == sim::zero() ){
         // assign initial densities (Y circulating, X sequestered)
         size_t today = mod_nn(ageDays, delta_C);
         
@@ -204,7 +205,7 @@ bool PennyInfection::updateDensity(double survivalFactor, int ageDays) {
             cirDensities[today] = exp(random::gauss(mu_Y,sigma_Y));
         }
         
-        _density = cirDensities[today];
+        m_density = cirDensities[today];
         today = mod_nn(ageDays, delta_V);
         
         if(update_density_gamma){
@@ -279,14 +280,14 @@ bool PennyInfection::updateDensity(double survivalFactor, int ageDays) {
         
         size_t todayC = mod_nn(ageDays, delta_C);
         cirDensities[todayC] = cirDensity_new;
-        _density = cirDensities[todayC];
+        m_density = cirDensities[todayC];
         
         size_t todayV = mod_nn(ageDays, delta_V);
         seqDensities[todayV] = seqDensity_new;
     }
     
     // used for immunity across infections
-    _cumulativeExposureJ += _density;
+    m_cumulativeExposureJ += m_density;
     
     // if we haven't already exited this funciton, the infection is not extinct (so return false)
     return false;

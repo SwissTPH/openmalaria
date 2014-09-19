@@ -27,7 +27,7 @@ namespace OM { namespace WithinHost {
 // Max duration of sample data for an infection in intervals. Simulated
 // infections may last longer; in this case the last sample data is repeated
 // until the infection terminates.
-const TimeStep maxDuration( 83 );
+const size_t maxDurationTS = 83;
 const int numDurations = 84;    // Above plus one (include a category for 0)
 
 //The maximum parasite density we allow per DescriptiveInfection. Higher values are set to maxDens.
@@ -70,10 +70,10 @@ public:
     /** Returns true when age reaches the pre-determined duration (i.e. when
     * this infection terminates). */
     bool expired () {
-        return TimeStep::simulation > _startdate+_duration;
+        return sim::now() > m_startDate + m_duration;
     }
     
-    /** Determines parasite density of an individual infection (5-day timestep
+    /** Determines parasite density of an individual infection (5-day time step
      * update)
      *
      * @param ageInYears Age (of human)
@@ -96,7 +96,7 @@ public:
      * normal distribution using parameters for 53 patients from Georgia.
      * Mean log duration of an infection values from AJTM p.9 eq.5.
      */
-    static TimeStep infectionDuration();
+    static SimTime infectionDuration();
     
     /// Includes the effect of attenuated infections by SP concentrations, when using IPT
     virtual void IPTattenuateAsexualDensity () {}
@@ -105,7 +105,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
     // Arbitrary predetermined maximum duration of the infection
-    TimeStep _duration; 
+    SimTime m_duration; 
     
     bool notPrintedMDWarning;
     

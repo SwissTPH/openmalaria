@@ -40,7 +40,7 @@ public:
     
     static void init ();
     
-    virtual bool updateDensity (double survivalFactor, int ageDays);
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
 };
 
 } }

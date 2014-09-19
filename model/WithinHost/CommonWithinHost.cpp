@@ -132,7 +132,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
-    for( int day = 0, days = TimeStep::interval; day < days; ++day ){
+    for( SimTime now = sim::now(), end = sim::now() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel->medicate( ageInYears );
         
@@ -147,7 +147,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
                     (*inf)->immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY) *
                     pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
                 // update, may result in termination of infection:
-                expires = (*inf)->update(survivalFactor, day);
+                expires = (*inf)->update(survivalFactor, now);
             }
             
             if( expires ){
@@ -169,8 +169,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
         pkpdModel->decayDrugs ();
         
         if( drugMon.is_open() && TimeStep::interventionPeriod >= TimeStep(0) ){
-            drugMon << TimeStep::interventionPeriod.inDays() + day;
-            drugMon << '\t' << sumLogDens;
+            drugMon << now << '\t' << sumLogDens;
             map<string,double> concentrations;
             pkpdModel->getConcentrations( concentrations );
             foreach( string& drugCode, drugMonCodes ){
