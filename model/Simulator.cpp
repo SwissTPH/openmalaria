@@ -136,19 +136,19 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
     SimTime humanWarmupLength = sim::maxHumanAge();
-    if( humanWarmupLength < sim::fromTS(population->_transmissionModel->minPreinitDuration()) ){
+    if( humanWarmupLength < population->_transmissionModel->minPreinitDuration() ){
         cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
         cerr << ") shorter than length of warm-up requested by" << endl;
         cerr << "transmission model ("
             << population->_transmissionModel->minPreinitDuration().inYears();
         cerr << "). Transmission may be unstable; perhaps use forced" << endl;
         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
-        humanWarmupLength = sim::fromTS(population->_transmissionModel->minPreinitDuration());
+        humanWarmupLength = population->_transmissionModel->minPreinitDuration();
     }
     humanWarmupLength = sim::fromYears( ceil(humanWarmupLength.inYears()) );
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
-        + sim::fromTS(population->_transmissionModel->expectedInitDuration())
+        + population->_transmissionModel->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
         + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
     assert( totalSimDuration.ts() < TimeStep::future && totalSimDuration.ts() + TimeStep::never < TimeStep(0) );
@@ -205,7 +205,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         if (phase == ONE_LIFE_SPAN) {
             simPeriodEnd = humanWarmupLength;
         } else if (phase == TRANSMISSION_INIT) {
-            SimTime iterate = sim::fromTS(population->_transmissionModel->initIterate());
+            SimTime iterate = population->_transmissionModel->initIterate();
             if( iterate > sim::zero() ){
                 simPeriodEnd += iterate;
                 --phase;        // repeat phase

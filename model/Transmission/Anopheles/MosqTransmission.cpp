@@ -41,7 +41,7 @@ MosqTransmission::MosqTransmission() :
         EIPDuration(0),
         N_v_length(0),
         minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
-        timestep_N_v0(0.0)
+        timeStep_N_v0(0.0)
 {
     // Warning: don't allocate memory here. The whole instance will be
     // bit-copied (see species.resize ... line in VectorModel constructor), so
@@ -234,7 +234,7 @@ double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
     // (S_v can be calculated before N_v).
     emergence->updateStats( d, tsP_dif, S_v[t] );
     
-    timestep_N_v0 += newAdults;
+    timeStep_N_v0 += newAdults;
     
     if( printDebug ){
         cerr<<"day "<<d<<":\temergence "<<newAdults<<",\tN_v "<<N_v[t]<<",\tS_v "<<S_v[t]<<endl;

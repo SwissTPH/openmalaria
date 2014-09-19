@@ -111,7 +111,7 @@ void VectorModel::ctsNetInsecticideContent (const Population& population, ostrea
 //     double meanVar = 0.0;
 //     int n = 0;
 //     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
 //             ++n;
 //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
 //         }
@@ -306,27 +306,27 @@ void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
 #endif
 
 
-TimeStep VectorModel::minPreinitDuration () {
+SimTime VectorModel::minPreinitDuration () {
     if ( interventionMode == forcedEIR ) {
-        return TimeStep(0);
+        return sim::zero();
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return TimeStep::fromYears( 55 );
+    return sim::fromYears( 55 );
 }
-TimeStep VectorModel::expectedInitDuration (){
-    return TimeStep::fromYears( 1 );
+SimTime VectorModel::expectedInitDuration (){
+    return sim::fromYears( 1 );
 }
 
-TimeStep VectorModel::initIterate () {
+SimTime VectorModel::initIterate () {
     if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
-        return TimeStep(0); // no initialization to do
+        return sim::zero(); // no initialization to do
     }
     if( initIterations < 0 ){
         assert( interventionMode = dynamicEIR );
         simulationMode = dynamicEIR;
-        return TimeStep(0);
+        return sim::zero();
     }
     
     ++initIterations;
@@ -346,16 +346,16 @@ TimeStep VectorModel::initIterate () {
     // to be enough (but I may be wrong).
     if( needIterate )
         // stabilization + 5 years data-collection time:
-        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);
+        return sim::fromYears( 1 ) + sim::fromYears(5);
     else
-        return TimeStep::fromYears( 1 );
+        return sim::fromYears( 1 );
 }
 
 double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
     PerHost& host = human.perHostTransmission;
     host.update( human );
     if (simulationMode == forcedEIR){
-        return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
+        return initialisationEIR[mod_nn(sim::now().indexTS(), sim::oneYear().indexTS())]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{
         assert( simulationMode == dynamicEIR );

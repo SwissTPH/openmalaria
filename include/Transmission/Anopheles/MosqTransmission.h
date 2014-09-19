@@ -97,11 +97,11 @@ public:
     //@{
     /// Reset per-time-step statistics before running time-step updates
     inline void resetTSStats() {
-        timestep_N_v0 = 0.0;
+        timeStep_N_v0 = 0.0;
     }
     /// Get mean emergence per day during last time-step
     inline double getLastN_v0 () const{
-        return timestep_N_v0 / TimeStep::interval;
+        return timeStep_N_v0 / sim::oneTS().inDays();
     }
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
@@ -139,7 +139,7 @@ public:
         S_v & stream;
         fArray & stream;
         ftauArray & stream;
-        timestep_N_v0 & stream;
+        timeStep_N_v0 & stream;
     }
     
     /** @brief Emergence model
@@ -195,7 +195,7 @@ private:
      *
      * Values at index ((d-1) mod N_v_length) are used to derive the state of
      * the population on day d. The state during days (t×(I-1)+1) through (t×I)
-     * where t is TimeStep::simulation and I is TimeStep::interval is what
+     * where t is sim::now() and I is sim::oneTS().inDays() is what
      * drives the transmission at time-step t.
      * 
      * These arrays should be checkpointed. */
@@ -241,7 +241,7 @@ private:
     //@}
     
     /** Variables tracking data to be reported. */
-    double timestep_N_v0;
+    double timeStep_N_v0;
     
     friend class ::MosqLifeCycleSuite;
 };

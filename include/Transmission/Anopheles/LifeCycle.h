@@ -219,7 +219,7 @@ private:
      * We don't store the number at age θ_l, since these are pupae.
      *
      * Unlike ϒ arrays, this only stores the state of the system from the
-     * last/this timestep before/after update. */
+     * last/this time step before/after update. */
     vector<double> numLarvae;
     
     /** Number of new pupae per time-step (ϒ_e). Units: pupae.

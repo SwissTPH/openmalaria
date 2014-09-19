@@ -231,20 +231,22 @@ void TransmissionModel::summarize () {
 
     survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
     inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
-
-    double duration = (TimeStep::simulation-lastSurveyTime).asInt();
+    
+    double duration = (sim::now() - lastSurveyTime) / sim::oneTS();
     if( duration == 0.0 ){
         if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
             throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
         }
         duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
     }
+    //TODO: we should really use bites-per-day or per year instead of per time
+    // step. But we also can't just change an existing measure.
     survey.setInputEIR (surveyInputEIR / duration);
     survey.setSimulatedEIR (surveySimulatedEIR / duration);
 
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
-    lastSurveyTime = TimeStep::simulation;
+    lastSurveyTime = sim::now();
 }
 
 

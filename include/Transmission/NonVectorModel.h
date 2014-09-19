@@ -42,9 +42,9 @@ public:
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   
-  virtual TimeStep minPreinitDuration ();
-  virtual TimeStep expectedInitDuration ();
-  virtual TimeStep initIterate ();
+  virtual SimTime minPreinitDuration ();
+  virtual SimTime expectedInitDuration ();
+  virtual SimTime initIterate ();
   
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);
@@ -99,7 +99,7 @@ private:
   
   //! The duration of sporogony in time steps
   // doesn't need checkpointing
-  TimeStep nspore;
+  SimTime nSpore;
   //@}
   
   /** EIR per time interval during the intervention period. Value at index

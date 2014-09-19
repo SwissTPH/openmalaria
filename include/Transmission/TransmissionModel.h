@@ -128,15 +128,15 @@ public:
    * 
    * Should include time for both data collection and to give the data
    * collected time to stabilize. */
-  virtual TimeStep minPreinitDuration () =0;
+  virtual SimTime minPreinitDuration () =0;
   /** Length of time that initIterate() is most likely to add: only used to
    * estimate total runtime. */
-  virtual TimeStep expectedInitDuration () =0;
+  virtual SimTime expectedInitDuration () =0;
   /** Check whether transmission has been sufficiently well initialized. If so,
    * switch to dynamic transmission mode. If not, try to improve the situation
    * and return the length of sim-time before this should be called again.
    */
-  virtual TimeStep initIterate ()=0;
+  virtual SimTime initIterate ()=0;
   
   /** Needs to be called each step of the simulation before Human::update().
    *
@@ -222,7 +222,7 @@ protected:
    * 
    * Length: time-steps per year
    *
-   * Index mod(TimeStep::simulation, TimeStep::stepsPerYear) corresponds to the EIR
+   * Index mod(sim::now().indexTS(), stepsPerYear) corresponds to the EIR
    * acting on the current time-step: i.e. total inoculations since the
    * previous time-step.
    * Since time-step 0 is not calculated, initialisationEIR[0] is actually the
@@ -232,12 +232,14 @@ protected:
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */
+  //TODO: due to index units, it may be more efficient to use an array of
+  // length 365 even though only 1/5th entries would be used on 5-day time step
   vector<double> initialisationEIR; 
 
   /** The probability of infection of a mosquito at each bite.
    * It is calculated as the average infectiousness per human.
    * 
-   * The value in index t mod Y (where t is TimeStep::simulation and Y is
+   * The value in index t mod Y (where t is sim::now().indexTS() and Y is
    * TimeStep::stepsPerYear) is for this time-step respectively (size)
    * time-steps ago: the latter during human updates since this value is not
    * updated until the end of the time-step update. The value in index
@@ -282,7 +284,7 @@ private:
    * Units: infectious bites/adult/inter-survey period. */
   double surveySimulatedEIR;
   /** Time of last survey. */
-  TimeStep lastSurveyTime;
+  SimTime lastSurveyTime;
   
   /// For "num transmitting humans" cts output.
   int numTransmittingHumans;

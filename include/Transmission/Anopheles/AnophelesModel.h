@@ -118,7 +118,7 @@ public:
     //@}
 
     
-    ///@brief Functions called as part of usual per-timestep operations
+    ///@brief Functions called as part of usual per-time-step operations
     //@{
     /** Called per time-step. Does most of calculation of EIR.
      *

@@ -159,6 +159,9 @@ public:
     /** Duration zero. */
     static inline SimTime zero(){ return SimTime(0); }
     
+    /** One day. */
+    static inline SimTime oneDay(){ return SimTime(1); }
+    
     /** One time step (currently either one or five days). */
     static inline SimTime oneTS(){ return SimTime(util::TimeStep::interval); }
     
