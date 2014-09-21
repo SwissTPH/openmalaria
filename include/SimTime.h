@@ -43,7 +43,7 @@ namespace OM {
  *****************************************************************************/
 class SimTime {
     /** Construct, from a time in days. */
-    explicit SimTime( int32_t days ) : d(days) {}
+    explicit SimTime( int days ) : d(days) {}
     
 public:
     /// Number of days in a year; defined as 365 (leap years are not simulated).
@@ -57,13 +57,13 @@ public:
     //one does with SimTimes (besides comparing with other SimTimes).
     //@{
     /// Get raw value (currently days; not guaranteed not to change). Same value as checkpointed.
-    inline int32_t raw() const{ return d; }
+    inline int raw() const{ return d; }
     
     /// Convert to TimeStep
     inline util::TimeStep ts() const{ return util::TimeStep::fromDays(d); }
     
     /// Get length of time in days. Currently this is simple no-op get.
-    inline int32_t inDays() const{ return d; }
+    inline int inDays() const{ return d; }
     
     /// Convert to years
     inline double inYears() const{ return d * (1.0 / DAYS_IN_YEAR); }
@@ -86,14 +86,14 @@ public:
         return SimTime( d + rhs.d );
     }
     // scale by an integer
-    inline SimTime operator*( int32_t scalar )const {
+    inline SimTime operator*( int scalar )const {
         return SimTime( d * scalar );
     }
     // scale by a double, rounding to nearest
     inline SimTime operator*( double scalar )const {
-        return SimTime( static_cast<int32_t>(d * scalar + 0.5) );
+        return SimTime( static_cast<int>(d * scalar + 0.5) );
     }
-    // Divide by another SimTime; result is unitless. Note integer result.
+    // Divide by another SimTime; result is unitless. Note integer division.
     inline int operator/( const SimTime rhs )const{
         return d / rhs.d;
     }
@@ -136,7 +136,7 @@ public:
     }
     
 private:
-    int32_t d;      // time in days
+    int d;      // time in days
     
     friend std::ostream& operator<<( std::ostream&, const SimTime );
     friend SimTime mod_nn( const SimTime, const SimTime );
@@ -186,10 +186,10 @@ public:
     static inline SimTime never(){ return SimTime(); }
     
     /** Duration in days. Should be fast (currently no conversion required). */
-    static inline SimTime fromDays(int32_t days){ return SimTime(days); }
+    static inline SimTime fromDays(int days){ return SimTime(days); }
     
     /** Convert from a whole number of years. */
-    static inline SimTime fromYearsI(int32_t years){
+    static inline SimTime fromYearsI(int years){
         return SimTime(SimTime::DAYS_IN_YEAR * years);
     }
     
@@ -204,7 +204,7 @@ public:
     }
     
     /** Convert. */
-    static inline SimTime fromTS(int32_t ts){ return one_step * ts; }
+    static inline SimTime fromTS(int ts){ return oneTS() * ts; }
     
     /** Round to the nearest time-step, where input is in days. */
     static inline SimTime roundToTSFromDays(double days){
