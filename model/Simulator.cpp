@@ -51,13 +51,42 @@ bool Simulator::startedFromCheckpoint;  // static
 
 const char* CHECKPOINT = "checkpoint";
 
+enum Phase {
+    STARTING_PHASE = 0,
+    /** Run the simulation using the equilibrium inoculation rates over one
+     * complete lifespan (sim::maxHumanAge()) to reach immunological
+     * equilibrium in all age classes. Don't report any events. */
+    ONE_LIFE_SPAN,
+    /** Initialisation/fitting phase for transmission models. */
+    TRANSMISSION_INIT,
+    //!  This procedure starts with the current state of the simulation 
+    /*! It continues updating    assuming:
+        (i)         the default (exponential) demographic model
+        (ii)        the entomological input defined by the EIRs in intEIR()
+        (iii)       the intervention packages defined in Intervention()
+        (iv)        the survey times defined in Survey() */
+    MAIN_PHASE,
+    END_SIM         // should have largest value of all enumerations
+};
+
+
 // ———  SimTime stuff  ———
 
 SimTime sim::sim_time;
 SimTime sim::one_step;
+SimTime sim::max_human_age;
+size_t sim::steps_per_year;
+double sim::years_per_step;
+
+void sim::init( int days_per_step, double max_age_years ){
+    sim::one_step = sim::fromDays( days_per_step );
+    sim::steps_per_year = sim::oneYear() / sim::oneTS();
+    sim::years_per_step = 1.0 / sim::steps_per_year;
+    sim::max_human_age = sim::fromTS( max_age_years * steps_per_year );
+}
 
 
-// -----  Set-up & tear-down  -----
+// ———  Set-up & tear-down  ———
 
 Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     simPeriodEnd(sim::zero()),
@@ -73,7 +102,8 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     
     // 1) elements with no dependencies on other elements initialised here:
     OM::TimeStep::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
-    sim::one_step = sim::fromDays( model.getParameters().getInterval() );
+    sim::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
+    
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
     
@@ -115,24 +145,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
 }
 
 
-// -----  run simulations  -----
-enum Phase {
-    STARTING_PHASE = 0,
-    /*! Run the simulation using the equilibrium inoculation rates over one complete
-        lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
-        classes. Don't report any events */
-    ONE_LIFE_SPAN,
-    /** Initialisation/fitting phase for transmission models. */
-    TRANSMISSION_INIT,
-    //!  This procedure starts with the current state of the simulation 
-    /*! It continues updating    assuming:
-        (i)         the default (exponential) demographic model
-        (ii)        the entomological input defined by the EIRs in intEIR()
-        (iii)       the intervention packages defined in Intervention()
-        (iv)        the survey times defined in Survey() */
-    MAIN_PHASE,
-    END_SIM         // should have largest value of all enumerations
-};
+// ———  run simulations  ———
 
 void Simulator::start(const scnXml::Monitoring& monitoring){
     TimeStep::simulation = TimeStep( 0 );
@@ -266,7 +279,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
 }
 
 
-// -----  checkpointing: set up read/write stream  -----
+// ———  checkpointing: set up read/write stream  ———
 
 int readCheckpointNum () {
     ifstream checkpointFile;
@@ -361,7 +374,7 @@ void Simulator::readCheckpoint() {
 }
 
 
-//   -----  checkpointing: Simulation data  -----
+// ———  checkpointing: Simulation data  ———
 
 void Simulator::checkpoint (istream& stream, int checkpointNum) {
     try {

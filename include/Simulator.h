@@ -64,23 +64,6 @@ private:
     // Data
     SimTime simPeriodEnd;
     SimTime totalSimDuration;
-    enum Phase {
-	STARTING_PHASE = 0,
-	/*! Run the simulation using the equilibrium inoculation rates over one complete
-	    lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
-	    classes. Don't report any events */
-	ONE_LIFE_SPAN,
-	/** Initialisation/fitting phase for transmission models. */
-	TRANSMISSION_INIT,
-	//!  This procedure starts with the current state of the simulation 
-	/*! It continues updating    assuming:
-	    (i)		the default (exponential) demographic model
-	    (ii)	the entomological input defined by the EIRs in intEIR()
-	    (iii)	the intervention packages defined in Intervention()
-	    (iv)	the survey times defined in Survey() */
-	MAIN_PHASE,
-	END_SIM		// should have largest value of all enumerations
-    };
     int phase;  // only need be a class member because value is checkpointed
     
     auto_ptr<Population> population;

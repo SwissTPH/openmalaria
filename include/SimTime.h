@@ -160,9 +160,16 @@ public:
      */
     static inline SimTime now(){ return sim_time; }
     
-    static inline SimTime maxHumanAge(){
-        return fromTS(util::TimeStep::maxAgeIntervals);
-    }
+    /** One time step (currently either one or five days). */
+    static inline SimTime oneTS(){ return one_step; }
+    
+    /** The number of time steps in one year. */
+    static inline size_t stepsPerYear(){ return steps_per_year; }
+    
+    /** A cached value: one year divided by one time step. */
+    static inline double yearsPerStep(){ return years_per_step; }
+    
+    static inline SimTime maxHumanAge(){ return max_human_age; }
     //@}
     
     ///@brief Constructors, for convenience
@@ -172,9 +179,6 @@ public:
     
     /** One day. */
     static inline SimTime oneDay(){ return SimTime(1); }
-    
-    /** One time step (currently either one or five days). */
-    static inline SimTime oneTS(){ return one_step; }
     
     /** One year. See SimTime::DAYS_IN_YEAR. */
     static inline SimTime oneYear(){ return SimTime(SimTime::DAYS_IN_YEAR); }
@@ -213,8 +217,13 @@ public:
     //@}
     
 private:
+    static void init( int days_per_step, double max_age_years );
+    
     static SimTime sim_time;
     static SimTime one_step;
+    static SimTime max_human_age;
+    static size_t steps_per_year;
+    static double years_per_step;
     
     friend class Simulator;
     friend class ::UnittestUtil;
