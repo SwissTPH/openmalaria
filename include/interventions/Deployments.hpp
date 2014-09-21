@@ -371,7 +371,7 @@ public:
         if( deployAge > TimeStep::maxAgeIntervals ){
             ostringstream msg;
             msg << "continuous intervention must have target age no greater than ";
-            msg << TimeStep::maxAgeIntervals * TimeStep::yearsPerInterval;
+            msg << sim::maxHumanAge().inYears();
             throw util::xml_scenario_error( msg.str() );
         }
     }

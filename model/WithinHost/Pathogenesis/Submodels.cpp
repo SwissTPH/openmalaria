@@ -36,14 +36,14 @@ double rateMultiplier_31;
 double densityExponent_32;
 
 void MuellerPathogenesis::init( const Parameters& parameters ){
-    rateMultiplier_31 = parameters[Parameters::MUELLER_RATE_MULTIPLIER];
+    rateMultiplier_31 = parameters[Parameters::MUELLER_RATE_MULTIPLIER]
+        * sim::yearsPerStep();
     densityExponent_32 = parameters[Parameters::MUELLER_DENSITY_EXPONENT];
 }
 
 double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
     double incidenceDensity = rateMultiplier_31
-            * (pow(totalDensity, densityExponent_32))
-            * TimeStep::yearsPerInterval;
+            * (pow(totalDensity, densityExponent_32));
     return 1.0 - exp(-incidenceDensity);
 }
 

@@ -68,11 +68,6 @@ public:
     
     /// Convert to years
     inline double inYears() const{ return d * (1.0 / DAYS_IN_YEAR); }
-    
-    /// Get array index in time steps (for dense arrays, involves conversion)
-    inline int32_t indexTS() const{
-        return d / util::TimeStep::interval;
-    }
     //@}
     
     ///@brief Simple arithmatic modifiers (all return a copy)

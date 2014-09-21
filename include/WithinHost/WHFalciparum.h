@@ -112,7 +112,7 @@ protected:
     /** Total asexual blood stage density over last 20 days (uses samples from
     * 10, 15 and 20 days ago).
     *
-    * m_y_lag[mod(sim::now().indexTS(), y_lag_len)] corresponds to the density from the
+    * m_y_lag[sim::now_steps_mod(y_lag_len)] corresponds to the density from the
     * previous time step (once updateInfection has been called). */
     vector<double> m_y_lag;
     

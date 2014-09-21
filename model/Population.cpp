@@ -228,7 +228,7 @@ void Population::update1( SimTime firstVecInitTS ){
 
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
-        if( cumPop > AgeStructure::targetCumPop(iter->getAge().indexTS(), targetPop) ){
+        if( cumPop > AgeStructure::targetCumPop(iter->getAge() / sim::oneTS(), targetPop) ){
             --cumPop;
             iter->destroy();
             iter = population.erase (iter);

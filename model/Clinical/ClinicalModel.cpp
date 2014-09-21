@@ -134,7 +134,7 @@ void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
 void ClinicalModel::updateInfantDeaths( SimTime age ){
     // update array for the infant death rates
     if (age <= sim::oneYear()){
-        size_t index = age.indexTS() - 1;
+        size_t index = age / sim::oneTS() - 1;
         infantIntervalsAtRisk[index] += 1;     // baseline
         // Testing doomed == DOOMED_NEXT_TS gives very slightly different results than
         // testing doomed == DOOMED_INDIRECT (due to above if(..))

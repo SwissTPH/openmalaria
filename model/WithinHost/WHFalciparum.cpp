@@ -60,7 +60,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
     immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
     asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
     
-    y_lag_len = sim::fromDays(20).indexTS();
+    y_lag_len = sim::daysToSteps(20);
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical(), false );
@@ -140,10 +140,10 @@ double WHFalciparum::probTransmissionToMosquito( SimTime ageOfHuman, double tbvF
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. We have 20 days history, so use mod_nn:
-    int firstIndex = sim::now().indexTS() - sim::fromDays(10).indexTS() + 1;
+    int firstIndex = sim::daysToSteps(sim::now().inDays() - 10) + 1;
     double x = beta1 * m_y_lag[mod_nn(firstIndex, y_lag_len)]
-            + beta2 * m_y_lag[mod_nn(firstIndex - sim::fromDays(5).indexTS(), y_lag_len)]
-            + beta3 * m_y_lag[mod_nn(firstIndex - sim::fromDays(10).indexTS(), y_lag_len)];
+            + beta2 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(5), y_lag_len)]
+            + beta3 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(10), y_lag_len)];
     if (x < 0.001){
         return 0.0;
     }

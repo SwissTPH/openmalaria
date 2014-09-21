@@ -222,7 +222,7 @@ protected:
    * 
    * Length: time-steps per year
    *
-   * Index mod(sim::now().indexTS(), stepsPerYear) corresponds to the EIR
+   * Index sim::now_mod_steps_per_year() corresponds to the EIR
    * acting on the current time-step: i.e. total inoculations since the
    * previous time-step.
    * Since time-step 0 is not calculated, initialisationEIR[0] is actually the
@@ -239,13 +239,13 @@ protected:
   /** The probability of infection of a mosquito at each bite.
    * It is calculated as the average infectiousness per human.
    * 
-   * The value in index t mod Y (where t is sim::now().indexTS() and Y is
-   * TimeStep::stepsPerYear) is for this time-step respectively (size)
-   * time-steps ago: the latter during human updates since this value is not
-   * updated until the end of the time-step update. The value in index
-   * (t-1) mod Y is from the previous time-step, index (t-2) mod Y corresponds
-   * to the one before that, etc. Length depends on entomological incubation
-   * period from non-vector model.
+   * The value in indexsim::now_mod_steps_per_year() is for this time step
+   * respectively steps-per-year time-steps ago: the latter during human
+   * updates since this value is not updated until the end of the time-step
+   * update. The value in index (t-1) mod steps-per-year is from the previous
+   * time-step, index (t-2) mod steps-per-year corresponds to the one before
+   * that, etc. Length depends on entomological incubation period from
+   * non-vector model.
    * 
    * Checkpointed. */
   vector<double> laggedKappa;

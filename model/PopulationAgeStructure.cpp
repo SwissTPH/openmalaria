@@ -46,7 +46,7 @@ vector<double> AgeStructure::cumAgeProp;
 
 void AgeStructure::init( const scnXml::Demography& demography ){
     // this number of cells are needed:
-    cumAgeProp.resize (TimeStep::maxAgeIntervals.asInt()+1);
+    cumAgeProp.resize( sim::maxHumanAge() / sim::oneTS() + 1 );
     
     estimateRemovalRates( demography );
     calcCumAgeProp();
@@ -160,7 +160,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 {
     rho = initialRho;
 
-    rho = rho * (0.01 * TimeStep::yearsPerInterval);
+    rho = rho * (0.01 * sim::yearsPerStep());
     if (rho != 0.0)
 	// Issue: in this case the total population size differs from populationSize,
 	// however, some code currently uses this as the total population size.
@@ -211,13 +211,13 @@ void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
     for (size_t j=1;j < cumAgeProp.size(); ++j) {
-	TimeStep age( cumAgeProp.size() - j - 1 );
+	SimTime age = sim::fromTS( cumAgeProp.size() - j - 1 );
 	double ageYears = age.inYears();
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
 	double M2s = (mu1 * (exp (alpha1 * ageYears) - 1.0) / alpha1);
 	double Ms = M1s + M2s;
 	double predperc = exp (-rho * ageYears - Ms);
-	if (age >= TimeStep::maxAgeIntervals) {
+	if (age >= sim::maxHumanAge()) {
 	    predperc = 0.0;
 	}
 	cumAgeProp[j] = cumAgeProp[j-1] + predperc;
