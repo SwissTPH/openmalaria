@@ -22,6 +22,7 @@
 #define Hmod_OM_SimTime
 
 #include "util/TimeStep.h"      // for conversion
+#include "util/mod.h"
 
 #include <iostream>
 #include <cassert>
@@ -189,6 +190,10 @@ public:
      * never() and future()). */
     static inline SimTime never(){ return SimTime(); }
     
+    /** Special value representing a time point always in the future, such that
+     * now() < future() and now() + future() does not overflow. */
+    static inline SimTime future(){ return SimTime(0x3FFFFFFF); }
+    
     /** Duration in days. Should be fast (currently no conversion required). */
     static inline SimTime fromDays(int days){ return SimTime(days); }
     
@@ -212,8 +217,25 @@ public:
     
     /** Round to the nearest time-step, where input is in days. */
     static inline SimTime roundToTSFromDays(double days){
-        return fromTS(std::floor( days / one_step.d + 0.5 ));
+        return fromTS(std::floor( days / oneTS().d + 0.5 ));
     }
+    //@}
+    
+    ///@brief Conversion functions, for convenience
+    //@{
+    /** Return the current time in time steps modulo some positive integer. */
+    static inline int nowStepsMod(int denominator){
+        return util::mod_nn(now() / oneTS(), denominator);
+    }
+    
+    /** Return the current time in time steps modulo steps per year. */
+    static inline int nowModStepsPerYear(){
+        return nowStepsMod(steps_per_year);
+    }
+    
+    /** Convert some number of days to some number of time steps (integer
+     * division). */
+    static inline int daysToSteps(int days){ return days / oneTS().d; }
     //@}
     
 private:
