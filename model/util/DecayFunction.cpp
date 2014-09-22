@@ -30,9 +30,6 @@
 namespace OM {
 namespace util {
 
-/// A round-to-nearest function. C++11: use std::round instead.
-inline double myround(double x){ return std::floor(x + 0.5); }
-
 class BaseHetDecayFunction : public DecayFunction {
     double mu, sigma;
 public:
@@ -92,7 +89,7 @@ class StepDecayFunction : public BaseHetDecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * sim::stepsPerYear() ) )
+        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) )
     {}
     
     double getBaseTMult() const{
@@ -107,11 +104,11 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return sim::fromTS( myround(1.0 / invL) );
+        return sim::roundToTSFromDays( 1.0 / invL );
     }
     
 private:
-    double invL;        // 1 / (steps)
+    double invL;        // 1 / days
 };
 
 class LinearDecayFunction : public BaseHetDecayFunction {
@@ -119,7 +116,7 @@ public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
         L( sim::fromYearsN( elt.getL() ) ),
-        invL( 1.0 / (elt.getL() * sim::stepsPerYear() ) )
+        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) )
     {}
     
     double getBaseTMult() const{
@@ -147,7 +144,7 @@ class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invLambda( log(2.0) / (elt.getL() * sim::stepsPerYear() ) )
+        invLambda( log(2.0) / (elt.getL() * sim::oneYear().inDays() ) )
     {
         util::streamValidate(invLambda);
     }
@@ -160,7 +157,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return sim::roundToTS(-log(random::uniform_01())/invLambda);
+        return sim::roundToTSFromDays( -log(random::uniform_01()) / invLambda );
     }
     
 private:
@@ -171,7 +168,7 @@ class WeibullDecayFunction : public BaseHetDecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * sim::stepsPerYear() ) ),
+        constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * sim::oneYear().inDays() ) ),
         k( elt.getK() )
     {}
     
@@ -183,7 +180,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return sim::roundToTS( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
+        return sim::roundToTSFromDays( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
     }
     
 private:
@@ -195,7 +192,7 @@ class HillDecayFunction : public BaseHetDecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * sim::stepsPerYear() ) ),
+        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) ),
         k( elt.getK() )
     {}
     
@@ -207,7 +204,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return sim::roundToTS( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
+        return sim::roundToTSFromDays( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
 private:
@@ -218,7 +215,7 @@ class SmoothCompactDecayFunction : public BaseHetDecayFunction {
 public:
     SmoothCompactDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * sim::stepsPerYear() ) ),
+        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) ),
         k( elt.getK() )
     {}
     
@@ -234,7 +231,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return sim::roundToTS( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
+        return sim::roundToTSFromDays( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
     }
     
 private:

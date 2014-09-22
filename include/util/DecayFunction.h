@@ -96,11 +96,11 @@ public:
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
     inline double evalAge( SimTime age, DecayFuncHet sample )const{
-        return eval( age / sim::oneTS() * sample.getTMult() );
+        return eval( age.inDays() * sample.getTMult() );
     }
     /** Same as above, but calculating age from a start date. */
     inline double evalStart( SimTime start, DecayFuncHet sample )const{
-        return eval( (sim::now() - start) / sim::oneTS() * sample.getTMult() );
+        return eval( (sim::now() - start).inDays() * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).
@@ -127,8 +127,7 @@ protected:
     DecayFunction() {}
     // Protected version. Note that the het sample parameter is needed even
     // when heterogeneity is not used so don't try calling this without that.
-    // TODO: use input in days, not time steps
-    virtual double eval(double ageTS) const =0;
+    virtual double eval(double ageDays) const =0;
 };
 
 } }

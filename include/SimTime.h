@@ -214,11 +214,6 @@ public:
     static inline SimTime roundToTSFromDays(double days){
         return fromTS(std::floor( days / oneTS().d + 0.5 ));
     }
-    
-    /** Round to the nearest time-step, where input is in time steps. */
-    static inline SimTime roundToTS(double ts){
-        return roundToTSFromDays(ts * oneTS().inDays());
-    }
     //@}
     
     ///@brief Conversion functions, for convenience
