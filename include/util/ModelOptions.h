@@ -200,7 +200,7 @@ namespace OM { namespace util {
          * not dependant on the healthSystemMemory value.
          * 
          * This removes from several outputs all humans who recieved treatment
-         * during the previous 4 (5-day) timesteps, who are therefore not
+         * during the previous 4 (5-day) time steps, who are therefore not
          * currently at risk of an additional episode. Summaries affected include
          * nHost, nInfect, nExpectd, nPatent, totalInfs, totalPatentInf, sumlogDens,
          * nNewInfections, sumLogPyrogenThres, sumPyrogenThresh, and potentially

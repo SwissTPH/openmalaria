@@ -28,8 +28,6 @@
 /** Provides some extra functions. See checkpoint.h. */
 namespace OM {
 namespace util {
-    class TimeStep;     // forward declare for a support function; don't really want another include here
-
 namespace checkpoint {
 
     ///@brief Operator& for stl containers

@@ -152,7 +152,7 @@ public:
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
   }
   
-  /** Does per-timestep updates and returns the EIR (inoculation rate per host
+  /** Does per-time-step updates and returns the EIR (inoculation rate per host
    * per time step). Should be called exactly once per time-step (at least,
    * during the intervention period when ITNs may be in use).
    *
@@ -228,7 +228,7 @@ protected:
    * Since time-step 0 is not calculated, initialisationEIR[0] is actually the
    * last value used (to calculate the state at the start of the second year).
    *
-   * Units: infectious bites per adult per timestep
+   * Units: infectious bites per adult per time step
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */
@@ -271,16 +271,16 @@ private:
   /// age at which an individual is considered an adult
   double adultAge;
 
-  /// accumulator for timestep EIR of adults
+  /// accumulator for time step EIR of adults
   double tsAdultEntoInocs;
 
   /// Adult-only EIR over the last update
   double tsAdultEIR;
 
-  /** Per-timestep input EIR summed over inter-survey period.
+  /** Per-time-step input EIR summed over inter-survey period.
    * Units: infectious bites/adult/inter-survey period. */
   double surveyInputEIR;
-  /** Per-timestep simulated EIR summed over inter-survey period.
+  /** Per-time-step simulated EIR summed over inter-survey period.
    * Units: infectious bites/adult/inter-survey period. */
   double surveySimulatedEIR;
   /** Time of last survey. */
@@ -289,7 +289,7 @@ private:
   /// For "num transmitting humans" cts output.
   int numTransmittingHumans;
 
-  /// accumulator for timestep adults requesting EIR
+  /// accumulator for time step adults requesting EIR
   int tsNumAdults;
 
   /** @brief Variables for reporting of entomological inoculations to humans.
@@ -300,10 +300,10 @@ private:
    * reporting period. */
   vector<double> inoculationsPerAgeGroup;
   
-  /** Sum of all EIR returned in this timestep, per age group
+  /** Sum of all EIR returned in this time step, per age group
    * Doesn't need to be checkpointed. */
   vector<double> timeStepEntoInocs;
-  /** Total number of EIRs output in the timestep (roughly equal to populationSize)
+  /** Total number of EIRs output in the time step (roughly equal to populationSize)
    * Doesn't need to be checkpointed. */
   size_t timeStepNumEntoInocs;
   //@}

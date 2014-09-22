@@ -164,7 +164,7 @@ public:
         return initialInsecticide * effectSurvival;
     }
     
-    /// Call once per timestep to update holes
+    /// Call once per time step to update holes
     virtual void update(Host::Human& human);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
