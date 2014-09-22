@@ -66,15 +66,15 @@ void PyrogenPathogenesis::init( const Parameters& parameters ){
     initPyroThres = parameters[Parameters::Y_STAR_0];
     
     double delt = 1.0 / n;
-    double smuY = -log(0.5)/
-        (TimeStep::stepsPerYear*parameters[Parameters::Y_STAR_HALF_LIFE]);
+    double smuY = -log(0.5) /
+        (sim::stepsPerYear() * parameters[Parameters::Y_STAR_HALF_LIFE]);
     b = -smuY * delt;
     
     Ystar2_13 = parameters[Parameters::Y_STAR_SQ];
     
     //alpha: factor determining increase in pyrogenic threshold
     double alpha14 = parameters[Parameters::ALPHA];
-    a = alpha14 * TimeStep::interval * delt;  
+    a = alpha14 * sim::oneTS().inDays() * delt;  
     
     //Ystar1: critical value of parasite density in determing increase in pyrog t
     Ystar1_26 = parameters[Parameters::Y_STAR_1];

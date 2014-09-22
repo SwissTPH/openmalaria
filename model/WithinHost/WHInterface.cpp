@@ -62,7 +62,7 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
             DummyInfection::init ();
         } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
             opt_empirical_whm = true;
-            EmpiricalInfection::init();    // 1-day timestep check
+            EmpiricalInfection::init();    // 1-day time step check
         } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
             opt_molineaux_whm = true;
             MolineauxInfection::init( parameters );
@@ -70,7 +70,7 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
             opt_penny_whm = true;
             PennyInfection::init();
         } else {
-            DescriptiveInfection::init( parameters );      // 5-day timestep check
+            DescriptiveInfection::init( parameters );      // 5-day time step check
         }
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;

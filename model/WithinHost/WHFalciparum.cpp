@@ -114,8 +114,8 @@ WHFalciparum::~WHFalciparum()
 
 double WHFalciparum::probTransmissionToMosquito( SimTime ageOfHuman, double tbvFactor ) const{
     /* This model (often referred to as the gametocyte model) was designed for
-    5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
-    for 1-day timesteps to avoid having to design and analyse a new model.
+    5-day time steps. We use the same model (sampling 10, 15 and 20 days ago)
+    for 1-day time steps to avoid having to design and analyse a new model.
     Description: AJTMH pp.32-33 */
     
     /* Note: we don't allow for treatment which clears gametocytes (e.g.

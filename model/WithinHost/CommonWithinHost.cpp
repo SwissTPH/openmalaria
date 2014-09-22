@@ -46,7 +46,7 @@ void CommonWithinHost::init(const scnXml::DrugConcentration& elt){
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
         WHFalciparum( comorbidityFactor ), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
-    assert( TimeStep::interval == 1 || TimeStep::interval == 5 );
+    assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
 }
 
 CommonWithinHost::~CommonWithinHost() {
@@ -103,7 +103,7 @@ void CommonWithinHost::importInfection(){
 
 void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    m_y_lag[mod_nn(TimeStep::simulation.asInt(),y_lag_len)] = totalDensity;
+    m_y_lag[sim::nowStepsMod(y_lag_len)] = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -168,7 +168,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
         }
         pkpdModel->decayDrugs ();
         
-        if( drugMon.is_open() && TimeStep::interventionPeriod >= TimeStep(0) ){
+        if( drugMon.is_open() && sim::intervNow() >= sim::zero() ){
             drugMon << now << '\t' << sumLogDens;
             map<string,double> concentrations;
             pkpdModel->getConcentrations( concentrations );
@@ -185,7 +185,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
 
 void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {
     // this should actually be easy; it just isn't needed yet
-    throw util::unimplemented_exception( "prophylactic effects on 1-day timestep" );
+    throw util::unimplemented_exception( "prophylactic effects on 1-day time step" );
 }
 
 

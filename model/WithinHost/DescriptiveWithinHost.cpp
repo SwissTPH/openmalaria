@@ -39,7 +39,7 @@ extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
 DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor ) :
         WHFalciparum( comorbidityFactor )
 {
-    assert( TimeStep::interval == 5 );
+    assert( sim::oneTS() == sim::fromDays(5) );
     if( util::ModelOptions::option( util::INCLUDES_PK_PD ) ){
         throw util::xml_scenario_error( "descriptive within-host model is not compatible with INCLUDES_PK_PD option" );
     }
@@ -102,7 +102,7 @@ void DescriptiveWithinHostModel::importInfection(){
 
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    m_y_lag[mod_nn(TimeStep::simulation.asInt(),y_lag_len)] = totalDensity;
+    m_y_lag[sim::nowStepsMod(y_lag_len)] = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -158,7 +158,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
 
         double density = (*inf)->getDensity();
         totalDensity += density;
-        m_cumulative_Y += TimeStep::interval * density;
+        m_cumulative_Y += sim::oneTS().inDays() * density;
 
         ++inf;
     }
