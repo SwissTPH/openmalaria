@@ -73,12 +73,14 @@ enum Phase {
 // ———  SimTime stuff  ———
 
 SimTime sim::sim_time;
+SimTime sim::interv_time;
 SimTime sim::one_step;
 SimTime sim::max_human_age;
 size_t sim::steps_per_year;
 double sim::years_per_step;
 
 void sim::init( int days_per_step, double max_age_years ){
+    sim::interv_time = sim::never();    // large negative number
     sim::one_step = sim::fromDays( days_per_step );
     sim::steps_per_year = sim::oneYear() / sim::oneTS();
     sim::years_per_step = 1.0 / sim::steps_per_year;
@@ -200,7 +202,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // do reporting (continuous and surveys)
             Continuous.update( *population );
-            if (TimeStep::interventionPeriod == Surveys.nextSurveyTime().ts()) {
+            if( sim::intervNow() == Surveys.nextSurveyTime() ){
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }
@@ -212,6 +214,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             ++TimeStep::simulation;
             sim::sim_time += sim::oneTS();
             ++TimeStep::interventionPeriod;
+            sim::interv_time += sim::oneTS();
             population->update1( humanWarmupLength );
             
             util::BoincWrapper::reportProgress(
@@ -236,6 +239,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
             TimeStep::interventionPeriod = TimeStep(0);
+            sim::interv_time = sim::zero();
             population->preMainSimInit();
             population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
             Surveys.incrementSurveyPeriod();
@@ -388,13 +392,14 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
 #       endif
         
         TimeStep::interventionPeriod & stream;
+        sim::interv_time & stream;
         simPeriodEnd & stream;
         totalSimDuration & stream;
         phase & stream;
         (*population) & stream;
         PopulationStats::staticCheckpoint( stream );
         InterventionManager::checkpoint( stream );
-        InterventionManager::loadFromCheckpoint( *population, TimeStep::interventionPeriod );
+        InterventionManager::loadFromCheckpoint( *population, sim::interv_time );
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
@@ -442,6 +447,7 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
 # endif
     
     TimeStep::interventionPeriod & stream;
+    sim::interv_time & stream;
     simPeriodEnd & stream;
     totalSimDuration & stream;
     phase & stream;

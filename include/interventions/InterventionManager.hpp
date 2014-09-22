@@ -57,7 +57,7 @@ public:
      * 
      * Serves to replace health-system and EIR where changeHS/changeEIR
      * interventions have been used. */
-    static void loadFromCheckpoint( OM::Population& population, OM::util::TimeStep interventionTime );
+    static void loadFromCheckpoint( OM::Population& population, SimTime interventionTime );
     
     /** @brief Deploy interventions
      *

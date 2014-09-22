@@ -156,6 +156,15 @@ public:
      */
     static inline SimTime now(){ return sim_time; }
     
+    /** Time relative to the intervention period. Some events are defined
+     * relative to this time rather than simulation time, and since the
+     * difference is not known until after the warmup period of the simulation
+     * it is easier to track the two separately.
+     * 
+     * This is a large negative number until the intervention period starts,
+     * at which time it jumps to zero then increments as does now(). */
+    static inline SimTime intervNow(){ return interv_time; }
+    
     /** One time step (currently either one or five days). */
     static inline SimTime oneTS(){ return one_step; }
     
@@ -237,6 +246,7 @@ private:
     static void init( int days_per_step, double max_age_years );
     
     static SimTime sim_time;
+    static SimTime interv_time;
     static SimTime one_step;
     static SimTime max_human_age;
     static size_t steps_per_year;

@@ -155,6 +155,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           functions, this is the age at which the parameter has decayed to half
           its original value. Not used for constant decay (though must be
           specified anyway).
+          
+          Input is rounded to the nearest time step.
         </xs:documentation>
         <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
       </xs:annotation>

@@ -234,7 +234,8 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             // timed deployments:
             typedef scnXml::UninfectVectors::TimedDeploymentSequence::const_iterator It;
             for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
-                timed.push_back( new TimedUninfectVectorsDeployment( TimeStep( it->getTime() ) ) );
+                //FIXME(schema): time units
+                timed.push_back( new TimedUninfectVectorsDeployment( sim::fromTS( it->getTime() ) ) );
             }
         }
     }
@@ -250,7 +251,8 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
                 for ( It it = seq.begin(); it != seq.end(); ++it ) {
-                    timed.push_back( new TimedVectorDeployment(TimeStep( it->getTime() ), instance) );
+                    //FIXME(schema): time units
+                    timed.push_back( new TimedVectorDeployment(sim::fromTS( it->getTime() ), instance) );
                 }
                 instance++;
             }
@@ -307,10 +309,10 @@ ComponentId InterventionManager::getComponentId( const string textId )
     return it->second;
 }
 
-void InterventionManager::loadFromCheckpoint( OM::Population& population, TimeStep interventionTime ){
+void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTime interventionTime ){
     // We need to re-deploy changeHS and changeEIR interventions, but nothing
     // else. nextTimed should be zero so we can go through all past interventions.
-    // Only redeploy those which happened before this timestep.
+    // Only redeploy those which happened before this time step.
     assert( nextTimed == 0 );
     while( timed[nextTimed].time < interventionTime ){
         if( dynamic_cast<TimedChangeHSDeployment*>(&timed[nextTimed])!=0 ||
@@ -333,7 +335,7 @@ void InterventionManager::deploy(OM::Population& population) {
     importedInfections.import( population );
     
     // deploy timed interventions
-    while( timed[nextTimed].time <= TimeStep::interventionPeriod ){
+    while( timed[nextTimed].time <= sim::intervNow() ){
         timed[nextTimed].deploy( population );
         nextTimed += 1;
     }

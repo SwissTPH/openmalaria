@@ -22,8 +22,8 @@
 // and contains definitions as well as declarations.
 
 // The includes here are more for documentation than required.
+#include "Global.h"
 #include "util/errors.h"
-#include "util/TimeStep.h"
 #include "Monitoring/Survey.h"
 #include "Clinical/ClinicalModel.h"
 #include "Population.h"
@@ -39,13 +39,14 @@ namespace OM { namespace interventions {
 class TimedDeployment {
 public:
     /// Create, passing time of deployment
-    explicit TimedDeployment(TimeStep deploymentTime) :
+    explicit TimedDeployment(SimTime deploymentTime) :
             time( deploymentTime )
     {
-        if( deploymentTime < TimeStep(0) ){
+        if( deploymentTime < sim::zero() ){
             throw util::xml_scenario_error("timed intervention deployment: may not be negative");
-        }else if( deploymentTime >= Monitoring::Survey::getLastSurveyTime().ts() ){
-            cerr << "Warning: timed intervention deployment at time "<<deploymentTime.asInt();
+        }else if( deploymentTime >= Monitoring::Survey::getLastSurveyTime() ){
+            //TODO(date): output as a date
+            cerr << "Warning: timed intervention deployment at time "<<(deploymentTime / sim::oneTS());
             cerr << " happens after last survey" << endl;
         }
     }
@@ -62,19 +63,19 @@ public:
 #endif
     
     // Read access required in this file; don't really need protection:
-    TimeStep time;
+    SimTime time;
 };
 
 class DummyTimedDeployment : public TimedDeployment {
 public:
     DummyTimedDeployment() :
-        TimedDeployment( TimeStep(0) )
+        TimedDeployment( sim::zero() )
     {
         // TimedDeployment's ctor checks that the deployment time-step is
         // within the intervention period. We want this time to be after the
         // last time-step, so set the time here after TimedDeployment's ctor
         // check has been done (hacky).
-        time = TimeStep::future;
+        time = sim::future();
     }
     virtual void deploy (OM::Population&) {}
 #ifdef WITHOUT_BOINC
@@ -87,7 +88,7 @@ public:
 class TimedChangeHSDeployment : public TimedDeployment {
 public:
     TimedChangeHSDeployment( const scnXml::ChangeHS::TimedDeploymentType& hs ) :
-        TimedDeployment( TimeStep( hs.getTime() ) ),
+        TimedDeployment( sim::fromTS( hs.getTime() ) /*FIXME(schema): units*/ ),
         newHS( hs._clone() )
     {}
     virtual void deploy (OM::Population& population) {
@@ -108,7 +109,7 @@ private:
 class TimedChangeEIRDeployment : public TimedDeployment {
 public:
     TimedChangeEIRDeployment( const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
-        TimedDeployment( TimeStep( nv.getTime() ) ),
+        TimedDeployment(sim::fromTS( nv.getTime() ) /*FIXME(schema): units*/ ),
         newEIR( nv._clone() )
     {}
     virtual void deploy (OM::Population& population) {
@@ -128,7 +129,7 @@ private:
 
 class TimedUninfectVectorsDeployment : public TimedDeployment {
 public:
-    TimedUninfectVectorsDeployment( TimeStep deployTime ) :
+    TimedUninfectVectorsDeployment( SimTime deployTime ) :
         TimedDeployment( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
@@ -144,7 +145,7 @@ public:
 #if 0
 class TimedR_0Deployment : public TimedDeployment {
 public:
-    TimedR_0Deployment( TimeStep deployTime ) :
+    TimedR_0Deployment( SimTime deployTime ) :
         TimedDeployment( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
@@ -227,22 +228,22 @@ public:
     TimedHumanDeployment( const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
                            ComponentId subPop, bool complement ) :
-        TimedDeployment( TimeStep( mass.getTime() ) ),
+        TimedDeployment( sim::fromTS( mass.getTime() ) /*FIXME(schema): units*/ ),
         HumanDeploymentBase( mass, intervention, subPop, complement ),
-        minAge( TimeStep::fromYears( mass.getMinAge() ) ),
-        maxAge( TimeStep::future )
+        minAge( sim::fromYearsN( mass.getMinAge() ) ),
+        maxAge( sim::future() )
     {
         if( mass.getMaxAge().present() )
-            maxAge = TimeStep::fromYears( mass.getMaxAge().get() );
+            maxAge = sim::fromYearsN( mass.getMaxAge().get() );
             
-        if( minAge < TimeStep(0) || maxAge < minAge ){
+        if( minAge < sim::zero() || maxAge < minAge ){
             throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
         }
     }
     
     virtual void deploy (OM::Population& population) {
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            TimeStep age = iter->getAge().ts();
+            SimTime age = iter->getAge();
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
                     if( util::random::bernoulli( coverage ) ){
@@ -266,8 +267,7 @@ public:
     
 protected:
     // restrictions on deployment
-    TimeStep minAge;
-    TimeStep maxAge;
+    SimTime minAge, maxAge;
 };
 
 /// Timed deployment of human-specific interventions in cumulative mode
@@ -294,7 +294,7 @@ public:
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally subPop
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            TimeStep age = iter->getAge().ts();
+            SimTime age = iter->getAge();
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
                     total+=1;
@@ -328,7 +328,7 @@ protected:
 
 class TimedVectorDeployment : public TimedDeployment {
 public:
-    TimedVectorDeployment( TimeStep deployTime, size_t instance ) :
+    TimedVectorDeployment( SimTime deployTime, size_t instance ) :
         TimedDeployment( deployTime ),
         inst(instance)
     {}
@@ -354,21 +354,22 @@ public:
                                  const HumanIntervention* intervention,
                                  ComponentId subPop, bool complement ) :
             HumanDeploymentBase( elt, intervention, subPop, complement ),
-            begin( elt.getBegin() ),
-            end( elt.getEnd() ),
-            deployAge( TimeStep::fromYears( elt.getTargetAgeYrs() ) )
+            //FIXME(schema): time units
+            begin( sim::fromTS(elt.getBegin()) ),
+            end( sim::fromTS(elt.getEnd()) ),
+            deployAge( sim::fromYearsN( elt.getTargetAgeYrs() ) )
     {
-        if( begin < TimeStep(0) || end < begin ){
+        if( begin < sim::zero() || end < begin ){
             throw util::xml_scenario_error("continuous intervention must have 0 <= begin <= end");
         }
-        if( deployAge <= TimeStep(0) ){
+        if( deployAge <= sim::zero() ){
             ostringstream msg;
             msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
-            msg << " years corresponds to timestep "<<deployAge;
-            msg << "; must be at least timestep 1.";
+            msg << " years corresponds to time step "<<deployAge;
+            msg << "; must be at least 1.";
             throw util::xml_scenario_error( msg.str() );
         }
-        if( deployAge > TimeStep::maxAgeIntervals ){
+        if( deployAge > sim::maxHumanAge() ){
             ostringstream msg;
             msg << "continuous intervention must have target age no greater than ";
             msg << sim::maxHumanAge().inYears();
@@ -386,14 +387,13 @@ public:
      * @returns false iff this deployment (and thus all later ones in the
      *  ordered list) happens in the future. */
     bool filterAndDeploy( Host::Human& human, const Population& population ) const{
-        TimeStep age = human.getAge().ts();
+        SimTime age = human.getAge();
         if( deployAge > age ){
             // stop processing continuous deployments for this
             // human for now because remaining ones happen in the future
             return false;
         }else if( deployAge == age ){
-            if( begin <= TimeStep::interventionPeriod &&
-                TimeStep::interventionPeriod < end &&
+            if( begin <= sim::intervNow() && sim::intervNow() < end &&
                 ( subPop == interventions::ComponentId_pop || (human.isInSubPop( subPop ) != complement) ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
             {
@@ -406,7 +406,7 @@ public:
 #ifdef WITHOUT_BOINC
     inline void print_details( std::ostream& out )const{
         out << begin << '\t';
-        if( end == TimeStep::future ) out << "(none)";
+        if( end == sim::future() ) out << "(none)";
         else out << end;
         out << '\t' << deployAge << '\t';
         if( subPop == ComponentId_pop ) out << "(none)";
@@ -417,8 +417,8 @@ public:
 #endif
     
 protected:
-    TimeStep begin, end;    // first timeStep active and first timeStep no-longer active
-    TimeStep deployAge;
+    SimTime begin, end;    // first time step active and first time step no-longer active
+    SimTime deployAge;
 };
 
 } }
