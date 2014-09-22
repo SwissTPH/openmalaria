@@ -37,7 +37,7 @@ namespace OM { namespace util {
     string CommandLine::resourcePath;
     string CommandLine::outputName;
     string CommandLine::ctsoutName;
-    set<TimeStep> CommandLine::checkpoint_times;
+    set<SimTime> CommandLine::checkpoint_times;
     
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
@@ -119,7 +119,7 @@ namespace OM { namespace util {
 			cloError = true;
 			break;
 		    }
-		    checkpoint_times.insert( TimeStep(time) );
+		    checkpoint_times.insert( sim::fromTS(time) );
 		} else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
 		    stringstream t;
 		    t << clo.substr (21);
@@ -229,8 +229,8 @@ namespace OM { namespace util {
 	    << "			Output samples of all used age-group data according to active"<<endl
 	    << "			interpolation method and exit."<<endl
 	    << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
-	    << "    --checkpoint=t	Forces a checkpoint a simulation time t. May be specified"<<endl
-	    << "			more than once. Overrides --checkpoint option."<<endl
+	    << "    --checkpoint=t	Forces a checkpoint a simulation time t (time steps). May"<<endl
+	    << "			be specified more than once. Overrides --checkpoint option."<<endl
 	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl
 	    << "			period, exiting after completing each"<<endl
 	    << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl

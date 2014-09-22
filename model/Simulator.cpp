@@ -183,8 +183,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     }
     // Set to either a checkpointing time step or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
-    SimTime testCheckpointTime =
-            sim::fromTS(util::CommandLine::getNextCheckpointTime( sim::now().ts() ));
+    SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now() );
     SimTime testCheckpointDieTime = testCheckpointTime;        // kill program at same time
     
     // phase loop
