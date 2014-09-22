@@ -195,12 +195,12 @@ public:
         return holeIndex;
     }
     inline double getInsecticideContent(const ITNComponent& params)const{
-        double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
-                                              insecticideDecayHet);
+        double effectSurvival = params.insecticideDecay->evalStart( deployTime,
+                                              insecticideDecayHet );
         return initialInsecticide * effectSurvival;
     }
     
-    /// Call once per timestep to update holes
+    /// Call once per time step to update holes
     virtual void update(Host::Human& human);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.
@@ -217,7 +217,7 @@ protected:
     
 private:
     // these parameters express the current state of the net:
-    TimeStep disposalTime;	// time at which net will be disposed of (if it's not already been replaced)
+    SimTime disposalTime;	// time at which net will be disposed of (if it's not already been replaced)
     int nHoles;				// total number of holes
     double holeIndex;		// a measure of both the number and size of holes
     double initialInsecticide;	// units: mg/m²

@@ -40,7 +40,7 @@ public:
     /** Default construction: always return 0. */
     SimpleDecayingValue() :
             initial(0.0),
-            deploy_t(TimeStep::never) {}
+            deploy_t(sim::never()) {}
     
     /** Configure from an XML element. */
     inline void set (double initial_value, const scnXml::DecayFunction& elt, const char* name){
@@ -49,7 +49,7 @@ public:
     }
     
     /** Trigger a deployment, if decay function was set. */
-    inline void deploy (TimeStep time){
+    inline void deploy (SimTime time){
         if( decay.get() == 0 ) return;  // cannot deploy
         deploy_t = time;
         het = decay->hetSample();
@@ -58,10 +58,10 @@ public:
     /** Get the value (0 if before any deployment or after complete decay,
      * also 0 if no decay function or initial value was set,
      * otherwise between zero and the inital value). */
-    inline double current_value (TimeStep time) const{
+    inline double current_value (SimTime time) const{
         if( decay.get() == 0 ) return 0.0;  // decay wasn't set: the always return 0
         
-        return initial * decay->eval( time - deploy_t, het );
+        return initial * decay->evalAge( time - deploy_t, het );
     }
     
     /** Checkpointing: only checkpoint parameters which change after initial
@@ -85,7 +85,7 @@ private:
     util::DecayFuncHet het;
     
     /** Time of larviciding deployment. */
-    TimeStep deploy_t;
+    SimTime deploy_t;
 };
 
 } }

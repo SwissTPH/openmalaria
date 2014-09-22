@@ -37,7 +37,6 @@ TimeStep TimeStep::fromDays( double d ){
 }
 
 TimeStep::ReadOnly<int> TimeStep::interval;
-TimeStep::ReadOnly<double> TimeStep::yearsPerInterval;
 TimeStep TimeStep::intervalsPer5Days( TimeStep::never );
 TimeStep TimeStep::intervalsPerYear( TimeStep::never );
 TimeStep TimeStep::maxAgeIntervals( TimeStep::never );
@@ -59,7 +58,6 @@ void TimeStep::init( int daysPerTimeStep, double maxAgeYears ) {
     intervalsPer5Days = TimeStep(5/interval);
     stepsPerYear = DAYS_IN_YEAR/interval;
     intervalsPerYear = TimeStep( stepsPerYear );
-    yearsPerInterval = double(interval) / DAYS_IN_YEAR;
     
     // Maximum age of an individual:
     maxAgeIntervals = TimeStep( static_cast<int>(maxAgeYears * stepsPerYear) );

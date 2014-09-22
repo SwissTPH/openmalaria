@@ -92,8 +92,6 @@ public:
     //@{
     /// temporal resolution of simulation, in days
     static ReadOnly<int> interval;
-    /// 1.0/intervalsPerYear
-    static ReadOnly<double> yearsPerInterval;
     /// Number of timesteps in 5 days (i.e. 5/interval)
     static TimeStep intervalsPer5Days;
     /// Simulation time steps per year (DAYS_IN_YEAR / interval)
@@ -196,10 +194,6 @@ public:
     /// Get value in days
     inline int inDays() const {
         return _ts * interval;
-    }
-    /// Get value in years
-    inline double inYears() const{
-        return _ts * yearsPerInterval;
     }
     /// Get value in time steps as an integer (marginally faster than inDays() and inYears())
     inline const int asInt()const {

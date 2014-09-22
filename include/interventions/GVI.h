@@ -108,7 +108,7 @@ public:
     
     /** This is the survival factor of the effect. */
     inline double getEffectSurvival(const GVIComponent& params)const{
-        return params.decay->eval (TimeStep::simulation - deployTime, decayHet);
+        return params.decay->evalStart( deployTime, decayHet );
     }
     
     virtual void update(Host::Human& human);

@@ -43,7 +43,7 @@ class HumanVectorInterventionComponent;
  * A base class for interventions affecting human-vector interaction.
  * 
  * The constructor should initialise the data to represent an intervention
- * deployed at this time (TimeStep::simulation).
+ * deployed at this time (sim::now()).
  * 
  * redeploy() should reset the intervention to a freshly deployed state. If
  * necessary, PerHost::deployComponent can be updated to make it create a new
@@ -56,7 +56,7 @@ public:
     /** Deploy an intervention. */
     virtual void redeploy( const HumanVectorInterventionComponent& params ) =0;
     
-    /** Per-timestep update. Used by ITNs to update hole decay. */
+    /** Per time step update. Used by ITNs to update hole decay. */
     virtual void update(Host::Human& human) =0;
     
     /** Get effect of deterrencies of interventions, as an attractiveness multiplier.
@@ -77,7 +77,7 @@ public:
     inline interventions::ComponentId id() const { return m_id; }
     
     /// Return true if this component is deployed (i.e. currently active)
-    inline bool isDeployed() const{ return deployTime != TimeStep::never; }
+    inline bool isDeployed() const{ return deployTime != sim::never(); }
     
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
@@ -89,13 +89,13 @@ public:
 protected:
     /// Set the component id
     explicit PerHostInterventionData( interventions::ComponentId id ) :
-            deployTime( TimeStep::simulation ),
+            deployTime( sim::now() ),
             m_id(id) {}
     
     /// Checkpointing: write
     virtual void checkpoint( ostream& stream ) =0;
     
-    TimeStep deployTime;        // time of deployment or TimeStep::never
+    SimTime deployTime;        // time of deployment or sim::never()
     interventions::ComponentId m_id;       // component id; don't change
 };
 
@@ -132,7 +132,7 @@ public:
     void initialise (TransmissionModel& tm, double availabilityFactor);
     //@}
     
-    /// Call once per timestep. Updates net holes.
+    /// Call once per time step. Updates net holes.
     void update(Host::Human& human);
     
     ///@brief Intervention controls

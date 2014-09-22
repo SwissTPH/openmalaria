@@ -288,8 +288,8 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
     transmission.emergence->deployVectorPopInterv(instance);
     // do same as in above function (of EmergenceModel)
     assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
-    seekingDeathRateIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
-    probDeathOvipositingIntervs[instance].deploy( TimeStep::simulation + TimeStep(1) );
+    seekingDeathRateIntervs[instance].deploy( sim::now() + sim::oneTS() );
+    probDeathOvipositingIntervs[instance].deploy( sim::now() + sim::oneTS() );
 }
 
 
@@ -337,7 +337,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double leaveSeekingStateRate = mosqSeekingDeathRate;
     for( vector<util::SimpleDecayingValue>::const_iterator it=seekingDeathRateIntervs.begin();
         it != seekingDeathRateIntervs.end(); ++it ){
-        leaveSeekingStateRate *= 1.0 + it->current_value( TimeStep::simulation );
+        leaveSeekingStateRate *= 1.0 + it->current_value( sim::now() );
     }
 
     // NC's non-autonomous model provides two methods for calculating P_df and
@@ -369,7 +369,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double baseP_df = P_Ai_base * probMosqSurvivalOvipositing;
     for( vector<util::SimpleDecayingValue>::const_iterator it=probDeathOvipositingIntervs.begin();
         it != probDeathOvipositingIntervs.end(); ++it ){
-        baseP_df *= 1.0 - it->current_value( TimeStep::simulation );
+        baseP_df *= 1.0 - it->current_value( sim::now() );
     }
     tsP_df  *= baseP_df;
     tsP_dif *= baseP_df;

@@ -159,8 +159,8 @@ public:
     
     /// Get remaining insecticide content based on initial amount and decay.
     inline double getInsecticideContent(const IRSComponent& params)const{
-        double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
-                                              insecticideDecayHet);
+        double effectSurvival = params.insecticideDecay->evalStart( deployTime,
+                                              insecticideDecayHet );
         return initialInsecticide * effectSurvival;
     }
     

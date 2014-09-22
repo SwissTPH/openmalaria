@@ -95,8 +95,12 @@ public:
      * being updated over. It would be more accurate to return the mean value
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
-    inline double eval(TimeStep age, DecayFuncHet sample) const {
-        return eval(age.asInt() * sample.getTMult());
+    inline double evalAge( SimTime age, DecayFuncHet sample )const{
+        return eval( age / sim::oneTS() * sample.getTMult() );
+    }
+    /** Same as above, but calculating age from a start date. */
+    inline double evalStart( SimTime start, DecayFuncHet sample )const{
+        return eval( (sim::now() - start) / sim::oneTS() * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).
@@ -117,12 +121,13 @@ public:
      * This is only valid where mu and sigma parameters are zero.
      * 
      * @returns Age at which an object should decay. */
-    virtual TimeStep sampleAgeOfDecay () const =0;
+    virtual SimTime sampleAgeOfDecay () const =0;
     
 protected:
     DecayFunction() {}
     // Protected version. Note that the het sample parameter is needed even
     // when heterogeneity is not used so don't try calling this without that.
+    // TODO: use input in days, not time steps
     virtual double eval(double ageTS) const =0;
 };
 
