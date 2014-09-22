@@ -42,6 +42,8 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
     holeRate.setParams( elt.getHoleRate() );
     ripRate.setParams( elt.getRipRate() );
+    holeRate.scaleMean( sim::yearsPerStep() );
+    ripRate.scaleMean( sim::yearsPerStep() );
     ripFactor = elt.getRipFactor().getValue();
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
     attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
@@ -483,8 +485,8 @@ HumanITN::HumanITN( const ITNComponent& params ) :
     // handling of net. They are sampled once per human: human handling is
     // presumed to be the largest cause of variance.
     util::NormalSample x = util::NormalSample::generate();
-    holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
-    ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
+    holeRate = params.holeRate.sample(x);
+    ripRate = params.ripRate.sample(x);
     insecticideDecayHet = params.insecticideDecay->hetSample(x);
 
     // Sample per-deployment variables as in redeploy:

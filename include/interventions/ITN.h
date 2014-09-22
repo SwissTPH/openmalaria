@@ -165,8 +165,8 @@ public:
     };
 
     NormalSampler initialInsecticide;
-    LognormalSampler holeRate;	// holes per annum
-    LognormalSampler ripRate;	// rips per hole per annum
+    LognormalSampler holeRate;	// holes per step
+    LognormalSampler ripRate;	// rips per hole per step
     double maxInsecticide;		// maximum initial insecticide
     double ripFactor;			// factor expressing how significant rips are in comparison to holes
     boost::shared_ptr<DecayFunction> insecticideDecay;
