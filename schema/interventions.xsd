@@ -617,6 +617,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           and health system events) but not beyond that. If this attribute is
           not given, the simulated human is a member until death or some other
           option triggers removal.
+          
+          Input is rounded to the nearest time step.
         </xs:documentation>
         <xs:appinfo>name:Remove from sub-population after;units:Years;min:0;</xs:appinfo>
       </xs:annotation>

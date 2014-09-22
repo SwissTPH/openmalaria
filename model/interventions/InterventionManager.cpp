@@ -92,7 +92,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             ComponentId id( humanComponents.size() );        // i.e. index of next item
             identifierMap.insert( make_pair(component.getId(), id) );
             
-            TimeStep expireAfter = TimeStep::future;
+            SimTime expireAfter = sim::future();
             if( component.getSubPopRemoval().present() ){
                 const scnXml::SubPopRemoval& removeOpts = component.getSubPopRemoval().get();
                 if( removeOpts.getOnFirstBout() ){
@@ -105,7 +105,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                     removeAtIds[SubPopRemove::ON_FIRST_TREATMENT].push_back( id );
                 }
                 if( removeOpts.getAfterYears().present() ){
-                    expireAfter = TimeStep::fromYears( removeOpts.getAfterYears().get() );
+                    expireAfter = sim::fromYearsN( removeOpts.getAfterYears().get() );
                 }
             }
             
@@ -223,7 +223,8 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             // timed deployments:
             typedef scnXml::InsertR_0Case::TimedDeploymentSequence::const_iterator It;
             for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
-                timed.push_back( new TimedR_0Deployment( TimeStep( it->getTime() ) ) );
+                //FIXME(schema): time units
+                timed.push_back( new TimedR_0Deployment( sim::fromTS( it->getTime() ) ) );
             }
         }
 #endif
@@ -318,7 +319,7 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTim
         if( dynamic_cast<TimedChangeHSDeployment*>(&timed[nextTimed])!=0 ||
             dynamic_cast<TimedChangeEIRDeployment*>(&timed[nextTimed])!=0 ){
             //Note: neither changeHS nor changeEIR interventions care what the
-            //current timestep is when they are deployed, so we don't need to
+            //current time step is when they are deployed, so we don't need to
             //tell them the deployment time.
             timed[nextTimed].deploy( population );
         }
@@ -328,7 +329,7 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTim
 
 
 void InterventionManager::deploy(OM::Population& population) {
-    if( TimeStep::interventionPeriod < TimeStep(0) )
+    if( sim::intervNow() < sim::zero() )
         return;
     
     // deploy imported infections (not strictly speaking an intervention)
