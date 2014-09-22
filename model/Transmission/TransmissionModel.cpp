@@ -75,14 +75,14 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)];
+    stream<<'\t'<<initialisationEIR[sim::nowModStepsPerYear()];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
     // The latest time-step's kappa:
-    stream<<'\t'<<laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())];
+    stream<<'\t'<<laggedKappa[sim::nowStepsMod(laggedKappa.size())];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
@@ -115,7 +115,7 @@ TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
     tsNumAdults(0),
     timeStepNumEntoInocs (0)
 {
-  initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
+  initialisationEIR.assign (sim::stepsPerYear(), 0.0);
   inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
 
@@ -160,7 +160,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     }
 
 
-    size_t lKMod = mod_nn(TimeStep::simulation, laggedKappa.size());	// now
+    size_t lKMod = sim::nowStepsMod(laggedKappa.size());	// now
     if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -172,7 +172,7 @@ double TransmissionModel::updateKappa (const Population& population) {
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    int tmod = mod_nn(TimeStep::simulation, TimeStep::stepsPerYear);   // now
+    int tmod = sim::nowModStepsPerYear();
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
@@ -182,13 +182,13 @@ double TransmissionModel::updateKappa (const Population& population) {
     }
 
     // Shared graphics: report infectiousness
-    if (mod_nn(TimeStep::simulation, 6) ==  0) {
+    if (sim::nowStepsMod(6) ==  0) {
         for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
             kappaByAge[i] /= nByAge[i];
         util::SharedGraphics::copyKappa(&kappaByAge[0]);
     }
 
-    // Sum up inoculations this timestep
+    // Sum up inoculations this time step
     for (size_t group = 0; group < timeStepEntoInocs.size(); ++group) {
         inoculationsPerAgeGroup[group] += timeStepEntoInocs[group];
         // Reset to zero:
@@ -226,7 +226,7 @@ double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monit
 
 void TransmissionModel::summarize () {
     Monitoring::Survey& survey = Monitoring::Survey::current();
-    survey.setNumTransmittingHosts(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
+    survey.setNumTransmittingHosts(laggedKappa[sim::nowStepsMod(laggedKappa.size())]);
     survey.setAnnualAverageKappa(_annualAverageKappa);
 
     survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.

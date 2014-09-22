@@ -144,7 +144,7 @@ SimTime NonVectorModel::initIterate (){
 void NonVectorModel::changeEIRIntervention (
         const scnXml::NonVector& nonVectorData)
 {
-    // Note: requires TimeStep::interventionPeriod >= 0, but this can only be
+    // Note: requires sim::intervNow() >= sim::zero(), but this can only be
     // called in intervention period anyway.
   simulationMode = transientEIRknown;
   
@@ -216,11 +216,11 @@ double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
       // the interventionEIR array (why -1? See interventionEIR declaration)
-      eir = interventionEIR[TimeStep::interventionPeriod.asInt() - 1];
+      eir = interventionEIR[(sim::intervNow() / sim::oneTS()) - 1];
       break;
     case dynamicEIR:
       eir = initialisationEIR[sim::nowModStepsPerYear()];
-      if (TimeStep::interventionPeriod >= TimeStep(0)) {
+      if (sim::intervNow() >= sim::zero()) {
 	  // we modulate the initialization based on the human infectiousness time steps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
