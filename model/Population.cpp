@@ -175,7 +175,7 @@ void Population::createInitialHumans ()
     
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
-    assert( TimeStep::simulation == TimeStep(0) );      // assumed below
+    assert( sim::now() == sim::zero() );      // assumed below
     _transmissionModel->init2 (*this);
 }
 
@@ -202,7 +202,7 @@ void Population::update1( SimTime firstVecInitTS ){
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
     //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * TimeStep::simulation));
+    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * (sim::now() / sim::oneTS())));
     int targetPop = populationSize;
     int cumPop = 0;
 
@@ -351,7 +351,7 @@ void Population::ctsGVICoverage (ostream& stream){
 //     double meanVar = 0.0;
 //     int nNets = 0;
 //     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
 //             ++nNets;
 //             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
 //         }
