@@ -75,14 +75,14 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[sim::nowModStepsPerYear()];
+    stream<<'\t'<<initialisationEIR[sim::stepOfYear0()];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
     // The latest time-step's kappa:
-    stream<<'\t'<<laggedKappa[sim::nowStepsMod(laggedKappa.size())];
+    stream<<'\t'<<laggedKappa[sim::now0StepsModulo(laggedKappa.size())];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
@@ -160,7 +160,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     }
 
 
-    size_t lKMod = sim::nowStepsMod(laggedKappa.size());	// now
+    size_t lKMod = sim::now1StepsModulo(laggedKappa.size());	// now
     if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -172,7 +172,7 @@ double TransmissionModel::updateKappa (const Population& population) {
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    int tmod = sim::nowModStepsPerYear();
+    int tmod = sim::stepOfYear1();
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
@@ -182,7 +182,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     }
 
     // Shared graphics: report infectiousness
-    if (sim::nowStepsMod(6) ==  0) {
+    if (sim::now1StepsModulo(6) ==  0) {
         for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
             kappaByAge[i] /= nByAge[i];
         util::SharedGraphics::copyKappa(&kappaByAge[0]);
@@ -226,13 +226,13 @@ double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monit
 
 void TransmissionModel::summarize () {
     Monitoring::Survey& survey = Monitoring::Survey::current();
-    survey.setNumTransmittingHosts(laggedKappa[sim::nowStepsMod(laggedKappa.size())]);
+    survey.setNumTransmittingHosts(laggedKappa[sim::now0StepsModulo(laggedKappa.size())]);
     survey.setAnnualAverageKappa(_annualAverageKappa);
 
     survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
     inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
     
-    double duration = (sim::now() - lastSurveyTime) / sim::oneTS();
+    double duration = (sim::now1() - lastSurveyTime) / sim::oneTS();
     if( duration == 0.0 ){
         if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
             throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
@@ -246,7 +246,7 @@ void TransmissionModel::summarize () {
 
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
-    lastSurveyTime = sim::now();
+    lastSurveyTime = sim::now1();
 }
 
 

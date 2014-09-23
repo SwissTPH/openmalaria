@@ -94,7 +94,7 @@ HumanGVI::HumanGVI ( const GVIComponent& params ) :
 }
 
 void HumanGVI::redeploy(const Transmission::HumanVectorInterventionComponent&) {
-    deployTime = sim::now();
+    deployTime = sim::now1();
 }
 
 void HumanGVI::update(Host::Human& human){

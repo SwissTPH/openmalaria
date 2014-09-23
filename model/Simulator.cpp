@@ -72,7 +72,8 @@ enum Phase {
 
 // ———  SimTime stuff  ———
 
-SimTime sim::sim_time;
+SimTime sim::sim_time0;
+SimTime sim::sim_time1;
 SimTime sim::interv_time;
 SimTime sim::one_step;
 SimTime sim::max_human_age;
@@ -149,7 +150,8 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
 // ———  run simulations  ———
 
 void Simulator::start(const scnXml::Monitoring& monitoring){
-    sim::sim_time = sim::zero();
+    sim::sim_time0 = sim::zero();
+    sim::sim_time1 = sim::zero();
     
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
@@ -180,19 +182,19 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     }
     // Set to either a checkpointing time step or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
-    SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now() );
+    SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now1() );
     SimTime testCheckpointDieTime = testCheckpointTime;        // kill program at same time
     
     // phase loop
     while (true){
         // loop for steps within a phase
-        while (sim::now() < simPeriodEnd){
+        while (sim::now1() < simPeriodEnd){
             // checkpoint
-            if( util::BoincWrapper::timeToCheckpoint() || testCheckpointTime == sim::now() ){
+            if( util::BoincWrapper::timeToCheckpoint() || testCheckpointTime == sim::now1() ){
                 writeCheckpoint();
                 util::BoincWrapper::checkpointCompleted();
             }
-            if( testCheckpointDieTime == sim::now() ){
+            if( testCheckpointDieTime == sim::now1() ){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }
             
@@ -207,12 +209,13 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             InterventionManager::deploy( *population );
             
             // update
-            sim::sim_time += sim::oneTS();
-            sim::interv_time += sim::oneTS();
+            sim::sim_time1 += sim::oneTS();
             population->update1( humanWarmupLength );
+            sim::sim_time0 += sim::oneTS();
+            sim::interv_time += sim::oneTS();
             
             util::BoincWrapper::reportProgress(
-                static_cast<double>(sim::now().raw()) /
+                static_cast<double>(sim::now1().raw()) /
                 static_cast<double>(totalSimDuration.raw()) );
         }
         
@@ -242,14 +245,14 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         }
         if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
             // First of middle of next phase, or current value (from command line) triggers a checkpoint.
-            SimTime phase_mid = sim::now() + (simPeriodEnd - sim::now()) * 0.5;
+            SimTime phase_mid = sim::now1() + (simPeriodEnd - sim::now1()) * 0.5;
             // Don't checkpoint 0-length phases or do mid-phase checkpointing
             // when timed checkpoints were specified, and don't checkpoint
             // ONE_LIFE_SPAN phase if already past time humanWarmupLength:
             // these are extra transmission inits, and we don't want to
             // checkpoint every one of them.
-            if( testCheckpointTime < sim::zero() && phase_mid > sim::now()
-                && (phase != ONE_LIFE_SPAN || sim::now() < humanWarmupLength)
+            if( testCheckpointTime < sim::zero() && phase_mid > sim::now1()
+                && (phase != ONE_LIFE_SPAN || sim::now1() < humanWarmupLength)
             ){
                 testCheckpointTime = phase_mid;
                 // Test checkpoint: die a bit later than checkpoint for better
@@ -304,7 +307,7 @@ void Simulator::writeCheckpoint(){
         ostringstream name;
         name << CHECKPOINT << checkpointNum;
         //Writing checkpoint:
-//      cerr << sim::now() << " WC: " << name.str();
+//      cerr << sim::now1() << " WC: " << name.str();
         if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
             name << ".gz";
             ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -363,7 +366,7 @@ void Simulator::readCheckpoint() {
   }
   
   // Keep size of stderr.txt minimal with a short message, since this is a common message:
-  cerr << sim::now() << " RC" << endl;
+  cerr << sim::now1() << " RC" << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))
@@ -395,7 +398,8 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
-        sim::sim_time & stream;
+        sim::sim_time0 & stream;
+        sim::sim_time1 & stream;
         util::random::checkpoint (stream, checkpointNum);
         
         // Check scenario.xml and checkpoint files correspond:
@@ -445,7 +449,8 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     PopulationStats::staticCheckpoint( stream );
     InterventionManager::checkpoint( stream );
     
-    sim::sim_time & stream;
+    sim::sim_time0 & stream;
+    sim::sim_time1 & stream;
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;
     cksum & stream;

@@ -103,9 +103,9 @@ private:
   //@}
   
   /** EIR per time interval during the intervention period. Value at index
-   * (sim::intervNow() / sim::oneTS()) - 1 used each time-step: first value
-   * should be used for update in the first interval, which has
-   * sim::intervNow() / sim::oneTS() = 1.
+   * sim::intervNow() / sim::oneTS() used each time-step: first value should
+   * be used for update in the first interval, which has
+   * sim::intervNow() / sim::oneTS() = 0.
    * 
    * Units: inoculations per adult per time step */
   vector<double> interventionEIR;
@@ -116,7 +116,7 @@ private:
    * When simulationMode == equilibriumMode, this may be multiple years long and
    * is used to collect values of kappa (human infectiousness).
    * 
-   * In either case, sim::nowStepsMod(initialKappa.size()) is the index
+   * In either case, sim::now1StepsModulo(initialKappa.size()) is the index
    * for the current infectiousness during updates. */
   vector<double> initialKappa; 
 };

@@ -201,7 +201,7 @@ void NonVectorModel::update (const Population& population) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){
-        initialKappa[sim::nowStepsMod(initialKappa.size())] = currentKappa;
+        initialKappa[sim::now1StepsModulo(initialKappa.size())] = currentKappa;
     }
 }
 
@@ -211,20 +211,20 @@ double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
   double eir;
   switch (simulationMode) {
     case forcedEIR:
-      eir = initialisationEIR[sim::nowModStepsPerYear()];
+      eir = initialisationEIR[sim::stepOfYear1()];
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
-      // the interventionEIR array (why -1? See interventionEIR declaration)
-      eir = interventionEIR[(sim::intervNow() / sim::oneTS()) - 1];
+      // the interventionEIR array
+      eir = interventionEIR[sim::intervNow() / sim::oneTS()];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[sim::nowModStepsPerYear()];
+      eir = initialisationEIR[sim::stepOfYear1()];
       if (sim::intervNow() >= sim::zero()) {
 	  // we modulate the initialization based on the human infectiousness time steps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
-          size_t t = (sim::now()-nSpore) / sim::oneTS();
+          size_t t = (sim::now1()-nSpore) / sim::oneTS();
 	eir *=
             laggedKappa[mod_nn(t, laggedKappa.size())] /
             initialKappa[mod_nn(t, sim::stepsPerYear())];
@@ -235,7 +235,7 @@ double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
   }
 #ifndef NDEBUG
   if (!(boost::math::isfinite)(eir)) {
-    size_t t = (sim::now()-nSpore) / sim::oneTS();
+    size_t t = (sim::now1()-nSpore) / sim::oneTS();
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
 	<< "\nlaggedKappa:\t"

@@ -43,7 +43,7 @@ class HumanVectorInterventionComponent;
  * A base class for interventions affecting human-vector interaction.
  * 
  * The constructor should initialise the data to represent an intervention
- * deployed at this time (sim::now()).
+ * deployed at this time (sim::now1()).
  * 
  * redeploy() should reset the intervention to a freshly deployed state. If
  * necessary, PerHost::deployComponent can be updated to make it create a new
@@ -89,7 +89,7 @@ public:
 protected:
     /// Set the component id
     explicit PerHostInterventionData( interventions::ComponentId id ) :
-            deployTime( sim::now() ),
+            deployTime( sim::now1() ),
             m_id(id) {}
     
     /// Checkpointing: write

@@ -156,7 +156,7 @@ void EmergenceModel::scaleEIR( double factor ) {
 void EmergenceModel::update () {
     emergenceSurvival = 1.0;
     for( size_t i = 0; i < emergenceReduction.size(); ++i )
-        emergenceSurvival *= 1.0 - emergenceReduction[i].current_value( sim::now() );
+        emergenceSurvival *= 1.0 - emergenceReduction[i].current_value( sim::now1() );
 }
 
 void EmergenceModel::checkpoint (istream& stream){ (*this) & stream; }
@@ -181,7 +181,7 @@ void EmergenceModel::deployVectorPopInterv (size_t instance) {
     
     // Note: intervention acts first on time-step following (+1) deployment.
     // This at least is consistent with previous results and gives the correct number of time steps of deployment
-    emergenceReduction[instance].deploy( sim::now() + sim::oneTS() );
+    emergenceReduction[instance].deploy( sim::now1() + sim::oneTS() );
 }
 
 

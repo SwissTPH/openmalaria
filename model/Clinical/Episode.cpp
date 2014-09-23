@@ -40,10 +40,10 @@ void Episode::flush() {
 
 void Episode::update (const Host::Human& human, Episode::State newState)
 {
-    if( time + healthSystemMemory < sim::now() ){
+    if( time + healthSystemMemory < sim::now1() ){
         report ();
 
-        time = sim::now();
+        time = sim::now1();
         surveyPeriod = Survey::getSurveyNumber();
         ageGroup = human.getMonitoringAgeGroup();
         cohortSet = human.cohortSet();

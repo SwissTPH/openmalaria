@@ -70,7 +70,7 @@ public:
     /** Returns true when age reaches the pre-determined duration (i.e. when
     * this infection terminates). */
     bool expired () {
-        return sim::now() > m_startDate + m_duration;
+        return sim::now1() > m_startDate + m_duration;
     }
     
     /** Determines parasite density of an individual infection (5-day time step

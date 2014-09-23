@@ -288,8 +288,8 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
     transmission.emergence->deployVectorPopInterv(instance);
     // do same as in above function (of EmergenceModel)
     assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
-    seekingDeathRateIntervs[instance].deploy( sim::now() + sim::oneTS() );
-    probDeathOvipositingIntervs[instance].deploy( sim::now() + sim::oneTS() );
+    seekingDeathRateIntervs[instance].deploy( sim::now1() + sim::oneTS() );
+    probDeathOvipositingIntervs[instance].deploy( sim::now1() + sim::oneTS() );
 }
 
 
@@ -337,7 +337,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double leaveSeekingStateRate = mosqSeekingDeathRate;
     for( vector<util::SimpleDecayingValue>::const_iterator it=seekingDeathRateIntervs.begin();
         it != seekingDeathRateIntervs.end(); ++it ){
-        leaveSeekingStateRate *= 1.0 + it->current_value( sim::now() );
+        leaveSeekingStateRate *= 1.0 + it->current_value( sim::now1() );
     }
 
     // NC's non-autonomous model provides two methods for calculating P_df and
@@ -369,7 +369,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double baseP_df = P_Ai_base * probMosqSurvivalOvipositing;
     for( vector<util::SimpleDecayingValue>::const_iterator it=probDeathOvipositingIntervs.begin();
         it != probDeathOvipositingIntervs.end(); ++it ){
-        baseP_df *= 1.0 - it->current_value( sim::now() );
+        baseP_df *= 1.0 - it->current_value( sim::now1() );
     }
     tsP_df  *= baseP_df;
     tsP_dif *= baseP_df;
@@ -384,7 +384,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     // simulation uses one or five day time steps.
     // The transmission for time-step t depends on the state during days
     // (t×(I-1)+1) through (t×I) where I is sim::oneTS().inDays().
-    for( SimTime now = sim::now(), end = sim::now() + sim::oneTS();
+    for( SimTime now = sim::now1(), end = sim::now1() + sim::oneTS();
         now < end; now += sim::oneDay() )
     {
         partialEIR += transmission.update( now, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;

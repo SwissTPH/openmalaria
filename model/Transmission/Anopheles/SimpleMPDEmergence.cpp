@@ -201,7 +201,7 @@ void SimpleMPDEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
 
 double SimpleMPDEmergence::getResAvailability() const {
     //TODO: why offset by one time step?
-    SimTime start = sim::now() - sim::oneTS();
+    SimTime start = sim::now1() - sim::oneTS();
     double total = 0;
     for( SimTime i = sim::zero(); i < sim::oneTS(); i += sim::oneDay() ){
         //TODO: only have to add one year because of offset

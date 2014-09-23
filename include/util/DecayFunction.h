@@ -100,7 +100,7 @@ public:
     }
     /** Same as above, but calculating age from a start date. */
     inline double evalStart( SimTime start, DecayFuncHet sample )const{
-        return eval( (sim::now() - start).inDays() * sample.getTMult() );
+        return eval( (sim::now1() - start).inDays() * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).

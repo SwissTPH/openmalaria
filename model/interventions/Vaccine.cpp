@@ -176,7 +176,7 @@ bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
     util::streamValidate(effect->initialEfficacy);
     
     effect->numDosesAdministered = numDosesAdministered + 1;
-    effect->timeLastDeployment = sim::now();
+    effect->timeLastDeployment = sim::now1();
     
     return true;
 }

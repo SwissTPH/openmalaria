@@ -124,7 +124,7 @@ double WHFalciparum::probTransmissionToMosquito( SimTime ageOfHuman, double tbvF
     
     //NOTE: this seems totally pointless to me. If m_y_lag is initialised to zero
     // then calculations should work correctly anyway.
-    if (ageOfHuman.inDays() <= 20 || sim::now().inDays() <= 20){
+    if (ageOfHuman.inDays() <= 20 || sim::now1().inDays() <= 20){
         // We need at least 20 days history (m_y_lag) to calculate infectiousness;
         // assume no infectiousness if we don't have this history.
         // Note: human not updated on DOB so age must be >20 days.
@@ -140,7 +140,7 @@ double WHFalciparum::probTransmissionToMosquito( SimTime ageOfHuman, double tbvF
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. We have 20 days history, so use mod_nn:
-    int firstIndex = sim::daysToSteps(sim::now().inDays() - 10) + 1;
+    int firstIndex = sim::daysToSteps(sim::now1().inDays() - 10) + 1;
     double x = beta1 * m_y_lag[mod_nn(firstIndex, y_lag_len)]
             + beta2 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(5), y_lag_len)]
             + beta3 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(10), y_lag_len)];
@@ -171,13 +171,13 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
         if( treat.liverEffect() < sim::zero() )
             clearInfections( Treatments::LIVER );
         else
-            treatExpiryLiver = max( treatExpiryLiver, sim::now() + treat.liverEffect() );
+            treatExpiryLiver = max( treatExpiryLiver, sim::now1() + treat.liverEffect() );
     }
     if( treat.bloodEffect() != sim::zero() ){
         if( treat.bloodEffect() < sim::zero() )
             clearInfections( Treatments::BLOOD );
         else
-            treatExpiryBlood = max( treatExpiryBlood, sim::now() + treat.bloodEffect() );
+            treatExpiryBlood = max( treatExpiryBlood, sim::now1() + treat.bloodEffect() );
     }
     
     // triggered intervention deployments:
@@ -190,13 +190,13 @@ void WHFalciparum::treatSimple(SimTime timeLiver, SimTime timeBlood){
         if( timeLiver < sim::zero() )
             clearInfections( Treatments::LIVER );
         else
-            treatExpiryLiver = max( treatExpiryLiver, sim::now() + timeLiver );
+            treatExpiryLiver = max( treatExpiryLiver, sim::now1() + timeLiver );
     }
     if( timeBlood != sim::zero() ){
         if( timeBlood < sim::zero() )
             clearInfections( Treatments::BLOOD );
         else
-            treatExpiryBlood = max( treatExpiryBlood, sim::now() + timeBlood );
+            treatExpiryBlood = max( treatExpiryBlood, sim::now1() + timeBlood );
     }
 }
 

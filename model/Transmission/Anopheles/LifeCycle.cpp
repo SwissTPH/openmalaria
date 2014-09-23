@@ -55,7 +55,7 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
     // When now=0, use indices 0 up to oneTS - oneDay
-    for( SimTime d = sim::now(), end = sim::now() + sim::oneTS(); d < end; i += sim::oneDay() ){
+    for( SimTime d = sim::now1(), end = sim::now1() + sim::oneTS(); d < end; i += sim::oneDay() ){
         val += 1.0 / invLarvalResources[mod_nn(d, sim::oneYear())];
     }
     //TODO: why are units per time step?

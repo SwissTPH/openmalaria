@@ -43,7 +43,7 @@ public:
     CM5DayCommon (double tSF);
 
     virtual bool notAtRisk() {
-        SimTime ageLastTreatment = sim::now() - m_tLastTreatment;
+        SimTime ageLastTreatment = sim::now0() - m_tLastTreatment;
         return ageLastTreatment > sim::zero() && ageLastTreatment <= sim::fromDays(20);
     }
     

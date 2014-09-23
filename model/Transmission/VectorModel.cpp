@@ -355,7 +355,7 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
     PerHost& host = human.perHostTransmission;
     host.update( human );
     if (simulationMode == forcedEIR){
-        return initialisationEIR[sim::nowModStepsPerYear()]
+        return initialisationEIR[sim::stepOfYear1()]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{
         assert( simulationMode == dynamicEIR );

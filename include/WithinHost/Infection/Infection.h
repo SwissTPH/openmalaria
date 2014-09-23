@@ -33,7 +33,7 @@ public:
     static void init( const OM::Parameters& parameters, SimTime latentP );
     
     Infection (uint32_t protID) :
-        m_startDate(sim::now()),
+        m_startDate(sim::now1()),
         m_proteome_ID(protID),
         m_density(0.0),
         m_cumulativeExposureJ(0.0)
@@ -64,7 +64,7 @@ public:
      * first update (though due to the latent period densities will still be
      * low). */
     inline bool bloodStage() const{
-        return sim::now() - m_startDate > sim::fromDays(5);
+        return sim::now1() - m_startDate > sim::fromDays(5);
     }
     
     //! Get proteome

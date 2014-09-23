@@ -195,7 +195,7 @@ private:
      *
      * Values at index ((d-1) mod N_v_length) are used to derive the state of
      * the population on day d. The state during days (t×(I-1)+1) through (t×I)
-     * where t is sim::now() and I is sim::oneTS().inDays() is what
+     * where t is sim::now1() and I is sim::oneTS().inDays() is what
      * drives the transmission at time-step t.
      * 
      * These arrays should be checkpointed. */

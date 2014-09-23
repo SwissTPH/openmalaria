@@ -86,7 +86,7 @@ public:
      * gametocytes independently, thus this also tests existance of
      * gametocytes. */
     inline bool isPatent() const{
-        return bloodStageClearDate > sim::now();
+        return bloodStageClearDate > sim::now1();
     }
     
     /** Fully clear blood stage parasites. */

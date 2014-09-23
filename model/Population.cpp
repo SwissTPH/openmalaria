@@ -175,7 +175,7 @@ void Population::createInitialHumans ()
     
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
-    assert( sim::now() == sim::zero() );      // assumed below
+    assert( sim::now1() == sim::zero() );      // assumed below
     _transmissionModel->init2 (*this);
 }
 
@@ -202,7 +202,7 @@ void Population::update1( SimTime firstVecInitTS ){
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
     //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * (sim::now() / sim::oneTS())));
+    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * (sim::now1() / sim::oneTS())));
     int targetPop = populationSize;
     int cumPop = 0;
 
@@ -240,7 +240,7 @@ void Population::update1( SimTime firstVecInitTS ){
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman( sim::now() );
+        newHuman( sim::now1() );
         //++nCounter;
         ++cumPop;
     }

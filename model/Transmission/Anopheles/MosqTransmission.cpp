@@ -225,7 +225,7 @@ double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
             S_v[t] = 0.0;
             /* Note: could report; these reports often occur too frequently, however
             if( S_v[t] != 0.0 ){        // potentially reduce reporting
-	cerr << sim::now() <<":\t S_v cut-off"<<endl;
+	cerr << sim::now1() <<":\t S_v cut-off"<<endl;
             } */
         }
     }
@@ -275,7 +275,7 @@ double MosqTransmission::getLastVecStat( VecStat vs )const{
     double val = 0.0;
     //TODO: why is there an offset — i.e. why not make this to zero?
     SimTime offset = sim::oneDay() - sim::oneTS();
-    for( SimTime now = sim::now() + offset, end = sim::now() + sim::oneTS() + offset;
+    for( SimTime now = sim::now1() + offset, end = sim::now1() + sim::oneTS() + offset;
         now < end; now += sim::oneDay() )
     {
         //TODO: if offset is changed, we don't need to add N_v_length

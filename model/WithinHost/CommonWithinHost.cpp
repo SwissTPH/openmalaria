@@ -103,7 +103,7 @@ void CommonWithinHost::importInfection(){
 
 void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    m_y_lag[sim::nowStepsMod(y_lag_len)] = totalDensity;
+    m_y_lag[sim::now1StepsModulo(y_lag_len)] = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -128,11 +128,11 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     double cumulative_Y=m_cumulative_Y;
     m_cumulative_h += nNewInfs;
 
-    bool treatmentLiver = treatExpiryLiver >= sim::now();
-    bool treatmentBlood = treatExpiryBlood >= sim::now();
+    bool treatmentLiver = treatExpiryLiver >= sim::now1();
+    bool treatmentBlood = treatExpiryBlood >= sim::now1();
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
-    for( SimTime now = sim::now(), end = sim::now() + sim::oneTS(); now < end; now += sim::oneDay() ){
+    for( SimTime now = sim::now1(), end = sim::now1() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel->medicate( ageInYears );
         

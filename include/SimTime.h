@@ -147,10 +147,16 @@ class sim {
 public:
     ///@brief Accessors, all returning a copy to make read-only
     //@{
-    /** Get the time now (i.e. duration since start of simulation, including
-     * initialisation period). The following is always true: now() >= zero().
-     */
-    static inline SimTime now(){ return sim_time; }
+    /** Get the time now: time at beginning of current update period.
+     *
+     * This is the time since the start of simulation, including the
+     * initialisation period, excluding the current update interval.
+     * The following is always true: now0() >= zero(). */
+    static inline SimTime now0(){ return sim_time0; }
+    /** As now0, except that this is the time at the end of the current update
+     * period (i.e. at some times now1 = now0 + 1, but at other times the two
+     * appear equal). */
+    static inline SimTime now1(){ return sim_time1; }
     
     /** Time relative to the intervention period. Some events are defined
      * relative to this time rather than simulation time, and since the
@@ -219,13 +225,21 @@ public:
     ///@brief Conversion functions, for convenience
     //@{
     /** Return the current time in time steps modulo some positive integer. */
-    static inline int nowStepsMod(int denominator){
-        return util::mod_nn(now() / oneTS(), denominator);
+    static inline int now0StepsModulo(int denominator){
+        return util::mod_nn(now0() / oneTS(), denominator);
+    }
+    /** Return the current time in time steps modulo some positive integer. */
+    static inline int now1StepsModulo(int denominator){
+        return util::mod_nn(now1() / oneTS(), denominator);
     }
     
     /** Return the current time in time steps modulo steps per year. */
-    static inline int nowModStepsPerYear(){
-        return nowStepsMod(steps_per_year);
+    static inline int stepOfYear0(){
+        return now0StepsModulo(steps_per_year);
+    }
+    /** Return the current time in time steps modulo steps per year. */
+    static inline int stepOfYear1(){
+        return now1StepsModulo(steps_per_year);
     }
     
     /** Convert some number of days to some number of time steps (integer
@@ -236,7 +250,8 @@ public:
 private:
     static void init( int days_per_step, double max_age_years );
     
-    static SimTime sim_time;
+    static SimTime sim_time0;
+    static SimTime sim_time1;
     static SimTime interv_time;
     static SimTime one_step;
     static SimTime max_human_age;
