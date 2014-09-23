@@ -185,13 +185,15 @@ bool LCEmergence::initIterate (MosqTransmission& transmission) {
 
 
 double LCEmergence::get( SimTime d, SimTime dYear1, double nOvipositing ) {
-    double emergence = lifeCycle.updateEmergence(lcParams, nOvipositing, d, dYear1);
+    double emergence = lifeCycle.updateEmergence(lcParams, nOvipositing, d);
     //TODO
     return emergence * larvicidingIneffectiveness;
 }
 
 void LCEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
-    SimTime d5Year = moda(d, sim::fromYearsI(5));
+    //TODO: why is there an offset — i.e. why not make this to zero?
+    SimTime offset = sim::oneDay() - sim::oneTS();
+    SimTime d5Year = moda(d + offset, sim::fromYearsI(5));
     quinquennialP_dif[d5Year] = tsP_dif;
 }
 

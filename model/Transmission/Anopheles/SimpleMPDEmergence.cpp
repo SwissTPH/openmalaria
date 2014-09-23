@@ -173,22 +173,29 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
 }
 
 
-double SimpleMPDEmergence::get( SimTime d, SimTime dYear1, double nOvipositing ) {
+double SimpleMPDEmergence::get( SimTime d, double nOvipositing ) {
+    //TODO: why is there an offset — i.e. why not make this to zero?
+    SimTime offset = sim::oneDay() - sim::oneTS();
+    // Day of year. Note that emergence during day 1
+    // comes from mosqEmergeRate[0], hence subtraction by 1.
+    SimTime dYear1 = mod_nn(d + offset - sim::oneDay(), sim::oneYear());
     // Simple Mosquito Population Dynamics model: emergence depends on the
     // adult population, resources available, and larviciding.
     // See: A Simple Periodically-Forced Difference Equation Model for
     // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
-    double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d, developmentDuration)];
+    double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d + offset, developmentDuration)];
     double emergence = interventionSurvival() * probPreadultSurvival * yt /
         (1.0 + invLarvalResources[dYear1] * yt);
-    nOvipositingDelayed[mod_nn(d, developmentDuration)] = nOvipositing;
-    SimTime d5Year = mod_nn(d, sim::fromYearsI(5));
+    nOvipositingDelayed[mod_nn(d + offset, developmentDuration)] = nOvipositing;
+    SimTime d5Year = mod_nn(d + offset, sim::fromYearsI(5));
     quinquennialOvipositing[d5Year] = nOvipositing;
     return emergence;
 }
 
 void SimpleMPDEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
-    SimTime d5Year = mod_nn(d, sim::fromYearsI(5));
+    //TODO: why is there an offset — i.e. why not make this to zero?
+    SimTime offset = sim::oneDay() - sim::oneTS();
+    SimTime d5Year = mod_nn(d + offset, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
 }
 

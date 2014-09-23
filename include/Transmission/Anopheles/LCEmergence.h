@@ -73,7 +73,7 @@ public:
     
     /// Return the emergence for today, taking interventions like larviciding
     /// into account.
-    double get( SimTime d, SimTime dYear1, double nOvipositing );
+    double get( SimTime d, double nOvipositing );
     
     /// Store S_v for day d. Used by initIterate().
     void updateStats( SimTime d, double tsP_dif, double S_v );

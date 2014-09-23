@@ -136,16 +136,16 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
 
 double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
                                  double tsP_dif, bool isDynamic, bool printDebug ){
+    //TODO: why is there an offset — i.e. why not make this to zero?
+    SimTime offset = sim::oneDay() - sim::oneTS();
+    
     // We add N_v_length so that we can use mod_nn() instead of mod().
     SimTime dMod = d + N_v_length;
-    assert (dMod >= N_v_length);
+    assert (dMod+offset >= N_v_length);
     // Indecies for today, yesterday and mosqRestDuration days back:
-    SimTime t    = mod_nn(dMod, N_v_length);
-    SimTime t1   = mod_nn(dMod - sim::oneDay(), N_v_length);
-    SimTime ttau = mod_nn(dMod - mosqRestDuration, N_v_length);
-    // Day of year. Note that emergence during day 1
-    // comes from mosqEmergeRate[0], hence subtraction by 1.
-    SimTime dYear1 = mod_nn(d - sim::oneDay(), sim::oneYear());
+    SimTime t    = mod_nn(dMod+offset, N_v_length);
+    SimTime t1   = mod_nn(dMod+offset - sim::oneDay(), N_v_length);
+    SimTime ttau = mod_nn(dMod+offset - mosqRestDuration, N_v_length);
     
     // These only need to be calculated once per time step, but should be
     // present in each of the previous N_v_length - 1 positions of arrays.
@@ -155,7 +155,7 @@ double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
     
     
     double nOvipositing = P_df[ttau] * N_v[ttau];
-    double newAdults = emergence->get( d, dYear1, nOvipositing );
+    double newAdults = emergence->get( d, nOvipositing );
     util::streamValidate( newAdults );
     
     // num seeking mosquitos is: new adults + those which didn't find a host
@@ -170,47 +170,47 @@ double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
                 + P_df[ttau] * O_v[ttau];
     
     //BEGIN S_v
-    // Set up array with n in 1..θ_s−1 for f_τ(dMod-n) (NDEMD eq. 1.7)
+    // Set up array with n in 1..θ_s−1 for f_τ(dMod+offset-n) (NDEMD eq. 1.7)
     SimTime fProdEnd = mosqRestDuration * 2;
     for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fProdEnd; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod-n, N_v_length);
+        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
         ftauArray[n] = ftauArray[n-sim::oneDay()] * P_A[tn];
     }
-    ftauArray[fProdEnd] += P_df[mod_nn(dMod-fProdEnd, N_v_length)];
+    ftauArray[fProdEnd] += P_df[mod_nn(dMod+offset-fProdEnd, N_v_length)];
 
     for( SimTime n = fProdEnd+sim::oneDay(); n < EIPDuration; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod-n, N_v_length);
+        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
         ftauArray[n] =
             P_df[tn] * ftauArray[n - mosqRestDuration]
             + P_A[tn] * ftauArray[n-sim::oneDay()];
     }
 
     double sum = 0.0;
-    SimTime ts = dMod - EIPDuration;
+    SimTime ts = dMod+offset - EIPDuration;
     for( SimTime l = sim::oneDay(); l < mosqRestDuration; l += sim::oneDay() ){
-        SimTime tsl = mod_nn(ts - l, N_v_length);       // index dMod - theta_s - l
+        SimTime tsl = mod_nn(ts - l, N_v_length);       // index dMod+offset - theta_s - l
         sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) *
                 ftauArray[EIPDuration+l-mosqRestDuration];
     }
 
 
-    // Set up array with n in 1..θ_s−τ for f(dMod-n) (NDEMD eq. 1.6)
+    // Set up array with n in 1..θ_s−τ for f(dMod+offset-n) (NDEMD eq. 1.6)
     for( SimTime n = sim::oneDay(); n <= mosqRestDuration; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod-n, N_v_length);
+        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
         fArray[n] = fArray[n-sim::oneDay()] * P_A[tn];
     }
     fArray[mosqRestDuration] += P_df[ttau];
 
     fProdEnd = EIPDuration-mosqRestDuration;
     for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fProdEnd; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod-n, N_v_length);
+        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
         fArray[n] =
             P_df[tn] * fArray[n - mosqRestDuration]
             + P_A[tn] * fArray[n-sim::oneDay()];
     }
 
 
-    ts = mod_nn(ts, N_v_length);       // index dMod - theta_s
+    ts = mod_nn(ts, N_v_length);       // index dMod+offset - theta_s
     S_v[t] = P_dif[ts] * fArray[EIPDuration-mosqRestDuration] * (N_v[ts] - O_v[ts])
                 + sum
                 + P_A[t1]*S_v[t1]

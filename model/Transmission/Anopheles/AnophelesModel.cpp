@@ -384,9 +384,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     // simulation uses one or five day time steps.
     // The transmission for time-step t depends on the state during days
     // (t×(I-1)+1) through (t×I) where I is sim::oneTS().inDays().
-    //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay() - sim::oneTS();
-    for( SimTime now = sim::now() + offset, end = sim::now() + sim::oneTS() + offset;
+    for( SimTime now = sim::now(), end = sim::now() + sim::oneTS();
         now < end; now += sim::oneDay() )
     {
         partialEIR += transmission.update( now, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;

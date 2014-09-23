@@ -189,14 +189,13 @@ public:
      * value based on num ovipositing yesterday? That's not right.
      * @param d The current day (exact value isn't important; it must be
      * non-negative and incremented by one between calls).
-     * @param dYear1 The day of the year of the last calculated time-point.
      * @returns The number of adults emerging between the last simulated time
      * point and the one being calculated. Assume immediate mating with 100%
      * survival and success.
      */
     double updateEmergence( const LifeCycleParams& lcParams,
                             double nOvipositingMosqs,
-                            SimTime d, SimTime dYear1 );
+                            SimTime d );
     
     /// Checkpointing
     template<class S>

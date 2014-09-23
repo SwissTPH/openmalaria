@@ -102,13 +102,12 @@ public:
      * 
      * @param d The current day (exact value isn't important; it must be
      * non-negative and incremented by one between calls).
-     * @param dYear1 The day of the year of the last calculated time-point.
      * @param nOvipositing The number of adults which successfully
      * oviposited this/last time-step.
      * @returns The number of adults emerging between the last simulated time
      * point and the one being calculated.
      */
-    virtual double get( SimTime d, SimTime dYear1, double nOvipositing ) =0;
+    virtual double get( SimTime d, double nOvipositing ) =0;
     
     /** Called at the end of each day's update to give the model data it needs
      * during initialisation.
