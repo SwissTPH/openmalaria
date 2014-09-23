@@ -185,6 +185,7 @@ public:
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
+        // age is that of human at start of time step (i.e. may be as low as 0)
         ptr_map<double,CMDecisionTree>::const_iterator it = branches.upper_bound( hostData.ageYears );
         if( it == branches.end() )
             throw TRACED_EXCEPTION( "bad age-based decision tree switch", util::Error::PkPd );

@@ -94,7 +94,7 @@ public:
      *
      * @param schedule Index of a treatment schedule
      * @param dosages Index of a dosage table
-     * @param age Age of human in years
+     * @param age Age of human at start of time step in years
      */
     virtual void prescribe(size_t schedule, size_t dosages, double age) =0;
     

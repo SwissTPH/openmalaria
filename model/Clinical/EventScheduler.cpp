@@ -170,7 +170,7 @@ void ClinicalEventScheduler::massDrugAdministration( Human& human,
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration ( 
-        CMHostData( human, human.getAge1().inYears(), pgState ),        //TODO: age0?
+        CMHostData( human, human.getAge0().inYears(), pgState ),
             human, screeningReport, drugReport
     );
 }
