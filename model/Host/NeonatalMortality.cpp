@@ -97,7 +97,7 @@ void NeonatalMortality::update (const Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = sim::now1StepsModulo(prevByGestationalAge.size());
+    size_t index = sim::now0StepsModulo(prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for (size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {

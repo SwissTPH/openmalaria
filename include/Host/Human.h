@@ -134,7 +134,7 @@ public:
   inline bool isInSubPop( interventions::ComponentId id )const{
       map<interventions::ComponentId,SimTime>::const_iterator it = m_subPopExp.find( id );
       if( it == m_subPopExp.end() ) return false;       // no history of membership
-      else return it->second > sim::now1();   // added: has expired?
+      else return it->second > sim::now0();   // added: has expired?
   }
   /** Return the cohort set. */
   inline uint32_t cohortSet()const{ return m_cohortSet; }

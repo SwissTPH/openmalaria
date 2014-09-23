@@ -190,7 +190,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
             m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
         {
             //  We use >= to test membership, < is inverse (see comment on m_subPopExp)
-            if( expIt->second < sim::now1() ){
+            if( expIt->second < sim::now0() ){
                 // don't flush reports
                 // report removal due to expiry
                 Survey::current().addInt(Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
@@ -245,7 +245,7 @@ void Human::summarize() {
 
 void Human::reportDeployment( ComponentId id, SimTime duration ){
     if( duration <= sim::zero() ) return; // nothing to do
-    m_subPopExp[id] = sim::now1() + duration;
+    m_subPopExp[id] = sim::now0() + duration;
     m_cohortSet = Survey::updateCohortSet( m_cohortSet, id, true );
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
@@ -254,7 +254,7 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
         SubPopT::iterator expIt = m_subPopExp.find( *it );
         if( expIt != m_subPopExp.end() ){
             //  We use >= to test membership (see comment on m_subPopExp)
-            if( expIt->second >= sim::now1() ){
+            if( expIt->second >= sim::now0() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment
                 // and onFirstInfection cohort options. Health system memory must
                 // be reset for this to work properly; in theory the memory should
