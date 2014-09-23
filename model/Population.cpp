@@ -168,6 +168,7 @@ void Population::createInitialHumans ()
     {
         int targetPop = AgeStructure::targetCumPop( iage, populationSize );
         while (cumulativePop < targetPop) {
+            //TODO: offset by oneTS happened when adjusting human DOB, but maybe code is wrong?
             newHuman( sim::zero() - sim::fromTS(iage) );
             ++cumulativePop;
         }
@@ -214,6 +215,7 @@ void Population::update1( SimTime firstVecInitTS ){
         // Update human, and remove if too old.
         // We only need to update humans who will survive past the end of the
         // "one life span" init phase (this is an optimisation).
+        //TODO: offset by oneTS happened when adjusting human DOB, but maybe code is wrong?
         SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
         bool updateHuman = lastPossibleTS >= firstVecInitTS;
         bool isDead = iter->update(_transmissionModel, updateHuman);
@@ -228,7 +230,8 @@ void Population::update1( SimTime firstVecInitTS ){
 
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
-        if( cumPop > AgeStructure::targetCumPop(iter->getAge() / sim::oneTS(), targetPop) ){
+        //TODO: age0 or age1?
+        if( cumPop > AgeStructure::targetCumPop(iter->getAge1() / sim::oneTS(), targetPop) ){
             --cumPop;
             iter->destroy();
             iter = population.erase (iter);
@@ -261,7 +264,7 @@ void Population::ctsHostDemography (ostream& stream){
     Population::ConstReverseIter it = population.crbegin();
     int cumCount = 0;
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
-        while( it != population.crend() && it->getAgeInYears() < ubound ){
+        while( it != population.crend() && it->getAge0().inYears() < ubound ){
             ++cumCount;
             ++it;
         }
@@ -318,7 +321,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYears());
+            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAge0().inYears());
         }
     }
     stream << '\t' << avail/nHumans;

@@ -155,7 +155,7 @@ TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::Depl
 void TriggeredDeployments::SubList::deploy( Host::Human& human,
         Deployment::Method method, VaccineLimits vaccLimits )const
 {
-    SimTime age = human.getAge();
+    SimTime age = human.getAge1();      //TODO: this should be age0, right?
     if( age >= minAge && age < maxAge ){
         if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
             HumanIntervention::deploy( human, method, vaccLimits );

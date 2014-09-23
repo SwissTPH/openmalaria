@@ -39,7 +39,7 @@ using namespace OM::util;
 double VectorModel::meanPopAvail (const Population& population) {
     double sumRelativeAvailability = 0.0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAge0().inYears());
     }
     if( population.size() > 0 ){
         return sumRelativeAvailability / population.size();     // mean-rel-avail
@@ -82,7 +82,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
         const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears() );
+            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAge0().inYears() );
         }
         stream << '\t' << total / population.size();
     }
@@ -375,7 +375,7 @@ void VectorModel::vectorUpdate (const Population& population) {
     popProbTransmission.reserve( population.size() );
     for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h ){
         popProbTransmission.push_back( h->withinHostModel->probTransmissionToMosquito(
-            h->getAge(), h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
+            h->getAge1() /*TODO: age0? */, h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
     }
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);

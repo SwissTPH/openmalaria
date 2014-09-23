@@ -116,13 +116,13 @@ public:
   
   /// @brief Small functions
   //@{
-    /** Get the human's age now. */
-    inline SimTime getAge() const{
-        return sim::now1() - m_DOB;
+    /** Get the human's age at the beginning of the time step. */
+    inline SimTime getAge0() const{
+        return sim::now0() - m_DOB;
     }
-    /** Get the age in years. */
-    inline double getAgeInYears() const{
-        return getAge().inYears();
+    /** Get the human's age at the end of the time step. */
+    inline SimTime getAge1() const{
+        return sim::now1() - m_DOB;
     }
     /** Date of birth. */
     inline SimTime getDateOfBirth() const{ return m_DOB; }
@@ -210,7 +210,7 @@ private:
   Clinical::ClinicalModel *clinicalModel;
   //@}
   
-  SimTime m_DOB;        // date of birth
+  SimTime m_DOB;        // date of birth; humans are always born at the end of a time step
   
   /// Vaccines
   //TODO: could move TBV code to WHFalciparum, where the efficacy is now used

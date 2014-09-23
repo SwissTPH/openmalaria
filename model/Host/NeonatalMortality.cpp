@@ -75,7 +75,7 @@ void NeonatalMortality::update (const Population& population) {
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
         //NOTE: this is based on last time-step's parasite densities but this
         // time-step's age, which is a bit strange (though not very significant).
-        double ageYears = iter->getAgeInYears();
+        double ageYears = iter->getAge1().inYears();    //TODO: age0?
         // Note: since we're using a linked list, we have to iterate until we reach
         // the individuals we're interested in. Due to population structure, it's
         // probably quickest to start iterating from the oldest.

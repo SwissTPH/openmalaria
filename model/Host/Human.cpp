@@ -177,7 +177,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
     if( doUpdate )
         ++PopulationStats::humanUpdates;
 #endif
-    SimTime age = getAge();
+    SimTime age = getAge1();    //TODO: age0?
     if (clinicalModel->isDead(age))
         return true;
     
@@ -233,7 +233,7 @@ void Human::summarize() {
     }
     
     Survey::current().addInt( Report::MI_HOSTS, *this, 1)
-        .addDouble( Report::MD_AGE, *this, getAgeInYears() );
+        .addDouble( Report::MD_AGE, *this, getAge0().inYears() );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     

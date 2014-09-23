@@ -231,7 +231,7 @@ void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, dou
 
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAge0().inYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
@@ -347,7 +347,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     size_t i = 0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAgeInYears());
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAge1().inYears());    //TODO: age0?
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
