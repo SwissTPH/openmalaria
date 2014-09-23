@@ -177,14 +177,18 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
     if( doUpdate )
         ++PopulationStats::humanUpdates;
 #endif
-    SimTime age = getAge1();    //TODO: age0?
-    if (clinicalModel->isDead(age))
+    SimTime age0 = getAge0();    //TODO: age0?
+    if (clinicalModel->isDead(age0))
         return true;
     
     if (doUpdate){
-        util::streamValidate( age.raw() );
-        double ageYears = age.inYears();
-        monitoringAgeGroup.update( ageYears );
+        util::streamValidate( age0.raw() );
+        // Ages at  the end of the update period respectively. In most cases
+        // the difference between this and age at the start is not especially
+        // important in the model design, but since we parameterised with
+        // ageYears1 we should stick with it.
+        double ageYears1 = getAge1().inYears();
+        monitoringAgeGroup.update( ageYears1 );
         // check sub-pop expiry
         for( map<ComponentId,SimTime>::iterator expIt =
             m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
@@ -203,14 +207,14 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 ++expIt;
             }
         }
-        double EIR = transmissionModel->getEIR( *this, ageYears, monitoringAgeGroup );
+        double EIR = transmissionModel->getEIR( *this, ageYears1, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
-        withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV), mon);
+        withinHostModel->update(nNewInfs, ageYears1, _vaccine.getFactor(interventions::Vaccine::BSV), mon);
         
-        clinicalModel->update( *this, ageYears, age == sim::oneTS() );
-        clinicalModel->updateInfantDeaths( age );
+        clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
+        clinicalModel->updateInfantDeaths( age0 );
     }
     return false;
 }

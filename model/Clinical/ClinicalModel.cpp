@@ -102,7 +102,7 @@ ClinicalModel::~ClinicalModel () {
 // -----  other non-static methods  -----
 
 bool ClinicalModel::isDead( SimTime age ){
-    if( age > sim::maxHumanAge())       // too old (reached age limit)
+    if( age >= sim::maxHumanAge())       // too old (reached age limit)
         doomed = DOOMED_TOO_OLD;
     if (doomed > NOT_DOOMED)	// killed by some means
         return true;	// remove from population
@@ -133,8 +133,8 @@ void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
 
 void ClinicalModel::updateInfantDeaths( SimTime age ){
     // update array for the infant death rates
-    if (age <= sim::oneYear()){
-        size_t index = age / sim::oneTS() - 1;
+    if (age < sim::oneYear()){
+        size_t index = age / sim::oneTS();
         infantIntervalsAtRisk[index] += 1;     // baseline
         // Testing doomed == DOOMED_NEXT_TS gives very slightly different results than
         // testing doomed == DOOMED_INDIRECT (due to above if(..))
