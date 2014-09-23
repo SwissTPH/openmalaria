@@ -25,6 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include "WithinHost/Infection/DescriptiveInfection.h"
 #include "util/random.h"
+#include "UnittestUtil.h"
 #include <limits>
 
 using namespace OM::WithinHost;
@@ -33,12 +34,11 @@ class DescriptiveInfectionSuite : public CxxTest::TestSuite
 {
 public:
     void setUp () {
+        UnittestUtil::initTime( 5 );
 	UnittestUtil::Infection_init ();
 	UnittestUtil::DescriptiveInfection_init ();
 	DescriptiveInfection::initParameters();	//FIXME: this gets data from InputData
 	gsl::setUp (83);	// seed is unimportant, but must be fixed
-	Global::interval = 5;
-	TimeStep::simulation = 1;	// value isn't really important
 	infection = new DescriptiveInfection ();
     }
     void tearDown () {

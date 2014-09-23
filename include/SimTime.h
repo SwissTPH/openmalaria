@@ -21,7 +21,6 @@
 #ifndef Hmod_OM_SimTime
 #define Hmod_OM_SimTime
 
-#include "util/TimeStep.h"      // for conversion
 #include "util/mod.h"
 
 #include <iostream>
@@ -59,9 +58,6 @@ public:
     //@{
     /// Get raw value (currently days; not guaranteed not to change). Same value as checkpointed.
     inline int raw() const{ return d; }
-    
-    /// Convert to TimeStep
-    inline util::TimeStep ts() const{ return util::TimeStep::fromDays(d); }
     
     /// Get length of time in days. Currently this is simple no-op get.
     inline int inDays() const{ return d; }
@@ -209,11 +205,6 @@ public:
     /** Convert from years to nearest time step. */
     static inline SimTime fromYearsN(double years){
         return roundToTSFromDays(SimTime::DAYS_IN_YEAR * years);
-    }
-    
-    /** Convert. */
-    static inline SimTime fromTS(const util::TimeStep ts){
-        return SimTime(ts.inDays());
     }
     
     /** Convert. */

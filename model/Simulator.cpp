@@ -103,7 +103,6 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     const scnXml::Demography& demography = scenario.getDemography();
     
     // 1) elements with no dependencies on other elements initialised here:
-    OM::TimeStep::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
     sim::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
     
     util::random::seed( model.getParameters().getIseed() );
@@ -150,7 +149,6 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
 // ———  run simulations  ———
 
 void Simulator::start(const scnXml::Monitoring& monitoring){
-    TimeStep::simulation = TimeStep( 0 );
     sim::sim_time = sim::zero();
     
     // Make sure warmup period is at least as long as a human lifespan, as the
@@ -171,7 +169,6 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         + population->_transmissionModel->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
         + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
-    assert( totalSimDuration.ts() < TimeStep::future && totalSimDuration.ts() + TimeStep::never < TimeStep(0) );
     assert( totalSimDuration + sim::never() < sim::zero() );
     
     if (isCheckpoint()) {
@@ -210,9 +207,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             InterventionManager::deploy( *population );
             
             // update
-            ++TimeStep::simulation;
             sim::sim_time += sim::oneTS();
-            ++TimeStep::interventionPeriod;
             sim::interv_time += sim::oneTS();
             population->update1( humanWarmupLength );
             
@@ -237,7 +232,6 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
-            TimeStep::interventionPeriod = TimeStep(0);
             sim::interv_time = sim::zero();
             population->preMainSimInit();
             population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
@@ -390,7 +384,6 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         util::StreamValidator & stream;
 #       endif
         
-        TimeStep::interventionPeriod & stream;
         sim::interv_time & stream;
         simPeriodEnd & stream;
         totalSimDuration & stream;
@@ -402,7 +395,6 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
-        TimeStep::simulation & stream;
         sim::sim_time & stream;
         util::random::checkpoint (stream, checkpointNum);
         
@@ -445,7 +437,6 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     util::StreamValidator & stream;
 # endif
     
-    TimeStep::interventionPeriod & stream;
     sim::interv_time & stream;
     simPeriodEnd & stream;
     totalSimDuration & stream;
@@ -454,7 +445,6 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     PopulationStats::staticCheckpoint( stream );
     InterventionManager::checkpoint( stream );
     
-    TimeStep::simulation & stream;
     sim::sim_time & stream;
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;

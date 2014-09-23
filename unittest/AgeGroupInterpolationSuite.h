@@ -34,7 +34,7 @@ class AgeGroupInterpolationSuite : public CxxTest::TestSuite
 public:
     AgeGroupInterpolationSuite () {
         // Set maximum age to 90 years:
-        UnittestUtil::AgeGroupInterpolation_init();
+        UnittestUtil::initTime( 5 );
         agvElt = auto_ptr<scnXml::AgeGroupValues>(new scnXml::AgeGroupValues());
         scnXml::AgeGroupValues::GroupSequence& seq = agvElt->getGroup();
         seq.resize( dataLen, scnXml::Group(0.0,0.0) );

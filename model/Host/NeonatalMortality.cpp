@@ -49,8 +49,8 @@ std::vector<double> prevByGestationalAge;
 
 
 void NeonatalMortality::init() {
-    TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
-    prevByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
+    SimTime fiveMonths = sim::fromDays( 5 * 30 );
+    prevByGestationalAge.assign( fiveMonths / sim::oneTS(), 0.0 );
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
@@ -97,7 +97,7 @@ void NeonatalMortality::update (const Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = mod_nn(TimeStep::simulation, prevByGestationalAge.size());
+    size_t index = sim::nowStepsMod(prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for (size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {

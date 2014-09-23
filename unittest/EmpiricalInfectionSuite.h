@@ -24,7 +24,9 @@
 
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.h"
+#include "ExtraAsserts.h"
 #include "WithinHost/Infection/EmpiricalInfection.h"
+#include "WithinHost/CommonWithinHost.h"
 #include "util/random.h"
 #include <limits>
 
@@ -35,73 +37,83 @@ class EmpiricalInfectionSuite : public CxxTest::TestSuite
 public:
     void setUp () {
         UnittestUtil::initTime(1);
-        now = sim::now();
-	UnittestUtil::Infection_init_NaN ();
-	EmpiricalInfection::init();
-	util::random::seed (83);	// seed is unimportant, but must be fixed
-	infection = new EmpiricalInfection (0xFFFFFFFF, 1);	// pkpdID (1st value) isn't important since we're not using drug model here
-        now += sim::oneDay();
+        UnittestUtil::Infection_init_latentP_and_NaN ();
+        EmpiricalInfection::init();
+        util::random::seed (83);	// seed is unimportant, but must be fixed
+        // pkpdID (1st value) isn't important since we're not using drug model here:
+        infection = CommonWithinHost::createInfection( 0xFFFFFFFF );
+        for( SimTime d = sim::now(), end = sim::now() + sim::fromDays(15); d < end; d += sim::oneDay() ){
+            // blood stage starts 15 days after creation
+            UnittestUtil::incrTime( sim::oneDay() );
+            infection->update( 1.0, d );
+        }
     }
     void tearDown () {
-	delete infection;
+        delete infection;
     }
-    
+
     void testNewInf () {
-	TS_ASSERT_APPROX (infection->getDensity(), 0.00000000000000000);
+        TS_ASSERT_APPROX (infection->getDensity(), 0.00000000000000000);
     }
-    
+
     // Parasite growth is stochastic, so there's not a lot we can test, except for reproducability
     void testUpdatedInf () {
-	infection->update (1.0, now);
-	TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
     }
     void testUpdated2Inf () {
-	infection->update (1.0, now);
-        now += sim::oneDay();
-	infection->update (1.0, now);
-	TS_ASSERT_APPROX (infection->getDensity(), 4.94261787639103382);
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        TS_ASSERT_APPROX (infection->getDensity(), 4.94261787639103382);
     }
     void testUpdated3Inf () {
-	infection->update (1.0, now);
-        now += sim::oneDay();
-	infection->update (1.0, now);
-        now += sim::oneDay();
-	infection->update (1.0, now);
-	TS_ASSERT_APPROX (infection->getDensity(), 162.62062791268144860);
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        TS_ASSERT_APPROX (infection->getDensity(), 162.62062791268144860);
     }
     void testUpdated4Inf () {
-	infection->update (1.0, now);
-        now += sim::oneDay();
-	infection->update (1.0, now);
-        now += sim::oneDay();
-	infection->update (1.0, now);
-        now += sim::oneDay();
-	infection->update (1.0, now);
-	TS_ASSERT_APPROX (infection->getDensity(), 6.10393200785528424);
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        TS_ASSERT_APPROX (infection->getDensity(), 6.10393200785528424);
     }
     void testUpdatedInf1 () {
-	infection->update (1.0, now);
-	TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
     }
-    
+
     void testUpdatedReducedInf () {
-	infection->update (1.0, now);
-        now += sim::oneDay();
-	infection->update (0.1, now);
-	// This is, as expected, 1/10th of that in testUpdated2Inf
-	TS_ASSERT_APPROX (infection->getDensity(), 0.49426178763910338);
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (0.1, sim::now());
+        // This is, as expected, 1/10th of that in testUpdated2Inf
+        TS_ASSERT_APPROX (infection->getDensity(), 0.49426178763910338);
     }
     void testUpdatedReducedInf2 () {
-	infection->update (0.1, now);
-        now += sim::oneDay();
-	infection->update (1.0, now);
-	// This is completely different due to stochasitic effects
-	TS_ASSERT_APPROX (infection->getDensity(), 1.97582432565095644);
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (0.1, sim::now());
+        UnittestUtil::incrTime( sim::oneTS() );
+        infection->update (1.0, sim::now());
+        // This is completely different due to stochasitic effects
+        TS_ASSERT_APPROX (infection->getDensity(), 1.97582432565095644);
     }
-    
+
 private:
     CommonInfection* infection;
-    SimTime now;
 };
 
 #endif

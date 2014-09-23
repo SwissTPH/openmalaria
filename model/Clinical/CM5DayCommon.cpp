@@ -74,7 +74,7 @@ void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
     }
     
     if (pg.indirectMortality && doomed == NOT_DOOMED)
-        doomed = -TimeStep::interval;
+        doomed = -sim::oneTS().inDays();
     
     if( m_tLastTreatment == sim::now() ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );

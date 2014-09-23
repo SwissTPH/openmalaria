@@ -56,6 +56,9 @@ public:
         // we could just use zero, but we may spot more errors by using some weird number
         sim::sim_time = sim::fromYearsN(83.2591);
     }
+    static void incrTime(SimTime incr){
+        sim::sim_time += incr;
+    }
     // Initialise surveys, to the minimum required not to crash
     static void initSurveys(){
         scnXml::OptionSet opts;
@@ -66,7 +69,6 @@ public:
     }
     
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
-	TimeStep::init( 1, 90.0 );	// I think the drug model is always going to be used with an interval of 1 day.
 	ModelOptions::reset();
         ModelOptions::set(util::INCLUDES_PK_PD);
 	
@@ -120,8 +122,9 @@ public:
     }
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
-    static void Infection_init_NaN () {
-	Infection::latentP = sim::zero();
+    // But do set latentP.
+    static void Infection_init_latentP_and_NaN () {
+	Infection::latentP = sim::fromDays(15);
 	Infection::invCumulativeYstar = numeric_limits<double>::quiet_NaN();
 	Infection::invCumulativeHstar = numeric_limits<double>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
@@ -135,27 +138,16 @@ public:
 	Infection::alpha_m = 1.0 - exp(- 2.411434);
 	Infection::decayM = 2.717773;
     }
-    static void Infection_init_1day () {
-        // don't set immunity vars: currently they're not used by unittest
-        Infection_init_NaN();
-        Infection::latentP = sim::fromDays(15);
-    }
     
     static void DescriptiveInfection_init () {
-	TimeStep::init( 5, 90.0 );
         ModelOptions::reset();
         ModelOptions::set(util::INCLUDES_PK_PD);
     }
     
     static void EmpiricalWHM_setup () {
-	TimeStep::init( 1, 90.0 );
         ModelOptions::reset();
         ModelOptions::set(util::EMPIRICAL_WITHIN_HOST_MODEL);
         OM::WithinHost::opt_common_whm = true;
-    }
-    
-    static void AgeGroupInterpolation_init() {
-        TimeStep::init( 5, 90.0 );
     }
     
     static void MosqLifeCycle_init() {

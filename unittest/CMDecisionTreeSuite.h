@@ -52,7 +52,7 @@ public:
 	util::random::seed (83);	// seed is unimportant, but must be fixed
         UnittestUtil::initTime(5);
         
-	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
+	UnittestUtil::EmpiricalWHM_setup();
         whm.reset( new WHMock() );
         ETS_ASSERT( whm.get() != 0 );
         

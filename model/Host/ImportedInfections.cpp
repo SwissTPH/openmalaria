@@ -63,8 +63,8 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
 
 void ImportedInfections::import( Population& population ){
     if( rate.size() == 0 ) return;      // no imported infections
-    assert( TimeStep::interventionPeriod >= TimeStep(0) );
-    SimTime now = sim::fromTS(TimeStep::interventionPeriod);
+    SimTime now = sim::intervNow();
+    assert( now >= sim::zero() );
     if( period > sim::zero() ){
         now = mod_nn(now, period);
     }

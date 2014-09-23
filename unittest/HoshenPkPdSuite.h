@@ -37,6 +37,7 @@ class HoshenPkPdSuite : public CxxTest::TestSuite
 public:
     void setUp () {
 	agd.update( 21.0 );
+        UnittestUtil::initTime(1);
 	UnittestUtil::PkPdSuiteSetup(PkPdModel::HOSHEN_PKPD);
 	proxy = new HoshenPkPdModel ();
 	proteome_ID = ProteomeInstance::getInstances()[0].getProteomeID();	// force a particular proteome rather than let it be randomly allocated

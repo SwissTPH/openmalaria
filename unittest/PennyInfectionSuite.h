@@ -37,9 +37,8 @@ class PennyInfectionSuite : public CxxTest::TestSuite
 {
 public:
     void setUp () {
-        TimeStep::init( 1, 90.0 );
         UnittestUtil::initTime(1);
-        UnittestUtil::Infection_init_1day ();
+        UnittestUtil::Infection_init_latentP_and_NaN ();
         PennyInfection::init();
         util::random::seed( 1095 );
         infection = new PennyInfection (0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here

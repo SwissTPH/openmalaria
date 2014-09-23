@@ -59,9 +59,9 @@ AgeGroupInterpolator ClinicalEventScheduler::MF_need_antibiotic;
 
 void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Clinical& clinical )
 {
-    if (TimeStep::interval != 1)
+    if( sim::oneTS() != sim::oneDay() )
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day time step.");
-    if (! (util::ModelOptions::option (util::INCLUDES_PK_PD)))
+    if( !util::ModelOptions::option(util::INCLUDES_PK_PD) )
         throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
     opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
@@ -251,7 +251,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
         }
         
         if (indirectMortality && doomed == NOT_DOOMED)
-            doomed = -TimeStep::interval; // start indirect mortality countdown
+            doomed = -sim::oneTS().inDays(); // start indirect mortality countdown
     }
     
     if( caseStartTime == sim::now() && (pgState & Episode::RUN_CM_TREE) ){

@@ -41,7 +41,7 @@ bool opt_imm_outcomes = false;
 void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& scenario ) {
     const scnXml::Clinical& clinical = scenario.getModel().getClinical();
     //FIXME(schema): input should be in days
-    SimTime hsMemory = sim::fromTS(TimeStep(clinical.getHealthSystemMemory()));
+    SimTime hsMemory = sim::fromTS(clinical.getHealthSystemMemory());
     initCMCommon( parameters, hsMemory );
     
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
@@ -111,7 +111,7 @@ bool ClinicalModel::isDead( SimTime age ){
 
 void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     if (doomed < NOT_DOOMED)	// Countdown to indirect mortality
-        doomed -= TimeStep::interval;
+        doomed -= sim::oneTS().inDays();
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (doomed <= DOOMED_EXPIRED) {	//clinical bout 6 intervals before

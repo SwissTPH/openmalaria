@@ -21,7 +21,6 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "util/checkpoint_containers.h"
 #include "util/ModelOptions.h"
-#include "util/TimeStep.h"
 
 namespace OM { namespace Clinical {
 
@@ -50,15 +49,15 @@ void initCMCommon( const OM::Parameters& parameters, SimTime hsMemory ){
     indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
     healthSystemMemory = hsMemory;
     oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
-    infantDeaths.resize(TimeStep::stepsPerYear);
-    infantIntervalsAtRisk.resize(TimeStep::stepsPerYear);
+    infantDeaths.resize(sim::stepsPerYear());
+    infantIntervalsAtRisk.resize(sim::stepsPerYear());
     nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
 }
 
 void mainSimInitCMCommon () {
-    for (TimeStep i(0);i<TimeStep::intervalsPerYear; ++i) {
-        Clinical::infantIntervalsAtRisk[i.asInt()]=0;
-        Clinical::infantDeaths[i.asInt()]=0;
+    for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){
+        Clinical::infantIntervalsAtRisk[i] = 0;
+        Clinical::infantDeaths[i] = 0;
     }
 }
 
@@ -83,10 +82,10 @@ double infantAllCauseMort(){
     //TODO: check this is really doing what is advertised, and probably change it to report per survey.
     
     double infantPropSurviving=1.0;       // use to calculate proportion surviving
-    for (TimeStep i(0);i<TimeStep::intervalsPerYear; ++i) {
+    for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){
         // multiply by proportion of infants surviving at each interval
-        infantPropSurviving *= double(infantIntervalsAtRisk[i.asInt()] - infantDeaths[i.asInt()])
-            / double(infantIntervalsAtRisk[i.asInt()]);
+        infantPropSurviving *= double(infantIntervalsAtRisk[i] - infantDeaths[i])
+            / double(infantIntervalsAtRisk[i]);
     }
     // Child deaths due to malaria (per 1000), plus non-malaria child deaths. Deaths per 1000 births is the return unit.
     return (1.0 - infantPropSurviving) * 1000.0 + nonMalariaMortality;
