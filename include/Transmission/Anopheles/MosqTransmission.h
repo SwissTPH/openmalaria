@@ -63,7 +63,7 @@ public:
      * before model is run. */
     void initState ( double tsP_A, double tsP_df,
                      double initNvFromSv, double initOvFromSv,
-                     const vector<double>& forcedS_v );
+                     const vecDay<double>& forcedS_v );
     
     /// Helper function for initialisation.
     void initIterateScale ( double factor );
@@ -82,14 +82,14 @@ public:
      * @param printDebug Print some info to cerr
      * @returns S_v for the next time-step
      */
-    double update( size_t d, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug );
+    double update( SimTime d, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug );
     
     ///@brief Interventions and reporting
     //@{
     void uninfectVectors();
     //@}
     
-    inline int getEIPDuration() const {
+    inline SimTime getEIPDuration() const {
         return EIPDuration;
     }
     
@@ -107,7 +107,7 @@ public:
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat ( VecStat vs ) const;
     
-    inline double getMosqRestDuration() const {
+    inline SimTime getMosqRestDuration() const {
         return mosqRestDuration;
     }
     
@@ -163,14 +163,14 @@ private:
     /** Duration of feeding cycle (equals duration of resting period) for
      * mosquito (τ).
      * Units: days. */
-    int mosqRestDuration;
+    SimTime mosqRestDuration;
 
     /** Duration of the extrinsic incubation period (sporozoite development time)
     * (θ_s).
     * Units: Days.
     *
     * Doesn't need checkpointing. */
-    int EIPDuration;
+    SimTime EIPDuration;
     
     /** N_v_length-1 is the number of previous days for which some parameters are
      * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
@@ -180,7 +180,7 @@ private:
      * θ_s + τ - 1 days back, plus current day.
      *
      * Set by initialise; no need to checkpoint. */
-    int N_v_length;
+    SimTime N_v_length;
     //@}
 
     /// If less than this many mosquitoes remain infected, transmission is interrupted.
@@ -201,7 +201,7 @@ private:
      * These arrays should be checkpointed. */
     //@{
     /** Probability of a mosquito not finding a host one night. */
-    vector<double> P_A;
+    vecDay<double> P_A;
 
     /** P_df and P_dif per-day.
      *
@@ -214,13 +214,13 @@ private:
      * HOWEVER, if the initialisation phase is driven by an input EIR and not by
      * vector calculations, then during the initialisation phase, P_dif contains
      * the daily kappa values read from XML for validation purposes. */
-    vector<double> P_df, P_dif;
+    vecDay<double> P_df, P_dif;
 
     /** Numbers of host-seeking mosquitos each day
      * 
      * N_v is the total number of host-seeking mosquitoes, O_v is those seeking
      * and infected, and S_v is those seeking and infective (to humans). */
-    vector<double> N_v, O_v, S_v;
+    vecDay<double> N_v, O_v, S_v;
     //@}
 
     ///@brief Working memory
@@ -236,8 +236,8 @@ private:
      *
      * Don't need to be checkpointed, but some values need to be initialised. */
     //@{
-    vector<double> fArray;
-    vector<double> ftauArray;
+    vecDay<double> fArray;
+    vecDay<double> ftauArray;
     //@}
     
     /** Variables tracking data to be reported. */

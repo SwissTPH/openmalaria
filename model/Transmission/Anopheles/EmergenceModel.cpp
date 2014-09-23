@@ -41,13 +41,13 @@ EmergenceModel::EmergenceModel() :
             initOvFromSv(numeric_limits<double>::quiet_NaN()),
             emergenceSurvival(1.0)
 {
-    forcedS_v.resize (TimeStep::DAYS_IN_YEAR);
+    forcedS_v.resize (sim::oneYear());
 }
 
 void EmergenceModel::initEIR(
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
-    int EIPDuration
+    SimTime EIPDuration
 ){
     const scnXml::Seasonality& seasonality = anoph.getSeasonality();
     if ( seasonality.getInput() != "EIR" ) {
@@ -55,7 +55,7 @@ void EmergenceModel::initEIR(
         //TODO
     }
     // EIR for this species, with index 0 refering to value over first interval
-    vector<double> speciesEIR (TimeStep::DAYS_IN_YEAR);
+    vecDay<double> speciesEIR (sim::oneYear());
 
     if ( seasonality.getFourierSeries().present() ) {
         const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
@@ -128,10 +128,10 @@ void EmergenceModel::initEIR(
     vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
     
     // Add to the TransmissionModel's EIR, used for the initalization phase.
-    // Note: sum stays the same, units changes to per-timestep.
-    for (int i = 0; i < TimeStep::DAYS_IN_YEAR; ++i) {
+    // Note: sum stays the same, units changes to per-time-step.
+    for( SimTime i = sim::zero(); i < sim::oneYear(); i += sim::oneDay() ){
         // index 1 of initialisationEIR corresponds to first period of year
-        initialisationEIR[mod_nn(1 + i / TimeStep::interval, TimeStep::stepsPerYear)] += speciesEIR[i];
+        initialisationEIR[mod_nn(1 + i / sim::oneTS(), sim::stepsPerYear())] += speciesEIR[i];
     }
     
 #ifdef WITHOUT_BOINC
@@ -142,7 +142,7 @@ void EmergenceModel::initEIR(
 #endif
 
     // Set other data used for mosqEmergeRate calculation:
-    FSRotateAngle = EIRRotateAngle - (EIPDuration+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
+    FSRotateAngle = EIRRotateAngle - (EIPDuration.inDays()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
     initOvFromSv = initNvFromSv * anoph.getPropInfected();
 }
@@ -152,7 +152,7 @@ void EmergenceModel::scaleEIR( double factor ) {
 }
 
 
-// Every TimeStep::interval days:
+// Every sim::oneTS() days:
 void EmergenceModel::update () {
     emergenceSurvival = 1.0;
     for( size_t i = 0; i < emergenceReduction.size(); ++i )

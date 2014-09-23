@@ -293,7 +293,7 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
 }
 
 
-// Every TimeStep::interval days:
+// Every sim::oneTS() days:
 void AnophelesModel::advancePeriod (const OM::Population& population,
                                      vector<double>& popProbTransmission,
                                      size_t sIndex,
@@ -307,8 +307,8 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
       "Nonautonomous Difference Equations for Malaria Dynamics
                    in a Mosquito Population" [NDEMD]
 
-    We calculate EIR over a 5-day TimeStep::interval as:
-      sum_{for t over days} σ_i[t] * s_v[t]
+    We calculate EIR over a time step (one or five days) as:
+      sum_{for t over days in step} σ_i[t] * s_v[t]
       = sum_... (N_v[t] * P_Ai[t] * P_B_i[t])/(T*N_i[t]) * S_v[t]/N_v[t]
       = sum_... P_Ai[t] * P_B_i[t] * S_v[t]
     (since T == 1 and N_i[t] == 1 for all t).
@@ -319,11 +319,11 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
       Let P_Ai_base[t] = (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA).
 
     Note that although the model allows α_i and P_B_i to vary per-day, they only
-    vary per TimeStep::interval of the main simulation. Hence:
+    vary per time step of the main simulation. Hence:
       EIR = (sum_{t=...} S_v[t] * P_Ai_base[t]) * α_i * P_B_i
 
     Since S_v[t] * P_Ai_base[t] does not vary per individual, we calculate this
-    per TimeStep::interval of the main simulation as partialEIR:
+    per time step of the main simulation as partialEIR:
       partialEIR = (sum_{t=...} S_v[t] * P_Ai_base[t])
 
     Hence calculateEIR() only needs to do the following:
@@ -381,12 +381,15 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     transmission.resetTSStats();
     
     // The code within the for loop needs to run per-day, wheras the main
-    // simulation uses TimeStep::interval day (currently 5 day) time steps.
+    // simulation uses one or five day time steps.
     // The transmission for time-step t depends on the state during days
-    // (t×(I-1)+1) through (t×I) where I is TimeStep::interval.
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        partialEIR += transmission.update( i + firstDay, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
+    // (t×(I-1)+1) through (t×I) where I is sim::oneTS().inDays().
+    //TODO: why is there an offset — i.e. why not make this to zero?
+    SimTime offset = sim::oneDay() - sim::oneTS();
+    for( SimTime now = sim::now() + offset, end = sim::now() + sim::oneTS() + offset;
+        now < end; now += sim::oneDay() )
+    {
+        partialEIR += transmission.update( now, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
     }
 }
 

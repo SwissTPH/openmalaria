@@ -38,21 +38,21 @@ using namespace OM::util;
 SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) :
     initNv0FromSv( numeric_limits<double>::quiet_NaN() )
 {
-    quinquennialS_v.assign (TimeStep::fromYears(5).inDays(), 0.0);
-    quinquennialOvipositing.assign (TimeStep::fromYears(5).inDays(), 0.0);
-    mosqEmergeRate.assign (TimeStep::DAYS_IN_YEAR, 0.0);
-    invLarvalResources.assign (TimeStep::DAYS_IN_YEAR, 0.0);
+    quinquennialS_v.assign (sim::fromYearsI(5), 0.0);
+    quinquennialOvipositing.assign (sim::fromYearsI(5), 0.0);
+    mosqEmergeRate.assign (sim::oneYear(), 0.0);
+    invLarvalResources.assign (sim::oneYear(), 0.0);
     
-    developmentDuration = elt.getDevelopmentDuration().getValue();
-    if (!(developmentDuration > 0))
+    developmentDuration = sim::fromDays(elt.getDevelopmentDuration().getValue());
+    if (!(developmentDuration > sim::zero()))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentDuration: "
             "must be positive");
     probPreadultSurvival = elt.getDevelopmentSurvival().getValue();
-    if (!(0 <= probPreadultSurvival && probPreadultSurvival <= 1))
+    if (!(0.0 <= probPreadultSurvival && probPreadultSurvival <= 1.0))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentSurvival: "
             "must be a probability (in range [0,1]");
     fEggsLaidByOviposit = elt.getFemaleEggsLaidByOviposit().getValue();
-    if (!(fEggsLaidByOviposit > 0))
+    if (!(fEggsLaidByOviposit > 0.0))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.femaleEggsLaidByOviposit: "
             "must be positive");
     nOvipositingDelayed.assign (developmentDuration, 0.0);
@@ -75,9 +75,9 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
     
     // Initialise nOvipositingDelayed
-	int y1 = TimeStep::DAYS_IN_YEAR;
-    int tau = transmission.getMosqRestDuration();	//TODO: why is mosqRestDuration of double type?
-    for (int t=0; t<developmentDuration; ++t){
+    SimTime y1 = sim::oneYear();
+    SimTime tau = transmission.getMosqRestDuration();
+    for( SimTime t = sim::zero(); t < developmentDuration; t += sim::oneDay() ){
         nOvipositingDelayed[mod_nn(t+tau, developmentDuration)] =
             tsP_df * initNvFromSv * forcedS_v[t];
     }
@@ -87,7 +87,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     // Used when calculating invLarvalResources (but not a hard constraint):
     assert(tau+developmentDuration <= y1);
-    for( int t=0; t<(int)mosqEmergeRate.size(); ++t ){
+    for( SimTime t = sim::zero(); t < mosqEmergeRate.size(); t += sim::oneDay() ){
         double yt = fEggsLaidByOviposit * tsP_df * initNvFromSv *
             forcedS_v[mod_nn(t + y1 - tau - developmentDuration, y1)];
         invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
@@ -126,9 +126,9 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
 
     // average annual period of S_v over 5 years
-    vector<double> avgAnnualS_v( TimeStep::DAYS_IN_YEAR, 0.0 );
-    for ( int i = 0; i < TimeStep::fromYears(5).inDays(); ++i ) {
-        avgAnnualS_v[mod_nn(i, TimeStep::fromYears(1).inDays())] =
+    vector<double> avgAnnualS_v( sim::oneYear().inDays(), 0.0 );
+    for( SimTime i = sim::zero(), end = sim::fromYearsI(5); i < end; i += sim::oneDay() ) {
+        avgAnnualS_v[mod_nn(i, sim::oneYear()).inDays()] =
             quinquennialS_v[i] / 5.0;
     }
 
@@ -146,15 +146,15 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     // Finally, update nOvipositingDelayed and invLarvalResources
     vectors::scale (nOvipositingDelayed, factor);
     
-    size_t y1 = TimeStep::DAYS_IN_YEAR,
-        y2 = 2*TimeStep::DAYS_IN_YEAR,
-        y3 = 3*TimeStep::DAYS_IN_YEAR,
-        y4 = 4*TimeStep::DAYS_IN_YEAR,
-        y5 = 5*TimeStep::DAYS_IN_YEAR;
+    SimTime y1 = sim::oneYear(),
+        y2 = sim::fromYearsI(2),
+        y3 = sim::fromYearsI(3),
+        y4 = sim::fromYearsI(4),
+        y5 = sim::fromYearsI(5);
     assert(mosqEmergeRate.size() == y1);
     
-    for( size_t t=0; t<y1; ++t ){
-        size_t ttj = t - developmentDuration;
+    for( SimTime t = sim::zero(); t < y1; t += sim::oneDay() ){
+        SimTime ttj = t - developmentDuration;
         // b · P_df · avg_N_v(t - θj - τ):
         double yt = fEggsLaidByOviposit * 0.2 * (
             quinquennialOvipositing[ttj + y1] +
@@ -168,12 +168,12 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     
     const double LIMIT = 0.1;
     return (fabs(factor - 1.0) > LIMIT) ||
-           (rAngle > LIMIT * 2*M_PI / TimeStep::stepsPerYear);
+           (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
     //NOTE: in theory, mosqEmergeRate and annualEggsLaid aren't needed after convergence.
 }
 
 
-double SimpleMPDEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
+double SimpleMPDEmergence::get( SimTime d, SimTime dYear1, double nOvipositing ) {
     // Simple Mosquito Population Dynamics model: emergence depends on the
     // adult population, resources available, and larviciding.
     // See: A Simple Periodically-Forced Difference Equation Model for
@@ -182,24 +182,26 @@ double SimpleMPDEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
     double emergence = interventionSurvival() * probPreadultSurvival * yt /
         (1.0 + invLarvalResources[dYear1] * yt);
     nOvipositingDelayed[mod_nn(d, developmentDuration)] = nOvipositing;
-    size_t d5Year = mod_nn(d, TimeStep::fromYears(5).inDays());
+    SimTime d5Year = mod_nn(d, sim::fromYearsI(5));
     quinquennialOvipositing[d5Year] = nOvipositing;
     return emergence;
 }
 
-void SimpleMPDEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
-    size_t d5Year = mod_nn(d, TimeStep::fromYears(5).inDays());
+void SimpleMPDEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
+    SimTime d5Year = mod_nn(d, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
 }
 
 double SimpleMPDEmergence::getResAvailability() const {
-    int start = TimeStep::simulation.inDays() - TimeStep::interval;
+    //TODO: why offset by one time step?
+    SimTime start = sim::now() - sim::oneTS();
     double total = 0;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        size_t dYear1 = mod(start + i, TimeStep::DAYS_IN_YEAR);
+    for( SimTime i = sim::zero(); i < sim::oneTS(); i += sim::oneDay() ){
+        //TODO: only have to add one year because of offset
+        SimTime dYear1 = mod_nn(start + i + sim::oneYear(), sim::oneYear());
         total += 1.0 / invLarvalResources[dYear1];
     }
-    return total / TimeStep::interval;
+    return total / sim::oneTS().inDays();
 }
 
 void SimpleMPDEmergence::checkpoint (istream& stream){ (*this) & stream; }

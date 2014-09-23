@@ -73,10 +73,10 @@ public:
     
     /// Return the emergence for today, taking interventions like larviciding
     /// into account.
-    double get( size_t d, size_t dYear1, double nOvipositing );
+    double get( SimTime d, SimTime dYear1, double nOvipositing );
     
     /// Store S_v for day d. Used by initIterate().
-    void updateStats( size_t d, double tsP_dif, double S_v );
+    void updateStats( SimTime d, double tsP_dif, double S_v );
     
     ///@brief Interventions and reporting
     //@{
@@ -118,7 +118,7 @@ private:
      * NOTE: technically, only a fifth as many values need to be stored since
      * this only changes every five days. But that makes life more complicated.
      */
-    vector<double> quinquennialP_dif;
+    vecDay<double> quinquennialP_dif;
     //@}
     
     ///@brief More stuff (init only?)

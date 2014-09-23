@@ -107,20 +107,6 @@ namespace OM { namespace util { namespace vectors {
    * @param FC Output values. Should already be allocated, with length
    *    2*N-1 for 1 ≤ N ≤ T. */
   void logDFT(const vector<double>& iArray, vector<double>& FC);
-  
-  /** The inverse of logDFT (or an approximation, when N&lt;T or
-   * tArray.size() ≠ T). Result may also be rotated.
-   * 
-   * (This was called calcExpFourierSeries, and does essentially the same
-   * thing.)
-   *
-   * @param tArray Array to fill with exponated values from Fourier series.
-   * Length should already be set. Need not have the same length as the
-   * array used to calculate FC.
-   * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...); can be any length
-   * so long as it is odd.
-   * @param rAngle Angle to rotate generated series by in radians: [0,2π] */
-  void expIDFT (vector<double>& tArray, const vector<double>& FC, double rAngle);
 }
 
 /// Utility to print a vector (operator must be in namespace)

@@ -113,7 +113,7 @@ ResourceFitter::ResourceFitter( const MosqTransmission& transData,
     initial_guess = gsl_vector_alloc( 1 );
     gsl_vector_set_all( initial_guess, lcParams.estimatedLarvalResources );
     buf = gsl_vector_alloc( invLarvalResources.size() );
-    samples.resize( TimeStep::DAYS_IN_YEAR );
+    samples.resize( sim::oneYear().inDays() );
     assert( buf->size == samples.size() );
     
     debugOutput = forceDebug || CommandLine::option( CommandLine::DEBUG_VECTOR_FITTING );
@@ -146,7 +146,7 @@ void ResourceFitter::targetS_vWithP_dif( const vector<double>& S_v,
     fitTarget = FT_S_V;
     target = S_v;
     
-    annualP_dif.assign( TimeStep::DAYS_IN_YEAR, 0 );
+    annualP_dif.assign( sim::oneYear().inDays(), 0 );
     assert( mod_pp(sampledP_dif.size(), annualP_dif.size()) == 0 );
     for( size_t i=0; i<sampledP_dif.size(); ++i )
         annualP_dif[ mod_pp(i, annualP_dif.size()) ] += sampledP_dif[ i ];
@@ -323,10 +323,9 @@ void ResourceFitter::simulate1Year()
     //FIXME: I think we need to re-init the life cycle model too?
     //lifeCycle.init( lcParams );
     
-    size_t end = 10*TimeStep::DAYS_IN_YEAR;
-    size_t lastDDifferent = 0;
-    for( size_t d = 1; d<end; ++d ){
-        size_t dYear = mod_pp(d, TimeStep::DAYS_IN_YEAR);
+    SimTime lastDDifferent = sim::zero();
+    for( SimTime d = sim::fromDays(1), end = sim::fromYearsI(10); d < end; d += sim::oneDay() ){
+        size_t dYear = mod_pp(d.inDays(), sim::oneYear().inDays());
         double S_v = transmission.update( d, P_A, P_df, annualP_dif[dYear], false, debugOutput );
         
         if( fitTarget == FT_EMERGENCE ){
@@ -336,7 +335,7 @@ void ResourceFitter::simulate1Year()
             if( !similar( samples[ dYear ], S_v, 1.001 ) )
                 lastDDifferent = d;
             samples[ dYear ] = S_v;
-            if( d - lastDDifferent >= TimeStep::DAYS_IN_YEAR ){
+            if( d - lastDDifferent >= sim::oneYear() ){
                 return;     // we're done
             }
         }else{

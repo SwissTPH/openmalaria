@@ -40,9 +40,9 @@ LCEmergence::LCEmergence() :
             initialP_A(numeric_limits<double>::quiet_NaN()),
             initialP_df(numeric_limits<double>::quiet_NaN())
 {
-    quinquennialP_dif.assign (TimeStep::fromYears(5).inDays(), 0.0);
+    quinquennialP_dif.assign (sim::fromYearsI(5), 0.0);
 #if 0
-    mosqEmergeRate.resize (TimeStep::DAYS_IN_YEAR); // Only needs to be done here if loading from checkpoint
+    mosqEmergeRate.resize (sim::oneYear()); // Only needs to be done here if loading from checkpoint
 #endif
 }
 
@@ -184,14 +184,14 @@ bool LCEmergence::initIterate (MosqTransmission& transmission) {
 }
 
 
-double LCEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
+double LCEmergence::get( SimTime d, SimTime dYear1, double nOvipositing ) {
     double emergence = lifeCycle.updateEmergence(lcParams, nOvipositing, d, dYear1);
     //TODO
     return emergence * larvicidingIneffectiveness;
 }
 
-void LCEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
-    size_t d5Year = moda(d, TimeStep::fromYears(5).inDays());
+void LCEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
+    SimTime d5Year = moda(d, sim::fromYearsI(5));
     quinquennialP_dif[d5Year] = tsP_dif;
 }
 

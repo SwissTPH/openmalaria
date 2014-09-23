@@ -37,9 +37,9 @@ using namespace OM::util;
 // -----  Initialisation of model, done before human warmup  ------
 
 MosqTransmission::MosqTransmission() :
-        mosqRestDuration(0),
-        EIPDuration(0),
-        N_v_length(0),
+        mosqRestDuration(sim::zero()),
+        EIPDuration(sim::zero()),
+        N_v_length(sim::zero()),
         minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
         timeStep_N_v0(0.0)
 {
@@ -77,9 +77,9 @@ void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOpti
     
     // -----  Set model variables  -----
 
-    mosqRestDuration = mosq.getMosqRestDuration().getValue();
-    EIPDuration = mosq.getExtrinsicIncubationPeriod().getValue();
-    if (1 > mosqRestDuration || mosqRestDuration*2 >= EIPDuration) {
+    mosqRestDuration = sim::fromDays(mosq.getMosqRestDuration().getValue());
+    EIPDuration = sim::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
+    if (sim::oneDay() > mosqRestDuration || mosqRestDuration * 2 >= EIPDuration) {
         //TODO: limit was EIPDuration >= mosqRestDuration >= 1
         // but in usage of ftauArray this wasn't enough. Check why.
         throw util::xml_scenario_error ("Code expects EIPDuration > 2*mosqRestDuration >= 2");
@@ -93,11 +93,12 @@ void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOpti
     // Set up fArray and ftauArray. Each step, all elements not set here are
     // calculated, even if they aren't directly used in the end;
     // however all calculated values are used in calculating the next value.
-    fArray.resize(EIPDuration-mosqRestDuration+1);
-    fArray[0] = 1.0;
+    fArray.resize(EIPDuration-mosqRestDuration+sim::oneDay());
+    fArray[sim::zero()] = 1.0;
     ftauArray.resize(EIPDuration);
-    for (int i = 0; i < mosqRestDuration; ++i)
+    for( SimTime i = sim::zero(); i < mosqRestDuration; i += sim::oneDay() ){
         ftauArray[i] = 0.0;
+    }
     ftauArray[mosqRestDuration] = 1.0;
 }
 
@@ -111,7 +112,7 @@ void MosqTransmission::initIterateScale ( double factor ){
 
 void MosqTransmission::initState ( double tsP_A, double tsP_df,
                                        double initNvFromSv, double initOvFromSv,
-                                       const vector<double>& forcedS_v ){
+                                       const vecDay<double>& forcedS_v ){
     N_v  .resize (N_v_length);
     O_v  .resize (N_v_length);
     S_v  .resize (N_v_length);
@@ -120,8 +121,8 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
     P_dif.resize (N_v_length);
     
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
-    assert( N_v_length <= static_cast<int>(forcedS_v.size()) );
-    for (int t = 0; t < N_v_length; ++t) {
+    assert( N_v_length <= forcedS_v.size() );
+    for( SimTime t = sim::zero(); t < N_v_length; t += sim::oneDay() ){
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
@@ -133,20 +134,20 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
 }
 
 
-double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
+double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
                                  double tsP_dif, bool isDynamic, bool printDebug ){
     // We add N_v_length so that we can use mod_nn() instead of mod().
-    size_t dMod = d + N_v_length;
-    assert (dMod >= (size_t)N_v_length);
+    SimTime dMod = d + N_v_length;
+    assert (dMod >= N_v_length);
     // Indecies for today, yesterday and mosqRestDuration days back:
-    size_t t    = mod_nn(dMod, N_v_length);
-    size_t t1   = mod_nn(dMod - 1, N_v_length);
-    size_t ttau = mod_nn(dMod - mosqRestDuration, N_v_length);
+    SimTime t    = mod_nn(dMod, N_v_length);
+    SimTime t1   = mod_nn(dMod - sim::oneDay(), N_v_length);
+    SimTime ttau = mod_nn(dMod - mosqRestDuration, N_v_length);
     // Day of year. Note that emergence during day 1
     // comes from mosqEmergeRate[0], hence subtraction by 1.
-    size_t dYear1 = mod_nn(d - 1, TimeStep::DAYS_IN_YEAR);
+    SimTime dYear1 = mod_nn(d - sim::oneDay(), sim::oneYear());
     
-    // These only need to be calculated once per timestep, but should be
+    // These only need to be calculated once per time step, but should be
     // present in each of the previous N_v_length - 1 positions of arrays.
     P_A[t] = tsP_A;
     P_df[t] = tsP_df;
@@ -170,42 +171,42 @@ double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
     
     //BEGIN S_v
     // Set up array with n in 1..θ_s−1 for f_τ(dMod-n) (NDEMD eq. 1.7)
-    size_t fProdEnd = 2*mosqRestDuration;
-    for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
-        size_t tn = mod_nn(dMod-n, N_v_length);
-        ftauArray[n] = ftauArray[n-1] * P_A[tn];
+    SimTime fProdEnd = mosqRestDuration * 2;
+    for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fProdEnd; n += sim::oneDay() ){
+        SimTime tn = mod_nn(dMod-n, N_v_length);
+        ftauArray[n] = ftauArray[n-sim::oneDay()] * P_A[tn];
     }
     ftauArray[fProdEnd] += P_df[mod_nn(dMod-fProdEnd, N_v_length)];
 
-    for (int n = fProdEnd+1; n < EIPDuration; ++n) {
-        size_t tn = mod_nn(dMod-n, N_v_length);
+    for( SimTime n = fProdEnd+sim::oneDay(); n < EIPDuration; n += sim::oneDay() ){
+        SimTime tn = mod_nn(dMod-n, N_v_length);
         ftauArray[n] =
             P_df[tn] * ftauArray[n - mosqRestDuration]
-            + P_A[tn] * ftauArray[n-1];
+            + P_A[tn] * ftauArray[n-sim::oneDay()];
     }
 
     double sum = 0.0;
-    size_t ts = dMod - EIPDuration;
-    for (int l = 1; l < mosqRestDuration; ++l) {
-        size_t tsl = mod_nn(ts - l, N_v_length);       // index dMod - theta_s - l
+    SimTime ts = dMod - EIPDuration;
+    for( SimTime l = sim::oneDay(); l < mosqRestDuration; l += sim::oneDay() ){
+        SimTime tsl = mod_nn(ts - l, N_v_length);       // index dMod - theta_s - l
         sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) *
                 ftauArray[EIPDuration+l-mosqRestDuration];
     }
 
 
     // Set up array with n in 1..θ_s−τ for f(dMod-n) (NDEMD eq. 1.6)
-    for (int n = 1; n <= mosqRestDuration; ++n) {
-        size_t tn = mod_nn(dMod-n, N_v_length);
-        fArray[n] = fArray[n-1] * P_A[tn];
+    for( SimTime n = sim::oneDay(); n <= mosqRestDuration; n += sim::oneDay() ){
+        SimTime tn = mod_nn(dMod-n, N_v_length);
+        fArray[n] = fArray[n-sim::oneDay()] * P_A[tn];
     }
     fArray[mosqRestDuration] += P_df[ttau];
 
     fProdEnd = EIPDuration-mosqRestDuration;
-    for (size_t n = mosqRestDuration+1; n <= fProdEnd; ++n) {
-        size_t tn = mod_nn(dMod-n, N_v_length);
+    for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fProdEnd; n += sim::oneDay() ){
+        SimTime tn = mod_nn(dMod-n, N_v_length);
         fArray[n] =
             P_df[tn] * fArray[n - mosqRestDuration]
-            + P_A[tn] * fArray[n-1];
+            + P_A[tn] * fArray[n-sim::oneDay()];
     }
 
 
@@ -224,7 +225,7 @@ double MosqTransmission::update( size_t d, double tsP_A, double tsP_df,
             S_v[t] = 0.0;
             /* Note: could report; these reports often occur too frequently, however
             if( S_v[t] != 0.0 ){        // potentially reduce reporting
-	cerr << TimeStep::simulation <<":\t S_v cut-off"<<endl;
+	cerr << sim::now() <<":\t S_v cut-off"<<endl;
             } */
         }
     }
@@ -258,10 +259,10 @@ void MosqTransmission::uninfectVectors() {
     P_dif.assign( P_dif.size(), 0.0 );
 }
 
-double MosqTransmission::getLastVecStat ( VecStat vs ) const{
+double MosqTransmission::getLastVecStat( VecStat vs )const{
     //Note: implementation isn't performance optimal but rather intended to
     //keep code size low and have no overhead if not used.
-    const vector<double> *array = 0;
+    const vecDay<double> *array = 0;
     switch( vs ){
         case PA: array = &P_A; break;
         case PDF: array = &P_df; break;
@@ -269,15 +270,19 @@ double MosqTransmission::getLastVecStat ( VecStat vs ) const{
         case NV: array = &N_v; break;
         case OV: array = &O_v; break;
         case SV: array = &S_v; break;
-        default: assert( false );
+        default: throw SWITCH_DEFAULT_EXCEPTION;
     }
     double val = 0.0;
-    int firstDay = TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        size_t t = mod(i + firstDay, N_v_length);
+    //TODO: why is there an offset — i.e. why not make this to zero?
+    SimTime offset = sim::oneDay() - sim::oneTS();
+    for( SimTime now = sim::now() + offset, end = sim::now() + sim::oneTS() + offset;
+        now < end; now += sim::oneDay() )
+    {
+        //TODO: if offset is changed, we don't need to add N_v_length
+        SimTime t = mod_nn(now + N_v_length, N_v_length);
         val += (*array)[t];
     }
-    return val / TimeStep::interval;
+    return val / sim::oneTS().inDays();
 }
 void MosqTransmission::summarize (const string speciesName) const{
     Monitoring::Survey::current()

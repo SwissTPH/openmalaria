@@ -54,12 +54,13 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
 
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
-    int firstDay = invLarvalResources.size() + TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        size_t t = mod(i + firstDay, invLarvalResources.size());
-        val += 1.0 / invLarvalResources[t];
+    //TODO: why the offset?
+    SimTime firstDay = sim::fromDays(invLarvalResources.size()) + sim::now() - sim::oneTS() + sim::oneDay();
+    for( SimTime i = sim::zero(); i < sim::oneTS(); i += sim::oneDay() ){
+        SimTime t = mod_nn(i + firstDay, sim::fromDays(invLarvalResources.size()));
+        val += 1.0 / invLarvalResources[t.inDays()];
     }
-    return val / TimeStep::interval;
+    return val / sim::oneTS().inDays();
 }
 
 void LifeCycle::init( const LifeCycleParams& lcParams ){
