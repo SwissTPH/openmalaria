@@ -188,7 +188,8 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         // important in the model design, but since we parameterised with
         // ageYears1 we should stick with it.
         double ageYears1 = getAge1().inYears();
-        monitoringAgeGroup.update( ageYears1 );
+        //TODO: how do we round ages in years? How do we use age0 vs age1? When does monitoringAgeGroup actually get used — at the end of the time step?
+        monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
         for( map<ComponentId,SimTime>::iterator expIt =
             m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )

@@ -41,7 +41,7 @@ class AgeGroup {
     /** Update age-group. Assumes age only increases (per instance).
      *
      * If called regularly, should be O(1); worst case is O(_upperbound.size()). */
-    void update (double ageYears);
+    void update (SimTime age);
     
     /// Checkpointing
     template<class S>
@@ -57,8 +57,8 @@ class AgeGroup {
     /// Get the total number of age categories (inc. one for indivs. not in any
     /// category given in XML).
     static inline size_t getNumGroups () {
-        if( _upperbound.size() == 0 ) throw TRACED_EXCEPTION_DEFAULT( "not yet initialised" );
-        return _upperbound.size();
+        assert( upperBound.size() > 0 );      // otherwise not yet initialised
+        return upperBound.size();
     }
     
 private:
@@ -68,11 +68,14 @@ private:
     static void init (const scnXml::Monitoring& monitoring);
     
     //BEGIN Static parameters only set by init()
-    /** Upper boundary of agegroups, in years.
+    /** Upper boundaries of age groups.
+     * 
+     * Converted from years (input) to days, rounding down to the next time
+     * step.
      *
      * These are age-groups given in XML plus one with no upper limit for
      * individuals outside other bounds. */
-    static vector<double> _upperbound;
+    static vector<SimTime> upperBound;
     //END
     
     friend class Survey;
