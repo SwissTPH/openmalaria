@@ -198,6 +198,19 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }
             
+            // Time step updates. Essentially, a time step is mid-day to
+            // mid-day. sim::now0() gives the date at the start of the step (in
+            // internal units), and sim::now1() the date at the end.
+            // Each step, monitoring (e.g. carrying out a survey) happens
+            // first, reporting on the state at the start of the step (e.g.
+            // patentcy diagnostics) or tallys of events which happened since
+            // some point in the past (e.g. a previous survey).
+            // Interventions are deployed next.
+            // Finally, Population::update1() runs, which updates both the
+            // transmission model and the human population. It also adds new
+            // humans, effectively born at the start of the next time step, to
+            // replace those lost.
+            
             // do reporting (continuous and surveys)
             Continuous.update( *population );
             if( sim::intervNow() == Surveys.nextSurveyTime() ){
@@ -208,7 +221,10 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             // deploy interventions
             InterventionManager::deploy( *population );
             
-            // update
+            // update humans and mosquitoes
+            
+            // sim_time1 is the time at the end of a time step, and mostly a
+            // confusing relic, though sometimes useful.
             sim::sim_time1 += sim::oneTS();
             population->update1( humanWarmupLength );
             sim::sim_time0 += sim::oneTS();
