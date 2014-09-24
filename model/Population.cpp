@@ -168,7 +168,6 @@ void Population::createInitialHumans ()
     {
         int targetPop = AgeStructure::targetCumPop( iage, populationSize );
         while (cumulativePop < targetPop) {
-            //TODO: offset by oneTS happened when adjusting human DOB, but maybe code is wrong?
             newHuman( sim::zero() - sim::fromTS(iage) );
             ++cumulativePop;
         }
@@ -214,8 +213,8 @@ void Population::update1( SimTime firstVecInitTS ){
     for (Iter iter = population.begin(); iter != population.end();) {
         // Update human, and remove if too old.
         // We only need to update humans who will survive past the end of the
-        // "one life span" init phase (this is an optimisation).
-        //TODO: offset by oneTS happened when adjusting human DOB, but maybe code is wrong?
+        // "one life span" init phase (this is an optimisation). lastPossibleTS
+        // is the time step they die at (some code still runs on this step).
         SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
         bool updateHuman = lastPossibleTS >= firstVecInitTS;
         bool isDead = iter->update(_transmissionModel, updateHuman);
@@ -230,7 +229,7 @@ void Population::update1( SimTime firstVecInitTS ){
 
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
-        //TODO: age0 or age1?
+        //NOTE: better to use getAge0()? Possibly, but the difference will not be very significant.
         if( cumPop > AgeStructure::targetCumPop(iter->getAge1() / sim::oneTS(), targetPop) ){
             --cumPop;
             iter->destroy();
@@ -243,7 +242,7 @@ void Population::update1( SimTime firstVecInitTS ){
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman( sim::now1() );
+        newHuman( sim::now1() );        // humans born at end of this time step = beginning of next
         //++nCounter;
         ++cumPop;
     }
