@@ -35,8 +35,7 @@ WHMock::WHMock() :
 {}
 WHMock::~WHMock() {}
 
-double WHMock::probTransmissionToMosquito( SimTime ageOfHuman,
-                                           double tbvFactor ) const
+double WHMock::probTransmissionToMosquito( double tbvFactor ) const
 {
     throw util::unimplemented_exception( "not needed in unit test" );
 }

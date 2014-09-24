@@ -374,8 +374,9 @@ void VectorModel::vectorUpdate (const Population& population) {
     vector<double> popProbTransmission;
     popProbTransmission.reserve( population.size() );
     for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h ){
-        popProbTransmission.push_back( h->withinHostModel->probTransmissionToMosquito(
-            h->getAge1() /*TODO: age0? */, h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
+        double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
+        double pTrans = h->withinHostModel->probTransmissionToMosquito( tbvFac );
+        popProbTransmission.push_back( pTrans );
     }
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);

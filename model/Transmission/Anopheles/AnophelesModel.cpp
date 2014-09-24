@@ -347,7 +347,9 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     size_t i = 0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAge1().inYears());    //TODO: age0?
+        //NOTE: calculate availability relative to age at end of time step;
+        // not my preference but consistent with TransmissionModel::getEIR().
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAge1().inYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);

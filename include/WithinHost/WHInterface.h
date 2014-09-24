@@ -101,7 +101,7 @@ public:
      * Calculates the value during the call, which is expensive (cache externally
      * if the value is needed multiple times). */
     //TODO: per genotype? (for LSTM's spread of resistance modelling)
-    virtual double probTransmissionToMosquito( SimTime ageOfHuman, double tbvFactor ) const =0;
+    virtual double probTransmissionToMosquito( double tbvFactor ) const =0;
     
     /// @returns true if host has patent parasites
     virtual bool summarize(const Host::Human& human) =0;

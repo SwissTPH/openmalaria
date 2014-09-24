@@ -112,7 +112,7 @@ WHFalciparum::~WHFalciparum()
 {
 }
 
-double WHFalciparum::probTransmissionToMosquito( SimTime ageOfHuman, double tbvFactor ) const{
+double WHFalciparum::probTransmissionToMosquito( double tbvFactor ) const{
     /* This model (often referred to as the gametocyte model) was designed for
     5-day time steps. We use the same model (sampling 10, 15 and 20 days ago)
     for 1-day time steps to avoid having to design and analyse a new model.
@@ -122,15 +122,6 @@ double WHFalciparum::probTransmissionToMosquito( SimTime ageOfHuman, double tbvF
      * Primaquine). Apparently Primaquine is not commonly used in P falciparum
      * treatment, but for vivax the effect may be important. */
     
-    //NOTE: this seems totally pointless to me. If m_y_lag is initialised to zero
-    // then calculations should work correctly anyway.
-    if (ageOfHuman.inDays() <= 20 || sim::now1().inDays() <= 20){
-        // We need at least 20 days history (m_y_lag) to calculate infectiousness;
-        // assume no infectiousness if we don't have this history.
-        // Note: human not updated on DOB so age must be >20 days.
-        return 0.0;
-    }
-    
     //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
     static const double beta1=1.0;
     static const double beta2=0.46;
@@ -139,8 +130,8 @@ double WHFalciparum::probTransmissionToMosquito( SimTime ageOfHuman, double tbvF
     static const double mu= -8.1;
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
-    // before. We have 20 days history, so use mod_nn:
-    int firstIndex = sim::daysToSteps(sim::now1().inDays() - 10) + 1;
+    // before. Add y_lag_len to ensure positive. All values initialised to 0.
+    int firstIndex = sim::daysToSteps(sim::now1().inDays() - 10) + 1 + y_lag_len;
     double x = beta1 * m_y_lag[mod_nn(firstIndex, y_lag_len)]
             + beta2 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(5), y_lag_len)]
             + beta3 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(10), y_lag_len)];

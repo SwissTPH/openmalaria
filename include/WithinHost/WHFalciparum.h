@@ -55,7 +55,7 @@ public:
     virtual ~WHFalciparum();
     //@}
     
-    virtual double probTransmissionToMosquito( SimTime ageOfHuman, double tbvFactor ) const;
+    virtual double probTransmissionToMosquito( double tbvFactor ) const;
     
     virtual bool summarize(const Host::Human& human);
     
