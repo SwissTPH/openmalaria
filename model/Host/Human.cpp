@@ -209,7 +209,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 ++expIt;
             }
         }
-        double EIR = transmissionModel->getEIR( *this, age1, ageYears1, monitoringAgeGroup );
+        double EIR = transmissionModel->getEIR( *this, age0, ageYears1, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
