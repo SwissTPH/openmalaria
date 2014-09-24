@@ -232,8 +232,8 @@ public:
     //@{
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
-    static inline double adultAge() {
-        return relAvailAge.firstGlobalMaximum();
+    static inline SimTime adultAge() {
+        return sim::fromYearsD( relAvailAge.firstGlobalMaximum() );
     }
     
     /** Get whether the user has any active deployments of interventions of

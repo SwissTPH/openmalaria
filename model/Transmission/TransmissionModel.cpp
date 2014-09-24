@@ -106,11 +106,11 @@ TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    adultAge(PerHost::adultAge()),
     tsAdultEntoInocs(0.0),
     tsAdultEIR(0.0),
     surveyInputEIR(0.0),
     surveySimulatedEIR(0.0),
+    adultAge(PerHost::adultAge()),
     numTransmittingHumans(0),
     tsNumAdults(0),
     timeStepNumEntoInocs (0)
@@ -206,7 +206,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (Host::Human& human, SimTime age, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
@@ -216,7 +216,7 @@ double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monit
   //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
   timeStepEntoInocs[ageGroup.i()] += EIR;
   timeStepNumEntoInocs ++;
-  if( ageYears >= adultAge ){
+  if( age >= adultAge ){
      tsAdultEntoInocs += EIR;
      tsNumAdults += 1;
   }

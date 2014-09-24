@@ -177,7 +177,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
     if( doUpdate )
         ++PopulationStats::humanUpdates;
 #endif
-    SimTime age0 = getAge0();    //TODO: age0?
+    SimTime age0 = getAge0();
     if (clinicalModel->isDead(age0))
         return true;
     
@@ -187,7 +187,8 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         // the difference between this and age at the start is not especially
         // important in the model design, but since we parameterised with
         // ageYears1 we should stick with it.
-        double ageYears1 = getAge1().inYears();
+        SimTime age1 = getAge1();
+        double ageYears1 = age1.inYears();
         //TODO: how do we round ages in years? How do we use age0 vs age1? When does monitoringAgeGroup actually get used — at the end of the time step?
         monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
@@ -208,7 +209,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 ++expIt;
             }
         }
-        double EIR = transmissionModel->getEIR( *this, ageYears1, monitoringAgeGroup );
+        double EIR = transmissionModel->getEIR( *this, age1, ageYears1, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;

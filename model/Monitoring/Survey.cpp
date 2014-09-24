@@ -208,7 +208,7 @@ void AgeGroup::init (const scnXml::Monitoring& monitoring) {
     upperBound.resize( groups.size() + 1 );
     for (size_t i = 0;i < groups.size(); ++i) {
         // convert to SimTime, rounding down to the next time step
-        upperBound[i] = sim::fromTS( std::floor(sim::stepsPerYear() * groups[i].getUpperbound()) );
+        upperBound[i] = sim::fromYearsD( groups[i].getUpperbound() );
     }
     upperBound[groups.size()] = sim::future();
 }

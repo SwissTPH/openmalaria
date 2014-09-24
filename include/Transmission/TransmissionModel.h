@@ -166,7 +166,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (Host::Human& human, double ageYears, Monitoring::AgeGroup ageGroup);
+  double getEIR (Host::Human& human, SimTime age, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Non-vector model: throw an exception. Vector model: check that the
    * simulation mode allows interventions, and return a map of species names
@@ -268,9 +268,6 @@ private:
    * Checkpointed. */
   double _sumAnnualKappa;
 
-  /// age at which an individual is considered an adult
-  double adultAge;
-
   /// accumulator for time step EIR of adults
   double tsAdultEntoInocs;
 
@@ -286,6 +283,9 @@ private:
   /** Time of last survey. */
   SimTime lastSurveyTime;
   
+  /// age at which an individual is considered an adult
+  SimTime adultAge;
+
   /// For "num transmitting humans" cts output.
   int numTransmittingHumans;
 

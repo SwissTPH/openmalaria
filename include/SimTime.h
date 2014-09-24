@@ -213,6 +213,11 @@ public:
         return roundToTSFromDays(SimTime::DAYS_IN_YEAR * years);
     }
     
+    /** Convert from years, rounding down to the next time step. */
+    static inline SimTime fromYearsD(double years){
+        return fromTS( std::floor(stepsPerYear() * years) );
+    }
+    
     /** Convert. */
     static inline SimTime fromTS(int ts){ return oneTS() * ts; }
     
