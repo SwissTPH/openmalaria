@@ -54,8 +54,9 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
 
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
-    // When now=0, use indices 0 up to oneTS - oneDay
-    for( SimTime d = sim::now1(), end = sim::now1() + sim::oneTS(); d < end; i += sim::oneDay() ){
+    // get resources available on the next time step
+    for( SimTime d = sim::now0(), end = sim::now0() + sim::oneTS(); d < end;
+            d += sim::oneDay() ){
         val += 1.0 / invLarvalResources[mod_nn(d, sim::oneYear())];
     }
     //TODO: why are units per time step?
@@ -82,9 +83,9 @@ double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
                                            double nOvipositingMosqs,
                                            SimTime d ){
     //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay() - sim::oneTS();
+    SimTime offset = sim::oneDay();
     // Day of year. Note that d==sim::oneTS() corresponds to Jan 1st, index 0.
-    SimTime dYear1 = mod_nn(d - sim::oneTS(), sim::oneYear());
+    SimTime dYear1 = mod_nn(d, sim::oneYear());
     // num newly emerging adults comes from num new pupae
     // pupalStageDuration days ago:
     double newAdults =

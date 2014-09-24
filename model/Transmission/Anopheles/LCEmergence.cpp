@@ -192,7 +192,7 @@ double LCEmergence::get( SimTime d, SimTime dYear1, double nOvipositing ) {
 
 void LCEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
     //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay() - sim::oneTS();
+    SimTime offset = sim::oneDay();
     SimTime d5Year = moda(d + offset, sim::fromYearsI(5));
     quinquennialP_dif[d5Year] = tsP_dif;
 }

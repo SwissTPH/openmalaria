@@ -181,7 +181,7 @@ void EmergenceModel::deployVectorPopInterv (size_t instance) {
     
     // Note: intervention acts first on time-step following (+1) deployment.
     // This at least is consistent with previous results and gives the correct number of time steps of deployment
-    emergenceReduction[instance].deploy( sim::now1() + sim::oneTS() );
+    emergenceReduction[instance].deploy( sim::now0() + sim::oneTS() );
 }
 
 

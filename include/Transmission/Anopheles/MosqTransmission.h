@@ -105,7 +105,7 @@ public:
     }
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
-    double getLastVecStat ( VecStat vs ) const;
+    double getLastVecStat( VecStat vs )const;
     
     inline SimTime getMosqRestDuration() const {
         return mosqRestDuration;
@@ -194,8 +194,8 @@ private:
      * P_A, P_df, P_dif, N_v, O_v and S_v are set in advancePeriod().
      *
      * Values at index ((d-1) mod N_v_length) are used to derive the state of
-     * the population on day d. The state during days (t×(I-1)+1) through (t×I)
-     * where t is sim::now1() and I is sim::oneTS().inDays() is what
+     * the population on day d. The state during days (t×I+1) through to ((t+1)×I)
+     * where t is sim::now0() and I is sim::oneTS().inDays() is what
      * drives the transmission at time-step t.
      * 
      * These arrays should be checkpointed. */

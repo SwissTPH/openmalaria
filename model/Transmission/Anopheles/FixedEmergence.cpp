@@ -123,7 +123,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 
 double FixedEmergence::get( SimTime d, double nOvipositing ) {
     //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay() - sim::oneTS();
+    SimTime offset = sim::oneDay();
     // Day of year. Note that emergence during day 1
     // comes from mosqEmergeRate[0], hence subtraction by 1.
     SimTime dYear1 = mod_nn(d + offset - sim::oneDay(), sim::oneYear());
@@ -133,7 +133,7 @@ double FixedEmergence::get( SimTime d, double nOvipositing ) {
 
 void FixedEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
     //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay() - sim::oneTS();
+    SimTime offset = sim::oneDay();
     SimTime d5Year = mod_nn(d + offset, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
 }

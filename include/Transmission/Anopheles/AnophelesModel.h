@@ -163,7 +163,7 @@ public:
     }
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
-    inline double getLastVecStat ( VecStat vs ) const{
+    inline double getLastVecStat( VecStat vs )const{
         return transmission.getLastVecStat( vs );
     }
     

@@ -175,14 +175,14 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
 
 double SimpleMPDEmergence::get( SimTime d, double nOvipositing ) {
     //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay() - sim::oneTS();
-    // Day of year. Note that emergence during day 1
-    // comes from mosqEmergeRate[0], hence subtraction by 1.
-    SimTime dYear1 = mod_nn(d + offset - sim::oneDay(), sim::oneYear());
+    SimTime offset = sim::oneDay();
+    SimTime dYear1 = mod_nn(d, sim::oneYear());
+    
     // Simple Mosquito Population Dynamics model: emergence depends on the
     // adult population, resources available, and larviciding.
     // See: A Simple Periodically-Forced Difference Equation Model for
     // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
+    
     double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d + offset, developmentDuration)];
     double emergence = interventionSurvival() * probPreadultSurvival * yt /
         (1.0 + invLarvalResources[dYear1] * yt);
@@ -194,18 +194,18 @@ double SimpleMPDEmergence::get( SimTime d, double nOvipositing ) {
 
 void SimpleMPDEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
     //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay() - sim::oneTS();
+    SimTime offset = sim::oneDay();
     SimTime d5Year = mod_nn(d + offset, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
 }
 
 double SimpleMPDEmergence::getResAvailability() const {
-    //TODO: why offset by one time step?
-    SimTime start = sim::now1() - sim::oneTS();
+    //TODO: why offset by one time step? This is effectively getting the resources available on the last time step
+    //TODO: only have to add one year because of offset
+    SimTime start = sim::now0() - sim::oneTS() + sim::oneYear();
     double total = 0;
-    for( SimTime i = sim::zero(); i < sim::oneTS(); i += sim::oneDay() ){
-        //TODO: only have to add one year because of offset
-        SimTime dYear1 = mod_nn(start + i + sim::oneYear(), sim::oneYear());
+    for( SimTime i = start, end = start + sim::oneTS(); i < end; i += sim::oneDay() ){
+        SimTime dYear1 = mod_nn(i, sim::oneYear());
         total += 1.0 / invLarvalResources[dYear1];
     }
     return total / sim::oneTS().inDays();

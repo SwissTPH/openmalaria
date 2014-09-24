@@ -288,8 +288,8 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
     transmission.emergence->deployVectorPopInterv(instance);
     // do same as in above function (of EmergenceModel)
     assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
-    seekingDeathRateIntervs[instance].deploy( sim::now1() + sim::oneTS() );
-    probDeathOvipositingIntervs[instance].deploy( sim::now1() + sim::oneTS() );
+    seekingDeathRateIntervs[instance].deploy( sim::now0() + sim::oneTS() );
+    probDeathOvipositingIntervs[instance].deploy( sim::now0() + sim::oneTS() );
 }
 
 
@@ -384,9 +384,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
-    // The transmission for time-step t depends on the state during days
-    // (t×(I-1)+1) through (t×I) where I is sim::oneTS().inDays().
-    for( SimTime now = sim::now1(), end = sim::now1() + sim::oneTS();
+    for( SimTime now = sim::now0(), end = sim::now0() + sim::oneTS();
         now < end; now += sim::oneDay() )
     {
         partialEIR += transmission.update( now, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;

@@ -56,8 +56,7 @@ public:
   /** Initialise all variables of a human datatype.
    * 
    * \param tm Transmission model reference (to initialize TM code)
-   * \param dateOfBirth date of birth (set to sim::now1() except when creating
-   * initial population) */
+   * \param dateOfBirth date of birth (usually start of next time step) */
   Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth);
 
   /** Destructor
