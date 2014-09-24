@@ -177,6 +177,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
     if( doUpdate )
         ++PopulationStats::humanUpdates;
 #endif
+    // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
     SimTime age0 = getAge0();
     if (clinicalModel->isDead(age0))
         return true;
@@ -187,9 +188,8 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         // the difference between this and age at the start is not especially
         // important in the model design, but since we parameterised with
         // ageYears1 we should stick with it.
-        SimTime age1 = getAge1();
-        double ageYears1 = age1.inYears();
-        //TODO: how do we round ages in years? How do we use age0 vs age1? When does monitoringAgeGroup actually get used — at the end of the time step?
+        double ageYears1 = getAge1().inYears();
+        // monitoringAgeGroup is the group for the start of the time step.
         monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
         for( map<ComponentId,SimTime>::iterator expIt =
@@ -209,12 +209,15 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 ++expIt;
             }
         }
+        // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
         double EIR = transmissionModel->getEIR( *this, age0, ageYears1, monitoringAgeGroup );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
+        // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
         withinHostModel->update(nNewInfs, ageYears1, _vaccine.getFactor(interventions::Vaccine::BSV), mon);
         
+        // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
         clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
         clinicalModel->updateInfantDeaths( age0 );
     }
