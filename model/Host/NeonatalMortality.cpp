@@ -47,6 +47,9 @@ double riskFromMaternalInfection = 0.0;
 /// Array of stored prevalences of mothers over last 5 months
 std::vector<double> prevByGestationalAge;
 
+/// Lower and upper bounds for potential mothers (as in model description)
+SimTime ageLb = sim::fromYearsI(20), ageUb = sim::fromYearsI(25);
+
 
 void NeonatalMortality::init() {
     SimTime fiveMonths = sim::fromDays( 5 * 30 );
@@ -73,14 +76,12 @@ void NeonatalMortality::update (const Population& population) {
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
-        //NOTE: this is based on last time-step's parasite densities but this
-        // time-step's age, which is a bit strange (though not very significant).
-        double ageYears = iter->getAge1().inYears();    //TODO: age0?
+        SimTime age = iter->getAge0();
         // Note: since we're using a linked list, we have to iterate until we reach
         // the individuals we're interested in. Due to population structure, it's
         // probably quickest to start iterating from the oldest.
-        if(ageYears >= 25.0) continue;
-        if (ageYears < 20.0) break;	// Not interested in younger individuals.
+        if( age >= ageUb ) continue;
+        if( age < ageLb ) break;	// Not interested in younger individuals.
         
         //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
         // reporting, but the one used should be that used to parameterise this model
