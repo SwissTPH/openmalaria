@@ -155,8 +155,9 @@ void EmergenceModel::scaleEIR( double factor ) {
 // Every sim::oneTS() days:
 void EmergenceModel::update () {
     emergenceSurvival = 1.0;
-    for( size_t i = 0; i < emergenceReduction.size(); ++i )
-        emergenceSurvival *= 1.0 - emergenceReduction[i].current_value( sim::now1() );
+    for( size_t i = 0; i < emergenceReduction.size(); ++i ){
+        emergenceSurvival *= 1.0 - emergenceReduction[i].current_value( sim::now0() );
+    }
 }
 
 void EmergenceModel::checkpoint (istream& stream){ (*this) & stream; }
@@ -178,10 +179,7 @@ void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
 
 void EmergenceModel::deployVectorPopInterv (size_t instance) {
     assert( instance < emergenceReduction.size() );
-    
-    // Note: intervention acts first on time-step following (+1) deployment.
-    // This at least is consistent with previous results and gives the correct number of time steps of deployment
-    emergenceReduction[instance].deploy( sim::now0() + sim::oneTS() );
+    emergenceReduction[instance].deploy( sim::now0() );
 }
 
 
