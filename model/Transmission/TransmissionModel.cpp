@@ -184,7 +184,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     }
 
     // Shared graphics: report infectiousness
-    if (sim::now1StepsModulo(6) ==  0) {
+    if( mod_nn(sim::now0(), sim::fromTS(6)) == sim::zero() ){
         for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
             kappaByAge[i] /= nByAge[i];
         util::SharedGraphics::copyKappa(&kappaByAge[0]);
@@ -234,7 +234,7 @@ void TransmissionModel::summarize () {
     survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
     inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
     
-    double duration = (sim::now1() - lastSurveyTime) / sim::oneTS();
+    double duration = (sim::now0() - lastSurveyTime) / sim::oneTS();
     if( duration == 0.0 ){
         if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
             throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
@@ -248,7 +248,7 @@ void TransmissionModel::summarize () {
 
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
-    lastSurveyTime = sim::now1();
+    lastSurveyTime = sim::now0();
 }
 
 
