@@ -131,7 +131,7 @@ void EmergenceModel::initEIR(
     // Note: sum stays the same, units changes to per-time-step.
     for( SimTime i = sim::zero(); i < sim::oneYear(); i += sim::oneDay() ){
         // index 1 of initialisationEIR corresponds to first period of year
-        initialisationEIR[mod_nn(1 + i / sim::oneTS(), sim::stepsPerYear())] += speciesEIR[i];
+        initialisationEIR[mod_nn(1 + i.inSteps(), sim::stepsPerYear())] += speciesEIR[i];
     }
     
 #ifdef WITHOUT_BOINC
@@ -156,7 +156,7 @@ void EmergenceModel::scaleEIR( double factor ) {
 void EmergenceModel::update () {
     emergenceSurvival = 1.0;
     for( size_t i = 0; i < emergenceReduction.size(); ++i ){
-        emergenceSurvival *= 1.0 - emergenceReduction[i].current_value( sim::now0() );
+        emergenceSurvival *= 1.0 - emergenceReduction[i].current_value( sim::ts0() );
     }
 }
 
@@ -179,7 +179,7 @@ void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
 
 void EmergenceModel::deployVectorPopInterv (size_t instance) {
     assert( instance < emergenceReduction.size() );
-    emergenceReduction[instance].deploy( sim::now0() );
+    emergenceReduction[instance].deploy( sim::now() );
 }
 
 

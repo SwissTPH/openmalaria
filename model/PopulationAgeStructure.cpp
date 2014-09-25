@@ -46,7 +46,7 @@ vector<double> AgeStructure::cumAgeProp;
 
 void AgeStructure::init( const scnXml::Demography& demography ){
     // this number of cells are needed:
-    cumAgeProp.resize( sim::maxHumanAge() / sim::oneTS() + 1 );
+    cumAgeProp.resize( sim::maxHumanAge().inSteps() + 1 );
     
     estimateRemovalRates( demography );
     calcCumAgeProp();

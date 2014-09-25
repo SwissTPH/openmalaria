@@ -46,7 +46,7 @@ public:
             throw util::xml_scenario_error("timed intervention deployment: may not be negative");
         }else if( deploymentTime >= Monitoring::Survey::getLastSurveyTime() ){
             //TODO(date): output as a date
-            cerr << "Warning: timed intervention deployment at time "<<(deploymentTime / sim::oneTS());
+            cerr << "Warning: timed intervention deployment at time "<<(deploymentTime.inSteps());
             cerr << " happens after last survey" << endl;
         }
     }
@@ -243,7 +243,7 @@ public:
     
     virtual void deploy (OM::Population& population) {
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            SimTime age = iter->getAge0();
+            SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
                     if( util::random::bernoulli( coverage ) ){
@@ -294,7 +294,7 @@ public:
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally subPop
         for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            SimTime age = iter->getAge0();
+            SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
                     total+=1;
@@ -387,14 +387,16 @@ public:
      * @returns false iff this deployment (and thus all later ones in the
      *  ordered list) happens in the future. */
     bool filterAndDeploy( Host::Human& human, const Population& population ) const{
-        SimTime age = human.getAge0();
+        SimTime age = human.age(sim::now());
         if( deployAge > age ){
             // stop processing continuous deployments for this
             // human for now because remaining ones happen in the future
             return false;
         }else if( deployAge == age ){
             if( begin <= sim::intervNow() && sim::intervNow() < end &&
-                ( subPop == interventions::ComponentId_pop || (human.isInSubPop( subPop ) != complement) ) &&
+                ( subPop == interventions::ComponentId_pop ||
+                    (human.isInSubPop( subPop ) != complement)
+                ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
             {
                 deployToHuman( human, Deployment::CTS );

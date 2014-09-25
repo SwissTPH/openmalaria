@@ -103,7 +103,7 @@ void CommonWithinHost::importInfection(){
 
 void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    m_y_lag[sim::now1StepsModulo(y_lag_len)] = totalDensity;
+    m_y_lag[sim::now1().moduloSteps(y_lag_len)] = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.

@@ -121,13 +121,13 @@ private:
     /// Current state of sickness
     Episode::State pgState;
 
-    /** Set to when a bout should start. If sim::now0() equals this, a bout
+    /** Set to when a bout should start. If sim::ts0() equals this, a bout
      * is started (UC & severe behaviour different).
      *
      * Note: medications are not delayed by this. */
     SimTime caseStartTime;
 
-    /** The individual recovers when sim::now0() >= timeOfRecovery,
+    /** The individual recovers when sim::ts0() >= timeOfRecovery,
      * assuming they didn't die. */
     SimTime timeOfRecovery;
 

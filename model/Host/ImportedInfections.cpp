@@ -40,7 +40,7 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
             throw util::xml_scenario_error( "interventions.importedInfections.timed: time cannot be greater than period when period is not zero" );
         }
         // convert to per-time-step, per-person
-        double rateVal = it->getValue() / (sim::oneYear() / sim::oneTS()) / 1000.0;
+        double rateVal = it->getValue() * sim::yearsPerStep() * (1.0 / 1000.0);
         rate.push_back( Rate( time, rateVal ) );
     }
     sort( rate.begin(), rate.end() );

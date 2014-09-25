@@ -82,11 +82,9 @@ public:
      * infantDeaths arrays. */
     void updateInfantDeaths( SimTime age );
     
-    /** Used with IPT within host model to potentially avoid further reports:
-     * The four time steps after a bout are not at risk of a further bout since
-     * if one occured it would be considered the same bout.
-     *
-     * Only supported by immediate outcomes model. */
+    /** Special option to avoid reporting several things (mostly clinical
+     * events and number at risk) in the four time steps after a bout, since a
+     * further event during this time would not be considered a new bout. */
     virtual bool notAtRisk() =0;
     
     /** One way to do mass drug administation. Only for EventScheduler model. */

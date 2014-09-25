@@ -202,7 +202,7 @@ void Population::update1( SimTime firstVecInitTS ){
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
     //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * (sim::now1() / sim::oneTS())));
+    //int targetPop = (int) (populationSize * exp( AgeStructure::rho * sim::now1().inSteps() ));
     int targetPop = populationSize;
     int cumPop = 0;
 
@@ -229,8 +229,8 @@ void Population::update1( SimTime firstVecInitTS ){
 
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
-        //NOTE: better to use getAge0()? Possibly, but the difference will not be very significant.
-        if( cumPop > AgeStructure::targetCumPop(iter->getAge1() / sim::oneTS(), targetPop) ){
+        //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
+        if( cumPop > AgeStructure::targetCumPop(iter->age(sim::ts1()).inSteps(), targetPop) ){
             --cumPop;
             iter->destroy();
             iter = population.erase (iter);
@@ -263,7 +263,7 @@ void Population::ctsHostDemography (ostream& stream){
     Population::ConstReverseIter it = population.crbegin();
     int cumCount = 0;
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
-        while( it != population.crend() && it->getAge0().inYears() < ubound ){
+        while( it != population.crend() && it->age(sim::now()).inYears() < ubound ){
             ++cumCount;
             ++it;
         }
@@ -320,7 +320,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAge0().inYears());
+            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->age(sim::now()).inYears());
         }
     }
     stream << '\t' << avail/nHumans;

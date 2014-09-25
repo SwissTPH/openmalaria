@@ -178,7 +178,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         ++PopulationStats::humanUpdates;
 #endif
     // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
-    SimTime age0 = getAge0();
+    SimTime age0 = age(sim::ts0());
     if (clinicalModel->isDead(age0))
         return true;
     
@@ -188,15 +188,14 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         // the difference between this and age at the start is not especially
         // important in the model design, but since we parameterised with
         // ageYears1 we should stick with it.
-        double ageYears1 = getAge1().inYears();
+        double ageYears1 = age(sim::ts1()).inYears();
         // monitoringAgeGroup is the group for the start of the time step.
         monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
         for( map<ComponentId,SimTime>::iterator expIt =
             m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
         {
-            //  We use >= to test membership, < is inverse (see comment on m_subPopExp)
-            if( expIt->second < sim::now0() ){
+            if( !(expIt->second >= sim::ts0()) ){       // membership expired
                 // don't flush reports
                 // report removal due to expiry
                 Survey::current().addInt(Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
@@ -242,7 +241,7 @@ void Human::summarize() {
     }
     
     Survey::current().addInt( Report::MI_HOSTS, *this, 1)
-        .addDouble( Report::MD_AGE, *this, getAge0().inYears() );
+        .addDouble( Report::MD_AGE, *this, age(sim::now()).inYears() );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     
@@ -254,7 +253,7 @@ void Human::summarize() {
 
 void Human::reportDeployment( ComponentId id, SimTime duration ){
     if( duration <= sim::zero() ) return; // nothing to do
-    m_subPopExp[id] = sim::now0() + duration;
+    m_subPopExp[id] = sim::nowOrTs1()/*TODO: should be now but requires delayed triggered deployments*/ + duration;
     m_cohortSet = Survey::updateCohortSet( m_cohortSet, id, true );
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
@@ -262,8 +261,7 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
     for( vector<ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
         SubPopT::iterator expIt = m_subPopExp.find( *it );
         if( expIt != m_subPopExp.end() ){
-            //  We use >= to test membership (see comment on m_subPopExp)
-            if( expIt->second >= sim::now0() ){
+            if( expIt->second > sim::nowOrTs0() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment
                 // and onFirstInfection cohort options. Health system memory must
                 // be reset for this to work properly; in theory the memory should

@@ -53,7 +53,7 @@ SimTime ageLb = sim::fromYearsI(20), ageUb = sim::fromYearsI(25);
 
 void NeonatalMortality::init() {
     SimTime fiveMonths = sim::fromDays( 5 * 30 );
-    prevByGestationalAge.assign( fiveMonths / sim::oneTS(), 0.0 );
+    prevByGestationalAge.assign( fiveMonths.inSteps(), 0.0 );
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
@@ -76,7 +76,7 @@ void NeonatalMortality::update (const Population& population) {
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
-        SimTime age = iter->getAge0();
+        SimTime age = iter->age(sim::ts0());
         // Note: since we're using a linked list, we have to iterate until we reach
         // the individuals we're interested in. Due to population structure, it's
         // probably quickest to start iterating from the oldest.
@@ -98,7 +98,7 @@ void NeonatalMortality::update (const Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = sim::now0StepsModulo(prevByGestationalAge.size());
+    size_t index = sim::ts0().moduloSteps(prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for (size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {

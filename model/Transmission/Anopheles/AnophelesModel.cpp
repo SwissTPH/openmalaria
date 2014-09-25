@@ -231,7 +231,7 @@ void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, dou
 
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAge0().inYears());
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::now()).inYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
@@ -288,8 +288,8 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
     transmission.emergence->deployVectorPopInterv(instance);
     // do same as in above function (of EmergenceModel)
     assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
-    seekingDeathRateIntervs[instance].deploy( sim::now0() );
-    probDeathOvipositingIntervs[instance].deploy( sim::now0() );
+    seekingDeathRateIntervs[instance].deploy( sim::now() );
+    probDeathOvipositingIntervs[instance].deploy( sim::now() );
 }
 
 
@@ -337,7 +337,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double leaveSeekingStateRate = mosqSeekingDeathRate;
     for( vector<util::SimpleDecayingValue>::const_iterator it=seekingDeathRateIntervs.begin();
         it != seekingDeathRateIntervs.end(); ++it ){
-        leaveSeekingStateRate *= 1.0 + it->current_value( sim::now0() );
+        leaveSeekingStateRate *= 1.0 + it->current_value( sim::ts0() );
     }
 
     // NC's non-autonomous model provides two methods for calculating P_df and
@@ -349,7 +349,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->getAge1().inYears());
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::ts1()).inYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
@@ -371,7 +371,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double baseP_df = P_Ai_base * probMosqSurvivalOvipositing;
     for( vector<util::SimpleDecayingValue>::const_iterator it=probDeathOvipositingIntervs.begin();
         it != probDeathOvipositingIntervs.end(); ++it ){
-        baseP_df *= 1.0 - it->current_value( sim::now0() );
+        baseP_df *= 1.0 - it->current_value( sim::ts0() );
     }
     tsP_df  *= baseP_df;
     tsP_dif *= baseP_df;
@@ -384,7 +384,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
-    for( SimTime now = sim::now0(), end = sim::now0() + sim::oneTS();
+    for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS();
         now < end; now += sim::oneDay() )
     {
         partialEIR += transmission.update( now, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;

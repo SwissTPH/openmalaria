@@ -64,6 +64,9 @@ public:
     
     /// Convert to years
     inline double inYears() const{ return d * (1.0 / DAYS_IN_YEAR); }
+    
+    /// Convert to time steps (rounding down)
+    inline int inSteps() const{ return d / interval; }
     //@}
     
     ///@brief Simple arithmatic modifiers (all return a copy)
@@ -120,6 +123,16 @@ public:
     }
     //@}
     
+    /** Return this time in time steps modulo some positive integer. */
+    inline int moduloSteps(int denominator){
+        return util::mod_nn(d / interval, denominator);
+    }
+    
+    /** Return this time in time steps modulo some positive integer. */
+    inline int moduloYearSteps(){
+        return util::mod_nn(d / interval, steps_per_year);
+    }
+    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
@@ -129,6 +142,11 @@ public:
     
 private:
     int d;      // time in days
+    
+    // Global constants
+    static int interval;        // days per time step
+    static size_t steps_per_year;
+    static double years_per_step;
     
     friend std::ostream& operator<<( std::ostream&, const SimTime );
     friend SimTime mod_nn( const SimTime, const SimTime );
@@ -147,16 +165,37 @@ class sim {
 public:
     ///@brief Accessors, all returning a copy to make read-only
     //@{
-    /** Get the time now: time at beginning of current update period.
+    /** Time at the beginning of a time step update.
      *
-     * This is the time since the start of simulation, including the
-     * initialisation period, excluding the current update interval.
-     * The following is always true: now0() >= zero(). */
-    static inline SimTime now0(){ return sim_time0; }
-    /** As now0, except that this is the time at the end of the current update
-     * period (i.e. at some times now1 = now0 + 1, but at other times the two
-     * appear equal). */
-    static inline SimTime now1(){ return sim_time1; }
+     * This is what is mostly used during an update. It is never negative and
+     * increases throughout the simulation. */
+    static inline SimTime ts0(){
+        assert(in_update);      // should only be used during updates
+        return time0;
+    }
+    /** Time at the end of a time step update.
+     * 
+     * During an update, ts0() + oneTS() = ts1(). Neither this nor ts0 should
+     * be used outside of updates. */
+    static inline SimTime ts1(){
+        assert(in_update);      // should only be used during updates
+        return time1;
+    }
+    /** Time during init, monitoring and intervention deployment (i.e. whenever
+     * a human or mosquito update is not in progress).
+     *
+     * This is equal to ts1() from the last update and ts0() from this update.
+     */
+    static inline SimTime now(){
+        assert(!in_update);     // only for use outside of step updates
+        return time0;   // which is equal to time1 outside of updates, but that's a detail
+    }
+    /** During updates, this is ts0; between, this is now. */
+    static inline SimTime nowOrTs0(){ return time0; }
+    /** During updates, this is ts1; between, this is now. */
+    static inline SimTime nowOrTs1(){ return time1; }
+    /** Relic, usage to be replaced. */
+    static inline SimTime now1(){ return time1; }
     
     /** Time relative to the intervention period. Some events are defined
      * relative to this time rather than simulation time, and since the
@@ -164,17 +203,17 @@ public:
      * it is easier to track the two separately.
      * 
      * This is a large negative number until the intervention period starts,
-     * at which time it jumps to zero then increments as does now(). */
+     * at which time it jumps to zero. */
     static inline SimTime intervNow(){ return interv_time; }
     
     /** One time step (currently either one or five days). */
-    static inline SimTime oneTS(){ return one_step; }
+    static inline SimTime oneTS(){ return SimTime(SimTime::interval); }
     
     /** The number of time steps in one year. */
-    static inline size_t stepsPerYear(){ return steps_per_year; }
+    static inline size_t stepsPerYear(){ return SimTime::steps_per_year; }
     
     /** A cached value: one year divided by one time step. */
-    static inline double yearsPerStep(){ return years_per_step; }
+    static inline double yearsPerStep(){ return SimTime::years_per_step; }
     
     static inline SimTime maxHumanAge(){ return max_human_age; }
     //@}
@@ -223,45 +262,28 @@ public:
     
     /** Round to the nearest time-step, where input is in days. */
     static inline SimTime roundToTSFromDays(double days){
-        return fromTS(std::floor( days / oneTS().d + 0.5 ));
+        return fromTS(std::floor( days / SimTime::interval + 0.5 ));
     }
     //@}
     
     ///@brief Conversion functions, for convenience
     //@{
-    /** Return the current time in time steps modulo some positive integer. */
-    static inline int now0StepsModulo(int denominator){
-        return util::mod_nn(now0() / oneTS(), denominator);
-    }
-    /** Return the current time in time steps modulo some positive integer. */
-    static inline int now1StepsModulo(int denominator){
-        return util::mod_nn(now1() / oneTS(), denominator);
-    }
-    
-    /** Return the current time in time steps modulo steps per year. */
-    static inline int stepOfYear0(){
-        return now0StepsModulo(steps_per_year);
-    }
-    /** Return the current time in time steps modulo steps per year. */
-    static inline int stepOfYear1(){
-        return now1StepsModulo(steps_per_year);
-    }
-    
     /** Convert some number of days to some number of time steps (integer
      * division). */
-    static inline int daysToSteps(int days){ return days / oneTS().d; }
+    static inline int daysToSteps(int days){ return days / SimTime::interval; }
     //@}
     
 private:
     static void init( int days_per_step, double max_age_years );
     
-    static SimTime sim_time0;
-    static SimTime sim_time1;
+    static SimTime max_human_age;   // constant
+    // Global variables
+#ifndef NDEBUG
+    static bool in_update;       // only true during human/population/transmission update
+#endif
+    static SimTime time0;
+    static SimTime time1;
     static SimTime interv_time;
-    static SimTime one_step;
-    static SimTime max_human_age;
-    static size_t steps_per_year;
-    static double years_per_step;
     
     friend class Simulator;
     friend class ::UnittestUtil;

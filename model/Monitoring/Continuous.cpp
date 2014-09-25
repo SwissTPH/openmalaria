@@ -244,7 +244,7 @@ namespace OM { namespace Monitoring {
         } else {
             if( mod_nn(sim::now1(), ctsPeriod) != sim::zero() )
                 return;
-            ctsOStream << (sim::now1() / sim::oneTS()) << '\t';
+            ctsOStream << sim::now1().inSteps() << '\t';
         }
 	
 	util::BoincWrapper::beginCriticalSection();	// see comment in staticCheckpoint
@@ -252,7 +252,7 @@ namespace OM { namespace Monitoring {
         if( duringInit && sim::intervNow() < sim::zero() ){
             ctsOStream << "nan";
         }else{
-            ctsOStream << (sim::intervNow() / sim::oneTS());
+            ctsOStream << sim::intervNow().inSteps();
         }
 	for( size_t i = 0; i < toReport.size(); ++i )
 	    toReport[i]->call( population, ctsOStream );

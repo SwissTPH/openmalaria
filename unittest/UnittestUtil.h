@@ -54,13 +54,13 @@ public:
     static void initTime(int daysPerStep){
         sim::init( daysPerStep, 90.0 /*max human age*/ );
         // we could just use zero, but we may spot more errors by using some weird number
-        sim::sim_time0 = sim::fromYearsN(83.2591);
-        sim::sim_time1 = sim::sim_time0;
+        sim::time0 = sim::fromYearsN(83.2591);
+        sim::time1 = sim::time0;
     }
     static void incrTime(SimTime incr){
         //NOTE: for unit tests, we do not differentiate between time0 and time1
-        sim::sim_time0 += incr;
-        sim::sim_time1 = sim::sim_time0;
+        sim::time0 += incr;
+        sim::time1 = sim::time0;
     }
     // Initialise surveys, to the minimum required not to crash
     static void initSurveys(){

@@ -115,25 +115,18 @@ public:
   
   /// @brief Small functions
   //@{
-    /** Get the human's age at the beginning of the time step. */
-    inline SimTime getAge0() const{
-        return sim::now0() - m_DOB;
-    }
-    /** Get the human's age at the end of the time step. */
-    inline SimTime getAge1() const{
-        return sim::now1() - m_DOB;
-    }
+    /** Get human's age with respect to some time. */
+    inline SimTime age( SimTime time )const{ return time - m_DOB; }
     /** Date of birth. */
     inline SimTime getDateOfBirth() const{ return m_DOB; }
   
   /** Return true if human is a member of the sub-population.
    * 
-   * This is only for use during intervention deployment (see comment on
-   * m_subPopExp). */
+   * @param id Sub-population identifier. */
   inline bool isInSubPop( interventions::ComponentId id )const{
       map<interventions::ComponentId,SimTime>::const_iterator it = m_subPopExp.find( id );
       if( it == m_subPopExp.end() ) return false;       // no history of membership
-      else return it->second > sim::now0();   // added: has expired?
+      else return it->second > sim::nowOrTs0();   // added: has expired?
   }
   /** Return the cohort set. */
   inline uint32_t cohortSet()const{ return m_cohortSet; }
@@ -230,10 +223,10 @@ private:
   /** This lists sub-populations of which the human is a member together with
    * expiry time.
    * 
-   * Definition: a human is in a sub-population if that sub-population is
-   * listed here, and, at time of intervention deployment the expiry time given
-   * here is greater than the current time, or during human update the
-   * expiry time given here is greater than or equal to the current time.
+   * Definition: a human is in sub-population p if m_subPopExp.contains(p) and,
+   * for t=m_subPopExp[p], t > sim::now() (at the time of intervention
+   * deployment) or t > sim::ts0() (equiv t >= sim::ts1()) during human update.
+   * 
    * NOTE: this discrepancy is because intervention deployment effectively
    * happens at the end of a time step and we want a duration of 1 time step to
    * mean 1 intervention deployment (that where the human becomes a member) and

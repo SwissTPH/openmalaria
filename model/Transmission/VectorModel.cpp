@@ -39,7 +39,7 @@ using namespace OM::util;
 double VectorModel::meanPopAvail (const Population& population) {
     double sumRelativeAvailability = 0.0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAge0().inYears());
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->age(sim::now()).inYears());
     }
     if( population.size() > 0 ){
         return sumRelativeAvailability / population.size();     // mean-rel-avail
@@ -82,7 +82,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
         const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAge0().inYears() );
+            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->age(sim::now()).inYears() );
         }
         stream << '\t' << total / population.size();
     }
@@ -355,7 +355,7 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
     PerHost& host = human.perHostTransmission;
     host.update( human );
     if (simulationMode == forcedEIR){
-        return initialisationEIR[sim::stepOfYear1()]
+        return initialisationEIR[sim::now1().moduloYearSteps()]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{
         assert( simulationMode == dynamicEIR );

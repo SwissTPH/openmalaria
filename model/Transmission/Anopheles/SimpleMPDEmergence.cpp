@@ -202,7 +202,7 @@ void SimpleMPDEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
 double SimpleMPDEmergence::getResAvailability() const {
     //TODO: why offset by one time step? This is effectively getting the resources available on the last time step
     //TODO: only have to add one year because of offset
-    SimTime start = sim::now0() - sim::oneTS() + sim::oneYear();
+    SimTime start = sim::now() - sim::oneTS() + sim::oneYear();
     double total = 0;
     for( SimTime i = start, end = start + sim::oneTS(); i < end; i += sim::oneDay() ){
         SimTime dYear1 = mod_nn(i, sim::oneYear());

@@ -225,7 +225,7 @@ double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
             S_v[t] = 0.0;
             /* Note: could report; these reports often occur too frequently, however
             if( S_v[t] != 0.0 ){        // potentially reduce reporting
-	cerr << sim::now0() <<":\t S_v cut-off"<<endl;
+	cerr << sim::ts0() <<":\t S_v cut-off"<<endl;
             } */
         }
     }
@@ -275,7 +275,7 @@ double MosqTransmission::getLastVecStat( VecStat vs )const{
     double val = 0.0;
     // Minus one time step since we are getting the last value. TODO: why +oneDay offset?
     // +N_v_length just to make now >= 0 in modular arithmatic
-    SimTime start = sim::now0() + sim::oneDay() - sim::oneTS() + N_v_length;
+    SimTime start = sim::now() + sim::oneDay() - sim::oneTS() + N_v_length;
     for( SimTime now = start, end = start + sim::oneTS();
         now < end; now += sim::oneDay() )
     {

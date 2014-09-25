@@ -72,20 +72,25 @@ enum Phase {
 
 // ———  SimTime stuff  ———
 
-SimTime sim::sim_time0;
-SimTime sim::sim_time1;
-SimTime sim::interv_time;
-SimTime sim::one_step;
+// global constants:
+int SimTime::interval;
+size_t SimTime::steps_per_year;
+double SimTime::years_per_step;
 SimTime sim::max_human_age;
-size_t sim::steps_per_year;
-double sim::years_per_step;
+// global variables:
+#ifndef NDEBUG
+bool sim::in_update = false;
+#endif
+SimTime sim::time0;
+SimTime sim::time1;
+SimTime sim::interv_time;
 
 void sim::init( int days_per_step, double max_age_years ){
+    SimTime::interval = days_per_step;
+    SimTime::steps_per_year = sim::oneYear().inSteps();
+    SimTime::years_per_step = 1.0 / SimTime::steps_per_year;
+    sim::max_human_age = sim::fromTS( max_age_years * SimTime::steps_per_year );
     sim::interv_time = sim::never();    // large negative number
-    sim::one_step = sim::fromDays( days_per_step );
-    sim::steps_per_year = sim::oneYear() / sim::oneTS();
-    sim::years_per_step = 1.0 / sim::steps_per_year;
-    sim::max_human_age = sim::fromTS( max_age_years * steps_per_year );
 }
 
 
@@ -150,8 +155,8 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
 // ———  run simulations  ———
 
 void Simulator::start(const scnXml::Monitoring& monitoring){
-    sim::sim_time0 = sim::zero();
-    sim::sim_time1 = sim::zero();
+    sim::time0 = sim::zero();
+    sim::time1 = sim::zero();
     
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
@@ -199,17 +204,24 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             }
             
             // Time step updates. Essentially, a time step is mid-day to
-            // mid-day. sim::now0() gives the date at the start of the step (in
-            // internal units), and sim::now1() the date at the end.
+            // mid-day. sim::ts0() gives the date at the start of the step (in
+            // internal units), and sim::ts1() the date at the end. Monitoring
+            // and intervention deployment happen between updates, at time
+            // sim::now().
+            
             // Each step, monitoring (e.g. carrying out a survey) happens
             // first, reporting on the state at the start of the step (e.g.
             // patentcy diagnostics) or tallys of events which happened since
             // some point in the past (e.g. a previous survey).
-            // Interventions are deployed next.
+            // Interventions are deployed next. For monitoring and intervention
+            // deployment sim::ts0() and sim::ts1() should not be used.
+            
             // Finally, Population::update1() runs, which updates both the
-            // transmission model and the human population. It also adds new
-            // humans, effectively born at the start of the next time step, to
-            // replace those lost.
+            // transmission model and the human population. During this time
+            // sim::now() should not be used, however sim::ts0() equals its
+            // last value while sim::ts1() is one greater.
+            // Population::update1() also adds new humans, born at time
+            //  sim::ts1(), to replace those lost.
             
             // do reporting (continuous and surveys)
             Continuous.update( *population );
@@ -223,11 +235,17 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // update humans and mosquitoes
             
-            // sim_time1 is the time at the end of a time step, and mostly a
+            // time1 is the time at the end of a time step, and mostly a
             // confusing relic, though sometimes useful.
-            sim::sim_time1 += sim::oneTS();
+            sim::time1 += sim::oneTS();
+#ifndef NDEBUG
+            sim::in_update = true;
+#endif
             population->update1( humanWarmupLength );
-            sim::sim_time0 += sim::oneTS();
+#ifndef NDEBUG
+            sim::in_update = false;
+#endif
+            sim::time0 += sim::oneTS();
             sim::interv_time += sim::oneTS();
             
             util::BoincWrapper::reportProgress(
@@ -414,8 +432,8 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
-        sim::sim_time0 & stream;
-        sim::sim_time1 & stream;
+        sim::time0 & stream;
+        sim::time1 & stream;
         util::random::checkpoint (stream, checkpointNum);
         
         // Check scenario.xml and checkpoint files correspond:
@@ -465,8 +483,8 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     PopulationStats::staticCheckpoint( stream );
     InterventionManager::checkpoint( stream );
     
-    sim::sim_time0 & stream;
-    sim::sim_time1 & stream;
+    sim::time0 & stream;
+    sim::time1 & stream;
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;
     cksum & stream;

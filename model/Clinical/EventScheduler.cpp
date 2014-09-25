@@ -170,7 +170,7 @@ void ClinicalEventScheduler::massDrugAdministration( Human& human,
     // Note: we augment any existing medications, however future medications will replace any yet-
     // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
     ESCaseManagement::massDrugAdministration ( 
-        CMHostData( human, human.getAge0().inYears(), pgState ),
+        CMHostData( human, human.age(sim::nowOrTs0()).inYears(), pgState ),
             human, screeningReport, drugReport
     );
 }
@@ -183,7 +183,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     Episode::State newState = static_cast<Episode::State>( pg.state );
     util::streamValidate( (newState << 16) & pgState );
     
-    if ( sim::now0() == timeOfRecovery ) {
+    if ( sim::ts0() == timeOfRecovery ) {
 	if( pgState & Episode::DIRECT_DEATH ){
 	    // Human dies this time step (last day of risk of death)
 	    doomed = DOOMED_COMPLICATED;
@@ -223,14 +223,14 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 // previously healthy or UC: progress to severe
                 pgState = Episode::State (pgState | newState | Episode::RUN_CM_TREE);
                 indirectMortality = pg.indirectMortality;
-                caseStartTime = sim::now0();
+                caseStartTime = sim::ts0();
             }
         } else {
             // uncomplicated case (UC/UC2/NMF): is it new?
             if (pgState & Episode::SICK) {
                 // previously UC; nothing to do
             }else{
-                if( caseStartTime < sim::now0() ) {
+                if( caseStartTime < sim::ts0() ) {
                     // new UC case
                     pgState = Episode::State (pgState | newState | Episode::RUN_CM_TREE);
                     indirectMortality = pg.indirectMortality;
@@ -245,7 +245,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                     assert(false);      // should have uVariate < 1 = cumDailyPrImmUCTS[len-1]
                     gotDelay:
                     // set start time: current time plus length of delay (days)
-                    caseStartTime = sim::now0() + sim::fromDays(i);
+                    caseStartTime = sim::ts0() + sim::fromDays(i);
                 }
             }
         }
@@ -254,12 +254,12 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
             doomed = -sim::oneTS().inDays(); // start indirect mortality countdown
     }
     
-    if( caseStartTime == sim::now0() && (pgState & Episode::RUN_CM_TREE) ){
+    if( caseStartTime == sim::ts0() && (pgState & Episode::RUN_CM_TREE) ){
         // OK, we're about to run the CM tree
         pgState = Episode::State (pgState & ~Episode::RUN_CM_TREE);
         
         // If last treatment prescribed was in recent memory, consider second line.
-        if( timeLastTreatment + healthSystemMemory > sim::now0() ){
+        if( timeLastTreatment + healthSystemMemory > sim::ts0() ){
             pgState = Episode::State (pgState | Episode::SECOND_CASE);
         }
 	
@@ -267,7 +267,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    CMHostData( human, ageYears, pgState ) );
 	
         if( auxOut.treated ){	// I.E. some treatment was given
-            timeLastTreatment = sim::now0();
+            timeLastTreatment = sim::ts0();
             if( pgState & Episode::COMPLICATED ){
                 Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
             }else{
@@ -364,7 +364,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	// Complicated case & at risk of death (note: extraDaysAtRisk <= 0)
 	if( (pgState & Episode::COMPLICATED)
 	    && !(pgState & Episode::DIRECT_DEATH)
-	    && (sim::now0() < timeOfRecovery + extraDaysAtRisk)
+	    && (sim::ts0() < timeOfRecovery + extraDaysAtRisk)
 	) {
 	    // In complicated episodes, S(t), the probability of survival on
 	    // subsequent days t, is described by log(S(t)) = -v(Y(t)/Y(t-1)),
@@ -389,7 +389,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     
     // Start of case. Not necessarily start of sickness due to treatment-seeking
     // delays and travel time.
-    if( caseStartTime == sim::now0() ){
+    if( caseStartTime == sim::ts0() ){
 	// Patients in hospital are removed from the transmission cycle.
 	// This should have an effect from the start of the next time step.
 	// NOTE: This is not very accurate, but considered of little importance.
@@ -402,17 +402,17 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    // exiting hospital are OK and medications terminating before the
 	    // end of hospitalisation shouldn't matter too much if the person
 	    // can't recieve new infections due to zero transmission in hospital.
-	    timeOfRecovery = sim::now0() + complicatedCaseDuration;
+	    timeOfRecovery = sim::ts0() + complicatedCaseDuration;
 	    // Time should be adjusted to end of at-risk period when patient dies:
 	    if( pgState & Episode::DIRECT_DEATH )	// death may already have been determined
 		timeOfRecovery += extraDaysAtRisk;	// ATORWD (search keyword)
 	} else {
-	    timeOfRecovery = sim::now0() + uncomplicatedCaseDuration;
+	    timeOfRecovery = sim::ts0() + uncomplicatedCaseDuration;
 	}
     }
     
     // Remove on first models...
-    if( timeLastTreatment == sim::now0() ){
+    if( timeLastTreatment == sim::ts0() ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
     }
     if( pgState & Episode::SICK ){

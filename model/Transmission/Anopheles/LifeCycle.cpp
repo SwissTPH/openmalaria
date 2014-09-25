@@ -55,7 +55,7 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
     // get resources available on the next time step
-    for( SimTime d = sim::now0(), end = sim::now0() + sim::oneTS(); d < end;
+    for( SimTime d = sim::now(), end = sim::now() + sim::oneTS(); d < end;
             d += sim::oneDay() ){
         val += 1.0 / invLarvalResources[mod_nn(d, sim::oneYear())];
     }
