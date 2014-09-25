@@ -151,8 +151,11 @@ public:
      * management" model, and case management diagnostics. */
     virtual double getTotalDensity() const =0;
     
-    /** Simulate use of a diagnostic test, using the general detection limit.
+    /** Simulate use of a diagnostic test.
+     *
      * Does not report for costing purposes.
+     * 
+     * Is used both during time step updates and during monitoring.
      * 
      * @returns true when the diagnostic is positive
      */
@@ -188,7 +191,8 @@ protected:
         int total;      // includes blood and liver stages
         int patent;     // number of detectible blood-stage infections
     };
-    /** For summarizing:
+    /** For summarizing: counts total and patent infections during monitoring
+     * (i.e. at start of time step).
      * 
      * @returns Number of infections, patent and total
      */

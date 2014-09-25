@@ -349,6 +349,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
+        //TODO: even stranger since popProbTransmission comes from the previous time step
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::ts1()).inYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex)

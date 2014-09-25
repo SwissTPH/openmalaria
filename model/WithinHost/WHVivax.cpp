@@ -110,10 +110,10 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
     // primary blood stage plus hypnozoites (relapses)
-    releases.insert( sim::now1() + latentP );
+    releases.insert( sim::ts0() + latentP );
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
-        SimTime timeToRelease = sim::now1() + latentP + sampleReleaseDelay();
+        SimTime timeToRelease = sim::ts0() + latentP + sampleReleaseDelay();
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
@@ -156,19 +156,19 @@ VivaxBrood::VivaxBrood( istream& stream ){
 
 
 VivaxBrood::UpdResult VivaxBrood::update(){
-    if( bloodStageClearDate == sim::now1() ){
+    if( bloodStageClearDate == sim::ts1() ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
         // protect against new blood-stage infections for a short time.
     }
     
     UpdResult result;
-    while( releaseDates.size() > 0 && releaseDates.back() == sim::now1() ){
+    while( releaseDates.size() > 0 && releaseDates.back() == sim::ts0() ){
         releaseDates.pop_back();
         
 #ifdef WHVivaxSamples
         if( sampleBrood == this ){
-            cout << "Time\t" << sim::now1();
+            cout << "Time\t" << sim::ts0();
             for( vector<SimTime>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
                 cout << '\t' << *it;
             cout << endl;
@@ -178,8 +178,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         // an existing or recently terminated blood stage from the same brood
         // protects against a newly released Hypnozoite
         //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
-        if( bloodStageClearDate + bloodStageProtectionLatency
-            >= sim::now1() ) continue;
+        if( bloodStageClearDate + bloodStageProtectionLatency >= sim::ts1() ) continue;
         
         if( !primaryHasStarted ){
             primaryHasStarted = true;
@@ -188,7 +187,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         result.newBS = true;
         
         double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
-        bloodStageClearDate = sim::now1() + sim::roundToTSFromDays( lengthDays );
+        bloodStageClearDate = sim::ts1() + sim::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
     }

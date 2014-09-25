@@ -76,7 +76,10 @@ void NeonatalMortality::update (const Population& population) {
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
+        // diagnosticDefault() gives patentcy after the last time step's
+        // update, so it's appropriate to use age at the beginning of this step.
         SimTime age = iter->age(sim::ts0());
+        
         // Note: since we're using a linked list, we have to iterate until we reach
         // the individuals we're interested in. Due to population structure, it's
         // probably quickest to start iterating from the oldest.
@@ -87,7 +90,7 @@ void NeonatalMortality::update (const Population& population) {
         // reporting, but the one used should be that used to parameterise this model
         nCounter ++;
         if (iter->withinHostModel->diagnosticDefault())
-        pCounter ++;
+            pCounter ++;
     }
     
     // ———  calculate risk of neonatal mortality  ———

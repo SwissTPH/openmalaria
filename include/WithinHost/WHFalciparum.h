@@ -78,6 +78,10 @@ public:
     }
     
 protected:
+    /** Clear infections of the appropriate stages.
+     * 
+     * @param stage Which stages of the infection are affected
+     */
     virtual void clearInfections( Treatments::Stages stage ) =0;
     
     ///@brief Immunity model parameters
