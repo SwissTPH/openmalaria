@@ -56,6 +56,9 @@ public:
         // we could just use zero, but we may spot more errors by using some weird number
         sim::time0 = sim::fromYearsN(83.2591);
         sim::time1 = sim::time0;
+#ifndef NDEBUG
+        sim::in_update = true;  // may not always be correct but we're more interested in getting around this check than using it in unit tests
+#endif
     }
     static void incrTime(SimTime incr){
         //NOTE: for unit tests, we do not differentiate between time0 and time1

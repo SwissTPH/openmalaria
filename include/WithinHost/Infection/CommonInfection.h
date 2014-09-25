@@ -31,8 +31,8 @@ namespace OM { namespace WithinHost {
  * conversion when the main simulation uses a 5 day time step by updating
  * infections and the PK-PD model multiple times.
  * 
- * Note therefore that sim::now1() may not always be accurate since it is only
- * updated once per main time step. */
+ * Note therefore that sim::ts0(), ts1(), etc. may not always be accurate since
+ * it is only updated once per main time step. */
 class CommonInfection : public Infection {
 public:
     /// @brief Construction and destruction
@@ -51,7 +51,7 @@ public:
     /** Update: calculate new density. Call this once per day.
      * 
      * @param survivalFactor Density multiplier to introduce drug & vaccine effects
-     * @param now The simulation time. Use this instead of sim::now1().
+     * @param now The simulation time. Use this instead of sim::ts1().
      * @returns True when the infection goes extinct. */
     inline bool update( double survivalFactor, SimTime now ){
 	SimTime bsAge = now - m_startDate - latentP;	// age of post-latent-period blood stage

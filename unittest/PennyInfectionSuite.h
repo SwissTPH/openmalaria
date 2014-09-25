@@ -72,7 +72,7 @@ public:
         
         bool extinct = false;
         int iterations=0;
-        SimTime now = sim::now1();
+        SimTime now = sim::ts1();
         do{
             extinct = infection->update(1.0, now);
             int ageDays = (now - infection->m_startDate - infection->latentP).inDays();

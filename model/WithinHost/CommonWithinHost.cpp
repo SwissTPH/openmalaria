@@ -132,7 +132,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     bool treatmentBlood = treatExpiryBlood >= sim::now1();
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
-    for( SimTime now = sim::now1(), end = sim::now1() + sim::oneTS(); now < end; now += sim::oneDay() ){
+    for( SimTime now = sim::ts1(), end = sim::ts1() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel->medicate( ageInYears );
         
