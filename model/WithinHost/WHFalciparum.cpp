@@ -131,7 +131,7 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor ) const{
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to ensure positive. All values initialised to 0.
-    int firstIndex = sim::daysToSteps(sim::now1().inDays() - 10) + 1 + y_lag_len;
+    int firstIndex = sim::daysToSteps(sim::ts0().inDays() - 10) + 1 + y_lag_len;
     double x = beta1 * m_y_lag[mod_nn(firstIndex, y_lag_len)]
             + beta2 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(5), y_lag_len)]
             + beta3 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(10), y_lag_len)];
