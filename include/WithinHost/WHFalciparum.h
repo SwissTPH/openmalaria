@@ -123,6 +123,7 @@ protected:
     /// The PathogenesisModel introduces illness dependant on parasite density
     auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
     
+    /// End of step on which treatment expires = start of first step after expiry
     SimTime treatExpiryLiver, treatExpiryBlood;
 
     virtual void checkpoint (istream& stream);

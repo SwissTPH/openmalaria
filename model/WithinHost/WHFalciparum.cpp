@@ -162,13 +162,13 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
         if( treat.liverEffect() < sim::zero() )
             clearInfections( Treatments::LIVER );
         else
-            treatExpiryLiver = max( treatExpiryLiver, sim::now1() + treat.liverEffect() );
+            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + treat.liverEffect() );
     }
     if( treat.bloodEffect() != sim::zero() ){
         if( treat.bloodEffect() < sim::zero() )
             clearInfections( Treatments::BLOOD );
         else
-            treatExpiryBlood = max( treatExpiryBlood, sim::now1() + treat.bloodEffect() );
+            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + treat.bloodEffect() );
     }
     
     // triggered intervention deployments:
@@ -181,13 +181,13 @@ void WHFalciparum::treatSimple(SimTime timeLiver, SimTime timeBlood){
         if( timeLiver < sim::zero() )
             clearInfections( Treatments::LIVER );
         else
-            treatExpiryLiver = max( treatExpiryLiver, sim::now1() + timeLiver );
+            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
     }
     if( timeBlood != sim::zero() ){
         if( timeBlood < sim::zero() )
             clearInfections( Treatments::BLOOD );
         else
-            treatExpiryBlood = max( treatExpiryBlood, sim::now1() + timeBlood );
+            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
     }
 }
 

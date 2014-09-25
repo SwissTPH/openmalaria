@@ -127,8 +127,8 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     double cumulative_Y=m_cumulative_Y;
     m_cumulative_h += nNewInfs;
     
-    bool treatmentLiver = treatExpiryLiver >= sim::now1();
-    bool treatmentBlood = treatExpiryBlood >= sim::now1();
+    bool treatmentLiver = treatExpiryLiver > sim::ts0();
+    bool treatmentBlood = treatExpiryBlood > sim::ts0();
     
     for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in

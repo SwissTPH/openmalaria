@@ -127,9 +127,9 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     double cumulative_h=m_cumulative_h;
     double cumulative_Y=m_cumulative_Y;
     m_cumulative_h += nNewInfs;
-
-    bool treatmentLiver = treatExpiryLiver >= sim::now1();
-    bool treatmentBlood = treatExpiryBlood >= sim::now1();
+    
+    bool treatmentLiver = treatExpiryLiver > sim::ts0();
+    bool treatmentBlood = treatExpiryBlood > sim::ts0();
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
     for( SimTime now = sim::ts1(), end = sim::ts1() + sim::oneTS(); now < end; now += sim::oneDay() ){
