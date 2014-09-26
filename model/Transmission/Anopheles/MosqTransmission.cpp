@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-//TODO: trim includes
 #include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
 #include "Transmission/Anopheles/SimpleMPDEmergence.h"
@@ -126,7 +125,6 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
         P_dif[t] = 0.0;     // humans start off with no infectiousness.. so just wait
-        //TODO: offset often won't be correct (comment from life-cycle code: is it true?)
         S_v[t] = forcedS_v[t];
         N_v[t] = S_v[t] * initNvFromSv;
         O_v[t] = S_v[t] * initOvFromSv;
@@ -272,13 +270,11 @@ double MosqTransmission::getLastVecStat( VecStat vs )const{
         default: throw SWITCH_DEFAULT_EXCEPTION;
     }
     double val = 0.0;
-    // Minus one time step since we are getting the last value. TODO: why +oneDay offset?
-    // +N_v_length just to make now >= 0 in modular arithmatic
-    SimTime start = sim::now() + sim::oneDay() - sim::oneTS() + N_v_length;
-    for( SimTime now = start, end = start + sim::oneTS();
-        now < end; now += sim::oneDay() )
-    {
-        val += (*array)[mod_nn(now, N_v_length)];
+    // Last time step ended at sim::now(). Values are stored per day, and for
+    // the last time step values at sim::now() and four previos were set.
+    SimTime end = sim::now() + sim::oneDay() + N_v_length;      // one plus last, plus (0 mod N_v_length) to avoid negatives
+    for( SimTime d1 = end - sim::oneTS(); d1 < end; d1 += sim::oneDay() ){
+        val += (*array)[mod_nn(d1, N_v_length)];
     }
     return val / sim::oneTS().inDays();
 }
