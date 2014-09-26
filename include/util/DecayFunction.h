@@ -86,8 +86,7 @@ public:
     /** Return a value in the range [0,1] describing remaining effectiveness of
      * the intervention.
      * 
-     * @param age Age of intervention/decayed property during the time-step
-     *  for which values are now being calculated.
+     * @param age Age of intervention/decayed property
      * @param sample A DecayFuncHet value sampled for the intervention and
      *  individual.
      * 
@@ -95,12 +94,8 @@ public:
      * being updated over. It would be more accurate to return the mean value
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
-    inline double evalAge( SimTime age, DecayFuncHet sample )const{
+    inline double eval( SimTime age, DecayFuncHet sample )const{
         return eval( age.inDays() * sample.getTMult() );
-    }
-    /** Same as above, but calculating age from a start date. */
-    inline double evalStart( SimTime start, DecayFuncHet sample )const{
-        return eval( (sim::now1() - start).inDays() * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).

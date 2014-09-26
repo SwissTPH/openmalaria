@@ -40,7 +40,7 @@ public:
         DummyInfection::init();
         // pkpdID (1st value) isn't important since we're not using drug model here:
         infection = CommonWithinHost::createInfection( 0xFFFFFFFF );
-        for( SimTime d = sim::now1(), end = sim::now1() + sim::fromDays(15); d < end; d += sim::oneDay() ){
+        for( SimTime d = sim::ts1(), end = sim::ts1() + sim::fromDays(15); d < end; d += sim::oneDay() ){
             // blood stage starts 15 days after creation
             UnittestUtil::incrTime( sim::oneDay() );
             infection->update( 1.0, d );
@@ -56,30 +56,30 @@ public:
 
     void testUpdatedInf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::now1());
+        infection->update (1.0, sim::ts1());
         TS_ASSERT_APPROX (infection->getDensity(), 128.00000008620828820);
     }
     void testUpdated2Inf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::now1());
+        infection->update (1.0, sim::ts1());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::now1());
+        infection->update (1.0, sim::ts1());
         TS_ASSERT_APPROX (infection->getDensity(), 1024.00000082264208600);
     }
 
     void testUpdatedReducedInf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::now1());
+        infection->update (1.0, sim::ts1());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (0.1, sim::now1());
+        infection->update (0.1, sim::ts1());
         // This is, as expected, 1/10th of that in testUpdated2Inf
         TS_ASSERT_APPROX (infection->getDensity(), 102.40000008226420860);
     }
     void testUpdatedReducedInf2 () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (0.1, sim::now1());
+        infection->update (0.1, sim::ts1());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::now1());
+        infection->update (1.0, sim::ts1());
         // This is nearly the same
         TS_ASSERT_APPROX (infection->getDensity(), 102.00000008286288040);
     }

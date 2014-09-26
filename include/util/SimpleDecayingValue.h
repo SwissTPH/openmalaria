@@ -61,7 +61,7 @@ public:
     inline double current_value (SimTime time) const{
         if( decay.get() == 0 ) return 0.0;  // decay wasn't set: the always return 0
         
-        return initial * decay->evalAge( time - deploy_t, het );
+        return initial * decay->eval( time - deploy_t, het );
     }
     
     /** Checkpointing: only checkpoint parameters which change after initial
