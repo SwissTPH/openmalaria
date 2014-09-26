@@ -153,7 +153,7 @@ void DescriptiveInfection::determineDensities(double ageInYears,
 {
     // Age of patent blood stage infection. Note: liver stage is fixed at one
     // 5-day time step and prepatent blood stage is latentp - 1 time steps.
-    SimTime infage = sim::ts1() - m_startDate - latentP;
+    SimTime infage = sim::ts0() - m_startDate - latentP;
     if ( infage < sim::zero()) {
         m_density = 0.0;
         if (bugfix_max_dens) timeStepMaxDensity = 0.0;

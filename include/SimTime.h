@@ -194,6 +194,8 @@ public:
     static inline SimTime nowOrTs0(){ return time0; }
     /** During updates, this is ts1; between, this is now. */
     static inline SimTime nowOrTs1(){ return time1; }
+    /** During updates, this is ts0; between, it is now - 1. */
+    static inline SimTime latestTs0(){ return time1 - oneTS(); };
     /** Relic, usage to be replaced. */
     static inline SimTime now1(){ return time1; }
     

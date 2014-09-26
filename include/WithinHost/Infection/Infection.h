@@ -33,7 +33,7 @@ public:
     static void init( const OM::Parameters& parameters, SimTime latentP );
     
     Infection (uint32_t protID) :
-        m_startDate(sim::nowOrTs0() + sim::oneTS()),
+        m_startDate(sim::nowOrTs0()),
         m_proteome_ID(protID),
         m_density(0.0),
         m_cumulativeExposureJ(0.0)
@@ -59,7 +59,7 @@ public:
      * first update (though due to the latent period densities will still be
      * low). */
     inline bool bloodStage() const{
-        return sim::nowOrTs1() - m_startDate > sim::fromDays(5);
+        return sim::latestTs0() - m_startDate > sim::fromDays(5);
     }
     
     //! Get proteome
@@ -97,7 +97,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
     /// Date of inoculation of infection (start of liver stage)
-    /// This is the end of step of inoculation (ts1()). It could be ts0 if bloodStage used ts0 or now()-1
+    /// This is the step of inoculation (ts0()).
     SimTime m_startDate;
         
     /// Proteome/genotype identifier
