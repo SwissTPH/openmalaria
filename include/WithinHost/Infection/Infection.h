@@ -33,7 +33,7 @@ public:
     static void init( const OM::Parameters& parameters, SimTime latentP );
     
     Infection (uint32_t protID) :
-        m_startDate(sim::nowOrTs1()/*FIXME: if we're using TS1 this should be now+1 for imported infections*/),
+        m_startDate(sim::nowOrTs0() + sim::oneTS()),
         m_proteome_ID(protID),
         m_density(0.0),
         m_cumulativeExposureJ(0.0)
