@@ -187,19 +187,19 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     }
     // Set to either a checkpointing time step or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
-    SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now1() );
+    SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now() );
     SimTime testCheckpointDieTime = testCheckpointTime;        // kill program at same time
     
     // phase loop
     while (true){
         // loop for steps within a phase
-        while (sim::now1() < simPeriodEnd){
+        while (sim::now() < simPeriodEnd){
             // checkpoint
-            if( util::BoincWrapper::timeToCheckpoint() || testCheckpointTime == sim::now1() ){
+            if( util::BoincWrapper::timeToCheckpoint() || testCheckpointTime == sim::now() ){
                 writeCheckpoint();
                 util::BoincWrapper::checkpointCompleted();
             }
-            if( testCheckpointDieTime == sim::now1() ){
+            if( testCheckpointDieTime == sim::now() ){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }
             
@@ -249,7 +249,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             sim::interv_time += sim::oneTS();
             
             util::BoincWrapper::reportProgress(
-                static_cast<double>(sim::now1().raw()) /
+                static_cast<double>(sim::now().raw()) /
                 static_cast<double>(totalSimDuration.raw()) );
         }
         
@@ -279,14 +279,14 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         }
         if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
             // First of middle of next phase, or current value (from command line) triggers a checkpoint.
-            SimTime phase_mid = sim::now1() + (simPeriodEnd - sim::now1()) * 0.5;
+            SimTime phase_mid = sim::now() + (simPeriodEnd - sim::now()) * 0.5;
             // Don't checkpoint 0-length phases or do mid-phase checkpointing
             // when timed checkpoints were specified, and don't checkpoint
             // ONE_LIFE_SPAN phase if already past time humanWarmupLength:
             // these are extra transmission inits, and we don't want to
             // checkpoint every one of them.
-            if( testCheckpointTime < sim::zero() && phase_mid > sim::now1()
-                && (phase != ONE_LIFE_SPAN || sim::now1() < humanWarmupLength)
+            if( testCheckpointTime < sim::zero() && phase_mid > sim::now()
+                && (phase != ONE_LIFE_SPAN || sim::now() < humanWarmupLength)
             ){
                 testCheckpointTime = phase_mid;
                 // Test checkpoint: die a bit later than checkpoint for better
@@ -341,7 +341,7 @@ void Simulator::writeCheckpoint(){
         ostringstream name;
         name << CHECKPOINT << checkpointNum;
         //Writing checkpoint:
-//      cerr << sim::now1() << " WC: " << name.str();
+//      cerr << sim::now() << " WC: " << name.str();
         if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
             name << ".gz";
             ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -400,7 +400,7 @@ void Simulator::readCheckpoint() {
   }
   
   // Keep size of stderr.txt minimal with a short message, since this is a common message:
-  cerr << sim::now1() << " RC" << endl;
+  cerr << sim::now() << " RC" << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))

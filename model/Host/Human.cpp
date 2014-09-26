@@ -86,7 +86,7 @@ Human::Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth) :
     nextCtsDist(0)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
-  assert( m_DOB == sim::now1() || (sim::now1() == sim::zero() && m_DOB < sim::now1()) );
+  assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
   
   
   /* Human heterogeneity; affects:

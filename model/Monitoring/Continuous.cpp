@@ -242,9 +242,9 @@ namespace OM { namespace Monitoring {
             if( sim::intervNow() < sim::zero() || mod_nn(sim::intervNow(), ctsPeriod) != sim::zero() )
                 return;
         } else {
-            if( mod_nn(sim::now1(), ctsPeriod) != sim::zero() )
+            if( mod_nn(sim::now(), ctsPeriod) != sim::zero() )
                 return;
-            ctsOStream << sim::now1().inSteps() << '\t';
+            ctsOStream << sim::now().inSteps() << '\t';
         }
 	
 	util::BoincWrapper::beginCriticalSection();	// see comment in staticCheckpoint
