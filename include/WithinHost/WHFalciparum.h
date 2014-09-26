@@ -125,7 +125,7 @@ protected:
     
     /// End of step on which treatment expires = start of first step after expiry
     SimTime treatExpiryLiver, treatExpiryBlood;
-
+    
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
 

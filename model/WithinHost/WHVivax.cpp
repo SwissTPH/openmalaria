@@ -156,7 +156,7 @@ VivaxBrood::VivaxBrood( istream& stream ){
 
 
 VivaxBrood::UpdResult VivaxBrood::update(){
-    if( bloodStageClearDate == sim::ts1() ){
+    if( bloodStageClearDate == sim::ts0() ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
         // protect against new blood-stage infections for a short time.
@@ -178,7 +178,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         // an existing or recently terminated blood stage from the same brood
         // protects against a newly released Hypnozoite
         //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
-        if( bloodStageClearDate + bloodStageProtectionLatency >= sim::ts1() ) continue;
+        if( bloodStageClearDate + bloodStageProtectionLatency >= sim::ts0() ) continue;
         
         if( !primaryHasStarted ){
             primaryHasStarted = true;
@@ -187,7 +187,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         result.newBS = true;
         
         double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
-        bloodStageClearDate = sim::ts1() + sim::roundToTSFromDays( lengthDays );
+        bloodStageClearDate = sim::ts0() + sim::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
     }

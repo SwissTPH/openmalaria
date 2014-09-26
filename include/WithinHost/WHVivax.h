@@ -86,7 +86,7 @@ public:
      * gametocytes independently, thus this also tests existance of
      * gametocytes. */
     inline bool isPatent() const{
-        return bloodStageClearDate > sim::nowOrTs1();
+        return bloodStageClearDate > sim::latestTs0();
     }
     
     /** Fully clear blood stage parasites. */
@@ -103,9 +103,8 @@ private:
     // time of release, soonest last (i.e. last element is next one to release)
     vector<SimTime> releaseDates;
     
-    // Either sim::never() (no blood stage) or the end of the time step on
-    // which the blood stage will clear. Note: could use ts0() instead of ts1()
-    // if isPatent used now()-1 outside of updates (i.e. state on last step).
+    // Either sim::never() (no blood stage) or the start of the time step on
+    // which the blood stage will clear.
     SimTime bloodStageClearDate;
     
     // Whether the primary blood stage infection has started
