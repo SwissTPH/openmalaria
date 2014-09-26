@@ -48,7 +48,7 @@ namespace Component { enum Type {
     SCREEN,     // screening, e.g. as part of MSAT
     SIMPLE_TREAT,       // treatment using the simple model (e.g. for MDA)
     P_S_TREAT,  // probabilistic choice of some simple treatment configuration
-    MDA_TS1D,   // MDA using the 1-day timestep decision tree and drug action models
+    MDA_TS1D,   // MDA using the 1-day time step decision tree and drug action models
     PEV,        // pre-erythrocytic vaccine
     BSV,        // blood-stage vaccine
     TBV,        // transmission-blocking vaccine
@@ -105,7 +105,7 @@ public:
     inline ComponentId id()const{ return m_id; }
     
     /** Get the duration. */
-    inline TimeStep duration()const{ return m_duration; }
+    inline SimTime duration()const{ return m_duration; }
     
     /** Returns the appropriate descriptor from the Component::Type enum.
      * 
@@ -118,7 +118,7 @@ public:
 #endif
     
     // Only for use by InterventionManager:
-    inline void setExpireAfter( TimeStep duration ){
+    inline void setExpireAfter( SimTime duration ){
         m_duration = duration;
     }
     
@@ -149,7 +149,7 @@ private:
     HumanInterventionComponent( const HumanInterventionComponent& );
     
     ComponentId m_id;
-    TimeStep m_duration;
+    SimTime m_duration;
     Monitoring::ReportMeasureI m_measureCts, m_measureTimed;
 };
 
@@ -189,7 +189,7 @@ private:
             VaccineLimits vaccLimits )const;
         
         // Deployment restrictions:
-        TimeStep minAge, maxAge;
+        SimTime minAge, maxAge;
         double coverage;
     };
     

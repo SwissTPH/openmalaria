@@ -70,7 +70,7 @@ public:
     void fitLarvalResourcesFromS_v(
         const LifeCycle& lcModel,
         double P_A, double P_df,
-        size_t N_v_length, size_t mosqRestDuration,
+        SimTime N_v_length, SimTime mosqRestDuration,
         vector<double>& annualP_dif,
         vector<double>& targetS_v
     );
@@ -88,15 +88,15 @@ private:
     //@{
     /** Duration of egg stage (time from laying until hatching) (θ_e).
      * Units: days. */
-    int eggStageDuration;
+    SimTime eggStageDuration;
 
     /** Duration of larval stage (time from hatching until becoming a pupa)
      * (θ_l). Units: days. */
-    int larvalStageDuration;
+    SimTime larvalStageDuration;
 
     /** Duration of pupal stage (time from becoming a pupa until emerging as an
      * adult) (θ_p). Units: days. */
-    int pupalStageDuration;
+    SimTime pupalStageDuration;
     //@}
     
     /** @brief Mosquito population-dynamics parameters
@@ -128,7 +128,7 @@ private:
      * 
      * Units: usage/larva. Units of usage are not defined, but should be the
      * same as that of resource availability. */
-    vector<double> larvaeResourceUsage;
+    vecDay<double> larvaeResourceUsage;
     
     /** @brief Measure of larval resources (1/γ)
      * Inverse of resource availability to female larvae throughout the year.
@@ -144,13 +144,13 @@ private:
      * 
      * Note: this parameter needs to be checkpointed since it is calculated
      * during init. */
-    vector<double> invLarvalResources;
+    vecDay<double> invLarvalResources;
     
     /** Effect of competition on larvae, per age (index i corresponds to age i
      * days since hatching).
      * 
      * Length: larvalStageDuration */
-    vector<double> effectCompetitionOnLarvae;
+    vecDay<double> effectCompetitionOnLarvae;
     //@}
     friend class LifeCycle;
     friend class ResourceFitter;
@@ -187,16 +187,14 @@ public:
      * @param nOvipositingMosqs The number of adults which successfully
      * oviposited this/last time-step. TODO(vec lifecycle): we're setting new
      * value based on num ovipositing yesterday? That's not right.
-     * @param d The current day (exact value isn't important; it must be
-     * non-negative and incremented by one between calls).
-     * @param dYear1 The day of the year of the last calculated time-point.
+     * @param d0 Time of the start of the update period
      * @returns The number of adults emerging between the last simulated time
      * point and the one being calculated. Assume immediate mating with 100%
      * survival and success.
      */
     double updateEmergence( const LifeCycleParams& lcParams,
                             double nOvipositingMosqs,
-                            size_t d, size_t dYear1 );
+                            SimTime d0 );
     
     /// Checkpointing
     template<class S>
@@ -211,7 +209,7 @@ private:
      * 
      * Length: θ_e. Value at index (d mod θ_e) refers to the value θ_e days
      * ago/at day d before/after update. */
-    vector<double> newEggs;
+    vecDay<double> newEggs;
     
     /** Number of larvae per age of development. Units: larvae.
      * 
@@ -219,14 +217,14 @@ private:
      * We don't store the number at age θ_l, since these are pupae.
      *
      * Unlike ϒ arrays, this only stores the state of the system from the
-     * last/this timestep before/after update. */
-    vector<double> numLarvae;
+     * last/this time step before/after update. */
+    vecDay<double> numLarvae;
     
     /** Number of new pupae per time-step (ϒ_e). Units: pupae.
      * 
      * Length: θ_p. Value at index (d mod θ_p) refers to the value θ_p days
      * ago/at day d before/after update. */
-    vector<double> newPupae;
+    vecDay<double> newPupae;
     
     friend class ::MosqLifeCycleSuite;
     friend class ResourceFitter;        // TODO(vec lifecycle): this is temporary for debugging

@@ -43,8 +43,8 @@ public:
     CM5DayCommon (double tSF);
 
     virtual bool notAtRisk() {
-        TimeStep ageLastTreatment = TimeStep::simulation - m_tLastTreatment;
-        return ageLastTreatment > TimeStep(0) && ageLastTreatment <= TimeStep::fromDays(20);
+        SimTime ageLastTreatment = sim::now() - m_tLastTreatment;
+        return ageLastTreatment > sim::zero() && ageLastTreatment <= sim::fromDays(20);
     }
     
     virtual void massDrugAdministration( Human& human,
@@ -68,8 +68,8 @@ protected:
     /** Called when a non-severe/complicated malaria sickness occurs. */
     virtual void uncomplicatedEvent(Human& human, Episode::State pgState) =0;
     
-    /** Timestep of the last treatment (TIMESTEP_NEVER if never treated). */
-    TimeStep m_tLastTreatment;
+    /** Time of the last treatment (sim::never() if never treated). */
+    SimTime m_tLastTreatment;
 
     //! treatment seeking for heterogeneity
     double m_treatmentSeekingFactor;

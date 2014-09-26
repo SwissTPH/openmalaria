@@ -76,7 +76,7 @@ namespace Monitoring {
         /// As above, except that the called delegate is passed a reference to the Population object
         void registerCallback (string optName, string titles, fastdelegate::FastDelegate2<const Population&, ostream&>);
 	
-	/// Generate time-step's output. Called at beginning of timestep.
+	/// Generate time-step's output. Called at beginning of time step.
         /// Passed population since some callbacks use this to generate output.
 	void update (const Population& population);
         

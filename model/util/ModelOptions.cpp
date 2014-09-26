@@ -245,7 +245,7 @@ namespace OM { namespace util {
             options[UPDATE_DENSITY_GAMMA] ) )
             throw xml_scenario_error( "Penny model option used without PENNY_WITHIN_HOST_MODEL option" );
         
-        if( TimeStep::interval == 5 ){
+        if( sim::oneTS() == sim::fromDays(5) ){
             bitset<NUM_OPTIONS> require1DayTS;
             require1DayTS
                 .set( CLINICAL_EVENT_SCHEDULER );
@@ -253,11 +253,11 @@ namespace OM { namespace util {
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (options [i] && require1DayTS[i]) {
                     ostringstream msg;
-                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 1-day timestep.";
+                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 1-day time step.";
                     throw xml_scenario_error (msg.str());
                 }
             }
-        }else if( TimeStep::interval == 1 ){
+        }else if( sim::oneTS() == sim::fromDays(1) ){
             bitset<NUM_OPTIONS> require5DayTS;
             require5DayTS
                 .set( IPTI_SP_MODEL )
@@ -266,13 +266,13 @@ namespace OM { namespace util {
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (options [i] && require5DayTS[i]) {
                     ostringstream msg;
-                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day timestep.";
+                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day time step.";
                     throw xml_scenario_error (msg.str());
                 }
             }
         }else{
             ostringstream msg;
-            msg << "Timestep interval set to " << TimeStep::interval << " days but only 1 and 5 days are supported.";
+            msg << "Time step set to " << sim::oneTS().inDays() << " days but only 1 and 5 days are supported.";
             throw xml_scenario_error (msg.str());
         }
     }

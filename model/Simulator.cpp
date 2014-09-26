@@ -51,11 +51,54 @@ bool Simulator::startedFromCheckpoint;  // static
 
 const char* CHECKPOINT = "checkpoint";
 
-// -----  Set-up & tear-down  -----
+enum Phase {
+    STARTING_PHASE = 0,
+    /** Run the simulation using the equilibrium inoculation rates over one
+     * complete lifespan (sim::maxHumanAge()) to reach immunological
+     * equilibrium in all age classes. Don't report any events. */
+    ONE_LIFE_SPAN,
+    /** Initialisation/fitting phase for transmission models. */
+    TRANSMISSION_INIT,
+    //!  This procedure starts with the current state of the simulation 
+    /*! It continues updating    assuming:
+        (i)         the default (exponential) demographic model
+        (ii)        the entomological input defined by the EIRs in intEIR()
+        (iii)       the intervention packages defined in Intervention()
+        (iv)        the survey times defined in Survey() */
+    MAIN_PHASE,
+    END_SIM         // should have largest value of all enumerations
+};
+
+
+// ———  SimTime stuff  ———
+
+// global constants:
+int SimTime::interval;
+size_t SimTime::steps_per_year;
+double SimTime::years_per_step;
+SimTime sim::max_human_age;
+// global variables:
+#ifndef NDEBUG
+bool sim::in_update = false;
+#endif
+SimTime sim::time0;
+SimTime sim::time1;
+SimTime sim::interv_time;
+
+void sim::init( int days_per_step, double max_age_years ){
+    SimTime::interval = days_per_step;
+    SimTime::steps_per_year = sim::oneYear().inSteps();
+    SimTime::years_per_step = 1.0 / SimTime::steps_per_year;
+    sim::max_human_age = sim::fromTS( max_age_years * SimTime::steps_per_year );
+    sim::interv_time = sim::never();    // large negative number
+}
+
+
+// ———  Set-up & tear-down  ———
 
 Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
-    simPeriodEnd(0),
-    totalSimDuration(0),
+    simPeriodEnd(sim::zero()),
+    totalSimDuration(sim::zero()),
     phase(STARTING_PHASE),
     workUnitIdentifier(0),
     cksum(ck)
@@ -66,7 +109,8 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     const scnXml::Demography& demography = scenario.getDemography();
     
     // 1) elements with no dependencies on other elements initialised here:
-    OM::TimeStep::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
+    sim::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
+    
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
     
@@ -108,31 +152,15 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
 }
 
 
-// -----  run simulations  -----
-enum Phase {
-    STARTING_PHASE = 0,
-    /*! Run the simulation using the equilibrium inoculation rates over one complete
-        lifespan (maxAgeIntervals) to reach immunological equilibrium in all age
-        classes. Don't report any events */
-    ONE_LIFE_SPAN,
-    /** Initialisation/fitting phase for transmission models. */
-    TRANSMISSION_INIT,
-    //!  This procedure starts with the current state of the simulation 
-    /*! It continues updating    assuming:
-        (i)         the default (exponential) demographic model
-        (ii)        the entomological input defined by the EIRs in intEIR()
-        (iii)       the intervention packages defined in Intervention()
-        (iv)        the survey times defined in Survey() */
-    MAIN_PHASE,
-    END_SIM         // should have largest value of all enumerations
-};
+// ———  run simulations  ———
 
 void Simulator::start(const scnXml::Monitoring& monitoring){
-    TimeStep::simulation = TimeStep( 0 );
+    sim::time0 = sim::zero();
+    sim::time1 = sim::zero();
     
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
-    TimeStep humanWarmupLength = TimeStep::maxAgeIntervals;
+    SimTime humanWarmupLength = sim::maxHumanAge();
     if( humanWarmupLength < population->_transmissionModel->minPreinitDuration() ){
         cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
         cerr << ") shorter than length of warm-up requested by" << endl;
@@ -142,14 +170,13 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
         humanWarmupLength = population->_transmissionModel->minPreinitDuration();
     }
-    humanWarmupLength = TimeStep::fromYears((humanWarmupLength.asInt()-1)
-            / TimeStep::stepsPerYear + 1);
+    humanWarmupLength = sim::fromYearsI( ceil(humanWarmupLength.inYears()) );
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->_transmissionModel->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
-        + Monitoring::Survey::getFinalTimestep() + TimeStep( 1 );
-    assert( totalSimDuration < TimeStep::future );      // absurdly unlikely, and if it really could happen we should check for overflows too
+        + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
+    assert( totalSimDuration + sim::never() < sim::zero() );
     
     if (isCheckpoint()) {
         Continuous.init( monitoring, true );
@@ -158,27 +185,47 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         Continuous.init( monitoring, false );
         population->createInitialHumans();
     }
-    // Set to either a checkpointing timestep or min int value. We only need to
+    // Set to either a checkpointing time step or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
-    TimeStep testCheckpointStep =
-            util::CommandLine::getNextCheckpointTime( TimeStep::simulation );
-    TimeStep testCheckpointDieStep = testCheckpointStep;        // kill program at same time
+    SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now() );
+    SimTime testCheckpointDieTime = testCheckpointTime;        // kill program at same time
     
     // phase loop
-    while (true) {
+    while (true){
         // loop for steps within a phase
-        while (TimeStep::simulation < simPeriodEnd) {
+        while (sim::now() < simPeriodEnd){
             // checkpoint
-            if (util::BoincWrapper::timeToCheckpoint() || TimeStep::simulation == testCheckpointStep) {
+            if( util::BoincWrapper::timeToCheckpoint() || testCheckpointTime == sim::now() ){
                 writeCheckpoint();
                 util::BoincWrapper::checkpointCompleted();
             }
-            if (TimeStep::simulation == testCheckpointDieStep)
+            if( testCheckpointDieTime == sim::now() ){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
+            }
+            
+            // Time step updates. Essentially, a time step is mid-day to
+            // mid-day. sim::ts0() gives the date at the start of the step (in
+            // internal units), and sim::ts1() the date at the end. Monitoring
+            // and intervention deployment happen between updates, at time
+            // sim::now().
+            
+            // Each step, monitoring (e.g. carrying out a survey) happens
+            // first, reporting on the state at the start of the step (e.g.
+            // patentcy diagnostics) or tallys of events which happened since
+            // some point in the past (e.g. a previous survey).
+            // Interventions are deployed next. For monitoring and intervention
+            // deployment sim::ts0() and sim::ts1() should not be used.
+            
+            // Finally, Population::update1() runs, which updates both the
+            // transmission model and the human population. During this time
+            // sim::now() should not be used, however sim::ts0() equals its
+            // last value while sim::ts1() is one greater.
+            // Population::update1() also adds new humans, born at time
+            //  sim::ts1(), to replace those lost.
             
             // do reporting (continuous and surveys)
             Continuous.update( *population );
-            if (TimeStep::interventionPeriod == Surveys.currentTimestep()) {
+            if( sim::intervNow() == Surveys.nextSurveyTime() ){
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
             }
@@ -186,32 +233,43 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             // deploy interventions
             InterventionManager::deploy( *population );
             
-            // update
-            ++TimeStep::simulation;
-            ++TimeStep::interventionPeriod;
-            population->update1();
+            // update humans and mosquitoes
             
-            util::BoincWrapper::reportProgress (
-                double(TimeStep::simulation.asInt()) / totalSimDuration.asInt());
+            // time1 is the time at the end of a time step, and mostly a
+            // confusing relic, though sometimes useful.
+            sim::time1 += sim::oneTS();
+#ifndef NDEBUG
+            sim::in_update = true;
+#endif
+            population->update1( humanWarmupLength );
+#ifndef NDEBUG
+            sim::in_update = false;
+#endif
+            sim::time0 += sim::oneTS();
+            sim::interv_time += sim::oneTS();
+            
+            util::BoincWrapper::reportProgress(
+                static_cast<double>(sim::now().raw()) /
+                static_cast<double>(totalSimDuration.raw()) );
         }
         
         ++phase;        // advance to next phase
         if (phase == ONE_LIFE_SPAN) {
             simPeriodEnd = humanWarmupLength;
         } else if (phase == TRANSMISSION_INIT) {
-            TimeStep iterate = population->_transmissionModel->initIterate();
-            if( iterate > TimeStep(0) ) {
+            SimTime iterate = population->_transmissionModel->initIterate();
+            if( iterate > sim::zero() ){
                 simPeriodEnd += iterate;
                 --phase;        // repeat phase
             } else {
                 // nothing to do: start main phase immediately
             }
             // adjust estimation of final time step: end of current period + length of main phase
-            totalSimDuration = simPeriodEnd + Monitoring::Survey::getFinalTimestep() + TimeStep( 1 );
+            totalSimDuration = simPeriodEnd + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
-            TimeStep::interventionPeriod = TimeStep(0);
+            sim::interv_time = sim::zero();
             population->preMainSimInit();
             population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
             Surveys.incrementSurveyPeriod();
@@ -221,21 +279,19 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         }
         if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
             // First of middle of next phase, or current value (from command line) triggers a checkpoint.
-            TimeStep phase_mid =
-                    TimeStep::simulation + TimeStep( (simPeriodEnd - TimeStep::simulation).asInt() / 2 );
+            SimTime phase_mid = sim::now() + (simPeriodEnd - sim::now()) * 0.5;
             // Don't checkpoint 0-length phases or do mid-phase checkpointing
             // when timed checkpoints were specified, and don't checkpoint
             // ONE_LIFE_SPAN phase if already past time humanWarmupLength:
             // these are extra transmission inits, and we don't want to
             // checkpoint every one of them.
-            if( testCheckpointStep == TimeStep::never
-                && phase_mid > TimeStep::simulation
-                && (phase != ONE_LIFE_SPAN || TimeStep::simulation < humanWarmupLength)
+            if( testCheckpointTime < sim::zero() && phase_mid > sim::now()
+                && (phase != ONE_LIFE_SPAN || sim::now() < humanWarmupLength)
             ){
-                testCheckpointStep = phase_mid;
+                testCheckpointTime = phase_mid;
                 // Test checkpoint: die a bit later than checkpoint for better
                 // resume testing (specifically, ctsout.txt).
-                testCheckpointDieStep = testCheckpointStep + TimeStep(2);
+                testCheckpointDieTime = testCheckpointTime + sim::oneTS() + sim::oneTS();
             }
         }
     }
@@ -257,7 +313,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
 }
 
 
-// -----  checkpointing: set up read/write stream  -----
+// ———  checkpointing: set up read/write stream  ———
 
 int readCheckpointNum () {
     ifstream checkpointFile;
@@ -285,7 +341,7 @@ void Simulator::writeCheckpoint(){
         ostringstream name;
         name << CHECKPOINT << checkpointNum;
         //Writing checkpoint:
-//      cerr << TimeStep::simulation << " WC: " << name.str();
+//      cerr << sim::now() << " WC: " << name.str();
         if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
             name << ".gz";
             ogzstream out(name.str().c_str(), ios::out | ios::binary);
@@ -344,7 +400,7 @@ void Simulator::readCheckpoint() {
   }
   
   // Keep size of stderr.txt minimal with a short message, since this is a common message:
-  cerr <<TimeStep::simulation<<" RC"<<endl;
+  cerr << sim::now() << " RC" << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))
@@ -352,7 +408,7 @@ void Simulator::readCheckpoint() {
 }
 
 
-//   -----  checkpointing: Simulation data  -----
+// ———  checkpointing: Simulation data  ———
 
 void Simulator::checkpoint (istream& stream, int checkpointNum) {
     try {
@@ -365,18 +421,19 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         util::StreamValidator & stream;
 #       endif
         
-        TimeStep::interventionPeriod & stream;
+        sim::interv_time & stream;
         simPeriodEnd & stream;
         totalSimDuration & stream;
         phase & stream;
         (*population) & stream;
         PopulationStats::staticCheckpoint( stream );
         InterventionManager::checkpoint( stream );
-        InterventionManager::loadFromCheckpoint( *population, TimeStep::interventionPeriod );
+        InterventionManager::loadFromCheckpoint( *population, sim::interv_time );
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
-        TimeStep::simulation & stream;
+        sim::time0 & stream;
+        sim::time1 & stream;
         util::random::checkpoint (stream, checkpointNum);
         
         // Check scenario.xml and checkpoint files correspond:
@@ -418,7 +475,7 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     util::StreamValidator & stream;
 # endif
     
-    TimeStep::interventionPeriod & stream;
+    sim::interv_time & stream;
     simPeriodEnd & stream;
     totalSimDuration & stream;
     phase & stream;
@@ -426,7 +483,8 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     PopulationStats::staticCheckpoint( stream );
     InterventionManager::checkpoint( stream );
     
-    TimeStep::simulation & stream;
+    sim::time0 & stream;
+    sim::time1 & stream;
     util::random::checkpoint (stream, checkpointNum);
     workUnitIdentifier & stream;
     cksum & stream;

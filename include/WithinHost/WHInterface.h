@@ -101,7 +101,7 @@ public:
      * Calculates the value during the call, which is expensive (cache externally
      * if the value is needed multiple times). */
     //TODO: per genotype? (for LSTM's spread of resistance modelling)
-    virtual double probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const =0;
+    virtual double probTransmissionToMosquito( double tbvFactor ) const =0;
     
     /// @returns true if host has patent parasites
     virtual bool summarize(const Host::Human& human) =0;
@@ -123,7 +123,7 @@ public:
     virtual bool optionalPqTreatment() =0;
     
     /** Treat a patient via the simple treatment model. */
-    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood) =0;
+    virtual void treatSimple(SimTime timeLiver, SimTime timeBlood) =0;
     
     /** Give a patient a course of drugs, via the Pk/Pd model
      * 
@@ -151,8 +151,11 @@ public:
      * management" model, and case management diagnostics. */
     virtual double getTotalDensity() const =0;
     
-    /** Simulate use of a diagnostic test, using the general detection limit.
+    /** Simulate use of a diagnostic test.
+     *
      * Does not report for costing purposes.
+     * 
+     * Is used both during time step updates and during monitoring.
      * 
      * @returns true when the diagnostic is positive
      */
@@ -161,7 +164,7 @@ public:
     /** Use the pathogenesis model to determine, based on infection status
      * and random draw, this person't morbidity.
      * 
-     * This function is called after update() every timestep.
+     * This function is called after update() every time step.
      * 
      * @param ageYears Age of human host in years
      */
@@ -171,8 +174,8 @@ public:
     virtual void clearImmunity() =0;
     
     // TODO(monitoring): these shouldn't have to be exposed (perhaps use summarize to report the data):
-    virtual double getCumulativeh() const =0;
-    virtual double getCumulativeY() const =0;
+    virtual double getCumulative_h() const =0;
+    virtual double getCumulative_Y() const =0;
 
     /** The maximum number of infections a human can have. The only real reason
      * for this limit is to prevent incase bad input from causing the number of
@@ -188,7 +191,8 @@ protected:
         int total;      // includes blood and liver stages
         int patent;     // number of detectible blood-stage infections
     };
-    /** For summarizing:
+    /** For summarizing: counts total and patent infections during monitoring
+     * (i.e. at start of time step).
      * 
      * @returns Number of infections, patent and total
      */

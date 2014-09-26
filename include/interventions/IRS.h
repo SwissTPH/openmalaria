@@ -159,12 +159,13 @@ public:
     
     /// Get remaining insecticide content based on initial amount and decay.
     inline double getInsecticideContent(const IRSComponent& params)const{
-        double effectSurvival = params.insecticideDecay->eval (TimeStep::simulation - deployTime,
-                                              insecticideDecayHet);
+        SimTime age = sim::nowOrTs1() - deployTime;  // implies age 1 TS on first use
+        double effectSurvival = params.insecticideDecay->eval( age,
+                                              insecticideDecayHet );
         return initialInsecticide * effectSurvival;
     }
     
-    /// Call once per timestep to update holes
+    /// Call once per time step to update holes
     virtual void update(Host::Human& human);
     
     /// Get deterrency. See ComponentParams::effect for a more detailed description.

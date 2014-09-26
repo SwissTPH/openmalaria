@@ -90,8 +90,8 @@ private:
      * intentional that they also miss following EPI doses (unless a timed mass
      * vaccination reintroduces them to the EPI schedule). */
     uint32_t numDosesAdministered;
-    /// Timestep of last vaccination with this vaccine type
-    TimeStep timeLastDeployment;
+    /// Time of last vaccination with this vaccine type
+    SimTime timeLastDeployment;
     /// Efficacy at last deployment (undecayed)
     double initialEfficacy;
     util::DecayFuncHet hetSample;

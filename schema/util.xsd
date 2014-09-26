@@ -47,7 +47,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="maxAge" type="xs:double" use="optional">
             <xs:annotation>
               <xs:documentation>
-                Maximum age of eligible humans (defaults to no limit)
+                Maximum age of eligible humans (defaults to no limit).
+                
+                Input is rounded to the nearest time step.
               </xs:documentation>
               <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
             </xs:annotation>
@@ -55,7 +57,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="minAge" type="xs:double" default="0">
             <xs:annotation>
               <xs:documentation>
-                Minimum age of eligible humans (defaults to 0)
+                Minimum age of eligible humans (defaults to 0).
+                
+                Input is rounded to the nearest time step.
               </xs:documentation>
               <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
             </xs:annotation>
@@ -155,6 +159,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           functions, this is the age at which the parameter has decayed to half
           its original value. Not used for constant decay (though must be
           specified anyway).
+          
+          Input is rounded to the nearest time step.
         </xs:documentation>
         <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
       </xs:annotation>

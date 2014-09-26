@@ -45,20 +45,20 @@ public:
     WHMock();
     virtual ~WHMock();
     
-    virtual double probTransmissionToMosquito( TimeStep ageOfHuman, double tbvFactor ) const;
+    virtual double probTransmissionToMosquito( double tbvFactor ) const;
     virtual bool summarize(const Host::Human& human);
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool optionalPqTreatment();
-    virtual void treatSimple(TimeStep tsLiver, TimeStep tsBlood);
+    virtual void treatSimple(SimTime timeLiver, SimTime timeBlood);
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
     virtual double getTotalDensity() const;
     virtual bool diagnosticDefault() const;
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
     virtual void clearImmunity();
-    virtual double getCumulativeh() const;
-    virtual double getCumulativeY() const;
+    virtual double getCumulative_h() const;
+    virtual double getCumulative_Y() const;
 
     // This mock class does not have actual infections. Just set this as you please.
     double totalDensity;
@@ -66,8 +66,8 @@ public:
     // This mock class counts the number of times treatment() was called. Read/write this as you like.
     int nTreatments;
     
-    // The last treatment time-spans used by the simple treatment model. TimeStep::never if not used.
-    TimeStep lastTimestepsLiver, lastTimestepsBlood;
+    // The last treatment time-spans used by the simple treatment model. sim::never() if not used.
+    SimTime lastTimeLiver, lastTimeBlood;
     
     // Lists medications and drugs in the body
     PkPd::LSTMPkPdModel pkpd;

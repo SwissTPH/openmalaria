@@ -141,7 +141,7 @@ double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
     double factor = 1.0;
     for( EffectList::const_iterator effect = effects.begin(); effect != effects.end(); ++effect ){
         if( VaccineComponent::getParams(effect->component).type == type ){
-            TimeStep age = TimeStep::simulation - effect->timeLastDeployment;
+            SimTime age = sim::ts1() - effect->timeLastDeployment;  // implies age 1 TS on first use
             double decayFactor = VaccineComponent::getParams(effect->component)
                 .decayFunc->eval( age, effect->hetSample );
             factor *= 1.0 - effect->initialEfficacy * decayFactor;
@@ -177,7 +177,7 @@ bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
     util::streamValidate(effect->initialEfficacy);
     
     effect->numDosesAdministered = numDosesAdministered + 1;
-    effect->timeLastDeployment = TimeStep::simulation;
+    effect->timeLastDeployment = sim::now();
     
     return true;
 }

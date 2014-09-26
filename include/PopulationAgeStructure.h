@@ -30,18 +30,18 @@ namespace OM
     class AgeStructure
     {
     public:
-	/** Set up cumAgeProp from XML data. */
-	static void init ( const scnXml::Demography& demography );
-	
-	/** Return maximum individual lifetime in intervals that AgeStructure can handle. */
-	static inline TimeStep getMaxTimestepsPerLife () {
-	    return TimeStep(cumAgeProp.size());
-	}
-	
-	/** Return the expected population size of individuals aged ageTSteps or
-	* older, based on a total population size of targetPop. */
-	static int targetCumPop (TimeStep ageTSteps, int targetPop);
-	
+        /** Set up cumAgeProp from XML data. */
+        static void init( const scnXml::Demography& demography );
+        
+        /** Return maximum individual lifetime in intervals that AgeStructure can handle. */
+        static inline size_t getMaxTStepsPerLife(){
+            return cumAgeProp.size();
+        }
+        
+        /** Return the expected population size of individuals aged ageTSteps or
+        * older, based on a total population size of targetPop. */
+        static int targetCumPop( size_t ageTSteps, int targetPop );
+    
     private:
         /*! Estimates demography parameters to define a smooth curve for the target
         population age-distribution (age in years) */
@@ -87,7 +87,7 @@ namespace OM
 	//BEGIN static parameters set by init() or calcCumAgeProp()
         /** Target cumulative percentage of population by age, from oldest age to youngest.
 	*
-	* cumAgeProp[size()+1-i] gives the proportion of people aged i timesteps or older.
+	* cumAgeProp[size()+1-i] gives the proportion of people aged i time steps or older.
 	*/
 	static std::vector<double> cumAgeProp;
 	//END

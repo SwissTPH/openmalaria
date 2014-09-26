@@ -39,7 +39,7 @@ using namespace OM::util;
 double VectorModel::meanPopAvail (const Population& population) {
     double sumRelativeAvailability = 0.0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->age(sim::now()).inYears());
     }
     if( population.size() > 0 ){
         return sumRelativeAvailability / population.size();     // mean-rel-avail
@@ -82,7 +82,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
         const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears() );
+            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->age(sim::now()).inYears() );
         }
         stream << '\t' << total / population.size();
     }
@@ -111,7 +111,7 @@ void VectorModel::ctsNetInsecticideContent (const Population& population, ostrea
 //     double meanVar = 0.0;
 //     int n = 0;
 //     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
 //             ++n;
 //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
 //         }
@@ -306,27 +306,27 @@ void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
 #endif
 
 
-TimeStep VectorModel::minPreinitDuration () {
+SimTime VectorModel::minPreinitDuration () {
     if ( interventionMode == forcedEIR ) {
-        return TimeStep(0);
+        return sim::zero();
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return TimeStep::fromYears( 55 );
+    return sim::fromYearsI( 55 );
 }
-TimeStep VectorModel::expectedInitDuration (){
-    return TimeStep::fromYears( 1 );
+SimTime VectorModel::expectedInitDuration (){
+    return sim::oneYear();
 }
 
-TimeStep VectorModel::initIterate () {
+SimTime VectorModel::initIterate () {
     if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
-        return TimeStep(0); // no initialization to do
+        return sim::zero(); // no initialization to do
     }
     if( initIterations < 0 ){
         assert( interventionMode = dynamicEIR );
         simulationMode = dynamicEIR;
-        return TimeStep(0);
+        return sim::zero();
     }
     
     ++initIterations;
@@ -346,16 +346,16 @@ TimeStep VectorModel::initIterate () {
     // to be enough (but I may be wrong).
     if( needIterate )
         // stabilization + 5 years data-collection time:
-        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);
+        return sim::oneYear() + sim::fromYearsI(5);
     else
-        return TimeStep::fromYears( 1 );
+        return sim::oneYear();
 }
 
 double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
     PerHost& host = human.perHostTransmission;
     host.update( human );
     if (simulationMode == forcedEIR){
-        return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
+        return initialisationEIR[sim::ts0().moduloYearSteps()]
                * host.relativeAvailabilityHetAge (ageYears);
     }else{
         assert( simulationMode == dynamicEIR );
@@ -374,9 +374,9 @@ void VectorModel::vectorUpdate (const Population& population) {
     vector<double> popProbTransmission;
     popProbTransmission.reserve( population.size() );
     for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h ){
-        popProbTransmission.push_back( h->withinHostModel->probTransmissionToMosquito(
-            h->getAgeInTimeSteps(),
-            h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
+        double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
+        double pTrans = h->withinHostModel->probTransmissionToMosquito( tbvFac );
+        popProbTransmission.push_back( pTrans );
     }
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);

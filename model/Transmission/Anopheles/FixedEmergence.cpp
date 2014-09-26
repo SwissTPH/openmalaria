@@ -37,8 +37,8 @@ using namespace OM::util;
 FixedEmergence::FixedEmergence() :
         initNv0FromSv(numeric_limits<double>::signaling_NaN())
 {
-    quinquennialS_v.assign (TimeStep::fromYears(5).inDays(), 0.0);
-    mosqEmergeRate.resize (TimeStep::DAYS_IN_YEAR); // Only needs to be done here if loading from checkpoint
+    quinquennialS_v.assign (sim::fromYearsI(5), 0.0);
+    mosqEmergeRate.resize (sim::oneYear()); // Only needs to be done here if loading from checkpoint
 }
 
 
@@ -98,15 +98,15 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
 
     // average annual period of S_v over 5 years
-    vector<double> avgAnnualS_v( TimeStep::DAYS_IN_YEAR, 0.0 );
-    for ( int i = 0; i < TimeStep::fromYears(5).inDays(); ++i ) {
-        avgAnnualS_v[mod_nn(i, TimeStep::fromYears(1).inDays())] =
+    vecDay<double> avgAnnualS_v( sim::oneYear(), 0.0 );
+    for( SimTime i = sim::zero(); i < sim::fromYearsI(5); i += sim::oneDay() ){
+        avgAnnualS_v[mod_nn(i, sim::oneYear())] =
             quinquennialS_v[i] / 5.0;
     }
 
     // Once the amplitude is approximately correct, we try to find a
     // rotation offset.
-    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v);
+    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v.internal());
     //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
     // annualS_v was already rotated by old value of FSRotateAngle, so increment:
     FSRotateAngle -= rAngle;
@@ -117,17 +117,19 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 
     const double LIMIT = 0.1;
     return (fabs(factor - 1.0) > LIMIT) ||
-           (rAngle > LIMIT * 2*M_PI / TimeStep::stepsPerYear);
+           (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
 }
 
 
-double FixedEmergence::get( size_t d, size_t dYear1, double nOvipositing ) {
+double FixedEmergence::get( SimTime d0, double nOvipositing ) {
+    // Get emergence at start of step:
+    SimTime dYear1 = mod_nn(d0, sim::oneYear());
     // Simple model: fixed emergence scaled by larviciding
     return mosqEmergeRate[dYear1] * interventionSurvival();
 }
 
-void FixedEmergence::updateStats( size_t d, double tsP_dif, double S_v ){
-    size_t d5Year = mod_nn(d, TimeStep::fromYears(5).inDays());
+void FixedEmergence::updateStats( SimTime d1, double tsP_dif, double S_v ){
+    SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
 }
 

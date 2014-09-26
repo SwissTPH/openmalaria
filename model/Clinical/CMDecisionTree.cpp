@@ -185,6 +185,7 @@ public:
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
+        // age is that of human at start of time step (i.e. may be as low as 0)
         ptr_map<double,CMDecisionTree>::const_iterator it = branches.upper_bound( hostData.ageYears );
         if( it == branches.end() )
             throw TRACED_EXCEPTION( "bad age-based decision tree switch", util::Error::PkPd );
@@ -264,18 +265,30 @@ private:
 class CMDTTreatSimple : public CMDecisionTree {
 public:
     CMDTTreatSimple( const scnXml::DTTreatSimple& elt ) :
-        tsLiver(elt.getTimestepsLiver()),
-        tsBlood(elt.getTimestepsBlood())
-    {}
+        timeLiver(sim::zero()), timeBlood(sim::zero())
+    {
+        //FIXME(schema): input shouldn't be in time steps
+        int tsL = elt.getTimestepsLiver(), tsB = elt.getTimestepsBlood();
+        if( tsL < -1 || tsB < -1 ){
+            throw util::xml_scenario_error( "treatSimple: cannot have timestepsBlood or timestepsLiver less than -1" );
+        }
+        if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+            if( tsL != 0 || tsB != -1 )
+                throw util::unimplemented_exception( "vivax model only supports timestepsLiver=0, timestepsBlood=-1" );
+            // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
+        }
+        timeLiver = sim::fromTS(tsL);
+        timeBlood = sim::fromTS(tsB);
+    }
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
-        hostData.withinHost().treatSimple( tsLiver, tsBlood );
+        hostData.withinHost().treatSimple( timeLiver, timeBlood );
         return CMDTOut(true);
     }
     
 private:
-    TimeStep tsLiver, tsBlood;
+    SimTime timeLiver, timeBlood;
 };
 
 /**

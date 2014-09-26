@@ -40,7 +40,7 @@ public:
     }
     
     void setUp() {
-        TimeStep::init(5,90.0);
+        UnittestUtil::initTime(5);
     }
     
     void testBad() {
@@ -55,78 +55,78 @@ public:
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         // First test: with a default-constructed DecayFuncHet and positive age, result should be zero
         DecayFuncHet dHet;
-        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->eval( sim::fromDays(5), dHet ), 0.0 );
         // Second test: with an appropriately sampled helper value, we should get the results we want
         dHet = df->hetSample();
-        TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(730), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::zero(), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(10), dHet ), 1.0 );
         // Third test: time of decay (age plus now) should always be in the future
-        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), TimeStep::future );
+        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), sim::future() );
     }
     
     void testStep () {
         dfElt.setFunction( "step" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
-        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->eval( sim::fromDays(5), dHet ), 0.0 );
         dHet = df->hetSample();
-        TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.0 );
-        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), TimeStep::fromYears(10) );
+        TS_ASSERT_APPROX( df->eval( sim::zero(), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(6), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(20), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), sim::fromYearsI(10) );
     }
     
     void testLinear () {
         dfElt.setFunction( "linear" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
-        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->eval( sim::fromDays(5), dHet ), 0.0 );
         dHet = df->hetSample();
-        TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.4 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.0 );
+        TS_ASSERT_APPROX( df->eval( sim::zero(), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(6), dHet ), 0.4 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(20), dHet ), 0.0 );
     }
     
     void testExponential () {
         dfElt.setFunction( "exponential" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
-        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->eval( sim::fromDays(5), dHet ), 0.0 );
         dHet = df->hetSample();
-        TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.65975394736842108 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.25 );
+        TS_ASSERT_APPROX( df->eval( sim::zero(), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(6), dHet ), 0.65975394736842108 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(20), dHet ), 0.25 );
     }
     
     void testWeibull () {
         dfElt.setFunction( "weibull" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet = df->hetSample();
-        TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.73631084210526321 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.122306 );
+        TS_ASSERT_APPROX( df->eval( sim::zero(), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(6), dHet ), 0.73631084210526321 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(20), dHet ), 0.122306 );
     }
     
     void testHill () {
         dfElt.setFunction( "hill" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
-        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->eval( sim::fromDays(5), dHet ), 0.0 );
         dHet = df->hetSample();
-        TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.6936673684210527 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.24805074736842106 );
+        TS_ASSERT_APPROX( df->eval( sim::zero(), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(6), dHet ), 0.6936673684210527 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(20), dHet ), 0.24805074736842106 );
     }
     
     void testSmoothCompact () {
         dfElt.setFunction( "smooth-compact" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
-        TS_ASSERT_EQUALS( df->eval( TimeStep(1), dHet ), 0.0 );
+        TS_ASSERT_EQUALS( df->eval( sim::fromDays(5), dHet ), 0.0 );
         dHet = df->hetSample();
-        TS_ASSERT_APPROX( df->eval( TimeStep(0), dHet ), 1.0 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(438), dHet ), 0.40656965789473687 );
-        TS_ASSERT_APPROX( df->eval( TimeStep(1460), dHet ), 0.0 );
+        TS_ASSERT_APPROX( df->eval( sim::zero(), dHet ), 1.0 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(6), dHet ), 0.40656965789473687 );
+        TS_ASSERT_APPROX( df->eval( sim::fromYearsI(20), dHet ), 0.0 );
     }
     
 private:

@@ -70,10 +70,10 @@ public:
     
     /// Return the emergence for today, taking interventions like larviciding
     /// into account.
-    double get( size_t d, size_t dYear1, double nOvipositing );
+    double get( SimTime d0, double nOvipositing );
     
-    /// Store S_v for day d. Used by initIterate().
-    void updateStats( size_t d, double tsP_dif, double S_v );
+    /// Store S_v for day d1. Used by initIterate().
+    void updateStats( SimTime d1, double tsP_dif, double S_v );
     
     ///@brief Interventions and reporting
     //@{
@@ -110,7 +110,7 @@ private:
      * Length is 365 * 5. Checkpoint.
      *
      * Units: inoculations. */
-    vector<double> quinquennialS_v;
+    vecDay<double> quinquennialS_v;
     
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
@@ -128,7 +128,7 @@ private:
      * Units: Animals per day.
      *
      * Should be checkpointed. */
-    vector<double> mosqEmergeRate;
+    vecDay<double> mosqEmergeRate;
 };
 
 }

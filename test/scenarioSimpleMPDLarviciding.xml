@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="larviciding" schemaVersion="33" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
-  <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="150">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>

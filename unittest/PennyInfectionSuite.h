@@ -37,10 +37,9 @@ class PennyInfectionSuite : public CxxTest::TestSuite
 {
 public:
     void setUp () {
-        TimeStep::init( 1, 90.0 );
-        UnittestUtil::Infection_init_1day ();
+        UnittestUtil::initTime(1);
+        UnittestUtil::Infection_init_latentP_and_NaN ();
         PennyInfection::init();
-        TimeStep::simulation = TimeStep(0);     // value shouldn't be important
         util::random::seed( 1095 );
         infection = new PennyInfection (0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
@@ -73,14 +72,15 @@ public:
         
         bool extinct = false;
         int iterations=0;
+        SimTime now = sim::ts0();
         do{
-            extinct = infection->update(1.0, 0);
-            int ageDays = (TimeStep::simulation - infection->_startdate - infection->latentp).inDays() + 0;
+            extinct = infection->update(1.0, now);
+            int ageDays = (now - infection->m_startDate - infection->latentP).inDays();
             while( ageDays < 0 ) ageDays += infection->delta_V; // special case encountered by unit test
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
             TS_ASSERT_APPROX( infection->getDensity(), cirDens[iterations] );
             TS_ASSERT_APPROX( infection->seqDensity(ageDays), seqDens[iterations] );
-            TimeStep::simulation += TimeStep(1);
+            now += sim::oneDay();
             iterations+=1;
         }while(!extinct);
         TS_ASSERT_EQUALS( iterations, cirDens.size() );

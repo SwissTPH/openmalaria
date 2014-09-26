@@ -134,14 +134,14 @@ void TriggeredDeployments::deploy(Human& human,
 
 TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::DeployType& elt ) :
         HumanIntervention( elt.getComponent() ),
-        minAge( TimeStep::fromYears( elt.getMinAge() ) ),
-        maxAge( TimeStep::future ),
+        minAge( sim::fromYearsN( elt.getMinAge() ) ),
+        maxAge( sim::future() ),
         coverage( elt.getP() )
 {
     if( elt.getMaxAge().present() )
-        maxAge = TimeStep::fromYears( elt.getMaxAge().get() );
+        maxAge = sim::fromYearsN( elt.getMaxAge().get() );
     
-    if( minAge < TimeStep(0) || maxAge < minAge ){
+    if( minAge < sim::zero() || maxAge < minAge ){
         throw util::xml_scenario_error("triggered intervention must have 0 <= minAge <= maxAge");
     }
     
@@ -155,7 +155,10 @@ TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::Depl
 void TriggeredDeployments::SubList::deploy( Host::Human& human,
         Deployment::Method method, VaccineLimits vaccLimits )const
 {
-    TimeStep age = human.getAgeInTimeSteps();
+    // This may be used within a time step; in that case we use human age at
+    // the beginning of the step since this gives the expected result with age
+    // limits of 0 to 1 time step.
+    SimTime age = human.age(sim::nowOrTs1()/*TODO: should be now() but requires delayed triggered deployments*/);
     if( age >= minAge && age < maxAge ){
         if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
             HumanIntervention::deploy( human, method, vaccLimits );

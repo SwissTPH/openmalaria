@@ -75,14 +75,15 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)];
+    //NOTE: because prevNow may be negative, we can't use mod_nn (hence moduloYearSteps):
+    stream<<'\t'<<initialisationEIR[util::mod(sim::prevNow() / sim::oneTS(), sim::stepsPerYear())];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
     // The latest time-step's kappa:
-    stream<<'\t'<<laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())];
+    stream<<'\t'<<laggedKappa[sim::now().moduloSteps(laggedKappa.size())];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
@@ -106,16 +107,16 @@ TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    adultAge(PerHost::adultAge()),
     tsAdultEntoInocs(0.0),
     tsAdultEIR(0.0),
     surveyInputEIR(0.0),
     surveySimulatedEIR(0.0),
+    adultAge(PerHost::adultAge()),
     numTransmittingHumans(0),
     tsNumAdults(0),
     timeStepNumEntoInocs (0)
 {
-  initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
+  initialisationEIR.assign (sim::stepsPerYear(), 0.0);
   inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
 
@@ -145,10 +146,12 @@ double TransmissionModel::updateKappa (const Population& population) {
     numTransmittingHumans = 0;
 
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
-        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
+        //NOTE: calculate availability relative to age at end of time step;
+        // not my preference but consistent with TransmissionModel::getEIR().
+        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->age(sim::ts1()).inYears());
         sumWeight += t;
-        t *= h->withinHostModel->probTransmissionToMosquito( h->getAgeInTimeSteps(),
-                                                             h->getVaccine().getFactor( interventions::Vaccine::TBV ) );
+        t *= h->withinHostModel->probTransmissionToMosquito(
+            h->getVaccine().getFactor( interventions::Vaccine::TBV ) );
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;
@@ -160,7 +163,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     }
 
 
-    size_t lKMod = mod_nn(TimeStep::simulation, laggedKappa.size());	// now
+    size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
     if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -172,23 +175,23 @@ double TransmissionModel::updateKappa (const Population& population) {
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    int tmod = mod_nn(TimeStep::simulation, TimeStep::stepsPerYear);   // now
+    size_t tmod = sim::ts0().moduloYearSteps();
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod == 0) {
+    if (tmod == sim::stepsPerYear() - 1) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
 
     // Shared graphics: report infectiousness
-    if (mod_nn(TimeStep::simulation, 6) ==  0) {
+    if( mod_nn(sim::ts0(), sim::fromTS(6)) == sim::zero() ){
         for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
             kappaByAge[i] /= nByAge[i];
         util::SharedGraphics::copyKappa(&kappaByAge[0]);
     }
 
-    // Sum up inoculations this timestep
+    // Sum up inoculations this time step
     for (size_t group = 0; group < timeStepEntoInocs.size(); ++group) {
         inoculationsPerAgeGroup[group] += timeStepEntoInocs[group];
         // Reset to zero:
@@ -206,7 +209,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
+double TransmissionModel::getEIR (Host::Human& human, SimTime age, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
   /* For the NonVector model, the EIR should just be multiplied by the
    * availability. For the Vector model, the availability is also required
    * for internal calculations, but again the EIR should be multiplied by the
@@ -216,7 +219,7 @@ double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monit
   //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
   timeStepEntoInocs[ageGroup.i()] += EIR;
   timeStepNumEntoInocs ++;
-  if( ageYears >= adultAge ){
+  if( age >= adultAge ){
      tsAdultEntoInocs += EIR;
      tsNumAdults += 1;
   }
@@ -226,25 +229,27 @@ double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monit
 
 void TransmissionModel::summarize () {
     Monitoring::Survey& survey = Monitoring::Survey::current();
-    survey.setNumTransmittingHosts(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
+    survey.setNumTransmittingHosts(laggedKappa[sim::now().moduloSteps(laggedKappa.size())]);
     survey.setAnnualAverageKappa(_annualAverageKappa);
 
     survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
     inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
-
-    double duration = (TimeStep::simulation-lastSurveyTime).asInt();
+    
+    double duration = (sim::now() - lastSurveyTime).inSteps();
     if( duration == 0.0 ){
         if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
             throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
         }
         duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
     }
+    //TODO: we should really use bites-per-day or per year instead of per time
+    // step. But we also can't just change an existing measure.
     survey.setInputEIR (surveyInputEIR / duration);
     survey.setSimulatedEIR (surveySimulatedEIR / duration);
 
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
-    lastSurveyTime = TimeStep::simulation;
+    lastSurveyTime = sim::now();
 }
 
 

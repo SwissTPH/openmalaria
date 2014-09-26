@@ -42,7 +42,7 @@ namespace OM { namespace util {
         }
         ofstream fstream( (name+".csv").c_str() );
         
-        double max = TimeStep::maxAgeIntervals.inYears();
+        double max = sim::maxHumanAge().inYears();
         for( double age = 0.0; age < max; age += 0.1 ){
             fstream << age << "," << this->eval( age ) << endl;
         }
@@ -190,7 +190,7 @@ namespace OM { namespace util {
             }
 
             // add a point in middle of last age group (taking upper bound as max-age-years:
-            dataPoints[ 0.5*(greatestLbound + TimeStep::maxAgeIntervals.inYears()) ] = lastValue;
+            dataPoints[ 0.5*(greatestLbound + sim::maxHumanAge().inYears()) ] = lastValue;
         }
 
         virtual void scale( double factor ){

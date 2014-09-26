@@ -38,7 +38,7 @@ namespace interventions {
 class ContinuousHumanDeployment;
 class TimedDeployment;
 
-/** Management of interventions deployed on a per-timestep basis. */
+/** Management of interventions deployed on a per-time-step basis. */
 class InterventionManager {
 public:
     /** Read XML descriptions. */
@@ -57,11 +57,11 @@ public:
      * 
      * Serves to replace health-system and EIR where changeHS/changeEIR
      * interventions have been used. */
-    static void loadFromCheckpoint( OM::Population& population, OM::util::TimeStep interventionTime );
+    static void loadFromCheckpoint( OM::Population& population, SimTime interventionTime );
     
     /** @brief Deploy interventions
      *
-     * Timed interventions are deployed for this timestep.
+     * Timed interventions are deployed for this time step.
      * 
      * Continuous interventions are deployed as humans reach the target ages.
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */

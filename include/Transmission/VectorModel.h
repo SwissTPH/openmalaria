@@ -52,9 +52,9 @@ public:
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   
-  virtual TimeStep minPreinitDuration ();
-  virtual TimeStep expectedInitDuration ();
-  virtual TimeStep initIterate ();
+  virtual SimTime minPreinitDuration ();
+  virtual SimTime expectedInitDuration ();
+  virtual SimTime initIterate ();
   
   virtual void vectorUpdate (const Population& population);
   virtual void update (const Population& population);

@@ -47,10 +47,13 @@ double riskFromMaternalInfection = 0.0;
 /// Array of stored prevalences of mothers over last 5 months
 std::vector<double> prevByGestationalAge;
 
+/// Lower and upper bounds for potential mothers (as in model description)
+SimTime ageLb = sim::fromYearsI(20), ageUb = sim::fromYearsI(25);
+
 
 void NeonatalMortality::init() {
-    TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
-    prevByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
+    SimTime fiveMonths = sim::fromDays( 5 * 30 );
+    prevByGestationalAge.assign( fiveMonths.inSteps(), 0.0 );
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
@@ -73,20 +76,21 @@ void NeonatalMortality::update (const Population& population) {
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
-        //NOTE: this is based on last time-step's parasite densities but this
-        // time-step's age, which is a bit strange (though not very significant).
-        double ageYears = iter->getAgeInYears();
+        // diagnosticDefault() gives patentcy after the last time step's
+        // update, so it's appropriate to use age at the beginning of this step.
+        SimTime age = iter->age(sim::ts0());
+        
         // Note: since we're using a linked list, we have to iterate until we reach
         // the individuals we're interested in. Due to population structure, it's
         // probably quickest to start iterating from the oldest.
-        if(ageYears >= 25.0) continue;
-        if (ageYears < 20.0) break;	// Not interested in younger individuals.
+        if( age >= ageUb ) continue;
+        if( age < ageLb ) break;	// Not interested in younger individuals.
         
         //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
         // reporting, but the one used should be that used to parameterise this model
         nCounter ++;
         if (iter->withinHostModel->diagnosticDefault())
-        pCounter ++;
+            pCounter ++;
     }
     
     // ———  calculate risk of neonatal mortality  ———
@@ -97,7 +101,7 @@ void NeonatalMortality::update (const Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = mod_nn(TimeStep::simulation, prevByGestationalAge.size());
+    size_t index = sim::ts0().moduloSteps(prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for (size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {

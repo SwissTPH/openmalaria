@@ -41,7 +41,7 @@ size_t dblReportMappings[Report::MD_NUM];
 
 // -----  Static members  -----
 
-vector<double> AgeGroup::_upperbound;
+vector<SimTime> AgeGroup::upperBound;
 bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
 
 
@@ -205,15 +205,16 @@ void AgeGroup::init (const scnXml::Monitoring& monitoring) {
         throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
     
     // The last age group includes individuals too old for reporting
-    _upperbound.resize (groups.size() + 1);
+    upperBound.resize( groups.size() + 1 );
     for (size_t i = 0;i < groups.size(); ++i) {
-        _upperbound[i] = groups[i].getUpperbound();
+        // convert to SimTime, rounding down to the next time step
+        upperBound[i] = sim::fromYearsD( groups[i].getUpperbound() );
     }
-    _upperbound[groups.size()] = numeric_limits<double>::infinity();
+    upperBound[groups.size()] = sim::future();
 }
 
-void AgeGroup::update (double ageYears) {
-    while (ageYears > _upperbound[index]){
+void AgeGroup::update (SimTime age) {
+    while (age >= upperBound[index]){
         ++index;
     }
 }

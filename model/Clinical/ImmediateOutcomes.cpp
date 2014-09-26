@@ -177,7 +177,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
     latestReport.update (human, Episode::State( pgState ) );
 
     // If last treatment prescribed was in recent memory, consider second line.
-    CaseType regimen = (m_tLastTreatment + healthSystemMemory > TimeStep::simulation) ?
+    CaseType regimen = (m_tLastTreatment + healthSystemMemory > sim::ts0()) ?
         SecondLine : FirstLine;
     
     double x = random::uniform_01();
@@ -191,7 +191,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
                 return; // negative outcome: no treatment
         }
         
-        m_tLastTreatment = TimeStep::simulation;
+        m_tLastTreatment = sim::ts0();
         Survey::current().addInt( measures[regimen], human, 1 );
         
         double p = ( x < accessUCSelfTreat[regimen] * m_treatmentSeekingFactor ) ?

@@ -128,15 +128,15 @@ public:
    * 
    * Should include time for both data collection and to give the data
    * collected time to stabilize. */
-  virtual TimeStep minPreinitDuration () =0;
+  virtual SimTime minPreinitDuration () =0;
   /** Length of time that initIterate() is most likely to add: only used to
    * estimate total runtime. */
-  virtual TimeStep expectedInitDuration () =0;
+  virtual SimTime expectedInitDuration () =0;
   /** Check whether transmission has been sufficiently well initialized. If so,
    * switch to dynamic transmission mode. If not, try to improve the situation
    * and return the length of sim-time before this should be called again.
    */
-  virtual TimeStep initIterate ()=0;
+  virtual SimTime initIterate ()=0;
   
   /** Needs to be called each step of the simulation before Human::update().
    *
@@ -152,7 +152,7 @@ public:
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
   }
   
-  /** Does per-timestep updates and returns the EIR (inoculation rate per host
+  /** Does per-time-step updates and returns the EIR (inoculation rate per host
    * per time step). Should be called exactly once per time-step (at least,
    * during the intervention period when ITNs may be in use).
    *
@@ -166,7 +166,7 @@ public:
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
    * called before this function in order to return the correct value. */
-  double getEIR (Host::Human& human, double ageYears, Monitoring::AgeGroup ageGroup);
+  double getEIR (Host::Human& human, SimTime age, double ageYears, Monitoring::AgeGroup ageGroup);
   
   /** Non-vector model: throw an exception. Vector model: check that the
    * simulation mode allows interventions, and return a map of species names
@@ -222,28 +222,27 @@ protected:
    * 
    * Length: time-steps per year
    *
-   * Index mod(TimeStep::simulation, TimeStep::stepsPerYear) corresponds to the EIR
+   * Index sim::now_mod_steps_per_year() corresponds to the EIR
    * acting on the current time-step: i.e. total inoculations since the
    * previous time-step.
    * Since time-step 0 is not calculated, initialisationEIR[0] is actually the
    * last value used (to calculate the state at the start of the second year).
    *
-   * Units: infectious bites per adult per timestep
+   * Units: infectious bites per adult per time step
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */
+  //TODO: due to index units, it may be more efficient to use an array of
+  // length 365 even though only 1/5th entries would be used on 5-day time step
   vector<double> initialisationEIR; 
 
   /** The probability of infection of a mosquito at each bite.
    * It is calculated as the average infectiousness per human.
    * 
-   * The value in index t mod Y (where t is TimeStep::simulation and Y is
-   * TimeStep::stepsPerYear) is for this time-step respectively (size)
-   * time-steps ago: the latter during human updates since this value is not
-   * updated until the end of the time-step update. The value in index
-   * (t-1) mod Y is from the previous time-step, index (t-2) mod Y corresponds
-   * to the one before that, etc. Length depends on entomological incubation
-   * period from non-vector model.
+   * The value in index sim::ts1().moduloSteps(initialKappa.size()) is the
+   * kappa from this time step (i.e. the infectiousness of humans at the end of
+   * this step). Length depends on entomological incubation period from
+   * non-vector model.
    * 
    * Checkpointed. */
   vector<double> laggedKappa;
@@ -266,28 +265,28 @@ private:
    * Checkpointed. */
   double _sumAnnualKappa;
 
-  /// age at which an individual is considered an adult
-  double adultAge;
-
-  /// accumulator for timestep EIR of adults
+  /// accumulator for time step EIR of adults
   double tsAdultEntoInocs;
 
   /// Adult-only EIR over the last update
   double tsAdultEIR;
 
-  /** Per-timestep input EIR summed over inter-survey period.
+  /** Per-time-step input EIR summed over inter-survey period.
    * Units: infectious bites/adult/inter-survey period. */
   double surveyInputEIR;
-  /** Per-timestep simulated EIR summed over inter-survey period.
+  /** Per-time-step simulated EIR summed over inter-survey period.
    * Units: infectious bites/adult/inter-survey period. */
   double surveySimulatedEIR;
   /** Time of last survey. */
-  TimeStep lastSurveyTime;
+  SimTime lastSurveyTime;
   
+  /// age at which an individual is considered an adult
+  SimTime adultAge;
+
   /// For "num transmitting humans" cts output.
   int numTransmittingHumans;
 
-  /// accumulator for timestep adults requesting EIR
+  /// accumulator for time step adults requesting EIR
   int tsNumAdults;
 
   /** @brief Variables for reporting of entomological inoculations to humans.
@@ -298,10 +297,10 @@ private:
    * reporting period. */
   vector<double> inoculationsPerAgeGroup;
   
-  /** Sum of all EIR returned in this timestep, per age group
+  /** Sum of all EIR returned in this time step, per age group
    * Doesn't need to be checkpointed. */
   vector<double> timeStepEntoInocs;
-  /** Total number of EIRs output in the timestep (roughly equal to populationSize)
+  /** Total number of EIRs output in the time step (roughly equal to populationSize)
    * Doesn't need to be checkpointed. */
   size_t timeStepNumEntoInocs;
   //@}

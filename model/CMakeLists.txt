@@ -77,7 +77,6 @@ set (Model_CPP
   util/random.cpp
   util/StreamValidator.cpp
   util/AgeGroupInterpolation.cpp
-  util/TimeStep.cpp
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp

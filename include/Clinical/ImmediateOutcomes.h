@@ -27,7 +27,7 @@ namespace OM {
 namespace Clinical {
 
 /**
- * This models case management at a 5-day timestep with all-or-nothing
+ * This models case management at a 5-day time step with all-or-nothing
  * treatment.
  * 
  * Uncomplicated cases: access, otherwise known as "seeking any type of

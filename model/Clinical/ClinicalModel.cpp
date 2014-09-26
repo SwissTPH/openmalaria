@@ -40,7 +40,9 @@ bool opt_imm_outcomes = false;
 
 void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& scenario ) {
     const scnXml::Clinical& clinical = scenario.getModel().getClinical();
-    initCMCommon( parameters, clinical.getHealthSystemMemory() );
+    //FIXME(schema): input should be in days
+    SimTime hsMemory = sim::fromTS(clinical.getHealthSystemMemory());
+    initCMCommon( parameters, hsMemory );
     
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
         opt_event_scheduler = true;
@@ -99,17 +101,17 @@ ClinicalModel::~ClinicalModel () {
 
 // -----  other non-static methods  -----
 
-bool ClinicalModel::isDead (TimeStep ageTimeSteps) {
-    if (ageTimeSteps > TimeStep::maxAgeIntervals)	// too old (reached age limit)
+bool ClinicalModel::isDead( SimTime age ){
+    if( age >= sim::maxHumanAge())       // too old (reached age limit)
         doomed = DOOMED_TOO_OLD;
     if (doomed > NOT_DOOMED)	// killed by some means
         return true;	// remove from population
     return false;
 }
 
-void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps) {
+void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     if (doomed < NOT_DOOMED)	// Countdown to indirect mortality
-        doomed -= TimeStep::interval;
+        doomed -= sim::oneTS().inDays();
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (doomed <= DOOMED_EXPIRED) {	//clinical bout 6 intervals before
@@ -117,7 +119,7 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
         doomed = DOOMED_INDIRECT;
         return;
     }
-    if(ageTimeSteps == TimeStep(1) /* i.e. first update since birth */) {
+    if(newBorn /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
         if (Host::NeonatalMortality::eventNeonatalMortality()) {
             Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
@@ -129,14 +131,15 @@ void ClinicalModel::update (Human& human, double ageYears, TimeStep ageTimeSteps
     doClinicalUpdate (human, ageYears);
 }
 
-void ClinicalModel::updateInfantDeaths( TimeStep ageTimeSteps ){
+void ClinicalModel::updateInfantDeaths( SimTime age ){
     // update array for the infant death rates
-    if (ageTimeSteps <= TimeStep::intervalsPerYear){
-        infantIntervalsAtRisk[ageTimeSteps.asInt()-1] += 1;     // baseline
+    if (age < sim::oneYear()){
+        size_t index = age / sim::oneTS();
+        infantIntervalsAtRisk[index] += 1;     // baseline
         // Testing doomed == DOOMED_NEXT_TS gives very slightly different results than
         // testing doomed == DOOMED_INDIRECT (due to above if(..))
         if( doomed == DOOMED_COMPLICATED || doomed == DOOMED_NEXT_TS || doomed == DOOMED_NEONATAL ){
-            infantDeaths[ageTimeSteps.asInt()-1] += 1;  // deaths
+            infantDeaths[index] += 1;  // deaths
         }
     }
 }

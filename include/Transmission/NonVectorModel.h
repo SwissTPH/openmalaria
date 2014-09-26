@@ -42,9 +42,9 @@ public:
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
   
-  virtual TimeStep minPreinitDuration ();
-  virtual TimeStep expectedInitDuration ();
-  virtual TimeStep initIterate ();
+  virtual SimTime minPreinitDuration ();
+  virtual SimTime expectedInitDuration ();
+  virtual SimTime initIterate ();
   
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);
@@ -99,24 +99,24 @@ private:
   
   //! The duration of sporogony in time steps
   // doesn't need checkpointing
-  TimeStep nspore;
+  SimTime nSpore;
   //@}
   
   /** EIR per time interval during the intervention period. Value at index
-   * TimeStep::interventionPeriod.asInt()-1 used each time-step: first value
-   * should be used for update in the first interval, which has
-   * TimeStep::interventionPeriod = 1.
+   * sim::intervNow().inSteps() used each time-step: first value should
+   * be used for update in the first interval, which has
+   * sim::intervNow().inSteps() = 0.
    * 
-   * Units: inoculations per adult per timestep */
+   * Units: inoculations per adult per time step */
   vector<double> interventionEIR;
   
   /** When simulationMode == dynamicEIR, this is the annual cycle of kappa
-   * from the warmup phase and has length 1 year (in timesteps).
+   * from the warmup phase and has length 1 year (in time steps).
    * 
    * When simulationMode == equilibriumMode, this may be multiple years long and
    * is used to collect values of kappa (human infectiousness).
    * 
-   * In either case, mod(TimeStep::simulation, initialKappa.size()) is the index
+   * In either case, sim::ts0().moduloSteps(initialKappa.size()) is the index
    * for the current infectiousness during updates. */
   vector<double> initialKappa; 
 };

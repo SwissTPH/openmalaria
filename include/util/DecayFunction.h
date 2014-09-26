@@ -86,8 +86,7 @@ public:
     /** Return a value in the range [0,1] describing remaining effectiveness of
      * the intervention.
      * 
-     * @param age Age of intervention/decayed property during the time-step
-     *  for which values are now being calculated.
+     * @param age Age of intervention/decayed property
      * @param sample A DecayFuncHet value sampled for the intervention and
      *  individual.
      * 
@@ -95,8 +94,8 @@ public:
      * being updated over. It would be more accurate to return the mean value
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
-    inline double eval(TimeStep age, DecayFuncHet sample) const {
-        return eval(age.asInt() * sample.getTMult());
+    inline double eval( SimTime age, DecayFuncHet sample )const{
+        return eval( age.inDays() * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).
@@ -117,13 +116,13 @@ public:
      * This is only valid where mu and sigma parameters are zero.
      * 
      * @returns Age at which an object should decay. */
-    virtual TimeStep sampleAgeOfDecay () const =0;
+    virtual SimTime sampleAgeOfDecay () const =0;
     
 protected:
     DecayFunction() {}
     // Protected version. Note that the het sample parameter is needed even
     // when heterogeneity is not used so don't try calling this without that.
-    virtual double eval(double ageTS) const =0;
+    virtual double eval(double ageDays) const =0;
 };
 
 } }

@@ -144,13 +144,13 @@ public:
      * needed and current() can be used instead. */
     static Survey& getSurvey(size_t n);
     
-    /** Return timestep of the final survey.
+    /** Return the time of the final survey.
      *
      * We use this to control when the simulation ends.
      * This isn't quite the same as before when the simulation end was
      * explicitly specified and has a small affect on
      * infantAllCauseMortality (survey 21) output. */
-    static TimeStep getFinalTimestep ();
+    static SimTime getLastSurveyTime ();
     
     /** Humans should store a "cohort set" identifier which is initially 0.
      * Whenever a human gains or loses membership status in some

@@ -42,7 +42,7 @@
 // Checkpointing and time-step operations are used _everywhere_:
 #include "util/checkpoint.h"
 #include "util/mod.h"
-#include "util/TimeStep.h"
+#include "SimTime.h"
 
 // foreach "keyword"
 #include <boost/foreach.hpp>
@@ -53,7 +53,6 @@ namespace OM {
 using boost::uint32_t;
 
 using namespace util::checkpoint;
-using util::TimeStep;
 using util::mod;
 using util::mod_nn;
 

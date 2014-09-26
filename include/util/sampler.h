@@ -104,12 +104,14 @@ namespace OM { namespace util {
          * @param s Square-root of variance of logarithm of sampled variates
          */
         void setParams( double mean, double s );
-        /** Set the mean, leave sigma unchanged. */
-        void setMean( double mean );
         /** As above, using an XML element. */
         inline void setParams( const scnXml::LognormalSample& elt ){
             setParams( elt.getMean(), elt.getSigma() );
         }
+        /** Set the mean, leave sigma unchanged. */
+        void setMean( double mean );
+        /** Scale the mean (i.e. multiply by a scalar). */
+        void scaleMean( double scalar );
         
         /** Sample a value. */
         double sample() const;

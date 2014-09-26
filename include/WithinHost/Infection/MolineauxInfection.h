@@ -32,13 +32,12 @@ namespace OM { namespace WithinHost {
 class MolineauxInfection : public CommonInfection {
 
 public:
-	MolineauxInfection (istream& stream);
-	    //! Constructor
-	MolineauxInfection(uint32_t protID);
+    MolineauxInfection (istream& stream);
+    MolineauxInfection(uint32_t protID);
 
-	virtual ~MolineauxInfection () {};
-	static void init(const OM::Parameters& parameters);
-	virtual bool updateDensity(double survivalFactor, int ageDays);
+    virtual ~MolineauxInfection () {};
+    static void init(const OM::Parameters& parameters);
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
 
 protected:
     virtual void checkpoint (ostream& stream);
@@ -49,7 +48,7 @@ private:
 
     /**This function adapt the growth rate.
      * We can't use the Molineaux as it, since
-     * this model is a two day timestep model.
+     * this model is a two day time step model.
      * the density p(t+1) is then extrapolated.
      *
      */
@@ -57,7 +56,7 @@ private:
 
 	// v: number of variants per clone (one infection = one new clone)
 	static const size_t v = 50;
-	// taus: used for the variantTranscending and variantSpecific array, 4 Molineaux timesteps = 8 days
+	// taus: used for the variantTranscending and variantSpecific array, 4 Molineaux time steps = 8 days
 	static const size_t taus = 4;
 
 	///@brief static variables red from parameters
@@ -82,7 +81,7 @@ private:
 	/** @brief q^(i+1) array
 	 *
 	 * all the values of q^1... q^50 are stored in this array.
-	 * this prevent the recalculation of those values on every two timesteps. */
+	 * this prevent the recalculation of those values on every two time steps. */
 	static double qPow[v];
 	
 	// m[i]: Multiplication factor, per two-day cycle of variant i

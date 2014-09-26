@@ -617,6 +617,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           and health system events) but not beyond that. If this attribute is
           not given, the simulated human is a member until death or some other
           option triggers removal.
+          
+          Input is rounded to the nearest time step.
         </xs:documentation>
         <xs:appinfo>name:Remove from sub-population after;units:Years;min:0;</xs:appinfo>
       </xs:annotation>
@@ -812,7 +814,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:attribute name="maxAge" type="xs:double" use="optional">
           <xs:annotation>
             <xs:documentation>
-              Maximum age of eligible individuals (defaults to no limit)
+              Maximum age of eligible individuals (defaults to no limit).
+              
+              Input is rounded to the nearest time step.
             </xs:documentation>
             <xs:appinfo>units:Years;min:0;name:Maximum age of eligible individuals;</xs:appinfo>
           </xs:annotation>
@@ -820,7 +824,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:attribute name="minAge" type="xs:double" default="0">
           <xs:annotation>
             <xs:documentation>
-              Minimum age of eligible individuals (defaults to 0)
+              Minimum age of eligible individuals (defaults to 0).
+              
+              Input is rounded to the nearest time step.
             </xs:documentation>
             <xs:appinfo>units:Years;min:0;name:Minimum age of eligible individuals;</xs:appinfo>
           </xs:annotation>
@@ -841,7 +847,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
           <xs:annotation>
             <xs:documentation>
-              Target age of intervention
+              Target age of intervention.
+              
+              Input is rounded to the nearest time step.
             </xs:documentation>
             <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
           </xs:annotation>

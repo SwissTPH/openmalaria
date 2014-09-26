@@ -42,7 +42,7 @@ public:
     /// Destructor
     virtual ~PennyInfection () {};
     
-    virtual bool updateDensity(double survivalFactor, int ageDays);
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
     
     /** Get the density of sequestered parasites. */
     inline double seqDensity(int ageDays){
@@ -84,9 +84,6 @@ private:
     double variantSpecificSummation;
     // tracked summation of densities with decay for clonal immunity (sigmoidal function)
     double clonalSummation;
-    
-    // 
-    
     
     // allow unittest to access private vars
     friend class ::PennyInfectionSuite;

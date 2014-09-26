@@ -68,12 +68,12 @@ namespace OM { namespace util {
 	    return options.test(code);
 	}
 	
-	/** Return first checkpointing timestep _greater than_ timestep passed,
+	/** Return first checkpointing time step _greater than_ time step passed,
 	 * or min int value if no (more) checkpoint times. */
-	static TimeStep getNextCheckpointTime( TimeStep now ) {
-	    set<TimeStep>::iterator it = checkpoint_times.upper_bound( now );
+	static SimTime getNextCheckpointTime( SimTime now ) {
+	    set<SimTime>::iterator it = checkpoint_times.upper_bound( now );
 	    if( it == checkpoint_times.end() )
-		return TimeStep::never;
+		return sim::never();
 	    else
 		return *it;
 	}
@@ -122,7 +122,7 @@ namespace OM { namespace util {
 	
 	/** Set of simulation times at which a checkpoint should be written and
 	* program should exit (to allow resume). */
-	static set<TimeStep> checkpoint_times;
+	static set<SimTime> checkpoint_times;
     };
 } }
 #endif

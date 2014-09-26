@@ -46,7 +46,7 @@ bool bugfix_max_dens = true, bugfix_innate_max_dens = true;
 
 void DescriptiveInfection::init (const Parameters& parameters) {
     // Error checks
-    if (TimeStep::interval != 5){
+    if( sim::oneTS().inDays() != 5 ){
         // To support non-5-day time-step models, either different data would
         // be needed or times need to be adjusted when accessing
         // meanLogParasiteCount. Probably the rest would be fine.
@@ -120,13 +120,13 @@ void DescriptiveInfection::init (const Parameters& parameters) {
 
 DescriptiveInfection::DescriptiveInfection () :
         Infection(0xFFFFFFFF),
-        _duration(infectionDuration()),
+        m_duration(infectionDuration()),
         notPrintedMDWarning(true)
 {
-    assert( TimeStep::interval == 5 );
+    assert( sim::oneTS().inDays() == 5 );
 }
 
-TimeStep DescriptiveInfection::infectionDuration() {
+SimTime DescriptiveInfection::infectionDuration() {
     //TODO: move values to XML.
     double dur_mean = 5.1300001144409179688;
     double dur_sigma = 0.80000001192092895508;
@@ -134,10 +134,11 @@ TimeStep DescriptiveInfection::infectionDuration() {
     
     //TODO:
     // Model did say infection is cleared on day dur+1 converted to a time-step
-    // ((1+floor(dur))/TimeStep::interval); now it says the last interval is:
-    // floor((1+dur)/TimeStep::interval)-1 = floor((dur+1-interval)/interval)
+    // let interval = sim::oneTS().inDays() in:
+    // ((1+floor(dur))/interval); now it says the last interval is:
+    // floor((1+dur)/interval)-1 = floor((dur+1-interval)/interval)
     // Is this reasonable, or should we change?
-    return TimeStep::fromDays(1.0+dur) - TimeStep(1);
+    return sim::fromDays( 1.0 + dur ) - sim::oneTS();
 }
 
 
@@ -151,23 +152,24 @@ void DescriptiveInfection::determineDensities(double ageInYears,
                                               double bsvFactor)
 {
     // Age of patent blood stage infection. Note: liver stage is fixed at one
-    // 5-day timestep and prepatent blood stage is latentp - 1 timesteps.
-    TimeStep infage = TimeStep::simulation - _startdate - latentp;
-    if ( infage < TimeStep(0)) {
-        _density = 0.0;
+    // 5-day time step and prepatent blood stage is latentp - 1 time steps.
+    SimTime infage = sim::ts0() - m_startDate - latentP;
+    if ( infage < sim::zero()) {
+        m_density = 0.0;
         if (bugfix_max_dens) timeStepMaxDensity = 0.0;
     }else{
         timeStepMaxDensity = 0.0;
         
-        int infAge = min (infage.asInt(), maxDuration.asInt());
-        int infDur = min (_duration.asInt(), maxDuration.asInt());
-        _density=max (exp(meanLogParasiteCount[infAge][infDur]), 1.0);
+        int32_t infAge = min( infage.inSteps(), maxDurationTS );
+        //TODO(performance): is it worth caching infDur at infection start?
+        int32_t infDur = min( m_duration.inSteps(), maxDurationTS );
+        m_density=max (exp(meanLogParasiteCount[infAge][infDur]), 1.0);
         
         // The expected parasite density in the non naive host (AJTM p.9 eq. 9)
         // Note that in published and current implementations Dx is zero.
-        _density = pow(_density, immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY));
+        m_density = pow(m_density, immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY));
         
-        //Perturb _density using a lognormal
+        //Perturb m_density using a lognormal
         double varlog = sigma0sq / (1.0 + (cumulativeh / xNuStar));
         double stdlog = sqrt(varlog);
         
@@ -176,13 +178,13 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
         the log of the predicted density.  If we really did the latter then this bias correction is not needed.
         */
-        double meanlog = log(_density) - stdlog*stdlog / 2.0;
+        double meanlog = log(m_density) - stdlog*stdlog / 2.0;
         if (stdlog > 0.0000001) {
             // Calculate the expected density on the day of sampling:
-            _density = random::log_normal(meanlog, stdlog);
-            // Calculate additional samples for T-1 days (T=TimeStep::interval):
-            if (TimeStep::interval > 1) {
-                double normp = pow(random::uniform_01(), 1.0 / (TimeStep::interval-1));
+            m_density = random::log_normal(meanlog, stdlog);
+            // Calculate additional samples for T-1 days (T=sim::oneTS().inDays()):
+            if( true /*was sim::oneTS().inDays() > 1, which is always true in this model*/ ){
+                double normp = pow( random::uniform_01(), 1.0 / (sim::oneTS().inDays() - 1) );
                 /*
                 To mimic sampling T-1 repeated values, we transform the sampling
                 distribution and use only one sampled value, which has the sampling
@@ -194,22 +196,22 @@ void DescriptiveInfection::determineDensities(double ageInYears,
                 */
                 timeStepMaxDensity = random::sampleFromLogNormal(normp, meanlog, stdlog);
             }
-            timeStepMaxDensity = std::max(_density, timeStepMaxDensity);
+            timeStepMaxDensity = std::max(m_density, timeStepMaxDensity);
         }
         if (timeStepMaxDensity > maxDens && notPrintedMDWarning){
-            cerr << "TSMD hit limit:\t" << _density << ",\t" << timeStepMaxDensity << endl;
+            cerr << "TSMD hit limit:\t" << m_density << ",\t" << timeStepMaxDensity << endl;
             notPrintedMDWarning = false;
         }
-        _density = min(_density, maxDens);
+        m_density = min(m_density, maxDens);
         timeStepMaxDensity = min(timeStepMaxDensity, maxDens);
         
         //Compute the proportion of parasites remaining after innate blood stage effect
-        _density *= innateImmSurvFact;
+        m_density *= innateImmSurvFact;
         
         //Include here the effect of blood stage vaccination
-        _density *= bsvFactor;
+        m_density *= bsvFactor;
         
-        _cumulativeExposureJ += TimeStep::interval * _density;
+        m_cumulativeExposureJ += sim::oneTS().inDays() * m_density;
     }
     
     //TODO: when bugfix_max_dens is required, this can go into the infage >= 0 part
@@ -221,14 +223,14 @@ void DescriptiveInfection::determineDensities(double ageInYears,
 // ———  checkpointing  ———
 
 DescriptiveInfection::DescriptiveInfection (istream& stream) :
-        Infection(stream), _duration(TimeStep::never)
+        Infection(stream), m_duration(sim::never())
 {
-    _duration & stream;
+    m_duration & stream;
     notPrintedMDWarning & stream;
 }
 void DescriptiveInfection::checkpoint (ostream& stream) {
     Infection::checkpoint (stream);
-    _duration & stream;
+    m_duration & stream;
     notPrintedMDWarning & stream;
 }
 

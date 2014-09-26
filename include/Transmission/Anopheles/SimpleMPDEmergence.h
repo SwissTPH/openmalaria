@@ -75,10 +75,11 @@ public:
     
     /// Return the emergence for today, taking interventions like larviciding
     /// into account.
-    double get( size_t d, size_t dYear1, double nOvipositing );
+    /// @param d0 Time of the start of the day-long update period
+    double get( SimTime d0, double nOvipositing );
     
-    /// Store S_v for day d. Used by initIterate().
-    void updateStats( size_t d, double tsP_dif, double S_v );
+    /// Store S_v for day d1. Used by initIterate().
+    void updateStats( SimTime d1, double tsP_dif, double S_v );
     
     ///@brief Interventions and reporting
     //@{
@@ -112,7 +113,7 @@ private:
     // -----  model parameters (loaded from XML)  -----
     
     /** Duration of development (time from egg laying to emergence) in days. */
-    int developmentDuration;
+    SimTime developmentDuration;
     
     /** Survival probability of a mosquito from egg to emergence in the absence
      * of density dependent mortality. */
@@ -132,10 +133,10 @@ private:
      * Length is 365 * 5. Checkpoint.
      *
      * Units: inoculations. */
-    vector<double> quinquennialS_v;
+    vecDay<double> quinquennialS_v;
     
     /** As quinquennialS_v, but for N_v*P_df (units: animals). */
-    vector<double> quinquennialOvipositing;
+    vecDay<double> quinquennialOvipositing;
     
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
@@ -153,7 +154,7 @@ private:
      * Units: Animals per day.
      *
      * Should be checkpointed. */
-    vector<double> mosqEmergeRate;
+    vecDay<double> mosqEmergeRate;
     
     /** Resources for mosquito larvae (or rather 1 over resources); γ(t) in
      * model description.
@@ -171,14 +172,14 @@ private:
      * 
      * Units: 1 / animals per day.
      *
-     * Should be checkpointed. */
-    vector<double> invLarvalResources;
+     * vecDay be checkpointed. */
+    vecDay<double> invLarvalResources;
     
     /** Vector for storing values of nOvipositing for the last
      * developmentDuration time steps. Index 0 should correspond to
      * nOvipositing developmentDuration days before
      * get(0, dYear1, nOvipositing) is called. */
-    vector<double> nOvipositingDelayed;
+    vecDay<double> nOvipositingDelayed;
 };
 
 }

@@ -34,16 +34,16 @@ Episode::~Episode ()
 
 void Episode::flush() {
     report();
-    time = TimeStep::never;
+    time = sim::never();
 }
 
 
 void Episode::update (const Host::Human& human, Episode::State newState)
 {
-    if (TimeStep::simulation > (time + healthSystemMemory)) {
+    if( time + healthSystemMemory < sim::ts0() ){
         report ();
 
-        time = TimeStep::simulation;
+        time = sim::ts0();
         surveyPeriod = Survey::getSurveyNumber();
         ageGroup = human.getMonitoringAgeGroup();
         cohortSet = human.cohortSet();
@@ -54,7 +54,7 @@ void Episode::update (const Host::Human& human, Episode::State newState)
 }
 
 void Episode::report () {
-    if (time == TimeStep::never)        // Nothing to report
+    if (time < sim::zero())        // Nothing to report
         return;
     
     Survey& survey = Survey::getSurvey(surveyPeriod);
@@ -115,7 +115,7 @@ void Episode::report () {
 
 void Episode::operator& (istream& stream) {
     time & stream;
-    if (time != TimeStep::never) {
+    if (time > sim::zero()) {
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;
@@ -126,7 +126,7 @@ void Episode::operator& (istream& stream) {
 }
 void Episode::operator& (ostream& stream) {
     time & stream;
-    if (time != TimeStep::never) {
+    if (time >= sim::zero()) {
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;

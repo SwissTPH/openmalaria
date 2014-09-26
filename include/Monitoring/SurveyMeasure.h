@@ -38,13 +38,13 @@ namespace SM {
 enum SurveyMeasure {
     /// Total number of humans
     nHost = 0,
-    /** The number of human hosts with an infection (patent or not) on the
-     * reporting timestep */
+    /** The number of human hosts with an infection (patent or not) at the time
+     * the survey is taken. */
     nInfect = 1,
     /** Expected number of infected hosts
      * 
-     * This is the sum of the probabilities across all timesteps since the last
-     * survey of each host becoming infected on that timestep. */
+     * This is the sum of the probabilities, across all time steps since the
+     * last survey, of each host becoming infected on that time step. */
     nExpectd= 2,
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */
@@ -164,12 +164,12 @@ enum SurveyMeasure {
     
     /** Input EIR (Expected EIR entered into scenario file)
      *
-     * Units: inoculations per adult per timestep.
+     * Units: inoculations per adult per time step.
      */
     inputEIR = 35,
     /** Simulated EIR (EIR output by the transmission model)
      *
-     * Units: inoculations per person per timestep (not per-adult:
+     * Units: inoculations per person per time step (not per-adult:
      * since children are less available to mosquitoes than adults,
      * this population-average figure ends up being smaller than if
      * all modelled humans were adults).
@@ -278,8 +278,8 @@ enum SurveyMeasure {
     /** Report the number of diagnostics used during treatment.
      * 
      * This is not the same as Clinical_RDTs + Clinical_Microscopy: those
-     * outputs are used by the "event scheduler" 1-day timestep clinical model,
-     * whereas this output is used by the 5-day timestep model. */
+     * outputs are used by the "event scheduler" 1-day time step clinical
+     * model, whereas this output is used by the 5-day time step model. */
     nTreatDiagnostics = 64,
     
     /** Number of "recruitment only" recruitments via timed deployment. */

@@ -42,6 +42,8 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
     holeRate.setParams( elt.getHoleRate() );
     ripRate.setParams( elt.getRipRate() );
+    holeRate.scaleMean( sim::yearsPerStep() );
+    ripRate.scaleMean( sim::yearsPerStep() );
     ripFactor = elt.getRipFactor().getValue();
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
     attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
@@ -483,12 +485,12 @@ HumanITN::HumanITN( const ITNComponent& params ) :
     // handling of net. They are sampled once per human: human handling is
     // presumed to be the largest cause of variance.
     util::NormalSample x = util::NormalSample::generate();
-    holeRate = params.holeRate.sample(x) * TimeStep::yearsPerInterval;
-    ripRate = params.ripRate.sample(x) * TimeStep::yearsPerInterval;
+    holeRate = params.holeRate.sample(x);
+    ripRate = params.ripRate.sample(x);
     insecticideDecayHet = params.insecticideDecay->hetSample(x);
 
     // Sample per-deployment variables as in redeploy:
-    disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
+    disposalTime = sim::now() + params.attritionOfNets->sampleAgeOfDecay();
     // this is sampled independently: initial insecticide content doesn't depend on handling
     initialInsecticide = params.initialInsecticide.sample();
     if( initialInsecticide < 0.0 )
@@ -500,8 +502,8 @@ HumanITN::HumanITN( const ITNComponent& params ) :
 void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionComponent& params0) {
     const ITNComponent& params = *dynamic_cast<const ITNComponent*>(&params0);
     
-    deployTime = TimeStep::simulation;
-    disposalTime = TimeStep::simulation + params.attritionOfNets->sampleAgeOfDecay();
+    deployTime = sim::now();
+    disposalTime = sim::now() + params.attritionOfNets->sampleAgeOfDecay();
     nHoles = 0;
     holeIndex = 0.0;
     // this is sampled independently: initial insecticide content doesn't depend on handling
@@ -514,11 +516,10 @@ void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionComponent
 
 void HumanITN::update(Host::Human& human){
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
-    if( deployTime != TimeStep::never ){
-        // First use is at age 1, so don't remove until *after* disposalTime to
-        // get use over the full duration given by sampleAgeOfDecay().
-        if( TimeStep::simulation > disposalTime ){
-            deployTime = TimeStep::never;
+    if( deployTime != sim::never() ){
+        // First use is at age 0 relative to ts0()
+        if( sim::ts0() >= disposalTime ){
+            deployTime = sim::never();
             human.removeFromSubPop(id());
             return;
         }
@@ -530,21 +531,21 @@ void HumanITN::update(Host::Human& human){
 }
 
 double HumanITN::relativeAttractiveness(size_t speciesIndex) const{
-    if( deployTime == TimeStep::never ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::preprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == TimeStep::never ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == TimeStep::never ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );

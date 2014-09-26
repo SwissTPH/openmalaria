@@ -62,18 +62,19 @@ protected:
     virtual void checkpoint (ostream& stream);
 
 private:
-    /// Maximum number of timesteps (including first of case) an individual will
-    /// remember they are sick before resetting.
-    static TimeStep maxUCSeekingMemory;
+    /// Maximum number of time steps (including first of case) an individual
+    /// will remember they are sick before resetting.
+    static SimTime maxUCSeekingMemory;
     /// Length of an uncomplicated case
-    static TimeStep uncomplicatedCaseDuration;
+    static SimTime uncomplicatedCaseDuration;
     /// Length of a complicated case
-    static TimeStep complicatedCaseDuration;
+    static SimTime complicatedCaseDuration;
     /// Time-span for which individual is at risk of death in complicated case
     /// minus length of complicated case (must be <= 0)
-    static TimeStep extraDaysAtRisk;
+    static SimTime extraDaysAtRisk;
     /// First value is probability immediate treatment, second is first +
     /// probability 1-day delay to treatment seeking, etc. Last value must be 1.
+    /// Index units are days.
     static vector<double> cumDailyPrImmUCTS;
 
     /// Parameter of S(t) for t > 0
@@ -120,20 +121,20 @@ private:
     /// Current state of sickness
     Episode::State pgState;
 
-    /** Set to when a bout should start. If TimeStep::simulation equals this, a bout
+    /** Set to when a bout should start. If sim::ts0() equals this, a bout
      * is started (UC & severe behaviour different).
      *
      * Note: medications are not delayed by this. */
-    TimeStep caseStartTime;
+    SimTime caseStartTime;
 
-    /** The individual recovers when TimeStep::simulation >= timeOfRecovery,
+    /** The individual recovers when sim::ts0() >= timeOfRecovery,
      * assuming they didn't die. */
-    TimeStep timeOfRecovery;
+    SimTime timeOfRecovery;
 
     /// Time at which last treatment was recieved (for second-case considerations).
-    TimeStep timeLastTreatment;
+    SimTime timeLastTreatment;
 
-    /// Total parasite density at previous timestep (used during a bout).
+    /// Total parasite density at last time step (used during a bout).
     double previousDensity;
 };
 

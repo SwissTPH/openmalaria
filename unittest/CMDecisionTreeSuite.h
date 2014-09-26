@@ -50,12 +50,13 @@ public:
 	// Note: cannot create whm in constructor, since it uses random number
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
+        UnittestUtil::initTime(5);
         
-	UnittestUtil::EmpiricalWHM_setup();     // use a 1-day-TS model
+	UnittestUtil::EmpiricalWHM_setup();
         whm.reset( new WHMock() );
         ETS_ASSERT( whm.get() != 0 );
         
-        human.reset( UnittestUtil::createHuman(TimeStep(0)).release() );
+        human.reset( UnittestUtil::createHuman(sim::zero()).release() );
         ETS_ASSERT( human.get() != 0 );
         UnittestUtil::setHumanWH( *human, whm.get() );
         
@@ -209,24 +210,24 @@ public:
     }
     
     void testSimpleTreat(){
-        TS_ASSERT_EQUALS( whm->lastTimestepsLiver, TimeStep::never );
-        TS_ASSERT_EQUALS( whm->lastTimestepsBlood, TimeStep::never );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver, sim::never() );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood, sim::never() );
         
-        scnXml::DTTreatSimple treat1( 0, 1 );
+        scnXml::DTTreatSimple treat1( 0, 1 );   // 0 time steps liver, 1 blood (using 1 day TS)
         scnXml::DecisionTree dt1;
         dt1.setTreatSimple( treat1 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt1 ), 1 );
-        TS_ASSERT_EQUALS( whm->lastTimestepsLiver.asInt(), 0 );
-        TS_ASSERT_EQUALS( whm->lastTimestepsBlood.asInt(), 1 );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver.inDays(), 0 );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood.inDays(), 1*5 );
         
         scnXml::DTTreatSimple treat2( 3, -1 );
         scnXml::DecisionTree dt2;
         dt2.setTreatSimple( treat2 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt2 ), 1 );
-        TS_ASSERT_EQUALS( whm->lastTimestepsLiver.asInt(), 3 );
-        TS_ASSERT_EQUALS( whm->lastTimestepsBlood.asInt(), -1 );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver.inDays(), 3*5 );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood.inDays(), -1*5 );
     }
     
     double runAndGetMgPrescribed( scnXml::DecisionTree& dt, double age ){

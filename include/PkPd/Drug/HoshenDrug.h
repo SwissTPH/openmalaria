@@ -41,7 +41,7 @@ public:
   /** Create a new instance. */
   HoshenDrug (const HoshenDrugType*);
   
-  /** Called per timestep to reduce concentrations.
+  /** Called once per time step to reduce concentrations.
    *
    * If remaining concentration is negligible, return true, and this class
    * object will be deleted. */
