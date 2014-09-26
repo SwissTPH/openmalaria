@@ -134,86 +134,85 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
 }
 
 
-double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
+double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
                                  double tsP_dif, bool isDynamic, bool printDebug ){
-    //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay();
+    SimTime d1 = d0 + sim::oneDay();    // end of step
     
     // We add N_v_length so that we can use mod_nn() instead of mod().
-    SimTime dMod = d + N_v_length;
-    assert (dMod+offset >= N_v_length);
-    // Indecies for today, yesterday and mosqRestDuration days back:
-    SimTime t    = mod_nn(dMod+offset, N_v_length);
-    SimTime t1   = mod_nn(dMod+offset - sim::oneDay(), N_v_length);
-    SimTime ttau = mod_nn(dMod+offset - mosqRestDuration, N_v_length);
+    SimTime d1Mod = d1 + N_v_length;
+    assert (d1Mod >= N_v_length);
+    // Indecies for end time, start time, and mosqRestDuration days before end time:
+    SimTime t1    = mod_nn(d1, N_v_length);
+    SimTime t0   = mod_nn(d0, N_v_length);
+    SimTime ttau = mod_nn(d1Mod - mosqRestDuration, N_v_length);
     
     // These only need to be calculated once per time step, but should be
     // present in each of the previous N_v_length - 1 positions of arrays.
-    P_A[t] = tsP_A;
-    P_df[t] = tsP_df;
-    P_dif[t] = tsP_dif;
+    P_A[t1] = tsP_A;
+    P_df[t1] = tsP_df;
+    P_dif[t1] = tsP_dif;
     
     
-    double nOvipositing = P_df[ttau] * N_v[ttau];
-    double newAdults = emergence->get( d, nOvipositing );
+    double nOvipositing = P_df[ttau] * N_v[ttau];       // number ovipositing on this step
+    double newAdults = emergence->get( d0, nOvipositing );
     util::streamValidate( newAdults );
     
     // num seeking mosquitos is: new adults + those which didn't find a host
     // yesterday + those who found a host tau days ago and survived cycle:
-    N_v[t] = newAdults
-                + P_A[t1]  * N_v[t1]
+    N_v[t1] = newAdults
+                + P_A[t0]  * N_v[t0]
                 + nOvipositing;
     // similar for O_v, except new mosquitoes are those who were uninfected
     // tau days ago, started a feeding cycle then, survived and got infected:
-    O_v[t] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
-                + P_A[t1]  * O_v[t1]
+    O_v[t1] = P_dif[ttau] * (N_v[ttau] - O_v[ttau])
+                + P_A[t0]  * O_v[t0]
                 + P_df[ttau] * O_v[ttau];
     
     //BEGIN S_v
-    // Set up array with n in 1..θ_s−1 for f_τ(dMod+offset-n) (NDEMD eq. 1.7)
+    // Set up array with n in 1..θ_s−1 for f_τ(d1Mod-n) (NDEMD eq. 1.7)
     SimTime fProdEnd = mosqRestDuration * 2;
     for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fProdEnd; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
+        SimTime tn = mod_nn(d1Mod-n, N_v_length);
         ftauArray[n] = ftauArray[n-sim::oneDay()] * P_A[tn];
     }
-    ftauArray[fProdEnd] += P_df[mod_nn(dMod+offset-fProdEnd, N_v_length)];
+    ftauArray[fProdEnd] += P_df[mod_nn(d1Mod-fProdEnd, N_v_length)];
 
     for( SimTime n = fProdEnd+sim::oneDay(); n < EIPDuration; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
+        SimTime tn = mod_nn(d1Mod-n, N_v_length);
         ftauArray[n] =
             P_df[tn] * ftauArray[n - mosqRestDuration]
             + P_A[tn] * ftauArray[n-sim::oneDay()];
     }
 
     double sum = 0.0;
-    SimTime ts = dMod+offset - EIPDuration;
+    SimTime ts = d1Mod - EIPDuration;
     for( SimTime l = sim::oneDay(); l < mosqRestDuration; l += sim::oneDay() ){
-        SimTime tsl = mod_nn(ts - l, N_v_length);       // index dMod+offset - theta_s - l
+        SimTime tsl = mod_nn(ts - l, N_v_length);       // index d1Mod - theta_s - l
         sum += P_dif[tsl] * P_df[ttau] * (N_v[tsl] - O_v[tsl]) *
                 ftauArray[EIPDuration+l-mosqRestDuration];
     }
 
 
-    // Set up array with n in 1..θ_s−τ for f(dMod+offset-n) (NDEMD eq. 1.6)
+    // Set up array with n in 1..θ_s−τ for f(d1Mod-n) (NDEMD eq. 1.6)
     for( SimTime n = sim::oneDay(); n <= mosqRestDuration; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
+        SimTime tn = mod_nn(d1Mod-n, N_v_length);
         fArray[n] = fArray[n-sim::oneDay()] * P_A[tn];
     }
     fArray[mosqRestDuration] += P_df[ttau];
 
     fProdEnd = EIPDuration-mosqRestDuration;
     for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fProdEnd; n += sim::oneDay() ){
-        SimTime tn = mod_nn(dMod+offset-n, N_v_length);
+        SimTime tn = mod_nn(d1Mod-n, N_v_length);
         fArray[n] =
             P_df[tn] * fArray[n - mosqRestDuration]
             + P_A[tn] * fArray[n-sim::oneDay()];
     }
 
 
-    ts = mod_nn(ts, N_v_length);       // index dMod+offset - theta_s
-    S_v[t] = P_dif[ts] * fArray[EIPDuration-mosqRestDuration] * (N_v[ts] - O_v[ts])
+    ts = mod_nn(ts, N_v_length);       // index d1Mod - theta_s
+    S_v[t1] = P_dif[ts] * fArray[EIPDuration-mosqRestDuration] * (N_v[ts] - O_v[ts])
                 + sum
-                + P_A[t1]*S_v[t1]
+                + P_A[t0]*S_v[t0]
                 + P_df[ttau]*S_v[ttau];
 
 
@@ -221,10 +220,10 @@ double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
         // We cut-off transmission when no more than X mosquitos are infected to
         // allow true elimination in simulations. Unfortunately, it may cause problems with
         // trying to simulate extremely low transmission, such as an R_0 case.
-        if ( S_v[t] <= minInfectedThreshold ) { // infectious mosquito cut-off
-            S_v[t] = 0.0;
+        if ( S_v[t1] <= minInfectedThreshold ) { // infectious mosquito cut-off
+            S_v[t1] = 0.0;
             /* Note: could report; these reports often occur too frequently, however
-            if( S_v[t] != 0.0 ){        // potentially reduce reporting
+            if( S_v[t1] != 0.0 ){        // potentially reduce reporting
 	cerr << sim::ts0() <<":\t S_v cut-off"<<endl;
             } */
         }
@@ -233,21 +232,21 @@ double MosqTransmission::update( SimTime d, double tsP_A, double tsP_df,
     
     //TODO: it should be possible to merge this call with emergence->get()
     // (S_v can be calculated before N_v).
-    emergence->updateStats( d, tsP_dif, S_v[t] );
+    emergence->updateStats( d1, tsP_dif, S_v[t1] );
     
     timeStep_N_v0 += newAdults;
     
     if( printDebug ){
-        cerr<<"day "<<d<<":\temergence "<<newAdults<<",\tN_v "<<N_v[t]<<",\tS_v "<<S_v[t]<<endl;
-        //cerr << "len: "<<N_v_length<<"\tdMod: "<<dMod<<"\tt: "<<t<<" "<<t1<<" "<<ttau<<"\tdYear1: "<<dYear1<<endl;
-/*        cerr<<"P_A\t"<<P_A[t]<<"\t"<<P_A[t1]<<"\t"<<P_A[ttau]<<endl;
-        cerr<<"P_df\t"<<P_df[t]<<"\t"<<P_df[t1]<<"\t"<<P_df[ttau]<<endl;
-        cerr<<"P_dif\t"<<P_dif[t]<<"\t"<<P_dif[t1]<<"\t"<<P_dif[ttau]<<endl;*/
+        cerr<<"step ending "<<d1<<" (days):\temergence "<<newAdults<<",\tN_v "<<N_v[t1]<<",\tS_v "<<S_v[t1]<<endl;
+        //cerr << "len: "<<N_v_length<<"\td1Mod: "<<d1Mod<<"\tt(0,1): "<<t0<<" "<<t1<<" "<<ttau<<endl;
+/*        cerr<<"P_A\t"<<P_A[t0]<<"\t"<<P_A[t1]<<"\t"<<P_A[ttau]<<endl;
+        cerr<<"P_df\t"<<P_df[t0]<<"\t"<<P_df[t1]<<"\t"<<P_df[ttau]<<endl;
+        cerr<<"P_dif\t"<<P_dif[t0]<<"\t"<<P_dif[t1]<<"\t"<<P_dif[ttau]<<endl;*/
         cerr<<ftauArray<<endl;
         cerr<<fArray<<endl;
     }
     
-    return S_v[t];
+    return S_v[t1];
 }
 
 

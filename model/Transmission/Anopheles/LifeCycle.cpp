@@ -81,22 +81,20 @@ double LifeCycle::getResRequirements( const LifeCycleParams& lcParams ) const{
 
 double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
                                            double nOvipositingMosqs,
-                                           SimTime d ){
-    //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay();
+                                           SimTime d0 ){
+    SimTime d1 = d0 + sim::oneDay();
     // Day of year. Note that d==sim::oneTS() corresponds to Jan 1st, index 0.
-    SimTime dYear1 = mod_nn(d, sim::oneYear());
-    // num newly emerging adults comes from num new pupae
-    // pupalStageDuration days ago:
-    double newAdults =
-        lcParams.pSurvPupalStage * newPupae[mod_pp(d + offset, lcParams.pupalStageDuration)];
+    SimTime dYear1 = mod_nn(d0, sim::oneYear());
+    // num newly emerging adults comes from num new pupae pupalStageDuration days ago:
+    size_t pupaeIndex = mod_nn(d1, lcParams.pupalStageDuration);
+    double newAdults = lcParams.pSurvPupalStage * newPupae[pupaeIndex];
     
     // resource competition during last time-step (L(t) * gamma(t))
     double resourceCompetition = getResRequirements( lcParams )
         * lcParams.invLarvalResources[dYear1];  // TODO: scale for larviciding here
     // num new pupae uses larval development formula based on num larvae
     // which were one day away from becoming adults yesterday
-    newPupae[mod_pp(d + offset, lcParams.pupalStageDuration)] =
+    newPupae[pupaeIndex] =
         lcParams.pSurvDayAsLarvae * numLarvae[lcParams.larvalStageDuration-1] /
         ( 1.0 + resourceCompetition * lcParams.effectCompetitionOnLarvae[lcParams.larvalStageDuration-1] );
     for( size_t age=lcParams.larvalStageDuration-1;age>=1;--age ){
@@ -105,13 +103,12 @@ double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
     }
     
     // num new larvae comes from num eggs laid eggStageDuration days ago:
-    numLarvae[ 0 ] =
-        lcParams.pSurvEggStage * newEggs[mod_pp(d + offset, lcParams.eggStageDuration)];
+    size_t eggIndex = mod_nn(d1, lcParams.eggStageDuration);
+    numLarvae[ 0 ] = lcParams.pSurvEggStage * newEggs[eggIndex];
     
     // num eggs laid depends on number of mosquitoes which completed a
     // feeding & egg-laying cycle starting tau days ago:
-    newEggs[mod_pp(d + offset, lcParams.eggStageDuration)] =
-        lcParams.fEggsLaidByOviposit * nOvipositingMosqs;
+    newEggs[eggIndex] = lcParams.fEggsLaidByOviposit * nOvipositingMosqs;
     
     return newAdults;
 }

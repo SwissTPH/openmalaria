@@ -224,7 +224,9 @@ namespace OM { namespace util {
         MOLINEAUX_PAIRWISE_SAMPLE,
         
         /** Use a simple Vivax model instead of Falciparum.
-         * TODO: description. */
+         * 
+         * See "Individual-Based Model for Plasmodium vvivax", Ross, Briet,
+         * Hardy, Chitnis (unpublished?). */
         VIVAX_SIMPLE_MODEL,
         
         /** Model allowing drugs to have prophylactic effect.

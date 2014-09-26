@@ -100,23 +100,22 @@ public:
     /** Return the emergence for today, taking interventions like larviciding
      * into account.
      * 
-     * @param d The current day (exact value isn't important; it must be
-     * non-negative and incremented by one between calls).
+     * @param d0 Time of the start of the day-long update period
      * @param nOvipositing The number of adults which successfully
      * oviposited this/last time-step.
      * @returns The number of adults emerging between the last simulated time
      * point and the one being calculated.
      */
-    virtual double get( SimTime d, double nOvipositing ) =0;
+    virtual double get( SimTime d0, double nOvipositing ) =0;
     
     /** Called at the end of each day's update to give the model data it needs
      * during initialisation.
      * 
-     * @param d Day counter of simulation
+     * @param d1 Time of the end of the day-long update period
      * @param tsP_dif Value of P_dif for this time-step
      * @param S_v Value of S_v for this day
      */
-    virtual void updateStats( SimTime d, double tsP_dif, double S_v ) =0;
+    virtual void updateStats( SimTime d1, double tsP_dif, double S_v ) =0;
     
     ///@brief Interventions and reporting
     //@{

@@ -79,7 +79,7 @@ double getCommunityCFR (double caseFatalityRatio){
 
 
 double infantAllCauseMort(){
-    //TODO: check this is really doing what is advertised, and probably change it to report per survey.
+    //TODO(monitoring): check this is really doing what is advertised, and probably change it to report per survey.
     
     double infantPropSurviving=1.0;       // use to calculate proportion surviving
     for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){

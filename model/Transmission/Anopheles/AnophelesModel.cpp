@@ -385,10 +385,10 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
-    for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS();
-        now < end; now += sim::oneDay() )
+    for( SimTime d0 = sim::ts0(), end = sim::ts0() + sim::oneTS();
+        d0 < end; d0 += sim::oneDay() )
     {
-        partialEIR += transmission.update( now, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
+        partialEIR += transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
     }
 }
 

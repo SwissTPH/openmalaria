@@ -75,14 +75,14 @@ public:
     
     /** Update by one day (may be called multiple times for 1 time-step update).
      * 
-     * @param d The day whose state we are calculating.
+     * @param d0 Time of the start of the day-long update period
      * @param tsP_A P_A for this time-step
      * @param tsP_df P_df for this time-step
      * @param tsP_dif P_dif for this time-step
      * @param printDebug Print some info to cerr
      * @returns S_v for the next time-step
      */
-    double update( SimTime d, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug );
+    double update( SimTime d0, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug );
     
     ///@brief Interventions and reporting
     //@{

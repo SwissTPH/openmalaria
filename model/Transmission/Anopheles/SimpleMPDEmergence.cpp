@@ -87,7 +87,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     // Used when calculating invLarvalResources (but not a hard constraint):
     assert(tau+developmentDuration <= y1);
-    for( SimTime t = sim::zero(); t < mosqEmergeRate.size(); t += sim::oneDay() ){
+    for( SimTime t = sim::zero(); t < sim::oneYear(); t += sim::oneDay() ){
         double yt = fEggsLaidByOviposit * tsP_df * initNvFromSv *
             forcedS_v[mod_nn(t + y1 - tau - developmentDuration, y1)];
         invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
@@ -173,29 +173,23 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
 }
 
 
-double SimpleMPDEmergence::get( SimTime d, double nOvipositing ) {
-    //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay();
-    SimTime dYear1 = mod_nn(d, sim::oneYear());
-    
+double SimpleMPDEmergence::get( SimTime d0, double nOvipositing ) {
     // Simple Mosquito Population Dynamics model: emergence depends on the
     // adult population, resources available, and larviciding.
     // See: A Simple Periodically-Forced Difference Equation Model for
     // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
     
-    double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d + offset, developmentDuration)];
+    SimTime d1 = d0 + sim::oneDay();
+    double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d1, developmentDuration)];
     double emergence = interventionSurvival() * probPreadultSurvival * yt /
-        (1.0 + invLarvalResources[dYear1] * yt);
-    nOvipositingDelayed[mod_nn(d + offset, developmentDuration)] = nOvipositing;
-    SimTime d5Year = mod_nn(d + offset, sim::fromYearsI(5));
-    quinquennialOvipositing[d5Year] = nOvipositing;
+        (1.0 + invLarvalResources[mod_nn(d0, sim::oneYear())] * yt);
+    nOvipositingDelayed[mod_nn(d1, developmentDuration)] = nOvipositing;
+    quinquennialOvipositing[mod_nn(d1, sim::fromYearsI(5))] = nOvipositing;
     return emergence;
 }
 
-void SimpleMPDEmergence::updateStats( SimTime d, double tsP_dif, double S_v ){
-    //TODO: why is there an offset — i.e. why not make this to zero?
-    SimTime offset = sim::oneDay();
-    SimTime d5Year = mod_nn(d + offset, sim::fromYearsI(5));
+void SimpleMPDEmergence::updateStats( SimTime d1, double tsP_dif, double S_v ){
+    SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
 }
 

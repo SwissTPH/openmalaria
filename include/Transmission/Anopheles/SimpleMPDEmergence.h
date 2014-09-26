@@ -75,10 +75,11 @@ public:
     
     /// Return the emergence for today, taking interventions like larviciding
     /// into account.
-    double get( SimTime d, double nOvipositing );
+    /// @param d0 Time of the start of the day-long update period
+    double get( SimTime d0, double nOvipositing );
     
-    /// Store S_v for day d. Used by initIterate().
-    void updateStats( SimTime d, double tsP_dif, double S_v );
+    /// Store S_v for day d1. Used by initIterate().
+    void updateStats( SimTime d1, double tsP_dif, double S_v );
     
     ///@brief Interventions and reporting
     //@{

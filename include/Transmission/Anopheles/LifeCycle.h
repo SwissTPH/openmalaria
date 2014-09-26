@@ -187,15 +187,14 @@ public:
      * @param nOvipositingMosqs The number of adults which successfully
      * oviposited this/last time-step. TODO(vec lifecycle): we're setting new
      * value based on num ovipositing yesterday? That's not right.
-     * @param d The current day (exact value isn't important; it must be
-     * non-negative and incremented by one between calls).
+     * @param d0 Time of the start of the update period
      * @returns The number of adults emerging between the last simulated time
      * point and the one being calculated. Assume immediate mating with 100%
      * survival and success.
      */
     double updateEmergence( const LifeCycleParams& lcParams,
                             double nOvipositingMosqs,
-                            SimTime d );
+                            SimTime d0 );
     
     /// Checkpointing
     template<class S>
