@@ -75,7 +75,8 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[sim::now().moduloYearSteps()];
+    //NOTE: because prevNow may be negative, we can't use mod_nn (hence moduloYearSteps):
+    stream<<'\t'<<initialisationEIR[util::mod(sim::prevNow() / sim::oneTS(), sim::stepsPerYear())];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
@@ -162,7 +163,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     }
 
 
-    size_t lKMod = sim::now1().moduloSteps(laggedKappa.size());	// now
+    size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
     if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -174,11 +175,11 @@ double TransmissionModel::updateKappa (const Population& population) {
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    int tmod = sim::now1().moduloYearSteps();
+    size_t tmod = sim::ts0().moduloYearSteps();
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod == 0) {
+    if (tmod == sim::stepsPerYear() - 1) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }

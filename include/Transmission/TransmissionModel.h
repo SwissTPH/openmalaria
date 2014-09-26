@@ -239,12 +239,9 @@ protected:
   /** The probability of infection of a mosquito at each bite.
    * It is calculated as the average infectiousness per human.
    * 
-   * The value in indexsim::now_mod_steps_per_year() is for this time step
-   * respectively steps-per-year time-steps ago: the latter during human
-   * updates since this value is not updated until the end of the time-step
-   * update. The value in index (t-1) mod steps-per-year is from the previous
-   * time-step, index (t-2) mod steps-per-year corresponds to the one before
-   * that, etc. Length depends on entomological incubation period from
+   * The value in index sim::ts1().moduloSteps(initialKappa.size()) is the
+   * kappa from this time step (i.e. the infectiousness of humans at the end of
+   * this step). Length depends on entomological incubation period from
    * non-vector model.
    * 
    * Checkpointed. */

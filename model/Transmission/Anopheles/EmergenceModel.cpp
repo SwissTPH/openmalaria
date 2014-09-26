@@ -130,8 +130,8 @@ void EmergenceModel::initEIR(
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
     for( SimTime i = sim::zero(); i < sim::oneYear(); i += sim::oneDay() ){
-        // index 1 of initialisationEIR corresponds to first period of year
-        initialisationEIR[mod_nn(1 + i.inSteps(), sim::stepsPerYear())] += speciesEIR[i];
+        // index 0 of initialisationEIR corresponds to first period of year
+        initialisationEIR[mod_nn(i.inSteps(), sim::stepsPerYear())] += speciesEIR[i];
     }
     
 #ifdef WITHOUT_BOINC

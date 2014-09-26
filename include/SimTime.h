@@ -190,14 +190,14 @@ public:
         assert(!in_update);     // only for use outside of step updates
         return time0;   // which is equal to time1 outside of updates, but that's a detail
     }
+    /** now() - 1 with same requirement only for use outside of updates. */
+    static inline SimTime prevNow(){ return now() - oneTS(); }
     /** During updates, this is ts0; between, this is now. */
     static inline SimTime nowOrTs0(){ return time0; }
     /** During updates, this is ts1; between, this is now. */
     static inline SimTime nowOrTs1(){ return time1; }
     /** During updates, this is ts0; between, it is now - 1. */
-    static inline SimTime latestTs0(){ return time1 - oneTS(); };
-    /** Relic, usage to be replaced. */
-    static inline SimTime now1(){ return time1; }
+    static inline SimTime latestTs0(){ return time1 - oneTS(); }
     
     /** Time relative to the intervention period. Some events are defined
      * relative to this time rather than simulation time, and since the

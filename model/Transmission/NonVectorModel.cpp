@@ -57,13 +57,13 @@ NonVectorModel::NonVectorModel(const scnXml::EntoData& entoData, const scnXml::N
     {
         double EIRdaily = std::max(static_cast<double>(daily[mpcday.inDays()]), minEIR);
         
-        // Index 1 (not 0) of initialisationEIR refers to the EIR affecting the
+        // Index 0 of initialisationEIR refers to the EIR affecting the
         // first day(s) of the year. Correspondingly, the first 1 or 5 values
         // of EIRDaily affect this (1- or 5-day) time-step.
-        size_t i1 = mod_nn(mpcday.inSteps() + 1, sim::stepsPerYear());
+        size_t i = mod_nn(mpcday.inSteps(), sim::stepsPerYear());
         
-        nDays[i1] += 1;
-        initialisationEIR[i1] += EIRdaily;
+        nDays[i] += 1;
+        initialisationEIR[i] += EIRdaily;
     }
     
     // Calculate total annual EIR
@@ -201,7 +201,7 @@ void NonVectorModel::update (const Population& population) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){
-        initialKappa[sim::now1().moduloSteps(initialKappa.size())] = currentKappa;
+        initialKappa[sim::ts1().moduloSteps(initialKappa.size())] = currentKappa;
     }
 }
 
@@ -211,7 +211,7 @@ double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
   double eir;
   switch (simulationMode) {
     case forcedEIR:
-      eir = initialisationEIR[sim::now1().moduloYearSteps()];
+      eir = initialisationEIR[sim::ts0().moduloYearSteps()];
       break;
     case transientEIRknown:
       // where the EIR for the intervention phase is known, obtain this from
@@ -219,12 +219,12 @@ double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
       eir = interventionEIR[sim::intervNow().inSteps()];
       break;
     case dynamicEIR:
-      eir = initialisationEIR[sim::now1().moduloYearSteps()];
+      eir = initialisationEIR[sim::ts0().moduloYearSteps()];
       if (sim::intervNow() >= sim::zero()) {
 	  // we modulate the initialization based on the human infectiousness time steps ago in the
 	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
 	  // nspore gives the sporozoite development delay.
-          size_t t = (sim::now1()-nSpore).inSteps();
+          size_t t = (sim::ts1()-nSpore).inSteps();
 	eir *=
             laggedKappa[mod_nn(t, laggedKappa.size())] /
             initialKappa[mod_nn(t, sim::stepsPerYear())];
@@ -235,7 +235,7 @@ double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
   }
 #ifndef NDEBUG
   if (!(boost::math::isfinite)(eir)) {
-    size_t t = (sim::now1()-nSpore).inSteps();
+    size_t t = (sim::ts1()-nSpore).inSteps();
     ostringstream msg;
     msg << "Error: non-vect eir is: " << eir
 	<< "\nlaggedKappa:\t"

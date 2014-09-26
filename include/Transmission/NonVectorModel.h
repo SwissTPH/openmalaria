@@ -116,7 +116,7 @@ private:
    * When simulationMode == equilibriumMode, this may be multiple years long and
    * is used to collect values of kappa (human infectiousness).
    * 
-   * In either case, sim::now1().moduloSteps(initialKappa.size()) is the index
+   * In either case, sim::ts0().moduloSteps(initialKappa.size()) is the index
    * for the current infectiousness during updates. */
   vector<double> initialKappa; 
 };
