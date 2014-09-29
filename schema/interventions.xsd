@@ -132,9 +132,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                             <xs:documentation>A time-rate pair.</xs:documentation>
                             <xs:appinfo>name:Rate;units:Imported cases per thousand people per year;</xs:appinfo>
                           </xs:annotation>
-                          <xs:attribute name="time" type="xs:int" use="required">
+                          <xs:attribute name="time" type="xs:string" use="required">
                             <xs:annotation>
-                              <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                              <xs:appinfo>name:Time of start;units:User defined (default: steps);min:0;</xs:appinfo>
                             </xs:annotation>
                           </xs:attribute>
                         </xs:extension>
@@ -142,16 +142,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     </xs:complexType>
                   </xs:element>
                 </xs:sequence>
-                <xs:attribute name="period" type="xs:int" default="0">
+                <xs:attribute name="period" type="xs:string" default="0">
                   <xs:annotation>
                     <xs:documentation>
                       If period is 0 (or effectively infinite), the last specified
                       value remains indefinitely in effect, otherwise the times of
                       all values specified must be less than the period, and values
-                      are repeated modulo period (timestep period+2 has same value
-                      as timestep 2, etc.).
+                      are repeated modulo period (the step at time 'period+2t'
+                      has same value as the step at '2t', etc.).
+                      
+                      Can be specified in steps (e.g. 1t) or days (e.g. 365d).
                     </xs:documentation>
-                    <xs:appinfo>name:Period of repetition;units:time-steps;min:0</xs:appinfo>
+                    <xs:appinfo>name:Period of repetition;units:User defined (default: steps);min:0</xs:appinfo>
                   </xs:annotation>
                 </xs:attribute>
               </xs:complexType>

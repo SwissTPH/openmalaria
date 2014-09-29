@@ -298,7 +298,14 @@ private:
     friend class ::UnittestUtil;
 };
 
-/** Encapsulation of code to parse times with units from strings. */
+/** Encapsulation of code to parse times with units from strings.
+ * 
+ * The goal of this is (a) to make entering values in the scenario documents
+ * easier and (b) to avoid confusion.
+ * 
+ * Use is being implemented by (a) changing existing values in the schema to
+ * use this without breaking backwards compatibility (by allowing the unit to
+ * be omitted), and (b) by requiring new values be specified with unit. */
 namespace UnitParse {
     enum DefaultUnit {
         NONE,   // error if not specified
@@ -310,14 +317,13 @@ namespace UnitParse {
     /** Parse a short duration from a string found in the input document.
      * 
      * Supports units of days (5d), and steps (2t) with integer values.
+     * Enforces that input values given in days are a whole number of steps.
      * 
      * Call sim::init() first. */
     SimTime readShortDuration( const std::string& str, DefaultUnit defUnit );
     
-    /** Parse a duration from a string found in the input document.
-     * 
-     * Supports units of years (3.2y), days (5d), and steps (2t) with decimal
-     * values.
+    /** Like readShortDuration(), but also allow inputs to be in fractional
+     * years, rounding from years to the nearest time step.
      * 
      * Call sim::init() first. */
     SimTime readDuration( const std::string& str, DefaultUnit defUnit );

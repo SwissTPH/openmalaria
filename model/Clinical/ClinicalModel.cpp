@@ -40,9 +40,13 @@ bool opt_imm_outcomes = false;
 
 void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& scenario ) {
     const scnXml::Clinical& clinical = scenario.getModel().getClinical();
-    //FIXME(schema): input should be in days
-    SimTime hsMemory = sim::fromTS(clinical.getHealthSystemMemory());
-    initCMCommon( parameters, hsMemory );
+    try{
+        //NOTE: if changing XSD, this should not have a default unit:
+        SimTime hsMemory = UnitParse::readShortDuration(clinical.getHealthSystemMemory(), UnitParse::STEPS);
+        initCMCommon( parameters, hsMemory );
+    }catch( const util::format_error& e ){
+        throw util::xml_scenario_error( string("model/clinical/healthSystemMemory: ").append(e.message()) );
+    }
     
     if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
         opt_event_scheduler = true;

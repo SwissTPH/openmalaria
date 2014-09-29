@@ -77,7 +77,7 @@
       <treeUCOfficial>
         <random name="p cure">
           <outcome p="0.6" name="60% chance cure">
-            <treatSimple timestepsLiver="0" timestepsBlood="1"/>
+            <treatSimple durationLiver="0" durationBlood="1t"/>
           </outcome>
           <outcome p="0.4">
             <treatFailure/>

@@ -213,7 +213,7 @@ public:
         TS_ASSERT_EQUALS( whm->lastTimeLiver, sim::never() );
         TS_ASSERT_EQUALS( whm->lastTimeBlood, sim::never() );
         
-        scnXml::DTTreatSimple treat1( 0, 1 );   // 0 time steps liver, 1 blood (using 1 day TS)
+        scnXml::DTTreatSimple treat1( "0t", "1t" );   // 0 time steps liver, 1 blood (using 1 day TS)
         scnXml::DecisionTree dt1;
         dt1.setTreatSimple( treat1 );
         
@@ -221,7 +221,7 @@ public:
         TS_ASSERT_EQUALS( whm->lastTimeLiver.inDays(), 0 );
         TS_ASSERT_EQUALS( whm->lastTimeBlood.inDays(), 1*5 );
         
-        scnXml::DTTreatSimple treat2( 3, -1 );
+        scnXml::DTTreatSimple treat2( "15d", "-1t" );
         scnXml::DecisionTree dt2;
         dt2.setTreatSimple( treat2 );
         

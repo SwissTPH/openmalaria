@@ -85,9 +85,14 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
     double detectionLimit=scenario.getMonitoring().getSurveys().getDetectionLimit()*densitybias;
     Diagnostic::default_.setDeterministic( detectionLimit );
     
-    //FIXME(schema): input should be in days
-    SimTime latentP = sim::fromTS(scenario.getModel().getParameters().getLatentp());
-    Infection::init( parameters, latentP );
+    try{
+        //NOTE: if XSD is changed, this should not have a default unit
+        SimTime latentP = UnitParse::readShortDuration(
+            scenario.getModel().getParameters().getLatentp(), UnitParse::STEPS );
+        Infection::init( parameters, latentP );
+    }catch( const util::format_error& e ){
+        throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+    }
 }
 
 

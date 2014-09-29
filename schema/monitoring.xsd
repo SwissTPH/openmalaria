@@ -12,12 +12,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:complexContent>
             <xs:extension base="om:OptionSet">
-              <xs:attribute name="period" type="xs:int" use="required">
+              <xs:attribute name="period" type="xs:string" use="required">
                 <xs:annotation>
                   <xs:documentation>
-                    Number of timesteps between reports.
+                    Delay between reports; typically one time step but can be
+                    greater.
+                    
+                    Can be specified in steps (e.g. 1t) or days (e.g. 5d).
                   </xs:documentation>
-                  <xs:appinfo>units:Days;min:1;max:unbounded;name:Days between reports;</xs:appinfo>
+                  <xs:appinfo>units:User defined (default: steps);name:Delay between reports;</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
               <xs:attribute name="duringInit" type="xs:boolean" use="optional">

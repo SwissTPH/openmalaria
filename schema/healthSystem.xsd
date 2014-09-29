@@ -64,13 +64,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
     </xs:sequence>
-    <xs:attribute name="healthSystemMemory" type="xs:int" use="required">
+    <xs:attribute name="healthSystemMemory" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
           Follow-up period during which a recurrence is
           considered to be a treatment failure
+          
+          Can be specified in steps (e.g. 6t) or days (e.g. 28d).
         </xs:documentation>
-        <xs:appinfo> units:Time steps;min:1;max:100;name:Follow-up period during which recurrence is treated as a failure;</xs:appinfo>
+        <xs:appinfo>units:User-defined (defaults to steps);
+          name:Follow-up period during which recurrence is considered a treatment failure;
+        </xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -876,38 +880,44 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
       <xs:appinfo>name:Simple treatment;</xs:appinfo>
     </xs:annotation>
-    <xs:attribute name="timestepsLiver" type="xs:int" use="required">
+    <xs:attribute name="durationLiver" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Controls action on liver-stage infections. 0 means no action, -1 is
-          a compatibility option to act like treatment before schema version 32
-          (which removed infections retrospectively), 1 or any n>0 means clear
-          liver-stage infections found on the next 1 or n timesteps.
+          Controls action on liver-stage infections. 0 means no action, -1 step
+          is a compatibility option to act like treatment before schema version
+          32 (which removed infections retrospectively), 1 step or any duration
+          which equals some whole number of steps n>0 means to clear all
+          liver-stage infections found on the next 1 or n steps.
           
-          Note on -1 compatibility option: the main difference to 1 (clearing
-          on the next timestep) is that parasite densities will be reduced
-          immediately, and thus from the point of view of surveys and mass
-          screen and treat interventions a peak in density which is immediately
-          treated through case management will not be seen.
+          Note on -1 compatibility option: the main difference to 1 step
+          (clearing on the next timestep) is that parasite densities will be
+          reduced immediately, and thus from the point of view of surveys and
+          mass screen and treat interventions a peak in density which is
+          immediately treated through case management will not be seen.
+          
+          Can be specified in steps (e.g. 1t, -1t) or days (e.g. 5d).
         </xs:documentation>
-        <xs:appinfo>name:Length of liver-stage effect;units:Timesteps;min:-1;</xs:appinfo>
+        <xs:appinfo>name:Length of liver-stage effect;units:User defined;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="timestepsBlood" type="xs:int" use="required">
+    <xs:attribute name="durationBlood" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Controls action on blood-stage infections. 0 means no action, -1 is
-          a compatibility option to act like treatment before schema version 32
-          (which removed infections retrospectively), 1 or any n>0 means clear
-          blood-stage infections found on the next 1 or n timesteps.
+          Controls action on blood-stage infections. 0 means no action, -1 step
+          is a compatibility option to act like treatment before schema version
+          32 (which removed infections retrospectively), 1 step or any duration
+          which equals some whole number of steps n>0 means to clear all
+          blood-stage infections found on the next 1 or n steps.
           
-          Note on -1 compatibility option: the main difference to 1 (clearing
-          on the next timestep) is that parasite densities will be reduced
-          immediately, and thus from the point of view of surveys and mass
-          screen and treat interventions a peak in density which is immediately
-          treated through case management will not be seen.
+          Note on -1 compatibility option: the main difference to 1 step
+          (clearing on the next timestep) is that parasite densities will be
+          reduced immediately, and thus from the point of view of surveys and
+          mass screen and treat interventions a peak in density which is
+          immediately treated through case management will not be seen.
+          
+          Can be specified in steps (e.g. 1t, -1t) or days (e.g. 5d).
         </xs:documentation>
-        <xs:appinfo>name:Length of blood-stage effect;units:Timesteps;min:-1;</xs:appinfo>
+        <xs:appinfo>name:Length of blood-stage effect;units:User defined;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1054,7 +1064,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:appinfo>name:Prophylactic treatment;</xs:appinfo>
             </xs:annotation>
             <xs:complexType>
-              <xs:attribute name="timesteps" type="xs:int" use="required">
+              <xs:attribute name="timesteps" type="xs:string" use="required">
                 <xs:annotation>
                   <xs:documentation>
                     The number of timesteps during which this action remains
@@ -1088,8 +1098,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     emulate the old behaviour.
                     
                     Values of 0 or less than -1 are not allowed.
+                    
+                    Can be specified in steps (e.g. 1t, -1t) or days (e.g. 5d).
                   </xs:documentation>
-                  <xs:appinfo>name:Length of effect;units:Timesteps;min:-1;</xs:appinfo>
+                  <xs:appinfo>name:Length of effect;units:User defined (defaults to steps);</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
               <xs:attribute name="stage" use="required">

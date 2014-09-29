@@ -189,12 +189,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Number;name:Random number seed;sweepable:true;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="latentp" type="xs:int" use="required">
+    <xs:attribute name="latentp" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          pre-erythrocytic latent period, in time steps
+          Pre-erythrocytic latent period
+          
+          Can be specified in steps (e.g. 3t) or days (e.g. 15d).
         </xs:documentation>
-        <xs:appinfo>units:Time steps;min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
+        <xs:appinfo>units:User defined (default: steps);min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

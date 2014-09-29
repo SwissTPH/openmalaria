@@ -118,7 +118,7 @@
           <treeUCOfficial>
             <random name="extra random number to closely model old behaviour">
               <outcome p="1">
-                <treatSimple timestepsLiver="0" timestepsBlood="1"/>
+                <treatSimple durationLiver="0" durationBlood="5d"/>
               </outcome>
             </random>
           </treeUCOfficial>

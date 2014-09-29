@@ -109,10 +109,14 @@ namespace OM { namespace Monitoring {
 	    ctsPeriod = sim::zero();
 	    return;
 	}
-	//FIXME(schema): should this be in days?
-	ctsPeriod = sim::fromTS( ctsOpt.get().getPeriod() );
-	if( ctsPeriod < sim::oneTS() )
-	    throw xml_scenario_error("monitoring.continuous.period: must be >= 1 time step");
+	try{
+            //NOTE: if changing XSD, this should not have a default unit:
+            ctsPeriod = UnitParse::readShortDuration( ctsOpt.get().getPeriod(), UnitParse::STEPS );
+            if( ctsPeriod < sim::oneTS() )
+                throw util::format_error("must be >= 1 time step");
+        }catch( const util::format_error& e ){
+            throw xml_scenario_error( string("monitoring/continuous/period: ").append(e.message()) );
+        }
 	
         if( ctsOpt.get().getDuringInit().present() )
             duringInit = ctsOpt.get().getDuringInit().get();

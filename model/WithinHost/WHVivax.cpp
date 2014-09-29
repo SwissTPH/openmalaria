@@ -453,8 +453,13 @@ double WHVivax::getCumulative_h() const{ throw TRACED_EXCEPTION( not_impl, util:
 double WHVivax::getCumulative_Y() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
 void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
-    //FIXME(schema): should be entered in days
-    latentP = sim::fromTS(  scenario.getModel().getParameters().getLatentp() );
+    try{
+        //NOTE: if XSD is changed, this should not have a default unit
+        latentP = UnitParse::readShortDuration(
+            scenario.getModel().getParameters().getLatentp(), UnitParse::STEPS );
+    }catch( const util::format_error& e ){
+        throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
+    }
     if( !scenario.getModel().getVivax().present() )
         throw util::xml_scenario_error( "no vivax model description in scenario XML" );
     const scnXml::Vivax& elt = scenario.getModel().getVivax().get();

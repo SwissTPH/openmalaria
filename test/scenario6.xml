@@ -142,7 +142,7 @@
       <treeUCOfficial>
         <random name="p cure">
           <outcome p="0.765" name="90% compliance, 85% chance cure">
-            <treatSimple timestepsLiver="-1" timestepsBlood="-1"/>
+            <treatSimple durationLiver="-1t" durationBlood="-1t"/>
           </outcome>
           <outcome p="0.235">
             <treatFailure/>
@@ -152,7 +152,7 @@
       <treeUCSelfTreat>
         <random name="p cure">
           <outcome p="0.5355" name="85% compliance, 63% chance cure">
-            <treatSimple timestepsLiver="-1" timestepsBlood="-1"/>
+            <treatSimple durationLiver="-5d" durationBlood="-5d"/>
           </outcome>
           <outcome p="0.4645">
             <treatFailure/>

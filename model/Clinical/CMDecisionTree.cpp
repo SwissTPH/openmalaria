@@ -267,18 +267,23 @@ public:
     CMDTTreatSimple( const scnXml::DTTreatSimple& elt ) :
         timeLiver(sim::zero()), timeBlood(sim::zero())
     {
-        //FIXME(schema): input shouldn't be in time steps
-        int tsL = elt.getTimestepsLiver(), tsB = elt.getTimestepsBlood();
-        if( tsL < -1 || tsB < -1 ){
-            throw util::xml_scenario_error( "treatSimple: cannot have timestepsBlood or timestepsLiver less than -1" );
+        try{
+            SimTime durL = UnitParse::readShortDuration( elt.getDurationLiver(), UnitParse::NONE ),
+                durB = UnitParse::readShortDuration( elt.getDurationBlood(), UnitParse::NONE );
+            SimTime neg1 = -sim::oneTS();
+            if( durL < neg1 || durB < neg1 ){
+                throw util::xml_scenario_error( "treatSimple: cannot have durationBlood or durationLiver less than -1" );
+            }
+            if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+                if( durL != sim::zero() || durB != neg1 )
+                    throw util::unimplemented_exception( "vivax model only supports timestepsLiver=0, timestepsBlood=-1" );
+                // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
+            }
+            timeLiver = durL;
+            timeBlood = durB;
+        }catch( const util::format_error& e ){
+            throw util::xml_scenario_error( string("treatSimple: ").append(e.message()) );
         }
-        if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
-            if( tsL != 0 || tsB != -1 )
-                throw util::unimplemented_exception( "vivax model only supports timestepsLiver=0, timestepsBlood=-1" );
-            // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
-        }
-        timeLiver = sim::fromTS(tsL);
-        timeBlood = sim::fromTS(tsB);
     }
     
 protected:

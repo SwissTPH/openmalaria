@@ -54,26 +54,30 @@ Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
         elt.getClearInfections().begin(), end = elt.getClearInfections().end();
         it != end; ++it )
     {
-        //FIXME(schema): input should not be in time steps
-        int len = it->getTimesteps();
-        if( len < -1 || len == 0 ){ 
-            throw util::xml_scenario_error( "prophylacticTreatment: timesteps: must be ≥ 1 or have special value -1" );
-        }
-        Stages stage = stageFromString( it->getStage() );
-        if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
-            if( stage != BLOOD || len != -1 )
-                throw util::unimplemented_exception( "vivax model requires treatments configured as blood-stage with timesteps=-1" );
-            // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
-        }
-        if( stage & LIVER ){
-            if( timeLiver != sim::zero() )   // existing treatment configuration
-                throw util::xml_scenario_error( "treatment action: multiple specification of liver stage effect" );
-            timeLiver = sim::fromTS(len);
-        }
-        if( stage & BLOOD ){
-            if( timeBlood != sim::zero() )   // existing treatment configuration
-                throw util::xml_scenario_error( "treatment action: multiple specification of blood stage effect" );
-            timeBlood = sim::fromTS(len);
+        try{
+            //NOTE: if changing XSD, this should not be called "timesteps" or have a default unit
+            SimTime len = UnitParse::readShortDuration( it->getTimesteps(), UnitParse::STEPS );
+            if( len < -sim::oneTS() || len == sim::zero() ){ 
+                throw util::format_error( "timesteps must be ≥ 1 or have special value -1" );
+            }
+            Stages stage = stageFromString( it->getStage() );
+            if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+                if( stage != BLOOD || len != -sim::oneTS() )
+                    throw util::unimplemented_exception( "vivax model requires treatments configured as blood-stage with timesteps=-1" );
+                // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
+            }
+            if( stage & LIVER ){
+                if( timeLiver != sim::zero() )   // existing treatment configuration
+                    throw util::xml_scenario_error( "treatment action: multiple specification of liver stage effect" );
+                timeLiver = len;
+            }
+            if( stage & BLOOD ){
+                if( timeBlood != sim::zero() )   // existing treatment configuration
+                    throw util::xml_scenario_error( "treatment action: multiple specification of blood stage effect" );
+                timeBlood = len;
+            }
+        }catch( const util::format_error& e ){
+            throw util::xml_scenario_error( string("treatment action: ").append(e.message()) );
         }
     }
 }

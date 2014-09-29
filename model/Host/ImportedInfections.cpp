@@ -24,40 +24,48 @@
 #include "Population.h"
 
 namespace OM { namespace Host {
-    
+
 void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     const scnXml::ImportedInfections::TimedType& tElt = iiElt.getTimed();
-    if( tElt.getPeriod() < 0 ){
-        throw util::xml_scenario_error( "interventions.importedInfections.timed.period cannot be negative" );
+    try{
+        //NOTE: if changing XSD, this should not have a default unit:
+        period = UnitParse::readDuration( tElt.getPeriod(), UnitParse::STEPS );
+        if( period < sim::zero() ){
+            throw util::format_error( "cannot be negative" );
+        }
+    }catch( const util::format_error& e ){
+        throw util::xml_scenario_error( string("interventions/importedInfections/timed/period: ").append(e.message()) );
     }
-    //FIXME(schema): use days in schema (or something completely different)
-    period = sim::fromTS(tElt.getPeriod());
     rate.reserve( tElt.getRate().size() );
-    for( scnXml::ImportedInfections::TimedType::RateSequence::const_iterator it = tElt.getRate().begin(); it != tElt.getRate().end(); ++it ){
-        //FIXME(schema): use days in schema (or something completely different)
-        SimTime time = sim::fromTS( it->getTime() );
-        if( period != sim::zero() && time >= period ){
-            throw util::xml_scenario_error( "interventions.importedInfections.timed: time cannot be greater than period when period is not zero" );
+    try{
+        for( scnXml::ImportedInfections::TimedType::RateSequence::const_iterator it = tElt.getRate().begin(); it != tElt.getRate().end(); ++it ){
+            //FIXME(schema): should be a date
+            SimTime time = UnitParse::readDuration( it->getTime(), UnitParse::STEPS );
+            if( period != sim::zero() && time >= period ){
+                throw util::format_error( "cannot be greater than period when period is not zero" );
+            }
+            // convert to per-time-step, per-person
+            double rateVal = it->getValue() * sim::yearsPerStep() * (1.0 / 1000.0);
+            rate.push_back( Rate( time, rateVal ) );
         }
-        // convert to per-time-step, per-person
-        double rateVal = it->getValue() * sim::yearsPerStep() * (1.0 / 1000.0);
-        rate.push_back( Rate( time, rateVal ) );
-    }
-    sort( rate.begin(), rate.end() );
-    if( rate.size() > 0 ){
-        if( period != sim::zero() && rate[0].time != sim::zero() ){
-            throw util::xml_scenario_error( "interventions.importedInfections.timed: must specify rate at time zero when period is not zero" );
-        }
-        // remove useless repeated entries from list
-        double lastRate = rate[0].value;
-        for( size_t i = 1; i < rate.size(); ){
-            if( rate[i].value == lastRate ){
-                rate.erase( rate.begin() + i );
-            }else{
-                lastRate = rate[i].value;
-                ++i;
+        sort( rate.begin(), rate.end() );
+        if( rate.size() > 0 ){
+            if( period != sim::zero() && rate[0].time != sim::zero() ){
+                throw util::xml_scenario_error( "must specify rate at time zero when period is not zero" );
+            }
+            // remove useless repeated entries from list
+            double lastRate = rate[0].value;
+            for( size_t i = 1; i < rate.size(); ){
+                if( rate[i].value == lastRate ){
+                    rate.erase( rate.begin() + i );
+                }else{
+                    lastRate = rate[i].value;
+                    ++i;
+                }
             }
         }
+    }catch( const util::format_error& e ){
+        throw util::xml_scenario_error( string("interventions/importedInfections/timed/time: ").append(e.message()) );
     }
 }
 
