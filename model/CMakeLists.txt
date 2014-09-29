@@ -80,6 +80,7 @@ set (Model_CPP
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp
+  util/misc.cpp
   
   Monitoring/Continuous.cpp
   Monitoring/Surveys.cpp

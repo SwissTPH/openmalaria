@@ -183,6 +183,12 @@ namespace OM { namespace util {
         explicit xml_scenario_error(const string& msg);
     };
     
+    /** Thrown to indicate a badly formatted parameter. */
+    class format_error : public xml_scenario_error {
+    public:
+        explicit format_error (const string& what_arg);
+    };
+    
     /** Thrown to indicate an error while loading/saving a checkpoint.
     *
     * Prepends "Error reading checkpoint: " to the message. */

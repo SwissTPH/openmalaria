@@ -93,6 +93,8 @@ namespace OM { namespace util {
                     (scenarioFile = "scenario").append(name).append(".xml");
                     (outputName = "output").append(name).append(".txt");
                     (ctsoutName = "ctsout").append(name).append(".txt");
+                } else if (clo == "validate-only") {
+                    options.set (SKIP_SIMULATION);
 		} else if (clo == "print-model") {
 		    options.set (PRINT_MODEL_OPTIONS);
                     options.set (SKIP_SIMULATION);
@@ -105,8 +107,6 @@ namespace OM { namespace util {
 		} else if (clo == "sample-interpolations") {
 		    options.set (SAMPLE_INTERPOLATIONS);
 		    options.set (SKIP_SIMULATION);
-                } else if (clo == "validate-only") {
-                    options.set (SKIP_SIMULATION);
 		} else if (clo == "checkpoint") {
 		    options.set (TEST_CHECKPOINTING);
 		} else if (clo.compare (0,11,"checkpoint=") == 0) {
@@ -221,6 +221,9 @@ namespace OM { namespace util {
 	    << "    --ctsout file.txt	Uses file.txt as ctsout file name. If not given, ctsout.txt is used." << endl
 	    << " -n --name NAME		Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt \\"<<endl
 	    << "			--ctsout ctsoutNAME.txt" <<endl
+	    << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
+	    << endl
+	    << "Debugging options:"<<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl
 	    << "    --print-EIR		Print the annual EIR (of each species in vector mode) and exit." << endl
 	    << "    --print-interventions" << endl
@@ -228,7 +231,6 @@ namespace OM { namespace util {
 	    << "    --sample-interpolations" <<endl
 	    << "			Output samples of all used age-group data according to active"<<endl
 	    << "			interpolation method and exit."<<endl
-	    << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
 	    << "    --checkpoint=t	Forces a checkpoint a simulation time t (time steps). May"<<endl
 	    << "			be specified more than once. Overrides --checkpoint option."<<endl
 	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl

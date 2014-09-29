@@ -21,10 +21,17 @@
 #ifndef Hmod_OM_SimTime
 #define Hmod_OM_SimTime
 
+#ifndef Hmod_Global
+#error "Please include Global.h not SimTime.h directly."
+// because checkpoint.h needs this, and we need checkpoint.h
+#endif
+
 #include "util/mod.h"
+#include "util/checkpoint.h"
 
 #include <iostream>
 #include <cassert>
+#include <string>
 
 class UnittestUtil;
 
@@ -290,6 +297,38 @@ private:
     friend class Simulator;
     friend class ::UnittestUtil;
 };
+
+/** Encapsulation of code to parse times with units from strings. */
+namespace UnitParse {
+    enum DefaultUnit {
+        NONE,   // error if not specified
+        DAYS,   // assume days
+        YEARS,  // assume years
+        STEPS,  // assume steps
+    };
+    
+    /** Parse a short duration from a string found in the input document.
+     * 
+     * Supports units of days (5d), and steps (2t) with integer values.
+     * 
+     * Call sim::init() first. */
+    SimTime readShortDuration( const std::string& str, DefaultUnit defUnit );
+    
+    /** Parse a duration from a string found in the input document.
+     * 
+     * Supports units of years (3.2y), days (5d), and steps (2t) with decimal
+     * values.
+     * 
+     * Call sim::init() first. */
+    SimTime readDuration( const std::string& str, DefaultUnit defUnit );
+    
+    /** Parse a date or relative time specifier found in the XML.
+     * 
+     * Supports dates (2015-10-08) as well as times relative to the start of
+     * the intervention period (as readDuration will parse). Returns a time to
+     * be compared against sim::intervNow(). */
+    SimTime readDate( const std::string& str, DefaultUnit defUnit );
+}
 
 }
 #endif
