@@ -70,30 +70,6 @@ enum Phase {
 };
 
 
-// ———  SimTime stuff  ———
-
-// global constants:
-int SimTime::interval;
-size_t SimTime::steps_per_year;
-double SimTime::years_per_step;
-SimTime sim::max_human_age;
-// global variables:
-#ifndef NDEBUG
-bool sim::in_update = false;
-#endif
-SimTime sim::time0;
-SimTime sim::time1;
-SimTime sim::interv_time;
-
-void sim::init( int days_per_step, double max_age_years ){
-    SimTime::interval = days_per_step;
-    SimTime::steps_per_year = sim::oneYear().inSteps();
-    SimTime::years_per_step = 1.0 / SimTime::steps_per_year;
-    sim::max_human_age = sim::fromTS( max_age_years * SimTime::steps_per_year );
-    sim::interv_time = sim::never();    // large negative number
-}
-
-
 // ———  Set-up & tear-down  ———
 
 Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
@@ -106,10 +82,9 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // ———  Initialise static data  ———
     
     const scnXml::Model& model = scenario.getModel();
-    const scnXml::Demography& demography = scenario.getDemography();
     
     // 1) elements with no dependencies on other elements initialised here:
-    sim::init( model.getParameters().getInterval(), demography.getMaximumAgeYrs() );
+    sim::init( scenario );
     
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
@@ -125,7 +100,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // Transmission model initialisation depends on Transmission::PerHost (from
     // Human, from Population::init()) and Monitoring::AgeGroup (from Surveys.init()):
     // Note: PerHost dependency can be postponed; it is only used to set adultAge
-    population = auto_ptr<Population>(new Population( scenario.getEntomology(), demography.getPopSize() ));
+    population = auto_ptr<Population>(new Population( scenario.getEntomology(), scenario.getDemography().getPopSize() ));
     
     // Depends on transmission model (for species indexes):
     // MDA1D may depend on health system (too complex to verify)

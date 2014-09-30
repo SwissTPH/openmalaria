@@ -35,6 +35,10 @@
 
 class UnittestUtil;
 
+namespace scnXml {
+    class Scenario;
+}
+
 namespace OM {
 
 /******************************************************************************
@@ -283,7 +287,7 @@ public:
     //@}
     
 private:
-    static void init( int days_per_step, double max_age_years );
+    static void init( const scnXml::Scenario& scenario );
     
     static SimTime max_human_age;   // constant
     // Global variables
@@ -328,11 +332,14 @@ namespace UnitParse {
      * Call sim::init() first. */
     SimTime readDuration( const std::string& str, DefaultUnit defUnit );
     
-    /** Parse a date or relative time specifier found in the XML.
+    /** Read a date or relative time specifier found in the XML; dates are
+     * rebased relative to a starting date so that they work the same as other
+     * ways of specifying intervention-period time from the point of view of
+     * code using this function.
      * 
-     * Supports dates (2015-10-08) as well as times relative to the start of
-     * the intervention period (as readDuration will parse). Returns a time to
-     * be compared against sim::intervNow(). */
+     * Supports dates (e.g. 2015-10-08) as well as times relative to the start
+     * of the intervention period (as readDuration will parse). Returns a time
+     * to be compared against sim::intervNow(). */
     SimTime readDate( const std::string& str, DefaultUnit defUnit );
 }
 

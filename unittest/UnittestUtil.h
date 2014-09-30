@@ -35,8 +35,7 @@
 #include "WithinHost/WHFalciparum.h"
 #include "Monitoring/Surveys.h"
 
-#include "schema/pharmacology.h"
-#include "schema/monitoring.h"
+#include "schema/scenario.h"
 
 using namespace OM;
 using namespace WithinHost;
@@ -52,7 +51,54 @@ namespace OM {
 class UnittestUtil {
 public:
     static void initTime(int daysPerStep){
-        sim::init( daysPerStep, 90.0 /*max human age*/ );
+        scnXml::AgeGroupPerC demAgeGroup(
+            numeric_limits<double>::quiet_NaN() /* lower bound */ );
+        scnXml::Demography demography( 
+            demAgeGroup,
+            "dummy" /* name */,
+            0 /* pop size */,
+            90.0 /*max human age*/ );
+        
+        scnXml::OptionSet survOpts;
+        scnXml::Surveys surveys(
+            numeric_limits<double>::quiet_NaN() /* detection limit */ );
+        scnXml::AgeGroup monAgeGroup(
+            numeric_limits<double>::quiet_NaN() /* lower bound */ );
+        scnXml::Monitoring monitoring(
+            survOpts,
+            surveys,
+            monAgeGroup,
+            "dummy" /* name */ );
+        
+        scnXml::Interventions interventions( "dummy" /* name */ );
+        
+        scnXml::AgeGroupValues cfr, pSeq;
+        scnXml::HealthSystem healthSystem( cfr, pSeq );
+        
+        scnXml::EntoData entomology( "dummy" /* name */,
+            "dummy" /* mode */ );
+        
+        scnXml::OptionSet modelOpts;
+        scnXml::Clinical modelClinical( "dummy" /* HS memory */ );
+        scnXml::AgeGroupValues modelHumanAvailMosq;
+        scnXml::Human modelHuman( modelHumanAvailMosq );
+        scnXml::Parameters modelParams(
+            daysPerStep,
+            0 /* iseed */,
+            "dummy" /* latentP */ );
+        scnXml::Model model( modelOpts, modelClinical, modelHuman, modelParams );
+        
+        scnXml::Scenario scenario(
+            demography,
+            monitoring,
+            interventions,
+            healthSystem,
+            entomology,
+            model,
+            0 /* schema version */,
+            "dummy" /* name */ );
+        sim::init( scenario );
+        
         // we could just use zero, but we may spot more errors by using some weird number
         sim::time0 = sim::fromYearsN(83.2591);
         sim::time1 = sim::time0;

@@ -135,9 +135,27 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Name of monitoring data
+          Name of monitoring settings
         </xs:documentation>
-        <xs:appinfo>name:Name of monitoring information;</xs:appinfo>
+        <xs:appinfo>name:Name of monitoring settings;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="startDate" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          An optional date for the start of monitoring. If given, dates may be
+          used to specify when other events (surveys, intervention deployments)
+          occur.
+          
+          Setting this to 1st January of some year might simplify usage of
+          dates, and putting the start a couple of years before the start of
+          intervention deployment (along with some extra surveys) may be useful
+          to check transmission stabilises to the expected pre-intervention
+          levels.
+          
+          Must be in the form YYYY-MM-DD, e.g. 2003-01-01.
+        </xs:documentation>
+        <xs:appinfo>name:Start of monitoring;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

@@ -250,6 +250,10 @@ namespace OM { namespace util {
          * scenarios but is recommended for new ones. */
         REQUIRE_UNITS,
         
+        /** If true, require dates to be used instead of steps/days/years
+         * wherever appropriate. */
+        REQUIRE_DATES,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };
