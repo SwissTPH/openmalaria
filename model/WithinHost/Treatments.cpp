@@ -45,7 +45,7 @@ Treatments::Stages stageFromString( const std::string& str ){
     if( str == "liver" ) return Treatments::LIVER;
     if( str == "blood" ) return Treatments::BLOOD;
     if( str == "both" ) return Treatments::BOTH;
-    throw util::xml_scenario_error( std::string("treatment action: stage must be liver, blood or both, not ").append(str) );
+    throw util::format_error( std::string("stage must be liver, blood or both, not ").append(str) );
 }
 Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
     TriggeredDeployments(elt), timeLiver(sim::zero()), timeBlood(sim::zero())
@@ -68,16 +68,16 @@ Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
             }
             if( stage & LIVER ){
                 if( timeLiver != sim::zero() )   // existing treatment configuration
-                    throw util::xml_scenario_error( "treatment action: multiple specification of liver stage effect" );
+                    throw util::format_error( "multiple specification of liver stage effect" );
                 timeLiver = len;
             }
             if( stage & BLOOD ){
                 if( timeBlood != sim::zero() )   // existing treatment configuration
-                    throw util::xml_scenario_error( "treatment action: multiple specification of blood stage effect" );
+                    throw util::format_error( "multiple specification of blood stage effect" );
                 timeBlood = len;
             }
         }catch( const util::format_error& e ){
-            throw util::xml_scenario_error( string("treatment action: ").append(e.message()) );
+            throw util::xml_scenario_error( string(".../clearInfections/timesteps: ").append(e.message()) );
         }
     }
 }

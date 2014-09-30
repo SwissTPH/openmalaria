@@ -1238,8 +1238,10 @@
       <option name="INCLUDES_PK_PD" value="true"/>
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
+      <option name="REQUIRE_UNITS"/>
+      <option name="REQUIRE_DATES"/>
     </ModelOptions>
-    <clinical healthSystemMemory="28"/>
+    <clinical healthSystemMemory="28t"/>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -1282,7 +1284,7 @@
         <group lowerbound="20.0" value="60.0"/>
       </weight>
     </human>
-    <parameters interval="1" iseed="1" latentp="15">
+    <parameters interval="1" iseed="1" latentp="15t">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

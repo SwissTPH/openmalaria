@@ -24,7 +24,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <continuous duringInit="false" period="1">
+    <continuous duringInit="false" period="5d">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>
@@ -105,10 +105,10 @@
       </nonCompliersEffective>
       <treatmentActions>
         <QN name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
+          <clearInfections stage="blood" timesteps="5d"/>
         </QN>
         <SP name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
+          <clearInfections stage="blood" timesteps="5d"/>
         </SP>
       </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
@@ -165,8 +165,10 @@
       <option name="MAX_DENS_CORRECTION" value="false"/>
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
+      <option name="REQUIRE_UNITS"/>
+      <option name="REQUIRE_DATES"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="30d"/>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -189,7 +191,7 @@
         <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="1" latentp="3">
+    <parameters interval="5" iseed="1" latentp="15d">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

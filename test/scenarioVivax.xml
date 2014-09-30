@@ -104,10 +104,10 @@
       </nonCompliersEffective>
       <treatmentActions>
         <ACT name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="-1"/>
+          <clearInfections stage="blood" timesteps="-1t"/>
         </ACT>
         <QN name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="-1"/>
+          <clearInfections stage="blood" timesteps="-1t"/>
         </QN>
       </treatmentActions>
       <!--set as desired... -->
@@ -503,8 +503,10 @@
     <ModelOptions>
       <option name="VIVAX_SIMPLE_MODEL" value="true"/>
       <option name="NON_MALARIA_FEVERS" value="true"/> 
+      <option name="REQUIRE_UNITS"/>
+      <option name="REQUIRE_DATES"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6">
+    <clinical healthSystemMemory="30d">
     <NonMalariaFevers>
       <incidence> 
       <group lowerbound="0" value="0.322769924518357"/>
@@ -637,7 +639,7 @@
       <!-- probability of a clinical event being severe -->
       <pEventIsSevere value="0.1"/>
     </vivax>
-    <parameters interval="5" iseed="0" latentp="3">
+    <parameters interval="5" iseed="0" latentp="15d">
       <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
       <parameter include="false" name="        Estar   " number="2" value="0.03247"/>
       <parameter include="false" name="        Simm    " number="3" value="0.1447"/>
