@@ -205,7 +205,6 @@ private:
   SimTime m_DOB;        // date of birth; humans are always born at the end of a time step
   
   /// Vaccines
-  //TODO: could move TBV code to WHFalciparum, where the efficacy is now used
   interventions::PerHumanVaccine _vaccine;
   
   ///@brief Cached values used by monitoring

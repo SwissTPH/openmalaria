@@ -320,14 +320,14 @@ namespace UnitParse {
     
     /** Parse a short duration from a string found in the input document.
      * 
-     * Supports units of days (5d), and steps (2t) with integer values.
-     * Enforces that input values given in days are a whole number of steps.
+     * Supports units of days (5d), and steps (2t) with integer values,
+     * rounding inputs to the nearest time step.
      * 
      * Call sim::init() first. */
     SimTime readShortDuration( const std::string& str, DefaultUnit defUnit );
     
     /** Like readShortDuration(), but also allow inputs to be in fractional
-     * years, rounding from years to the nearest time step.
+     * years.
      * 
      * Call sim::init() first. */
     SimTime readDuration( const std::string& str, DefaultUnit defUnit );
@@ -339,7 +339,8 @@ namespace UnitParse {
      * 
      * Supports dates (e.g. 2015-10-08) as well as times relative to the start
      * of the intervention period (as readDuration will parse). Returns a time
-     * to be compared against sim::intervNow(). */
+     * to be compared against sim::intervNow(). Again, the result is rounded to
+     * the nearest time step. */
     SimTime readDate( const std::string& str, DefaultUnit defUnit );
 }
 

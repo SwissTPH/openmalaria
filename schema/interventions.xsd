@@ -30,13 +30,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       </xs:documentation>
                       <xs:appinfo>name:Timed replacement;</xs:appinfo>
                     </xs:annotation>
-                    <xs:attribute name="time" type="xs:int" use="required">
+                    <xs:attribute name="time" type="xs:string" use="required">
                       <xs:annotation>
                         <xs:documentation>
-                          Time-step at which this replacement occurs, starting
-                          from 0, the first intervention-period time-step.
+                          Time at which this replacement occurs. See doc on
+                          intervention period and on monitoring/startDate for
+                          details of how times work.
+                          
+                          Can be specified in steps, days, years, or as a date
+                          (examples: 15t, 75d, 0.2y, 2000-03-16).
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -79,13 +83,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       </xs:documentation>
                       <xs:appinfo>name:Timed replacement;</xs:appinfo>
                     </xs:annotation>
-                    <xs:attribute name="time" type="xs:int" use="required">
+                    <xs:attribute name="time" type="xs:string" use="required">
                       <xs:annotation>
                         <xs:documentation>
-                          Time-step at which this replacement occurs, starting
-                          from 0, the first intervention-period time-step.
+                          Time at which this replacement occurs. See doc on
+                          intervention period and on monitoring/startDate for
+                          details of how times work.
+                          
+                          Can be specified in steps, days, years, or as a date
+                          (examples: 15t, 75d, 0.2y, 2000-03-16).
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -134,7 +142,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                           </xs:annotation>
                           <xs:attribute name="time" type="xs:string" use="required">
                             <xs:annotation>
-                              <xs:appinfo>name:Time of start;units:User defined (default: steps);min:0;</xs:appinfo>
+                              <xs:documentation>
+                                Time at which this importation rate becomes active.
+                                
+                                See doc on intervention period and on monitoring/startDate for
+                                details of how times work. Can be specified in steps, days,
+                                years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
+                              </xs:documentation>
+                              <xs:appinfo>name:Time of start;units:User defined (defauls to steps);min:0;</xs:appinfo>
                             </xs:annotation>
                           </xs:attribute>
                         </xs:extension>
@@ -190,13 +205,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:annotation>
                   <xs:appinfo>name:Timed occurrence;</xs:appinfo>
                 </xs:annotation>
-                <xs:attribute name="time" type="xs:int" use="required">
+                <xs:attribute name="time" type="xs:string" use="required">
                   <xs:annotation>
                     <xs:documentation>
-                      Time-step at which this intervention occurs, starting
-                      from 0, the first intervention-period time-step.
+                      Time at which this intervention occurs.
+                      
+                      See doc on intervention period and on monitoring/startDate for
+                      details of how times work. Can be specified in steps, days,
+                      years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
                     </xs:documentation>
-                    <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                    <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                   </xs:annotation>
                 </xs:attribute>
               </xs:complexType>
@@ -233,13 +251,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:annotation>
                   <xs:appinfo>name:Timed occurrence;</xs:appinfo>
                 </xs:annotation>
-                <xs:attribute name="time" type="xs:int" use="required">
+                <xs:attribute name="time" type="xs:string" use="required">
                   <xs:annotation>
                     <xs:documentation>
-                      Time-step at which this intervention occurs, starting
-                      from 0, the first intervention-period time-step.
+                      Time at which this intervention occurs.
+                      
+                      See doc on intervention period and on monitoring/startDate for
+                      details of how times work. Can be specified in steps, days,
+                      years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
                     </xs:documentation>
-                    <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                    <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                   </xs:annotation>
                 </xs:attribute>
               </xs:complexType>
@@ -756,13 +777,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="timedBase">
-    <xs:attribute name="time" type="xs:int" use="required">
+    <xs:attribute name="time" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Time-step at which this intervention occurs, starting
-          from 0, the first intervention-period time-step.
+          Time at which this deployment occurs.
+          
+          See doc on intervention period and on monitoring/startDate for
+          details of how times work. Can be specified in steps, days,
+          years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
         </xs:documentation>
-        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -804,13 +828,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="mass">
     <xs:complexContent>
       <xs:extension base="om:deploymentBase">
-        <xs:attribute name="time" type="xs:int" use="required">
+        <xs:attribute name="time" type="xs:string" use="required">
           <xs:annotation>
             <xs:documentation>
-              Time-step at which this intervention occurs, starting
-              from 0, the first intervention-period time-step.
+              Time at which this deployment occurs.
+              
+              See doc on intervention period and on monitoring/startDate for
+              details of how times work. Can be specified in steps, days,
+              years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+            <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="maxAge" type="xs:double" use="optional">
@@ -856,23 +883,32 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="begin" type="xs:int" default="0">
+        <xs:attribute name="begin" type="xs:string" use="optional">
           <xs:annotation>
             <xs:documentation>
-              First timestep (from 0 at the beginning of the intervention period)
-              this item is active. Defaults to 0.
+              First time at which this deployment is active. If not specified,
+              deployment starts at the beginning of the intervention period.
+              
+              See doc on intervention period and on monitoring/startDate for
+              details of how times work. Can be specified in steps, days,
+              years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:First timestep active;</xs:appinfo>
+            <xs:appinfo>name:First time active;units:User defined (defauls to steps);</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="end" type="xs:int" default="2147483647">
+        <xs:attribute name="end" type="xs:string" use="optional">
           <xs:annotation>
             <xs:documentation>
               End of the period during which the intervention is active (to be
-              exact, the first timestep of the intervention period at which the item
-              becomes inactive). Defaults to 2147483647.
+              exact, the first step of the intervention period at which the
+              item becomes inactive). If not specified, deployment never
+              ceases after starting during the simulation.
+              
+              See doc on intervention period and on monitoring/startDate for
+              details of how times work. Can be specified in steps, days,
+              years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
+            <xs:appinfo>units:User defined (defauls to steps);name:End step;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>

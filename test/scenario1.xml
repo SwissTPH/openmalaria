@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Test Moni">
+  <monitoring name="Test Moni" startDate="1234-12-31">
     <continuous period="5d">
       <option name="recent births" value="true"/>
       <option name="input EIR" value="true"/>
@@ -73,7 +73,7 @@
   </monitoring>
   <interventions name="Change to monitoring HS">
     <changeHS>
-      <timedDeployment time="0">
+      <timedDeployment time="1234-12-31">
         <!-- ImmediateOutcomes name="Test HS">
           <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
           <initialACR>
@@ -1074,7 +1074,7 @@
       <option name="REQUIRE_UNITS"/>
       <option name="REQUIRE_DATES"/>
     </ModelOptions>
-    <clinical healthSystemMemory="30d"/>
+    <clinical healthSystemMemory="28d"/>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>

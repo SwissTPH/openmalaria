@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Quarterly Surveys">
+  <monitoring name="Quarterly Surveys" startDate="1351-1-1">
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nInfect" value="true"/>
@@ -128,7 +128,7 @@
           <deploy coverage="1" targetAgeYrs="2.25" vaccMaxCumDoses="5" vaccMinPrevDoses="4"/>
         </continuous>
         <timed>
-          <deploy coverage="1" maxAge="999" minAge="0" time="26"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="1351-03-11"/>
         </timed>
       </deployment>
     </human>
@@ -556,6 +556,7 @@
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
       <option name="REQUIRE_UNITS"/>
+      <option name="REQUIRE_DATES"/>
     </ModelOptions>
     <clinical healthSystemMemory="6t"/>
     <human>

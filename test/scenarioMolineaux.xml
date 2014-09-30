@@ -1011,6 +1011,8 @@
       <option name="INCLUDES_PK_PD" value="true"/>
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
+      <option name="REQUIRE_UNITS"/>
+      <option name="REQUIRE_DATES"/>
     </ModelOptions>
     <clinical healthSystemMemory="0"/>
     <human>

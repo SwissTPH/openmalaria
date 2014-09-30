@@ -23,7 +23,7 @@
       <group poppercent="0.1" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Monthly Surveys">
+  <monitoring name="Monthly Surveys" startDate="2100-01-01">
     <continuous duringInit="false" period="5d">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
@@ -132,7 +132,7 @@
         <component id="MDA"/>
         <timed>
           <restrictToSubPop id="mdaPop"/>
-          <deploy coverage="1" time="30"/>
+          <deploy coverage="1" time="2100-06-01"/>
         </timed>
       </deployment>
       <deployment name="LLIN test">
@@ -145,40 +145,40 @@
         <component id="IRS"/>
         <timed>
           <cumulativeCoverage component="IRS"/>
-          <deploy coverage="0.05775" time="18"/>
-          <deploy coverage="0.1155" time="19"/>
-          <deploy coverage="0.17325" time="20"/>
-          <deploy coverage="0.231" time="21"/>
-          <deploy coverage="0.28875" time="22"/>
-          <deploy coverage="0.3465" time="23"/>
-          <deploy coverage="0.40425" time="24"/>
-          <deploy coverage="0.462" time="25"/>
-          <deploy coverage="0.51975" time="26"/>
-          <deploy coverage="0.5775" time="27"/>
-          <deploy coverage="0.63525" time="28"/>
-          <deploy coverage="0.693" time="29"/>
-          <deploy coverage="0.05775" time="103"/>
-          <deploy coverage="0.1155" time="104"/>
-          <deploy coverage="0.17325" time="105"/>
-          <deploy coverage="0.231" time="106"/>
-          <deploy coverage="0.28875" time="107"/>
-          <deploy coverage="0.3465" time="108"/>
-          <deploy coverage="0.40425" time="109"/>
-          <deploy coverage="0.462" time="110"/>
-          <deploy coverage="0.51975" time="111"/>
-          <deploy coverage="0.5775" time="112"/>
-          <deploy coverage="0.63525" time="113"/>
-          <deploy coverage="0.693" time="114"/>
+          <deploy coverage="0.05775" time="18t"/>
+          <deploy coverage="0.1155" time="19t"/>
+          <deploy coverage="0.17325" time="20t"/>
+          <deploy coverage="0.231" time="21t"/>
+          <deploy coverage="0.28875" time="22t"/>
+          <deploy coverage="0.3465" time="23t"/>
+          <deploy coverage="0.40425" time="24t"/>
+          <deploy coverage="0.462" time="25t"/>
+          <deploy coverage="0.51975" time="26t"/>
+          <deploy coverage="0.5775" time="27t"/>
+          <deploy coverage="0.63525" time="28t"/>
+          <deploy coverage="0.693" time="29t"/>
+          <deploy coverage="0.05775" time="103t"/>
+          <deploy coverage="0.1155" time="104t"/>
+          <deploy coverage="0.17325" time="105t"/>
+          <deploy coverage="0.231" time="106t"/>
+          <deploy coverage="0.28875" time="107t"/>
+          <deploy coverage="0.3465" time="108t"/>
+          <deploy coverage="0.40425" time="109t"/>
+          <deploy coverage="0.462" time="110t"/>
+          <deploy coverage="0.51975" time="111t"/>
+          <deploy coverage="0.5775" time="112t"/>
+          <deploy coverage="0.63525" time="113t"/>
+          <deploy coverage="0.693" time="114t"/>
         </timed>
       </deployment>
       <deployment>
         <component id="mdaPop"/>
         <timed>
-          <deploy coverage="0.018696" maxAge="5" minAge="1" time="0"/>
-          <deploy coverage="0.249757" maxAge="10" minAge="5" time="1"/>
-          <deploy coverage="0.195228" maxAge="15" minAge="10" time="2"/>
-          <deploy coverage="0.207164" maxAge="20" minAge="15" time="3"/>
-          <deploy coverage="0.157818" maxAge="90" minAge="20" time="4"/>
+          <deploy coverage="0.018696" maxAge="5" minAge="1" time="2100-01-01"/>
+          <deploy coverage="0.249757" maxAge="10" minAge="5" time="2100-01-06"/>
+          <deploy coverage="0.195228" maxAge="15" minAge="10" time="2100-01-11"/>
+          <deploy coverage="0.207164" maxAge="20" minAge="15" time="2100-01-16"/>
+          <deploy coverage="0.157818" maxAge="90" minAge="20" time="2100-01-21"/>
         </timed>
       </deployment>
     </human>
@@ -278,9 +278,9 @@
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
       <option name="REQUIRE_UNITS"/>
-      <option name="REQUIRE_DATES"/>
+      <option name="REQUIRE_DATES" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="30d"/>
+    <clinical healthSystemMemory="28d"/>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>

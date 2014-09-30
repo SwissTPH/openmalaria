@@ -87,8 +87,8 @@ public:
 
 class TimedChangeHSDeployment : public TimedDeployment {
 public:
-    TimedChangeHSDeployment( const scnXml::ChangeHS::TimedDeploymentType& hs ) :
-        TimedDeployment( sim::fromTS( hs.getTime() ) /*FIXME(schema): units*/ ),
+    TimedChangeHSDeployment( SimTime date, const scnXml::ChangeHS::TimedDeploymentType& hs ) :
+        TimedDeployment( date ),
         newHS( hs._clone() )
     {}
     virtual void deploy (OM::Population& population) {
@@ -108,8 +108,8 @@ private:
 
 class TimedChangeEIRDeployment : public TimedDeployment {
 public:
-    TimedChangeEIRDeployment( const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
-        TimedDeployment(sim::fromTS( nv.getTime() ) /*FIXME(schema): units*/ ),
+    TimedChangeEIRDeployment( SimTime date, const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
+        TimedDeployment( date ),
         newEIR( nv._clone() )
     {}
     virtual void deploy (OM::Population& population) {
@@ -220,15 +220,17 @@ protected:
 class TimedHumanDeployment : public TimedDeployment, protected HumanDeploymentBase {
 public:
     /** 
+     * @param date Time of deployment
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
      * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
      */
-    TimedHumanDeployment( const scnXml::Mass& mass,
+    TimedHumanDeployment( SimTime date,
+                           const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
                            ComponentId subPop, bool complement ) :
-        TimedDeployment( sim::fromTS( mass.getTime() ) /*FIXME(schema): units*/ ),
+        TimedDeployment( date ),
         HumanDeploymentBase( mass, intervention, subPop, complement ),
         minAge( sim::fromYearsN( mass.getMinAge() ) ),
         maxAge( sim::future() )
@@ -274,17 +276,19 @@ protected:
 class TimedCumulativeHumanDeployment : public TimedHumanDeployment {
 public:
     /** 
+     * @param date Time of deployment
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
      * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
      * @param cumCuvId Id of component to test coverage for
      */
-    TimedCumulativeHumanDeployment( const scnXml::Mass& mass,
+    TimedCumulativeHumanDeployment( SimTime date,
+                           const scnXml::Mass& mass,
                            const HumanIntervention* intervention,
                            ComponentId subPop, bool complement,
                            ComponentId cumCuvId ) :
-        TimedHumanDeployment( mass, intervention, subPop, complement ),
+        TimedHumanDeployment( date, mass, intervention, subPop, complement ),
         cumCovInd( cumCuvId )
     {
     }
@@ -350,13 +354,12 @@ private:
 class ContinuousHumanDeployment : protected HumanDeploymentBase {
 public:
     /// Create, passing deployment age
-    ContinuousHumanDeployment( const ::scnXml::ContinuousDeployment& elt,
+    ContinuousHumanDeployment( SimTime begin, SimTime end,
+                                 const ::scnXml::ContinuousDeployment& elt,
                                  const HumanIntervention* intervention,
                                  ComponentId subPop, bool complement ) :
             HumanDeploymentBase( elt, intervention, subPop, complement ),
-            //FIXME(schema): time units
-            begin( sim::fromTS(elt.getBegin()) ),
-            end( sim::fromTS(elt.getEnd()) ),
+            begin( begin ), end( end ),
             deployAge( sim::fromYearsN( elt.getTargetAgeYrs() ) )
     {
         if( begin < sim::zero() || end < begin ){

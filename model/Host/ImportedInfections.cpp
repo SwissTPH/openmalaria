@@ -39,8 +39,7 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     rate.reserve( tElt.getRate().size() );
     try{
         for( scnXml::ImportedInfections::TimedType::RateSequence::const_iterator it = tElt.getRate().begin(); it != tElt.getRate().end(); ++it ){
-            //FIXME(schema): should be a date
-            SimTime time = UnitParse::readDuration( it->getTime(), UnitParse::STEPS );
+            SimTime time = UnitParse::readDate( it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/ );
             if( period != sim::zero() && time >= period ){
                 throw util::format_error( "cannot be greater than period when period is not zero" );
             }

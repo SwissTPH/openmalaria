@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Test Moni">
+  <monitoring name="Test Moni" startDate="0000-01-01"><!-- no reason we can't pretent we're in year 0 -->
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nExpectd" value="true"/>
@@ -89,7 +89,7 @@
       <deployment>
         <component id="MDA"/>
         <timed>
-          <deploy coverage="0.6" time="730"/>
+          <deploy coverage="0.6" time="0002-01-01"/>
         </timed>
       </deployment>
       <deployment>
@@ -98,7 +98,7 @@
           <deploy coverage="0.05" targetAgeYrs="1.0"/>
         </continuous>
         <timed>
-          <deploy coverage="0.4" time="0"/>
+          <deploy coverage="0.4" time="0000-01-01"/>
         </timed>
       </deployment>
     </human>

@@ -59,14 +59,6 @@ int longToInt( long x ){
     return y;
 }
 
-SimTime daysToTSExact( long days ){
-    SimTime t = sim::fromDays( longToInt(days) );
-    if( mod(t.inDays(), sim::oneTS().inDays()) != 0 ){
-        throw util::format_error( "input in days is not a whole number of time steps" );
-    }
-    return t;
-}
-
 SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
     const char * s = str.c_str();
     char * end = 0;
@@ -80,7 +72,7 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
         }else if( util::ModelOptions::option(util::REQUIRE_UNITS) || defUnit == NONE ){
             throw util::format_error( "unit required but not given (try e.g. 5d or 12t)" );
         }else if( defUnit == DAYS ){
-            return daysToTSExact( v );
+            return sim::roundToTSFromDays( v );
         }else if( defUnit == STEPS ){
             return sim::fromTS( longToInt(v) );
         }else{
@@ -90,7 +82,7 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
         // one extra character found; is this a unit?
         char u = str[len];
         if( u == 'd' || u == 'D' ){
-            return daysToTSExact( v );
+            return sim::roundToTSFromDays( v );
         }else if( u == 't' || u == 'T' ){
             return sim::fromTS( longToInt(v) );
         }
@@ -116,7 +108,7 @@ SimTime readDuration( const std::string& str, DefaultUnit defUnit ){
         }else if( v != std::floor(v) ){
             throw util::format_error( "fractional values are only allowed when the unit is years (e.g. 0.25y)" );
         }else if( defUnit == DAYS ){
-            return daysToTSExact( v );
+            return sim::roundToTSFromDays( v );
         }else if( defUnit == STEPS ){
             return sim::fromTS( longToInt(v) );
         }else{
@@ -130,7 +122,7 @@ SimTime readDuration( const std::string& str, DefaultUnit defUnit ){
         }else if( v != std::floor(v) ){
             throw util::format_error( "fractional values are only allowed when the unit is years (e.g. 0.25y)" );
         }else if( u == 'd' || u == 'D' ){
-            return daysToTSExact( v );
+            return sim::roundToTSFromDays( v );
         }else if( u == 't' || u == 'T' ){
             return sim::fromTS( longToInt(v) );
         }
@@ -143,6 +135,7 @@ SimTime readDuration( const std::string& str, DefaultUnit defUnit ){
  * but encounters definite format errors. */
 SimTime parseDate( const std::string& str ){
     static sregex dateRx = sregex::compile ( "(\\d{4})-(\\d{1,2})-(\\d{1,2})" );
+    static int monthLen[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
     static int monthStart[] = { // offsets of start of month from start of year
         0 /*Jan*/, 31, 59, 90,
         120 /*May*/, 151, 181, 212,
@@ -153,12 +146,13 @@ SimTime parseDate( const std::string& str ){
         int year = std::atoi(rx_what[1].str().c_str()),
             month = std::atoi(rx_what[2].str().c_str()),
             day = std::atoi(rx_what[3].str().c_str());
-        if( month < 1 || month > 12 || day < 1 || day > 31 ){
-            throw util::format_error( string(str).append(" does not look like a date (expected YYYY-MM-DD with 1≤MM≤12 and 1≤DD≤31)") );
+        if( month < 1 || month > 12 || day < 1 || day > monthLen[month-1] ){
+            throw util::format_error( string(str).append(" does not look like a date (expected YYYY-MM-DD with 1≤MM≤12 and 1≤DD≤(days in month))") );
         }
         // We can't overflow: the largest year possible is 9999 which is about
         // 3.6 million days; an int is good to more than 1e9.
-        return sim::fromYearsI(year) + sim::fromDays(monthStart[month-1] + day - 1);
+        // We should also round to the nearest step
+        return sim::fromYearsI(year) + sim::roundToTSFromDays(monthStart[month-1] + day - 1);
     }else{
         return sim::never();
     }

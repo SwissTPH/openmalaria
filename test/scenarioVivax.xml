@@ -506,7 +506,7 @@
       <option name="REQUIRE_UNITS"/>
       <option name="REQUIRE_DATES"/>
     </ModelOptions>
-    <clinical healthSystemMemory="30d">
+    <clinical healthSystemMemory="28d">
     <NonMalariaFevers>
       <incidence> 
       <group lowerbound="0" value="0.322769924518357"/>

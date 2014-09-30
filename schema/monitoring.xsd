@@ -145,13 +145,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           An optional date for the start of monitoring. If given, dates may be
           used to specify when other events (surveys, intervention deployments)
-          occur.
+          occur; alternately times relative to the start of the intervention
+          period may be used to specify event times.
           
           Setting this to 1st January of some year might simplify usage of
           dates, and putting the start a couple of years before the start of
           intervention deployment (along with some extra surveys) may be useful
           to check transmission stabilises to the expected pre-intervention
           levels.
+          
+          As an example, if this date is set to 2000-01-01, then the following
+          event times are equivalent (assuming 1t=5d):
+          15t, 75d, 0.2y, 2000-03-16.
           
           Must be in the form YYYY-MM-DD, e.g. 2003-01-01.
         </xs:documentation>

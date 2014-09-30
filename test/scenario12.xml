@@ -51,7 +51,7 @@
   </monitoring>
   <interventions name="A2 Intervention">
     <changeEIR>
-      <timedDeployment eipDuration="10" time="0">
+      <timedDeployment eipDuration="10" time="0t">
         <EIRDaily origin="interpolate">0.00219</EIRDaily>
         <EIRDaily origin="interpolate">0.00210</EIRDaily>
         <EIRDaily origin="interpolate">0.00202</EIRDaily>
@@ -652,14 +652,14 @@
       <deployment>
         <component id="MSAT"/>
         <timed>
-          <deploy coverage="1" time="0"/>
-          <deploy coverage="1" time="14"/>
-          <deploy coverage="1" time="28"/>
-          <deploy coverage="1" time="42"/>
-          <deploy coverage="1" time="56"/>
-          <deploy coverage="1" time="70"/>
-          <deploy coverage="1" time="84"/>
-          <deploy coverage="1" time="98"/>
+          <deploy coverage="1" time="0t"/>
+          <deploy coverage="1" time="14t"/>
+          <deploy coverage="1" time="28t"/>
+          <deploy coverage="1" time="42t"/>
+          <deploy coverage="1" time="56t"/>
+          <deploy coverage="1" time="70t"/>
+          <deploy coverage="1" time="84t"/>
+          <deploy coverage="1" time="98t"/>
         </timed>
       </deployment>
     </human>
