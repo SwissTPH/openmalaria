@@ -80,6 +80,7 @@ set (OM_CXXTEST_HEADERS
   AgeGroupInterpolationSuite.h
   DecayFunctionSuite.h
   PennyInfectionSuite.h
+  MolineauxInfectionSuite.h
   #MosqLifeCycleSuite.h
   UtilVectorsSuite.h
 )
@@ -97,11 +98,11 @@ else (OM_CXXTEST_INTERPRETER)
   message (SEND_ERROR "Unable to find perl or python executable. Thus I can't build tests.cpp which is required to run the unittests.")
 endif (OM_CXXTEST_INTERPRETER)
 
-# This file is needed to run the EmpiricalInfection unittest:
+# These files are needed to run various infection model tests:
 configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-# and these by the PennyInfection unittest:
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennyCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennySeqDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 # and these by MosqLifeCycleSuite:
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_EmergenceRateConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_AdultMosqConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)

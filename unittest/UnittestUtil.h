@@ -202,6 +202,14 @@ public:
         OM::WithinHost::opt_common_whm = true;
     }
     
+    static void MolineauxWHM_setup () {
+        ModelOptions::reset();
+        ModelOptions::set(util::INCLUDES_PK_PD);
+        ModelOptions::set(util::MOLINEAUX_WITHIN_HOST_MODEL);
+        ModelOptions::set(util::MOLINEAUX_PAIRWISE_SAMPLE);
+        OM::WithinHost::opt_common_whm = true;
+    }
+    
     static void MosqLifeCycle_init() {
         ModelOptions::reset();
         ModelOptions::set(util::VECTOR_LIFE_CYCLE_MODEL);

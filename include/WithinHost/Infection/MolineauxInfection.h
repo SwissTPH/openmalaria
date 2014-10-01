@@ -27,6 +27,8 @@
 
 #include "WithinHost/Infection/CommonInfection.h"
 
+class MolineauxInfectionSuite;
+
 namespace OM { namespace WithinHost {
 
 class MolineauxInfection : public CommonInfection {
@@ -54,69 +56,72 @@ private:
      */
     void updateGrowthRateMultiplier(int ageDays);
 
-	// v: number of variants per clone (one infection = one new clone)
-	static const size_t v = 50;
-	// taus: used for the variantTranscending and variantSpecific array, 4 Molineaux time steps = 8 days
-	static const size_t taus = 4;
+    // v: number of variants per clone (one infection = one new clone)
+    static const size_t v = 50;
+    // taus: used for the variantTranscending and variantSpecific array, 4 Molineaux time steps = 8 days
+    static const size_t taus = 4;
 
-	///@brief static variables red from parameters
-	//@{
-	/// depends on lognormal/gamma distribution for first_local_max
-	static bool first_local_maximum_gamma;
-	/// mean/shape and sd/scale of the first local maximum density for lognormal/gamma distribution
-	static double mean_shape_first_local_max, sd_scale_first_local_max;
-	
-	/// depends on between lognormal/gamma distribution for mean_duration diff_pos_days
-	static bool mean_duration_gamma;
-	/// mean/shape and sd/scale of the difference between last positive and first positive days for lognormal/gamma distribution
-	static double mean_shape_diff_pos_days, sd_scale_diff_pos_days;
-	
-	/// boolean choosing between gamma and lognormal distribution for equation 11
-	static bool multi_factor_gamma;
-        
-        /// pairwise sample of case-specific P* parameters
-        static bool pairwise_PStar_sample;
-	//@}
-	
-	/** @brief q^(i+1) array
-	 *
-	 * all the values of q^1... q^50 are stored in this array.
-	 * this prevent the recalculation of those values on every two time steps. */
-	static double qPow[v];
-	
-	// m[i]: Multiplication factor, per two-day cycle of variant i
-	float m[v];
-        // variantTranscendingSummation: See Molineaux paper, equation 7
-        float variantTranscendingSummation;
+    ///@brief static variables red from parameters
+    //@{
+    /// depends on lognormal/gamma distribution for first_local_max
+    static bool first_local_maximum_gamma;
+    /// mean/shape and sd/scale of the first local maximum density for lognormal/gamma distribution
+    static double mean_shape_first_local_max, sd_scale_first_local_max;
+    
+    /// depends on between lognormal/gamma distribution for mean_duration diff_pos_days
+    static bool mean_duration_gamma;
+    /// mean/shape and sd/scale of the difference between last positive and first positive days for lognormal/gamma distribution
+    static double mean_shape_diff_pos_days, sd_scale_diff_pos_days;
+    
+    /// boolean choosing between gamma and lognormal distribution for equation 11
+    static bool multi_factor_gamma;
+    
+    /// pairwise sample of case-specific P* parameters
+    static bool pairwise_PStar_sample;
+    //@}
+    
+    /** @brief q^(i+1) array
+     *
+     * all the values of q^1... q^50 are stored in this array.
+     * this prevent the recalculation of those values on every two time steps. */
+    static double qPow[v];
+    
+    // m[i]: Multiplication factor, per two-day cycle of variant i
+    float m[v];
+    // variantTranscendingSummation: See Molineaux paper, equation 7
+    float variantTranscendingSummation;
+    // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
+    float laggedPc[taus];
+    /* Pstar_c, Pstar_m: two host-specific critical densities...
+     * Those two values depend on the first local maximum or the difference
+     * between the last positive day and the first positive day. */
+    float Pstar_c, Pstar_m;
+    struct Variant {
+        // growthRate[i]: variant's i growthRate
+        float growthRate;
+        // P[i]: variant's i density
+        float P;
+        // variantSpecificSummation: See Molineaux paper, equation 6
+        float variantSpecificSummation;
+        // initP[i]: Density of in t+2 emerging variant i
+        float initP;
         // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
-        float laggedPc[taus];
-        /* Pstar_c, Pstar_m: two host-specific critical densities...
-         * Those two values depend on the first local maximum or the difference
-         * between the last positive day and the first positive day. */
-        float Pstar_c, Pstar_m;
-	struct Variant {
-            // growthRate[i]: variant's i growthRate
-            float growthRate;
-            // P[i]: variant's i density
-            float P;
-            // variantSpecificSummation: See Molineaux paper, equation 6
-            float variantSpecificSummation;
-            // initP[i]: Density of in t+2 emerging variant i
-            float initP;
-            // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
-	    float laggedP[taus];
-	    
-	    Variant ();
-	    
-	    /// Checkpointing
-	    void operator& (ostream& stream);
-	    void operator& (istream& stream);
-	    
-	    void updateGrowthRateMultiplier( double pd, double immune_response_escape );
-	    double updateDensity (double survivalFactor, int ageDays /* age of infection in days */);
-	    double getVariantSpecificSummation(int ageDays);
-	};
-	vector<Variant> variants;
+        float laggedP[taus];
+        
+        Variant ();
+        
+        /// Checkpointing
+        void operator& (ostream& stream);
+        void operator& (istream& stream);
+        
+        void updateGrowthRateMultiplier( double pd, double immune_response_escape );
+        double updateDensity (double survivalFactor, int ageDays /* age of infection in days */);
+        double getVariantSpecificSummation(int ageDays);
+    };
+    vector<Variant> variants;
+    
+    // allow unittest to access private vars
+    friend class ::MolineauxInfectionSuite;
 };
 
 }}
