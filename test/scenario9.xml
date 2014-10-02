@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Idete">
+  <monitoring name="Idete" startDate="1000-01-01">
     <SurveyOptions>
       <option name="nHost"/>
       <option name="nUncomp"/>
@@ -47,7 +47,7 @@
         <MDA>
           <effects>
             <option pSelection="1">
-              <clearInfections timesteps="5" stage="both"/>
+              <clearInfections timesteps="5t" stage="both"/>
             </option>
           </effects>
         </MDA>
@@ -55,17 +55,17 @@
       <deployment name="clear human infections">
         <component id="clearInfections"/>
         <timed>
-          <deploy coverage="1" time="73"/>
+          <deploy coverage="1" time="1001-01-01"/>
         </timed>
       </deployment>
     </human>
     <uninfectVectors name="clear mosquito infections">
-      <timedDeployment time="73"/>
-      <timedDeployment time="74"/>
-      <timedDeployment time="75"/>
-      <timedDeployment time="76"/>
-      <timedDeployment time="77"/>
-      <timedDeployment time="78"/>
+      <timedDeployment time="1001-01-01"/>
+      <timedDeployment time="1001-01-06"/>
+      <timedDeployment time="1001-01-11"/>
+      <timedDeployment time="1001-01-16"/>
+      <timedDeployment time="1001-01-21"/>
+      <timedDeployment time="1001-01-26"/>
     </uninfectVectors>
   </interventions>
   <healthSystem>
@@ -89,7 +89,7 @@
       </treeUCSelfTreat>
       <cureRateSevere value="0.60"/>
       <treatmentSevere>
-        <clearInfections stage="blood" timesteps="1"/>
+        <clearInfections stage="blood" timesteps="1t"/>
       </treatmentSevere>
     </DecisionTree5Day>
     <CFR>
@@ -991,7 +991,7 @@
       <option name="REQUIRE_UNITS"/>
       <option name="REQUIRE_DATES"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="6t"/>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -1014,7 +1014,7 @@
         <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="0" latentp="3">
+    <parameters interval="5" iseed="0" latentp="3t">
       <parameter include="false" name="         '-ln(1-Sinf)'    " number="1" value="0.050736"/>
       <parameter include="false" name="         Estar    " number="2" value="0.03247"/>
       <parameter include="false" name="         Simm     " number="3" value="0.157325"/>
