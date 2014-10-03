@@ -35,8 +35,9 @@
 #include "util/errors.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
-#include <schema/scenario.h>
 #include "Population.h"
+#include "WithinHost/Diagnostic.h"
+#include "schema/scenario.h"
 
 #include <fstream>
 #include <gzstream/gzstream.h>
@@ -88,6 +89,9 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
+    if( scenario.getDiagnostics().present() ){
+        WithinHost::diagnostics::init( scenario.getDiagnostics().get() );
+    }
     
     // 2) elements depending on only elements initialised in (1):
     Parameters parameters( model.getParameters() );     // depends on nothing

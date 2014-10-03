@@ -637,10 +637,7 @@
         </MDA>
       </component>
       <component id="MSAT">
-        <screen>
-          <diagnostic>
-            <deterministic minDensity="20"/>
-          </diagnostic>
+        <screen diagnostic="deterministic">
           <positive>
             <deploy>
               <component id="treat"/>
@@ -1208,6 +1205,11 @@
       <EIRDaily origin="interpolate">0.00227</EIRDaily>
     </nonVector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="deterministic">
+      <deterministic minDensity="20"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="COMORB_HET" value="true"/>

@@ -37,8 +37,10 @@
 #include <schema/interventions.h>
 
 namespace OM { namespace interventions {
-    using Host::Human;
-    using namespace Monitoring;
+using Host::Human;
+using WithinHost::Diagnostic;
+using WithinHost::diagnostics;
+using namespace Monitoring;
 
 // ———  HumanIntervention  ———
 
@@ -301,11 +303,10 @@ public:
     ScreenComponent( ComponentId id, const scnXml::Screen& elt ) :
         HumanInterventionComponent(id,
                 Report::MI_SCREENING_CTS, Report::MI_SCREENING_TIMED),
+        diagnostic(diagnostics::get(elt.getDiagnostic())),
         positive( elt.getPositive() ),
         negative( elt.getNegative() )
-    {
-        diagnostic.setXml( elt.getDiagnostic() );
-    }
+    {}
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits ) const{
         Survey::current().addInt( reportMeasure(method), human, 1 );
@@ -325,7 +326,7 @@ public:
 #endif
     
 private:
-    WithinHost::Diagnostic diagnostic;
+    const Diagnostic& diagnostic;
     TriggeredDeployments positive, negative;
 };
 

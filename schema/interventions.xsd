@@ -665,17 +665,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:(Mass) screening;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="diagnostic" type="om:HSDiagnostic">
-        <xs:annotation>
-          <xs:documentation>
-            Description of the diagnostic test used by the screening.
-          </xs:documentation>
-          <xs:appinfo>name:Diagnostic;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
       <xs:element name="positive" type="om:TriggeredDeployments"/>
       <xs:element name="negative" type="om:TriggeredDeployments"/>
     </xs:sequence>
+    <xs:attribute name="diagnostic" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of a parameterised diagnostic (see scenario/diagnostics).
+        </xs:documentation>
+        <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="MDAComponent">
      <xs:annotation>

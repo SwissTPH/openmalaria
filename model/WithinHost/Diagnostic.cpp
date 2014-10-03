@@ -21,18 +21,15 @@
 #include "WithinHost/Diagnostic.h"
 #include "util/random.h"
 #include "util/errors.h"
-
+#include "schema/scenario.h"
+#include <limits>
 #include <boost/ptr_container/ptr_map.hpp>
 
 namespace OM { namespace WithinHost {
 
-void Diagnostic::setDeterministic(double limit){
-    assert( (boost::math::isnan)(dens_lim) );       // multiple initialisations
-    specificity = numeric_limits<double>::quiet_NaN();
-    dens_lim = limit;
-}
+// ———  Diagnostic (non-static)  ———
 
-void Diagnostic::setXml( const scnXml::HSDiagnostic& elt ){
+Diagnostic::Diagnostic( const scnXml::Diagnostic& elt ){
     if( elt.getDeterministic().present() ){
         specificity = numeric_limits<double>::quiet_NaN();
         dens_lim = elt.getDeterministic().get().getMinDensity();
@@ -47,7 +44,8 @@ void Diagnostic::setXml( const scnXml::HSDiagnostic& elt ){
             specificity = elt.getStochastic().get().getSpecificity();
             if( specificity < 0.0 || specificity > 1.0 ){
                 throw util::xml_scenario_error(
-                    string("diagnostic: specificity must be in range [0,1]") );
+                    string("diagnostics/diagnostic(").append(elt.getName())
+                    .append("): specificity must be in range [0,1]") );
             }
         }
     }else{
@@ -57,7 +55,8 @@ void Diagnostic::setXml( const scnXml::HSDiagnostic& elt ){
     }
     if( dens_lim < 0.0 ){
         throw util::xml_scenario_error(
-            string("diagnostic: must have density ≥ 0") );
+            string("diagnostics/diagnostic(").append(elt.getName())
+            .append("): must have density ≥ 0") );
     }
 }
 
@@ -86,6 +85,24 @@ Diagnostic_set diagnostic_set;
 
 void diagnostics::clear(){
     diagnostic_set.clear();
+}
+
+void diagnostics::init( const scnXml::Diagnostics& diagnostics ){
+    foreach( const scnXml::Diagnostic& diagnostic, diagnostics.getDiagnostic() ){
+        string name = diagnostic.getName();     // conversion fails without this extra line
+        bool inserted = diagnostic_set.insert( name, new Diagnostic(diagnostic) ).second;
+        if( !inserted ){
+            throw util::xml_scenario_error( string("diagnostic with this name already set: ").append(diagnostic.getName()) );
+        }
+    }
+}
+
+const Diagnostic& diagnostics::get( const string& name ){
+    Diagnostic_set::const_iterator it = diagnostic_set.find(name);
+    if( it == diagnostic_set.end() ){
+        throw util::xml_scenario_error( string("diagnostic not found: ").append(name) );
+    }
+    return *it->second;
 }
 
 const Diagnostic& diagnostics::make_deterministic(double minDens){

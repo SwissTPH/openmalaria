@@ -22,33 +22,26 @@
 #define HS_DIAGNOSTIC
 
 #include "Global.h"
-#include "schema/interventions.h"
-#include <limits>
+
+class UnittestUtil;
+namespace scnXml {
+    class Diagnostics;
+    class Diagnostic;
+}
 
 namespace OM { namespace WithinHost {
 
 class Diagnostic {
 public:
-    /** Construct. Set params to NaNs. */
-    Diagnostic() :
-        specificity( numeric_limits<double>::signaling_NaN() ),
-        dens_lim( numeric_limits<double>::signaling_NaN() )
-    {}
-    
-    /** Set parameters from an XML element. */
-    void setXml( const scnXml::HSDiagnostic& elt );
-    /** Set deterministic with a given detection limit. Note that the
-     * test uses "greater than or equal to", thus using a limit of 0 makes
-     * the test always positive. */
-    void setDeterministic( double limit );
-    
     /** Use the test.
      * 
      * @param dens Current parasite density in parasites per µL
      * @returns True if outcome is positive. */
     bool isPositive( double dens ) const;
-    
+        
 private:
+    /** Construct from XML parameters. */
+    Diagnostic( const scnXml::Diagnostic& elt );
     /** Construct as deterministic. */
     Diagnostic( double minDens );
     
@@ -65,6 +58,15 @@ private:
  * objects. */
 class diagnostics {
 public:
+    /** Initialise from input data. */
+    static void init( const scnXml::Diagnostics& diagnostics );
+    
+    /** Look up a diagnostic by name and get a reference to it.
+     * 
+     * @throws util::xml_scenario_error on failure
+     */
+    static const Diagnostic& get( const std::string& name );
+    
     /** Make a new diagnostic with deterministic density and return a reference. */
     static const Diagnostic& make_deterministic( double minDens );
     
