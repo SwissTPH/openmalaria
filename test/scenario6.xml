@@ -128,7 +128,7 @@
           <deploy coverage="1" targetAgeYrs="2.25" vaccMaxCumDoses="5" vaccMinPrevDoses="4"/>
         </continuous>
         <timed>
-          <deploy coverage="1" maxAge="999" minAge="0" time="1351-03-11"/>
+          <deploy coverage="1" maxAge="999" minAge="0" time="1351-05-11"/>
         </timed>
       </deployment>
     </human>
