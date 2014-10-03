@@ -58,8 +58,7 @@ namespace dummyXML{
         90.0 /*max human age*/ );
     
     scnXml::OptionSet survOpts;
-    scnXml::Surveys surveys(
-        numeric_limits<double>::quiet_NaN() /* detection limit */ );
+    scnXml::Surveys surveys;
     scnXml::AgeGroup monAgeGroup(
         0.0 /* lower bound */ );
     scnXml::Monitoring monitoring(

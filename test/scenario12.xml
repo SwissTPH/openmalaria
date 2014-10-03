@@ -31,7 +31,7 @@
       <option name="nUncomp"/>
       <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
-    <surveys detectionLimit="2">
+    <surveys diagnostic="garki">
       <surveyTime repeatStep="14" repeatEnd="126">14</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
@@ -1208,6 +1208,9 @@
   <diagnostics>
     <diagnostic name="deterministic">
       <deterministic minDensity="20"/>
+    </diagnostic>
+    <diagnostic name="garki">
+      <deterministic minDensity="9.59221545093408"/>
     </diagnostic>
   </diagnostics>
   <model>

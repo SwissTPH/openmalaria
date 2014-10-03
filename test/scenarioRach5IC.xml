@@ -62,7 +62,7 @@
       <option name="nMassGVI" value="true"/>
       <option name="nMDAs" value="true"/>
     </SurveyOptions>
-    <surveys detectionLimit="200">
+    <surveys diagnostic="standard">
       <surveyTime>1</surveyTime>
       <surveyTime repeatStep="6" repeatEnd="150">6</surveyTime>
     </surveys>
@@ -268,6 +268,9 @@
     </vector>
   </entomology>
   <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="35.475714197491"/>
+    </diagnostic>
     <diagnostic name="neonatal">
       <!-- 40 × estimated non-Garki bias (this should be the correct threshold
         for neonatal mortalities data source) -->

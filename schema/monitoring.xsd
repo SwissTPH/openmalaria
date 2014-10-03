@@ -91,12 +91,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:complexType>
             </xs:element>
           </xs:sequence>
-          <xs:attribute name="detectionLimit" type="xs:double" use="required">
+          <xs:attribute name="detectionLimit" type="xs:double" use="optional">
             <xs:annotation>
               <xs:documentation>
-                Limit above which a human's infection is reported as patent.
+                Deprecated: limit above which a human's infection is reported
+                as patent.
+                
+                Alternative: do not specify this; instead specify "diagnostic".
               </xs:documentation>
               <xs:appinfo>units:parasites/microlitre;min:0;name:Detection limit for parasitaemia;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="diagnostic" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Name of a parameterised diagnostic to use in surveys (see
+                scenario/diagnostics).
+              </xs:documentation>
+              <xs:appinfo>name:Name of monitoring diagnostic;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>

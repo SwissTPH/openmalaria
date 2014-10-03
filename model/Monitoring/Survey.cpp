@@ -209,7 +209,11 @@ void Survey::init( const OM::Parameters& parameters,
         // So far the implemented Vivax code does not produce parasite
         // densities, thus this diagnostic model cannot be used.
         m_diagnostic = &diagnostics::make_deterministic( numeric_limits<double>::quiet_NaN() );
-    }else{
+    }else if( surveys.getDetectionLimit().present() ){
+        if( surveys.getDiagnostic().present() ){
+            throw util::xml_scenario_error( "monitoring/surveys: do not specify both detectionLimit and diagnostic" );
+        }
+        
         //FIXME: something is likely wrong here (e.g. should densitybias be
         // used for other diagnostics?). Awaiting further information.
         /*
@@ -229,8 +233,13 @@ void Survey::init( const OM::Parameters& parameters,
             }
             densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
         }
-        double detectionLimit = surveys.getDetectionLimit() * densitybias;
+        double detectionLimit = surveys.getDetectionLimit().get() * densitybias;
         m_diagnostic = &diagnostics::make_deterministic( detectionLimit );
+    }else{
+        if( !surveys.getDiagnostic().present() ){
+            throw util::xml_scenario_error( "monitoring/surveys: require either detectionLimit or diagnostic" );
+        }
+        m_diagnostic = &diagnostics::get( surveys.getDiagnostic().get() );
     }
 }
 void AgeGroup::init (const scnXml::Monitoring& monitoring) {
