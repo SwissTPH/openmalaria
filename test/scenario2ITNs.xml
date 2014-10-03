@@ -297,13 +297,20 @@
       <nonHumanHosts name="unprotectedAnimals" number="1.0"/>
     </vector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="35.475714197491"/><!-- 200 × param 15 -->
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
       <option name="INNATE_MAX_DENS" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="6">
+      <NeonatalMortality diagnostic="standard"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>

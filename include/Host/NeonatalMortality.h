@@ -23,6 +23,9 @@
 
 #include "Global.h"
 
+namespace scnXml {
+    class Clinical;
+}
 namespace OM {
     class Population;
 namespace Host {
@@ -30,7 +33,7 @@ namespace Host {
 class NeonatalMortality {
 public:
   /// Initialisation
-  static void init();
+  static void init( const scnXml::Clinical& clinical );
   
   static void staticCheckpoint (istream& stream);
   static void staticCheckpoint (ostream& stream);

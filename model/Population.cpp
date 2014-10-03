@@ -51,7 +51,7 @@ namespace OM
 void Population::init( const Parameters& parameters, const scnXml::Scenario& scenario )
 {
     Host::Human::init( parameters, scenario );
-    Host::NeonatalMortality::init();
+    Host::NeonatalMortality::init( scenario.getModel().getClinical() );
     PkPd::PkPdModel::init( scenario );
     
     AgeStructure::init( scenario.getDemography() );

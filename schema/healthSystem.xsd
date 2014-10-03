@@ -17,7 +17,26 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
       <xs:appinfo>name:Description of clinical parameters;</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
+    <xs:all>
+      <xs:element name="NeonatalMortality" minOccurs="0">
+        <xs:annotation><xs:appinfo>name:Neonatal mortality parameters;</xs:appinfo></xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="diagnostic" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                The name of a diagnostic used to parameterise the model.
+                
+                Neonatal mortality is derived from malaria patency of a certain
+                sub-population of humans. This is the diagnostic used to asses
+                patency for this purpose.
+                
+                If this is not specified, the monitoring diagnostic is used.
+              </xs:documentation>
+              <xs:appinfo>name:Diagnostic used to parameterise model;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
       <xs:element name="NonMalariaFevers" minOccurs="0">
         <xs:complexType>
           <xs:annotation>
@@ -63,7 +82,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-    </xs:sequence>
+    </xs:all>
     <xs:attribute name="healthSystemMemory" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>

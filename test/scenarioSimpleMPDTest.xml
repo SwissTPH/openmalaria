@@ -175,6 +175,11 @@
       </anopheles>
     </vector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="0.4434464274686375"/><!-- 2.5 × param 15 -->
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
@@ -185,7 +190,9 @@
       <option name="INDIRECT_MORTALITY_FIX" value="true"/>
       <option name="REQUIRE_UNITS"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6t"/>
+    <clinical healthSystemMemory="6t">
+      <NeonatalMortality diagnostic="standard"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>

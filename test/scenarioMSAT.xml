@@ -565,6 +565,11 @@
       </drug>
     </drugs>
   </pharmacology>
+  <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="10.25272"/><!-- 40 × param 15 -->
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="MOLINEAUX_WITHIN_HOST_MODEL" value="true"/>
@@ -572,7 +577,9 @@
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
       <option name="INDIRECT_MORTALITY_FIX" value="true"/>
     </ModelOptions>
-    <clinical healthSystemMemory="14"/>
+    <clinical healthSystemMemory="14">
+      <NeonatalMortality diagnostic="standard"/>
+    </clinical>
     <!-- run id=740 parameterization id=243641 sampling date=2010-08-21 11:14:03 lossfunction=82.879291 -->
     <human>
       <availabilityToMosquitoes>

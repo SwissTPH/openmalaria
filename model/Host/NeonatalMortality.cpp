@@ -21,13 +21,15 @@
 #include "Host/NeonatalMortality.h"
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Diagnostic.h"
 #include "Monitoring/Survey.h"
 #include "util/random.h"
+#include "schema/healthSystem.h"
 
 #include <cmath>
 
 namespace OM { namespace Host {
-    using namespace OM::util;
+using namespace OM::util;
 
 //Goodman estimated for neonatal mortality due to malaria in pregnancy
 const double gEst = 0.011;
@@ -51,10 +53,23 @@ std::vector<double> prevByGestationalAge;
 /// Lower and upper bounds for potential mothers (as in model description)
 SimTime ageLb = sim::fromYearsI(20), ageUb = sim::fromYearsI(25);
 
+// The model is parameterised based on patency levels; the diagnostic
+// used for this may be important.
+const WithinHost::Diagnostic* neonatalDiagnostic = 0;
 
-void NeonatalMortality::init() {
+
+void NeonatalMortality::init( const scnXml::Clinical& clinical ){
     SimTime fiveMonths = sim::fromDays( 5 * 30 );
     prevByGestationalAge.assign( fiveMonths.inSteps(), 0.0 );
+    
+    if( clinical.getNeonatalMortality().present() ){
+        neonatalDiagnostic = &WithinHost::diagnostics::get(
+            clinical.getNeonatalMortality().get().getDiagnostic() );
+    }else{
+        //NOTE: this is a compatibility option for older scenarios
+        //TODO: deprecate
+        neonatalDiagnostic = &Monitoring::Survey::diagnostic();
+    }
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
@@ -77,7 +92,7 @@ void NeonatalMortality::update (const Population& population) {
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
-        // Monitoring::Survey::diagnostic() gives patency after the last time step's
+        // diagnosticDefault() gives patency after the last time step's
         // update, so it's appropriate to use age at the beginning of this step.
         SimTime age = iter->age(sim::ts0());
         
@@ -87,11 +102,10 @@ void NeonatalMortality::update (const Population& population) {
         if( age >= ageUb ) continue;
         if( age < ageLb ) break;	// Not interested in younger individuals.
         
-        //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
-        // reporting, but the one used should be that used to parameterise this model
         nCounter ++;
-        if (iter->withinHostModel->diagnosticResult( Monitoring::Survey::diagnostic() ))
+        if( iter->withinHostModel->diagnosticResult(*neonatalDiagnostic) ){
             pCounter ++;
+        }
     }
     
     // ———  calculate risk of neonatal mortality  ———
