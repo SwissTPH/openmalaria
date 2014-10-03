@@ -48,11 +48,6 @@ public:
      * @returns True if outcome is positive. */
     bool isPositive( double dens ) const;
     
-    /** The default diagnostic, set from the XML's detectionLimit.
-     * 
-     * TODO: this should be configured more flexibly in the XML. */
-    static Diagnostic default_;
-    
 private:
     /** Construct as deterministic. */
     Diagnostic( double minDens );

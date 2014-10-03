@@ -125,7 +125,7 @@ public:
     /// @brief Static methods
     //@{
     /// Initialise static parameters
-    static void init(const OM::Parameters& parameters, const scnXml::Scenario& scenario);
+    static void init( const OM::Parameters& parameters, const scnXml::Model& model );
     
     /** Set health system parameters (stored in this class for convenience). */
     static void setHSParameters( const scnXml::Primaquine& );

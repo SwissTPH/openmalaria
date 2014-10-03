@@ -54,7 +54,7 @@ int WHFalciparum::y_lag_len = 0;
 
 // -----  static functions  -----
 
-void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ) {
+void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& model ) {
     sigma_i=sqrt(parameters[Parameters::SIGMA_I_SQ]);
     immPenalty_22=1-exp(parameters[Parameters::IMMUNITY_PENALTY]);
     immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
@@ -63,32 +63,12 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
     y_lag_len = sim::daysToSteps(20);
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
-    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical(), false );
-    
-    /*
-    The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
-    TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
-    The density bias allows the detection limit for microscopy to be higher for other sites
-    */
-    double densitybias;
-    if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
-        densitybias = parameters[Parameters::DENSITY_BIAS_GARKI];
-    } else {
-        if( scenario.getAnalysisNo().present() ){
-            int analysisNo = scenario.getAnalysisNo().get();
-            if ((analysisNo >= 22) && (analysisNo <= 30)) {
-                cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
-            }
-        }
-        densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
-    }
-    double detectionLimit=scenario.getMonitoring().getSurveys().getDetectionLimit()*densitybias;
-    Diagnostic::default_.setDeterministic( detectionLimit );
+    Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
     
     try{
         //NOTE: if XSD is changed, this should not have a default unit
         SimTime latentP = UnitParse::readShortDuration(
-            scenario.getModel().getParameters().getLatentp(), UnitParse::STEPS );
+            model.getParameters().getLatentp(), UnitParse::STEPS );
         Infection::init( parameters, latentP );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );

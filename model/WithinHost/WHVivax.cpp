@@ -454,17 +454,16 @@ double WHVivax::getTotalDensity() const{ throw TRACED_EXCEPTION( not_impl, util:
 double WHVivax::getCumulative_h() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 double WHVivax::getCumulative_Y() const{ throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
-void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ){
+void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model ){
     try{
         //NOTE: if XSD is changed, this should not have a default unit
-        latentP = UnitParse::readShortDuration(
-            scenario.getModel().getParameters().getLatentp(), UnitParse::STEPS );
+        latentP = UnitParse::readShortDuration( model.getParameters().getLatentp(), UnitParse::STEPS );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
     }
-    if( !scenario.getModel().getVivax().present() )
+    if( !model.getVivax().present() )
         throw util::xml_scenario_error( "no vivax model description in scenario XML" );
-    const scnXml::Vivax& elt = scenario.getModel().getVivax().get();
+    const scnXml::Vivax& elt = model.getVivax().get();
     probBloodStageInfectiousToMosq = elt.getProbBloodStageInfectiousToMosq().getValue();
     maxNumberHypnozoites = elt.getNumberHypnozoites().getMax();
     baseNumberHypnozoites = elt.getNumberHypnozoites().getBase();
@@ -482,7 +481,7 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Scenario& sc
     pEventIsSevere = elt.getPEventIsSevere().getValue();
     
     initNHypnozoites();
-    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical(), true );
+    Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), true );
 }
 void WHVivax::setHSParameters(const scnXml::Primaquine& elt){
     if( pHetNoPQ != pHetNoPQ )// not set yet

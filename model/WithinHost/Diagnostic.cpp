@@ -26,8 +26,6 @@
 
 namespace OM { namespace WithinHost {
 
-Diagnostic Diagnostic::default_;
-
 void Diagnostic::setDeterministic(double limit){
     assert( (boost::math::isnan)(dens_lim) );       // multiple initialisations
     specificity = numeric_limits<double>::quiet_NaN();

@@ -31,6 +31,7 @@ using namespace std;
 
 namespace scnXml{
     class Scenario;
+    class Model;
     class TreatmentOption;
 }
 class UnittestUtil;
