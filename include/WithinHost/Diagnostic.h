@@ -26,40 +26,40 @@
 #include <limits>
 
 namespace OM { namespace WithinHost {
+
+class Diagnostic {
+public:
+    /** Construct. Set params to NaNs. */
+    Diagnostic() :
+        specificity( numeric_limits<double>::signaling_NaN() ),
+        dens_lim( numeric_limits<double>::signaling_NaN() )
+    {}
     
-    class Diagnostic {
-    public:
-        /** Construct. Set params to NaNs. */
-        Diagnostic() :
-            specificity( numeric_limits<double>::signaling_NaN() ),
-            density( numeric_limits<double>::signaling_NaN() )
-        {}
-        
-        /** Set parameters from an XML element. */
-        void setXml( const scnXml::HSDiagnostic& elt );
-        /** Set deterministic with a given detection limit. Note that the
-         * test uses "greater than or equal to", thus using a limit of 0 makes
-         * the test always positive. */
-        void setDeterministic( double limit );
-        
-        /** Use the test.
-         * 
-         * @param x Current parasite density in parasites per µL
-         * @returns True if outcome is positive. */
-        bool isPositive( double x ) const;
-        
-        /** The default diagnostic, set from the XML's detectionLimit.
-         * 
-         * TODO: this should be configured more flexibly in the XML. */
-        static Diagnostic default_;
-        
-    private:
-        // either not-a-number indicating a deterministic test, or specificity
-        double specificity;
-        // depending on model, this is either the minimum detectible density
-        // or the density at which test has half a chance of a positive outcome
-        double density;
-    };
+    /** Set parameters from an XML element. */
+    void setXml( const scnXml::HSDiagnostic& elt );
+    /** Set deterministic with a given detection limit. Note that the
+     * test uses "greater than or equal to", thus using a limit of 0 makes
+     * the test always positive. */
+    void setDeterministic( double limit );
+    
+    /** Use the test.
+     * 
+     * @param dens Current parasite density in parasites per µL
+     * @returns True if outcome is positive. */
+    bool isPositive( double dens ) const;
+    
+    /** The default diagnostic, set from the XML's detectionLimit.
+     * 
+     * TODO: this should be configured more flexibly in the XML. */
+    static Diagnostic default_;
+    
+private:
+    // switch: either not-a-number indicating a deterministic test, or specificity
+    double specificity;
+    // depending on model, this is either the minimum detectible density
+    // or the density at which test has half a chance of a positive outcome
+    double dens_lim;
+};
 
 } }
 #endif

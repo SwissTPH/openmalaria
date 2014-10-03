@@ -27,31 +27,48 @@ namespace OM { namespace WithinHost {
 Diagnostic Diagnostic::default_;
 
 void Diagnostic::setDeterministic(double limit){
-    assert( (boost::math::isnan)(density) );       // multiple initialisations
+    assert( (boost::math::isnan)(dens_lim) );       // multiple initialisations
     specificity = numeric_limits<double>::quiet_NaN();
-    density = limit;
+    dens_lim = limit;
 }
 
 void Diagnostic::setXml( const scnXml::HSDiagnostic& elt ){
     if( elt.getDeterministic().present() ){
         specificity = numeric_limits<double>::quiet_NaN();
-        density = elt.getDeterministic().get().getMinDensity();
+        dens_lim = elt.getDeterministic().get().getMinDensity();
     }else if( elt.getStochastic().present() ){
-        specificity = elt.getStochastic().get().getSpecificity();
-        density = elt.getStochastic().get().getDens_50();
+        dens_lim = elt.getStochastic().get().getDens_50();
+        if( dens_lim == 0.0 ){
+            // The equation used for stochastic diagnostics breaks down when
+            // dens=dens_lim=0 and for other cases the deterministic model is
+            // the same when dens_lim=0.
+            specificity = numeric_limits<double>::quiet_NaN();
+        }else{
+            specificity = elt.getStochastic().get().getSpecificity();
+            if( specificity < 0.0 || specificity > 1.0 ){
+                throw util::xml_scenario_error(
+                    string("diagnostic: specificity must be in range [0,1]") );
+            }
+        }
     }else{
         // This should be impossible since according to schema one of these
         // elements must be present.
-        assert(false);
+        throw SWITCH_DEFAULT_EXCEPTION;
+    }
+    if( dens_lim < 0.0 ){
+        throw util::xml_scenario_error(
+            string("diagnostic: must have density ≥ 0") );
     }
 }
 
-bool Diagnostic::isPositive( double x ) const {
+bool Diagnostic::isPositive( double dens ) const {
     if( (boost::math::isnan)(specificity) ){
         // use deterministic test
-        return x >= density;
+        return dens >= dens_lim;
     }else{
-        double pPositive = 1.0 + specificity * (x / (x + density) - 1.0);
+        // dens_lim is dens_50 in this case
+        double pPositive = 1.0 + specificity * (dens / (dens + dens_lim) - 1.0);
+//         double pPositive = (dens + dens_lim - dens_lim * specificity) / (dens + dens_lim);       // equivalent
         return util::random::bernoulli( pPositive );
     }
 }

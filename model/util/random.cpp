@@ -246,6 +246,7 @@ int random::poisson(double lambda){
 }
 
 bool random::bernoulli(double prob){
+    assert( (boost::math::isfinite)(prob) );
     // return true iff our variate is less than the probability
     bool result =random::uniform_01() < prob;
 //     util::streamValidate(result);
@@ -253,6 +254,7 @@ bool random::bernoulli(double prob){
 }
 
 int random::uniform(int n){
+    assert( (boost::math::isfinite)(n) );
     return random::uniform_01() * n;
 }
 
