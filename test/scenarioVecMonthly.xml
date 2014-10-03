@@ -219,8 +219,10 @@
     </vector>
   </entomology>
   <diagnostics>
-    <diagnostic name="standard">
-      <deterministic minDensity="0.4434464274686375"/><!-- 2.5 × param 15 -->
+    <diagnostic name="neonatal">
+      <!-- 40 × estimated non-Garki bias (this should be the correct threshold
+        for neonatal mortalities data source) -->
+      <deterministic minDensity="7.0951428394982"/>
     </diagnostic>
   </diagnostics>
   <model>
@@ -232,7 +234,7 @@
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
     <clinical healthSystemMemory="6">
-      <NeonatalMortality diagnostic="standard"/>
+      <NeonatalMortality diagnostic="neonatal"/>
     </clinical>
     <human>
       <availabilityToMosquitoes>
