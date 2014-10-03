@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
+#include "WithinHost/Diagnostic.h"
 #include "WithinHost/Pathogenesis/State.h"
 #include "Parameters.h"
 
@@ -159,7 +160,7 @@ public:
      * 
      * @returns true when the diagnostic is positive
      */
-    virtual bool diagnosticDefault() const =0;
+    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const =0;
     
     /** Use the pathogenesis model to determine, based on infection status
      * and random draw, this person't morbidity.

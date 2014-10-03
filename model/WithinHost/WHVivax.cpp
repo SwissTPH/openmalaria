@@ -331,7 +331,9 @@ void WHVivax::update(int nNewInfs, double ageInYears, double, ofstream& drugMon)
     }
 }
 
-bool WHVivax::diagnosticDefault() const{
+bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
+    //TODO(monitoring): this shouldn't ignore the diagnostic (especially since
+    // it should always return true if diagnostic.density=0)
     for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {

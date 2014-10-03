@@ -21,6 +21,7 @@
 #include "Host/NeonatalMortality.h"
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
+#include "Monitoring/Survey.h"
 #include "util/random.h"
 
 #include <cmath>
@@ -76,7 +77,7 @@ void NeonatalMortality::update (const Population& population) {
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
-        // diagnosticDefault() gives patentcy after the last time step's
+        // Monitoring::Survey::diagnostic() gives patency after the last time step's
         // update, so it's appropriate to use age at the beginning of this step.
         SimTime age = iter->age(sim::ts0());
         
@@ -89,7 +90,7 @@ void NeonatalMortality::update (const Population& population) {
         //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
         // reporting, but the one used should be that used to parameterise this model
         nCounter ++;
-        if (iter->withinHostModel->diagnosticDefault())
+        if (iter->withinHostModel->diagnosticResult( Monitoring::Survey::diagnostic() ))
             pCounter ++;
     }
     

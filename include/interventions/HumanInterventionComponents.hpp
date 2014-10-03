@@ -309,7 +309,7 @@ public:
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits ) const{
         Survey::current().addInt( reportMeasure(method), human, 1 );
-        if( diagnostic.isPositive( human.withinHostModel->getTotalDensity() ) ){
+        if( human.withinHostModel->diagnosticResult(diagnostic) ){
             positive.deploy( human, method, vaccLimits );
         }else{
             negative.deploy( human, method, vaccLimits );

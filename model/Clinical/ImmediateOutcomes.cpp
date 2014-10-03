@@ -158,6 +158,7 @@ void ImmediateOutcomes::setHealthSystem (const scnXml::HSImmediateOutcomes& hsDe
     else if( inpatient == secondLine ) treatmentSevere = treatmentUC[SecondLine];
     else treatmentSevere = getHealthSystemTreatmentByName(hsDescription.getTreatmentActions(), inpatient);
     
+    //TODO: deprecate this feature
     useDiagnosticUC = hsDescription.getUseDiagnosticUC();
     
     if( hsDescription.getPrimaquine().present() ){
@@ -187,7 +188,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         
         if( useDiagnosticUC ){
             Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
-            if( !human.withinHostModel->diagnosticDefault() )
+            if( !human.withinHostModel->diagnosticResult(Survey::diagnostic()) )
                 return; // negative outcome: no treatment
         }
         

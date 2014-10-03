@@ -54,7 +54,7 @@ public:
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
     virtual double getTotalDensity() const;
-    virtual bool diagnosticDefault() const;
+    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
     virtual void clearImmunity();
     virtual double getCumulative_h() const;

@@ -145,7 +145,7 @@ public:
     
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
     
-    virtual bool diagnosticDefault() const;
+    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
 
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
     

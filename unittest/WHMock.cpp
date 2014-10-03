@@ -69,7 +69,7 @@ inline double WHMock::getTotalDensity() const{
     return totalDensity;
 }
 
-bool WHMock::diagnosticDefault() const{
+bool WHMock::diagnosticResult( const Diagnostic& diagnostic ) const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 

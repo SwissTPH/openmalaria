@@ -185,7 +185,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // Each step, monitoring (e.g. carrying out a survey) happens
             // first, reporting on the state at the start of the step (e.g.
-            // patentcy diagnostics) or tallys of events which happened since
+            // patency diagnostics) or tallys of events which happened since
             // some point in the past (e.g. a previous survey).
             // Interventions are deployed next. For monitoring and intervention
             // deployment sim::ts0() and sim::ts1() should not be used.

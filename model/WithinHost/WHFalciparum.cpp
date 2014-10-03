@@ -157,8 +157,8 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor ) const{
     return result;
 }
 
-bool WHFalciparum::diagnosticDefault() const{
-    return Diagnostic::default_.isPositive( totalDensity );
+bool WHFalciparum::diagnosticResult( const Diagnostic& diagnostic ) const{
+    return diagnostic.isPositive( totalDensity );
 }
 
 void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
@@ -244,7 +244,7 @@ bool WHFalciparum::summarize (const Host::Human& human) {
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
-    if (diagnosticDefault()) {
+    if( diagnosticResult(Survey::diagnostic()) ){
         survey
             .addInt( Report::MI_PATENT_HOSTS, human, 1)
             .addDouble( Report::MD_LOG_DENSITY, human, log(totalDensity) );

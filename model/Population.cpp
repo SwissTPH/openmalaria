@@ -278,7 +278,7 @@ void Population::ctsRecentBirths (ostream& stream){
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->getWithinHostModel().diagnosticDefault() )
+        if( iter->getWithinHostModel().diagnosticResult(Monitoring::Survey::diagnostic()) )
             ++patent;
     }
     stream << '\t' << patent;

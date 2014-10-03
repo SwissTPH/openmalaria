@@ -195,7 +195,7 @@ WHInterface::InfectionCount CommonWithinHost::countInfections () const{
     InfectionCount count;       // constructor initialises counts to 0
     count.total = infections.size();
     for (std::list<CommonInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
+        if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) )
             count.patent += 1;
     }
     return count;
