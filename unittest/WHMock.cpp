@@ -70,7 +70,7 @@ inline double WHMock::getTotalDensity() const{
 }
 
 bool WHMock::diagnosticResult( const Diagnostic& diagnostic ) const{
-    throw util::unimplemented_exception( "not needed in unit test" );
+    return diagnostic.isPositive( totalDensity );
 }
 
 void WHMock::treatment( Host::Human& human, TreatmentId treatId ){

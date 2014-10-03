@@ -20,6 +20,7 @@
 
 #include "Clinical/CMDecisionTree.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Diagnostic.h"
 #include "PkPd/LSTMTreatments.h"
 #include "util/random.h"
 #include "Monitoring/Survey.h"
@@ -36,6 +37,8 @@
 
 namespace OM { namespace Clinical {
 
+using WithinHost::Diagnostic;
+using WithinHost::diagnostics;
 using Monitoring::Survey;
 using namespace OM::util;
 using namespace boost::assign;
@@ -109,44 +112,26 @@ public:
     
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
-        if( isRDT )     Survey::current().report_Clinical_RDTs (1);
-        else            Survey::current().report_Clinical_Microscopy (1);
+        //FIXME: type of report (make new ones?)
+        Survey::current().report_Clinical_RDTs (1);
+        // or this: Survey::current().report_Clinical_Microscopy (1);
         
-        double dens = hostData.withinHost().getTotalDensity ();
-        double pPositive = 1.0 + specificity * (dens / (dens + dens_50) - 1.0);
-        if( random::bernoulli(pPositive) ) return positive->exec( hostData );
-        else return negative->exec( hostData );
-    }
-    
-private:
-    CMDTDiagnostic( const string& type,
-        auto_ptr<CMDecisionTree> positive,
-        auto_ptr<CMDecisionTree> negative ) :
-        positive(positive), negative(negative)
-    {
-        //TODO: these values should not be hard-coded and maybe we should allow
-        // more than two types of diagnostic.
-        if( type == "microscopy" ){
-            // Microscopy sensitivity/specificity data in Africa;
-            // Source: expert opinion — Allan Schapira
-            dens_50 = 20.0;
-            specificity = .75;
-            isRDT = false;
+        if( hostData.withinHost().diagnosticResult( diagnostic ) ){
+            return positive->exec( hostData );
         }else{
-            assert( type == "RDT" );
-            // RDT sensitivity/specificity for Plasmodium falciparum in Africa
-            // Source: Murray et al (Clinical Microbiological Reviews, Jan. 2008)
-            dens_50 = 50.0;
-            specificity = .942;
-            isRDT = true;
+            return negative->exec( hostData );
         }
     }
     
-    //NOTE: could be const if constructed differently:
-    double dens_50;     // parasite density giving 50% chance of positive outcome
-    double specificity; // chance of a negative outcome given no parasites
-    bool isRDT;   // for reporting
+private:
+    CMDTDiagnostic( const Diagnostic& diagnostic,
+        auto_ptr<CMDecisionTree> positive,
+        auto_ptr<CMDecisionTree> negative ) :
+        diagnostic(diagnostic),
+        positive(positive), negative(negative)
+    {}
     
+    const Diagnostic& diagnostic;
     const auto_ptr<CMDecisionTree> positive;
     const auto_ptr<CMDecisionTree> negative;
 };
@@ -369,9 +354,11 @@ auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node, b
     ) );
 }
 
+Diagnostic d_microscopy( 20, 0.75 ), d_RDT( 50, 0.942 );
+
 auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& node, bool isUC ){
     return auto_ptr<CMDecisionTree>( new CMDTDiagnostic(
-        node.getType(),
+        node.getType() == "microscopy" ? d_microscopy : d_RDT,
         CMDecisionTree::create( node.getPositive(), isUC ),
         CMDecisionTree::create( node.getNegative(), isUC )
     ) );
