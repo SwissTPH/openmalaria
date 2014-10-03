@@ -19,12 +19,10 @@
  */
 
 #include "WHMock.h"
-#include "UnittestUtil.h"
+#include "WithinHost/Diagnostic.h"
 #include "util/errors.h"
 
 using namespace std;
-
-class UnittestUtil;
 
 namespace OM {
 namespace UnitTest {

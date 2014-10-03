@@ -90,9 +90,8 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     util::ModelOptions::init( model.getModelOptions() );
     
     // 2) elements depending on only elements initialised in (1):
-    Surveys.init( scenario.getMonitoring() );
-    
     Parameters parameters( model.getParameters() );     // depends on nothing
+    Surveys.init( parameters, scenario, scenario.getMonitoring() );
     Population::init( parameters, scenario );
     
     // 3) elements depending on other elements; dependencies on (1) are not mentioned:

@@ -40,10 +40,7 @@ class CMDecisionTreeSuite : public CxxTest::TestSuite
 {
 public:
     CMDecisionTreeSuite () :
-            whm(0), hd(0)
-    {
-        UnittestUtil::initSurveys();
-    }
+            whm(0), hd(0) {}
     ~CMDecisionTreeSuite () {}
     
     void setUp () {
@@ -51,6 +48,7 @@ public:
 	// generator which is initialized after constructor runs.
 	util::random::seed (83);	// seed is unimportant, but must be fixed
         UnittestUtil::initTime(5);
+        UnittestUtil::initSurveys();
         
 	UnittestUtil::EmpiricalWHM_setup();
         whm.reset( new WHMock() );

@@ -22,6 +22,8 @@
 #include "util/random.h"
 #include "util/errors.h"
 
+#include <boost/ptr_container/ptr_map.hpp>
+
 namespace OM { namespace WithinHost {
 
 Diagnostic Diagnostic::default_;
@@ -61,6 +63,11 @@ void Diagnostic::setXml( const scnXml::HSDiagnostic& elt ){
     }
 }
 
+Diagnostic::Diagnostic(double minDens){
+    specificity = numeric_limits<double>::quiet_NaN();
+    dens_lim = minDens;
+}
+
 bool Diagnostic::isPositive( double dens ) const {
     if( (boost::math::isnan)(specificity) ){
         // use deterministic test
@@ -71,6 +78,24 @@ bool Diagnostic::isPositive( double dens ) const {
 //         double pPositive = (dens + dens_lim - dens_lim * specificity) / (dens + dens_lim);       // equivalent
         return util::random::bernoulli( pPositive );
     }
+}
+
+
+// ———  diagnostics (static)  ———
+
+typedef boost::ptr_map<string,Diagnostic> Diagnostic_set;
+Diagnostic_set diagnostic_set;
+
+void diagnostics::clear(){
+    diagnostic_set.clear();
+}
+
+const Diagnostic& diagnostics::make_deterministic(double minDens){
+    string name = "";   // anything not matching an existing name is fine
+    assert( diagnostic_set.count(name) == 0 );  // we shouldn't need to call make_deterministic more than once, so I think this will do
+    Diagnostic *diagnostic = new Diagnostic( minDens );
+    diagnostic_set.insert( name, diagnostic );
+    return *diagnostic;
 }
 
 } }

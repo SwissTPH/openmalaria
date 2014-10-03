@@ -53,9 +53,11 @@ public:
             {}
     
     /** Read in some params from XML and allocate memory. */
-    void init (const scnXml::Monitoring& monitoring);
+    void init( const OM::Parameters& parameters,
+                   const scnXml::Scenario& scenario,
+                   const scnXml::Monitoring& monitoring );
     /** Second initialisation step: must happen after the InterventionManager is set up. */
-    void init2 (const scnXml::Monitoring& monitoring);
+    void init2( const scnXml::Monitoring& monitoring );
     
     //! It increments the survey period
     void incrementSurveyPeriod();

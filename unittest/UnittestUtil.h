@@ -48,56 +48,62 @@ namespace OM {
     }
 }
 
+namespace dummyXML{
+    scnXml::AgeGroupPerC demAgeGroup(
+        numeric_limits<double>::quiet_NaN() /* lower bound */ );
+    scnXml::Demography demography( 
+        demAgeGroup,
+        "dummy" /* name */,
+        0 /* pop size */,
+        90.0 /*max human age*/ );
+    
+    scnXml::OptionSet survOpts;
+    scnXml::Surveys surveys(
+        numeric_limits<double>::quiet_NaN() /* detection limit */ );
+    scnXml::AgeGroup monAgeGroup(
+        0.0 /* lower bound */ );
+    scnXml::Monitoring monitoring(
+        survOpts,
+        surveys,
+        monAgeGroup,
+        "dummy" /* name */ );
+    
+    scnXml::Interventions interventions( "dummy" /* name */ );
+    
+    scnXml::AgeGroupValues cfr, pSeq;
+    scnXml::HealthSystem healthSystem( cfr, pSeq );
+    
+    scnXml::EntoData entomology( "dummy" /* name */,
+        "dummy" /* mode */ );
+    
+    scnXml::OptionSet modelOpts;
+    scnXml::Clinical modelClinical( "dummy" /* HS memory */ );
+    scnXml::AgeGroupValues modelHumanAvailMosq;
+    scnXml::Human modelHuman( modelHumanAvailMosq );
+    scnXml::Parameters modelParams(
+        0 /* interval */,
+        0 /* iseed */,
+        "dummy" /* latentP */ );
+    scnXml::Model model( modelOpts, modelClinical, modelHuman, modelParams );
+    
+    scnXml::Scenario scenario(
+        demography,
+        monitoring,
+        interventions,
+        healthSystem,
+        entomology,
+        model,
+        0 /* schema version */,
+        "dummy" /* name */ );
+}
+
 class UnittestUtil {
 public:
     static void initTime(int daysPerStep){
-        scnXml::AgeGroupPerC demAgeGroup(
-            numeric_limits<double>::quiet_NaN() /* lower bound */ );
-        scnXml::Demography demography( 
-            demAgeGroup,
-            "dummy" /* name */,
-            0 /* pop size */,
-            90.0 /*max human age*/ );
-        
-        scnXml::OptionSet survOpts;
-        scnXml::Surveys surveys(
-            numeric_limits<double>::quiet_NaN() /* detection limit */ );
-        scnXml::AgeGroup monAgeGroup(
-            numeric_limits<double>::quiet_NaN() /* lower bound */ );
-        scnXml::Monitoring monitoring(
-            survOpts,
-            surveys,
-            monAgeGroup,
-            "dummy" /* name */ );
-        
-        scnXml::Interventions interventions( "dummy" /* name */ );
-        
-        scnXml::AgeGroupValues cfr, pSeq;
-        scnXml::HealthSystem healthSystem( cfr, pSeq );
-        
-        scnXml::EntoData entomology( "dummy" /* name */,
-            "dummy" /* mode */ );
-        
-        scnXml::OptionSet modelOpts;
-        scnXml::Clinical modelClinical( "dummy" /* HS memory */ );
-        scnXml::AgeGroupValues modelHumanAvailMosq;
-        scnXml::Human modelHuman( modelHumanAvailMosq );
-        scnXml::Parameters modelParams(
-            daysPerStep,
-            0 /* iseed */,
-            "dummy" /* latentP */ );
-        scnXml::Model model( modelOpts, modelClinical, modelHuman, modelParams );
-        
-        scnXml::Scenario scenario(
-            demography,
-            monitoring,
-            interventions,
-            healthSystem,
-            entomology,
-            model,
-            0 /* schema version */,
-            "dummy" /* name */ );
-        sim::init( scenario );
+        dummyXML::modelParams.setInterval( daysPerStep );
+        dummyXML::model.setParameters(dummyXML::modelParams);
+        dummyXML::scenario.setModel(dummyXML::model);
+        sim::init( dummyXML::scenario );
         
         // we could just use zero, but we may spot more errors by using some weird number
         sim::time0 = sim::fromYearsN(83.2591);
@@ -113,11 +119,15 @@ public:
     }
     // Initialise surveys, to the minimum required not to crash
     static void initSurveys(){
-        scnXml::OptionSet opts;
-        scnXml::Surveys surveys( numeric_limits<double>::quiet_NaN() /* detection limit */);
-        scnXml::AgeGroup ageGroups( 0.0 /* lower bound */ );
-        scnXml::Monitoring mon( opts, surveys, ageGroups, "no monitoring" );
-        Monitoring::Surveys.init( mon );
+        diagnostics::clear();
+        if( dummyXML::modelParams.getParameter().size() == 0 ){
+            scnXml::Parameter densBias( "non-garki density bias", 15, numeric_limits<double>::quiet_NaN() );
+            dummyXML::modelParams.getParameter().push_back( densBias );
+        }
+        Parameters parameters( dummyXML::modelParams );
+        dummyXML::surveys.setDetectionLimit( numeric_limits<double>::quiet_NaN() );
+        dummyXML::monitoring.setSurveys( dummyXML::surveys );
+        Monitoring::Surveys.init( parameters, dummyXML::scenario, dummyXML::monitoring );
     }
     
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {

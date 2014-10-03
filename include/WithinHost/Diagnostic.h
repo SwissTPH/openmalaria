@@ -54,11 +54,28 @@ public:
     static Diagnostic default_;
     
 private:
+    /** Construct as deterministic. */
+    Diagnostic( double minDens );
+    
     // switch: either not-a-number indicating a deterministic test, or specificity
     double specificity;
     // depending on model, this is either the minimum detectible density
     // or the density at which test has half a chance of a positive outcome
     double dens_lim;
+    
+    friend class diagnostics;
+};
+
+/** Static members to do with Diagnostic: library of parameterised Diagnostic
+ * objects. */
+class diagnostics {
+public:
+    /** Make a new diagnostic with deterministic density and return a reference. */
+    static const Diagnostic& make_deterministic( double minDens );
+    
+private:
+    static void clear();        // for unit tests
+    friend class ::UnittestUtil;
 };
 
 } }

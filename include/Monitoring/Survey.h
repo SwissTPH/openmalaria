@@ -21,21 +21,25 @@
 #ifndef Hmod_Survey
 #define Hmod_Survey
 
+#include "Global.h"
 #include "Monitoring/SurveyMeasure.h"
 #include "Monitoring/AgeGroup.h"        // only needed for special version of addInt() used by Episode
-#include "Global.h"
+#include "WithinHost/Diagnostic.h"
+#include "Parameters.h"
 #include "util/checkpoint_containers.h"
 #include <bitset>
 #include <map>
 #include <boost/multi_array.hpp>
 
+class UnittestUtil;
 namespace scnXml{ class Monitoring; }
 namespace OM {
 namespace Host {
     class Human;
 }
 namespace Monitoring {
-    using boost::multi_array;
+using WithinHost::Diagnostic;
+using boost::multi_array;
 
 /// Encapsulate report measure codes
 namespace Report {
@@ -115,7 +119,9 @@ private:
     ///@brief Static members (options from XML). Parameters only set by init().
     //@{
     /// Initialize static parameters.
-    static void init(const scnXml::Monitoring& monitoring);
+    static void init( const OM::Parameters& parameters,
+                   const scnXml::Scenario& scenario,
+                   const scnXml::Monitoring& monitoring );
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
@@ -151,6 +157,11 @@ public:
      * explicitly specified and has a small affect on
      * infantAllCauseMortality (survey 21) output. */
     static SimTime getLastSurveyTime ();
+    
+    static inline const Diagnostic& diagnostic(){
+        assert( m_diagnostic != 0 );
+        return *m_diagnostic;
+    }
     
     /** Humans should store a "cohort set" identifier which is initially 0.
      * Whenever a human gains or loses membership status in some
@@ -288,7 +299,10 @@ private:
      * next survey. */
     static Survey *m_current;
     
+    static const Diagnostic* m_diagnostic;
+    
     friend class SurveysType;
+    friend class ::UnittestUtil;
 };
 
 /** Line end character. Use Unix line endings to save a little size. */

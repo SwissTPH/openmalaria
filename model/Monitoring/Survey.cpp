@@ -20,14 +20,17 @@
 
 #include "Monitoring/Surveys.h"
 #include "Monitoring/AgeGroup.h"
-#include "util/errors.h"
 #include "Host/Human.h"
+#include "util/ModelOptions.h"
+#include "util/errors.h"
 #include "schema/monitoring.h"
+#include "schema/scenario.h"    // TODO: only for analysisNo
 
 #include <boost/static_assert.hpp>
 #include <stdexcept>
 
 namespace OM { namespace Monitoring {
+using WithinHost::diagnostics;
  
 // -----  Utility forward declarations  -----
 
@@ -43,7 +46,7 @@ size_t dblReportMappings[Report::MD_NUM];
 
 vector<SimTime> AgeGroup::upperBound;
 bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
-
+const Diagnostic* Survey::m_diagnostic = 0;
 
 class SurveyMeasureMap {
     // Lookup table to translate the strings used in the XML file to the internal enumerated values:
@@ -139,7 +142,9 @@ public:
 };
 
 
-void Survey::init (const scnXml::Monitoring& monitoring) {
+void Survey::init( const OM::Parameters& parameters,
+                   const scnXml::Scenario& scenario,
+                   const scnXml::Monitoring& monitoring ){
     intReportMappings[Report::MI_HOSTS] = SM::nHost;
     intReportMappings[Report::MI_INFECTED_HOSTS] = SM::nInfect;
     intReportMappings[Report::MI_PATENT_HOSTS] = SM::nPatent;
@@ -197,6 +202,35 @@ void Survey::init (const scnXml::Monitoring& monitoring) {
     scnXml::OptionSet::OptionSequence sOSeq = monitoring.getSurveyOptions().getOption();
     for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 	active[codeMap[it->getName()]] = it->getValue();
+    }
+    
+    const scnXml::Surveys& surveys = monitoring.getSurveys();
+    if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+        // So far the implemented Vivax code does not produce parasite
+        // densities, thus this diagnostic model cannot be used.
+        m_diagnostic = &diagnostics::make_deterministic( numeric_limits<double>::quiet_NaN() );
+    }else{
+        //FIXME: something is likely wrong here (e.g. should densitybias be
+        // used for other diagnostics?). Awaiting further information.
+        /*
+        The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
+        TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
+        The density bias allows the detection limit for microscopy to be higher for other sites
+        */
+        double densitybias = numeric_limits<double>::quiet_NaN();
+        if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
+            densitybias = parameters[Parameters::DENSITY_BIAS_GARKI];
+        } else {
+            if( scenario.getAnalysisNo().present() ){
+                int analysisNo = scenario.getAnalysisNo().get();
+                if ((analysisNo >= 22) && (analysisNo <= 30)) {
+                    cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+                }
+            }
+            densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
+        }
+        double detectionLimit = surveys.getDetectionLimit() * densitybias;
+        m_diagnostic = &diagnostics::make_deterministic( detectionLimit );
     }
 }
 void AgeGroup::init (const scnXml::Monitoring& monitoring) {

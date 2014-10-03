@@ -36,8 +36,8 @@
 #include <algorithm>
 
 namespace OM { namespace Monitoring {
-    using interventions::ComponentId;
-    
+using interventions::ComponentId;
+
 SurveysType Surveys;
 size_t Survey::m_surveyNumber;
 Survey* Survey::m_current;
@@ -52,7 +52,9 @@ bool notPowerOfTwo( uint32_t num ){
     }
     return true;
 }
-void SurveysType::init( const scnXml::Monitoring& monitoring ){
+void SurveysType::init( const OM::Parameters& parameters,
+                   const scnXml::Scenario& scenario,
+                   const scnXml::Monitoring& monitoring ){
     Survey::m_surveyNumber = 0;
     if( monitoring.getCohorts().present() ){
         // this needs to be set early, but we can't set cohortSubPopIds until after InterventionManager is initialised
@@ -87,7 +89,7 @@ void SurveysType::init( const scnXml::Monitoring& monitoring ){
     m_surveysTimeIntervals.push_back( sim::never() );
     m_nextSurveyTime = m_surveysTimeIntervals[0];
 
-    Survey::init( monitoring );
+    Survey::init( parameters, scenario, monitoring );
 
     m_surveys.resize (m_surveysTimeIntervals.size());
     if( !Simulator::isCheckpoint() ){
