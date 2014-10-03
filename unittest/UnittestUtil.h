@@ -128,6 +128,22 @@ public:
         dummyXML::monitoring.setSurveys( dummyXML::surveys );
         Monitoring::Surveys.init( parameters, dummyXML::scenario, dummyXML::monitoring );
     }
+    // Parameterise standard diagnostics
+    static void setDiagnostics(){
+        // note that this is only ever called after initSurveys(), thus we
+        // don't need to call diagnostics::clear() (and shouldn't because it
+        // would leave a dangling pointer in Survey::m_diagnostic)
+        scnXml::Diagnostic microscopy( "microscopy" );
+        scnXml::Stochastic microscopyParams( 20, 0.75 );
+        microscopy.setStochastic( microscopyParams );
+        scnXml::Diagnostic rdt( "RDT" );
+        scnXml::Stochastic rdtParams( 50, 0.942 );
+        rdt.setStochastic( rdtParams );
+        scnXml::Diagnostics diagsElt;
+        diagsElt.getDiagnostic().push_back( microscopy );
+        diagsElt.getDiagnostic().push_back( rdt );
+        diagnostics::init( diagsElt );
+    }
     
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	ModelOptions::reset();

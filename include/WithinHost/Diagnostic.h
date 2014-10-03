@@ -38,11 +38,6 @@ public:
      * @param dens Current parasite density in parasites per µL
      * @returns True if outcome is positive. */
     bool isPositive( double dens ) const;
-    
-    /** Construct from specific parameters. */
-    Diagnostic( double dens_50, double specificity ):
-        specificity(specificity),
-        dens_lim(dens_50) {}
         
 private:
     /** Construct from XML parameters. */

@@ -708,19 +708,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="positive" type="om:DecisionTree"/>
       <xs:element name="negative" type="om:DecisionTree"/>
     </xs:all>
-    <xs:attribute name="type" use="required">
+    <xs:attribute name="diagnostic" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          The type of diagnostic used. Supported: RDT, microscopy.
+          Should match the name of some parameterised diagnostic (see
+          scenario/diagnostics).
         </xs:documentation>
-        <xs:appinfo>name:Type of diagnostic;</xs:appinfo>
+        <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
       </xs:annotation>
-      <xs:simpleType>
-        <xs:restriction base="xs:string">
-          <xs:enumeration value="microscopy" />
-          <xs:enumeration value="RDT" />
-        </xs:restriction>
-      </xs:simpleType>
     </xs:attribute>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>

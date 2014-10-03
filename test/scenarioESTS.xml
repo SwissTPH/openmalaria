@@ -123,7 +123,7 @@
             <!--NOTE: this entire hospital tree is repeated several times-->
             <random>
               <outcome p="0.75">
-                <diagnostic type="RDT">
+                <diagnostic diagnostic="RDT">
                   <positive>
                     <treatPKPD schedule="AS" dosage="AS"/>
                     <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -135,7 +135,7 @@
                 </diagnostic>
               </outcome>
               <outcome p="0.25">
-                <diagnostic type="microscopy">
+                <diagnostic diagnostic="microscopy">
                   <positive>
                     <treatPKPD schedule="AS" dosage="AS"/>
                     <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -156,7 +156,7 @@
             diagnostic, which the old tree did not support. -->
             <random>
               <outcome p="0.5">
-                <diagnostic type="RDT">
+                <diagnostic diagnostic="RDT">
                   <positive>
                     <!--NOTE: this entire referral tree is repeated several times-->
                     <random name="referral">
@@ -165,7 +165,7 @@
                         <!--NOTE: this entire hospital tree is repeated several times-->
                         <random>
                           <outcome p="0.75">
-                            <diagnostic type="RDT">
+                            <diagnostic diagnostic="RDT">
                               <positive>
                                 <treatPKPD schedule="AS" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -177,7 +177,7 @@
                             </diagnostic>
                           </outcome>
                           <outcome p="0.25">
-                            <diagnostic type="microscopy">
+                            <diagnostic diagnostic="microscopy">
                               <positive>
                                 <treatPKPD schedule="AS" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -195,7 +195,7 @@
                         <!--NOTE: this entire hospital tree is repeated several times-->
                         <random>
                           <outcome p="0.75">
-                            <diagnostic type="RDT">
+                            <diagnostic diagnostic="RDT">
                               <positive>
                                 <treatPKPD schedule="AS_delay_24" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_108" dosage="AL"/>
@@ -207,7 +207,7 @@
                             </diagnostic>
                           </outcome>
                           <outcome p="0.25">
-                            <diagnostic type="microscopy">
+                            <diagnostic diagnostic="microscopy">
                               <positive>
                                 <treatPKPD schedule="AS_delay_24" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_108" dosage="AL"/>
@@ -233,7 +233,7 @@
                         <!--NOTE: this entire hospital tree is repeated several times-->
                         <random>
                           <outcome p="0.75">
-                            <diagnostic type="RDT">
+                            <diagnostic diagnostic="RDT">
                               <positive>
                                 <treatPKPD schedule="AS" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -245,7 +245,7 @@
                             </diagnostic>
                           </outcome>
                           <outcome p="0.25">
-                            <diagnostic type="microscopy">
+                            <diagnostic diagnostic="microscopy">
                               <positive>
                                 <treatPKPD schedule="AS" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -263,7 +263,7 @@
                         <!--NOTE: this entire hospital tree is repeated several times-->
                         <random>
                           <outcome p="0.75">
-                            <diagnostic type="RDT">
+                            <diagnostic diagnostic="RDT">
                               <positive>
                                 <treatPKPD schedule="AS_delay_24" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_108" dosage="AL"/>
@@ -275,7 +275,7 @@
                             </diagnostic>
                           </outcome>
                           <outcome p="0.25">
-                            <diagnostic type="microscopy">
+                            <diagnostic diagnostic="microscopy">
                               <positive>
                                 <treatPKPD schedule="AS_delay_24" dosage="AS"/>
                                 <treatPKPD schedule="AL_delay_108" dosage="AL"/>
@@ -303,7 +303,7 @@
                     <!--NOTE: this entire hospital tree is repeated several times-->
                     <random>
                       <outcome p="0.75">
-                        <diagnostic type="RDT">
+                        <diagnostic diagnostic="RDT">
                           <positive>
                             <treatPKPD schedule="AS" dosage="AS"/>
                             <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -315,7 +315,7 @@
                         </diagnostic>
                       </outcome>
                       <outcome p="0.25">
-                        <diagnostic type="microscopy">
+                        <diagnostic diagnostic="microscopy">
                           <positive>
                             <treatPKPD schedule="AS" dosage="AS"/>
                             <treatPKPD schedule="AL_delay_84" dosage="AL"/>
@@ -333,7 +333,7 @@
                     <!--NOTE: this entire hospital tree is repeated several times-->
                     <random>
                       <outcome p="0.75">
-                        <diagnostic type="RDT">
+                        <diagnostic diagnostic="RDT">
                           <positive>
                             <treatPKPD schedule="AS_delay_24" dosage="AS"/>
                             <treatPKPD schedule="AL_delay_108" dosage="AL"/>
@@ -345,7 +345,7 @@
                         </diagnostic>
                       </outcome>
                       <outcome p="0.25">
-                        <diagnostic type="microscopy">
+                        <diagnostic diagnostic="microscopy">
                           <positive>
                             <treatPKPD schedule="AS_delay_24" dosage="AS"/>
                             <treatPKPD schedule="AL_delay_108" dosage="AL"/>
@@ -1439,6 +1439,14 @@
       </drug>
     </drugs>
   </pharmacology>
+  <diagnostics>
+    <diagnostic name="microscopy">
+      <stochastic dens_50="20" specificity="0.75"/>
+    </diagnostic>
+    <diagnostic name="RDT">
+      <stochastic dens_50="50" specificity="0.942"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="MOLINEAUX_WITHIN_HOST_MODEL" value="true"/>

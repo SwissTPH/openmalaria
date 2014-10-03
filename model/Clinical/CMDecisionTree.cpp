@@ -354,11 +354,9 @@ auto_ptr<CMDecisionTree> CMDTCaseType::create( const scnXml::DTCaseType& node, b
     ) );
 }
 
-Diagnostic d_microscopy( 20, 0.75 ), d_RDT( 50, 0.942 );
-
 auto_ptr<CMDecisionTree> CMDTDiagnostic::create( const scnXml::DTDiagnostic& node, bool isUC ){
     return auto_ptr<CMDecisionTree>( new CMDTDiagnostic(
-        node.getType() == "microscopy" ? d_microscopy : d_RDT,
+        diagnostics::get( node.getDiagnostic() ),
         CMDecisionTree::create( node.getPositive(), isUC ),
         CMDecisionTree::create( node.getNegative(), isUC )
     ) );

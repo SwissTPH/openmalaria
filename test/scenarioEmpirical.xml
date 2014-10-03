@@ -86,7 +86,7 @@
                 <noTreatment/>
               </outcome>
               <outcome p="0.3" name="microscopy test">
-                <diagnostic type="microscopy">
+                <diagnostic diagnostic="microscopy">
                   <positive>
                     <random>
                       <outcome p="0.9">
@@ -103,7 +103,7 @@
                 </diagnostic>
               </outcome><!-- microscopy -->
               <outcome p="0.2" name="RDT test">
-                <diagnostic type="RDT">
+                <diagnostic diagnostic="RDT">
                   <positive>
                     <random>
                       <outcome p="0.9">
@@ -130,7 +130,7 @@
                 <noTreatment/>
               </outcome>
               <outcome p="0.3" name="microscopy test">
-                <diagnostic type="microscopy">
+                <diagnostic diagnostic="microscopy">
                   <positive>
                     <random>
                       <outcome p="0.9">
@@ -147,7 +147,7 @@
                 </diagnostic>
               </outcome><!-- microscopy -->
               <outcome p="0.3" name="RDT test">
-                <diagnostic type="RDT">
+                <diagnostic diagnostic="RDT">
                   <positive>
                     <random>
                       <outcome p="0.9">
@@ -174,7 +174,7 @@
             <!-- TODO: hospitalise -->
           </outcome>
           <outcome p="0.5" name="RDT">
-            <diagnostic type="RDT">
+            <diagnostic diagnostic="RDT">
               <positive>
                 <random>
                   <outcome p="0.9">
@@ -194,7 +194,7 @@
             </diagnostic>
           </outcome>
           <outcome p="0.2" name="microscopy">
-            <diagnostic type="microscopy">
+            <diagnostic diagnostic="microscopy">
               <positive>
                 <random>
                   <outcome p="0.9">
@@ -1194,6 +1194,14 @@
       </drug>
     </drugs>
   </pharmacology>
+  <diagnostics>
+    <diagnostic name="microscopy">
+      <stochastic dens_50="20" specificity="0.75"/>
+    </diagnostic>
+    <diagnostic name="RDT">
+      <stochastic dens_50="50" specificity="0.942"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="EMPIRICAL_WITHIN_HOST_MODEL" value="true"/>
