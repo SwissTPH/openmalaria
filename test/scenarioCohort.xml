@@ -1236,10 +1236,10 @@
     <diagnostic name="standard">
       <deterministic minDensity="2.5"/>
     </diagnostic>
-    <diagnostic name="microscopy" units="Malariatherapy">
+    <diagnostic name="microscopy">
       <stochastic dens_50="20" specificity="0.75"/>
     </diagnostic>
-    <diagnostic name="RDT" units="Malariatherapy">
+    <diagnostic name="RDT">
       <stochastic dens_50="50" specificity="0.942"/>
     </diagnostic>
   </diagnostics>

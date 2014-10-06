@@ -1207,10 +1207,15 @@
   </entomology>
   <diagnostics>
     <diagnostic name="deterministic" units="Malariatherapy">
+      <!-- this diagnostic has no basis in reality -->
       <deterministic minDensity="20"/>
     </diagnostic>
     <diagnostic name="garki" units="Garki">
       <deterministic minDensity="2"/>
+    </diagnostic>
+    <diagnostic name="neonatal" units="Other">
+      <!-- detection limit 40 according to non-Garki method -->
+      <deterministic minDensity="40"/>
     </diagnostic>
   </diagnostics>
   <model>
@@ -1222,7 +1227,9 @@
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
       <option name="REQUIRE_UNITS"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6t"/>
+    <clinical healthSystemMemory="28d">
+      <NeonatalMortality diagnostic="neonatal"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>

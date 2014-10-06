@@ -569,7 +569,7 @@
     <diagnostic name="standard">
       <deterministic minDensity="40"/>
     </diagnostic>
-    <diagnostic name="RDT" units="Malariatherapy">
+    <diagnostic name="RDT">
       <stochastic dens_50="50" specificity=".942"/>
     </diagnostic>
   </diagnostics>
