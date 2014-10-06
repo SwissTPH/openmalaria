@@ -567,9 +567,9 @@
   </pharmacology>
   <diagnostics>
     <diagnostic name="standard">
-      <deterministic minDensity="10.25272"/><!-- 40 × param 15 -->
+      <deterministic minDensity="40"/>
     </diagnostic>
-    <diagnostic name="RDT">
+    <diagnostic name="RDT" units="Malariatherapy">
       <stochastic dens_50="50" specificity=".942"/>
     </diagnostic>
   </diagnostics>

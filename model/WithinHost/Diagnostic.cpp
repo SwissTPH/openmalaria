@@ -19,8 +19,10 @@
  */
 
 #include "WithinHost/Diagnostic.h"
+#include "Parameters.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 #include "schema/scenario.h"
 #include <limits>
 #include <boost/ptr_container/ptr_map.hpp>
@@ -29,7 +31,7 @@ namespace OM { namespace WithinHost {
 
 // ———  Diagnostic (non-static)  ———
 
-Diagnostic::Diagnostic( const scnXml::Diagnostic& elt ){
+Diagnostic::Diagnostic( const Parameters& parameters, const scnXml::Diagnostic& elt ){
     if( elt.getDeterministic().present() ){
         specificity = numeric_limits<double>::quiet_NaN();
         dens_lim = elt.getDeterministic().get().getMinDensity();
@@ -57,6 +59,28 @@ Diagnostic::Diagnostic( const scnXml::Diagnostic& elt ){
         throw util::xml_scenario_error(
             string("diagnostics/diagnostic(").append(elt.getName())
             .append("): must have density ≥ 0") );
+    }
+    
+    // We use a bias factor to adjust the "units" used to specify the density
+    // of this diagnostic, since estimates from Garki and the standard
+    // non-Garki sources are not equivalent to those from the Malariatherapy
+    // data (which is used internally).
+    if( !elt.getUnits().present() ){
+        if( util::ModelOptions::option(util::GARKI_DENSITY_BIAS) ){
+            // User must be explicit in this case, because presumably the Garki
+            // bias is to be used for some diagnostics but likely not all
+            // (e.g. neonatal mortality).
+            throw util::xml_scenario_error( "diagnostics/diagnostic(*)/units: must specify this attribute when GARKI_DENSITY_BIAS is set" );
+        }
+        // otherwise we assume "Other"
+        dens_lim *= parameters[Parameters::DENSITY_BIAS_NON_GARKI];
+    }else if( elt.getUnits().get() == "Other" ){
+        dens_lim *= parameters[Parameters::DENSITY_BIAS_NON_GARKI];
+    }else if( elt.getUnits().get() == "Garki" ){
+        dens_lim *= parameters[Parameters::DENSITY_BIAS_GARKI];
+    }else{
+        assert( elt.getUnits().get() == "Malariatherapy" );
+        // in this case we don't need to use a bias factor
     }
 }
 
@@ -87,10 +111,10 @@ void diagnostics::clear(){
     diagnostic_set.clear();
 }
 
-void diagnostics::init( const scnXml::Diagnostics& diagnostics ){
+void diagnostics::init( const Parameters& parameters, const scnXml::Diagnostics& diagnostics ){
     foreach( const scnXml::Diagnostic& diagnostic, diagnostics.getDiagnostic() ){
         string name = diagnostic.getName();     // conversion fails without this extra line
-        bool inserted = diagnostic_set.insert( name, new Diagnostic(diagnostic) ).second;
+        bool inserted = diagnostic_set.insert( name, new Diagnostic(parameters, diagnostic) ).second;
         if( !inserted ){
             throw util::xml_scenario_error( string("diagnostic with this name already set: ").append(diagnostic.getName()) );
         }

@@ -214,13 +214,8 @@ void Survey::init( const OM::Parameters& parameters,
             throw util::xml_scenario_error( "monitoring/surveys: do not specify both detectionLimit and diagnostic" );
         }
         
-        //FIXME: something is likely wrong here (e.g. should densitybias be
-        // used for other diagnostics?). Awaiting further information.
-        /*
-        The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
-        TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
-        The density bias allows the detection limit for microscopy to be higher for other sites
-        */
+        // This controls whether the detection limit is specified relative to
+        // the Garki or other methods.
         double densitybias = numeric_limits<double>::quiet_NaN();
         if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
             densitybias = parameters[Parameters::DENSITY_BIAS_GARKI];

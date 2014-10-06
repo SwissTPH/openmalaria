@@ -171,12 +171,12 @@ public:
         TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 1 - 0.942, LIM );
 	
         whm->totalDensity = 80.0;	// a few parasites
-	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic ), 0.85, LIM );
-        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.63769, LIM );
+	TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic ), 0.96815, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.90599, LIM );
 	
         whm->totalDensity = 2000.0;	// lots of parasites
-        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic ), 0.99257, LIM );
-        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.99702, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_mic ), 0.99867, LIM );
+        TS_ASSERT_DELTA( propTreatmentsNReps( N, dt_rdt ), 0.99584, LIM );
     }
     
     void testAgeSwitch(){

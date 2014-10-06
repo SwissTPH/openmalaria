@@ -86,15 +86,17 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     
     // 1) elements with no dependencies on other elements initialised here:
     sim::init( scenario );
+    Parameters parameters( model.getParameters() );     // depends on nothing
     
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
-    if( scenario.getDiagnostics().present() ){
-        WithinHost::diagnostics::init( scenario.getDiagnostics().get() );
-    }
     
     // 2) elements depending on only elements initialised in (1):
-    Parameters parameters( model.getParameters() );     // depends on nothing
+    
+    if( scenario.getDiagnostics().present() ){
+        WithinHost::diagnostics::init( parameters, scenario.getDiagnostics().get() );
+    }
+    // Survey init depends on diagnostics:
     Surveys.init( parameters, scenario, scenario.getMonitoring() );
     Population::init( parameters, scenario );
     

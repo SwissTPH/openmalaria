@@ -29,7 +29,9 @@ namespace scnXml {
     class Diagnostic;
 }
 
-namespace OM { namespace WithinHost {
+namespace OM {
+    class Parameters;
+namespace WithinHost {
 
 class Diagnostic {
 public:
@@ -41,7 +43,7 @@ public:
         
 private:
     /** Construct from XML parameters. */
-    Diagnostic( const scnXml::Diagnostic& elt );
+    Diagnostic( const Parameters& parameters, const scnXml::Diagnostic& elt );
     /** Construct as deterministic. */
     explicit Diagnostic( double minDens );
     
@@ -59,7 +61,7 @@ private:
 class diagnostics {
 public:
     /** Initialise from input data. */
-    static void init( const scnXml::Diagnostics& diagnostics );
+    static void init( const Parameters& parameters, const scnXml::Diagnostics& diagnostics );
     
     /** Look up a diagnostic by name and get a reference to it.
      * 

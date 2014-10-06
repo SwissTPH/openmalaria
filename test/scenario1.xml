@@ -1069,7 +1069,7 @@
   </entomology>
   <diagnostics>
     <diagnostic name="standard">
-      <deterministic minDensity="0.4434464274686375"/>
+      <deterministic minDensity="2.5"/>
     </diagnostic>
   </diagnostics>
   <model>

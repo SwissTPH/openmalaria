@@ -372,5 +372,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="units" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Parasite densities, as estimated according to standard microscopy
+          methods, the Garki method, and as derived from Malariatherapy data
+          are not equivalent. Internally, a "bias" factor is used to convert
+          values estimated by one methods to values comparable with another
+          (see AJTMHv75 supplement 2 pp20-21).
+          
+          This option allows specification of which methodology the density
+          given in the diagnostic specification is measured with. Values
+          allowed are: Malariatherapy, Garki and Other. If not specified,
+          Other is assumed, unless the GARKI_DENSITY_BIAS model option is used,
+          in which case this option must be specified.
+        </xs:documentation>
+        <xs:appinfo>name:Parasite density units / methodology;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Other"/>
+          <xs:enumeration value="Garki"/>
+          <xs:enumeration value="Malariatherapy"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
   </xs:complexType>
 </xs:schema>

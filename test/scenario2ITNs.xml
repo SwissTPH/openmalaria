@@ -299,7 +299,7 @@
   </entomology>
   <diagnostics>
     <diagnostic name="standard">
-      <deterministic minDensity="35.475714197491"/><!-- 200 × param 15 -->
+      <deterministic minDensity="200"/>
     </diagnostic>
   </diagnostics>
   <model>

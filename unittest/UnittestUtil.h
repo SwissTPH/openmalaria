@@ -116,14 +116,19 @@ public:
         sim::time0 += incr;
         sim::time1 = sim::time0;
     }
+    
+    static const scnXml::Parameters& prepareParameters(){
+        if( dummyXML::modelParams.getParameter().size() == 0 ){
+            scnXml::Parameter densBias( "non-garki density bias", 15, 0.177378570987455 );
+            dummyXML::modelParams.getParameter().push_back( densBias );
+        }
+        return dummyXML::modelParams;
+    }
+    
     // Initialise surveys, to the minimum required not to crash
     static void initSurveys(){
         diagnostics::clear();
-        if( dummyXML::modelParams.getParameter().size() == 0 ){
-            scnXml::Parameter densBias( "non-garki density bias", 15, numeric_limits<double>::quiet_NaN() );
-            dummyXML::modelParams.getParameter().push_back( densBias );
-        }
-        Parameters parameters( dummyXML::modelParams );
+        Parameters parameters( prepareParameters() );
         dummyXML::surveys.setDetectionLimit( numeric_limits<double>::quiet_NaN() );
         dummyXML::monitoring.setSurveys( dummyXML::surveys );
         Monitoring::Surveys.init( parameters, dummyXML::scenario, dummyXML::monitoring );
@@ -142,7 +147,8 @@ public:
         scnXml::Diagnostics diagsElt;
         diagsElt.getDiagnostic().push_back( microscopy );
         diagsElt.getDiagnostic().push_back( rdt );
-        diagnostics::init( diagsElt );
+        Parameters parameters( prepareParameters() );
+        diagnostics::init( parameters, diagsElt );
     }
     
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {

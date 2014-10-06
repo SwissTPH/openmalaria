@@ -1206,11 +1206,11 @@
     </nonVector>
   </entomology>
   <diagnostics>
-    <diagnostic name="deterministic">
+    <diagnostic name="deterministic" units="Malariatherapy">
       <deterministic minDensity="20"/>
     </diagnostic>
-    <diagnostic name="garki">
-      <deterministic minDensity="9.59221545093408"/>
+    <diagnostic name="garki" units="Garki">
+      <deterministic minDensity="2"/>
     </diagnostic>
   </diagnostics>
   <model>

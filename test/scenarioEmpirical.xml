@@ -1195,10 +1195,10 @@
     </drugs>
   </pharmacology>
   <diagnostics>
-    <diagnostic name="microscopy">
+    <diagnostic name="microscopy" units="Malariatherapy">
       <stochastic dens_50="20" specificity="0.75"/>
     </diagnostic>
-    <diagnostic name="RDT">
+    <diagnostic name="RDT" units="Malariatherapy">
       <stochastic dens_50="50" specificity="0.942"/>
     </diagnostic>
   </diagnostics>
