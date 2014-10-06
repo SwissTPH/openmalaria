@@ -306,6 +306,7 @@ protected:
 // ———  static functions  ———
 
 auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& node, bool isUC ){
+    if( node.getMultiple().present() ) return CMDTMultiple::create( node.getMultiple().get(), isUC );
     // branching nodes
     if( node.getCaseType().present() ) return CMDTCaseType::create( node.getCaseType().get(), isUC );
     if( node.getDiagnostic().present() ) return CMDTDiagnostic::create( node.getDiagnostic().get(), isUC );
@@ -318,6 +319,8 @@ auto_ptr<CMDecisionTree> CMDecisionTree::create( const scnXml::DecisionTree& nod
         new CMDTTreatPKPD( node.getTreatPKPD() ) );
     if( node.getTreatSimple().present() ) return auto_ptr<CMDecisionTree>(
         new CMDTTreatSimple( node.getTreatSimple().get() ) );
+    if( node.getDeploy().size() ) return auto_ptr<CMDecisionTree>(
+        new CMDTDeploy( node.getDeploy() ) );
     throw xml_scenario_error( "unterminated decision tree" );
 }
 
@@ -340,6 +343,9 @@ auto_ptr<CMDecisionTree> CMDTMultiple::create( const scnXml::DTMultiple& node, b
     }
     if( node.getTreatSimple().present() ){
         self->children.push_back( new CMDTTreatSimple( node.getTreatSimple().get() ) );
+    }
+    if( node.getDeploy().size() ){
+        self->children.push_back( new CMDTDeploy(node.getDeploy()) );
     }
     return auto_ptr<CMDecisionTree>( self.release() );
 }
