@@ -119,35 +119,29 @@
       <complicated>
         <random name="initial provider">
           <outcome p="0.2" name="hospital">
-            <!--TODO: hospital entry-->
+            <!--NOTE: the intention of this design was to use a diagnostic but
+            to treat with antimalarials regardless of the outcome -->
             <!--NOTE: this entire hospital tree is repeated several times-->
-            <random>
-              <outcome p="0.75">
-                <diagnostic diagnostic="RDT">
-                  <positive>
-                    <treatPKPD schedule="AS" dosage="AS"/>
-                    <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                  </positive>
-                  <negative>
-                    <treatPKPD schedule="AS" dosage="AS"/>
-                    <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                  </negative>
-                </diagnostic>
-              </outcome>
-              <outcome p="0.25">
-                <diagnostic diagnostic="microscopy">
-                  <positive>
-                    <treatPKPD schedule="AS" dosage="AS"/>
-                    <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                  </positive>
-                  <negative>
-                    <treatPKPD schedule="AS" dosage="AS"/>
-                    <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                  </negative>
-                </diagnostic>
-              </outcome>
-            </random>
-          </outcome>
+            <!--TODO: hospital entry-->
+            <multiple>
+              <random>
+                <outcome p="0.75">
+                  <diagnostic diagnostic="RDT">
+                    <positive><noTreatment/><!-- treatment is below --></positive>
+                    <negative><noTreatment/><!-- treatment is below --></negative>
+                  </diagnostic>
+                </outcome>
+                <outcome p="0.25">
+                  <diagnostic diagnostic="microscopy">
+                    <positive><noTreatment/><!-- treatment is below --></positive>
+                    <negative><noTreatment/><!-- treatment is below --></negative>
+                  </diagnostic>
+                </outcome>
+              </random>
+              <treatPKPD schedule="AS" dosage="AS"/>
+              <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+            </multiple>
+          </outcome><!-- hospital -->
           <outcome p="0.3" name="lower level">
             <!--NOTE: VC's tree had 50% chance to use an RDT, 50% chance to use
             no diagnostic here. In all cases, the next step was either immediate
@@ -161,64 +155,48 @@
                     <!--NOTE: this entire referral tree is repeated several times-->
                     <random name="referral">
                       <outcome p="0.5" name="immediate referral">
-                        <!--TODO: hospital entry-->
                         <!--NOTE: this entire hospital tree is repeated several times-->
-                        <random>
-                          <outcome p="0.75">
-                            <diagnostic diagnostic="RDT">
-                              <positive>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                          <outcome p="0.25">
-                            <diagnostic diagnostic="microscopy">
-                              <positive>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                        </random>
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+                        </multiple>
                       </outcome>
                       <outcome p="0.3" name="delayed referral">
-                        <!--TODO: delayed hospital entry-->
                         <!--NOTE: this entire hospital tree is repeated several times-->
-                        <random>
-                          <outcome p="0.75">
-                            <diagnostic diagnostic="RDT">
-                              <positive>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                          <outcome p="0.25">
-                            <diagnostic diagnostic="microscopy">
-                              <positive>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                        </random>
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS_delay_24" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_108" dosage="AL"/>
+                        </multiple>
                       </outcome>
                       <outcome p="0.2" name="no referral">
                         <noTreatment/>
@@ -229,64 +207,48 @@
                     <!--NOTE: this entire referral tree is repeated several times-->
                     <random name="referral">
                       <outcome p="0.5" name="immediate referral">
-                        <!--TODO: hospital entry-->
                         <!--NOTE: this entire hospital tree is repeated several times-->
-                        <random>
-                          <outcome p="0.75">
-                            <diagnostic diagnostic="RDT">
-                              <positive>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                          <outcome p="0.25">
-                            <diagnostic diagnostic="microscopy">
-                              <positive>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                        </random>
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+                        </multiple>
                       </outcome>
                       <outcome p="0.3" name="delayed referral">
-                        <!--TODO: delayed hospital entry-->
                         <!--NOTE: this entire hospital tree is repeated several times-->
-                        <random>
-                          <outcome p="0.75">
-                            <diagnostic diagnostic="RDT">
-                              <positive>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                          <outcome p="0.25">
-                            <diagnostic diagnostic="microscopy">
-                              <positive>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </positive>
-                              <negative>
-                                <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                                <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                              </negative>
-                            </diagnostic>
-                          </outcome>
-                        </random>
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS_delay_24" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_108" dosage="AL"/>
+                        </multiple>
                       </outcome>
                       <outcome p="0.2" name="no referral">
                         <noTreatment/>
@@ -299,64 +261,48 @@
                 <!--NOTE: this entire referral tree is repeated several times-->
                 <random name="referral">
                   <outcome p="0.5" name="immediate referral">
-                    <!--TODO: hospital entry-->
                     <!--NOTE: this entire hospital tree is repeated several times-->
-                    <random>
-                      <outcome p="0.75">
-                        <diagnostic diagnostic="RDT">
-                          <positive>
-                            <treatPKPD schedule="AS" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                          </positive>
-                          <negative>
-                            <treatPKPD schedule="AS" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                          </negative>
-                        </diagnostic>
-                      </outcome>
-                      <outcome p="0.25">
-                        <diagnostic diagnostic="microscopy">
-                          <positive>
-                            <treatPKPD schedule="AS" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                          </positive>
-                          <negative>
-                            <treatPKPD schedule="AS" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_84" dosage="AL"/>
-                          </negative>
-                        </diagnostic>
-                      </outcome>
-                    </random>
+                    <!--TODO: hospital entry-->
+                    <multiple>
+                      <random>
+                        <outcome p="0.75">
+                          <diagnostic diagnostic="RDT">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                        <outcome p="0.25">
+                          <diagnostic diagnostic="microscopy">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                      </random>
+                      <treatPKPD schedule="AS" dosage="AS"/>
+                      <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+                    </multiple>
                   </outcome>
                   <outcome p="0.3" name="delayed referral">
-                    <!--TODO: delayed hospital entry-->
                     <!--NOTE: this entire hospital tree is repeated several times-->
-                    <random>
-                      <outcome p="0.75">
-                        <diagnostic diagnostic="RDT">
-                          <positive>
-                            <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                          </positive>
-                          <negative>
-                            <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                          </negative>
-                        </diagnostic>
-                      </outcome>
-                      <outcome p="0.25">
-                        <diagnostic diagnostic="microscopy">
-                          <positive>
-                            <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                          </positive>
-                          <negative>
-                            <treatPKPD schedule="AS_delay_24" dosage="AS"/>
-                            <treatPKPD schedule="AL_delay_108" dosage="AL"/>
-                          </negative>
-                        </diagnostic>
-                      </outcome>
-                    </random>
+                    <!--TODO: hospital entry-->
+                    <multiple>
+                      <random>
+                        <outcome p="0.75">
+                          <diagnostic diagnostic="RDT">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                        <outcome p="0.25">
+                          <diagnostic diagnostic="microscopy">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                      </random>
+                      <treatPKPD schedule="AS_delay_24" dosage="AS"/>
+                      <treatPKPD schedule="AL_delay_108" dosage="AL"/>
+                    </multiple>
                   </outcome>
                   <outcome p="0.2" name="no referral">
                     <noTreatment/>

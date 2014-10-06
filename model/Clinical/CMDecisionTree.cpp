@@ -188,6 +188,7 @@ private:
 // ———  action nodes  ———
 
 /** Do nothing. **/
+//TODO(optimisation): we only ever need one instance of this, but can't do that while using auto_ptr
 class CMDTNoTreatment : public CMDecisionTree {
 protected:
     virtual CMDTOut exec( CMHostData hostData ) const{
