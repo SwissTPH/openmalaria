@@ -33,8 +33,6 @@ namespace WithinHost {
 namespace Clinical {
 using WithinHost::WHInterface;
 
-using std::auto_ptr;
-
 /** All data which needs to be passed to the decision tree evaluators. */
 struct  CMHostData {
     CMHostData (Host::Human& h, double aY, Episode::State pS) :
@@ -62,7 +60,15 @@ public:
     virtual ~CMDecisionTree() {}
     
     /// Create a user-configured decision from an XML node.
-    static auto_ptr<CMDecisionTree> create( const ::scnXml::DecisionTree& node, bool isUC );
+    static const CMDecisionTree& create( const ::scnXml::DecisionTree& node, bool isUC );
+    
+    /** Test for equivalence in two decision trees. Nodes are equivalent if
+     * they have the same type, same deployments and treatments, and their
+     * sub-nodes are equivalent. */
+    virtual bool operator==( const CMDecisionTree& that ) const =0;
+    inline bool operator!=( const CMDecisionTree& that ) const{
+        return !(*this == that);
+    }
     
     /** Run the decision tree.
      * 

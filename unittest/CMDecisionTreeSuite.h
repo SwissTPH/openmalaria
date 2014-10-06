@@ -76,12 +76,12 @@ public:
      * returns the proportion of these runs where the output was any treatment
      */
     double propTreatmentsNReps (int N, const scnXml::DecisionTree& dt) {
-        auto_ptr<CMDecisionTree> cmdt = CMDecisionTree::create( dt, true );
+        const CMDecisionTree& cmdt = CMDecisionTree::create( dt, true );
         
 	whm->nTreatments = 0;
         int secondCounter = 0;
 	for (int i = 0; i < N; ++i) {
-	    secondCounter += (cmdt->exec( *hd ).treated ? 1 : 0);
+	    secondCounter += (cmdt.exec( *hd ).treated ? 1 : 0);
 	}
 	TS_ASSERT_EQUALS( whm->nTreatments, secondCounter );
 	return double(whm->nTreatments) / double(N);

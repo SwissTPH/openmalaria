@@ -36,7 +36,7 @@ using namespace Monitoring;
 enum CaseType { FirstLine, SecondLine, NumCaseTypes };
 
 // These parameters are set by setHealthSystem() and do not need checkpointing.
-auto_ptr<CMDecisionTree> treeUCOfficial, treeUCSelfTreat;
+const CMDecisionTree *treeUCOfficial = 0, *treeUCSelfTreat = 0;
 
 // ———  static, init  ———
 
@@ -61,8 +61,8 @@ void DecisionTree5Day::setHealthSystem(const scnXml::HSDT5Day& hsDescription){
             "be in range [0,1]");
     }
     
-    treeUCOfficial.reset( CMDecisionTree::create( hsDescription.getTreeUCOfficial(), true ).release() );
-    treeUCSelfTreat.reset( CMDecisionTree::create( hsDescription.getTreeUCSelfTreat(), true ).release() );
+    treeUCOfficial = &CMDecisionTree::create( hsDescription.getTreeUCOfficial(), true );
+    treeUCSelfTreat = &CMDecisionTree::create( hsDescription.getTreeUCSelfTreat(), true );
     
     cureRateSevere = hsDescription.getCureRateSevere().getValue();
     treatmentSevere = WHInterface::addTreatment( hsDescription.getTreatmentSevere() );

@@ -39,13 +39,13 @@ namespace OM { namespace Clinical {
 
 // -----  ESCaseManagement  -----
 
-auto_ptr<CMDecisionTree> ESCaseManagement::uncomplicated,
-    ESCaseManagement::complicated,
-    ESCaseManagement::mda;
+const CMDecisionTree *escm_uncomplicated = 0,
+    *escm_complicated = 0,
+    *escm_mda = 0;
 
 void ESCaseManagement::setHealthSystem(const scnXml::HSEventScheduler& esData){
-    uncomplicated = CMDecisionTree::create( esData.getUncomplicated(), true );
-    complicated = CMDecisionTree::create( esData.getComplicated(), false );
+    escm_uncomplicated = &CMDecisionTree::create( esData.getUncomplicated(), true );
+    escm_complicated = &CMDecisionTree::create( esData.getComplicated(), false );
     
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
@@ -53,7 +53,7 @@ void ESCaseManagement::setHealthSystem(const scnXml::HSEventScheduler& esData){
 }
 
 void ESCaseManagement::initMDA (const scnXml::DecisionTree& desc){
-    mda = CMDecisionTree::create( desc, true );
+    escm_mda = &CMDecisionTree::create( desc, true );
 }
 
 void ESCaseManagement::massDrugAdministration(
@@ -63,7 +63,8 @@ void ESCaseManagement::massDrugAdministration(
         Monitoring::ReportMeasureI drugReport
 ){
     Survey::current().addInt( screeningReport, human, 1 );
-    CMDTOut out = mda->exec( hostData );
+    assert( escm_mda != 0 );
+    CMDTOut out = escm_mda->exec( hostData );
     if( out.treated ){
         Survey::current().addInt( drugReport, human, 1 );
     }
@@ -77,8 +78,8 @@ CMDTOut ESCaseManagement::execute (
     //TODO: Note that these trees do both "access" and "case management" decisions.
     //TODO: medicateQueue.clear();
     
-    CMDecisionTree& tree = (hostData.pgState & Episode::COMPLICATED) ?
-        *complicated : *uncomplicated;
+    const CMDecisionTree& tree = (hostData.pgState & Episode::COMPLICATED) ?
+        *escm_complicated : *escm_uncomplicated;
     return tree.exec( hostData );
 }
 

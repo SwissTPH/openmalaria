@@ -59,9 +59,6 @@ public:
     );
     
     static CMDTOut execute( const CMHostData& hostData );
-    
-private:
-    static auto_ptr<CMDecisionTree> uncomplicated, complicated, mda;
 };
 
 } }
