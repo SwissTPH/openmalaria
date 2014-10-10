@@ -150,19 +150,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="L" type="xs:double" use="required">
+    <xs:attribute name="L" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
-          Scale parameter of distribution. With the smooth-compact (smooth
-          function with compact support), step and linear functions, this is the
-          age at which the parameter has decayed to 0; with the other three
-          functions, this is the age at which the parameter has decayed to half
-          its original value. Not used for constant decay (though must be
-          specified anyway).
+          (Time) scale parameter of distribution: this is either the age of
+          complete decay (smooth-compact, step and linear functions) or the age
+          at which the parameter has decayed to half its original value
+          (exponential, weibull and hill). Not used when function="constant"
+          (i.e. no decay).
           
-          Input is rounded to the nearest time step.
+          This value can be specified in years, days or steps (e.g. 2y, 180d or
+          100t). When the unit is not specified years are assumed. The value is
+          used without rounding except when sampling an age of decay, when the
+          rounding happens as late as possible.
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
+        <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="k" type="xs:double" default="1.0">

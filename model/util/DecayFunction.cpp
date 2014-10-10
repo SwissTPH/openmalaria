@@ -85,11 +85,18 @@ public:
     }
 };
 
+double readLToDays( const scnXml::DecayFunction& elt ){
+    if( !elt.getL().present() ){
+        throw util::xml_scenario_error( "decay function: attribute L required" );
+    }
+    return UnitParse::durationToDays(elt.getL().get(), UnitParse::YEARS);
+}
+
 class StepDecayFunction : public BaseHetDecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) )
+        invL( 1.0 / readLToDays(elt) )
     {}
     
     double getBaseTMult() const{
@@ -115,8 +122,7 @@ class LinearDecayFunction : public BaseHetDecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        L( sim::fromYearsN( elt.getL() ) ),
-        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) )
+        invL( 1.0 / readLToDays(elt) )
     {}
     
     double getBaseTMult() const{
@@ -132,11 +138,10 @@ public:
     
     SimTime sampleAgeOfDecay () const{
         // Note: rounds to nearest. Object may decay instantly or at time L.
-        return L * random::uniform_01();
+        return sim::roundToTSFromDays(random::uniform_01() / invL);
     }
     
 private:
-    SimTime L;
     double invL;
 };
 
@@ -144,7 +149,7 @@ class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invLambda( log(2.0) / (elt.getL() * sim::oneYear().inDays() ) )
+        invLambda( log(2.0) / readLToDays(elt) )
     {
         util::streamValidate(invLambda);
     }
@@ -168,7 +173,7 @@ class WeibullDecayFunction : public BaseHetDecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * sim::oneYear().inDays() ) ),
+        constOverLambda( pow(log(2.0),1.0/elt.getK()) / readLToDays(elt) ),
         k( elt.getK() )
     {}
     
@@ -192,7 +197,7 @@ class HillDecayFunction : public BaseHetDecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) ),
+        invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() )
     {}
     
@@ -215,7 +220,7 @@ class SmoothCompactDecayFunction : public BaseHetDecayFunction {
 public:
     SmoothCompactDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * sim::oneYear().inDays() ) ),
+        invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() )
     {}
     

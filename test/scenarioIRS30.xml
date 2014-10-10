@@ -95,8 +95,8 @@
           <ripRate mean="0.7" sigma="0.8"/>
           <ripFactor value="0.4"/>
           <initialInsecticide mu="70" sigma="20"/>
-          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
-          <attritionOfNets L="12" function="smooth-compact" k="2"/>
+          <insecticideDecay L="2.2y" function="exponential" mu="-0.32" sigma="0.8"/>
+          <attritionOfNets L="12y" function="smooth-compact" k="2"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
             <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
@@ -108,7 +108,7 @@
         <IRS>
           <!-- Initial insecticide: units are μg/cm²; no variance here -->
           <initialInsecticide mu="118" sigma="0"/>
-          <insecticideDecay L="0.15" function="exponential"/>
+          <insecticideDecay L="0.15y" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency insecticideFactor="0.12" insecticideScalingFactor="0.05"/>
             <preprandialKillingEffect baseFactor="0.01" insecticideFactor="0.25" insecticideScalingFactor="0.008"/>
@@ -119,7 +119,7 @@
       </component>
       <component id="vectorDeterrent" name="hypothetical deterrency">
         <GVI>
-          <decay L="4" function="exponential"/>
+          <decay L="4y" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency value="0"/>
           </anophelesParams>

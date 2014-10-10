@@ -332,6 +332,12 @@ namespace UnitParse {
      * Call sim::init() first. */
     SimTime readDuration( const std::string& str, DefaultUnit defUnit );
     
+    /** Like readDuration(), but without rounding. Output is in days and may
+     * not be an integer.
+     * 
+     * Call sim::init() first. */
+    double durationToDays( const std::string& str, DefaultUnit defUnit );
+    
     /** Read a date or relative time specifier found in the XML; dates are
      * rebased relative to a starting date so that they work the same as other
      * ways of specifying intervention-period time from the point of view of

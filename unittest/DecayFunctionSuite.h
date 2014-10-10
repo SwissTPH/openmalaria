@@ -34,8 +34,9 @@ class DecayFunctionSuite : public CxxTest::TestSuite
 {
 public:
     DecayFunctionSuite () :
-        dfElt( "", 10.0 )
+        dfElt( "" )
     {
+        dfElt.setL( "10y" );
         dfElt.setK( 1.6 );
     }
     
