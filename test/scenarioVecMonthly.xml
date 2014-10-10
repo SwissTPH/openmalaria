@@ -44,8 +44,8 @@
       <option name="nTreatDeployments"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime repeatStep="6" repeatEnd="73">6</surveyTime>
-      <surveyTime repeatStep="6" repeatEnd="160">79</surveyTime>
+      <surveyTime repeatStep="30d" repeatEnd="365d">30d</surveyTime>
+      <surveyTime repeatStep="30d" repeatEnd="800d">395d</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>

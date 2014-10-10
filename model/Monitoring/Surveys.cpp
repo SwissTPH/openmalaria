@@ -34,6 +34,7 @@
 #include <fstream>
 #include <stdexcept>
 #include <algorithm>
+#include <boost/algorithm/string.hpp>
 
 namespace OM { namespace Monitoring {
 using interventions::ComponentId;
@@ -66,23 +67,28 @@ void SurveysType::init( const OM::Parameters& parameters,
     m_surveysTimeIntervals.reserve (survs.size() + 1);
     for (size_t i = 0; i < survs.size(); ++i) {
         const scnXml::SurveyTime& surv = survs[i];
-        //TODO(schema): read survey times in days or dates or something
-        SimTime cur = sim::fromTS(surv);
-        if( surv.getRepeatStep().present() != surv.getRepeatEnd().present() ){
-            throw util::xml_scenario_error( "surveyTime: use of repeatStep or repeatEnd without other" );
-        }
-        if( surv.getRepeatStep().present() ){
-            SimTime step = sim::fromTS( surv.getRepeatStep().get() );
-            if( step < sim::oneTS() ){
-                throw util::xml_scenario_error( "surveyTime: repeatStep must be >= 1" );
+        try{
+            std::string s = surv;
+            boost::algorithm::trim(s);
+            SimTime cur = UnitParse::readDate( s, UnitParse::STEPS );
+            if( surv.getRepeatStep().present() != surv.getRepeatEnd().present() ){
+                throw util::xml_scenario_error( "surveyTime: use of repeatStep or repeatEnd without other" );
             }
-            SimTime end = sim::fromTS( surv.getRepeatEnd().get() );
-            while(cur < end){
+            if( surv.getRepeatStep().present() ){
+                SimTime step = UnitParse::readDuration( surv.getRepeatStep().get(), UnitParse::NONE );
+                if( step < sim::oneTS() ){
+                    throw util::xml_scenario_error( "surveyTime: repeatStep must be >= 1" );
+                }
+                SimTime end = UnitParse::readDate( surv.getRepeatEnd().get(), UnitParse::NONE );
+                while(cur < end){
+                    m_surveysTimeIntervals.push_back( cur );
+                    cur += step;
+                }
+            }else{
                 m_surveysTimeIntervals.push_back( cur );
-                cur += step;
             }
-        }else{
-            m_surveysTimeIntervals.push_back( cur );
+        }catch( const util::format_error& e ){
+            throw util::xml_scenario_error( string("surveyTime: ").append(e.message()) );
         }
     }
     sort( m_surveysTimeIntervals.begin(), m_surveysTimeIntervals.end() );

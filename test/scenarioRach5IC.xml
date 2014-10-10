@@ -63,8 +63,8 @@
       <option name="nMDAs" value="true"/>
     </SurveyOptions>
     <surveys diagnostic="standard">
-      <surveyTime>1</surveyTime>
-      <surveyTime repeatStep="6" repeatEnd="150">6</surveyTime>
+      <surveyTime>1t</surveyTime>
+      <surveyTime repeatStep="6t" repeatEnd="150t">6t</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>

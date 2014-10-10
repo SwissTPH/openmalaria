@@ -31,8 +31,8 @@
       <option name="sumlogDens"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
-      <surveyTime>73</surveyTime>
-      <surveyTime>146</surveyTime>
+      <surveyTime>1001-01-01</surveyTime>
+      <surveyTime>1002-01-01</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="0.25"/>

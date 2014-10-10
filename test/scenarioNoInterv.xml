@@ -23,7 +23,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Quarterly Surveys">
+  <monitoring name="Quarterly Surveys" startDate="1351-1-1">
     <continuous period="1">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
@@ -61,10 +61,10 @@
       <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
-      <surveyTime repeatStep="73" repeatEnd="1462">1</surveyTime>
-      <surveyTime repeatStep="73" repeatEnd="1462">19</surveyTime>
-      <surveyTime repeatStep="73" repeatEnd="1462">37</surveyTime>
-      <surveyTime repeatStep="73" repeatEnd="1462">55</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-1-6</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-4-6</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-7-5</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-10-3</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="0.25"/>

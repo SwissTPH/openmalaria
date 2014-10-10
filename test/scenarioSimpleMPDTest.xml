@@ -57,9 +57,9 @@
       <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime>1</surveyTime>
-      <surveyTime>293</surveyTime>
-      <surveyTime>366</surveyTime>
+      <surveyTime>1t</surveyTime>
+      <surveyTime>293t</surveyTime>
+      <surveyTime>366t</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>

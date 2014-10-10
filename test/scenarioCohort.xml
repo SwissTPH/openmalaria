@@ -46,7 +46,7 @@
       <option name="nCtsRecruitOnly"/>
     </SurveyOptions>
     <surveys diagnostic="standard">
-      <surveyTime repeatStep="730" repeatEnd="4000">730</surveyTime>
+      <surveyTime repeatStep="2y" repeatEnd="0011-01-01">0002-01-01</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>

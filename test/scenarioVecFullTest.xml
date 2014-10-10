@@ -68,10 +68,10 @@
       <option name="nMassGVI"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
-      <surveyTime repeatStep="73" repeatEnd="1462">1</surveyTime>
-      <surveyTime repeatStep="73" repeatEnd="1462">19</surveyTime>
-      <surveyTime repeatStep="73" repeatEnd="1462">37</surveyTime>
-      <surveyTime repeatStep="73" repeatEnd="1462">55</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">19t</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">37t</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">55t</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="0.25"/>
