@@ -638,12 +638,7 @@
       </component>
       <component id="MSAT">
         <screen diagnostic="deterministic">
-          <positive>
-            <deploy>
-              <component id="treat"/>
-            </deploy>
-          </positive>
-          <negative/>
+          <positive id="treat"/>
         </screen>
       </component>
       <deployment>

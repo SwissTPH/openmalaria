@@ -225,7 +225,7 @@ HumanIRS::HumanIRS( const IRSComponent& params ) :
 }
 
 void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionComponent& params ) {
-    deployTime = sim::now();
+    deployTime = sim::nowOrTs1();
     const IRSComponent* irsParams = dynamic_cast<const IRSComponent*>(&params);
     assert( irsParams != 0 );   // code error if this fails
     initialInsecticide = irsParams->sampleInitialInsecticide();

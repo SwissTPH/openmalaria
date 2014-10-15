@@ -327,7 +327,7 @@ public:
     
 private:
     const Diagnostic& diagnostic;
-    TriggeredDeployments positive, negative;
+    HumanIntervention positive, negative;
 };
 
 class MDA1DComponent : public HumanInterventionComponent {

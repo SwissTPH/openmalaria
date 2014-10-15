@@ -49,6 +49,7 @@ namespace WithinHost {
  * om:TreatmentOption in healthSystem.xsd with om:DecisionTree (requires an
  * XML updator algorithm), then optionally removing ImmediateOutcomes.
  */
+//TODO: can we construct a CMDecisionTree when loading the relevant bits from the XML instead of changing the XSD?
 struct TreatmentId{
     inline bool operator==( const TreatmentId that ){ return id == that.id; }
     inline bool operator!=( const TreatmentId that ){ return id != that.id; }
@@ -112,8 +113,10 @@ public:
     virtual void importInfection() =0;
 
     /**
-     * Carry out the effects of some treatment option
-     */
+     * Carry out the effects of some treatment option.
+     * 
+     * This may be used by intervention deployment, thus should use time 
+     * sim::nowOrTs1(). */
     //TODO: remove this (use treatSimple instead)
     virtual void treatment( Host::Human& human, TreatmentId treatId ) =0;
     

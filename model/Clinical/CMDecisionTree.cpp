@@ -383,8 +383,10 @@ private:
 };
 
 /**
- * Deploy one or more interventions
+ * Deploy one or more interventions.
  */
+/*NOTE: we use interventions::HumanIntervention to read and sort the list of
+ * interventions to be deployed, though we don't use pointers it finds. */
 class CMDTDeploy : public CMDecisionTree, interventions::HumanIntervention {
 public:
     CMDTDeploy( const scnXml::DecisionTree::DeploySequence& seq ) :

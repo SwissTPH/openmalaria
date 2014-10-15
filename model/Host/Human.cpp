@@ -253,7 +253,7 @@ void Human::summarize() {
 
 void Human::reportDeployment( ComponentId id, SimTime duration ){
     if( duration <= sim::zero() ) return; // nothing to do
-    m_subPopExp[id] = sim::nowOrTs1()/*TODO: should be now but requires delayed triggered deployments*/ + duration;
+    m_subPopExp[id] = sim::nowOrTs1() + duration;
     m_cohortSet = Survey::updateCohortSet( m_cohortSet, id, true );
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){

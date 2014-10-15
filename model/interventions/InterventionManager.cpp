@@ -123,6 +123,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             if( component.getScreen().present() ){
                 hiComponent = new ScreenComponent( id, component.getScreen().get() );
             }else if( component.getMDA().present() ){
+                //TODO: use 5-day decision tree instead of this?
                 hiComponent = createSimpleTreatComponent( id, component.getMDA().get() );
             }else if( component.getMDA1D().present() ){
                 //TODO(monitoring): report

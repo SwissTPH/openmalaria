@@ -665,8 +665,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:(Mass) screening;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="positive" type="om:TriggeredDeployments"/>
-      <xs:element name="negative" type="om:TriggeredDeployments"/>
+      <xs:element name="positive" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
+      <xs:element name="negative" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
     </xs:sequence>
     <xs:attribute name="diagnostic" type="xs:string" use="required">
       <xs:annotation>

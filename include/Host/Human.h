@@ -218,6 +218,8 @@ private:
   /// The next continuous distribution in the series
   uint32_t nextCtsDist;
   
+  //TODO(optimisation): it might be better to instead store for each
+  // ComponentId of interest the set of humans who are members
   typedef std::map<interventions::ComponentId,SimTime> SubPopT;
   /** This lists sub-populations of which the human is a member together with
    * expiry time.

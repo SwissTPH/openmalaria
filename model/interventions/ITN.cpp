@@ -502,8 +502,8 @@ HumanITN::HumanITN( const ITNComponent& params ) :
 void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionComponent& params0) {
     const ITNComponent& params = *dynamic_cast<const ITNComponent*>(&params0);
     
-    deployTime = sim::now();
-    disposalTime = sim::now() + params.attritionOfNets->sampleAgeOfDecay();
+    deployTime = sim::nowOrTs1();
+    disposalTime = sim::nowOrTs1() + params.attritionOfNets->sampleAgeOfDecay();
     nHoles = 0;
     holeIndex = 0.0;
     // this is sampled independently: initial insecticide content doesn't depend on handling

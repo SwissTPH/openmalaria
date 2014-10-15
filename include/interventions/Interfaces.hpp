@@ -95,6 +95,9 @@ public:
     
     /** Deploy the component to a pre-selected human.
      * 
+     * This may be called between updates (usual intervention deployment time)
+     * or from case management. It should use time sim::nowOrTs1().
+     * 
      * @param human Individual receiving the intervention
      * @param method Channel of deployment (mass, continuous)
      */
@@ -174,6 +177,8 @@ protected:
     vector<const HumanInterventionComponent*> components;
 };
 
+//TODO: this class is likely more complicated than it needs to be (e.g. SubList
+// could just store ComponentId instead of inheriting HumanIntervention)
 class TriggeredDeployments {
 public:
     TriggeredDeployments( const scnXml::TriggeredDeployments& elt );

@@ -160,8 +160,8 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
                 timeStepMaxDensity = max(timeStepMaxDensity, density);
                 m_cumulative_Y += density;
                 if( density > 0 ){
-                    //NOTE: this is a provisional output. It should not, however, add log(0)=-inf to the sum.
-                    sumLogDens += log(density);
+                    // Base 10 logarithms are usually used; +1 because it avoids negatives in output while having very little affect on high densities
+                    sumLogDens += log10(1.0 + density);
                 }
                 ++inf;
             }
