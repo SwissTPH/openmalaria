@@ -25,7 +25,6 @@
 #include "Parameters.h"
 #include "Monitoring/Survey.h"
 #include "WithinHost/Pathogenesis/State.h"
-#include "util/AgeGroupInterpolation.h"
 
 namespace scnXml{
     class HSESNMF;
@@ -33,7 +32,6 @@ namespace scnXml{
 }
 
 namespace OM { namespace WithinHost { namespace Pathogenesis {
-using util::AgeGroupInterpolator;
 
 /*! PathogenesisModel abstract base class.
  *
@@ -47,7 +45,7 @@ public:
     *
     * @param cF = Comorbidity factor (currently set in Human). */
     static PathogenesisModel* createPathogenesisModel(double cF);
-
+    
     
     virtual ~PathogenesisModel() {}
 
@@ -79,21 +77,6 @@ protected:
 
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
-
-private:
-    ///@brief static vars set by init()
-    //@{
-    /// Comorbidity prevalence at birth as a risk factor for indirect mortality
-    static double indirRiskCoFactor_18;
-    /// sevMal: critical density for severe malaria bout (Y*B1)
-    static double sevMal_21;
-    /// Critical age for co-morbidity (for both severe and indirect)
-    static double critAgeComorb_30;
-    /// Comorbidity prevalence at birth as a risk factor for severe
-    static double comorbintercept_24;
-    /// Rate of Non-Malaria Fever incidence by age. Non-seasonal.
-    static AgeGroupInterpolator NMF_incidence;
-    //@}
 
 protected:
     virtual double getPEpisode(double timeStepMaxDensity, double totalDensity)=0;
