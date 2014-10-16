@@ -122,12 +122,12 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             HumanInterventionComponent *hiComponent;
             if( component.getScreen().present() ){
                 hiComponent = new ScreenComponent( id, component.getScreen().get() );
-            }else if( component.getMDA().present() ){
-                //TODO: use 5-day decision tree instead of this?
-                hiComponent = createSimpleTreatComponent( id, component.getMDA().get() );
-            }else if( component.getMDA1D().present() ){
-                //TODO(monitoring): report
-                hiComponent = new MDA1DComponent( id, component.getMDA1D().get() );
+            }else if( component.getTreatSimple().present() ){
+                hiComponent = new TreatSimpleComponent( id, component.getTreatSimple().get() );
+            }else if( component.getTreatPKPD().present() ){
+                hiComponent = new TreatPKPDComponent( id, component.getTreatPKPD().get() );
+            }else if( component.getDecisionTree().present() ){
+                hiComponent = new DecisionTreeComponent( id, component.getDecisionTree().get() );
             }else if( component.getPEV().present() ){
                 hiComponent = new VaccineComponent( id, component.getPEV().get(), Vaccine::PEV );
             }else if( component.getBSV().present() ){

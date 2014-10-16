@@ -40,8 +40,7 @@ namespace OM { namespace Clinical {
 // -----  ESCaseManagement  -----
 
 const CMDecisionTree *escm_uncomplicated = 0,
-    *escm_complicated = 0,
-    *escm_mda = 0;
+    *escm_complicated = 0;
 
 void ESCaseManagement::setHealthSystem(const scnXml::HSEventScheduler& esData){
     escm_uncomplicated = &CMDecisionTree::create( esData.getUncomplicated(), true );
@@ -50,24 +49,6 @@ void ESCaseManagement::setHealthSystem(const scnXml::HSEventScheduler& esData){
     // Calling our parent class like this is messy. Changing this would require
     // moving change-of-health-system handling into ClinicalModel.
     ClinicalEventScheduler::setParameters( esData );
-}
-
-void ESCaseManagement::initMDA (const scnXml::DecisionTree& desc){
-    escm_mda = &CMDecisionTree::create( desc, true );
-}
-
-void ESCaseManagement::massDrugAdministration(
-        const CMHostData& hostData,
-        const Host::Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport
-){
-    Survey::current().addInt( screeningReport, human, 1 );
-    assert( escm_mda != 0 );
-    CMDTOut out = escm_mda->exec( hostData );
-    if( out.treated ){
-        Survey::current().addInt( drugReport, human, 1 );
-    }
 }
 
 CMDTOut ESCaseManagement::execute (

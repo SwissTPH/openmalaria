@@ -83,13 +83,8 @@
   <interventions name="Full Set">
     <human>
       <component id="MDA">
-        <MDA>
-          <effects>
-            <option pSelection="1">
-              <clearInfections timesteps="-1" stage="both"/>
-            </option>
-          </effects>
-        </MDA>
+        <!-- legacy effect -->
+        <treatSimple durationLiver="-1t" durationBlood="-1t"/>
       </component>
       <component id="ITN" name="LLIN test">
         <ITN>

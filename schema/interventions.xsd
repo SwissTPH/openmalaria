@@ -400,26 +400,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:sequence>
       <xs:choice>
         <xs:element name="screen" type="om:Screen"/>
-        <xs:element name="MDA" type="om:MDAComponent"/>
-        <xs:element name="MDA1D" type="om:DecisionTree">
-          <xs:annotation>
-            <xs:documentation>
-              Description of a MDA/MSAT intervention (Mass Screen and Treat is
-              just Mass Drug Administration with a diagnostic).
-              
-              This MDA/MSAT model piggy-backs the 1-day timestep case management
-              and drug models, and thus is only available when using a 1-day
-              timestep.
-              
-              Description of treatment type used by mass treatment option of
-              one-day case management model. Can be used to describe
-              one-size-fits-all mass drug dosing, age-based mass drug dosing and
-              screen-and-treat. Number of treatments given can be reported by
-              the nMDAs option.
-            </xs:documentation>
-            <xs:appinfo>name:Mass drug administration (with decision tree and drug PK/PD model);</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
+        <xs:element name="treatSimple" type="om:DTTreatSimple"/>
+        <xs:element name="treatPKPD" type="om:DTTreatPKPD"/>
+        <xs:element name="decisionTree" type="om:DecisionTree"/>
         <xs:element name="PEV" type="om:vaccineDescription">
           <xs:annotation>
             <xs:documentation>
@@ -676,66 +659,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="MDAComponent">
-     <xs:annotation>
-      <xs:documentation>
-        Description of treatment deployed as an intervention (treatment is
-        usually a simple model of a drug's action, thus when deployed on mass
-        or via screening this becomes part of a mass drug administration (MDA)
-        or mass screen-and-treat (MSAT) intervention. For historical reasons
-        this is called "MDA" in the XML, not "treatment".
-        
-        For the 1-day timestep models, a more detailed model of drug action and
-        more flexible model of deployment decisions are available; see MDA1D.
-        
-        The model of action of this intervention is to select one option from a
-        list of treatment options (randomly when multiple are available) then
-        carry out the treatment option's actions (which may be to do nothing).
-      </xs:documentation>
-      <xs:appinfo>name:Treatment / (mass) drug administration;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="effects">
-        <xs:annotation>
-          <xs:documentation>
-            A list of treatment options. When treatment is to be given,
-            one option will be selected randomly (according to the
-            "pSelection" probability of selection parameters given), and
-            the actions of that option enacted.
-            
-            Multiple options are intended to allow simulation of drug
-            failure and varying patient adherence. An option may do
-            nothing.
-          </xs:documentation>
-          <xs:appinfo>name:Treatment options;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="option" maxOccurs="unbounded">
-              <xs:complexType>
-                <!-- Note: it may in the future be preferable to define
-                the option elsewhere and link to it via some identifier -->
-                <xs:complexContent>
-                  <xs:extension base="om:TreatmentOption">
-                    <xs:attribute name="pSelection" type="xs:double" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
-                          The probability of selection of this treatment
-                          option. The sum of probabilities of all options
-                          in the list should be 1.
-                        </xs:documentation>
-                        <xs:appinfo>name:Probability of selection;min:0;max:1;units:dimensionless;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="VectorIntervention">
     <xs:annotation>

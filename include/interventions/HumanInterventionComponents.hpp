@@ -32,6 +32,7 @@
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
 #include "WithinHost/Diagnostic.h"
+#include "PkPd/LSTMTreatments.h"
 #include "util/random.h"
 #include <schema/healthSystem.h>
 #include <schema/interventions.h>
@@ -194,110 +195,6 @@ public:
 #endif
 };
 
-/// Simple treatment: no PK/PD, just remove parasites
-class SimpleTreatComponent : public HumanInterventionComponent {
-public:
-    SimpleTreatComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
-        HumanInterventionComponent(id,
-                Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
-    {
-        const scnXml::Effects::OptionSequence& options = mda.getEffects().getOption();
-        assert( options.size() == 1 );
-        if( options[0].getPSelection() != 1.0 )
-            throw util::xml_scenario_error( "sum of pSelection of a group of treatments is not 1" );
-        treatId = WithinHost::WHInterface::addTreatment( options[0] );
-    }
-    
-    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        Survey::current().addInt( reportMeasure(method), human, 1 );
-        human.withinHostModel->treatment( human, treatId );
-    }
-    
-    virtual Component::Type componentType() const{ return Component::SIMPLE_TREAT; }
-    
-#ifdef WITHOUT_BOINC
-    virtual void print_details( std::ostream& out )const{
-        out << id().id << "\tTreat";
-    }
-#endif
-    
-private:
-    WithinHost::TreatmentId treatId;
-};
-
-/// As SimpleTreatComponent, but with a probabilistic choice
-class ProbSimpleTreatComponent : public HumanInterventionComponent {
-public:
-    ProbSimpleTreatComponent( ComponentId id, const scnXml::MDAComponent& mda ) :
-        HumanInterventionComponent(id,
-                Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
-    {
-        const scnXml::Effects::OptionSequence& options = mda.getEffects().getOption();
-        assert( options.size() >= 1 );
-        treatments.reserve( options.size() );
-        double cumP = 0.0;
-        for( scnXml::Effects::OptionConstIterator it = options.begin(),
-            end = options.end(); it != end; ++it )
-        {
-            cumP += it->getPSelection();
-            TreatOptions treatOpts( cumP, WithinHost::WHInterface::addTreatment( *it ) );
-            treatments.push_back( treatOpts );
-        }
-        
-        // we expect the prob. to be roughly one as an error check, but allow slight deviation
-        if( cumP < 0.99 || cumP > 1.01 ) throw util::xml_scenario_error( "sum of pSelection of a group of treatments is not 1" );
-        for( vector<TreatOptions>::iterator it = treatments.begin(),
-            end = treatments.end(); it != end; ++it )
-        {
-            it->cumProb /= cumP;
-        }
-    }
-    
-    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        Survey::current().addInt( reportMeasure(method), human, 1 );
-        human.withinHostModel->treatment( human, selectTreatment() );
-    }
-    
-    virtual Component::Type componentType() const{ return Component::P_S_TREAT; }
-    
-#ifdef WITHOUT_BOINC
-    virtual void print_details( std::ostream& out )const{
-        out << id().id << "\tTreat";
-    }
-#endif
-    
-private:
-    WithinHost::TreatmentId selectTreatment()const{
-        if( treatments.size() == 1 ) return treatments[0].treatId;
-        
-        double x = util::random::uniform_01();      // random sample: choose
-        for( vector<TreatOptions>::const_iterator it = treatments.begin(),
-            end = treatments.end(); it != end; ++it )
-        {
-            if( it->cumProb > x ) return it->treatId;
-        }
-        assert( false );    // last item should have pCum=1 and x<1 in theory
-        return treatments[0].treatId; // remain type safe
-    }
-    
-    struct TreatOptions{
-        double cumProb;
-        WithinHost::TreatmentId treatId;
-        TreatOptions( double cumProb, WithinHost::TreatmentId treatId ):
-            cumProb(cumProb), treatId(treatId) {}
-    };
-    vector<TreatOptions> treatments;
-};
-
-HumanInterventionComponent* createSimpleTreatComponent( ComponentId id,
-                                                        const scnXml::MDAComponent& mda )
-{
-    if( mda.getEffects().getOption().size() == 1 )
-        return new SimpleTreatComponent( id, mda );
-    else
-        return new ProbSimpleTreatComponent( id, mda );
-}
-
 class ScreenComponent : public HumanInterventionComponent {
 public:
     ScreenComponent( ComponentId id, const scnXml::Screen& elt ) :
@@ -330,39 +227,110 @@ private:
     HumanIntervention positive, negative;
 };
 
-class MDA1DComponent : public HumanInterventionComponent {
+/// Simple treatment: no PK/PD, just remove parasites
+class TreatSimpleComponent : public HumanInterventionComponent {
 public:
-    MDA1DComponent( ComponentId id, const scnXml::DecisionTree& description ) :
+    TreatSimpleComponent( ComponentId id, const scnXml::DTTreatSimple& elt ) :
         HumanInterventionComponent(id,
-                Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
-        m_screenMeasureCts(Report::MI_SCREENING_CTS),
-        m_screenMeasureTimed(Report::MI_SCREENING_TIMED)
+                Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
     {
-        if( !util::ModelOptions::option( util::CLINICAL_EVENT_SCHEDULER ) )
-            throw util::xml_scenario_error( "MDA1D intervention: requires CLINICAL_EVENT_SCHEDULER option" );
-        Clinical::ESCaseManagement::initMDA( description );
+        //NOTE: this code is currently identical to that in CMDTTreatSimple
+        try{
+            SimTime durL = UnitParse::readShortDuration( elt.getDurationLiver(), UnitParse::NONE ),
+                durB = UnitParse::readShortDuration( elt.getDurationBlood(), UnitParse::NONE );
+            SimTime neg1 = -sim::oneTS();
+            if( durL < neg1 || durB < neg1 ){
+                throw util::xml_scenario_error( "treatSimple: cannot have durationBlood or durationLiver less than -1" );
+            }
+            if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+                if( durL != sim::zero() || durB != neg1 )
+                    throw util::unimplemented_exception( "vivax model only supports timestepsLiver=0, timestepsBlood=-1" );
+                // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
+            }
+            timeLiver = durL;
+            timeBlood = durB;
+        }catch( const util::format_error& e ){
+            throw util::xml_scenario_error( string("treatSimple: ").append(e.message()) );
+        }
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
-        human.getClinicalModel().massDrugAdministration( human, screeningMeasure(method), reportMeasure(method) );
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+        human.withinHostModel->treatSimple( timeLiver, timeBlood );
     }
     
-    virtual Component::Type componentType() const{ return Component::MDA_TS1D; }
+    virtual Component::Type componentType() const{ return Component::TREAT_SIMPLE; }
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << id().id << "\tMDA1D";
+        out << id().id << "\ttreatSimple";
     }
 #endif
     
 private:
-    /** Trivial helper function to get deployment measure. */
-    inline ReportMeasureI screeningMeasure( Deployment::Method method )const{
-        return (method == Deployment::TIMED) ? m_screenMeasureTimed :
-            (method == Deployment::CTS) ? m_screenMeasureCts :
-            Report::MI_TREAT_DEPLOYMENTS;
+    SimTime timeLiver, timeBlood;
+};
+
+//NOTE: this is similar to CMDTTreatPKPD, but supporting only a single "treatment"
+class TreatPKPDComponent : public HumanInterventionComponent {
+public:
+    TreatPKPDComponent( ComponentId id, const scnXml::DTTreatPKPD& elt ) :
+        HumanInterventionComponent(id,
+                Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
+            schedule(PkPd::LSTMTreatments::findSchedule(elt.getSchedule())),
+            dosage(PkPd::LSTMTreatments::findDosages(elt.getDosage())),
+            delay_h(elt.getDelay_h())
+    {
+        if( !util::ModelOptions::option( util::INCLUDES_PK_PD ) ){
+            throw util::xml_scenario_error( "treatPKPD: requires INCLUDES_PK_PD model option" );
+        }
     }
-    ReportMeasureI m_screenMeasureCts, m_screenMeasureTimed;
+    
+    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
+        Survey::current().addInt( reportMeasure(method), human, 1 );
+        human.withinHostModel->treatPkPd( schedule, dosage, delay_h );
+    }
+    
+    virtual Component::Type componentType() const{ return Component::TREAT_PKPD; }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << id().id << "\ttreatPKPD";
+    }
+#endif
+    
+private:
+    size_t schedule;        // index of the schedule
+    size_t dosage;          // name of the dosage table
+    double delay_h;         // delay in hours
+};
+
+class DecisionTreeComponent : public HumanInterventionComponent {
+public:
+    DecisionTreeComponent( ComponentId id, const scnXml::DecisionTree& elt ) :
+        HumanInterventionComponent(id, Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
+        tree(Clinical::CMDecisionTree::create(elt, false))
+    {}
+    
+    void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
+        Clinical::CMDTOut out = tree.exec( Clinical::CMHostData(human,
+                human.age(sim::nowOrTs1()).inYears(),
+                Clinical::Episode::NONE /*parameter not needed*/) );
+        if( out.treated ){
+            Survey::current().addInt( reportMeasure(method), human, 1 );
+        }
+    }
+    
+    virtual Component::Type componentType() const{ return Component::CM_DT; }
+    
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << id().id << "\tDecision tree";
+    }
+#endif
+    
+private:
+    const Clinical::CMDecisionTree& tree;
 };
 
 class ClearImmunityComponent : public HumanInterventionComponent {

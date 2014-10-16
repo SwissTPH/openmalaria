@@ -82,6 +82,7 @@ private:
      *
      * Since infection models and within host models are very much intertwined,
      * the idea is that each WithinHostModel has its own list of infections. */
+    //TODO: better to template class over infection type than use dynamic type?
     std::list<CommonInfection*> infections;
 };
 

@@ -47,10 +47,6 @@ public:
         return ageLastTreatment > sim::zero() && ageLastTreatment <= sim::fromDays(20);
     }
     
-    virtual void massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport );
-
 protected:
     enum CaseType { FirstLine, SecondLine, NumCaseTypes };
     static Monitoring::ReportMeasureI measures[NumCaseTypes];

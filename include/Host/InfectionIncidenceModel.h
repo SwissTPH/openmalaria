@@ -145,6 +145,8 @@ protected:
   static int ctsNewInfections;
 };
 
+//TODO(optimisation): none of these add data members, so should we be using
+// inheritance and dynamic type? Could instead use static function pointers.
 /** A workaround to produce the same results as with heterogeneity work-units.
  *
  * The EIR passed into the function was not in one place adjusted by the

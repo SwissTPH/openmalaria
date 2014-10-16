@@ -173,13 +173,6 @@ void CM5DayCommon::severeMalaria (
 
 // ———  per-human, intervention & checkpointing  ———
 
-void CM5DayCommon::massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport )
-{
-    assert(false);      // should never be called
-}
-
 void CM5DayCommon::checkpoint (istream& stream) {
     ClinicalModel::checkpoint (stream);
     m_tLastTreatment & stream;

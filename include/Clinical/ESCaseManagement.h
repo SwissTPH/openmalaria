@@ -47,17 +47,6 @@ public:
     * (Re)loads all data affected by this healthSystem element. */
     static void setHealthSystem (const scnXml::HSEventScheduler& esData);
     
-    /** Set up MDA drug. Must be called if massDrugAdministration() is
-        * ever used to deploy an MDA intervention. */
-    static void initMDA (const scnXml::DecisionTree& desc);
-    
-    static void massDrugAdministration(
-        const CMHostData& hostData,
-        const Host::Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport
-    );
-    
     static CMDTOut execute( const CMHostData& hostData );
 };
 

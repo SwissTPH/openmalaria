@@ -628,13 +628,8 @@
     </changeEIR>
     <human>
       <component id="treat">
-        <MDA>
-          <effects>
-            <option name="legacy effect" pSelection="1">
-              <clearInfections stage="both" timesteps="-1t"/>
-            </option>
-          </effects>
-        </MDA>
+        <!-- legacy effect -->
+        <treatSimple durationLiver="-1t" durationBlood="-1t"/>
       </component>
       <component id="MSAT">
         <screen diagnostic="deterministic">

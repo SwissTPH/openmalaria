@@ -35,6 +35,9 @@ using WithinHost::WHInterface;
 
 /** All data which needs to be passed to the decision tree evaluators. */
 struct  CMHostData {
+    /** Initialise, from a human h with age aY (years), and pathogenesis state
+     * pS. Note that pS is only needed for uncomplicated trees
+     * (see CMDecisionTree::create()). */
     CMHostData (Host::Human& h, double aY, Episode::State pS) :
         human(h), ageYears(aY), pgState(pS) {}
     Host::Human& human;
@@ -59,7 +62,15 @@ class CMDecisionTree {
 public:
     virtual ~CMDecisionTree() {}
     
-    /// Create a user-configured decision from an XML node.
+    /** Create a user-configured decision from an XML node.
+     * 
+     * Memory management is handled internally (statically).
+     * 
+     * @param node XML element describing the tree
+     * @param isUC If isUC is false and a "case type" decision is created, an
+     *  xml_scenario_error exception is thrown. CMHostData::pgState is only
+     *  used by the "case type" decision, so if isUC is false when creating the
+     *  tree, pgState does not need to be set when executing the tree. */
     static const CMDecisionTree& create( const ::scnXml::DecisionTree& node, bool isUC );
     
     /** Test for equivalence in two decision trees. Nodes are equivalent if
@@ -70,7 +81,7 @@ public:
         return !(*this == that);
     }
     
-    /** Run the decision tree.
+    /** Execute the decision tree.
      * 
      * Reporting: use of diagnostics is reported. Treatment is not, but the
      * output may be used to determine whether any treatment took place. */

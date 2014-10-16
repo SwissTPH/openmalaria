@@ -79,9 +79,7 @@
   <interventions name="cohort selection">
     <human>
       <component id="MDA">
-        <MDA1D>
-          <treatPKPD schedule="MQ1" dosage="MQ1"/>
-        </MDA1D>
+        <treatPKPD schedule="MQ1" dosage="MQ1"/>
       </component>
       <component id="cohort">
         <recruitmentOnly/>

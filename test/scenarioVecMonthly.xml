@@ -75,13 +75,7 @@
   <interventions name="vector pop tests">
     <human>
       <component id="treat">
-        <MDA>
-          <effects>
-            <option name="simple treatment" pSelection="1">
-              <clearInfections timesteps="1" stage="blood"/>
-            </option>
-          </effects>
-        </MDA>
+        <treatSimple durationBlood="1t" durationLiver="0"/>
       </component>
     </human>
     <vectorPop>

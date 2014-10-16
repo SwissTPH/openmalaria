@@ -64,6 +64,7 @@ protected:
    * 
    * Since infection models and within host models are very much intertwined,
    * the idea is that each WithinHostModel has its own list of infections. */
+  //TODO(optimisation): why use pointer indirection when we know type?
   std::list<DescriptiveInfection*> infections;
 };
 

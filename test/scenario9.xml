@@ -44,13 +44,7 @@
   <interventions name="uninfect population">
     <human>
       <component id="clearInfections">
-        <MDA>
-          <effects>
-            <option pSelection="1">
-              <clearInfections timesteps="5t" stage="both"/>
-            </option>
-          </effects>
-        </MDA>
+        <treatSimple durationBlood="5t" durationLiver="5t"/>
       </component>
       <deployment name="clear human infections">
         <component id="clearInfections"/>

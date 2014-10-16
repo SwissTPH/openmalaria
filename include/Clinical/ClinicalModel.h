@@ -87,11 +87,6 @@ public:
      * further event during this time would not be considered a new bout. */
     virtual bool notAtRisk() =0;
     
-    /** One way to do mass drug administation. Only for EventScheduler model. */
-    virtual void massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport ) =0;
-    
     /// Force all pending summaries to be reported. Should only be called when
     /// class is about to be destroyed anyway to avoid affecting output.
     inline void flushReports (){

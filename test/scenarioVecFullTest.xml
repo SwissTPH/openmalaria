@@ -109,15 +109,8 @@
   <interventions name="Full Set">
     <human>
       <component id="MDA">
-        <MDA>
-          <effects>
-            <option name="prophylactic blood and liver" pSelection="1">
-              <!-- this is a weird description, used only to test the model -->
-              <clearInfections timesteps="4" stage="blood"/>
-              <clearInfections timesteps="5" stage="liver"/>
-            </option>
-          </effects>
-        </MDA>
+        <!-- this is a weird description, used only to test the model -->
+        <treatSimple durationBlood="4t" durationLiver="5t"/>
       </component>
       <component id="PevDrug">
         <!-- this is a made-up short-effect pre-erythrocytic effect drug -->

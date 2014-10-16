@@ -80,13 +80,7 @@
   <interventions name="Full Set">
     <human>
       <component id="MDA">
-        <MDA>
-          <effects>
-            <option name="clear blood-stage infections" pSelection="1">
-              <clearInfections stage="blood" timesteps="1t"/>
-            </option>
-          </effects>
-        </MDA>
+        <treatSimple durationBlood="1t" durationLiver="0"/>
       </component>
       <component id="ITN" name="LLIN test">
         <ITN>

@@ -161,20 +161,6 @@ bool ClinicalEventScheduler::notAtRisk() {
     throw TRACED_EXCEPTION_DEFAULT("notAtRisk: not supported by 1-day time-step models");
 }
 
-void ClinicalEventScheduler::massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport )
-{
-    // Note: we use the same medication method as with drugs as treatments, hence the actual
-    // medication doesn't occur until the next time step.
-    // Note: we augment any existing medications, however future medications will replace any yet-
-    // to-be-medicated MDA treatments (even all MDA doses when treatment happens immediately).
-    ESCaseManagement::massDrugAdministration (
-        CMHostData( human, human.age(sim::nowOrTs1()).inYears(), pgState ),
-            human, screeningReport, drugReport
-    );
-}
-
 void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     WHInterface& withinHostModel = *human.withinHostModel;
     // Run pathogenesisModel

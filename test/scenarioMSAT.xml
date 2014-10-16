@@ -66,7 +66,6 @@
       <option name="nMassITNs" value="true"/>
       <option name="Clinical_Microscopy" value="true"/>
       <option name="nMDAs" value="true"/>
-      <option name="nMassScreenings" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <!-- we don't actually need many for testing -->
@@ -117,7 +116,7 @@
     </importedInfections>
     <human>
       <component id="MDA">
-        <MDA1D>
+        <decisionTree>
           <diagnostic diagnostic="RDT">
             <positive>
               <treatPKPD schedule="AL_treat" dosage="AL_dosages"/>
@@ -126,7 +125,7 @@
               <noTreatment/>
             </negative>
           </diagnostic>
-        </MDA1D>
+        </decisionTree>
       </component>
       <component id="ITN" name="Extended ITNs">
         <ITN>
