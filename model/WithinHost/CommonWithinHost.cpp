@@ -34,6 +34,7 @@ namespace WithinHost {
 CommonInfection* (* CommonWithinHost::createInfection) (uint32_t protID);
 CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
+// Only required for a drug monitoring HACK and could be removed:
 vector<string> drugMonCodes;
 
 

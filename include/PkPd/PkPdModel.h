@@ -77,7 +77,8 @@ public:
   }
   //@}
   
-    /** HACK to report drug concentrations.
+    /** Feature added for a drug monitoring HACK. Could be replaced with better
+     * monitoring code.
      * 
      * Gives the drug concentrations at the start of the day (before medication,
      * where drugs are medicated at hour 0).

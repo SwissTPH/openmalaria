@@ -147,7 +147,7 @@ public:
      * @param nNewInfs Number of inoculations this time-step
      * @param ageInYears Age of human
      * @param bsvFactor Parasite survival factor for blood-stage vaccines
-     * @param drugMon HACK(drug mon)
+     * @param drugMon Only required for a drug monitoring HACK and could be removed
      */
     virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) =0;
 

@@ -44,7 +44,7 @@ namespace OM { namespace Host {
             opt_comorb_trans_het = false, opt_triple_het = false,
             opt_report_only_at_risk = false;
     
-    //HACK(drug mon)
+    // Only required for a drug monitoring HACK and could be removed:
     ofstream monDrug, monFake;
     ComponentId drugMonId(0 /*lazy initialisation*/);
 
@@ -70,8 +70,14 @@ void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario
 
 void Human::init2( const scnXml::Monitoring& monitoring ){
     if( monitoring.getDrugConcentration().present() ){
+#ifdef WITHOUT_BOINC
         monDrug.open( monitoring.getDrugConcentration().get().getFile().c_str(), ios::out );
         drugMonId = interventions::InterventionManager::getComponentId( monitoring.getDrugConcentration().get().getCohort() );
+#else
+        // This feature is disabled in BOINC because it writes to a file and I
+        // don't want another security feature needing review.
+        std::cerr << "monitoring/drugConcentration: feature disabled in BOINC builds" << std::endl;
+#endif
     }
 }
 

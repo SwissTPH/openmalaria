@@ -40,7 +40,8 @@ namespace OM { namespace WithinHost {
 class CommonWithinHost : public WHFalciparum
 {
 public:
-    static void init(const scnXml::DrugConcentration& elt);     //HACK(drug mon)
+    // Only required for a drug monitoring HACK and could be removed:
+    static void init(const scnXml::DrugConcentration& elt);
     
     CommonWithinHost( double comorbidityFactor );
     virtual ~CommonWithinHost();

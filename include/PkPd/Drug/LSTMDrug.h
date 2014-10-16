@@ -140,7 +140,7 @@ protected:
      * and in updateConcentration() to update concentration. */
     DoseMap doses;
     
-    friend class LSTMPkPdModel; //HACK(drug mon)
+    friend class LSTMPkPdModel; // only required for a drug monitoring HACK; could be removed
 };
 
 }

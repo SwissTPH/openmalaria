@@ -152,7 +152,9 @@ public:
     inline size_t getIndex() const {
         return index;
     }
-    inline const string& getName() const{ return name; }//HACK(drug mon)
+#ifdef WITHOUT_BOINC
+    inline const string& getName() const{ return name; }
+#endif
     inline double getVolumeOfDistribution() const{
         return vol_dist;
     }
@@ -208,7 +210,9 @@ private:
      * Independant of frequencies of alleles at other loci (for other drugs). */
     vector<double> cumInitialFreq;
     
-    string name;        // HACK(drug mon) drug code
+#ifdef WITHOUT_BOINC
+    string name;        // only required for a drug monitoring HACK; could be removed
+#endif
     
     // Allow LSTMDrug to access private members
     friend class LSTMDrugAllele;

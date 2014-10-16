@@ -175,7 +175,8 @@ public:
   ///@name static public
   //@{
   static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
-  static void init2( const scnXml::Monitoring& monitoring );    // HACK(drug mon)
+  // init2 is only required for a drug-monitoring HACK, and could be removed:
+  static void init2( const scnXml::Monitoring& monitoring );
   //@}
     
 public:

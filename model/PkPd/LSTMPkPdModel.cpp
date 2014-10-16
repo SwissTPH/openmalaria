@@ -94,9 +94,11 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 // ———  non-static simulation time functions  ———
 
 void LSTMPkPdModel::getConcentrations(map< string, double >& concentrations)const{
+#ifdef WITHOUT_BOINC
     foreach( const LSTMDrug& drug, _drugs ){
         concentrations[drug.typeData.getName()] = drug.concentration;
     }
+#endif
 }
 
 void LSTMPkPdModel::prescribe(size_t schedule, size_t dosage, double age){
