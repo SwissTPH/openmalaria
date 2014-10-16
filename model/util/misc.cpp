@@ -22,6 +22,7 @@
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "schema/scenario.h"
+#include "util/CommandLine.h"
 
 #include <cstdlib>
 #include <boost/xpressive/xpressive.hpp>
@@ -47,6 +48,8 @@ SimTime sim::time0;
 SimTime sim::time1;
 SimTime sim::interv_time;
 
+using util::CommandLine;
+
 
 // ———  Unit parsing stuff  ———
 namespace UnitParse {
@@ -69,14 +72,19 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
         // no unit given; examine our policy:
         if( v == 0 ){   // don't need a unit in this case
             return sim::zero();
-        }else if( util::ModelOptions::option(util::REQUIRE_UNITS) || defUnit == NONE ){
+        }else if( defUnit == NONE ){
             throw util::format_error( "unit required but not given (try e.g. 5d or 12t)" );
-        }else if( defUnit == DAYS ){
-            return sim::roundToTSFromDays( v );
-        }else if( defUnit == STEPS ){
-            return sim::fromTS( longToInt(v) );
         }else{
-            throw SWITCH_DEFAULT_EXCEPTION;
+            if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
+                cerr << "Deprecation warning: duration \"" << str << "\" specified without unit; it is recommended to do so (e.g. 5d or 1t)" << endl;
+            }
+            if( defUnit == DAYS ){
+                return sim::roundToTSFromDays( v );
+            }else if( defUnit == STEPS ){
+                return sim::fromTS( longToInt(v) );
+            }else{
+                throw SWITCH_DEFAULT_EXCEPTION;
+            }
         }
     }else if( len + 1 == str.size() ){
         // one extra character found; is this a unit?
@@ -109,10 +117,10 @@ double parseDurationAndUnit( const std::string& str, DefaultUnit& unit ){
         }
     }else if( len == str.size() ){
         if( v == 0.0 ) unit = DAYS;        // special case: 0 does not require a unit; pretend the unit is days
-        else if( unit == NONE /*no default set for this value*/ ||
-            util::ModelOptions::option(util::REQUIRE_UNITS) )
-        {
+        else if( unit == NONE /*no default set for this value*/ ){
             throw util::format_error( "unit required but not given (try e.g. 5d or 12t or 2.3y)" );
+        }else if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
+            cerr << "Deprecation warning: duration \"" << str << "\" specified without unit; it is recommended to do so (e.g. 5d or 1t or 0.5y)" << endl;
         }
     }else{
         throw util::format_error( string("bad format: '").append(str).append("' (try e.g. 1 or 2d or 3s or 4y)") );
@@ -178,11 +186,10 @@ SimTime readDate( const std::string& str, DefaultUnit defUnit ){
             return date - interv_start_date;  // externally, intervention dates are relative to the start
         }
     }else{
-        if( util::ModelOptions::option(util::REQUIRE_DATES) ){
-            throw util::format_error( string("expected to find a date, not ").append(str) );
-        }else{
-            return readDuration( str, defUnit );
+        if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
+            cerr << "Deprecation warning: time specified via duration \"" << str << "\" where a date could be used; recommended to use a date (e.g. 2011-12-20)" << endl;
         }
+        return readDuration( str, defUnit );
     }
 }
 

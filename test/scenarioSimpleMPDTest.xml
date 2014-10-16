@@ -190,7 +190,6 @@
       <option name="VECTOR_SIMPLE_MPD_MODEL" value="true"/>
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="true"/>
-      <option name="REQUIRE_UNITS"/>
     </ModelOptions>
     <clinical healthSystemMemory="6t">
       <NeonatalMortality diagnostic="neonatal"/>

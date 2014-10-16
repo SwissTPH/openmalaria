@@ -75,8 +75,6 @@ namespace OM { namespace util {
             codeMap["PROPHYLACTIC_DRUG_ACTION_MODEL"]=PROPHYLACTIC_DRUG_ACTION_MODEL;
             codeMap["VIVAX_SIMPLE_MODEL"] = VIVAX_SIMPLE_MODEL;
             codeMap["INDIRECT_MORTALITY_FIX"] = INDIRECT_MORTALITY_FIX;
-            codeMap["REQUIRE_UNITS"] = REQUIRE_UNITS;
-            codeMap["REQUIRE_DATES"] = REQUIRE_DATES;
 	}
 	
 	OptionCodes operator[] (const string s) {

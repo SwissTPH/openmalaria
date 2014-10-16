@@ -95,6 +95,8 @@ namespace OM { namespace util {
                     (ctsoutName = "ctsout").append(name).append(".txt");
                 } else if (clo == "validate-only") {
                     options.set (SKIP_SIMULATION);
+                } else if (clo == "deprecation-warnings") {
+                    options.set (DEPRECATION_WARNINGS);
 		} else if (clo == "print-model") {
 		    options.set (PRINT_MODEL_OPTIONS);
                     options.set (SKIP_SIMULATION);
@@ -222,6 +224,9 @@ namespace OM { namespace util {
 	    << " -n --name NAME		Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt \\"<<endl
 	    << "			--ctsout ctsoutNAME.txt" <<endl
 	    << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
+	    << "    --deprecation-warnings" << endl
+	    << "			Warn about the use of features deemed error-prone and where" << endl
+	    << "			more flexible alternatives are available." << endl
 	    << endl
 	    << "Debugging options:"<<endl
 	    << " -m --print-model	Print all model options with a non-default value and exit." << endl

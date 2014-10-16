@@ -55,6 +55,7 @@ double LSTMDrugAllele::calcFactor( const LSTMDrugType& drug, double& C1, double 
     double C0 = C1;
     drug.updateConcentration( C1, duration );
     
+    // From Hastings & Winter 2011 paper
     // Note: these look a little different from original equations because IC50_pow_slope
     // and power are calculated when read from the scenario document instead of here.
     double numerator = IC50_pow_slope + pow(C1, slope);

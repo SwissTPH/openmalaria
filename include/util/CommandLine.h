@@ -60,6 +60,9 @@ namespace OM { namespace util {
             DEBUG_VECTOR_FITTING,
             /** Print out details about interventions. */
             PRINT_INTERVENTIONS,
+            /** Warn on use of deprecated features; that is recommend the use
+             * of replacement features. */
+            DEPRECATION_WARNINGS,
 	    NUM_OPTIONS
 	};
 	

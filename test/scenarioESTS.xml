@@ -1399,7 +1399,6 @@
       <option name="INCLUDES_PK_PD" value="true"/>
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
-      <option name="REQUIRE_UNITS"/>
     </ModelOptions>
     <clinical healthSystemMemory="14d"/>
     <!-- run id=740 parameterization id=243641 sampling date=2010-08-21 11:14:03 lossfunction=82.879291 -->

@@ -502,9 +502,7 @@
   <model>
     <ModelOptions>
       <option name="VIVAX_SIMPLE_MODEL" value="true"/>
-      <option name="NON_MALARIA_FEVERS" value="true"/> 
-      <option name="REQUIRE_UNITS"/>
-      <option name="REQUIRE_DATES"/>
+      <option name="NON_MALARIA_FEVERS" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="28d">
     <NonMalariaFevers>

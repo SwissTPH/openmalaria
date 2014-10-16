@@ -158,7 +158,6 @@ void ImmediateOutcomes::setHealthSystem (const scnXml::HSImmediateOutcomes& hsDe
     else if( inpatient == secondLine ) treatmentSevere = treatmentUC[SecondLine];
     else treatmentSevere = getHealthSystemTreatmentByName(hsDescription.getTreatmentActions(), inpatient);
     
-    //TODO: deprecate this feature
     useDiagnosticUC = hsDescription.getUseDiagnosticUC();
     
     if( hsDescription.getPrimaquine().present() ){

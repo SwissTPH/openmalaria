@@ -28,6 +28,7 @@
 
 #include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
+#include "util/CommandLine.h"
 #include <schema/scenario.h>
 
 namespace OM { namespace Clinical {
@@ -52,8 +53,13 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& 
         opt_event_scheduler = true;
         ClinicalEventScheduler::init( parameters, clinical );
     }else{
-        if( scenario.getHealthSystem().getImmediateOutcomes().present() )
+        if( scenario.getHealthSystem().getImmediateOutcomes().present() ){
             opt_imm_outcomes = true;
+            
+            if( util::CommandLine::DEPRECATION_WARNINGS ){
+                cerr << "Deprecation warning: healthSystem: use of ImmediateOutcomes can be replaced by the more flexible DecisionTree5Day (optional)" << endl;
+            }
+        }
         // else: decision tree 5 day
     }
 }

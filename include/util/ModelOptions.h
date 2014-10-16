@@ -245,15 +245,6 @@ namespace OM { namespace util {
          * depending on which case management model is used). */
         INDIRECT_MORTALITY_FIX,
         
-        /** If true, do not allow units to be omitted wherever they may be
-         * given. This is not turned on by default for compatibility with old
-         * scenarios but is recommended for new ones. */
-        REQUIRE_UNITS,
-        
-        /** If true, require dates to be used instead of steps/days/years
-         * wherever appropriate. */
-        REQUIRE_DATES,
-        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };
