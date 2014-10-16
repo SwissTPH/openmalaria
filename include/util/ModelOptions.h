@@ -245,6 +245,17 @@ namespace OM { namespace util {
          * depending on which case management model is used). */
         INDIRECT_MORTALITY_FIX,
         
+        /** Potentially a bug-fix: for in-hospital severe malaria patients
+         * where treatment fails to clear parasites, enabling this option
+         * selects the use of hospital Case-Fatality-Rate (as described in the
+         * AJTMH supplement); otherwise the community CFR is used (old model
+         * behaviour, whether a bug or intended behaviour).
+         * 
+         * This is disabled by default since model parameters have been fitted
+         * with this disabled. New models could be fit with the option enabled.
+         */
+        CFR_PF_USE_HOSPITAL,
+        
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
     };

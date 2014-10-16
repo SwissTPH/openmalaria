@@ -36,6 +36,8 @@ using Host::Human;
 class CM5DayCommon : public ClinicalModel
 {
 public:
+    static void init();
+    
     /** Construct an instance (per-human).
      * 
      * @param tSF Treatment-seeking factor. Normally 1 but allows simple heterogeneity.

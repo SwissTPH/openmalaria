@@ -61,6 +61,8 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& 
             }
         }
         // else: decision tree 5 day
+        
+        CM5DayCommon::init();
     }
 }
 
