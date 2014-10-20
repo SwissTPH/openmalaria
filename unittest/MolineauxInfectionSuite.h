@@ -33,6 +33,11 @@
 
 using namespace OM::WithinHost;
 
+//TODO: test option PARASITE_REPLICATION_GAMMA
+//TODO: test option MOLINEAUX_PAIRWISE_SAMPLE
+//TODO: test option FIRST_LOCAL_MAXIMUM_GAMMA
+//TODO: test option MEAN_DURATION_GAMMA
+//TODO: capture key stats, e.g. length, first local maximum, initial slope
 class MolineauxInfectionSuite : public CxxTest::TestSuite
 {
 public:

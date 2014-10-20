@@ -18,10 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-/*This model refers to the paper:
- *L. MOLINEAUX, H. H. DIEBNER, M. EICHNER, W. E. COLLINS, G. M. JEFFERY and K. DIETZ (2001). Plasmodium falciparum parasitaemia described by a new mathematical model. Parasitology, 122 , pp 379-391
- *doi:10.1017/S0031182001007533*/
-
 #ifndef Hmod_MOLINEAUXINFECTION_H
 #define Hmod_MOLINEAUXINFECTION_H
 
@@ -31,60 +27,54 @@ class MolineauxInfectionSuite;
 
 namespace OM { namespace WithinHost {
 
+/**
+ * Implementation of a P. falciparum model by Molineaux et. al., published in:
+ * 
+ * L. MOLINEAUX, H. H. DIEBNER, M. EICHNER, W. E. COLLINS, G. M. JEFFERY and
+ * K. DIETZ, 2001: Plasmodium falciparum parasitaemia described by a new
+ * mathematical model. Parasitology, 122, pp 379-391
+ * doi:10.1017/S0031182001007533
+ */
 class MolineauxInfection : public CommonInfection {
-
 public:
-    MolineauxInfection (istream& stream);
-    MolineauxInfection(uint32_t protID);
-
-    virtual ~MolineauxInfection () {};
+    ///@brief Static class members
+    //@{
     static void init(const OM::Parameters& parameters);
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
-
-protected:
-    virtual void checkpoint (ostream& stream);
-
-private:
-    double getVariantSpecificSummation(int i, double P_current);
-    double getVariantTranscendingSummation(int ageDays);
-
-    /**This function adapt the growth rate.
-     * We can't use the Molineaux as it, since
-     * this model is a two day time step model.
-     * the density p(t+1) is then extrapolated.
-     *
-     */
-    void updateGrowthRateMultiplier(int ageDays);
-
+    
+    // Constants:
     // v: number of variants per clone (one infection = one new clone)
+    //TODO: v should have a significant effect on performance, but reducing by,
+    // say, half, may not have a big effect on the model. Evaluate.
     static const size_t v = 50;
     // taus: used for the variantTranscending and variantSpecific array, 4 Molineaux time steps = 8 days
     static const size_t taus = 4;
-
-    ///@brief static variables red from parameters
-    //@{
-    /// depends on lognormal/gamma distribution for first_local_max
-    static bool first_local_maximum_gamma;
-    /// mean/shape and sd/scale of the first local maximum density for lognormal/gamma distribution
-    static double mean_shape_first_local_max, sd_scale_first_local_max;
-    
-    /// depends on between lognormal/gamma distribution for mean_duration diff_pos_days
-    static bool mean_duration_gamma;
-    /// mean/shape and sd/scale of the difference between last positive and first positive days for lognormal/gamma distribution
-    static double mean_shape_diff_pos_days, sd_scale_diff_pos_days;
-    
-    /// boolean choosing between gamma and lognormal distribution for equation 11
-    static bool multi_factor_gamma;
-    
-    /// pairwise sample of case-specific P* parameters
-    static bool pairwise_PStar_sample;
     //@}
     
-    /** @brief q^(i+1) array
-     *
-     * all the values of q^1... q^50 are stored in this array.
-     * this prevent the recalculation of those values on every two time steps. */
-    static double qPow[v];
+    // Initialise. Samples several parameters.
+    MolineauxInfection(uint32_t protID);
+    // Load from a checkpoint:
+    MolineauxInfection (istream& stream);
+    virtual ~MolineauxInfection () {};
+    
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
+    
+protected:
+    virtual void checkpoint (ostream& stream);
+    
+private:
+    double getVariantSpecificSummation(int i, double P_current);
+    double getVariantTranscendingSummation(int ageDays);
+    
+    /** This function adapts the growth rate.
+     * 
+     * We can't use the Molineaux model as is, since the published model uses a
+     * two day time step. We extrapolate the density p(t+1). */
+    void updateGrowthRateMultiplier(int ageDays);
+    
+    // NOTE: we also have inherited parameters
+    // m_startDate is used to give the age here
+    // m_density is equivalent to Pc in paper
+    // m_cumulativeExposureJ is TODO
     
     // m[i]: Multiplication factor, per two-day cycle of variant i
     float m[v];
@@ -92,32 +82,40 @@ private:
     float variantTranscendingSummation;
     // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
     float laggedPc[taus];
-    /* Pstar_c, Pstar_m: two host-specific critical densities...
-     * Those two values depend on the first local maximum or the difference
+    /* Pc_star, Pm_star: two host-specific critical densities.
+     * These two values depend on the first local maximum or the difference
      * between the last positive day and the first positive day. */
-    float Pstar_c, Pstar_m;
+    float Pc_star, Pm_star;
+    
     struct Variant {
-        // growthRate[i]: variant's i growthRate
-        float growthRate;
-        // P[i]: variant's i density
-        float P;
-        // variantSpecificSummation: See Molineaux paper, equation 6
-        float variantSpecificSummation;
-        // initP[i]: Density of in t+2 emerging variant i
-        float initP;
-        // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
-        float laggedP[taus];
-        
+        // Initialise all variables to 0
         Variant ();
+        
+        inline void setP( float P ){ this->P = P; }
+        inline void setNextP( float nextP ){ initP = nextP; }
         
         /// Checkpointing
         void operator& (ostream& stream);
         void operator& (istream& stream);
         
-        void updateGrowthRateMultiplier( double pd, double immune_response_escape );
         double updateDensity (double survivalFactor, int ageDays /* age of infection in days */);
+        void updateGrowthRateMultiplier( double pd, double immune_response_escape );
         double getVariantSpecificSummation(int ageDays);
+        
+    private:
+        // growthRate[i]: used to calculate Pi(t+1) as sqrt(Pi(t) * Pi(t+2))
+        float growthRate;
+        // P[i]: variant's i density (PRBC/μl blood)
+        float P;
+        // variantSpecificSummation: See Molineaux paper, equation 6
+        float variantSpecificSummation;
+        // initP[i]: Density of in t+2 emerging variant i
+        float initP;    //TODO: we can refactor the model not to need this
+        // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
+        float laggedP[taus];
     };
+    // variant-specific data; variants[i-1] corresponds to variant i in the paper
+    //TODO: more optimal storage of variants? Fixed-size list? Like this, or a map?
     vector<Variant> variants;
     
     // allow unittest to access private vars
