@@ -52,7 +52,7 @@ struct vecDay {
     inline void resize(SimTime new_size, typename vec_t::value_type x = typename vec_t::value_type()){
         v.resize( new_size.inDays(), x ); }
     
-    inline SimTime size() const _GLIBCXX_NOEXCEPT {
+    inline SimTime size() const {
         return sim::fromDays(v.size()); }
     
     inline typename vec_t::reference
