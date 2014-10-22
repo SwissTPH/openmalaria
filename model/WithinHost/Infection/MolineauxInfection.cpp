@@ -205,7 +205,6 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
             }while( m[i]<1.0 );
         }else{
             do{
-                //FIXME: shouldn't this use sigma_m^2 or maybe something else?
                 m[i] = static_cast<float>(random::gauss(mu_m, sigma_m));
             }while( m[i]<1.0 );
         }
@@ -370,7 +369,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
             // Molineaux paper equation 2
             if( P_prime >= 1.0e-5 ){    // [if not, Pi(t+2)) = 0 and we don't add a new variant]
                 // express a new variant:
-                variants.resize( i+1 ); //TODO: do we want to do this? It precludes variants with lower i ever being expressed
+                variants.resize( i+1 );
                 variants[i].setNextP( static_cast<float>(P_prime) );
             }
         }

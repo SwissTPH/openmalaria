@@ -41,7 +41,8 @@ namespace random {
     /** Generate a random number in the range [0,1). */
     double uniform_01 ();
     
-    /** This function returns a Gaussian random variate, with mean mean and standard deviation std. */
+    /** This function returns a Gaussian random variate, with mean mean and
+     * standard deviation std. The sampled value x ~ N(mean, std^2) . */
     double gauss (double mean, double std);
     
     /** As above, but with mean 0 (may be slightly faster). */
