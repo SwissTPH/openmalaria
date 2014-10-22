@@ -69,8 +69,8 @@ endif (MSVC)
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments")
-  # these need to be mentioned explicitly for Clang, but shouldn't be for MSVC:
-  # (they can optionally be mentitoned for GCC)
+  # These are actually only needed when using "clang" not "clang++" (same with
+  # "gcc"), but adding here saves a user error:
   set (OM_STD_LIBS m stdc++)
 endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 
