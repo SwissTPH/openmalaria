@@ -30,6 +30,7 @@
 #include <limits>
 #include <fstream>
 #include <iomanip>
+#include <gsl/gsl_fit.h>
 
 using namespace OM::WithinHost;
 
@@ -49,10 +50,8 @@ public:
         Parameters params(xmlParams);      // this is never used but we need to pass anyway
         MolineauxInfection::init(params);
         util::random::seed( 1095 );
-        infection = new MolineauxInfection (0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
     void tearDown () {
-        delete infection;
         util::random::seed(0);  // make sure nothing else uses this seed/reports
     }
     
@@ -72,24 +71,92 @@ public:
         vector<double> dens;
         readVector(dens,"MolineauxCirDens.txt");
         
+        // pkpdID (value) isn't important since we're not using drug model here:
+        MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
         bool extinct = false;
-        int iterations=0;
+        size_t day=0;
         SimTime now = sim::ts0();
         do{
             extinct = infection->update(1.0 /*no external immunity*/, now);
             SimTime age = now - infection->m_startDate - infection->latentP;
             if( age >= sim::zero() ){
-                ETS_ASSERT_LESS_THAN( iterations, dens.size() );
-                TS_ASSERT_APPROX( infection->getDensity(), dens[iterations] );
-                iterations+=1;
+                ETS_ASSERT_LESS_THAN( day, dens.size() );
+                TS_ASSERT_APPROX( infection->getDensity(), dens[day] );
+                day += 1;
             }
             now += sim::oneDay();
         }while(!extinct);
-        TS_ASSERT_EQUALS( iterations, dens.size() );
+        TS_ASSERT_EQUALS( day, dens.size() );
+        delete infection;
     }
     
+    void testKeyStats(){
+        // This runs the infection several times, capturing some key statistics
+        
+        const size_t N = 1000;  // number of runs
+        vector<MolInfStats> stats( N );
+        
+        vector<double> dens;    // time series of density
+        for( size_t run = 0; run < N; ++run ){
+            dens.resize( 0 );
+            MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
+            SimTime now = sim::ts0();
+            
+            while( !infection->update(1.0 /*no external immunity*/, now) ){
+                dens.push_back( infection->getDensity() );
+                now += sim::oneDay();
+            }
+            delete infection;
+            stats.push_back( MolInfStats( dens ) );
+        }
+        
+        //TODO: print out stats, then do some tests based on these
+    }
+
 private:
-    MolineauxInfection* infection;
+    /** Calculates some key stats — these correspond to table 1 from the
+     * Molineaux paper. Note that 'log' means 'log base 10'. */
+    struct MolInfStats{
+        double init_slope;      // slope of a linear regression line through
+        // the log densities from first positive to first local maxima TODO
+        double log_1st_max;     // log of first local maxima
+        int no_max;  // number of local maxima
+        double slope_max;       // slope of linear regression line through log
+        // densities of local maxima TODO
+        double GM_interv;       // geometric mean of intervals between
+        // consecutive local maxima TODO
+        double SD_log;  // standard deviation of logs of intervals between
+        // consecutive local maxima TODO
+        double prop_pos_1st;    // proportion of observations during the first
+        // half of the interval between first and last positive days which are
+        // positive TODO
+        double prop_pos_2nd;    // as above, but for second half TODO
+        double last_pos_day;    // difference between first and last positive days TODO
+        
+        MolInfStats(){}  // leaves stuff uninintialised
+        /** Calculate stats */
+        MolInfStats( const vector<double>& dens ){
+            size_t firstPos = 0, lastPos = 0, posFirstLocalMax = 0;
+            no_max = 0;
+            
+            // Iterate with a step of two. Note that in one case we coincide
+            // with density updates, in the other we get the interpolated
+            // values.
+            const size_t start = 0 /* 0 or 1 */, step = 2;
+            for( size_t day = start; day < dens.size(); day += step ){
+                if( firstPos == 0 && dens[day] > 0.0 ) firstPos = day;
+                if( dens[day] > 0.0 ) lastPos = day;    // gets re-set until end of inf.
+                if( posFirstLocalMax == 0 && day + step < dens.size() && dens[day] > dens[day+step] ){
+                    posFirstLocalMax = day;
+                    log_1st_max = log10(dens[day]);
+                }
+                if( day >= step && day + step < dens.size() && dens[day] > dens[day-step] && dens[day] > dens[day+step] ){
+                    //NOTE: assumes non-zero densities never exactly repeat
+                    no_max += 1;
+                }
+            }
+        };
+    };
 };
 
 #endif
