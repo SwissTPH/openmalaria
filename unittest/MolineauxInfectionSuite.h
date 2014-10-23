@@ -31,6 +31,7 @@
 #include <fstream>
 #include <iomanip>
 #include <gsl/gsl_fit.h>
+#include <gsl/gsl_statistics_double.h>
 
 using namespace OM::WithinHost;
 
@@ -118,43 +119,94 @@ private:
      * Molineaux paper. Note that 'log' means 'log base 10'. */
     struct MolInfStats{
         double init_slope;      // slope of a linear regression line through
-        // the log densities from first positive to first local maxima TODO
+        // the log densities from first positive to first local maxima
         double log_1st_max;     // log of first local maxima
         int no_max;  // number of local maxima
         double slope_max;       // slope of linear regression line through log
-        // densities of local maxima TODO
+        // densities of local maxima
         double GM_interv;       // geometric mean of intervals between
-        // consecutive local maxima TODO
+        // consecutive local maxima
         double SD_log;  // standard deviation of logs of intervals between
-        // consecutive local maxima TODO
+        // consecutive local maxima
         double prop_pos_1st;    // proportion of observations during the first
         // half of the interval between first and last positive days which are
-        // positive TODO
-        double prop_pos_2nd;    // as above, but for second half TODO
-        double last_pos_day;    // difference between first and last positive days TODO
+        // positive
+        double prop_pos_2nd;    // as above, but for second half
+        double last_pos_day;    // difference between first and last positive days
         
-        MolInfStats(){}  // leaves stuff uninintialised
+        MolInfStats() :
+            init_slope(numeric_limits<double>::quiet_NaN()),
+            log_1st_max(numeric_limits<double>::quiet_NaN()),
+            no_max(0),
+            slope_max(numeric_limits<double>::quiet_NaN()),
+            GM_interv(numeric_limits<double>::quiet_NaN()),
+            SD_log(numeric_limits<double>::quiet_NaN()),
+            prop_pos_1st(numeric_limits<double>::quiet_NaN()),
+            prop_pos_2nd(numeric_limits<double>::quiet_NaN()),
+            last_pos_day(numeric_limits<double>::quiet_NaN())
+        {}
         /** Calculate stats */
         MolInfStats( const vector<double>& dens ){
-            size_t firstPos = 0, lastPos = 0, posFirstLocalMax = 0;
-            no_max = 0;
+            size_t first_pos = 0, last_pos = 0, posFirstLocalMax = 0;
+            vector<double> maxima_t, maxima_ld;
             
             // Iterate with a step of two. Note that in one case we coincide
             // with density updates, in the other we get the interpolated
             // values.
             const size_t start = 0 /* 0 or 1 */, step = 2;
             for( size_t day = start; day < dens.size(); day += step ){
-                if( firstPos == 0 && dens[day] > 0.0 ) firstPos = day;
-                if( dens[day] > 0.0 ) lastPos = day;    // gets re-set until end of inf.
-                if( posFirstLocalMax == 0 && day + step < dens.size() && dens[day] > dens[day+step] ){
-                    posFirstLocalMax = day;
-                    log_1st_max = log10(dens[day]);
-                }
+                if( first_pos == 0 && dens[day] > 0.0 ) first_pos = day;
+                if( dens[day] > 0.0 ) last_pos = day;    // gets re-set until end of infection
                 if( day >= step && day + step < dens.size() && dens[day] > dens[day-step] && dens[day] > dens[day+step] ){
                     //NOTE: assumes non-zero densities never exactly repeat
-                    no_max += 1;
+                    maxima_t.push_back( day );
+                    maxima_ld.push_back( log10(dens[day]) );
+                    if( posFirstLocalMax == 0 ){
+                        posFirstLocalMax = day;
+                    }
                 }
             }
+            last_pos_day = last_pos - first_pos;
+            no_max = maxima_t.size();
+            if( no_max == 0 ) return;  // no local maxima — shouldn't happen
+            log_1st_max = maxima_ld[0];
+            
+            vector<double> init_times( (maxima_t[0] - first_pos)/step + 1, 0 );
+            for( size_t i = 0; i < init_times.size(); i++ ){
+                init_times[i] = step*i + first_pos;
+            }
+            
+            double c0, c1, cov00, cov01, cov11, sum_sq;
+            gsl_fit_linear( &init_times[0], sizeof(double), &dens[first_pos], step*sizeof(double), init_times.size(),
+                            &c0, &c1, &cov00, &cov01, &cov11, &sum_sq );
+            init_slope = c1;
+            
+            gsl_fit_linear( &maxima_t[0], sizeof(double), &maxima_ld[0], sizeof(double), maxima_t.size(),
+                            &c0, &c1, &cov00, &cov01, &cov11, &sum_sq );
+            slope_max = c1;
+            
+            double gm = 1.0;
+            vector<double> log_intervals( maxima_t.size() - 1, 0 );
+            for( size_t i = 1; i < maxima_t.size(); ++i ){
+                double interval = maxima_t[i] - maxima_t[i-1];
+                gm *= interval;
+                log_intervals.push_back( log10(interval) );
+            }
+            GM_interv = pow(gm, 1.0 / (maxima_t.size() - 1));
+            SD_log = gsl_stats_sd( log_intervals.data(), sizeof(double), log_intervals.size() );
+            
+            size_t mid_pos = (first_pos + last_pos) / 2;  // average: this rounds down
+            mid_pos = start + ((mid_pos - start)/step)*step;    // must be in sync with step
+            double pos_obs = 0.0;
+            for( size_t day = first_pos; day <= mid_pos; day += step ){
+                if( dens[day] > 0.0 ) pos_obs += 1.0;
+            }
+            prop_pos_1st = pos_obs / ((mid_pos - first_pos) / step + 1); // +1 because we count both first_pos and mid_pos
+            pos_obs = 0.0;
+            for( size_t day = mid_pos + step; day <= last_pos; day += step ){
+                if( dens[day] > 0.0 ) pos_obs += 1.0;
+            }
+            prop_pos_2nd = pos_obs / ((last_pos - mid_pos) / step);      // we don't count at mid_pos
         };
     };
 };
