@@ -42,7 +42,7 @@ public:
     static void init(const OM::Parameters& parameters);
     
     // Constants:
-    // v: number of variants per clone (one infection = one new clone)
+    // v: number of variants per clone (one infection = one new clone); 50 in paper
     //TODO: v should have a significant effect on performance, but reducing by,
     // say, half, may not have a big effect on the model. Evaluate.
     static const size_t v = 50;

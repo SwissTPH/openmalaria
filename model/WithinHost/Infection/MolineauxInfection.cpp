@@ -59,7 +59,7 @@ static bool multi_factor_gamma = false;
 static bool pairwise_PStar_sample = false;
 
 // q^(i+1) array
-// All the values of q^1... q^50 are stored in this array.
+// All the values of q^1... q^v are stored in this array.
 // This avoids the recalculation of those values every second time step. */
 static double qPow[MolineauxInfection::v];
 
@@ -188,7 +188,7 @@ void MolineauxInfection::init( const Parameters& parameters ){
         }
     }
     
-   for(int i=0;i<50;i++){
+   for( size_t i = 0; i < v; i++ ){
        qPow[i] = pow(q, static_cast<double>(i+1));
    }
 }
