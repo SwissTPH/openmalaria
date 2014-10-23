@@ -233,15 +233,26 @@ public:
         OM::WithinHost::opt_common_whm = true;
     }
     
-    static void MolineauxWHM_setup( const std::string& mode ){
+    static void MolineauxWHM_setup( const std::string& mode, bool repl_gamma ){
         ModelOptions::reset();
         ModelOptions::set(util::INCLUDES_PK_PD);
         ModelOptions::set(util::MOLINEAUX_WITHIN_HOST_MODEL);
         OM::WithinHost::opt_common_whm = true;
-        if( mode == "pairwise" ){
+        if( mode == "original" ){
+        }else if( mode == "1st_max_gamma" ){
+            ModelOptions::set(util::FIRST_LOCAL_MAXIMUM_GAMMA);
+        }else if( mode == "mean_dur_gamma" ){
+            ModelOptions::set(util::MEAN_DURATION_GAMMA);
+        }else if( mode == "1st_max_and_mean_dur_gamma" ){
+            ModelOptions::set(util::FIRST_LOCAL_MAXIMUM_GAMMA);
+            ModelOptions::set(util::MEAN_DURATION_GAMMA);
+        }else if( mode == "pairwise" ){
             ModelOptions::set(util::MOLINEAUX_PAIRWISE_SAMPLE);
         }else{
             ETS_ASSERT( false );        // stop this test
+        }
+        if( repl_gamma ){
+            ModelOptions::set(util::PARASITE_REPLICATION_GAMMA);
         }
     }
     

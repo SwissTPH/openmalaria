@@ -79,6 +79,7 @@ const double q = 0.3;
 // mu_m, sigma_m: Mean and standard deviation to use for the normal distribution setting the variant specific multiplication factor.
 const double mu_m = 16.0;
 const double sigma_m = 10.4;
+// constants for sampling multiplication factors from a Gamma distribution instead of normal (above)
 const double shape_m = 2.4;
 const double scale_m = 6.8;
 
