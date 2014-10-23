@@ -112,6 +112,8 @@ public:
         }
         
         stats.sort();
+        stats.print();
+//         stats.compare( "MolineauxStats1" );
         //TODO: do some tests based on stats
     }
 
@@ -214,6 +216,7 @@ private:
             prop_pos_2nd[n] = pos_obs / ((last_pos - mid_pos) / step);      // we don't count at mid_pos
         }
         
+        /** Sort stats: only do this after calculation of all stats. */
         void sort(){
             std::sort( init_slope.begin(), init_slope.end() );
             std::sort( log_1st_max.begin(), log_1st_max.end() );
@@ -224,9 +227,19 @@ private:
             std::sort( prop_pos_1st.begin(), prop_pos_1st.end() );
             std::sort( prop_pos_2nd.begin(), prop_pos_2nd.end() );
             std::sort( last_pos_day.begin(), last_pos_day.end() );
+        }
+        
+        /** Print stats (call sort() first) */
+        void print(){
+            // we look at median, 1st and 3rd quartiles, and 1st and 9th deciles
+            // we also round to nearest, hence the addition part
+            size_t last = init_slope.size() - 1;
+            size_t med = (last + 1) / 2;
+            size_t q1 = (last + 2) / 4, q3 = (last * 3 + 2) / 4;
+            size_t c5 = (last + 10) / 20, c95 = (last * 19 + 10) / 20;
             
-            size_t mid = init_slope.size() / 2;
-#define MOL_PRINT_STAT( s ) std::cout << "Stat " #s "\tmin: " << s[0] << "\tmed: " << s[mid] << "\tmax: " << s.back() << std::endl;
+            std::cout << std::endl;
+#define MOL_PRINT_STAT( s ) std::cout << "Stat " #s "\tc5: " << s[c5] << "\tq1: " << s[q1] << "\tmed: " << s[med] << "\tq3: " << s[q3] << "\tc95: " << s[c95] << std::endl;
             MOL_PRINT_STAT( init_slope );
             MOL_PRINT_STAT( log_1st_max );
             MOL_PRINT_STAT( no_max );
@@ -236,6 +249,68 @@ private:
             MOL_PRINT_STAT( prop_pos_1st );
             MOL_PRINT_STAT( prop_pos_2nd );
             MOL_PRINT_STAT( last_pos_day );
+        }
+        
+        /** Write stats in a format we can read */
+        void write( const char * file_name ){
+            size_t last = init_slope.size() - 1;
+            size_t med = (last + 1) / 2;
+            size_t q1 = (last + 2) / 4, q3 = (last * 3 + 2) / 4;
+            size_t c5 = (last + 10) / 20, c95 = (last * 19 + 10) / 20;
+            
+            std::ofstream file( file_name );
+            file << std::setprecision( 5 );     // this is more precision than we need
+            file << "stat\tc5\tq1\tmed\tq3\tc95" << std::endl;
+#define MOL_WRITE_STAT( s ) file << #s << '\t' << s[c5] << '\t' << s[q1] << '\t' << s[med] << '\t' << s[q3] << '\t' << s[c95] << std::endl
+            MOL_WRITE_STAT( init_slope );
+            MOL_WRITE_STAT( log_1st_max );
+            MOL_WRITE_STAT( no_max );
+            MOL_WRITE_STAT( slope_max );
+            MOL_WRITE_STAT( GM_interv );
+            MOL_WRITE_STAT( SD_log );
+            MOL_WRITE_STAT( prop_pos_1st );
+            MOL_WRITE_STAT( prop_pos_2nd );
+            MOL_WRITE_STAT( last_pos_day );
+        }
+        
+        /** Read and compare stats */
+        void compare( const char * file_name ){
+            size_t last = init_slope.size() - 1;
+            size_t med = (last + 1) / 2;
+            size_t q1 = (last + 2) / 4, q3 = (last * 3 + 2) / 4;
+            size_t c5 = (last + 10) / 20, c95 = (last * 19 + 10) / 20;
+            
+            std::ifstream file( file_name );
+            TS_ASSERT( file );  // is the file open?
+            if( !file ) return; // skip rest if file is not available
+            
+            std::string head;
+            TS_ASSERT( file >> head && head == "stat" );
+            TS_ASSERT( file >> head && head == "c5" );
+            TS_ASSERT( file >> head && head == "q1" );
+            TS_ASSERT( file >> head && head == "med" );
+            TS_ASSERT( file >> head && head == "q3" );
+            TS_ASSERT( file >> head && head == "c95" );
+            
+            double v_c5, v_q1, v_med, v_q3, v_c95;
+            const double tol_rel = 1e-2, tol_abs = 1e-2;
+#define MOL_CHECK_STAT( s ) \
+            TS_ASSERT( file >> head >> v_c5 >> v_q1 >> v_med >> v_q3 >> v_c95 );\
+            TS_ASSERT_EQUALS( head, #s );\
+            TS_ASSERT_APPROX_TOL( v_c5, s[c5], tol_rel, tol_abs );\
+            TS_ASSERT_APPROX_TOL( v_q1, s[q1], tol_rel, tol_abs );\
+            TS_ASSERT_APPROX_TOL( v_med, s[med], tol_rel, tol_abs );\
+            TS_ASSERT_APPROX_TOL( v_q3, s[q3], tol_rel, tol_abs );\
+            TS_ASSERT_APPROX_TOL( v_c95, s[c95], tol_rel, tol_abs );
+            MOL_CHECK_STAT( init_slope );
+            MOL_CHECK_STAT( log_1st_max );
+            MOL_CHECK_STAT( no_max );
+            MOL_CHECK_STAT( slope_max );
+            MOL_CHECK_STAT( GM_interv );
+            MOL_CHECK_STAT( SD_log );
+            MOL_CHECK_STAT( prop_pos_1st );
+            MOL_CHECK_STAT( prop_pos_2nd );
+            MOL_CHECK_STAT( last_pos_day );
         }
     };
 };
