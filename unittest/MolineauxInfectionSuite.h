@@ -94,8 +94,8 @@ public:
     void testKeyStats(){
         // This runs the infection several times, capturing some key statistics
         
-        const size_t N = 1000;  // number of runs
-        vector<MolInfStats> stats( N );
+        const size_t N = 200;  // number of runs
+        MolInfStats stats( N );
         
         vector<double> dens;    // time series of density
         for( size_t run = 0; run < N; ++run ){
@@ -108,45 +108,47 @@ public:
                 now += sim::oneDay();
             }
             delete infection;
-            stats.push_back( MolInfStats( dens ) );
+            stats.calc( run, dens );
         }
         
-        //TODO: print out stats, then do some tests based on these
+        stats.sort();
+        //TODO: do some tests based on stats
     }
 
 private:
     /** Calculates some key stats — these correspond to table 1 from the
      * Molineaux paper. Note that 'log' means 'log base 10'. */
     struct MolInfStats{
-        double init_slope;      // slope of a linear regression line through
+        vector<double> init_slope;      // slope of a linear regression line through
         // the log densities from first positive to first local maxima
-        double log_1st_max;     // log of first local maxima
-        int no_max;  // number of local maxima
-        double slope_max;       // slope of linear regression line through log
+        vector<double> log_1st_max;     // log of first local maxima
+        vector<int> no_max;  // number of local maxima
+        vector<double> slope_max;       // slope of linear regression line through log
         // densities of local maxima
-        double GM_interv;       // geometric mean of intervals between
+        vector<double> GM_interv;       // geometric mean of intervals between
         // consecutive local maxima
-        double SD_log;  // standard deviation of logs of intervals between
+        vector<double> SD_log;  // standard deviation of logs of intervals between
         // consecutive local maxima
-        double prop_pos_1st;    // proportion of observations during the first
+        vector<double> prop_pos_1st;    // proportion of observations during the first
         // half of the interval between first and last positive days which are
         // positive
-        double prop_pos_2nd;    // as above, but for second half
-        double last_pos_day;    // difference between first and last positive days
+        vector<double> prop_pos_2nd;    // as above, but for second half
+        vector<double> last_pos_day;    // difference between first and last positive days
         
-        MolInfStats() :
-            init_slope(numeric_limits<double>::quiet_NaN()),
-            log_1st_max(numeric_limits<double>::quiet_NaN()),
-            no_max(0),
-            slope_max(numeric_limits<double>::quiet_NaN()),
-            GM_interv(numeric_limits<double>::quiet_NaN()),
-            SD_log(numeric_limits<double>::quiet_NaN()),
-            prop_pos_1st(numeric_limits<double>::quiet_NaN()),
-            prop_pos_2nd(numeric_limits<double>::quiet_NaN()),
-            last_pos_day(numeric_limits<double>::quiet_NaN())
+        MolInfStats(size_t N) :
+            init_slope(N, numeric_limits<double>::quiet_NaN()),
+            log_1st_max(N, numeric_limits<double>::quiet_NaN()),
+            no_max(N, 0),
+            slope_max(N, numeric_limits<double>::quiet_NaN()),
+            GM_interv(N, numeric_limits<double>::quiet_NaN()),
+            SD_log(N, numeric_limits<double>::quiet_NaN()),
+            prop_pos_1st(N, numeric_limits<double>::quiet_NaN()),
+            prop_pos_2nd(N, numeric_limits<double>::quiet_NaN()),
+            last_pos_day(N, numeric_limits<double>::quiet_NaN())
         {}
+        
         /** Calculate stats */
-        MolInfStats( const vector<double>& dens ){
+        void calc( size_t n, const vector<double>& dens ){
             size_t first_pos = 0, last_pos = 0, posFirstLocalMax = 0;
             vector<double> maxima_t, maxima_ld;
             
@@ -166,24 +168,27 @@ private:
                     }
                 }
             }
-            last_pos_day = last_pos - first_pos;
-            no_max = maxima_t.size();
-            if( no_max == 0 ) return;  // no local maxima — shouldn't happen
-            log_1st_max = maxima_ld[0];
+            last_pos_day[n] = last_pos - first_pos;
+            no_max[n] = maxima_t.size();
+            if( maxima_t.size() == 0 ) return;  // no local maxima — shouldn't happen
+            log_1st_max[n] = maxima_ld[0];
             
-            vector<double> init_times( (maxima_t[0] - first_pos)/step + 1, 0 );
-            for( size_t i = 0; i < init_times.size(); i++ ){
-                init_times[i] = step*i + first_pos;
+            size_t len_init = (maxima_t[0] - first_pos)/step + 1;
+            vector<double> init_t_logdens( len_init * 2, 0 );
+            for( size_t i = 0; i < len_init; i++ ){
+                size_t day = step*i + first_pos;
+                init_t_logdens[2*i] = day;
+                init_t_logdens[2*i+1] = log10(dens[day]);
             }
             
             double c0, c1, cov00, cov01, cov11, sum_sq;
-            gsl_fit_linear( &init_times[0], sizeof(double), &dens[first_pos], step*sizeof(double), init_times.size(),
+            gsl_fit_linear( &init_t_logdens[0], 2, &init_t_logdens[1], 2, len_init,
                             &c0, &c1, &cov00, &cov01, &cov11, &sum_sq );
-            init_slope = c1;
+            init_slope[n] = c1;
             
-            gsl_fit_linear( &maxima_t[0], sizeof(double), &maxima_ld[0], sizeof(double), maxima_t.size(),
+            gsl_fit_linear( &maxima_t[0], 1, &maxima_ld[0], 1, maxima_t.size(),
                             &c0, &c1, &cov00, &cov01, &cov11, &sum_sq );
-            slope_max = c1;
+            slope_max[n] = c1;
             
             double gm = 1.0;
             vector<double> log_intervals( maxima_t.size() - 1, 0 );
@@ -192,22 +197,46 @@ private:
                 gm *= interval;
                 log_intervals.push_back( log10(interval) );
             }
-            GM_interv = pow(gm, 1.0 / (maxima_t.size() - 1));
-            SD_log = gsl_stats_sd( log_intervals.data(), sizeof(double), log_intervals.size() );
+            GM_interv[n] = pow(gm, 1.0 / (maxima_t.size() - 1));
+            SD_log[n] = gsl_stats_sd( log_intervals.data(), 1, log_intervals.size() );
             
             size_t mid_pos = (first_pos + last_pos) / 2;  // average: this rounds down
             mid_pos = start + ((mid_pos - start)/step)*step;    // must be in sync with step
-            double pos_obs = 0.0;
+            double pos_obs = 0.0, detect_lim = 10.0;
             for( size_t day = first_pos; day <= mid_pos; day += step ){
-                if( dens[day] > 0.0 ) pos_obs += 1.0;
+                if( dens[day] > detect_lim ) pos_obs += 1.0;
             }
-            prop_pos_1st = pos_obs / ((mid_pos - first_pos) / step + 1); // +1 because we count both first_pos and mid_pos
+            prop_pos_1st[n] = pos_obs / ((mid_pos - first_pos) / step + 1); // +1 because we count both first_pos and mid_pos
             pos_obs = 0.0;
             for( size_t day = mid_pos + step; day <= last_pos; day += step ){
-                if( dens[day] > 0.0 ) pos_obs += 1.0;
+                if( dens[day] > detect_lim ) pos_obs += 1.0;
             }
-            prop_pos_2nd = pos_obs / ((last_pos - mid_pos) / step);      // we don't count at mid_pos
-        };
+            prop_pos_2nd[n] = pos_obs / ((last_pos - mid_pos) / step);      // we don't count at mid_pos
+        }
+        
+        void sort(){
+            std::sort( init_slope.begin(), init_slope.end() );
+            std::sort( log_1st_max.begin(), log_1st_max.end() );
+            std::sort( no_max.begin(), no_max.end() );
+            std::sort( slope_max.begin(), slope_max.end() );
+            std::sort( GM_interv.begin(), GM_interv.end() );
+            std::sort( SD_log.begin(), SD_log.end() );
+            std::sort( prop_pos_1st.begin(), prop_pos_1st.end() );
+            std::sort( prop_pos_2nd.begin(), prop_pos_2nd.end() );
+            std::sort( last_pos_day.begin(), last_pos_day.end() );
+            
+            size_t mid = init_slope.size() / 2;
+#define MOL_PRINT_STAT( s ) std::cout << "Stat " #s "\tmin: " << s[0] << "\tmed: " << s[mid] << "\tmax: " << s.back() << std::endl;
+            MOL_PRINT_STAT( init_slope );
+            MOL_PRINT_STAT( log_1st_max );
+            MOL_PRINT_STAT( no_max );
+            MOL_PRINT_STAT( slope_max );
+            MOL_PRINT_STAT( GM_interv );
+            MOL_PRINT_STAT( SD_log );
+            MOL_PRINT_STAT( prop_pos_1st );
+            MOL_PRINT_STAT( prop_pos_2nd );
+            MOL_PRINT_STAT( last_pos_day );
+        }
     };
 };
 
