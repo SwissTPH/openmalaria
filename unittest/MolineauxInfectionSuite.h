@@ -101,9 +101,9 @@ public:
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). These stats are considerably worse than those from the
-        // pairwise model, in comparison to those in the paper.
-        stats.write( "MolineauxStatsOrig" );
+        // accuracy). These stats look similar to and possibly better than those
+        // from the pairwise model, when compared to those in the paper.
+        stats.compare( "MolineauxStatsOrig" );
     }
     
     void testMolOrigRG(){
@@ -111,62 +111,62 @@ public:
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). These stats are considerably worse than those from the
-        // pairwise model, in comparison to those in the paper.
-        stats.write( "MolineauxStatsOrigRG" );
+        // accuracy). These stats look similar to and possibly better than those
+        // from the pairwise model, when compared to those in the paper.
+        stats.compare( "MolineauxStatsOrigRG" );
     }
     
-    void testMol1MG(){
+    void dont_testMol1MG(){
         molInit( "1st_max_gamma", false );
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). FIXME: model is broken!
+        // accuracy). Output is nowhere near what we want.
         stats.write( "MolineauxStats1MG" );
     }
     
-    void testMol1MGRG(){
+    void dont_testMol1MGRG(){
         molInit( "1st_max_gamma", true );
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). FIXME: model is broken!
+        // accuracy). Output is nowhere near what we want.
         stats.write( "MolineauxStats1MGRG" );
     }
     
-    void testMolMDG(){
+    void dont_testMolMDG(){
         molInit( "mean_dur_gamma", false );
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). FIXME: model is broken!
+        // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStatsMDG" );
     }
     
-    void testMolMDGRG(){
+    void dont_testMolMDGRG(){
         molInit( "mean_dur_gamma", true );
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). FIXME: model is broken!
+        // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStatsMDGRG" );
     }
     
-    void testMol1MGMDG(){
+    void dont_testMol1MGMDG(){
         molInit( "1st_max_and_mean_dur_gamma", false );
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). FIXME: model is broken!
+        // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStats1MGMDG" );
     }
     
-    void testMol1MGMDGRG(){
+    void dont_testMol1MGMDGRG(){
         molInit( "1st_max_and_mean_dur_gamma", true );
         MolInfStats stats( 200 );
         stats.capture();
         // We compare against model outputs (checking for changes, rather than
-        // accuracy). FIXME: model is broken!
+        // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStats1MGMDGRG" );;
     }
     
