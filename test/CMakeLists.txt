@@ -24,6 +24,7 @@ set (OM_BOXTEST_NAMES
   ESTS
   IRS30
   Molineaux
+  MolPairwise
   MSAT
   # disabled due to test failure (TODO: since when?)
   # MultiVecPopInterventions
