@@ -270,8 +270,7 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge ){
         m_density = sum;
     }
     
-    //FIXME: why half finished sentence? Integration with inter-infection immunity...
-    // Note: normally this is multiplied by the 
+    // Integration with inter-infection immunity model
     m_cumulativeExposureJ += m_density;
     
     if( m_density <= 1.0e-5 ){
@@ -293,8 +292,9 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ag
     // p(t+2) = p(t) * sqrt(p(t+2)/p(t))^2...
     P *= growthRate;
     
-    //FIXME: this gives us an extra immunity effect; can we integrate with Sc/Si/Sm?
     // survivalFactor: effects of drugs, immunity and vaccines
+    // Note: this gives us an additional immune response (besides Si, Sc, Sm);
+    // according to MP this is the best thing to do for now.
     P = static_cast<float>(P * survivalFactor);
     initP = static_cast<float>(initP * survivalFactor);
     
@@ -304,12 +304,6 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ag
         P = initP;
     }
     
-    // TODO: we don't need this (since if P_prime is zero, growthRate and then P become zero)
-    if( P<1.0e-5 ){
-        //NOTE: if a variant goes extinct, we _may_ be able to reduce the size
-        // of variants (if no higher index variant is still positive). But is it worth reallocating?
-        P = 0.0;
-    }
     return P;
 }
 
