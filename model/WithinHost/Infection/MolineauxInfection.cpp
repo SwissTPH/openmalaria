@@ -222,26 +222,22 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
         Pc_star = k_c * caseSpecificData[2 * patient + 1];
         Pm_star = k_m * caseSpecificData[2 * patient + 0];
     }else{
-        //FIXME: for all of below, MP uses 10 ^ normrnd(...)
-        // (i.e. sampling is done on log-base-10 scale).
-        // This code does the power the wrong way around?
-        
         // Sampling of the first local maxima:
         if( first_local_maximum_gamma ){
-            Pc_star = static_cast<float>( k_c * pow(random::gamma(
-                mean_shape_first_local_max, sd_scale_first_local_max), 10.0) );
+            Pc_star = static_cast<float>( k_c * pow(10.0, random::gamma(
+                mean_shape_first_local_max, sd_scale_first_local_max)) );
         } else {
-            Pc_star = static_cast<float>( k_c * pow(random::gauss(
-                mean_shape_first_local_max, sd_scale_first_local_max), 10.0) );
+            Pc_star = static_cast<float>( k_c * pow(10.0, random::gauss(
+                mean_shape_first_local_max, sd_scale_first_local_max)) );
         }
         
         // Sampling of duration:
         if( mean_duration_gamma ) {
-            Pm_star = static_cast<float>( k_m * pow(random::gamma(
-                mean_shape_diff_pos_days,sd_scale_diff_pos_days), 10.0) );
+            Pm_star = static_cast<float>( k_m * pow(10.0, random::gamma(
+                mean_shape_diff_pos_days,sd_scale_diff_pos_days)) );
         } else {
-            Pm_star = static_cast<float>( k_m * pow(random::gauss(
-                mean_shape_diff_pos_days,sd_scale_diff_pos_days), 10.0) );
+            Pm_star = static_cast<float>( k_m * pow(10.0, random::gauss(
+                mean_shape_diff_pos_days,sd_scale_diff_pos_days)) );
         }
     }
 }

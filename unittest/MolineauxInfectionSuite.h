@@ -103,7 +103,7 @@ public:
         // We compare against model outputs (checking for changes, rather than
         // accuracy). These stats are considerably worse than those from the
         // pairwise model, in comparison to those in the paper.
-        stats.compare( "MolineauxStatsOrig" );
+        stats.write( "MolineauxStatsOrig" );
     }
     
     void testMolOrigRG(){
@@ -113,7 +113,7 @@ public:
         // We compare against model outputs (checking for changes, rather than
         // accuracy). These stats are considerably worse than those from the
         // pairwise model, in comparison to those in the paper.
-        stats.compare( "MolineauxStatsOrigRG" );
+        stats.write( "MolineauxStatsOrigRG" );
     }
     
     void testMol1MG(){
