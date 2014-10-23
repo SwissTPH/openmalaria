@@ -103,6 +103,7 @@ configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CU
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennyCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennySeqDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStatsPairwise ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 # and these by MosqLifeCycleSuite:
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_EmergenceRateConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_AdultMosqConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)

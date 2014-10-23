@@ -233,12 +233,16 @@ public:
         OM::WithinHost::opt_common_whm = true;
     }
     
-    static void MolineauxWHM_setup () {
+    static void MolineauxWHM_setup( const std::string& mode ){
         ModelOptions::reset();
         ModelOptions::set(util::INCLUDES_PK_PD);
         ModelOptions::set(util::MOLINEAUX_WITHIN_HOST_MODEL);
-        ModelOptions::set(util::MOLINEAUX_PAIRWISE_SAMPLE);
         OM::WithinHost::opt_common_whm = true;
+        if( mode == "pairwise" ){
+            ModelOptions::set(util::MOLINEAUX_PAIRWISE_SAMPLE);
+        }else{
+            ETS_ASSERT( false );        // stop this test
+        }
     }
     
     static void MosqLifeCycle_init() {
