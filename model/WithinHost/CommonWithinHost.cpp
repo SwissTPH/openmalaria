@@ -22,7 +22,10 @@
 #include "WithinHost/Diagnostic.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
+#include "util/AgeGroupInterpolation.h"
+#include "util/random.h"
 #include "util/StreamValidator.h"
+#include "schema/scenario.h"
 
 #include <boost/algorithm/string.hpp>
 
@@ -34,20 +37,48 @@ namespace WithinHost {
 CommonInfection* (* CommonWithinHost::createInfection) (uint32_t protID);
 CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
+double hetMassMultStdDev = std::numeric_limits<double>::signaling_NaN();
+double minHetMassMult = std::numeric_limits<double>::signaling_NaN();
+util::AgeGroupInterpolator massByAge;
+
 // Only required for a drug monitoring HACK and could be removed:
 vector<string> drugMonCodes;
 
 
 // -----  Initialization  -----
 
-void CommonWithinHost::init(const scnXml::DrugConcentration& elt){
-    boost::split( drugMonCodes, elt.getDrugCodes(), boost::is_any_of("," ) );
+void CommonWithinHost::init( const scnXml::Model& model, const scnXml::Monitoring& mon ){
+    const scnXml::Human human = model.getHuman();
+    if( !human.getWeight().present() ){
+        // Technically this is needed by the PK/PD and Molineaux models
+        throw util::xml_scenario_error( "model->human->weight element required by certain models" );
+    }
+    massByAge.set( human.getWeight().get(), "weight" );
+    hetMassMultStdDev = human.getWeight().get().getMultStdDev();
+    // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
+    minHetMassMult = 0.5 / massByAge.eval( 0.0 );
+    
+    if( mon.getDrugConcentration().present() ){
+        boost::split( drugMonCodes, mon.getDrugConcentration().get().getDrugCodes(), boost::is_any_of("," ) );
+    }
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
         WHFalciparum( comorbidityFactor ), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
 {
     assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
+    
+    // Sample a weight heterogeneity factor
+#ifndef NDEBUG
+    int counter = 0;
+#endif
+    do {
+        hetMassMultiplier = util::random::gauss( 1.0, hetMassMultStdDev );
+#ifndef NDEBUG
+        assert( counter < 100 );        // too many resamples: resamples should rarely be needed...
+        ++counter;
+#endif
+    } while( hetMassMultiplier < minHetMassMult );
 }
 
 CommonWithinHost::~CommonWithinHost() {
@@ -79,7 +110,8 @@ void CommonWithinHost::clearInfections( Treatments::Stages stage ){
 // -----  interventions -----
 
 void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages, double age){
-    pkpdModel->prescribe( schedule, dosages, age );
+    double mass = massByAge.eval( age ) * hetMassMultiplier;
+    pkpdModel->prescribe( schedule, dosages, age, mass );
 }
 void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
@@ -133,9 +165,11 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
+    double mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
+    
     for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
-        pkpdModel->medicate( ageInYears );
+        pkpdModel->medicate( mass );
         
         double sumLogDens = 0.0;
         
@@ -205,6 +239,7 @@ WHInterface::InfectionCount CommonWithinHost::countInfections () const{
 
 void CommonWithinHost::checkpoint (istream& stream) {
     WHFalciparum::checkpoint (stream);
+    hetMassMultiplier & stream;
     (*pkpdModel) & stream;
     for (int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
@@ -214,6 +249,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
 
 void CommonWithinHost::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
+    hetMassMultiplier & stream;
     (*pkpdModel) & stream;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;

@@ -31,16 +31,12 @@ namespace OM { namespace PkPd {
     * empty implementation in this class.
     */
     class VoidPkPdModel : public PkPdModel {
-        virtual void getConcentrations(map<string,double>& concentrations) const{}
-        virtual void prescribe(size_t schedule, size_t dosages, double age) {}
-        virtual void medicate(double age) {};
-        virtual double getDrugFactor (uint32_t proteome_ID) {
-            return 1.0;
-        }
+        virtual void getConcentrations(map<string,double>&) const{}
+        virtual void prescribe(size_t, size_t, double, double) {}
+        virtual void medicate(double) {};
+        virtual double getDrugFactor (uint32_t) { return 1.0; }
         virtual void decayDrugs () {}
-        virtual uint32_t new_proteome_ID () {
-            return 0xFFFFFFFF;
-        }
+        virtual uint32_t new_proteome_ID () { return 0xFFFFFFFF; }
     protected:
         virtual void checkpoint (istream& stream) {}
         virtual void checkpoint (ostream& stream) {}

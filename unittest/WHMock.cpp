@@ -58,7 +58,7 @@ void WHMock::treatSimple(SimTime timeLiver, SimTime timeBlood){
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages, double age){
     nTreatments += 1;
-    pkpd.prescribe( schedule, dosages, age );
+    pkpd.prescribe( schedule, dosages, age, numeric_limits<double>::quiet_NaN() );
 }
 
 void WHMock::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon){

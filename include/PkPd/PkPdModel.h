@@ -96,18 +96,19 @@ public:
      * @param schedule Index of a treatment schedule
      * @param dosages Index of a dosage table
      * @param age Age of human at start of time step in years
+     * @param body_mass Mass of human in kg
      */
-    virtual void prescribe(size_t schedule, size_t dosages, double age) =0;
+    virtual void prescribe(size_t schedule, size_t dosages, double age, double body_mass) =0;
     
     /** Medicate drugs: human takes prescribed drugs which are to be taken this
      * day.
      * 
-     * @param age Age of human in years
+     * @param body_mass Mass of human in kg
      * 
      * Note: poor adherence on the part of the patient is not modeled here; to
      * model, prescribe with a "poor adherence" schedule.
      */
-    virtual void medicate(double age) =0;
+    virtual void medicate(double body_mass) =0;
     
     /** This is how drugs act on infections.
      *

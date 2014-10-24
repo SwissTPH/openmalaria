@@ -20,9 +20,7 @@
 
 #include "PkPd/LSTMPkPdModel.h"
 #include "PkPd/LSTMMedicate.h"
-#include "util/random.h"
 #include "util/checkpoint_containers.h"
-#include "util/AgeGroupInterpolation.h"
 #include "util/errors.h"
 
 #include "schema/scenario.h"
@@ -31,39 +29,9 @@
 
 namespace OM { namespace PkPd {
 
-// ———  static init  ———
-
-double hetMassMultStdDev = std::numeric_limits<double>::signaling_NaN();
-double minHetMassMult = std::numeric_limits<double>::signaling_NaN();
-util::AgeGroupInterpolator massByAge;
-
-void LSTMPkPdModel::init(const scnXml::Model& model){
-    const scnXml::Human human = model.getHuman();
-    if( !human.getWeight().present() ){
-        throw util::xml_scenario_error( "model->human->weight element required by PK/PD model" );
-    }
-    massByAge.set( human.getWeight().get(), "weight" );
-    hetMassMultStdDev = human.getWeight().get().getMultStdDev();
-    // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
-    minHetMassMult = 0.5 / massByAge.eval( 0.0 );
-}
-
-
 // ———  non-static set up / tear down functions  ———
 
-LSTMPkPdModel::LSTMPkPdModel () {
-    // Sample a weight heterogeneity factor
-#ifndef NDEBUG
-    int counter = 0;
-#endif
-    do {
-        hetMassMultiplier = util::random::gauss( 1.0, hetMassMultStdDev );
-#ifndef NDEBUG
-        assert( counter < 100 );        // too many resamples: resamples should rarely be needed...
-        ++counter;
-#endif
-    } while( hetMassMultiplier < minHetMassMult );
-}
+LSTMPkPdModel::LSTMPkPdModel () {}
 LSTMPkPdModel::~LSTMPkPdModel () {}
 
 void LSTMPkPdModel::checkpoint (istream& stream) {
@@ -77,7 +45,6 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
 	_drugs.back() & stream;
     }
     medicateQueue & stream;
-    hetMassMultiplier & stream;
 }
 
 void LSTMPkPdModel::checkpoint (ostream& stream) {
@@ -87,7 +54,6 @@ void LSTMPkPdModel::checkpoint (ostream& stream) {
 	(*it) & stream;
     }
     medicateQueue & stream;
-    hetMassMultiplier & stream;
 }
 
 
@@ -101,28 +67,26 @@ void LSTMPkPdModel::getConcentrations(map< string, double >& concentrations)cons
 #endif
 }
 
-void LSTMPkPdModel::prescribe(size_t schedule, size_t dosage, double age){
+void LSTMPkPdModel::prescribe(size_t schedule, size_t dosage, double age, double body_mass){
     const DosageTable& table = dosages[dosage];
-    double key = table.useMass ? massByAge.eval( age ) * hetMassMultiplier : age;
+    double key = table.useMass ? body_mass : age;
     double doseMult = dosages[dosage].getMultiplier( key );
     foreach( MedicateData& medicateData, schedules[schedule].medications ){
         medicateQueue.push_back( medicateData.multiplied(doseMult) );
     }
 }
 
-void LSTMPkPdModel::medicate(double age){
+void LSTMPkPdModel::medicate(double body_mass){
     if( medicateQueue.empty() ) return;
-    
-    // Body mass is calculated from age with a simple heterogeneity factor
-    double bodyMass = massByAge.eval( age ) * hetMassMultiplier; // units: kg
     
     // Process pending medications (in interal queue) and apply/update:
     list<MedicateData>::iterator it = medicateQueue.begin();
     while( it != medicateQueue.end() ){
-        if ( it->time < 1.0 ) { // Medicate medications to be prescribed starting at the next time-step
-            medicateDrug (it->drug, it->qty, it->time, it->duration, bodyMass);     // could be inlined, except for testing
+        if( it->time < 1.0 ){   // Medicate medications to be prescribed starting at the next time-step
+            // This function could be inlined, except for uses in testing:
+            medicateDrug (it->drug, it->qty, it->time, it->duration, body_mass);
             it = medicateQueue.erase (it);
-        } else {   // and decrement treatment seeking delay for the rest
+        }else{  // and decrement treatment seeking delay for the rest
             it->time -= 1.0;
             ++it;
         }

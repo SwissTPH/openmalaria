@@ -25,7 +25,6 @@
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/CommonInfection.h"
 #include "PkPd/PkPdModel.h"
-#include <schema/monitoring.h>
 
 using namespace std;
 
@@ -40,8 +39,7 @@ namespace OM { namespace WithinHost {
 class CommonWithinHost : public WHFalciparum
 {
 public:
-    // Only required for a drug monitoring HACK and could be removed:
-    static void init(const scnXml::DrugConcentration& elt);
+    static void init(const scnXml::Model& model, const scnXml::Monitoring& elt);
     
     CommonWithinHost( double comorbidityFactor );
     virtual ~CommonWithinHost();
@@ -76,6 +74,9 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
+    /// Multiplies the mean mass (for this age) as a heterogeneity factor.
+    double hetMassMultiplier;
+    
     /// Encapsulates drug code for each human
     PkPd::PkPdModel* pkpdModel;
     

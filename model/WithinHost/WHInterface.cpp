@@ -76,10 +76,7 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
                 || opt_molineaux_whm || opt_penny_whm;
         
         if( opt_common_whm ){
-            PkPd::LSTMPkPdModel::init( scenario.getModel() );
-            if( scenario.getMonitoring().getDrugConcentration().present() ){
-                CommonWithinHost::init( scenario.getMonitoring().getDrugConcentration().get() );
-            }
+            CommonWithinHost::init( scenario.getModel(), scenario.getMonitoring() );
         }
     }
 }

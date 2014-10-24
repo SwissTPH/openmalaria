@@ -25,7 +25,6 @@
 #include "PkPd/Drug/LSTMDrug.h"
 
 namespace scnXml{
-    class Model;
     class PKPDMedication;
 }
 namespace OM { namespace PkPd {
@@ -75,8 +74,6 @@ private:
  * body. */
 class LSTMPkPdModel : public PkPdModel {
 public:
-    static void init(const scnXml::Model& model);
-    
     LSTMPkPdModel ();
     virtual ~LSTMPkPdModel ();
     
@@ -84,8 +81,8 @@ public:
     virtual void checkpoint (ostream& stream);
     
     virtual void getConcentrations(map<string,double>& concentrations) const;
-    virtual void prescribe(size_t schedule, size_t dosages, double age);
-    virtual void medicate(double age);
+    virtual void prescribe(size_t schedule, size_t dosages, double age, double body_mass);
+    virtual void medicate(double body_mass);
     virtual double getDrugFactor (uint32_t proteome_ID);
     virtual void decayDrugs ();
     
@@ -115,9 +112,6 @@ private:
     
     /// All pending medications
     list<MedicateData> medicateQueue;
-    
-    /// Multiplies the mean mass (for this age) as a heterogeneity factor.
-    double hetMassMultiplier;
     
     friend class ::UnittestUtil;
 };
