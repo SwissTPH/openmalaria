@@ -95,8 +95,13 @@ const int kappa_v = 3;
 // C: Maximum daily antigenic stimulus, per mul, of the acquired variant-transcending immune response
 const double C = 1.0;
 
-// Density of first variant at start of infection
-const float initial_P = 0.1f;
+// Blood volume per kg can be found, for example, here:
+// http://hypertextbook.com/facts/1998/LanNaLee.shtml
+// Futher searches give values between around 65 and 85 ml/kg.
+const double blood_vol_per_kg = 7e4;    // μl/kg; (equals 70 ml/kg)
+// PRBC = parasited red blood cell
+const double initial_dens = 0.1;        // initial parasite density in PRBC/μl
+const double elim_parasites = 50;       // minimum number PRBC to avoid elimination of infection and variant
 
 /* Case-specific parameters.
  * 
@@ -171,6 +176,7 @@ void MolineauxInfection::init( const Parameters& parameters ){
         
         // with gamma distribution shape and scale parameters has to be recalculated 
         if (util::ModelOptions::option (util::FIRST_LOCAL_MAXIMUM_GAMMA)) {
+            //TODO: review this variant (or discard)?
             first_local_maximum_gamma = true;
             mean_shape_first_local_max = pow(mean_shape_first_local_max,2) / pow(sd_scale_first_local_max,2);
             sd_scale_first_local_max = pow(sd_scale_first_local_max,2) / mean_shape_first_local_max;
@@ -180,6 +186,7 @@ void MolineauxInfection::init( const Parameters& parameters ){
         
         // with gamma distribution shape and scale parameters has to be recalculated
         if(util::ModelOptions::option (util::MEAN_DURATION_GAMMA)) {
+            //TODO: review this variant (or discard)?
             mean_duration_gamma = true;
             mean_shape_diff_pos_days = pow(mean_shape_diff_pos_days,2) / pow(sd_scale_diff_pos_days,2);
             sd_scale_diff_pos_days = pow(sd_scale_diff_pos_days,2) / mean_shape_diff_pos_days;
@@ -252,16 +259,20 @@ MolineauxInfection::Variant::Variant () :
 
 // ———  MolineauxInfection: density updates  ———
 
-bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge ){
+bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, double body_mass ){
     // bsAge : age of blood stage; 0 implies initial density (0.1; time t=0 in
     // paper, t=1 in MP's Matlab code), age 2 days is after first update step
     // survivalFactor : probabilty of merozoites surviving drugs, inter-infection immunity and vaccines
     
+    double blood_volume = blood_vol_per_kg * body_mass;
+    double elim_dens = elim_parasites / blood_volume;   // 50 / 5e6 = 5e-5
+    
     if (bsAge == sim::zero()){
-        // The first variant starts with density 0.1 while other variants start at zero
+        // The first variant starts with a pre-set density (regardless of blood
+        // volume; this is an assumption by DH; paper assumes fixed volume)
         variants.resize(1);
-        variants[0].setP( initial_P );
-        m_density = initial_P;
+        variants[0].setP( initial_dens );
+        m_density = initial_dens;
     }else{
         double sum = 0.0;
         for( size_t i=0; i<variants.size(); i++ ){
@@ -273,14 +284,14 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge ){
     // Integration with inter-infection immunity model
     m_cumulativeExposureJ += m_density;
     
-    if( m_density <= 1.0e-5 ){
+    if( m_density <= elim_dens ){
         return true;    // infection goes extinct
     }
     
     // If the infection hasn't gone extinct age is even, then update
     // growthRateMultiplier for the next two steps:
     if( mod_nn(bsAge.inDays(), 2) == 0 ){
-        updateGrowthRateMultiplier(bsAge.inDays());
+        updateGrowthRateMultiplier( bsAge.inDays(), elim_dens );
     }
     return false;
 }
@@ -308,7 +319,7 @@ double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ag
 }
 
 
-void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
+void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_dens ){
     // The immune responses are represented by the variables
     // Sc (probability that a parasite escapes control by innate and variant-transcending immune response)
     // Sm (                        "                      acquired and variant-transcending immune response)
@@ -349,7 +360,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
         // This is the growth rate after taking immune effect into account:
         double growth_factor = m[i] * S[i] * Sc * Sm;
         if( i < variants.size() ){
-            variants[i].updateGrowthRateMultiplier( p_i*m_density, growth_factor );
+            variants[i].updateGrowthRateMultiplier( p_i*m_density, growth_factor, elim_dens );
         }else{
             //NOTE: this does the same as updateGrowthRateMultiplier, where P == 0
             // The code duplication is due to an optimisation: not storing variants which haven't been expressed.
@@ -358,7 +369,7 @@ void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
             double P_prime = ( sProb * p_i * m_density ) * growth_factor;
             
             // Molineaux paper equation 2
-            if( P_prime >= 1.0e-5 ){    // [if not, Pi(t+2)) = 0 and we don't add a new variant]
+            if( P_prime >= elim_dens ){    // [if not, Pi(t+2)) = 0 and we don't add a new variant]
                 // express a new variant:
                 variants.resize( i+1 );
                 variants[i].setNextP( static_cast<float>(P_prime) );
@@ -367,12 +378,12 @@ void MolineauxInfection::updateGrowthRateMultiplier(int ageDays) {
     }
 }
 
-void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double growth_factor ){
+void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double growth_factor, double elim_dens ){
     // P_prime: Variant density at t = t + 2 (eqn 1 in paper)
     double P_prime = ( (1.0 - sProb) * P + sProb * pd ) * growth_factor;
     
     // Molineaux paper equation 2
-    if (P_prime<1.0e-5){
+    if( P_prime < elim_dens ){
         P_prime = 0.0;
     }
     

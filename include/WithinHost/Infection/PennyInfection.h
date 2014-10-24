@@ -42,7 +42,7 @@ public:
     /// Destructor
     virtual ~PennyInfection () {};
     
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double );
     
     /** Get the density of sequestered parasites. */
     inline double seqDensity(int ageDays){

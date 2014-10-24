@@ -74,7 +74,7 @@ public:
         int iterations=0;
         SimTime now = sim::ts0();
         do{
-            extinct = infection->update(1.0, now);
+            extinct = infection->update(1.0, now, numeric_limits<double>::quiet_NaN());
             int ageDays = (now - infection->m_startDate - infection->latentP).inDays();
             while( ageDays < 0 ) ageDays += infection->delta_V; // special case encountered by unit test
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );

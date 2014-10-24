@@ -159,7 +159,7 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
 
 // TODO: TS needs to improve documentation of this function.
 const int EI_MAX_SAMPLES = 10;
-bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge ){
+bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge, double ){
   //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
   # define L _laggedLogDensities
   

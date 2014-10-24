@@ -47,7 +47,7 @@ DummyInfection::DummyInfection (uint32_t protID) :
     m_density=16;	// increased by DH to avoid zeros in initialKappa
 }
 
-bool DummyInfection::updateDensity( double survivalFactor, SimTime bsAge ){
+bool DummyInfection::updateDensity( double survivalFactor, SimTime, double ){
     const double GROWTH_RATE = 8.0;
     const double PARASITE_THRESHOLD = 1;
     

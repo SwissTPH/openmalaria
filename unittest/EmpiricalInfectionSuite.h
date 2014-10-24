@@ -45,7 +45,7 @@ public:
         for( SimTime d = sim::ts1(), end = sim::ts1() + sim::fromDays(15); d < end; d += sim::oneDay() ){
             // blood stage starts 15 days after creation
             UnittestUtil::incrTime( sim::oneDay() );
-            infection->update( 1.0, d );
+            infection->update( 1.0, d, numeric_limits<double>::quiet_NaN() );
         }
     }
     void tearDown () {
@@ -59,55 +59,55 @@ public:
     // Parasite growth is stochastic, so there's not a lot we can test, except for reproducability
     void testUpdatedInf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
     }
     void testUpdated2Inf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         TS_ASSERT_APPROX (infection->getDensity(), 4.94261787639103382);
     }
     void testUpdated3Inf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         TS_ASSERT_APPROX (infection->getDensity(), 162.62062791268144860);
     }
     void testUpdated4Inf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         TS_ASSERT_APPROX (infection->getDensity(), 6.10393200785528424);
     }
     void testUpdatedInf1 () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         TS_ASSERT_APPROX (infection->getDensity(), 15.36758760023472284);
     }
 
     void testUpdatedReducedInf () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (0.1, sim::ts1());
+        infection->update (0.1, sim::ts1(), numeric_limits<double>::quiet_NaN());
         // This is, as expected, 1/10th of that in testUpdated2Inf
         TS_ASSERT_APPROX (infection->getDensity(), 0.49426178763910338);
     }
     void testUpdatedReducedInf2 () {
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (0.1, sim::ts1());
+        infection->update (0.1, sim::ts1(), numeric_limits<double>::quiet_NaN());
         UnittestUtil::incrTime( sim::oneTS() );
-        infection->update (1.0, sim::ts1());
+        infection->update (1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         // This is completely different due to stochasitic effects
         TS_ASSERT_APPROX (infection->getDensity(), 1.97582432565095644);
     }

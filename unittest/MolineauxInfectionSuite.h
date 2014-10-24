@@ -72,7 +72,7 @@ public:
         size_t day=0;
         SimTime now = sim::ts0();
         do{
-            extinct = infection->update(1.0 /*no external immunity*/, now);
+            extinct = infection->update(1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/);
             SimTime age = now - infection->m_startDate - infection->latentP;
             if( age >= sim::zero() ){
                 ETS_ASSERT_LESS_THAN( day, dens.size() );
@@ -289,7 +289,7 @@ private:
                 MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
                 SimTime now = sim::ts0();
                 
-                while( !infection->update(1.0 /*no external immunity*/, now) ){
+                while( !infection->update(1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/) ){
                     dens.push_back( infection->getDensity() );
                     now += sim::oneDay();
                 }

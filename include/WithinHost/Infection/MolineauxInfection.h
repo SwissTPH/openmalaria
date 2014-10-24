@@ -56,7 +56,7 @@ public:
     MolineauxInfection (istream& stream);
     virtual ~MolineauxInfection () {};
     
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge );
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double body_mass );
     
 protected:
     virtual void checkpoint (ostream& stream);
@@ -69,12 +69,12 @@ private:
      * 
      * We can't use the Molineaux model as is, since the published model uses a
      * two day time step. We extrapolate the density p(t+1). */
-    void updateGrowthRateMultiplier(int ageDays);
+    void updateGrowthRateMultiplier( int ageDays, double elim_dens );
     
     // NOTE: we also have inherited parameters
     // m_startDate is used to give the age here
     // m_density is equivalent to Pc in paper
-    // m_cumulativeExposureJ is TODO
+    // m_cumulativeExposureJ is cumulative parasite density (used by external immunity function)
     
     // m[i]: Multiplication factor, per two-day cycle of variant i
     float m[v];
@@ -99,7 +99,7 @@ private:
         void operator& (istream& stream);
         
         double updateDensity (double survivalFactor, int ageDays /* age of infection in days */);
-        void updateGrowthRateMultiplier( double pd, double immune_response_escape );
+        void updateGrowthRateMultiplier( double pd, double immune_response_escape, double elim_dens );
         double getVariantSpecificSummation(int ageDays);
         
     private:

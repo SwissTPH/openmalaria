@@ -52,13 +52,14 @@ public:
      * 
      * @param survivalFactor Density multiplier to introduce drug & vaccine effects
      * @param now The simulation time. Use this instead of sim::ts1().
+     * @param body_mass Body mass of host in kg
      * @returns True when the infection goes extinct. */
-    inline bool update( double survivalFactor, SimTime now ){
+    inline bool update( double survivalFactor, SimTime now, double body_mass ){
 	SimTime bsAge = now - m_startDate - latentP;	// age of post-latent-period blood stage
 	if( bsAge < sim::zero() )
 	    return false;	// latent period (liver stage) — don't do anything
 	else
-	    return updateDensity( survivalFactor, bsAge );
+	    return updateDensity( survivalFactor, bsAge, body_mass );
     }
     
 protected:
@@ -69,8 +70,9 @@ protected:
      * @param bsAge Age of the patent blood-stage infection (sim::zero() on
      *  first day). Note that liver and pre-patent blood stages occur before
      *  this, but this function is not called during those stages.
+     * @param body_mass Body mass of host in kg
      * @returns True when the infection goes extinct. */
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge )=0;
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double body_mass )=0;
 };
 
 } }

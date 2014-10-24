@@ -165,11 +165,11 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
     double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
-    double mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
+    double body_mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
     
     for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
-        pkpdModel->medicate( mass );
+        pkpdModel->medicate( body_mass );
         
         double sumLogDens = 0.0;
         
@@ -182,7 +182,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
                     (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y) *
                     pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
                 // update, may result in termination of infection:
-                expires = (*inf)->update(survivalFactor, now);
+                expires = (*inf)->update(survivalFactor, now, body_mass);
             }
             
             if( expires ){
