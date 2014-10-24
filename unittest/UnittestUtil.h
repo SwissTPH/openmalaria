@@ -33,6 +33,7 @@
 #include "PkPd/LSTMTreatments.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"
+#include "WithinHost/Infection/MolineauxInfection.h"
 #include "Monitoring/Surveys.h"
 
 #include "schema/scenario.h"
@@ -119,8 +120,11 @@ public:
     
     static const scnXml::Parameters& prepareParameters(){
         if( dummyXML::modelParams.getParameter().size() == 0 ){
-            scnXml::Parameter densBias( "non-garki density bias", 15, 0.177378570987455 );
-            dummyXML::modelParams.getParameter().push_back( densBias );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "non-garki density bias", 15, 0.177378570987455 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Molineaux first local max density mean", 34, 4.7601 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Molineaux first local max density sd", 35, 0.5008 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Diff positive days mean", 36, 2.2736 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Diff positive days sd", 37, 0.2315 ) );
         }
         return dummyXML::modelParams;
     }
@@ -254,6 +258,12 @@ public:
         if( repl_gamma ){
             ModelOptions::set(util::PARASITE_REPLICATION_GAMMA);
         }
+        
+        // Set parameters; all of these were estimated externally from OpenMalaria
+        Parameters params(prepareParameters());
+        
+        // This sets up the model based on parameters and options
+        WithinHost::MolineauxInfection::init(params);
     }
     
     static void MosqLifeCycle_init() {
