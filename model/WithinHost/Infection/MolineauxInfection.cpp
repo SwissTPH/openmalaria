@@ -250,7 +250,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 }
 
 MolineauxInfection::Variant::Variant () :
-        P(0.0), P1(0.0), P2(0.0), variantSpecificSummation(0.0)
+        P1(0.0), P2(0.0), variantSpecificSummation(0.0)
 {
     for (size_t tau=0; tau<taus; tau++){
         laggedP[tau] =  0.0;
@@ -267,17 +267,21 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
     double blood_volume = blood_vol_per_kg * body_mass;
     double elim_dens = elim_parasites / blood_volume;   // 50 / 5e6 = 5e-5
     
+    // ———  1. Update m_density and related  ———
+    
+    float P_i[v] = { 0.0f };
+    
     if (bsAge == sim::zero()){
         // The first variant starts with a pre-set density (regardless of blood
         // volume; this is an assumption by DH; paper assumes fixed volume)
         variants.resize(1);
-        variants[0].P = initial_dens;
+        P_i[0] = initial_dens;
         m_density = initial_dens;
     }else{
         double sum = 0.0;
         for( size_t i=0; i<variants.size(); i++ ){
             double newP = survivalFactor * variants[i].P1;
-            variants[i].P = static_cast<float>(newP);
+            P_i[i] = static_cast<float>(newP);
             variants[i].P1 = static_cast<float>(survivalFactor * variants[i].P2);
             sum += newP;
         }
@@ -291,16 +295,14 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
         return true;    // infection goes extinct
     }
     
-    // If the infection hasn't gone extinct age is even, then update
-    // growthRateMultiplier for the next two steps:
-    if( mod_nn(bsAge.inDays(), 2) == 0 ){
-        updateGrowthRateMultiplier( bsAge.inDays(), elim_dens );
+    // Every other step (if bsAge is even) we calculate new densities (the
+    // Molineaux model uses a 2-day step; we have simply added interpolation
+    // for the interleaving densities). In other cases we are finished now.
+    if( mod_nn(bsAge.inDays(), 2) != 0 ){
+        return false;   // end of update, not extinct
     }
-    return false;
-}
-
-
-void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_dens ){
+    
+    
     // The immune responses are represented by the variables
     // Sc (probability that a parasite escapes control by innate and variant-transcending immune response)
     // Sm (                        "                      acquired and variant-transcending immune response)
@@ -313,7 +315,7 @@ void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_de
     
     // ———  2. variant-transcending immune response (equations 7, 8)  ———
     // 2.a) Update the sum in (7), based on previous result
-    const size_t tau = mod_nn(ageDays / 2, taus);        // 8 days ago has same index as today
+    const size_t tau = mod_nn(bsAge.inDays() / 2, taus);    // 8 days ago has same index as today
     // NOTE: rho == 0 so we can optimise this code:
     //variantTranscendingSummation = variantTranscendingSummation * exp(-2.0*rho) + laggedPc[index];
     variantTranscendingSummation = variantTranscendingSummation + laggedPc[tau];
@@ -338,7 +340,7 @@ void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_de
             variants[i].variantSpecificSummation = static_cast<float>(
                 variants[i].variantSpecificSummation * sigma_decay + variants[i].laggedP[tau]);
             // 3.b) update history of density (P_i(t))
-            variants[i].laggedP[tau] = variants[i].P;
+            variants[i].laggedP[tau] = P_i[i];
             
             // 3.c) calculate S_i(t) (equation 6)
             BOOST_STATIC_ASSERT( kappa_v == 3 );        // again, optimise pow to multiplication
@@ -365,11 +367,11 @@ void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_de
         double growth_factor = m[i] * S[i] * Sc * Sm;   // part of eqn 1
         if( i < variants.size() ){
             // P_prime: the variant's density at time t+2 (eqn 1)
-            double P_prime = ( (1.0 - sProb) * variants[i].P + sProb * p_i * m_density ) * growth_factor;
+            double P_prime = ( (1.0 - sProb) * P_i[i] + sProb * p_i * m_density ) * growth_factor;
             
             if( P_prime < elim_dens ) P_prime = 0.0;    // eqn 2
             
-            variants[i].P1 = static_cast<float>(sqrt(variants[i].P * P_prime));
+            variants[i].P1 = static_cast<float>(sqrt(P_i[i] * P_prime));
             variants[i].P2 = static_cast<float>(P_prime);
         }else{
             // In this case P_i(τ) = 0 for all τ ≤ t, and we haven't allocated storage.
@@ -385,6 +387,8 @@ void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_de
             }
         }
     }
+    
+    return false;       // end of update, not extinct
 }
 
 // ———  MolineauxInfection: checkpointing  ———
@@ -423,7 +427,6 @@ void MolineauxInfection::Variant::operator& (istream& stream) {
     bool nonZero;
     nonZero & stream;
     if( nonZero ){
-        P & stream;
         P1 & stream;
         P2 & stream;
         variantSpecificSummation & stream;
@@ -436,14 +439,12 @@ void MolineauxInfection::Variant::operator& (istream& stream) {
 
 void MolineauxInfection::Variant::operator& (ostream& stream) {
     bool nonZero =
-            P != 0.0 ||
             P1 != 0.0 ||
             P2 != 0.0 ||
             variantSpecificSummation != 0.0;
 
     nonZero & stream;
     if( nonZero ){
-        P & stream;
         P1 & stream;
         P2 & stream;
         variantSpecificSummation & stream;

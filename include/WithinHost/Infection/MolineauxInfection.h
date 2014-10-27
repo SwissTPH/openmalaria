@@ -64,12 +64,6 @@ protected:
 private:
     double getVariantSpecificSummation(int i, double P_current);
     
-    /** This function adapts the growth rate.
-     * 
-     * We can't use the Molineaux model as is, since the published model uses a
-     * two day time step. We extrapolate the density p(t+1). */
-    void updateGrowthRateMultiplier( int ageDays, double elim_dens );
-    
     // NOTE: we also have inherited parameters
     // m_startDate is used to give the age here
     // m_density is equivalent to Pc in paper
@@ -95,8 +89,8 @@ private:
         void operator& (istream& stream);
         
         //TODO: we probably don't need P now
-        // Pi(t), Pi(t+1), Pi(t+2): variant's i density (PRBC/μl blood)
-        float P, P1, P2;
+        // P_i(t+1), P_i(t+2): variant's i density (PRBC/μl blood)
+        float P1, P2;
         // variantSpecificSummation: See Molineaux paper, equation 6
         float variantSpecificSummation;
         // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
