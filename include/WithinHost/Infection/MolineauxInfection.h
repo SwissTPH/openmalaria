@@ -64,17 +64,15 @@ protected:
 private:
     double getVariantSpecificSummation(int i, double P_current);
     
-    // NOTE: we also have inherited parameters
+    // Note: we also have inherited parameters:
     // m_startDate is used to give the age here
     // m_density is equivalent to Pc in paper
     // m_cumulativeExposureJ is cumulative parasite density (used by external immunity function)
     
-    // m[i]: Multiplication factor, per two-day cycle of variant i
-    float m[v];
-    // variantTranscendingSummation: See Molineaux paper, equation 7
-    float variantTranscendingSummation;
-    // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
-    float laggedPc[taus];
+    float mi[v];        // base multiplication factor per two-day cycle of variant i
+    float Sm_summation; // sum in eqn 7
+    // index: we use ((bsAge.inDays()/2) mod 4) for τ = t - δ_v respectively τ = t
+    float lagged_Pc[taus];       // Pc(τ) for τ ∈ {t - δ_v, ..., t - 2}
     /* Pc_star, Pm_star: two host-specific critical densities.
      * These two values depend on the first local maximum or the difference
      * between the last positive day and the first positive day. */
@@ -88,16 +86,12 @@ private:
         void operator& (ostream& stream);
         void operator& (istream& stream);
         
-        //TODO: we probably don't need P now
-        // P_i(t+1), P_i(t+2): variant's i density (PRBC/μl blood)
-        float P1, P2;
-        // variantSpecificSummation: See Molineaux paper, equation 6
-        float variantSpecificSummation;
-        // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
-        float laggedP[taus];
+        float Pi1, Pi2;   // Pi(t+1), Pi(t+2): variant's i density (PRBC/μl blood)
+        float Si_summation;     // sum in eqn 6
+        // index: we use ((bsAge.inDays()/2) mod 4) for τ = t - δ_v respectively τ = t
+        float lagged_Pi[taus];   // Pi(τ) for τ ∈ {t - δ_v, ..., t - 2}
     };
     // variant-specific data; variants[i-1] corresponds to variant i in the paper
-    //TODO: more optimal storage of variants? Fixed-size list? Like this, or a map?
     vector<Variant> variants;
     
     // allow unittest to access private vars
