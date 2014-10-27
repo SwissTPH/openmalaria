@@ -372,14 +372,8 @@ void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double 
         P_prime = 0.0;
     }
     
-    //TODO: these calculations lose more precision than strictly necessary; this is to reproduce previous behaviour
-    if( P == 0 ){
-        P2 = P_prime;
-        P1 = 0.0;
-    }else{
-        P1 = static_cast<float>(sqrt(P * P_prime));
-        P2 = static_cast<float>(P_prime);
-    }
+    P1 = static_cast<float>(sqrt(P * P_prime));
+    P2 = static_cast<float>(P_prime);
 }
 
 double MolineauxInfection::getVariantTranscendingSummation(int ageDays) {
