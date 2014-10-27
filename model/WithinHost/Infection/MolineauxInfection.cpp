@@ -271,12 +271,15 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
         // The first variant starts with a pre-set density (regardless of blood
         // volume; this is an assumption by DH; paper assumes fixed volume)
         variants.resize(1);
-        variants[0].setP( initial_dens );
+        variants[0].P = initial_dens;
         m_density = initial_dens;
     }else{
         double sum = 0.0;
         for( size_t i=0; i<variants.size(); i++ ){
-            sum += variants[i].updateDensity( survivalFactor, bsAge.inDays() );
+            double newP = survivalFactor * variants[i].P1;
+            variants[i].P = static_cast<float>(newP);
+            variants[i].P1 = static_cast<float>(survivalFactor * variants[i].P2);
+            sum += newP;
         }
         m_density = sum;
     }
@@ -296,13 +299,6 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
     return false;
 }
 
-double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ageDays) {
-    double newP = survivalFactor * P1;
-    P = static_cast<float>(newP);
-    P1 = static_cast<float>(survivalFactor * P2);
-    return newP;
-}
-
 
 void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_dens ){
     // The immune responses are represented by the variables
@@ -310,98 +306,85 @@ void MolineauxInfection::updateGrowthRateMultiplier( int ageDays, double elim_de
     // Sm (                        "                      acquired and variant-transcending immune response)
     // S[i] (                      "                      acquired and variant-specific immune response)
     
+    // ———  1. innate immunity (equation 5)  ———
     BOOST_STATIC_ASSERT( kappa_c == 3 );        // allows us to optimise pow(..., kappa_c) to multiplication
-    double base = m_density/Pc_star;
-    double Sc = 1.0 / (1.0 + base*base*base);
+    const double base = m_density/Pc_star;
+    const double Sc = 1.0 / (1.0 + base*base*base);
     
+    // ———  2. variant-transcending immune response (equations 7, 8)  ———
+    // 2.a) Update the sum in (7), based on previous result
+    const size_t tau = mod_nn(ageDays / 2, taus);        // 8 days ago has same index as today
+    // NOTE: rho == 0 so we can optimise this code:
+    //variantTranscendingSummation = variantTranscendingSummation * exp(-2.0*rho) + laggedPc[index];
+    variantTranscendingSummation = variantTranscendingSummation + laggedPc[tau];
+    
+    // 2.b) Update laggedPc (equation 8, but only stored for the last tau steps)
+    //We could use min here, but it seems that min has problems with static const double C
+    laggedPc[tau] = static_cast<float>(m_density < C ? m_density : C);
+    
+    // 2.c) calculate S_m(t) (equation 7)
     BOOST_STATIC_ASSERT( kappa_m == 1 );        // allows us to optimise out pow(..., kappa_m):
-    //double Sm = (1.0 - beta) / (1.0 + pow(getVariantTranscendingSummation(ageDays) * inv_Pm_star, kappa_m)) + beta
-    double Sm = (1.0 - beta) / (1.0 + getVariantTranscendingSummation(ageDays) / Pm_star) + beta;
-    double S[v];
-
-    double sum_qj_Sj=0.0;
+    //double Sm = (1.0 - beta) / (1.0 + pow(variantTranscendingSummation / Pm_star, kappa_m)) + beta
+    const double Sm = (1.0 - beta) / (1.0 + variantTranscendingSummation / Pm_star) + beta;
     
-    for (size_t i=0; i<v; i++)
-    {
-        S[i] = 1.0;
+    // ———  3. variant-specific immune response (equation 6)  ———
+    double S[v];        // calculate value for each variant
+    double sum_qj_Sj=0.0;       // simultaneously calculation summataion in equation 4
+    
+    for (size_t i=0; i<v; i++){
         if( i < variants.size() ){
+            // 3.a) Update the sum in (6) based on the last step's value
+            //note: sigma_decay = exp(-2*sigma)
+            variants[i].variantSpecificSummation = static_cast<float>(
+                variants[i].variantSpecificSummation * sigma_decay + variants[i].laggedP[tau]);
+            // 3.b) update history of density (P_i(t))
+            variants[i].laggedP[tau] = variants[i].P;
+            
+            // 3.c) calculate S_i(t) (equation 6)
             BOOST_STATIC_ASSERT( kappa_v == 3 );        // again, optimise pow to multiplication
-            double base = variants[i].getVariantSpecificSummation(ageDays) * inv_Pstar_v;
-            S[i] = 1.0 / (1.0 + base*base*base);
+            const double base = variants[i].variantSpecificSummation * inv_Pstar_v;
+            S[i] = 1.0 / (1.0 + base*base*base);        // eqn 6, given κ_v = 3
+        }else{
+            S[i] = 1.0; // eqn 6 for the case when P_i(τ) = 0 for τ ≤ t - δ_m
         }
-        sum_qj_Sj+= qPow[i]*S[i];
+        sum_qj_Sj += qPow[i] * S[i];    // sum in eqn 4
     }
-
+    
+    // ———  4. Variant densities, equations 1, 2 and 4  ———
     for (size_t i=0;i<v;i++)
     {
-        // Molineaux paper equation 4
-        // p_i: variant selection probability
+        // 4.a) Calculate p_i, variant selection probability (eqn 4)
         double p_i = 0.0;
         if( S[i] >= 0.1 ){
             //note: qPow[i] = pow(q, i+1)
             p_i = qPow[i] * S[i] / sum_qj_Sj;
         }
         
+        // 4.b) calculate P_i'(t+2) [eqn 1] then P_i(t+2) [eqn 2]
         // This is the growth rate after taking immune effect into account:
-        double growth_factor = m[i] * S[i] * Sc * Sm;
+        double growth_factor = m[i] * S[i] * Sc * Sm;   // part of eqn 1
         if( i < variants.size() ){
-            variants[i].updateGrowthRateMultiplier( p_i*m_density, growth_factor, elim_dens );
-        }else{
-            //NOTE: this does the same as updateGrowthRateMultiplier, where P == 0
-            // The code duplication is due to an optimisation: not storing variants which haven't been expressed.
+            // P_prime: the variant's density at time t+2 (eqn 1)
+            double P_prime = ( (1.0 - sProb) * variants[i].P + sProb * p_i * m_density ) * growth_factor;
             
-            // P_prime: Variant density at t = t + 2 (eqn 1 in paper)
+            if( P_prime < elim_dens ) P_prime = 0.0;    // eqn 2
+            
+            variants[i].P1 = static_cast<float>(sqrt(variants[i].P * P_prime));
+            variants[i].P2 = static_cast<float>(P_prime);
+        }else{
+            // In this case P_i(τ) = 0 for all τ ≤ t, and we haven't allocated storage.
+            
+            // P_prime: the variant's density at time t+2 (eqn 1 in paper)
             double P_prime = ( sProb * p_i * m_density ) * growth_factor;
             
             // Molineaux paper equation 2
-            if( P_prime >= elim_dens ){    // [if not, Pi(t+2)) = 0 and we don't add a new variant]
-                // express a new variant:
-                variants.resize( i+1 );
-                variants[i].setNextP( static_cast<float>(P_prime) );
+            if( P_prime >= elim_dens ){    // [if not, P_i(t+2) = 0]
+                // express a new variant at time t+2:
+                variants.resize( i+1 ); // allocate (potentially for multiple variants)
+                variants[i].P2 = static_cast<float>(P_prime);
             }
         }
     }
-}
-
-void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double growth_factor, double elim_dens ){
-    // P_prime: Variant density at t = t + 2 (eqn 1 in paper)
-    double P_prime = ( (1.0 - sProb) * P + sProb * pd ) * growth_factor;
-    
-    // Molineaux paper equation 2
-    if( P_prime < elim_dens ){
-        P_prime = 0.0;
-    }
-    
-    P1 = static_cast<float>(sqrt(P * P_prime));
-    P2 = static_cast<float>(P_prime);
-}
-
-double MolineauxInfection::getVariantTranscendingSummation(int ageDays) {
-    //Molineaux paper equation 5
-    size_t tau = mod_nn(ageDays / 2, taus);        // 8 days ago has same index as today
-    // NOTE: rho == 0 so we can optimise this code:
-    //variantTranscendingSummation = variantTranscendingSummation * exp(-2.0*rho) + laggedPc[index];
-    variantTranscendingSummation = variantTranscendingSummation + laggedPc[tau];
-    
-    //Molineaux paper equation 8
-    //We could use min here, but it seems that min has problems with static const double C
-    laggedPc[tau] = static_cast<float>(m_density < C ? m_density : C);
-    
-    return variantTranscendingSummation;
-}
-
-double MolineauxInfection::Variant::getVariantSpecificSummation(int ageDays) {
-    //The effective exposure is computed by adding in the 8-day lagged parasite density (i.e. 4 time steps)
-    //and decaying the previous value for the effective exposure with decay parameter 2*sigma (the 2 arises because
-    //the time steps are two days and the unit of sigma is per day. (reasoning: rearrangment of Molineaux paper equation 6)
-    
-    //Molineaux paper equation 6
-    size_t tau = mod_nn(ageDays / 2, taus);      // 8 days ago has same index as today
-    //note: sigma_decay = exp(-2*sigma)
-    variantSpecificSummation = static_cast<float>(variantSpecificSummation * sigma_decay + laggedP[tau]);
-    laggedP[tau] = P;
-    
-    return variantSpecificSummation;
 }
 
 // ———  MolineauxInfection: checkpointing  ———

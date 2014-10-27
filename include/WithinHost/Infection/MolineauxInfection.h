@@ -63,7 +63,6 @@ protected:
     
 private:
     double getVariantSpecificSummation(int i, double P_current);
-    double getVariantTranscendingSummation(int ageDays);
     
     /** This function adapts the growth rate.
      * 
@@ -91,18 +90,10 @@ private:
         // Initialise all variables to 0
         Variant ();
         
-        inline void setP( float P ){ this->P = P; }
-        inline void setNextP( float nextP ){ P2 = nextP; }
-        
         /// Checkpointing
         void operator& (ostream& stream);
         void operator& (istream& stream);
         
-        double updateDensity (double survivalFactor, int ageDays /* age of infection in days */);
-        void updateGrowthRateMultiplier( double pd, double immune_response_escape, double elim_dens );
-        double getVariantSpecificSummation(int ageDays);
-        
-    private:
         //TODO: we probably don't need P now
         // Pi(t), Pi(t+1), Pi(t+2): variant's i density (PRBC/μl blood)
         float P, P1, P2;
