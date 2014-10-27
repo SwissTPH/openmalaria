@@ -297,10 +297,10 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
 }
 
 double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ageDays) {
-    P = static_cast<float>(survivalFactor * P1);
+    double newP = survivalFactor * P1;
+    P = static_cast<float>(newP);
     P1 = static_cast<float>(survivalFactor * P2);
-    
-    return P;
+    return newP;
 }
 
 
