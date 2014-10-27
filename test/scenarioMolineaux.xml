@@ -26,6 +26,8 @@
   <monitoring name="NDmo" startDate="1111-1-1">
     <SurveyOptions>
       <option name="nHost" value="true"/>
+      <option name="nPatent"/>
+      <option name="annAvgK"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
     </SurveyOptions>
