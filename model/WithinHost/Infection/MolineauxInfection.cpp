@@ -377,8 +377,7 @@ void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double 
         P2 = P_prime;
         P1 = 0.0;
     }else{
-        float growthRate = static_cast<float>(sqrt(P_prime / P));
-        P1 = P * growthRate;
+        P1 = static_cast<float>(sqrt(P * P_prime));
         P2 = static_cast<float>(P_prime);
     }
 }

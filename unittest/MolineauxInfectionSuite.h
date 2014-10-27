@@ -65,6 +65,8 @@ public:
         // only useful thing this test does is spot changes in output!
         vector<double> dens;
         readVector(dens,"MolineauxCirDens.txt");
+//         ofstream out("MolineauxCirDens2.txt");
+//         out << setprecision(8);
         
         // pkpdID (value) isn't important since we're not using drug model here:
         MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
@@ -77,6 +79,7 @@ public:
             if( age >= sim::zero() ){
                 ETS_ASSERT_LESS_THAN( day, dens.size() );
                 TS_ASSERT_APPROX( infection->getDensity(), dens[day] );
+//                 out << infection->getDensity() << endl;
                 day += 1;
             }
             now += sim::oneDay();
