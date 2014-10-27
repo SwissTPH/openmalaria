@@ -92,7 +92,7 @@ private:
         Variant ();
         
         inline void setP( float P ){ this->P = P; }
-        inline void setNextP( float nextP ){ initP = nextP; }
+        inline void setNextP( float nextP ){ P2 = nextP; }
         
         /// Checkpointing
         void operator& (ostream& stream);
@@ -103,14 +103,11 @@ private:
         double getVariantSpecificSummation(int ageDays);
         
     private:
-        // growthRate[i]: used to calculate Pi(t+1) as sqrt(Pi(t) * Pi(t+2))
-        float growthRate;
-        // P[i]: variant's i density (PRBC/μl blood)
-        float P;
+        //TODO: we probably don't need P now
+        // Pi(t), Pi(t+1), Pi(t+2): variant's i density (PRBC/μl blood)
+        float P, P1, P2;
         // variantSpecificSummation: See Molineaux paper, equation 6
         float variantSpecificSummation;
-        // initP[i]: Density of in t+2 emerging variant i
-        float initP;    //TODO: we can refactor the model not to need this
         // index: we use (ageDays mod 8) / 2 (but ageDays could be replaced by e.g. simTimeDays if available)
         float laggedP[taus];
     };

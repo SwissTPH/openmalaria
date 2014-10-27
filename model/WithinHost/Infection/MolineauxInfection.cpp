@@ -250,7 +250,7 @@ MolineauxInfection::MolineauxInfection(uint32_t protID):
 }
 
 MolineauxInfection::Variant::Variant () :
-        growthRate(0.0), P(0.0), variantSpecificSummation(0.0), initP(0.0)
+        P(0.0), P1(0.0), P2(0.0), variantSpecificSummation(0.0)
 {
     for (size_t tau=0; tau<taus; tau++){
         laggedP[tau] =  0.0;
@@ -297,23 +297,8 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
 }
 
 double MolineauxInfection::Variant::updateDensity (double survivalFactor, int ageDays) {
-    // growthRate:
-    // p(t+1) = p(t) * sqrt(p(t+2)/p(t))
-    // p(t+2) = p(t+1) * sqrt(p(t+2)/p(t))
-    // p(t+2) = p(t) * sqrt(p(t+2)/p(t))^2...
-    P *= growthRate;
-    
-    // survivalFactor: effects of drugs, immunity and vaccines
-    // Note: this gives us an additional immune response (besides Si, Sc, Sm);
-    // according to MP this is the best thing to do for now.
-    P = static_cast<float>(P * survivalFactor);
-    initP = static_cast<float>(initP * survivalFactor);
-    
-    // if t+2: The new variant is now expressed. For already extinct
-    // variants this doesn't matter, since initP = 0 for those variants.
-    if( P==0 && mod_nn(ageDays, 2) == 0 ){
-        P = initP;
-    }
+    P = static_cast<float>(survivalFactor * P1);
+    P1 = static_cast<float>(survivalFactor * P2);
     
     return P;
 }
@@ -387,16 +372,14 @@ void MolineauxInfection::Variant::updateGrowthRateMultiplier( double pd, double 
         P_prime = 0.0;
     }
     
-    // if P == 0 then that means this variant wasn't expressed yet
-    // or is extinct. If this variant is emerging in (t+2) the new variant
-    // density is stored in the initP array,  so that we are able to add
-    // the survival factor's effect to the emerging variant's density.
+    //TODO: these calculations lose more precision than strictly necessary; this is to reproduce previous behaviour
     if( P == 0 ){
-        initP = static_cast<float>(P_prime);
-        growthRate = 0.0;
+        P2 = P_prime;
+        P1 = 0.0;
     }else{
-        initP = 0.0;
-        growthRate = static_cast<float>(sqrt(P_prime / P));
+        float growthRate = static_cast<float>(sqrt(P_prime / P));
+        P1 = P * growthRate;
+        P2 = P1 * growthRate;
     }
 }
 
@@ -464,10 +447,10 @@ void MolineauxInfection::Variant::operator& (istream& stream) {
     bool nonZero;
     nonZero & stream;
     if( nonZero ){
-        growthRate & stream;
         P & stream;
+        P1 & stream;
+        P2 & stream;
         variantSpecificSummation & stream;
-        initP & stream;
         for(size_t i = 0; i < taus; ++i){
             laggedP[i] & stream;
         }
@@ -477,17 +460,17 @@ void MolineauxInfection::Variant::operator& (istream& stream) {
 
 void MolineauxInfection::Variant::operator& (ostream& stream) {
     bool nonZero =
-            growthRate != 0.0 ||
             P != 0.0 ||
-            variantSpecificSummation != 0.0 ||
-            initP != 0.0;
+            P1 != 0.0 ||
+            P2 != 0.0 ||
+            variantSpecificSummation != 0.0;
 
     nonZero & stream;
     if( nonZero ){
-        growthRate & stream;
         P & stream;
+        P1 & stream;
+        P2 & stream;
         variantSpecificSummation & stream;
-        initP & stream;
         for(size_t i = 0; i < taus; ++i){
             laggedP[i] & stream;
         }
