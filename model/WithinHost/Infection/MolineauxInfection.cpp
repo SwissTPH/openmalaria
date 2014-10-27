@@ -269,7 +269,7 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
     
     // ———  1. Update m_density and related  ———
     
-    float P_i[v] = { 0.0f };
+    double P_i[v] = { 0.0f };
     
     if (bsAge == sim::zero()){
         // The first variant starts with a pre-set density (regardless of blood
@@ -281,7 +281,7 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
         double sum = 0.0;
         for( size_t i=0; i<variants.size(); i++ ){
             double newP = survivalFactor * variants[i].P1;
-            P_i[i] = static_cast<float>(newP);
+            P_i[i] = newP;
             variants[i].P1 = static_cast<float>(survivalFactor * variants[i].P2);
             sum += newP;
         }
@@ -340,7 +340,7 @@ bool MolineauxInfection::updateDensity( double survivalFactor, SimTime bsAge, do
             variants[i].variantSpecificSummation = static_cast<float>(
                 variants[i].variantSpecificSummation * sigma_decay + variants[i].laggedP[tau]);
             // 3.b) update history of density (P_i(t))
-            variants[i].laggedP[tau] = P_i[i];
+            variants[i].laggedP[tau] = static_cast<float>(P_i[i]);
             
             // 3.c) calculate S_i(t) (equation 6)
             BOOST_STATIC_ASSERT( kappa_v == 3 );        // again, optimise pow to multiplication
