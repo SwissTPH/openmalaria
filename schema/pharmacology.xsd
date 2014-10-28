@@ -7,7 +7,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
            xmlns:om="http://openmalaria.org/schema/scenario_33"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!-- root element -->
-  <xs:complexType name="pharmacology">
+  <xs:complexType name="Pharmacology">
     <xs:annotation>
       <xs:documentation>
         A library of drug related data for the PK/PD model.

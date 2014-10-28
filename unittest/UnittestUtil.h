@@ -50,7 +50,7 @@ namespace OM {
 }
 
 namespace dummyXML{
-    scnXml::AgeGroupPerC demAgeGroup(
+    scnXml::DemogAgeGroup demAgeGroup(
         numeric_limits<double>::quiet_NaN() /* lower bound */ );
     scnXml::Demography demography( 
         demAgeGroup,
@@ -60,7 +60,7 @@ namespace dummyXML{
     
     scnXml::OptionSet survOpts;
     scnXml::Surveys surveys;
-    scnXml::AgeGroup monAgeGroup(
+    scnXml::MonAgeGroup monAgeGroup(
         0.0 /* lower bound */ );
     scnXml::Monitoring monitoring(
         survOpts,
@@ -73,7 +73,7 @@ namespace dummyXML{
     scnXml::AgeGroupValues cfr, pSeq;
     scnXml::HealthSystem healthSystem( cfr, pSeq );
     
-    scnXml::EntoData entomology( "dummy" /* name */,
+    scnXml::Entomology entomology( "dummy" /* name */,
         "dummy" /* mode */ );
     
     scnXml::OptionSet modelOpts;

@@ -40,7 +40,7 @@ namespace Transmission {
  * code is in the Anopheles directory and namespace. */
 class VectorModel : public TransmissionModel {
 public:
-  VectorModel(const scnXml::EntoData& entoData, const scnXml::Vector vectorData, int populationSize);
+  VectorModel(const scnXml::Entomology& entoData, const scnXml::Vector vectorData, int populationSize);
   virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
@@ -50,7 +50,7 @@ public:
   virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name );
   
   virtual void scaleEIR (double factor);
-//   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
+//   virtual void scaleXML_EIR (scnXml::Entomology&, double factor) const;
   
   virtual SimTime minPreinitDuration ();
   virtual SimTime expectedInitDuration ();

@@ -9,7 +9,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:include schemaLocation="util.xsd"/>
   
   <!-- root element for clinical data outside the healthSystem element -->
-  <xs:complexType name="clinical">
+  <xs:complexType name="Clinical">
     <xs:annotation>
       <xs:documentation>
         Description of clinical parameters that are related to the health-system description, but which contain data
@@ -99,7 +99,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   
   <!-- the healthSystem element -->
-  <xs:complexType name="healthSystem">
+  <xs:complexType name="HealthSystem">
     <xs:annotation>
       <xs:documentation>
         Description of case management system, used to specify the initial model
@@ -141,9 +141,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 
   <xs:complexType name="Primaquine">
     <xs:all>
-      <xs:element name="pHumanCannotReceive" type="om:inputValue"/>
-      <xs:element name="pUseUncomplicated" type="om:inputValue"/>
-      <xs:element name="effectivenessOnUse" type="om:inputValue"/>
+      <xs:element name="pHumanCannotReceive" type="om:DoubleValue"/>
+      <xs:element name="pUseUncomplicated" type="om:DoubleValue"/>
+      <xs:element name="effectivenessOnUse" type="om:DoubleValue"/>
     </xs:all>
   </xs:complexType>
   
@@ -193,7 +193,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="initialACR" type="om:treatmentDetails">
+      <xs:element name="initialACR" type="om:TreatmentDetails">
         <xs:annotation>
           <xs:documentation>
             Initial cure rate
@@ -202,7 +202,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             units:Dimensionless;min:0.0;max:1.0;name:Initial cure rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="compliance" type="om:treatmentDetails">
+      <xs:element name="compliance" type="om:TreatmentDetails">
         <xs:annotation>
           <xs:documentation>
             Adherence to treatment
@@ -210,7 +210,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Dimensionless;min:0.0;max:1.0;name:Adherence to treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="nonCompliersEffective" type="om:treatmentDetails">
+      <xs:element name="nonCompliersEffective" type="om:TreatmentDetails">
         <xs:annotation>
           <xs:documentation>
             Effectiveness of treatment for non-compliant patients
@@ -233,7 +233,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
       <!-- begin elements in common with DecisionTree5Day -->
       <!-- note: we cannot use class extension without reordering existing XMLs -->
-      <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated1" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with newly incident
@@ -244,7 +244,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
+      <xs:element name="pSelfTreatUncomplicated" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with uncomplicated disease without
@@ -257,7 +257,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareUncomplicated2" type="om:inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated2" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with recurrence of
@@ -268,7 +268,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareSevere" type="om:inputValue">
+      <xs:element name="pSeekOfficialCareSevere" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with severe disease
@@ -291,15 +291,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
     <xs:attribute name="useDiagnosticUC" type="xs:boolean" default="false"/>
   </xs:complexType>
-  <xs:complexType name="treatmentDetails">
+  <xs:complexType name="TreatmentDetails">
     <xs:sequence>
-      <xs:element maxOccurs="1" minOccurs="0" name="CQ" type="om:inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="CQ" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>Chloroquine</xs:documentation>
           <xs:appinfo>name:Chloroquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="SP" type="om:inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="SP" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Sulphadoxine-pyrimethamine
@@ -307,13 +307,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Sulphadoxine-pyrimethamine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="AQ" type="om:inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="AQ" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>Amodiaquine</xs:documentation>
           <xs:appinfo>name:Amodiaquine</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="SPAQ" type="om:inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="SPAQ" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Sulphadoxine-pyrimethamine/Amodiaquine
@@ -321,7 +321,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Sulphadoxine-pyrimethamine/Amodiaquine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="ACT" type="om:inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="ACT" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Artemisinine combination therapy
@@ -329,13 +329,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Artemisinine based combination therapy;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="0" name="QN" type="om:inputValue">
+      <xs:element maxOccurs="1" minOccurs="0" name="QN" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>Quinine</xs:documentation>
           <xs:appinfo>name:Quinine;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="selfTreatment" type="om:inputValue">
+      <xs:element name="selfTreatment" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability of self-treatment
@@ -364,7 +364,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:all>
       <!-- begin elements in common with DecisionTree5Day -->
       <!-- note: we cannot use class extension without reordering existing XMLs -->
-      <xs:element name="pSeekOfficialCareUncomplicated1" type="om:inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated1" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with newly incident
@@ -375,7 +375,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSelfTreatUncomplicated" type="om:inputValue">
+      <xs:element name="pSelfTreatUncomplicated" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with uncomplicated disease without
@@ -388,7 +388,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareUncomplicated2" type="om:inputValue">
+      <xs:element name="pSeekOfficialCareUncomplicated2" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with recurrence of
@@ -399,7 +399,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pSeekOfficialCareSevere" type="om:inputValue">
+      <xs:element name="pSeekOfficialCareSevere" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Probability that a patient with severe disease
@@ -413,7 +413,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="primaquine" type="om:Primaquine" minOccurs="0"/>
       <xs:element name="treeUCOfficial" type="om:DecisionTree"/>
       <xs:element name="treeUCSelfTreat" type="om:DecisionTree"/>
-      <xs:element name="cureRateSevere" type="om:inputValue">
+      <xs:element name="cureRateSevere" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             The probability of clearing parasites given access to

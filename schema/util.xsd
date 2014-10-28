@@ -104,7 +104,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="doubleList">
+  <xs:complexType name="DoubleList">
     <xs:sequence>
       <xs:element name="item" maxOccurs="unbounded" type="xs:double" />
     </xs:sequence>
@@ -292,7 +292,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="inputValue">
+  <xs:complexType name="DoubleValue">
     <xs:attribute name="value" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>A double-precision floating-point value.</xs:documentation>
@@ -300,7 +300,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="intValue">
+  <xs:complexType name="IntValue">
     <xs:attribute name="value" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>An integer value.</xs:documentation>
@@ -323,7 +323,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:complexContent>
-            <xs:extension base="om:inputValue">
+            <xs:extension base="om:DoubleValue">
               <xs:attribute name="lowerbound" type="xs:double" use="required">
                 <xs:annotation>
                   <xs:documentation>

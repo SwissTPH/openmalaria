@@ -6,9 +6,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
            xmlns:om="http://openmalaria.org/schema/scenario_33"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!---HumanPopulationStructure-->
-  <xs:complexType name="demography">
+  <xs:complexType name="Demography">
     <xs:sequence>
-      <xs:element name="ageGroup" type="om:ageGroupPerC">
+      <xs:element name="ageGroup" type="om:DemogAgeGroup">
         <xs:annotation>
           <xs:documentation>
             list of age groups included in demography
@@ -50,7 +50,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
   </xs:complexType>
   <!-- ageGroup -->
-  <xs:complexType name="ageGroupPerC">
+  <xs:complexType name="DemogAgeGroup">
     <xs:annotation>
       <xs:documentation>
         list of age groups included in demography or surveys
@@ -58,7 +58,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:list of age groups;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group" type="om:groupBoundsPerC" />
+      <xs:element maxOccurs="unbounded" name="group" type="om:DemogGroupBounds" />
     </xs:sequence>
     <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>
@@ -69,7 +69,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="groupBoundsPerC">
+  <xs:complexType name="DemogGroupBounds">
     <xs:attribute name="poppercent" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>

@@ -32,7 +32,7 @@ namespace OM { namespace Transmission {
 class NonVectorModel : public TransmissionModel { 
 public:
 
-  NonVectorModel(const scnXml::EntoData& entoData, const scnXml::NonVector& nonVectorData);
+  NonVectorModel(const scnXml::Entomology& entoData, const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorModel();
   
   virtual void init2 (const Population& population);
@@ -40,7 +40,7 @@ public:
   virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name );
   
   virtual void scaleEIR (double factor);
-//   virtual void scaleXML_EIR (scnXml::EntoData&, double factor) const;
+//   virtual void scaleXML_EIR (scnXml::Entomology&, double factor) const;
   
   virtual SimTime minPreinitDuration ();
   virtual SimTime expectedInitDuration ();

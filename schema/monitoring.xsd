@@ -6,7 +6,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
            xmlns:om="http://openmalaria.org/schema/scenario_33"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
-  <xs:complexType name="monitoring">
+  <xs:complexType name="Monitoring">
     <xs:sequence>
       <xs:element name="continuous" minOccurs="0">
         <xs:complexType>
@@ -132,7 +132,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:attribute>
         </xs:complexType>
       </xs:element>
-      <xs:element name="ageGroup" type="om:ageGroup">
+      <xs:element name="ageGroup" type="om:MonAgeGroup">
         <xs:annotation>
           <xs:documentation>
             List of age groups included in demography or surveys
@@ -197,9 +197,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="ageGroup">
+  <xs:complexType name="MonAgeGroup">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="group" type="om:groupBounds" />
+      <xs:element maxOccurs="unbounded" name="group" type="om:MonGroupBounds" />
     </xs:sequence>
     <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>
@@ -210,7 +210,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="groupBounds">
+  <xs:complexType name="MonGroupBounds">
     <xs:attribute name="upperbound" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>

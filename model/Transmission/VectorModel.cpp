@@ -159,7 +159,7 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
-VectorModel::VectorModel (const scnXml::EntoData& entoData,
+VectorModel::VectorModel (const scnXml::Entomology& entoData,
                           const scnXml::Vector vectorData, int populationSize) :
     TransmissionModel( entoData ),
     initIterations(0), numSpecies(0)

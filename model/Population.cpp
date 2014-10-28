@@ -75,7 +75,7 @@ void Population::staticCheckpoint (ostream& stream)
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
-Population::Population(const scnXml::EntoData& entoData, size_t populationSize)
+Population::Population(const scnXml::Entomology& entoData, size_t populationSize)
     : populationSize (populationSize), recentBirths(0)
 {
     using Monitoring::Continuous;

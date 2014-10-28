@@ -29,7 +29,7 @@
 #include <fstream>
 
 namespace scnXml{
-    class EntoData;
+    class Entomology;
     class Scenario;
 }
 namespace OM {
@@ -47,7 +47,7 @@ public:
     static void staticCheckpoint (ostream& stream); ///< ditto
 
 
-    Population( const scnXml::EntoData& entoData, size_t populationSize );
+    Population( const scnXml::Entomology& entoData, size_t populationSize );
     //! Clears human collection.
     ~Population();
 

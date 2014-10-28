@@ -227,7 +227,7 @@ public:
      * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
      */
     TimedHumanDeployment( SimTime date,
-                           const scnXml::Mass& mass,
+                           const scnXml::MassDeployment& mass,
                            const HumanIntervention* intervention,
                            ComponentId subPop, bool complement ) :
         TimedDeployment( date ),
@@ -284,7 +284,7 @@ public:
      * @param cumCuvId Id of component to test coverage for
      */
     TimedCumulativeHumanDeployment( SimTime date,
-                           const scnXml::Mass& mass,
+                           const scnXml::MassDeployment& mass,
                            const HumanIntervention* intervention,
                            ComponentId subPop, bool complement,
                            ComponentId cumCuvId ) :

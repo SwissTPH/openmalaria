@@ -116,7 +116,7 @@ void AgeStructure::estimateRemovalRates( const scnXml::Demography& demography ){
     
     //Get lower and upper age bounds for age groups and cumulative precentage of population from field data
     double sumperc = 0.0;
-    const scnXml::AgeGroupPerC::GroupSequence& group = demography.getAgeGroup().getGroup();
+    const scnXml::DemogAgeGroup::GroupSequence& group = demography.getAgeGroup().getGroup();
     
     size_t ngroups = group.size() + 1;
     ageGroupBounds.resize(ngroups+1,0);

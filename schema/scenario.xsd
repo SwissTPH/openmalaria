@@ -17,7 +17,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:annotation>
     <xs:complexType>
       <xs:all>
-        <xs:element name="demography" type="om:demography">
+        <xs:element name="demography" type="om:Demography">
           <xs:annotation>
             <xs:documentation>
               Description of demography
@@ -25,7 +25,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Human age distribution;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="monitoring" type="om:monitoring">
+        <xs:element name="monitoring" type="om:Monitoring">
           <xs:annotation>
             <xs:documentation>
               Description of surveys
@@ -33,7 +33,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Measures to be reported;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="interventions" type="om:interventions">
+        <xs:element name="interventions" type="om:Interventions">
           <xs:annotation>
             <xs:documentation>
               List of interventions. Generally these are either point-time
@@ -44,7 +44,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="healthSystem" type="om:healthSystem">
+        <xs:element name="healthSystem" type="om:HealthSystem">
           <xs:annotation>
             <xs:documentation>
               Description of health system.
@@ -52,7 +52,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Health system description;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="entomology" type="om:entoData">
+        <xs:element name="entomology" type="om:Entomology">
           <xs:annotation>
             <xs:documentation>
               Description of entomological data
@@ -60,7 +60,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="pharmacology" type="om:pharmacology" minOccurs="0">
+        <xs:element name="pharmacology" type="om:Pharmacology" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
               Drug model parameters and drug usage parameters
@@ -68,7 +68,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Drug parameters (PK, PD and usage);</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="diagnostics" type="om:diagnostics" minOccurs="0">
+        <xs:element name="diagnostics" type="om:Diagnostics" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
               Diagnostic model parameters
@@ -96,10 +96,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:appinfo>name:Model Options;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="clinical" type="om:clinical" />
-              <xs:element name="human" type="om:human"/>
-              <xs:element name="vivax" type="om:vivax" minOccurs="0"/>
-              <xs:element name="parameters" type="om:parameters">
+              <xs:element name="clinical" type="om:Clinical" />
+              <xs:element name="human" type="om:Human"/>
+              <xs:element name="vivax" type="om:Vivax" minOccurs="0"/>
+              <xs:element name="parameters" type="om:Parameters">
                 <xs:annotation>
                   <xs:documentation>
                     Parameters of the epidemiological model
@@ -150,7 +150,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:complexType>
   </xs:element>
   <!--Parameters-->
-  <xs:complexType name="parameter">
+  <xs:complexType name="Parameter">
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Name of parameter</xs:documentation>
@@ -181,9 +181,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="parameters">
+  <xs:complexType name="Parameters">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="parameter" type="om:parameter" />
+      <xs:element maxOccurs="unbounded" name="parameter" type="om:Parameter" />
     </xs:sequence>
     <xs:attribute name="interval" type="xs:int" use="required">
       <xs:annotation>
@@ -209,7 +209,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
   </xs:complexType>
   <!-- Host data -->
-  <xs:complexType name="human">
+  <xs:complexType name="Human">
     <xs:annotation>
       <xs:documentation>
         Parameters of host models.
@@ -253,9 +253,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="vivax">
+  <xs:complexType name="Vivax">
     <xs:all>
-      <xs:element name="probBloodStageInfectiousToMosq" type="om:inputValue"/>
+      <xs:element name="probBloodStageInfectiousToMosq" type="om:DoubleValue"/>
       <xs:element name="numberHypnozoites">
         <xs:complexType>
           <xs:attribute type="xs:int" use="required" name="max"/>
@@ -269,7 +269,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute type="xs:double" use="required" name="sigma"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="bloodStageProtectionLatency" type="om:inputValue"/>
+      <xs:element name="bloodStageProtectionLatency" type="om:DoubleValue"/>
       <xs:element name="bloodStageLengthDays">
         <xs:complexType>
           <xs:attribute type="xs:double" use="required" name="weibullScale"/>
@@ -278,14 +278,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
       <xs:element name="pEventPrimary" type="om:ProbVivaxEvent"/>
       <xs:element name="pEventSecondary" type="om:ProbVivaxEvent"/>
-      <xs:element name="pEventIsSevere" type="om:inputValue"/>
+      <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="ProbVivaxEvent">
     <xs:attribute name="a" type="xs:double" use="required"/>
     <xs:attribute name="b" type="xs:double" use="required"/>
   </xs:complexType>
-  <xs:complexType name="diagnostics">
+  <xs:complexType name="Diagnostics">
     <xs:sequence>
       <xs:element name="diagnostic" type="om:Diagnostic" maxOccurs="unbounded" minOccurs="0"/>
     </xs:sequence>

@@ -38,16 +38,16 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
-TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::EntoData& entoData, int populationSize) {
-  // EntoData contains either a list of at least one anopheles or a list of at
+TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Entomology& entoData, int populationSize) {
+  // Entomology contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData::VectorOptional& vectorData = entoData.getVector();
+  const scnXml::Entomology::VectorOptional& vectorData = entoData.getVector();
 
   TransmissionModel *model;
   if (vectorData.present())
     model = new VectorModel(entoData, vectorData.get(), populationSize);
   else {
-      const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
+      const scnXml::Entomology::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ) ||
@@ -100,7 +100,7 @@ SimulationMode readMode(const string& str){
         // set automatically.
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
-TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
+TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
     simulationMode(forcedEIR),
     interventionMode(readMode(entoData.getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this

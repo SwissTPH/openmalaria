@@ -238,7 +238,7 @@ void Survey::init( const OM::Parameters& parameters,
     }
 }
 void AgeGroup::init (const scnXml::Monitoring& monitoring) {
-    const scnXml::AgeGroup::GroupSequence& groups = monitoring.getAgeGroup().getGroup();
+    const scnXml::MonAgeGroup::GroupSequence& groups = monitoring.getAgeGroup().getGroup();
     if (!(monitoring.getAgeGroup().getLowerbound() <= 0.0))
         throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
     

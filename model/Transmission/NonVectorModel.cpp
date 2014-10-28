@@ -38,7 +38,7 @@ const double NonVectorModel::min_EIR_mult= 0.01;
 
 const int nYearsWarmupData = 5;
 
-NonVectorModel::NonVectorModel(const scnXml::EntoData& entoData, const scnXml::NonVector& nonVectorData) :
+NonVectorModel::NonVectorModel(const scnXml::Entomology& entoData, const scnXml::NonVector& nonVectorData) :
     TransmissionModel(entoData),
     nSpore( sim::fromDays( nonVectorData.getEipDuration() ) )
 {
@@ -94,7 +94,7 @@ void NonVectorModel::scaleEIR (double factor){
     annualEIR = vectors::sum( initialisationEIR );
 }
 #if 0
-void NonVectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
+void NonVectorModel::scaleXML_EIR (scnXml::Entomology& ed, double factor) const{
     assert( ed.getNonVector().present() );
     scnXml::NonVector::EIRDailySequence& daily = ed.getNonVector().get().getEIRDaily();
     
