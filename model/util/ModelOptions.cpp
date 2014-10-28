@@ -132,8 +132,12 @@ namespace OM { namespace util {
 #endif
 	
 	// Test for removed options
-        if( util::ModelOptions::option( IPTI_SP_MODEL ) )
+        if( util::ModelOptions::option(IPTI_SP_MODEL) ){
             throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
+        }
+        if( util::ModelOptions::option(PROPHYLACTIC_DRUG_ACTION_MODEL) ){
+            cerr << "Warning: the PROPHYLACTIC_DRUG_ACTION_MODEL option no longer does anything." << endl;
+        }
 	
 	// Test for incompatible options
 	
@@ -207,16 +211,12 @@ namespace OM { namespace util {
             .set(FIRST_LOCAL_MAXIMUM_GAMMA)
             .set(MEAN_DURATION_GAMMA);
         
-        incompatibilities[IPTI_SP_MODEL]
-            .set(PROPHYLACTIC_DRUG_ACTION_MODEL);
-        
         
         incompatibilities[VIVAX_SIMPLE_MODEL]
             .set( DUMMY_WITHIN_HOST_MODEL )
             .set( EMPIRICAL_WITHIN_HOST_MODEL )
             .set( MOLINEAUX_WITHIN_HOST_MODEL )
-            .set( PENNY_WITHIN_HOST_MODEL )
-            .set( IPTI_SP_MODEL );
+            .set( PENNY_WITHIN_HOST_MODEL );
         
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (options [i] && (options & incompatibilities[i]).any()) {

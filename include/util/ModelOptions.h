@@ -101,13 +101,15 @@ namespace OM { namespace util {
 	
 	/** @brief Use a PK & PD model for drug effects
 	 *
-	 * This causes simulation of the pharmacokinetics and pharmacodynamics of drugs,
-	 * as opposed to the original (and default) models, in which drugs have all or
-	 * nothing effects (except in certain IPTi models).
+	 * This enables simulation of the pharmacokinetics and pharmacodynamics
+         * of drugs, allowing simulation of partial treatment. The alternate
+         * treatment model gives drugs all-or-nothing effects, and is available
+         * regardless of whether this option is enabled.
 	 * 
-	 * Currently this means to use either the Hoshen or the LSTM PKPD model
-	 * (LSTM when drugDescription XML element is present in scenario description.)
-	 */
+         * The available PK/PD model, "LSTM", is that developed by colleagues
+         * at the Liverpool School of Tropical Medicine.
+         * 
+         * Use of a 1-day infection model is required. */
 	INCLUDES_PK_PD,
 	
 	/** @brief Use revised clinical and case management model, ClinicalEventScheduler
@@ -229,9 +231,7 @@ namespace OM { namespace util {
          * Hardy, Chitnis (unpublished?). */
         VIVAX_SIMPLE_MODEL,
         
-        /** Model allowing drugs to have prophylactic effect.
-         * 
-         * Currently fairly simple and only used by MDA. */
+        /** No longer used. */
         PROPHYLACTIC_DRUG_ACTION_MODEL,
         
         /** Bug fixes:

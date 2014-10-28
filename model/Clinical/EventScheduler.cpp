@@ -61,8 +61,6 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::C
 {
     if( sim::oneTS() != sim::oneDay() )
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day time step.");
-    if( !util::ModelOptions::option(util::INCLUDES_PK_PD) )
-        throw util::xml_scenario_error ("ClinicalEventScheduler requires INCLUDES_PK_PD");
     
     opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
     

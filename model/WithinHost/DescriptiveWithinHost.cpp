@@ -166,10 +166,6 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }
 
-void DescriptiveWithinHostModel::addProphylacticEffects(const vector<double>& pClearanceByTime) {
-    throw util::xml_scenario_error( "Please enable PROPHYLACTIC_DRUG_ACTION_MODEL" );
-}
-
 
 // -----  Summarize  -----
 

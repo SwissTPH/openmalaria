@@ -46,8 +46,6 @@ public:
   
   virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
   
-  virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
-  
 protected:
   virtual void clearInfections( Treatments::Stages stage );
   

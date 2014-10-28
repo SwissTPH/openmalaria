@@ -23,6 +23,7 @@
 #include "Host/Human.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "util/CommandLine.h"
 #include "schema/monitoring.h"
 #include "schema/scenario.h"    // TODO: only for analysisNo
 
@@ -211,7 +212,12 @@ void Survey::init( const OM::Parameters& parameters,
         m_diagnostic = &diagnostics::make_deterministic( numeric_limits<double>::quiet_NaN() );
     }else if( surveys.getDetectionLimit().present() ){
         if( surveys.getDiagnostic().present() ){
-            throw util::xml_scenario_error( "monitoring/surveys: do not specify both detectionLimit and diagnostic" );
+            throw util::xml_scenario_error( "monitoring/surveys: do not "
+                "specify both detectionLimit and diagnostic" );
+        }
+        if( util::CommandLine::option( util::CommandLine::DEPRECATION_WARNINGS ) ){
+            std::cerr << "Deprecation warning: monitoring/surveys: "
+                "specification of \"diagnostic\" is suggested over \"detectionLimit\"" << std::endl;
         }
         
         // This controls whether the detection limit is specified relative to
@@ -223,7 +229,9 @@ void Survey::init( const OM::Parameters& parameters,
             if( scenario.getAnalysisNo().present() ){
                 int analysisNo = scenario.getAnalysisNo().get();
                 if ((analysisNo >= 22) && (analysisNo <= 30)) {
-                    cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+                    cerr << "Warning: these analysis numbers used to mean "
+                        "use Garki density bias. If you do want to use this, "
+                        "specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
                 }
             }
             densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
@@ -232,7 +240,12 @@ void Survey::init( const OM::Parameters& parameters,
         m_diagnostic = &diagnostics::make_deterministic( detectionLimit );
     }else{
         if( !surveys.getDiagnostic().present() ){
-            throw util::xml_scenario_error( "monitoring/surveys: require either detectionLimit or diagnostic" );
+            throw util::xml_scenario_error( "monitoring/surveys: require "
+                "either detectionLimit or diagnostic" );
+        }
+        if( util::ModelOptions::option(util::GARKI_DENSITY_BIAS) ){
+            throw util::xml_scenario_error( "Use of GARKI_DENSITY_BIAS is not "
+                "appropriate when monitoring/surveys/diagnostic is used." );
         }
         m_diagnostic = &diagnostics::get( surveys.getDiagnostic().get() );
     }

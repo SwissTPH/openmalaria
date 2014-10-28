@@ -281,9 +281,6 @@ public:
             dosage(PkPd::LSTMTreatments::findDosages(elt.getDosage())),
             delay_h(elt.getDelay_h())
     {
-        if( !util::ModelOptions::option( util::INCLUDES_PK_PD ) ){
-            throw util::xml_scenario_error( "treatPKPD: requires INCLUDES_PK_PD model option" );
-        }
     }
     
     void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
