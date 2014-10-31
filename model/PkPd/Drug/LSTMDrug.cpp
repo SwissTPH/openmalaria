@@ -109,7 +109,7 @@ void LSTMDrug::check_split_IV( DoseMap::iterator lastInserted ){
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
+double LSTMDrug::calculateDrugFactor(uint32_t genotype) {
     /* Survival factor of the parasite (this multiplies the parasite density).
     Calculated below for each time interval. */
     double totalFactor = 1.0;
@@ -118,7 +118,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
     // function may be called multiple times (or not at all) in a day.
     double concentration_today = concentration; // mg / l
     
-    const LSTMDrugAllele& drugAllele = typeData.getAllele(proteome_ID);
+    const LSTMDrugPD& drugPD = typeData.getPD(genotype);
     
     // Make sure we have a dose at both time 0 and time 1
     //TODO: analyse efficiency of this method
@@ -139,12 +139,12 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             // Oral dose
             concentration_today += dose->second.qty;
             
-            totalFactor *= drugAllele.calcFactor( typeData, concentration_today, time_to_next );
+            totalFactor *= drugPD.calcFactor( typeData, concentration_today, time_to_next );
         } else {
             // IV dose
             assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
             
-            totalFactor *= drugAllele.calcFactorIV( typeData, concentration_today, time_to_next, dose->second.qty );
+            totalFactor *= drugPD.calcFactorIV( typeData, concentration_today, time_to_next, dose->second.qty );
         }
         
         dose = next_dose;

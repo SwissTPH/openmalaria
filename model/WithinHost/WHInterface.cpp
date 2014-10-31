@@ -76,7 +76,7 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
                 || opt_molineaux_whm || opt_penny_whm;
         
         if( opt_common_whm ){
-            CommonWithinHost::init( scenario.getModel(), scenario.getMonitoring() );
+            CommonWithinHost::init( scenario );
         }
     }
 }

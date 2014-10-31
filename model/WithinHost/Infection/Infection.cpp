@@ -67,13 +67,11 @@ double Infection::immunitySurvivalFactor (double ageInYears, double cumulativeh,
 
 Infection::Infection (istream& stream) : m_startDate(sim::never()) {
     m_startDate & stream;
-    m_proteome_ID & stream;
     m_density & stream;
     m_cumulativeExposureJ & stream;
 }
 void Infection::checkpoint (ostream& stream) {
     m_startDate & stream;
-    m_proteome_ID & stream;
     m_density & stream;
     m_cumulativeExposureJ & stream;
 }

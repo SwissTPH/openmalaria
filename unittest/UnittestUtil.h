@@ -158,6 +158,7 @@ public:
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	ModelOptions::reset();
         ModelOptions::set(util::INCLUDES_PK_PD);
+        WithinHost::Genotype::initSingle();
 	
 	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
 	//PkPdModel::init ();
@@ -165,10 +166,10 @@ public:
 	PkPd::PkPdModel::activeModel = modelID;
 	if (modelID == PkPd::PkPdModel::LSTM_PKPD) {
             // Drugs
- 	    scnXml::Allele allele ( 1.0 /* initial_frequency */, 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */, "sensitive" /* name */ );
+ 	    scnXml::Phenotype phenotype ( 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */ );
 	    
 	    scnXml::PD pd;
-	    pd.getAllele().push_back (allele);
+	    pd.getPhenotype().push_back (phenotype);
 	    
 	    scnXml::PK pk ( 0.006654 /* negligible_concentration */, 19.254 /* half_life */, 20.8 /* vol_dist */ );
 	    

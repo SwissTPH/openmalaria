@@ -36,7 +36,6 @@ namespace OM { namespace PkPd {
         virtual void medicate(double) {};
         virtual double getDrugFactor (uint32_t) { return 1.0; }
         virtual void decayDrugs () {}
-        virtual uint32_t new_proteome_ID () { return 0xFFFFFFFF; }
     protected:
         virtual void checkpoint (istream& stream) {}
         virtual void checkpoint (ostream& stream) {}

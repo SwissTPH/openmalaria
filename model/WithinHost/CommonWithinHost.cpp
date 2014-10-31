@@ -47,8 +47,8 @@ vector<string> drugMonCodes;
 
 // -----  Initialization  -----
 
-void CommonWithinHost::init( const scnXml::Model& model, const scnXml::Monitoring& mon ){
-    const scnXml::Human human = model.getHuman();
+void CommonWithinHost::init( const scnXml::Scenario& scenario ){
+    const scnXml::Human human = scenario.getModel().getHuman();
     if( !human.getWeight().present() ){
         // Technically this is needed by the PK/PD and Molineaux models
         throw util::xml_scenario_error( "model->human->weight element required by certain models" );
@@ -58,9 +58,14 @@ void CommonWithinHost::init( const scnXml::Model& model, const scnXml::Monitorin
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
     minHetMassMult = 0.5 / massByAge.eval( 0.0 );
     
+    const scnXml::Monitoring& mon = scenario.getMonitoring();
     if( mon.getDrugConcentration().present() ){
-        boost::split( drugMonCodes, mon.getDrugConcentration().get().getDrugCodes(), boost::is_any_of("," ) );
+        boost::split( drugMonCodes,
+                      mon.getDrugConcentration().get().getDrugCodes(),
+                      boost::is_any_of("," ) );
     }
+    
+    Genotype::init( scenario );
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
@@ -126,7 +131,7 @@ void CommonWithinHost::importInfection(){
         PopulationStats::allowedInfections += 1;
         m_cumulative_h += 1;
         numInfs += 1;
-        infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
+        infections.push_back(createInfection(Genotype::sampleGenotype()));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -146,7 +151,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for ( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(createInfection (pkpdModel->new_proteome_ID ()));
+        infections.push_back(createInfection (Genotype::sampleGenotype()));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
     
@@ -180,7 +185,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 double survivalFactor = survivalFactor_part *
                     (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y) *
-                    pkpdModel->getDrugFactor((*inf)->get_proteome_ID());
+                    pkpdModel->getDrugFactor((*inf)->genotype());
                 // update, may result in termination of infection:
                 expires = (*inf)->update(survivalFactor, now, body_mass);
             }

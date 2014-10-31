@@ -1155,12 +1155,11 @@
     <drugs>
       <drug abbrev="AR">
         <PD>
-          <allele name="sensitive">
-            <initial_frequency>1</initial_frequency>
+          <phenotype>
             <max_killing_rate>4</max_killing_rate>
             <IC50>0.0023</IC50>
             <slope>4</slope>
-          </allele>
+          </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.000023</negligible_concentration>
@@ -1170,12 +1169,11 @@
       </drug>
       <drug abbrev="AS">
         <PD>
-          <allele name="sensitive">
-            <initial_frequency>1</initial_frequency>
+          <phenotype>
             <max_killing_rate>4.6</max_killing_rate>
             <IC50>0.0016</IC50>
             <slope>4</slope>
-          </allele>
+          </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.000016</negligible_concentration>
@@ -1185,12 +1183,11 @@
       </drug>
       <drug abbrev="CQ">
         <PD>
-          <allele name="sensitive">
-            <initial_frequency>1</initial_frequency>
+          <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>0.036</IC50>
             <slope>1.6</slope>
-          </allele>
+          </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.00036</negligible_concentration>
@@ -1200,12 +1197,11 @@
       </drug>
       <drug abbrev="LR">
         <PD>
-          <allele name="sensitive">
-            <initial_frequency>1</initial_frequency>
+          <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>0.100</IC50>
             <slope>4</slope>
-          </allele>
+          </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.001</negligible_concentration>
@@ -1215,12 +1211,11 @@
       </drug>
       <drug abbrev="MQ">
         <PD>
-          <allele name="sensitive">
-            <initial_frequency>1</initial_frequency>
+          <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>0.5</IC50>
             <slope>5</slope>
-          </allele>
+          </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.005</negligible_concentration>

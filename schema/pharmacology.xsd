@@ -177,55 +177,37 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="PD">
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="allele" minOccurs="1" maxOccurs="unbounded">
+            <xs:element name="phenotype" type="om:Phenotype" minOccurs="1" maxOccurs="unbounded">
               <xs:annotation>
                 <xs:documentation>
-                    PD parameters per allele, plus initial frequency of each allele.
-                    
-                    Note: we assume a one-to-one correspondance of drugs to loci, hence each
-                    drug has an independent set of alleles here.
-                      </xs:documentation>
-                <xs:appinfo>name:PD parameters per allele;</xs:appinfo>
+                  Pharmaco-Dynamic parameters for some resistance phenotype.
+                  
+                  To model resistance to this drug, describe multiple infection
+                  phenotypes (with respect to these PD parameters) and list one
+                  or more "restrict" elements for each phenotype.
+                  
+                  Loci are specified elsewhere. Multiple loci may influence the
+                  action of a single drug and each locus may influence multiple
+                  drugs.
+                </xs:documentation>
+                <xs:appinfo>name:PD parameters for some allele / resistance phenotype;</xs:appinfo>
               </xs:annotation>
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="initial_frequency" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          Frequency, relative to the total frequency of all alleles for this drug/locus.
-                        </xs:documentation>
-                      <xs:appinfo>units:dimensionless;min:0;name:Relative frequency;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                  <xs:element name="max_killing_rate" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          k1 — Maximal parasite killing rate.
-                        </xs:documentation>
-                      <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                  <xs:element name="IC50" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          Half maximal effect concentration.
-                        </xs:documentation>
-                      <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                  <xs:element name="slope" type="xs:double">
-                    <xs:annotation>
-                      <xs:documentation>
-                          n — Slope of the concentration effect curve
-                        </xs:documentation>
-                      <xs:appinfo>units:dimensionless;name:Slope of effect curve;</xs:appinfo>
-                    </xs:annotation>
-                  </xs:element>
-                </xs:sequence>
-                <xs:attribute name="name" use="required" type="xs:string" />
-              </xs:complexType>
             </xs:element>
           </xs:sequence>
+          <xs:attribute name="locus" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                Optional; if present specifies the locus corresponding to this
+                drug's PD phenotypes: each phenotype must then match one of
+                that locus's alleles. Otherwise the drug should specify only
+                one phenotype.
+                
+                There is currently a one-to-many correspondance between loci
+                and drugs.
+              </xs:documentation>
+              <xs:appinfo>name:Locus;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
         </xs:complexType>
       </xs:element>
       <xs:element name="PK">
@@ -261,5 +243,76 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
     <xs:attribute name="abbrev" use="required" type="xs:string" />
+  </xs:complexType>
+  <xs:complexType name="Phenotype">
+    <xs:sequence>
+      <xs:element name="restriction" minOccurs="0" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Specifies the mapping from genotype to phenotype. For each drug
+            type, if only one phenotype is present, restrictions need not be
+            specified, but otherwise restrictions must be specified.
+            
+            The set of loci affecting phenotypes of this drug's action must be
+            fixed for any drug type. Each phenotype must list, for each of
+            these loci, a restriction to one or more alleles under the locus.
+          </xs:documentation>
+          <xs:appinfo>name:Restrict phenotype applicability to certain alleles;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="onLocus" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                A locus under which only a restricted set of alleles map to
+                this phenotype.
+              </xs:documentation>
+              <xs:appinfo>Locus relevant to the mapping of alleles to this phenotype;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="toAllele" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                One allele of a locus upon which phenotype choice depends.
+                If multiple alleles under this locus should map to the same
+                phenotype, repeat the whole "restriction onLocus..." element.
+              </xs:documentation>
+              <xs:appinfo>Alleles mapping to this phenotype;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="max_killing_rate" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+              k1 — Maximal parasite killing rate.
+            </xs:documentation>
+          <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="IC50" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+              Half maximal effect concentration.
+            </xs:documentation>
+          <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="slope" type="xs:double">
+        <xs:annotation>
+          <xs:documentation>
+              n — Slope of the concentration effect curve
+            </xs:documentation>
+          <xs:appinfo>units:dimensionless;name:Slope of effect curve;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" use="optional" type="xs:string">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the phenotype; for documentation use only.
+        </xs:documentation>
+        <xs:appinfo>name:Name of phenotype;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
 </xs:schema>

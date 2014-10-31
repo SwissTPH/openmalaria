@@ -37,15 +37,18 @@ using namespace std;
 namespace scnXml{
     class Drugs;
     class PKPDDrug;
-    class Allele;
+    class Phenotype;
 }
 namespace OM { namespace PkPd {
 
 class LSTMDrugType;
 
-/** Per drug, per allele parameters and functions to calculate drug factors and
- * concentrations. */
-class LSTMDrugAllele {
+/** Drug PD parameters (specified per phenotype), as well as applicable
+ * functions to calculate drug factors and concentrations.
+ * 
+ * Parasite genotypology is specified elsewhere; we simply map genotype to
+ * phenotype as well as describing phenotypes here. */
+class LSTMDrugPD {
     struct Cache {
         Cache( double c, double d, double r );
         
@@ -80,7 +83,7 @@ class LSTMDrugAllele {
     double max_killing_rate;
     
 public:
-    LSTMDrugAllele( const scnXml::Allele& allele, double elimination_rate_constant );
+    LSTMDrugPD( const scnXml::Phenotype& phenotype, double elimination_rate_constant );
     
     /** Calculate a survival factor induced by a drug already in the blood.
      * It is expected that no drug doses are taken over the period for which
@@ -108,11 +111,11 @@ public:
 };
     
     
-/** Information about each (type of) drug (rather than each use of a drug).
- *
+/** Drug PK & PD parameters (one instance per drug type).
+ * 
  * Static data contains a list of all available drug types.
  * 
- * No DrugType data is checkpointed, because it is loaded by init() from XML
+ * None of this data is checkpointed, because it is loaded by init() from XML
  * data. (Although if it cannot be reproduced by reloading it should be
  * checkpointed.) */
 class LSTMDrugType {
@@ -132,9 +135,6 @@ public:
     
     /** Get a drug by its index. */
     static const LSTMDrugType& getDrug( size_t index );
-    
-    /// Return a new proteome ID
-    static uint32_t new_proteome_ID ();
     //@}
     
     
@@ -143,10 +143,9 @@ public:
     /** Create a new DrugType.
      *
      * @param index     Index of drug in internal list
-     * @param drugData Scenario data for this drug (PK params, PD params per allele)
-     * @param bit_start Next bit of infection's proteome_id available (see allele_rshift).
+     * @param drugData Scenario data for this drug (PK params, PD params per phenotype)
      */
-    LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData, uint32_t& bit_start);
+    LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData);
     ~LSTMDrugType ();
     
     inline size_t getIndex() const {
@@ -162,8 +161,8 @@ public:
         return negligible_concentration;
     }
     
-    /** Return reference to correct drug-allele data. */
-    const LSTMDrugAllele& getAllele( uint32_t proteome_ID ) const;
+    /** Return reference to correct drug-phenotype data. */
+    const LSTMDrugPD& getPD( uint32_t genotype ) const;
     
     /** Decay concentration C0 over time duration (days) assuming no
      * administration during this time. */
@@ -175,23 +174,18 @@ public:
     //@}
   
 private:
-    // non-copyable (due to allocation of members of drugAllele)
+    // non-copyable (due to allocation of members of drugPhenotype)
     LSTMDrugType( const LSTMDrugType& );
     
     /** The drug index. Stored here since LTSMDrug stores a pointer to this
      * struct object, not the index. */
     size_t index;
     
-    /** Allele information is stored as a uint32_t in infection. Denote this p_id,
-     * then we use ((p_id >> allele_rshift) & allele_mask) as an index in
-     * PD_params for the allele.
-     * 
-     * This does restrict the number of alleles, for all drugs, that can be
-     * represented, so might have to be changed or extended. */
-    uint32_t allele_rshift, allele_mask;
+    /** A mapping from genotype codes to phenotypes for this drug. */
+    vector<uint32_t> genotype_mapping;
     
-    /*PD parameters required - varies with infection genotype*/
-    boost::ptr_vector<LSTMDrugAllele> drugAllele;
+    /* PD parameters (may vary based on infection genotype). */
+    boost::ptr_vector<LSTMDrugPD> PD;
     
     /*PK parameters required - varies with humans age and severity of disease*/
     /** Concentration, below which drug is deemed not to have an effect and is
@@ -204,18 +198,12 @@ private:
     double vol_dist;
     
     /* Resistance data */
-    /** Cumulative initial frequencies of each allele. Length and indicies
-     * correspond to drugAllele vector.
-     * 
-     * Independant of frequencies of alleles at other loci (for other drugs). */
-    vector<double> cumInitialFreq;
-    
 #ifdef WITHOUT_BOINC
     string name;        // only required for a drug monitoring HACK; could be removed
 #endif
     
     // Allow LSTMDrug to access private members
-    friend class LSTMDrugAllele;
+    friend class LSTMDrugPD;
     friend inline double drugEffect (const LSTMDrugType& drugType, double& concentration, double duration, double weight_kg, double dose_mg);
 };
 

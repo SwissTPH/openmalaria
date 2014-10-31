@@ -34,7 +34,7 @@ using namespace std;
 
 namespace OM { namespace PkPd {
 
-LSTMDrugAllele::Cache::Cache( double c, double d, double r ) :
+LSTMDrugPD::Cache::Cache( double c, double d, double r ) :
     C0(c), duration(d), rate(r),
     C1(numeric_limits<double>::signaling_NaN()),
     drugFactor(numeric_limits<double>::signaling_NaN())
@@ -44,14 +44,14 @@ LSTMDrugAllele::Cache::Cache( double c, double d, double r ) :
     hash = hasher(c) ^ hasher(d) ^ hasher(r);
 }
 
-LSTMDrugAllele::LSTMDrugAllele( const scnXml::Allele& allele, double elimination_rate_constant ){
-    slope = allele.getSlope ();
-    power = allele.getMax_killing_rate () / (elimination_rate_constant * slope);
-    IC50_pow_slope = pow(allele.getIC50 (), slope);
-    max_killing_rate = allele.getMax_killing_rate ();  
+LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype, double elimination_rate_constant ){
+    slope = phenotype.getSlope ();
+    power = phenotype.getMax_killing_rate () / (elimination_rate_constant * slope);
+    IC50_pow_slope = pow(phenotype.getIC50 (), slope);
+    max_killing_rate = phenotype.getMax_killing_rate ();  
 }
 
-double LSTMDrugAllele::calcFactor( const LSTMDrugType& drug, double& C1, double duration ) const{
+double LSTMDrugPD::calcFactor( const LSTMDrugType& drug, double& C1, double duration ) const{
     double C0 = C1;
     drug.updateConcentration( C1, duration );
     
@@ -91,7 +91,7 @@ double func_IV_conc( double t, void* pp ){
     return fC;
 }
 
-double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const{
+double LSTMDrugPD::calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const{
     Cache key( C0, duration, rate );
     CachedIV::const_iterator it = cachedIV.find( key );
     if( it != cachedIV.end() ){

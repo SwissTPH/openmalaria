@@ -1081,12 +1081,11 @@
     <drugs>
       <drug abbrev="MF">
         <PD>
-          <allele name="sensitive (rename)">
-            <initial_frequency>1</initial_frequency>
+          <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>0.6654</IC50>
             <slope>2.5</slope>
-          </allele>
+          </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.006654</negligible_concentration>

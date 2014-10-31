@@ -992,12 +992,11 @@
     <drugs>
       <drug abbrev="effective">
         <PD>
-          <allele name="sensitive">
-            <initial_frequency>1</initial_frequency>
+          <phenotype>
             <max_killing_rate>1e7</max_killing_rate>
             <IC50>1</IC50>
             <slope>1</slope>
-          </allele>
+          </phenotype>
         </PD>
         <PK>
           <negligible_concentration>1e-5</negligible_concentration>

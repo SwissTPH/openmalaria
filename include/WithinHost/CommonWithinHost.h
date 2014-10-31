@@ -39,7 +39,7 @@ namespace OM { namespace WithinHost {
 class CommonWithinHost : public WHFalciparum
 {
 public:
-    static void init(const scnXml::Model& model, const scnXml::Monitoring& elt);
+    static void init(const scnXml::Scenario& scenario);
     
     CommonWithinHost( double comorbidityFactor );
     virtual ~CommonWithinHost();

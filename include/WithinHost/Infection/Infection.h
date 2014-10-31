@@ -32,9 +32,8 @@ class Infection {
 public:
     static void init( const OM::Parameters& parameters, SimTime latentP );
     
-    Infection (uint32_t protID) :
+    Infection () :
         m_startDate(sim::nowOrTs0()),
-        m_proteome_ID(protID),
         m_density(0.0),
         m_cumulativeExposureJ(0.0)
     {}
@@ -60,11 +59,6 @@ public:
      * low). */
     inline bool bloodStage() const{
         return sim::latestTs0() - m_startDate > sim::fromDays(5);
-    }
-    
-    //! Get proteome
-    inline uint32_t get_proteome_ID() const {
-        return m_proteome_ID;
     }
     
     /// Get the density of the infection as of the last update
@@ -99,9 +93,6 @@ protected:
     /// Date of inoculation of infection (start of liver stage)
     /// This is the step of inoculation (ts0()).
     SimTime m_startDate;
-        
-    /// Proteome/genotype identifier
-    uint32_t m_proteome_ID;
     
     /// Current density of the infection
     double m_density;

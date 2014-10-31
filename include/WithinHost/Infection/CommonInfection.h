@@ -25,6 +25,45 @@
 
 namespace OM { namespace WithinHost {
 
+/** Represents infection genotypes. */
+class Genotype {
+public:
+    /// Represent a combination of alleles, each from a different locus
+    struct AlleleComb{
+        AlleleComb( uint32_t allele, double iFreq, double fit ):
+            init_freq(iFreq), fitness(fit)
+        {
+            alleles.insert(allele);
+        }
+        AlleleComb cross( const AlleleComb& that )const;
+        set<uint32_t> alleles;      // set of codes of all alleles
+        double init_freq;
+        double fitness;
+    };
+    
+    /** Initialise with a single genotype. */
+    static void initSingle();
+    
+    /** Initialise from XML data. Call this before other static methods are
+     * used (from PK/PD code). */
+    static void init( const scnXml::Scenario& scenario );
+    
+    /** Map a locus name and allele name to an allele code.
+     * 
+     * Note that two alleles from different loci will always have different
+     * codes.
+     * 
+     * Returns max value when no match is found. */
+    static uint32_t findAlleleCode( const string& locus, const string& allele );
+    
+    /** Get a reference to the list of all genotypes. */
+    static const vector<AlleleComb>& getGenotypes();
+    
+    /** Sample the genotype using the configured approach. */
+    //TODO: needs input data!
+    static uint32_t sampleGenotype();
+};
+
 /** Represent infections used by CommonWithinHost.
  * 
  * All these use a 1-day time step, however CommonWithinHost handles the
@@ -38,15 +77,16 @@ public:
     /// @brief Construction and destruction
     //@{
     /// For checkpointing (don't use for anything else)
-    CommonInfection(istream& stream) :
-	Infection(stream)
-    {}
+    CommonInfection(istream& stream);
     /// Per instance initialisation; create new inf.
-    CommonInfection(uint32_t protID) :
-	Infection(protID)
+    CommonInfection(uint32_t genotype) :
+	m_genotype(genotype)
     {}
     virtual ~CommonInfection() {}
     //@}
+    
+    /** Get the infection's genotype. */
+    uint32_t genotype()const{ return m_genotype; }
     
     /** Update: calculate new density. Call this once per day.
      * 
@@ -73,6 +113,12 @@ protected:
      * @param body_mass Body mass of host in kg
      * @returns True when the infection goes extinct. */
     virtual bool updateDensity( double survivalFactor, SimTime bsAge, double body_mass )=0;
+    
+    virtual void checkpoint (ostream& stream);
+    
+private:
+    /// Genotype of infection (a code; see Genotype class).
+    uint32_t m_genotype;
 };
 
 } }

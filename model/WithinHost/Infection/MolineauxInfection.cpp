@@ -202,8 +202,8 @@ void MolineauxInfection::init( const Parameters& parameters ){
 
 // ———  MolineauxInfection: initialisation  ———
 
-MolineauxInfection::MolineauxInfection(uint32_t proteome):
-        CommonInfection(proteome)
+MolineauxInfection::MolineauxInfection(uint32_t genotype):
+        CommonInfection(genotype)
 {
     for( size_t i = 0; i < v; i++ ){
         // Molineaux paper, equation 11

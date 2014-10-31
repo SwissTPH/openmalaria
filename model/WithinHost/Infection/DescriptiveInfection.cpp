@@ -119,7 +119,6 @@ void DescriptiveInfection::init (const Parameters& parameters) {
 // ———  non-static init/destruction  ———
 
 DescriptiveInfection::DescriptiveInfection () :
-        Infection(0xFFFFFFFF),
         m_duration(infectionDuration()),
         notPrintedMDWarning(true)
 {

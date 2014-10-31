@@ -83,10 +83,8 @@ public:
     virtual void getConcentrations(map<string,double>& concentrations) const;
     virtual void prescribe(size_t schedule, size_t dosages, double age, double body_mass);
     virtual void medicate(double body_mass);
-    virtual double getDrugFactor (uint32_t proteome_ID);
+    virtual double getDrugFactor (uint32_t genotype);
     virtual void decayDrugs ();
-    
-    virtual uint32_t new_proteome_ID ();
     
 private:
   /** Medicate drugs to an individual, which act on infections the following

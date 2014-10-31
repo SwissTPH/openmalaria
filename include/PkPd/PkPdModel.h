@@ -115,26 +115,24 @@ public:
      * Each time step, on each infection, the parasite density is multiplied by
      * the return value of this infection. The WithinHostModels are responsible
      * for clearing infections once the parasite density is negligible. */
-    virtual double getDrugFactor (uint32_t proteome_ID) =0;
+    virtual double getDrugFactor (uint32_t genotype) =0;
     
     /** After any resident infections have been reduced by getDrugFactor(),
      * this function is called to update drug levels to their effective level
      * at the end of the day, as well as clear data once drug concentrations
      * become negligible. */
     virtual void decayDrugs () =0;
-  
-  virtual uint32_t new_proteome_ID () =0;
-  
-  enum ActiveModel {
-      NON_PKPD = 0,
+    
+    enum ActiveModel {
+        NON_PKPD = 0,
 //       HOSHEN_PKPD,   note: this code is no longer maintained or enabled
-      LSTM_PKPD
-  };
-  
+        LSTM_PKPD
+    };
+    
 protected:
-  virtual void checkpoint (istream& stream) =0;
-  virtual void checkpoint (ostream& stream) =0;
-  
+    virtual void checkpoint (istream& stream) =0;
+    virtual void checkpoint (ostream& stream) =0;
+    
 private:
     /// Which model is in use (set by init())
     static ActiveModel activeModel;

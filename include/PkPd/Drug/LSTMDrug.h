@@ -104,7 +104,7 @@ public:
      *
      * This doesn't adjust concentration because this function may be called
      * several times (for each infection) per time step, or not at all. */
-    double calculateDrugFactor(uint32_t proteome_ID);
+    double calculateDrugFactor(uint32_t genotype);
 
     /** Updates concentration variable and clears day's doses.
      *

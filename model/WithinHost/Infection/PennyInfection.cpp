@@ -338,7 +338,7 @@ PennyInfection::PennyInfection (istream& stream) :
 }
 
 void PennyInfection::checkpoint (ostream& stream) {
-    Infection::checkpoint(stream);
+    CommonInfection::checkpoint(stream);
     for(int i=0; i<delta_C; ++i){
         cirDensities[i] & stream;
     }

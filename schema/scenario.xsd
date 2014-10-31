@@ -60,6 +60,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
+        <xs:element name="parasiteGenotypology" type="om:ParasiteGenotypology" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              A specification of genotypes of infection parasites.
+              
+              May be omitted; in this case there is no modelling of genetic
+              differences of infections (resistance, fitness).
+            </xs:documentation>
+            <xs:appinfo>name:Parasite genotypology;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
         <xs:element name="pharmacology" type="om:Pharmacology" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
@@ -285,6 +296,145 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="a" type="xs:double" use="required"/>
     <xs:attribute name="b" type="xs:double" use="required"/>
   </xs:complexType>
+  
+  <xs:complexType name="ParasiteGenotypology">
+    <xs:sequence>
+      <xs:element name="locus" type="om:ParasiteLocus" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Describes a locus, or a point at which an infection may
+            vary. The genotype of an infection is determined by
+            choosing one allele at each locus. Initial frequencies of
+            alleles are specified independently for each locus, but
+            subsequent infections are selected according to success of
+            genotypes.
+            
+            Alleles at loci can affect fitness and resistance to any
+            number of drugs.
+          </xs:documentation>
+          <xs:appinfo>name:Locus;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="samplingMode" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          This controls how genotypes are determined for new infections during
+          the intervention period. Prior to this (in initialisation phases),
+          genotypes are always sampled using the specified initial frequencies.
+          
+          Mode "initial" continues to sample genotypes using initial
+          frequencies (i.e. independent of the success of parent generations of
+          parasites).
+          
+          Mode "tracking" samples genotypes based on the success parent
+          generations of parasites have in infecting mosquitoes, tracked per
+          genotype.
+          
+          It is possible that in the future a recombination option will be
+          added to this list, however designing a suitable model is not
+          trivial.
+        </xs:documentation>
+        <xs:appinfo>Name:Sampling mode;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="initial"/>
+          <xs:enumeration value="tracking"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ParasiteGenotype">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the genotype; used to refer to it elsewhere.
+        </xs:documentation>
+        <xs:appinfo>name:Name (for reference purposes);</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="initialFrequency" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Specification of how commonly this genotype occurs during
+          initialisation phases of the simulation relative to other genotypes.
+        </xs:documentation>
+        <xs:appinfo>name:Initial frequency;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="fitness" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Fitness factor of the genotype. This is multiplication factor used to
+          speed up or slow down replication of parasites.
+          
+          For example, if a genotype has a fitness factor of 0.8, then the
+          parasites with this genotype will replicate 20% slower in the host
+          than the baseline.
+        </xs:documentation>
+        <xs:appinfo>name:Fitness factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ParasiteLocus">
+    <xs:sequence>
+      <xs:element name="allele" type="om:ParasiteAllele" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Describes an allele, or one possible genetic option
+            of multiple at one point of variance.
+          </xs:documentation>
+          <xs:appinfo>name:Allele;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>Name of the Locus</xs:documentation>
+        <xs:appinfo>name:Name of locus;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ParasiteAllele">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the allele; used to refer to it elsewhere.
+        </xs:documentation>
+        <xs:appinfo>name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="initialFrequency" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Specification of how commonly this allele occurs during warmup
+          relative to other alleles of the same locus.
+          
+          During the simulation's initialisation phases, the frequency at which
+          each allele of each locus occurs is fixed. After the initialisation
+          phase, frequency of alleles is modelled as an emergent property of
+          the success of genotypes.
+        </xs:documentation>
+        <xs:appinfo>name:Initial frequency;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="fitness" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Fitness factor of the allele. This is multiplication factor used to
+          speed up or slow down replication of parasites.
+          
+          For example, if a genotype has an allele with a fitness factor of 1
+          at one locus and another allele with a fitness factor of 0.8 at a
+          second locus, then the parasites with the genotype will replicate 20%
+          slower than the baseline.
+        </xs:documentation>
+        <xs:appinfo>name:Fitness factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
   <xs:complexType name="Diagnostics">
     <xs:sequence>
       <xs:element name="diagnostic" type="om:Diagnostic" maxOccurs="unbounded" minOccurs="0"/>

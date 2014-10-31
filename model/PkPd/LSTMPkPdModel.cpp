@@ -39,10 +39,10 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
     numDrugs & stream;
     util::checkpoint::validateListSize (numDrugs);
     for (size_t i=0; i<numDrugs; ++i) {
-	size_t index;
+        size_t index;
         index & stream;
-	_drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(index)));
-	_drugs.back() & stream;
+        _drugs.push_back (LSTMDrug (LSTMDrugType::getDrug(index)));
+        _drugs.back() & stream;
     }
     medicateQueue & stream;
 }
@@ -50,8 +50,8 @@ void LSTMPkPdModel::checkpoint (istream& stream) {
 void LSTMPkPdModel::checkpoint (ostream& stream) {
     _drugs.size() & stream;
     for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); ++it) {
-	it->getIndex() & stream;
-	(*it) & stream;
+        it->getIndex() & stream;
+        (*it) & stream;
     }
     medicateQueue & stream;
 }
@@ -112,11 +112,11 @@ void LSTMPkPdModel::medicateDrug(size_t typeIndex, double qty, double time, doub
     }
 }
 
-double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID) {
+double LSTMPkPdModel::getDrugFactor (uint32_t genotype) {
     double factor = 1.0; //no effect
     
     for (list<LSTMDrug>::iterator it=_drugs.begin(); it!=_drugs.end(); ++it) {
-        double drugFactor = it->calculateDrugFactor(proteome_ID);
+        double drugFactor = it->calculateDrugFactor(genotype);
         factor *= drugFactor;
     }
     return factor;
@@ -126,16 +126,12 @@ double LSTMPkPdModel::getDrugFactor (uint32_t proteome_ID) {
 class DecayPredicate {
 public:
     bool operator() (LSTMDrug& drug) {
-	return drug.updateConcentration();
+        return drug.updateConcentration();
     }
 };
 void LSTMPkPdModel::decayDrugs () {
-  // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
-  _drugs.remove_if (DecayPredicate());
-}
-
-uint32_t LSTMPkPdModel::new_proteome_ID () {
-    return LSTMDrugType::new_proteome_ID ();
+    // for each item in _drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
+    _drugs.remove_if (DecayPredicate());
 }
 
 } }
