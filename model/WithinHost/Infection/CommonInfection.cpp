@@ -44,8 +44,6 @@ map<double,uint32_t> cum_initial_freqs;
 map<string, map<string, uint32_t> > alleleCodes;
 uint32_t nextAlleleCode = 0;
 
-size_t nDrugTypes;      // HACK to reproduce results
-
 // Represent a set of loci: all possible combinations of alleles
 // This is actually just machinery to calculate the list of all genotypes
 struct LocusSet{
@@ -141,9 +139,6 @@ void Genotype::init( const scnXml::Scenario& scenario ){
     }else{
         initSingle();
     }
-    
-    GT::nDrugTypes = scenario.getPharmacology().present() ?
-        scenario.getPharmacology().get().getDrugs().getDrug().size() : 0;
 }
 
 uint32_t Genotype::findAlleleCode(const string& locus, const string& allele){
@@ -159,10 +154,6 @@ const vector< Genotype::AlleleComb >& Genotype::getGenotypes(){
 }
 
 uint32_t Genotype::sampleGenotype(){
-    // For compatibility with previous results, we must sample a few random numbers gratuitously:
-    for( size_t i = 0; i < GT::nDrugTypes - (GT::current_mode == GT::SAMPLE_INITIAL ? 1 : 0); ++i ){
-        util::random::uniform_01();
-    }
     if( GT::current_mode == GT::SAMPLE_FIRST ){
         return 0;       // always the first genotype code
     }else if( GT::current_mode == GT::SAMPLE_INITIAL ){
