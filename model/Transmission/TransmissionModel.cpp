@@ -114,8 +114,7 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
     surveySimulatedEIR(0.0),
     adultAge(PerHost::adultAge()),
     numTransmittingHumans(0),
-    tsNumAdults(0),
-    timeStepNumEntoInocs (0)
+    tsNumAdults(0)
 {
   initialisationEIR.assign (sim::stepsPerYear(), 0.0);
   inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
@@ -202,7 +201,6 @@ double TransmissionModel::updateKappa (const Population& population) {
         // Reset to zero:
         timeStepEntoInocs[group] = 0.0;
     }
-    timeStepNumEntoInocs = 0;
 
     tsAdultEIR = tsAdultEntoInocs / tsNumAdults;
     tsAdultEntoInocs = 0.0;
@@ -223,7 +221,6 @@ double TransmissionModel::getEIR (Host::Human& human, SimTime age, double ageYea
 
   //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
   timeStepEntoInocs[ageGroup.i()] += EIR;
-  timeStepNumEntoInocs ++;
   if( age >= adultAge ){
      tsAdultEntoInocs += EIR;
      tsNumAdults += 1;
@@ -278,7 +275,6 @@ void TransmissionModel::checkpoint (istream& stream) {
     tsNumAdults & stream;
     inoculationsPerAgeGroup & stream;
     timeStepEntoInocs & stream;
-    timeStepNumEntoInocs & stream;
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;
@@ -301,7 +297,6 @@ void TransmissionModel::checkpoint (ostream& stream) {
     tsNumAdults & stream;
     inoculationsPerAgeGroup & stream;
     timeStepEntoInocs & stream;
-    timeStepNumEntoInocs & stream;
     noOfAgeGroupsSharedMem & stream;
     kappaByAge & stream;
     nByAge & stream;

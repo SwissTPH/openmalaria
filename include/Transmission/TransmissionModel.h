@@ -300,9 +300,6 @@ private:
   /** Sum of all EIR returned in this time step, per age group
    * Doesn't need to be checkpointed. */
   vector<double> timeStepEntoInocs;
-  /** Total number of EIRs output in the time step (roughly equal to populationSize)
-   * Doesn't need to be checkpointed. */
-  size_t timeStepNumEntoInocs;
   //@}
   
   /** @brief Variables for shared graphics kappa-by-age graph
