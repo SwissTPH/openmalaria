@@ -165,8 +165,20 @@ public:
    * During vector initialisation phase, EIR is forced based on the EIR given
    * in the XML file as a Fourier Series. After endVectorInitPeriod() is called
    * the simulation switches to using dynamic EIR. advanceStep _must_ be
-   * called before this function in order to return the correct value. */
-  double getEIR (Host::Human& human, SimTime age, double ageYears, Monitoring::AgeGroup ageGroup);
+   * called before this function in order to return the correct value.
+   * 
+   * @param human A reference to the human who's EIR is being calculated.
+   *    The human's "per host transmission" potentially needs updating.
+   * @param age Age of the human in time units
+   * @param ageYears Age of the human in years
+   * @param ageGroup Age group of the human (for monitoring)
+   * @param EIR Out-vector of EIR per parasite genotype. The length is also set
+   *    by the calling function. Where genotype tracking is not supported (e.g.
+   *    the non-vector model), the length is set to one.
+   * @returns the sum of EIR across genotypes
+   */
+  double getEIR (Host::Human& human, SimTime age, double ageYears,
+                 Monitoring::AgeGroup ageGroup, vector<double>& EIR);
   
   /** Non-vector model: throw an exception. Vector model: check that the
    * simulation mode allows interventions, and return a map of species names
@@ -192,10 +204,11 @@ protected:
    * 
    * @param host Transmission data for the human to calculate EIR for.
    * @param ageGroupData Age group of this host for availablility data.
-   *
-   * @returns  The age- and heterogeneity-specific EIR an individual is exposed
-   * to, in units of inoculations per day. */
-  virtual double calculateEIR(Host::Human& human, double ageYears) = 0; 
+   * @param EIR Out-vector. Set to the age- and heterogeneity-specific EIR an
+   *    individual human is exposed to, per parasite genotype, in units of
+   *    inoculations per day. Length set by callee. */
+  virtual double calculateEIR(Host::Human& human, double ageYears,
+        vector<double>& EIR ) = 0; 
   
   /** Needs to be called each time-step after Human::update() to update summary
    * statististics related to transmission. Also returns kappa (the average

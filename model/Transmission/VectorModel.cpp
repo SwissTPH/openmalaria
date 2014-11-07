@@ -352,20 +352,24 @@ SimTime VectorModel::initIterate () {
         return sim::oneYear();
 }
 
-double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
+double VectorModel::calculateEIR(Host::Human& human, double ageYears,
+        vector<double>& EIR)
+{
     PerHost& host = human.perHostTransmission;
     host.update( human );
     if (simulationMode == forcedEIR){
-        return initialisationEIR[sim::ts0().moduloYearSteps()]
-               * host.relativeAvailabilityHetAge (ageYears);
+        double eir = initialisationEIR[sim::ts0().moduloYearSteps()] *
+                host.relativeAvailabilityHetAge (ageYears);
+        EIR.assign( 1, eir );
+        return eir;
     }else{
         assert( simulationMode == dynamicEIR );
-        double simEIR = 0.0;
+        EIR.assign( WithinHost::Genotypes::N(), 0.0 );
         for (size_t i = 0; i < numSpecies; ++i) {
-            simEIR += species[i].calculateEIR (i, host);
+            species[i].calculateEIR( i, host, EIR );
         }
-        simEIR *= host.relativeAvailabilityAge (ageYears);
-        return simEIR;
+        vectors::scale( EIR, host.relativeAvailabilityAge (ageYears) );
+        return vectors::sum( EIR );
     }
 }
 

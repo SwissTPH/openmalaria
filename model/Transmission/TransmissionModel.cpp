@@ -212,21 +212,24 @@ double TransmissionModel::updateKappa (const Population& population) {
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (Host::Human& human, SimTime age, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
-  /* For the NonVector model, the EIR should just be multiplied by the
-   * availability. For the Vector model, the availability is also required
-   * for internal calculations, but again the EIR should be multiplied by the
-   * availability. */
-  double EIR = calculateEIR (human, ageYears);
-
-  //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
-  timeStepEntoInocs[ageGroup.i()] += EIR;
-  if( age >= adultAge ){
-     tsAdultEntoInocs += EIR;
-     tsNumAdults += 1;
-  }
-  util::streamValidate( EIR );
-  return EIR;
+double TransmissionModel::getEIR( Host::Human& human, SimTime age,
+                    double ageYears, OM::Monitoring::AgeGroup ageGroup,
+                    vector<double>& EIR ){
+    /* For the NonVector model, the EIR should just be multiplied by the
+     * availability. For the Vector model, the availability is also required
+     * for internal calculations, but again the EIR should be multiplied by the
+     * availability. */
+    calculateEIR( human, ageYears, EIR );
+    util::streamValidate( EIR );
+    double allEIR = vectors::sum( EIR );
+    
+    //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
+    timeStepEntoInocs[ageGroup.i()] += allEIR;
+    if( age >= adultAge ){
+        tsAdultEntoInocs += allEIR;
+        tsNumAdults += 1;
+    }
+    return allEIR;
 }
 
 void TransmissionModel::summarize () {

@@ -144,8 +144,12 @@ public:
      * level instead of the whole simulation, but that doesn't appear worth doing.
      *
      * @param sIndex Index of this in VectorModel::species
-     * @param host PerHost of the human requesting this EIR. */
-    double calculateEIR (size_t sIndex, Transmission::PerHost& host );
+     * @param host PerHost of the human requesting this EIR.
+     * @param EIR Vector of EIR per genotype; function adds to this to
+     *  eventually yield the EIR per genotype summed across species.
+     */
+    void calculateEIR (size_t sIndex, Transmission::PerHost& host,
+            vector<double>& EIR );
     //@}
 
 
@@ -307,12 +311,12 @@ private:
     vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
     //@}
     
-    /** Per time-step partial calculation of EIR.
+    /** Per time-step partial calculation of EIR, per genotype.
     *
     * See comment in advancePeriod() for details of how the EIR is calculated.
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
-    double partialEIR;
+    vector<double> partialEIR;
 };
 
 }

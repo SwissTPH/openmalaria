@@ -36,7 +36,7 @@ enum SampleMode{
     SAMPLE_TRACKING    // sample from tracked success at genotype level (no recombination)
 };
 // Mode to use now (until switched) and from the start of the intervention period.
-SampleMode current_mode = SAMPLE_FIRST, inerv_mode = SAMPLE_FIRST;
+SampleMode current_mode = SAMPLE_FIRST, interv_mode = SAMPLE_FIRST;
 
 // keys are cumulative probabilities; last entry should equal 1; values are genotype codes
 map<double,uint32_t> cum_initial_freqs;
@@ -107,9 +107,11 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         
         GT::current_mode = GT::SAMPLE_INITIAL;      // turn on sampling
         if( genetics.getSamplingMode() == "initial" ){
-            GT::inerv_mode = GT::SAMPLE_INITIAL;
+            GT::interv_mode = GT::SAMPLE_INITIAL;
         }else if( genetics.getSamplingMode() == "tracking" ){
-            GT::inerv_mode = GT::SAMPLE_TRACKING;
+            GT::interv_mode = GT::SAMPLE_TRACKING;
+            //TODO: check vector model is in use and that simulation_mode is dynamicEIR
+            //FIXME: update current_mode at appropriate time
         }else{
             throw util::xml_scenario_error( "parasiteGenetics/samplingMode: expected \"initial\" or \"tracking\"" );
         }
@@ -166,6 +168,7 @@ uint32_t Genotypes::sampleGenotype(){
         assert( it != GT::cum_initial_freqs.end() );
         return it->second;
     }else{
+        assert( GT::current_mode == GT::SAMPLE_TRACKING );
         assert(false);  //FIXME
     }
 }

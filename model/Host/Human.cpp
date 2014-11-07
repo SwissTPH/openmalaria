@@ -29,6 +29,7 @@
 #include "PopulationStats.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
+#include "util/vectors.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
 #include "interventions/InterventionManager.hpp"
@@ -214,8 +215,10 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 ++expIt;
             }
         }
+        vector<double> EIR_per_genotype;        //TODO: avoid reallocating on every use!
         // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
-        double EIR = transmissionModel->getEIR( *this, age0, ageYears1, monitoringAgeGroup );
+        double EIR = transmissionModel->getEIR( *this, age0, ageYears1,
+                monitoringAgeGroup, EIR_per_genotype );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;

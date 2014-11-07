@@ -80,11 +80,13 @@ public:
      * @param tsP_A P_A for this time-step
      * @param tsP_df P_df for this time-step
      * @param tsP_dif P_dif for this time-step, per parasite genotype
-     * @param printDebug Print some info to cerr
-     * @returns S_v for the next time-step
+     * @param partialEIR Vector, per genotype; after calculation, the latest
+     *  S_v values are multiplied by EIR_factor and added to this.
+     * @param EIR_factor see parameter partialEIR
      */
-    double update( SimTime d0, double tsP_A, double tsP_df,
-                   const vector<double> tsP_dif, bool isDynamic, bool printDebug );
+    void update( SimTime d0, double tsP_A, double tsP_df,
+                   const vector<double> tsP_dif, bool isDynamic,
+                   vector<double>& partialEIR, double EIR_factor );
     
     ///@brief Interventions and reporting
     //@{

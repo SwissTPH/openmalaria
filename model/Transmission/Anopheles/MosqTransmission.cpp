@@ -136,8 +136,9 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
 }
 
 
-double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
-                                 const vector<double> tsP_dif, bool isDynamic, bool printDebug )
+void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
+        const vector<double> tsP_dif, bool isDynamic,
+        vector<double>& partialEIR, double EIR_factor )
 {
     SimTime d1 = d0 + sim::oneDay();    // end of step
     
@@ -236,7 +237,7 @@ double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
             }
         }
         
-        //FIXME out_S_v[genotype] = S_v.at(t1, genotype);
+        partialEIR[genotype] += S_v.at(t1, genotype) * EIR_factor;
         total_S_v += S_v.at(t1, genotype);
         //END S_v
     }
@@ -253,17 +254,15 @@ double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     
     timeStep_N_v0 += newAdults;
     
-    if( printDebug ){
-        cerr<<"step ending "<<d1<<" (days):\temergence "<<newAdults<<",\tN_v "<<N_v[t1]<<",\tS_v "<<total_S_v<<endl;
+//     if( printDebug ){
+//         cerr<<"step ending "<<d1<<" (days):\temergence "<<newAdults<<",\tN_v "<<N_v[t1]<<",\tS_v "<<total_S_v<<endl;
         //cerr << "len: "<<N_v_length<<"\td1Mod: "<<d1Mod<<"\tt(0,1): "<<t0<<" "<<t1<<" "<<ttau<<endl;
 /*        cerr<<"P_A\t"<<P_A[t0]<<"\t"<<P_A[t1]<<"\t"<<P_A[ttau]<<endl;
         cerr<<"P_df\t"<<P_df[t0]<<"\t"<<P_df[t1]<<"\t"<<P_df[ttau]<<endl;
         cerr<<"P_dif\t"<<P_dif[t0]<<"\t"<<P_dif[t1]<<"\t"<<P_dif[ttau]<<endl;*/
-        cerr<<ftauArray<<endl;
-        cerr<<fArray<<endl;
-    }
-    
-    return total_S_v;
+//         cerr<<ftauArray<<endl;
+//         cerr<<fArray<<endl;
+//     }
 }
 
 

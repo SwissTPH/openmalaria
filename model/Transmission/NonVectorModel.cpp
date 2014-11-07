@@ -21,6 +21,7 @@
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
 #include "Host/Human.h"
+#include "WithinHost/Genotypes.h"
 #include "Monitoring/Survey.h" // sim-end time step
 #include "util/random.h"
 #include "util/vectors.h"
@@ -206,47 +207,48 @@ void NonVectorModel::update (const Population& population) {
 }
 
 
-double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
-  // where the full model, with estimates of human mosquito transmission is in use, use this:
-  double eir;
-  switch (simulationMode) {
-    case forcedEIR:
-      eir = initialisationEIR[sim::ts0().moduloYearSteps()];
-      break;
-    case transientEIRknown:
-      // where the EIR for the intervention phase is known, obtain this from
-      // the interventionEIR array
-      eir = interventionEIR[sim::intervNow().inSteps()];
-      break;
-    case dynamicEIR:
-      eir = initialisationEIR[sim::ts0().moduloYearSteps()];
-      if (sim::intervNow() >= sim::zero()) {
-	  // we modulate the initialization based on the human infectiousness time steps ago in the
-	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
-	  // nspore gives the sporozoite development delay.
-          size_t t = (sim::ts1()-nSpore).inSteps();
-	eir *=
-            laggedKappa[mod_nn(t, laggedKappa.size())] /
-            initialKappa[mod_nn(t, sim::stepsPerYear())];
-      }
-      break;
-    default:	// Anything else.. don't continue silently
-      throw util::xml_scenario_error ("Invalid simulation mode");
-  }
-#ifndef NDEBUG
-  if (!(boost::math::isfinite)(eir)) {
-    size_t t = (sim::ts1()-nSpore).inSteps();
-    ostringstream msg;
-    msg << "Error: non-vect eir is: " << eir
-	<< "\nlaggedKappa:\t"
-        << laggedKappa[mod_nn(t, laggedKappa.size())]
-	<< "\ninitialKappa:\t"
-        << initialKappa[mod_nn(t, sim::stepsPerYear())]
-        << endl;
-    throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
-  }
-#endif
-  return eir * human.perHostTransmission.relativeAvailabilityHetAge (ageYears);
+double NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<double>& EIR){
+    EIR.resize( 1 );    // no support for per-genotype tracking in this model (possible, but we're lazy)
+    // where the full model, with estimates of human mosquito transmission is in use, use this:
+    switch (simulationMode) {
+        case forcedEIR:
+        EIR[0] = initialisationEIR[sim::ts0().moduloYearSteps()];
+        break;
+        case transientEIRknown:
+        // where the EIR for the intervention phase is known, obtain this from
+        // the interventionEIR array
+        EIR[0] = interventionEIR[sim::intervNow().inSteps()];
+        break;
+        case dynamicEIR:
+        EIR[0] = initialisationEIR[sim::ts0().moduloYearSteps()];
+        if (sim::intervNow() >= sim::zero()) {
+            // we modulate the initialization based on the human infectiousness time steps ago in the
+            // simulation relative to infectiousness at the same time-of-year, pre-intervention.
+            // nspore gives the sporozoite development delay.
+            size_t t = (sim::ts1()-nSpore).inSteps();
+            EIR[0] *=
+                laggedKappa[mod_nn(t, laggedKappa.size())] /
+                initialKappa[mod_nn(t, sim::stepsPerYear())];
+        }
+        break;
+        default:	// Anything else.. don't continue silently
+        throw util::xml_scenario_error ("Invalid simulation mode");
+    }
+    #ifndef NDEBUG
+    if (!(boost::math::isfinite)(EIR[0])) {
+        size_t t = (sim::ts1()-nSpore).inSteps();
+        ostringstream msg;
+        msg << "Error: non-vect eir is: " << EIR[0]
+            << "\nlaggedKappa:\t"
+            << laggedKappa[mod_nn(t, laggedKappa.size())]
+            << "\ninitialKappa:\t"
+            << initialKappa[mod_nn(t, sim::stepsPerYear())]
+            << endl;
+        throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
+    }
+    #endif
+    EIR[0] *= human.perHostTransmission.relativeAvailabilityHetAge (ageYears);
+    return EIR[0];
 }
 
 

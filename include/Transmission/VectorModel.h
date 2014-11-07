@@ -59,7 +59,8 @@ public:
   virtual void vectorUpdate (const Population& population);
   virtual void update (const Population& population);
 
-  virtual double calculateEIR(Host::Human& human, double ageYears); 
+  virtual double calculateEIR( Host::Human& human, double ageYears,
+        vector<double>& EIR );
   
   virtual const map<string,size_t>& getSpeciesIndexMap();
   virtual void deployVectorPopInterv (size_t instance);

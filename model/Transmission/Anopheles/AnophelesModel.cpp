@@ -382,7 +382,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     
     // Summed per day:
-    partialEIR = 0.0;
+    partialEIR.assign( WithinHost::Genotypes::N(), 0.0 );
     
     transmission.resetTSStats();
     
@@ -391,20 +391,28 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     for( SimTime d0 = sim::ts0(), end = sim::ts0() + sim::oneTS();
         d0 < end; d0 += sim::oneDay() )
     {
-        partialEIR += transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, false ) * P_Ai_base;
+        transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, partialEIR, P_Ai_base );
     }
 }
 
-double AnophelesModel::calculateEIR (size_t sIndex, OM::Transmission::PerHost& host ) {
-    if ( (boost::math::isnan)(partialEIR) ) {
+void AnophelesModel::calculateEIR( size_t sIndex,
+        OM::Transmission::PerHost& host, vector<double>& EIR )
+{
+#ifdef WITHOUT_BOINC
+    if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
         cerr<<"partialEIR is not a number; "<<sIndex<<endl;
     }
+#endif
     /* Calculates EIR per individual (hence N_i == 1).
-        *
-        * See comment in AnophelesModel::advancePeriod for method. */
-    return partialEIR
-            * host.entoAvailabilityHetVecItv (humanBase, sIndex)
+     *
+     * See comment in AnophelesModel::advancePeriod for method. */
+    double entoFactor = host.entoAvailabilityHetVecItv (humanBase, sIndex)
             * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
+    
+    assert( EIR.size() == partialEIR.size() );
+    for( size_t g = 0; g < EIR.size(); ++g ){
+        EIR[g] += partialEIR[g] * entoFactor;
+    }
 }
 
 }
