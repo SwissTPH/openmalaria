@@ -157,16 +157,6 @@ double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
         P_dif.at(t1,i) = tsP_dif[i];
     
     
-    const double nOvipositing = P_df[ttau] * N_v[ttau];       // number ovipositing on this step
-    const double newAdults = emergence->get( d0, nOvipositing );
-    util::streamValidate( newAdults );
-    
-    // num seeking mosquitos is: new adults + those which didn't find a host
-    // yesterday + those who found a host tau days ago and survived cycle:
-    N_v[t1] = newAdults
-                + P_A[t0]  * N_v[t0]
-                + nOvipositing;
-    
     //BEGIN cache calculation: fArray, ftauArray, uninfected_v
     // Set up array with n in 1..θ_s−τ for f(d1Mod-n) (NDEMD eq. 1.6)
     for( SimTime n = sim::oneDay(); n <= mosqRestDuration; n += sim::oneDay() ){
@@ -208,8 +198,10 @@ double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     
     double total_S_v = 0.0;
     for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
-        // similar for O_v, except new mosquitoes are those who were uninfected
-        // tau days ago, started a feeding cycle then, survived and got infected:
+        // Num infected seeking mosquitoes is the new ones (those who were
+        // uninfected tau days ago, started a feeding cycle then, survived and
+        // got infected) + those who didn't find a host yesterday + those who
+        // found a host tau days ago and survived a feeding cycle.
         O_v.at(t1,genotype) = P_dif.at(ttau,genotype) * uninfected_v[mosqRestDuration]
                     + P_A[t0]  * O_v.at(t0,genotype)
                     + P_df[ttau] * O_v.at(ttau,genotype);
@@ -224,10 +216,11 @@ double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
         }
         
         const SimTime tsm = mod_nn(ts, N_v_length);       // index d1Mod - theta_s
-        S_v.at(t1,genotype) = P_dif.at(tsm,genotype) * fArray[EIPDuration-mosqRestDuration] * (uninfected_v[EIPDuration])
-                    + sum
-                    + P_A[t0]*S_v.at(t0,genotype)
-                    + P_df[ttau]*S_v.at(ttau,genotype);
+        S_v.at(t1,genotype) = P_dif.at(tsm,genotype) *
+                fArray[EIPDuration-mosqRestDuration] * (uninfected_v[EIPDuration])
+            + sum
+            + P_A[t0]*S_v.at(t0,genotype)
+            + P_df[ttau]*S_v.at(ttau,genotype);
 
 
         if( isDynamic ){
@@ -248,9 +241,15 @@ double MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
         //END S_v
     }
     
-    //TODO: it should be possible to merge this call with emergence->get()
-    // (S_v can be calculated before N_v).
-    emergence->updateStats( d1, total_S_v );
+    const double nOvipositing = P_df[ttau] * N_v[ttau];       // number ovipositing on this step
+    const double newAdults = emergence->update( d0, nOvipositing, total_S_v );
+    util::streamValidate( newAdults );
+    
+    // num seeking mosquitos is: new adults + those which didn't find a host
+    // yesterday + those who found a host tau days ago and survived cycle:
+    N_v[t1] = newAdults
+                + P_A[t0]  * N_v[t0]
+                + nOvipositing;
     
     timeStep_N_v0 += newAdults;
     

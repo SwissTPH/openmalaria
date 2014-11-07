@@ -173,24 +173,22 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
 }
 
 
-double SimpleMPDEmergence::get( SimTime d0, double nOvipositing ) {
+double SimpleMPDEmergence::update( SimTime d0, double nOvipositing, double S_v ){
+    SimTime d1 = d0 + sim::oneDay();
+    SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
+    quinquennialS_v[d5Year] = S_v;
+    
     // Simple Mosquito Population Dynamics model: emergence depends on the
     // adult population, resources available, and larviciding.
     // See: A Simple Periodically-Forced Difference Equation Model for
     // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
     
-    SimTime d1 = d0 + sim::oneDay();
     double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d1, developmentDuration)];
     double emergence = interventionSurvival() * probPreadultSurvival * yt /
         (1.0 + invLarvalResources[mod_nn(d0, sim::oneYear())] * yt);
     nOvipositingDelayed[mod_nn(d1, developmentDuration)] = nOvipositing;
     quinquennialOvipositing[mod_nn(d1, sim::fromYearsI(5))] = nOvipositing;
     return emergence;
-}
-
-void SimpleMPDEmergence::updateStats( SimTime d1, double S_v ){
-    SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
-    quinquennialS_v[d5Year] = S_v;
 }
 
 double SimpleMPDEmergence::getResAvailability() const {

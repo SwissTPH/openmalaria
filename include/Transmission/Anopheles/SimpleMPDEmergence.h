@@ -73,13 +73,7 @@ public:
     bool initIterate (MosqTransmission& transmission);
     //@}
     
-    /// Return the emergence for today, taking interventions like larviciding
-    /// into account.
-    /// @param d0 Time of the start of the day-long update period
-    double get( SimTime d0, double nOvipositing );
-    
-    /// Store S_v for day d1. Used by initIterate().
-    virtual void updateStats( SimTime d1, double S_v );
+    virtual double update( SimTime d0, double nOvipositing, double S_v );
     
     ///@brief Interventions and reporting
     //@{

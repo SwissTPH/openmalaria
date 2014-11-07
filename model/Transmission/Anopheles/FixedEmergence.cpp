@@ -121,16 +121,15 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 }
 
 
-double FixedEmergence::get( SimTime d0, double nOvipositing ) {
+double FixedEmergence::update( SimTime d0, double nOvipositing, double S_v ){
+    // We use time at end of step (i.e. start + 1) in index:
+    SimTime d5Year = mod_nn(d0 + sim::oneDay(), sim::fromYearsI(5));
+    quinquennialS_v[d5Year] = S_v;
+    
     // Get emergence at start of step:
     SimTime dYear1 = mod_nn(d0, sim::oneYear());
     // Simple model: fixed emergence scaled by larviciding
     return mosqEmergeRate[dYear1] * interventionSurvival();
-}
-
-void FixedEmergence::updateStats( SimTime d1, double S_v ){
-    SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
-    quinquennialS_v[d5Year] = S_v;
 }
 
 void FixedEmergence::checkpoint (istream& stream){ (*this) & stream; }
