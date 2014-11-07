@@ -143,7 +143,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             if( allele == numeric_limits<uint32_t>::max() ){
                 throw util::xml_scenario_error( (boost::format("phenotype has "
                     "restriction on locus %1%, allele %2% but this locus/allele "
-                    "has not been defined in parasiteGenotypology section")
+                    "has not been defined in parasiteGenetics section")
                     %restriction.getOnLocus() %restriction.getToAllele()).str() );
             }
             map<string,size_t>::const_iterator it = loci.find(restriction.getOnLocus());
@@ -167,7 +167,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             genotype_mapping.assign( Genotypes::getGenotypes().size(), 0 );
         }
     }else{
-        const vector<Genotypes::AlleleComb>& genotypes = Genotypes::getGenotypes();
+        const vector<Genotypes::Genotype>& genotypes = Genotypes::getGenotypes();
         genotype_mapping.assign( genotypes.size(), 0 );
         for( size_t j = 0; j < genotypes.size(); ++j ){
             uint32_t phenotype = numeric_limits<uint32_t>::max();

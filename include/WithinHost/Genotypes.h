@@ -27,13 +27,13 @@ namespace OM { namespace WithinHost {
 class Genotypes {
 public:
     /// Represent a combination of alleles, each from a different locus
-    struct AlleleComb{
-        AlleleComb( uint32_t allele, double iFreq, double fit ):
+    struct Genotype{
+        Genotype( uint32_t allele, double iFreq, double fit ):
             init_freq(iFreq), fitness(fit)
         {
             alleles.insert(allele);
         }
-        AlleleComb cross( const AlleleComb& that )const;
+        Genotype cross( const Genotype& that )const;
         set<uint32_t> alleles;      // set of codes of all alleles
         double init_freq;
         double fitness;
@@ -55,7 +55,7 @@ public:
     static uint32_t findAlleleCode( const string& locus, const string& allele );
     
     /** Get a reference to the list of all genotypes. */
-    static const vector<AlleleComb>& getGenotypes();
+    static const vector<Genotype>& getGenotypes();
     
     /** Sample the genotype using the configured approach. */
     static uint32_t sampleGenotype();

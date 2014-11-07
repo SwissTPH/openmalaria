@@ -46,7 +46,7 @@ class LSTMDrugType;
 /** Drug PD parameters (specified per phenotype), as well as applicable
  * functions to calculate drug factors and concentrations.
  * 
- * Parasite genotypology is specified elsewhere; we simply map genotype to
+ * Parasite genetics is specified elsewhere; we simply map genotype to
  * phenotype as well as describing phenotypes here. */
 class LSTMDrugPD {
     struct Cache {

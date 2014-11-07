@@ -107,14 +107,14 @@
       <EIRDaily>0.00505349</EIRDaily><EIRDaily>0.00919697</EIRDaily><EIRDaily>0.00919697</EIRDaily><EIRDaily>0.00919697</EIRDaily><EIRDaily>0.00919697</EIRDaily><EIRDaily>0.00919697</EIRDaily><EIRDaily>0.0159879</EIRDaily><EIRDaily>0.0159879</EIRDaily><EIRDaily>0.0159879</EIRDaily><EIRDaily>0.0159879</EIRDaily><EIRDaily>0.0159879</EIRDaily><EIRDaily>0.0261076</EIRDaily><EIRDaily>0.0261076</EIRDaily><EIRDaily>0.0261076</EIRDaily><EIRDaily>0.0261076</EIRDaily><EIRDaily>0.0261076</EIRDaily>
     </nonVector>
   </entomology>
-  <parasiteGenotypology samplingMode="initial">
-    <locus name="CQ">
+  <parasiteGenetics samplingMode="initial">
+    <locus name="mdr">
       <!-- model three alleles, no real reason -->
       <allele name="sensitive" initialFrequency="0.6" fitness="1"/>
       <allele name="resistant" initialFrequency="0.2" fitness="1"/>
       <allele name="highly resistant" initialFrequency="0.2" fitness="1"/>
     </locus>
-  </parasiteGenotypology>
+  </parasiteGenetics>
   <diagnostics>
     <diagnostic name="standard" units="Other">
       <!-- detection limit 40 according to non-Garki method -->
@@ -144,19 +144,19 @@
         <PD>
           <!-- three alleles match those described above -->
           <phenotype name="sensitive">
-            <restriction onLocus="CQ" toAllele="sensitive"/>
+            <restriction onLocus="mdr" toAllele="sensitive"/>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>0.02</IC50>
             <slope>1.6</slope>
           </phenotype>
           <phenotype name="resistant">
-            <restriction onLocus="CQ" toAllele="resistant"/>
+            <restriction onLocus="mdr" toAllele="resistant"/>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>0.2</IC50>
             <slope>1.6</slope>
           </phenotype>
           <phenotype name="highly resistant">
-            <restriction onLocus="CQ" toAllele="highly resistant"/>
+            <restriction onLocus="mdr" toAllele="highly resistant"/>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>2</IC50>
             <slope>1.6</slope>

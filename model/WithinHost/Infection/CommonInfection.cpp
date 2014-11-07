@@ -55,7 +55,7 @@ struct LocusSet{
             uint32_t alleleCode = (nextAlleleCode++);
             alleleCodes[elt_l.getName()][elt_a.getName()] = alleleCode;
             cum_p += elt_a.getInitialFrequency();
-            alleles.push_back( Genotypes::AlleleComb( alleleCode, elt_a.getInitialFrequency(), elt_a.getFitness() ) );
+            alleles.push_back( Genotypes::Genotype( alleleCode, elt_a.getInitialFrequency(), elt_a.getFitness() ) );
         }
         if( cum_p < 0.999 || cum_p > 1.001 ){
             throw util::xml_scenario_error( (
@@ -67,7 +67,7 @@ struct LocusSet{
         alleles[0].init_freq += 1.0 - cum_p;     // account for any small errors by adjusting the first frequency
     }
     void include( LocusSet& that ){
-        vector<Genotypes::AlleleComb> newAlleles;
+        vector<Genotypes::Genotype> newAlleles;
         newAlleles.reserve( alleles.size() * that.alleles.size() );
         for( size_t i = 0; i < alleles.size(); i += 1 ){
             for( size_t j = 0; j < that.alleles.size(); j += 1 ){
@@ -78,15 +78,15 @@ struct LocusSet{
         alleles.swap(newAlleles);
     }
     
-    vector<Genotypes::AlleleComb> alleles;
+    vector<Genotypes::Genotype> alleles;
 };
 
-vector<Genotypes::AlleleComb> genotypes;
+vector<Genotypes::Genotype> genotypes;
 }
 size_t Genotypes::N_genotypes = 1;
 
-Genotypes::AlleleComb Genotypes::AlleleComb::cross( const AlleleComb& that )const{
-    AlleleComb result(*that.alleles.begin(), init_freq*that.init_freq, fitness*that.fitness);
+Genotypes::Genotype Genotypes::Genotype::cross( const Genotype& that )const{
+    Genotype result(*that.alleles.begin(), init_freq*that.init_freq, fitness*that.fitness);
     result.alleles.insert( alleles.begin(), alleles.end() );
     result.alleles.insert( that.alleles.begin(), that.alleles.end() );
     return result;
@@ -95,29 +95,29 @@ Genotypes::AlleleComb Genotypes::AlleleComb::cross( const AlleleComb& that )cons
 void Genotypes::initSingle()
 {
     // no specification implies there is a single genotype
-    GT::genotypes.assign( 1, Genotypes::AlleleComb(
+    GT::genotypes.assign( 1, Genotypes::Genotype(
         0 /*allele code*/, 1.0/*frequency*/, 1.0/*fitness*/) );
     N_genotypes = 1;
 }
 
 void Genotypes::init( const scnXml::Scenario& scenario ){
-    if( scenario.getParasiteGenotypology().present() ){
-        const scnXml::ParasiteGenotypology& genotypology =
-            scenario.getParasiteGenotypology().get();
+    if( scenario.getParasiteGenetics().present() ){
+        const scnXml::ParasiteGenetics& genetics =
+            scenario.getParasiteGenetics().get();
         
         GT::current_mode = GT::SAMPLE_INITIAL;      // turn on sampling
-        if( genotypology.getSamplingMode() == "initial" ){
+        if( genetics.getSamplingMode() == "initial" ){
             GT::inerv_mode = GT::SAMPLE_INITIAL;
-        }else if( genotypology.getSamplingMode() == "tracking" ){
+        }else if( genetics.getSamplingMode() == "tracking" ){
             GT::inerv_mode = GT::SAMPLE_TRACKING;
         }else{
-            throw util::xml_scenario_error( "parasiteGenotypology/samplingMode: expected \"initial\" or \"tracking\"" );
+            throw util::xml_scenario_error( "parasiteGenetics/samplingMode: expected \"initial\" or \"tracking\"" );
         }
         
         // Build the list of all allele combinations by iterating over loci (plural of locus):
-        GT::LocusSet loci( genotypology.getLocus()[0] );
-        for( size_t i = 1; i < genotypology.getLocus().size(); i += 1 ){
-            GT::LocusSet newLocus(genotypology.getLocus()[i]);
+        GT::LocusSet loci( genetics.getLocus()[0] );
+        for( size_t i = 1; i < genetics.getLocus().size(); i += 1 ){
+            GT::LocusSet newLocus(genetics.getLocus()[i]);
             loci.include( newLocus );
         }
         GT::genotypes.swap( loci.alleles );
@@ -153,7 +153,7 @@ uint32_t Genotypes::findAlleleCode(const string& locus, const string& allele){
     return it2->second;
 }
 
-const vector< Genotypes::AlleleComb >& Genotypes::getGenotypes(){
+const vector< Genotypes::Genotype >& Genotypes::getGenotypes(){
     return GT::genotypes;
 }
 

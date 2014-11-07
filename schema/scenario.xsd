@@ -60,7 +60,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="parasiteGenotypology" type="om:ParasiteGenotypology" minOccurs="0">
+        <xs:element name="parasiteGenetics" type="om:ParasiteGenetics" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
               A specification of genotypes of infection parasites.
@@ -68,7 +68,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               May be omitted; in this case there is no modelling of genetic
               differences of infections (resistance, fitness).
             </xs:documentation>
-            <xs:appinfo>name:Parasite genotypology;</xs:appinfo>
+            <xs:appinfo>name:Parasite genetics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="pharmacology" type="om:Pharmacology" minOccurs="0">
@@ -297,7 +297,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="b" type="xs:double" use="required"/>
   </xs:complexType>
   
-  <xs:complexType name="ParasiteGenotypology">
+  <xs:complexType name="ParasiteGenetics">
     <xs:sequence>
       <xs:element name="locus" type="om:ParasiteLocus" maxOccurs="unbounded">
         <xs:annotation>
