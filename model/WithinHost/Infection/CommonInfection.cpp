@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/Infection/CommonInfection.h"
+#include "WithinHost/Genotypes.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include "schema/scenario.h"
@@ -54,7 +55,7 @@ struct LocusSet{
             uint32_t alleleCode = (nextAlleleCode++);
             alleleCodes[elt_l.getName()][elt_a.getName()] = alleleCode;
             cum_p += elt_a.getInitialFrequency();
-            alleles.push_back( Genotype::AlleleComb( alleleCode, elt_a.getInitialFrequency(), elt_a.getFitness() ) );
+            alleles.push_back( Genotypes::AlleleComb( alleleCode, elt_a.getInitialFrequency(), elt_a.getFitness() ) );
         }
         if( cum_p < 0.999 || cum_p > 1.001 ){
             throw util::xml_scenario_error( (
@@ -66,7 +67,7 @@ struct LocusSet{
         alleles[0].init_freq += 1.0 - cum_p;     // account for any small errors by adjusting the first frequency
     }
     void include( LocusSet& that ){
-        vector<Genotype::AlleleComb> newAlleles;
+        vector<Genotypes::AlleleComb> newAlleles;
         newAlleles.reserve( alleles.size() * that.alleles.size() );
         for( size_t i = 0; i < alleles.size(); i += 1 ){
             for( size_t j = 0; j < that.alleles.size(); j += 1 ){
@@ -77,27 +78,29 @@ struct LocusSet{
         alleles.swap(newAlleles);
     }
     
-    vector<Genotype::AlleleComb> alleles;
+    vector<Genotypes::AlleleComb> alleles;
 };
 
-vector<Genotype::AlleleComb> genotypes;
+vector<Genotypes::AlleleComb> genotypes;
 }
+size_t Genotypes::N_genotypes = 1;
 
-Genotype::AlleleComb Genotype::AlleleComb::cross( const AlleleComb& that )const{
+Genotypes::AlleleComb Genotypes::AlleleComb::cross( const AlleleComb& that )const{
     AlleleComb result(*that.alleles.begin(), init_freq*that.init_freq, fitness*that.fitness);
     result.alleles.insert( alleles.begin(), alleles.end() );
     result.alleles.insert( that.alleles.begin(), that.alleles.end() );
     return result;
 }
 
-void Genotype::initSingle()
+void Genotypes::initSingle()
 {
     // no specification implies there is a single genotype
-    GT::genotypes.assign( 1, Genotype::AlleleComb(
+    GT::genotypes.assign( 1, Genotypes::AlleleComb(
         0 /*allele code*/, 1.0/*frequency*/, 1.0/*fitness*/) );
+    N_genotypes = 1;
 }
 
-void Genotype::init( const scnXml::Scenario& scenario ){
+void Genotypes::init( const scnXml::Scenario& scenario ){
     if( scenario.getParasiteGenotypology().present() ){
         const scnXml::ParasiteGenotypology& genotypology =
             scenario.getParasiteGenotypology().get();
@@ -118,6 +121,7 @@ void Genotype::init( const scnXml::Scenario& scenario ){
             loci.include( newLocus );
         }
         GT::genotypes.swap( loci.alleles );
+        N_genotypes = GT::genotypes.size();
         
         double cum_p = 0.0;
         for( size_t i = 0; i < GT::genotypes.size(); ++i ){
@@ -141,7 +145,7 @@ void Genotype::init( const scnXml::Scenario& scenario ){
     }
 }
 
-uint32_t Genotype::findAlleleCode(const string& locus, const string& allele){
+uint32_t Genotypes::findAlleleCode(const string& locus, const string& allele){
     map<string, map<string, uint32_t> >::const_iterator it = GT::alleleCodes.find(locus);
     if( it == GT::alleleCodes.end() ) return numeric_limits<uint32_t>::max();
     map<string, uint32_t>::const_iterator it2 = it->second.find( allele );
@@ -149,11 +153,11 @@ uint32_t Genotype::findAlleleCode(const string& locus, const string& allele){
     return it2->second;
 }
 
-const vector< Genotype::AlleleComb >& Genotype::getGenotypes(){
+const vector< Genotypes::AlleleComb >& Genotypes::getGenotypes(){
     return GT::genotypes;
 }
 
-uint32_t Genotype::sampleGenotype(){
+uint32_t Genotypes::sampleGenotype(){
     if( GT::current_mode == GT::SAMPLE_FIRST ){
         return 0;       // always the first genotype code
     }else if( GT::current_mode == GT::SAMPLE_INITIAL ){
@@ -163,6 +167,16 @@ uint32_t Genotype::sampleGenotype(){
         return it->second;
     }else{
         assert(false);  //FIXME
+    }
+}
+
+double Genotypes::initialFreq( size_t genotype ){
+    if( GT::genotypes.size() == 0 ){
+        assert( genotype == 0 );
+        assert( N_genotypes == 1 );
+        return 1.0;     // only 1 genotype, thus initial frequency is 100%
+    }else{
+        return GT::genotypes[genotype].init_freq;
     }
 }
 

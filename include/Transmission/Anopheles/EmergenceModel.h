@@ -112,10 +112,9 @@ public:
      * during initialisation.
      * 
      * @param d1 Time of the end of the day-long update period
-     * @param tsP_dif Value of P_dif for this time-step
      * @param S_v Value of S_v for this day
      */
-    virtual void updateStats( SimTime d1, double tsP_dif, double S_v ) =0;
+    virtual void updateStats( SimTime d1, double S_v ) =0;
     
     ///@brief Interventions and reporting
     //@{

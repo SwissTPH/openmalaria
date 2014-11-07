@@ -21,6 +21,7 @@
 #include "WithinHost/WHVivax.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Treatments.h"
+#include "WithinHost/Genotypes.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include <schema/scenario.h>
@@ -242,7 +243,8 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito( double tbvFactor )const{
+double WHVivax::probTransmissionToMosquito( double tbvFactor, size_t genotype )const{
+    assert( WithinHost::Genotypes::N() == 1 );
     for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {

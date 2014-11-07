@@ -33,7 +33,7 @@ WHMock::WHMock() :
 {}
 WHMock::~WHMock() {}
 
-double WHMock::probTransmissionToMosquito( double tbvFactor ) const
+double WHMock::probTransmissionToMosquito( double tbvFactor, size_t genotype ) const
 {
     throw util::unimplemented_exception( "not needed in unit test" );
 }

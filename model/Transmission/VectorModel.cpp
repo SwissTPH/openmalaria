@@ -22,6 +22,7 @@
 #include "Population.h"
 #include "Host/Human.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Genotypes.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
@@ -371,12 +372,15 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
 
 // Every Global::interval days:
 void VectorModel::vectorUpdate (const Population& population) {
-    vector<double> popProbTransmission;
-    popProbTransmission.reserve( population.size() );
-    for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h ){
+    vector2D<double> popProbTransmission;
+    popProbTransmission.resize( population.size(), WithinHost::Genotypes::N() );
+    size_t i = 0;
+    for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i ){
         double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
-        double pTrans = h->withinHostModel->probTransmissionToMosquito( tbvFac );
-        popProbTransmission.push_back( pTrans );
+        for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
+            double pTrans = h->withinHostModel->probTransmissionToMosquito( tbvFac, g );
+            popProbTransmission.at(i,g) = pTrans;
+        }
     }
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);

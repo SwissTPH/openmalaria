@@ -19,7 +19,7 @@
  */
 
 #include "PkPd/Drug/LSTMDrugType.h"
-#include "WithinHost/Infection/CommonInfection.h"
+#include "WithinHost/Genotypes.h"
 #include "util/errors.h"
 #include "util/random.h"
 #include <schema/pharmacology.h>
@@ -33,7 +33,7 @@ using namespace std;
 namespace OM {
 namespace PkPd {
 using namespace OM::util;
-using WithinHost::Genotype;
+using WithinHost::Genotypes;
 
 // -----  Static variables and functions  -----
 
@@ -139,7 +139,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         map<string,size_t> loci;
         vector<vector<uint32_t> > loc_alleles;
         foreach( const scnXml::Restriction& restriction, phenotype.getRestriction() ){
-            uint32_t allele = Genotype::findAlleleCode( restriction.getOnLocus(), restriction.getToAllele() );
+            uint32_t allele = Genotypes::findAlleleCode( restriction.getOnLocus(), restriction.getToAllele() );
             if( allele == numeric_limits<uint32_t>::max() ){
                 throw util::xml_scenario_error( (boost::format("phenotype has "
                     "restriction on locus %1%, allele %2% but this locus/allele "
@@ -164,10 +164,10 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                 " restrictions required when num. phenotypes > 1" );
         }else{
             // All genotypes map to phenotype 0
-            genotype_mapping.assign( Genotype::getGenotypes().size(), 0 );
+            genotype_mapping.assign( Genotypes::getGenotypes().size(), 0 );
         }
     }else{
-        const vector<Genotype::AlleleComb>& genotypes = Genotype::getGenotypes();
+        const vector<Genotypes::AlleleComb>& genotypes = Genotypes::getGenotypes();
         genotype_mapping.assign( genotypes.size(), 0 );
         for( size_t j = 0; j < genotypes.size(); ++j ){
             uint32_t phenotype = numeric_limits<uint32_t>::max();

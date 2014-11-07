@@ -79,7 +79,7 @@ public:
     double get( SimTime d0, double nOvipositing );
     
     /// Store S_v for day d1. Used by initIterate().
-    void updateStats( SimTime d1, double tsP_dif, double S_v );
+    virtual void updateStats( SimTime d1, double S_v );
     
     ///@brief Interventions and reporting
     //@{

@@ -28,6 +28,7 @@
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Treatments.h"
+#include "WithinHost/Genotypes.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -90,14 +91,14 @@ WHFalciparum::WHFalciparum( double comorbidityFactor ):
     // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
     _innateImmSurvFact = exp(-random::gauss(sigma_i));
     
-    m_y_lag.assign (y_lag_len, 0.0);
+    m_y_lag.assign(y_lag_len, Genotypes::N(), 0.0);
 }
 
 WHFalciparum::~WHFalciparum()
 {
 }
 
-double WHFalciparum::probTransmissionToMosquito( double tbvFactor ) const{
+double WHFalciparum::probTransmissionToMosquito( double tbvFactor, size_t genotype ) const{
     /* This model (often referred to as the gametocyte model) was designed for
     5-day time steps. We use the same model (sampling 10, 15 and 20 days ago)
     for 1-day time steps to avoid having to design and analyse a new model.
@@ -117,9 +118,9 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor ) const{
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to ensure positive. All values initialised to 0.
     int firstIndex = sim::daysToSteps(sim::ts0().inDays() - 10) + 1 + y_lag_len;
-    double x = beta1 * m_y_lag[mod_nn(firstIndex, y_lag_len)]
-            + beta2 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(5), y_lag_len)]
-            + beta3 * m_y_lag[mod_nn(firstIndex - sim::daysToSteps(10), y_lag_len)];
+    double x = beta1 * m_y_lag.at(mod_nn(firstIndex, y_lag_len), genotype)
+            + beta2 * m_y_lag.at(mod_nn(firstIndex - sim::daysToSteps(5), y_lag_len), genotype)
+            + beta3 * m_y_lag.at(mod_nn(firstIndex - sim::daysToSteps(10), y_lag_len), genotype);
     if (x < 0.001){
         return 0.0;
     }

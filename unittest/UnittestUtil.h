@@ -34,6 +34,7 @@
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
+#include "WithinHost/Genotypes.h"
 #include "Monitoring/Surveys.h"
 
 #include "schema/scenario.h"
@@ -158,7 +159,7 @@ public:
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
 	ModelOptions::reset();
         ModelOptions::set(util::INCLUDES_PK_PD);
-        WithinHost::Genotype::initSingle();
+        WithinHost::Genotypes::initSingle();
 	
 	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
 	//PkPdModel::init ();

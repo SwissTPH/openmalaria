@@ -21,6 +21,7 @@
 #include "Global.h"
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/Diagnostic.h"
+#include "WithinHost/Genotypes.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
@@ -102,7 +103,8 @@ void DescriptiveWithinHostModel::importInfection(){
 
 void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    m_y_lag[sim::ts0().moduloSteps(y_lag_len)] = totalDensity;
+    assert( Genotypes::N() == 1 );
+    m_y_lag.at(sim::ts0().moduloSteps(y_lag_len), 0/*first and only genotype*/) = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.

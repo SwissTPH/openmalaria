@@ -28,9 +28,11 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-/* Various utilities acting on vectors. */
+namespace OM {
+namespace util {
 
-namespace OM { namespace util { namespace vectors {
+/** Various utilities acting on vectors. */
+namespace vectors {
 
   ///@brief Basic operations on std::vector
   //@{
@@ -120,6 +122,61 @@ ostream& operator<< (ostream& out, vector<T> vec) {
   out << ']';
   return out;
 }
+
+/** A two-dimensional vector. */
+template<typename T, typename Alloc = std::allocator<T> >
+struct vector2D {
+    typedef std::vector<T, Alloc> vec_t;
+    
+    vector2D() : v() {}
+    explicit vector2D(const typename vec_t::allocator_type& a) : stride(0), v(a) {}
+    explicit vector2D(size_t n1, size_t n2,
+        const typename vec_t::value_type& value = typename vec_t::value_type(),
+        const typename vec_t::allocator_type& a = typename vec_t::allocator_type() )
+            : stride(n2), v(static_cast<size_t>(n1 * n2), value, a) {}
+    vector2D(const vector2D& x) : stride(x.strid), v(x.v) {}
+    
+    inline void assign(size_t dim1, size_t dim2,
+        const typename vec_t::value_type& val)
+    {
+        v.assign(dim1 * dim2, val);
+        stride = dim2;
+    }
+
+    inline void resize(size_t dim1, size_t dim2,
+        typename vec_t::value_type x = typename vec_t::value_type())
+    {
+        v.resize( dim1 * dim2, x );
+        stride = dim2;
+    }
+    
+    inline typename vec_t::reference
+    at(size_t n1, size_t n2){
+        return v[n1 * stride + n2];
+    }
+    
+    inline typename vec_t::const_reference
+    at(size_t n1, size_t n2) const{
+        return v[n1 * stride + n2];
+    }
+    
+    inline vec_t& internal_vec(){ return v; }
+    
+    inline void set_all( typename vec_t::value_type x ){
+        v.assign( v.size(), x );
+    }
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        stride & stream;
+        v & stream;
+    }
+    
+private:
+    size_t stride;
+    vec_t v;
+};
 
 } }
 #endif

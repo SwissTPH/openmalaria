@@ -35,6 +35,9 @@ void vectors::scale (vecDay<double>& vec, double a) {
   for( SimTime i = sim::zero(); i < vec.size(); i += sim::oneDay() )
     vec[i] *= a;
 }
+void vectors::scale (vecDay2D<double>& vec, double a) {
+  scale(vec.internal_vec(), a);
+}
 
 double vectors::sum (const vector<double>& vec) {
   double r = 0.0;

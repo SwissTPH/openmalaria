@@ -74,9 +74,68 @@ private:
     vec_t v;
 };
 
+/** A two-dimensional array whose first index has SimTime type (as vecDay) and
+ * second index has size_t type. */
+template<typename T, typename Alloc = std::allocator<T> >
+struct vecDay2D {
+    typedef std::vector<T, Alloc> vec_t;
+    
+    vecDay2D() : v() {}
+    explicit vecDay2D(const typename vec_t::allocator_type& a) : stride(0), v(a) {}
+    explicit vecDay2D(SimTime n1, size_t n2,
+        const typename vec_t::value_type& value = typename vec_t::value_type(),
+        const typename vec_t::allocator_type& a = typename vec_t::allocator_type() )
+            : stride(n2), v(static_cast<size_t>(n1.inDays() * n2), value, a) {}
+    vecDay2D(const vecDay2D& x) : stride(x.stride), v(x.v) {}
+    
+    inline void assign(SimTime dim1, size_t dim2,
+        const typename vec_t::value_type& val)
+    {
+        v.assign(dim1.inDays() * dim2, val);
+        stride = dim2;
+    }
+
+    inline void resize(SimTime dim1, size_t dim2,
+        typename vec_t::value_type x = typename vec_t::value_type())
+    {
+        v.resize( dim1.inDays() * dim2, x );
+        stride = dim2;
+    }
+    
+    inline typename vec_t::reference
+    at(SimTime n1, size_t n2){
+        return v[n1.inDays() * stride + n2];
+    }
+    
+    inline typename vec_t::const_reference
+    at(SimTime n1, size_t n2) const{
+        return v[n1.inDays() * stride + n2];
+    }
+    
+    inline vec_t& internal_vec(){ return v; }
+    
+    inline void set_all( typename vec_t::value_type x ){
+        v.assign( v.size(), x );
+    }
+    
+    /// Checkpointing
+    template<class S>
+    void operator& (S& stream) {
+        stride & stream;
+        v & stream;
+    }
+    
+private:
+    size_t stride;
+    vec_t v;
+};
+
 namespace vectors{
   /// Scale all elements of a vector by a in-situ
   void scale (vecDay<double>& vec, double a);
+  
+  /// Scale all elements of a vector by a in-situ
+  void scale (vecDay2D<double>& vec, double a);
   
   /// Return sum of all elements
   double sum (const vecDay<double>& vec);

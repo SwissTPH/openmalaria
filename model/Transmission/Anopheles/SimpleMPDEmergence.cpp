@@ -188,7 +188,7 @@ double SimpleMPDEmergence::get( SimTime d0, double nOvipositing ) {
     return emergence;
 }
 
-void SimpleMPDEmergence::updateStats( SimTime d1, double tsP_dif, double S_v ){
+void SimpleMPDEmergence::updateStats( SimTime d1, double S_v ){
     SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
 }

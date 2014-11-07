@@ -24,6 +24,7 @@
 
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Genotypes.h"
 #include "Monitoring/Continuous.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
@@ -150,8 +151,12 @@ double TransmissionModel::updateKappa (const Population& population) {
         // not my preference but consistent with TransmissionModel::getEIR().
         double t = h->perHostTransmission.relativeAvailabilityHetAge(h->age(sim::ts1()).inYears());
         sumWeight += t;
-        t *= h->withinHostModel->probTransmissionToMosquito(
-            h->getVaccine().getFactor( interventions::Vaccine::TBV ) );
+        double pTransmit = 0.0;
+        for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
+            pTransmit += h->withinHostModel->probTransmissionToMosquito(
+                h->getVaccine().getFactor( interventions::Vaccine::TBV ), g );
+        }
+        t *= pTransmit;
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;

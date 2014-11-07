@@ -97,14 +97,14 @@ public:
 
     /** Return the infectiousness of this human to biting mosquitoes.
      * 
-     * @param ageOfHuman Age of the human
      * @param tbvFactor Probability that transmission is not blocked by a
      *  "transmission blocking vaccine".
+     * @param genotype Parasite genotype to get infectiousness for
      * 
      * Calculates the value during the call, which is expensive (cache externally
      * if the value is needed multiple times). */
-    //TODO: per genotype? (for LSTM's spread of resistance modelling)
-    virtual double probTransmissionToMosquito( double tbvFactor ) const =0;
+    virtual double probTransmissionToMosquito( double tbvFactor,
+            size_t genotype ) const =0;
     
     /// @returns true if host has patent parasites
     virtual bool summarize(const Host::Human& human) =0;

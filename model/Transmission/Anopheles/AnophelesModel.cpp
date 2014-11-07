@@ -22,7 +22,8 @@
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/PerHost.h"
 #include "Population.h"
-
+#include "WithinHost/Genotypes.h"
+#include "util/vectors.h"
 #include "util/errors.h"
 
 #include <cmath>
@@ -295,7 +296,7 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
 
 // Every sim::oneTS() days:
 void AnophelesModel::advancePeriod (const OM::Population& population,
-                                     vector<double>& popProbTransmission,
+                                     vector2D<double>& popProbTransmission,
                                      size_t sIndex,
                                      bool isDynamic) {
     transmission.emergence->update();
@@ -343,7 +344,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
     double tsP_df = 0.0;
-    double tsP_dif = 0.0;
+    vector<double> tsP_dif( WithinHost::Genotypes::N(), 0.0 );
     size_t i = 0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
@@ -355,7 +356,9 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         prod *= host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
         tsP_df += prod;
-        tsP_dif += prod * popProbTransmission[i];
+        for( size_t genotype = 0; genotype < WithinHost::Genotypes::N(); ++genotype ){
+            tsP_dif[genotype] += prod * popProbTransmission.at(i, genotype);
+        }
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
@@ -375,7 +378,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         baseP_df *= 1.0 - it->current_value( sim::ts0() );
     }
     tsP_df  *= baseP_df;
-    tsP_dif *= baseP_df;
+    vectors::scale( tsP_dif, baseP_df );
     
     
     // Summed per day:

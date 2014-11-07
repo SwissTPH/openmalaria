@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/Treatments.h"
+#include "util/vectors.h"
 
 #include <list>
 #include <memory>
@@ -37,6 +38,7 @@ namespace WithinHost {
 namespace Pathogenesis {
     class PathogenesisModel;
 }
+using util::vector2D;
 
 /**
  * Immunity code and base class for all current P. falciparum models.
@@ -55,7 +57,8 @@ public:
     virtual ~WHFalciparum();
     //@}
     
-    virtual double probTransmissionToMosquito( double tbvFactor ) const;
+    virtual double probTransmissionToMosquito( double tbvFactor,
+            size_t genotype ) const;
     
     virtual bool summarize(const Host::Human& human);
     
@@ -118,7 +121,7 @@ protected:
     *
     * m_y_lag[sim::ts0().moduloSteps(y_lag_len)] corresponds to the density
     * from the previous time step (once updateInfection has been called). */
-    vector<double> m_y_lag;
+    vector2D<double> m_y_lag;
     
     /// The PathogenesisModel introduces illness dependant on parasite density
     auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;

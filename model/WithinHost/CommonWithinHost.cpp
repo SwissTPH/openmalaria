@@ -20,6 +20,7 @@
 
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Diagnostic.h"
+#include "WithinHost/Genotypes.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
 #include "util/AgeGroupInterpolation.h"
@@ -65,7 +66,7 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
                       boost::is_any_of("," ) );
     }
     
-    Genotype::init( scenario );
+    Genotypes::init( scenario );
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
@@ -131,7 +132,7 @@ void CommonWithinHost::importInfection(){
         PopulationStats::allowedInfections += 1;
         m_cumulative_h += 1;
         numInfs += 1;
-        infections.push_back(createInfection(Genotype::sampleGenotype()));
+        infections.push_back(createInfection(Genotypes::sampleGenotype()));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -141,7 +142,11 @@ void CommonWithinHost::importInfection(){
 
 void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
     // Cache total density for infectiousness calculations
-    m_y_lag[sim::ts0().moduloSteps(y_lag_len)] = totalDensity;
+    int y_lag_i = sim::ts0().moduloSteps(y_lag_len);
+    for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag.at(y_lag_i, g) = 0.0;
+    for( std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf ){
+        m_y_lag.at( y_lag_i, (*inf)->genotype() ) += (*inf)->getDensity();
+    }
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -151,7 +156,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for ( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(createInfection (Genotype::sampleGenotype()));
+        infections.push_back(createInfection (Genotypes::sampleGenotype()));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
     

@@ -28,6 +28,7 @@
 #include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
 #include "util/SimpleDecayingValue.h"
+#include "util/vectors.h"
 
 #include <vector>
 #include <limits>
@@ -37,6 +38,7 @@ namespace OM {
 namespace Transmission {
 namespace Anopheles {
     using std::numeric_limits;
+    using util::vector2D;
 
 /** Per-species part for vector transmission model.
  *
@@ -124,14 +126,16 @@ public:
      *
      * @param population The human population; so we can sum up availability and
      *  infectiousness.
-     * @param popProbTransmission A vector of the probability of transmission
-     *  to mosquito for each human host (in same order as population). This is
-     *  simply a cache, since calling probTransmissionToMosquito() is expensive.
+     * @param popProbTransmission A two-dimensional vector of the probability
+     *  of transmission to mosquito for each human host (first index, in same
+     *  order as population) and for each parasite genotype (second index).
+     *  This is simply a cache, since calling probTransmissionToMosquito() is
+     *  expensive.
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
     void advancePeriod( const OM::Population& population,
-                        vector<double>& popProbTransmission,
+                        vector2D<double>& popProbTransmission,
                         size_t sIndex, bool isDynamic );
 
     /** Returns the EIR calculated by advancePeriod().

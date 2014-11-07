@@ -34,6 +34,7 @@ class MosqLifeCycleSuite;
 namespace OM {
 namespace Transmission {
 namespace Anopheles {
+using util::vecDay2D;
 
 // enumeration of gettable stats for cts out
 enum VecStat { PA, PDF, PDIF, NV, OV, SV };
@@ -78,11 +79,12 @@ public:
      * @param d0 Time of the start of the day-long update period
      * @param tsP_A P_A for this time-step
      * @param tsP_df P_df for this time-step
-     * @param tsP_dif P_dif for this time-step
+     * @param tsP_dif P_dif for this time-step, per parasite genotype
      * @param printDebug Print some info to cerr
      * @returns S_v for the next time-step
      */
-    double update( SimTime d0, double tsP_A, double tsP_df, double tsP_dif, bool isDynamic, bool printDebug );
+    double update( SimTime d0, double tsP_A, double tsP_df,
+                   const vector<double> tsP_dif, bool isDynamic, bool printDebug );
     
     ///@brief Interventions and reporting
     //@{
@@ -137,8 +139,10 @@ public:
         N_v & stream;
         O_v & stream;
         S_v & stream;
+        //TODO: do we actually need to checkpoint these next three?
         fArray & stream;
         ftauArray & stream;
+        uninfected_v & stream;
         timeStep_N_v0 & stream;
     }
     
@@ -182,7 +186,7 @@ private:
      * Set by initialise; no need to checkpoint. */
     SimTime N_v_length;
     //@}
-
+    
     /// If less than this many mosquitoes remain infected, transmission is interrupted.
     double minInfectedThreshold;
     
@@ -191,7 +195,10 @@ private:
     
     /** @brief Variable arrays N_v_length long.
      *
-     * P_A, P_df, P_dif, N_v, O_v and S_v are set in advancePeriod().
+     * P_A, P_df, P_dif, N_v, O_v and S_v are set in advancePeriod() and have
+     * values stored per day.
+     * 
+     * P_dif, O_v and S_v have a second index: the parasite genotype.
      *
      * Values at index ((d-1) mod N_v_length) are used to derive the state of
      * the population on day d. The state during days (t×I+1) through to ((t+1)×I)
@@ -202,25 +209,25 @@ private:
     //@{
     /** Probability of a mosquito not finding a host one night. */
     vecDay<double> P_A;
-
-    /** P_df and P_dif per-day.
-     *
-     * P_df is the probability of a mosquito finding a host and completing a
-     * feeding cycle without being killed.
-     *
-     * P_dif is the probability of a mosquito finding a host, getting infected,
-     * and successfully completing a feeding cycle.
-     *
-     * HOWEVER, if the initialisation phase is driven by an input EIR and not by
-     * vector calculations, then during the initialisation phase, P_dif contains
-     * the daily kappa values read from XML for validation purposes. */
-    vecDay<double> P_df, P_dif;
-
+    
+    /** P_df is the probability of a mosquito finding a host and completing a
+     * feeding cycle without being killed. */
+    vecDay<double> P_df;
+    
+    /** P_dif is the probability of a mosquito finding a host, getting
+     * infected, and successfully completing a feeding cycle. */
+    vecDay2D<double> P_dif;
+    
     /** Numbers of host-seeking mosquitos each day
      * 
-     * N_v is the total number of host-seeking mosquitoes, O_v is those seeking
-     * and infected, and S_v is those seeking and infective (to humans). */
-    vecDay<double> N_v, O_v, S_v;
+     * N_v is the total number of host-seeking mosquitoes. */
+    vecDay<double> N_v;
+    
+    /** Numbers of host-seeking mosquitos each day
+     * 
+     * O_v is the number of infected host-seeking mosquitoes, and S_v is the
+     * number of infective (to humans) host-seeking mosquitoes. */
+    vecDay2D<double> O_v, S_v;
     //@}
 
     ///@brief Working memory
@@ -230,14 +237,18 @@ private:
      * Values are recalculated each step; only fArray[0] and
      * ftauArray[0..mosqRestDuration] are stored across steps for optimisation
      * (reallocating each time they are needed would be slow).
+     * 
+     * uninfected_v[0] is not used.
      *
      * Length (fArray): EIPDuration - mosqRestDuration + 1 (θ_s - τ + 1)
      * Length (ftauArray): EIPDuration (θ_s)
+     * Length (uninfected_v): N_v_length
      *
      * Don't need to be checkpointed, but some values need to be initialised. */
     //@{
     vecDay<double> fArray;
     vecDay<double> ftauArray;
+    vecDay<double> uninfected_v;
     //@}
     
     /** Variables tracking data to be reported. */
