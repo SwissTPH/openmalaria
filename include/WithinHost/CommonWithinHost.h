@@ -50,7 +50,8 @@ public:
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual void clearImmunity();
     
-    virtual void update (int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon);
+    virtual void update (int nNewInfs, vector<double>& genotype_weights,
+            double ageInYears, double bsvFactor, ofstream& drugMon);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     

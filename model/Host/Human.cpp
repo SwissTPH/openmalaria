@@ -223,7 +223,8 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         
         ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
         // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-        withinHostModel->update(nNewInfs, ageYears1, _vaccine.getFactor(interventions::Vaccine::BSV), mon);
+        withinHostModel->update(nNewInfs, EIR_per_genotype, ageYears1,
+                _vaccine.getFactor(interventions::Vaccine::BSV), mon);
         
         // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
         clinicalModel->update( *this, ageYears1, age0 == sim::zero() );

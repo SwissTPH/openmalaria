@@ -132,7 +132,10 @@ void CommonWithinHost::importInfection(){
         PopulationStats::allowedInfections += 1;
         m_cumulative_h += 1;
         numInfs += 1;
-        infections.push_back(createInfection(Genotypes::sampleGenotype()));
+        // This is a hook, used by interventions. The newly imported infections
+        // should use initial frequencies to select genotypes.
+        vector<double> weights( 0 );        // zero length: signal to use initial frequencies
+        infections.push_back(createInfection(Genotypes::sampleGenotype(weights)));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -140,7 +143,9 @@ void CommonWithinHost::importInfection(){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
+void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
+        double ageInYears, double bsvFactor, ofstream& drugMon)
+{
     // Cache total density for infectiousness calculations
     int y_lag_i = sim::ts0().moduloSteps(y_lag_len);
     for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag.at(y_lag_i, g) = 0.0;
@@ -156,7 +161,7 @@ void CommonWithinHost::update(int nNewInfs, double ageInYears, double bsvFactor,
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for ( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(createInfection (Genotypes::sampleGenotype()));
+        infections.push_back(createInfection (Genotypes::sampleGenotype(genotype_weights)));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
     

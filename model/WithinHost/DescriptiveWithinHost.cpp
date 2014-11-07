@@ -101,7 +101,9 @@ void DescriptiveWithinHostModel::importInfection(){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) {
+void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_weights,
+        double ageInYears, double bsvFactor, ofstream& drugMon)
+{
     // Cache total density for infectiousness calculations
     assert( Genotypes::N() == 1 );
     m_y_lag.at(sim::ts0().moduloSteps(y_lag_len), 0/*first and only genotype*/) = totalDensity;

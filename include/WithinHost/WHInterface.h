@@ -145,11 +145,15 @@ public:
      * infections. Also update immune status.
      *
      * @param nNewInfs Number of inoculations this time-step
+     * @param genotype_weights For use in selecting infection genotypes. See
+     *  documentation of Genotypes::sampleGenotype().
      * @param ageInYears Age of human
      * @param bsvFactor Parasite survival factor for blood-stage vaccines
-     * @param drugMon Only required for a drug monitoring HACK and could be removed
+     * @param drugMon Only required for a drug monitoring HACK and could be
+     *  removed
      */
-    virtual void update(int nNewInfs, double ageInYears, double bsvFactor, ofstream& drugMon) =0;
+    virtual void update(int nNewInfs, vector<double>& genotype_weights,
+            double ageInYears, double bsvFactor, ofstream& drugMon) =0;
 
     /** TODO: this should not need to be exposed. It is currently used by a
      * severe outcome (pDeath) model inside the EventScheduler "case

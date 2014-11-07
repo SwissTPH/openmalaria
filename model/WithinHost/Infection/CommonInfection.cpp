@@ -22,6 +22,7 @@
 #include "WithinHost/Genotypes.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "util/vectors.h"
 #include "schema/scenario.h"
 
 #include <boost/format.hpp>
@@ -110,7 +111,16 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
             GT::interv_mode = GT::SAMPLE_INITIAL;
         }else if( genetics.getSamplingMode() == "tracking" ){
             GT::interv_mode = GT::SAMPLE_TRACKING;
-            //TODO: check vector model is in use and that simulation_mode is dynamicEIR
+            if( !scenario.getEntomology().getVector().present() ){
+                throw util::xml_scenario_error( "incompatibility; either use "
+                    "entomology/vector (not nonVector) or set "
+                    "parasiteGenetics/samplingMode to \"initial\" (not \"tracking\")" );
+            }
+            if( scenario.getEntomology().getMode() != "dynamic" ){
+                throw util::xml_scenario_error( "incompatibility; either set "
+                    "entomology/mode to \"dynamic\" (not \"forced\") or set "
+                    "parasiteGenetics/samplingMode to \"initial\" (not \"tracking\")" );
+            }
             //FIXME: update current_mode at appropriate time
         }else{
             throw util::xml_scenario_error( "parasiteGenetics/samplingMode: expected \"initial\" or \"tracking\"" );
@@ -159,17 +169,29 @@ const vector< Genotypes::Genotype >& Genotypes::getGenotypes(){
     return GT::genotypes;
 }
 
-uint32_t Genotypes::sampleGenotype(){
+uint32_t Genotypes::sampleGenotype( vector<double>& genotype_weights ){
     if( GT::current_mode == GT::SAMPLE_FIRST ){
         return 0;       // always the first genotype code
-    }else if( GT::current_mode == GT::SAMPLE_INITIAL ){
+    }else if( GT::current_mode == GT::SAMPLE_INITIAL
+            || genotype_weights.size() == 0 )
+    {
         double sample = util::random::uniform_01();
         map<double,uint32_t>::const_iterator it = GT::cum_initial_freqs.upper_bound( sample );
         assert( it != GT::cum_initial_freqs.end() );
         return it->second;
     }else{
         assert( GT::current_mode == GT::SAMPLE_TRACKING );
-        assert(false);  //FIXME
+        assert( genotype_weights.size() == N_genotypes );
+        double weight_sum = util::vectors::sum( genotype_weights );
+        assert( weight_sum > 1e-5 && weight_sum < 1e5 );        // possible loss of precision or other error
+        double sample = util::random::uniform_01() * weight_sum;
+        double cum = 0.0;
+        for( size_t g = 0; g < N_genotypes; ++g ){
+            cum += genotype_weights[g];
+            if( sample < cum ) return g;
+        }
+        assert(false);  // above loop should not terminate
+        return 0;       // just to be safe
     }
 }
 

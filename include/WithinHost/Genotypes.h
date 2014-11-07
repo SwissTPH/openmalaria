@@ -57,8 +57,13 @@ public:
     /** Get a reference to the list of all genotypes. */
     static const vector<Genotype>& getGenotypes();
     
-    /** Sample the genotype using the configured approach. */
-    static uint32_t sampleGenotype();
+    /** Sample the genotype using the configured approach.
+     * 
+     * @param genotype_weights When in tracking mode, this vector gives the
+     *  weights of each genotype for use in sampling. Total need not be one.
+     *  Also, passing a zero-length vector is a signal to use initial
+     *  frequencies in sampling. */
+    static uint32_t sampleGenotype( std::vector<double>& genotype_weights );
     
     /** Get the number of genotypes. Functions like sampleGenotype use values
      * from 0 to one less than this. */
