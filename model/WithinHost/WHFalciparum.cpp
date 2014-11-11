@@ -113,6 +113,7 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, size_t genoty
     static const double beta2=0.46;
     static const double beta3=0.17;
     static const double tau= 0.066;
+    static const double tau_prime = 1.0 / sqrt(1.0 / tau);
     static const double mu= -8.1;
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
@@ -125,7 +126,7 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, size_t genoty
         return 0.0;
     }
     
-    double zval=(log(x)+mu)/sqrt(1.0/tau);
+    double zval=(log(x)+mu) * tau_prime;
     double pone = gsl_cdf_ugaussian_P(zval);
     double transmit=(pone*pone);
     //transmit has to be between 0 and 1
