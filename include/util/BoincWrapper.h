@@ -59,16 +59,6 @@ namespace BoincWrapper {
   void endCriticalSection();
 }
 
-/// Memory shared with graphics app:
-namespace SharedGraphics {
-  /// Creates shared memory and sets up updates.
-  void init();
-  
-  const size_t KappaArraySize = 12;
-  /// Function to set kappa in shared memory:
-  void copyKappa(double *kappa);
-}
-
 /** Class for storing and generating checksums.
 *
 * These are nearly md5 sums but not quite.
