@@ -120,10 +120,6 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
   inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
   timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
 
-  // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
-  // memory corruption or extra tests when setting/copying values
-  noOfAgeGroupsSharedMem = std::max(Monitoring::AgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
-
   using Monitoring::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
   Continuous.registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
@@ -136,13 +132,9 @@ TransmissionModel::~TransmissionModel () {
 
 
 double TransmissionModel::updateKappa (const Population& population) {
-    // We calculate kappa for output and non-vector model, and kappaByAge for
-    // the shared graphics.
-
+    // We calculate kappa for output and the non-vector model.
     double sumWt_kappa= 0.0;
     double sumWeight  = 0.0;
-    kappaByAge.assign (noOfAgeGroupsSharedMem, 0.0);
-    nByAge.assign (noOfAgeGroupsSharedMem, 0);
     numTransmittingHumans = 0;
 
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
@@ -159,11 +151,6 @@ double TransmissionModel::updateKappa (const Population& population) {
         sumWt_kappa += t;
         if( t > 0.0 )
             ++numTransmittingHumans;
-
-        // kappaByAge and nByAge are used in the screensaver only
-        Monitoring::AgeGroup ag = h->getMonitoringAgeGroup();
-        kappaByAge[ag.i()] += t;
-        ++nByAge[ag.i()];
     }
 
 
@@ -186,13 +173,6 @@ double TransmissionModel::updateKappa (const Population& population) {
     if (tmod == sim::stepsPerYear() - 1) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
-    }
-
-    // Shared graphics: report infectiousness
-    if( mod_nn(sim::ts0(), sim::fromTS(6)) == sim::zero() ){
-        for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
-            kappaByAge[i] /= nByAge[i];
-        util::SharedGraphics::copyKappa(&kappaByAge[0]);
     }
 
     // Sum up inoculations this time step
@@ -278,9 +258,6 @@ void TransmissionModel::checkpoint (istream& stream) {
     tsNumAdults & stream;
     inoculationsPerAgeGroup & stream;
     timeStepEntoInocs & stream;
-    noOfAgeGroupsSharedMem & stream;
-    kappaByAge & stream;
-    nByAge & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     simulationMode & stream;
@@ -300,9 +277,6 @@ void TransmissionModel::checkpoint (ostream& stream) {
     tsNumAdults & stream;
     inoculationsPerAgeGroup & stream;
     timeStepEntoInocs & stream;
-    noOfAgeGroupsSharedMem & stream;
-    kappaByAge & stream;
-    nByAge & stream;
 }
 
 } }

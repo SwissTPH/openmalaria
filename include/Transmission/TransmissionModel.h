@@ -314,14 +314,6 @@ private:
    * Doesn't need to be checkpointed. */
   vector<double> timeStepEntoInocs;
   //@}
-  
-  /** @brief Variables for shared graphics kappa-by-age graph
-   * Don't need checkpointing; only kept here to save reallocating each step. */
-  //@{
-  size_t noOfAgeGroupsSharedMem;
-  vector<double> kappaByAge;
-  vector<int> nByAge;
-  //@}
 };
 
 } }

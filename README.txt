@@ -20,7 +20,6 @@ http://code.google.com/p/openmalaria/wiki/Start
 
 Code subdirs:
 contrib	Third-party libraries, distributed under the same repo for convenience.
-graphics	Separate graphics app. Currently out-of-date (untested with latest simulator code).
 include		Header files associated with model.
 model		Source code for the malaria model.
 test		High-level testing: test scenarios with expected outputs. Also run-time files: densities.csv, scenario_?.xsd, Nv0scenario*.txt.
