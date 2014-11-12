@@ -20,6 +20,7 @@
 
 #include "Host/Human.h"
 
+#include "Host/HumanHet.hpp"
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
 #include "WithinHost/WHInterface.h"
@@ -28,7 +29,6 @@
 #include "Monitoring/Survey.h"
 #include "PopulationStats.h"
 #include "util/ModelOptions.h"
-#include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
@@ -40,10 +40,7 @@ namespace OM { namespace Host {
     using namespace Monitoring;
     using interventions::ComponentId;
     
-    bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
-            opt_trans_treat_het = false, opt_comorb_treat_het = false,
-            opt_comorb_trans_het = false, opt_triple_het = false,
-            opt_report_only_at_risk = false;
+    bool opt_report_only_at_risk = false;
     
     // Only required for a drug monitoring HACK and could be removed:
     ofstream monDrug, monFake;
@@ -52,13 +49,7 @@ namespace OM { namespace Host {
 // -----  Static functions  -----
 
 void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario ){    // static
-    opt_trans_het = util::ModelOptions::option (util::TRANS_HET);
-    opt_comorb_het = util::ModelOptions::option (util::COMORB_HET);
-    opt_treat_het = util::ModelOptions::option (util::TREAT_HET);
-    opt_trans_treat_het = util::ModelOptions::option (util::TRANS_TREAT_HET);
-    opt_comorb_treat_het = util::ModelOptions::option (util::COMORB_TREAT_HET);
-    opt_comorb_trans_het = util::ModelOptions::option (util::COMORB_TRANS_HET);
-    opt_triple_het = util::ModelOptions::option (util::TRIPLE_HET);
+    HumanHet::init();
     opt_report_only_at_risk = util::ModelOptions::option( util::REPORT_ONLY_AT_RISK );
     
     const scnXml::Model& model = scenario.getModel();
@@ -95,69 +86,10 @@ Human::Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth) :
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
   assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
   
-  
-  /* Human heterogeneity; affects:
-   * _comorbidityFactor (stored in PathogenesisModel)
-   * _treatmentSeekingFactor (stored in CaseManagementModel)
-   * availabilityFactor (stored in Transmission::PerHost)
-   */
-  double comorbidityFactor = 1.0;
-  double treatmentSeekingFactor = 1.0;
-  double availabilityFactor = 1.0;
-  
-  if (opt_trans_het) {
-    availabilityFactor=0.2;
-    if (random::uniform_01() < 0.5) {
-      availabilityFactor=1.8;
-    }
-  }
-  if (opt_comorb_het) {
-    comorbidityFactor=0.2;
-    if (random::uniform_01() < 0.5) {
-      comorbidityFactor=1.8;
-    }   
-  }
-  if (opt_treat_het) {
-    treatmentSeekingFactor=0.2;
-    if (random::uniform_01() < 0.5) {            
-      treatmentSeekingFactor=1.8;
-    }   
-  }
-  if (opt_trans_treat_het) {
-    treatmentSeekingFactor=0.2;
-    availabilityFactor=1.8;
-    if (random::uniform_01()<0.5) {
-      treatmentSeekingFactor=1.8;
-      availabilityFactor=0.2;
-    }
-  } else if (opt_comorb_treat_het) {
-    if (random::uniform_01()<0.5) {
-      comorbidityFactor=1.8;
-      treatmentSeekingFactor=0.2;
-    } else {
-      comorbidityFactor=0.2;
-      treatmentSeekingFactor=1.8;
-    }
-  } else if (opt_comorb_trans_het) {
-    availabilityFactor=1.8;
-    comorbidityFactor=1.8;
-    if (random::uniform_01()<0.5) {
-      availabilityFactor=0.2;
-      comorbidityFactor=0.2;
-    }
-  } else if (opt_triple_het) {
-    availabilityFactor=1.8;
-    comorbidityFactor=1.8;
-    treatmentSeekingFactor=0.2;
-    if (random::uniform_01()<0.5) {
-      availabilityFactor=0.2;
-      comorbidityFactor=0.2;
-      treatmentSeekingFactor=1.8;
-    }
-  }
-  withinHostModel = WithinHost::WHInterface::createWithinHostModel( comorbidityFactor );
-  perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
-  clinicalModel = Clinical::ClinicalModel::createClinicalModel (treatmentSeekingFactor);
+  HumanHet het = HumanHet::sample();
+  withinHostModel = WithinHost::WHInterface::createWithinHostModel( het.comorbidityFactor );
+  perHostTransmission.initialise (tm, het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
+  clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
 }
 
 Human::Human(SimTime dateOfBirth) :
