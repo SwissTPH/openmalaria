@@ -380,10 +380,13 @@ void VectorModel::vectorUpdate (const Population& population) {
     popProbTransmission.resize( population.size(), WithinHost::Genotypes::N() );
     size_t i = 0;
     for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i ){
-        double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
-        for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
-            double pTrans = h->withinHostModel->probTransmissionToMosquito( tbvFac, g );
-            popProbTransmission.at(i,g) = pTrans;
+        const double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
+        WithinHost::WHInterface& whm = *h->withinHostModel;
+        double weightedSum;
+        const double pTrans = whm.probTransmissionToMosquito( tbvFac, &weightedSum );
+        if( WithinHost::Genotypes::N() == 1 ) popProbTransmission.at(i,0) = pTrans;
+        else for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
+            popProbTransmission.at(i,g) = whm.pTransGenotype( pTrans, weightedSum, g );
         }
     }
     for (size_t i = 0; i < numSpecies; ++i){

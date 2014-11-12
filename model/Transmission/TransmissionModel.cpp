@@ -148,16 +148,14 @@ double TransmissionModel::updateKappa (const Population& population) {
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
-        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->age(sim::ts1()).inYears());
-        sumWeight += t;
-        double pTransmit = 0.0;
-        for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
-            pTransmit += h->withinHostModel->probTransmissionToMosquito(
-                h->getVaccine().getFactor( interventions::Vaccine::TBV ), g );
-        }
-        t *= pTransmit;
-        sumWt_kappa += t;
-        if( t > 0.0 )
+        const double avail = h->perHostTransmission.relativeAvailabilityHetAge(
+            h->age(sim::ts1()).inYears());
+        sumWeight += avail;
+        const double tbvFactor = h->getVaccine().getFactor( interventions::Vaccine::TBV );
+        const double pTransmit = h->withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
+        const double riskTrans = avail * pTransmit;
+        sumWt_kappa += riskTrans;
+        if( riskTrans > 0.0 )
             ++numTransmittingHumans;
 
         // kappaByAge and nByAge are used in the screensaver only

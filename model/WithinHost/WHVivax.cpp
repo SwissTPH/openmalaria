@@ -243,8 +243,9 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito( double tbvFactor, size_t genotype )const{
+double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
+    assert( sumX == 0 );
     for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
@@ -254,6 +255,9 @@ double WHVivax::probTransmissionToMosquito( double tbvFactor, size_t genotype )c
         }
     }
     return 0;   // no gametocytes
+}
+double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
+    throw util::unimplemented_exception("genotype tracking for vivax");
 }
 
 bool WHVivax::summarize(const Host::Human& human) {

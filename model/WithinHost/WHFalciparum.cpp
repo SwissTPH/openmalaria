@@ -98,45 +98,69 @@ WHFalciparum::~WHFalciparum()
 {
 }
 
-double WHFalciparum::probTransmissionToMosquito( double tbvFactor, size_t genotype ) const{
-    /* This model (often referred to as the gametocyte model) was designed for
-    5-day time steps. We use the same model (sampling 10, 15 and 20 days ago)
-    for 1-day time steps to avoid having to design and analyse a new model.
-    Description: AJTMH pp.32-33 */
+// Infectiousness parameters: see AJTMH p.33; tau=1/sigmag**2 
+const double PTM_beta1=1.0;
+const double PTM_beta2=0.46;
+const double PTM_beta3=0.17;
+const double PTM_tau= 0.066;
+const double PTM_tau_prime = 1.0 / sqrt(1.0 / PTM_tau);
+const double PTM_mu= -8.1;
+
+double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX ) const{
+    // This model (often referred to as the gametocyte model) was designed for
+    // 5-day time steps. We use the same model (sampling 10, 15 and 20 days
+    // ago) for 1-day time steps to avoid having to design and analyse a new
+    // model. Description: AJTMH pp.32-33 and p9.
     
-    /* Note: we don't allow for treatment which clears gametocytes (e.g.
-     * Primaquine). Apparently Primaquine is not commonly used in P falciparum
-     * treatment, but for vivax the effect may be important. */
-    
-    //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
-    static const double beta1=1.0;
-    static const double beta2=0.46;
-    static const double beta3=0.17;
-    static const double tau= 0.066;
-    static const double tau_prime = 1.0 / sqrt(1.0 / tau);
-    static const double mu= -8.1;
+    // Note: we don't allow for gametocydal treatments (e.g. Primaquine).
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
-    // before. Add y_lag_len to ensure positive. All values initialised to 0.
-    int firstIndex = sim::daysToSteps(sim::ts0().inDays() - 10) + 1 + y_lag_len;
-    double x = beta1 * m_y_lag.at(mod_nn(firstIndex, y_lag_len), genotype)
-            + beta2 * m_y_lag.at(mod_nn(firstIndex - sim::daysToSteps(5), y_lag_len), genotype)
-            + beta3 * m_y_lag.at(mod_nn(firstIndex - sim::daysToSteps(10), y_lag_len), genotype);
-    if (x < 0.001){
-        return 0.0;
+    // before. Add y_lag_len to index to ensure positive.
+    const int i10 = (sim::ts0() - sim::fromDays(10) + sim::oneTS()).inSteps() + y_lag_len;
+    const int i5d = sim::daysToSteps(5);
+    const int i10d = 2 * i5d;
+    // Sum lagged densities across genotypes:
+    double y10 = 0.0, y15 = 0.0, y20 = 0.0;
+    for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
+        y10 += m_y_lag.at(mod_nn(i10, y_lag_len), genotype);
+        y15 += m_y_lag.at(mod_nn(i10 - i5d, y_lag_len), genotype);
+        y20 += m_y_lag.at(mod_nn(i10 - i10d, y_lag_len), genotype);
     }
+    // Weighted sum:
+    const double x = PTM_beta1 * y10 + PTM_beta2 * y15 + PTM_beta3 * y20;
+    if( sumX != 0 ) *sumX = 1.0 / x;    // copy to sumX, if set
+    if( x < 0.001 ) return 0.0; // cut off for uninfectious humans
     
-    double zval=(log(x)+mu) * tau_prime;
-    double pone = gsl_cdf_ugaussian_P(zval);
-    double transmit=(pone*pone);
-    //transmit has to be between 0 and 1
-    transmit=std::max(transmit, 0.0);
-    transmit=std::min(transmit, 1.0);
+    // Get a zval, convert to equivalent Normal sample:
+    const double zval = (log(x) + PTM_mu) * PTM_tau_prime;
+    const double pone = gsl_cdf_ugaussian_P(zval);
+    double pTransmit = pone*pone;
+    // pTransmit has to be between 0 and 1:
+    pTransmit=std::max(pTransmit, 0.0);
+    pTransmit=std::min(pTransmit, 1.0);
     
-    //    Include here the effect of transmission-blocking vaccination
-    double result = transmit * tbvFactor;
-    util::streamValidate( result );
-    return result;
+    // Include here the effect of transmission-blocking vaccination:
+    pTransmit *= tbvFactor;
+    util::streamValidate( pTransmit );
+    return pTransmit;
+}
+double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
+{
+    // This is an extension of the original model.
+    //NOTE: it is an approximation since it ignores the possibility of
+    // simultaneously infecting a mosquito with multiple genotypes.
+    
+    // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
+    // before. Add y_lag_len to index to ensure positive.
+    const int i10 = (sim::ts0() - sim::fromDays(10) + sim::oneTS()).inSteps() + y_lag_len;
+    const int i5d = sim::daysToSteps(5);
+    const int i10d = 2 * i5d;
+    const double x =
+        PTM_beta1 * m_y_lag.at(mod_nn(i10, y_lag_len), genotype) +
+        PTM_beta2 * m_y_lag.at(mod_nn(i10 - i5d, y_lag_len), genotype) +
+        PTM_beta3 * m_y_lag.at(mod_nn(i10 - i10d, y_lag_len), genotype);
+    
+    return pTrans * x * sumX;
 }
 
 bool WHFalciparum::diagnosticResult( const Diagnostic& diagnostic ) const{

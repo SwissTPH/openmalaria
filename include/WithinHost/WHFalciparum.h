@@ -57,8 +57,8 @@ public:
     virtual ~WHFalciparum();
     //@}
     
-    virtual double probTransmissionToMosquito( double tbvFactor,
-            size_t genotype ) const;
+    virtual double probTransmissionToMosquito( double tbvFactor, double *sumX )const;
+    virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
     virtual bool summarize(const Host::Human& human);
     
