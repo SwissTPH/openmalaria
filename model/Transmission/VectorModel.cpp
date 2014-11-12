@@ -382,11 +382,13 @@ void VectorModel::vectorUpdate (const Population& population) {
     for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i ){
         const double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
         WithinHost::WHInterface& whm = *h->withinHostModel;
-        double weightedSum;
-        const double pTrans = whm.probTransmissionToMosquito( tbvFac, &weightedSum );
+        double sumX;
+        const double pTrans = whm.probTransmissionToMosquito( tbvFac, &sumX );
         if( WithinHost::Genotypes::N() == 1 ) popProbTransmission.at(i,0) = pTrans;
         else for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
-            popProbTransmission.at(i,g) = whm.pTransGenotype( pTrans, weightedSum, g );
+            const double k = whm.probTransGenotype( pTrans, sumX, g );
+            assert( (boost::math::isfinite)(k) );
+            popProbTransmission.at(i,g) = k;
         }
     }
     for (size_t i = 0; i < numSpecies; ++i){

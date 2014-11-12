@@ -113,8 +113,10 @@ public:
      * genotype to a mosquito, given the two outputs of
      * probTransmissionToMosquito(). Only available for WHFalciparum and
      * should only be called when num genotypes > 1. */
-    virtual double pTransGenotype( double pTrans, double sumX,
-                                   size_t genotype ) =0;
+    inline double probTransGenotype( double pTrans, double sumX, size_t genotype ){
+        if( pTrans <= 0.0 ) return 0.0;
+        else return pTransGenotype( pTrans, sumX, genotype );
+    }
     
     /// @returns true if host has patent parasites
     virtual bool summarize(const Host::Human& human) =0;
@@ -204,7 +206,10 @@ public:
     static const int MAX_INFECTIONS = 21;
 
 protected:
-
+    // See probTransGenotype; this function should only be called when pTrans > 0
+    virtual double pTransGenotype( double pTrans, double sumX,
+                                   size_t genotype ) =0;
+    
     struct InfectionCount{
         InfectionCount(): total(0), patent(0) {}        // initialise to 0
         int total;      // includes blood and liver stages
