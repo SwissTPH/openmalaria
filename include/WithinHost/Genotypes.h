@@ -46,6 +46,9 @@ public:
      * used (from PK/PD code). */
     static void init( const scnXml::Scenario& scenario );
     
+    /** Switch to whichever mode has been enabled for the main simulation. */
+    static void startMainSim();
+    
     /** Map a locus name and allele name to an allele code.
      * 
      * Note that two alleles from different loci will always have different

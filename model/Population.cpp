@@ -27,6 +27,7 @@
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Genotypes.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "PkPd/PkPdModel.h"
@@ -152,6 +153,7 @@ void Population::preMainSimInit ()
 {
     Host::InfectionIncidenceModel::initMainSimulation();
     Clinical::mainSimInitCMCommon();
+    WithinHost::Genotypes::startMainSim();
     recentBirths = 0;
 }
 

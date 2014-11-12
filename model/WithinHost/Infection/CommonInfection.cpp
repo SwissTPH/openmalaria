@@ -157,6 +157,10 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
     }
 }
 
+void Genotypes::startMainSim(){
+    GT::current_mode = GT::interv_mode;
+}
+
 uint32_t Genotypes::findAlleleCode(const string& locus, const string& allele){
     map<string, map<string, uint32_t> >::const_iterator it = GT::alleleCodes.find(locus);
     if( it == GT::alleleCodes.end() ) return numeric_limits<uint32_t>::max();
