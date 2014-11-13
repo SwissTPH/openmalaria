@@ -95,7 +95,8 @@ set (Model_CPP
 )
 
 # Headers - only included so they show up in IDEs:
-file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
+# This misses loads of headers. Fix if you care.
+file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/model/*.h")
 
 
 include_directories (SYSTEM
@@ -112,7 +113,7 @@ include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
 
 add_library (model

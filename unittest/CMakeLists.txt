@@ -60,7 +60,7 @@ include_directories( SYSTEM
     ${CMAKE_SOURCE_DIR}/contrib/cxxtest
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/model
   ${CMAKE_SOURCE_DIR}/unittest
   ${CMAKE_BINARY_DIR}/unittest
 )
