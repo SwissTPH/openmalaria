@@ -28,6 +28,9 @@
 #include "Monitoring/Continuous.h"
 #include "Monitoring/Surveys.h"
 #include "interventions/InterventionManager.hpp"
+#include "Population.h"
+#include "WithinHost/Diagnostic.h"
+#include "mon/management.h"
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
 #include "util/CommandLine.h"
@@ -35,8 +38,6 @@
 #include "util/errors.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
-#include "Population.h"
-#include "WithinHost/Diagnostic.h"
 #include "schema/scenario.h"
 
 #include <fstream>
@@ -208,6 +209,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             if( sim::intervNow() == Surveys.nextSurveyTime() ){
                 population->newSurvey();
                 Surveys.incrementSurveyPeriod();
+                mon::concludeSurvey();
             }
             
             // deploy interventions
@@ -253,6 +255,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             population->preMainSimInit();
             population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
             Surveys.incrementSurveyPeriod();
+            mon::initMainSim();
         } else if (phase == END_SIM) {
             cerr << "sim end" << endl;
             break;
@@ -397,6 +400,7 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         Population::staticCheckpoint (stream);
         Surveys & stream;
         Continuous & stream;
+        mon::checkpoint( stream );
 #       ifdef OM_STREAM_VALIDATOR
         util::StreamValidator & stream;
 #       endif
@@ -451,6 +455,7 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     Population::staticCheckpoint (stream);
     Surveys & stream;
     Continuous & stream;
+    mon::checkpoint( stream );
 # ifdef OM_STREAM_VALIDATOR
     util::StreamValidator & stream;
 # endif

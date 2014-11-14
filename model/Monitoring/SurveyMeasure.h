@@ -36,19 +36,7 @@ namespace SM {
  * Don't ever change these names or numbers. The names are used in scenario
  * files, and the numbers in results output/databases. */
 enum SurveyMeasure {
-    /// Total number of humans
-    nHost = 0,
-    /** The number of human hosts with an infection (patent or not) at the time
-     * the survey is taken. */
-    nInfect = 1,
-    /** Expected number of infected hosts
-     * 
-     * This is the sum of the probabilities, across all time steps since the
-     * last survey, of each host becoming infected on that time step. */
-    nExpectd= 2,
-    /** The number of human hosts whose total (blood-stage) parasite density is
-     * above the detection threshold */
-    nPatent= 3,
+    BLANK = 0,  // temporary: items moved to OutputMeasures.hpp
     
     /// Sum of the log of the pyrogen threshold
     sumLogPyrogenThres = 4,
@@ -58,19 +46,12 @@ enum SurveyMeasure {
      * monitoring diagnostic). */
     sumlogDens= 5,
     
-    /** The total number of infections in the population: includes both blood
-     * and liver stages. Vivax: this is the number of broods. */
-    totalInfs= 6,
     /** Infectiousness of human population to mosquitoes
      *
      * Number of hosts transmitting to mosquitoes (i.e. proportion of
      * mosquitoes that get infected multiplied by human population size).
      * Single value, not per age-group. */
     nTransmit= 7,
-    /** The sum of all detectable infections (where blood stage parasite
-     * density is above the detection limit) across all human hosts.
-     * Vivax: the number of broods with an active blood stage. */
-    totalPatentInf= 8,
 //     /// Contribuion to immunity functions (removed)
 //     contrib= 9,
     /// Sum of the pyrogenic threshold

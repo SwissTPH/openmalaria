@@ -95,7 +95,7 @@ void SurveysType::init( const OM::Parameters& parameters,
     m_surveysTimeIntervals.push_back( sim::never() );
     m_nextSurveyTime = m_surveysTimeIntervals[0];
 
-    Survey::init( parameters, scenario, monitoring );
+    Survey::init( parameters, scenario, monitoring, m_surveysTimeIntervals.size() );
 
     m_surveys.resize (m_surveysTimeIntervals.size());
     if( !Simulator::isCheckpoint() ){

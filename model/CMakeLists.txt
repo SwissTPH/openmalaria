@@ -67,6 +67,8 @@ set (Model_CPP
   WithinHost/Diagnostic.cpp
   WithinHost/Treatments.cpp
   
+  mon/mon.cpp
+  
   util/BoincWrapper.cpp
   util/timer.cpp
   util/vectors.cpp

@@ -22,6 +22,7 @@
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Treatments.h"
 #include "WithinHost/Genotypes.h"
+#include "mon/reporting.h"
 #include "util/random.h"
 #include "util/errors.h"
 #include <schema/scenario.h>
@@ -33,7 +34,6 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
-using namespace Monitoring;
 using boost::ptr_list;
 
 // ———  parameters  ———
@@ -261,17 +261,14 @@ double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
 }
 
 bool WHVivax::summarize(const Host::Human& human) {
-    Survey& survey = Survey::current();
     InfectionCount count = countInfections();
-    if( count.total != 0 ){
-        survey
-            .addInt( Report::MI_INFECTED_HOSTS, human, 1 )
-            .addInt( Report::MI_INFECTIONS, human, count.total )
-            .addInt( Report::MI_PATENT_INFECTIONS, human, count.patent );
+    if (count.total != 0) {
+        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        mon::reportMHI( mon::MHR_INFECTIONS, human, count.total );
+        mon::reportMHI( mon::MHR_PATENT_INFECTIONS, human, count.patent );
     }
     if( count.patent > 0 ){
-        survey
-            .addInt( Report::MI_PATENT_HOSTS, human, 1 );
+        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
         return true;
     }
     return false;

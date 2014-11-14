@@ -29,6 +29,7 @@
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Treatments.h"
 #include "WithinHost/Genotypes.h"
+#include "mon/reporting.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -242,20 +243,18 @@ void WHFalciparum::updateImmuneStatus() {
 // -----  Summarize  -----
 
 bool WHFalciparum::summarize (const Host::Human& human) {
-    Survey& survey = Survey::current();
     pathogenesisModel->summarize( human );
     InfectionCount count = countInfections();
     if (count.total != 0) {
-        survey
-            .addInt( Report::MI_INFECTED_HOSTS, human, 1 )
-            .addInt( Report::MI_INFECTIONS, human, count.total )
-            .addInt( Report::MI_PATENT_INFECTIONS, human, count.patent );
+        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        mon::reportMHI( mon::MHR_INFECTIONS, human, count.total );
+        mon::reportMHI( mon::MHR_PATENT_INFECTIONS, human, count.patent );
     }
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
     if( diagnosticResult(Survey::diagnostic()) ){
-        survey
-            .addInt( Report::MI_PATENT_HOSTS, human, 1)
+        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        Survey::current()
             .addDouble( Report::MD_LOG_DENSITY, human, log(totalDensity) );
         return true;
     }

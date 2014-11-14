@@ -21,6 +21,7 @@
 #include "Monitoring/Surveys.h"
 #include "Monitoring/AgeGroup.h"
 #include "Host/Human.h"
+#include "mon/management.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
@@ -56,15 +57,15 @@ class SurveyMeasureMap {
     
 public:
     SurveyMeasureMap () {
-        codeMap["nHost"] = SM::nHost;
-        codeMap["nInfect"] = SM::nInfect;
-        codeMap["nExpectd"] = SM::nExpectd;
-        codeMap["nPatent"] = SM::nPatent;
+        codeMap["nHost"] = SM::BLANK;
+        codeMap["nInfect"] = SM::BLANK;
+        codeMap["nExpectd"] = SM::BLANK;
+        codeMap["nPatent"] = SM::BLANK;
         codeMap["sumLogPyrogenThres"] = SM::sumLogPyrogenThres;
         codeMap["sumlogDens"] = SM::sumlogDens;
-        codeMap["totalInfs"] = SM::totalInfs;
+        codeMap["totalInfs"] = SM::BLANK;
         codeMap["nTransmit"] = SM::nTransmit;
-        codeMap["totalPatentInf"] = SM::totalPatentInf;
+        codeMap["totalPatentInf"] = SM::BLANK;
         removedCodes.insert("contrib");
         codeMap["sumPyrogenThresh"] = SM::sumPyrogenThresh;
         codeMap["nTreatments1"] = SM::nTreatments1;
@@ -145,12 +146,8 @@ public:
 
 void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
-                   const scnXml::Monitoring& monitoring ){
-    intReportMappings[Report::MI_HOSTS] = SM::nHost;
-    intReportMappings[Report::MI_INFECTED_HOSTS] = SM::nInfect;
-    intReportMappings[Report::MI_PATENT_HOSTS] = SM::nPatent;
-    intReportMappings[Report::MI_INFECTIONS] = SM::totalInfs;
-    intReportMappings[Report::MI_PATENT_INFECTIONS] = SM::totalPatentInf;
+                   const scnXml::Monitoring& monitoring,
+                   size_t nSurveys ){
     intReportMappings[Report::MI_TREATMENTS_1] = SM::nTreatments1;
     intReportMappings[Report::MI_TREATMENTS_2] = SM::nTreatments2;
     intReportMappings[Report::MI_TREATMENTS_3] = SM::nTreatments3;
@@ -188,13 +185,14 @@ void Survey::init( const OM::Parameters& parameters,
     intReportMappings[Report::MI_RECRUIT_CTS] = SM::nCtsRecruitOnly;
     intReportMappings[Report::MI_TREAT_DEPLOYMENTS] = SM::nTreatDeployments;
     
-    dblReportMappings[Report::MD_EXPECTED_INFECTED] = SM::nExpectd;
     dblReportMappings[Report::MD_LOG_PYROGENIC_THRESHOLD] = SM::sumLogPyrogenThres;
     dblReportMappings[Report::MD_LOG_DENSITY] = SM::sumlogDens;
     dblReportMappings[Report::MD_PYROGENIC_THRESHOLD] = SM::sumPyrogenThresh;
     dblReportMappings[Report::MD_AGE] = SM::sumAge;
     
     AgeGroup::init (monitoring);
+    
+    mon::initialise( nSurveys, AgeGroup::getNumGroups(), Surveys.numCohortSets(), monitoring );
     
     // by default, none are active
     active.reset ();
@@ -348,6 +346,7 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
     size_t nAgeGroups = m_humanReportsInt.shape()[1] - 1;   // Don't write out last age-group
     size_t nCohortSets = m_humanReportsInt.shape()[2];
+    mon::writeMHI( outputFile, survey );
     for( size_t intMeasure = 0; intMeasure < Report::MI_NUM; ++intMeasure ){
         if( active[intReportMappings[intMeasure]] ){
             for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
@@ -360,6 +359,7 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
             }
         }
     }
+    mon::writeMHD( outputFile, survey );
     for( size_t dblMeasure = 0; dblMeasure < Report::MD_NUM; ++dblMeasure ){
         if( active[dblReportMappings[dblMeasure]] ){
             for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){

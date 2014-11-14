@@ -21,13 +21,14 @@
 #include "Host/InfectionIncidenceModel.h"
 #include "Host/Human.h"
 #include "Transmission/PerHost.h"
-#include "util/ModelOptions.h"
-#include "util/random.h"
-#include "Monitoring/Continuous.h"
-#include "Monitoring/Survey.h"
-#include "util/errors.h"
 #include "WithinHost/WHInterface.h"
 #include "Parameters.h"
+#include "Monitoring/Continuous.h"
+#include "Monitoring/Survey.h"
+#include "mon/reporting.h"
+#include "util/ModelOptions.h"
+#include "util/random.h"
+#include "util/errors.h"
 
 #include <stdexcept>
 #include <cmath>
@@ -151,7 +152,7 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 }
 
 void InfectionIncidenceModel::summarize (const Host::Human& human) {
-    Survey::current().addDouble( Report::MD_EXPECTED_INFECTED, human, _pinfected);
+    mon::reportMHD( mon::MHD_EXPECTED_INFECTED, human, _pinfected );
 }
 
 

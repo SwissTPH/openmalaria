@@ -48,11 +48,6 @@ namespace Report {
      * Note: for timed/continuous deployment pairs, the continuous version
      * is always the timed version + 1. */
     enum IntReportMeasures{
-        MI_HOSTS,
-        MI_INFECTED_HOSTS,
-        MI_PATENT_HOSTS,
-        MI_INFECTIONS,
-        MI_PATENT_INFECTIONS,
         MI_TREATMENTS_1,
         MI_TREATMENTS_2,
         MI_TREATMENTS_3,
@@ -93,7 +88,6 @@ namespace Report {
     };
     /// Measures which are reported as doubles
     enum DblReportMeasures{
-        MD_EXPECTED_INFECTED,
         MD_LOG_PYROGENIC_THRESHOLD,
         MD_LOG_DENSITY,
         MD_PYROGENIC_THRESHOLD,
@@ -121,7 +115,8 @@ private:
     /// Initialize static parameters.
     static void init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
-                   const scnXml::Monitoring& monitoring );
+                   const scnXml::Monitoring& monitoring,
+                   size_t nSurveys );
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).

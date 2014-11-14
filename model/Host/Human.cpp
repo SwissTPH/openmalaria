@@ -26,18 +26,18 @@
 #include "WithinHost/WHInterface.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "Monitoring/Survey.h"
 #include "PopulationStats.h"
 #include "util/ModelOptions.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
 #include "interventions/InterventionManager.hpp"
+#include "mon/reporting.h"
 #include "schema/scenario.h"
 
 namespace OM { namespace Host {
     using namespace OM::util;
-    using namespace Monitoring;
+    using Monitoring::Survey;
     using interventions::ComponentId;
     
     bool opt_report_only_at_risk = false;
@@ -137,7 +137,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
             if( !(expIt->second >= sim::ts0()) ){       // membership expired
                 // don't flush reports
                 // report removal due to expiry
-                Survey::current().addInt(Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
+                Survey::current().addInt(Monitoring::Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
                 m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
                 // erase element, but continue iteration (note: this is simpler in C++11)
                 map<ComponentId,SimTime>::iterator toErase = expIt;
@@ -182,8 +182,9 @@ void Human::summarize() {
         return;
     }
     
-    Survey::current().addInt( Report::MI_HOSTS, *this, 1)
-        .addDouble( Report::MD_AGE, *this, age(sim::now()).inYears() );
+    mon::reportMHI( mon::MHR_HOSTS, *this, 1 );
+    Survey::current().addDouble( Monitoring::Report::MD_AGE, *this, age(sim::now()).inYears() );
+//     mon::reportMHD( mon::MHD_AGE, *this, age(sim::now()).inYears() );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     
@@ -211,7 +212,7 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
                 flushReports();     // reset HS memory
                 
                 // report removal due to first infection/bout/treatment
-                Survey::current().addInt(Report::MI_N_SP_REM_FIRST_EVENT, *this, 1 );
+                Survey::current().addInt(Monitoring::Report::MI_N_SP_REM_FIRST_EVENT, *this, 1 );
             }
             m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
             // remove (affects reporting, restrictToSubPop and cumulative deployment):
