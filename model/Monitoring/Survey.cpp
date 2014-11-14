@@ -61,13 +61,13 @@ public:
         codeMap["nInfect"] = SM::BLANK;
         codeMap["nExpectd"] = SM::BLANK;
         codeMap["nPatent"] = SM::BLANK;
-        codeMap["sumLogPyrogenThres"] = SM::sumLogPyrogenThres;
-        codeMap["sumlogDens"] = SM::sumlogDens;
+        codeMap["sumLogPyrogenThres"] = SM::BLANK;
+        codeMap["sumlogDens"] = SM::BLANK;
         codeMap["totalInfs"] = SM::BLANK;
         codeMap["nTransmit"] = SM::nTransmit;
         codeMap["totalPatentInf"] = SM::BLANK;
         removedCodes.insert("contrib");
-        codeMap["sumPyrogenThresh"] = SM::sumPyrogenThresh;
+        codeMap["sumPyrogenThresh"] = SM::BLANK;
         codeMap["nTreatments1"] = SM::nTreatments1;
         codeMap["nTreatments2"] = SM::nTreatments2;
         codeMap["nTreatments3"] = SM::nTreatments3;
@@ -185,9 +185,6 @@ void Survey::init( const OM::Parameters& parameters,
     intReportMappings[Report::MI_RECRUIT_CTS] = SM::nCtsRecruitOnly;
     intReportMappings[Report::MI_TREAT_DEPLOYMENTS] = SM::nTreatDeployments;
     
-    dblReportMappings[Report::MD_LOG_PYROGENIC_THRESHOLD] = SM::sumLogPyrogenThres;
-    dblReportMappings[Report::MD_LOG_DENSITY] = SM::sumlogDens;
-    dblReportMappings[Report::MD_PYROGENIC_THRESHOLD] = SM::sumPyrogenThresh;
     dblReportMappings[Report::MD_AGE] = SM::sumAge;
     
     AgeGroup::init (monitoring);

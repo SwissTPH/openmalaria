@@ -38,14 +38,6 @@ namespace SM {
 enum SurveyMeasure {
     BLANK = 0,  // temporary: items moved to OutputMeasures.hpp
     
-    /// Sum of the log of the pyrogen threshold
-    sumLogPyrogenThres = 4,
-    
-    /** Sum (across hosts) of the natural logarithm of the parasite density of
-     * hosts with detectable parasite density (patent according to the
-     * monitoring diagnostic). */
-    sumlogDens= 5,
-    
     /** Infectiousness of human population to mosquitoes
      *
      * Number of hosts transmitting to mosquitoes (i.e. proportion of
@@ -54,8 +46,6 @@ enum SurveyMeasure {
     nTransmit= 7,
 //     /// Contribuion to immunity functions (removed)
 //     contrib= 9,
-    /// Sum of the pyrogenic threshold
-    sumPyrogenThresh = 10,
     
     /// number of treatments (1st line)
     nTreatments1= 11,

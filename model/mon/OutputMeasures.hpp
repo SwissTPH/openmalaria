@@ -79,6 +79,15 @@ void defineOutMeasures(){
      * density is above the detection limit) across all human hosts.
      * Vivax: the number of broods with an active blood stage. */
     namedOutMeasures["totalPatentInf"] = OutMeasure::humanAC( 8, MHR_PATENT_INFECTIONS, false );
+    
+    /** Sum (across hosts) of the natural logarithm of the parasite density of
+     * hosts with detectable parasite density (patent according to the
+     * monitoring diagnostic). */
+    namedOutMeasures["sumlogDens"] = OutMeasure::humanAC( 5, MHD_LOG_DENSITY, true );
+    /// Sum of log(1 + p) where p is the pyrogenic threshold
+    namedOutMeasures["sumLogPyrogenThres"] = OutMeasure::humanAC( 4, MHD_LOG_PYROGENIC_THRESHOLD, true );
+    /// Sum of the pyrogenic threshold
+    namedOutMeasures["sumPyrogenThresh"] = OutMeasure::humanAC( 10, MHD_PYROGENIC_THRESHOLD, true );
 }
 
 }

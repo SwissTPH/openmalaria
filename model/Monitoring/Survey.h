@@ -88,9 +88,6 @@ namespace Report {
     };
     /// Measures which are reported as doubles
     enum DblReportMeasures{
-        MD_LOG_PYROGENIC_THRESHOLD,
-        MD_LOG_DENSITY,
-        MD_PYROGENIC_THRESHOLD,
         MD_AGE,
         MD_NUM  // must be last; not a measure to report
     };
