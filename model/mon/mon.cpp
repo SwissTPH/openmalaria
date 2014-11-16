@@ -37,6 +37,10 @@ size_t nSurveys, nAgeGroups, nCohortSets;
 // Accumulators, variables:
 size_t currentSurvey;
 
+#ifndef NDEBUG
+const size_t NOT_ACCEPTED = boost::integer_traits<size_t>::const_max - 1;
+#endif
+
 // Store by human age and cohort
 template<typename T>
 struct StoreHAC{
@@ -60,8 +64,14 @@ struct StoreHAC{
         outMeasures.assign( 0, 0 );
         
         for( list<OutMeasure>::const_iterator it = required.begin(); it != required.end(); ++it ){
-            if( it->isDouble != (typeid(T) == typeid(double) ) ||
-                !it->byAge || !it->byCohort ) continue;
+            if( it->isDouble != (typeid(T) == typeid(double) ) ){
+#ifndef NDEBUG
+                // Debug mode: this should prevent silly errors where the type reported does not match the type defined for some output
+                mIndices[it->m] = NOT_ACCEPTED;
+#endif
+                continue;
+            }
+            if( !it->byAge || !it->byCohort ) continue;
             
             if( mIndices[it->m] != NOT_USED ){
                 //FIXME: use a name not a number to describe the measure
@@ -79,7 +89,7 @@ struct StoreHAC{
     // Take a value and either store it or forget it
     void accept( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, T val ){
         if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
-        //TODO: can we differentiate NOT_USED and NOT_ACCEPTED reports, at least in debug mode?
+        assert( mIndices[measure] != NOT_ACCEPTED );
         if( mIndices[measure] == NOT_USED ) return;     // measure not used by this store
         if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
         size_t mIndex = mIndices[measure];
