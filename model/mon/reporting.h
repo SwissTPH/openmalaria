@@ -21,6 +21,9 @@
 #ifndef H_OM_mon_reporting
 #define H_OM_mon_reporting
 
+#include "Monitoring/AgeGroup.h"
+#include <boost/integer_traits.hpp>
+
 /** This header handles reporting of data and querying of which outputs are
  * active.
  *
@@ -108,10 +111,19 @@ enum Measure{
     M_NUM
 };
 
-// Report some value (integer) for some human.
+// For surveys and measures to say something shouldn't be reported
+const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
+
+// The current survey number (read only usage)
+extern size_t currentSurvey;
+
+// Report some value (integer) for some human to the current survey.
 void reportMHI( Measure measure, const Host::Human& human, int val );
-// Report some value (double) for some human.
+// Report some value (double) for some human to the current survey.
 void reportMHD( Measure measure, const Host::Human& human, double val );
+
+// Report some value (integer) for some survey, age group and cohort set
+void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val );
 
 // Query whether an output measure is used.
 bool isUsedM( Measure measure );

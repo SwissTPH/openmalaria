@@ -23,7 +23,8 @@
 
 #include "Global.h"
 #include "WithinHost/Pathogenesis/State.h"
-#include "Monitoring/Survey.h"	//Monitoring::AgeGroup
+#include "Monitoring/AgeGroup.h"
+#include "mon/reporting.h"
 #include <ostream>
 
 namespace OM {
@@ -76,7 +77,7 @@ public:
     
     Episode() :
             time(sim::never()),
-            surveyPeriod(0 /* dummy survey */),
+            surveyPeriod(mon::NOT_USED),
             ageGroup(),
             cohortSet(0),
             state(NONE)

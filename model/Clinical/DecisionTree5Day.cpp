@@ -98,7 +98,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
         
         if( output.treated ){   // if any treatment or intervention deployed
             m_tLastTreatment = sim::ts0();
-            Survey::current().addInt( measures[regimen], human, 1 );
+            mon::reportMHI( measures[regimen], human, 1 );
         }
         
         if( human.withinHostModel->optionalPqTreatment() )

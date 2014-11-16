@@ -26,13 +26,12 @@
 #include "Clinical/DecisionTree5Day.h"
 #include "Host/NeonatalMortality.h"
 
-#include "Monitoring/Survey.h"
+#include "mon/reporting.h"
 #include "util/ModelOptions.h"
 #include "util/CommandLine.h"
 #include <schema/scenario.h>
 
 namespace OM { namespace Clinical {
-    using namespace Monitoring;
 
 bool opt_event_scheduler = false;
 bool opt_imm_outcomes = false;
@@ -127,14 +126,14 @@ void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (doomed <= DOOMED_EXPIRED) {	//clinical bout 6 intervals before
-        Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
+        mon::reportMHI( mon::MHO_INDIRECT_DEATHS, human, 1 );
         doomed = DOOMED_INDIRECT;
         return;
     }
     if(newBorn /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
         if (Host::NeonatalMortality::eventNeonatalMortality()) {
-            Survey::current().addInt( Report::MI_INDIRECT_DEATHS, human, 1 );
+            mon::reportMHI( mon::MHO_INDIRECT_DEATHS, human, 1 );
             doomed = DOOMED_NEONATAL;
             return;
         }

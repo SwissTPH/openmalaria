@@ -47,26 +47,6 @@ enum SurveyMeasure {
 //     /// Contribuion to immunity functions (removed)
 //     contrib= 9,
     
-    /// number of treatments (1st line)
-    nTreatments1= 11,
-    /// number of treatments (2nd line)
-    nTreatments2= 12,
-    /// number of treatments (inpatient)
-    nTreatments3= 13,
-    
-    /// number of episodes (uncomplicated)
-    nUncomp= 14,
-    /// number of episodes (severe)
-    nSevere= 15,
-    /// cases with sequelae
-    nSeq= 16,
-    /// deaths in hospital
-    nHospitalDeaths= 17,
-    /// Number of deaths indirectly caused by malaria
-    nIndDeaths= 18,
-    /// Number of deaths directly caused by malaria
-    nDirDeaths= 19,
-    
     /** Number of vaccine doses given via EPI.
      * 
      * Since schema 22, each vaccine type may be deployed independently. To be
@@ -92,11 +72,6 @@ enum SurveyMeasure {
      * (with an "effect" element) will be reported. */
     nMassVaccinations= 22,
     
-    /// recoveries in hospital
-    nHospitalRecovs= 23,
-    /// sequelae in hospital
-    nHospitalSeqs= 24,
-    
 //     /// Number of IPT Doses (removed together with IPT model)
 //     nIPTDoses= 25,
     
@@ -105,9 +80,6 @@ enum SurveyMeasure {
      * Calculated once a year as sum of human infectiousness divided by initial
      * EIR summed over a year. Single value, not per age-group. */
     annAvgK= 26,
-    
-    /// Number of episodes (non-malaria fever)
-    nNMFever= 27,
     
     /** The total number of inoculations per age group, summed over the
      * reporting period. */
@@ -163,10 +135,6 @@ enum SurveyMeasure {
      * 
      * Reporting removed. */
     //Clinical_DrugUsage = 40,
-    /// Direct death on first day of CM (before treatment takes effect)
-    Clinical_FirstDayDeaths = 41,
-    /// Direct death on first day of CM (before treatment takes effect); hospital only
-    Clinical_HospitalFirstDayDeaths = 42,
     //@}
     
     /** The number of actual infections since the last survey. */
@@ -205,8 +173,6 @@ enum SurveyMeasure {
      * the number of tests used.) */
     nMDAs = 52,
     
-    /// Number of deaths caused by non-malaria fevers
-    nNmfDeaths = 53,
 //     /// Number of antibiotic treatments given (disabled — not used)
 //     nAntibioticTreatments = 54,
     

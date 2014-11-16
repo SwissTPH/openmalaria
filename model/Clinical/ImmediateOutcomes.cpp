@@ -192,7 +192,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         }
         
         m_tLastTreatment = sim::ts0();
-        Survey::current().addInt( measures[regimen], human, 1 );
+        mon::reportMHI( measures[regimen], human, 1 );
         
         double p = ( x < accessUCSelfTreat[regimen] * m_treatmentSeekingFactor ) ?
             cureRateUCSelfTreat[regimen] : cureRateUCOfficial[regimen];

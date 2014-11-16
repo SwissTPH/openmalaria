@@ -27,7 +27,6 @@
 #include "schema/monitoring.h"
 
 #include <iostream>
-#include <boost/integer_traits.hpp>
 #include <boost/format.hpp>
 
 namespace OM {
@@ -35,7 +34,6 @@ namespace mon {
 
 // Constants or defined during init:
 size_t nSurveys, nAgeGroups, nCohortSets;
-const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
 // Accumulators, variables:
 size_t currentSurvey;
 
@@ -79,26 +77,25 @@ struct StoreHAC{
     }
     
     // Take a value and either store it or forget it
-    void accept( Measure measure, const Host::Human& human, T val ){
-        if( currentSurvey == NOT_USED ) return; // pre-main-sim we ignore all reports
+    void accept( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, T val ){
+        if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
         if( mIndices[measure] == NOT_USED ) return;     // measure not used by this store
-        size_t ageIndex = human.getMonitoringAgeGroup().i();
         if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
         size_t mIndex = mIndices[measure];
 #ifndef NDEBUG
         if( mIndex >= outMeasures.size() ||
-            currentSurvey >= nSurveys ||
+            survey >= nSurveys ||
             ageIndex >= nAgeGroups ||
-            human.cohortSet() >= nCohortSets
+            cohortSet >= nCohortSets
         ){
-            cout << "Index out of bounds for survey:\t" << currentSurvey << " of " << nSurveys
+            cout << "Index out of bounds for survey:\t" << survey << " of " << nSurveys
                 << "\nmeasure number\t" << mIndex << " of " << outMeasures.size()
                 << "\nage group\t" << ageIndex << " of " << nAgeGroups
-                << "\ncohort set\t" << human.cohortSet() << " of " << nCohortSets
+                << "\ncohort set\t" << cohortSet << " of " << nCohortSets
                 << endl;
         }
 #endif
-        reports[index(mIndex,currentSurvey,ageIndex,human.cohortSet())] += val;
+        reports[index(mIndex,survey,ageIndex,cohortSet)] += val;
     }
     
     // Write stored values to stream
@@ -166,6 +163,8 @@ void initMainSim(){
 }
 void concludeSurvey(){
     currentSurvey += 1;
+    // After the last survey has completed:
+    if( currentSurvey >= nSurveys ) currentSurvey = NOT_USED;
 }
 
 void writeMHI( ostream& stream, int survey ){
@@ -176,10 +175,15 @@ void writeMHD( ostream& stream, int survey ){
 }
 
 void reportMHI( Measure measure, const Host::Human& human, int val ){
-    storeHACI.accept( measure, human, val );
+    size_t ageIndex = human.getMonitoringAgeGroup().i();
+    storeHACI.accept( measure, currentSurvey, ageIndex, human.cohortSet(), val );
 }
 void reportMHD( Measure measure, const Host::Human& human, double val ){
-    storeHACD.accept( measure, human, val );
+    size_t ageIndex = human.getMonitoringAgeGroup().i();
+    storeHACD.accept( measure, currentSurvey, ageIndex, human.cohortSet(), val );
+}
+void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val ){
+    storeHACI.accept( measure, survey, ageGroup.i(), cohortSet, val );
 }
 
 void checkpoint( ostream& stream ){

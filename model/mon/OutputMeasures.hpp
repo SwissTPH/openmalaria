@@ -68,7 +68,8 @@ void defineOutMeasures(){
      * 
      * This is the sum of the probabilities, across all time steps since the
      * last survey, of each host becoming infected on that time step. */
-    namedOutMeasures["nExpectd"] = OutMeasure::humanAC( 2, MHD_EXPECTED_INFECTED, true );
+    namedOutMeasures["nExpectd"] =
+        OutMeasure::humanAC( 2, MHD_EXPECTED_INFECTED, true );
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */
     namedOutMeasures["nPatent"] = OutMeasure::humanAC( 3, MHR_PATENT_HOSTS, false );
@@ -78,16 +79,62 @@ void defineOutMeasures(){
     /** The sum of all detectable infections (where blood stage parasite
      * density is above the detection limit) across all human hosts.
      * Vivax: the number of broods with an active blood stage. */
-    namedOutMeasures["totalPatentInf"] = OutMeasure::humanAC( 8, MHR_PATENT_INFECTIONS, false );
+    namedOutMeasures["totalPatentInf"] =
+        OutMeasure::humanAC( 8, MHR_PATENT_INFECTIONS, false );
     
     /** Sum (across hosts) of the natural logarithm of the parasite density of
      * hosts with detectable parasite density (patent according to the
      * monitoring diagnostic). */
     namedOutMeasures["sumlogDens"] = OutMeasure::humanAC( 5, MHD_LOG_DENSITY, true );
     /// Sum of log(1 + p) where p is the pyrogenic threshold
-    namedOutMeasures["sumLogPyrogenThres"] = OutMeasure::humanAC( 4, MHD_LOG_PYROGENIC_THRESHOLD, true );
+    namedOutMeasures["sumLogPyrogenThres"] =
+        OutMeasure::humanAC( 4, MHD_LOG_PYROGENIC_THRESHOLD, true );
     /// Sum of the pyrogenic threshold
-    namedOutMeasures["sumPyrogenThresh"] = OutMeasure::humanAC( 10, MHD_PYROGENIC_THRESHOLD, true );
+    namedOutMeasures["sumPyrogenThresh"] =
+        OutMeasure::humanAC( 10, MHD_PYROGENIC_THRESHOLD, true );
+    
+    /// number of treatments (1st line)
+    namedOutMeasures["nTreatments1"] = OutMeasure::humanAC( 11, MHT_TREATMENTS_1, false );
+    /// number of treatments (2nd line)
+    namedOutMeasures["nTreatments2"] = OutMeasure::humanAC( 12, MHT_TREATMENTS_2, false );
+    /// number of treatments (inpatient)
+    namedOutMeasures["nTreatments3"] = OutMeasure::humanAC( 13, MHT_TREATMENTS_3, false );
+    
+    /// number of episodes (uncomplicated)
+    namedOutMeasures["nUncomp"] =
+        OutMeasure::humanAC( 14, MHE_UNCOMPLICATED_EPISODES, false );
+    /// number of episodes (severe)
+    namedOutMeasures["nSevere"] =
+        OutMeasure::humanAC( 15, MHE_SEVERE_EPISODES, false );
+    /// Number of episodes (non-malaria fever)
+    namedOutMeasures["nNMFever"] =
+        OutMeasure::humanAC( 27, MHE_NON_MALARIA_FEVERS, false );
+    
+    /// cases with sequelae
+    namedOutMeasures["nSeq"] = OutMeasure::humanAC( 16, MHO_SEQUELAE, false );
+    /// deaths in hospital
+    namedOutMeasures["nHospitalDeaths"] =
+        OutMeasure::humanAC( 17, MHO_HOSPITAL_DEATHS, false );
+    /// Number of deaths indirectly caused by malaria
+    namedOutMeasures["nIndDeaths"] =
+        OutMeasure::humanAC( 18, MHO_INDIRECT_DEATHS, false );
+    /// Number of deaths directly caused by malaria
+    namedOutMeasures["nDirDeaths"] =
+        OutMeasure::humanAC( 19, MHO_DIRECT_DEATHS, false );
+    /// recoveries in hospital
+    namedOutMeasures["nHospitalRecovs"] =
+        OutMeasure::humanAC( 23, MHO_HOSPITAL_RECOVERIES, false );
+    /// sequelae in hospital
+    namedOutMeasures["nHospitalSeqs"] =
+        OutMeasure::humanAC( 24, MHO_HOSPITAL_SEQUELAE, false );
+    /// Direct death on first day of CM (before treatment takes effect)
+    namedOutMeasures["Clinical_FirstDayDeaths"] =
+        OutMeasure::humanAC( 41, MHO_FIRST_DAY_DEATHS, false );
+    /// Direct death on first day of CM (before treatment takes effect); hospital only
+    namedOutMeasures["Clinical_HospitalFirstDayDeaths"] =
+        OutMeasure::humanAC( 42, MHO_HOSPITAL_FIRST_DAY_DEATHS, false );
+    /// Number of deaths caused by non-malaria fevers
+    namedOutMeasures["nNmfDeaths"] = OutMeasure::humanAC( 53, MHO_NMF_DEATHS, false );
 }
 
 }

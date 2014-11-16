@@ -31,14 +31,13 @@
 namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
-using namespace Monitoring;
 
 // ———  static pararmeters and methods  ———
 
 // These parameters are set by setHealthSystem() and do not need checkpointing.
-Monitoring::ReportMeasureI CM5DayCommon::measures[NumCaseTypes] = {
-    Report::MI_TREATMENTS_1,    // first line official
-    Report::MI_TREATMENTS_2    // second line official
+mon::Measure CM5DayCommon::measures[NumCaseTypes] = {
+    mon::MHT_TREATMENTS_1,  // first line official
+    mon::MHT_TREATMENTS_2   // second line official
 };
 double CM5DayCommon::accessUCAny[NumCaseTypes];
 double CM5DayCommon::accessUCSelfTreat[NumCaseTypes];
@@ -144,7 +143,7 @@ void CM5DayCommon::severeMalaria (
     //NOTE: we do not model diagnostics in this case
     if( prandom >= q[2] ){      // treated in hospital
         m_tLastTreatment = sim::ts0();
-        Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
+        mon::reportMHI( mon::MHT_TREATMENTS_3, human, 1 );
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         
         if( prandom >= q[5] ){  // treatment successful at clearing parasites

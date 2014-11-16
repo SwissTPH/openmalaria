@@ -25,6 +25,7 @@
 #include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
 #include "WithinHost/WHInterface.h"
+#include "mon/reporting.h"
 
 namespace OM {
 namespace Clinical {
@@ -51,7 +52,7 @@ public:
     
 protected:
     enum CaseType { FirstLine, SecondLine, NumCaseTypes };
-    static Monitoring::ReportMeasureI measures[NumCaseTypes];
+    static mon::Measure measures[NumCaseTypes];
     static double accessUCAny[NumCaseTypes];
     static double accessUCSelfTreat[NumCaseTypes];
     static double accessSevere;

@@ -23,6 +23,7 @@
 #include "util/random.h"
 #include "WithinHost/WHInterface.h"
 #include "Monitoring/Survey.h"
+#include "mon/reporting.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
@@ -253,12 +254,12 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
         if( auxOut.treated ){	// I.E. some treatment was given
             timeLastTreatment = sim::ts0();
             if( pgState & Episode::COMPLICATED ){
-                Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
+                mon::reportMHI( mon::MHT_TREATMENTS_3, human, 1 );
             }else{
                 if( pgState & Episode::SECOND_CASE ){
-                    Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
+                    mon::reportMHI( mon::MHT_TREATMENTS_2, human, 1 );
                 }else{
-                    Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
+                    mon::reportMHI( mon::MHT_TREATMENTS_1, human, 1 );
                 }
             }
         }

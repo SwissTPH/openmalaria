@@ -64,27 +64,29 @@ public:
         codeMap["sumLogPyrogenThres"] = SM::BLANK;
         codeMap["sumlogDens"] = SM::BLANK;
         codeMap["totalInfs"] = SM::BLANK;
-        codeMap["nTransmit"] = SM::nTransmit;
         codeMap["totalPatentInf"] = SM::BLANK;
-        removedCodes.insert("contrib");
         codeMap["sumPyrogenThresh"] = SM::BLANK;
-        codeMap["nTreatments1"] = SM::nTreatments1;
-        codeMap["nTreatments2"] = SM::nTreatments2;
-        codeMap["nTreatments3"] = SM::nTreatments3;
-        codeMap["nUncomp"] = SM::nUncomp;
-        codeMap["nSevere"] = SM::nSevere;
-        codeMap["nSeq"] = SM::nSeq;
-        codeMap["nHospitalDeaths"] = SM::nHospitalDeaths;
-        codeMap["nIndDeaths"] = SM::nIndDeaths;
-        codeMap["nDirDeaths"] = SM::nDirDeaths;
+        codeMap["nTreatments1"] = SM::BLANK;
+        codeMap["nTreatments2"] = SM::BLANK;
+        codeMap["nTreatments3"] = SM::BLANK;
+        codeMap["nUncomp"] = SM::BLANK;
+        codeMap["nSevere"] = SM::BLANK;
+        codeMap["nSeq"] = SM::BLANK;
+        codeMap["nHospitalDeaths"] = SM::BLANK;
+        codeMap["nIndDeaths"] = SM::BLANK;
+        codeMap["nDirDeaths"] = SM::BLANK;
+        codeMap["nHospitalRecovs"] = SM::BLANK;
+        codeMap["nHospitalSeqs"] = SM::BLANK;
+        codeMap["nNMFever"] = SM::BLANK;
+        codeMap["Clinical_FirstDayDeaths"] = SM::BLANK;
+        codeMap["Clinical_HospitalFirstDayDeaths"] = SM::BLANK;
+        codeMap["nNmfDeaths"] = SM::BLANK;
+        
+        codeMap["nTransmit"] = SM::nTransmit;
         codeMap["nEPIVaccinations"] = SM::nEPIVaccinations;
         codeMap["allCauseIMR"] = SM::allCauseIMR;
         codeMap["nMassVaccinations"] = SM::nMassVaccinations;
-        codeMap["nHospitalRecovs"] = SM::nHospitalRecovs;
-        codeMap["nHospitalSeqs"] = SM::nHospitalSeqs;
-        removedCodes.insert("nIPTDoses");
         codeMap["annAvgK"] = SM::annAvgK;
-        codeMap["nNMFever"] = SM::nNMFever;
         codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
         codeMap["Vector_Nv0"] = SM::Vector_Nv0;
         codeMap["Vector_Nv"] = SM::Vector_Nv;
@@ -93,20 +95,14 @@ public:
         codeMap["inputEIR"] = SM::inputEIR;
         codeMap["simulatedEIR"] = SM::simulatedEIR;
         codeMap["Clinical_RDTs"] = SM::Clinical_RDTs;
-        codeMap["Clinical_FirstDayDeaths"] = SM::Clinical_FirstDayDeaths;
-        codeMap["Clinical_HospitalFirstDayDeaths"] = SM::Clinical_HospitalFirstDayDeaths;
         codeMap["nNewInfections"] = SM::nNewInfections;
         codeMap["nMassITNs"] = SM::nMassITNs;
         codeMap["nEPI_ITNs"] = SM::nEPI_ITNs;
         codeMap["nMassIRS"] = SM::nMassIRS;
         codeMap["nMassGVI"] = SM::nMassGVI;
         codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
-        removedCodes.insert("nAddedToCohort");
-        removedCodes.insert("nRemovedFromCohort");
         codeMap["nMDAs"] = SM::nMDAs;
         codeMap["nMassScreenings"] = SM::nMassScreenings;
-        codeMap["nNmfDeaths"] = SM::nNmfDeaths;
-        removedCodes.insert("nAntibioticTreatments");
         codeMap["nCtsIRS"] = SM::nCtsIRS;
         codeMap["nCtsGVI"] = SM::nCtsGVI;
         codeMap["nCtsMDA"] = SM::nCtsMDA;
@@ -119,6 +115,12 @@ public:
         codeMap["nCtsRecruitOnly"] = SM::nCtsRecruitOnly;
         codeMap["nTreatDeployments"] = SM::nTreatDeployments;
         codeMap["sumAge"] = SM::sumAge;
+        
+        removedCodes.insert("contrib");
+        removedCodes.insert("nIPTDoses");
+        removedCodes.insert("nAddedToCohort");
+        removedCodes.insert("nRemovedFromCohort");
+        removedCodes.insert("nAntibioticTreatments");
     }
     
     SM::SurveyMeasure operator[] (const string s) {
@@ -148,20 +150,8 @@ void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
                    const scnXml::Monitoring& monitoring,
                    size_t nSurveys ){
-    intReportMappings[Report::MI_TREATMENTS_1] = SM::nTreatments1;
-    intReportMappings[Report::MI_TREATMENTS_2] = SM::nTreatments2;
-    intReportMappings[Report::MI_TREATMENTS_3] = SM::nTreatments3;
-    intReportMappings[Report::MI_UNCOMPLICATED_EPISODES] = SM::nUncomp;
-    intReportMappings[Report::MI_SEVERE_EPISODES] = SM::nSevere;
-    intReportMappings[Report::MI_SEQUELAE] = SM::nSeq;
-    intReportMappings[Report::MI_HOSPITAL_DEATHS] = SM::nHospitalDeaths;
-    intReportMappings[Report::MI_INDIRECT_DEATHS] = SM::nIndDeaths;
-    intReportMappings[Report::MI_DIRECT_DEATHS] = SM::nDirDeaths;
     intReportMappings[Report::MI_VACCINATION_TIMED] = SM::nMassVaccinations;
     intReportMappings[Report::MI_VACCINATION_CTS] = SM::nEPIVaccinations;
-    intReportMappings[Report::MI_HOSPITAL_RECOVERIES] = SM::nHospitalRecovs;
-    intReportMappings[Report::MI_HOSPITAL_SEQUELAE] = SM::nHospitalSeqs;
-    intReportMappings[Report::MI_NON_MALARIA_FEVERS] = SM::nNMFever;
     intReportMappings[Report::MI_NEW_INFECTIONS] = SM::nNewInfections;
     intReportMappings[Report::MI_ITN_TIMED] = SM::nMassITNs;
     intReportMappings[Report::MI_ITN_CTS] = SM::nEPI_ITNs;
@@ -173,10 +163,6 @@ void Survey::init( const OM::Parameters& parameters,
     intReportMappings[Report::MI_MDA_CTS] = SM::nCtsMDA;
     intReportMappings[Report::MI_SCREENING_TIMED] = SM::nMassScreenings;
     intReportMappings[Report::MI_SCREENING_CTS] = SM::nCtsScreenings;
-    intReportMappings[Report::MI_NMF_DEATHS] = SM::nNmfDeaths;
-//     intReportMappings[Report::MI_NMF_TREATMENTS] = SM::nAntibioticTreatments;
-    intReportMappings[Report::MI_FIRST_DAY_DEATHS] = SM::Clinical_FirstDayDeaths;
-    intReportMappings[Report::MI_HOSPITAL_FIRST_DAY_DEATHS] = SM::Clinical_HospitalFirstDayDeaths;
     intReportMappings[Report::MI_N_SP_REM_TOO_OLD] = SM::nSubPopRemovalTooOld;
     intReportMappings[Report::MI_N_SP_REM_FIRST_EVENT] = SM::nSubPopRemovalFirstEvent;
     intReportMappings[Report::MI_PQ_TREATMENTS] = SM::nPQTreatments;
