@@ -327,8 +327,10 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 double treatmentEffectMult = 1.0;
                 
                 if( random::uniform_01() < pTreatment ){
+                    /*FIXME: impossible due to above; NMF output removed
                     Survey::current().addInt( Report::MI_NMF_TREATMENTS, human, 1 );
                     treatmentEffectMult = oneMinusEfficacyAb;
+                    */
                 }
                 
                 // In a severe NMF case (only when not malarial), there is a

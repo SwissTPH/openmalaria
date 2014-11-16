@@ -39,6 +39,7 @@
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
       <option name="nTreatments3" value="true"/>
+      <option name="sumAge" value="true"/>
     </SurveyOptions>
     <surveys diagnostic="standard">
       <surveyTime>1235-01-05</surveyTime>

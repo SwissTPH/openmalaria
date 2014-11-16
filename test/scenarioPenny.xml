@@ -32,8 +32,6 @@
       <option name="nExpectd" value="true"/>
       <option name="nPatent" value="true"/>
       <option name="sumlogDens"/>
-      <option name="nUncomp"/>
-      <option name="nSevere"/>
       <option name="nDirDeaths"/>
       <option name="nIndDeaths"/>
       <option name="allCauseIMR"/>

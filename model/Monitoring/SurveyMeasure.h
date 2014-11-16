@@ -187,7 +187,7 @@ enum SurveyMeasure {
     nMassIRS = 46,
     /** Defunct; was used by "vector availability" intervention (which is now a
      * sub-set of GVI). */
-    nMassVA = 47,
+//     nMassVA = 47,
     
     /// Number of malarial tests via microscopy used
     Clinical_Microscopy = 48,
@@ -207,8 +207,8 @@ enum SurveyMeasure {
     
     /// Number of deaths caused by non-malaria fevers
     nNmfDeaths = 53,
-    /// Number of antibiotic treatments given
-    nAntibioticTreatments = 54,
+//     /// Number of antibiotic treatments given (disabled — not used)
+//     nAntibioticTreatments = 54,
     
     /** Report the number of screenings used in a mass screen-and-treat
      * operation. */

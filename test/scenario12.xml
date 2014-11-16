@@ -30,6 +30,7 @@
       <option name="sumlogDens" value="true"/>
       <option name="nUncomp"/>
       <option name="simulatedEIR" value="true"/>
+      <option name="nMassScreenings"/>
     </SurveyOptions>
     <surveys diagnostic="garki">
       <surveyTime repeatStep="14t" repeatEnd="126t">14t</surveyTime>

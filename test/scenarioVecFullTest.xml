@@ -34,7 +34,6 @@
       <option name="new infections" value="true"/>
       <option name="num transmitting humans" value="true"/>
       <option name="ITN coverage"/>
-      <option name="IRS coverage"/>
       <option name="GVI coverage"/>
       <!-- <option name="mean hole index"/>
       <option name="mean insecticide content"/>-->
@@ -66,6 +65,7 @@
       <option name="nMDAs"/>
       <option name="nCtsMDA"/>
       <option name="nMassGVI"/>
+      <option name="nEPI_ITNs"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>

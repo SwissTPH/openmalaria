@@ -74,7 +74,7 @@ namespace Report {
         MI_SCREENING_TIMED,
         MI_SCREENING_CTS,
         MI_NMF_DEATHS,
-        MI_NMF_TREATMENTS /* also known as antibiotics */,
+//         MI_NMF_TREATMENTS /* also known as antibiotics */,
         MI_FIRST_DAY_DEATHS,
         MI_HOSPITAL_FIRST_DAY_DEATHS,
         MI_N_SP_REM_TOO_OLD,

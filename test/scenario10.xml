@@ -27,6 +27,7 @@
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nUncomp" value="true"/>
+      <option name="sumAge" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime>73</surveyTime>

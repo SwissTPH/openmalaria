@@ -106,7 +106,7 @@ public:
         codeMap["nMDAs"] = SM::nMDAs;
         codeMap["nMassScreenings"] = SM::nMassScreenings;
         codeMap["nNmfDeaths"] = SM::nNmfDeaths;
-        codeMap["nAntibioticTreatments"] = SM::nAntibioticTreatments;
+        removedCodes.insert("nAntibioticTreatments");
         codeMap["nCtsIRS"] = SM::nCtsIRS;
         codeMap["nCtsGVI"] = SM::nCtsGVI;
         codeMap["nCtsMDA"] = SM::nCtsMDA;
@@ -174,7 +174,7 @@ void Survey::init( const OM::Parameters& parameters,
     intReportMappings[Report::MI_SCREENING_TIMED] = SM::nMassScreenings;
     intReportMappings[Report::MI_SCREENING_CTS] = SM::nCtsScreenings;
     intReportMappings[Report::MI_NMF_DEATHS] = SM::nNmfDeaths;
-    intReportMappings[Report::MI_NMF_TREATMENTS] = SM::nAntibioticTreatments;
+//     intReportMappings[Report::MI_NMF_TREATMENTS] = SM::nAntibioticTreatments;
     intReportMappings[Report::MI_FIRST_DAY_DEATHS] = SM::Clinical_FirstDayDeaths;
     intReportMappings[Report::MI_HOSPITAL_FIRST_DAY_DEATHS] = SM::Clinical_HospitalFirstDayDeaths;
     intReportMappings[Report::MI_N_SP_REM_TOO_OLD] = SM::nSubPopRemovalTooOld;
