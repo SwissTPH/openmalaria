@@ -79,6 +79,7 @@ struct StoreHAC{
     // Take a value and either store it or forget it
     void accept( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, T val ){
         if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
+        //TODO: can we differentiate NOT_USED and NOT_ACCEPTED reports, at least in debug mode?
         if( mIndices[measure] == NOT_USED ) return;     // measure not used by this store
         if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
         size_t mIndex = mIndices[measure];

@@ -183,8 +183,7 @@ void Human::summarize() {
     }
     
     mon::reportMHI( mon::MHR_HOSTS, *this, 1 );
-    Survey::current().addDouble( Monitoring::Report::MD_AGE, *this, age(sim::now()).inYears() );
-//     mon::reportMHD( mon::MHD_AGE, *this, age(sim::now()).inYears() );
+    mon::reportMHD( mon::MHD_AGE, *this, age(sim::now()).inYears() );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     

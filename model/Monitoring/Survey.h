@@ -70,21 +70,11 @@ namespace Report {
         MI_TREAT_DEPLOYMENTS,
         MI_NUM  // must be last; not a measure to report
     };
-    /// Measures which are reported as doubles
-    enum DblReportMeasures{
-        MD_AGE,
-        MD_NUM  // must be last; not a measure to report
-    };
 }
 /** Wrap an IntReportMeasures to enforce initialisation. */
 struct ReportMeasureI{
     /* implicit */ ReportMeasureI( Report::IntReportMeasures m ) : code( m ) {}
     Report::IntReportMeasures code;
-};
-/** Wrap an DblReportMeasures to enforce initialisation. */
-struct ReportMeasureD{
-    /* implicit */ ReportMeasureD( Report::DblReportMeasures m ) : code( m ) {}
-    Report::DblReportMeasures code;
 };
 
 /// Data struct for a single survey.
@@ -182,16 +172,6 @@ public:
      * @returns (*this) object to allow chain calling
      */
     Survey& addInt( ReportMeasureI measure, const Host::Human &human, int val );
-    /**
-     * Report some quantity (double), adding the quantity to a total.
-     * 
-     * @param measure Measure value being reported
-     * @param human The host whose data is being reported (used to get age
-     *          group and cohort set)
-     * @param val Quantity (added to total)
-     * @returns (*this) object to allow chain calling
-     */
-    Survey& addDouble( ReportMeasureD measure, const Host::Human &human, double val );
     
     /** Lower level version of addInt(). */
     Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, uint32_t cohortSet, int val );
@@ -256,8 +236,6 @@ private:
     // first index is the measure (IntReportMeasures), second is age group, third is cohort set:
     typedef multi_array<int, 3> ReportsIntAgeT;
     ReportsIntAgeT m_humanReportsInt;
-    typedef multi_array<double, 3> ReportsDblAgeT;
-    ReportsDblAgeT m_humanReportsDouble;
     //@}
     
     void checkpoint( istream& stream );

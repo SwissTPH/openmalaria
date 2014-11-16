@@ -59,6 +59,10 @@ NamedMeasureMapT namedOutMeasures;
 // outputs), type of output (integer or floating point), aggregation, and the
 // corresponding internal measure code.
 void defineOutMeasures(){
+    //NOTE: measures are ordered by their output codes.
+    // Add new outputs with next available code at end of list.
+    // Don't reuse old codes.
+    
     /// Total number of humans
     namedOutMeasures["nHost"] = OutMeasure::humanAC( 0, MHR_HOSTS, false );
     /** The number of human hosts with an infection (patent or not) at the time
@@ -73,6 +77,13 @@ void defineOutMeasures(){
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */
     namedOutMeasures["nPatent"] = OutMeasure::humanAC( 3, MHR_PATENT_HOSTS, false );
+    /// Sum of log(1 + p) where p is the pyrogenic threshold
+    namedOutMeasures["sumLogPyrogenThres"] =
+        OutMeasure::humanAC( 4, MHD_LOG_PYROGENIC_THRESHOLD, true );
+    /** Sum (across hosts) of the natural logarithm of the parasite density of
+     * hosts with detectable parasite density (patent according to the
+     * monitoring diagnostic). */
+    namedOutMeasures["sumlogDens"] = OutMeasure::humanAC( 5, MHD_LOG_DENSITY, true );
     /** The total number of infections in the population: includes both blood
      * and liver stages. Vivax: this is the number of broods. */
     namedOutMeasures["totalInfs"] = OutMeasure::humanAC( 6, MHR_INFECTIONS, false );
@@ -81,35 +92,21 @@ void defineOutMeasures(){
      * Vivax: the number of broods with an active blood stage. */
     namedOutMeasures["totalPatentInf"] =
         OutMeasure::humanAC( 8, MHR_PATENT_INFECTIONS, false );
-    
-    /** Sum (across hosts) of the natural logarithm of the parasite density of
-     * hosts with detectable parasite density (patent according to the
-     * monitoring diagnostic). */
-    namedOutMeasures["sumlogDens"] = OutMeasure::humanAC( 5, MHD_LOG_DENSITY, true );
-    /// Sum of log(1 + p) where p is the pyrogenic threshold
-    namedOutMeasures["sumLogPyrogenThres"] =
-        OutMeasure::humanAC( 4, MHD_LOG_PYROGENIC_THRESHOLD, true );
     /// Sum of the pyrogenic threshold
     namedOutMeasures["sumPyrogenThresh"] =
         OutMeasure::humanAC( 10, MHD_PYROGENIC_THRESHOLD, true );
-    
     /// number of treatments (1st line)
     namedOutMeasures["nTreatments1"] = OutMeasure::humanAC( 11, MHT_TREATMENTS_1, false );
     /// number of treatments (2nd line)
     namedOutMeasures["nTreatments2"] = OutMeasure::humanAC( 12, MHT_TREATMENTS_2, false );
     /// number of treatments (inpatient)
     namedOutMeasures["nTreatments3"] = OutMeasure::humanAC( 13, MHT_TREATMENTS_3, false );
-    
     /// number of episodes (uncomplicated)
     namedOutMeasures["nUncomp"] =
         OutMeasure::humanAC( 14, MHE_UNCOMPLICATED_EPISODES, false );
     /// number of episodes (severe)
     namedOutMeasures["nSevere"] =
         OutMeasure::humanAC( 15, MHE_SEVERE_EPISODES, false );
-    /// Number of episodes (non-malaria fever)
-    namedOutMeasures["nNMFever"] =
-        OutMeasure::humanAC( 27, MHE_NON_MALARIA_FEVERS, false );
-    
     /// cases with sequelae
     namedOutMeasures["nSeq"] = OutMeasure::humanAC( 16, MHO_SEQUELAE, false );
     /// deaths in hospital
@@ -128,6 +125,9 @@ void defineOutMeasures(){
     namedOutMeasures["nHospitalSeqs"] =
         OutMeasure::humanAC( 24, MHO_HOSPITAL_SEQUELAE, false );
     /// Direct death on first day of CM (before treatment takes effect)
+    /// Number of episodes (non-malaria fever)
+    namedOutMeasures["nNMFever"] =
+        OutMeasure::humanAC( 27, MHE_NON_MALARIA_FEVERS, false );
     namedOutMeasures["Clinical_FirstDayDeaths"] =
         OutMeasure::humanAC( 41, MHO_FIRST_DAY_DEATHS, false );
     /// Direct death on first day of CM (before treatment takes effect); hospital only
@@ -135,6 +135,9 @@ void defineOutMeasures(){
         OutMeasure::humanAC( 42, MHO_HOSPITAL_FIRST_DAY_DEATHS, false );
     /// Number of deaths caused by non-malaria fevers
     namedOutMeasures["nNmfDeaths"] = OutMeasure::humanAC( 53, MHO_NMF_DEATHS, false );
+    /** Report the total age of all humans in this a group (sum across humans,
+     * in years). Divide by nHost to get the average age. */
+    namedOutMeasures["sumAge"] = OutMeasure::humanAC( 68, MHD_AGE, true );
 }
 
 }

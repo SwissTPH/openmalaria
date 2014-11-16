@@ -40,7 +40,7 @@ namespace mon {
  * the model can report.
 */
 enum Measure{
-    // MHR: measures for human reports (integers)
+    // ———  MHR: measures for human reports (integers)  ———
     // Number of hosts. Units: humans
     MHR_HOSTS,
     // Number of infected hosts. Units: humans
@@ -54,7 +54,7 @@ enum Measure{
     // Number of new infections in humans. Units: infections
     MHR_NEW_INFECTIONS,
     
-    // MHT: measures for human treatments (integers)
+    // ———  MHT: measures for human treatments (integers)  ———
     // Number of first line treatments in humans. Units: treatments (whole courses)
     MHT_TREATMENTS_1,
     // Number of second line treatments in humans. Units: treatments (whole courses)
@@ -68,7 +68,7 @@ enum Measure{
     // Number of diagnostics used during treatment. Units: diagnostics
     MHT_TREAT_DIAGNOSTICS,
     
-    // MHE: measures for human episodes (integers)
+    // ———  MHE: measures for human episodes (integers)  ———
     // Number of uncomplicated fever episodes in humans. Units: cases
     MHE_UNCOMPLICATED_EPISODES,
     // Number of severe fever episodes in humans. Units: cases
@@ -76,7 +76,7 @@ enum Measure{
     // Number of fever episodes in humans not due to malaria. Units: cases
     MHE_NON_MALARIA_FEVERS,
     
-    // MHO: outcomes
+    // ———  MHO: outcomes  ———
     // Number of human patients dying directly due to malaria. Units: cases
     MHO_DIRECT_DEATHS,
     // Number of human patients dying indirectly (delayed deaths) due to malaria. Units: cases
@@ -96,7 +96,7 @@ enum Measure{
     // Number of human patients dying on their first day in hospital due to malaria. Units: cases
     MHO_HOSPITAL_FIRST_DAY_DEATHS,
     
-    // MHD: measures for human reports (double)
+    // ———  MHD: measures for human reports (double)  ———
     // Expected number of new infections per human. Units: infections
     MHD_EXPECTED_INFECTED,
     // Report of log of pyrogenic threshold. Units: ?
