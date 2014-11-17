@@ -46,7 +46,7 @@ public:
     GVIComponent( ComponentId, const scnXml::GVIDescription& elt,
                const map<string,size_t>& species_name_map );
     
-    void deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const;
+    void deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const;
     
     virtual Component::Type componentType() const;
     

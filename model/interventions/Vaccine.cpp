@@ -40,7 +40,7 @@ vector<VaccineComponent*> VaccineComponent::params;
 ComponentId VaccineComponent::reportComponent = ComponentId_pop;
 
 VaccineComponent::VaccineComponent( ComponentId component, const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
-        HumanInterventionComponent(component, Report::MI_VACCINATION_CTS, Report::MI_VACCINATION_TIMED),
+        HumanInterventionComponent(component),
         type(type),
         decayFunc(DecayFunction::makeObject( vd.getDecay(), "decay" )),
         efficacyB(vd.getEfficacyB().getValue())
@@ -63,11 +63,11 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
     params[component.id] = this;
 }
 
-void VaccineComponent::deploy(Host::Human& human, Deployment::Method method, VaccineLimits vaccLimits) const
+void VaccineComponent::deploy(Host::Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits) const
 {
     bool administered = human.getVaccine().possiblyVaccinate( human, id(), vaccLimits );
     if( administered && VaccineComponent::reportComponent == id() ){
-        Survey::current().addInt( reportMeasure(method), human, 1 );
+        mon::reportMHD( mon::MHD_VACCINATIONS, human, method );
     }
 }
 

@@ -32,20 +32,35 @@ namespace mon {
 
 // Describes each "measure" to be output
 struct OutMeasure{
-    int outId;  // number used in output to identify this measure/aggregation
+    // Number used in output to identify this measure/aggregation.
+    // This is what identifies this "measure".
+    int outId;
+    
+    // The following control what is reported by this measure:
     Measure m;  // internal measure (e.g. MHR_HOSTS) this comes from
     bool isDouble;  // false: type is int; true: type is double
     bool byAge; // segregate by age
     bool byCohort;      // segregate by cohort
+    uint8_t method;     // deployment method (see above)
     
     // Convenience constructors:
-    OutMeasure() : outId(-1), m(M_NUM), isDouble(false), byAge(false), byCohort(false) {}
-    OutMeasure( int outId, Measure m, bool isDouble, bool byAge, bool byCohort ) :
-        outId(outId), m(m), isDouble(isDouble), byAge(byAge), byCohort(byCohort)
+    OutMeasure() : outId(-1), m(M_NUM), isDouble(false), byAge(false), byCohort(false), method(0) {}
+    OutMeasure( int outId, Measure m, bool isDouble, bool byAge, bool byCohort, uint8_t method ) :
+        outId(outId), m(m), isDouble(isDouble), byAge(byAge), byCohort(byCohort), method(method)
     {}
     // Something with reports segregated by human age and cohort membership
     static OutMeasure humanAC( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, true, true );
+        return OutMeasure( outId, m, isDouble, true, true, Deploy::NA );
+    }
+    // Deployments with reports segregated by human age and cohort membership
+    // Method can be Deploy::NA to not match deployments (but in this case,
+    // better to use a different constructor), or it can be one of the three
+    // deployment methods (to only count reports of that type of deployment),
+    // or it can be a bit-or-ed combination of any of the three methods (to
+    // count deployments of multiple types simultaneously).
+    static OutMeasure humanDeploy( int outId, Measure m, Deploy::Method method ){
+        assert( method >= 0 && method <= (Deploy::TIMED|Deploy::CTS|Deploy::TREAT) );
+        return OutMeasure( outId, m, false, true, true, method );
     }
 };
 
@@ -118,6 +133,20 @@ void defineOutMeasures(){
     /// Number of deaths directly caused by malaria
     namedOutMeasures["nDirDeaths"] =
         OutMeasure::humanAC( 19, MHO_DIRECT_DEATHS, false );
+    /** Number of vaccine doses given via EPI.
+     * 
+     * Since schema 22, each vaccine type may be deployed independently. To be
+     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
+     * (with an "effect" element) will be reported. */
+    namedOutMeasures["nEPIVaccinations"] =
+        OutMeasure::humanDeploy( 20, MHD_VACCINATIONS, Deploy::CTS );
+    /** Number of vaccine doses given via mass campaign.
+     * 
+     * Since schema 22, each vaccine type may be deployed independently. To be
+     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
+     * (with an "effect" element) will be reported. */
+    namedOutMeasures["nMassVaccinations"] =
+        OutMeasure::humanDeploy( 22, MHD_VACCINATIONS, Deploy::TIMED );
     /// recoveries in hospital
     namedOutMeasures["nHospitalRecovs"] =
         OutMeasure::humanAC( 23, MHO_HOSPITAL_RECOVERIES, false );

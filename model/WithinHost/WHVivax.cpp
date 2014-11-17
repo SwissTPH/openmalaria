@@ -380,7 +380,7 @@ void WHVivax::treatment( Host::Human& human, TreatmentId treatId ){
     // triggered intervention deployments:
     const Treatments& treat = Treatments::select( treatId );
     treat.deploy( human,
-                  interventions::Deployment::TREAT,
+                  mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
 bool WHVivax::optionalPqTreatment(){

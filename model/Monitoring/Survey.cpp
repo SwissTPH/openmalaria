@@ -83,9 +83,9 @@ public:
         codeMap["sumAge"] = SM::BLANK;
         
         codeMap["nTransmit"] = SM::nTransmit;
-        codeMap["nEPIVaccinations"] = SM::nEPIVaccinations;
+        codeMap["nEPIVaccinations"] = SM::BLANK;
         codeMap["allCauseIMR"] = SM::allCauseIMR;
-        codeMap["nMassVaccinations"] = SM::nMassVaccinations;
+        codeMap["nMassVaccinations"] = SM::BLANK;
         codeMap["annAvgK"] = SM::annAvgK;
         codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
         codeMap["Vector_Nv0"] = SM::Vector_Nv0;
@@ -149,8 +149,6 @@ void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
                    const scnXml::Monitoring& monitoring,
                    size_t nSurveys ){
-    intReportMappings[Report::MI_VACCINATION_TIMED] = SM::nMassVaccinations;
-    intReportMappings[Report::MI_VACCINATION_CTS] = SM::nEPIVaccinations;
     intReportMappings[Report::MI_NEW_INFECTIONS] = SM::nNewInfections;
     intReportMappings[Report::MI_ITN_TIMED] = SM::nMassITNs;
     intReportMappings[Report::MI_ITN_CTS] = SM::nEPI_ITNs;

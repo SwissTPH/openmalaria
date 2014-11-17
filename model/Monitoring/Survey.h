@@ -48,8 +48,6 @@ namespace Report {
      * Note: for timed/continuous deployment pairs, the continuous version
      * is always the timed version + 1. */
     enum IntReportMeasures{
-        MI_VACCINATION_TIMED,
-        MI_VACCINATION_CTS,
         MI_NEW_INFECTIONS,
         MI_ITN_TIMED,
         MI_ITN_CTS,

@@ -47,13 +47,6 @@ enum SurveyMeasure {
 //     /// Contribuion to immunity functions (removed)
 //     contrib= 9,
     
-    /** Number of vaccine doses given via EPI.
-     * 
-     * Since schema 22, each vaccine type may be deployed independently. To be
-     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
-     * (with an "effect" element) will be reported. */
-    nEPIVaccinations= 20,
-    
     /** All cause infant mortality rate
      * 
      * Reports death rate of infants due to all causes (malaria as modelled
@@ -64,13 +57,6 @@ enum SurveyMeasure {
      * line 74).
      */
     allCauseIMR= 21,
-    
-    /** Number of vaccine doses given via mass campaign.
-     * 
-     * Since schema 22, each vaccine type may be deployed independently. To be
-     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
-     * (with an "effect" element) will be reported. */
-    nMassVaccinations= 22,
     
 //     /// Number of IPT Doses (removed together with IPT model)
 //     nIPTDoses= 25,

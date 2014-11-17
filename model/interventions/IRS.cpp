@@ -58,7 +58,7 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
     componentsByIndex[id.id] = this;
 }
 
-void IRSComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
+void IRSComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
     Survey::current().addInt( reportMeasure(method), human, 1 );
 }

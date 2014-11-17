@@ -65,7 +65,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     componentsByIndex[id.id] = this;
 }
 
-void ITNComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
+void ITNComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent( *this );
     Survey::current().addInt( reportMeasure(method), human, 1 );
 }

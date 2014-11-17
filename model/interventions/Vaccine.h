@@ -42,7 +42,7 @@ class VaccineComponent : public HumanInterventionComponent {
 public:
     VaccineComponent( ComponentId id, const scnXml::VaccineDescription& seq, Vaccine::Types type );
     
-    void deploy( Host::Human& human, Deployment::Method method, VaccineLimits vaccLimits )const;
+    void deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits )const;
     
     virtual Component::Type componentType() const;
     

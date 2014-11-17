@@ -47,15 +47,24 @@ struct StoreHAC{
     // These are the stored reports
     // Array has four dimensions; see index()
     vector<T> reports;
-    // This maps from measures (MHR_HOSTS, etc) to an index in reports or NOT_USED
-    vector<size_t> mIndices;
-    // This maps from an index in reports to an output measure
-    vector<int> outMeasures;
-    
     // get an index in reports
     inline size_t index( size_t m, size_t s, size_t a, size_t c ){
         return c + nCohortSets * (a + nAgeGroups * (s + nSurveys * m));
     }
+    
+    // This maps from an index in reports to an output measure
+    vector<int> outMeasures;
+    
+    // mIndices and deployIndices both map from measures to indices.
+    // The former should be faster but is insufficient for deployments.
+    // Usage should not overlap (i.e. only one should match any measure).
+    
+    // This maps from measures (MHR_HOSTS, etc.) to an index in reports or NOT_USED
+    vector<size_t> mIndices;
+    // This maps from measures (MHD_VACCINATIONS, etc.) to a Deploy::Method enum
+    // and an index in reports. Measures may have any number of matches here.
+    typedef multimap<int,pair<uint8_t,size_t> > DeployInd_t;
+    DeployInd_t deployIndices;
     
     // Set up ready to accept reports.
     void init( const list<OutMeasure>& required ){
@@ -73,40 +82,52 @@ struct StoreHAC{
             }
             if( !it->byAge || !it->byCohort ) continue;
             
-            if( mIndices[it->m] != NOT_USED ){
+            if( mIndices[it->m] != NOT_USED ||
+                (it->method == Deploy::NA && deployIndices.count(it->m) > 0) )
+            {
                 //FIXME: use a name not a number to describe the measure
                 throw util::xml_scenario_error( (boost::format("multiple use "
                     "of output measure %1% by age and cohort") %it->m).str() );
             }
             
-            mIndices[it->m] = outMeasures.size();       // length becomes our index
+            size_t newInd = outMeasures.size();     // length becomes our index
+            if( it->method == Deploy::NA ){
+                mIndices[it->m] = newInd;
+            }else{
+                deployIndices.insert( make_pair(it->m, make_pair(it->method, newInd)) );
+            }
             outMeasures.push_back( it->outId ); // increment length
         }
         
         reports.resize(outMeasures.size() * nSurveys * nAgeGroups * nCohortSets);
     }
     
-    // Take a value and either store it or forget it
-    void accept( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, T val ){
-        if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
+    // Take a reported value and either store it or forget it
+    void report( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, T val ){
         assert( mIndices[measure] != NOT_ACCEPTED );
-        if( mIndices[measure] == NOT_USED ) return;     // measure not used by this store
-        if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
-        size_t mIndex = mIndices[measure];
-#ifndef NDEBUG
-        if( mIndex >= outMeasures.size() ||
-            survey >= nSurveys ||
-            ageIndex >= nAgeGroups ||
-            cohortSet >= nCohortSets
-        ){
-            cout << "Index out of bounds for survey:\t" << survey << " of " << nSurveys
-                << "\nmeasure number\t" << mIndex << " of " << outMeasures.size()
-                << "\nage group\t" << ageIndex << " of " << nAgeGroups
-                << "\ncohort set\t" << cohortSet << " of " << nCohortSets
-                << endl;
+        if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
+        if( mIndices[measure] == NOT_USED ){    // measure not used by this store
+            assert( deployIndices.count(measure) == 0);
+            return;
         }
-#endif
-        reports[index(mIndex,survey,ageIndex,cohortSet)] += val;
+        if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
+        add( mIndices[measure], survey, ageIndex, cohortSet, val );
+    }
+    
+    // Take a deployment report and potentially store it in one or more places
+    void deploy( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, Deploy::Method method, T val ){
+        assert( method == Deploy::NA || method == Deploy::TIMED || method == Deploy::CTS || method == Deploy::TREAT );
+        assert( mIndices[measure] == NOT_USED );
+        if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
+        if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
+        
+        typedef DeployInd_t::const_iterator const_it_t;
+        pair<const_it_t,const_it_t> range = deployIndices.equal_range( measure );
+        for( const_it_t it = range.first; it != range.second; ++it ){
+            uint8_t mask = it->second.first;
+            if( (mask & method) == 0 ) continue;
+            add( it->second.second, survey, ageIndex, cohortSet, val );
+        }
     }
     
     // Write stored values to stream
@@ -144,6 +165,24 @@ struct StoreHAC{
             y & stream;
         }
         // mIndices and outMeasures are constant after initialisation
+    }
+    
+private:
+    inline void add(size_t mIndex, size_t survey, size_t ageIndex, uint32_t cohortSet, T val){
+#ifndef NDEBUG
+        if( mIndex >= outMeasures.size() ||
+            survey >= nSurveys ||
+            ageIndex >= nAgeGroups ||
+            cohortSet >= nCohortSets
+        ){
+            cout << "Index out of bounds for survey:\t" << survey << " of " << nSurveys
+                << "\nmeasure number\t" << mIndex << " of " << outMeasures.size()
+                << "\nage group\t" << ageIndex << " of " << nAgeGroups
+                << "\ncohort set\t" << cohortSet << " of " << nCohortSets
+                << endl;
+        }
+#endif
+        reports[index(mIndex,survey,ageIndex,cohortSet)] += val;
     }
 };
 
@@ -187,14 +226,18 @@ void writeMHD( ostream& stream, int survey ){
 
 void reportMHI( Measure measure, const Host::Human& human, int val ){
     size_t ageIndex = human.getMonitoringAgeGroup().i();
-    storeHACI.accept( measure, currentSurvey, ageIndex, human.cohortSet(), val );
+    storeHACI.report( measure, currentSurvey, ageIndex, human.cohortSet(), val );
 }
 void reportMHF( Measure measure, const Host::Human& human, double val ){
     size_t ageIndex = human.getMonitoringAgeGroup().i();
-    storeHACD.accept( measure, currentSurvey, ageIndex, human.cohortSet(), val );
+    storeHACD.report( measure, currentSurvey, ageIndex, human.cohortSet(), val );
 }
 void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val ){
-    storeHACI.accept( measure, survey, ageGroup.i(), cohortSet, val );
+    storeHACI.report( measure, survey, ageGroup.i(), cohortSet, val );
+}
+void reportMHD( Measure measure, const Host::Human& human, Deploy::Method method ){
+    size_t ageIndex = human.getMonitoringAgeGroup().i();
+    storeHACI.deploy( measure, currentSurvey, ageIndex, human.cohortSet(), method, 1 /*always report 1 deployment*/ );
 }
 
 void checkpoint( ostream& stream ){

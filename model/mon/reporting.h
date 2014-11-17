@@ -96,6 +96,16 @@ enum Measure{
     // Number of human patients dying on their first day in hospital due to malaria. Units: cases
     MHO_HOSPITAL_FIRST_DAY_DEATHS,
     
+    // ———  MHD: intervention deployments  ———
+    /** Number of vaccine doses deployed. Units: doses (including first dose,
+     * second dose, booster doses, etc.).
+     * 
+     * Since schema 22, each vaccine type may be deployed independently. To be
+     * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
+     * (with an "effect" element) will be reported. */
+    MHD_VACCINATIONS,
+    //TODO: also more specific outputs?
+    
     // ———  MHF: measures for human reports (double)  ———
     // Expected number of new infections per human. Units: infections
     MHF_EXPECTED_INFECTED,
@@ -117,12 +127,24 @@ const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
 /// The current survey number (read only usage)
 extern size_t currentSurvey;
 
+namespace Deploy {
+    /// Deployment methods
+    enum Method {
+        NA = 0,     // not a deployment method
+        TIMED = 1<<0,   // mass distribution campaign
+        CTS = 1<<1, // continuous deployment (EPI, etc.)
+        TREAT = 1<<2    // triggered by case management
+    };
+}
+
 /// Report some value (integer) for some human to the current survey.
 void reportMHI( Measure measure, const Host::Human& human, int val );
 /// Report some value (floating point) for some human to the current survey.
 void reportMHF( Measure measure, const Host::Human& human, double val );
 /// Report some value (integer) for some survey, age group and cohort set
 void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val );
+/// Report one deployment for some human to the current survey.
+void reportMHD( Measure measure, const Host::Human& human, Deploy::Method method );
 /// Query whether an output measure is used.
 bool isUsedM( Measure measure );
 

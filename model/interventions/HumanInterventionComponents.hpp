@@ -93,7 +93,7 @@ HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTD
     std::stable_sort( components.begin(), components.end(), componentCmp );
 }
 
-void HumanIntervention::deploy( Human& human, Deployment::Method method,
+void HumanIntervention::deploy( Human& human, mon::Deploy::Method method,
     VaccineLimits vaccLimits ) const
 {
     for( vector<const HumanInterventionComponent*>::const_iterator it = components.begin();
@@ -128,7 +128,7 @@ TriggeredDeployments::TriggeredDeployments(const scnXml::TriggeredDeployments& e
     }
 }
 void TriggeredDeployments::deploy(Human& human,
-        Deployment::Method method, VaccineLimits vaccLimits) const
+        mon::Deploy::Method method, VaccineLimits vaccLimits) const
 {
     for( vector<SubList>::const_iterator it = lists.begin(); it != lists.end(); ++it ){
         it->deploy( human, method, vaccLimits );
@@ -156,7 +156,7 @@ TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::Depl
     if( coverage <= 0.0 || minAge >= maxAge ) components.clear();
 }
 void TriggeredDeployments::SubList::deploy( Host::Human& human,
-        Deployment::Method method, VaccineLimits vaccLimits )const
+        mon::Deploy::Method method, VaccineLimits vaccLimits )const
 {
     // This may be used within a time step; in that case we use human age at
     // the beginning of the step since this gives the expected result with age
@@ -180,7 +180,7 @@ public:
     virtual ~RecruitmentOnlyComponent() {}
     
     /// Reports to monitoring, nothing else
-    virtual void deploy( Host::Human& human, Deployment::Method method, VaccineLimits ) const{
+    virtual void deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits ) const{
         Survey::current().addInt( reportMeasure(method), human, 1 );
     }
     
@@ -205,7 +205,7 @@ public:
         negative( elt.getNegative() )
     {}
     
-    void deploy( Human& human, Deployment::Method method, VaccineLimits vaccLimits ) const{
+    void deploy( Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits ) const{
         Survey::current().addInt( reportMeasure(method), human, 1 );
         if( human.withinHostModel->diagnosticResult(diagnostic) ){
             positive.deploy( human, method, vaccLimits );
@@ -254,7 +254,7 @@ public:
         }
     }
     
-    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
+    void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
         Survey::current().addInt( reportMeasure(method), human, 1 );
         human.withinHostModel->treatSimple( timeLiver, timeBlood );
     }
@@ -283,7 +283,7 @@ public:
     {
     }
     
-    void deploy( Human& human, Deployment::Method method, VaccineLimits ) const{
+    void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
         Survey::current().addInt( reportMeasure(method), human, 1 );
         human.withinHostModel->treatPkPd( schedule, dosage, delay_h );
     }
@@ -309,7 +309,7 @@ public:
         tree(Clinical::CMDecisionTree::create(elt, false))
     {}
     
-    void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
+    void deploy( Human& human, mon::Deploy::Method method, VaccineLimits )const{
         Clinical::CMDTOut out = tree.exec( Clinical::CMHostData(human,
                 human.age(sim::nowOrTs1()).inYears(),
                 Clinical::Episode::NONE /*parameter not needed*/) );
@@ -335,7 +335,7 @@ public:
     ClearImmunityComponent( ComponentId id ) :
         HumanInterventionComponent(id, Report::MI_NUM, Report::MI_NUM /*never reported*/) {}
     
-    void deploy( Human& human, Deployment::Method method, VaccineLimits )const{
+    void deploy( Human& human, mon::Deploy::Method method, VaccineLimits )const{
         human.clearImmunity();
     }
     

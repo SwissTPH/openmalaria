@@ -22,6 +22,7 @@
 
 #include "Global.h"
 #include "Monitoring/Survey.h"
+#include "mon/reporting.h"
 #include <schema/interventions.h>
 #include <boost/integer_traits.hpp>
 
@@ -32,14 +33,6 @@ namespace Host {
     class Human;
 }
 namespace interventions {
-
-namespace Deployment {
-    enum Method {
-        TIMED,   // mass distribution campaign
-        CTS,     // continuous deployment (EPI, etc.)
-        TREAT   // triggered by case management
-    };
-}
 
 /** Enumeration of all available components, in the order that these should be
  * deployed in within a single intervention. */
@@ -101,7 +94,7 @@ public:
      * @param human Individual receiving the intervention
      * @param method Channel of deployment (mass, continuous)
      */
-    virtual void deploy( Host::Human& human, Deployment::Method method,
+    virtual void deploy( Host::Human& human, mon::Deploy::Method method,
         VaccineLimits vaccLimits ) const =0;
     
     /** Get the component identifier. */
@@ -126,6 +119,7 @@ public:
     }
     
 protected:
+    //HACK: support two types of measure during migration to new monitoring system
     /** Construct (from a derived class).
      * 
      * @param id Component identifier; used as an identifier for cumulative
@@ -138,13 +132,24 @@ protected:
                                         Monitoring::ReportMeasureI ctsMeasure,
                                         Monitoring::ReportMeasureI timedMeasure) :
             m_id(id),
-            m_measureCts( ctsMeasure ), m_measureTimed( timedMeasure ) {}
+            m_measureCts(ctsMeasure), m_measureTimed(timedMeasure) {}
+    /** Construct (from a derived class).
+     * 
+     * @param id Component identifier; used as an identifier for cumulative
+     *  deployment as well as to match human-specific components to general
+     *  parameters (i.e. objects of the class extending this one).
+     */
+    explicit HumanInterventionComponent(ComponentId id) :
+            m_id(id),
+            m_measureCts(Monitoring::Report::MI_NUM), m_measureTimed(Monitoring::Report::MI_NUM) {}
     
     /** Trivial helper function to get deployment measure. */
-    inline Monitoring::ReportMeasureI reportMeasure( Deployment::Method method )const{
-        return (method == Deployment::TIMED) ? m_measureTimed :
-            (method == Deployment::CTS) ? m_measureCts :
+    inline Monitoring::ReportMeasureI reportMeasure( mon::Deploy::Method method )const{
+        Monitoring::ReportMeasureI m = (method == mon::Deploy::TIMED) ? m_measureTimed :
+            (method == mon::Deploy::CTS) ? m_measureCts :
             Monitoring::Report::MI_TREAT_DEPLOYMENTS;
+        assert( m.code != Monitoring::Report::MI_NUM );
+        return m;
     }
     
 private:
@@ -165,7 +170,7 @@ public:
     explicit HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTDeploy>& componentList );
     
     /** Deploy all components to a pre-selected human. */
-    void deploy( Host::Human& human, Deployment::Method method,
+    void deploy( Host::Human& human, mon::Deploy::Method method,
         VaccineLimits vaccLimits ) const;
     
 #ifdef WITHOUT_BOINC
@@ -183,14 +188,14 @@ class TriggeredDeployments {
 public:
     TriggeredDeployments( const scnXml::TriggeredDeployments& elt );
     
-    void deploy( Host::Human& human, Deployment::Method method,
+    void deploy( Host::Human& human, mon::Deploy::Method method,
             VaccineLimits vaccLimits )const;
     
 private:
     struct SubList : protected HumanIntervention{
         SubList( const scnXml::TriggeredDeployments::DeployType& elt );
         
-        void deploy( Host::Human& human, Deployment::Method method,
+        void deploy( Host::Human& human, mon::Deploy::Method method,
             VaccineLimits vaccLimits )const;
         
         // Deployment restrictions:

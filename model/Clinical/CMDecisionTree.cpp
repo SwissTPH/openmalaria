@@ -408,7 +408,7 @@ protected:
     
     virtual CMDTOut exec( CMHostData hostData ) const{
         deploy( hostData.human,
-                  interventions::Deployment::TREAT,
+                  mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
         
         //NOTE: it's not intuitively obvious what value should be returned here

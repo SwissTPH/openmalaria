@@ -205,7 +205,7 @@ protected:
         vaccLimits.set( deploy );
     }
     
-    inline void deployToHuman( Host::Human& human, Deployment::Method method ) const{
+    inline void deployToHuman( Host::Human& human, mon::Deploy::Method method ) const{
         intervention->deploy( human, method, vaccLimits );
     }
     
@@ -249,7 +249,7 @@ public:
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
                     if( util::random::bernoulli( coverage ) ){
-                        deployToHuman( *iter, Deployment::TIMED );
+                        deployToHuman( *iter, mon::Deploy::TIMED );
                     }
                 }
             }
@@ -320,7 +320,7 @@ public:
                  iter != unprotected.end(); ++iter)
             {
                 if( util::random::uniform_01() < additionalCoverage ){
-                    deployToHuman( **iter, Deployment::TIMED );
+                    deployToHuman( **iter, mon::Deploy::TIMED );
                 }
             }
         }
@@ -402,7 +402,7 @@ public:
                 ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
             {
-                deployToHuman( human, Deployment::CTS );
+                deployToHuman( human, mon::Deploy::CTS );
             }
         }//else: for some reason, a deployment age was missed; ignore it
         return true;
