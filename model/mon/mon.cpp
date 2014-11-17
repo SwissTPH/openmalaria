@@ -132,14 +132,18 @@ struct StoreHAC{
     
     // Write stored values to stream
     void write( ostream& stream, int survey ){
+        map<int,size_t> measuresOrdered;
         for( size_t m = 0; m < outMeasures.size(); ++m ){
-            int outMeasure = outMeasures[m];
+            measuresOrdered[outMeasures[m]] = m;
+        }
+        typedef pair<int,size_t> P;
+        foreach( P mp, measuresOrdered ){
             for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
                 for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
                     // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
                     const int col2 = 1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet ) + ageGroup + 1;
-                    T value = reports[index(m,survey-1,ageGroup,cohortSet)];
-                    stream << survey << '\t' << col2 << '\t' << outMeasure
+                    T value = reports[index(mp.second,survey-1,ageGroup,cohortSet)];
+                    stream << survey << '\t' << col2 << '\t' << mp.first
                         << '\t' << value << Monitoring::lineEnd;
                 }
             }
