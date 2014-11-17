@@ -24,8 +24,6 @@
 #include "WithinHost/WHInterface.h"
 #include "Parameters.h"
 #include "Monitoring/Continuous.h"
-#include "Monitoring/Survey.h"
-#include "mon/reporting.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -35,7 +33,6 @@
 
 namespace OM { namespace Host {
     using namespace OM::util;
-    using namespace Monitoring;
 
 double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
 double InfectionIncidenceModel::InfectionrateShapeParam;
@@ -104,7 +101,7 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
         }
     }
     
-    Continuous.registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
+    Monitoring::Continuous.registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
 }
 
 
@@ -227,7 +224,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
         // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
-    Survey::current().addInt( Report::MI_NEW_INFECTIONS, human, n );
+    mon::reportMHI( mon::MHR_NEW_INFECTIONS, human, n );
     ctsNewInfections += n;
     return n;
   }

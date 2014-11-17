@@ -186,7 +186,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         // UC2: official care only
         
         if( useDiagnosticUC ){
-            Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
+            mon::reportMHI( mon::MHT_TREAT_DIAGNOSTICS, human, 1 );
             if( !human.withinHostModel->diagnosticResult(Survey::diagnostic()) )
                 return; // negative outcome: no treatment
         }
@@ -205,7 +205,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         }
         
         if( human.withinHostModel->optionalPqTreatment() )
-            Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
+            mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
     } else {
         // No change in parasitological status: non-treated
     }

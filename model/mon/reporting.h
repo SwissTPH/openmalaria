@@ -53,6 +53,10 @@ enum Measure{
     MHR_PATENT_INFECTIONS,
     // Number of new infections in humans. Units: infections
     MHR_NEW_INFECTIONS,
+    // Number of sub-population removals due to first event. Units: humans
+    MHR_SUB_POP_REM_FIRST_EVENT,
+    // Number of sub-population removals due to expiry. Units: humans
+    MHR_SUB_POP_REM_TOO_OLD,
     
     // ———  MHT: measures for human treatments (integers)  ———
     // Number of first line treatments in humans. Units: treatments (whole courses)

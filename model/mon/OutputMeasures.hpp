@@ -162,6 +162,9 @@ void defineOutMeasures(){
     /// Direct death on first day of CM (before treatment takes effect); hospital only
     namedOutMeasures["Clinical_HospitalFirstDayDeaths"] =
         OutMeasure::humanAC( 42, MHO_HOSPITAL_FIRST_DAY_DEATHS, false );
+    /** The number of actual infections since the last survey. */
+    namedOutMeasures["nNewInfections"] =
+        OutMeasure::humanAC( 43, MHR_NEW_INFECTIONS, false );
     /** The number of ITNs delivered by mass distribution since last survey.
      *
      * These are "modelled ITNs": cover only a single person, cannot be passed
@@ -211,6 +214,24 @@ void defineOutMeasures(){
      * when the diagnostic is positive. Also see nCtsMDA description. */
     namedOutMeasures["nCtsScreenings"] =
         OutMeasure::humanDeploy( 60, MHD_SCREEN, Deploy::CTS );
+    /** Number of removals from a sub-population due to expiry of duration of
+     * membership (e.g. intervention too old). */
+    namedOutMeasures["nSubPopRemovalTooOld"] =
+        OutMeasure::humanAC( 61, MHR_SUB_POP_REM_TOO_OLD, false );
+    /** Number of removals from a sub-population due to first
+     * infection/bout/treatment (see onFirstBout & co). */
+    namedOutMeasures["nSubPopRemovalFirstEvent"] =
+        OutMeasure::humanAC( 62, MHR_SUB_POP_REM_FIRST_EVENT, false );
+    /** Report the number of Primaquine treatments given. */
+    namedOutMeasures["nPQTreatments"] =
+        OutMeasure::humanAC( 63, MHT_PQ_TREATMENTS, false );
+    /** Report the number of diagnostics used during treatment.
+     * 
+     * This is not the same as Clinical_RDTs + Clinical_Microscopy: those
+     * outputs are used by the "event scheduler" 1-day time step clinical
+     * model, whereas this output is used by the 5-day time step model. */
+    namedOutMeasures["nTreatDiagnostics"] =
+        OutMeasure::humanAC( 64, MHT_TREAT_DIAGNOSTICS, false );
     /** Number of "recruitment only" recruitments via timed deployment. */
     namedOutMeasures["nMassRecruitOnly"] =
         OutMeasure::humanDeploy( 65, MHD_RECRUIT, Deploy::TIMED );

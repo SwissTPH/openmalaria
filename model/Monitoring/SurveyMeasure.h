@@ -123,9 +123,6 @@ enum SurveyMeasure {
     //Clinical_DrugUsage = 40,
     //@}
     
-    /** The number of actual infections since the last survey. */
-    nNewInfections = 43,
-    
     /** Defunct; was used by "vector availability" intervention (which is now a
      * sub-set of GVI). */
 //     nMassVA = 47,
@@ -142,23 +139,6 @@ enum SurveyMeasure {
     
 //     /// Number of antibiotic treatments given (disabled — not used)
 //     nAntibioticTreatments = 54,
-    
-    /** Number of removals from a sub-population due to expiry of duration of
-     * membership (e.g. intervention too old). */
-    nSubPopRemovalTooOld = 61,
-    /** Number of removals from a sub-population due to first
-     * infection/bout/treatment (see onFirstBout & co). */
-    nSubPopRemovalFirstEvent = 62,
-    
-    /** Report the number of Primaquine treatments given. */
-    nPQTreatments = 63,
-    
-    /** Report the number of diagnostics used during treatment.
-     * 
-     * This is not the same as Clinical_RDTs + Clinical_Microscopy: those
-     * outputs are used by the "event scheduler" 1-day time step clinical
-     * model, whereas this output is used by the 5-day time step model. */
-    nTreatDiagnostics = 64,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

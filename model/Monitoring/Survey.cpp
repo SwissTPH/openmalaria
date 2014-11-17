@@ -41,8 +41,6 @@ void writeValue(ostream& file, int measure, int survey, T& value);
 
 void writeMap (ostream& file, int measure, int survey, map<string,double>& data);
 
-size_t intReportMappings[Report::MI_NUM];
-
 // -----  Static members  -----
 
 vector<SimTime> AgeGroup::upperBound;
@@ -96,6 +94,11 @@ public:
         codeMap["nMassRecruitOnly"] = SM::BLANK;
         codeMap["nCtsRecruitOnly"] = SM::BLANK;
         codeMap["nTreatDeployments"] = SM::BLANK;
+        codeMap["nNewInfections"] = SM::BLANK;
+        codeMap["nSubPopRemovalTooOld"] = SM::BLANK;
+        codeMap["nSubPopRemovalFirstEvent"] = SM::BLANK;
+        codeMap["nPQTreatments"] = SM::BLANK;
+        codeMap["nTreatDiagnostics"] = SM::BLANK;
         
         codeMap["nTransmit"] = SM::nTransmit;
         codeMap["allCauseIMR"] = SM::allCauseIMR;
@@ -108,12 +111,7 @@ public:
         codeMap["inputEIR"] = SM::inputEIR;
         codeMap["simulatedEIR"] = SM::simulatedEIR;
         codeMap["Clinical_RDTs"] = SM::Clinical_RDTs;
-        codeMap["nNewInfections"] = SM::nNewInfections;
         codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
-        codeMap["nSubPopRemovalTooOld"] = SM::nSubPopRemovalTooOld;
-        codeMap["nSubPopRemovalFirstEvent"] = SM::nSubPopRemovalFirstEvent;
-        codeMap["nPQTreatments"] = SM::nPQTreatments;
-        codeMap["nTreatDiagnostics"] = SM::nTreatDiagnostics;
         
         removedCodes.insert("contrib");
         removedCodes.insert("nIPTDoses");
@@ -149,12 +147,6 @@ void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
                    const scnXml::Monitoring& monitoring,
                    size_t nSurveys ){
-    intReportMappings[Report::MI_NEW_INFECTIONS] = SM::nNewInfections;
-    intReportMappings[Report::MI_N_SP_REM_TOO_OLD] = SM::nSubPopRemovalTooOld;
-    intReportMappings[Report::MI_N_SP_REM_FIRST_EVENT] = SM::nSubPopRemovalFirstEvent;
-    intReportMappings[Report::MI_PQ_TREATMENTS] = SM::nPQTreatments;
-    intReportMappings[Report::MI_TREAT_DIAGNOSTICS] = SM::nTreatDiagnostics;
-    
     AgeGroup::init (monitoring);
     
     mon::initialise( nSurveys, AgeGroup::getNumGroups(), Surveys.numCohortSets(), monitoring );
@@ -247,11 +239,6 @@ Survey::Survey() :
 {}
 
 void Survey::allocate(){
-    size_t numAgeGroups = AgeGroup::getNumGroups();
-    size_t nCohortSets = Surveys.numCohortSets();
-    m_humanReportsInt.resize(boost::extents[Report::MI_NUM][numAgeGroups][nCohortSets]);
-    
-    
     m_nTransmit = numeric_limits<double>::signaling_NaN();
     m_annAvgK = numeric_limits<double>::signaling_NaN();
     // These 3 are set as a whole and so don't require allocation:
@@ -266,53 +253,9 @@ void Survey::allocate(){
     m_Clinical_Microscopy = 0;
 }
 
-Survey& Survey::addInt( ReportMeasureI measure, const Host::Human &human, int val ){
-    size_t ageIndex = human.getMonitoringAgeGroup().i();
-#ifndef NDEBUG
-    if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
-        ageIndex >= m_humanReportsInt.shape()[1] ||
-        human.cohortSet() >= m_humanReportsInt.shape()[2]
-    ){
-        cout << "Index out of bounds for survey:\t" << static_cast<void*>(this)
-            << "\nmeasure number\t" << measure.code << " of " << m_humanReportsInt.shape()[0]
-            << "\nage group\t" << ageIndex << " of " << m_humanReportsInt.shape()[1]
-            << "\ncohort set\t" << human.cohortSet() << " of " << m_humanReportsInt.shape()[2]
-            << endl;
-    }
-#endif
-    m_humanReportsInt[measure.code][ageIndex][human.cohortSet()] += val;
-    return *this;
-}
-
-Survey& Survey::addInt( ReportMeasureI measure, AgeGroup ageGroup, uint32_t cohortSet, int val ){
-    if( static_cast<size_t>(measure.code) >= m_humanReportsInt.shape()[0] ||
-        ageGroup.i() >= m_humanReportsInt.shape()[1] ){
-        cout << "Index out of bounds:\n"
-            "survey\t" << static_cast<void*>(this)
-            << "\nalloc\t" << m_humanReportsInt.shape()[0] << "\t" << m_humanReportsInt.shape()[1]
-            << "\nindex\t" << measure.code << "\t" << ageGroup.i() << endl;
-    }
-    m_humanReportsInt[measure.code][ageGroup.i()][cohortSet] += val;
-    return *this;
-}
-
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
-    size_t nAgeGroups = m_humanReportsInt.shape()[1] - 1;   // Don't write out last age-group
-    size_t nCohortSets = m_humanReportsInt.shape()[2];
     mon::writeMHI( outputFile, survey );
-    for( size_t intMeasure = 0; intMeasure < Report::MI_NUM; ++intMeasure ){
-        if( active[intReportMappings[intMeasure]] ){
-            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
-                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
-                    // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
-                    size_t ageCohortId = 1000 * Surveys.cohortSetOutputId( cohortSet ) + ageGroup + 1;
-                    outputFile << survey << "\t" << ageCohortId << "\t" << intReportMappings[intMeasure];
-                    outputFile << "\t" << m_humanReportsInt[intMeasure][ageGroup][cohortSet] << lineEnd;
-                }
-            }
-        }
-    }
     mon::writeMHD( outputFile, survey );
     
   if (active[SM::nTransmit]) {
@@ -368,45 +311,6 @@ void writeMap (ostream& file, int measure, int survey, map<string,double>& data)
     for (map<string,double>::const_iterator it = data.begin(); it != data.end(); ++it) {
         file << survey << "\t" << it->first << "\t" << measure;
         file << "\t" << it->second << lineEnd;
-    }
-}
-
-
-void Survey::checkpoint(istream& stream){
-    BOOST_STATIC_ASSERT( ReportsIntAgeT::dimensionality == 3 );
-    size_t len0, len1, len2;
-    len0 & stream;
-    len1 & stream;
-    len2 & stream;
-    if( len0 != Report::MI_NUM || len1 != AgeGroup::getNumGroups() ||
-        len2 != Surveys.numCohortSets() )
-    {
-        throw util::checkpoint_error( "wrong survey data size" );
-    }
-    m_humanReportsInt.resize(boost::extents[len0][len1][len2]);
-    for( size_t i = 0; i < len0; ++i ){
-        for( size_t j = 0; j < len1; ++j ){
-            for( size_t k = 0; k < len2; ++k ){
-                m_humanReportsInt[i][j][k] & stream;
-            }
-        }
-    }
-}
-
-void Survey::checkpoint(ostream& stream) const{
-    BOOST_STATIC_ASSERT( ReportsIntAgeT::dimensionality == 3 );
-    size_t len0 = m_humanReportsInt.shape()[0],
-        len1 = m_humanReportsInt.shape()[1],
-        len2 = m_humanReportsInt.shape()[2];
-    len0 & stream;
-    len1 & stream;
-    len2 & stream;
-    for( size_t i = 0; i < len0; ++i ){
-        for( size_t j = 0; j < len1; ++j ){
-            for( size_t k = 0; k < len2; ++k ){
-                m_humanReportsInt[i][j][k] & stream;
-            }
-        }
     }
 }
 

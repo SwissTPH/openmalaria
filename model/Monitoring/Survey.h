@@ -29,7 +29,6 @@
 #include "util/checkpoint_containers.h"
 #include <bitset>
 #include <map>
-#include <boost/multi_array.hpp>
 
 class UnittestUtil;
 namespace scnXml{ class Monitoring; }
@@ -39,28 +38,6 @@ namespace Host {
 }
 namespace Monitoring {
 using WithinHost::Diagnostic;
-using boost::multi_array;
-
-/// Encapsulate report measure codes
-namespace Report {
-    /** Measures which are reported as integers
-     * 
-     * Note: for timed/continuous deployment pairs, the continuous version
-     * is always the timed version + 1. */
-    enum IntReportMeasures{
-        MI_NEW_INFECTIONS,
-        MI_N_SP_REM_TOO_OLD,
-        MI_N_SP_REM_FIRST_EVENT,
-        MI_PQ_TREATMENTS,
-        MI_TREAT_DIAGNOSTICS,
-        MI_NUM  // must be last; not a measure to report
-    };
-}
-/** Wrap an IntReportMeasures to enforce initialisation. */
-struct ReportMeasureI{
-    /* implicit */ ReportMeasureI( Report::IntReportMeasures m ) : code( m ) {}
-    Report::IntReportMeasures code;
-};
 
 /// Data struct for a single survey.
 class Survey {
@@ -147,20 +124,6 @@ public:
     Survey& set_Vector_Sv (string key, double v) { data_Vector_Sv[key] = v; return *this; }
     //@}
     
-    /**
-     * Report some integer number of events, adding the number to a total.
-     * 
-     * @param measure Measure value being reported
-     * @param human The host whose data is being reported (used to get age
-     *          group and cohort set)
-     * @param val Number of events (added to total)
-     * @returns (*this) object to allow chain calling
-     */
-    Survey& addInt( ReportMeasureI measure, const Host::Human &human, int val );
-    
-    /** Lower level version of addInt(). */
-    Survey& addInt( ReportMeasureI measure, AgeGroup ageGroup, uint32_t cohortSet, int val );
-    
     void setInoculationsPerAgeGroup (vector<double>& v) {
         m_inoculationsPerAgeGroup = v;	// copies v, not just its reference
     }
@@ -181,8 +144,6 @@ public:
         data_Vector_Sv & stream;
         
         m_inoculationsPerAgeGroup & stream;
-        
-        checkpoint( stream );   // for m_humanReportsInt, m_humanReportsDouble
   }
   
 private:
@@ -216,15 +177,7 @@ private:
     
     // data categorised by human age group:
     vector<double> m_inoculationsPerAgeGroup;
-    
-    // data categorised by human age group and cohort set:
-    // first index is the measure (IntReportMeasures), second is age group, third is cohort set:
-    typedef multi_array<int, 3> ReportsIntAgeT;
-    ReportsIntAgeT m_humanReportsInt;
     //@}
-    
-    void checkpoint( istream& stream );
-    void checkpoint( ostream& stream) const;
     
     // ———  static members  ———
     

@@ -23,15 +23,12 @@
 #include "Clinical/CMDecisionTree.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
-#include "Monitoring/Survey.h"
-#include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 
 namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
-using namespace Monitoring;
 
 enum CaseType { FirstLine, SecondLine, NumCaseTypes };
 
@@ -102,7 +99,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
         }
         
         if( human.withinHostModel->optionalPqTreatment() )
-            Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
+            mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
     } else {
         // No care sought
     }
