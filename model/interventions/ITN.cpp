@@ -34,7 +34,7 @@ vector<ITNComponent*> ITNComponent::componentsByIndex;
 
 ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
         const map<string, size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id, Report::MI_ITN_CTS, Report::MI_ITN_TIMED),
+        Transmission::HumanVectorInterventionComponent(id),
         ripFactor( numeric_limits<double>::signaling_NaN() )
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
@@ -67,7 +67,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
 
 void ITNComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent( *this );
-    Survey::current().addInt( reportMeasure(method), human, 1 );
+    mon::reportMHD( mon::MHD_ITN, human, method );
 }
 
 Component::Type ITNComponent::componentType() const{

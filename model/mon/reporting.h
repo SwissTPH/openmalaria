@@ -104,7 +104,26 @@ enum Measure{
      * roughly backwards-compatible, the first type (PEV, BSV or TBV) described
      * (with an "effect" element) will be reported. */
     MHD_VACCINATIONS,
-    //TODO: also more specific outputs?
+    // Number of pre-erythrocytic vaccine doses deployed. Units: doses (as above)
+    MHD_PEV,
+    // Number of blood-stage vaccine doses deployed. Units: doses (as above)
+    MHD_BSV,
+    // Number of transmission-blocking vaccine doses deployed. Units: doses (as above)
+    MHD_TBV,
+    // Number of bet nets deployed (technically: deployments using the "ITN" model)
+    MHD_ITN,
+    // Number of IRS spray rounds (technically: deployments using the "IRS" model)
+    MHD_IRS,
+    // Number of human-vector intervention deployments (technically: deployments using the "GVI" model)
+    MHD_GVI,
+    // Number of treat intervention deployments (e.g. treatments deployed in an MDA/MSAT campaign)
+    MHD_TREAT,
+    // Number of screenings done (e.g. tests used in MSAT/T&T)
+    MHD_SCREEN,
+    // Number of sub-pop recruitments without deployment (deployments of "FIXME" intervention)
+    MHD_RECRUIT,
+    // Number of deployments (all interventions)
+    MHD_ALL_DEPLOYS,
     
     // ———  MHF: measures for human reports (double)  ———
     // Expected number of new infections per human. Units: infections

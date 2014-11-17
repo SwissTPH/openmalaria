@@ -119,38 +119,13 @@ public:
     }
     
 protected:
-    //HACK: support two types of measure during migration to new monitoring system
-    /** Construct (from a derived class).
-     * 
-     * @param id Component identifier; used as an identifier for cumulative
-     *  deployment as well as to match human-specific components to general
-     *  parameters (i.e. objects of the class extending this one).
-     * @param ctsMeasure Report measure to use for continuous deployment
-     * @param timedMeasure Report measure to use for timed deployment
-     */
-    explicit HumanInterventionComponent(ComponentId id,
-                                        Monitoring::ReportMeasureI ctsMeasure,
-                                        Monitoring::ReportMeasureI timedMeasure) :
-            m_id(id),
-            m_measureCts(ctsMeasure), m_measureTimed(timedMeasure) {}
     /** Construct (from a derived class).
      * 
      * @param id Component identifier; used as an identifier for cumulative
      *  deployment as well as to match human-specific components to general
      *  parameters (i.e. objects of the class extending this one).
      */
-    explicit HumanInterventionComponent(ComponentId id) :
-            m_id(id),
-            m_measureCts(Monitoring::Report::MI_NUM), m_measureTimed(Monitoring::Report::MI_NUM) {}
-    
-    /** Trivial helper function to get deployment measure. */
-    inline Monitoring::ReportMeasureI reportMeasure( mon::Deploy::Method method )const{
-        Monitoring::ReportMeasureI m = (method == mon::Deploy::TIMED) ? m_measureTimed :
-            (method == mon::Deploy::CTS) ? m_measureCts :
-            Monitoring::Report::MI_TREAT_DEPLOYMENTS;
-        assert( m.code != Monitoring::Report::MI_NUM );
-        return m;
-    }
+    explicit HumanInterventionComponent(ComponentId id) : m_id(id) {}
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
@@ -158,7 +133,6 @@ private:
     
     ComponentId m_id;
     SimTime m_duration;
-    Monitoring::ReportMeasureI m_measureCts, m_measureTimed;
 };
 
 /** A description of a human intervention (as a list of components). */

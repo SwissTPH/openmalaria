@@ -175,13 +175,13 @@ void TriggeredDeployments::SubList::deploy( Host::Human& human,
 class RecruitmentOnlyComponent : public HumanInterventionComponent {
 public:
     RecruitmentOnlyComponent( ComponentId id ) :
-        HumanInterventionComponent(id, Report::MI_RECRUIT_CTS, Report::MI_RECRUIT_TIMED)
+        HumanInterventionComponent(id)
     {}
     virtual ~RecruitmentOnlyComponent() {}
     
     /// Reports to monitoring, nothing else
     virtual void deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits ) const{
-        Survey::current().addInt( reportMeasure(method), human, 1 );
+        mon::reportMHD( mon::MHD_RECRUIT, human, method );
     }
     
     virtual Component::Type componentType() const{
@@ -198,15 +198,14 @@ public:
 class ScreenComponent : public HumanInterventionComponent {
 public:
     ScreenComponent( ComponentId id, const scnXml::Screen& elt ) :
-        HumanInterventionComponent(id,
-                Report::MI_SCREENING_CTS, Report::MI_SCREENING_TIMED),
+        HumanInterventionComponent(id),
         diagnostic(diagnostics::get(elt.getDiagnostic())),
         positive( elt.getPositive() ),
         negative( elt.getNegative() )
     {}
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits ) const{
-        Survey::current().addInt( reportMeasure(method), human, 1 );
+        mon::reportMHD( mon::MHD_SCREEN, human, method );
         if( human.withinHostModel->diagnosticResult(diagnostic) ){
             positive.deploy( human, method, vaccLimits );
         }else{
@@ -231,8 +230,7 @@ private:
 class TreatSimpleComponent : public HumanInterventionComponent {
 public:
     TreatSimpleComponent( ComponentId id, const scnXml::DTTreatSimple& elt ) :
-        HumanInterventionComponent(id,
-                Report::MI_MDA_CTS, Report::MI_MDA_TIMED)
+        HumanInterventionComponent(id)
     {
         //NOTE: this code is currently identical to that in CMDTTreatSimple
         try{
@@ -255,7 +253,7 @@ public:
     }
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
-        Survey::current().addInt( reportMeasure(method), human, 1 );
+        mon::reportMHD( mon::MHD_TREAT, human, method );
         human.withinHostModel->treatSimple( timeLiver, timeBlood );
     }
     
@@ -275,8 +273,7 @@ private:
 class TreatPKPDComponent : public HumanInterventionComponent {
 public:
     TreatPKPDComponent( ComponentId id, const scnXml::DTTreatPKPD& elt ) :
-        HumanInterventionComponent(id,
-                Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
+        HumanInterventionComponent(id),
             schedule(PkPd::LSTMTreatments::findSchedule(elt.getSchedule())),
             dosage(PkPd::LSTMTreatments::findDosages(elt.getDosage())),
             delay_h(elt.getDelay_h())
@@ -284,7 +281,7 @@ public:
     }
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
-        Survey::current().addInt( reportMeasure(method), human, 1 );
+        mon::reportMHD( mon::MHD_TREAT, human, method );
         human.withinHostModel->treatPkPd( schedule, dosage, delay_h );
     }
     
@@ -305,7 +302,7 @@ private:
 class DecisionTreeComponent : public HumanInterventionComponent {
 public:
     DecisionTreeComponent( ComponentId id, const scnXml::DecisionTree& elt ) :
-        HumanInterventionComponent(id, Report::MI_MDA_CTS, Report::MI_MDA_TIMED),
+        HumanInterventionComponent(id),
         tree(Clinical::CMDecisionTree::create(elt, false))
     {}
     
@@ -314,7 +311,7 @@ public:
                 human.age(sim::nowOrTs1()).inYears(),
                 Clinical::Episode::NONE /*parameter not needed*/) );
         if( out.treated ){
-            Survey::current().addInt( reportMeasure(method), human, 1 );
+            mon::reportMHD( mon::MHD_TREAT, human, method );
         }
     }
     
@@ -333,10 +330,11 @@ private:
 class ClearImmunityComponent : public HumanInterventionComponent {
 public:
     ClearImmunityComponent( ComponentId id ) :
-        HumanInterventionComponent(id, Report::MI_NUM, Report::MI_NUM /*never reported*/) {}
+        HumanInterventionComponent(id) {}
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits )const{
         human.clearImmunity();
+        //NOTE: not reported
     }
     
     virtual Component::Type componentType() const{ return Component::CLEAR_IMMUNITY; }

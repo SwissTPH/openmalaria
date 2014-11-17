@@ -242,6 +242,8 @@ void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup,
 void reportMHD( Measure measure, const Host::Human& human, Deploy::Method method ){
     size_t ageIndex = human.getMonitoringAgeGroup().i();
     storeHACI.deploy( measure, currentSurvey, ageIndex, human.cohortSet(), method, 1 /*always report 1 deployment*/ );
+    // This is for nTreatDeployments:
+    storeHACI.deploy( MHD_ALL_DEPLOYS, currentSurvey, ageIndex, human.cohortSet(), method, 1 );
 }
 
 void checkpoint( ostream& stream ){

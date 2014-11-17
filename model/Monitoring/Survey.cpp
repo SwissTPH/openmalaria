@@ -81,11 +81,24 @@ public:
         codeMap["Clinical_HospitalFirstDayDeaths"] = SM::BLANK;
         codeMap["nNmfDeaths"] = SM::BLANK;
         codeMap["sumAge"] = SM::BLANK;
+        codeMap["nEPIVaccinations"] = SM::BLANK;
+        codeMap["nMassVaccinations"] = SM::BLANK;
+        codeMap["nMassITNs"] = SM::BLANK;
+        codeMap["nEPI_ITNs"] = SM::BLANK;
+        codeMap["nMassIRS"] = SM::BLANK;
+        codeMap["nMassGVI"] = SM::BLANK;
+        codeMap["nMDAs"] = SM::BLANK;
+        codeMap["nMassScreenings"] = SM::BLANK;
+        codeMap["nCtsIRS"] = SM::BLANK;
+        codeMap["nCtsGVI"] = SM::BLANK;
+        codeMap["nCtsMDA"] = SM::BLANK;
+        codeMap["nCtsScreenings"] = SM::BLANK;
+        codeMap["nMassRecruitOnly"] = SM::BLANK;
+        codeMap["nCtsRecruitOnly"] = SM::BLANK;
+        codeMap["nTreatDeployments"] = SM::BLANK;
         
         codeMap["nTransmit"] = SM::nTransmit;
-        codeMap["nEPIVaccinations"] = SM::BLANK;
         codeMap["allCauseIMR"] = SM::allCauseIMR;
-        codeMap["nMassVaccinations"] = SM::BLANK;
         codeMap["annAvgK"] = SM::annAvgK;
         codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
         codeMap["Vector_Nv0"] = SM::Vector_Nv0;
@@ -96,24 +109,11 @@ public:
         codeMap["simulatedEIR"] = SM::simulatedEIR;
         codeMap["Clinical_RDTs"] = SM::Clinical_RDTs;
         codeMap["nNewInfections"] = SM::nNewInfections;
-        codeMap["nMassITNs"] = SM::nMassITNs;
-        codeMap["nEPI_ITNs"] = SM::nEPI_ITNs;
-        codeMap["nMassIRS"] = SM::nMassIRS;
-        codeMap["nMassGVI"] = SM::nMassGVI;
         codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
-        codeMap["nMDAs"] = SM::nMDAs;
-        codeMap["nMassScreenings"] = SM::nMassScreenings;
-        codeMap["nCtsIRS"] = SM::nCtsIRS;
-        codeMap["nCtsGVI"] = SM::nCtsGVI;
-        codeMap["nCtsMDA"] = SM::nCtsMDA;
-        codeMap["nCtsScreenings"] = SM::nCtsScreenings;
         codeMap["nSubPopRemovalTooOld"] = SM::nSubPopRemovalTooOld;
         codeMap["nSubPopRemovalFirstEvent"] = SM::nSubPopRemovalFirstEvent;
         codeMap["nPQTreatments"] = SM::nPQTreatments;
         codeMap["nTreatDiagnostics"] = SM::nTreatDiagnostics;
-        codeMap["nMassRecruitOnly"] = SM::nMassRecruitOnly;
-        codeMap["nCtsRecruitOnly"] = SM::nCtsRecruitOnly;
-        codeMap["nTreatDeployments"] = SM::nTreatDeployments;
         
         removedCodes.insert("contrib");
         removedCodes.insert("nIPTDoses");
@@ -150,23 +150,10 @@ void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Monitoring& monitoring,
                    size_t nSurveys ){
     intReportMappings[Report::MI_NEW_INFECTIONS] = SM::nNewInfections;
-    intReportMappings[Report::MI_ITN_TIMED] = SM::nMassITNs;
-    intReportMappings[Report::MI_ITN_CTS] = SM::nEPI_ITNs;
-    intReportMappings[Report::MI_IRS_TIMED] = SM::nMassIRS;
-    intReportMappings[Report::MI_IRS_CTS] = SM::nCtsIRS;
-    intReportMappings[Report::MI_GVI_TIMED] = SM::nMassGVI;
-    intReportMappings[Report::MI_GVI_CTS] = SM::nCtsGVI;
-    intReportMappings[Report::MI_MDA_TIMED] = SM::nMDAs;
-    intReportMappings[Report::MI_MDA_CTS] = SM::nCtsMDA;
-    intReportMappings[Report::MI_SCREENING_TIMED] = SM::nMassScreenings;
-    intReportMappings[Report::MI_SCREENING_CTS] = SM::nCtsScreenings;
     intReportMappings[Report::MI_N_SP_REM_TOO_OLD] = SM::nSubPopRemovalTooOld;
     intReportMappings[Report::MI_N_SP_REM_FIRST_EVENT] = SM::nSubPopRemovalFirstEvent;
     intReportMappings[Report::MI_PQ_TREATMENTS] = SM::nPQTreatments;
     intReportMappings[Report::MI_TREAT_DIAGNOSTICS] = SM::nTreatDiagnostics;
-    intReportMappings[Report::MI_RECRUIT_TIMED] = SM::nMassRecruitOnly;
-    intReportMappings[Report::MI_RECRUIT_CTS] = SM::nCtsRecruitOnly;
-    intReportMappings[Report::MI_TREAT_DEPLOYMENTS] = SM::nTreatDeployments;
     
     AgeGroup::init (monitoring);
     

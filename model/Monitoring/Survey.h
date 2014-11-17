@@ -49,23 +49,10 @@ namespace Report {
      * is always the timed version + 1. */
     enum IntReportMeasures{
         MI_NEW_INFECTIONS,
-        MI_ITN_TIMED,
-        MI_ITN_CTS,
-        MI_IRS_TIMED,
-        MI_IRS_CTS,
-        MI_GVI_TIMED,
-        MI_GVI_CTS,
-        MI_MDA_TIMED,
-        MI_MDA_CTS /* "mass" drug administration via EPI/schools */,
-        MI_SCREENING_TIMED,
-        MI_SCREENING_CTS,
         MI_N_SP_REM_TOO_OLD,
         MI_N_SP_REM_FIRST_EVENT,
         MI_PQ_TREATMENTS,
         MI_TREAT_DIAGNOSTICS,
-        MI_RECRUIT_TIMED,
-        MI_RECRUIT_CTS,
-        MI_TREAT_DEPLOYMENTS,
         MI_NUM  // must be last; not a measure to report
     };
 }

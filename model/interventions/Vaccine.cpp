@@ -69,6 +69,10 @@ void VaccineComponent::deploy(Host::Human& human, mon::Deploy::Method method, Va
     if( administered && VaccineComponent::reportComponent == id() ){
         mon::reportMHD( mon::MHD_VACCINATIONS, human, method );
     }
+    if( type == Vaccine::PEV ) mon::reportMHD( mon::MHD_PEV, human, method );
+    else if( type == Vaccine::BSV ) mon::reportMHD( mon::MHD_BSV, human, method );
+    else if( type == Vaccine::TBV ) mon::reportMHD( mon::MHD_TBV, human, method );
+    else assert( false );
 }
 
 Component::Type VaccineComponent::componentType() const

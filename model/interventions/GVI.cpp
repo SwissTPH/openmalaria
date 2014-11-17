@@ -33,7 +33,7 @@ vector<GVIComponent*> GVIComponent::componentsByIndex;
 
 GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id, Report::MI_GVI_CTS, Report::MI_GVI_TIMED)
+        Transmission::HumanVectorInterventionComponent(id)
 {
     decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
     
@@ -52,7 +52,7 @@ GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
 
 void GVIComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Survey::current().addInt(reportMeasure(method), human, 1 );
+    mon::reportMHD( mon::MHD_GVI, human, method );
 }
 
 Component::Type GVIComponent::componentType()const{ return Component::GVI; }

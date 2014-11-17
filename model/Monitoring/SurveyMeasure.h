@@ -126,19 +126,6 @@ enum SurveyMeasure {
     /** The number of actual infections since the last survey. */
     nNewInfections = 43,
     
-    /** The number of ITNs delivered by mass distribution since last survey.
-     *
-     * These are "modelled ITNs": cover only a single person, cannot be passed
-     * to someone else for reuse or used for fishing, etc. */
-    nMassITNs = 44,
-    /** The number of ITNs delivered through EPI since last survey.
-     *
-     * Comments from nMassITNs apply. */
-    nEPI_ITNs = 45,
-    /** The number of people newly protected by IRS since last survey.
-     *
-     * Modelled IRS: affects one person, cannot be plastered over. */
-    nMassIRS = 46,
     /** Defunct; was used by "vector availability" intervention (which is now a
      * sub-set of GVI). */
 //     nMassVA = 47,
@@ -153,43 +140,8 @@ enum SurveyMeasure {
 //     /// Number of individuals removed from cohort (removed)
 //     nRemovedFromCohort = 51,
     
-    /** Number of people (per age group) treated by mass drug administration
-     * campaign. (Note that in one day time-step model MDA can be configured
-     * as screen-and-treat. This option reports treatments administered not
-     * the number of tests used.) */
-    nMDAs = 52,
-    
 //     /// Number of antibiotic treatments given (disabled — not used)
 //     nAntibioticTreatments = 54,
-    
-    /** Report the number of screenings used in a mass screen-and-treat
-     * operation. */
-    nMassScreenings = 55,
-    
-    /** Report the number of mass deployments of generic vector interventions.
-     * 
-     * Note: this is a provisionary reporting measure. Like many other measures,
-     * it is insufficient now that multiple descriptions of any intervention
-     * type are possible. */
-    nMassGVI = 56,
-    
-    /** Number of IRS deployments via continuous deployment. */
-    nCtsIRS = 57,
-    
-    /** Number of GVI deployments via continuous deployment. */
-    nCtsGVI = 58,
-    
-    /** Number of "MDA" deployments via continuous deployment.
-     * 
-     * Note: MDA stands for mass drug administration, but the term has come to
-     * be used more flexibly by OpenMalaria, including optional screening and
-     * deployment through age-based systems. */
-    nCtsMDA = 59,
-    
-    /** Number of diagnostics used by "MDA" distribution through continuous
-     * methods. Can be higher than nCtsMDA since drugs are administered only
-     * when the diagnostic is positive. Also see nCtsMDA description. */
-    nCtsScreenings = 60,
     
     /** Number of removals from a sub-population due to expiry of duration of
      * membership (e.g. intervention too old). */
@@ -207,15 +159,6 @@ enum SurveyMeasure {
      * outputs are used by the "event scheduler" 1-day time step clinical
      * model, whereas this output is used by the 5-day time step model. */
     nTreatDiagnostics = 64,
-    
-    /** Number of "recruitment only" recruitments via timed deployment. */
-    nMassRecruitOnly = 65,
-    /** Number of "recruitment only" recruitments via age-based deployment. */
-    nCtsRecruitOnly = 66,
-    
-    /** Number of deployments (of all intervention components) triggered by
-     * treatment (case management). */
-    nTreatDeployments = 67,
     
     // must be hightest value above plus one
     NUM_SURVEY_OPTIONS	

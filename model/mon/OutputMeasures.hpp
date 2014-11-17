@@ -162,8 +162,65 @@ void defineOutMeasures(){
     /// Direct death on first day of CM (before treatment takes effect); hospital only
     namedOutMeasures["Clinical_HospitalFirstDayDeaths"] =
         OutMeasure::humanAC( 42, MHO_HOSPITAL_FIRST_DAY_DEATHS, false );
+    /** The number of ITNs delivered by mass distribution since last survey.
+     *
+     * These are "modelled ITNs": cover only a single person, cannot be passed
+     * to someone else for reuse or used for fishing, etc. */
+    namedOutMeasures["nMassITNs"] =
+        OutMeasure::humanDeploy( 44, MHD_ITN, Deploy::TIMED );
+    /** The number of ITNs delivered through EPI since last survey.
+     *
+     * Comments from nMassITNs apply. */
+    namedOutMeasures["nEPI_ITNs"] =
+        OutMeasure::humanDeploy( 45, MHD_ITN, Deploy::CTS );
+    /** The number of people newly protected by IRS since last survey.
+     *
+     * Modelled IRS: affects one person, cannot be plastered over. */
+    namedOutMeasures["nMassIRS"] =
+        OutMeasure::humanDeploy( 46, MHD_IRS, Deploy::TIMED );
+    /** Number of people (per age group) treated by mass drug administration
+     * campaign. (Note that in one day time-step model MDA can be configured
+     * as screen-and-treat. This option reports treatments administered not
+     * the number of tests used.) */
+    namedOutMeasures["nMDAs"] =
+        OutMeasure::humanDeploy( 52, MHD_TREAT, Deploy::TIMED );
     /// Number of deaths caused by non-malaria fevers
     namedOutMeasures["nNmfDeaths"] = OutMeasure::humanAC( 53, MHO_NMF_DEATHS, false );
+    /** Report the number of screenings used in a mass screen-and-treat
+     * operation. */
+    namedOutMeasures["nMassScreenings"] =
+        OutMeasure::humanDeploy( 55, MHD_SCREEN, Deploy::TIMED );
+    /// Report the number of mass deployments of generic vector interventions.
+    namedOutMeasures["nMassGVI"] =
+        OutMeasure::humanDeploy( 56, MHD_GVI, Deploy::TIMED );
+    /** Number of IRS deployments via continuous deployment. */
+    namedOutMeasures["nCtsIRS"] =
+        OutMeasure::humanDeploy( 57, MHD_IRS, Deploy::CTS );
+    /** Number of GVI deployments via continuous deployment. */
+    namedOutMeasures["nCtsGVI"] =
+        OutMeasure::humanDeploy( 58, MHD_GVI, Deploy::CTS );
+    /** Number of "MDA" deployments via continuous deployment.
+     * 
+     * Note: MDA stands for mass drug administration, but the term has come to
+     * be used more flexibly by OpenMalaria, including optional screening and
+     * deployment through age-based systems. */
+    namedOutMeasures["nCtsMDA"] =
+        OutMeasure::humanDeploy( 59, MHD_TREAT, Deploy::CTS );
+    /** Number of diagnostics used by "MDA" distribution through continuous
+     * methods. Can be higher than nCtsMDA since drugs are administered only
+     * when the diagnostic is positive. Also see nCtsMDA description. */
+    namedOutMeasures["nCtsScreenings"] =
+        OutMeasure::humanDeploy( 60, MHD_SCREEN, Deploy::CTS );
+    /** Number of "recruitment only" recruitments via timed deployment. */
+    namedOutMeasures["nMassRecruitOnly"] =
+        OutMeasure::humanDeploy( 65, MHD_RECRUIT, Deploy::TIMED );
+    /** Number of "recruitment only" recruitments via age-based deployment. */
+    namedOutMeasures["nCtsRecruitOnly"] =
+        OutMeasure::humanDeploy( 66, MHD_RECRUIT, Deploy::CTS );
+    /** Number of deployments (of all intervention components) triggered by
+     * treatment (case management). */
+    namedOutMeasures["nTreatDeployments"] =
+        OutMeasure::humanDeploy( 67, MHD_ALL_DEPLOYS, Deploy::TREAT );
     /** Report the total age of all humans in this a group (sum across humans,
      * in years). Divide by nHost to get the average age. */
     namedOutMeasures["sumAge"] = OutMeasure::humanAC( 68, MHF_AGE, true );
