@@ -145,10 +145,7 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        //FIXME: type of report (make new ones?)
-        Survey::current().report_Clinical_RDTs (1);
-        // or this: Survey::current().report_Clinical_Microscopy (1);
-        
+        mon::reportMHI( mon::MHT_TREAT_DIAGNOSTICS, hostData.human, 1 );
         if( hostData.withinHost().diagnosticResult( diagnostic ) ){
             return positive.exec( hostData );
         }else{

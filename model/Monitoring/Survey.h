@@ -112,8 +112,6 @@ public:
     void setAnnualAverageKappa(double kappa) { m_annAvgK = kappa; }
     void setInputEIR (double v) { m_inputEIR = v; }
     void setSimulatedEIR (double v) { m_simulatedEIR = v; }
-    void report_Clinical_RDTs (int num) { m_Clinical_RDTs += num; }
-    void report_Clinical_Microscopy (int num) { m_Clinical_Microscopy += num; }
     //@}
     
     ///@brief Set outputs per vector species
@@ -135,8 +133,6 @@ public:
         m_annAvgK & stream;
         m_inputEIR & stream;
         m_simulatedEIR & stream;
-        m_Clinical_RDTs & stream;
-        m_Clinical_Microscopy & stream;
         
         data_Vector_Nv0 & stream;
         data_Vector_Nv & stream;
@@ -166,8 +162,6 @@ private:
     double m_annAvgK;
     double m_inputEIR;
     double m_simulatedEIR;
-    int m_Clinical_RDTs;
-    int m_Clinical_Microscopy;
     
     // data categorised by vector species:
     map<string,double> data_Vector_Nv0;

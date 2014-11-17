@@ -112,7 +112,7 @@ enum SurveyMeasure {
     /// @brief EventScheduler reporting (additional to above)
     //@{
     /// Number of Rapid Diagnostic Tests used
-    Clinical_RDTs = 39,
+//     Clinical_RDTs = 39,
     /* Effective total quanty of each drug used orally, in mg.
      * (Per active ingredient abbreviation.)
      * 
@@ -128,7 +128,7 @@ enum SurveyMeasure {
 //     nMassVA = 47,
     
     /// Number of malarial tests via microscopy used
-    Clinical_Microscopy = 48,
+//     Clinical_Microscopy = 48,
     /* As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
     //Clinical_DrugUsageIV = 49,
     

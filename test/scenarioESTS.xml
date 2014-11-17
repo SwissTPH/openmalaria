@@ -40,8 +40,7 @@
       <option name="nHospitalRecovs" value="true"/>
       <option name="nHospitalSeqs" value="true"/>
       <option name="nNMFever" value="true"/>
-      <option name="Clinical_RDTs" value="true"/>
-      <option name="Clinical_Microscopy" value="true"/>
+      <option name="nTreatDiagnostics" value="true"/>
       <!--TODO <option name="Clinical_DrugUsage" value="true"/> -->
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>

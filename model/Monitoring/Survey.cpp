@@ -110,9 +110,9 @@ public:
         codeMap["Vector_Sv"] = SM::Vector_Sv;
         codeMap["inputEIR"] = SM::inputEIR;
         codeMap["simulatedEIR"] = SM::simulatedEIR;
-        codeMap["Clinical_RDTs"] = SM::Clinical_RDTs;
-        codeMap["Clinical_Microscopy"] = SM::Clinical_Microscopy;
         
+        removedCodes.insert("Clinical_RDTs");
+        removedCodes.insert("Clinical_Microscopy");
         removedCodes.insert("contrib");
         removedCodes.insert("nIPTDoses");
         removedCodes.insert("nAddedToCohort");
@@ -233,9 +233,7 @@ Survey::Survey() :
         m_nTransmit(numeric_limits<double>::signaling_NaN()),
         m_annAvgK(numeric_limits<double>::signaling_NaN()),
         m_inputEIR(numeric_limits<double>::signaling_NaN()),
-        m_simulatedEIR(numeric_limits<double>::signaling_NaN()),
-        m_Clinical_RDTs(numeric_limits<int>::min()),
-        m_Clinical_Microscopy(numeric_limits<int>::min())
+        m_simulatedEIR(numeric_limits<double>::signaling_NaN())
 {}
 
 void Survey::allocate(){
@@ -248,9 +246,6 @@ void Survey::allocate(){
     
     m_inputEIR =numeric_limits<double>::signaling_NaN() ;
     m_simulatedEIR = numeric_limits<double>::signaling_NaN();
-    
-    m_Clinical_RDTs = 0;
-    m_Clinical_Microscopy = 0;
 }
 
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
@@ -289,12 +284,6 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::simulatedEIR]) {
     writeValue (outputFile, SM::simulatedEIR, survey, m_simulatedEIR);
-  }
-  if (active[SM::Clinical_RDTs]) {
-      writeValue (outputFile, SM::Clinical_RDTs, survey, m_Clinical_RDTs);
-  }
-  if (active[SM::Clinical_Microscopy]) {
-      writeValue (outputFile, SM::Clinical_Microscopy, survey, m_Clinical_Microscopy);
   }
 }
 

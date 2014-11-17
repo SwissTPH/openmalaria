@@ -62,9 +62,8 @@
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
       <option name="nNewInfections" value="true"/>
-      <option name="Clinical_RDTs" value="true"/>
+      <option name="nTreatDiagnostics" value="true"/>
       <option name="nMassITNs" value="true"/>
-      <option name="Clinical_Microscopy" value="true"/>
       <option name="nMDAs" value="true"/>
       <option name="nNmfDeaths" value="true"/>
     </SurveyOptions>

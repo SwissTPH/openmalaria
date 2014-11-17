@@ -38,7 +38,6 @@
       <option name="nHospitalDeaths" value="true"/>
       <option name="nHospitalRecovs" value="true"/>
       <option name="nHospitalSeqs" value="true"/>
-      <option name="Clinical_RDTs" value="true"/>
       <!--TODO <option name="Clinical_DrugUsage" value="true"/> -->
       <option name="Clinical_FirstDayDeaths" value="true"/>
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
