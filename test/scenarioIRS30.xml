@@ -41,8 +41,6 @@
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
       <option name="nTreatments3" value="true"/>
-      <option name="nEPIVaccinations" value="true"/>
-      <option name="nMassVaccinations" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="nMassIRS" value="true"/>
       <option name="nMDAs" value="true"/>

@@ -43,9 +43,7 @@
       <option name="nSeq" value="true"/>
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
-      <option name="nEPIVaccinations" value="true"/>
       <option name="allCauseIMR" value="true"/>
-      <option name="nMassVaccinations" value="true"/>
       <option name="annAvgK" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
