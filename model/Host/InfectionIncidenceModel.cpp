@@ -152,7 +152,7 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 }
 
 void InfectionIncidenceModel::summarize (const Host::Human& human) {
-    mon::reportMHD( mon::MHD_EXPECTED_INFECTED, human, _pinfected );
+    mon::reportMHF( mon::MHF_EXPECTED_INFECTED, human, _pinfected );
 }
 
 

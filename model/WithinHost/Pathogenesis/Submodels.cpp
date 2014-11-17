@@ -92,8 +92,8 @@ double PyrogenPathogenesis::getPEpisode(double timeStepMaxDensity, double totalD
 }
 
 void PyrogenPathogenesis::summarize (const Host::Human& human) {
-    mon::reportMHD( mon::MHD_PYROGENIC_THRESHOLD, human, _pyrogenThres );
-    mon::reportMHD( mon::MHD_LOG_PYROGENIC_THRESHOLD, human, log(_pyrogenThres+1.0) );
+    mon::reportMHF( mon::MHF_PYROGENIC_THRESHOLD, human, _pyrogenThres );
+    mon::reportMHF( mon::MHF_LOG_PYROGENIC_THRESHOLD, human, log(_pyrogenThres+1.0) );
 }
 
 void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){

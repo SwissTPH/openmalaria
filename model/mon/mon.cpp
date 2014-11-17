@@ -189,7 +189,7 @@ void reportMHI( Measure measure, const Host::Human& human, int val ){
     size_t ageIndex = human.getMonitoringAgeGroup().i();
     storeHACI.accept( measure, currentSurvey, ageIndex, human.cohortSet(), val );
 }
-void reportMHD( Measure measure, const Host::Human& human, double val ){
+void reportMHF( Measure measure, const Host::Human& human, double val ){
     size_t ageIndex = human.getMonitoringAgeGroup().i();
     storeHACD.accept( measure, currentSurvey, ageIndex, human.cohortSet(), val );
 }

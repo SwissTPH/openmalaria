@@ -96,36 +96,34 @@ enum Measure{
     // Number of human patients dying on their first day in hospital due to malaria. Units: cases
     MHO_HOSPITAL_FIRST_DAY_DEATHS,
     
-    // ———  MHD: measures for human reports (double)  ———
+    // ———  MHF: measures for human reports (double)  ———
     // Expected number of new infections per human. Units: infections
-    MHD_EXPECTED_INFECTED,
+    MHF_EXPECTED_INFECTED,
     // Report of log of pyrogenic threshold. Units: ?
-    MHD_LOG_PYROGENIC_THRESHOLD,
+    MHF_LOG_PYROGENIC_THRESHOLD,
     // Report of natural log of total parasite density in humans. Units: log(PRBC/μl)
-    MHD_LOG_DENSITY,
+    MHF_LOG_DENSITY,
     // Report of pyrogenic threshold. Units: ?
-    MHD_PYROGENIC_THRESHOLD,
+    MHF_PYROGENIC_THRESHOLD,
     // Report of age of humans. Units: years
-    MHD_AGE,
+    MHF_AGE,
     
     M_NUM
 };
 
-// For surveys and measures to say something shouldn't be reported
+/// For surveys and measures to say something shouldn't be reported
 const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
 
-// The current survey number (read only usage)
+/// The current survey number (read only usage)
 extern size_t currentSurvey;
 
-// Report some value (integer) for some human to the current survey.
+/// Report some value (integer) for some human to the current survey.
 void reportMHI( Measure measure, const Host::Human& human, int val );
-// Report some value (double) for some human to the current survey.
-void reportMHD( Measure measure, const Host::Human& human, double val );
-
-// Report some value (integer) for some survey, age group and cohort set
+/// Report some value (floating point) for some human to the current survey.
+void reportMHF( Measure measure, const Host::Human& human, double val );
+/// Report some value (integer) for some survey, age group and cohort set
 void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val );
-
-// Query whether an output measure is used.
+/// Query whether an output measure is used.
 bool isUsedM( Measure measure );
 
 }

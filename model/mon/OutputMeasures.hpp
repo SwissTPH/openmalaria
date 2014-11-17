@@ -73,17 +73,17 @@ void defineOutMeasures(){
      * This is the sum of the probabilities, across all time steps since the
      * last survey, of each host becoming infected on that time step. */
     namedOutMeasures["nExpectd"] =
-        OutMeasure::humanAC( 2, MHD_EXPECTED_INFECTED, true );
+        OutMeasure::humanAC( 2, MHF_EXPECTED_INFECTED, true );
     /** The number of human hosts whose total (blood-stage) parasite density is
      * above the detection threshold */
     namedOutMeasures["nPatent"] = OutMeasure::humanAC( 3, MHR_PATENT_HOSTS, false );
     /// Sum of log(1 + p) where p is the pyrogenic threshold
     namedOutMeasures["sumLogPyrogenThres"] =
-        OutMeasure::humanAC( 4, MHD_LOG_PYROGENIC_THRESHOLD, true );
+        OutMeasure::humanAC( 4, MHF_LOG_PYROGENIC_THRESHOLD, true );
     /** Sum (across hosts) of the natural logarithm of the parasite density of
      * hosts with detectable parasite density (patent according to the
      * monitoring diagnostic). */
-    namedOutMeasures["sumlogDens"] = OutMeasure::humanAC( 5, MHD_LOG_DENSITY, true );
+    namedOutMeasures["sumlogDens"] = OutMeasure::humanAC( 5, MHF_LOG_DENSITY, true );
     /** The total number of infections in the population: includes both blood
      * and liver stages. Vivax: this is the number of broods. */
     namedOutMeasures["totalInfs"] = OutMeasure::humanAC( 6, MHR_INFECTIONS, false );
@@ -94,7 +94,7 @@ void defineOutMeasures(){
         OutMeasure::humanAC( 8, MHR_PATENT_INFECTIONS, false );
     /// Sum of the pyrogenic threshold
     namedOutMeasures["sumPyrogenThresh"] =
-        OutMeasure::humanAC( 10, MHD_PYROGENIC_THRESHOLD, true );
+        OutMeasure::humanAC( 10, MHF_PYROGENIC_THRESHOLD, true );
     /// number of treatments (1st line)
     namedOutMeasures["nTreatments1"] = OutMeasure::humanAC( 11, MHT_TREATMENTS_1, false );
     /// number of treatments (2nd line)
@@ -137,7 +137,7 @@ void defineOutMeasures(){
     namedOutMeasures["nNmfDeaths"] = OutMeasure::humanAC( 53, MHO_NMF_DEATHS, false );
     /** Report the total age of all humans in this a group (sum across humans,
      * in years). Divide by nHost to get the average age. */
-    namedOutMeasures["sumAge"] = OutMeasure::humanAC( 68, MHD_AGE, true );
+    namedOutMeasures["sumAge"] = OutMeasure::humanAC( 68, MHF_AGE, true );
 }
 
 }

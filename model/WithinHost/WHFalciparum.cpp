@@ -254,7 +254,7 @@ bool WHFalciparum::summarize (const Host::Human& human) {
     // (and are applied after update()); here we report the last calculated density.
     if( diagnosticResult(Survey::diagnostic()) ){
         mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
-        mon::reportMHD( mon::MHD_LOG_DENSITY, human, log(totalDensity) );
+        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;
     }
     return false;
