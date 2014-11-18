@@ -104,16 +104,6 @@ public:
         interventions::ComponentId subPop, bool isMember );
     //@}
     
-    ///@brief Set outputs without extra categorisation
-    //@{
-    /** Number of hosts transmitting to mosquitoes, reported as nTransmit. */
-    void setNumTransmittingHosts(double value) { m_nTransmit = value; }
-    /** Reported as annAvgK **/
-    void setAnnualAverageKappa(double kappa) { m_annAvgK = kappa; }
-    void setInputEIR (double v) { m_inputEIR = v; }
-    void setSimulatedEIR (double v) { m_simulatedEIR = v; }
-    //@}
-    
     ///@brief Set outputs per vector species
     //@{
     Survey& set_Vector_Nv0 (string key, double v) { data_Vector_Nv0[key] = v; return *this; }
@@ -129,11 +119,6 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        m_nTransmit & stream;
-        m_annAvgK & stream;
-        m_inputEIR & stream;
-        m_simulatedEIR & stream;
-        
         data_Vector_Nv0 & stream;
         data_Vector_Nv & stream;
         data_Vector_Ov & stream;
@@ -157,12 +142,6 @@ private:
     
     /// @brief Data stored for reporting; all of this is per survey
     //@{
-    // no further categorisation:
-    double m_nTransmit;
-    double m_annAvgK;
-    double m_inputEIR;
-    double m_simulatedEIR;
-    
     // data categorised by vector species:
     map<string,double> data_Vector_Nv0;
     map<string,double> data_Vector_Nv;

@@ -38,12 +38,6 @@ namespace SM {
 enum SurveyMeasure {
     BLANK = 0,  // temporary: items moved to OutputMeasures.hpp
     
-    /** Infectiousness of human population to mosquitoes
-     *
-     * Number of hosts transmitting to mosquitoes (i.e. proportion of
-     * mosquitoes that get infected multiplied by human population size).
-     * Single value, not per age-group. */
-    nTransmit= 7,
 //     /// Contribuion to immunity functions (removed)
 //     contrib= 9,
     
@@ -60,12 +54,6 @@ enum SurveyMeasure {
     
 //     /// Number of IPT Doses (removed together with IPT model)
 //     nIPTDoses= 25,
-    
-    /** Annual Average Kappa
-     *
-     * Calculated once a year as sum of human infectiousness divided by initial
-     * EIR summed over a year. Single value, not per age-group. */
-    annAvgK= 26,
     
     /** The total number of inoculations per age group, summed over the
      * reporting period. */
@@ -94,19 +82,6 @@ enum SurveyMeasure {
     /// Number of infectious mosquitoes
     Vector_Sv = 34,
     
-    /** Input EIR (Expected EIR entered into scenario file)
-     *
-     * Units: inoculations per adult per time step.
-     */
-    inputEIR = 35,
-    /** Simulated EIR (EIR output by the transmission model)
-     *
-     * Units: inoculations per person per time step (not per-adult:
-     * since children are less available to mosquitoes than adults,
-     * this population-average figure ends up being smaller than if
-     * all modelled humans were adults).
-     */
-    simulatedEIR = 36,
     //@}
     
     /// @brief EventScheduler reporting (additional to above)

@@ -99,17 +99,17 @@ public:
         codeMap["nSubPopRemovalFirstEvent"] = SM::BLANK;
         codeMap["nPQTreatments"] = SM::BLANK;
         codeMap["nTreatDiagnostics"] = SM::BLANK;
+        codeMap["nTransmit"] = SM::BLANK;
+        codeMap["annAvgK"] = SM::BLANK;
+        codeMap["inputEIR"] = SM::BLANK;
+        codeMap["simulatedEIR"] = SM::BLANK;
         
-        codeMap["nTransmit"] = SM::nTransmit;
         codeMap["allCauseIMR"] = SM::allCauseIMR;
-        codeMap["annAvgK"] = SM::annAvgK;
         codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
         codeMap["Vector_Nv0"] = SM::Vector_Nv0;
         codeMap["Vector_Nv"] = SM::Vector_Nv;
         codeMap["Vector_Ov"] = SM::Vector_Ov;
         codeMap["Vector_Sv"] = SM::Vector_Sv;
-        codeMap["inputEIR"] = SM::inputEIR;
-        codeMap["simulatedEIR"] = SM::simulatedEIR;
         
         removedCodes.insert("Clinical_RDTs");
         removedCodes.insert("Clinical_Microscopy");
@@ -229,37 +229,19 @@ void AgeGroup::update (SimTime age) {
 // -----  Non-static members  -----
 
 
-Survey::Survey() :
-        m_nTransmit(numeric_limits<double>::signaling_NaN()),
-        m_annAvgK(numeric_limits<double>::signaling_NaN()),
-        m_inputEIR(numeric_limits<double>::signaling_NaN()),
-        m_simulatedEIR(numeric_limits<double>::signaling_NaN())
-{}
+Survey::Survey() {}
 
 void Survey::allocate(){
-    m_nTransmit = numeric_limits<double>::signaling_NaN();
-    m_annAvgK = numeric_limits<double>::signaling_NaN();
     // These 3 are set as a whole and so don't require allocation:
 //   _innoculationsPerDayOfYear;
 //   _kappaPerDayOfYear;
 //   _innoculationsPerAgeGroup;
-    
-    m_inputEIR =numeric_limits<double>::signaling_NaN() ;
-    m_simulatedEIR = numeric_limits<double>::signaling_NaN();
 }
 
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
-    mon::writeMHI( outputFile, survey );
-    mon::writeMHD( outputFile, survey );
+    mon::write( outputFile, survey );
     
-  if (active[SM::nTransmit]) {
-    writeValue (outputFile, SM::nTransmit, survey, m_nTransmit);
-  }
-  if (active[SM::annAvgK]) {
-    writeValue (outputFile, SM::annAvgK, survey, m_annAvgK);
-  }
-
   if (active[SM::innoculationsPerAgeGroup]) {
     for (int ageGroup = 0; ageGroup < (int) m_inoculationsPerAgeGroup.size() - 1; ++ageGroup) { // Don't write out last age-group
         outputFile << survey << "\t" << ageGroup + 1 << "\t" << SM::innoculationsPerAgeGroup;
@@ -278,12 +260,6 @@ void Survey::writeSummaryArrays (ostream& outputFile, int survey)
   }
   if (active[SM::Vector_Sv]) {
     writeMap (outputFile, SM::Vector_Sv, survey, data_Vector_Sv);
-  }
-  if (active[SM::inputEIR]) {
-    writeValue (outputFile, SM::inputEIR, survey, m_inputEIR);
-  }
-  if (active[SM::simulatedEIR]) {
-    writeValue (outputFile, SM::simulatedEIR, survey, m_simulatedEIR);
   }
 }
 

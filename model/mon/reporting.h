@@ -141,6 +141,16 @@ enum Measure{
     // Report of age of humans. Units: years
     MHF_AGE,
     
+    // ———  MVF: vector (transmission) measures (doubles)  ———
+    // Infectiousness of human population to mosquitoes
+    MVF_NUM_TRANSMIT,
+    // Annual Average Kappa
+    MVF_ANN_AVG_K,
+    // Input EIR (Expected EIR entered into scenario file). Units: inoculations per adult per time step.
+    MVF_INPUT_EIR,
+    // Simulated EIR (EIR output by the transmission model). Units: inoculations per adult per time step.
+    MVF_SIM_EIR,
+    
     M_NUM
 };
 
@@ -160,6 +170,10 @@ namespace Deploy {
     };
 }
 
+/// Report some value (integer) to the current survey.
+void reportMI( Measure measure, int val );
+/// Report some value (floating point) to the current survey.
+void reportMF( Measure measure, double val );
 /// Report some value (integer) for some human to the current survey.
 void reportMHI( Measure measure, const Host::Human& human, int val );
 /// Report some value (floating point) for some human to the current survey.

@@ -212,8 +212,8 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
 
 void TransmissionModel::summarize () {
     Monitoring::Survey& survey = Monitoring::Survey::current();
-    survey.setNumTransmittingHosts(laggedKappa[sim::now().moduloSteps(laggedKappa.size())]);
-    survey.setAnnualAverageKappa(_annualAverageKappa);
+    mon::reportMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );
+    mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
 
     survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
     inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
@@ -225,11 +225,9 @@ void TransmissionModel::summarize () {
         }
         duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
     }
-    //TODO: we should really use bites-per-day or per year instead of per time
-    // step. But we also can't just change an existing measure.
-    survey.setInputEIR (surveyInputEIR / duration);
-    survey.setSimulatedEIR (surveySimulatedEIR / duration);
-
+    mon::reportMF( mon::MVF_INPUT_EIR, surveyInputEIR / duration );
+    mon::reportMF( mon::MVF_SIM_EIR, surveySimulatedEIR / duration );
+    
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
     lastSurveyTime = sim::now();

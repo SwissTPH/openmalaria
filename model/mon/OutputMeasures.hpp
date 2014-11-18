@@ -48,6 +48,10 @@ struct OutMeasure{
     OutMeasure( int outId, Measure m, bool isDouble, bool byAge, bool byCohort, uint8_t method ) :
         outId(outId), m(m), isDouble(isDouble), byAge(byAge), byCohort(byCohort), method(method)
     {}
+    // Simple reports
+    static OutMeasure value( int outId, Measure m, bool isDouble ){
+        return OutMeasure( outId, m, isDouble, false, false, Deploy::NA );
+    }
     // Something with reports segregated by human age and cohort membership
     static OutMeasure humanAC( int outId, Measure m, bool isDouble ){
         return OutMeasure( outId, m, isDouble, true, true, Deploy::NA );
@@ -102,6 +106,12 @@ void defineOutMeasures(){
     /** The total number of infections in the population: includes both blood
      * and liver stages. Vivax: this is the number of broods. */
     namedOutMeasures["totalInfs"] = OutMeasure::humanAC( 6, MHR_INFECTIONS, false );
+    /** Infectiousness of human population to mosquitoes
+     *
+     * Number of hosts transmitting to mosquitoes (i.e. proportion of
+     * mosquitoes that get infected multiplied by human population size).
+     * Single value, not per age-group. */
+    namedOutMeasures["nTransmit"] = OutMeasure::value( 7, MVF_NUM_TRANSMIT, true );
     /** The sum of all detectable infections (where blood stage parasite
      * density is above the detection limit) across all human hosts.
      * Vivax: the number of broods with an active blood stage. */
@@ -153,10 +163,24 @@ void defineOutMeasures(){
     /// sequelae in hospital
     namedOutMeasures["nHospitalSeqs"] =
         OutMeasure::humanAC( 24, MHO_HOSPITAL_SEQUELAE, false );
-    /// Direct death on first day of CM (before treatment takes effect)
+    /** Annual Average Kappa
+     *
+     * Calculated once a year as sum of human infectiousness divided by initial
+     * EIR summed over a year. Single value, not per age-group. */
+    namedOutMeasures["annAvgK"] = OutMeasure::value( 26, MVF_ANN_AVG_K, true );
     /// Number of episodes (non-malaria fever)
     namedOutMeasures["nNMFever"] =
         OutMeasure::humanAC( 27, MHE_NON_MALARIA_FEVERS, false );
+    /** Input EIR (Expected EIR entered into scenario file)
+     *
+     * Units: inoculations per adult per time step. */
+    namedOutMeasures["inputEIR"] = OutMeasure::value( 35, MVF_INPUT_EIR, true );
+    /** Simulated EIR (EIR output by the transmission model)
+     *
+     * Units: inoculations per adult per time step (children are excluded
+     * when measuring). */
+    namedOutMeasures["simulatedEIR"] = OutMeasure::value( 36, MVF_SIM_EIR, true );
+    /// Direct death on first day of CM (before treatment takes effect)
     namedOutMeasures["Clinical_FirstDayDeaths"] =
         OutMeasure::humanAC( 41, MHO_FIRST_DAY_DEATHS, false );
     /// Direct death on first day of CM (before treatment takes effect); hospital only

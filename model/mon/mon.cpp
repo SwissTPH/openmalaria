@@ -42,14 +42,17 @@ const size_t NOT_ACCEPTED = boost::integer_traits<size_t>::const_max - 1;
 #endif
 
 // Store by human age and cohort
-template<typename T>
-struct StoreHAC{
+template<typename T, bool BY_AGE, bool BY_COHORT>
+struct Store{
     // These are the stored reports
     // Array has four dimensions; see index()
     vector<T> reports;
     // get an index in reports
     inline size_t index( size_t m, size_t s, size_t a, size_t c ){
-        return c + nCohortSets * (a + nAgeGroups * (s + nSurveys * m));
+        size_t i = s + nSurveys * m;
+        if( BY_AGE ) i = a + nAgeGroups * i;
+        if( BY_COHORT ) i = c + nCohortSets * i;
+        return i;
     }
     
     // This maps from an index in reports to an output measure
@@ -80,7 +83,7 @@ struct StoreHAC{
 #endif
                 continue;
             }
-            if( !it->byAge || !it->byCohort ) continue;
+            if( it->byAge != BY_AGE || it->byCohort != BY_COHORT ) continue;
             
             if( mIndices[it->m] != NOT_USED ||
                 (it->method == Deploy::NA && deployIndices.count(it->m) > 0) )
@@ -99,15 +102,16 @@ struct StoreHAC{
             outMeasures.push_back( it->outId ); // increment length
         }
         
-        reports.resize(outMeasures.size() * nSurveys * nAgeGroups * nCohortSets);
+        reports.assign(outMeasures.size() * nSurveys * nAgeGroups * nCohortSets, 0);
     }
     
-    // Take a reported value and either store it or forget it
+    // Take a reported value and either store it or forget it.
+    // If some ageIndex or cohortSet are not applicable, use 0.
     void report( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, T val ){
         assert( mIndices[measure] != NOT_ACCEPTED );
         if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
         if( mIndices[measure] == NOT_USED ){    // measure not used by this store
-            assert( deployIndices.count(measure) == 0);
+            assert( deployIndices.count(measure) == 0 );
             return;
         }
         if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
@@ -115,6 +119,7 @@ struct StoreHAC{
     }
     
     // Take a deployment report and potentially store it in one or more places
+    // If some ageIndex or cohortSet are not applicable, use 0.
     void deploy( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, Deploy::Method method, T val ){
         assert( method == Deploy::NA || method == Deploy::TIMED || method == Deploy::CTS || method == Deploy::TREAT );
         assert( mIndices[measure] == NOT_USED );
@@ -137,11 +142,14 @@ struct StoreHAC{
             measuresOrdered[outMeasures[m]] = m;
         }
         typedef pair<int,size_t> P;
+        size_t nCohorts = BY_COHORT ? nCohortSets : 1;
+        size_t nAges = BY_AGE ? nAgeGroups : 1;
+        const int addCol2 = BY_AGE ? 1 : 0;     // backwards compatibility: first age group starts at 0, unless there isn't an age group
         foreach( P mp, measuresOrdered ){
-            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
-                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
+            for( size_t cohortSet = 0; cohortSet < nCohorts; ++cohortSet ){
+                for( size_t ageGroup = 0; ageGroup < nAges; ++ageGroup ){
                     // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
-                    const int col2 = 1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet ) + ageGroup + 1;
+                    const int col2 = 1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet ) + ageGroup + addCol2;
                     T value = reports[index(mp.second,survey-1,ageGroup,cohortSet)];
                     stream << survey << '\t' << col2 << '\t' << mp.first
                         << '\t' << value << Monitoring::lineEnd;
@@ -190,8 +198,10 @@ private:
     }
 };
 
-StoreHAC<int> storeHACI;
-StoreHAC<double> storeHACD;
+Store<int, false, false> storeI;
+Store<double, false, false> storeF;
+Store<int, true, true> storeHACI;
+Store<double, true, true> storeHACF;
 
 void initialise( size_t nS, size_t nAG, size_t nCS, const scnXml::Monitoring& monElt ){
     nSurveys = nS - 1;  //NOTE: nS is actually 1 greater than required
@@ -208,8 +218,10 @@ void initialise( size_t nS, size_t nAG, size_t nCS, const scnXml::Monitoring& mo
         if( it == namedOutMeasures.end() ) continue;    //TODO: eventually throw an xml_scenario_error
         enabledOutMeasures.push_back( it->second );
     }
+    storeI.init( enabledOutMeasures );
+    storeF.init( enabledOutMeasures );
     storeHACI.init( enabledOutMeasures );
-    storeHACD.init( enabledOutMeasures );
+    storeHACF.init( enabledOutMeasures );
 }
 
 void initMainSim(){
@@ -221,40 +233,59 @@ void concludeSurvey(){
     if( currentSurvey >= nSurveys ) currentSurvey = NOT_USED;
 }
 
-void writeMHI( ostream& stream, int survey ){
+void write( ostream& stream, int survey ){
+    //TODO: re-order these by output measure
     storeHACI.write( stream, survey );
-}
-void writeMHD( ostream& stream, int survey ){
-    storeHACD.write( stream, survey );
+    storeHACF.write( stream, survey );
+    storeI.write( stream, survey );
+    storeF.write( stream, survey );
 }
 
+// Report functions: each reports to all relevant stores.
+void reportMI( Measure measure, int val ){
+    storeI.report( measure, currentSurvey, 0, 0, val );
+}
+void reportMF( Measure measure, double val ){
+    storeF.report( measure, currentSurvey, 0, 0, val );
+}
 void reportMHI( Measure measure, const Host::Human& human, int val ){
+    storeI.report( measure, currentSurvey, 0, 0, val );
     size_t ageIndex = human.getMonitoringAgeGroup().i();
     storeHACI.report( measure, currentSurvey, ageIndex, human.cohortSet(), val );
 }
 void reportMHF( Measure measure, const Host::Human& human, double val ){
+    storeF.report( measure, currentSurvey, 0, 0, val );
     size_t ageIndex = human.getMonitoringAgeGroup().i();
-    storeHACD.report( measure, currentSurvey, ageIndex, human.cohortSet(), val );
+    storeHACF.report( measure, currentSurvey, ageIndex, human.cohortSet(), val );
 }
 void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val ){
+    storeI.report( measure, currentSurvey, 0, 0, val );
     storeHACI.report( measure, survey, ageGroup.i(), cohortSet, val );
 }
+// Deployment reporting uses a different function to handle the method
+// (mostly to make other types of report faster).
 void reportMHD( Measure measure, const Host::Human& human, Deploy::Method method ){
+    const int val = 1;  // always report 1 deployment
+    storeI.deploy( measure, currentSurvey, 0, 0, method, val );
     size_t ageIndex = human.getMonitoringAgeGroup().i();
-    storeHACI.deploy( measure, currentSurvey, ageIndex, human.cohortSet(), method, 1 /*always report 1 deployment*/ );
+    storeHACI.deploy( measure, currentSurvey, ageIndex, human.cohortSet(), method, val );
     // This is for nTreatDeployments:
-    storeHACI.deploy( MHD_ALL_DEPLOYS, currentSurvey, ageIndex, human.cohortSet(), method, 1 );
+    storeHACI.deploy( MHD_ALL_DEPLOYS, currentSurvey, ageIndex, human.cohortSet(), method, val );
 }
 
 void checkpoint( ostream& stream ){
     currentSurvey & stream;
+    storeI.checkpoint(stream);
+    storeF.checkpoint(stream);
     storeHACI.checkpoint(stream);
-    storeHACD.checkpoint(stream);
+    storeHACF.checkpoint(stream);
 }
 void checkpoint( istream& stream ){
     currentSurvey & stream;
+    storeI.checkpoint(stream);
+    storeF.checkpoint(stream);
     storeHACI.checkpoint(stream);
-    storeHACD.checkpoint(stream);
+    storeHACF.checkpoint(stream);
 }
 
 }

@@ -41,9 +41,8 @@ void initMainSim();
 // Call after all data for some survey number has been provided
 void concludeSurvey();
 
-//TODO: these are for backwards compatibility of output files
-void writeMHI( std::ostream& stream, int survey );
-void writeMHD( std::ostream& stream, int survey );
+// Write results for a single survey to stream
+void write( std::ostream& stream, int survey );
 
 // Checkpointing
 void checkpoint( std::ostream& stream );
