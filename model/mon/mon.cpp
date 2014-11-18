@@ -33,7 +33,7 @@ namespace OM {
 namespace mon {
 
 // Constants or defined during init:
-size_t nSurveys, nAgeGroups, nCohortSets;
+size_t nSurveys;
 // Accumulators, variables:
 size_t currentSurvey;
 
@@ -44,15 +44,13 @@ const size_t NOT_ACCEPTED = boost::integer_traits<size_t>::const_max - 1;
 // Store by human age and cohort
 template<typename T, bool BY_AGE, bool BY_COHORT>
 struct Store{
+    size_t nAgeGroups, nCohortSets;
     // These are the stored reports
     // Array has four dimensions; see index()
     vector<T> reports;
     // get an index in reports
     inline size_t index( size_t m, size_t s, size_t a, size_t c ){
-        size_t i = s + nSurveys * m;
-        if( BY_AGE ) i = a + nAgeGroups * i;
-        if( BY_COHORT ) i = c + nCohortSets * i;
-        return i;
+        return c + nCohortSets * (a + nAgeGroups * (s + nSurveys * m));
     }
     
     // This maps from an index in reports to an output measure
@@ -70,7 +68,9 @@ struct Store{
     DeployInd_t deployIndices;
     
     // Set up ready to accept reports.
-    void init( const list<OutMeasure>& required ){
+    void init( const list<OutMeasure>& required, size_t nAG, size_t nCS ){
+        nAgeGroups = BY_AGE ? nAG : 1;
+        nCohortSets = BY_COHORT ? nCS : 1;
         mIndices.assign( M_NUM, NOT_USED );
         // outMeasures.size() is the number of measures we store here
         outMeasures.assign( 0, 0 );
@@ -142,12 +142,10 @@ struct Store{
             measuresOrdered[outMeasures[m]] = m;
         }
         typedef pair<int,size_t> P;
-        size_t nCohorts = BY_COHORT ? nCohortSets : 1;
-        size_t nAges = BY_AGE ? nAgeGroups : 1;
-        const int addCol2 = BY_AGE ? 1 : 0;     // backwards compatibility: first age group starts at 0, unless there isn't an age group
+        const int addCol2 = BY_AGE ? 1 : 0;     // backwards compatibility: first age group starts at 1, unless there isn't an age group
         foreach( P mp, measuresOrdered ){
-            for( size_t cohortSet = 0; cohortSet < nCohorts; ++cohortSet ){
-                for( size_t ageGroup = 0; ageGroup < nAges; ++ageGroup ){
+            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
+                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
                     // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
                     const int col2 = 1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet ) + ageGroup + addCol2;
                     T value = reports[index(mp.second,survey-1,ageGroup,cohortSet)];
@@ -203,10 +201,9 @@ Store<double, false, false> storeF;
 Store<int, true, true> storeHACI;
 Store<double, true, true> storeHACF;
 
-void initialise( size_t nS, size_t nAG, size_t nCS, const scnXml::Monitoring& monElt ){
+void initialise( size_t nS, size_t nAG, size_t nCohortSets, const scnXml::Monitoring& monElt ){
     nSurveys = nS - 1;  //NOTE: nS is actually 1 greater than required
-    nAgeGroups = nAG - 1;       //NOTE: last group is those too old to be reported
-    nCohortSets = nCS;
+    size_t nAgeGroups = nAG - 1;       //NOTE: last group is those too old to be reported
     currentSurvey = NOT_USED;
     
     defineOutMeasures();
@@ -218,10 +215,10 @@ void initialise( size_t nS, size_t nAG, size_t nCS, const scnXml::Monitoring& mo
         if( it == namedOutMeasures.end() ) continue;    //TODO: eventually throw an xml_scenario_error
         enabledOutMeasures.push_back( it->second );
     }
-    storeI.init( enabledOutMeasures );
-    storeF.init( enabledOutMeasures );
-    storeHACI.init( enabledOutMeasures );
-    storeHACF.init( enabledOutMeasures );
+    storeI.init( enabledOutMeasures, nAgeGroups, nCohortSets );
+    storeF.init( enabledOutMeasures, nAgeGroups, nCohortSets );
+    storeHACI.init( enabledOutMeasures, nAgeGroups, nCohortSets );
+    storeHACF.init( enabledOutMeasures, nAgeGroups, nCohortSets );
 }
 
 void initMainSim(){
