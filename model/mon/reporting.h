@@ -160,7 +160,9 @@ enum Measure{
     // S_v: infectious vectors seeking to feed during the last time step. Units: mosquitoes/day
     MVF_LAST_SV,
     
-    M_NUM
+    M_NUM,
+    M_OBSOLETE,
+    M_ALL_CAUSE_IMR
 };
 
 namespace Deploy {

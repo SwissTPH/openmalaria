@@ -37,6 +37,7 @@ struct OutMeasure{
     int outId;
     
     // The following control what is reported by this measure:
+    // Set m to M_NUM for obsolete/special outputs
     Measure m;  // internal measure (e.g. MHR_HOSTS) this comes from
     bool isDouble;  // false: type is int; true: type is double
     bool byAge; // segregate by age
@@ -73,6 +74,9 @@ struct OutMeasure{
     static OutMeasure humanDeploy( int outId, Measure m, Deploy::Method method ){
         assert( method >= 0 && method <= (Deploy::TIMED|Deploy::CTS|Deploy::TREAT) );
         return OutMeasure( outId, m, false, true, true, false, method );
+    }
+    static OutMeasure obsolete( int outId ){
+        return OutMeasure( outId, M_OBSOLETE, false, false, false, false, Deploy::NA );
     }
 };
 
@@ -125,6 +129,8 @@ void defineOutMeasures(){
      * Vivax: the number of broods with an active blood stage. */
     namedOutMeasures["totalPatentInf"] =
         OutMeasure::humanAC( 8, MHR_PATENT_INFECTIONS, false );
+    /// Contribuion to immunity functions (removed)
+    namedOutMeasures["contrib"] = OutMeasure::obsolete( 9 );
     /// Sum of the pyrogenic threshold
     namedOutMeasures["sumPyrogenThresh"] =
         OutMeasure::humanAC( 10, MHF_PYROGENIC_THRESHOLD, true );
@@ -158,6 +164,13 @@ void defineOutMeasures(){
      * (with an "effect" element) will be reported. */
     namedOutMeasures["nEPIVaccinations"] =
         OutMeasure::humanDeploy( 20, MHD_VACCINATIONS, Deploy::CTS );
+    /** All cause infant mortality rate
+     * 
+     * Reports death rate of infants due to all causes (malaria as modelled
+     * plus fixed non-malaria attribution). Calculated via Kaplan-Meier method.
+     * Units: deaths per thousand births. */
+    namedOutMeasures["allCauseIMR"] =
+        OutMeasure::value( 21, M_ALL_CAUSE_IMR, true );
     /** Number of vaccine doses given via mass campaign.
      * 
      * Since schema 22, each vaccine type may be deployed independently. To be
@@ -171,6 +184,8 @@ void defineOutMeasures(){
     /// sequelae in hospital
     namedOutMeasures["nHospitalSeqs"] =
         OutMeasure::humanAC( 24, MHO_HOSPITAL_SEQUELAE, false );
+    /// Number of IPT Doses (removed together with IPT model)
+    namedOutMeasures["nIPTDoses"] = OutMeasure::obsolete( 25 );
     /** Annual Average Kappa
      *
      * Calculated once a year as sum of human infectiousness divided by initial
@@ -179,6 +194,12 @@ void defineOutMeasures(){
     /// Number of episodes (non-malaria fever)
     namedOutMeasures["nNMFever"] =
         OutMeasure::humanAC( 27, MHE_NON_MALARIA_FEVERS, false );
+    /// Inoculations per human (all ages) per day of year, over the last year.
+    /// (Reporting removed.)
+    namedOutMeasures["innoculationsPerDayOfYear"] = OutMeasure::obsolete( 28 );
+    /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
+    /// (Reporting removed.)
+    namedOutMeasures["kappaPerDayOfYear"] = OutMeasure::obsolete( 29 );
     /** The total number of inoculations, by age group and cohort, summed over
      * the reporting period. */
     namedOutMeasures["innoculationsPerAgeGroup"] =
@@ -200,6 +221,16 @@ void defineOutMeasures(){
      * Units: inoculations per adult per time step (children are excluded
      * when measuring). */
     namedOutMeasures["simulatedEIR"] = OutMeasure::value( 36, MVF_SIM_EIR, true );
+    /// Number of Rapid Diagnostic Tests used
+    namedOutMeasures["Clinical_RDTs"] = OutMeasure::obsolete( 39 );
+    /* Effective total quanty of each drug used orally, in mg.
+     * (Per active ingredient abbreviation.)
+     * 
+     * The quantity is efffective with respect to the cost (see treatment
+     * schedule definition).
+     * 
+     * Reporting removed. */
+    namedOutMeasures["Clinical_DrugUsage"] = OutMeasure::obsolete( 40 );
     /// Direct death on first day of CM (before treatment takes effect)
     namedOutMeasures["Clinical_FirstDayDeaths"] =
         OutMeasure::humanAC( 41, MHO_FIRST_DAY_DEATHS, false );
@@ -225,6 +256,17 @@ void defineOutMeasures(){
      * Modelled IRS: affects one person, cannot be plastered over. */
     namedOutMeasures["nMassIRS"] =
         OutMeasure::humanDeploy( 46, MHD_IRS, Deploy::TIMED );
+    /** Defunct; was used by "vector availability" intervention (which is now a
+     * sub-set of GVI). */
+    namedOutMeasures["nMassVA"] = OutMeasure::obsolete( 47 );
+    /// Number of malarial tests via microscopy used
+    namedOutMeasures["Clinical_Microscopy"] = OutMeasure::obsolete( 48 );
+    /* As Clinical_DrugUsage, but for quatities of drug delivered via IV. */
+    namedOutMeasures["Clinical_DrugUsageIV"] = OutMeasure::obsolete( 49 );
+    /// Number of cohort recruitments removed)
+    namedOutMeasures["nAddedToCohort"] = OutMeasure::obsolete( 50 );
+    /// Number of individuals removed from cohort (removed)
+    namedOutMeasures["nRemovedFromCohort"] = OutMeasure::obsolete( 51 );
     /** Number of people (per age group) treated by mass drug administration
      * campaign. (Note that in one day time-step model MDA can be configured
      * as screen-and-treat. This option reports treatments administered not
@@ -233,6 +275,8 @@ void defineOutMeasures(){
         OutMeasure::humanDeploy( 52, MHD_TREAT, Deploy::TIMED );
     /// Number of deaths caused by non-malaria fevers
     namedOutMeasures["nNmfDeaths"] = OutMeasure::humanAC( 53, MHO_NMF_DEATHS, false );
+    /// Number of antibiotic treatments given (disabled — not used)
+    namedOutMeasures["nAntibioticTreatments"] = OutMeasure::obsolete( 54 );
     /** Report the number of screenings used in a mass screen-and-treat
      * operation. */
     namedOutMeasures["nMassScreenings"] =

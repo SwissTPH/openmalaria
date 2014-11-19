@@ -34,117 +34,12 @@ using WithinHost::diagnostics;
 
 // -----  Static members  -----
 
-bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
 const Diagnostic* Survey::m_diagnostic = 0;
-
-class SurveyMeasureMap {
-    // Lookup table to translate the strings used in the XML file to the internal enumerated values:
-    map<string,SM::SurveyMeasure> codeMap;
-    set<string> removedCodes;
-    
-public:
-    SurveyMeasureMap () {
-        codeMap["nHost"] = SM::BLANK;
-        codeMap["nInfect"] = SM::BLANK;
-        codeMap["nExpectd"] = SM::BLANK;
-        codeMap["nPatent"] = SM::BLANK;
-        codeMap["sumLogPyrogenThres"] = SM::BLANK;
-        codeMap["sumlogDens"] = SM::BLANK;
-        codeMap["totalInfs"] = SM::BLANK;
-        codeMap["totalPatentInf"] = SM::BLANK;
-        codeMap["sumPyrogenThresh"] = SM::BLANK;
-        codeMap["nTreatments1"] = SM::BLANK;
-        codeMap["nTreatments2"] = SM::BLANK;
-        codeMap["nTreatments3"] = SM::BLANK;
-        codeMap["nUncomp"] = SM::BLANK;
-        codeMap["nSevere"] = SM::BLANK;
-        codeMap["nSeq"] = SM::BLANK;
-        codeMap["nHospitalDeaths"] = SM::BLANK;
-        codeMap["nIndDeaths"] = SM::BLANK;
-        codeMap["nDirDeaths"] = SM::BLANK;
-        codeMap["nHospitalRecovs"] = SM::BLANK;
-        codeMap["nHospitalSeqs"] = SM::BLANK;
-        codeMap["nNMFever"] = SM::BLANK;
-        codeMap["Clinical_FirstDayDeaths"] = SM::BLANK;
-        codeMap["Clinical_HospitalFirstDayDeaths"] = SM::BLANK;
-        codeMap["nNmfDeaths"] = SM::BLANK;
-        codeMap["sumAge"] = SM::BLANK;
-        codeMap["nEPIVaccinations"] = SM::BLANK;
-        codeMap["nMassVaccinations"] = SM::BLANK;
-        codeMap["nMassITNs"] = SM::BLANK;
-        codeMap["nEPI_ITNs"] = SM::BLANK;
-        codeMap["nMassIRS"] = SM::BLANK;
-        codeMap["nMassGVI"] = SM::BLANK;
-        codeMap["nMDAs"] = SM::BLANK;
-        codeMap["nMassScreenings"] = SM::BLANK;
-        codeMap["nCtsIRS"] = SM::BLANK;
-        codeMap["nCtsGVI"] = SM::BLANK;
-        codeMap["nCtsMDA"] = SM::BLANK;
-        codeMap["nCtsScreenings"] = SM::BLANK;
-        codeMap["nMassRecruitOnly"] = SM::BLANK;
-        codeMap["nCtsRecruitOnly"] = SM::BLANK;
-        codeMap["nTreatDeployments"] = SM::BLANK;
-        codeMap["nNewInfections"] = SM::BLANK;
-        codeMap["nSubPopRemovalTooOld"] = SM::BLANK;
-        codeMap["nSubPopRemovalFirstEvent"] = SM::BLANK;
-        codeMap["nPQTreatments"] = SM::BLANK;
-        codeMap["nTreatDiagnostics"] = SM::BLANK;
-        codeMap["nTransmit"] = SM::BLANK;
-        codeMap["annAvgK"] = SM::BLANK;
-        codeMap["inputEIR"] = SM::BLANK;
-        codeMap["simulatedEIR"] = SM::BLANK;
-        codeMap["Vector_Nv0"] = SM::BLANK;
-        codeMap["Vector_Nv"] = SM::BLANK;
-        codeMap["Vector_Ov"] = SM::BLANK;
-        codeMap["Vector_Sv"] = SM::BLANK;
-        codeMap["innoculationsPerAgeGroup"] = SM::BLANK;
-        
-        codeMap["allCauseIMR"] = SM::allCauseIMR;
-        
-        removedCodes.insert("Clinical_RDTs");
-        removedCodes.insert("Clinical_Microscopy");
-        removedCodes.insert("contrib");
-        removedCodes.insert("nIPTDoses");
-        removedCodes.insert("nAddedToCohort");
-        removedCodes.insert("nRemovedFromCohort");
-        removedCodes.insert("nAntibioticTreatments");
-    }
-    
-    SM::SurveyMeasure operator[] (const string s) {
-        map<string,SM::SurveyMeasure>::iterator codeIt = codeMap.find (s);
-        if (codeIt == codeMap.end()) {
-            ostringstream msg;
-            if( removedCodes.count(s) > 0 ) msg << "Removed";
-            else msg << "Unrecognised";
-            msg << " survey option: \"" << s << '"';
-            throw util::xml_scenario_error(msg.str());
-        }
-        return codeIt->second;
-    }
-    // reverse-lookup in map; only used for error/debug printing so efficiency is unimportant
-    // doesn't ensure code is unique in the map either
-    string toString (const SM::SurveyMeasure code) {
-        for (map<string,SM::SurveyMeasure>::iterator codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
-            if (codeIt->second == code)
-                return codeIt->first;
-        }
-        throw TRACED_EXCEPTION_DEFAULT ("toString called with unknown code");	// this is a code error
-    }
-};
 
 
 void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
                    const scnXml::Monitoring& monitoring ){
-    // by default, none are active
-    active.reset ();
-    SurveyMeasureMap codeMap;
-    
-    scnXml::OptionSet::OptionSequence sOSeq = monitoring.getSurveyOptions().getOption();
-    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
-	active[codeMap[it->getName()]] = it->getValue();
-    }
-    
     const scnXml::Surveys& surveys = monitoring.getSurveys();
     if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
         // So far the implemented Vivax code does not produce parasite

@@ -23,7 +23,6 @@
 
 #include "Monitoring/Surveys.h"
 #include "Simulator.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "interventions/InterventionManager.hpp"
 #include "mon/management.h"
 #include "util/BoincWrapper.h"
@@ -118,14 +117,6 @@ void SurveysType::writeSummaryArrays ()
   //   outputFile << scientific;
 
   mon::write( outputFile );
-
-  //Infant mortality rate is a single number, therefore treated separately
-  // Note: Storing a single value instead of one per reporting period is inconsistent with other
-  // reporting, but I believe required for parameterisation.
-  if (Survey::active[SM::allCauseIMR]) {
-    outputFile << 1 << "\t" << 1 << "\t" << SM::allCauseIMR;
-    outputFile << "\t" << Clinical::infantAllCauseMort() << lineEnd;
-  }
 
   outputFile.close();
 }

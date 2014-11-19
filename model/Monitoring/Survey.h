@@ -22,7 +22,6 @@
 #define Hmod_Survey
 
 #include "Global.h"
-#include "Monitoring/SurveyMeasure.h"
 #include "WithinHost/Diagnostic.h"
 #include "Parameters.h"
 #include "util/checkpoint_containers.h"
@@ -40,14 +39,6 @@ using WithinHost::Diagnostic;
 
 /// Data struct for a single survey.
 class Survey {
-private:
-    ///@brief Static members (options from XML). Parameters only set by init().
-    //@{
-    /// Encoding of which summary options are active in XML is converted into
-    /// this array for easier reading (and to make changing encoding within XML easier).
-    static bitset<SM::NUM_SURVEY_OPTIONS> active;
-    //@}
-  
 public:
     /// Initialize static parameters.
     static void init( const OM::Parameters& parameters,

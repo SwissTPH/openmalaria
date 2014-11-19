@@ -22,6 +22,7 @@
 #include "mon/reporting.h"
 #include "Monitoring/Survey.h"
 #include "Monitoring/Surveys.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
 #define H_OM_mon_cpp
 #include "mon/OutputMeasures.hpp"
@@ -141,6 +142,7 @@ public:
         for( list<OutMeasure>::const_iterator it = required.begin();
             it != required.end(); ++it )
         {
+            if( it->m >= M_NUM ) continue;      // skip: obsolete/special
             if( it->isDouble != (typeid(T) == typeid(double) ) ){
 #ifndef NDEBUG
                 // Debug mode: this should prevent silly errors where the type
@@ -262,6 +264,7 @@ Store<double, false, false, false> storeF;
 Store<int, true, true, false> storeHACI;
 Store<double, true, true, false> storeHACF;
 Store<double, false, false, true> storeSF;
+int reportIMR = -1; // special output for fitting
 
 void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
 {
@@ -270,8 +273,20 @@ void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
     list<OutMeasure> enabledOutMeasures;
     foreach( const scnXml::Option& optElt, optsElt.getOption() ){
         if( optElt.getValue() == false ) continue;      // option is disabled
-        NamedMeasureMapT::const_iterator it = namedOutMeasures.find( optElt.getName() );
-        if( it == namedOutMeasures.end() ) continue;    //TODO: eventually throw an xml_scenario_error
+        NamedMeasureMapT::const_iterator it =
+            namedOutMeasures.find( optElt.getName() );
+        if( it == namedOutMeasures.end() ){
+            throw util::xml_scenario_error( (boost::format("unrecognised "
+                "survey option: %1%") %optElt.getName()).str() );
+        }
+        if( it->second.m == M_NUM ){
+            throw util::xml_scenario_error( (boost::format("obsolete "
+                "survey option: %1%") %optElt.getName()).str() );
+        }
+        if( it->second.m == M_ALL_CAUSE_IMR && it->second.isDouble &&
+            !it->second.byAge && !it->second.byCohort && !it->second.bySpecies ){
+            reportIMR = it->second.outId;
+        }
         enabledOutMeasures.push_back( it->second );
     }
     storeI.init( enabledOutMeasures, nSpecies );
@@ -296,6 +311,13 @@ void write( ostream& stream ){
         foreach( PP pp, measuresOrdered ){
             pp.second.first( stream, survey, pp.first, pp.second.second );
         }
+    }
+    if( reportIMR >= 0 ){
+        // Infant mortality rate is a single number, therefore treated specially.
+        // It is calculated across the entire intervention period and used in
+        // model fitting.
+        stream << 1 << "\t" << 1 << "\t" << reportIMR
+            << "\t" << Clinical::infantAllCauseMort() << Monitoring::lineEnd;
     }
 }
 
