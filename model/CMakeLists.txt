@@ -87,7 +87,6 @@ set (Model_CPP
   util/misc.cpp
   
   Monitoring/Continuous.cpp
-  Monitoring/Surveys.cpp
   Monitoring/Survey.cpp
   
   interventions/InterventionManager.cpp

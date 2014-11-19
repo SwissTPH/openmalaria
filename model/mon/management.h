@@ -40,21 +40,34 @@ void initSurveyTimes( const Parameters& parameters,
         const scnXml::Scenario& scenario,
         const scnXml::Monitoring& monitoring );
 
-// Call before start of simulation to set up outputs
+/// Call before start of simulation to set up outputs
 void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt );
 
-// Call just before the start of the intervention period
+/// Call just before the start of the intervention period
 void initMainSim();
 
-// Call after all data for some survey number has been provided
+/// Call after all data for some survey number has been provided
 void concludeSurvey();
 
-// Write results to stream
-void write( std::ostream& stream );
+/// Write survey data to output.txt (or configured file)
+void writeSurveyData();
 
 // Checkpointing
 void checkpoint( std::ostream& stream );
 void checkpoint( std::istream& stream );
+
+// Functions for internal use (within mon package)
+namespace internal{
+    /** Init component (called by initReporting()). */
+    void initCohorts( const scnXml::Monitoring& monitoring );
+    
+    // Write results to stream
+    void write( std::ostream& stream );
+    
+    /** Get the output cohort set numeric identifier given the internal one
+     * (as returned by Survey::updateCohortSet()). */
+    uint32_t cohortSetOutputId( uint32_t cohortSet );
+}
 
 }
 }

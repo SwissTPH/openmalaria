@@ -37,7 +37,6 @@
 
 namespace OM { namespace Host {
     using namespace OM::util;
-    using Monitoring::Survey;
     using interventions::ComponentId;
     
     bool opt_report_only_at_risk = false;
@@ -138,7 +137,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 // don't flush reports
                 // report removal due to expiry
                 mon::reportMHI( mon::MHR_SUB_POP_REM_TOO_OLD, *this, 1 );
-                m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
+                m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
                 // erase element, but continue iteration (note: this is simpler in C++11)
                 map<ComponentId,SimTime>::iterator toErase = expIt;
                 ++expIt;
@@ -196,7 +195,7 @@ void Human::summarize() {
 void Human::reportDeployment( ComponentId id, SimTime duration ){
     if( duration <= sim::zero() ) return; // nothing to do
     m_subPopExp[id] = sim::nowOrTs1() + duration;
-    m_cohortSet = Survey::updateCohortSet( m_cohortSet, id, true );
+    m_cohortSet = mon::updateCohortSet( m_cohortSet, id, true );
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
     const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
@@ -213,7 +212,7 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
                 // report removal due to first infection/bout/treatment
                 mon::reportMHI( mon::MHR_SUB_POP_REM_FIRST_EVENT, *this, 1 );
             }
-            m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
+            m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
             // remove (affects reporting, restrictToSubPop and cumulative deployment):
             m_subPopExp.erase( expIt );
         }

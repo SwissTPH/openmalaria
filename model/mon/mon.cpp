@@ -20,12 +20,12 @@
 
 #include "mon/info.h"
 #include "mon/reporting.h"
-#include "Monitoring/Survey.h"
-#include "Monitoring/Surveys.h"
-#include "Clinical/CaseManagementCommon.h"
-#include "Host/Human.h"
+#include "mon/management.h"
 #define H_OM_mon_cpp
 #include "mon/OutputMeasures.hpp"
+#include "Monitoring/Survey.h"
+#include "Clinical/CaseManagementCommon.h"
+#include "Host/Human.h"
 #include "util/errors.h"
 #include "schema/monitoring.h"
 
@@ -119,7 +119,7 @@ class Store{
             for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
                 // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
                 const int col2 = ageGroup + ageGroupAdd +
-                    1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet );
+                    1000 * internal::cohortSetOutputId( cohortSet );
                 T value = reports[index(inMeasure,survey,ageGroup,cohortSet,0)];
                 stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
                     << '\t' << value << lineEnd;
@@ -294,9 +294,11 @@ void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
     storeSF.init( enabledOutMeasures, nSpecies );
     storeHACI.init( enabledOutMeasures, nSpecies );
     storeHACF.init( enabledOutMeasures, nSpecies );
+    
+    internal::initCohorts( monElt );
 }
 
-void write( ostream& stream ){
+void internal::write( ostream& stream ){
     // use a (tree) map to sort by external measure
     typedef pair<WriteDelegate,size_t> MPair;
     map<int,MPair> measuresOrdered;

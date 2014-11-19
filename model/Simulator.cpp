@@ -26,7 +26,6 @@
 #include "Parameters.h"
 #include "Clinical/ClinicalModel.h"
 #include "Monitoring/Continuous.h"
-#include "Monitoring/Surveys.h"
 #include "interventions/InterventionManager.hpp"
 #include "Population.h"
 #include "WithinHost/Diagnostic.h"
@@ -46,7 +45,6 @@
 
 namespace OM {
     using Monitoring::Continuous;
-    using Monitoring::Surveys;
     using interventions::InterventionManager;
 
 bool Simulator::startedFromCheckpoint;  // static
@@ -118,7 +116,6 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     
     // Depends on interventions:
     mon::initReporting( population.get()->_transmissionModel->getNSpecies(), scenario.getMonitoring() );
-    Surveys.init2( scenario.getMonitoring() );
     
     // Depends on interventions:
     Host::Human::init2( scenario.getMonitoring() );
@@ -287,7 +284,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     PopulationStats::print();
     
     population->flushReports();        // ensure all Human instances report past events
-    Surveys.writeSummaryArrays();
+    mon::writeSurveyData();
     Continuous.finalise();
     
 # ifdef OM_STREAM_VALIDATOR

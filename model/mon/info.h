@@ -48,9 +48,6 @@ const char lineEnd = '\n';
 /// survey times). May have the special value NOT_USED.
 inline size_t currentSurvey(){ return impl::currentSurvey; }
 
-/// The number of cohort sets
-inline size_t numCohortSets(){ return impl::nCohortSets; }
-
 /** Time the current (next) survey ends at, or sim::never() if no more
  * surveys take place. */
 SimTime nextSurveyTime();
@@ -62,6 +59,20 @@ SimTime nextSurveyTime();
  * explicitly specified and has a small affect on
  * infantAllCauseMortality (survey 21) output. */
 SimTime finalSurveyTime();
+
+/// The number of cohort sets
+inline size_t numCohortSets(){ return impl::nCohortSets; }
+
+/** Humans should store a "cohort set" identifier which is initially 0.
+ * Whenever a human gains or loses membership status in some
+ * sup-population, it should update that value with this function.
+ * 
+ * @param old       Old identifier value (initially 0)
+ * @param subPop    Sub-population to which membership status changed
+ * @param isMember  New membership status
+ * @returns         New identifier value */
+uint32_t updateCohortSet( uint32_t old, interventions::ComponentId subPop,
+        bool isMember );
 
 } }
 #endif

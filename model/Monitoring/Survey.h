@@ -51,18 +51,6 @@ public:
         assert( m_diagnostic != 0 );
         return *m_diagnostic;
     }
-    
-    /** Humans should store a "cohort set" identifier which is initially 0.
-     * Whenever a human gains or loses membership status in some
-     * sup-population, it should update that value with this function.
-     * 
-     * @param old       Old identifier value (initially 0)
-     * @param subPop    Sub-population to which membership status changed
-     * @param isMember  New membership status
-     * @returns         New identifier value
-     */
-    static uint32_t updateCohortSet( uint32_t old,
-        interventions::ComponentId subPop, bool isMember );
     //@}
     
 private:

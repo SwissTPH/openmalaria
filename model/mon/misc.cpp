@@ -23,9 +23,16 @@
 #include "mon/AgeGroup.h"
 #include "mon/reporting.h"
 #include "Monitoring/Survey.h"  // for init
+#include "interventions/InterventionManager.hpp"
+#include "util/BoincWrapper.h"
+#include "util/CommandLine.h"
 #include "util/errors.h"
 #include "schema/monitoring.h"
+
+#include <gzstream/gzstream.h>
+#include <fstream>
 #include <boost/algorithm/string.hpp>
+#include <boost/math/special_functions/nonfinite_num_facets.hpp>
 
 namespace OM {
 namespace mon {
@@ -107,6 +114,34 @@ SimTime finalSurveyTime(){
     return impl::surveyTimes[impl::surveyTimes.size()-1];
 }
 
+void writeSurveyData ()
+{
+#ifdef WITHOUT_BOINC
+    ofstream outputFile;          // without boinc, use plain text (for easy reading)
+#else
+    ogzstream outputFile;         // with, use gzip
+#endif
+    
+    // This locale ensures uniform formatting of nans and infs on all platforms.
+    std::locale old_locale;
+    std::locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
+    outputFile.imbue( nfn_put_locale );
+
+    string output_filename = util::BoincWrapper::resolveFile(
+        util::CommandLine::getOutputName() );
+    
+    outputFile.open( output_filename.c_str(), std::ios::out | std::ios::binary );
+    
+    outputFile.width (0);
+    // For additional control:
+    // outputFile.precision (6);
+    // outputFile << scientific;
+    
+    internal::write( outputFile );
+    
+    outputFile.close();
+}
+
 
 // ———  AgeGroup  ———
 
@@ -131,6 +166,65 @@ void AgeGroup::update (SimTime age) {
     while (age >= upperBound[index]){
         ++index;
     }
+}
+
+
+// ———  Cohort sets  ———
+
+using interventions::ComponentId;
+vector<uint32_t> cohortSubPopNumbers;   // value is output number
+map<ComponentId,uint32_t> cohortSubPopIds;      // value is internal index (used above)
+
+bool notPowerOfTwo( uint32_t num ){
+    for( uint32_t i = 0; i <= 21; ++i ){
+        if( num == (static_cast<uint32_t>(1) << i) )
+            return false;
+    }
+    return true;
+}
+// Init cohort sets. Depends on interventions (initialise those first).
+void internal::initCohorts( const scnXml::Monitoring& monitoring )
+{
+    if( monitoring.getCohorts().present() ){
+        const scnXml::Cohorts monCohorts = monitoring.getCohorts().get();
+        uint32_t nextId = 0;
+        for( scnXml::Cohorts::SubPopConstIterator it = monCohorts.getSubPop().begin(),
+            end = monCohorts.getSubPop().end(); it != end; ++it )
+        {
+            ComponentId compId = interventions::InterventionManager::getComponentId( it->getId() );
+            bool inserted = cohortSubPopIds.insert( make_pair(compId,nextId) ).second;
+            if( !inserted ){
+                throw util::xml_scenario_error(
+                    string("cohort specification uses sub-population \"").append(it->getId())
+                    .append("\" more than once") );
+            }
+            if( it->getNumber() < 0 || notPowerOfTwo( it->getNumber() ) ){
+                throw util::xml_scenario_error(
+                    string( "cohort specification assigns sub-population \"").append(it->getId())
+                    .append("\" a number which is not a power of 2 (up to 2^21)") );
+            }
+            cohortSubPopNumbers.push_back( it->getNumber() );
+            nextId += 1;
+        }
+    }
+}
+
+uint32_t updateCohortSet( uint32_t old, ComponentId subPop, bool isMember ){
+    map<ComponentId,uint32_t>::const_iterator it = cohortSubPopIds.find( subPop );
+    if( it == cohortSubPopIds.end() ) return old;       // sub-pop not used in cohorts
+    uint32_t subPopId = static_cast<uint32_t>(1) << it->second;        // 1 bit positive
+    return (old & ~subPopId) | (isMember ? subPopId : 0);
+}
+
+uint32_t internal::cohortSetOutputId(uint32_t cohortSet){
+    uint32_t outNum = 0;
+    assert( (cohortSet >> cohortSubPopNumbers.size()) == 0 );
+    for( uint32_t i = 0; i < cohortSubPopNumbers.size(); ++i ){
+        if( cohortSet & (static_cast<uint32_t>(1) << i) ){
+            outNum += cohortSubPopNumbers[i];
+        }
+    }
+    return outNum;
 }
 
 } }
