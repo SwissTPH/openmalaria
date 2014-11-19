@@ -22,7 +22,7 @@
 #include <boost/math/nonfinite_num_facets.hpp>
 
 #include "Monitoring/Continuous.h"
-#include "Monitoring/Survey.h"	// lineEnd
+#include "mon/info.h"   // lineEnd
 #include "util/errors.h"
 #include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
@@ -180,7 +180,7 @@ namespace OM { namespace Monitoring {
 		    toReport.push_back( reg_it->second );
 		}
 	    }
-	    ctsOStream << lineEnd << flush;
+	    ctsOStream << mon::lineEnd << flush;
 	    streamOff = ctsOStream.tellp() - streamStart;
 	}
     }
@@ -262,7 +262,7 @@ namespace OM { namespace Monitoring {
 	    toReport[i]->call( population, ctsOStream );
 	// We must flush often to avoid temporarily outputting partial lines
 	// (resulting in incorrect real-time graphs).
-	ctsOStream << lineEnd << flush;
+	ctsOStream << mon::lineEnd << flush;
 	
 	streamOff = ctsOStream.tellp() - streamStart;
 	util::BoincWrapper::endCriticalSection();

@@ -74,8 +74,5 @@ private:
     friend class ::UnittestUtil;
 };
 
-/** Line end character. Use Unix line endings to save a little size. */
-const char lineEnd = '\n';
-
 } }
 #endif

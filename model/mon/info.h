@@ -41,6 +41,9 @@ namespace impl {
 /// For surveys and measures to say something shouldn't be reported
 const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
 
+/** Line end character. Use Unix line endings to save a little size. */
+const char lineEnd = '\n';
+
 /// The current survey number (can be passed back to report functions taking
 /// survey times). May have the special value NOT_USED.
 inline size_t currentSurvey(){ return impl::currentSurvey; }

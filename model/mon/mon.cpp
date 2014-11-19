@@ -109,7 +109,7 @@ class Store{
                 const int col2 = species + 1;
                 T value = reports[index(inMeasure,survey,0,0,species)];
                 stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
-                    << '\t' << value << Monitoring::lineEnd;
+                    << '\t' << value << lineEnd;
             }
         }else{
             // Backwards compatibility: first age group starts at 1, unless
@@ -122,7 +122,7 @@ class Store{
                     1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet );
                 T value = reports[index(inMeasure,survey,ageGroup,cohortSet,0)];
                 stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
-                    << '\t' << value << Monitoring::lineEnd;
+                    << '\t' << value << lineEnd;
             } }
         }
     }
@@ -317,7 +317,7 @@ void write( ostream& stream ){
         // It is calculated across the entire intervention period and used in
         // model fitting.
         stream << 1 << "\t" << 1 << "\t" << reportIMR
-            << "\t" << Clinical::infantAllCauseMort() << Monitoring::lineEnd;
+            << "\t" << Clinical::infantAllCauseMort() << lineEnd;
     }
 }
 
