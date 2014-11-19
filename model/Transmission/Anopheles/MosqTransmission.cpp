@@ -22,11 +22,12 @@
 #include "Transmission/Anopheles/FixedEmergence.h"
 #include "Transmission/Anopheles/SimpleMPDEmergence.h"
 #include "WithinHost/Genotypes.h"
-#include "schema/entomology.h"
+#include "mon/reporting.h"
 #include "util/vectors.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/StreamValidator.h"
+#include "schema/entomology.h"
 
 namespace OM {
 namespace Transmission {
@@ -304,12 +305,12 @@ double MosqTransmission::getLastVecStat( VecStat vs )const{
     }
     return val / sim::oneTS().inDays();
 }
-void MosqTransmission::summarize (const string speciesName) const{
-    Monitoring::Survey::current()
-        .set_Vector_Nv0 (speciesName, getLastN_v0())
-        .set_Vector_Nv (speciesName, getLastVecStat(NV))
-        .set_Vector_Ov (speciesName, getLastVecStat(OV))
-        .set_Vector_Sv (speciesName, getLastVecStat(SV));
+void MosqTransmission::summarize( size_t species )const{
+    mon::reportMSF( mon::MVF_LAST_NV0, species, getLastN_v0() );
+    mon::reportMSF( mon::MVF_LAST_NV, species, getLastVecStat(NV) );
+    //TODO: should be reported per genotype:
+    mon::reportMSF( mon::MVF_LAST_OV, species, getLastVecStat(OV) );
+    mon::reportMSF( mon::MVF_LAST_SV, species, getLastVecStat(SV) );
 }
 
 }

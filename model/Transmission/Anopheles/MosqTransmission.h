@@ -123,7 +123,7 @@ public:
     }
     
     /// Write some per-species summary information.
-    void summarize (const string speciesName) const;
+    void summarize( size_t species )const;
     //@}
     
     

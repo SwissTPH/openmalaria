@@ -68,22 +68,6 @@ enum SurveyMeasure {
 //     kappaPerDayOfYear = 29,
     //END
     
-    /** @brief Vector model parameters.
-     *
-     * All are point-time outputs, not averages. The Nv0, Nv, Ov and Sv outputs
-     * are per-species; the EIR outputs are single values. */
-    //@{
-    /** Mosquito emergence rate. */
-    Vector_Nv0 = 31,
-    /// Mosquito population size
-    Vector_Nv = 32,
-    /// Number of infected mosquitoes
-    Vector_Ov = 33,
-    /// Number of infectious mosquitoes
-    Vector_Sv = 34,
-    
-    //@}
-    
     /// @brief EventScheduler reporting (additional to above)
     //@{
     /// Number of Rapid Diagnostic Tests used

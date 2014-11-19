@@ -406,6 +406,9 @@ void VectorModel::checkSimMode() const{
     }
 }
 
+size_t VectorModel::getNSpecies(){
+    return numSpecies;
+}
 const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
     checkSimMode();     //TODO: can probably eventually inline
     return speciesIndex;
@@ -425,9 +428,10 @@ void VectorModel::uninfectVectors() {
 
 void VectorModel::summarize () {
     TransmissionModel::summarize ();
-
-    for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)
-        species[it->second].summarize (it->first);
+    
+    for (size_t i = 0; i < numSpecies; ++i){
+        species[i].summarize( i );
+    }
 }
 
 

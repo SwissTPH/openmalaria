@@ -26,33 +26,28 @@
 #include "mon/OutputMeasures.hpp"
 #include "schema/monitoring.h"
 
+#include <FastDelegate.h>
 #include <iostream>
 #include <boost/format.hpp>
 
 namespace OM {
 namespace mon {
+    using namespace fastdelegate;
 
 // Constants or defined during init:
-size_t nSurveys;
+size_t nSurveys = 0;
 // Accumulators, variables:
-size_t currentSurvey;
+size_t currentSurvey = NOT_USED;
 
 #ifndef NDEBUG
 const size_t NOT_ACCEPTED = boost::integer_traits<size_t>::const_max - 1;
 #endif
 
+typedef FastDelegate4<ostream&,int,int,size_t> WriteDelegate;
+
 // Store by human age and cohort
-template<typename T, bool BY_AGE, bool BY_COHORT>
-struct Store{
-    size_t nAgeGroups, nCohortSets;
-    // These are the stored reports
-    // Array has four dimensions; see index()
-    vector<T> reports;
-    // get an index in reports
-    inline size_t index( size_t m, size_t s, size_t a, size_t c ){
-        return c + nCohortSets * (a + nAgeGroups * (s + nSurveys * m));
-    }
-    
+template<typename T, bool BY_AGE, bool BY_COHORT, bool BY_SPECIES>
+class Store{
     // This maps from an index in reports to an output measure
     vector<int> outMeasures;
     
@@ -67,23 +62,91 @@ struct Store{
     typedef multimap<int,pair<uint8_t,size_t> > DeployInd_t;
     DeployInd_t deployIndices;
     
+    size_t nAgeGroups, nCohortSets, nSpecies;
+    // These are the stored reports
+    // Array has four dimensions; see index()
+    vector<T> reports;
+    
+    // get size of reports
+    inline size_t size(){ return outMeasures.size() * nSurveys *
+        nAgeGroups * nCohortSets * nSpecies; }
+    // get an index in reports
+    inline size_t index( size_t m, size_t s, size_t a, size_t c, size_t sp ){
+        return sp + nSpecies * (c + nCohortSets * (a + nAgeGroups * (s + nSurveys * m)));
+    }
+    
+    inline void add(size_t mIndex, size_t survey, size_t ageIndex,
+                    uint32_t cohortSet, size_t species, T val)
+    {
+#ifndef NDEBUG
+        if( mIndex >= outMeasures.size() ||
+            survey >= nSurveys ||
+            ageIndex >= nAgeGroups ||
+            cohortSet >= nCohortSets ||
+            species >= nSpecies
+        ){
+            cout << "Index out of bounds for survey:\t" << survey << " of " << nSurveys
+                << "\nmeasure number\t" << mIndex << " of " << outMeasures.size()
+                << "\nage group\t" << ageIndex << " of " << nAgeGroups
+                << "\ncohort set\t" << cohortSet << " of " << nCohortSets
+                << "\nspecies\t" << species << " of " << nSpecies
+                << endl;
+        }
+#endif
+        reports[index(mIndex,survey,ageIndex,cohortSet,species)] += val;
+    }
+    
+    void writeM( ostream& stream, int survey, int outMeasure, size_t inMeasure ){
+        if( BY_SPECIES ){
+            assert( !BY_AGE && !BY_COHORT );  // output col2 conflicts
+            for( size_t species = 0; species < nSpecies; ++species ){
+                //TODO: should we make this backwards-compatible (output
+                // name, not a number)?
+                const int col2 = species + 1;
+                T value = reports[index(inMeasure,survey-1,0,0,species)];
+                stream << survey << '\t' << col2 << '\t' << outMeasure
+                    << '\t' << value << Monitoring::lineEnd;
+            }
+        }else{
+            // Backwards compatibility: first age group starts at 1, unless
+            // there isn't an age group:
+            const int ageGroupAdd = BY_AGE ? 1 : 0;
+            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
+            for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
+                // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
+                const int col2 = ageGroup + ageGroupAdd +
+                    1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet );
+                T value = reports[index(inMeasure,survey-1,ageGroup,cohortSet,0)];
+                stream << survey << '\t' << col2 << '\t' << outMeasure
+                    << '\t' << value << Monitoring::lineEnd;
+            } }
+        }
+    }
+    
+public:
     // Set up ready to accept reports.
-    void init( const list<OutMeasure>& required, size_t nAG, size_t nCS ){
+    void init( const list<OutMeasure>& required, size_t nAG, size_t nCS, size_t nSp ){
         nAgeGroups = BY_AGE ? nAG : 1;
         nCohortSets = BY_COHORT ? nCS : 1;
+        nSpecies = (BY_SPECIES && nSp > 0) ? nSp : 1;
         mIndices.assign( M_NUM, NOT_USED );
         // outMeasures.size() is the number of measures we store here
         outMeasures.assign( 0, 0 );
         
-        for( list<OutMeasure>::const_iterator it = required.begin(); it != required.end(); ++it ){
+        for( list<OutMeasure>::const_iterator it = required.begin();
+            it != required.end(); ++it )
+        {
             if( it->isDouble != (typeid(T) == typeid(double) ) ){
 #ifndef NDEBUG
-                // Debug mode: this should prevent silly errors where the type reported does not match the type defined for some output
+                // Debug mode: this should prevent silly errors where the type
+                // reported does not match the type defined for some output:
                 mIndices[it->m] = NOT_ACCEPTED;
 #endif
                 continue;
             }
-            if( it->byAge != BY_AGE || it->byCohort != BY_COHORT ) continue;
+            if( it->byAge != BY_AGE ||
+                it->byCohort != BY_COHORT ||
+                it->bySpecies != BY_SPECIES ) continue;
             
             if( mIndices[it->m] != NOT_USED ||
                 (it->method == Deploy::NA && deployIndices.count(it->m) > 0) )
@@ -102,57 +165,68 @@ struct Store{
             outMeasures.push_back( it->outId ); // increment length
         }
         
-        reports.assign(outMeasures.size() * nSurveys * nAgeGroups * nCohortSets, 0);
+        reports.assign(size(), 0);
     }
     
     // Take a reported value and either store it or forget it.
-    // If some ageIndex or cohortSet are not applicable, use 0.
-    void report( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, T val ){
+    // If some of ageIndex, cohortSet, species are not applicable, use 0.
+    void report( T val, Measure measure, size_t survey, size_t ageIndex = 0,
+                 uint32_t cohortSet = 0, size_t species = 0 )
+    {
+        if( survey == NOT_USED ) return; // pre-main-sim & unit tests we ignore all reports
         assert( mIndices[measure] != NOT_ACCEPTED );
-        if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
+        //TODO: is this optimisable?
+        assert( BY_AGE || (nAgeGroups == 1 && ageIndex == 0) );
+        assert( BY_COHORT || (nCohortSets == 1 && cohortSet == 0) );
+        assert( BY_SPECIES || (nSpecies == 1 && species == 0) );
         if( mIndices[measure] == NOT_USED ){    // measure not used by this store
             assert( deployIndices.count(measure) == 0 );
             return;
         }
-        if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
-        add( mIndices[measure], survey, ageIndex, cohortSet, val );
+        // last category is for humans too old for reporting groups:
+        if( ageIndex == nAgeGroups ) return;
+        add( mIndices[measure], survey, ageIndex, cohortSet, species, val );
     }
     
     // Take a deployment report and potentially store it in one or more places
     // If some ageIndex or cohortSet are not applicable, use 0.
-    void deploy( Measure measure, size_t survey, size_t ageIndex, uint32_t cohortSet, Deploy::Method method, T val ){
-        assert( method == Deploy::NA || method == Deploy::TIMED || method == Deploy::CTS || method == Deploy::TREAT );
-        assert( mIndices[measure] == NOT_USED );
-        if( survey == NOT_USED ) return; // pre-main-sim we ignore all reports
+    void deploy( T val, Measure measure, size_t survey, size_t ageIndex,
+                 uint32_t cohortSet, Deploy::Method method )
+    {
+        if( survey == NOT_USED ) return; // pre-main-sim & unit tests we ignore all reports
         if( ageIndex == nAgeGroups ) return;    // last category is for humans too old for reporting groups
+        assert( method == Deploy::NA || method == Deploy::TIMED ||
+            method == Deploy::CTS || method == Deploy::TREAT );
+        assert( mIndices[measure] == NOT_USED );
+        assert( nSpecies == 1 );        // this function does not take species
         
         typedef DeployInd_t::const_iterator const_it_t;
         pair<const_it_t,const_it_t> range = deployIndices.equal_range( measure );
         for( const_it_t it = range.first; it != range.second; ++it ){
             uint8_t mask = it->second.first;
             if( (mask & method) == 0 ) continue;
-            add( it->second.second, survey, ageIndex, cohortSet, val );
+            add( it->second.second, survey, ageIndex, cohortSet, 0, val );
+        }
+    }
+    
+    // Order self in a list of outputs
+    void addMeasures( map<int,pair<WriteDelegate,size_t> >& mOrdered ){
+        for( size_t m = 0; m < outMeasures.size(); ++m ){
+            mOrdered[outMeasures[m]] = make_pair( MakeDelegate( this,
+                    &Store<T,BY_AGE,BY_COHORT,BY_SPECIES>::writeM), m );
         }
     }
     
     // Write stored values to stream
     void write( ostream& stream, int survey ){
+        // use a (tree) map to sort by external measure
         map<int,size_t> measuresOrdered;
         for( size_t m = 0; m < outMeasures.size(); ++m ){
             measuresOrdered[outMeasures[m]] = m;
         }
         typedef pair<int,size_t> P;
-        const int addCol2 = BY_AGE ? 1 : 0;     // backwards compatibility: first age group starts at 1, unless there isn't an age group
         foreach( P mp, measuresOrdered ){
-            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
-                for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
-                    // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
-                    const int col2 = 1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet ) + ageGroup + addCol2;
-                    T value = reports[index(mp.second,survey-1,ageGroup,cohortSet)];
-                    stream << survey << '\t' << col2 << '\t' << mp.first
-                        << '\t' << value << Monitoring::lineEnd;
-                }
-            }
+            writeM( stream, survey, mp.first, mp.second );
         }
     }
     
@@ -167,7 +241,7 @@ struct Store{
     void checkpoint( istream& stream ){
         size_t l;
         l & stream;
-        if( l != outMeasures.size() * nSurveys * nAgeGroups * nCohortSets ){
+        if( l != size() ){
             throw util::checkpoint_error( "mon::reports: invalid list size" );
         }
         reports.resize (l);
@@ -176,34 +250,20 @@ struct Store{
         }
         // mIndices and outMeasures are constant after initialisation
     }
-    
-private:
-    inline void add(size_t mIndex, size_t survey, size_t ageIndex, uint32_t cohortSet, T val){
-#ifndef NDEBUG
-        if( mIndex >= outMeasures.size() ||
-            survey >= nSurveys ||
-            ageIndex >= nAgeGroups ||
-            cohortSet >= nCohortSets
-        ){
-            cout << "Index out of bounds for survey:\t" << survey << " of " << nSurveys
-                << "\nmeasure number\t" << mIndex << " of " << outMeasures.size()
-                << "\nage group\t" << ageIndex << " of " << nAgeGroups
-                << "\ncohort set\t" << cohortSet << " of " << nCohortSets
-                << endl;
-        }
-#endif
-        reports[index(mIndex,survey,ageIndex,cohortSet)] += val;
-    }
 };
 
-Store<int, false, false> storeI;
-Store<double, false, false> storeF;
-Store<int, true, true> storeHACI;
-Store<double, true, true> storeHACF;
+Store<int, false, false, false> storeI;
+Store<double, false, false, false> storeF;
+Store<int, true, true, false> storeHACI;
+Store<double, true, true, false> storeHACF;
+Store<double, false, false, true> storeSF;
 
-void initialise( size_t nS, size_t nAG, size_t nCohortSets, const scnXml::Monitoring& monElt ){
-    nSurveys = nS - 1;  //NOTE: nS is actually 1 greater than required
-    size_t nAgeGroups = nAG - 1;       //NOTE: last group is those too old to be reported
+void initialise( size_t numSurveys, size_t nCohortSets, size_t nSpecies,
+                 const scnXml::Monitoring& monElt )
+{
+    nSurveys = numSurveys;
+    // Last group is those too old to be reported:
+    size_t nAgeGroups = Monitoring::AgeGroup::getNumGroups() - 1;
     currentSurvey = NOT_USED;
     
     defineOutMeasures();
@@ -215,10 +275,11 @@ void initialise( size_t nS, size_t nAG, size_t nCohortSets, const scnXml::Monito
         if( it == namedOutMeasures.end() ) continue;    //TODO: eventually throw an xml_scenario_error
         enabledOutMeasures.push_back( it->second );
     }
-    storeI.init( enabledOutMeasures, nAgeGroups, nCohortSets );
-    storeF.init( enabledOutMeasures, nAgeGroups, nCohortSets );
-    storeHACI.init( enabledOutMeasures, nAgeGroups, nCohortSets );
-    storeHACF.init( enabledOutMeasures, nAgeGroups, nCohortSets );
+    storeI.init( enabledOutMeasures, nAgeGroups, nCohortSets, nSpecies );
+    storeF.init( enabledOutMeasures, nAgeGroups, nCohortSets, nSpecies );
+    storeSF.init( enabledOutMeasures, nAgeGroups, nCohortSets, nSpecies );
+    storeHACI.init( enabledOutMeasures, nAgeGroups, nCohortSets, nSpecies );
+    storeHACF.init( enabledOutMeasures, nAgeGroups, nCohortSets, nSpecies );
 }
 
 void initMainSim(){
@@ -230,50 +291,86 @@ void concludeSurvey(){
     if( currentSurvey >= nSurveys ) currentSurvey = NOT_USED;
 }
 
-void write( ostream& stream, int survey ){
-    //TODO: re-order these by output measure
+void write1( ostream& stream, int survey ){
+    //TODO: sort these
     storeHACI.write( stream, survey );
     storeHACF.write( stream, survey );
-    storeI.write( stream, survey );
-    storeF.write( stream, survey );
+    //TODO: this complicated mess is just to maintain order of outputs
+    // use a (tree) map to sort by external measure
+    typedef pair<WriteDelegate,size_t> MPair;
+    map<int,MPair> measuresOrdered;
+    storeI.addMeasures( measuresOrdered );
+    storeF.addMeasures( measuresOrdered );
+    storeSF.addMeasures( measuresOrdered );
+//     storeHACI.addMeasures( measuresOrdered );
+//     storeHACF.addMeasures( measuresOrdered );
+    typedef pair<int,MPair> PP;
+    foreach( PP pp, measuresOrdered ){
+        if( pp.first < 30 )
+            pp.second.first( stream, survey, pp.first, pp.second.second );
+    }
+}
+void write2( ostream& stream, int survey ){
+    // use a (tree) map to sort by external measure
+    typedef pair<WriteDelegate,size_t> MPair;
+    map<int,MPair> measuresOrdered;
+    storeSF.addMeasures( measuresOrdered );
+    storeI.addMeasures( measuresOrdered );
+    storeF.addMeasures( measuresOrdered );
+    typedef pair<int,MPair> PP;
+    foreach( PP pp, measuresOrdered ){
+        if( pp.first > 30 )
+            pp.second.first( stream, survey, pp.first, pp.second.second );
+    }
 }
 
-// Report functions: each reports to all relevant stores.
+// Report functions: each reports to all usable stores (i.e. correct data type
+// and where parameters don't have to be fabricated).
 void reportMI( Measure measure, int val ){
-    storeI.report( measure, currentSurvey, 0, 0, val );
+    storeI.report( val, measure, currentSurvey );
 }
 void reportMF( Measure measure, double val ){
-    storeF.report( measure, currentSurvey, 0, 0, val );
+    storeF.report( val, measure, currentSurvey );
 }
 void reportMHI( Measure measure, const Host::Human& human, int val ){
-    storeI.report( measure, currentSurvey, 0, 0, val );
+    storeI.report( val, measure, currentSurvey );
     size_t ageIndex = human.getMonitoringAgeGroup().i();
-    storeHACI.report( measure, currentSurvey, ageIndex, human.cohortSet(), val );
+    storeHACI.report( val, measure, currentSurvey, ageIndex, human.cohortSet() );
 }
 void reportMHF( Measure measure, const Host::Human& human, double val ){
-    storeF.report( measure, currentSurvey, 0, 0, val );
+    storeF.report( val, measure, currentSurvey );
     size_t ageIndex = human.getMonitoringAgeGroup().i();
-    storeHACF.report( measure, currentSurvey, ageIndex, human.cohortSet(), val );
+    storeHACF.report( val, measure, currentSurvey, ageIndex, human.cohortSet() );
 }
-void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val ){
-    storeI.report( measure, currentSurvey, 0, 0, val );
-    storeHACI.report( measure, survey, ageGroup.i(), cohortSet, val );
+void reportMSACI( Measure measure, size_t survey,
+                  Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val )
+{
+    storeI.report( val, measure, currentSurvey );
+    storeHACI.report( val, measure, survey, ageGroup.i(), cohortSet );
+}
+void reportMSF( Measure measure, size_t species, double val ){
+    storeF.report( val, measure, currentSurvey );
+    storeSF.report( val, measure, currentSurvey, 0, 0, species );
 }
 // Deployment reporting uses a different function to handle the method
 // (mostly to make other types of report faster).
-void reportMHD( Measure measure, const Host::Human& human, Deploy::Method method ){
+void reportMHD( Measure measure, const Host::Human& human,
+                Deploy::Method method )
+{
     const int val = 1;  // always report 1 deployment
-    storeI.deploy( measure, currentSurvey, 0, 0, method, val );
+    storeI.deploy( val, measure, currentSurvey, 0, 0, method );
     size_t ageIndex = human.getMonitoringAgeGroup().i();
-    storeHACI.deploy( measure, currentSurvey, ageIndex, human.cohortSet(), method, val );
+    storeHACI.deploy( val, measure, currentSurvey, ageIndex, human.cohortSet(), method );
     // This is for nTreatDeployments:
-    storeHACI.deploy( MHD_ALL_DEPLOYS, currentSurvey, ageIndex, human.cohortSet(), method, val );
+    storeHACI.deploy( val, MHD_ALL_DEPLOYS, currentSurvey, ageIndex,
+                      human.cohortSet(), method );
 }
 
 void checkpoint( ostream& stream ){
     currentSurvey & stream;
     storeI.checkpoint(stream);
     storeF.checkpoint(stream);
+    storeSF.checkpoint(stream);
     storeHACI.checkpoint(stream);
     storeHACF.checkpoint(stream);
 }
@@ -281,6 +378,7 @@ void checkpoint( istream& stream ){
     currentSurvey & stream;
     storeI.checkpoint(stream);
     storeF.checkpoint(stream);
+    storeSF.checkpoint(stream);
     storeHACI.checkpoint(stream);
     storeHACF.checkpoint(stream);
 }

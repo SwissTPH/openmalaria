@@ -57,7 +57,7 @@ public:
                    const scnXml::Scenario& scenario,
                    const scnXml::Monitoring& monitoring );
     /** Second initialisation step: must happen after the InterventionManager is set up. */
-    void init2( const scnXml::Monitoring& monitoring );
+    void init2( const scnXml::Monitoring& monitoring, size_t nSpecies );
     
     //! It increments the survey period
     void incrementSurveyPeriod();

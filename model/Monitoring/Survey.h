@@ -48,8 +48,7 @@ private:
     /// Initialize static parameters.
     static void init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
-                   const scnXml::Monitoring& monitoring,
-                   size_t nSurveys );
+                   const scnXml::Monitoring& monitoring );
     
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
@@ -104,14 +103,6 @@ public:
         interventions::ComponentId subPop, bool isMember );
     //@}
     
-    ///@brief Set outputs per vector species
-    //@{
-    Survey& set_Vector_Nv0 (string key, double v) { data_Vector_Nv0[key] = v; return *this; }
-    Survey& set_Vector_Nv (string key, double v) { data_Vector_Nv[key] = v; return *this; }
-    Survey& set_Vector_Ov (string key, double v) { data_Vector_Ov[key] = v; return *this; }
-    Survey& set_Vector_Sv (string key, double v) { data_Vector_Sv[key] = v; return *this; }
-    //@}
-    
     void setInoculationsPerAgeGroup (vector<double>& v) {
         m_inoculationsPerAgeGroup = v;	// copies v, not just its reference
     }
@@ -119,11 +110,6 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        data_Vector_Nv0 & stream;
-        data_Vector_Nv & stream;
-        data_Vector_Ov & stream;
-        data_Vector_Sv & stream;
-        
         m_inoculationsPerAgeGroup & stream;
   }
   
@@ -142,12 +128,6 @@ private:
     
     /// @brief Data stored for reporting; all of this is per survey
     //@{
-    // data categorised by vector species:
-    map<string,double> data_Vector_Nv0;
-    map<string,double> data_Vector_Nv;
-    map<string,double> data_Vector_Ov;
-    map<string,double> data_Vector_Sv;
-    
     // data categorised by human age group:
     vector<double> m_inoculationsPerAgeGroup;
     //@}

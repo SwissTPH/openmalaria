@@ -32,8 +32,8 @@ namespace OM {
 namespace mon {
 
 // Call before start of simulation to set up outputs
-void initialise( size_t nSurveys, size_t nAgeGroups, size_t nCohortSets,
-                 const scnXml::Monitoring& monElt );
+void initialise( size_t nSurveys, size_t nCohortSets,
+                 size_t nSpecies, const scnXml::Monitoring& monElt );
 
 // Call just before the start of the intervention period
 void initMainSim();
@@ -42,7 +42,8 @@ void initMainSim();
 void concludeSurvey();
 
 // Write results for a single survey to stream
-void write( std::ostream& stream, int survey );
+void write1( std::ostream& stream, int survey );
+void write2( std::ostream& stream, int survey );
 
 // Checkpointing
 void checkpoint( std::ostream& stream );

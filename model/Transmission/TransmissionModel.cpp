@@ -210,6 +210,10 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
     return allEIR;
 }
 
+size_t TransmissionModel::getNSpecies(){
+    return 0;
+}
+
 void TransmissionModel::summarize () {
     Monitoring::Survey& survey = Monitoring::Survey::current();
     mon::reportMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );

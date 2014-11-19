@@ -22,12 +22,13 @@
 #include <boost/math/nonfinite_num_facets.hpp>
 
 #include "Monitoring/Surveys.h"
+#include "Simulator.h"
 #include "Clinical/CaseManagementCommon.h"
+#include "interventions/InterventionManager.hpp"
+#include "mon/management.h"
 #include "util/BoincWrapper.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
-#include "interventions/InterventionManager.hpp"
-#include "Simulator.h"
 #include "schema/monitoring.h"
 
 #include <gzstream/gzstream.h>
@@ -95,7 +96,7 @@ void SurveysType::init( const OM::Parameters& parameters,
     m_surveysTimeIntervals.push_back( sim::never() );
     m_nextSurveyTime = m_surveysTimeIntervals[0];
 
-    Survey::init( parameters, scenario, monitoring, m_surveysTimeIntervals.size() );
+    Survey::init( parameters, scenario, monitoring );
 
     m_surveys.resize (m_surveysTimeIntervals.size());
     if( !Simulator::isCheckpoint() ){
@@ -105,7 +106,11 @@ void SurveysType::init( const OM::Parameters& parameters,
     Survey::m_current = &m_surveys[0];
 }
 
-void SurveysType::init2( const scnXml::Monitoring& monitoring ){
+void SurveysType::init2( const scnXml::Monitoring& monitoring, size_t nSpecies )
+{
+    mon::initialise( m_surveysTimeIntervals.size()-1, Surveys.numCohortSets(),
+                     nSpecies, monitoring );
+    
     if( monitoring.getCohorts().present() ){
         const scnXml::Cohorts monCohorts = monitoring.getCohorts().get();
         uint32_t nextId = 0;
@@ -192,8 +197,11 @@ void SurveysType::writeSummaryArrays ()
   //   outputFile.precision (6);
   //   outputFile << scientific;
 
-  for (size_t i = 1; i < m_surveys.size(); ++i)
+  for (size_t i = 1; i < m_surveys.size(); ++i){
+    mon::write1( outputFile, i );
     m_surveys[i].writeSummaryArrays (outputFile, i);
+    mon::write2( outputFile, i );
+  }
 
   //Infant mortality rate is a single number, therefore treated separately
   // Note: Storing a single value instead of one per reporting period is inconsistent with other

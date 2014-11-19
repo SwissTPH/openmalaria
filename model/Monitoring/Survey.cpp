@@ -21,7 +21,6 @@
 #include "Monitoring/Surveys.h"
 #include "Monitoring/AgeGroup.h"
 #include "Host/Human.h"
-#include "mon/management.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
@@ -103,13 +102,13 @@ public:
         codeMap["annAvgK"] = SM::BLANK;
         codeMap["inputEIR"] = SM::BLANK;
         codeMap["simulatedEIR"] = SM::BLANK;
+        codeMap["Vector_Nv0"] = SM::BLANK;
+        codeMap["Vector_Nv"] = SM::BLANK;
+        codeMap["Vector_Ov"] = SM::BLANK;
+        codeMap["Vector_Sv"] = SM::BLANK;
         
         codeMap["allCauseIMR"] = SM::allCauseIMR;
         codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
-        codeMap["Vector_Nv0"] = SM::Vector_Nv0;
-        codeMap["Vector_Nv"] = SM::Vector_Nv;
-        codeMap["Vector_Ov"] = SM::Vector_Ov;
-        codeMap["Vector_Sv"] = SM::Vector_Sv;
         
         removedCodes.insert("Clinical_RDTs");
         removedCodes.insert("Clinical_Microscopy");
@@ -145,11 +144,8 @@ public:
 
 void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
-                   const scnXml::Monitoring& monitoring,
-                   size_t nSurveys ){
+                   const scnXml::Monitoring& monitoring ){
     AgeGroup::init (monitoring);
-    
-    mon::initialise( nSurveys, AgeGroup::getNumGroups(), Surveys.numCohortSets(), monitoring );
     
     // by default, none are active
     active.reset ();
@@ -240,26 +236,11 @@ void Survey::allocate(){
 
 void Survey::writeSummaryArrays (ostream& outputFile, int survey)
 {
-    mon::write( outputFile, survey );
-    
   if (active[SM::innoculationsPerAgeGroup]) {
     for (int ageGroup = 0; ageGroup < (int) m_inoculationsPerAgeGroup.size() - 1; ++ageGroup) { // Don't write out last age-group
         outputFile << survey << "\t" << ageGroup + 1 << "\t" << SM::innoculationsPerAgeGroup;
         outputFile << "\t" << m_inoculationsPerAgeGroup[ageGroup] << lineEnd;
     }
-  }
-  
-  if (active[SM::Vector_Nv0]) {
-    writeMap (outputFile, SM::Vector_Nv0, survey, data_Vector_Nv0);
-  }
-  if (active[SM::Vector_Nv]) {
-    writeMap (outputFile, SM::Vector_Nv, survey, data_Vector_Nv);
-  }
-  if (active[SM::Vector_Ov]) {
-    writeMap (outputFile, SM::Vector_Ov, survey, data_Vector_Ov);
-  }
-  if (active[SM::Vector_Sv]) {
-    writeMap (outputFile, SM::Vector_Sv, survey, data_Vector_Sv);
   }
 }
 

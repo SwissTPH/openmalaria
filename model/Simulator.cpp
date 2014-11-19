@@ -116,7 +116,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     Clinical::ClinicalModel::changeHS( scenario.getHealthSystem() );    // i.e. init health system
     
     // Depends on interventions:
-    Surveys.init2( scenario.getMonitoring() );
+    Surveys.init2( scenario.getMonitoring(), population.get()->_transmissionModel->getNSpecies() );
     
     // Depends on interventions:
     Host::Human::init2( scenario.getMonitoring() );

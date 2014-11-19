@@ -41,20 +41,28 @@ struct OutMeasure{
     bool isDouble;  // false: type is int; true: type is double
     bool byAge; // segregate by age
     bool byCohort;      // segregate by cohort
+    bool bySpecies;     // segregate by species of vector
     uint8_t method;     // deployment method (see above)
     
     // Convenience constructors:
-    OutMeasure() : outId(-1), m(M_NUM), isDouble(false), byAge(false), byCohort(false), method(0) {}
-    OutMeasure( int outId, Measure m, bool isDouble, bool byAge, bool byCohort, uint8_t method ) :
-        outId(outId), m(m), isDouble(isDouble), byAge(byAge), byCohort(byCohort), method(method)
+    OutMeasure() : outId(-1), m(M_NUM), isDouble(false), byAge(false),
+                byCohort(false), bySpecies(false), method(0) {}
+    OutMeasure( int outId, Measure m, bool isDouble, bool byAge, bool byCohort,
+                bool bySpecies, uint8_t method ) :
+        outId(outId), m(m), isDouble(isDouble), byAge(byAge),
+        byCohort(byCohort), bySpecies(bySpecies), method(method)
     {}
     // Simple reports
     static OutMeasure value( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, false, false, Deploy::NA );
+        return OutMeasure( outId, m, isDouble, false, false, false, Deploy::NA );
     }
     // Something with reports segregated by human age and cohort membership
     static OutMeasure humanAC( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, true, true, Deploy::NA );
+        return OutMeasure( outId, m, isDouble, true, true, false, Deploy::NA );
+    }
+    // Reports by mosquito species. All are floating point (currently).
+    static OutMeasure species( int outId, Measure m ){
+        return OutMeasure( outId, m, true, false, false, true, Deploy::NA );
     }
     // Deployments with reports segregated by human age and cohort membership
     // Method can be Deploy::NA to not match deployments (but in this case,
@@ -64,7 +72,7 @@ struct OutMeasure{
     // count deployments of multiple types simultaneously).
     static OutMeasure humanDeploy( int outId, Measure m, Deploy::Method method ){
         assert( method >= 0 && method <= (Deploy::TIMED|Deploy::CTS|Deploy::TREAT) );
-        return OutMeasure( outId, m, false, true, true, method );
+        return OutMeasure( outId, m, false, true, true, false, method );
     }
 };
 
@@ -171,6 +179,14 @@ void defineOutMeasures(){
     /// Number of episodes (non-malaria fever)
     namedOutMeasures["nNMFever"] =
         OutMeasure::humanAC( 27, MHE_NON_MALARIA_FEVERS, false );
+    /// N_v0: emergence of feeding vectors during the last time step. Units: mosquitoes/day
+    namedOutMeasures["Vector_Nv0"] = OutMeasure::species( 31, MVF_LAST_NV0 );
+    /// N_v: vectors seeking to feed during the last time step. Units: mosquitoes/day
+    namedOutMeasures["Vector_Nv"] = OutMeasure::species( 32, MVF_LAST_NV );
+    /// N_v: infected vectors seeking to feed during the last time step. Units: mosquitoes/day
+    namedOutMeasures["Vector_Ov"] = OutMeasure::species( 33, MVF_LAST_OV );
+    /// N_v: infectious vectors seeking to feed during the last time step. Units: mosquitoes/day
+    namedOutMeasures["Vector_Sv"] = OutMeasure::species( 34, MVF_LAST_SV );
     /** Input EIR (Expected EIR entered into scenario file)
      *
      * Units: inoculations per adult per time step. */

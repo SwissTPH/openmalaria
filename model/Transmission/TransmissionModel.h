@@ -180,6 +180,8 @@ public:
   double getEIR (Host::Human& human, SimTime age, double ageYears,
                  Monitoring::AgeGroup ageGroup, vector<double>& EIR);
   
+  /// Return the number of vector species (0 if not Vector model).
+  virtual size_t getNSpecies();
   /** Non-vector model: throw an exception. Vector model: check that the
    * simulation mode allows interventions, and return a map of species names
    * to indecies. Each index must be unique and in the range [0,n) where

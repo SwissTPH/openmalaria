@@ -183,8 +183,8 @@ public:
     }
 
     /// Write some per-species summary information.
-    inline void summarize (const string speciesName) const {
-        transmission.summarize( speciesName );
+    inline void summarize( size_t species )const{
+        transmission.summarize( species );
     }
     //@}
     
