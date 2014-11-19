@@ -298,14 +298,11 @@ void write( ostream& stream ){
     storeI.addMeasures( measuresOrdered );
     storeF.addMeasures( measuresOrdered );
     storeSF.addMeasures( measuresOrdered );
-//     storeHACI.addMeasures( measuresOrdered );
-//     storeHACF.addMeasures( measuresOrdered );
+    storeHACI.addMeasures( measuresOrdered );
+    storeHACF.addMeasures( measuresOrdered );
     
     typedef pair<int,MPair> PP;
     for( size_t survey = 0; survey < nSurveys; ++survey ){
-        //TODO: sort these
-        storeHACI.write( stream, survey );
-        storeHACF.write( stream, survey );
         foreach( PP pp, measuresOrdered ){
             pp.second.first( stream, survey, pp.first, pp.second.second );
         }
