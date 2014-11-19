@@ -48,39 +48,15 @@ class SurveysType
 public:
     ///@brief Init, output, checkpointing functions
     //@{
-    SurveysType() :
-            m_nextSurveyTime(sim::never())
-            {}
-    
-    /** Read in some params from XML and allocate memory. */
-    void init( const OM::Parameters& parameters,
-                   const scnXml::Scenario& scenario,
-                   const scnXml::Monitoring& monitoring );
     /** Second initialisation step: must happen after the InterventionManager is set up. */
-    void init2( const scnXml::Monitoring& monitoring, size_t nSpecies );
+    void init2( const scnXml::Monitoring& monitoring );
     
-    //! It increments the survey period
-    void incrementSurveyPeriod();
-
     //! Write all the summary arrays requested by summaryOption to output.txt
     void writeSummaryArrays();
-
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        checkpoint (stream);
-    }
     //@}
     
     ///@brief Simple getters
     //@{
-    /** Time the current (next) survey ends at.
-     * 
-     * For point-time surveys this is the time of the survey; where data is
-     * collected over a period, the period is from the time step following the
-     * previous survey (or the start of the main simulation) until this time. */
-    inline SimTime nextSurveyTime()const{ return m_nextSurveyTime; }
-    
     /** Get the number of cohort sets (i.e. two to the power of the number of
      * sub-populations considered cohorts). */
     uint32_t numCohortSets()const;
@@ -91,19 +67,6 @@ public:
     //@}
     
 private:
-    void checkpoint (istream& stream);
-    void checkpoint (ostream& stream);
-    
-    /// Time of the next survey, i.e. the one we're currently gathering data for
-    SimTime m_nextSurveyTime;
-    
-    /// Times of all surveys specified in the XML, appended with sim::never()
-    vector<SimTime> m_surveysTimeIntervals;
-    
-    /// Our collection of surveys. m_surveys[0] is a dummy container for data
-    /// we're not interested in, in order to avoid having to check current is valid.
-    vector<Survey> m_surveys;
-    
     friend class Survey;
 };
 /// Data — entry-point for using Surveys. Checkpointed.

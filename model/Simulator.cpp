@@ -88,6 +88,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // 1) elements with no dependencies on other elements initialised here:
     sim::init( scenario );
     Parameters parameters( model.getParameters() );     // depends on nothing
+    mon::AgeGroup::init (scenario.getMonitoring());
     
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
@@ -98,7 +99,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
         WithinHost::diagnostics::init( parameters, scenario.getDiagnostics().get() );
     }
     // Survey init depends on diagnostics:
-    Surveys.init( parameters, scenario, scenario.getMonitoring() );
+    mon::initSurveyTimes( parameters, scenario, scenario.getMonitoring() );
     Population::init( parameters, scenario );
     
     // 3) elements depending on other elements; dependencies on (1) are not mentioned:
@@ -116,7 +117,8 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     Clinical::ClinicalModel::changeHS( scenario.getHealthSystem() );    // i.e. init health system
     
     // Depends on interventions:
-    Surveys.init2( scenario.getMonitoring(), population.get()->_transmissionModel->getNSpecies() );
+    mon::initReporting( population.get()->_transmissionModel->getNSpecies(), scenario.getMonitoring() );
+    Surveys.init2( scenario.getMonitoring() );
     
     // Depends on interventions:
     Host::Human::init2( scenario.getMonitoring() );
@@ -156,7 +158,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->_transmissionModel->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
-        + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
+        + mon::finalSurveyTime() + sim::oneTS();
     assert( totalSimDuration + sim::never() < sim::zero() );
     
     if (isCheckpoint()) {
@@ -206,9 +208,8 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // do reporting (continuous and surveys)
             Continuous.update( *population );
-            if( sim::intervNow() == Surveys.nextSurveyTime() ){
+            if( sim::intervNow() == mon::nextSurveyTime() ){
                 population->newSurvey();
-                Surveys.incrementSurveyPeriod();
                 mon::concludeSurvey();
             }
             
@@ -247,14 +248,13 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
                 // nothing to do: start main phase immediately
             }
             // adjust estimation of final time step: end of current period + length of main phase
-            totalSimDuration = simPeriodEnd + Monitoring::Survey::getLastSurveyTime() + sim::oneTS();
+            totalSimDuration = simPeriodEnd + mon::finalSurveyTime() + sim::oneTS();
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
             sim::interv_time = sim::zero();
             population->preMainSimInit();
             population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
-            Surveys.incrementSurveyPeriod();
             mon::initMainSim();
         } else if (phase == END_SIM) {
             cerr << "sim end" << endl;
@@ -398,7 +398,6 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         util::checkpoint::header (stream);
         util::CommandLine::staticCheckpoint (stream);
         Population::staticCheckpoint (stream);
-        Surveys & stream;
         Continuous & stream;
         mon::checkpoint( stream );
 #       ifdef OM_STREAM_VALIDATOR
@@ -453,7 +452,6 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     
     util::CommandLine::staticCheckpoint (stream);
     Population::staticCheckpoint (stream);
-    Surveys & stream;
     Continuous & stream;
     mon::checkpoint( stream );
 # ifdef OM_STREAM_VALIDATOR

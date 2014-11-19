@@ -68,6 +68,7 @@ set (Model_CPP
   WithinHost/Treatments.cpp
   
   mon/mon.cpp
+  mon/misc.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp

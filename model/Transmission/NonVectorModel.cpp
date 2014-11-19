@@ -22,7 +22,7 @@
 #include "Transmission/PerHost.h"
 #include "Host/Human.h"
 #include "WithinHost/Genotypes.h"
-#include "Monitoring/Survey.h" // sim-end time step
+#include "mon/info.h"
 #include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
@@ -155,7 +155,7 @@ void NonVectorModel::changeEIRIntervention (
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
   vector<int> nDays( sim::fromDays(daily.size()-1).inSteps() + 1, 0 );
   interventionEIR.assign (nDays.size(), 0.0);
-  size_t required_days = static_cast<size_t>(Monitoring::Survey::getLastSurveyTime().inDays()+1);
+  size_t required_days = static_cast<size_t>(mon::finalSurveyTime().inDays()+1);
   if (daily.size() < required_days) {
     cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size()
         << "\nRequired: " << required_days << endl;

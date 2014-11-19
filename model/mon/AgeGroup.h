@@ -18,15 +18,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_Monitoring_AgeGroup
-#define Hmod_Monitoring_AgeGroup
+#ifndef H_OM_mon_AgeGroup
+#define H_OM_mon_AgeGroup
 
 #include "Global.h"
-#include "util/errors.h"
+#include <vector>
 
 namespace scnXml{ class Monitoring; }
 namespace OM {
-namespace Monitoring {
+namespace mon {
 /**
  * Included for type-saftey: don't allow implicit double->int conversions.
  *
@@ -54,18 +54,18 @@ class AgeGroup {
         return index;
     }
     
+    /// Read age group bounds from XML data
+    static void init (const scnXml::Monitoring& monitoring);
+    
     /// Get the total number of age categories (inc. one for indivs. not in any
     /// category given in XML).
-    static inline size_t getNumGroups () {
+    static inline size_t numGroups () {
         assert( upperBound.size() > 0 );      // otherwise not yet initialised
         return upperBound.size();
     }
     
 private:
     size_t index;
-    
-    /// Read age group bounds from XML data
-    static void init (const scnXml::Monitoring& monitoring);
     
     //BEGIN Static parameters only set by init()
     /** Upper boundaries of age groups.
@@ -75,10 +75,8 @@ private:
      *
      * These are age-groups given in XML plus one with no upper limit for
      * individuals outside other bounds. */
-    static vector<SimTime> upperBound;
+    static std::vector<SimTime> upperBound;
     //END
-    
-    friend class Survey;
 };
 
 } }

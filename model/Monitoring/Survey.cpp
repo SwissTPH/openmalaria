@@ -19,7 +19,6 @@
  */
 
 #include "Monitoring/Surveys.h"
-#include "Monitoring/AgeGroup.h"
 #include "Host/Human.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -35,7 +34,6 @@ using WithinHost::diagnostics;
 
 // -----  Static members  -----
 
-vector<SimTime> AgeGroup::upperBound;
 bitset<SM::NUM_SURVEY_OPTIONS> Survey::active;
 const Diagnostic* Survey::m_diagnostic = 0;
 
@@ -138,8 +136,6 @@ public:
 void Survey::init( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
                    const scnXml::Monitoring& monitoring ){
-    AgeGroup::init (monitoring);
-    
     // by default, none are active
     active.reset ();
     SurveyMeasureMap codeMap;
@@ -194,28 +190,4 @@ void Survey::init( const OM::Parameters& parameters,
         m_diagnostic = &diagnostics::get( surveys.getDiagnostic().get() );
     }
 }
-void AgeGroup::init (const scnXml::Monitoring& monitoring) {
-    const scnXml::MonAgeGroup::GroupSequence& groups = monitoring.getAgeGroup().getGroup();
-    if (!(monitoring.getAgeGroup().getLowerbound() <= 0.0))
-        throw util::xml_scenario_error ("Expected survey age-group lowerbound of 0");
-    
-    // The last age group includes individuals too old for reporting
-    upperBound.resize( groups.size() + 1 );
-    for (size_t i = 0;i < groups.size(); ++i) {
-        // convert to SimTime, rounding down to the next time step
-        upperBound[i] = sim::fromYearsD( groups[i].getUpperbound() );
-    }
-    upperBound[groups.size()] = sim::future();
-}
-
-void AgeGroup::update (SimTime age) {
-    while (age >= upperBound[index]){
-        ++index;
-    }
-}
-
-// -----  Non-static members  -----
-
-Survey::Survey() {}
-
 } }

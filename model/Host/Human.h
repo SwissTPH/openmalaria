@@ -23,7 +23,7 @@
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
 #include "Monitoring/Survey.h"
-#include "Monitoring/AgeGroup.h"
+#include "mon/AgeGroup.h"
 #include "interventions/HumanComponents.h"
 #include "util/checkpoint_containers.h"
 #include <map>
@@ -159,7 +159,7 @@ public:
   }
   
   /// Get monitoring age group
-  inline const Monitoring::AgeGroup& getMonitoringAgeGroup() const{
+  inline const mon::AgeGroup& getMonitoringAgeGroup() const{
       return monitoringAgeGroup;
   }
   
@@ -211,7 +211,7 @@ private:
   ///@brief Cached values used by monitoring
   //@{
   /// Made persistant to save a lookup each time step (significant performance improvement)
-  Monitoring::AgeGroup monitoringAgeGroup;
+  mon::AgeGroup monitoringAgeGroup;
   /// Cache, updated when human is added to or removed from a sub-population
   uint32_t m_cohortSet;
   //@}

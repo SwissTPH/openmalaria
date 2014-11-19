@@ -26,7 +26,7 @@
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/Genotypes.h"
 #include "Monitoring/Continuous.h"
-#include "Monitoring/Surveys.h"
+#include "mon/info.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
@@ -118,8 +118,8 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
     tsNumAdults(0)
 {
   initialisationEIR.assign (sim::stepsPerYear(), 0.0);
-  surveyInoculations.assign (Monitoring::AgeGroup::getNumGroups() *
-        Monitoring::Surveys.numCohortSets(), 0.0);
+  surveyInoculations.assign (mon::AgeGroup::numGroups() *
+        mon::numCohortSets(), 0.0);
 
   using Monitoring::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
@@ -197,7 +197,7 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
     
     //TODO: also by genotype?
     surveyInoculations[human.getMonitoringAgeGroup().i() +
-        Monitoring::AgeGroup::getNumGroups() * human.cohortSet()] += allEIR;
+        mon::AgeGroup::numGroups() * human.cohortSet()] += allEIR;
     if( age >= adultAge ){
         tsAdultEntoInocs += allEIR;
         tsNumAdults += 1;
@@ -213,8 +213,8 @@ void TransmissionModel::summarize () {
     mon::reportMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );
     mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
     
-    for( size_t ag = 0, nAg = Monitoring::AgeGroup::getNumGroups(), cs = 0,
-        nCS = Monitoring::Surveys.numCohortSets(); ag < nAg; ++ag ){
+    for( size_t ag = 0, nAg = mon::AgeGroup::numGroups(), cs = 0,
+        nCS = mon::numCohortSets(); ag < nAg; ++ag ){
         for( cs = 0; cs < nCS; ++cs ){
             mon::reportMACF( mon::MVF_INOCS, ag, cs,
                 surveyInoculations[ag + nAg * cs] );

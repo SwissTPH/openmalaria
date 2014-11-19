@@ -23,8 +23,8 @@
 
 #include "Global.h"
 #include "WithinHost/Pathogenesis/State.h"
-#include "Monitoring/AgeGroup.h"
-#include "mon/reporting.h"
+#include "mon/AgeGroup.h"
+#include "mon/info.h"
 #include <ostream>
 
 namespace OM {
@@ -113,7 +113,7 @@ private:
     /// Survey during which the event occured
     size_t surveyPeriod;
     /// Age group of the individual when the episode's first bout occurred
-    Monitoring::AgeGroup ageGroup;
+    mon::AgeGroup ageGroup;
     /// Cohort membership
     uint32_t cohortSet;
     /// Descriptor of state, containing reporting info. Not all information will

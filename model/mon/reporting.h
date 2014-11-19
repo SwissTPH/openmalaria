@@ -21,8 +21,7 @@
 #ifndef H_OM_mon_reporting
 #define H_OM_mon_reporting
 
-#include "Monitoring/AgeGroup.h"
-#include <boost/integer_traits.hpp>
+#include "mon/AgeGroup.h"
 
 /** This header handles reporting of data and querying of which outputs are
  * active.
@@ -164,12 +163,6 @@ enum Measure{
     M_NUM
 };
 
-/// For surveys and measures to say something shouldn't be reported
-const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
-
-/// The current survey number (read only usage)
-extern size_t currentSurvey;
-
 namespace Deploy {
     /// Deployment methods
     enum Method {
@@ -189,7 +182,7 @@ void reportMHI( Measure measure, const Host::Human& human, int val );
 /// Report some value (floating point) for some human to the current survey.
 void reportMHF( Measure measure, const Host::Human& human, double val );
 /// Report some value (integer) for some survey, age group and cohort set
-void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val );
+void reportMSACI( Measure measure, size_t survey, AgeGroup ageGroup, uint32_t cohortSet, int val );
 /// Report some value (floating point) for the current survey and some age group and cohort set
 void reportMACF( Measure measure, size_t ageIndex, uint32_t cohortSet, double val );
 /// Report some value (floating point) by vector species to the current survey.

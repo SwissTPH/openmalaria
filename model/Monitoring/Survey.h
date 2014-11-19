@@ -23,7 +23,6 @@
 
 #include "Global.h"
 #include "Monitoring/SurveyMeasure.h"
-#include "Monitoring/AgeGroup.h"        // only needed for special version of addInt() used by Episode
 #include "WithinHost/Diagnostic.h"
 #include "Parameters.h"
 #include "util/checkpoint_containers.h"
@@ -42,49 +41,21 @@ using WithinHost::Diagnostic;
 /// Data struct for a single survey.
 class Survey {
 private:
-    
     ///@brief Static members (options from XML). Parameters only set by init().
     //@{
-    /// Initialize static parameters.
-    static void init( const OM::Parameters& parameters,
-                   const scnXml::Scenario& scenario,
-                   const scnXml::Monitoring& monitoring );
-    
     /// Encoding of which summary options are active in XML is converted into
     /// this array for easier reading (and to make changing encoding within XML easier).
     static bitset<SM::NUM_SURVEY_OPTIONS> active;
     //@}
   
 public:
-    // Constructor used by SurveysType. Call allocate() explicitly for allocation.
-    Survey();
+    /// Initialize static parameters.
+    static void init( const OM::Parameters& parameters,
+                   const scnXml::Scenario& scenario,
+                   const scnXml::Monitoring& monitoring );
     
     ///@brief Static access functions: these are here so that most users don't need to include Surveys.h
     //@{
-    /** Get access to the current survey.
-     * 
-     * This is an inline function and should be very fast to look up.
-     * 
-     * Note: current() == getSurvey(getSurveyNumber()) */
-    inline static Survey& current(){ return *m_current; }
-    
-    /** Returns the number of the current survey. Use this to report
-     * retrospectively. */
-    inline static size_t getSurveyNumber(){ return m_surveyNumber; }
-    
-    /** Return Survey number n (counting from 1). Use this along with
-     * getSurveyNumber() to report retrospectively; in most cases this is not
-     * needed and current() can be used instead. */
-    static Survey& getSurvey(size_t n);
-    
-    /** Return the time of the final survey.
-     *
-     * We use this to control when the simulation ends.
-     * This isn't quite the same as before when the simulation end was
-     * explicitly specified and has a small affect on
-     * infantAllCauseMortality (survey 21) output. */
-    static SimTime getLastSurveyTime ();
-    
     static inline const Diagnostic& diagnostic(){
         assert( m_diagnostic != 0 );
         return *m_diagnostic;
@@ -105,16 +76,6 @@ public:
     
 private:
     // ———  static members  ———
-    
-    /** Index for the time dimention of the summary arrays
-     * Index starts from 1 for used surveys; is 0 to write to dummy survey. */
-    static size_t m_surveyNumber;
-    
-    /** Points to SurveysType::surveys[m_surveyNumber] (or the dummy element 
-     * SurveysType::surveys[0] before the intervention period and after
-     * completion of last survey). This is for data being collected for the
-     * next survey. */
-    static Survey *m_current;
     
     static const Diagnostic* m_diagnostic;
     

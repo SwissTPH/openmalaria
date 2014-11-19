@@ -23,17 +23,25 @@
 
 #include <fstream>
 
-namespace scnXml{ class Monitoring; }
+namespace scnXml{
+    class Scenario;
+    class Monitoring;
+}
 
 /** This header manages monitoring: it reads configuration and writes output.
  *
  * It does not store reported data (directly) and does not handle reports. */
 namespace OM {
+    class Parameters;
 namespace mon {
 
+/// Read survey times from XML.
+void initSurveyTimes( const Parameters& parameters,
+        const scnXml::Scenario& scenario,
+        const scnXml::Monitoring& monitoring );
+
 // Call before start of simulation to set up outputs
-void initialise( size_t nSurveys, size_t nCohortSets,
-                 size_t nSpecies, const scnXml::Monitoring& monElt );
+void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt );
 
 // Call just before the start of the intervention period
 void initMainSim();

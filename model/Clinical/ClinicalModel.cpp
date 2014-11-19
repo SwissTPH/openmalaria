@@ -25,11 +25,11 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "Clinical/DecisionTree5Day.h"
 #include "Host/NeonatalMortality.h"
-
 #include "mon/reporting.h"
 #include "util/ModelOptions.h"
 #include "util/CommandLine.h"
-#include <schema/scenario.h>
+#include "util/errors.h"
+#include "schema/scenario.h"
 
 namespace OM { namespace Clinical {
 

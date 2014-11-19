@@ -27,6 +27,7 @@
 #include "Global.h"
 #include "util/ModelOptions.h"
 
+#include "Host/Human.h"
 #include "PkPd/PkPdModel.h"
 // #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
@@ -35,7 +36,7 @@
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Genotypes.h"
-#include "Monitoring/Surveys.h"
+#include "mon/management.h"
 
 #include "schema/scenario.h"
 
@@ -136,7 +137,7 @@ public:
         Parameters parameters( prepareParameters() );
         dummyXML::surveys.setDetectionLimit( numeric_limits<double>::quiet_NaN() );
         dummyXML::monitoring.setSurveys( dummyXML::surveys );
-        Monitoring::Surveys.init( parameters, dummyXML::scenario, dummyXML::monitoring );
+        mon::initSurveyTimes( parameters, dummyXML::scenario, dummyXML::monitoring );
     }
     // Parameterise standard diagnostics
     static void setDiagnostics(){

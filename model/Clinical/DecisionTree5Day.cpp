@@ -25,6 +25,7 @@
 #include "WithinHost/WHVivax.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
+#include "util/errors.h"
 
 namespace OM {
 namespace Clinical {
