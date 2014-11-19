@@ -103,35 +103,7 @@ public:
         interventions::ComponentId subPop, bool isMember );
     //@}
     
-    void setInoculationsPerAgeGroup (vector<double>& v) {
-        m_inoculationsPerAgeGroup = v;	// copies v, not just its reference
-    }
-  
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        m_inoculationsPerAgeGroup & stream;
-  }
-  
 private:
-    /** Resizes all vectors, allocating memory.
-     * 
-     * This is a separate initialisation step to make allocation explicit and
-     * avoid accidental allocations when manipulating containers of Survey
-     * elements. */
-    void allocate ();
-    
-    /** Write out arrays
-     * @param outputFile Stream to write to
-     * @param survey Survey number (starting from 1) */
-    void writeSummaryArrays (ostream& outputFile, int survey);
-    
-    /// @brief Data stored for reporting; all of this is per survey
-    //@{
-    // data categorised by human age group:
-    vector<double> m_inoculationsPerAgeGroup;
-    //@}
-    
     // ———  static members  ———
     
     /** Index for the time dimention of the summary arrays

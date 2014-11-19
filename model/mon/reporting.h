@@ -150,6 +150,8 @@ enum Measure{
     MVF_INPUT_EIR,
     // Simulated EIR (EIR output by the transmission model). Units: inoculations per adult per time step.
     MVF_SIM_EIR,
+    // Total inoculations over survey period per group (age, cohort). Units: inoculations.
+    MVF_INOCS,
     // N_v0: emergence of feeding vectors during the last time step. Units: mosquitoes/day
     MVF_LAST_NV0,
     // N_v: vectors seeking to feed during the last time step. Units: mosquitoes/day
@@ -188,6 +190,8 @@ void reportMHI( Measure measure, const Host::Human& human, int val );
 void reportMHF( Measure measure, const Host::Human& human, double val );
 /// Report some value (integer) for some survey, age group and cohort set
 void reportMSACI( Measure measure, size_t survey, Monitoring::AgeGroup ageGroup, uint32_t cohortSet, int val );
+/// Report some value (floating point) for the current survey and some age group and cohort set
+void reportMACF( Measure measure, size_t ageIndex, uint32_t cohortSet, double val );
 /// Report some value (floating point) by vector species to the current survey.
 void reportMSF( Measure measure, size_t species, double val );
 /// Report one deployment for some human to the current survey.

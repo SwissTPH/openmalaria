@@ -55,10 +55,6 @@ enum SurveyMeasure {
 //     /// Number of IPT Doses (removed together with IPT model)
 //     nIPTDoses= 25,
     
-    /** The total number of inoculations per age group, summed over the
-     * reporting period. */
-    innoculationsPerAgeGroup = 30,
-    
     //BEGIN Per day-of-year data (removed)
 //     /// Inoculations per human (all ages) per day of year, over the last year.
 //     /// (Reporting removed.)

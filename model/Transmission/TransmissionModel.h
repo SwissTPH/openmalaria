@@ -24,7 +24,6 @@
 #include "Global.h"
 #include "util/errors.h"
 #include "schema/interventions.h"
-#include "Monitoring/Survey.h"
 
 #include <fstream>
 #include <string.h>
@@ -35,9 +34,9 @@
 namespace OM {
     class Summary;
     class Population;
+namespace Host{ class Human; }
 namespace Transmission {
     class PerHost;
-
 
 /** Variable describing current simulation mode. */
 enum SimulationMode {
@@ -171,14 +170,13 @@ public:
    *    The human's "per host transmission" potentially needs updating.
    * @param age Age of the human in time units
    * @param ageYears Age of the human in years
-   * @param ageGroup Age group of the human (for monitoring)
    * @param EIR Out-vector of EIR per parasite genotype. The length is also set
    *    by the calling function. Where genotype tracking is not supported (e.g.
    *    the non-vector model), the length is set to one.
    * @returns the sum of EIR across genotypes
    */
   double getEIR (Host::Human& human, SimTime age, double ageYears,
-                 Monitoring::AgeGroup ageGroup, vector<double>& EIR);
+                 vector<double>& EIR);
   
   /// Return the number of vector species (0 if not Vector model).
   virtual size_t getNSpecies();
@@ -303,19 +301,10 @@ private:
 
   /// accumulator for time step adults requesting EIR
   int tsNumAdults;
-
-  /** @brief Variables for reporting of entomological inoculations to humans.
-   *
-   * inoculationsPerAgeGroup need checkpointing. */
-  //@{
-  /** The total number of inoculations per age group, summed over the
-   * reporting period. */
-  vector<double> inoculationsPerAgeGroup;
   
-  /** Sum of all EIR returned in this time step, per age group
-   * Doesn't need to be checkpointed. */
-  vector<double> timeStepEntoInocs;
-  //@}
+  /// Total inoculations since last survey, by age group and cohort set.
+  /// Index is ageGroup + numAgeGroups * cohortSet.
+  vector<double> surveyInoculations;
 };
 
 } }

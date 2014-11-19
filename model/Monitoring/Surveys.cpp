@@ -99,10 +99,6 @@ void SurveysType::init( const OM::Parameters& parameters,
     Survey::init( parameters, scenario, monitoring );
 
     m_surveys.resize (m_surveysTimeIntervals.size());
-    if( !Simulator::isCheckpoint() ){
-        for (size_t i = 0; i < m_surveys.size(); ++i)
-            m_surveys[i].allocate();
-    }
     Survey::m_current = &m_surveys[0];
 }
 
@@ -197,11 +193,7 @@ void SurveysType::writeSummaryArrays ()
   //   outputFile.precision (6);
   //   outputFile << scientific;
 
-  for (size_t i = 1; i < m_surveys.size(); ++i){
-    mon::write1( outputFile, i );
-    m_surveys[i].writeSummaryArrays (outputFile, i);
-    mon::write2( outputFile, i );
-  }
+  mon::write( outputFile );
 
   //Infant mortality rate is a single number, therefore treated separately
   // Note: Storing a single value instead of one per reporting period is inconsistent with other
@@ -218,21 +210,12 @@ void SurveysType::checkpoint (istream& stream) {
     m_nextSurveyTime & stream;
     m_surveysTimeIntervals & stream;
     Survey::m_surveyNumber & stream;
-    // read those surveys checkpointed, call allocate on the rest:
-    for( size_t i = 1; i <= Survey::m_surveyNumber; ++i )
-        m_surveys[i] & stream;
-    m_surveys[0].allocate();
-    for( size_t i = Survey::m_surveyNumber + 1; i < m_surveys.size(); ++i )
-        m_surveys[i].allocate();
     Survey::m_current = &m_surveys[Survey::m_surveyNumber];
 }
 void SurveysType::checkpoint (ostream& stream) {
     m_nextSurveyTime & stream;
     m_surveysTimeIntervals & stream;
     Survey::m_surveyNumber & stream;
-    // checkpoint only those surveys used; exclude 0 since that's a "write only DB"
-    for( size_t i = 1; i <= Survey::m_surveyNumber; ++i )
-        m_surveys[i] & stream;
 }
 
 } }

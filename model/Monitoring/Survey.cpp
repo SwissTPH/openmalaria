@@ -32,13 +32,6 @@
 
 namespace OM { namespace Monitoring {
 using WithinHost::diagnostics;
- 
-// -----  Utility forward declarations  -----
-
-template <class T>
-void writeValue(ostream& file, int measure, int survey, T& value);
-
-void writeMap (ostream& file, int measure, int survey, map<string,double>& data);
 
 // -----  Static members  -----
 
@@ -106,9 +99,9 @@ public:
         codeMap["Vector_Nv"] = SM::BLANK;
         codeMap["Vector_Ov"] = SM::BLANK;
         codeMap["Vector_Sv"] = SM::BLANK;
+        codeMap["innoculationsPerAgeGroup"] = SM::BLANK;
         
         codeMap["allCauseIMR"] = SM::allCauseIMR;
-        codeMap["innoculationsPerAgeGroup"] = SM::innoculationsPerAgeGroup;
         
         removedCodes.insert("Clinical_RDTs");
         removedCodes.insert("Clinical_Microscopy");
@@ -221,43 +214,8 @@ void AgeGroup::update (SimTime age) {
     }
 }
 
-
 // -----  Non-static members  -----
 
-
 Survey::Survey() {}
-
-void Survey::allocate(){
-    // These 3 are set as a whole and so don't require allocation:
-//   _innoculationsPerDayOfYear;
-//   _kappaPerDayOfYear;
-//   _innoculationsPerAgeGroup;
-}
-
-void Survey::writeSummaryArrays (ostream& outputFile, int survey)
-{
-  if (active[SM::innoculationsPerAgeGroup]) {
-    for (int ageGroup = 0; ageGroup < (int) m_inoculationsPerAgeGroup.size() - 1; ++ageGroup) { // Don't write out last age-group
-        outputFile << survey << "\t" << ageGroup + 1 << "\t" << SM::innoculationsPerAgeGroup;
-        outputFile << "\t" << m_inoculationsPerAgeGroup[ageGroup] << lineEnd;
-    }
-  }
-}
-
-
-template <class T>
-void writeValue (ostream& file, int measure, int survey, T& value)
-{
-    file << survey << "\t" << 0 << "\t" << measure;
-    file << "\t" << value << lineEnd;
-}
-
-void writeMap (ostream& file, int measure, int survey, map<string,double>& data)
-{
-    for (map<string,double>::const_iterator it = data.begin(); it != data.end(); ++it) {
-        file << survey << "\t" << it->first << "\t" << measure;
-        file << "\t" << it->second << lineEnd;
-    }
-}
 
 } }

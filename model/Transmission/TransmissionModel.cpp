@@ -26,6 +26,7 @@
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/Genotypes.h"
 #include "Monitoring/Continuous.h"
+#include "Monitoring/Surveys.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
@@ -117,8 +118,8 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
     tsNumAdults(0)
 {
   initialisationEIR.assign (sim::stepsPerYear(), 0.0);
-  inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
-  timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
+  surveyInoculations.assign (Monitoring::AgeGroup::getNumGroups() *
+        Monitoring::Surveys.numCohortSets(), 0.0);
 
   using Monitoring::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
@@ -172,18 +173,11 @@ double TransmissionModel::updateKappa (const Population& population) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
-
-    // Sum up inoculations this time step
-    for (size_t group = 0; group < timeStepEntoInocs.size(); ++group) {
-        inoculationsPerAgeGroup[group] += timeStepEntoInocs[group];
-        // Reset to zero:
-        timeStepEntoInocs[group] = 0.0;
-    }
-
+    
     tsAdultEIR = tsAdultEntoInocs / tsNumAdults;
     tsAdultEntoInocs = 0.0;
     tsNumAdults = 0;
-
+    
     surveyInputEIR += initialisationEIR[tmod];
     surveySimulatedEIR += tsAdultEIR;
     
@@ -191,8 +185,8 @@ double TransmissionModel::updateKappa (const Population& population) {
 }
 
 double TransmissionModel::getEIR( Host::Human& human, SimTime age,
-                    double ageYears, OM::Monitoring::AgeGroup ageGroup,
-                    vector<double>& EIR ){
+                    double ageYears, vector<double>& EIR )
+{
     /* For the NonVector model, the EIR should just be multiplied by the
      * availability. For the Vector model, the availability is also required
      * for internal calculations, but again the EIR should be multiplied by the
@@ -201,8 +195,9 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
     util::streamValidate( EIR );
     double allEIR = vectors::sum( EIR );
     
-    //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
-    timeStepEntoInocs[ageGroup.i()] += allEIR;
+    //TODO: also by genotype?
+    surveyInoculations[human.getMonitoringAgeGroup().i() +
+        Monitoring::AgeGroup::getNumGroups() * human.cohortSet()] += allEIR;
     if( age >= adultAge ){
         tsAdultEntoInocs += allEIR;
         tsNumAdults += 1;
@@ -215,12 +210,17 @@ size_t TransmissionModel::getNSpecies(){
 }
 
 void TransmissionModel::summarize () {
-    Monitoring::Survey& survey = Monitoring::Survey::current();
     mon::reportMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );
     mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
-
-    survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
-    inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
+    
+    for( size_t ag = 0, nAg = Monitoring::AgeGroup::getNumGroups(), cs = 0,
+        nCS = Monitoring::Surveys.numCohortSets(); ag < nAg; ++ag ){
+        for( cs = 0; cs < nCS; ++cs ){
+            mon::reportMACF( mon::MVF_INOCS, ag, cs,
+                surveyInoculations[ag + nAg * cs] );
+        }
+    }
+    surveyInoculations.assign( surveyInoculations.size(), 0.0 );
     
     double duration = (sim::now() - lastSurveyTime).inSteps();
     if( duration == 0.0 ){
@@ -256,8 +256,7 @@ void TransmissionModel::checkpoint (istream& stream) {
     lastSurveyTime & stream;
     numTransmittingHumans & stream;
     tsNumAdults & stream;
-    inoculationsPerAgeGroup & stream;
-    timeStepEntoInocs & stream;
+    surveyInoculations & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     simulationMode & stream;
@@ -275,8 +274,7 @@ void TransmissionModel::checkpoint (ostream& stream) {
     lastSurveyTime & stream;
     numTransmittingHumans & stream;
     tsNumAdults & stream;
-    inoculationsPerAgeGroup & stream;
-    timeStepEntoInocs & stream;
+    surveyInoculations & stream;
 }
 
 } }

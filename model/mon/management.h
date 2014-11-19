@@ -41,9 +41,8 @@ void initMainSim();
 // Call after all data for some survey number has been provided
 void concludeSurvey();
 
-// Write results for a single survey to stream
-void write1( std::ostream& stream, int survey );
-void write2( std::ostream& stream, int survey );
+// Write results to stream
+void write( std::ostream& stream );
 
 // Checkpointing
 void checkpoint( std::ostream& stream );

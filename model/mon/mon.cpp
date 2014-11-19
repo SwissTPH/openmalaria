@@ -43,7 +43,7 @@ size_t currentSurvey = NOT_USED;
 const size_t NOT_ACCEPTED = boost::integer_traits<size_t>::const_max - 1;
 #endif
 
-typedef FastDelegate4<ostream&,int,int,size_t> WriteDelegate;
+typedef FastDelegate4<ostream&,size_t,int,size_t> WriteDelegate;
 
 // Store by human age and cohort
 template<typename T, bool BY_AGE, bool BY_COHORT, bool BY_SPECIES>
@@ -96,15 +96,15 @@ class Store{
         reports[index(mIndex,survey,ageIndex,cohortSet,species)] += val;
     }
     
-    void writeM( ostream& stream, int survey, int outMeasure, size_t inMeasure ){
+    void writeM( ostream& stream, size_t survey, int outMeasure, size_t inMeasure ){
         if( BY_SPECIES ){
             assert( !BY_AGE && !BY_COHORT );  // output col2 conflicts
             for( size_t species = 0; species < nSpecies; ++species ){
                 //TODO: should we make this backwards-compatible (output
                 // name, not a number)?
                 const int col2 = species + 1;
-                T value = reports[index(inMeasure,survey-1,0,0,species)];
-                stream << survey << '\t' << col2 << '\t' << outMeasure
+                T value = reports[index(inMeasure,survey,0,0,species)];
+                stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
                     << '\t' << value << Monitoring::lineEnd;
             }
         }else{
@@ -116,8 +116,8 @@ class Store{
                 // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
                 const int col2 = ageGroup + ageGroupAdd +
                     1000 * Monitoring::Surveys.cohortSetOutputId( cohortSet );
-                T value = reports[index(inMeasure,survey-1,ageGroup,cohortSet,0)];
-                stream << survey << '\t' << col2 << '\t' << outMeasure
+                T value = reports[index(inMeasure,survey,ageGroup,cohortSet,0)];
+                stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
                     << '\t' << value << Monitoring::lineEnd;
             } }
         }
@@ -218,7 +218,7 @@ public:
     }
     
     // Write stored values to stream
-    void write( ostream& stream, int survey ){
+    void write( ostream& stream, size_t survey ){
         // use a (tree) map to sort by external measure
         map<int,size_t> measuresOrdered;
         for( size_t m = 0; m < outMeasures.size(); ++m ){
@@ -291,11 +291,7 @@ void concludeSurvey(){
     if( currentSurvey >= nSurveys ) currentSurvey = NOT_USED;
 }
 
-void write1( ostream& stream, int survey ){
-    //TODO: sort these
-    storeHACI.write( stream, survey );
-    storeHACF.write( stream, survey );
-    //TODO: this complicated mess is just to maintain order of outputs
+void write( ostream& stream ){
     // use a (tree) map to sort by external measure
     typedef pair<WriteDelegate,size_t> MPair;
     map<int,MPair> measuresOrdered;
@@ -304,23 +300,15 @@ void write1( ostream& stream, int survey ){
     storeSF.addMeasures( measuresOrdered );
 //     storeHACI.addMeasures( measuresOrdered );
 //     storeHACF.addMeasures( measuresOrdered );
+    
     typedef pair<int,MPair> PP;
-    foreach( PP pp, measuresOrdered ){
-        if( pp.first < 30 )
+    for( size_t survey = 0; survey < nSurveys; ++survey ){
+        //TODO: sort these
+        storeHACI.write( stream, survey );
+        storeHACF.write( stream, survey );
+        foreach( PP pp, measuresOrdered ){
             pp.second.first( stream, survey, pp.first, pp.second.second );
-    }
-}
-void write2( ostream& stream, int survey ){
-    // use a (tree) map to sort by external measure
-    typedef pair<WriteDelegate,size_t> MPair;
-    map<int,MPair> measuresOrdered;
-    storeSF.addMeasures( measuresOrdered );
-    storeI.addMeasures( measuresOrdered );
-    storeF.addMeasures( measuresOrdered );
-    typedef pair<int,MPair> PP;
-    foreach( PP pp, measuresOrdered ){
-        if( pp.first > 30 )
-            pp.second.first( stream, survey, pp.first, pp.second.second );
+        }
     }
 }
 
@@ -347,6 +335,11 @@ void reportMSACI( Measure measure, size_t survey,
 {
     storeI.report( val, measure, currentSurvey );
     storeHACI.report( val, measure, survey, ageGroup.i(), cohortSet );
+}
+void reportMACF( Measure measure, size_t ageIndex, uint32_t cohortSet, double val )
+{
+    storeF.report( val, measure, currentSurvey );
+    storeHACF.report( val, measure, currentSurvey, ageIndex, cohortSet );
 }
 void reportMSF( Measure measure, size_t species, double val ){
     storeF.report( val, measure, currentSurvey );

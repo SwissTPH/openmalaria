@@ -179,6 +179,10 @@ void defineOutMeasures(){
     /// Number of episodes (non-malaria fever)
     namedOutMeasures["nNMFever"] =
         OutMeasure::humanAC( 27, MHE_NON_MALARIA_FEVERS, false );
+    /** The total number of inoculations, by age group and cohort, summed over
+     * the reporting period. */
+    namedOutMeasures["innoculationsPerAgeGroup"] =
+        OutMeasure::humanAC( 30, MVF_INOCS, true );
     /// N_v0: emergence of feeding vectors during the last time step. Units: mosquitoes/day
     namedOutMeasures["Vector_Nv0"] = OutMeasure::species( 31, MVF_LAST_NV0 );
     /// N_v: vectors seeking to feed during the last time step. Units: mosquitoes/day
