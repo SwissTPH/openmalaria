@@ -95,10 +95,6 @@ double WHMock::getCumulative_Y() const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-WHInterface::InfectionCount WHMock::countInfections() const{
-    throw util::unimplemented_exception( "not needed in unit test" );
-}
-
 void WHMock::checkpoint (istream& stream){
     throw util::unimplemented_exception( "not needed in unit test" );
 }

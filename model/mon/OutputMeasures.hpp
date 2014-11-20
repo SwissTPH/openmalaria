@@ -123,7 +123,7 @@ void defineOutMeasures(){
     namedOutMeasures["sumlogDens"] = OutMeasure::humanAC( 5, MHF_LOG_DENSITY, true );
     /** The total number of infections in the population: includes both blood
      * and liver stages. Vivax: this is the number of broods. */
-    namedOutMeasures["totalInfs"] = OutMeasure::humanAC( 6, MHR_INFECTIONS, false );
+    namedOutMeasures["totalInfs"] = OutMeasure::humanACG( 6, MHR_INFECTIONS, false );
     /** Infectiousness of human population to mosquitoes
      *
      * Number of hosts transmitting to mosquitoes (i.e. proportion of
@@ -134,7 +134,7 @@ void defineOutMeasures(){
      * density is above the detection limit) across all human hosts.
      * Vivax: the number of broods with an active blood stage. */
     namedOutMeasures["totalPatentInf"] =
-        OutMeasure::humanAC( 8, MHR_PATENT_INFECTIONS, false );
+        OutMeasure::humanACG( 8, MHR_PATENT_INFECTIONS, false );
     /// Contribuion to immunity functions (removed)
     namedOutMeasures["contrib"] = OutMeasure::obsolete( 9 );
     /// Sum of the pyrogenic threshold

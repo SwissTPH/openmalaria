@@ -74,7 +74,6 @@ public:
     PkPd::LSTMPkPdModel pkpd;
 
 protected:
-    virtual InfectionCount countInfections () const;
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
 };

@@ -173,14 +173,18 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 
 // -----  Summarize  -----
 
-WHInterface::InfectionCount DescriptiveWithinHostModel::countInfections () const{
-    InfectionCount count;       // constructor initialises counts to 0
-    count.total = infections.size();
-    for (std::list<DescriptiveInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) )
-            count.patent += 1;
+void DescriptiveWithinHostModel::summarizeInfs( const Host::Human& human )const{
+    if( infections.size() > 0 ){
+        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
     }
-    return count;
+    // (patent) infections are reported by genotype, even though we don't have
+    // genotype in this model
+    mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
+    for (std::list<DescriptiveInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+        if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
+            mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+        }
+    }
 }
 
 

@@ -244,12 +244,7 @@ void WHFalciparum::updateImmuneStatus() {
 
 bool WHFalciparum::summarize (const Host::Human& human) {
     pathogenesisModel->summarize( human );
-    InfectionCount count = countInfections();
-    if (count.total != 0) {
-        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
-        mon::reportMHI( mon::MHR_INFECTIONS, human, count.total );
-        mon::reportMHI( mon::MHR_PATENT_INFECTIONS, human, count.patent );
-    }
+    summarizeInfs( human );
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
     if( diagnosticResult(Survey::diagnostic()) ){

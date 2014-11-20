@@ -261,17 +261,22 @@ double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
 }
 
 bool WHVivax::summarize(const Host::Human& human) {
-    InfectionCount count = countInfections();
-    if (count.total != 0) {
-        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
-        mon::reportMHI( mon::MHR_INFECTIONS, human, count.total );
-        mon::reportMHI( mon::MHR_PATENT_INFECTIONS, human, count.patent );
+    if( infections.size() == 0 ) return false;  // no infections: not patent, nothing to report
+    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+    bool patentHost = false;
+    // (patent) infections are reported by genotype, even though we don't have
+    // genotype in this model
+    mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
+    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
+         inf != infections.end(); ++inf) 
+    {
+        if (inf->isPatent()){
+            mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+            patentHost = true;
+        }
     }
-    if( count.patent > 0 ){
-        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
-        return true;
-    }
-    return false;
+    if( patentHost ) mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+    return patentHost;
 }
 
 void WHVivax::importInfection(){
@@ -358,15 +363,6 @@ void WHVivax::clearImmunity(){
     throw TRACED_EXCEPTION_DEFAULT( "vivax model does not include immune suppression" );
 }
 
-WHInterface::InfectionCount WHVivax::countInfections () const{
-    InfectionCount count;       // constructor initialises counts to 0
-    count.total = infections.size();
-    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if (inf->isPatent())
-            count.patent += 1;
-    }
-    return count;
-}
 void WHVivax::treatment( Host::Human& human, TreatmentId treatId ){
     //TODO: something less ugly than this. Possibly we should revise code to
     // make Pf and Pv treatment models work more similarly.

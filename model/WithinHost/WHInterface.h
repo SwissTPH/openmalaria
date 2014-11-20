@@ -210,18 +210,6 @@ protected:
     virtual double pTransGenotype( double pTrans, double sumX,
                                    size_t genotype ) =0;
     
-    struct InfectionCount{
-        InfectionCount(): total(0), patent(0) {}        // initialise to 0
-        int total;      // includes blood and liver stages
-        int patent;     // number of detectible blood-stage infections
-    };
-    /** For summarizing: counts total and patent infections during monitoring
-     * (i.e. at start of time step).
-     * 
-     * @returns Number of infections, patent and total
-     */
-    virtual InfectionCount countInfections () const =0;
-
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
 

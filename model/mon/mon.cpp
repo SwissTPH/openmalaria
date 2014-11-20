@@ -269,11 +269,17 @@ public:
     }
 };
 
+//TODO: is this far too many options? Would it be better to remove some, e.g.
+// make age-group and cohort coincide and report everything as doubles?
 // Stores by integer value (no outputs include species or genotype):
 Store<int, false, false, false, false> storeI;
 Store<int, true, false, false, false> storeAI;
 Store<int, false, true, false, false> storeCI;
 Store<int, true, true, false, false> storeACI;
+Store<int, false, false, false, true> storeGI;
+Store<int, true, false, false, true> storeAGI;
+Store<int, false, true, false, true> storeCGI;
+Store<int, true, true, false, true> storeACGI;
 // Stores by double value (note that by species reports never include age or cohort):
 Store<double, false, false, false, false> storeF;
 Store<double, true, false, false, false> storeAF;
@@ -364,6 +370,10 @@ void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
     storeAI.init( enabledOutMeasures, nSpecies );
     storeCI.init( enabledOutMeasures, nSpecies );
     storeACI.init( enabledOutMeasures, nSpecies );
+    storeGI.init( enabledOutMeasures, nSpecies );
+    storeAGI.init( enabledOutMeasures, nSpecies );
+    storeCGI.init( enabledOutMeasures, nSpecies );
+    storeACGI.init( enabledOutMeasures, nSpecies );
     
     storeF.init( enabledOutMeasures, nSpecies );
     storeAF.init( enabledOutMeasures, nSpecies );
@@ -388,6 +398,10 @@ void internal::write( ostream& stream ){
     storeAI.addMeasures( measuresOrdered );
     storeCI.addMeasures( measuresOrdered );
     storeACI.addMeasures( measuresOrdered );
+    storeGI.addMeasures( measuresOrdered );
+    storeAGI.addMeasures( measuresOrdered );
+    storeCGI.addMeasures( measuresOrdered );
+    storeACGI.addMeasures( measuresOrdered );
     
     storeF.addMeasures( measuresOrdered );
     storeAF.addMeasures( measuresOrdered );
@@ -420,9 +434,6 @@ void internal::write( ostream& stream ){
 void reportMI( Measure measure, int val ){
     storeI.report( val, measure, impl::currentSurvey, 0, 0, 0, 0 );
 }
-void reportMF( Measure measure, double val ){
-    storeF.report( val, measure, impl::currentSurvey, 0, 0, 0, 0 );
-}
 void reportMHI( Measure measure, const Host::Human& human, int val ){
     const size_t survey = impl::currentSurvey;
     const size_t ageIndex = human.monAgeGroup().i();
@@ -430,14 +441,6 @@ void reportMHI( Measure measure, const Host::Human& human, int val ){
     storeAI.report( val, measure, survey, ageIndex, 0, 0, 0 );
     storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
     storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
-}
-void reportMHF( Measure measure, const Host::Human& human, double val ){
-    const size_t survey = impl::currentSurvey;
-    const size_t ageIndex = human.monAgeGroup().i();
-    storeF.report( val, measure, survey, 0, 0, 0, 0 );
-    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
-    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
-    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
 }
 void reportMSACI( Measure measure, size_t survey,
                   AgeGroup ageGroup, uint32_t cohortSet, int val )
@@ -447,10 +450,54 @@ void reportMSACI( Measure measure, size_t survey,
     storeCI.report( val, measure, survey, 0, cohortSet, 0, 0 );
     storeACI.report( val, measure, survey, ageGroup.i(), cohortSet, 0, 0 );
 }
+void reportMHGI( Measure measure, const Host::Human& human, size_t genotype,
+                 int val )
+{
+    const size_t survey = impl::currentSurvey;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeI.report( val, measure, survey, 0, 0, 0, 0 );
+    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
+    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
+    storeGI.report( val, measure, survey, 0, 0, 0, genotype );
+    storeAGI.report( val, measure, survey, ageIndex, 0, 0, genotype );
+    storeCGI.report( val, measure, survey, 0, human.cohortSet(), 0, genotype );
+    storeACGI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, genotype );
+}
+// Deployment reporting uses a different function to handle the method
+// (mostly to make other types of report faster).
+void reportMHD( Measure measure, const Host::Human& human,
+                Deploy::Method method )
+{
+    const int val = 1;  // always report 1 deployment
+    const size_t survey = impl::currentSurvey;
+    size_t ageIndex = human.monAgeGroup().i();
+    storeI.deploy( val, measure, survey, 0, 0, method );
+    storeAI.deploy( val, measure, survey, ageIndex, 0, method );
+    storeCI.deploy( val, measure, survey, 0, human.cohortSet(), method );
+    storeACI.deploy( val, measure, survey, ageIndex, human.cohortSet(), method );
+    // This is for nTreatDeployments:
+    measure = MHD_ALL_DEPLOYS;
+    storeI.deploy( val, measure, survey, 0, 0, method );
+    storeAI.deploy( val, measure, survey, ageIndex, 0, method );
+    storeCI.deploy( val, measure, survey, 0, human.cohortSet(), method );
+    storeACI.deploy( val, measure, survey, ageIndex, human.cohortSet(), method );
+}
+
+void reportMF( Measure measure, double val ){
+    storeF.report( val, measure, impl::currentSurvey, 0, 0, 0, 0 );
+}
+void reportMHF( Measure measure, const Host::Human& human, double val ){
+    const size_t survey = impl::currentSurvey;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeF.report( val, measure, survey, 0, 0, 0, 0 );
+    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
+    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
+    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
+}
 void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
                   size_t genotype, double val )
 {
-    //TODO: is this kind of configuration over the top? Does it seriously affect performance?
     const size_t survey = impl::currentSurvey;
     storeF.report( val, measure, survey, 0, 0, 0, 0 );
     storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
@@ -473,25 +520,6 @@ void reportMSGF( Measure measure, size_t species, size_t genotype, double val ){
     storeSF.report( val, measure, survey, 0, 0, species, 0 );
     storeSGF.report( val, measure, survey, 0, 0, species, genotype );
 }
-// Deployment reporting uses a different function to handle the method
-// (mostly to make other types of report faster).
-void reportMHD( Measure measure, const Host::Human& human,
-                Deploy::Method method )
-{
-    const int val = 1;  // always report 1 deployment
-    const size_t survey = impl::currentSurvey;
-    size_t ageIndex = human.monAgeGroup().i();
-    storeI.deploy( val, measure, survey, 0, 0, method );
-    storeAI.deploy( val, measure, survey, ageIndex, 0, method );
-    storeCI.deploy( val, measure, survey, 0, human.cohortSet(), method );
-    storeACI.deploy( val, measure, survey, ageIndex, human.cohortSet(), method );
-    // This is for nTreatDeployments:
-    measure = MHD_ALL_DEPLOYS;
-    storeI.deploy( val, measure, survey, 0, 0, method );
-    storeAI.deploy( val, measure, survey, ageIndex, 0, method );
-    storeCI.deploy( val, measure, survey, 0, human.cohortSet(), method );
-    storeACI.deploy( val, measure, survey, ageIndex, human.cohortSet(), method );
-}
 
 void checkpoint( ostream& stream ){
     impl::currentSurvey & stream;
@@ -501,6 +529,10 @@ void checkpoint( ostream& stream ){
     storeAI.checkpoint(stream);
     storeCI.checkpoint(stream);
     storeACI.checkpoint(stream);
+    storeGI.checkpoint(stream);
+    storeAGI.checkpoint(stream);
+    storeCGI.checkpoint(stream);
+    storeACGI.checkpoint(stream);
     
     storeF.checkpoint(stream);
     storeAF.checkpoint(stream);
@@ -521,6 +553,10 @@ void checkpoint( istream& stream ){
     storeAI.checkpoint(stream);
     storeCI.checkpoint(stream);
     storeACI.checkpoint(stream);
+    storeGI.checkpoint(stream);
+    storeAGI.checkpoint(stream);
+    storeCGI.checkpoint(stream);
+    storeACGI.checkpoint(stream);
     
     storeF.checkpoint(stream);
     storeAF.checkpoint(stream);

@@ -87,6 +87,10 @@ protected:
      */
     virtual void clearInfections( Treatments::Stages stage ) =0;
     
+    /// For summarizing: counts total and patent infections during monitoring
+    /// (i.e. at start of time step).
+    virtual void summarizeInfs( const Host::Human& human )const =0;
+    
     ///@brief Immunity model parameters
     //@{
     /** Updates for the immunity model − assumes m_cumulative_h and m_cumulative_Y

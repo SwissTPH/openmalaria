@@ -181,11 +181,18 @@ void reportMI( Measure measure, int val );
 void reportMF( Measure measure, double val );
 /// Report some value (integer) for some human to the current survey.
 void reportMHI( Measure measure, const Host::Human& human, int val );
-/// Report some value (floating point) for some human to the current survey.
-void reportMHF( Measure measure, const Host::Human& human, double val );
 /// Report some value (integer) for some survey, age group and cohort set
 void reportMSACI( Measure measure, size_t survey, AgeGroup ageGroup,
                   uint32_t cohortSet, int val );
+/// Report some value (integer) for some human and genotype to the current survey.
+void reportMHGI( Measure measure, const Host::Human& human, size_t genotype,
+                 int val );
+/// Report one deployment for some human to the current survey.
+void reportMHD( Measure measure, const Host::Human& human,
+                Deploy::Method method );
+
+/// Report some value (floating point) for some human to the current survey.
+void reportMHF( Measure measure, const Host::Human& human, double val );
 /// Report some value (floating point) for the current survey and some age
 /// group and cohort set
 void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
@@ -194,9 +201,6 @@ void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
 void reportMSF( Measure measure, size_t species, double val );
 /// Report some value (floating point) by genotype to the current survey.
 void reportMSGF( Measure measure, size_t species, size_t genotype, double val );
-/// Report one deployment for some human to the current survey.
-void reportMHD( Measure measure, const Host::Human& human,
-                Deploy::Method method );
 /// Query whether an output measure is used.
 bool isUsedM( Measure measure );
 

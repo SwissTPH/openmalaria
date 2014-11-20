@@ -68,8 +68,7 @@ public:
     
 protected:
     virtual void clearInfections( Treatments::Stages stage );
-    
-    virtual InfectionCount countInfections () const;
+    virtual void summarizeInfs( const Host::Human& human )const;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
