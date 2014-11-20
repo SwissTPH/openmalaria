@@ -214,11 +214,10 @@ void defineOutMeasures(){
     namedOutMeasures["Vector_Nv0"] = OutMeasure::species( 31, MVF_LAST_NV0, false );
     /// N_v: vectors seeking to feed during the last time step. Units: mosquitoes/day
     namedOutMeasures["Vector_Nv"] = OutMeasure::species( 32, MVF_LAST_NV, false );
-    //TODO: make the next two per genotype
     /// N_v: infected vectors seeking to feed during the last time step. Units: mosquitoes/day
-    namedOutMeasures["Vector_Ov"] = OutMeasure::species( 33, MVF_LAST_OV, false );
+    namedOutMeasures["Vector_Ov"] = OutMeasure::species( 33, MVF_LAST_OV, true );
     /// N_v: infectious vectors seeking to feed during the last time step. Units: mosquitoes/day
-    namedOutMeasures["Vector_Sv"] = OutMeasure::species( 34, MVF_LAST_SV, false );
+    namedOutMeasures["Vector_Sv"] = OutMeasure::species( 34, MVF_LAST_SV, true );
     /** Input EIR (Expected EIR entered into scenario file)
      *
      * Units: inoculations per adult per time step. */

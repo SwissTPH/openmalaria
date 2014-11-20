@@ -275,42 +275,62 @@ void MosqTransmission::uninfectVectors() {
     P_dif.set_all( 0.0 );
 }
 
-double MosqTransmission::getLastVecStat( VecStat vs )const{
-    //Note: implementation isn't performance optimal but rather intended to
-    //keep code size low and have no overhead if not used.
-    const vecDay<double> *arr1 = 0;
-    const vecDay2D<double> *arr2 = 0;
-    switch( vs ){
-        case PA: arr1 = &P_A; break;
-        case PDF: arr1 = &P_df; break;
-        case PDIF: arr2 = &P_dif; break;
-        case NV: arr1 = &N_v; break;
-        case OV: arr2 = &O_v; break;
-        case SV: arr2 = &S_v; break;
-        default: throw SWITCH_DEFAULT_EXCEPTION;
-    }
+double sum1( const vecDay<double>& arr, SimTime end, SimTime N_v_length ){
     double val = 0.0;
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
-    SimTime end = sim::now() + sim::oneDay() + N_v_length;      // one plus last, plus (0 mod N_v_length) to avoid negatives
+    for( SimTime d1 = end - sim::oneTS(); d1 < end; d1 += sim::oneDay() ){
+        val += arr[mod_nn(d1, N_v_length)];
+    }
+    return val / sim::oneTS().inDays();
+}
+double sum2( const vecDay2D<double>& arr, SimTime end, SimTime N_v_length ){
+    double val = 0.0;
+    // Last time step ended at sim::now(). Values are stored per day, and for
+    // the last time step values at sim::now() and four previos were set.
     for( SimTime d1 = end - sim::oneTS(); d1 < end; d1 += sim::oneDay() ){
         SimTime i1 = mod_nn(d1, N_v_length);
-        if( arr1 != 0 ){
-            val += (*arr1)[i1];
-        }else{
-            for( size_t g = 0; g < Genotypes::N(); ++g ){
-                val += arr2->at(i1, g);
-            }
+        for( size_t g = 0; g < Genotypes::N(); ++g ){
+            val += arr.at(i1, g);
         }
     }
     return val / sim::oneTS().inDays();
 }
+double sum3( const vecDay2D<double>& arr, size_t g, SimTime end, SimTime N_v_length ){
+    double val = 0.0;
+    // Last time step ended at sim::now(). Values are stored per day, and for
+    // the last time step values at sim::now() and four previos were set.
+    for( SimTime d1 = end - sim::oneTS(); d1 < end; d1 += sim::oneDay() ){
+        val += arr.at(mod_nn(d1, N_v_length), g);
+    }
+    return val / sim::oneTS().inDays();
+}
+double MosqTransmission::getLastVecStat( VecStat vs )const{
+    // Last time step ended at sim::now(). Values are stored per day, and for
+    // the last time step values at sim::now() and four previos were set.
+    // One plus last, plus (0 mod N_v_length) to avoid negatives:
+    SimTime end = sim::now() + sim::oneDay() + N_v_length;
+    switch( vs ){
+        case PA: return sum1(P_A, end, N_v_length);
+        case PDF: return sum1(P_df, end, N_v_length);
+        case PDIF: return sum2(P_dif, end, N_v_length);
+        case NV: return sum1(N_v, end, N_v_length);
+        case OV: return sum2(O_v, end, N_v_length);
+        case SV: return sum2(S_v, end, N_v_length);
+        default: throw SWITCH_DEFAULT_EXCEPTION;
+    }
+}
 void MosqTransmission::summarize( size_t species )const{
+    // Last time step ended at sim::now(). Values are stored per day, and for
+    // the last time step values at sim::now() and four previos were set.
+    // One plus last, plus (0 mod N_v_length) to avoid negatives:
+    SimTime end = sim::now() + sim::oneDay() + N_v_length;
     mon::reportMSF( mon::MVF_LAST_NV0, species, getLastN_v0() );
-    mon::reportMSF( mon::MVF_LAST_NV, species, getLastVecStat(NV) );
-    //TODO: should be reported per genotype:
-    mon::reportMSF( mon::MVF_LAST_OV, species, getLastVecStat(OV) );
-    mon::reportMSF( mon::MVF_LAST_SV, species, getLastVecStat(SV) );
+    mon::reportMSF( mon::MVF_LAST_NV, species, sum1(N_v, end, N_v_length) );
+    for( size_t g = 0; g < Genotypes::N(); ++g ){
+        mon::reportMSGF( mon::MVF_LAST_OV, species, g, sum3(O_v, g, end, N_v_length) );
+        mon::reportMSGF( mon::MVF_LAST_SV, species, g, sum3(S_v, g, end, N_v_length) );
+    }
 }
 
 }
