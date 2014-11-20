@@ -79,30 +79,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="OptionSet">
     <xs:sequence>
-      <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
-        <xs:complexType>
-          <xs:attribute name="name" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
-            Options define different model structures.
-                Option name. Must be one of a strictly defined set.
-                Options are not required to be listed if their default value is desired.
-              </xs:documentation>
-              <xs:appinfo>name:Model options required;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="value" type="xs:boolean" default="true">
-            <xs:annotation>
-              <xs:documentation>
-                Option value (true/false). Each option has a default value used
-                if the option is not listed (usually false but sometimes true).
-              </xs:documentation>
-            <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
-           </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="option" type="om:Option" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Option">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of an option (monitoring measure or model option).
+        </xs:documentation>
+        <xs:appinfo>name:Option name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="value" type="xs:boolean" default="true">
+      <xs:annotation>
+        <xs:documentation>
+          Option on/off switch (true/false). Specifying value="true" is
+          the same as not specifying a value; specifying value="false"
+          explicitly turns the option off. If an option is not mentioned
+          at all, it is left at its default value (normally off, but
+          in a few cases, such as some bug-fix options, on).
+        </xs:documentation>
+      <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="DoubleList">
     <xs:sequence>

@@ -185,8 +185,8 @@ public:
     
     // Take a reported value and either store it or forget it.
     // If some of ageIndex, cohortSet, species are not applicable, use 0.
-    void report( T val, Measure measure, size_t survey, size_t ageIndex = 0,
-                 uint32_t cohortSet = 0, size_t species = 0, size_t genotype = 0 )
+    void report( T val, Measure measure, size_t survey, size_t ageIndex,
+                 uint32_t cohortSet, size_t species, size_t genotype )
     {
         if( survey == NOT_USED ) return; // pre-main-sim & unit tests we ignore all reports
         // last category is for humans too old for reporting groups:
@@ -269,21 +269,32 @@ public:
     }
 };
 
+// Stores by integer value (no outputs include species or genotype):
 Store<int, false, false, false, false> storeI;
+Store<int, true, false, false, false> storeAI;
+Store<int, false, true, false, false> storeCI;
+Store<int, true, true, false, false> storeACI;
+// Stores by double value (note that by species reports never include age or cohort):
 Store<double, false, false, false, false> storeF;
-Store<int, true, true, false, false> storeHACI;
-Store<double, true, true, false, false> storeHACF;
-Store<double, true, true, false, true> storeHACGF;
+Store<double, true, false, false, false> storeAF;
+Store<double, false, true, false, false> storeCF;
+Store<double, true, true, false, false> storeACF;
+Store<double, false, false, false, true> storeGF;
+Store<double, true, false, false, true> storeAGF;
+Store<double, false, true, false, true> storeCGF;
+Store<double, true, true, false, true> storeACGF;
 Store<double, false, false, true, false> storeSF;
 Store<double, false, false, true, true> storeSGF;
+
 int reportIMR = -1; // special output for fitting
 
 void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
 {
     defineOutMeasures();
-    const scnXml::OptionSet& optsElt = monElt.getSurveyOptions();
+    const scnXml::MonitoringOptions& optsElt = monElt.getSurveyOptions();
+    set<int> outIds;    // all measure numbers used in output
     list<OutMeasure> enabledOutMeasures;
-    foreach( const scnXml::Option& optElt, optsElt.getOption() ){
+    foreach( const scnXml::MonitoringOption& optElt, optsElt.getOption() ){
         if( optElt.getValue() == false ) continue;      // option is disabled
         NamedMeasureMapT::const_iterator it =
             namedOutMeasures.find( optElt.getName() );
@@ -291,21 +302,77 @@ void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
             throw util::xml_scenario_error( (boost::format("unrecognised "
                 "survey option: %1%") %optElt.getName()).str() );
         }
-        if( it->second.m == M_NUM ){
+        OutMeasure om = it->second;     // copy; we may modify below
+        if( om.m == M_NUM ){
             throw util::xml_scenario_error( (boost::format("obsolete "
                 "survey option: %1%") %optElt.getName()).str() );
         }
-        if( it->second.m == M_ALL_CAUSE_IMR && it->second.isDouble &&
-            !it->second.byAge && !it->second.byCohort && !it->second.bySpecies ){
-            reportIMR = it->second.outId;
+        if( om.m == M_ALL_CAUSE_IMR ){
+            if( om.isDouble && !om.byAge && !om.byCohort && !om.bySpecies ){
+                reportIMR = om.outId;
+            }else{
+                throw util::xml_scenario_error( "measure allCauseIMR does not "
+                    "support any categorisation" );
+            }
         }
-        enabledOutMeasures.push_back( it->second );
+        if( optElt.getByAge().present() ){
+            if( om.byAge ){
+                om.byAge = optElt.getByAge().get();     // disable or keep
+            }else if( optElt.getByAge().get() ){
+                throw util::xml_scenario_error( (boost::format("measure %1% "
+                    "does not support categorisation by age group")
+                    %optElt.getName()).str() );
+            }
+        }
+        if( optElt.getByCohort().present() ){
+            if( om.byCohort ){
+                om.byCohort = optElt.getByCohort().get();   // disable or keep
+            }else if( optElt.getByCohort().get() ){
+                throw util::xml_scenario_error( (boost::format("measure %1% "
+                    "does not support categorisation by cohort")
+                    %optElt.getName()).str() );
+            }
+        }
+        if( optElt.getBySpecies().present() ){
+            if( om.bySpecies ){
+                om.bySpecies = optElt.getBySpecies().get(); // disable or keep
+            }else if( optElt.getBySpecies().get() ){
+                throw util::xml_scenario_error( (boost::format("measure %1% "
+                    "does not support categorisation by age group")
+                    %optElt.getName()).str() );
+            }
+        }
+        if( optElt.getByGenotype().present() ){
+            if( om.byGenotype ){
+                om.byGenotype = optElt.getByGenotype().get();   // disable or keep
+            }else if( optElt.getByGenotype().get() ){
+                throw util::xml_scenario_error( (boost::format("measure %1% "
+                    "does not support categorisation by age group")
+                    %optElt.getName()).str() );
+            }
+        }
+        if( optElt.getOutputNumber().present() ) om.outId = optElt.getOutputNumber().get();
+        if( outIds.count(om.outId) ){
+            throw util::xml_scenario_error( (boost::format("monitoring output "
+                "number %1% used more than once") %om.outId).str() );
+        }
+        outIds.insert( om.outId );
+        enabledOutMeasures.push_back( om );
     }
+    
     storeI.init( enabledOutMeasures, nSpecies );
+    storeAI.init( enabledOutMeasures, nSpecies );
+    storeCI.init( enabledOutMeasures, nSpecies );
+    storeACI.init( enabledOutMeasures, nSpecies );
+    
     storeF.init( enabledOutMeasures, nSpecies );
-    storeHACI.init( enabledOutMeasures, nSpecies );
-    storeHACF.init( enabledOutMeasures, nSpecies );
-    storeHACGF.init( enabledOutMeasures, nSpecies );
+    storeAF.init( enabledOutMeasures, nSpecies );
+    storeCF.init( enabledOutMeasures, nSpecies );
+    storeACF.init( enabledOutMeasures, nSpecies );
+    storeGF.init( enabledOutMeasures, nSpecies );
+    storeAGF.init( enabledOutMeasures, nSpecies );
+    storeCGF.init( enabledOutMeasures, nSpecies );
+    storeACGF.init( enabledOutMeasures, nSpecies );
     storeSF.init( enabledOutMeasures, nSpecies );
     storeSGF.init( enabledOutMeasures, nSpecies );
     
@@ -316,11 +383,20 @@ void internal::write( ostream& stream ){
     // use a (tree) map to sort by external measure
     typedef pair<WriteDelegate,size_t> MPair;
     map<int,MPair> measuresOrdered;
+    
     storeI.addMeasures( measuresOrdered );
+    storeAI.addMeasures( measuresOrdered );
+    storeCI.addMeasures( measuresOrdered );
+    storeACI.addMeasures( measuresOrdered );
+    
     storeF.addMeasures( measuresOrdered );
-    storeHACI.addMeasures( measuresOrdered );
-    storeHACF.addMeasures( measuresOrdered );
-    storeHACGF.addMeasures( measuresOrdered );
+    storeAF.addMeasures( measuresOrdered );
+    storeCF.addMeasures( measuresOrdered );
+    storeACF.addMeasures( measuresOrdered );
+    storeGF.addMeasures( measuresOrdered );
+    storeAGF.addMeasures( measuresOrdered );
+    storeCGF.addMeasures( measuresOrdered );
+    storeACGF.addMeasures( measuresOrdered );
     storeSF.addMeasures( measuresOrdered );
     storeSGF.addMeasures( measuresOrdered );
     
@@ -342,45 +418,60 @@ void internal::write( ostream& stream ){
 // Report functions: each reports to all usable stores (i.e. correct data type
 // and where parameters don't have to be fabricated).
 void reportMI( Measure measure, int val ){
-    storeI.report( val, measure, impl::currentSurvey );
+    storeI.report( val, measure, impl::currentSurvey, 0, 0, 0, 0 );
 }
 void reportMF( Measure measure, double val ){
-    storeF.report( val, measure, impl::currentSurvey );
+    storeF.report( val, measure, impl::currentSurvey, 0, 0, 0, 0 );
 }
 void reportMHI( Measure measure, const Host::Human& human, int val ){
-    storeI.report( val, measure, impl::currentSurvey );
-    size_t ageIndex = human.monAgeGroup().i();
-    storeHACI.report( val, measure, impl::currentSurvey, ageIndex,
-                      human.cohortSet() );
+    const size_t survey = impl::currentSurvey;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeI.report( val, measure, survey, 0, 0, 0, 0 );
+    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
+    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
 }
 void reportMHF( Measure measure, const Host::Human& human, double val ){
-    storeF.report( val, measure, impl::currentSurvey );
-    size_t ageIndex = human.monAgeGroup().i();
-    storeHACF.report( val, measure, impl::currentSurvey, ageIndex,
-                      human.cohortSet() );
+    const size_t survey = impl::currentSurvey;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeF.report( val, measure, survey, 0, 0, 0, 0 );
+    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
+    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
+    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
 }
 void reportMSACI( Measure measure, size_t survey,
                   AgeGroup ageGroup, uint32_t cohortSet, int val )
 {
-    storeI.report( val, measure, impl::currentSurvey );
-    storeHACI.report( val, measure, survey, ageGroup.i(), cohortSet );
+    storeI.report( val, measure, survey, 0 ,0 ,0, 0 );
+    storeAI.report( val, measure, survey, ageGroup.i(), 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, cohortSet, 0, 0 );
+    storeACI.report( val, measure, survey, ageGroup.i(), cohortSet, 0, 0 );
 }
 void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
                   size_t genotype, double val )
 {
-    storeF.report( val, measure, impl::currentSurvey );
-    storeHACF.report( val, measure, impl::currentSurvey, ageIndex, cohortSet );
-    storeHACGF.report( val, measure, impl::currentSurvey, ageIndex, cohortSet,
-                       0, genotype );
+    //TODO: is this kind of configuration over the top? Does it seriously affect performance?
+    const size_t survey = impl::currentSurvey;
+    storeF.report( val, measure, survey, 0, 0, 0, 0 );
+    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
+    storeCF.report( val, measure, survey, 0, cohortSet, 0, 0 );
+    storeACF.report( val, measure, survey, ageIndex, cohortSet, 0, 0 );
+    storeGF.report( val, measure, survey, 0, 0, 0, genotype );
+    storeAGF.report( val, measure, survey, ageIndex, 0, 0, genotype );
+    storeCGF.report( val, measure, survey, 0, cohortSet, 0, genotype );
+    storeACGF.report( val, measure, survey, ageIndex, cohortSet, 0, genotype );
 }
 void reportMSF( Measure measure, size_t species, double val ){
-    storeF.report( val, measure, impl::currentSurvey );
-    storeSF.report( val, measure, impl::currentSurvey, 0, 0, species );
+    const size_t survey = impl::currentSurvey;
+    storeF.report( val, measure, survey, 0, 0, 0, 0 );
+    storeSF.report( val, measure, survey, 0, 0, species, 0 );
 }
 void reportMSGF( Measure measure, size_t species, size_t genotype, double val ){
-    storeF.report( val, measure, impl::currentSurvey );
-    storeSF.report( val, measure, impl::currentSurvey, 0, 0, species );
-    storeSGF.report( val, measure, impl::currentSurvey, 0, 0, species, genotype );
+    const size_t survey = impl::currentSurvey;
+    storeF.report( val, measure, survey, 0, 0, 0, 0 );
+    storeGF.report( val, measure, survey, 0, 0, 0, genotype );
+    storeSF.report( val, measure, survey, 0, 0, species, 0 );
+    storeSGF.report( val, measure, survey, 0, 0, species, genotype );
 }
 // Deployment reporting uses a different function to handle the method
 // (mostly to make other types of report faster).
@@ -388,34 +479,57 @@ void reportMHD( Measure measure, const Host::Human& human,
                 Deploy::Method method )
 {
     const int val = 1;  // always report 1 deployment
-    storeI.deploy( val, measure, impl::currentSurvey, 0, 0, method );
+    const size_t survey = impl::currentSurvey;
     size_t ageIndex = human.monAgeGroup().i();
-    storeHACI.deploy( val, measure, impl::currentSurvey, ageIndex,
-                      human.cohortSet(), method );
+    storeI.deploy( val, measure, survey, 0, 0, method );
+    storeAI.deploy( val, measure, survey, ageIndex, 0, method );
+    storeCI.deploy( val, measure, survey, 0, human.cohortSet(), method );
+    storeACI.deploy( val, measure, survey, ageIndex, human.cohortSet(), method );
     // This is for nTreatDeployments:
-    storeHACI.deploy( val, MHD_ALL_DEPLOYS, impl::currentSurvey, ageIndex,
-                      human.cohortSet(), method );
+    measure = MHD_ALL_DEPLOYS;
+    storeI.deploy( val, measure, survey, 0, 0, method );
+    storeAI.deploy( val, measure, survey, ageIndex, 0, method );
+    storeCI.deploy( val, measure, survey, 0, human.cohortSet(), method );
+    storeACI.deploy( val, measure, survey, ageIndex, human.cohortSet(), method );
 }
 
 void checkpoint( ostream& stream ){
     impl::currentSurvey & stream;
     impl::nextSurveyTime & stream;
+    
     storeI.checkpoint(stream);
+    storeAI.checkpoint(stream);
+    storeCI.checkpoint(stream);
+    storeACI.checkpoint(stream);
+    
     storeF.checkpoint(stream);
-    storeHACI.checkpoint(stream);
-    storeHACF.checkpoint(stream);
-    storeHACGF.checkpoint(stream);
+    storeAF.checkpoint(stream);
+    storeCF.checkpoint(stream);
+    storeACF.checkpoint(stream);
+    storeGF.checkpoint(stream);
+    storeAGF.checkpoint(stream);
+    storeCGF.checkpoint(stream);
+    storeACGF.checkpoint(stream);
     storeSF.checkpoint(stream);
     storeSGF.checkpoint(stream);
 }
 void checkpoint( istream& stream ){
     impl::currentSurvey & stream;
     impl::nextSurveyTime & stream;
+    
     storeI.checkpoint(stream);
+    storeAI.checkpoint(stream);
+    storeCI.checkpoint(stream);
+    storeACI.checkpoint(stream);
+    
     storeF.checkpoint(stream);
-    storeHACI.checkpoint(stream);
-    storeHACF.checkpoint(stream);
-    storeHACGF.checkpoint(stream);
+    storeAF.checkpoint(stream);
+    storeCF.checkpoint(stream);
+    storeACF.checkpoint(stream);
+    storeGF.checkpoint(stream);
+    storeAGF.checkpoint(stream);
+    storeCGF.checkpoint(stream);
+    storeACGF.checkpoint(stream);
     storeSF.checkpoint(stream);
     storeSGF.checkpoint(stream);
 }

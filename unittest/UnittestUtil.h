@@ -60,7 +60,7 @@ namespace dummyXML{
         0 /* pop size */,
         90.0 /*max human age*/ );
     
-    scnXml::OptionSet survOpts;
+    scnXml::MonitoringOptions survOpts;
     scnXml::Surveys surveys;
     scnXml::MonAgeGroup monAgeGroup(
         0.0 /* lower bound */ );

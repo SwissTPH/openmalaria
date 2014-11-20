@@ -42,7 +42,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:complexContent>
         </xs:complexType>
       </xs:element>
-      <xs:element name="SurveyOptions" type="om:OptionSet">
+      <xs:element name="SurveyOptions" type="om:MonitoringOptions">
         <xs:annotation>
           <xs:documentation>
             List of all active survey options. See include/Survey.h for a list of
@@ -271,5 +271,72 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Sub-population number;units:dimensionless;min:1;max:2097152;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="MonitoringOptions">
+    <xs:sequence>
+      <xs:element name="option" type="om:MonitoringOption" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="MonitoringOption">
+    <xs:complexContent>
+      <xs:extension base="om:Option">
+        <xs:attribute name="outputNumber" type="xs:int" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              Number identifying this monitoring measure in the output
+              file (3rd column). Normally this is determined from the
+              measure, but it can be set manually, e.g. for when the same
+              measure is recorded twice (to accumulate across different
+              categories).
+            </xs:documentation>
+            <xs:appinfo>name:Number identifying measure in output;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="byAge" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each age category. If
+              false, values are summed across all age categories and only
+              the sum reported. If not specified, separate categories
+              will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by age category;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="byCohort" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each cohort separately.
+              If false, values are summed across all cohorts and only
+              the sum reported. If not specified, separate categories
+              will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by cohort;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="bySpecies" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each mosquito species
+              separately. If false, values are summed across all species
+              and only the sum reported. If not specified, separate
+              categories will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by mosquito species;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="byGenotype" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each parasite genotype
+              separately. If false, values are summed across all genotypes
+              and only the sum reported. If not specified, separate
+              categories will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by parasite genotype;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
 </xs:schema>

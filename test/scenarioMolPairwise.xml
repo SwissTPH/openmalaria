@@ -31,7 +31,7 @@
       <option name="simulatedEIR" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="innoculationsPerAgeGroup"/>
+      <option name="innoculationsPerAgeGroup" byGenotype="false"/>
     </SurveyOptions>
     <surveys diagnostic="standard">
       <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>
