@@ -302,9 +302,9 @@ private:
   /// accumulator for time step adults requesting EIR
   int tsNumAdults;
   
-  /// Total inoculations since last survey, by age group and cohort set.
-  /// Index is ageGroup + numAgeGroups * cohortSet.
-  vector<double> surveyInoculations;
+    /// Total inoculations since last survey (multidimensional).
+    /// See survInocsSize, survInocsIndex in cpp file.
+    vector<double> surveyInoculations;
 };
 
 } }

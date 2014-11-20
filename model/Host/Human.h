@@ -159,7 +159,7 @@ public:
   }
   
   /// Get monitoring age group
-  inline const mon::AgeGroup& getMonitoringAgeGroup() const{
+  inline mon::AgeGroup monAgeGroup() const{
       return monitoringAgeGroup;
   }
   

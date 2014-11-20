@@ -43,27 +43,33 @@ struct OutMeasure{
     bool byAge; // segregate by age
     bool byCohort;      // segregate by cohort
     bool bySpecies;     // segregate by species of vector
+    bool byGenotype;    // segregate by genotype of parasite
     uint8_t method;     // deployment method (see above)
     
     // Convenience constructors:
     OutMeasure() : outId(-1), m(M_NUM), isDouble(false), byAge(false),
-                byCohort(false), bySpecies(false), method(0) {}
+                byCohort(false), bySpecies(false), byGenotype(false), method(0) {}
     OutMeasure( int outId, Measure m, bool isDouble, bool byAge, bool byCohort,
-                bool bySpecies, uint8_t method ) :
-        outId(outId), m(m), isDouble(isDouble), byAge(byAge),
-        byCohort(byCohort), bySpecies(bySpecies), method(method)
-    {}
+                bool bySpecies, bool byGenotype, uint8_t method ) :
+        outId(outId), m(m), isDouble(isDouble), byAge(byAge), byCohort(byCohort),
+        bySpecies(bySpecies), byGenotype(byGenotype), method(method) {}
     // Simple reports
     static OutMeasure value( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, false, false, false, Deploy::NA );
+        return OutMeasure( outId, m, isDouble, false, false, false, false, Deploy::NA );
     }
     // Something with reports segregated by human age and cohort membership
     static OutMeasure humanAC( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, true, true, false, Deploy::NA );
+        return OutMeasure( outId, m, isDouble, true, true, false, false, Deploy::NA );
     }
-    // Reports by mosquito species. All are floating point (currently).
-    static OutMeasure species( int outId, Measure m ){
-        return OutMeasure( outId, m, true, false, false, true, Deploy::NA );
+    // Something with reports segregated by human age, cohort membership
+    // and parasite genotype.
+    static OutMeasure humanACG( int outId, Measure m, bool isDouble ){
+        return OutMeasure( outId, m, isDouble, true, true, false, true, Deploy::NA );
+    }
+    // Reports by mosquito species and optionally parasite genotype.
+    // All are floating point (currently).
+    static OutMeasure species( int outId, Measure m, bool byGenotype ){
+        return OutMeasure( outId, m, true, false, false, true, byGenotype, Deploy::NA );
     }
     // Deployments with reports segregated by human age and cohort membership
     // Method can be Deploy::NA to not match deployments (but in this case,
@@ -73,10 +79,10 @@ struct OutMeasure{
     // count deployments of multiple types simultaneously).
     static OutMeasure humanDeploy( int outId, Measure m, Deploy::Method method ){
         assert( method >= 0 && method <= (Deploy::TIMED|Deploy::CTS|Deploy::TREAT) );
-        return OutMeasure( outId, m, false, true, true, false, method );
+        return OutMeasure( outId, m, false, true, true, false, false, method );
     }
     static OutMeasure obsolete( int outId ){
-        return OutMeasure( outId, M_OBSOLETE, false, false, false, false, Deploy::NA );
+        return OutMeasure( outId, M_OBSOLETE, false, false, false, false, false, Deploy::NA );
     }
 };
 
@@ -203,15 +209,16 @@ void defineOutMeasures(){
     /** The total number of inoculations, by age group and cohort, summed over
      * the reporting period. */
     namedOutMeasures["innoculationsPerAgeGroup"] =
-        OutMeasure::humanAC( 30, MVF_INOCS, true );
+        OutMeasure::humanACG( 30, MVF_INOCS, true );
     /// N_v0: emergence of feeding vectors during the last time step. Units: mosquitoes/day
-    namedOutMeasures["Vector_Nv0"] = OutMeasure::species( 31, MVF_LAST_NV0 );
+    namedOutMeasures["Vector_Nv0"] = OutMeasure::species( 31, MVF_LAST_NV0, false );
     /// N_v: vectors seeking to feed during the last time step. Units: mosquitoes/day
-    namedOutMeasures["Vector_Nv"] = OutMeasure::species( 32, MVF_LAST_NV );
+    namedOutMeasures["Vector_Nv"] = OutMeasure::species( 32, MVF_LAST_NV, false );
+    //TODO: make the next two per genotype
     /// N_v: infected vectors seeking to feed during the last time step. Units: mosquitoes/day
-    namedOutMeasures["Vector_Ov"] = OutMeasure::species( 33, MVF_LAST_OV );
+    namedOutMeasures["Vector_Ov"] = OutMeasure::species( 33, MVF_LAST_OV, false );
     /// N_v: infectious vectors seeking to feed during the last time step. Units: mosquitoes/day
-    namedOutMeasures["Vector_Sv"] = OutMeasure::species( 34, MVF_LAST_SV );
+    namedOutMeasures["Vector_Sv"] = OutMeasure::species( 34, MVF_LAST_SV, false );
     /** Input EIR (Expected EIR entered into scenario file)
      *
      * Units: inoculations per adult per time step. */

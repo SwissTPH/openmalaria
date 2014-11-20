@@ -40,6 +40,14 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
+inline size_t survInocsSize(){
+    return mon::AgeGroup::numGroups() * mon::numCohortSets() *
+        WithinHost::Genotypes::N(); }
+inline size_t survInocsIndex(size_t ageGroup, size_t cohortSet, size_t genotype){
+    return ageGroup + mon::AgeGroup::numGroups() *
+        (cohortSet + mon::numCohortSets() * genotype);
+}
+
 TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Entomology& entoData, int populationSize) {
   // Entomology contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
@@ -117,10 +125,9 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
     numTransmittingHumans(0),
     tsNumAdults(0)
 {
-  initialisationEIR.assign (sim::stepsPerYear(), 0.0);
-  surveyInoculations.assign (mon::AgeGroup::numGroups() *
-        mon::numCohortSets(), 0.0);
-
+    initialisationEIR.assign (sim::stepsPerYear(), 0.0);
+    surveyInoculations.assign(survInocsSize(), 0.0);
+    
   using Monitoring::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
   Continuous.registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
@@ -193,11 +200,13 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
      * availability. */
     calculateEIR( human, ageYears, EIR );
     util::streamValidate( EIR );
-    double allEIR = vectors::sum( EIR );
     
-    //TODO: also by genotype?
-    surveyInoculations[human.getMonitoringAgeGroup().i() +
-        mon::AgeGroup::numGroups() * human.cohortSet()] += allEIR;
+    for( size_t g = 0, nG = WithinHost::Genotypes::N(); g < nG; ++g ){
+        size_t index = survInocsIndex(human.monAgeGroup().i(), human.cohortSet(), g);
+        surveyInoculations[index] += EIR[g];
+    }
+    
+    double allEIR = vectors::sum( EIR );
     if( age >= adultAge ){
         tsAdultEntoInocs += allEIR;
         tsNumAdults += 1;
@@ -214,19 +223,21 @@ void TransmissionModel::summarize () {
     mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
     
     for( size_t ag = 0, nAg = mon::AgeGroup::numGroups(), cs = 0,
-        nCS = mon::numCohortSets(); ag < nAg; ++ag ){
+        nCS = mon::numCohortSets(), g = 0, nG = WithinHost::Genotypes::N();
+        ag < nAg; ++ag )
+    {
         for( cs = 0; cs < nCS; ++cs ){
-            mon::reportMACF( mon::MVF_INOCS, ag, cs,
-                surveyInoculations[ag + nAg * cs] );
+            for( g = 0; g < nG; ++ g ){
+                size_t index = survInocsIndex(ag, cs, g);
+                mon::reportMACGF( mon::MVF_INOCS, ag, cs, g, surveyInoculations[index] );
+            }
         }
     }
     surveyInoculations.assign( surveyInoculations.size(), 0.0 );
     
     double duration = (sim::now() - lastSurveyTime).inSteps();
     if( duration == 0.0 ){
-        if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
-            throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
-        }
+        assert( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 );
         duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
     }
     mon::reportMF( mon::MVF_INPUT_EIR, surveyInputEIR / duration );
