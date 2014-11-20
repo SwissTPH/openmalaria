@@ -121,8 +121,8 @@ double LSTMDrug::calculateDrugFactor(uint32_t genotype) {
     const LSTMDrugPD& drugPD = typeData.getPD(genotype);
     
     // Make sure we have a dose at both time 0 and time 1
-    //TODO: analyse efficiency of this method
     //NOTE: this forces function to be non-const and not thread-safe over the same human (probably not an issue)
+    //TODO(performance): can we use a faster allocator? Or avoid allocating at all?
     if( doses.begin()->first != 0.0 ){
         doses.insert( doses.begin(), make_pair( 0.0, DoseParams() ) );
     }
@@ -158,7 +158,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t genotype) {
 
 bool LSTMDrug::updateConcentration () {
     // Make sure we have a dose at both time 0 and time 1
-    //TODO: analyse efficiency of this method
+    //TODO(performance): can we use a faster allocator? Or avoid allocating at all?
     if( doses.begin()->first != 0.0 ){
         doses.insert( doses.begin(), make_pair( 0.0, DoseParams() ) );
     }
@@ -192,6 +192,7 @@ bool LSTMDrug::updateConcentration () {
     DoseMap::iterator firstTomorrow = doses.lower_bound( 1.0 );
     doses.erase( doses.begin(), firstTomorrow );
     
+    //TODO(performance): is there some way we can avoid copying here? Cache all possible simulated days?
     // Now we've removed today's doses, subtract a day from times of tomorrow's doses.
     // Keys are read-only, so we have to create a copy.
     DoseMap newDoses;

@@ -162,7 +162,7 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
 
 VectorModel::VectorModel (const scnXml::Entomology& entoData,
                           const scnXml::Vector vectorData, int populationSize) :
-    TransmissionModel( entoData ),
+    TransmissionModel( entoData, WithinHost::Genotypes::N() ),
     initIterations(0), numSpecies(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.

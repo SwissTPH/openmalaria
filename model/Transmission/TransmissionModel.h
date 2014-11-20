@@ -80,8 +80,11 @@ public:
   static TransmissionModel* createTransmissionModel (const scnXml::Entomology& entoData, int populationSize);
   
 protected:
-  //! Reads all entomological parameters from the input datafile. 
-  TransmissionModel(const scnXml::Entomology& entoData);
+    /// Reads all entomological parameters from the input datafile.
+    /// @param entoData input configuration for model
+    /// @param nGenotypes number of genotypes transmission model is using
+    TransmissionModel( const scnXml::Entomology& entoData,
+        size_t nGenotypes );
 public:
   //!Deallocate memory for TransmissionModel parameters and clean up
   virtual ~TransmissionModel();

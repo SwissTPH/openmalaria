@@ -61,6 +61,7 @@ double LSTMDrugPD::calcFactor( const LSTMDrugType& drug, double& C1, double dura
     double numerator = IC50_pow_slope + pow(C1, slope);
     double denominator = IC50_pow_slope + pow(C0, slope);
     
+    //TODO(performance): can we cache the value for each parameter combination?
     return pow( numerator / denominator, power );       // unitless
 }
 

@@ -40,9 +40,8 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
-inline size_t survInocsSize(){
-    return mon::AgeGroup::numGroups() * mon::numCohortSets() *
-        WithinHost::Genotypes::N(); }
+inline size_t survInocsSize(size_t nGenotypes){
+    return mon::AgeGroup::numGroups() * mon::numCohortSets() * nGenotypes; }
 inline size_t survInocsIndex(size_t ageGroup, size_t cohortSet, size_t genotype){
     return ageGroup + mon::AgeGroup::numGroups() *
         (cohortSet + mon::numCohortSets() * genotype);
@@ -110,7 +109,8 @@ SimulationMode readMode(const string& str){
         // set automatically.
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
-TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
+TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
+                                     size_t nGenotypes) :
     simulationMode(forcedEIR),
     interventionMode(readMode(entoData.getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this
@@ -126,7 +126,7 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData) :
     tsNumAdults(0)
 {
     initialisationEIR.assign (sim::stepsPerYear(), 0.0);
-    surveyInoculations.assign(survInocsSize(), 0.0);
+    surveyInoculations.assign(survInocsSize(nGenotypes), 0.0);
     
   using Monitoring::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
@@ -201,7 +201,7 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
     calculateEIR( human, ageYears, EIR );
     util::streamValidate( EIR );
     
-    for( size_t g = 0, nG = WithinHost::Genotypes::N(); g < nG; ++g ){
+    for( size_t g = 0, nG = EIR.size(); g < nG; ++g ){
         size_t index = survInocsIndex(human.monAgeGroup().i(), human.cohortSet(), g);
         surveyInoculations[index] += EIR[g];
     }
@@ -223,7 +223,7 @@ void TransmissionModel::summarize () {
     mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
     
     for( size_t ag = 0, nAg = mon::AgeGroup::numGroups(), cs = 0,
-        nCS = mon::numCohortSets(), g = 0, nG = WithinHost::Genotypes::N();
+        nCS = mon::numCohortSets(), g = 0, nG = surveyInoculations.size() / (nAg * nCS);
         ag < nAg; ++ag )
     {
         for( cs = 0; cs < nCS; ++cs ){

@@ -102,8 +102,9 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     
     // 3) elements depending on other elements; dependencies on (1) are not mentioned:
     
-    // Transmission model initialisation depends on Transmission::PerHost (from
-    // Human, from Population::init()) and Monitoring::AgeGroup (from Surveys.init()):
+    // Transmission model initialisation depends on Transmission::PerHost and
+    // genotypes (both from Human, from Population::init()) and
+    // Monitoring::AgeGroup (from Surveys.init()):
     // Note: PerHost dependency can be postponed; it is only used to set adultAge
     population = auto_ptr<Population>(new Population( scenario.getEntomology(), scenario.getDemography().getPopSize() ));
     

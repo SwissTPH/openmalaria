@@ -39,8 +39,9 @@ const double NonVectorModel::min_EIR_mult= 0.01;
 
 const int nYearsWarmupData = 5;
 
-NonVectorModel::NonVectorModel(const scnXml::Entomology& entoData, const scnXml::NonVector& nonVectorData) :
-    TransmissionModel(entoData),
+NonVectorModel::NonVectorModel(const scnXml::Entomology& entoData,
+        const scnXml::NonVector& nonVectorData) :
+    TransmissionModel(entoData, 1/*this model doesn't support multiple genotypes*/),
     nSpore( sim::fromDays( nonVectorData.getEipDuration() ) )
 {
     laggedKappa.resize( nSpore.inSteps() + 1, 0.0 );
