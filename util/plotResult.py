@@ -96,7 +96,10 @@ measureNames = {
     65 : 'nMassRecruitOnly',
     66 : 'nCtsRecruitOnly',
     67 : 'nTreatDeployments',
-    68 : 'sumAge'
+    68 : 'sumAge',
+    69 : 'nInfectByGenotype',
+    70 : 'nPatentByGenotype',
+    71 : 'logDensByGenotype'
 }
 
 # List of measure groups. Each includes name, boolean (true if use log scale),
@@ -106,8 +109,8 @@ measureNames = {
 # /usr/lib64/python3.3/site-packages/matplotlib/colors.py
 combinedMeasures = [
     ('hosts',[(0,'all','black')]),
-    ('infected hosts',[(1,'all','red'),(2,'expected','green'),(3,'patent','blue'),(43,'new','purple')]),
-    ('sum log',[(4,'pyrogenic threshold','purple'),(5,'parasite density','green')]),
+    ('infected hosts',[(1,'all','red'),(2,'expected','green'),(3,'patent','blue'),(43,'new','purple'),(69,'all (by genotype)','orange'),(70,'patent (by genotype)','black')]),
+    ('sum log',[(4,'pyrogenic threshold','purple'),(5,'parasite density','green'),(71,'parasite density (by genotype)','orange')]),
     ('total infections',[(6,'all','red'),(8,'patent','blue')]),
     ('transmitting humans',[(7,'sum(p(transmit))','green'),(26,'annual sum(p(transmit)) / annual EIR','blue')]),
     ('sum pyrog thres',[(10,'sum pyrogenic threshold','purple')]),
@@ -182,18 +185,20 @@ def ensureUnique(colour,used):
 
 replaceFN=None
 class MultiKey(object):
-    __slots__ = ["mg","m","s","g","f"]
-    def __init__(self,measureGroup=None,measure=None,survey=None,group=None,fileName=None):
+    __slots__ = ["mg","m","s","g","c","gt","f"]
+    def __init__(self,measureGroup=None,measure=None,survey=None,group=None,cohort=None,genotype=None,fileName=None):
         self.mg=measureGroup #int index in combinedMeasures
         self.m=measure #int
         self.s=survey #int
-        self.g=group #string or int
+        self.g=group #int (age group or species)
+        self.c=cohort #int
+        self.gt=genotype #int
         self.f=fileName #int
     def __and__(self,other):
-        """Set each member from other is not set in self.
+        """Set each member from other if not set in self.
         Should complain if set in self and in other, but this is a bit unnecessary."""
         assert isinstance(other,MultiKey)
-        first=MultiKey(self.mg,self.m,self.s,self.g,self.f)
+        first=MultiKey(self.mg,self.m,self.s,self.g,self.c,self.gt,self.f)
         if first.mg==None:
             first.mg=other.mg
         if first.m==None:
@@ -202,6 +207,10 @@ class MultiKey(object):
             first.s=other.s
         if first.g==None:
             first.g=other.g
+        if first.c==None:
+            first.c=other.c
+        if first.gt==None:
+            first.gt=other.gt
         if first.f==None:
             first.f=other.f
         return first
@@ -219,6 +228,12 @@ class MultiKey(object):
     @staticmethod
     def fromGroups(groups):
         return [MultiKey(group=group) for group in groups]
+    @staticmethod
+    def fromCohorts(cohorts):
+        return [MultiKey(cohort=cohort) for cohort in cohorts]
+    @staticmethod
+    def fromGenotypes(genotypes):
+        return [MultiKey(genotype=genotype) for genotype in genotypes]
     @staticmethod
     def fromFiles(files):
         return [MultiKey(fileName=fl) for fl in files]
@@ -245,6 +260,14 @@ class MultiKey(object):
             if len(r):
                 r+=","
             r+="group "+str(self.g)
+        if self.c!=base.c:
+            if len(r):
+                r+=","
+            r+="cohort "+str(self.c)
+        if self.gt!=base.gt:
+            if len(r):
+                r+=","
+            r+="genotype "+str(self.gt)
         if self.f!=base.f:
             if len(r):
                 r+=","
@@ -269,7 +292,7 @@ class Plotter(object):
         if len(self.values.getMeasures())==0:
             raise Exception("No data to plot (after filtering)!")
     
-    def plot(self,am,s,g,f):
+    def plot(self,am,s,g,c,gt,f):
         x_axis=Keys.NONE
         x_label=""
         if s=="x-axis":
@@ -280,6 +303,14 @@ class Plotter(object):
             assert x_axis==Keys.NONE, "dual assignment to x-axis!"
             x_axis=Keys.GROUP
             x_label="group"
+        if c=="x-axis":
+            assert x_axis==Keys.NONE, "dual assignment to x-axis!"
+            x_axis=Keys.COHORT
+            x_label="cohort"
+        if gt=="x-axis":
+            assert x_axis==Keys.NONE, "dual assignment to x-axis!"
+            x_axis=Keys.GENOTYPE
+            x_label="genotype"
         if f=="x-axis":
             assert x_axis==Keys.NONE, "dual assignment to x-axis!"
             x_axis=Keys.FILE
@@ -290,6 +321,8 @@ class Plotter(object):
         lines=set()
         if s=="line": lines.add(Keys.SURVEY)
         if g=="line": lines.add(Keys.GROUP)
+        if c=="line": lines.add(Keys.COHORT)
+        if gt=="line": lines.add(Keys.GENOTYPE)
         if f=="line": lines.add(Keys.FILE)
         
         plots=[MultiKey()]
@@ -314,6 +347,7 @@ class Plotter(object):
             plots=list()
             for p in origplots:
                 plots += [p&b for b in MultiKey.fromGroups(self.values.getGroups(p.m))]
+        #TODO: cohorts and genotypes like groups?
         if f=="plot":
             # NOTE: we assume all files contain data over same measures, surveys and groups
             MultiKey.expand(plots, MultiKey.fromFiles(self.values.getFiles()))
@@ -337,6 +371,10 @@ class Plotter(object):
                 x_label=self.values.getGroupLabel(m)
             elif x_axis==Keys.SURVEY:
                 x=self.values.getSurveys(m)
+            elif x_axis==Keys.COHORT:
+                x=self.values.getCohorts(m)
+            elif x_axis==Keys.GENOTYPE:
+                x=self.values.getGenotype(m)
             #else x was set previously
             
             pLines=[plot]
@@ -347,6 +385,10 @@ class Plotter(object):
                 MultiKey.expand(pLines, MultiKey.fromSurveys(self.values.getSurveys(m)))
             if Keys.GROUP in lines:
                 MultiKey.expand(pLines, MultiKey.fromGroups(self.values.getGroups(m)))
+            if Keys.COHORT in lines:
+                MultiKey.expand(pLines, MultiKey.fromCohorts(self.values.getCohorts(m)))
+            if Keys.GENOTYPE in lines:
+                MultiKey.expand(pLines, MultiKey.fromGenotypes(self.values.getGenotypes(m)))
             if Keys.FILE in lines:
                 MultiKey.expand(pLines, MultiKey.fromFiles(self.values.getFiles()))
             
@@ -396,9 +438,13 @@ class Plotter(object):
                         MultiKey.expand(xKeys, MultiKey.fromSurveys(self.values.getSurveys(m)))
                     elif x_axis==Keys.GROUP:
                         MultiKey.expand(xKeys, MultiKey.fromGroups(self.values.getGroups(m)))
+                    elif x_axis==Keys.COHORT:
+                        MultiKey.expand(xKeys, MultiKey.fromCohorts(self.values.getCohorts(m)))
+                    elif x_axis==Keys.GENOTYPE:
+                        MultiKey.expand(xKeys, MultiKey.fromGenotypes(self.values.getGenotypes(m)))
                     elif x_axis==Keys.FILE:
                         MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
-                    y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
+                    y=[self.values.get(k.m,k.s,k.g,k.c,k.gt,k.f) for k in xKeys]
                     colour=ensureUnique(getMeasureColour(pLine.mg,pLine.m),lineColours)
                     try:
                         plotted.append(subplot.plot(x,y,colour))
@@ -446,6 +492,10 @@ class Plotter(object):
                             MultiKey.expand(xKeys, MultiKey.fromSurveys(self.values.getSurveys(m)))
                         elif x_axis==Keys.GROUP:
                             MultiKey.expand(xKeys, MultiKey.fromGroups(self.values.getGroups(m)))
+                        elif x_axis==Keys.COHORT:
+                            MultiKey.expand(xKeys, MultiKey.fromCohorts(self.values.getCohorts(m)))
+                        elif x_axis==Keys.GENOTYPE:
+                            MultiKey.expand(xKeys, MultiKey.fromGenotypes(self.values.getGenotypes(m)))
                         elif x_axis==Keys.FILE:
                             MultiKey.expand(xKeys, MultiKey.fromFiles(self.values.getFiles()))
                         
@@ -511,11 +561,11 @@ file by time. Currently no support for simultaeneously handling
 multiple files or plotting according to age group.
 
 Valid targets for plotting keys are: none (key is aggregated), x-axis, plot, line.
-If no key is set to the x-axis, the first unassigned of survey, group, file will be
-assigned to the x-axis.""",version="%prog 0.1")
+If no key is set to the x-axis, the first unassigned of survey, group, cohort,
+genotype, file will be assigned to the x-axis.""",version="%prog 0.1")
     
     parser.add_option("-e","--filter", action="store", type="string", dest="filterExpr", default="m!=0",
-            help="Filter entries read according to this rule (i.e. values are included when this returns true). Parameters available: f, m, s, g, c. Examples: 'True', 'm!=0' (default), 'm in [11,12,13]', 's > 73 and m!=0'.")
+            help="Filter entries read according to this rule (i.e. values are included when this returns true). Parameters available: f, m, s, g, c, gt, c. Examples: 'True', 'm!=0' (default), 'm in [11,12,13]', 's > 73 and m!=0'.")
     parser.add_option("--debug-filter", action="store_true", dest="debugFilter", default=False,
             help="Each time FILTEREXPR is called, print input values and output. Warning: will print a lot of data!")
     parser.add_option("-a","--no-auto-measures", action="store_false", dest="am", default=True,
@@ -524,6 +574,10 @@ assigned to the x-axis.""",version="%prog 0.1")
             choices=["none","x-axis","plot","line"],help="How to plot surveys")
     parser.add_option("-g","--group", action="store", type="choice", dest="g", default="none",
             choices=["none","x-axis","plot","line"],help="How to plot (age) groups")
+    parser.add_option("-c","--cohort", action="store", type="choice", dest="c", default="none",
+            choices=["none","x-axis","plot","line"],help="How to plot cohorts")
+    parser.add_option("--genotype", action="store", type="choice", dest="gt", default="none",
+            choices=["none","x-axis","plot","line"],help="How to plot genotypes")
     parser.add_option("-f","--file", action="store", type="choice", dest="f", default="plot",
             choices=["none","x-axis","plot","line"],help="How to plot outputs from different files")
     parser.add_option("-n","--file-names", action="store_true", dest="fullNames", default=False,
@@ -548,6 +602,10 @@ assigned to the x-axis.""",version="%prog 0.1")
             options.s="x-axis"
         elif options.g == "none":
             options.g="x-axis"
+        elif options.c == "none":
+            options.c="x-axis"
+        elif options.gt == "none":
+            options.gt="x-axis"
         elif options.f == "none":
             options.f="x-axis"
         else:
@@ -558,6 +616,8 @@ assigned to the x-axis.""",version="%prog 0.1")
     keys.add(Keys.MEASURE)
     if options.s != "none": keys.add(Keys.SURVEY)
     if options.g != "none": keys.add(Keys.GROUP)
+    if options.c != "none": keys.add(Keys.COHORT)
+    if options.gt != "none": keys.add(Keys.GENOTYPE)
     if options.f != "none": keys.add(Keys.FILE)
     
     plotter=Plotter(keys)
@@ -576,7 +636,7 @@ assigned to the x-axis.""",version="%prog 0.1")
     for output in others:
         plotter.read(output,options.filterExpr,options.debugFilter)
     
-    plotter.plot(options.am,options.s,options.g,options.f)
+    plotter.plot(options.am,options.s,options.g,options.c,options.gt,options.f)
     
     return 0
 
