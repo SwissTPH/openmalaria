@@ -87,7 +87,10 @@ void initSurveyTimes( const OM::Parameters& parameters,
         impl::nCohortSets = static_cast<uint32_t>(1) << monitoring.getCohorts().get().getSubPop().size();
     }
     
+    mon::AgeGroup::init( monitoring );
     Monitoring::Survey::init( parameters, scenario, monitoring );
+    
+    internal::initReporting( scenario );
 }
 
 void initMainSim(){
@@ -183,7 +186,7 @@ bool notPowerOfTwo( uint32_t num ){
     return true;
 }
 // Init cohort sets. Depends on interventions (initialise those first).
-void internal::initCohorts( const scnXml::Monitoring& monitoring )
+void initCohorts( const scnXml::Monitoring& monitoring )
 {
     if( monitoring.getCohorts().present() ){
         const scnXml::Cohorts monCohorts = monitoring.getCohorts().get();

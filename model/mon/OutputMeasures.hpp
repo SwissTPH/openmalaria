@@ -339,6 +339,14 @@ void defineOutMeasures(){
     /** Report the total age of all humans in this a group (sum across humans,
      * in years). Divide by nHost to get the average age. */
     namedOutMeasures["sumAge"] = OutMeasure::humanAC( 68, MHF_AGE, true );
+    /** The number of human hosts with an infection (patent or not), for each
+     * genotype, at the time the survey is taken. */
+    namedOutMeasures["nInfectByGenotype"] =
+        OutMeasure::humanAC( 69, MHR_INFECTED_GENOTYPE, false );
+    /** The number of human hosts whose total (blood-stage) parasite density,
+     * for each genotype, is above the detection threshold */
+    namedOutMeasures["nPatentByGenotype"] =
+        OutMeasure::humanAC( 70, MHR_PATENT_GENOTYPE, false );
 }
 
 }

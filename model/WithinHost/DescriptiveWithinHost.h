@@ -35,36 +35,39 @@ namespace OM { namespace WithinHost {
  * INNATE_MAX_DENS). Thus results can be preserved. */
 class DescriptiveWithinHostModel : public WHFalciparum {
 public:
-  /// Create a new WHM
-  DescriptiveWithinHostModel( double comorbidityFactor );
-  virtual ~DescriptiveWithinHostModel();
-  
-  virtual void importInfection();
-  /// load an infection from a checkpoint
-  virtual void loadInfection(istream& stream);
-  virtual void clearImmunity();
-  
-  virtual void update(int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor, ofstream& drugMon);
-  
-protected:
-  virtual void clearInfections( Treatments::Stages stage );
-  
-  virtual DescriptiveInfection* createInfection ();
-  virtual void summarizeInfs( const Host::Human& human )const;
-  
-  virtual void checkpoint (istream& stream);
-  virtual void checkpoint (ostream& stream);
+    /// Must run after monitoring is set up.
+    static void initDescriptive();
     
-  // Doesn't do anything in this model:
-  virtual void treatPkPd(size_t schedule, size_t dosages, double age);
-  
-  /** The list of all infections this human has.
-   * 
-   * Since infection models and within host models are very much intertwined,
-   * the idea is that each WithinHostModel has its own list of infections. */
-  //TODO(optimisation): why use pointer indirection when we know type?
-  std::list<DescriptiveInfection*> infections;
+    /// Create a new WHM
+    DescriptiveWithinHostModel( double comorbidityFactor );
+    virtual ~DescriptiveWithinHostModel();
+    
+    virtual void importInfection();
+    /// load an infection from a checkpoint
+    virtual void loadInfection(istream& stream);
+    virtual void clearImmunity();
+    
+    virtual void update(int nNewInfs, vector<double>& genotype_weights,
+            double ageInYears, double bsvFactor, ofstream& drugMon);
+    
+protected:
+    virtual void clearInfections( Treatments::Stages stage );
+    
+    virtual DescriptiveInfection* createInfection ();
+    virtual void summarizeInfs( const Host::Human& human )const;
+    
+    virtual void checkpoint (istream& stream);
+    virtual void checkpoint (ostream& stream);
+    
+    // Doesn't do anything in this model:
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age);
+    
+    /** The list of all infections this human has.
+     * 
+     * Since infection models and within host models are very much intertwined,
+     * the idea is that each WithinHostModel has its own list of infections. */
+     //TODO(optimisation): why use pointer indirection when we know type?
+     std::list<DescriptiveInfection*> infections;
 };
 
 } }

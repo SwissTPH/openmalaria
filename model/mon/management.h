@@ -40,8 +40,8 @@ void initSurveyTimes( const Parameters& parameters,
         const scnXml::Scenario& scenario,
         const scnXml::Monitoring& monitoring );
 
-/// Call before start of simulation to set up outputs
-void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt );
+/// Call after initialising interventions
+void initCohorts( const scnXml::Monitoring& monitoring );
 
 /// Call just before the start of the intervention period
 void initMainSim();
@@ -58,8 +58,8 @@ void checkpoint( std::istream& stream );
 
 // Functions for internal use (within mon package)
 namespace internal{
-    /** Init component (called by initReporting()). */
-    void initCohorts( const scnXml::Monitoring& monitoring );
+    /// Call before start of simulation to set up outputs. Call initSurveyTimes first.
+    void initReporting( const scnXml::Scenario& scenario );
     
     // Write results to stream
     void write( std::ostream& stream );

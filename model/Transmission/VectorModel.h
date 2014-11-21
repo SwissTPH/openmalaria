@@ -62,7 +62,6 @@ public:
   virtual double calculateEIR( Host::Human& human, double ageYears,
         vector<double>& EIR );
   
-  virtual size_t getNSpecies();
   virtual const map<string,size_t>& getSpeciesIndexMap();
   virtual void deployVectorPopInterv (size_t instance);
   virtual void uninfectVectors();

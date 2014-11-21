@@ -29,6 +29,7 @@
 #include "interventions/InterventionManager.hpp"
 #include "Population.h"
 #include "WithinHost/Diagnostic.h"
+#include "WithinHost/Genotypes.h"
 #include "mon/management.h"
 #include "util/BoincWrapper.h"
 #include "util/timer.h"
@@ -86,17 +87,19 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // 1) elements with no dependencies on other elements initialised here:
     sim::init( scenario );
     Parameters parameters( model.getParameters() );     // depends on nothing
-    mon::AgeGroup::init (scenario.getMonitoring());
+    WithinHost::Genotypes::init( scenario );
     
     util::random::seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
     
     // 2) elements depending on only elements initialised in (1):
     
+    // Depends on parameters:
     if( scenario.getDiagnostics().present() ){
         WithinHost::diagnostics::init( parameters, scenario.getDiagnostics().get() );
     }
-    // Survey init depends on diagnostics:
+    
+    // Survey init depends on diagnostics, monitoring:
     mon::initSurveyTimes( parameters, scenario, scenario.getMonitoring() );
     Population::init( parameters, scenario );
     
@@ -116,7 +119,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     Clinical::ClinicalModel::changeHS( scenario.getHealthSystem() );    // i.e. init health system
     
     // Depends on interventions:
-    mon::initReporting( population.get()->_transmissionModel->getNSpecies(), scenario.getMonitoring() );
+    mon::initCohorts( scenario.getMonitoring() );
     
     // Depends on interventions:
     Host::Human::init2( scenario.getMonitoring() );

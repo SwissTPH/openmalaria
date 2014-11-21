@@ -56,6 +56,10 @@ enum Measure{
     MHR_SUB_POP_REM_FIRST_EVENT,
     // Number of sub-population removals due to expiry. Units: humans
     MHR_SUB_POP_REM_TOO_OLD,
+    // Number of infected hosts by genotype. Units: humans
+    MHR_INFECTED_GENOTYPE,
+    // Number of patent infected hosts by genotype. Units: humans
+    MHR_PATENT_GENOTYPE,
     
     // ———  MHT: measures for human treatments (integers)  ———
     // Number of first line treatments in humans. Units: treatments (whole courses)
@@ -202,6 +206,7 @@ void reportMSF( Measure measure, size_t species, double val );
 /// Report some value (floating point) by genotype to the current survey.
 void reportMSGF( Measure measure, size_t species, size_t genotype, double val );
 /// Query whether an output measure is used.
+/// This function is not fast, so it is recommended to cache the result.
 bool isUsedM( Measure measure );
 
 }

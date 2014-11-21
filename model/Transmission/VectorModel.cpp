@@ -406,9 +406,6 @@ void VectorModel::checkSimMode() const{
     }
 }
 
-size_t VectorModel::getNSpecies(){
-    return numSpecies;
-}
 const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
     checkSimMode();     //TODO: can probably eventually inline
     return speciesIndex;

@@ -34,8 +34,13 @@ namespace OM {
 namespace WithinHost {
 
 extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
+bool reportPatentInfected = false;
 
 // -----  Initialization  -----
+
+void DescriptiveWithinHostModel::initDescriptive(){
+    reportPatentInfected = mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
+}
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor ) :
         WHFalciparum( comorbidityFactor )
@@ -174,15 +179,17 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 // -----  Summarize  -----
 
 void DescriptiveWithinHostModel::summarizeInfs( const Host::Human& human )const{
-    if( infections.size() > 0 ){
-        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
-    }
+    if( infections.size() == 0 ) return;        // nothing to report
+    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
     // (patent) infections are reported by genotype, even though we don't have
     // genotype in this model
     mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
-    for (std::list<DescriptiveInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
-            mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+    if( reportPatentInfected ){
+        for (std::list<DescriptiveInfection*>::const_iterator inf =
+            infections.begin(); inf != infections.end(); ++inf) {
+            if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
+                mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+            }
         }
     }
 }

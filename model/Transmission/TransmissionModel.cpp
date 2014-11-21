@@ -214,10 +214,6 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
     return allEIR;
 }
 
-size_t TransmissionModel::getNSpecies(){
-    return 0;
-}
-
 void TransmissionModel::summarize () {
     mon::reportMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );
     mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );

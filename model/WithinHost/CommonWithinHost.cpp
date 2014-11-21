@@ -42,6 +42,9 @@ double hetMassMultStdDev = std::numeric_limits<double>::signaling_NaN();
 double minHetMassMult = std::numeric_limits<double>::signaling_NaN();
 util::AgeGroupInterpolator massByAge;
 
+bool reportInfectedOrPatentInfected = false;
+bool reportInfectedByGenotype = false;
+
 // Only required for a drug monitoring HACK and could be removed:
 vector<string> drugMonCodes;
 
@@ -66,7 +69,10 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
                       boost::is_any_of("," ) );
     }
     
-    Genotypes::init( scenario );
+    reportInfectedOrPatentInfected = mon::isUsedM(mon::MHR_INFECTIONS) ||
+        mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
+    reportInfectedByGenotype = mon::isUsedM(mon::MHR_INFECTED_GENOTYPE) ||
+        mon::isUsedM(mon::MHR_PATENT_GENOTYPE);
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
@@ -241,16 +247,48 @@ void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceBy
 
 // -----  Summarize  -----
 
-void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
-    if( infections.size() > 0 ){
-        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+// Used in summarizeInfs.
+vector<CommonInfection*> sortedInfs;
+struct InfGenotypeSorter {
+    bool operator() (CommonInfection* i, CommonInfection* j){
+        return i->genotype() < j->genotype();
     }
-    // (patent) infections are reported by genotype, even though we don't have
-    // genotype in this model
-    mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
-    for (std::list<CommonInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
-            mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+} infGenotypeSorter;
+
+void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
+    if( infections.size() == 0 ) return;        // nothing to report
+    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+    if( reportInfectedOrPatentInfected ){
+        for (std::list<CommonInfection*>::const_iterator inf =
+            infections.begin(); inf != infections.end(); ++inf) {
+            uint32_t genotype = (*inf)->genotype();
+            mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
+            if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
+                mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
+            }
+        }
+    }
+    if( reportInfectedByGenotype ){
+        // Instead of storing nInfs and total density by genotype we sort
+        // infections by genotype and report each in sequence.
+        // We don't sort in place since that would affect random number sampling
+        // order when updating, and the monitoring system should not in my
+        // opinion affect outputs (since it would make testing harder).
+        sortedInfs.assign( infections.begin(), infections.end() );
+        sort( sortedInfs.begin(), sortedInfs.end(), infGenotypeSorter );
+        vector<CommonInfection*>::const_iterator inf = sortedInfs.begin();
+        while( inf != sortedInfs.end() ){
+            uint32_t genotype = (*inf)->genotype();
+            double dens = 0.0;
+            do{     // at start: genotype is that of the current infection, dens is 0
+                dens += (*inf)->getDensity();
+                ++inf;
+            }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
+            // we had at least one infection of this genotype
+            mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
+            if( Monitoring::Survey::diagnostic().isPositive(dens) ){
+                mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
+            }
         }
     }
 }

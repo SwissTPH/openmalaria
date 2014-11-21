@@ -77,6 +77,8 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
         
         if( opt_common_whm ){
             CommonWithinHost::init( scenario );
+        }else{
+            DescriptiveWithinHostModel::initDescriptive();
         }
     }
 }

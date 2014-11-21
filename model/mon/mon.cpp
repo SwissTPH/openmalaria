@@ -28,7 +28,7 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
 #include "util/errors.h"
-#include "schema/monitoring.h"
+#include "schema/scenario.h"
 
 #include <FastDelegate.h>
 #include <iostream>
@@ -226,6 +226,13 @@ public:
         }
     }
     
+    // Return true if reports by this measure are recorded, false if they are discarded.
+    bool isUsed( Measure measure ){
+        assert( measure < mIndices.size() );
+        assert( mIndices[measure] != NOT_ACCEPTED );
+        return mIndices[measure] != NOT_USED || deployIndices.count(measure) > 0;
+    }
+    
     // Order self in a list of outputs
     void addMeasures( map<int,pair<WriteDelegate,size_t> >& mOrdered ){
         for( size_t m = 0; m < outMeasures.size(); ++m ){
@@ -294,10 +301,9 @@ Store<double, false, false, true, true> storeSGF;
 
 int reportIMR = -1; // special output for fitting
 
-void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
-{
+void internal::initReporting( const scnXml::Scenario& scenario ){
     defineOutMeasures();
-    const scnXml::MonitoringOptions& optsElt = monElt.getSurveyOptions();
+    const scnXml::MonitoringOptions& optsElt = scenario.getMonitoring().getSurveyOptions();
     set<int> outIds;    // all measure numbers used in output
     list<OutMeasure> enabledOutMeasures;
     foreach( const scnXml::MonitoringOption& optElt, optsElt.getOption() ){
@@ -366,6 +372,9 @@ void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
         enabledOutMeasures.push_back( om );
     }
     
+    size_t nSpecies = scenario.getEntomology().getVector().present() ?
+        scenario.getEntomology().getVector().get().getAnopheles().size() : 1;
+    
     storeI.init( enabledOutMeasures, nSpecies );
     storeAI.init( enabledOutMeasures, nSpecies );
     storeCI.init( enabledOutMeasures, nSpecies );
@@ -385,8 +394,6 @@ void initReporting( size_t nSpecies, const scnXml::Monitoring& monElt )
     storeACGF.init( enabledOutMeasures, nSpecies );
     storeSF.init( enabledOutMeasures, nSpecies );
     storeSGF.init( enabledOutMeasures, nSpecies );
-    
-    internal::initCohorts( monElt );
 }
 
 void internal::write( ostream& stream ){
@@ -519,6 +526,27 @@ void reportMSGF( Measure measure, size_t species, size_t genotype, double val ){
     storeGF.report( val, measure, survey, 0, 0, 0, genotype );
     storeSF.report( val, measure, survey, 0, 0, species, 0 );
     storeSGF.report( val, measure, survey, 0, 0, species, genotype );
+}
+
+bool isUsedM( Measure measure ){
+    return storeI.isUsed(measure) ||
+        storeAI.isUsed(measure) ||
+        storeCI.isUsed(measure) ||
+        storeACI.isUsed(measure) ||
+        storeGI.isUsed(measure) ||
+        storeAGI.isUsed(measure) ||
+        storeCGI.isUsed(measure) ||
+        storeACGI.isUsed(measure) ||
+        storeF.isUsed(measure) ||
+        storeAF.isUsed(measure) ||
+        storeCF.isUsed(measure) ||
+        storeACF.isUsed(measure) ||
+        storeGF.isUsed(measure) ||
+        storeAGF.isUsed(measure) ||
+        storeCGF.isUsed(measure) ||
+        storeACGF.isUsed(measure) ||
+        storeSF.isUsed(measure) ||
+        storeSGF.isUsed(measure);
 }
 
 void checkpoint( ostream& stream ){
