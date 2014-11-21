@@ -515,6 +515,20 @@ void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
     storeCGF.report( val, measure, survey, 0, cohortSet, 0, genotype );
     storeACGF.report( val, measure, survey, ageIndex, cohortSet, 0, genotype );
 }
+void reportMHGF( Measure measure, const Host::Human& human, size_t genotype,
+                 double val )
+{
+    const size_t survey = impl::currentSurvey;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeF.report( val, measure, survey, 0, 0, 0, 0 );
+    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
+    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
+    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
+    storeGF.report( val, measure, survey, 0, 0, 0, genotype );
+    storeAGF.report( val, measure, survey, ageIndex, 0, 0, genotype );
+    storeCGF.report( val, measure, survey, 0, human.cohortSet(), 0, genotype );
+    storeACGF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, genotype );
+}
 void reportMSF( Measure measure, size_t species, double val ){
     const size_t survey = impl::currentSurvey;
     storeF.report( val, measure, survey, 0, 0, 0, 0 );

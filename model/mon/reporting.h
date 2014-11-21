@@ -135,12 +135,14 @@ enum Measure{
     // ———  MHF: measures for human reports (double)  ———
     // Expected number of new infections per human. Units: infections
     MHF_EXPECTED_INFECTED,
+    // Report of pyrogenic threshold. Units: ?
+    MHF_PYROGENIC_THRESHOLD,
     // Report of log of pyrogenic threshold. Units: ?
     MHF_LOG_PYROGENIC_THRESHOLD,
     // Report of natural log of total parasite density in humans. Units: log(PRBC/μl)
     MHF_LOG_DENSITY,
-    // Report of pyrogenic threshold. Units: ?
-    MHF_PYROGENIC_THRESHOLD,
+    // As MHF_LOG_DENSITY, but per genotype
+    MHF_LOG_DENSITY_GENOTYPE,
     // Report of age of humans. Units: years
     MHF_AGE,
     
@@ -201,6 +203,9 @@ void reportMHF( Measure measure, const Host::Human& human, double val );
 /// group and cohort set
 void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
                   size_t genotpye, double val );
+/// Report some value (floating point) for some human and genotype to the current survey.
+void reportMHGF( Measure measure, const Host::Human& human, size_t genotype,
+                 double val );
 /// Report some value (floating point) by vector species to the current survey.
 void reportMSF( Measure measure, size_t species, double val );
 /// Report some value (floating point) by genotype to the current survey.

@@ -342,11 +342,15 @@ void defineOutMeasures(){
     /** The number of human hosts with an infection (patent or not), for each
      * genotype, at the time the survey is taken. */
     namedOutMeasures["nInfectByGenotype"] =
-        OutMeasure::humanAC( 69, MHR_INFECTED_GENOTYPE, false );
+        OutMeasure::humanACG( 69, MHR_INFECTED_GENOTYPE, false );
     /** The number of human hosts whose total (blood-stage) parasite density,
      * for each genotype, is above the detection threshold */
     namedOutMeasures["nPatentByGenotype"] =
-        OutMeasure::humanAC( 70, MHR_PATENT_GENOTYPE, false );
+        OutMeasure::humanACG( 70, MHR_PATENT_GENOTYPE, false );
+    /** For each infection genotype, sum across humans the natural log of
+     * parasite density (like sumlogDens but per genotype). */
+    namedOutMeasures["logDensByGenotype"] =
+        OutMeasure::humanACG( 71, MHF_LOG_DENSITY_GENOTYPE, true );
 }
 
 }

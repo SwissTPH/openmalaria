@@ -43,7 +43,7 @@ double minHetMassMult = std::numeric_limits<double>::signaling_NaN();
 util::AgeGroupInterpolator massByAge;
 
 bool reportInfectedOrPatentInfected = false;
-bool reportInfectedByGenotype = false;
+bool reportInfectionsByGenotype = false;
 
 // Only required for a drug monitoring HACK and could be removed:
 vector<string> drugMonCodes;
@@ -71,8 +71,9 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
     
     reportInfectedOrPatentInfected = mon::isUsedM(mon::MHR_INFECTIONS) ||
         mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
-    reportInfectedByGenotype = mon::isUsedM(mon::MHR_INFECTED_GENOTYPE) ||
-        mon::isUsedM(mon::MHR_PATENT_GENOTYPE);
+    reportInfectionsByGenotype = mon::isUsedM(mon::MHR_INFECTED_GENOTYPE) ||
+        mon::isUsedM(mon::MHR_PATENT_GENOTYPE) ||
+        mon::isUsedM(mon::MHF_LOG_DENSITY_GENOTYPE);
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
@@ -268,7 +269,7 @@ void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
             }
         }
     }
-    if( reportInfectedByGenotype ){
+    if( reportInfectionsByGenotype ){
         // Instead of storing nInfs and total density by genotype we sort
         // infections by genotype and report each in sequence.
         // We don't sort in place since that would affect random number sampling
@@ -289,6 +290,7 @@ void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
             if( Monitoring::Survey::diagnostic().isPositive(dens) ){
                 mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
             }
+            mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
         }
     }
 }
