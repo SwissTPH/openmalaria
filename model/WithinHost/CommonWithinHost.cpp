@@ -289,8 +289,8 @@ void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
             mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
             if( Monitoring::Survey::diagnostic().isPositive(dens) ){
                 mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
+                mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
             }
-            mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
         }
     }
 }
