@@ -24,6 +24,7 @@
 #include "WithinHost/Diagnostic.h"
 #include "Monitoring/Survey.h"
 #include "util/random.h"
+#include "util/CommandLine.h"
 #include "schema/healthSystem.h"
 
 #include <cmath>
@@ -67,7 +68,11 @@ void NeonatalMortality::init( const scnXml::Clinical& clinical ){
             clinical.getNeonatalMortality().get().getDiagnostic() );
     }else{
         //NOTE: this is a compatibility option for older scenarios
-        //TODO: deprecate
+        if( CommandLine::option( CommandLine::DEPRECATION_WARNINGS ) ){
+            cerr << "Deprecation warning: specification of the diagnostic "
+                "used by the Neonatal Mortality model is recommended "
+                "(model/clinical/neonatalMortality)" << endl;
+        }
         neonatalDiagnostic = &Monitoring::Survey::diagnostic();
     }
 }
