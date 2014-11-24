@@ -3,6 +3,95 @@ users. It is however far from complete. The more complete changelog is on the
 wiki: http://code.google.com/p/openmalaria/wiki/Changelog
 
 
+— 2014-11-?? — Schema 33 —
+
+## Schema changes requiring updates to scenario XMLs
+
+MDA and MDA1D intervention components replaced:
+    
+    The "MDA1D" component has been replaced with "decisionTree", a component
+    which runs a case management decision tree on deployment; this is now
+    usable with 5-day timestep models and gives a flexible way to implement T&T
+    or similar campaigns.
+    
+    The "MDA" component has been replaced with "screen", "treatSimple" and
+    "treatPKPD" components. The first of these uses a diagnostic and optionally
+    triggers deployment of one or more other components on positive and/or
+    negative outcomes while the latter offer two ways of treating infections.
+
+## Backwards-compatible schema changes
+
+Some of these changes offer additional functionality and some are recommended
+but optional changes to enhance clarity of the XML or improve models. Running
+OpenMalaria with the --deprecation-warnings option will print messages
+recommending possible changes in XML documents.
+
+Time units (improved clarity):
+
+    Previously dates and durations were given in days, time steps or years with
+    only a little documentation to indicate which unit should be used. Now
+    most of these inputs accept units of days, steps or years with an explicit
+    unit, and in the case of absolute times (i.e. not durations), dates.
+
+Diagnostics (bug fixes, new capabilities):
+
+    Previously the diagnostic used for monitoring purposes was deterministic
+    with a specified detection limit, interpreted as being derived from either
+    Garki or common (non-Garki) microscopy methods, while diagnostics used by
+    the health system and intervention deployment could be either stochastic or
+    deterministic with configurable limits but did not adjust these for the
+    density estimation method (bug). Now all diagnostics can be specified with
+    Garki, common or Malaria-therapy detection limits as deterministic or
+    stochastic tests. Further, the diagnostic used by the neonatal mortality
+    model may be independant of that used in monitoring.
+
+Parasite genetics (new model):
+
+    A new model has been introduced for selecting parasite genetics, with
+    specification of initial genotype frequency and fitness, and (vector
+    transmission model only) optional tracking of genotype frequency.
+    
+    This replaces the simplistic genotype model previously embedded within the
+    PK/PD model and allows modeling the spread of drug resistance in
+    OpenMalaria.
+
+Monitoring (more options, some non-backwards-compatible changes):
+
+    Much of the monitoring code was rewritten to be easier to extend. XML
+    configuration and output files remain backwards compatible but with new
+    options: output identifier is configurable, measures can be configured to
+    aggregate over some dimensions (age group, cohort, species, genotype)
+    to reduce output size, new measures (for tracking parasite genetics)
+    are available.
+    
+    Vector species was previously indicated via name in output files but is
+    now numeric.
+    
+    Some measures have been disabled (which?).
+
+Health system (clarity, new capabilities):
+    
+    A new health system model is available (essentially a merge of the old
+    ImmediateOutcomes and unused EventScheduler) models. This specifies
+    access and severe outcomes as the ImmediateOutcomes model but uses
+    decision trees to describe uncomplicated treatment. As with the
+    ImmediateOutcomes model, this is only functional on a 5-day timestep.
+
+Molineaux infection model (bug fixes):
+    
+    The Molineaux infection model has been improved slightly. Most notably,
+    blood volume is derived from human age (giving infants lower volume and
+    higher parasite density elimination thresholds), and parameter sampling
+    for new infections has been fixed (non-pairwise-sampling mode).
+    
+    New testing code has also been written for the model.
+
+## Tool changes
+
+The plotResults.py script was updated to handle new outputs and allow plotting
+results by cohort and genotype (on x-axis as separate lines).
+
+
 — 2014-04-22 — Schema 32 —
 
 Cohorts / sub-populations:
