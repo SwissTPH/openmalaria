@@ -44,7 +44,7 @@ namespace WithinHost {
  * 
  * Pass by value; it just hides an integer.
  * 
- * TODO: this struct and the Treatments class are no longer strictly necessary.
+ * NOTE: this struct and the Treatments class are no longer strictly necessary.
  * Ideally, one would remove this, firstly by replacing usages of
  * om:TreatmentOption in healthSystem.xsd with om:DecisionTree (requires an
  * XML updator algorithm), then optionally removing ImmediateOutcomes.

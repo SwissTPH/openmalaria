@@ -26,7 +26,6 @@
 
 #include <list>
 #include <memory>
-#include <boost/ptr_container/ptr_list.hpp>
 
 using namespace std;
 
@@ -97,7 +96,6 @@ public:
     
 private:
     VivaxBrood() {}     // not default constructible
-    VivaxBrood( const VivaxBrood& ) {}  // not copy constructible
     
     // list of times at which the merozoite and hypnozoites release, ordered by
     // time of release, soonest last (i.e. last element is next one to release)
@@ -170,8 +168,7 @@ protected:
 private:
     WHVivax( const WHVivax& ) {}        // not copy constructible
     
-    //TODO: shouldn't have to store by pointer (at least, if using C++11)
-    boost::ptr_list<VivaxBrood> infections;
+    list<VivaxBrood> infections;
     
     /* Is flagged as never getting PQ: this is a heteogeneity factor. Example:
      * Set to zero if everyone can get PQ, 0.5 if females can't get PQ and

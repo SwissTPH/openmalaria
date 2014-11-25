@@ -34,7 +34,6 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
-using boost::ptr_list;
 
 // ———  parameters  ———
 
@@ -246,7 +245,7 @@ WHVivax::~WHVivax(){
 double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
     assert( sumX == 0 );
-    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
+    for (list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
@@ -267,7 +266,7 @@ bool WHVivax::summarize(const Host::Human& human) {
     // (patent) infections are reported by genotype, even though we don't have
     // genotype in this model
     mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
-    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
+    for (list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf) 
     {
         if (inf->isPatent()){
@@ -281,7 +280,7 @@ bool WHVivax::summarize(const Host::Human& human) {
 
 void WHVivax::importInfection(){
     // this means one new liver stage infection, which can result in multiple blood stages
-    infections.push_back( new VivaxBrood( this ) );
+    infections.push_back( VivaxBrood( this ) );
 }
 
 void WHVivax::update(int nNewInfs, vector<double>&,
@@ -289,13 +288,13 @@ void WHVivax::update(int nNewInfs, vector<double>&,
 {
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )
-        infections.push_back( new VivaxBrood( this ) );
+        infections.push_back( VivaxBrood( this ) );
     
     // update infections
     // NOTE: currently no BSV model
     morbidity = Pathogenesis::NONE;
     uint32_t oldCumInf = cumPrimInf;
-    ptr_list<VivaxBrood>::iterator inf = infections.begin();
+    list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
         VivaxBrood::UpdResult result = inf->update();
         if( result.newPrimaryBS ) cumPrimInf += 1;
@@ -344,7 +343,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
 bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
     //TODO(monitoring): this shouldn't ignore the diagnostic (especially since
     // it should always return true if diagnostic.density=0)
-    for (ptr_list<VivaxBrood>::const_iterator inf = infections.begin();
+    for (list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if (inf->isPatent())
@@ -369,7 +368,7 @@ void WHVivax::treatment( Host::Human& human, TreatmentId treatId ){
     // For now we rely on the check in Treatments::Treatments(...).
     
     // This means clear blood stage infection(s) but not liver stage.
-    for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+    for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
         it->treatmentBS();
     }
     
@@ -385,7 +384,7 @@ bool WHVivax::optionalPqTreatment(){
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
     if (pReceivePQ > 0.0 && !noPQ && random::bernoulli(pReceivePQ)){
         if( random::bernoulli(effectivenessPQ) ){
-            for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
         }
@@ -405,14 +404,14 @@ void WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
         }
         if( timeLiver >= sim::zero() )
             throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
-        for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+        for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
             it->treatmentLS();
         }
     }
     
     // there probably will be blood-stage treatment
     if( timeBlood < sim::zero() ){
-        for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+        for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
             it->treatmentBS();
         }
     }else{
@@ -429,7 +428,7 @@ void WHVivax::checkpoint(istream& stream){
     size_t len;
     len & stream;
     for( size_t i = 0; i < len; ++i ){
-        infections.push_back( new VivaxBrood( stream ) );
+        infections.push_back( VivaxBrood( stream ) );
     }
     noPQ & stream;
     int morbidity_i;
@@ -440,7 +439,7 @@ void WHVivax::checkpoint(istream& stream){
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
     infections.size() & stream;
-    for( ptr_list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+    for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
         it->checkpoint( stream );
     }
     noPQ & stream;

@@ -121,7 +121,6 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
                     "entomology/mode to \"dynamic\" (not \"forced\") or set "
                     "parasiteGenetics/samplingMode to \"initial\" (not \"tracking\")" );
             }
-            //FIXME: update current_mode at appropriate time
         }else{
             throw util::xml_scenario_error( "parasiteGenetics/samplingMode: expected \"initial\" or \"tracking\"" );
         }

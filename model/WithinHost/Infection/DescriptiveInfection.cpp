@@ -126,7 +126,7 @@ DescriptiveInfection::DescriptiveInfection () :
 }
 
 SimTime DescriptiveInfection::infectionDuration() {
-    //TODO: move values to XML.
+    // Forgive the excess precision; it just avoids having to update all expected results
     double dur_mean = 5.1300001144409179688;
     double dur_sigma = 0.80000001192092895508;
     double dur=random::log_normal(dur_mean, dur_sigma);
@@ -160,7 +160,6 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         timeStepMaxDensity = 0.0;
         
         int32_t infAge = min( infage.inSteps(), maxDurationTS );
-        //TODO(performance): is it worth caching infDur at infection start?
         int32_t infDur = min( m_duration.inSteps(), maxDurationTS );
         m_density=max (exp(meanLogParasiteCount[infAge][infDur]), 1.0);
         
@@ -213,7 +212,6 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         m_cumulativeExposureJ += sim::oneTS().inDays() * m_density;
     }
     
-    //TODO: when bugfix_max_dens is required, this can go into the infage >= 0 part
     if (bugfix_innate_max_dens) timeStepMaxDensity *= innateImmSurvFact;
     timeStepMaxDensity *= bsvFactor;
 }
