@@ -109,6 +109,8 @@ void Human::destroy() {
 
 // -----  Non-static functions: per-time-step update  -----
 
+vector<double> EIR_per_genotype;        // cache (not thread safe)
+
 bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
     ++PopulationStats::humanUpdateCalls;
@@ -146,7 +148,6 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 ++expIt;
             }
         }
-        vector<double> EIR_per_genotype;        //TODO: avoid reallocating on every use!
         // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
         double EIR = transmissionModel->getEIR( *this, age0, ageYears1,
                 EIR_per_genotype );

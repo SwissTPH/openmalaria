@@ -174,7 +174,7 @@ public:
    * @param age Age of the human in time units
    * @param ageYears Age of the human in years
    * @param EIR Out-vector of EIR per parasite genotype. The length is also set
-   *    by the calling function. Where genotype tracking is not supported (e.g.
+   *    by the called function. Where genotype tracking is not supported (e.g.
    *    the non-vector model), the length is set to one.
    * @returns the sum of EIR across genotypes
    */
