@@ -23,7 +23,7 @@
 #include "util/errors.h"
 #include "util/CommandLine.h"
 #include "schema/monitoring.h"
-#include "schema/scenario.h"    // TODO: only for analysisNo
+#include "schema/scenario.h"
 
 #include <boost/static_assert.hpp>
 #include <stdexcept>
