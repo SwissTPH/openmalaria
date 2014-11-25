@@ -374,7 +374,7 @@ class Plotter(object):
             elif x_axis==Keys.COHORT:
                 x=self.values.getCohorts(m)
             elif x_axis==Keys.GENOTYPE:
-                x=self.values.getGenotype(m)
+                x=self.values.getGenotypes(m)
             #else x was set previously
             
             pLines=[plot]
@@ -597,7 +597,7 @@ genotype, file will be assigned to the x-axis.""",version="%prog 0.1")
         parser.print_usage()
         return 1
     
-    if options.s != "x-axis" and options.g != "x-axis" and options.f != "x-axis":
+    if options.s != "x-axis" and options.g != "x-axis" and options.c != "x-axis" and options.gt != "x-axis" and options.f != "x-axis":
         if options.s == "none":
             options.s="x-axis"
         elif options.g == "none":
