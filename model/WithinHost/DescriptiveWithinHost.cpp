@@ -51,30 +51,21 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor
     }
 }
 
-DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
-    for( list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf ){
-        delete *inf;
-    }
-    infections.clear();
-}
+DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
 
 
 // -----  Simple infection adders/removers  -----
 
-DescriptiveInfection* DescriptiveWithinHostModel::createInfection () {
-    return new DescriptiveInfection();
-}
 void DescriptiveWithinHostModel::loadInfection(istream& stream) {
-    infections.push_back(new DescriptiveInfection(stream));
+    infections.push_back(DescriptiveInfection(stream));
 }
 
 void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
-    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
         if( stage == Treatments::BOTH ||
-            (stage == Treatments::LIVER && !(*inf)->bloodStage()) ||
-            (stage == Treatments::BLOOD && (*inf)->bloodStage())
+            (stage == Treatments::LIVER && !inf->bloodStage()) ||
+            (stage == Treatments::BLOOD && inf->bloodStage())
         ){
-            delete *inf;
             inf = infections.erase( inf );
         }else{
             ++inf;
@@ -86,8 +77,8 @@ void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
 // -----  Interventions  -----
 
 void DescriptiveWithinHostModel::clearImmunity() {
-    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        (*inf)->clearImmunity();
+    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+        inf->clearImmunity();
     }
     m_cumulative_h = 0.0;
     m_cumulative_Y_lag = 0.0;
@@ -98,7 +89,7 @@ void DescriptiveWithinHostModel::importInfection(){
         PopulationStats::allowedInfections += 1;
         m_cumulative_h += 1;
         numInfs += 1;
-        infections.push_back(createInfection());
+        infections.push_back(DescriptiveInfection());
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -121,7 +112,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for ( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(createInfection());
+        infections.push_back(DescriptiveInfection());
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 
@@ -139,7 +130,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
     
-    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
         // CommonWithinHost.cpp, but a few changes would be needed:
         // INNATE_MAX_DENS and MAX_DENS_CORRECTION would need to be required
@@ -147,10 +138,9 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
         // any more).
         // SP drug action and the PK/PD model would need to be abstracted
         // behind a common interface.
-        if ( (*inf)->expired() /* infection has self-terminated */ ||
-            ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver) )
+        if ( inf->expired() /* infection has self-terminated */ ||
+            (inf->bloodStage() ? treatmentBlood : treatmentLiver) )
         {
-            delete *inf;
             inf=infections.erase(inf);
             numInfs--;
             continue;
@@ -159,13 +149,13 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
         // Should be: infStepMaxDens = 0.0, but has some history.
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
-        (*inf)->determineDensities(ageInYears, cumulative_h, cumulative_Y, infStepMaxDens, _innateImmSurvFact, bsvFactor);
+        inf->determineDensities(ageInYears, cumulative_h, cumulative_Y, infStepMaxDens, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
         timeStepMaxDensity = infStepMaxDens;
 
-        double density = (*inf)->getDensity();
+        double density = inf->getDensity();
         totalDensity += density;
         m_cumulative_Y += sim::oneTS().inDays() * density;
 
@@ -185,9 +175,9 @@ void DescriptiveWithinHostModel::summarizeInfs( const Host::Human& human )const{
     // genotype in this model
     mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
     if( reportPatentInfected ){
-        for (std::list<DescriptiveInfection*>::const_iterator inf =
+        for (std::list<DescriptiveInfection>::const_iterator inf =
             infections.begin(); inf != infections.end(); ++inf) {
-            if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
+            if( Monitoring::Survey::diagnostic().isPositive( inf->getDensity() ) ){
                 mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
             }
         }
@@ -206,8 +196,8 @@ void DescriptiveWithinHostModel::checkpoint (istream& stream) {
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
-    BOOST_FOREACH (DescriptiveInfection* inf, infections) {
-        (*inf) & stream;
+    BOOST_FOREACH (DescriptiveInfection& inf, infections) {
+        inf & stream;
     }
 }
 

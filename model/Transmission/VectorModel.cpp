@@ -399,21 +399,19 @@ void VectorModel::update( const Population& population ) {
     TransmissionModel::updateKappa( population );
 }
 
-void VectorModel::checkSimMode() const{
+const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
     if( interventionMode != dynamicEIR ){
         throw xml_scenario_error("vector interventions can only be used in "
             "dynamic transmission mode (mode=\"dynamic\")");
     }
-}
-
-const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
-    checkSimMode();     //TODO: can probably eventually inline
     return speciesIndex;
 }
 
 void VectorModel::deployVectorPopInterv (size_t instance) {
-    checkSimMode();
-    
+    if( interventionMode != dynamicEIR ){
+        throw xml_scenario_error("vector interventions can only be used in "
+            "dynamic transmission mode (mode=\"dynamic\")");
+    }
     for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
         it->deployVectorPopInterv(instance);
     }

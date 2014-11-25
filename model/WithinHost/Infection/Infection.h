@@ -62,7 +62,7 @@ public:
     }
     
     /// Get the density of the infection as of the last update
-    inline double getDensity() {
+    inline double getDensity()const{
         return m_density;
     }
     

@@ -53,7 +53,6 @@ public:
 protected:
     virtual void clearInfections( Treatments::Stages stage );
     
-    virtual DescriptiveInfection* createInfection ();
     virtual void summarizeInfs( const Host::Human& human )const;
     
     virtual void checkpoint (istream& stream);
@@ -66,8 +65,7 @@ protected:
      * 
      * Since infection models and within host models are very much intertwined,
      * the idea is that each WithinHostModel has its own list of infections. */
-     //TODO(optimisation): why use pointer indirection when we know type?
-     std::list<DescriptiveInfection*> infections;
+     std::list<DescriptiveInfection> infections;
 };
 
 } }
