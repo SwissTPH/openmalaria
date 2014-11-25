@@ -48,7 +48,7 @@ public:
     
     void setUp () {
         UnittestUtil::initTime(1);
-	UnittestUtil::PkPdSuiteSetup(PkPdModel::LSTM_PKPD);
+	UnittestUtil::PkPdSuiteSetup();
 	proxy = new LSTMPkPdModel ();
         MF_index = LSTMDrugType::findDrug( "MF" );
     }

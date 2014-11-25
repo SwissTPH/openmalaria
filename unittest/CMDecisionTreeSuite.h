@@ -63,7 +63,7 @@ public:
                                   Episode::NONE ) );
         
 	// could seed random-number-generator, but shouldn't affect outcomes
-	UnittestUtil::PkPdSuiteSetup (PkPd::PkPdModel::LSTM_PKPD);
+	UnittestUtil::PkPdSuiteSetup ();
     }
     void tearDown () {
         human.reset();

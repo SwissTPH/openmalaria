@@ -112,20 +112,11 @@ public:
      * become negligible. */
     virtual void decayDrugs () =0;
     
-    enum ActiveModel {
-        NON_PKPD = 0,
-//       HOSHEN_PKPD,   note: this code is no longer maintained or enabled
-        LSTM_PKPD
-    };
-    
 protected:
     virtual void checkpoint (istream& stream) =0;
     virtual void checkpoint (ostream& stream) =0;
     
 private:
-    /// Which model is in use (set by init())
-    static ActiveModel activeModel;
-    
     friend class ::UnittestUtil;
 };
 

@@ -29,7 +29,6 @@
 
 #include "Host/Human.h"
 #include "PkPd/PkPdModel.h"
-// #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "PkPd/LSTMTreatments.h"
 #include "WithinHost/Infection/Infection.h"
@@ -157,7 +156,7 @@ public:
         diagnostics::init( parameters, diagsElt );
     }
     
-    static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {
+    static void PkPdSuiteSetup () {
 	ModelOptions::reset();
         ModelOptions::set(util::INCLUDES_PK_PD);
         WithinHost::Genotypes::initSingle();
@@ -165,50 +164,42 @@ public:
 	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
 	//PkPdModel::init ();
 	
-	PkPd::PkPdModel::activeModel = modelID;
-	if (modelID == PkPd::PkPdModel::LSTM_PKPD) {
-            // Drugs
- 	    scnXml::Phenotype phenotype ( 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */ );
-	    
-	    scnXml::PD pd;
-	    pd.getPhenotype().push_back (phenotype);
-	    
-	    scnXml::PK pk ( 0.006654 /* negligible_concentration */, 19.254 /* half_life */, 20.8 /* vol_dist */ );
-	    
-	    scnXml::PKPDDrug drug ( pd, pk, "MF" /* abbrev */ );
-	    
-            scnXml::Drugs drugs;
-            drugs.getDrug().push_back (drug);
-	    
-	    PkPd::LSTMDrugType::init (drugs);
-            
-            // Treatments
-            scnXml::PKPDSchedule sched1("sched1");
-            sched1.getMedicate().push_back(
-                scnXml::PKPDMedication("MF", 6 /*mg*/, 0 /*hour*/));
-            
-            scnXml::PKPDSchedule sched2("sched2");
-            sched2.getMedicate().push_back(
-                scnXml::PKPDMedication("MF", 2 /*mg*/, 0 /*hour*/));
-            sched2.getMedicate().push_back(
-                scnXml::PKPDMedication("MF", 5 /*mg*/, 12 /*hour*/));
-            
-            // a very basic dosage table, so that we can test it does what's expected
-            scnXml::PKPDDosages dosage1("dosage1");
-            dosage1.getAge().push_back(scnXml::PKPDDosageRange(0 /*age lb*/,1 /*mult*/));
-            dosage1.getAge().push_back(scnXml::PKPDDosageRange(5 /*age lb*/,5 /*mult*/));
-            
-            scnXml::Treatments treatments;
-            treatments.getSchedule().push_back(sched1);
-            treatments.getSchedule().push_back(sched2);
-            treatments.getDosages().push_back(dosage1);
-            PkPd::LSTMTreatments::init(treatments);
-	} /*else if (modelID == PkPd::PkPdModel::HOSHEN_PKPD) {
-	    PkPd::ProteomeManager::init ();
-	    PkPd::HoshenDrugType::init();
-	} */else {
-	    assert (false);
-	}
+        // Drugs
+        scnXml::Phenotype phenotype ( 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */ );
+        
+        scnXml::PD pd;
+        pd.getPhenotype().push_back (phenotype);
+        
+        scnXml::PK pk ( 0.006654 /* negligible_concentration */, 19.254 /* half_life */, 20.8 /* vol_dist */ );
+        
+        scnXml::PKPDDrug drug ( pd, pk, "MF" /* abbrev */ );
+        
+        scnXml::Drugs drugs;
+        drugs.getDrug().push_back (drug);
+        
+        PkPd::LSTMDrugType::init (drugs);
+        
+        // Treatments
+        scnXml::PKPDSchedule sched1("sched1");
+        sched1.getMedicate().push_back(
+            scnXml::PKPDMedication("MF", 6 /*mg*/, 0 /*hour*/));
+        
+        scnXml::PKPDSchedule sched2("sched2");
+        sched2.getMedicate().push_back(
+            scnXml::PKPDMedication("MF", 2 /*mg*/, 0 /*hour*/));
+        sched2.getMedicate().push_back(
+            scnXml::PKPDMedication("MF", 5 /*mg*/, 12 /*hour*/));
+        
+        // a very basic dosage table, so that we can test it does what's expected
+        scnXml::PKPDDosages dosage1("dosage1");
+        dosage1.getAge().push_back(scnXml::PKPDDosageRange(0 /*age lb*/,1 /*mult*/));
+        dosage1.getAge().push_back(scnXml::PKPDDosageRange(5 /*age lb*/,5 /*mult*/));
+        
+        scnXml::Treatments treatments;
+        treatments.getSchedule().push_back(sched1);
+        treatments.getSchedule().push_back(sched2);
+        treatments.getDosages().push_back(dosage1);
+        PkPd::LSTMTreatments::init(treatments);
     }
     
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.

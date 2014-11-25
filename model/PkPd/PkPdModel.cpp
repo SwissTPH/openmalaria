@@ -19,15 +19,12 @@
  */
 
 #include "PkPd/PkPdModel.h"
-// #include "PkPd/Drug/HoshenDrugType.h"
 #include "Global.h"
-// #include "PkPd/Proteome.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include <schema/scenario.h>
 
 // submodels:
-// #include "PkPd/HoshenPkPdModel.h"
 #include "PkPd/LSTMPkPdModel.h"
 #include "PkPd/VoidPkPdModel.h"
 #include "PkPd/LSTMTreatments.h"
@@ -38,7 +35,7 @@
 
 namespace OM { namespace PkPd {
 
-PkPdModel::ActiveModel PkPdModel::activeModel = PkPdModel::NON_PKPD;
+bool pkpdEnabled = false;
 
 
 // -----  static functions  -----
@@ -46,40 +43,21 @@ PkPdModel::ActiveModel PkPdModel::activeModel = PkPdModel::NON_PKPD;
 void PkPdModel::init( const scnXml::Scenario& scenario ){
     if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
         if (scenario.getPharmacology().present()) {
-            activeModel = LSTM_PKPD;
+            pkpdEnabled = true;
             LSTMDrugType::init(scenario.getPharmacology().get().getDrugs());
             LSTMTreatments::init(scenario.getPharmacology().get().getTreatments());
         } else {
             throw util::xml_scenario_error( "pharmacology element required in XML" );
         }
-        /* if ... {
-            // Hoshen model has been removed.
-            activeModel = HOSHEN_PKPD;
-            ProteomeManager::init ();
-            HoshenDrugType::init();
-        } */
     }
 }
-
-/*
-void PkPdModel::cleanup () {
-    if (activeModel == HOSHEN_PKPD) {
-        assert( false );
-        HoshenDrugType::cleanup();
-        ProteomeManager::cleanup ();
-    }
-}
-*/
 
 PkPdModel* PkPdModel::createPkPdModel () {
-    if (activeModel == NON_PKPD) {
-        return new VoidPkPdModel();
-    } else if (activeModel == LSTM_PKPD) {
+    if (pkpdEnabled) {
         return new LSTMPkPdModel ();
-    } /* else if (activeModel == HOSHEN_PKPD) {
-        return new HoshenPkPdModel ();
-    } */
-    throw TRACED_EXCEPTION_DEFAULT("bad PKPD model");
+    }else{
+        return new VoidPkPdModel();
+    }
 }
 
 
