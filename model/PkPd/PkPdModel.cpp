@@ -26,7 +26,6 @@
 
 // submodels:
 #include "PkPd/LSTMPkPdModel.h"
-#include "PkPd/VoidPkPdModel.h"
 #include "PkPd/LSTMTreatments.h"
 
 #include <assert.h>
@@ -35,29 +34,18 @@
 
 namespace OM { namespace PkPd {
 
-bool pkpdEnabled = false;
-
 
 // -----  static functions  -----
 
 void PkPdModel::init( const scnXml::Scenario& scenario ){
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD)) {
-        if (scenario.getPharmacology().present()) {
-            pkpdEnabled = true;
-            LSTMDrugType::init(scenario.getPharmacology().get().getDrugs());
-            LSTMTreatments::init(scenario.getPharmacology().get().getTreatments());
-        } else {
-            throw util::xml_scenario_error( "pharmacology element required in XML" );
-        }
+    if (scenario.getPharmacology().present()) {
+        LSTMDrugType::init(scenario.getPharmacology().get().getDrugs());
+        LSTMTreatments::init(scenario.getPharmacology().get().getTreatments());
     }
 }
 
 PkPdModel* PkPdModel::createPkPdModel () {
-    if (pkpdEnabled) {
-        return new LSTMPkPdModel ();
-    }else{
-        return new VoidPkPdModel();
-    }
+    return new LSTMPkPdModel ();
 }
 
 

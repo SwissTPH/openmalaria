@@ -99,6 +99,7 @@ namespace OM { namespace util {
 	* Default: Non-malaria fevers are not simulated. */
 	NON_MALARIA_FEVERS,
 	
+        //Deprecated: PK/PD code is enabled in all compatible within-host models
 	/** @brief Use a PK & PD model for drug effects
 	 *
 	 * This enables simulation of the pharmacokinetics and pharmacodynamics
@@ -110,7 +111,7 @@ namespace OM { namespace util {
          * at the Liverpool School of Tropical Medicine.
          * 
          * Use of a 1-day infection model is required. */
-	INCLUDES_PK_PD,
+// 	INCLUDES_PK_PD,
 	
 	/** @brief Use revised clinical and case management model, ClinicalEventScheduler
 	* 
@@ -258,6 +259,8 @@ namespace OM { namespace util {
         
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,
+        
+        IGNORE  // special value for use in string to enum lookup
     };
     
     

@@ -33,6 +33,7 @@ namespace OM { namespace util {
     class OptionCodeMap {
 	// Lookup table to translate the strings used in the XML file to the internal enumerated values:
 	map<string,OptionCodes> codeMap;
+        set<string> ignoreOptions;
 	
     public:
 	OptionCodeMap () {
@@ -47,7 +48,7 @@ namespace OM { namespace util {
 	    codeMap["DUMMY_WITHIN_HOST_MODEL"] = DUMMY_WITHIN_HOST_MODEL;
 	    codeMap["PREDETERMINED_EPISODES"] = PREDETERMINED_EPISODES;
 	    codeMap["NON_MALARIA_FEVERS"] = NON_MALARIA_FEVERS;
-	    codeMap["INCLUDES_PK_PD"] = INCLUDES_PK_PD;
+            ignoreOptions.insert("INCLUDES_PK_PD");
 	    codeMap["CLINICAL_EVENT_SCHEDULER"] = CLINICAL_EVENT_SCHEDULER;
 	    codeMap["MUELLER_PRESENTATION_MODEL"] = MUELLER_PRESENTATION_MODEL;
 	    codeMap["TRANS_HET"] = TRANS_HET;
@@ -79,17 +80,22 @@ namespace OM { namespace util {
 	
 	OptionCodes operator[] (const string s) {
 	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
-	    if (codeIt == codeMap.end()) {
-		ostringstream msg;
-                if( s == "PENALISATION_EPISODES" || s == "ATTENUATION_ASEXUAL_DENSITY" ){
-                    msg << "Please use schema 31 or earlier to use option "
-                        << s << "; it is not available in later versions.";
-                }else{
-                    msg << "Unrecognised model option: " << s;
+	    if( codeIt != codeMap.end() ) return codeIt->second;
+            if( ignoreOptions.count(s) ){
+                if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
+                    cerr << "Deprecation warning: model option INCLUDES_PK_PD is no longer used" << endl;
                 }
-		throw xml_scenario_error(msg.str());
-	    }
-	    return codeIt->second;
+                return IGNORE;
+            }
+            
+            ostringstream msg;
+            if( s == "PENALISATION_EPISODES" || s == "ATTENUATION_ASEXUAL_DENSITY" ){
+                msg << "Please use schema 31 or earlier to use option "
+                    << s << "; it is not available in later versions.";
+            }else{
+                msg << "Unrecognised model option: " << s;
+            }
+            throw xml_scenario_error(msg.str());
 	}
 	// reverse-lookup in map; only used for error/debug printing so efficiency is unimportant
 	// doesn't ensure code is unique in the map either
@@ -116,7 +122,8 @@ namespace OM { namespace util {
 	
 	const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.getOption();
 	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
-	    options[codeMap[it->getName()]] = it->getValue();
+            OptionCodes opt = codeMap[it->getName()];
+            if( opt != IGNORE ) options[opt] = it->getValue();
 	}
 	
 #ifdef WITHOUT_BOINC

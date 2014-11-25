@@ -30,7 +30,6 @@
 #include "WithinHost/Genotypes.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
-#include "PkPd/PkPdModel.h"
 
 #include "util/errors.h"
 #include "util/random.h"
@@ -53,7 +52,6 @@ void Population::init( const Parameters& parameters, const scnXml::Scenario& sce
 {
     Host::Human::init( parameters, scenario );
     Host::NeonatalMortality::init( scenario.getModel().getClinical() );
-    PkPd::PkPdModel::init( scenario );
     
     AgeStructure::init( scenario.getDemography() );
 }
@@ -63,14 +61,12 @@ void Population::staticCheckpoint (istream& stream)
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
     Clinical::staticCheckpointCMCommon (stream);
-    PkPd::PkPdModel::staticCheckpoint (stream);
 }
 void Population::staticCheckpoint (ostream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
     Clinical::staticCheckpointCMCommon (stream);
-    PkPd::PkPdModel::staticCheckpoint (stream);
 }
 
 

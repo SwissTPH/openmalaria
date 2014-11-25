@@ -158,7 +158,6 @@ public:
     
     static void PkPdSuiteSetup () {
 	ModelOptions::reset();
-        ModelOptions::set(util::INCLUDES_PK_PD);
         WithinHost::Genotypes::initSingle();
 	
 	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
@@ -222,7 +221,6 @@ public:
     
     static void DescriptiveInfection_init () {
         ModelOptions::reset();
-        ModelOptions::set(util::INCLUDES_PK_PD);
     }
     
     static void EmpiricalWHM_setup () {
@@ -233,7 +231,6 @@ public:
     
     static void MolineauxWHM_setup( const std::string& mode, bool repl_gamma ){
         ModelOptions::reset();
-        ModelOptions::set(util::INCLUDES_PK_PD);
         ModelOptions::set(util::MOLINEAUX_WITHIN_HOST_MODEL);
         OM::WithinHost::opt_common_whm = true;
         if( mode == "original" ){

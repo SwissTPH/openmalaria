@@ -101,10 +101,11 @@ void LSTMTreatments::clear(){
     dosagesNames.clear();
 }
 
+inline void invalidModel(){
+    throw util::xml_scenario_error( "use of PK/PD treatment requires use of a compatible infection model and specification of pharmacology/treatments" );
+}
 size_t LSTMTreatments::findSchedule(const string& name){
-    if( scheduleNames.size() == 0 ){
-        throw util::xml_scenario_error( "use of PK/PD treatment requires the INCLUDES_PK_PD model option and specification of pharmacology/treatments" );
-    }
+    if( scheduleNames.size() == 0 ) invalidModel();
     map<string,size_t>::const_iterator it = scheduleNames.find( name );
     if( it == scheduleNames.end() ){
         throw util::xml_scenario_error(string("no treatment schedule with this name: ")
@@ -114,9 +115,7 @@ size_t LSTMTreatments::findSchedule(const string& name){
 }
 
 size_t LSTMTreatments::findDosages(const string& name){
-    if( dosagesNames.size() == 0 ){
-        throw util::xml_scenario_error( "use of PK/PD treatment requires the INCLUDES_PK_PD model option and specification of pharmacology/treatments" );
-    }
+    if( dosagesNames.size() == 0 ) invalidModel();
     map<string,size_t>::const_iterator it = dosagesNames.find( name );
     if( it == dosagesNames.end() ){
         throw util::xml_scenario_error(string("no dosage table with this name: ")

@@ -52,9 +52,6 @@ void DescriptiveInfection::init (const Parameters& parameters) {
         // meanLogParasiteCount. Probably the rest would be fine.
         throw util::xml_scenario_error ("DescriptiveInfection only supports using an interval of 5");
     }
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-        throw util::xml_scenario_error ("INCLUDES_PK_PD is incompatible with the old within-host model");
-    
     // Bug fixes: these are enabled by default but may be off in old parameterisations
     bugfix_innate_max_dens = util::ModelOptions::option (util::INNATE_MAX_DENS);
     // Warning: if MAX_DENS_CORRECTION is off, infections not yet at the blood

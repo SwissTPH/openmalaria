@@ -64,6 +64,8 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
     reportInfectionsByGenotype = mon::isUsedM(mon::MHR_INFECTED_GENOTYPE) ||
         mon::isUsedM(mon::MHR_PATENT_GENOTYPE) ||
         mon::isUsedM(mon::MHF_LOG_DENSITY_GENOTYPE);
+    
+    PkPd::PkPdModel::init( scenario );
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
@@ -286,6 +288,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
         infections.push_back (checkpointedInfection (stream));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
+    PkPd::PkPdModel::staticCheckpoint (stream);
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {
@@ -295,6 +298,7 @@ void CommonWithinHost::checkpoint (ostream& stream) {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;
     }
+    PkPd::PkPdModel::staticCheckpoint (stream);
 }
 }
 }
