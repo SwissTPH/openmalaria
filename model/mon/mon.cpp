@@ -166,9 +166,13 @@ public:
             if( mIndices[it->m] != NOT_USED ||
                 (it->method == Deploy::NA && deployIndices.count(it->m) > 0) )
             {
-                //FIXME: use a name not a number to describe the measure
-                throw util::xml_scenario_error( (boost::format("multiple use "
-                    "of output measure %1% by age and cohort") %it->m).str() );
+                //NOTE: if we give MHR_HOSTS, etc. names visible to the XML
+                // we should report that name. Current use of a number may be confusing.
+                ostringstream msg;
+                msg << "multiple use of monitoring measure " << it->m << " (used by ";
+                findNamedMeasuresUsing( it->m, msg );
+                msg << ") by age and cohort";
+                throw util::xml_scenario_error( msg.str() );
             }
             
             size_t newInd = outMeasures.size();     // length becomes our index
@@ -276,8 +280,8 @@ public:
     }
 };
 
-//TODO: is this far too many options? Would it be better to remove some, e.g.
-// make age-group and cohort coincide and report everything as doubles?
+//NOTE: there may be more options than necessary. Optionally, A without C and
+// C without A could be removed, and all outputs could be made doubles.
 // Stores by integer value (no outputs include species or genotype):
 Store<int, false, false, false, false> storeI;
 Store<int, true, false, false, false> storeAI;

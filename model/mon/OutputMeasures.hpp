@@ -91,6 +91,19 @@ struct OutMeasure{
 typedef std::map<std::string,OutMeasure> NamedMeasureMapT;
 NamedMeasureMapT namedOutMeasures;
 
+void findNamedMeasuresUsing( Measure m, ostream& msg ){
+    int nMatches = 0;
+    for( NamedMeasureMapT::const_iterator it = namedOutMeasures.begin();
+        it != namedOutMeasures.end(); ++it ){
+        if( it->second.m == m ){
+            if( nMatches > 0 ) msg << ", ";
+            msg << it->first;
+            nMatches += 1;
+        }
+    }
+    if( nMatches == 0 ) msg << "??";
+}
+
 // This method defines output measures accepted by name in the XML (e.g.
 // "nHost") and their numeric output identifier (i.e. measure column of
 // outputs), type of output (integer or floating point), aggregation, and the
