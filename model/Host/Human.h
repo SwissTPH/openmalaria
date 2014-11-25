@@ -172,12 +172,8 @@ public:
   //@}
   
   
-  ///@name static public
-  //@{
+  /// Initialise human-specific models
   static void init( const OM::Parameters& parameters, const scnXml::Scenario& scenario );
-  // init2 is only required for a drug-monitoring HACK, and could be removed:
-  static void init2( const scnXml::Monitoring& monitoring );
-  //@}
     
 public:
   /** @brief Models

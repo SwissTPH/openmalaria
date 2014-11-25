@@ -98,7 +98,7 @@ void DescriptiveWithinHostModel::importInfection(){
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor, ofstream& drugMon)
+        double ageInYears, double bsvFactor)
 {
     // Cache total density for infectiousness calculations
     assert( Genotypes::N() == 1 );

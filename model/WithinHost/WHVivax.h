@@ -143,7 +143,7 @@ public:
     virtual void importInfection();
     
     virtual void update(int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor, ofstream& drugMon);
+            double ageInYears, double bsvFactor);
     
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
 

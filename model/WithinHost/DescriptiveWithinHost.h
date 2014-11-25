@@ -48,7 +48,7 @@ public:
     virtual void clearImmunity();
     
     virtual void update(int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor, ofstream& drugMon);
+            double ageInYears, double bsvFactor);
     
 protected:
     virtual void clearInfections( Treatments::Stages stage );

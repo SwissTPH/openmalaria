@@ -284,7 +284,7 @@ void WHVivax::importInfection(){
 }
 
 void WHVivax::update(int nNewInfs, vector<double>&,
-        double ageInYears, double, ofstream& drugMon)
+        double ageInYears, double)
 {
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )

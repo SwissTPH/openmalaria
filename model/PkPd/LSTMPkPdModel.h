@@ -80,7 +80,6 @@ public:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
-    virtual void getConcentrations(map<string,double>& concentrations) const;
     virtual void prescribe(size_t schedule, size_t dosages, double age, double body_mass);
     virtual void medicate(double body_mass);
     virtual double getDrugFactor (uint32_t genotype);

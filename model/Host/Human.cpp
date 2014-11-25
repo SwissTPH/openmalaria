@@ -40,10 +40,6 @@ namespace OM { namespace Host {
     using interventions::ComponentId;
     
     bool opt_report_only_at_risk = false;
-    
-    // Only required for a drug monitoring HACK and could be removed:
-    ofstream monDrug, monFake;
-    ComponentId drugMonId(0 /*lazy initialisation*/);
 
 // -----  Static functions  -----
 
@@ -57,19 +53,6 @@ void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario
     InfectionIncidenceModel::init( parameters );
     WithinHost::WHInterface::init( parameters, scenario );
     Clinical::ClinicalModel::init( parameters, scenario );
-}
-
-void Human::init2( const scnXml::Monitoring& monitoring ){
-    if( monitoring.getDrugConcentration().present() ){
-#ifdef WITHOUT_BOINC
-        monDrug.open( monitoring.getDrugConcentration().get().getFile().c_str(), ios::out );
-        drugMonId = interventions::InterventionManager::getComponentId( monitoring.getDrugConcentration().get().getCohort() );
-#else
-        // This feature is disabled in BOINC because it writes to a file and I
-        // don't want another security feature needing review.
-        std::cerr << "monitoring/drugConcentration: feature disabled in BOINC builds" << std::endl;
-#endif
-    }
 }
 
 
@@ -153,10 +136,9 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 EIR_per_genotype );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
-        ofstream& mon = isInSubPop(drugMonId) ? monDrug : monFake;
         // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
         withinHostModel->update(nNewInfs, EIR_per_genotype, ageYears1,
-                _vaccine.getFactor(interventions::Vaccine::BSV), mon);
+                _vaccine.getFactor(interventions::Vaccine::BSV));
         
         // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
         clinicalModel->update( *this, ageYears1, age0 == sim::zero() );

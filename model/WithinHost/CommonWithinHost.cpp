@@ -45,9 +45,6 @@ util::AgeGroupInterpolator massByAge;
 bool reportInfectedOrPatentInfected = false;
 bool reportInfectionsByGenotype = false;
 
-// Only required for a drug monitoring HACK and could be removed:
-vector<string> drugMonCodes;
-
 
 // -----  Initialization  -----
 
@@ -61,13 +58,6 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
     hetMassMultStdDev = human.getWeight().get().getMultStdDev();
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
     minHetMassMult = 0.5 / massByAge.eval( 0.0 );
-    
-    const scnXml::Monitoring& mon = scenario.getMonitoring();
-    if( mon.getDrugConcentration().present() ){
-        boost::split( drugMonCodes,
-                      mon.getDrugConcentration().get().getDrugCodes(),
-                      boost::is_any_of("," ) );
-    }
     
     reportInfectedOrPatentInfected = mon::isUsedM(mon::MHR_INFECTIONS) ||
         mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
@@ -151,7 +141,7 @@ void CommonWithinHost::importInfection(){
 // -----  Density calculations  -----
 
 void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor, ofstream& drugMon)
+        double ageInYears, double bsvFactor)
 {
     // Cache total density for infectiousness calculations
     int y_lag_i = sim::ts0().moduloSteps(y_lag_len);
@@ -224,16 +214,6 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             }
         }
         pkpdModel->decayDrugs ();
-        
-        if( drugMon.is_open() && sim::intervNow() >= sim::zero() ){
-            drugMon << now << '\t' << sumLogDens;
-            map<string,double> concentrations;
-            pkpdModel->getConcentrations( concentrations );
-            foreach( string& drugCode, drugMonCodes ){
-                drugMon << '\t' << concentrations[drugCode];
-            }
-            drugMon << endl;
-        }
     }
     
     util::streamValidate(totalDensity);
@@ -293,6 +273,8 @@ void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
             }
         }
     }
+    
+    //TODO: call pkpdModel->summarize() or similar to report drug concentrations
 }
 
 

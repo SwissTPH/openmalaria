@@ -51,7 +51,7 @@ public:
     virtual void clearImmunity();
     
     virtual void update (int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor, ofstream& drugMon);
+            double ageInYears, double bsvFactor);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     
@@ -78,6 +78,7 @@ private:
     double hetMassMultiplier;
     
     /// Encapsulates drug code for each human
+    //TODO: we have two PK/PD models: LSTM and Void. But don't we always want LSTM? Why bother with another interface here?
     PkPd::PkPdModel* pkpdModel;
     
     /** The list of all infections this human has.

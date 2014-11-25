@@ -151,9 +151,6 @@ public:
     inline size_t getIndex() const {
         return index;
     }
-#ifdef WITHOUT_BOINC
-    inline const string& getName() const{ return name; }
-#endif
     inline double getVolumeOfDistribution() const{
         return vol_dist;
     }
@@ -196,11 +193,6 @@ private:
     double neg_elimination_rate_constant;
     /// Volume of distribution (l/kg)
     double vol_dist;
-    
-    /* Resistance data */
-#ifdef WITHOUT_BOINC
-    string name;        // only required for a drug monitoring HACK; could be removed
-#endif
     
     // Allow LSTMDrug to access private members
     friend class LSTMDrugPD;
