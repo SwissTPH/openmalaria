@@ -60,8 +60,8 @@ public:
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {
-      _pinfected & stream;
-      _cumulativeEIRa & stream;
+      m_pInfected & stream;
+      m_cumulativeEIRa & stream;
   }
   
   /// Static checkpointing
@@ -112,37 +112,13 @@ protected:
    *
    * Appears to be used only for calculating expected inoculations for the
    * analysis of pre-erythrocytic immunity. */
-  double _pinfected;
+  double m_pInfected;
   
   //!Number of infective bites since birth
-  double _cumulativeEIRa;//TODO(memory opt): not needed by NegBinomMAII and LogNormalMAII
+  double m_cumulativeEIRa;//TODO(memory opt): not needed by NegBinomMAII and LogNormalMAII
   
-  //BEGIN Static data set by init()
-  /* Shape constant of (Gamma) distribution of availability
-  real, parameter :: BaselineAvailabilityGammaShapeParam =1.0 */
-  static double BaselineAvailabilityShapeParam;
-  
-  //VARIABLES INCLUDED IN CORE GETs of number of infections 
-  //! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr. 
-  static double InfectionrateShapeParam;
-  
-  /** @brief Parameters used in the "expected number of infections" model */
-  //@{
-  //!Steepness of relationship between success of inoculation and Xp in Phase A model 
-  static double gamma_p;
-  //!Lower limit of success probability of inoculations at high exposure in Phase A model 
-  static double Sinf;
-  //!Lower limit of success probability of inoculations in immune individuals in Phase A model 
-  static double Simm;
-  //!1 over the critical value of cumulative number of entomologic inoculations in Phase A model 
-  static double Xstar_pInv;
-  //!1 over the critical value of EIR in Phase A pre-erythrocytic model 
-  static double EstarInv;
-  //@}
-  //END
-  
-  /// Number of new infections introduced, per continuous reporting period
-  static int ctsNewInfections;
+    /// Number of new infections introduced, per continuous reporting period
+    static int ctsNewInfections;
 };
 
 //TODO(optimisation): none of these add data members, so should we be using

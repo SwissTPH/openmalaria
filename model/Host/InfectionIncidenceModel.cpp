@@ -34,25 +34,42 @@
 namespace OM { namespace Host {
     using namespace OM::util;
 
-double InfectionIncidenceModel::BaselineAvailabilityShapeParam;
-double InfectionIncidenceModel::InfectionrateShapeParam;
+// ———  model constants set by init()  ———
 
-double InfectionIncidenceModel::gamma_p;
-double InfectionIncidenceModel::Sinf;
-double InfectionIncidenceModel::Simm;
-double InfectionIncidenceModel::Xstar_pInv;
-double InfectionIncidenceModel::EstarInv;
+/* Shape constant of (Gamma) distribution of availability
+real, parameter :: BaselineAvailabilityGammaShapeParam =1.0 */
+double baseline_avail_shape_param, baseline_avail_offset;
 
-int InfectionIncidenceModel::ctsNewInfections = 0;
+//VARIABLES INCLUDED IN CORE GETs of number of infections 
+//! Describes the shape of the Infectionrate distribution, related to the baseline availabilty distr.
+double inf_rate_shape_param, inf_rate_offset;
+
+/** @brief Parameters used in the "expected number of infections" model */
+//@{
+//!Steepness of relationship between success of inoculation and Xp in Phase A model 
+double gamma_p;
+//!Lower limit of success probability of inoculations at high exposure in Phase A model 
+double Sinf;
+//!Lower limit of success probability of inoculations in immune individuals in Phase A model 
+double Simm;
+//!1 over the critical value of cumulative number of entomologic inoculations in Phase A model 
+double Xstar_pInv;
+//!1 over the critical value of EIR in Phase A pre-erythrocytic model 
+double EstarInv;
+//@}
 
 // model options:
 bool opt_neg_bin_mass_action = false, opt_lognormal_mass_action = false,
         opt_no_pre_erythrocytic = false, opt_any_het = false;
 
+// ———  variables  ———
+int InfectionIncidenceModel::ctsNewInfections = 0;
+
 // -----  static initialisation  -----
 
 void InfectionIncidenceModel::init ( const Parameters& parameters ) {
-    BaselineAvailabilityShapeParam=parameters[Parameters::BASELINE_AVAILABILITY_SHAPE];
+    baseline_avail_shape_param = parameters[Parameters::BASELINE_AVAILABILITY_SHAPE];
+    baseline_avail_offset = 0.5 * pow(baseline_avail_shape_param, 2);
     
     gamma_p=parameters[Parameters::GAMMA_P];
     Sinf=1-exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_SINF]);
@@ -76,18 +93,19 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
     opt_no_pre_erythrocytic = util::ModelOptions::option (util::NO_PRE_ERYTHROCYTIC);
     opt_neg_bin_mass_action = util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION);
     if (opt_neg_bin_mass_action) {
-        InfectionrateShapeParam = (BaselineAvailabilityShapeParam+1.0) / (r_square_Gamma*BaselineAvailabilityShapeParam - 1.0);
-        InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
+        inf_rate_shape_param = (baseline_avail_shape_param+1.0) / (r_square_Gamma*baseline_avail_shape_param - 1.0);
+        inf_rate_shape_param=std::max(inf_rate_shape_param, 0.0);
     } else if (util::ModelOptions::option (util::LOGNORMAL_MASS_ACTION)) {
         opt_lognormal_mass_action = true;
         
         //! constant defining the constraint for the log Normal variance
         /// Used for the case where availability is assumed log Normally distributed
         double r_square_LogNormal = log(1.0+r_square_Gamma);
-    
-        InfectionrateShapeParam = sqrt(r_square_LogNormal - 1.86*pow(BaselineAvailabilityShapeParam, 2));
-        InfectionrateShapeParam=std::max(InfectionrateShapeParam, 0.0);
-        if( (boost::math::isnan)(InfectionrateShapeParam) ){
+        
+        inf_rate_shape_param = sqrt(r_square_LogNormal - 1.86 * pow(baseline_avail_shape_param, 2));
+        inf_rate_shape_param=std::max(inf_rate_shape_param, 0.0);
+        inf_rate_offset = 0.5 * pow(inf_rate_shape_param, 2);
+        if( (boost::math::isnan)(inf_rate_shape_param) ){
             throw util::xml_scenario_error( "bad parameter 16 (BASELINE_AVAILABILITY_SHAPE)" );
         }
     }else{
@@ -123,7 +141,7 @@ InfectionIncidenceModel* InfectionIncidenceModel::createModel () {
 }
 
 InfectionIncidenceModel::InfectionIncidenceModel () :
-  _pinfected(0.0), _cumulativeEIRa(0.0)
+  m_pInfected(0.0), m_cumulativeEIRa(0.0)
 {}
 
 
@@ -134,8 +152,8 @@ double InfectionIncidenceModel::getAvailabilityFactor(double baseAvailability) {
 }
 double NegBinomMAII::getAvailabilityFactor(double baseAvailability) {
     // Gamma sample with k=BaselineAvailabilityShapeParam; mean is baseAvailability
-  return random::gamma(BaselineAvailabilityShapeParam,
-		 baseAvailability/BaselineAvailabilityShapeParam);
+  return random::gamma(baseline_avail_shape_param,
+		 baseAvailability/baseline_avail_shape_param);
 }
 double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
     // given BaselineAvailabilityShapeParam = sqrt (log (1 + variance/mean²))
@@ -144,12 +162,12 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
         // NOTE: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
         throw TRACED_EXCEPTION_DEFAULT("LogNormalMAII::getAvailabilityFactor");
     }
-  return random::log_normal (log(baseAvailability)-(0.5*pow(BaselineAvailabilityShapeParam, 2)),
-		     BaselineAvailabilityShapeParam);
+  return random::log_normal (log(baseAvailability) - baseline_avail_offset,
+		     baseline_avail_shape_param);
 }
 
 void InfectionIncidenceModel::summarize (const Host::Human& human) {
-    mon::reportMHF( mon::MHF_EXPECTED_INFECTED, human, _pinfected );
+    mon::reportMHF( mon::MHF_EXPECTED_INFECTED, human, m_pInfected );
 }
 
 
@@ -167,16 +185,14 @@ double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEI
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
-  return random::gamma(InfectionrateShapeParam,
-      effectiveEIR * susceptibility() / InfectionrateShapeParam);
+  return random::gamma(inf_rate_shape_param,
+      effectiveEIR * susceptibility() / inf_rate_shape_param);
 }
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
     //TODO: is this equivalent to gsl_ran_lognormal?
-    //TODO: optimise the calculations on consts
   return random::sampleFromLogNormal(random::uniform_01(),
-      log(effectiveEIR * susceptibility()) - 0.5*pow(InfectionrateShapeParam, 2),
-      InfectionrateShapeParam);
+      log(effectiveEIR * susceptibility()) - inf_rate_offset, inf_rate_shape_param);
 }
 
 double InfectionIncidenceModel::susceptibility () {
@@ -192,7 +208,7 @@ double InfectionIncidenceModel::susceptibility () {
   } else {
     // S_2(i,t) from AJTMH 75 (suppl 2) p12 eqn. (7)
     return Simm + (1.0-Simm) /
-      (1.0 + pow(_cumulativeEIRa*Xstar_pInv, gamma_p));
+      (1.0 + pow(m_cumulativeEIRa*Xstar_pInv, gamma_p));
   }
 }
 
@@ -209,13 +225,13 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
     expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
   
   //Update pre-erythrocytic immunity
-  _cumulativeEIRa+=effectiveEIR;
+  m_cumulativeEIRa+=effectiveEIR;
   
-  _pinfected = 1.0 - exp(-expectedNumInfections) * (1.0-_pinfected);
-  if (_pinfected < 0.0)
-    _pinfected = 0.0;
-  else if (_pinfected > 1.0)
-    _pinfected = 1.0;
+  m_pInfected = 1.0 - exp(-expectedNumInfections) * (1.0-m_pInfected);
+  if (m_pInfected < 0.0)
+    m_pInfected = 0.0;
+  else if (m_pInfected > 1.0)
+    m_pInfected = 1.0;
   
   if (expectedNumInfections > 0.0000001){
     int n = random::poisson(expectedNumInfections);
