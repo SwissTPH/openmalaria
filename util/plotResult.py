@@ -501,7 +501,7 @@ class Plotter(object):
                         
                         if ytop==None:
                             ytop=[0.0 for k in xKeys]
-                        y=[self.values.get(k.m,k.s,k.g,k.f) for k in xKeys]
+                        y=[self.values.get(k.m,k.s,k.g, k.c, k.gt,k.f) for k in xKeys]
                         colour=getMeasureColour(pLSBlock.mg,pLSBlock.m)
                         if not am:
                             colour=ensureUnique(colour,lineColours)
