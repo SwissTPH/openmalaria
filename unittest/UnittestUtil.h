@@ -28,8 +28,7 @@
 #include "util/ModelOptions.h"
 
 #include "Host/Human.h"
-#include "PkPd/PkPdModel.h"
-#include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMModel.h"
 #include "PkPd/LSTMTreatments.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"
@@ -262,7 +261,7 @@ public:
         ModelOptions::set(util::VECTOR_LIFE_CYCLE_MODEL);
     }
     
-    static double getPrescribedMg( const PkPd::LSTMPkPdModel& pkpd ){
+    static double getPrescribedMg( const PkPd::LSTMModel& pkpd ){
         double r = 0.0;
         foreach( const PkPd::MedicateData& md, pkpd.medicateQueue ){
             r += md.qty;
@@ -270,12 +269,12 @@ public:
         return r;
     }
     
-    static void medicate(PkPd::LSTMPkPdModel& pkpd, size_t typeIndex, double qty,
+    static void medicate(PkPd::LSTMModel& pkpd, size_t typeIndex, double qty,
                          double time, double duration, double bodyMass){
         pkpd.medicateDrug(typeIndex, qty, time, duration, bodyMass);
     }
     
-    static void clearMedicateQueue( PkPd::LSTMPkPdModel& pkpd ){
+    static void clearMedicateQueue( PkPd::LSTMModel& pkpd ){
         pkpd.medicateQueue.clear();
     }
     

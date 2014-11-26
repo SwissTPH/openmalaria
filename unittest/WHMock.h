@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "WithinHost/WHInterface.h"
-#include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMModel.h"
 
 using namespace std;
 
@@ -71,7 +71,7 @@ public:
     SimTime lastTimeLiver, lastTimeBlood;
     
     // Lists medications and drugs in the body
-    PkPd::LSTMPkPdModel pkpd;
+    PkPd::LSTMModel pkpd;
 
 protected:
     virtual void checkpoint (istream& stream);

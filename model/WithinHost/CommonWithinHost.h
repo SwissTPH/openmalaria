@@ -24,7 +24,7 @@
 #include "Global.h"
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/CommonInfection.h"
-#include "PkPd/PkPdModel.h"
+#include "PkPd/LSTMModel.h"
 
 using namespace std;
 
@@ -78,8 +78,7 @@ private:
     double hetMassMultiplier;
     
     /// Encapsulates drug code for each human
-    //TODO: we have two PK/PD models: LSTM and Void. But don't we always want LSTM? Why bother with another interface here?
-    PkPd::PkPdModel* pkpdModel;
+    PkPd::LSTMModel pkpdModel;
     
     /** The list of all infections this human has.
      *

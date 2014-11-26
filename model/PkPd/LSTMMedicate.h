@@ -26,7 +26,7 @@
 #define Hmod_LSTMMedicate
 
 #include "Global.h"
-#include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMModel.h"
 #include "util/errors.h"
 #include "schema/pharmacology.h"
 

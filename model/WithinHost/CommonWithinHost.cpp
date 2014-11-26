@@ -65,11 +65,11 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
         mon::isUsedM(mon::MHR_PATENT_GENOTYPE) ||
         mon::isUsedM(mon::MHF_LOG_DENSITY_GENOTYPE);
     
-    PkPd::PkPdModel::init( scenario );
+    PkPd::LSTMModel::init( scenario );
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
-        WHFalciparum( comorbidityFactor ), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
+        WHFalciparum( comorbidityFactor )
 {
     assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
     
@@ -87,8 +87,6 @@ CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
 }
 
 CommonWithinHost::~CommonWithinHost() {
-    delete pkpdModel;
-    pkpdModel = 0;
     for( list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf ){
         delete *inf;
     }
@@ -116,7 +114,7 @@ void CommonWithinHost::clearInfections( Treatments::Stages stage ){
 
 void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages, double age){
     double mass = massByAge.eval( age ) * hetMassMultiplier;
-    pkpdModel->prescribe( schedule, dosages, age, mass );
+    pkpdModel.prescribe( schedule, dosages, age, mass );
 }
 void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
@@ -183,7 +181,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     
     for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
-        pkpdModel->medicate( body_mass );
+        pkpdModel.medicate( body_mass );
         
         double sumLogDens = 0.0;
         
@@ -194,7 +192,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 double survivalFactor = survivalFactor_part *
                     (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y) *
-                    pkpdModel->getDrugFactor((*inf)->genotype());
+                    pkpdModel.getDrugFactor((*inf)->genotype());
                 // update, may result in termination of infection:
                 expires = (*inf)->update(survivalFactor, now, body_mass);
             }
@@ -215,7 +213,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
                 ++inf;
             }
         }
-        pkpdModel->decayDrugs ();
+        pkpdModel.decayDrugs ();
     }
     
     util::streamValidate(totalDensity);
@@ -283,22 +281,20 @@ void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
 void CommonWithinHost::checkpoint (istream& stream) {
     WHFalciparum::checkpoint (stream);
     hetMassMultiplier & stream;
-    (*pkpdModel) & stream;
+    pkpdModel & stream;
     for (int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
-    PkPd::PkPdModel::staticCheckpoint (stream);
 }
 
 void CommonWithinHost::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
     hetMassMultiplier & stream;
-    (*pkpdModel) & stream;
+    pkpdModel & stream;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;
     }
-    PkPd::PkPdModel::staticCheckpoint (stream);
 }
 }
 }

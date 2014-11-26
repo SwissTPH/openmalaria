@@ -25,8 +25,7 @@ set (Model_CPP
   Clinical/DecisionTree5Day.cpp
   Clinical/CM5DayCommon.cpp
   
-  PkPd/PkPdModel.cpp
-  PkPd/LSTMPkPdModel.cpp
+  PkPd/LSTMModel.cpp
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/Drug/LSTMDrugAllele.cpp

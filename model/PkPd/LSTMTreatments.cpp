@@ -22,7 +22,7 @@
 #include "PkPd/LSTMTreatments.h"
 #include "PkPd/LSTMMedicate.h"
 #include "PkPd/Drug/LSTMDrugType.h"
-#include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMModel.h"
 
 #include <boost/foreach.hpp>
 
