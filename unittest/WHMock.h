@@ -47,7 +47,7 @@ public:
     
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX ) const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
-    virtual bool summarize(const Host::Human& human);
+    virtual bool summarize(const Host::Human& human)const;
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool optionalPqTreatment();

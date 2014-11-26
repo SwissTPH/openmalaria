@@ -40,7 +40,7 @@ double WHMock::pTransGenotype( double, double, size_t ){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-bool WHMock::summarize(const Host::Human& human){
+bool WHMock::summarize(const Host::Human& human)const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 

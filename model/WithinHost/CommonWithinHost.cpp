@@ -21,6 +21,7 @@
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
 #include "util/AgeGroupInterpolation.h"
@@ -236,45 +237,57 @@ struct InfGenotypeSorter {
     }
 } infGenotypeSorter;
 
-void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
-    if( infections.size() == 0 ) return;        // nothing to report
-    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
-    if( reportInfectedOrPatentInfected ){
-        for (std::list<CommonInfection*>::const_iterator inf =
-            infections.begin(); inf != infections.end(); ++inf) {
-            uint32_t genotype = (*inf)->genotype();
-            mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
-            if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
-                mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
+bool CommonWithinHost::summarize( const Host::Human& human )const{
+    pathogenesisModel->summarize( human );
+    //TODO: call pkpdModel->summarize() or similar to report drug concentrations
+    
+    if( infections.size() > 0 ){
+        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        if( reportInfectedOrPatentInfected ){
+            for (std::list<CommonInfection*>::const_iterator inf =
+                infections.begin(); inf != infections.end(); ++inf) {
+                uint32_t genotype = (*inf)->genotype();
+                mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
+                if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
+                    mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
+                }
             }
         }
-    }
-    if( reportInfectionsByGenotype ){
-        // Instead of storing nInfs and total density by genotype we sort
-        // infections by genotype and report each in sequence.
-        // We don't sort in place since that would affect random number sampling
-        // order when updating, and the monitoring system should not in my
-        // opinion affect outputs (since it would make testing harder).
-        sortedInfs.assign( infections.begin(), infections.end() );
-        sort( sortedInfs.begin(), sortedInfs.end(), infGenotypeSorter );
-        vector<CommonInfection*>::const_iterator inf = sortedInfs.begin();
-        while( inf != sortedInfs.end() ){
-            uint32_t genotype = (*inf)->genotype();
-            double dens = 0.0;
-            do{     // at start: genotype is that of the current infection, dens is 0
-                dens += (*inf)->getDensity();
-                ++inf;
-            }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
-            // we had at least one infection of this genotype
-            mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
-            if( Monitoring::Survey::diagnostic().isPositive(dens) ){
-                mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
-                mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
+        if( reportInfectionsByGenotype ){
+            // Instead of storing nInfs and total density by genotype we sort
+            // infections by genotype and report each in sequence.
+            // We don't sort in place since that would affect random number sampling
+            // order when updating, and the monitoring system should not in my
+            // opinion affect outputs (since it would make testing harder).
+            sortedInfs.assign( infections.begin(), infections.end() );
+            sort( sortedInfs.begin(), sortedInfs.end(), infGenotypeSorter );
+            vector<CommonInfection*>::const_iterator inf = sortedInfs.begin();
+            while( inf != sortedInfs.end() ){
+                uint32_t genotype = (*inf)->genotype();
+                double dens = 0.0;
+                do{     // at start: genotype is that of the current infection, dens is 0
+                    dens += (*inf)->getDensity();
+                    ++inf;
+                }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
+                // we had at least one infection of this genotype
+                mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
+                if( Monitoring::Survey::diagnostic().isPositive(dens) ){
+                    mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
+                    mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
+                }
             }
         }
     }
     
-    //TODO: call pkpdModel->summarize() or similar to report drug concentrations
+    // Some treatments (simpleTreat with steps=-1) clear infections immediately
+    // (and are applied after update()), thus infections.size() may be 0 while
+    // totalDensity > 0. Here we report the last calculated density.
+    if( Monitoring::Survey::diagnostic().isPositive(totalDensity) ){
+        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        return true;    // patent
+    }
+    return false;       // not patent
 }
 
 

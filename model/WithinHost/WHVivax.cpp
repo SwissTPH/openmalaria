@@ -259,7 +259,7 @@ double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
     throw util::unimplemented_exception("genotype tracking for vivax");
 }
 
-bool WHVivax::summarize(const Host::Human& human) {
+bool WHVivax::summarize(const Host::Human& human) const{
     if( infections.size() == 0 ) return false;  // no infections: not patent, nothing to report
     mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
     bool patentHost = false;

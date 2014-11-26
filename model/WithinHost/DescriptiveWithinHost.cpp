@@ -22,6 +22,7 @@
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
@@ -165,20 +166,33 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 
 // -----  Summarize  -----
 
-void DescriptiveWithinHostModel::summarizeInfs( const Host::Human& human )const{
-    if( infections.size() == 0 ) return;        // nothing to report
-    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
-    // (patent) infections are reported by genotype, even though we don't have
-    // genotype in this model
-    mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
-    if( reportPatentInfected ){
-        for (std::list<DescriptiveInfection>::const_iterator inf =
-            infections.begin(); inf != infections.end(); ++inf) {
-            if( Monitoring::Survey::diagnostic().isPositive( inf->getDensity() ) ){
-                mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
+    pathogenesisModel->summarize( human );
+    
+    if( infections.size() > 0 ){
+        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        // (patent) infections are reported by genotype, even though we don't have
+        // genotype in this model
+        mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
+        if( reportPatentInfected ){
+            for (std::list<DescriptiveInfection>::const_iterator inf =
+                infections.begin(); inf != infections.end(); ++inf) {
+                if( Monitoring::Survey::diagnostic().isPositive( inf->getDensity() ) ){
+                    mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+                }
             }
         }
     }
+    
+    // Some treatments (simpleTreat with steps=-1) clear infections immediately
+    // (and are applied after update()), thus infections.size() may be 0 while
+    // totalDensity > 0. Here we report the last calculated density.
+    if( Monitoring::Survey::diagnostic().isPositive(totalDensity) ){
+        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        return true;    // patent
+    }
+    return false;       // not patent
 }
 
 

@@ -119,7 +119,7 @@ public:
     }
     
     /// @returns true if host has patent parasites
-    virtual bool summarize(const Host::Human& human) =0;
+    virtual bool summarize(const Host::Human& human) const =0;
 
     /// Create a new infection within this human
     virtual void importInfection() =0;

@@ -66,9 +66,10 @@ public:
     static CommonInfection* (* checkpointedInfection) (istream& stream);
     //@}
     
+    virtual bool summarize( const Host::Human& human )const;
+    
 protected:
     virtual void clearInfections( Treatments::Stages stage );
-    virtual void summarizeInfs( const Host::Human& human )const;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

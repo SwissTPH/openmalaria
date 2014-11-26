@@ -60,8 +60,6 @@ public:
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX )const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
-    virtual bool summarize(const Host::Human& human);
-    
     // No PQ treatment for falciparum in current models:
     virtual bool optionalPqTreatment(){ return false; }
     
@@ -86,10 +84,6 @@ protected:
      * @param stage Which stages of the infection are affected
      */
     virtual void clearInfections( Treatments::Stages stage ) =0;
-    
-    /// For summarizing: counts total and patent infections during monitoring
-    /// (i.e. at start of time step).
-    virtual void summarizeInfs( const Host::Human& human )const =0;
     
     ///@brief Immunity model parameters
     //@{
