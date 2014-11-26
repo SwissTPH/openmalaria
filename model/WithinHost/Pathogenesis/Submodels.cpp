@@ -28,7 +28,6 @@ using namespace std;
 namespace OM {
 namespace WithinHost {
 namespace Pathogenesis {
-    using namespace Monitoring;
 
 // ———  Müller presentation model  ———
 

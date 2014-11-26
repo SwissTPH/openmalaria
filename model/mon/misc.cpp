@@ -22,12 +22,13 @@
 #include "mon/management.h"
 #include "mon/AgeGroup.h"
 #include "mon/reporting.h"
-#include "Monitoring/Survey.h"  // for init
 #include "interventions/InterventionManager.hpp"
 #include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
 #include "schema/monitoring.h"
+
+#include "WithinHost/Diagnostic.h"
 
 #include <gzstream/gzstream.h>
 #include <fstream>
@@ -88,8 +89,7 @@ void initSurveyTimes( const OM::Parameters& parameters,
     }
     
     mon::AgeGroup::init( monitoring );
-    Monitoring::Survey::init( parameters, scenario, monitoring );
-    
+
     internal::initReporting( scenario );
 }
 

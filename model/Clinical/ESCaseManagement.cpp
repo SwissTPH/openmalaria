@@ -21,7 +21,6 @@
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/CMDecisionTree.h"
 #include "Clinical/EventScheduler.h"
-#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 
@@ -33,7 +32,6 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
     using namespace boost::assign;
-    using namespace Monitoring;
     using boost::format;
 
 

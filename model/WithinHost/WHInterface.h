@@ -22,7 +22,6 @@
 #define Hmod_WithinHost_Interface
 
 #include "Global.h"
-#include "Monitoring/Survey.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Pathogenesis/State.h"
 #include "Parameters.h"
@@ -37,6 +36,9 @@ namespace scnXml{
 class UnittestUtil;
 
 namespace OM {
+namespace Host {
+    class Human;
+}
 namespace WithinHost {
 
 /**

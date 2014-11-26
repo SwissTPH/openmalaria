@@ -21,13 +21,11 @@
 #include "Global.h"
 #include "interventions/GVI.h"
 #include "Host/Human.h"
-#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 #include "util/errors.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
-    using namespace Monitoring;
 
 vector<GVIComponent*> GVIComponent::componentsByIndex;
 

@@ -19,7 +19,6 @@
  */
 
 #include "Population.h"
-#include "Monitoring/Survey.h"
 #include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
@@ -28,6 +27,7 @@
 #include "Host/NeonatalMortality.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/Genotypes.h"
+#include "WithinHost/Diagnostic.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "PkPd/PkPdModel.h"
@@ -280,7 +280,7 @@ void Population::ctsRecentBirths (ostream& stream){
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->getWithinHostModel().diagnosticResult(Monitoring::Survey::diagnostic()) )
+        if( iter->getWithinHostModel().diagnosticResult(WithinHost::diagnostics::monitoringDiagnostic()) )
             ++patent;
     }
     stream << '\t' << patent;

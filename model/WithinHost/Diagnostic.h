@@ -66,7 +66,7 @@ private:
 class diagnostics {
 public:
     /** Initialise from input data. */
-    static void init( const Parameters& parameters, const scnXml::Diagnostics& diagnostics );
+    static void init( const Parameters& parameters, const scnXml::Scenario& scenario );
     
     /** Look up a diagnostic by name and get a reference to it.
      * 
@@ -76,9 +76,18 @@ public:
     
     /** Make a new diagnostic with deterministic density and return a reference. */
     static const Diagnostic& make_deterministic( double minDens );
+
+    /// Static access functions
+
+    static inline const Diagnostic& monitoringDiagnostic(){
+        assert( monitoring_diagnostic != 0 );
+        return *monitoring_diagnostic;
+    }
+
     
 private:
     static void clear();        // for unit tests
+    static const Diagnostic* monitoring_diagnostic;
     friend class ::UnittestUtil;
 };
 

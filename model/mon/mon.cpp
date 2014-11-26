@@ -23,7 +23,6 @@
 #include "mon/management.h"
 #define H_OM_mon_cpp
 #include "mon/OutputMeasures.hpp"
-#include "Monitoring/Survey.h"
 #include "WithinHost/Genotypes.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"

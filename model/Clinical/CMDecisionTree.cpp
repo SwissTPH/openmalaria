@@ -23,7 +23,6 @@
 #include "WithinHost/Diagnostic.h"
 #include "PkPd/LSTMTreatments.h"
 #include "util/random.h"
-#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "interventions/Interfaces.hpp"
@@ -40,7 +39,6 @@ namespace OM { namespace Clinical {
 
 using WithinHost::Diagnostic;
 using WithinHost::diagnostics;
-using Monitoring::Survey;
 using namespace OM::util;
 using namespace boost::assign;
 using boost::ptr_vector;

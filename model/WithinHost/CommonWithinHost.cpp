@@ -264,7 +264,7 @@ void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
             infections.begin(); inf != infections.end(); ++inf) {
             uint32_t genotype = (*inf)->genotype();
             mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
-            if( Monitoring::Survey::diagnostic().isPositive( (*inf)->getDensity() ) ){
+            if( WithinHost::diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity() ) ){
                 mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
             }
         }
@@ -287,7 +287,7 @@ void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
             }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
             // we had at least one infection of this genotype
             mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
-            if( Monitoring::Survey::diagnostic().isPositive(dens) ){
+            if( WithinHost::diagnostics::monitoringDiagnostic().isPositive(dens) ){
                 mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
                 mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
             }

@@ -95,9 +95,7 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // 2) elements depending on only elements initialised in (1):
     
     // Depends on parameters:
-    if( scenario.getDiagnostics().present() ){
-        WithinHost::diagnostics::init( parameters, scenario.getDiagnostics().get() );
-    }
+    WithinHost::diagnostics::init( parameters, scenario );
     
     // Survey init depends on diagnostics, monitoring:
     mon::initSurveyTimes( parameters, scenario, scenario.getMonitoring() );

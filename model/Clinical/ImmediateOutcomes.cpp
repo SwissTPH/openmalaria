@@ -22,7 +22,6 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
-#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -30,7 +29,6 @@
 namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
-using namespace Monitoring;
 
 // These parameters are set by setHealthSystem() and do not need checkpointing.
 double ImmediateOutcomes::cureRateUCOfficial[ImmediateOutcomes::NumCaseTypes];
@@ -187,7 +185,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         
         if( useDiagnosticUC ){
             mon::reportMHI( mon::MHT_TREAT_DIAGNOSTICS, human, 1 );
-            if( !human.withinHostModel->diagnosticResult(Survey::diagnostic()) )
+            if( !human.withinHostModel->diagnosticResult(WithinHost::diagnostics::monitoringDiagnostic()) )
                 return; // negative outcome: no treatment
         }
         

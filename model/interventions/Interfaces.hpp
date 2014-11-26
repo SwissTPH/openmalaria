@@ -21,7 +21,6 @@
 #define OM_INTERVENTIONS_INTERFACES
 
 #include "Global.h"
-#include "Monitoring/Survey.h"
 #include "mon/reporting.h"
 #include <schema/interventions.h>
 #include <boost/integer_traits.hpp>

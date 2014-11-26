@@ -22,7 +22,6 @@
 #define Hmod_Anopheles_Transmission
 
 #include "Global.h"
-#include "Monitoring/Survey.h"
 #include "Transmission/Anopheles/EmergenceModel.h"
 #include "schema/entomology.h"
 

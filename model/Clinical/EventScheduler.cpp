@@ -22,7 +22,6 @@
 #include "Clinical/CaseManagementCommon.h"
 #include "util/random.h"
 #include "WithinHost/WHInterface.h"
-#include "Monitoring/Survey.h"
 #include "mon/reporting.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -33,7 +32,6 @@
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
-    using namespace Monitoring;
 
 SimTime ClinicalEventScheduler::maxUCSeekingMemory(sim::never());
 SimTime ClinicalEventScheduler::uncomplicatedCaseDuration(sim::never());

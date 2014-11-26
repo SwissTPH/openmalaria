@@ -23,6 +23,7 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
+#include "util/CommandLine.h"
 #include "schema/scenario.h"
 #include <limits>
 #include <boost/ptr_container/ptr_map.hpp>
@@ -106,18 +107,68 @@ bool Diagnostic::isPositive( double dens ) const {
 
 typedef boost::ptr_map<string,Diagnostic> Diagnostic_set;
 Diagnostic_set diagnostic_set;
+const Diagnostic* diagnostics::monitoring_diagnostic = 0;
 
 void diagnostics::clear(){
     diagnostic_set.clear();
 }
 
-void diagnostics::init( const Parameters& parameters, const scnXml::Diagnostics& diagnostics ){
-    foreach( const scnXml::Diagnostic& diagnostic, diagnostics.getDiagnostic() ){
-        string name = diagnostic.getName();     // conversion fails without this extra line
-        bool inserted = diagnostic_set.insert( name, new Diagnostic(parameters, diagnostic) ).second;
-        if( !inserted ){
-            throw util::xml_scenario_error( string("diagnostic with this name already set: ").append(diagnostic.getName()) );
+void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& scenario ){
+    if(scenario.getDiagnostics().present()){
+        foreach( const scnXml::Diagnostic& diagnostic, scenario.getDiagnostics().get().getDiagnostic() ){
+            string name = diagnostic.getName();     // conversion fails without this extra line
+            bool inserted = diagnostic_set.insert( name, new Diagnostic(parameters, diagnostic) ).second;
+            if( !inserted ){
+                throw util::xml_scenario_error( string("diagnostic with this name already set: ").append(diagnostic.getName()) );
+            }
         }
+    }
+
+    const scnXml::Surveys& surveys = scenario.getMonitoring().getSurveys();
+    if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+        // So far the implemented Vivax code does not produce parasite
+        // densities, thus this diagnostic model cannot be used.
+        diagnostics::monitoring_diagnostic = &diagnostics::make_deterministic( numeric_limits<double>::quiet_NaN() );
+    }else if( surveys.getDetectionLimit().present() ){
+        if( surveys.getDiagnostic().present() ){
+            throw util::xml_scenario_error( "monitoring/surveys: do not "
+                "specify both detectionLimit and diagnostic" );
+        }
+        if( util::CommandLine::option( util::CommandLine::DEPRECATION_WARNINGS ) ){
+            std::cerr << "Deprecation warning: monitoring/surveys: "
+                "specification of \"diagnostic\" is suggested over \"detectionLimit\"" << std::endl;
+        }
+
+        // This controls whether the detection limit is specified relative to
+        // the Garki or other methods.
+        double densitybias = numeric_limits<double>::quiet_NaN();
+        if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
+            densitybias = parameters[Parameters::DENSITY_BIAS_GARKI];
+        } else {
+#ifdef WITHOUT_BOINC
+            if( scenario.getAnalysisNo().present() ){
+                int analysisNo = scenario.getAnalysisNo().get();
+                if ((analysisNo >= 22) && (analysisNo <= 30)) {
+                    cerr << "Warning: these analysis numbers used to mean "
+                        "use Garki density bias. If you do want to use this, "
+                        "specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
+                }
+            }
+#endif
+            densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
+        }
+        double detectionLimit = surveys.getDetectionLimit().get() * densitybias;
+        diagnostics::monitoring_diagnostic = &diagnostics::make_deterministic( detectionLimit );
+    }else{
+        if( !surveys.getDiagnostic().present() ){
+            throw util::xml_scenario_error( "monitoring/surveys: require "
+                "either detectionLimit or diagnostic" );
+        }
+        if( util::ModelOptions::option(util::GARKI_DENSITY_BIAS) ){
+            throw util::xml_scenario_error( "Use of GARKI_DENSITY_BIAS is not "
+                "appropriate when monitoring/surveys/diagnostic is used." );
+        }
+        diagnostics::monitoring_diagnostic = &diagnostics::get( surveys.getDiagnostic().get() );
     }
 }
 

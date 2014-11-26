@@ -154,7 +154,8 @@ public:
         diagsElt.getDiagnostic().push_back( microscopy );
         diagsElt.getDiagnostic().push_back( rdt );
         Parameters parameters( prepareParameters() );
-        diagnostics::init( parameters, diagsElt );
+        dummyXML::scenario.setDiagnostics(diagsElt);
+        diagnostics::init( parameters, dummyXML::scenario );
     }
     
     static void PkPdSuiteSetup (PkPd::PkPdModel::ActiveModel modelID) {

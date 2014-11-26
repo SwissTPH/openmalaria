@@ -23,7 +23,6 @@
 #include "Clinical/CMDecisionTree.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
-#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"

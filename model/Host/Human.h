@@ -22,7 +22,6 @@
 #include "Global.h"
 #include "Transmission/PerHost.h"
 #include "InfectionIncidenceModel.h"
-#include "Monitoring/Survey.h"
 #include "mon/AgeGroup.h"
 #include "interventions/HumanComponents.h"
 #include "util/checkpoint_containers.h"

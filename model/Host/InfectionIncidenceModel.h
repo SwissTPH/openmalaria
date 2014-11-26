@@ -22,7 +22,6 @@
 #define Hmod_InfectionIncidence
 
 #include "Global.h"
-#include "Monitoring/Survey.h"
 #include "Transmission/PerHost.h"
 
 namespace OM {

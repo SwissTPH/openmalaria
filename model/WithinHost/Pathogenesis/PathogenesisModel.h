@@ -23,7 +23,6 @@
 
 #include "Global.h"
 #include "Parameters.h"
-#include "Monitoring/Survey.h"
 #include "WithinHost/Pathogenesis/State.h"
 
 namespace scnXml{
@@ -31,7 +30,9 @@ namespace scnXml{
     class Clinical;
 }
 
-namespace OM { namespace WithinHost { namespace Pathogenesis {
+namespace OM {
+    namespace Host { class Human; }
+    namespace WithinHost { namespace Pathogenesis {
 
 /*! PathogenesisModel abstract base class.
  *

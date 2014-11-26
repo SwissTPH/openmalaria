@@ -23,7 +23,6 @@
 #include "Host/Human.h"
 #include "util/random.h"
 #include "util/errors.h"
-#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 
 #include "R_nmath/qnorm.h"
@@ -31,7 +30,6 @@
 
 namespace OM { namespace interventions {
     using util::random::poisson;
-    using namespace Monitoring;
 
 vector<IRSComponent*> IRSComponent::componentsByIndex;
 

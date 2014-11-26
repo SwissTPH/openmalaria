@@ -24,7 +24,6 @@
 #include "Global.h"
 #include "Clinical/CMDecisionTree.h"    // needed for ESDecisionMap
 #include "WithinHost/WHInterface.h"
-#include "Monitoring/Survey.h"
 #include "schema/pharmacology.h"
 
 #include <cassert>
@@ -35,7 +34,6 @@
 
 namespace OM { namespace Clinical {
 using WithinHost::WHInterface;
-using Monitoring::Survey;
 
 
 /** Tracks clinical status (sickness), does case management for new events,

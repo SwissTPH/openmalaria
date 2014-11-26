@@ -46,7 +46,6 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
-using namespace Monitoring;
 
 double WHFalciparum::sigma_i;
 double WHFalciparum::immPenalty_22;
@@ -247,7 +246,7 @@ bool WHFalciparum::summarize (const Host::Human& human) {
     summarizeInfs( human );
     // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
     // (and are applied after update()); here we report the last calculated density.
-    if( diagnosticResult(Survey::diagnostic()) ){
+    if( diagnosticResult(WithinHost::diagnostics::monitoringDiagnostic()) ){
         mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
         mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;

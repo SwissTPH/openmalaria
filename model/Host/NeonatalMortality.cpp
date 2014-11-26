@@ -22,7 +22,6 @@
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/Diagnostic.h"
-#include "Monitoring/Survey.h"
 #include "util/random.h"
 #include "util/CommandLine.h"
 #include "schema/healthSystem.h"
@@ -73,7 +72,7 @@ void NeonatalMortality::init( const scnXml::Clinical& clinical ){
                 "used by the Neonatal Mortality model is recommended "
                 "(model/clinical/neonatalMortality)" << endl;
         }
-        neonatalDiagnostic = &Monitoring::Survey::diagnostic();
+        neonatalDiagnostic = &WithinHost::diagnostics::monitoringDiagnostic();
     }
 }
 

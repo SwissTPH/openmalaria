@@ -24,7 +24,6 @@
 // The includes here are more for documentation than required.
 #include "Global.h"
 #include "util/errors.h"
-#include "Monitoring/Survey.h"
 #include "Clinical/ClinicalModel.h"
 #include "Population.h"
 #include "Transmission/TransmissionModel.h"

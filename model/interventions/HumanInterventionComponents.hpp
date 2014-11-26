@@ -24,7 +24,6 @@
 // The includes here are more for documentation than required.
 #include "interventions/Interfaces.hpp"
 #include "interventions/InterventionManager.hpp"
-#include "Monitoring/Survey.h"
 #include "util/ModelOptions.h"
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
@@ -41,7 +40,6 @@ namespace OM { namespace interventions {
 using Host::Human;
 using WithinHost::Diagnostic;
 using WithinHost::diagnostics;
-using namespace Monitoring;
 
 // ———  HumanIntervention  ———
 

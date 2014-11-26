@@ -26,7 +26,6 @@
 #include "util/ModelOptions.h"
 #include "schema/interventions.h"
 #include "util/StreamValidator.h"
-#include "Monitoring/Survey.h"
 
 #include <limits>
 #include <cmath>
@@ -34,7 +33,6 @@
 namespace OM {
 namespace interventions {
 using namespace OM::util;
-using namespace Monitoring;
 
 vector<VaccineComponent*> VaccineComponent::params;
 ComponentId VaccineComponent::reportComponent = ComponentId_pop;

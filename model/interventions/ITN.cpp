@@ -23,12 +23,10 @@
 #include "util/errors.h"
 #include "util/SpeciesIndexChecker.h"
 #include "Host/Human.h"
-#include "Monitoring/Survey.h"
 #include "R_nmath/qnorm.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
-    using namespace Monitoring;
 
 vector<ITNComponent*> ITNComponent::componentsByIndex;
 

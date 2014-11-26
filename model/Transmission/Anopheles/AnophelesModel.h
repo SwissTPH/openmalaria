@@ -22,7 +22,6 @@
 #define Hmod_AnophelesModel
 
 #include "Global.h"
-#include "Monitoring/Survey.h"
 #include "Transmission/Anopheles/PerHost.h"
 #include "Transmission/PerHost.h"
 #include "Transmission/Anopheles/MosqTransmission.h"

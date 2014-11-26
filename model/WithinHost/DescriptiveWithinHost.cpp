@@ -177,7 +177,7 @@ void DescriptiveWithinHostModel::summarizeInfs( const Host::Human& human )const{
     if( reportPatentInfected ){
         for (std::list<DescriptiveInfection>::const_iterator inf =
             infections.begin(); inf != infections.end(); ++inf) {
-            if( Monitoring::Survey::diagnostic().isPositive( inf->getDensity() ) ){
+            if( WithinHost::diagnostics::monitoringDiagnostic().isPositive( inf->getDensity() ) ){
                 mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
             }
         }

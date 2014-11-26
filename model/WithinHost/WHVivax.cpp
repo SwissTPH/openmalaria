@@ -25,6 +25,7 @@
 #include "mon/reporting.h"
 #include "util/random.h"
 #include "util/errors.h"
+#include "util/checkpoint_containers.h"
 #include <schema/scenario.h>
 #include <algorithm>
 #include <limits>
