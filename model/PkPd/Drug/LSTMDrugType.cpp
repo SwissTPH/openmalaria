@@ -62,6 +62,10 @@ void LSTMDrugType::clear()
     drugTypeNames.clear();
 }
 
+size_t LSTMDrugType::numDrugTypes(){
+    return drugTypes.size();
+}
+
 size_t LSTMDrugType::findDrug(string _abbreviation) {
     map<string,size_t>::const_iterator it = drugTypeNames.find (_abbreviation);
     if (it == drugTypeNames.end())

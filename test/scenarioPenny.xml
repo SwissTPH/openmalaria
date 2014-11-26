@@ -959,25 +959,6 @@
       <EIRDaily origin="monthly">0.1291</EIRDaily>
     </nonVector>
   </entomology>
-  <pharmacology>
-    <treatments/>
-    <drugs>
-      <drug abbrev="effective">
-        <PD>
-          <phenotype>
-            <max_killing_rate>1e7</max_killing_rate>
-            <IC50>1</IC50>
-            <slope>1</slope>
-          </phenotype>
-        </PD>
-        <PK>
-          <negligible_concentration>1e-5</negligible_concentration>
-          <half_life>0.00069</half_life>
-          <vol_dist>0.01667</vol_dist>
-        </PK>
-      </drug>
-    </drugs>
-  </pharmacology>
   <model>
     <ModelOptions>
       <option name="PENNY_WITHIN_HOST_MODEL" value="true"/>

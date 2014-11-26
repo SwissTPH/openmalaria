@@ -44,32 +44,45 @@ struct OutMeasure{
     bool byCohort;      // segregate by cohort
     bool bySpecies;     // segregate by species of vector
     bool byGenotype;    // segregate by genotype of parasite
+    bool byDrug;        // segregate by drug type
     uint8_t method;     // deployment method (see above)
     
     // Convenience constructors:
     OutMeasure() : outId(-1), m(M_NUM), isDouble(false), byAge(false),
-                byCohort(false), bySpecies(false), byGenotype(false), method(0) {}
+                byCohort(false), bySpecies(false), byGenotype(false),
+                byDrug(false), method(0) {}
     OutMeasure( int outId, Measure m, bool isDouble, bool byAge, bool byCohort,
-                bool bySpecies, bool byGenotype, uint8_t method ) :
+                bool bySpecies, bool byGenotype, bool byDrug, uint8_t method ) :
         outId(outId), m(m), isDouble(isDouble), byAge(byAge), byCohort(byCohort),
-        bySpecies(bySpecies), byGenotype(byGenotype), method(method) {}
+        bySpecies(bySpecies), byGenotype(byGenotype), byDrug(byDrug),
+        method(method) {}
     // Simple reports
     static OutMeasure value( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, false, false, false, false, Deploy::NA );
+        return OutMeasure( outId, m, isDouble, false, false, false, false,
+                           false, Deploy::NA );
     }
     // Something with reports segregated by human age and cohort membership
     static OutMeasure humanAC( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, true, true, false, false, Deploy::NA );
+        return OutMeasure( outId, m, isDouble, true, true, false, false, false,
+                           Deploy::NA );
     }
     // Something with reports segregated by human age, cohort membership
     // and parasite genotype.
     static OutMeasure humanACG( int outId, Measure m, bool isDouble ){
-        return OutMeasure( outId, m, isDouble, true, true, false, true, Deploy::NA );
+        return OutMeasure( outId, m, isDouble, true, true, false, true, false,
+                           Deploy::NA );
+    }
+    // Something with reports segregated by human age, cohort membership
+    // and drug type.
+    static OutMeasure humanACP( int outId, Measure m, bool isDouble ){
+        return OutMeasure( outId, m, isDouble, true, true, false, false, true,
+                           Deploy::NA );
     }
     // Reports by mosquito species and optionally parasite genotype.
     // All are floating point (currently).
     static OutMeasure species( int outId, Measure m, bool byGenotype ){
-        return OutMeasure( outId, m, true, false, false, true, byGenotype, Deploy::NA );
+        return OutMeasure( outId, m, true, false, false, true, byGenotype,
+                           false, Deploy::NA );
     }
     // Deployments with reports segregated by human age and cohort membership
     // Method can be Deploy::NA to not match deployments (but in this case,
@@ -78,11 +91,14 @@ struct OutMeasure{
     // or it can be a bit-or-ed combination of any of the three methods (to
     // count deployments of multiple types simultaneously).
     static OutMeasure humanDeploy( int outId, Measure m, Deploy::Method method ){
-        assert( method >= 0 && method <= (Deploy::TIMED|Deploy::CTS|Deploy::TREAT) );
-        return OutMeasure( outId, m, false, true, true, false, false, method );
+        assert( method >= 0 &&
+            method <= (Deploy::TIMED|Deploy::CTS|Deploy::TREAT) );
+        return OutMeasure( outId, m, false, true, true, false, false, false,
+                           method );
     }
     static OutMeasure obsolete( int outId ){
-        return OutMeasure( outId, M_OBSOLETE, false, false, false, false, false, Deploy::NA );
+        return OutMeasure( outId, M_OBSOLETE, false, false, false, false,
+                           false, false, Deploy::NA );
     }
 };
 
@@ -364,6 +380,16 @@ void defineOutMeasures(){
      * parasite density (like sumlogDens but per genotype). */
     namedOutMeasures["logDensByGenotype"] =
         OutMeasure::humanACG( 71, MHF_LOG_DENSITY_GENOTYPE, true );
+    /** For each drug type in the pharmacology section of the XML, report the
+     * number of humans with non-zero concentration of this drug in their
+     * blood. */
+    namedOutMeasures["nHostDrugConcNonZero"] = 
+        OutMeasure::humanACP( 72, MHR_HOSTS_POS_DRUG_CONC, false );
+    /** For each drug type in the pharmacology section of the XML, report the
+     * sum of the natural logarithm of the drug concentration in hosts with
+     * non-zero concentration. */
+    namedOutMeasures["sumLogDrugConcNonZero"] =
+        OutMeasure::humanACP( 73, MHF_LOG_DRUG_CONC, true );
 }
 
 }

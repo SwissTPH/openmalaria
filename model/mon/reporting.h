@@ -60,6 +60,9 @@ enum Measure{
     MHR_INFECTED_GENOTYPE,
     // Number of patent infected hosts by genotype. Units: humans
     MHR_PATENT_GENOTYPE,
+    // Number of humans with non-zero drug concentration in blood.
+    // Per age group, cohort and drug type. Units: humans.
+    MHR_HOSTS_POS_DRUG_CONC,
     
     // ———  MHT: measures for human treatments (integers)  ———
     // Number of first line treatments in humans. Units: treatments (whole courses)
@@ -127,7 +130,7 @@ enum Measure{
     MHD_TREAT,
     // Number of screenings done (e.g. tests used in MSAT/T&T)
     MHD_SCREEN,
-    // Number of sub-pop recruitments without deployment (deployments of "FIXME" intervention)
+    // Number of sub-pop recruitments without deployment (deployments of "recruitmentOnly" intervention)
     MHD_RECRUIT,
     // Number of deployments (all interventions)
     MHD_ALL_DEPLOYS,
@@ -145,6 +148,9 @@ enum Measure{
     MHF_LOG_DENSITY_GENOTYPE,
     // Report of age of humans. Units: years
     MHF_AGE,
+    // Sum of log of drug concentration in (human) blood where > 0.
+    // Per age group, cohort and drug type. Units: log(mg/l)
+    MHF_LOG_DRUG_CONC,
     
     // ———  MVF: vector (transmission) measures (doubles)  ———
     // Infectiousness of human population to mosquitoes
@@ -193,6 +199,9 @@ void reportMSACI( Measure measure, size_t survey, AgeGroup ageGroup,
 /// Report some value (integer) for some human and genotype to the current survey.
 void reportMHGI( Measure measure, const Host::Human& human, size_t genotype,
                  int val );
+/// Report some value (integer) for some human and drug index to the current survey.
+void reportMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
+                int val );
 /// Report one deployment for some human to the current survey.
 void reportMHD( Measure measure, const Host::Human& human,
                 Deploy::Method method );
@@ -206,10 +215,13 @@ void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
 /// Report some value (floating point) for some human and genotype to the current survey.
 void reportMHGF( Measure measure, const Host::Human& human, size_t genotype,
                  double val );
+/// Report some value (floating point) for some human and drug index to the current survey.
+void reportMHPF( Measure measure, const Host::Human& human, size_t drugIndex, double val );
 /// Report some value (floating point) by vector species to the current survey.
 void reportMSF( Measure measure, size_t species, double val );
 /// Report some value (floating point) by genotype to the current survey.
 void reportMSGF( Measure measure, size_t species, size_t genotype, double val );
+
 /// Query whether an output measure is used.
 /// This function is not fast, so it is recommended to cache the result.
 bool isUsedM( Measure measure );

@@ -99,7 +99,9 @@ measureNames = {
     68 : 'sumAge',
     69 : 'nInfectByGenotype',
     70 : 'nPatentByGenotype',
-    71 : 'logDensByGenotype'
+    71 : 'logDensByGenotype',
+    72 : 'nHostDrugConcNonZero',
+    73 : 'sumLogDrugConcNonZero'
 }
 
 # List of measure groups. Each includes name, boolean (true if use log scale),
@@ -108,7 +110,7 @@ measureNames = {
 # Note: color names are defined by matplotlib:
 # /usr/lib64/python3.3/site-packages/matplotlib/colors.py
 combinedMeasures = [
-    ('hosts',[(0,'all','black')]),
+    ('hosts',[(0,'all','black'),(72,'hosts with non-zero drug conc','green')]),
     ('infected hosts',[(1,'all','red'),(2,'expected','green'),(3,'patent','blue'),(43,'new','purple'),(69,'all (by genotype)','orange'),(70,'patent (by genotype)','black')]),
     ('sum log',[(4,'pyrogenic threshold','purple'),(5,'parasite density','green'),(71,'parasite density (by genotype)','orange')]),
     ('total infections',[(6,'all','red'),(8,'patent','blue')]),
@@ -135,7 +137,8 @@ combinedMeasures = [
     ('recruit only',[(65,'timed','purple'),(66,'cts','pink')]),
     ('intervention deployments',[(67,'via CM','grey')]),
     ('host age',[(68,'sum','darkred')]),
-    ('user defined',[(90,'90','red'),(91,'91','brown'),(92,'92','green')])
+    ('user defined',[(90,'90','red'),(91,'91','brown'),(92,'92','green')]),
+    ('sum log',[(73, 'drug concentration', 'green')])
 ]
 appendMeasureNumber=None
 def measureNumber(m):

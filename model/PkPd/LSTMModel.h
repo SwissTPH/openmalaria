@@ -26,7 +26,11 @@
 namespace scnXml{
     class PKPDMedication;
 }
-namespace OM { namespace PkPd {
+namespace OM {
+namespace Host{
+    class Human;
+}
+namespace PkPd {
 
 struct MedicateData {
     MedicateData () :
@@ -121,6 +125,9 @@ public:
      * at the end of the day, as well as clear data once drug concentrations
      * become negligible. */
     void decayDrugs ();
+    
+    /** Make summaries of drug concentration data. */
+    void summarize( const Host::Human& human ) const;
     
 private:
     /** Medicate drugs to an individual, which act on infections the following

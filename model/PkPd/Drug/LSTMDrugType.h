@@ -127,6 +127,9 @@ public:
     /** Clear previous data. Only needed for testing. */
     static void clear();
     
+    /** Get the number of drug types. */
+    static size_t numDrugTypes();
+    
     /** Find a DrugType by its abbreviation, and returns its index.
      *
      * Throws if the drug isn't found, so you can rely on it returning a valid

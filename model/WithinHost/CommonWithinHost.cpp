@@ -239,7 +239,7 @@ struct InfGenotypeSorter {
 
 bool CommonWithinHost::summarize( const Host::Human& human )const{
     pathogenesisModel->summarize( human );
-    //TODO: call pkpdModel->summarize() or similar to report drug concentrations
+    pkpdModel.summarize( human );
     
     if( infections.size() > 0 ){
         mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );

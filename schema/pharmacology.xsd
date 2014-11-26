@@ -24,8 +24,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="schedule" type="om:PKPDSchedule" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element name="dosages" type="om:PKPDDosages" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="schedule" type="om:PKPDSchedule" minOccurs="1" maxOccurs="unbounded"/>
+            <xs:element name="dosages" type="om:PKPDDosages" minOccurs="1" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -38,7 +38,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="drug" type="om:PKPDDrug" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element name="drug" type="om:PKPDDrug" minOccurs="1" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>

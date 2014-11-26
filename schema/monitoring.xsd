@@ -327,6 +327,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Report by parasite genotype;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="byDrugType" type="xs:boolean" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              If true, the measure is reported for each drug type
+              separately. If false, values are summed across all drug types
+              and only the sum reported. If not specified, separate
+              categories will be reported if the measure supports this.
+            </xs:documentation>
+            <xs:appinfo>name:Report by drug type;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>

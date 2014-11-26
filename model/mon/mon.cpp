@@ -51,7 +51,7 @@ typedef FastDelegate4<ostream&,size_t,int,size_t> WriteDelegate;
 
 // Store by human age and cohort
 template<typename T, bool BY_AGE, bool BY_COHORT, bool BY_SPECIES,
-    bool BY_GENOTYPE>
+    bool BY_GENOTYPE, bool BY_DRUG>
 class Store{
     // This maps from an index in reports to an output measure
     vector<int> outMeasures;
@@ -67,21 +67,26 @@ class Store{
     typedef multimap<int,pair<uint8_t,size_t> > DeployInd_t;
     DeployInd_t deployIndices;
     
-    size_t nAgeGroups, nCohortSets, nSpecies, nGenotypes;
+    size_t nAgeGroups, nCohortSets, nSpecies, nGenotypes, nDrugs;
     // These are the stored reports (multidimensional; use size() and index())
     vector<T> reports;
     
     // get size of reports
     inline size_t size(){ return outMeasures.size() * impl::nSurveys *
-        nAgeGroups * nCohortSets * nSpecies * nGenotypes; }
+        nAgeGroups * nCohortSets * nSpecies * nGenotypes * nDrugs; }
     // get an index in reports
-    inline size_t index( size_t m, size_t s, size_t a, size_t c, size_t sp, size_t g ){
-        return g + nGenotypes * (sp + nSpecies * (c + nCohortSets *
-            (a + nAgeGroups * (s + impl::nSurveys * m))));
+    inline size_t index( size_t m, size_t s, size_t a, size_t c, size_t sp, size_t g, size_t d ){
+        return d + nDrugs *
+            (g + nGenotypes *
+            (sp + nSpecies *
+            (c + nCohortSets *
+            (a + nAgeGroups *
+            (s + impl::nSurveys *
+            m)))));
     }
     
     inline void add(T val, size_t mIndex, size_t survey, size_t ageIndex,
-                    uint32_t cohortSet, size_t species, size_t genotype)
+                    uint32_t cohortSet, size_t species, size_t genotype, size_t drug)
     {
 #ifndef NDEBUG
         if( mIndex >= outMeasures.size() ||
@@ -89,7 +94,8 @@ class Store{
             ageIndex >= nAgeGroups ||
             cohortSet >= nCohortSets ||
             species >= nSpecies ||
-            genotype >= nGenotypes
+            genotype >= nGenotypes ||
+            drug >= nDrugs
         ){
             cout << "Index out of bounds for survey:\t" << survey << " of " << impl::nSurveys
                 << "\nmeasure number\t" << mIndex << " of " << outMeasures.size()
@@ -97,23 +103,40 @@ class Store{
                 << "\ncohort set\t" << cohortSet << " of " << nCohortSets
                 << "\nspecies\t" << species << " of " << nSpecies
                 << "\ngenotype\t" << genotype << " of " << nGenotypes
+                << "\ndrug\t" << drug << " of " << nDrugs
                 << endl;
         }
 #endif
-        reports[index(mIndex,survey,ageIndex,cohortSet,species,genotype)] += val;
+        reports[index(mIndex,survey,ageIndex,cohortSet,species,genotype,drug)] += val;
     }
     
     void writeM( ostream& stream, size_t survey, int outMeasure, size_t inMeasure ){
+        assert( !(BY_DRUG && (BY_SPECIES || BY_GENOTYPE)) );
         if( BY_SPECIES ){
             assert( !BY_AGE && !BY_COHORT );  // output col2 conflicts
             for( size_t species = 0; species < nSpecies; ++species ){
             for( size_t genotype = 0; genotype < nGenotypes; ++genotype ){
                 const int col2 = species + 1 +
                     1000000 * genotype;
-                T value = reports[index(inMeasure,survey,0,0,species,genotype)];
+                T value = reports[index(inMeasure,survey,0,0,species,genotype,0)];
                 stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
                     << '\t' << value << lineEnd;
             } }
+        }else if( BY_DRUG ){
+            // Backwards compatibility: first age group starts at 1, unless
+            // there isn't an age group:
+            const int ageGroupAdd = BY_AGE ? 1 : 0;
+            for( size_t cohortSet = 0; cohortSet < nCohortSets; ++cohortSet ){
+            for( size_t ageGroup = 0; ageGroup < nAgeGroups; ++ageGroup ){
+            for( size_t drug = 0; drug < nDrugs; ++drug ){
+                // Yeah, >999 age groups clashes with cohort sets, but unlikely a real issue
+                const int col2 = ageGroup + ageGroupAdd +
+                    1000 * internal::cohortSetOutputId( cohortSet ) +
+                    1000000 * (drug + 1);
+                T value = reports[index(inMeasure,survey,ageGroup,cohortSet,0,0,drug)];
+                stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
+                    << '\t' << value << lineEnd;
+            } } }
         }else{
             // Backwards compatibility: first age group starts at 1, unless
             // there isn't an age group:
@@ -125,7 +148,7 @@ class Store{
                 const int col2 = ageGroup + ageGroupAdd +
                     1000 * internal::cohortSetOutputId( cohortSet ) +
                     1000000 * genotype;
-                T value = reports[index(inMeasure,survey,ageGroup,cohortSet,0,genotype)];
+                T value = reports[index(inMeasure,survey,ageGroup,cohortSet,0,genotype,0)];
                 stream << (survey+1) << '\t' << col2 << '\t' << outMeasure
                     << '\t' << value << lineEnd;
             } } }
@@ -134,13 +157,14 @@ class Store{
     
 public:
     // Set up ready to accept reports.
-    void init( const list<OutMeasure>& required, size_t nSp ){
+    void init( const list<OutMeasure>& required, size_t nSp, size_t nD ){
         // Set these internally to 1 if we don't segregate.
         // Age groups -1 because last isn't reported.
         nAgeGroups = BY_AGE ? (AgeGroup::numGroups() - 1) : 1;
         nCohortSets = BY_COHORT ? impl::nCohortSets : 1;
-        nSpecies = (BY_SPECIES && nSp > 0) ? nSp : 1;
+        nSpecies = BY_SPECIES ? nSp : 1;
         nGenotypes = BY_GENOTYPE ? WithinHost::Genotypes::N() : 1;
+        nDrugs = BY_DRUG ? nD : 1;
         mIndices.assign( M_NUM, NOT_USED );
         // outMeasures.size() is the number of measures we store here
         outMeasures.assign( 0, 0 );
@@ -160,7 +184,8 @@ public:
             if( it->byAge != BY_AGE ||
                 it->byCohort != BY_COHORT ||
                 it->bySpecies != BY_SPECIES ||
-                it->byGenotype != BY_GENOTYPE ) continue;
+                it->byGenotype != BY_GENOTYPE ||
+                it->byDrug != BY_DRUG ) continue;
             
             if( mIndices[it->m] != NOT_USED ||
                 (it->method == Deploy::NA && deployIndices.count(it->m) > 0) )
@@ -189,7 +214,7 @@ public:
     // Take a reported value and either store it or forget it.
     // If some of ageIndex, cohortSet, species are not applicable, use 0.
     void report( T val, Measure measure, size_t survey, size_t ageIndex,
-                 uint32_t cohortSet, size_t species, size_t genotype )
+                 uint32_t cohortSet, size_t species, size_t genotype, size_t drug )
     {
         if( survey == NOT_USED ) return; // pre-main-sim & unit tests we ignore all reports
         // last category is for humans too old for reporting groups:
@@ -200,11 +225,13 @@ public:
         assert( cohortSet < nCohortSets && (BY_COHORT || nCohortSets == 1) );
         assert( species < nSpecies && (BY_SPECIES || nSpecies == 1) );
         assert( genotype < nGenotypes && (BY_GENOTYPE || nGenotypes == 1) );
+        assert( drug < nDrugs && (BY_DRUG || nDrugs == 1) );
         if( mIndices[measure] == NOT_USED ){    // measure not used by this store
             assert( deployIndices.count(measure) == 0 );
             return;
         }
-        add( val, mIndices[measure], survey, ageIndex, cohortSet, species, genotype );
+        add( val, mIndices[measure], survey, ageIndex, cohortSet, species,
+             genotype, drug );
     }
     
     // Take a deployment report and potentially store it in one or more places
@@ -225,7 +252,7 @@ public:
         for( const_it_t it = range.first; it != range.second; ++it ){
             uint8_t mask = it->second.first;
             if( (mask & method) == 0 ) continue;
-            add( val, it->second.second, survey, ageIndex, cohortSet, 0, 0 );
+            add( val, it->second.second, survey, ageIndex, cohortSet, 0, 0, 0 );
         }
     }
     
@@ -240,7 +267,7 @@ public:
     void addMeasures( map<int,pair<WriteDelegate,size_t> >& mOrdered ){
         for( size_t m = 0; m < outMeasures.size(); ++m ){
             mOrdered[outMeasures[m]] = make_pair( MakeDelegate( this,
-                    &Store<T,BY_AGE,BY_COHORT,BY_SPECIES,BY_GENOTYPE>::writeM), m );
+                    &Store<T,BY_AGE,BY_COHORT,BY_SPECIES,BY_GENOTYPE,BY_DRUG>::writeM), m );
         }
     }
     
@@ -282,25 +309,33 @@ public:
 //NOTE: there may be more options than necessary. Optionally, A without C and
 // C without A could be removed, and all outputs could be made doubles.
 // Stores by integer value (no outputs include species or genotype):
-Store<int, false, false, false, false> storeI;
-Store<int, true, false, false, false> storeAI;
-Store<int, false, true, false, false> storeCI;
-Store<int, true, true, false, false> storeACI;
-Store<int, false, false, false, true> storeGI;
-Store<int, true, false, false, true> storeAGI;
-Store<int, false, true, false, true> storeCGI;
-Store<int, true, true, false, true> storeACGI;
+Store<int, false, false, false, false, false> storeI;
+Store<int, true, false, false, false, false> storeAI;
+Store<int, false, true, false, false, false> storeCI;
+Store<int, true, true, false, false, false> storeACI;
+Store<int, false, false, false, true, false> storeGI;
+Store<int, true, false, false, true, false> storeAGI;
+Store<int, false, true, false, true, false> storeCGI;
+Store<int, true, true, false, true, false> storeACGI;
+Store<int, false, false, false, false, true> storePI;
+Store<int, true, false, false, false, true> storeAPI;
+Store<int, false, true, false, false, true> storeCPI;
+Store<int, true, true, false, false, true> storeACPI;
 // Stores by double value (note that by species reports never include age or cohort):
-Store<double, false, false, false, false> storeF;
-Store<double, true, false, false, false> storeAF;
-Store<double, false, true, false, false> storeCF;
-Store<double, true, true, false, false> storeACF;
-Store<double, false, false, false, true> storeGF;
-Store<double, true, false, false, true> storeAGF;
-Store<double, false, true, false, true> storeCGF;
-Store<double, true, true, false, true> storeACGF;
-Store<double, false, false, true, false> storeSF;
-Store<double, false, false, true, true> storeSGF;
+Store<double, false, false, false, false, false> storeF;
+Store<double, true, false, false, false, false> storeAF;
+Store<double, false, true, false, false, false> storeCF;
+Store<double, true, true, false, false, false> storeACF;
+Store<double, false, false, false, true, false> storeGF;
+Store<double, true, false, false, true, false> storeAGF;
+Store<double, false, true, false, true, false> storeCGF;
+Store<double, true, true, false, true, false> storeACGF;
+Store<double, false, false, false, false, true> storePF;
+Store<double, true, false, false, false, true> storeAPF;
+Store<double, false, true, false, false, true> storeCPF;
+Store<double, true, true, false, false, true> storeACPF;
+Store<double, false, false, true, false, false> storeSF;
+Store<double, false, false, true, true, false> storeSGF;
 
 int reportIMR = -1; // special output for fitting
 
@@ -366,6 +401,15 @@ void internal::initReporting( const scnXml::Scenario& scenario ){
                     %optElt.getName()).str() );
             }
         }
+        if( optElt.getByDrugType().present() ){
+            if( om.byDrug ){
+                om.byDrug = optElt.getByDrugType().get();   // disable or keep
+            }else if( optElt.getByDrugType().get() ){
+                throw util::xml_scenario_error( (boost::format("measure %1% "
+                    "does not support categorisation by drug type")
+                    %optElt.getName()).str() );
+            }
+        }
         if( optElt.getOutputNumber().present() ) om.outId = optElt.getOutputNumber().get();
         if( outIds.count(om.outId) ){
             throw util::xml_scenario_error( (boost::format("monitoring output "
@@ -377,26 +421,36 @@ void internal::initReporting( const scnXml::Scenario& scenario ){
     
     size_t nSpecies = scenario.getEntomology().getVector().present() ?
         scenario.getEntomology().getVector().get().getAnopheles().size() : 1;
+    size_t nDrugs = scenario.getPharmacology().present() ?
+        scenario.getPharmacology().get().getDrugs().getDrug().size() : 1;
     
-    storeI.init( enabledOutMeasures, nSpecies );
-    storeAI.init( enabledOutMeasures, nSpecies );
-    storeCI.init( enabledOutMeasures, nSpecies );
-    storeACI.init( enabledOutMeasures, nSpecies );
-    storeGI.init( enabledOutMeasures, nSpecies );
-    storeAGI.init( enabledOutMeasures, nSpecies );
-    storeCGI.init( enabledOutMeasures, nSpecies );
-    storeACGI.init( enabledOutMeasures, nSpecies );
+    storeI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeAI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeCI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeACI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeGI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeAGI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeCGI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeACGI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storePI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeAPI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeCPI.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeACPI.init( enabledOutMeasures, nSpecies, nDrugs );
     
-    storeF.init( enabledOutMeasures, nSpecies );
-    storeAF.init( enabledOutMeasures, nSpecies );
-    storeCF.init( enabledOutMeasures, nSpecies );
-    storeACF.init( enabledOutMeasures, nSpecies );
-    storeGF.init( enabledOutMeasures, nSpecies );
-    storeAGF.init( enabledOutMeasures, nSpecies );
-    storeCGF.init( enabledOutMeasures, nSpecies );
-    storeACGF.init( enabledOutMeasures, nSpecies );
-    storeSF.init( enabledOutMeasures, nSpecies );
-    storeSGF.init( enabledOutMeasures, nSpecies );
+    storeF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeAF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeCF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeACF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeGF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeAGF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeCGF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeACGF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storePF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeAPF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeCPF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeACPF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeSF.init( enabledOutMeasures, nSpecies, nDrugs );
+    storeSGF.init( enabledOutMeasures, nSpecies, nDrugs );
 }
 
 void internal::write( ostream& stream ){
@@ -412,6 +466,10 @@ void internal::write( ostream& stream ){
     storeAGI.addMeasures( measuresOrdered );
     storeCGI.addMeasures( measuresOrdered );
     storeACGI.addMeasures( measuresOrdered );
+    storePI.addMeasures( measuresOrdered );
+    storeAPI.addMeasures( measuresOrdered );
+    storeCPI.addMeasures( measuresOrdered );
+    storeACPI.addMeasures( measuresOrdered );
     
     storeF.addMeasures( measuresOrdered );
     storeAF.addMeasures( measuresOrdered );
@@ -421,6 +479,10 @@ void internal::write( ostream& stream ){
     storeAGF.addMeasures( measuresOrdered );
     storeCGF.addMeasures( measuresOrdered );
     storeACGF.addMeasures( measuresOrdered );
+    storePF.addMeasures( measuresOrdered );
+    storeAPF.addMeasures( measuresOrdered );
+    storeCPF.addMeasures( measuresOrdered );
+    storeACPF.addMeasures( measuresOrdered );
     storeSF.addMeasures( measuresOrdered );
     storeSGF.addMeasures( measuresOrdered );
     
@@ -442,37 +504,51 @@ void internal::write( ostream& stream ){
 // Report functions: each reports to all usable stores (i.e. correct data type
 // and where parameters don't have to be fabricated).
 void reportMI( Measure measure, int val ){
-    storeI.report( val, measure, impl::currentSurvey, 0, 0, 0, 0 );
+    storeI.report( val, measure, impl::currentSurvey, 0, 0, 0, 0, 0 );
 }
 void reportMHI( Measure measure, const Host::Human& human, int val ){
     const size_t survey = impl::currentSurvey;
     const size_t ageIndex = human.monAgeGroup().i();
-    storeI.report( val, measure, survey, 0, 0, 0, 0 );
-    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0 );
-    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
-    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
+    storeI.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0, 0 );
+    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
 }
 void reportMSACI( Measure measure, size_t survey,
                   AgeGroup ageGroup, uint32_t cohortSet, int val )
 {
-    storeI.report( val, measure, survey, 0 ,0 ,0, 0 );
-    storeAI.report( val, measure, survey, ageGroup.i(), 0, 0, 0 );
-    storeCI.report( val, measure, survey, 0, cohortSet, 0, 0 );
-    storeACI.report( val, measure, survey, ageGroup.i(), cohortSet, 0, 0 );
+    storeI.report( val, measure, survey, 0 ,0 ,0, 0, 0 );
+    storeAI.report( val, measure, survey, ageGroup.i(), 0, 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, cohortSet, 0, 0, 0 );
+    storeACI.report( val, measure, survey, ageGroup.i(), cohortSet, 0, 0, 0 );
 }
 void reportMHGI( Measure measure, const Host::Human& human, size_t genotype,
                  int val )
 {
     const size_t survey = impl::currentSurvey;
     const size_t ageIndex = human.monAgeGroup().i();
-    storeI.report( val, measure, survey, 0, 0, 0, 0 );
-    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0 );
-    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
-    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
-    storeGI.report( val, measure, survey, 0, 0, 0, genotype );
-    storeAGI.report( val, measure, survey, ageIndex, 0, 0, genotype );
-    storeCGI.report( val, measure, survey, 0, human.cohortSet(), 0, genotype );
-    storeACGI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, genotype );
+    storeI.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0, 0 );
+    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
+    storeGI.report( val, measure, survey, 0, 0, 0, genotype, 0 );
+    storeAGI.report( val, measure, survey, ageIndex, 0, 0, genotype, 0 );
+    storeCGI.report( val, measure, survey, 0, human.cohortSet(), 0, genotype, 0 );
+    storeACGI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, genotype, 0 );
+}
+void reportMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
+                int val )
+{
+    const size_t survey = impl::currentSurvey;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeI.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0, 0 );
+    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
+    storePI.report( val, measure, survey, 0, 0, 0, 0, drugIndex );
+    storeAPI.report( val, measure, survey, ageIndex, 0, 0, 0, drugIndex );
+    storeCPI.report( val, measure, survey, 0, human.cohortSet(), 0, 0, drugIndex );
+    storeACPI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, drugIndex );
 }
 // Deployment reporting uses a different function to handle the method
 // (mostly to make other types of report faster).
@@ -495,54 +571,58 @@ void reportMHD( Measure measure, const Host::Human& human,
 }
 
 void reportMF( Measure measure, double val ){
-    storeF.report( val, measure, impl::currentSurvey, 0, 0, 0, 0 );
+    storeF.report( val, measure, impl::currentSurvey, 0, 0, 0, 0, 0 );
 }
 void reportMHF( Measure measure, const Host::Human& human, double val ){
     const size_t survey = impl::currentSurvey;
     const size_t ageIndex = human.monAgeGroup().i();
-    storeF.report( val, measure, survey, 0, 0, 0, 0 );
-    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
-    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
-    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
+    storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
+    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0, 0 );
+    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
 }
 void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
                   size_t genotype, double val )
 {
     const size_t survey = impl::currentSurvey;
-    storeF.report( val, measure, survey, 0, 0, 0, 0 );
-    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
-    storeCF.report( val, measure, survey, 0, cohortSet, 0, 0 );
-    storeACF.report( val, measure, survey, ageIndex, cohortSet, 0, 0 );
-    storeGF.report( val, measure, survey, 0, 0, 0, genotype );
-    storeAGF.report( val, measure, survey, ageIndex, 0, 0, genotype );
-    storeCGF.report( val, measure, survey, 0, cohortSet, 0, genotype );
-    storeACGF.report( val, measure, survey, ageIndex, cohortSet, 0, genotype );
+    storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
+    storeCF.report( val, measure, survey, 0, cohortSet, 0, 0, 0 );
+    storeACF.report( val, measure, survey, ageIndex, cohortSet, 0, 0, 0 );
+    storeGF.report( val, measure, survey, 0, 0, 0, genotype, 0 );
+    storeAGF.report( val, measure, survey, ageIndex, 0, 0, genotype, 0 );
+    storeCGF.report( val, measure, survey, 0, cohortSet, 0, genotype, 0 );
+    storeACGF.report( val, measure, survey, ageIndex, cohortSet, 0, genotype, 0 );
+}
+void reportMHPF( Measure measure, const Host::Human& human, size_t drug, double val ){
+    const size_t survey = impl::currentSurvey;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
+    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0, 0 );
+    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
+    storePF.report( val, measure, survey, 0, 0, 0, 0, drug );
+    storeAPF.report( val, measure, survey, ageIndex, 0, 0, 0, drug );
+    storeCPF.report( val, measure, survey, 0, human.cohortSet(), 0, 0, drug );
+    storeACPF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, drug );
 }
 void reportMHGF( Measure measure, const Host::Human& human, size_t genotype,
                  double val )
 {
-    const size_t survey = impl::currentSurvey;
-    const size_t ageIndex = human.monAgeGroup().i();
-    storeF.report( val, measure, survey, 0, 0, 0, 0 );
-    storeAF.report( val, measure, survey, ageIndex, 0, 0, 0 );
-    storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0 );
-    storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0 );
-    storeGF.report( val, measure, survey, 0, 0, 0, genotype );
-    storeAGF.report( val, measure, survey, ageIndex, 0, 0, genotype );
-    storeCGF.report( val, measure, survey, 0, human.cohortSet(), 0, genotype );
-    storeACGF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, genotype );
+    reportMACGF( measure, human.monAgeGroup().i(), human.cohortSet(),
+                 genotype, val );
 }
 void reportMSF( Measure measure, size_t species, double val ){
     const size_t survey = impl::currentSurvey;
-    storeF.report( val, measure, survey, 0, 0, 0, 0 );
-    storeSF.report( val, measure, survey, 0, 0, species, 0 );
+    storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeSF.report( val, measure, survey, 0, 0, species, 0, 0 );
 }
 void reportMSGF( Measure measure, size_t species, size_t genotype, double val ){
     const size_t survey = impl::currentSurvey;
-    storeF.report( val, measure, survey, 0, 0, 0, 0 );
-    storeGF.report( val, measure, survey, 0, 0, 0, genotype );
-    storeSF.report( val, measure, survey, 0, 0, species, 0 );
-    storeSGF.report( val, measure, survey, 0, 0, species, genotype );
+    storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeGF.report( val, measure, survey, 0, 0, 0, genotype, 0 );
+    storeSF.report( val, measure, survey, 0, 0, species, 0, 0 );
+    storeSGF.report( val, measure, survey, 0, 0, species, genotype, 0 );
 }
 
 bool isUsedM( Measure measure ){
@@ -554,6 +634,10 @@ bool isUsedM( Measure measure ){
         storeAGI.isUsed(measure) ||
         storeCGI.isUsed(measure) ||
         storeACGI.isUsed(measure) ||
+        storePI.isUsed(measure) ||
+        storeAPI.isUsed(measure) ||
+        storeCPI.isUsed(measure) ||
+        storeACPI.isUsed(measure) ||
         storeF.isUsed(measure) ||
         storeAF.isUsed(measure) ||
         storeCF.isUsed(measure) ||
@@ -562,6 +646,10 @@ bool isUsedM( Measure measure ){
         storeAGF.isUsed(measure) ||
         storeCGF.isUsed(measure) ||
         storeACGF.isUsed(measure) ||
+        storePF.isUsed(measure) ||
+        storeAPF.isUsed(measure) ||
+        storeCPF.isUsed(measure) ||
+        storeACPF.isUsed(measure) ||
         storeSF.isUsed(measure) ||
         storeSGF.isUsed(measure);
 }
@@ -578,6 +666,10 @@ void checkpoint( ostream& stream ){
     storeAGI.checkpoint(stream);
     storeCGI.checkpoint(stream);
     storeACGI.checkpoint(stream);
+    storePI.checkpoint(stream);
+    storeAPI.checkpoint(stream);
+    storeCPI.checkpoint(stream);
+    storeACPI.checkpoint(stream);
     
     storeF.checkpoint(stream);
     storeAF.checkpoint(stream);
@@ -587,6 +679,10 @@ void checkpoint( ostream& stream ){
     storeAGF.checkpoint(stream);
     storeCGF.checkpoint(stream);
     storeACGF.checkpoint(stream);
+    storePF.checkpoint(stream);
+    storeAPF.checkpoint(stream);
+    storeCPF.checkpoint(stream);
+    storeACPF.checkpoint(stream);
     storeSF.checkpoint(stream);
     storeSGF.checkpoint(stream);
 }
@@ -602,6 +698,10 @@ void checkpoint( istream& stream ){
     storeAGI.checkpoint(stream);
     storeCGI.checkpoint(stream);
     storeACGI.checkpoint(stream);
+    storePI.checkpoint(stream);
+    storeAPI.checkpoint(stream);
+    storeCPI.checkpoint(stream);
+    storeACPI.checkpoint(stream);
     
     storeF.checkpoint(stream);
     storeAF.checkpoint(stream);
@@ -611,6 +711,10 @@ void checkpoint( istream& stream ){
     storeAGF.checkpoint(stream);
     storeCGF.checkpoint(stream);
     storeACGF.checkpoint(stream);
+    storePF.checkpoint(stream);
+    storeAPF.checkpoint(stream);
+    storeCPF.checkpoint(stream);
+    storeACPF.checkpoint(stream);
     storeSF.checkpoint(stream);
     storeSGF.checkpoint(stream);
 }

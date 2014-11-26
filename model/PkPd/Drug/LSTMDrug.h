@@ -110,6 +110,9 @@ public:
      *
      * @returns true if concentration is negligible (this class instance can be removed). */
     bool updateConcentration ();
+    
+    /** Get the concentration. */
+    inline double getConcentration()const{ return concentration; }
 
     /// Checkpointing
     template<class S>

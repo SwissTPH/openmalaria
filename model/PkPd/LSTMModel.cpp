@@ -21,6 +21,7 @@
 #include "PkPd/LSTMModel.h"
 #include "PkPd/LSTMMedicate.h"
 #include "PkPd/LSTMTreatments.h"
+#include "mon/reporting.h"
 #include "util/checkpoint_containers.h"
 #include "util/errors.h"
 
@@ -114,8 +115,8 @@ void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double d
 double LSTMModel::getDrugFactor (uint32_t genotype) {
     double factor = 1.0; //no effect
     
-    for (list<LSTMDrug>::iterator it=m_drugs.begin(); it!=m_drugs.end(); ++it) {
-        double drugFactor = it->calculateDrugFactor(genotype);
+    foreach( LSTMDrug& drug, m_drugs ){
+        double drugFactor = drug.calculateDrugFactor(genotype);
         factor *= drugFactor;
     }
     return factor;
@@ -131,6 +132,15 @@ public:
 void LSTMModel::decayDrugs () {
     // for each item in m_drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
     m_drugs.remove_if (DecayPredicate());
+}
+
+void LSTMModel::summarize(const Host::Human& human) const{
+    foreach( const LSTMDrug& drug, m_drugs ){
+        assert( drug.getConcentration() > 0 );
+        size_t index = drug.getIndex();
+        mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
+        mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(drug.getConcentration()) );
+    }
 }
 
 } }
