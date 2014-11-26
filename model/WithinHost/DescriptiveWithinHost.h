@@ -28,11 +28,12 @@ using namespace std;
 
 namespace OM { namespace WithinHost {
 
-/*! Old Within Host Model class.
+/** Within-host model class for the original (descriptive) infection model.
  *
  * Note: this implementation has a few bugs with (hopefully) small effect
- * conditionally fixed (see MAX_DENS_CORRECTION and
- * INNATE_MAX_DENS). Thus results can be preserved. */
+ * conditionally fixed (see MAX_DENS_CORRECTION and INNATE_MAX_DENS).
+ * This allows reproduction of old results and is the main reason it cannot be
+ * integrated with the CommonWithinHost class. */
 class DescriptiveWithinHostModel : public WHFalciparum {
 public:
     /// Must run after monitoring is set up.
@@ -48,12 +49,12 @@ public:
     virtual void clearImmunity();
     
     virtual void update(int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor, ofstream& drugMon);
+            double ageInYears, double bsvFactor);
+    
+    virtual bool summarize( const Host::Human& human )const;
     
 protected:
     virtual void clearInfections( Treatments::Stages stage );
-    
-    virtual void summarizeInfs( const Host::Human& human )const;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

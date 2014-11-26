@@ -130,7 +130,8 @@ protected:
 
     /// Always links a drug instance to its drug-type data
     const LSTMDrugType& typeData;
-
+    
+    /// Concentration in blood; units: mg / l.
     double concentration;
 
     /** List of each dose given today (and possibly tomorrow), ordered by time.
@@ -139,8 +140,6 @@ protected:
      * Used in calculateDrugFactor temporarily,
      * and in updateConcentration() to update concentration. */
     DoseMap doses;
-    
-    friend class LSTMPkPdModel; // only required for a drug monitoring HACK; could be removed
 };
 
 }

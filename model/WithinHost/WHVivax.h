@@ -138,12 +138,12 @@ public:
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX )const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
-    virtual bool summarize(const Host::Human& human);
+    virtual bool summarize(const Host::Human& human) const;
     
     virtual void importInfection();
     
     virtual void update(int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor, ofstream& drugMon);
+            double ageInYears, double bsvFactor);
     
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
 

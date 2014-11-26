@@ -239,21 +239,7 @@ void WHFalciparum::updateImmuneStatus() {
 }
 
 
-// -----  Summarize  -----
-
-bool WHFalciparum::summarize (const Host::Human& human) {
-    pathogenesisModel->summarize( human );
-    summarizeInfs( human );
-    // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
-    // (and are applied after update()); here we report the last calculated density.
-    if( diagnosticResult(WithinHost::diagnostics::monitoringDiagnostic()) ){
-        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
-        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
-        return true;
-    }
-    return false;
-}
-
+// -----  Checkpointing  -----
 
 void WHFalciparum::checkpoint (istream& stream) {
     WHInterface::checkpoint( stream );

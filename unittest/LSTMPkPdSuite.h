@@ -24,7 +24,7 @@
 #define Hmod_LSTMPkPdSuite
 
 #include <cxxtest/TestSuite.h>
-#include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMModel.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <limits>
@@ -48,8 +48,8 @@ public:
     
     void setUp () {
         UnittestUtil::initTime(1);
-	UnittestUtil::PkPdSuiteSetup(PkPdModel::LSTM_PKPD);
-	proxy = new LSTMPkPdModel ();
+	UnittestUtil::PkPdSuiteSetup();
+	proxy = new LSTMModel ();
         MF_index = LSTMDrugType::findDrug( "MF" );
     }
     void tearDown () {
@@ -134,7 +134,7 @@ public:
     }
     
 private:
-    LSTMPkPdModel *proxy;
+    LSTMModel *proxy;
     uint32_t genotype;
     double massAt21;
     size_t MF_index;

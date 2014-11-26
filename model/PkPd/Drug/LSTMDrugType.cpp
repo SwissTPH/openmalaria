@@ -79,8 +79,7 @@ const LSTMDrugType& LSTMDrugType::getDrug(size_t index) {
 // -----  Non-static LSTMDrugType functions  -----
 
 LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
-        index (index),
-        name(drugData.getAbbrev())
+        index (index)
 {
     const scnXml::PD::PhenotypeSequence& pElt = drugData.getPD().getPhenotype();
     assert( pElt.size() > 0 );  // required by XSD

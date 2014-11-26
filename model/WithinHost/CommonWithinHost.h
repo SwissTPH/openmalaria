@@ -24,7 +24,7 @@
 #include "Global.h"
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/CommonInfection.h"
-#include "PkPd/PkPdModel.h"
+#include "PkPd/LSTMModel.h"
 
 using namespace std;
 
@@ -51,7 +51,7 @@ public:
     virtual void clearImmunity();
     
     virtual void update (int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor, ofstream& drugMon);
+            double ageInYears, double bsvFactor);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     
@@ -66,9 +66,10 @@ public:
     static CommonInfection* (* checkpointedInfection) (istream& stream);
     //@}
     
+    virtual bool summarize( const Host::Human& human )const;
+    
 protected:
     virtual void clearInfections( Treatments::Stages stage );
-    virtual void summarizeInfs( const Host::Human& human )const;
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
@@ -78,7 +79,7 @@ private:
     double hetMassMultiplier;
     
     /// Encapsulates drug code for each human
-    PkPd::PkPdModel* pkpdModel;
+    PkPd::LSTMModel pkpdModel;
     
     /** The list of all infections this human has.
      *

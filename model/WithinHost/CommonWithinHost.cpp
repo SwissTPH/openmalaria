@@ -21,6 +21,7 @@
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/errors.h"
 #include "PopulationStats.h"
 #include "util/AgeGroupInterpolation.h"
@@ -45,9 +46,6 @@ util::AgeGroupInterpolator massByAge;
 bool reportInfectedOrPatentInfected = false;
 bool reportInfectionsByGenotype = false;
 
-// Only required for a drug monitoring HACK and could be removed:
-vector<string> drugMonCodes;
-
 
 // -----  Initialization  -----
 
@@ -62,22 +60,17 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
     // hetWeightMult must be large enough that birth weight is at least 0.5 kg:
     minHetMassMult = 0.5 / massByAge.eval( 0.0 );
     
-    const scnXml::Monitoring& mon = scenario.getMonitoring();
-    if( mon.getDrugConcentration().present() ){
-        boost::split( drugMonCodes,
-                      mon.getDrugConcentration().get().getDrugCodes(),
-                      boost::is_any_of("," ) );
-    }
-    
     reportInfectedOrPatentInfected = mon::isUsedM(mon::MHR_INFECTIONS) ||
         mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
     reportInfectionsByGenotype = mon::isUsedM(mon::MHR_INFECTED_GENOTYPE) ||
         mon::isUsedM(mon::MHR_PATENT_GENOTYPE) ||
         mon::isUsedM(mon::MHF_LOG_DENSITY_GENOTYPE);
+    
+    PkPd::LSTMModel::init( scenario );
 }
 
 CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
-        WHFalciparum( comorbidityFactor ), pkpdModel(PkPd::PkPdModel::createPkPdModel ())
+        WHFalciparum( comorbidityFactor )
 {
     assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
     
@@ -95,8 +88,6 @@ CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
 }
 
 CommonWithinHost::~CommonWithinHost() {
-    delete pkpdModel;
-    pkpdModel = 0;
     for( list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf ){
         delete *inf;
     }
@@ -124,7 +115,7 @@ void CommonWithinHost::clearInfections( Treatments::Stages stage ){
 
 void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages, double age){
     double mass = massByAge.eval( age ) * hetMassMultiplier;
-    pkpdModel->prescribe( schedule, dosages, age, mass );
+    pkpdModel.prescribe( schedule, dosages, age, mass );
 }
 void CommonWithinHost::clearImmunity() {
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
@@ -151,7 +142,7 @@ void CommonWithinHost::importInfection(){
 // -----  Density calculations  -----
 
 void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor, ofstream& drugMon)
+        double ageInYears, double bsvFactor)
 {
     // Cache total density for infectiousness calculations
     int y_lag_i = sim::ts0().moduloSteps(y_lag_len);
@@ -191,7 +182,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     
     for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
-        pkpdModel->medicate( body_mass );
+        pkpdModel.medicate( body_mass );
         
         double sumLogDens = 0.0;
         
@@ -202,7 +193,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 double survivalFactor = survivalFactor_part *
                     (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y) *
-                    pkpdModel->getDrugFactor((*inf)->genotype());
+                    pkpdModel.getDrugFactor((*inf)->genotype());
                 // update, may result in termination of infection:
                 expires = (*inf)->update(survivalFactor, now, body_mass);
             }
@@ -223,17 +214,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
                 ++inf;
             }
         }
-        pkpdModel->decayDrugs ();
-        
-        if( drugMon.is_open() && sim::intervNow() >= sim::zero() ){
-            drugMon << now << '\t' << sumLogDens;
-            map<string,double> concentrations;
-            pkpdModel->getConcentrations( concentrations );
-            foreach( string& drugCode, drugMonCodes ){
-                drugMon << '\t' << concentrations[drugCode];
-            }
-            drugMon << endl;
-        }
+        pkpdModel.decayDrugs ();
     }
     
     util::streamValidate(totalDensity);
@@ -256,50 +237,64 @@ struct InfGenotypeSorter {
     }
 } infGenotypeSorter;
 
-void CommonWithinHost::summarizeInfs( const Host::Human& human )const{
-    if( infections.size() == 0 ) return;        // nothing to report
-    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
-    if( reportInfectedOrPatentInfected ){
-        for (std::list<CommonInfection*>::const_iterator inf =
-            infections.begin(); inf != infections.end(); ++inf) {
-            uint32_t genotype = (*inf)->genotype();
-            mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
-            if( WithinHost::diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity() ) ){
-                mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
+bool CommonWithinHost::summarize( const Host::Human& human )const{
+    pathogenesisModel->summarize( human );
+    //TODO: call pkpdModel->summarize() or similar to report drug concentrations
+    
+    if( infections.size() > 0 ){
+        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        if( reportInfectedOrPatentInfected ){
+            for (std::list<CommonInfection*>::const_iterator inf =
+                infections.begin(); inf != infections.end(); ++inf) {
+                uint32_t genotype = (*inf)->genotype();
+                mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
+                if( diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity() ) ){
+                    mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
+                }
+            }
+        }
+        if( reportInfectionsByGenotype ){
+            // Instead of storing nInfs and total density by genotype we sort
+            // infections by genotype and report each in sequence.
+            // We don't sort in place since that would affect random number sampling
+            // order when updating, and the monitoring system should not in my
+            // opinion affect outputs (since it would make testing harder).
+            sortedInfs.assign( infections.begin(), infections.end() );
+            sort( sortedInfs.begin(), sortedInfs.end(), infGenotypeSorter );
+            vector<CommonInfection*>::const_iterator inf = sortedInfs.begin();
+            while( inf != sortedInfs.end() ){
+                uint32_t genotype = (*inf)->genotype();
+                double dens = 0.0;
+                do{     // at start: genotype is that of the current infection, dens is 0
+                    dens += (*inf)->getDensity();
+                    ++inf;
+                }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
+                // we had at least one infection of this genotype
+                mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
+                if( diagnostics::monitoringDiagnostic().isPositive(dens) ){
+                    mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
+                    mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
+                }
             }
         }
     }
-    if( reportInfectionsByGenotype ){
-        // Instead of storing nInfs and total density by genotype we sort
-        // infections by genotype and report each in sequence.
-        // We don't sort in place since that would affect random number sampling
-        // order when updating, and the monitoring system should not in my
-        // opinion affect outputs (since it would make testing harder).
-        sortedInfs.assign( infections.begin(), infections.end() );
-        sort( sortedInfs.begin(), sortedInfs.end(), infGenotypeSorter );
-        vector<CommonInfection*>::const_iterator inf = sortedInfs.begin();
-        while( inf != sortedInfs.end() ){
-            uint32_t genotype = (*inf)->genotype();
-            double dens = 0.0;
-            do{     // at start: genotype is that of the current infection, dens is 0
-                dens += (*inf)->getDensity();
-                ++inf;
-            }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
-            // we had at least one infection of this genotype
-            mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
-            if( WithinHost::diagnostics::monitoringDiagnostic().isPositive(dens) ){
-                mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
-                mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
-            }
-        }
+    
+    // Some treatments (simpleTreat with steps=-1) clear infections immediately
+    // (and are applied after update()), thus infections.size() may be 0 while
+    // totalDensity > 0. Here we report the last calculated density.
+    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity) ){
+        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        return true;    // patent
     }
+    return false;       // not patent
 }
 
 
 void CommonWithinHost::checkpoint (istream& stream) {
     WHFalciparum::checkpoint (stream);
     hetMassMultiplier & stream;
-    (*pkpdModel) & stream;
+    pkpdModel & stream;
     for (int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
     }
@@ -309,7 +304,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
 void CommonWithinHost::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
     hetMassMultiplier & stream;
-    (*pkpdModel) & stream;
+    pkpdModel & stream;
     for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;
     }

@@ -40,7 +40,7 @@ double WHMock::pTransGenotype( double, double, size_t ){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-bool WHMock::summarize(const Host::Human& human){
+bool WHMock::summarize(const Host::Human& human)const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
@@ -63,7 +63,7 @@ void WHMock::treatPkPd(size_t schedule, size_t dosages, double age){
     pkpd.prescribe( schedule, dosages, age, numeric_limits<double>::quiet_NaN() );
 }
 
-void WHMock::update(int nNewInfs, vector<double>&, double ageInYears, double bsvFactor, ofstream& drugMon){
+void WHMock::update(int nNewInfs, vector<double>&, double ageInYears, double bsvFactor){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 

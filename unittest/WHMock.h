@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "WithinHost/WHInterface.h"
-#include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMModel.h"
 
 using namespace std;
 
@@ -47,13 +47,13 @@ public:
     
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX ) const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
-    virtual bool summarize(const Host::Human& human);
+    virtual bool summarize(const Host::Human& human)const;
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool optionalPqTreatment();
     virtual void treatSimple(SimTime timeLiver, SimTime timeBlood);
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
-    virtual void update(int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor, ofstream& drugMon);
+    virtual void update(int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
@@ -71,7 +71,7 @@ public:
     SimTime lastTimeLiver, lastTimeBlood;
     
     // Lists medications and drugs in the body
-    PkPd::LSTMPkPdModel pkpd;
+    PkPd::LSTMModel pkpd;
 
 protected:
     virtual void checkpoint (istream& stream);

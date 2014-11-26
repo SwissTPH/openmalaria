@@ -44,26 +44,26 @@ public:
     ~CMDecisionTreeSuite () {}
     
     void setUp () {
-	// Note: cannot create whm in constructor, since it uses random number
-	// generator which is initialized after constructor runs.
-	util::random::seed (83);	// seed is unimportant, but must be fixed
+        // Note: cannot create whm in constructor, since it uses random number
+        // generator which is initialized after constructor runs.
+        util::random::seed (83);	// seed is unimportant, but must be fixed
         UnittestUtil::initTime(5);
         UnittestUtil::initSurveys();
         UnittestUtil::setDiagnostics();
-        
-	UnittestUtil::EmpiricalWHM_setup();
+
+        UnittestUtil::EmpiricalWHM_setup();
         whm.reset( new WHMock() );
         ETS_ASSERT( whm.get() != 0 );
-        
+
         human.reset( UnittestUtil::createHuman(sim::zero()).release() );
         ETS_ASSERT( human.get() != 0 );
         UnittestUtil::setHumanWH( *human, whm.get() );
-        
-	hd.reset( new CMHostData( *human, 21 /* any real age will do for most tests */,
-                                  Episode::NONE ) );
-        
-	// could seed random-number-generator, but shouldn't affect outcomes
-	UnittestUtil::PkPdSuiteSetup (PkPd::PkPdModel::LSTM_PKPD);
+
+        hd.reset( new CMHostData( *human, 21 /* any real age will do for most tests */,
+                                      Episode::NONE ) );
+
+        // could seed random-number-generator, but shouldn't affect outcomes
+        UnittestUtil::PkPdSuiteSetup ();
     }
     void tearDown () {
         human.reset();

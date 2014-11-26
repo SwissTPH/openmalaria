@@ -25,16 +25,11 @@ set (Model_CPP
   Clinical/DecisionTree5Day.cpp
   Clinical/CM5DayCommon.cpp
   
-  PkPd/PkPdModel.cpp
-  #PkPd/HoshenPkPdModel.cpp
-  PkPd/LSTMPkPdModel.cpp
-  #PkPd/Drug/HoshenDrug.cpp
-  #PkPd/Drug/HoshenDrugType.cpp
+  PkPd/LSTMModel.cpp
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/Drug/LSTMDrugAllele.cpp
   PkPd/LSTMTreatments.cpp
-  #PkPd/Proteome.cpp
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVectorModel.cpp
