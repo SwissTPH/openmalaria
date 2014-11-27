@@ -49,17 +49,18 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
     }
     
     // This is set later, by ResourceFitter class.
-    invLarvalResources.resize(365);
+    invLarvalResources.resize(sim::oneYear());
 }
 
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
-    int firstDay = invLarvalResources.size() + TimeStep::simulation.inDays() - TimeStep::interval + 1;
-    for (size_t i = 0; i < (size_t)TimeStep::interval; ++i) {
-        size_t t = mod(i + firstDay, invLarvalResources.size());
-        val += 1.0 / invLarvalResources[t];
+    // get resources available on the next time step
+    for( SimTime d = sim::now(), end = sim::now() + sim::oneTS(); d < end;
+            d += sim::oneDay() ){
+        val += 1.0 / invLarvalResources[mod_nn(d, sim::oneYear())];
     }
-    return val / TimeStep::interval;
+    //TODO: why are units per time step?
+    return val / sim::oneTS().inDays();
 }
 
 void LifeCycle::init( const LifeCycleParams& lcParams ){
@@ -80,18 +81,20 @@ double LifeCycle::getResRequirements( const LifeCycleParams& lcParams ) const{
 
 double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
                                            double nOvipositingMosqs,
-                                           size_t d, size_t dYear1 ){
-    // num newly emerging adults comes from num new pupae
-    // pupalStageDuration days ago:
-    double newAdults =
-        lcParams.pSurvPupalStage * newPupae[mod_pp(d, lcParams.pupalStageDuration)];
+                                           SimTime d0 ){
+    SimTime d1 = d0 + sim::oneDay();
+    // Day of year. Note that d==sim::oneTS() corresponds to Jan 1st, index 0.
+    SimTime dYear1 = mod_nn(d0, sim::oneYear());
+    // num newly emerging adults comes from num new pupae pupalStageDuration days ago:
+    size_t pupaeIndex = mod_nn(d1, lcParams.pupalStageDuration);
+    double newAdults = lcParams.pSurvPupalStage * newPupae[pupaeIndex];
     
     // resource competition during last time-step (L(t) * gamma(t))
     double resourceCompetition = getResRequirements( lcParams )
         * lcParams.invLarvalResources[dYear1];  // TODO: scale for larviciding here
     // num new pupae uses larval development formula based on num larvae
     // which were one day away from becoming adults yesterday
-    newPupae[mod_pp(d, lcParams.pupalStageDuration)] =
+    newPupae[pupaeIndex] =
         lcParams.pSurvDayAsLarvae * numLarvae[lcParams.larvalStageDuration-1] /
         ( 1.0 + resourceCompetition * lcParams.effectCompetitionOnLarvae[lcParams.larvalStageDuration-1] );
     for( size_t age=lcParams.larvalStageDuration-1;age>=1;--age ){
@@ -100,13 +103,12 @@ double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
     }
     
     // num new larvae comes from num eggs laid eggStageDuration days ago:
-    numLarvae[ 0 ] =
-        lcParams.pSurvEggStage * newEggs[mod_pp(d, lcParams.eggStageDuration)];
+    size_t eggIndex = mod_nn(d1, lcParams.eggStageDuration);
+    numLarvae[ 0 ] = lcParams.pSurvEggStage * newEggs[eggIndex];
     
     // num eggs laid depends on number of mosquitoes which completed a
     // feeding & egg-laying cycle starting tau days ago:
-    newEggs[mod_pp(d, lcParams.eggStageDuration)] =
-        lcParams.fEggsLaidByOviposit * nOvipositingMosqs;
+    newEggs[eggIndex] = lcParams.fEggsLaidByOviposit * nOvipositingMosqs;
     
     return newAdults;
 }

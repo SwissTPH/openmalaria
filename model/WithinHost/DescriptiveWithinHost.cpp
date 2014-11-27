@@ -21,6 +21,8 @@
 #include "Global.h"
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/Diagnostic.h"
+#include "WithinHost/Genotypes.h"
+#include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
 #include "util/StreamValidator.h"
@@ -33,39 +35,35 @@ namespace OM {
 namespace WithinHost {
 
 extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
+bool reportPatentInfected = false;
 
 // -----  Initialization  -----
+
+void DescriptiveWithinHostModel::initDescriptive(){
+    reportPatentInfected = mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
+}
 
 DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor ) :
         WHFalciparum( comorbidityFactor )
 {
-    assert( TimeStep::interval == 5 );
+    assert( sim::oneTS() == sim::fromDays(5) );
 }
 
-DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {
-    for( list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf ){
-        delete *inf;
-    }
-    infections.clear();
-}
+DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
 
 
 // -----  Simple infection adders/removers  -----
 
-DescriptiveInfection* DescriptiveWithinHostModel::createInfection () {
-    return new DescriptiveInfection();
-}
 void DescriptiveWithinHostModel::loadInfection(istream& stream) {
-    infections.push_back(new DescriptiveInfection(stream));
+    infections.push_back(DescriptiveInfection(stream));
 }
 
 void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
-    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
         if( stage == Treatments::BOTH ||
-            (stage == Treatments::LIVER && !(*inf)->bloodStage()) ||
-            (stage == Treatments::BLOOD && (*inf)->bloodStage())
+            (stage == Treatments::LIVER && !inf->bloodStage()) ||
+            (stage == Treatments::BLOOD && inf->bloodStage())
         ){
-            delete *inf;
             inf = infections.erase( inf );
         }else{
             ++inf;
@@ -77,19 +75,19 @@ void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
 // -----  Interventions  -----
 
 void DescriptiveWithinHostModel::clearImmunity() {
-    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        (*inf)->clearImmunity();
+    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+        inf->clearImmunity();
     }
-    _cumulativeh = 0.0;
-    _cumulativeYlag = 0.0;
+    m_cumulative_h = 0.0;
+    m_cumulative_Y_lag = 0.0;
 }
 void DescriptiveWithinHostModel::importInfection(){
     PopulationStats::totalInfections += 1;
     if( numInfs < MAX_INFECTIONS ){
         PopulationStats::allowedInfections += 1;
-        _cumulativeh += 1;
+        m_cumulative_h += 1;
         numInfs += 1;
-        infections.push_back(createInfection());
+        infections.push_back(DescriptiveInfection());
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -97,9 +95,12 @@ void DescriptiveWithinHostModel::importInfection(){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double bsvFactor) {
+void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_weights,
+        double ageInYears, double bsvFactor)
+{
     // Cache total density for infectiousness calculations
-    _ylag[mod_nn(TimeStep::simulation.asInt(),_ylagLen)] = totalDensity;
+    assert( Genotypes::N() == 1 );
+    m_y_lag.at(sim::ts0().moduloSteps(y_lag_len), 0/*first and only genotype*/) = totalDensity;
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -109,7 +110,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for ( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(createInfection());
+        infections.push_back(DescriptiveInfection());
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 
@@ -118,17 +119,16 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     totalDensity = 0.0;
     timeStepMaxDensity = 0.0;
 
-    // As in AJTMH p22, cumulativeh (X_h + 1) doesn't include infections added
-    // this time-step and cumulativeY only includes past densities.
-    double cumulativeh=_cumulativeh;
-    double cumulativeY=_cumulativeY;
-    _cumulativeh += nNewInfs;
+    // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
+    // this time-step and cumulative_Y only includes past densities.
+    double cumulative_h=m_cumulative_h;
+    double cumulative_Y=m_cumulative_Y;
+    m_cumulative_h += nNewInfs;
     
-    bool treatmentLiver = treatExpiryLiver >= TimeStep::simulation;
-    bool treatmentBlood = treatExpiryBlood >= TimeStep::simulation;
-    bool treatmentBoth = treatmentLiver && treatmentBlood;
+    bool treatmentLiver = treatExpiryLiver > sim::ts0();
+    bool treatmentBlood = treatExpiryBlood > sim::ts0();
     
-    for (std::list<DescriptiveInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
         // CommonWithinHost.cpp, but a few changes would be needed:
         // INNATE_MAX_DENS and MAX_DENS_CORRECTION would need to be required
@@ -136,12 +136,9 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // any more).
         // SP drug action and the PK/PD model would need to be abstracted
         // behind a common interface.
-        if ( (*inf)->expired() /* infection has self-terminated */ ||
-            treatmentBoth /* effective treatment targeting both stages */ ||
-            (treatmentBlood && (*inf)->bloodStage()) /* blood stage treatment */ ||
-            (treatmentLiver && !(*inf)->bloodStage()) /* liver stage treatment */ )
+        if ( inf->expired() /* infection has self-terminated */ ||
+            (inf->bloodStage() ? treatmentBlood : treatmentLiver) )
         {
-            delete *inf;
             inf=infections.erase(inf);
             numInfs--;
             continue;
@@ -150,15 +147,15 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
         // Should be: infStepMaxDens = 0.0, but has some history.
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
-        (*inf)->determineDensities(ageInYears, cumulativeh, cumulativeY, infStepMaxDens, _innateImmSurvFact, bsvFactor);
+        inf->determineDensities(ageInYears, cumulative_h, cumulative_Y, infStepMaxDens, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
         timeStepMaxDensity = infStepMaxDens;
 
-        double density = (*inf)->getDensity();
+        double density = inf->getDensity();
         totalDensity += density;
-        _cumulativeY += TimeStep::interval * density;
+        m_cumulative_Y += sim::oneTS().inDays() * density;
 
         ++inf;
     }
@@ -166,21 +163,36 @@ void DescriptiveWithinHostModel::update(int nNewInfs, double ageInYears, double 
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }
 
-void DescriptiveWithinHostModel::addProphylacticEffects(const vector<double>& pClearanceByTime) {
-    throw util::xml_scenario_error( "Please enable PROPHYLACTIC_DRUG_ACTION_MODEL" );
-}
-
 
 // -----  Summarize  -----
 
-WHInterface::InfectionCount DescriptiveWithinHostModel::countInfections () const{
-    InfectionCount count;       // constructor initialises counts to 0
-    count.total = infections.size();
-    for (std::list<DescriptiveInfection*>::const_iterator inf = infections.begin(); inf != infections.end(); ++inf) {
-        if (Diagnostic::default_.isPositive( (*inf)->getDensity() ) )
-            count.patent += 1;
+bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
+    pathogenesisModel->summarize( human );
+    
+    if( infections.size() > 0 ){
+        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        // (patent) infections are reported by genotype, even though we don't have
+        // genotype in this model
+        mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
+        if( reportPatentInfected ){
+            for (std::list<DescriptiveInfection>::const_iterator inf =
+                infections.begin(); inf != infections.end(); ++inf) {
+            if( diagnostics::monitoringDiagnostic().isPositive( inf->getDensity() ) ){
+                    mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+                }
+            }
+        }
     }
-    return count;
+    
+    // Some treatments (simpleTreat with steps=-1) clear infections immediately
+    // (and are applied after update()), thus infections.size() may be 0 while
+    // totalDensity > 0. Here we report the last calculated density.
+    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity) ){
+        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        return true;    // patent
+    }
+    return false;       // not patent
 }
 
 
@@ -195,10 +207,14 @@ void DescriptiveWithinHostModel::checkpoint (istream& stream) {
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
-    BOOST_FOREACH (DescriptiveInfection* inf, infections) {
-        (*inf) & stream;
+    BOOST_FOREACH (DescriptiveInfection& inf, infections) {
+        inf & stream;
     }
 }
+
+char const*const not_impl = "feature not available with the \"descriptive\" within-host model";
+void DescriptiveWithinHostModel::treatPkPd(size_t schedule, size_t dosages, double age){
+    throw TRACED_EXCEPTION( not_impl, util::Error::WHFeatures ); }
 
 }
 }

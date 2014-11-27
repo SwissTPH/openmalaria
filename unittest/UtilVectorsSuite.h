@@ -26,8 +26,10 @@
 #include "ExtraAsserts.h"
 
 #include "util/vectors.h"
+#include "util/vecDay.h"
 
 using namespace OM::util;
+using OM::sim;
 
 class UtilVectorsSuite : public CxxTest::TestSuite
 {
@@ -39,13 +41,13 @@ public:
 //         cout << '\n' << input << endl;
         vector<double> freqDomain( input.size() * 2 - 1 );
         vectors::logDFT( input, freqDomain );
-        vector<double> result( input.size() );
+        vecDay<double> result( sim::fromDays(input.size()) );
         vectors::expIDFT( result, freqDomain, 0 );
 //         cout << freqDomain << endl;
 //         cout << result << endl;
-        ETS_ASSERT_EQUALS( input.size(), result.size() );
-        for( size_t i=0; i<result.size(); ++i )
-            TS_ASSERT_APPROX( input[i], result[i] );
+        ETS_ASSERT_EQUALS( input.size(), result.internal().size() );
+        for( size_t i=0; i<result.internal().size(); ++i )
+            TS_ASSERT_APPROX( input[i], result[sim::fromDays(i)] );
     }
 };
 

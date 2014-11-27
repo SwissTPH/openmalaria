@@ -27,9 +27,11 @@ class Keys:
     MEASURE=1
     SURVEY=2
     GROUP=3
-    FILE=4
+    COHORT=4
+    GENOTYPE=5
+    FILE=6
     
-    all=set([NONE,MEASURE,SURVEY,GROUP,FILE])
+    all=set([NONE,MEASURE,SURVEY,GROUP,COHORT,GENOTYPE,FILE])
     
     def fromString(str):
         if str=="none":
@@ -40,6 +42,10 @@ class Keys:
             return SURVEY
         elif str=="group":
             return GROUP
+        elif str=="cohort":
+            return COHORT
+        elif str=="genotype":
+            return GENOTYPE
         elif str=="file":
             return FILE
         else:
@@ -75,30 +81,26 @@ class TestMultiKeys (unittest.TestCase):
         self.assert_ (self.b1.__hash__() == self.b2.__hash__())
 
 def isAgeGroup(measure):
-    if measure in set([7,21,26,31,32,33,34,35,36,39,40,48,49]):
+    if measure in set([7,9,21,25,26,28,29,31,32,33,34,35,36,39,40,47,48,49,50,51,54]):
         return False
     return True
 
 class MeasureDict(object):
-    def add(self,survey,group,f,value):
-        """survey:int, group:string or int, f:int, value:float"""
-        pass
-    def get(self,survey,group,f):
-        """survey:int, group:string, f:string"""
-        pass
-    def getGroups(self):
-        pass
-class MeasureAGDict(object):
-    def __init__(self):
-        self.nAGroups = 0
-        #(list by fileID) of (list by survey) of (list by group)
+    def __init__(self,m):
+        self.nGroups = 0
+        self.nCohorts = 0
+        self.nGenotypes = 0
+        #(list by fileID) of (list by survey) of (list by group) of (list by cohort) of (list by genotype)
         self.v=list()
-        self.groupLabel="age group"
-    def add(self,survey,group,f,value):
-        """survey: int, group: string, f: int"""
-        ag = int(group) # force type as int
-        if ag >= self.nAGroups:
-            self.nAGroups = ag+1
+        if m>=31 and m<=34:
+            self.groupLabel="vector species"
+        else:
+            self.groupLabel="age group"
+    def add(self,survey,group,cohort,genotype,f,value):
+        """survey:int, group:int, cohort:int, genotype:int, f:int, value:float"""
+        self.nGroups = max(self.nGroups,group+1)
+        self.nCohorts = max(self.nCohorts,cohort+1)
+        self.nGenotypes = max(self.nGenotypes,genotype+1)
         
         while f>=len(self.v):
             self.v.append(list())
@@ -106,49 +108,26 @@ class MeasureAGDict(object):
         while survey >= len(surveys):
             surveys.append(list())
         groups=surveys[survey]
-        while ag >= len(groups):
-            groups.append(0.0)
-        groups[ag] += value
-    def get(self,survey,group,f):
+        while group >= len(groups):
+            groups.append(list())
+        cohorts=groups[group]
+        while cohort >= len(cohorts):
+            cohorts.append(list())
+        genotypes=cohorts[cohort]
+        while genotype >= len(genotypes):
+            genotypes.append(0.0)
+        genotypes[genotype] += value
+    def get(self,survey,group,cohort,genotype,f):
         try:
-            return self.v[f][survey][int(group)]
+            return self.v[f][survey][group][cohort][genotype]
         except LookupError:
             return 1e1000 - 1e0000 # NaN
     def getGroups(self):
-        return range(0,self.nAGroups)
-class MeasureOGDict(object):
-    def __init__(self,m):
-        self.groups=set() # record of all groups this measure has
-        #(list by fileID) of (list by survey) of (dict by group)
-        self.v=list()
-        if m in set([40,49]):
-            self.groupLabel="drug ID"
-        elif m>=31 and m<=34:
-            self.groupLabel="vector species"
-        else:
-            self.groupLabel="(none)"
-    def add(self,survey,group,f,value):
-        """survey: int, group: string, f: int"""
-        group=str(group) # force same type to make sure hash sums match
-        self.groups.add(group)
-        
-        while f>=len(self.v):
-            self.v.append(list())
-        surveys=self.v[f]
-        while survey >= len(surveys):
-            surveys.append(dict())
-        groups=surveys[survey]
-        groups[group] = groups.get(group,0.0) + value
-    def get(self,survey,group,f):
-        group=str(group)
-        try:
-            return self.v[f][survey][group]
-        except LookupError:
-            print "can't find:",f,survey,group
-            print "have:",self.v
-            return 1e1000 - 1e1000 # NaN
-    def getGroups(self):
-        return list(self.groups)
+        return range(0,self.nGroups)
+    def getCohorts(self):
+        return range(0,self.nCohorts)
+    def getGenotypes(self):
+        return range(0,self.nGenotypes)
 
 def stringIndexAllMatch(strs,ind,char):
     for s in strs:
@@ -171,13 +150,15 @@ class ValDict (object):
     
     def read(self,fileName,filterExpr,exprDebug):
         """Read from fileName. If measures is non-empty, only read these measures."""
-        def filterFun(f,m,s,g):
+        def filterFun(f,m,s,g,c,gt):
             r=eval(filterExpr)
             if exprDebug:
-                print "f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g)+":",r
+                print "f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g),"c="+str(c),"g="+str(g)+":",r
             return r
         aKS = Keys.SURVEY in self.aggregateKeys
         aKG = Keys.GROUP in self.aggregateKeys
+        aKC = Keys.COHORT in self.aggregateKeys
+        aKGT = Keys.GENOTYPE in self.aggregateKeys
         if Keys.FILE not in self.aggregateKeys:
             assert fileName not in self.files, "Reading same file twice?"
             fID = len(self.files)
@@ -198,20 +179,28 @@ class ValDict (object):
             
             m=int(items[2])
             s=int(items[0])
-            g=items[1]
-            if not filterFun(fileName,m,s,g):
+            g=int(items[1])
+            gt = g / 1000000 # genotype
+            g = g - 1000000*gt
+            c = g / 1000   # cohort
+            g = g - 1000*c
+            if not filterFun(fileName,m,s,g,c,gt):
                 continue
             if aKS:
                 s=0
             if aKG:
                 g=0
+            if aKC:
+                c=0
+            if aKGT:
+                gt=0
             i=len(self.values)
             while m >= i:
-                self.values.append(MeasureAGDict() if isAgeGroup(i) else MeasureOGDict(m))
+                self.values.append(MeasureDict(m))
                 i+=1
             self.measures.add(m)
             self.nSurveys=max(self.nSurveys,s)
-            self.values[m].add(s,g,fID,robustFloat(items[3]))
+            self.values[m].add(s,g,c,gt,fID,robustFloat(items[3]))
     
     def getFiles(self):
         return range(len(self.files))
@@ -254,16 +243,24 @@ class ValDict (object):
         return groups
     def getGroups(self,measure):
         return self.values[measure].getGroups()
+    def getCohorts(self,measure):
+        return self.values[measure].getCohorts()
+    def getGenotypes(self,measure):
+        return self.values[measure].getGenotypes()
     def getGroupLabel(self,measure):
         return self.values[measure].groupLabel
-    def get(self,m,s,g,f):
+    def get(self,m,s,g,c,gt,f):
         if s==None:
             s=0
         if g==None:
             g=0
+        if c==None:
+            c=0
+        if gt==None:
+            gt=0
         if f==None:
             f=0
-        return self.values[m].get(s,g,f)
+        return self.values[m].get(s,g,c,gt,f)
 
 
 #http://stackoverflow.com/questions/2974124/reading-floating-point-numbers-with-1-qnan-values-in-python
@@ -291,7 +288,7 @@ def readEntries (fname):
             print line
             continue
             
-        key=Multi3Keys(int(items[2]),int(items[0]),items[1])
+        key=Multi3Keys(int(items[2]),int(items[0]),int(items[1]))
         values[key]=robustFloat(items[3])
     return values
 

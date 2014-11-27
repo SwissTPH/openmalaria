@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" schemaVersion="32" wuID="53630539" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" schemaVersion="33" wuID="53630539" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -45,91 +45,13 @@
       <option name="nDirDeaths" value="true"/>
       <option name="nEPIVaccinations" value="true"/>
       <option name="allCauseIMR" value="true"/>
-      <option name="nMassVaccinations" value="true"/>
       <option name="annAvgK" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
-      <surveyTime>1</surveyTime>
-      <surveyTime>19</surveyTime>
-      <surveyTime>37</surveyTime>
-      <surveyTime>55</surveyTime>
-      <surveyTime>74</surveyTime>
-      <surveyTime>92</surveyTime>
-      <surveyTime>110</surveyTime>
-      <surveyTime>128</surveyTime>
-      <surveyTime>147</surveyTime>
-      <surveyTime>165</surveyTime>
-      <surveyTime>183</surveyTime>
-      <surveyTime>201</surveyTime>
-      <surveyTime>220</surveyTime>
-      <surveyTime>238</surveyTime>
-      <surveyTime>256</surveyTime>
-      <surveyTime>274</surveyTime>
-      <surveyTime>293</surveyTime>
-      <surveyTime>311</surveyTime>
-      <surveyTime>329</surveyTime>
-      <surveyTime>347</surveyTime>
-      <surveyTime>366</surveyTime>
-      <surveyTime>384</surveyTime>
-      <surveyTime>402</surveyTime>
-      <surveyTime>420</surveyTime>
-      <surveyTime>439</surveyTime>
-      <surveyTime>457</surveyTime>
-      <surveyTime>475</surveyTime>
-      <surveyTime>493</surveyTime>
-      <surveyTime>512</surveyTime>
-      <surveyTime>530</surveyTime>
-      <surveyTime>548</surveyTime>
-      <surveyTime>566</surveyTime>
-      <surveyTime>585</surveyTime>
-      <surveyTime>603</surveyTime>
-      <surveyTime>621</surveyTime>
-      <surveyTime>639</surveyTime>
-      <surveyTime>658</surveyTime>
-      <surveyTime>676</surveyTime>
-      <surveyTime>694</surveyTime>
-      <surveyTime>712</surveyTime>
-      <surveyTime>731</surveyTime>
-      <surveyTime>749</surveyTime>
-      <surveyTime>767</surveyTime>
-      <surveyTime>785</surveyTime>
-      <surveyTime>804</surveyTime>
-      <surveyTime>822</surveyTime>
-      <surveyTime>840</surveyTime>
-      <surveyTime>858</surveyTime>
-      <surveyTime>877</surveyTime>
-      <surveyTime>895</surveyTime>
-      <surveyTime>913</surveyTime>
-      <surveyTime>931</surveyTime>
-      <surveyTime>950</surveyTime>
-      <surveyTime>968</surveyTime>
-      <surveyTime>986</surveyTime>
-      <surveyTime>1004</surveyTime>
-      <surveyTime>1023</surveyTime>
-      <surveyTime>1041</surveyTime>
-      <surveyTime>1059</surveyTime>
-      <surveyTime>1077</surveyTime>
-      <surveyTime>1096</surveyTime>
-      <surveyTime>1114</surveyTime>
-      <surveyTime>1132</surveyTime>
-      <surveyTime>1150</surveyTime>
-      <surveyTime>1169</surveyTime>
-      <surveyTime>1187</surveyTime>
-      <surveyTime>1205</surveyTime>
-      <surveyTime>1223</surveyTime>
-      <surveyTime>1242</surveyTime>
-      <surveyTime>1260</surveyTime>
-      <surveyTime>1278</surveyTime>
-      <surveyTime>1296</surveyTime>
-      <surveyTime>1315</surveyTime>
-      <surveyTime>1333</surveyTime>
-      <surveyTime>1351</surveyTime>
-      <surveyTime>1369</surveyTime>
-      <surveyTime>1388</surveyTime>
-      <surveyTime>1406</surveyTime>
-      <surveyTime>1424</surveyTime>
-      <surveyTime>1442</surveyTime>
-      <surveyTime>1461</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">19t</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">37t</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="20.027y">55t</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="0.25"/>

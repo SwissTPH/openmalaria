@@ -19,19 +19,11 @@
  */
 
 #include "Clinical/Episode.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
 
 namespace OM {
 namespace Clinical {
-using namespace Monitoring;
-
-TimeStep Episode::healthSystemMemory( TimeStep::never );
-
-
-void Episode::init( int hsMemory ) {
-    healthSystemMemory = TimeStep( hsMemory );
-}
-
 
 Episode::~Episode ()
 {
@@ -40,103 +32,95 @@ Episode::~Episode ()
 
 void Episode::flush() {
     report();
-    _time = TimeStep::never;
+    time = sim::never();
 }
 
 
 void Episode::update (const Host::Human& human, Episode::State newState)
 {
-    if (TimeStep::simulation > (_time + healthSystemMemory)) {
+    if( time + healthSystemMemory < sim::ts0() ){
         report ();
 
-        _time = TimeStep::simulation;
-        _surveyPeriod = Survey::getSurveyNumber();
-        _ageGroup = human.getMonitoringAgeGroup();
-        m_cohortSet = human.cohortSet();
-        _state = newState;
+        time = sim::ts0();
+        surveyPeriod = mon::currentSurvey();
+        ageGroup = human.monAgeGroup();
+        cohortSet = human.cohortSet();
+        state = newState;
     } else {
-        _state = Episode::State (_state | newState);
+        state = Episode::State (state | newState);
     }
 }
 
 void Episode::report () {
-    if (_time == TimeStep::never)        // Nothing to report
+    if (time < sim::zero())        // Nothing to report
         return;
     
-    Survey& survey = Survey::getSurvey(_surveyPeriod);
-
     // Reports malarial/non-malarial UC fever dependent on cause, not diagnosis.
-    if (_state & Episode::MALARIA) {
+    if (state & Episode::MALARIA) {
         // Malarial fevers: report bout
-        if (_state & Episode::COMPLICATED) {
-            survey.addInt( Report::MI_SEVERE_EPISODES, _ageGroup, m_cohortSet, 1) ;
+        if (state & Episode::COMPLICATED) {
+            mon::reportMSACI( mon::MHE_SEVERE_EPISODES, surveyPeriod, ageGroup, cohortSet, 1 );
         } else { // UC or UC2
-            survey.addInt( Report::MI_UNCOMPLICATED_EPISODES, _ageGroup, m_cohortSet, 1 );
+            mon::reportMSACI( mon::MHE_UNCOMPLICATED_EPISODES, surveyPeriod, ageGroup, cohortSet, 1 );
         }
 
         // Report outcomes of malarial fevers
-        if (_state & Episode::EVENT_IN_HOSPITAL) {
-            if (_state & Episode::DIRECT_DEATH) {
-                survey
-                    .addInt( Report::MI_DIRECT_DEATHS, _ageGroup, m_cohortSet, 1 )
-                    .addInt( Report::MI_HOSPITAL_DEATHS, _ageGroup, m_cohortSet, 1 );
-                if (_state & Episode::EVENT_FIRST_DAY)
-                    survey
-                        .addInt( Report::MI_FIRST_DAY_DEATHS, _ageGroup, m_cohortSet, 1 )
-                        .addInt( Report::MI_HOSPITAL_FIRST_DAY_DEATHS, _ageGroup, m_cohortSet, 1 );
+        if (state & Episode::EVENT_IN_HOSPITAL) {
+            if (state & Episode::DIRECT_DEATH) {
+                mon::reportMSACI( mon::MHO_DIRECT_DEATHS, surveyPeriod, ageGroup, cohortSet, 1 );
+                mon::reportMSACI( mon::MHO_HOSPITAL_DEATHS, surveyPeriod, ageGroup, cohortSet, 1 );
+                if (state & Episode::EVENT_FIRST_DAY){
+                    mon::reportMSACI( mon::MHO_FIRST_DAY_DEATHS, surveyPeriod, ageGroup, cohortSet, 1 );
+                    mon::reportMSACI( mon::MHO_HOSPITAL_FIRST_DAY_DEATHS, surveyPeriod, ageGroup, cohortSet, 1 );
+                }
             }
-            else if (_state & Episode::SEQUELAE) {
-                survey
-                    .addInt( Report::MI_SEQUELAE, _ageGroup, m_cohortSet, 1 )
-                    .addInt( Report::MI_HOSPITAL_SEQUELAE, _ageGroup, m_cohortSet, 1 );
+            else if (state & Episode::SEQUELAE) {
+                mon::reportMSACI( mon::MHO_SEQUELAE, surveyPeriod, ageGroup, cohortSet, 1 );
+                mon::reportMSACI( mon::MHO_HOSPITAL_SEQUELAE, surveyPeriod, ageGroup, cohortSet, 1 );
             }
-            else if (_state & Episode::RECOVERY)
-                survey
-                    .addInt( Report::MI_HOSPITAL_RECOVERIES, _ageGroup, m_cohortSet, 1 );
+            else if (state & Episode::RECOVERY){
+                mon::reportMSACI( mon::MHO_HOSPITAL_RECOVERIES, surveyPeriod, ageGroup, cohortSet, 1 );
+            }
         } else {
-            if (_state & Episode::DIRECT_DEATH) {
-                survey
-                    .addInt( Report::MI_DIRECT_DEATHS, _ageGroup, m_cohortSet, 1 );
-                if (_state & Episode::EVENT_FIRST_DAY)
-                    survey
-                        .addInt( Report::MI_FIRST_DAY_DEATHS, _ageGroup, m_cohortSet, 1 );
+            if (state & Episode::DIRECT_DEATH) {
+                mon::reportMSACI( mon::MHO_DIRECT_DEATHS, surveyPeriod, ageGroup, cohortSet, 1 );
+                if (state & Episode::EVENT_FIRST_DAY){
+                    mon::reportMSACI( mon::MHO_FIRST_DAY_DEATHS, surveyPeriod, ageGroup, cohortSet, 1 );
+                }
             }
-            else if (_state & Episode::SEQUELAE)
-                survey
-                    .addInt( Report::MI_SEQUELAE, _ageGroup, m_cohortSet, 1 );
+            else if (state & Episode::SEQUELAE){
+                mon::reportMSACI( mon::MHO_SEQUELAE, surveyPeriod, ageGroup, cohortSet, 1 );
+            }
             // Don't care about out-of-hospital recoveries
         }
-    } else if (_state & Episode::SICK) {
+    } else if (state & Episode::SICK) {
         // Report non-malarial fever and outcomes
-        survey
-            .addInt( Report::MI_NON_MALARIA_FEVERS, _ageGroup, m_cohortSet, 1 );
+        mon::reportMSACI( mon::MHE_NON_MALARIA_FEVERS, surveyPeriod, ageGroup, cohortSet, 1 );
 
-        if (_state & Episode::DIRECT_DEATH) {
-            survey
-                .addInt( Report::MI_NMF_DEATHS, _ageGroup, m_cohortSet, 1 );
+        if (state & Episode::DIRECT_DEATH) {
+            mon::reportMSACI( mon::MHO_NMF_DEATHS, surveyPeriod, ageGroup, cohortSet, 1 );
         }
     }
-
 }
 
 void Episode::operator& (istream& stream) {
-    _time & stream;
-    if (_time != TimeStep::never) {
-        _surveyPeriod & stream;
-        _ageGroup & stream;
-        m_cohortSet & stream;
+    time & stream;
+    if (time > sim::zero()) {
+        surveyPeriod & stream;
+        ageGroup & stream;
+        cohortSet & stream;
         int s;
         s & stream;
-        _state = Episode::State(s);
+        state = Episode::State(s);
     }
 }
 void Episode::operator& (ostream& stream) {
-    _time & stream;
-    if (_time != TimeStep::never) {
-        _surveyPeriod & stream;
-        _ageGroup & stream;
-        m_cohortSet & stream;
-        _state & stream;
+    time & stream;
+    if (time >= sim::zero()) {
+        surveyPeriod & stream;
+        ageGroup & stream;
+        cohortSet & stream;
+        state & stream;
     }
 }
 

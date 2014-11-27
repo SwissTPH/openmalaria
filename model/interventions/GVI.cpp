@@ -21,19 +21,17 @@
 #include "Global.h"
 #include "interventions/GVI.h"
 #include "Host/Human.h"
-#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 #include "util/errors.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
-    using namespace Monitoring;
 
 vector<GVIComponent*> GVIComponent::componentsByIndex;
 
 GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id, Report::MI_GVI_CTS, Report::MI_GVI_TIMED)
+        Transmission::HumanVectorInterventionComponent(id)
 {
     decay = DecayFunction::makeObject( elt.getDecay(), "interventions.human.vector.decay" );
     
@@ -50,9 +48,9 @@ GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
     componentsByIndex[id.id] = this;
 }
 
-void GVIComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
+void GVIComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Survey::current().addInt(reportMeasure(method), human, 1 );
+    mon::reportMHD( mon::MHD_GVI, human, method );
 }
 
 Component::Type GVIComponent::componentType()const{ return Component::GVI; }
@@ -94,7 +92,7 @@ HumanGVI::HumanGVI ( const GVIComponent& params ) :
 }
 
 void HumanGVI::redeploy(const Transmission::HumanVectorInterventionComponent&) {
-    deployTime = TimeStep::simulation;
+    deployTime = sim::nowOrTs1();
 }
 
 void HumanGVI::update(Host::Human& human){

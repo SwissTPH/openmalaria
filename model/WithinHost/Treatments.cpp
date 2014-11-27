@@ -45,38 +45,39 @@ Treatments::Stages stageFromString( const std::string& str ){
     if( str == "liver" ) return Treatments::LIVER;
     if( str == "blood" ) return Treatments::BLOOD;
     if( str == "both" ) return Treatments::BOTH;
-    throw util::xml_scenario_error( std::string("treatment action: stage must be liver, blood or both, not ").append(str) );
+    throw util::format_error( std::string("stage must be liver, blood or both, not ").append(str) );
 }
 Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
-    TriggeredDeployments(elt),
-    timestepsLiver(0), timestepsBlood(0)
+    TriggeredDeployments(elt), timeLiver(sim::zero()), timeBlood(sim::zero())
 {
     for( scnXml::TreatmentOption::ClearInfectionsConstIterator it =
         elt.getClearInfections().begin(), end = elt.getClearInfections().end();
         it != end; ++it )
     {
-        int len = it->getTimesteps();
-        if( len < -1 || len == 0 ){ 
-            throw util::xml_scenario_error( "prophylacticTreatment: timesteps: must be ≥ 1 or have special value -1" );
-        }
-        Stages stage = stageFromString( it->getStage() );
-        if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
-            if( stage != BLOOD || len != -1 )
-                throw util::unimplemented_exception( "vivax model requires treatments configured as blood-stage with timesteps=-1" );
-            // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
-        }else if( TimeStep::interval != 5 && stage != BOTH ){
-            throw util::unimplemented_exception(
-                "differentiation of infection stages for simple treatment (alternative: use the PK/PD model)" );
-        }
-        if( stage & LIVER ){
-            if( timestepsLiver.asInt() != 0 )   // existing treatment configuration
-                throw util::xml_scenario_error( "treatment action: multiple specification of liver stage effect" );
-            timestepsLiver = TimeStep(len);
-        }
-        if( stage & BLOOD ){
-            if( timestepsBlood.asInt() != 0 )   // existing treatment configuration
-                throw util::xml_scenario_error( "treatment action: multiple specification of blood stage effect" );
-            timestepsBlood = TimeStep(len);
+        try{
+            //NOTE: if changing XSD, this should not be called "timesteps" or have a default unit
+            SimTime len = UnitParse::readShortDuration( it->getTimesteps(), UnitParse::STEPS );
+            if( len < -sim::oneTS() || len == sim::zero() ){ 
+                throw util::format_error( "timesteps must be ≥ 1 or have special value -1" );
+            }
+            Stages stage = stageFromString( it->getStage() );
+            if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+                if( stage != BLOOD || len != -sim::oneTS() )
+                    throw util::unimplemented_exception( "vivax model requires treatments configured as blood-stage with timesteps=-1" );
+                // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
+            }
+            if( stage & LIVER ){
+                if( timeLiver != sim::zero() )   // existing treatment configuration
+                    throw util::format_error( "multiple specification of liver stage effect" );
+                timeLiver = len;
+            }
+            if( stage & BLOOD ){
+                if( timeBlood != sim::zero() )   // existing treatment configuration
+                    throw util::format_error( "multiple specification of blood stage effect" );
+                timeBlood = len;
+            }
+        }catch( const util::format_error& e ){
+            throw util::xml_scenario_error( string(".../clearInfections/timesteps: ").append(e.message()) );
         }
     }
 }

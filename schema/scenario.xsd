@@ -2,8 +2,8 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
-           xmlns:om="http://openmalaria.org/schema/scenario_32"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_33"
+           xmlns:om="http://openmalaria.org/schema/scenario_33"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="demography.xsd"/>
   <xs:include schemaLocation="monitoring.xsd"/>
@@ -13,27 +13,27 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:element name="scenario">
     <xs:annotation>
       <xs:documentation>Description of scenario</xs:documentation>
-      <xs:appinfo>type:list of elements;name:Scenario;</xs:appinfo>
+      <xs:appinfo>name:Scenario;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
       <xs:all>
-        <xs:element name="demography" type="om:demography">
+        <xs:element name="demography" type="om:Demography">
           <xs:annotation>
             <xs:documentation>
               Description of demography
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Human age distribution;</xs:appinfo>
+            <xs:appinfo>name:Human age distribution;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="monitoring" type="om:monitoring">
+        <xs:element name="monitoring" type="om:Monitoring">
           <xs:annotation>
             <xs:documentation>
               Description of surveys
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Measures to be reported;</xs:appinfo>
+            <xs:appinfo>name:Measures to be reported;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="interventions" type="om:interventions">
+        <xs:element name="interventions" type="om:Interventions">
           <xs:annotation>
             <xs:documentation>
               List of interventions. Generally these are either point-time
@@ -41,31 +41,50 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               continuous-time distribution targetting individuals when they
               reach a certain age.
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Preventative interventions;</xs:appinfo>
+            <xs:appinfo>name:Preventative interventions;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="healthSystem" type="om:healthSystem">
+        <xs:element name="healthSystem" type="om:HealthSystem">
           <xs:annotation>
             <xs:documentation>
               Description of health system.
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Health system description;</xs:appinfo>
+            <xs:appinfo>name:Health system description;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="entomology" type="om:entoData">
+        <xs:element name="entomology" type="om:Entomology">
           <xs:annotation>
             <xs:documentation>
               Description of entomological data
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Transmission and vector bionomics;</xs:appinfo>
+            <xs:appinfo>name:Transmission and vector bionomics;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="pharmacology" type="om:pharmacology" minOccurs="0">
+        <xs:element name="parasiteGenetics" type="om:ParasiteGenetics" minOccurs="0">
           <xs:annotation>
             <xs:documentation>
-              Drug model parameters
+              A specification of genotypes of infection parasites.
+              
+              May be omitted; in this case there is no modelling of genetic
+              differences of infections (resistance, fitness).
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Pharmacokinetics and pharmacodynamics;</xs:appinfo>
+            <xs:appinfo>name:Parasite genetics;</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="pharmacology" type="om:Pharmacology" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Drug model parameters and drug usage parameters
+            </xs:documentation>
+            <xs:appinfo>name:Drug parameters (PK, PD and usage);</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="diagnostics" type="om:Diagnostics" minOccurs="0">
+          <xs:annotation>
+            <xs:documentation>
+              Diagnostic model parameters
+            </xs:documentation>
+            <xs:appinfo>name:Diagnostic parameters;</xs:appinfo>
           </xs:annotation>
         </xs:element>
         <xs:element name="model">
@@ -74,7 +93,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Encapsulation of all parameters which describe the model according
             to which fitting is done.
             </xs:documentation>
-            <xs:appinfo>type:list of elements;name:Model options and parameters;</xs:appinfo>
+            <xs:appinfo>name:Model options and parameters;</xs:appinfo>
           </xs:annotation>
           <xs:complexType>
             <xs:all>
@@ -85,18 +104,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     The list of recognised options can be found in the code at:
                     include/util/ModelOptions.h and should also be in the wiki.
                   </xs:documentation>
-                  <xs:appinfo>type:list of elements;name:Model Options;</xs:appinfo>
+                  <xs:appinfo>name:Model Options;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="clinical" type="om:clinical" />
-              <xs:element name="human" type="om:human"/>
-              <xs:element name="vivax" type="om:vivax" minOccurs="0"/>
-              <xs:element name="parameters" type="om:parameters">
+              <xs:element name="clinical" type="om:Clinical" />
+              <xs:element name="human" type="om:Human"/>
+              <xs:element name="vivax" type="om:Vivax" minOccurs="0"/>
+              <xs:element name="parameters" type="om:Parameters">
                 <xs:annotation>
                   <xs:documentation>
                     Parameters of the epidemiological model
                   </xs:documentation>
-                  <xs:appinfo>type:list of elements;name:Parameters of the model of epidemiology;</xs:appinfo>
+                  <xs:appinfo>name:Parameters of the model of epidemiology;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:all>
@@ -117,7 +136,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Unique identifier of scenario
           </xs:documentation>
-          <xs:appinfo>type:integer; units: Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
+          <xs:appinfo>units: Number;min:1;max:100000000;name:Reference number of the analysis;exposed:false;
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
@@ -126,23 +145,23 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Name of intervention
           </xs:documentation>
-          <xs:appinfo>type:string;name:Name of intervention;</xs:appinfo>
+          <xs:appinfo>name:Name of intervention;</xs:appinfo>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="wuID" type="xs:int" use="optional">
         <xs:annotation>
           <xs:documentation>
-            Work unit ID. Only used to validate checkpointing, to prevent checkpoint cheats.
+            Work unit ID. Obselete and no longer required.
           </xs:documentation>
           <xs:appinfo>
-            units:Number;min:1;max:100000000;name:Work unit identifier;exposed:false;
+            units:Number;name:Work unit identifier;exposed:false;
           </xs:appinfo>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
   </xs:element>
   <!--Parameters-->
-  <xs:complexType name="parameter">
+  <xs:complexType name="Parameter">
     <xs:attribute name="name" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>Name of parameter</xs:documentation>
@@ -154,7 +173,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:documentation>
           Reference number of input parameter
         </xs:documentation>
-        <xs:appinfo>type:boolean;units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
+        <xs:appinfo>units:Number;min:1;max:100;name:Parameter number;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="value" type="xs:double" use="required">
@@ -169,13 +188,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           True if parameter is to be sampled in optimization
           runs. Not used in simulator app.
         </xs:documentation>
-        <xs:appinfo>type:Boolean;units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
+        <xs:appinfo>units:Number;min:0;max:1;name:Sampling indicator;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="parameters">
+  <xs:complexType name="Parameters">
     <xs:sequence>
-      <xs:element maxOccurs="unbounded" name="parameter" type="om:parameter" />
+      <xs:element maxOccurs="unbounded" name="parameter" type="om:Parameter" />
     </xs:sequence>
     <xs:attribute name="interval" type="xs:int" use="required">
       <xs:annotation>
@@ -189,17 +208,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Number;name:Random number seed;sweepable:true;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="latentp" type="xs:int" use="required">
+    <xs:attribute name="latentp" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          pre-erythrocytic latent period, in time steps
+          Pre-erythrocytic latent period
+          
+          Can be specified in steps (e.g. 3t) or days (e.g. 15d).
         </xs:documentation>
-        <xs:appinfo>units:Time steps;min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
+        <xs:appinfo>units:User defined (default: steps);min:0;max:20;name:Pre-erythrocytic latent period;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
   <!-- Host data -->
-  <xs:complexType name="human">
+  <xs:complexType name="Human">
     <xs:annotation>
       <xs:documentation>
         Parameters of host models.
@@ -234,7 +255,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     A standard deviation of zero for no heterogeneity is valid; a rough
                     value from Tanzanian data is 0.14.
                   </xs:documentation>
-                  <xs:appinfo>type:double;name:Standard deviation;units:None;min:0</xs:appinfo>
+                  <xs:appinfo>name:Standard deviation;units:None;min:0</xs:appinfo>
                 </xs:annotation>
               </xs:attribute>
             </xs:extension>
@@ -243,9 +264,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="vivax">
+  <xs:complexType name="Vivax">
     <xs:all>
-      <xs:element name="probBloodStageInfectiousToMosq" type="om:inputValue"/>
+      <xs:element name="probBloodStageInfectiousToMosq" type="om:DoubleValue"/>
       <xs:element name="numberHypnozoites">
         <xs:complexType>
           <xs:attribute type="xs:int" use="required" name="max"/>
@@ -259,7 +280,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute type="xs:double" use="required" name="sigma"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="bloodStageProtectionLatency" type="om:inputValue"/>
+      <xs:element name="bloodStageProtectionLatency" type="om:DoubleValue"/>
       <xs:element name="bloodStageLengthDays">
         <xs:complexType>
           <xs:attribute type="xs:double" use="required" name="weibullScale"/>
@@ -268,11 +289,263 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
       <xs:element name="pEventPrimary" type="om:ProbVivaxEvent"/>
       <xs:element name="pEventSecondary" type="om:ProbVivaxEvent"/>
-      <xs:element name="pEventIsSevere" type="om:inputValue"/>
+      <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="ProbVivaxEvent">
     <xs:attribute name="a" type="xs:double" use="required"/>
     <xs:attribute name="b" type="xs:double" use="required"/>
+  </xs:complexType>
+  
+  <xs:complexType name="ParasiteGenetics">
+    <xs:sequence>
+      <xs:element name="locus" type="om:ParasiteLocus" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Describes a locus, or a point at which an infection may
+            vary. The genotype of an infection is determined by
+            choosing one allele at each locus. Initial frequencies of
+            alleles are specified independently for each locus, but
+            subsequent infections are selected according to success of
+            genotypes.
+            
+            Alleles at loci can affect fitness and resistance to any
+            number of drugs.
+          </xs:documentation>
+          <xs:appinfo>name:Locus;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="samplingMode" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          This controls how genotypes are determined for new infections during
+          the intervention period. Prior to this (in initialisation phases),
+          genotypes are always sampled using the specified initial frequencies.
+          
+          Mode "initial" continues to sample genotypes using initial
+          frequencies (i.e. independent of the success of parent generations of
+          parasites).
+          
+          Mode "tracking" samples genotypes based on the success parent
+          generations of parasites have in infecting mosquitoes, tracked per
+          genotype.
+          
+          It is possible that in the future a recombination option will be
+          added to this list, however designing a suitable model is not
+          trivial.
+        </xs:documentation>
+        <xs:appinfo>Name:Sampling mode;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="initial"/>
+          <xs:enumeration value="tracking"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ParasiteGenotype">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the genotype; used to refer to it elsewhere.
+        </xs:documentation>
+        <xs:appinfo>name:Name (for reference purposes);</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="initialFrequency" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Specification of how commonly this genotype occurs during
+          initialisation phases of the simulation relative to other genotypes.
+        </xs:documentation>
+        <xs:appinfo>name:Initial frequency;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="fitness" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Fitness factor of the genotype. This is multiplication factor used to
+          speed up or slow down replication of parasites.
+          
+          For example, if a genotype has a fitness factor of 0.8, then the
+          parasites with this genotype will replicate 20% slower in the host
+          than the baseline.
+        </xs:documentation>
+        <xs:appinfo>name:Fitness factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ParasiteLocus">
+    <xs:sequence>
+      <xs:element name="allele" type="om:ParasiteAllele" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Describes an allele, or one possible genetic option
+            of multiple at one point of variance.
+          </xs:documentation>
+          <xs:appinfo>name:Allele;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>Name of the Locus</xs:documentation>
+        <xs:appinfo>name:Name of locus;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ParasiteAllele">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of the allele; used to refer to it elsewhere.
+        </xs:documentation>
+        <xs:appinfo>name:Name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="initialFrequency" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Specification of how commonly this allele occurs during warmup
+          relative to other alleles of the same locus.
+          
+          During the simulation's initialisation phases, the frequency at which
+          each allele of each locus occurs is fixed. After the initialisation
+          phase, frequency of alleles is modelled as an emergent property of
+          the success of genotypes.
+        </xs:documentation>
+        <xs:appinfo>name:Initial frequency;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="fitness" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Fitness factor of the allele. This is multiplication factor used to
+          speed up or slow down replication of parasites.
+          
+          For example, if a genotype has an allele with a fitness factor of 1
+          at one locus and another allele with a fitness factor of 0.8 at a
+          second locus, then the parasites with the genotype will replicate 20%
+          slower than the baseline.
+        </xs:documentation>
+        <xs:appinfo>name:Fitness factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  
+  <xs:complexType name="Diagnostics">
+    <xs:sequence>
+      <xs:element name="diagnostic" type="om:Diagnostic" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="Diagnostic">
+    <!-- Description of a generic parasitaemia diagnostic. -->
+    <!-- Garki/non-Garki measurement biases are not taken into account by this
+      code; the effect could be included via parameterisation or via adjusting
+      input density. -->
+    <xs:sequence>
+      <xs:choice>
+        <xs:element name="deterministic">
+          <xs:annotation>
+            <xs:documentation>
+              Specify that an artificial deterministic test is used: outcome is
+              positive if parasite density is at least the minimum given.
+            </xs:documentation>
+            <xs:appinfo>name:Deterministic detection;</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:attribute name="minDensity" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The minimum density at which parasites can be detected. If 0,
+                  the test outcome is always positive.
+                </xs:documentation>
+                <xs:appinfo>name:Minimum detectible density;units:parasites/microlitre;min:0;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="stochastic">
+          <xs:annotation>
+            <xs:documentation>
+              An improved model of detection which is non-deterministic, including
+              false positive results as well as false negatives.
+              
+              The probability of a positive outcome is modelled as 1 + s×(x/(x+d) - 1)
+              where x is the parasite density, d is the density at which the test outcome
+              has a 50% chance of being positive, and s is the probability of a positive
+              outcome given no parasites (the specificity).
+              
+              Some parameterisations:
+              
+              Microscopy sensitivity/specificity data in Africa;
+              Source: expert opinion — Allan Schapira
+                dens_50 = 20.0
+                specificity = .75
+              
+              RDT sensitivity/specificity for Plasmodium falciparum in Africa
+              Source: Murray et al (Clinical Microbiological Reviews, Jan. 2008)
+                dens_50 = 50.0;
+                specificity = .942;
+            </xs:documentation>
+            <xs:appinfo>name:Non-deterministic detection</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:attribute name="dens_50" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The density at which the test outcome has a 50% chance of being positive.
+                </xs:documentation>
+                <xs:appinfo>name:Density 50;units:parasites/microlitre;min:0;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+            <xs:attribute name="specificity" type="xs:double" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  The probability of a positive test outcome in the absense of parasites.
+                </xs:documentation>
+                <xs:appinfo>units:Dimensionless;name:Specificity;min:0;max:1;</xs:appinfo>
+              </xs:annotation>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of this diagnostic (parameterisation). May be used elsewhere in
+          the XML document to refer to this set of diagnostic parameters.
+        </xs:documentation>
+        <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="units" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Parasite densities, as estimated according to standard microscopy
+          methods, the Garki method, and as derived from Malariatherapy data
+          are not equivalent. Internally, a "bias" factor is used to convert
+          values estimated by one methods to values comparable with another
+          (see AJTMHv75 supplement 2 pp20-21).
+          
+          This option allows specification of which methodology the density
+          given in the diagnostic specification is measured with. Values
+          allowed are: Malariatherapy, Garki and Other. If not specified,
+          Other is assumed, unless the GARKI_DENSITY_BIAS model option is used,
+          in which case this option must be specified.
+        </xs:documentation>
+        <xs:appinfo>name:Parasite density units / methodology;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Other"/>
+          <xs:enumeration value="Garki"/>
+          <xs:enumeration value="Malariatherapy"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
   </xs:complexType>
 </xs:schema>

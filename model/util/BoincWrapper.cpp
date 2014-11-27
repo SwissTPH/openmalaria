@@ -41,11 +41,6 @@
 #include <sstream>
 #endif
 
-#if (defined(_GRAPHICS_6)&&defined(_BOINC))
-#include "ShmStruct.h"
-#include "graphics2.h"
-#endif
-
 using namespace std;
 
 namespace OM { namespace util {
@@ -109,8 +104,6 @@ namespace BoincWrapper {
     }
     // Probably we don't need to know this. Disable to compress stderr.txt:
 //     std::cout << "BoincWrapper: BOINC initialized" << std::endl;
-    
-    SharedGraphics::init();
   }
   void finish(int err) {
     boinc_finish(err);	// doesn't return
@@ -203,40 +196,4 @@ void Checksum::writeToFile (string filename) {
 }
 #endif	// Without/with BOINC
 
-#if (defined(_GRAPHICS_6)&&defined(_BOINC))
-namespace SharedGraphics {
-  UC_SHMEM* shmem = NULL;
-  void update_shmem() {
-    shmem->fraction_done = boinc_get_fraction_done();
-    shmem->cpu_time = boinc_worker_thread_cpu_time();
-    shmem->update_time = dtime();
-    boinc_get_status(&shmem->status);
-  }
-  
-  void init() {
-    // create shared mem segment for graphics, and arrange to update it.
-    //"malariacontrol" is a hard coded shared mem key, could be better
-    shmem = (UC_SHMEM*)boinc_graphics_make_shmem("malariacontrol", sizeof(UC_SHMEM));
-    if (shmem == NULL) {
-      cerr << "failed to create graphics shared mem segment (no graphics possible)" << endl;
-      return;
-    }
-    cerr << "graphics shared mem segment created" << endl;
-    
-    update_shmem();
-    boinc_register_timer_callback(update_shmem);
-  }
-  
-  void copyKappa(double *kappa){
-    if (!shmem) return;
-    memcpy (shmem->KappaArray, kappa, KappaArraySize*sizeof(*kappa));
-  }
-
-}
-#else
-namespace SharedGraphics {
-  void init() {}
-  void copyKappa(double *kappa){}
-}
-#endif
 } }

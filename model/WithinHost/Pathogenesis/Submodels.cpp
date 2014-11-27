@@ -20,6 +20,7 @@
 
 #include "WithinHost/Pathogenesis/Submodels.h"
 #include "Parameters.h"
+#include "mon/reporting.h"
 
 #include <cmath>
 using namespace std;
@@ -27,7 +28,6 @@ using namespace std;
 namespace OM {
 namespace WithinHost {
 namespace Pathogenesis {
-    using namespace Monitoring;
 
 // ———  Müller presentation model  ———
 
@@ -36,14 +36,14 @@ double rateMultiplier_31;
 double densityExponent_32;
 
 void MuellerPathogenesis::init( const Parameters& parameters ){
-    rateMultiplier_31 = parameters[Parameters::MUELLER_RATE_MULTIPLIER];
+    rateMultiplier_31 = parameters[Parameters::MUELLER_RATE_MULTIPLIER]
+        * sim::yearsPerStep();
     densityExponent_32 = parameters[Parameters::MUELLER_DENSITY_EXPONENT];
 }
 
 double MuellerPathogenesis::getPEpisode(double, double totalDensity) {
     double incidenceDensity = rateMultiplier_31
-            * (pow(totalDensity, densityExponent_32))
-            * TimeStep::yearsPerInterval;
+            * (pow(totalDensity, densityExponent_32));
     return 1.0 - exp(-incidenceDensity);
 }
 
@@ -66,15 +66,15 @@ void PyrogenPathogenesis::init( const Parameters& parameters ){
     initPyroThres = parameters[Parameters::Y_STAR_0];
     
     double delt = 1.0 / n;
-    double smuY = -log(0.5)/
-        (TimeStep::stepsPerYear*parameters[Parameters::Y_STAR_HALF_LIFE]);
+    double smuY = -log(0.5) /
+        (sim::stepsPerYear() * parameters[Parameters::Y_STAR_HALF_LIFE]);
     b = -smuY * delt;
     
     Ystar2_13 = parameters[Parameters::Y_STAR_SQ];
     
     //alpha: factor determining increase in pyrogenic threshold
     double alpha14 = parameters[Parameters::ALPHA];
-    a = alpha14 * TimeStep::interval * delt;  
+    a = alpha14 * sim::oneTS().inDays() * delt;  
     
     //Ystar1: critical value of parasite density in determing increase in pyrog t
     Ystar1_26 = parameters[Parameters::Y_STAR_1];
@@ -91,9 +91,8 @@ double PyrogenPathogenesis::getPEpisode(double timeStepMaxDensity, double totalD
 }
 
 void PyrogenPathogenesis::summarize (const Host::Human& human) {
-    Survey::current()
-        .addDouble( Report::MD_PYROGENIC_THRESHOLD, human, _pyrogenThres )
-        .addDouble( Report::MD_LOG_PYROGENIC_THRESHOLD, human, log(_pyrogenThres+1.0) );
+    mon::reportMHF( mon::MHF_PYROGENIC_THRESHOLD, human, _pyrogenThres );
+    mon::reportMHF( mon::MHF_LOG_PYROGENIC_THRESHOLD, human, log(_pyrogenThres+1.0) );
 }
 
 void PyrogenPathogenesis::updatePyrogenThres(double totalDensity){

@@ -19,7 +19,6 @@
  */
 
 #include "Population.h"
-#include "Monitoring/Survey.h"
 #include "Monitoring/Continuous.h"
 
 #include "Transmission/TransmissionModel.h"
@@ -27,9 +26,10 @@
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Genotypes.h"
+#include "WithinHost/Diagnostic.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
-#include "PkPd/PkPdModel.h"
 
 #include "util/errors.h"
 #include "util/random.h"
@@ -50,38 +50,31 @@ namespace OM
 
 void Population::init( const Parameters& parameters, const scnXml::Scenario& scenario )
 {
-    Host::Human::initHumanParameters( parameters, scenario );
-    Host::NeonatalMortality::init();
-    PkPd::PkPdModel::init( scenario );
+    Host::Human::init( parameters, scenario );
+    Host::NeonatalMortality::init( scenario.getModel().getClinical() );
     
     AgeStructure::init( scenario.getDemography() );
-}
-
-void Population::clear()
-{
-    PkPd::PkPdModel::cleanup ();
-    Host::Human::clear();
 }
 
 void Population::staticCheckpoint (istream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::ClinicalModel::staticCheckpoint (stream);
-    PkPd::PkPdModel::staticCheckpoint (stream);
+    Clinical::staticCheckpointCMCommon (stream);
+    WithinHost::Genotypes::staticCheckpoint(stream);
 }
 void Population::staticCheckpoint (ostream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::ClinicalModel::staticCheckpoint (stream);
-    PkPd::PkPdModel::staticCheckpoint (stream);
+    Clinical::staticCheckpointCMCommon (stream);
+    WithinHost::Genotypes::staticCheckpoint(stream);
 }
 
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
-Population::Population(const scnXml::EntoData& entoData, size_t populationSize)
+Population::Population(const scnXml::Entomology& entoData, size_t populationSize)
     : populationSize (populationSize), recentBirths(0)
 {
     using Monitoring::Continuous;
@@ -140,7 +133,7 @@ void Population::checkpoint (istream& stream)
     for (size_t i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( new Host::Human (*_transmissionModel, TimeStep(0)) );
+        population.push_back( new Host::Human (*_transmissionModel, sim::zero()) );
         population.back() & stream;
     }
     if (population.size() != popSize)
@@ -157,7 +150,8 @@ void Population::checkpoint (ostream& stream)
 void Population::preMainSimInit ()
 {
     Host::InfectionIncidenceModel::initMainSimulation();
-    Clinical::ClinicalModel::initMainSimulation();
+    Clinical::mainSimInitCMCommon();
+    WithinHost::Genotypes::startMainSim();
     recentBirths = 0;
 }
 
@@ -169,34 +163,32 @@ void Population::createInitialHumans ()
     until vector init, which saves computation and memory (no infections). */
     
     int cumulativePop = 0;
-    for (TimeStep iage = AgeStructure::getMaxTimestepsPerLife() - TimeStep(1);
-         iage >= TimeStep(0); --iage )
+    for (size_t iage_prev = AgeStructure::getMaxTStepsPerLife(), iage = iage_prev - 1;
+         iage_prev > 0; iage_prev = iage, iage -= 1 )
     {
-	int targetPop = AgeStructure::targetCumPop (iage, populationSize);
-	while (cumulativePop < targetPop) {
-	    newHuman (-iage);
-	    ++cumulativePop;
-	}
+        int targetPop = AgeStructure::targetCumPop( iage, populationSize );
+        while (cumulativePop < targetPop) {
+            newHuman( sim::zero() - sim::fromTS(iage) );
+            ++cumulativePop;
+        }
     }
     
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
-    assert( TimeStep::simulation == TimeStep(0) );      // assumed below
+    assert( sim::now() == sim::zero() );      // assumed below
     _transmissionModel->init2 (*this);
 }
 
 
 // -----  non-static methods: simulation loop  -----
 
-void Population::newHuman (TimeStep dob)
-{
-    util::streamValidate( dob.asInt() );
+void Population::newHuman( SimTime dob ){
+    util::streamValidate( dob.raw() );
     population.push_back( new Host::Human (*_transmissionModel, dob) );
     ++recentBirths;
 }
 
-void Population::update1()
-{
+void Population::update1( SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
@@ -210,7 +202,7 @@ void Population::update1()
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
     //targetPop is the population size at time t allowing population growth
-    //int targetPop = (int) (populationSize * exp (AgeStructure::rho * TimeStep::simulation));
+    //int targetPop = (int) (populationSize * exp( AgeStructure::rho * sim::ts1().inSteps() ));
     int targetPop = populationSize;
     int cumPop = 0;
 
@@ -219,25 +211,27 @@ void Population::update1()
     Iter last = population.end();
     --last;
     for (Iter iter = population.begin(); iter != population.end();) {
-        // Update human, and remove if too old:
-        if (iter->update (_transmissionModel,
-		/* Only include humans who can survive until vector init.
-		Note: we could exclude more humans due to age distribution,
-		but how many extra to leave due to deaths isn't obvious. */
-		TimeStep::intervalsPerYear + iter->getDateOfBirth() > TimeStep(0)
-	    )) {
+        // Update human, and remove if too old.
+        // We only need to update humans who will survive past the end of the
+        // "one life span" init phase (this is an optimisation). lastPossibleTS
+        // is the time step they die at (some code still runs on this step).
+        SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
+        bool updateHuman = lastPossibleTS >= firstVecInitTS;
+        bool isDead = iter->update(_transmissionModel, updateHuman);
+        if( isDead ){
             iter->destroy();
             iter = population.erase (iter);
             continue;
         }
-
+        
         //BEGIN Population size & age structure
         ++cumPop;
-        TimeStep age = (TimeStep::simulation - iter->getDateOfBirth());
 
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
-        if (cumPop > AgeStructure::targetCumPop (age, targetPop)) {
+        //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
+        // Also see targetPop = ... comment above
+        if( cumPop > AgeStructure::targetCumPop(iter->age(sim::ts1()).inSteps(), targetPop) ){
             --cumPop;
             iter->destroy();
             iter = population.erase (iter);
@@ -249,7 +243,7 @@ void Population::update1()
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman (TimeStep::simulation);
+        newHuman( sim::ts1() );        // humans born at end of this time step = beginning of next
         //++nCounter;
         ++cumPop;
     }
@@ -270,7 +264,7 @@ void Population::ctsHostDemography (ostream& stream){
     Population::ConstReverseIter it = population.crbegin();
     int cumCount = 0;
     BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
-        while( it != population.crend() && it->getAgeInYears() < ubound ){
+        while( it != population.crend() && it->age(sim::now()).inYears() < ubound ){
             ++cumCount;
             ++it;
         }
@@ -284,7 +278,7 @@ void Population::ctsRecentBirths (ostream& stream){
 void Population::ctsPatentHosts (ostream& stream){
     int patent = 0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        if( iter->getWithinHostModel().diagnosticDefault() )
+        if( iter->getWithinHostModel().diagnosticResult(WithinHost::diagnostics::monitoringDiagnostic()) )
             ++patent;
     }
     stream << '\t' << patent;
@@ -292,7 +286,7 @@ void Population::ctsPatentHosts (ostream& stream){
 void Population::ctsImmunityh (ostream& stream){
     double x = 0.0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        x += iter->getWithinHostModel().getCumulativeh();
+        x += iter->getWithinHostModel().getCumulative_h();
     }
     x /= populationSize;
     stream << '\t' << x;
@@ -300,7 +294,7 @@ void Population::ctsImmunityh (ostream& stream){
 void Population::ctsImmunityY (ostream& stream){
     double x = 0.0;
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        x += iter->getWithinHostModel().getCumulativeY();
+        x += iter->getWithinHostModel().getCumulative_Y();
     }
     x /= populationSize;
     stream << '\t' << x;
@@ -309,7 +303,7 @@ void Population::ctsMedianImmunityY (ostream& stream){
     vector<double> list;
     list.reserve( populationSize );
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-        list.push_back( iter->getWithinHostModel().getCumulativeY() );
+        list.push_back( iter->getWithinHostModel().getCumulative_Y() );
     }
     sort( list.begin(), list.end() );
     double x;
@@ -327,7 +321,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->getAgeInYears());
+            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->age(sim::now()).inYears());
         }
     }
     stream << '\t' << avail/nHumans;
@@ -360,7 +354,7 @@ void Population::ctsGVICoverage (ostream& stream){
 //     double meanVar = 0.0;
 //     int nNets = 0;
 //     for (Iter iter = population.begin(); iter != population.end(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
 //             ++nNets;
 //             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
 //         }

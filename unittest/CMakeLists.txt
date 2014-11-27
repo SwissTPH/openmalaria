@@ -60,7 +60,7 @@ include_directories( SYSTEM
     ${CMAKE_SOURCE_DIR}/contrib/cxxtest
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include
+  ${CMAKE_SOURCE_DIR}/model
   ${CMAKE_SOURCE_DIR}/unittest
   ${CMAKE_BINARY_DIR}/unittest
 )
@@ -68,18 +68,18 @@ include_directories (
 set (OM_CXXTEST_HEADERS
   #AnophelesModelSuite.h needs updating for vector model changes
   ExtraAsserts.h	# must appear after at least some of the above
-  #HoshenPkPdSuite.h
   LSTMPkPdSuite.h
   CheckpointSuite.h
   DummyInfectionSuite.h
   EmpiricalInfectionSuite.h
   InfectionImmunitySuite.h
   #DescriptiveInfectionSuite.h
-  ESCaseManagementSuite.h
-  ESDecisionTreeSuite.h
+  #ESCaseManagementSuite.h
+  CMDecisionTreeSuite.h
   AgeGroupInterpolationSuite.h
   DecayFunctionSuite.h
   PennyInfectionSuite.h
+  MolineauxInfectionSuite.h
   #MosqLifeCycleSuite.h
   UtilVectorsSuite.h
 )
@@ -97,11 +97,21 @@ else (OM_CXXTEST_INTERPRETER)
   message (SEND_ERROR "Unable to find perl or python executable. Thus I can't build tests.cpp which is required to run the unittests.")
 endif (OM_CXXTEST_INTERPRETER)
 
-# This file is needed to run the EmpiricalInfection unittest:
+# These files are needed to run various infection model tests:
 configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
-# and these by the PennyInfection unittest:
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennyCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/PennySeqDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxCirDens.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStatsPairwise ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStatsPairwiseRG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStatsOrig ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStatsOrigRG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStats1MG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStats1MGRG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStatsMDG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStatsMDGRG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStats1MGMDG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
+# configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MolineauxStats1MGMDGRG ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 # and these by MosqLifeCycleSuite:
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_EmergenceRateConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_AdultMosqConstantRA.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
@@ -112,6 +122,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_OvipositingAdultsPeriodicRA.txt
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/MLCS_PeriodicResourceAvailability.txt ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
 
 add_executable (unittest
+  WHMock.cpp
   tests.cpp
   ${OM_CXXTEST_HEADERS} # for IDEs
 )

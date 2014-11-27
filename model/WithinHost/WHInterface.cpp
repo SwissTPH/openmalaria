@@ -30,6 +30,7 @@
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
+#include "schema/scenario.h"
 //using namespace std;
 
 #include <cmath>
@@ -51,16 +52,16 @@ bool opt_vivax_simple = false,
 void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ) {
     if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
         opt_vivax_simple = true;
-        WHVivax::init( parameters, scenario );
+        WHVivax::init( parameters, scenario.getModel() );
     }else{
-        WHFalciparum::init( parameters, scenario );
+        WHFalciparum::init( parameters, scenario.getModel() );
         
         if (util::ModelOptions::option (util::DUMMY_WITHIN_HOST_MODEL)) {
             opt_dummy_whm = true;
             DummyInfection::init ();
         } else if (util::ModelOptions::option (util::EMPIRICAL_WITHIN_HOST_MODEL)) {
             opt_empirical_whm = true;
-            EmpiricalInfection::init();    // 1-day timestep check
+            EmpiricalInfection::init();    // 1-day time step check
         } else if (util::ModelOptions::option (util::MOLINEAUX_WITHIN_HOST_MODEL)) {
             opt_molineaux_whm = true;
             MolineauxInfection::init( parameters );
@@ -68,10 +69,16 @@ void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario
             opt_penny_whm = true;
             PennyInfection::init();
         } else {
-            DescriptiveInfection::init( parameters );      // 5-day timestep check
+            DescriptiveInfection::init( parameters );      // 5-day time step check
         }
         opt_common_whm = opt_dummy_whm || opt_empirical_whm
                 || opt_molineaux_whm || opt_penny_whm;
+        
+        if( opt_common_whm ){
+            CommonWithinHost::init( scenario );
+        }else{
+            DescriptiveWithinHostModel::initDescriptive();
+        }
     }
 }
 
@@ -95,22 +102,6 @@ WHInterface::WHInterface () :
 
 WHInterface::~WHInterface()
 {
-}
-
-
-void WHInterface::medicate(string drugAbbrev, double qty, double time, double duration, double bodyMass){
-    throw TRACED_EXCEPTION( "should not call medicate() except with CommonWithinHost model", util::Error::WHFeatures );
-}
-
-double WHInterface::getTotalDensity() const{
-    throw TRACED_EXCEPTION( "should not call getTotalDensity() with non-falciparum model", util::Error::WHFeatures );
-}
-
-double WHInterface::getCumulativeh() const{
-    throw TRACED_EXCEPTION( "should not call getCumulativeh() with non-falciparum model", util::Error::WHFeatures );
-}
-double WHInterface::getCumulativeY() const{
-    throw TRACED_EXCEPTION( "should not call getCumulativeY() with non-falciparum model", util::Error::WHFeatures );
 }
 
 

@@ -19,54 +19,74 @@
  */
 
 #include "Clinical/CaseManagementCommon.h"
-#include "Clinical/ImmediateOutcomes.h"
-#include "Clinical/ESCaseManagement.h"
+#include "util/checkpoint_containers.h"
 #include "util/ModelOptions.h"
-#include "util/errors.h"
-#include <limits>
-#include <boost/format.hpp>
 
 namespace OM { namespace Clinical {
-    using util::AgeGroupInterpolation;
-    
-    util::AgeGroupInterpolation* CaseManagementCommon::caseFatalityRate = AgeGroupInterpolation::dummyObject();
-    double CaseManagementCommon::_oddsRatioThreshold;
-    util::AgeGroupInterpolation* CaseManagementCommon::pSeqInpatient = AgeGroupInterpolation::dummyObject();
-    
-    // -----  functions  -----
-    
-    void CaseManagementCommon::initCommon( const OM::Parameters& parameters ){
-	_oddsRatioThreshold = exp (parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY]);
+
+bool indirectMortBugfix;
+
+SimTime healthSystemMemory( sim::never() );
+
+//log odds ratio of case-fatality in community compared to hospital
+double oddsRatioThreshold;
+
+util::AgeGroupInterpolator caseFatalityRate;
+util::AgeGroupInterpolator pSequelaeInpatient;
+
+///@brief Infant death summaries (checkpointed).
+//@{
+vector<int> infantDeaths;
+vector<int> infantIntervalsAtRisk;
+//@}
+
+/// Non-malaria mortality in under 1year olds.
+/// Set by init ()
+double nonMalariaMortality;
+
+
+void initCMCommon( const OM::Parameters& parameters, SimTime hsMemory ){
+    indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
+    healthSystemMemory = hsMemory;
+    oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
+    infantDeaths.resize(sim::stepsPerYear());
+    infantIntervalsAtRisk.resize(sim::stepsPerYear());
+    nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
+}
+
+void mainSimInitCMCommon () {
+    for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){
+        Clinical::infantIntervalsAtRisk[i] = 0;
+        Clinical::infantDeaths[i] = 0;
     }
-    void CaseManagementCommon::cleanupCommon (){
-        AgeGroupInterpolation::freeObject( caseFatalityRate );
-        AgeGroupInterpolation::freeObject( pSeqInpatient );
+}
+
+void staticCheckpointCMCommon (istream& stream) {
+    infantDeaths & stream;
+    infantIntervalsAtRisk & stream;
+}
+void staticCheckpointCMCommon (ostream& stream) {
+    infantDeaths & stream;
+    infantIntervalsAtRisk & stream;
+}
+
+
+double getCommunityCFR (double caseFatalityRatio){
+    double x = caseFatalityRatio * oddsRatioThreshold;
+    return x / (1 - caseFatalityRatio + x);
+}
+
+
+
+double infantAllCauseMort(){
+    double infantPropSurviving=1.0;       // use to calculate proportion surviving
+    for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){
+        // multiply by proportion of infants surviving at each interval
+        infantPropSurviving *= double(infantIntervalsAtRisk[i] - infantDeaths[i])
+            / double(infantIntervalsAtRisk[i]);
     }
-    
-    void CaseManagementCommon::changeHealthSystem( const scnXml::HealthSystem& healthSystem ){
-	readCommon( healthSystem );
-	
-	if (util::ModelOptions::option (util::CLINICAL_EVENT_SCHEDULER)){
-	    ESCaseManagement::setHealthSystem(healthSystem);
-        }else{
-	    ClinicalImmediateOutcomes::setHealthSystem(healthSystem);
-        }
-    }
-    
-    void CaseManagementCommon::readCommon (const scnXml::HealthSystem& healthSystem)
-    {
-	// -----  case fatality rates  -----
-        AgeGroupInterpolation::freeObject( caseFatalityRate );
-	caseFatalityRate = AgeGroupInterpolation::makeObject( healthSystem.getCFR(), "CFR" );
-	
-	// -----  sequelae  -----
-        AgeGroupInterpolation::freeObject( pSeqInpatient );
-        pSeqInpatient = AgeGroupInterpolation::makeObject( healthSystem.getPSequelaeInpatient(), "pSequelaeInpatient" );
-    }
-    
-    double CaseManagementCommon::getCommunityCaseFatalityRate (double caseFatalityRatio)
-    {
-	double x = caseFatalityRatio * _oddsRatioThreshold;
-	return x / (1 - caseFatalityRatio + x);
-    }
+    // Child deaths due to malaria (per 1000), plus non-malaria child deaths. Deaths per 1000 births is the return unit.
+    return (1.0 - infantPropSurviving) * 1000.0 + nonMalariaMortality;
+}
+
 } }

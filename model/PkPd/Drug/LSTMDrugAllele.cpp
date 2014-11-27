@@ -34,7 +34,7 @@ using namespace std;
 
 namespace OM { namespace PkPd {
 
-LSTMDrugAllele::Cache::Cache( double c, double d, double r ) :
+LSTMDrugPD::Cache::Cache( double c, double d, double r ) :
     C0(c), duration(d), rate(r),
     C1(numeric_limits<double>::signaling_NaN()),
     drugFactor(numeric_limits<double>::signaling_NaN())
@@ -44,48 +44,55 @@ LSTMDrugAllele::Cache::Cache( double c, double d, double r ) :
     hash = hasher(c) ^ hasher(d) ^ hasher(r);
 }
 
-LSTMDrugAllele::LSTMDrugAllele( const scnXml::Allele& allele, double elimination_rate_constant ){
-    slope = allele.getSlope ();
-    power = allele.getMax_killing_rate () / (elimination_rate_constant * slope);
-    IC50_pow_slope = pow(allele.getIC50 (), slope);
-    max_killing_rate = allele.getMax_killing_rate ();  
+LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype, double elimination_rate_constant ){
+    slope = phenotype.getSlope ();
+    power = phenotype.getMax_killing_rate () / (elimination_rate_constant * slope);
+    IC50_pow_slope = pow(phenotype.getIC50 (), slope);
+    max_killing_rate = phenotype.getMax_killing_rate ();  
 }
 
-double LSTMDrugAllele::calcFactor( const LSTMDrugType& drug, double& C1, double duration ) const{
+double LSTMDrugPD::calcFactor( const LSTMDrugType& drug, double& C1, double duration ) const{
     double C0 = C1;
     drug.updateConcentration( C1, duration );
     
+    // From Hastings & Winter 2011 paper
     // Note: these look a little different from original equations because IC50_pow_slope
     // and power are calculated when read from the scenario document instead of here.
     double numerator = IC50_pow_slope + pow(C1, slope);
     double denominator = IC50_pow_slope + pow(C0, slope);
     
-    return pow( numerator / denominator, power );
+    //TODO(performance): can we cache the value for each parameter combination?
+    return pow( numerator / denominator, power );       // unitless
 }
 
 struct IV_conc_params {
-    double C0;
-    double ivRate; // dose->second.qty
-    double neg_elimination_rate_constant;
-    double elim_rate_dist;      // -neg_elimination_rate_constant * vol_dist
-    double slope;
-    double max_kill_rate;
-    double IC50_pow_slope;
+    double C0;  // initial concentration (mg/l)
+    double ivRate; // dose->second.qty (mg/kg/day)
+    double neg_elimination_rate_constant;       // 1 / days
+    double elim_rate_dist;      // -neg_elimination_rate_constant * vol_dist (l/kg/day)
+    double slope;       // unitless
+    double max_kill_rate;       // unitless
+    double IC50_pow_slope;      // (mg/kg) ^ slope
 };
 /** Function for calculating killing factor of IV and requiring integration.
+ * 
+ * @param t The variable being integrated over (in this case, time, units days)
+ * @param pp Pointer to an IV_conc_params struct
+ * @return killing rate (unitless)
  */
 double func_IV_conc( double t, void* pp ){
     IV_conc_params *p = static_cast<IV_conc_params*>( pp );
     
-    double conc_decay = exp(p->neg_elimination_rate_constant * t);
+    //TODO: is this correct? Compare with LSTMDrugType::updateConcentrationIV()
+    double conc_decay = exp(p->neg_elimination_rate_constant * t);      // unitless
     double infusion = p->ivRate * (1.0 - conc_decay ) / p->elim_rate_dist
-        + p->C0 * conc_decay;
-    double infusion_pow_slope = pow(infusion, p->slope);
-    double fC = p->max_kill_rate * infusion_pow_slope / (infusion_pow_slope + p->IC50_pow_slope);
+        + p->C0 * conc_decay;   // mg/l
+    double infusion_pow_slope = pow(infusion, p->slope);        // (mg/l) ^ slope
+    double fC = p->max_kill_rate * infusion_pow_slope / (infusion_pow_slope + p->IC50_pow_slope);       // unitless
     return fC;
 }
 
-double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const{
+double LSTMDrugPD::calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const{
     Cache key( C0, duration, rate );
     CachedIV::const_iterator it = cachedIV.find( key );
     if( it != cachedIV.end() ){
@@ -122,7 +129,10 @@ double LSTMDrugAllele::calcFactorIV( const LSTMDrugType& drug, double& C0, doubl
             throw TRACED_EXCEPTION( "calcFactorIV: error from gsl_integration_qag",util::Error::GSL );
         }
         if( err_eps > 1e-8 ){
-            cerr << "Warning in calcFactorIV: error epsilon is: "<<err_eps<<" (integral is "<<intfC<<")"<<endl;
+            // This could be a warning, except that warnings tend to be ignored.
+            ostringstream msg;
+            msg << "calcFactorIV: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
+            throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
         }
         gsl_integration_workspace_free (workspace);
         

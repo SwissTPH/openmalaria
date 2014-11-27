@@ -28,6 +28,8 @@
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Treatments.h"
+#include "WithinHost/Genotypes.h"
+#include "mon/reporting.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -44,48 +46,34 @@ namespace OM {
 namespace WithinHost {
 
 using namespace OM::util;
-using namespace Monitoring;
 
 double WHFalciparum::sigma_i;
 double WHFalciparum::immPenalty_22;
 double WHFalciparum::asexImmRemain;
 double WHFalciparum::immEffectorRemain;
-int WHFalciparum::_ylagLen = 0;
+int WHFalciparum::y_lag_len = 0;
 
 // -----  static functions  -----
 
-void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ) {
+void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& model ) {
     sigma_i=sqrt(parameters[Parameters::SIGMA_I_SQ]);
     immPenalty_22=1-exp(parameters[Parameters::IMMUNITY_PENALTY]);
     immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
     asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
     
-    _ylagLen = TimeStep::intervalsPer5Days.asInt() * 4;
+    y_lag_len = sim::daysToSteps(20);
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
-    Pathogenesis::PathogenesisModel::init( parameters, scenario.getModel().getClinical(), false );
+    Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
     
-    /*
-    The detection limit (in parasites/ul) is currently the same for PCR and for microscopy
-    TODO: in fact the detection limit in Garki should be the same as the PCR detection limit
-    The density bias allows the detection limit for microscopy to be higher for other sites
-    */
-    double densitybias;
-    if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
-        densitybias = parameters[Parameters::DENSITY_BIAS_GARKI];
-    } else {
-        if( scenario.getAnalysisNo().present() ){
-            int analysisNo = scenario.getAnalysisNo().get();
-            if ((analysisNo >= 22) && (analysisNo <= 30)) {
-                cerr << "Warning: these analysis numbers used to mean use Garki density bias. If you do want to use this, specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
-            }
-        }
-        densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
+    try{
+        //NOTE: if XSD is changed, this should not have a default unit
+        SimTime latentP = UnitParse::readShortDuration(
+            model.getParameters().getLatentp(), UnitParse::STEPS );
+        Infection::init( parameters, latentP );
+    }catch( const util::format_error& e ){
+        throw util::xml_scenario_error( string("model/parameters/latentP: ").append(e.message()) );
     }
-    double detectionLimit=scenario.getMonitoring().getSurveys().getDetectionLimit()*densitybias;
-    Diagnostic::default_.setDeterministic( detectionLimit );
-    
-    Infection::init( parameters, scenario.getModel().getParameters().getLatentp() );
 }
 
 
@@ -93,7 +81,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Scenari
 
 WHFalciparum::WHFalciparum( double comorbidityFactor ):
     WHInterface(),
-    _cumulativeh(0.0), _cumulativeY(0.0), _cumulativeYlag(0.0),
+    m_cumulative_h(0.0), m_cumulative_Y(0.0), m_cumulative_Y_lag(0.0),
     totalDensity(0.0), timeStepMaxDensity(0.0),
     pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
 {
@@ -103,83 +91,118 @@ WHFalciparum::WHFalciparum( double comorbidityFactor ):
     // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
     _innateImmSurvFact = exp(-random::gauss(sigma_i));
     
-    _ylag.assign (_ylagLen, 0.0);
+    m_y_lag.assign(y_lag_len, Genotypes::N(), 0.0);
 }
 
 WHFalciparum::~WHFalciparum()
 {
 }
 
-double WHFalciparum::probTransmissionToMosquito( TimeStep ageTimeSteps, double tbvFactor ) const{
-    /* This model (often referred to as the gametocyte model) was designed for
-    5-day timesteps. We use the same model (sampling 10, 15 and 20 days ago)
-    for 1-day timesteps to avoid having to design and analyse a new model.
-    Description: AJTMH pp.32-33 */
+// Infectiousness parameters: see AJTMH p.33; tau=1/sigmag**2 
+const double PTM_beta1=1.0;
+const double PTM_beta2=0.46;
+const double PTM_beta3=0.17;
+const double PTM_tau= 0.066;
+const double PTM_tau_prime = 1.0 / sqrt(1.0 / PTM_tau);
+const double PTM_mu= -8.1;
+
+double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX ) const{
+    // This model (often referred to as the gametocyte model) was designed for
+    // 5-day time steps. We use the same model (sampling 10, 15 and 20 days
+    // ago) for 1-day time steps to avoid having to design and analyse a new
+    // model. Description: AJTMH pp.32-33 and p9.
     
-    /* Note: we don't allow for treatment which clears gametocytes (e.g.
-     * Primaquine). Apparently Primaquine is not commonly used in P falciparum
-     * treatment, but for vivax the effect may be important. */
-    
-    if (ageTimeSteps.inDays() <= 20 || TimeStep::simulation.inDays() <= 20){
-        // We need at least 20 days history (_ylag) to calculate infectiousness;
-        // assume no infectiousness if we don't have this history.
-        // Note: human not updated on DOB so age must be >20 days.
-        return 0.0;
-    }
-    
-    //Infectiousness parameters: see AJTMH p.33, tau=1/sigmag**2 
-    static const double beta1=1.0;
-    static const double beta2=0.46;
-    static const double beta3=0.17;
-    static const double tau= 0.066;
-    static const double mu= -8.1;
+    // Note: we don't allow for gametocydal treatments (e.g. Primaquine).
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
-    // before. We have 20 days history, so use mod_nn:
-    int firstIndex = TimeStep::simulation.asInt()-2*TimeStep::intervalsPer5Days.asInt() + 1;
-    double x = beta1 * _ylag[mod_nn(firstIndex, _ylagLen)]
-            + beta2 * _ylag[mod_nn(firstIndex-TimeStep::intervalsPer5Days.asInt(), _ylagLen)]
-            + beta3 * _ylag[mod_nn(firstIndex-2*TimeStep::intervalsPer5Days.asInt(), _ylagLen)];
-    if (x < 0.001){
-        return 0.0;
+    // before. Add y_lag_len to index to ensure positive.
+    const int i10 = (sim::ts0() - sim::fromDays(10) + sim::oneTS()).inSteps() + y_lag_len;
+    const int i5d = sim::daysToSteps(5);
+    const int i10d = 2 * i5d;
+    // Sum lagged densities across genotypes:
+    double y10 = 0.0, y15 = 0.0, y20 = 0.0;
+    for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
+        y10 += m_y_lag.at(mod_nn(i10, y_lag_len), genotype);
+        y15 += m_y_lag.at(mod_nn(i10 - i5d, y_lag_len), genotype);
+        y20 += m_y_lag.at(mod_nn(i10 - i10d, y_lag_len), genotype);
     }
+    // Weighted sum:
+    const double x = PTM_beta1 * y10 + PTM_beta2 * y15 + PTM_beta3 * y20;
+    if( sumX != 0 ) *sumX = 1.0 / x;    // copy to sumX, if set
+    if( x < 0.001 ) return 0.0; // cut off for uninfectious humans
     
-    double zval=(log(x)+mu)/sqrt(1.0/tau);
-    double pone = gsl_cdf_ugaussian_P(zval);
-    double transmit=(pone*pone);
-    //transmit has to be between 0 and 1
-    transmit=std::max(transmit, 0.0);
-    transmit=std::min(transmit, 1.0);
+    // Get a zval, convert to equivalent Normal sample:
+    const double zval = (log(x) + PTM_mu) * PTM_tau_prime;
+    const double pone = gsl_cdf_ugaussian_P(zval);
+    double pTransmit = pone*pone;
+    // pTransmit has to be between 0 and 1:
+    pTransmit=std::max(pTransmit, 0.0);
+    pTransmit=std::min(pTransmit, 1.0);
     
-    //    Include here the effect of transmission-blocking vaccination
-    double result = transmit * tbvFactor;
-    util::streamValidate( result );
-    return result;
+    // Include here the effect of transmission-blocking vaccination:
+    pTransmit *= tbvFactor;
+    util::streamValidate( pTransmit );
+    return pTransmit;
+}
+double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
+{
+    assert( pTrans > 0.0 );
+    assert( (boost::math::isfinite)(sumX) );
+    
+    // This is an extension of the original model.
+    //NOTE: it is an approximation since it ignores the possibility of
+    // simultaneously infecting a mosquito with multiple genotypes.
+    
+    // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
+    // before. Add y_lag_len to index to ensure positive.
+    const int i10 = (sim::ts0() - sim::fromDays(10) + sim::oneTS()).inSteps() + y_lag_len;
+    const int i5d = sim::daysToSteps(5);
+    const int i10d = 2 * i5d;
+    const double x =
+        PTM_beta1 * m_y_lag.at(mod_nn(i10, y_lag_len), genotype) +
+        PTM_beta2 * m_y_lag.at(mod_nn(i10 - i5d, y_lag_len), genotype) +
+        PTM_beta3 * m_y_lag.at(mod_nn(i10 - i10d, y_lag_len), genotype);
+    
+    return pTrans * x * sumX;
 }
 
-bool WHFalciparum::diagnosticDefault() const{
-    return Diagnostic::default_.isPositive( totalDensity );
+bool WHFalciparum::diagnosticResult( const Diagnostic& diagnostic ) const{
+    return diagnostic.isPositive( totalDensity );
 }
 
 void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
     const Treatments& treat = Treatments::select( treatId );
-    if( treat.liverEffect().asInt() != 0 ){
-        if( treat.liverEffect().asInt() == -1 )
+    if( treat.liverEffect() != sim::zero() ){
+        if( treat.liverEffect() < sim::zero() )
             clearInfections( Treatments::LIVER );
         else
-            treatExpiryLiver = max( treatExpiryLiver, TimeStep::simulation + treat.liverEffect() );
+            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + treat.liverEffect() );
     }
-    if( treat.bloodEffect().asInt() != 0 ){
-        if( treat.bloodEffect().asInt() == -1 )
+    if( treat.bloodEffect() != sim::zero() ){
+        if( treat.bloodEffect() < sim::zero() )
             clearInfections( Treatments::BLOOD );
         else
-            treatExpiryBlood = max( treatExpiryBlood, TimeStep::simulation + treat.bloodEffect() );
+            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + treat.bloodEffect() );
     }
     
     // triggered intervention deployments:
     treat.deploy( human,
-                  interventions::Deployment::TREAT,
+                  mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
+}
+void WHFalciparum::treatSimple(SimTime timeLiver, SimTime timeBlood){
+    if( timeLiver != sim::zero() ){
+        if( timeLiver < sim::zero() )
+            clearInfections( Treatments::LIVER );
+        else
+            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
+    }
+    if( timeBlood != sim::zero() ){
+        if( timeBlood < sim::zero() )
+            clearInfections( Treatments::BLOOD );
+        else
+            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
+    }
 }
 
 Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
@@ -189,9 +212,9 @@ Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
     /* Note: this model can easily be re-enabled, but is not used and not considered to be a good model.
     if( (result.state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){
         // This does immunity penalisation:
-        _cumulativeY = _cumulativeYlag - immPenalty_22*(_cumulativeY-_cumulativeYlag);
-        if (_cumulativeY < 0) {
-            _cumulativeY=0.0;
+        m_cumulative_Y = m_cumulative_Y_lag - immPenalty_22*(m_cumulative_Y-m_cumulative_Y_lag);
+        if (m_cumulative_Y < 0) {
+            m_cumulative_Y=0.0;
         }
     }*/
     
@@ -203,52 +226,30 @@ Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
 
 void WHFalciparum::updateImmuneStatus() {
     if (immEffectorRemain < 1) {
-        _cumulativeh*=immEffectorRemain;
-        _cumulativeY*=immEffectorRemain;
+        m_cumulative_h*=immEffectorRemain;
+        m_cumulative_Y*=immEffectorRemain;
     }
     if (asexImmRemain < 1) {
-        _cumulativeh*=asexImmRemain/
-                      (1+(_cumulativeh*(1-asexImmRemain) * Infection::invCumulativeHstar));
-        _cumulativeY*=asexImmRemain/
-                      (1+(_cumulativeY*(1-asexImmRemain) * Infection::invCumulativeYstar));
+        m_cumulative_h*=asexImmRemain/
+                      (1+(m_cumulative_h*(1-asexImmRemain) * Infection::invCumulativeHstar));
+        m_cumulative_Y*=asexImmRemain/
+                      (1+(m_cumulative_Y*(1-asexImmRemain) * Infection::invCumulativeYstar));
     }
-    _cumulativeYlag = _cumulativeY;
+    m_cumulative_Y_lag = m_cumulative_Y;
 }
 
 
-// -----  Summarize  -----
-
-bool WHFalciparum::summarize (const Host::Human& human) {
-    Survey& survey = Survey::current();
-    pathogenesisModel->summarize( human );
-    InfectionCount count = countInfections();
-    if (count.total != 0) {
-        survey
-            .addInt( Report::MI_INFECTED_HOSTS, human, 1 )
-            .addInt( Report::MI_INFECTIONS, human, count.total )
-            .addInt( Report::MI_PATENT_INFECTIONS, human, count.patent );
-    }
-    // Treatments in the old ImmediateOutcomes clinical model clear infections immediately
-    // (and are applied after update()); here we report the last calculated density.
-    if (diagnosticDefault()) {
-        survey
-            .addInt( Report::MI_PATENT_HOSTS, human, 1)
-            .addDouble( Report::MD_LOG_DENSITY, human, log(totalDensity) );
-        return true;
-    }
-    return false;
-}
-
+// -----  Checkpointing  -----
 
 void WHFalciparum::checkpoint (istream& stream) {
     WHInterface::checkpoint( stream );
     _innateImmSurvFact & stream;
-    _cumulativeh & stream;
-    _cumulativeY & stream;
-    _cumulativeYlag & stream;
+    m_cumulative_h & stream;
+    m_cumulative_Y & stream;
+    m_cumulative_Y_lag & stream;
     totalDensity & stream;
     timeStepMaxDensity & stream;
-    _ylag & stream;
+    m_y_lag & stream;
     (*pathogenesisModel) & stream;
     treatExpiryLiver & stream;
     treatExpiryBlood & stream;
@@ -256,12 +257,12 @@ void WHFalciparum::checkpoint (istream& stream) {
 void WHFalciparum::checkpoint (ostream& stream) {
     WHInterface::checkpoint( stream );
     _innateImmSurvFact & stream;
-    _cumulativeh & stream;
-    _cumulativeY & stream;
-    _cumulativeYlag & stream;
+    m_cumulative_h & stream;
+    m_cumulative_Y & stream;
+    m_cumulative_Y_lag & stream;
     totalDensity & stream;
     timeStepMaxDensity & stream;
-    _ylag & stream;
+    m_y_lag & stream;
     (*pathogenesisModel) & stream;
     treatExpiryLiver & stream;
     treatExpiryBlood & stream;

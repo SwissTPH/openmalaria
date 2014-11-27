@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="cut down version of VC's treatment seeking test scenario" schemaVersion="32" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="cut down version of VC's treatment seeking test scenario" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -40,42 +40,15 @@
       <option name="nHospitalRecovs" value="true"/>
       <option name="nHospitalSeqs" value="true"/>
       <option name="nNMFever" value="true"/>
-      <option name="Clinical_RDTs" value="true"/>
-      <option name="Clinical_Microscopy" value="true"/>
-      <option name="Clinical_DrugUsage" value="true"/>
+      <option name="nTreatDiagnostics" value="true"/>
+      <!--TODO <option name="Clinical_DrugUsage" value="true"/> -->
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
       <option name="Clinical_FirstDayDeaths" value="true"/>
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
-      <surveyTime> 0 </surveyTime>
-      <surveyTime> 14 </surveyTime>
-      <surveyTime> 28 </surveyTime>
-      <surveyTime> 42 </surveyTime>
-      <surveyTime> 56 </surveyTime>
-      <surveyTime> 70 </surveyTime>
-      <surveyTime> 84 </surveyTime>
-      <surveyTime> 98 </surveyTime>
-      <surveyTime> 112 </surveyTime>
-      <surveyTime> 126 </surveyTime>
-      <surveyTime> 140 </surveyTime>
-      <surveyTime> 154 </surveyTime>
-      <surveyTime> 168 </surveyTime>
-      <surveyTime> 182 </surveyTime>
-      <surveyTime> 196 </surveyTime>
-      <surveyTime> 210 </surveyTime>
-      <surveyTime> 224 </surveyTime>
-      <surveyTime> 238 </surveyTime>
-      <surveyTime> 252 </surveyTime>
-      <surveyTime> 266 </surveyTime>
-      <surveyTime> 280 </surveyTime>
-      <surveyTime> 294 </surveyTime>
-      <surveyTime> 308 </surveyTime>
-      <surveyTime> 322 </surveyTime>
-      <surveyTime> 336 </surveyTime>
-      <surveyTime> 350 </surveyTime>
-      <surveyTime> 364 </surveyTime>
+      <surveyTime repeatStep="14t" repeatEnd="1y"> 0 </surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
@@ -106,677 +79,241 @@
   <healthSystem>
     <EventScheduler>
       <uncomplicated>
-        <decisions>
-          <decision depends="age" name="age5" values="under5,over5">
-            age(0-5): under5
-            age(5-inf): over5
-         </decision>
-          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_30, 30_inf">
-            age(0-3): 0_3
-            age(3-9): 3_9
-            age(9-15): 9_15
-            age(15-30): 15_30
-            age(30-inf): 30_inf
-          </decision>
-          <!-- Had to add another age category so there would be 5, like in CQ -->
-          <decision depends="age" name="age_CQ" values="0_1,1_5,5_9, 9_15, 15_inf">
-            age(0-1): 0_1
-            age(1-5): 1_5
-            age(5-9): 5_9
-            age(9-15): 9_15
-            age(15-inf): 15_inf
-         </decision>
-          <decision depends="case,p" name="provider" values="formal, community_health_worker, informal, none">
-            case(UC1){
-              p(0.5): formal
-              p(0): community_health_worker
-              p(0): informal
-              p(0.5): none 
-            }
-            case(UC2){
-              p(0.5): formal
-              p(0): community_health_worker
-              p(0): informal
-              p(0.5): none
-            }
-          </decision>
-          <decision depends="age5,provider,p" name="test" values="none,microscopy,RDT">
-            age5(under5){
-            provider(formal){
-              p(1.0): none
-              p(0): microscopy
-              p(0): RDT
-            }
-            provider(community_health_worker){
-              p(1.0): none
-              p(0): microscopy
-              p(0): RDT
-            }
-            provider(informal){
-              p(1.0): none
-              p(0): microscopy
-              p(0): RDT
-            }
-            provider(none){
-              none
-            }
-            }
-            age5(over5){
-            provider(formal){
-              p(1.0): none
-              p(0): microscopy
-              p(0): RDT
-            }
-            provider(community_health_worker){
-              p(1.0): none
-              p(0): microscopy
-              p(0): RDT
-            }
-            provider(informal){
-              p(1.0): none
-              p(0): microscopy
-              p(0): RDT
-            }
-            provider(none){
-              none
-            }
-            }
-          </decision>
-          <decision depends="case,provider,result,p" name="treatment" values="AL_treat, CQ_treat, none">
-            case(UC1){
-              provider(formal){
-                result(none){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(positive){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(negative){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-            }
-            provider(community_health_worker){
-                result(none){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(positive){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(negative){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-            }
-            provider(informal){
-                result(none){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(positive){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(negative){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-            }
-            provider(none){
-                  none
-            }
-            }
-            case(UC2){
-            provider(formal){
-                result(none){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(positive){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(negative){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-            }
-            provider(community_health_worker){
-                result(none){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(positive){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(negative){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-            }
-            provider(informal){
-                result(none){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(positive){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-                result(negative){
-                  p(0): CQ_treat
-                  p(1.0): AL_treat
-                  p(0): none
-            }
-            }
-            provider(none){
-                  none
-            }
-            }
-          </decision>
-          <decision depends="treatment,provider,test,result,p" name="adherence" values="full,missFirstDose,missLastDay">
-            treatment(CQ_treat){
-              provider(formal){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(community_health_worker){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(informal){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(none):full
-                  }
-            treatment(AL_treat){
-              provider(formal){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(community_health_worker){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(informal){
-               test(none){
-                result(none){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(negative){
-                    full
-                    }
-                result(positive){
-                    full
-                    }
-                    }
-               test(microscopy){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-               test(RDT){
-                result(none){
-                    full
-                    }
-                result(negative){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                result(positive){
-                    p(.90): full
-                    p(0): missFirstDose
-                    p(.10): missLastDay
-                    }
-                    }
-                    }
-              provider(none):full
-                  }
-            treatment(none): full
-          </decision>
-          <decision depends="provider,p" name="quality" values="good, medium, poor">
-            provider(formal){
-              p(1.0): good
-              p(0): medium
-              p(0): poor
-            }
-            provider(community_health_worker){
-              p(1.0): good
-              p(0): medium
-              p(0): poor
-            }
-            provider(informal){
-              p(1.0): good
-              p(0): medium
-              p(0): poor
-            }
-            provider(none): good
-          </decision>
-          <decision depends="treatment,age_AL, age_CQ" name="doseSize" values="0,1,10,100,1000">
-            treatment(AL_treat){
-              age_AL(0_3):0
-              age_AL(3_9):1
-              age_AL(9_15):10
-              age_AL(15_30):100
-              age_AL(30_inf):1000
-            }
-            treatment(CQ_treat){
-              age_CQ(0_1):0
-              age_CQ(1_5):1
-              age_CQ(5_9):10
-              age_CQ(9_15):100
-              age_CQ(15_inf):1000
-            }
-            treatment(none):0
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-          <treatment name="AL_treat">
-            <schedule>
-              <medicate drug="AR" hour="0" mg="20"/>
-              <medicate drug="LU" hour="0" mg="120"/>
-              <medicate drug="AR" hour="8" mg="20"/>
-              <medicate drug="LU" hour="8" mg="120"/>
-              <medicate drug="AR" hour="24" mg="20"/>
-              <medicate drug="LU" hour="24" mg="120"/>
-              <medicate drug="AR" hour="36" mg="20"/>
-              <medicate drug="LU" hour="36" mg="120"/>
-              <medicate drug="AR" hour="48" mg="20"/>
-              <medicate drug="LU" hour="48" mg="120"/>
-              <medicate drug="AR" hour="60" mg="20"/>
-              <medicate drug="LU" hour="60" mg="120"/>
-            </schedule>
-            <modifier decision="quality">
-              <multiplyQty effect="AR(1.0),LU(1.0)" value="good"/>
-              <multiplyQty effect="AR(0.6), LU(0.6)" value="medium"/>
-              <multiplyQty effect="AR(0.3), LU(0.3)" value="poor"/>
-            </modifier>
-            <modifier decision="adherence">
-              <selectTimeRange effect="AR(0-61),LU(0-61)" value="full"/>
-              <selectTimeRange effect="AR(1-61),LU(1-61)" value="missFirstDose"/>
-              <selectTimeRange effect="AR(0-47),LU(0-47)" value="missLastDay"/>
-            </modifier>
-            <modifier decision="doseSize">
-              <multiplyQty effect="AR(1.0),LU(1.0)" value="0"/>
-              <multiplyQty effect="AR(2.0), LU(2.0)" value="1"/>
-              <multiplyQty effect="AR(3.0), LU(3.0)" value="10"/>
-              <multiplyQty effect="AR(4.0), LU(4.0)" value="100"/>
-              <multiplyQty effect="AR(4.0), LU(4.0)" value="1000"/>
-            </modifier>
-          </treatment>
-          <treatment name="CQ_treat">
-            <schedule>
-              <medicate drug="CQ" hour="0" mg="150"/>
-              <medicate drug="CQ" hour="24" mg="150"/>
-              <medicate drug="CQ" hour="48" mg="75"/>
-            </schedule>
-            <modifier decision="doseSize">
-              <multiplyQty effect="CQ(0.5)" value="0"/>
-              <multiplyQty effect="CQ(1.0)" value="1"/>
-              <multiplyQty effect="CQ(2.0)" value="10"/>
-              <multiplyQty effect="CQ(3.0)" value="100"/>
-              <multiplyQty effect="CQ(4.0)" value="1000"/>
-            </modifier>
-            <modifier decision="quality">
-              <multiplyQty effect="CQ(1.0)" value="good"/>
-              <multiplyQty effect="CQ(0.6)" value="medium"/>
-              <multiplyQty effect="CQ(0.3)" value="poor"/>
-            </modifier>
-            <modifier decision="adherence">
-              <selectTimeRange effect="CQ(0-100)" value="full"/>
-              <selectTimeRange effect="CQ(1-100)" value="missFirstDose"/>
-              <selectTimeRange effect="CQ(0-35)" value="missLastDay"/>
-            </modifier>
-          </treatment>
-        </treatments>
+        <random name="provider">
+          <outcome p="0.5" name="formal">
+            <random name="patient adherence">
+              <outcome p="0.9">
+                <treatPKPD schedule="AL_full" dosage="AL"/>
+              </outcome>
+              <outcome p="0.1">
+                <treatPKPD schedule="AL_miss_last" dosage="AL"/>
+              </outcome>
+            </random>
+          </outcome>
+          <outcome p="0.0" name="community health worker">
+            <random name="patient adherence">
+              <outcome p="0.9">
+                <treatPKPD schedule="AL_full" dosage="AL"/>
+              </outcome>
+              <outcome p="0.1">
+                <treatPKPD schedule="AL_miss_last" dosage="AL"/>
+              </outcome>
+            </random>
+          </outcome>
+          <outcome p="0.0" name="informal">
+            <random name="patient adherence">
+              <outcome p="0.9">
+                <treatPKPD schedule="AL_full" dosage="AL"/>
+              </outcome>
+              <outcome p="0.1">
+                <treatPKPD schedule="AL_miss_last" dosage="AL"/>
+              </outcome>
+            </random>
+          </outcome>
+          <outcome p="0.5" name="none">
+            <noTreatment/>
+          </outcome>
+        </random>
       </uncomplicated>
       <complicated>
-        <decisions>
-          <decision depends="age" name="age_AL" values="0_3, 3_9, 9_15, 15_inf">
-            age(0-3): 0_3
-            age(3-9): 3_9
-            age(9-15): 9_15
-            age(15-inf): 15_inf
-          </decision>
-          <decision depends="p" name="initial_provider" values="hospital, lower_level, none">
-             p(0.2): hospital
-             p(0.3): lower_level
-             p(0.5): none
-        </decision>
-          <decision depends="initial_provider,p" name="test" values="none,RDT,microscopy">
-             initial_provider(hospital){
-              p(0): none
-              p(0.75): RDT
-              p(0.25): microscopy
-              }
-             initial_provider(lower_level){
-              p(0.5): none
-              p(0.5): RDT
-              p(0): microscopy
-              }
-             initial_provider(none){
-              none
-              }
-        </decision>
-          <decision depends="initial_provider, p" name="referral" values="immediate, delayed, none">
-             initial_provider(hospital){
-              none
-              }
-              initial_provider(lower_level){
-              p(0.5): immediate
-              p(0.3): delayed
-              p(0.2): none
-              }
-              initial_provider(none){
-              none
-              }
-        </decision>
-          <decision depends="initial_provider, referral" name="hospitalisation" values="none, delayed, immediate">
-             initial_provider(hospital){
-              immediate
-              }
-              initial_provider(lower_level){
-                referral(none): none
-                referral(immediate): immediate
-                referral(delayed): delayed
-              }
-              initial_provider(none){
-              none
-              }
-        </decision>
-          <decision depends="hospitalisation,test" name="treatment" values="AS_sev,none">
-            hospitalisation(immediate){
-             AS_sev
-            }
-            hospitalisation(delayed){
-             AS_sev
-            }
-            hospitalisation(none){
-            none
-            }
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-          <treatment name="AS_sev">
-            <schedule>
-              <medicate drug="AS" duration="0.001" hour="0" mg="2.4"/>
-              <medicate drug="AS" duration="0.001" hour="12" mg="2.4"/>
-              <medicate drug="AS" duration="0.001" hour="24" mg="2.4"/>
-              <medicate drug="AS" duration="0.001" hour="48" mg="2.4"/>
-              <medicate drug="AS" duration="0.001" hour="72" mg="2.4"/>
-              <medicate drug="AR" hour="84" mg="20"/>
-              <medicate drug="LU" hour="84" mg="120"/>
-              <medicate drug="AR" hour="96" mg="20"/>
-              <medicate drug="LU" hour="96" mg="120"/>
-              <medicate drug="AR" hour="108" mg="20"/>
-              <medicate drug="LU" hour="108" mg="120"/>
-              <medicate drug="AR" hour="120" mg="20"/>
-              <medicate drug="LU" hour="120" mg="120"/>
-              <medicate drug="AR" hour="132" mg="20"/>
-              <medicate drug="LU" hour="132" mg="120"/>
-              <medicate drug="AR" hour="144" mg="20"/>
-              <medicate drug="LU" hour="144" mg="120"/>
-            </schedule>
-            <modifier decision="age_AL">
-              <multiplyQty effect="AR(1.0), LU(1.0), AS(1)" value="0_3"/>
-              <multiplyQty effect="AR(2.0), LU(2.0), AS(1)" value="3_9"/>
-              <multiplyQty effect="AR(3.0), LU(3.0), AS(1)" value="9_15"/>
-              <multiplyQty effect="AR(4.0), LU(4.0), AS(1)" value="15_inf"/>
-            </modifier>
-            <modifier decision="hospitalisation">
-              <delay effect="AR(0),LU(0),AS(0)" value="none"/>
-              <delay effect="AR(0),LU(0),AS(0)" value="immediate"/>
-              <delay effect="AR(24),LU(24),AS(24)" value="delayed"/>
-            </modifier>
-          </treatment>
-        </treatments>
+        <random name="initial provider">
+          <outcome p="0.2" name="hospital">
+            <!--NOTE: the intention of this design was to use a diagnostic but
+            to treat with antimalarials regardless of the outcome -->
+            <!--NOTE: this entire hospital tree is repeated several times-->
+            <!--TODO: hospital entry-->
+            <multiple>
+              <random>
+                <outcome p="0.75">
+                  <diagnostic diagnostic="RDT">
+                    <positive><noTreatment/><!-- treatment is below --></positive>
+                    <negative><noTreatment/><!-- treatment is below --></negative>
+                  </diagnostic>
+                </outcome>
+                <outcome p="0.25">
+                  <diagnostic diagnostic="microscopy">
+                    <positive><noTreatment/><!-- treatment is below --></positive>
+                    <negative><noTreatment/><!-- treatment is below --></negative>
+                  </diagnostic>
+                </outcome>
+              </random>
+              <treatPKPD schedule="AS" dosage="AS"/>
+              <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+            </multiple>
+          </outcome><!-- hospital -->
+          <outcome p="0.3" name="lower level">
+            <!--NOTE: VC's tree had 50% chance to use an RDT, 50% chance to use
+            no diagnostic here. In all cases, the next step was either immediate
+            referral, delayed referral or no referral to hospital. The only
+            difference here is that hospitalisation results in usage of a second
+            diagnostic, which the old tree did not support. -->
+            <random>
+              <outcome p="0.5">
+                <diagnostic diagnostic="RDT">
+                  <positive>
+                    <!--NOTE: this entire referral tree is repeated several times-->
+                    <random name="referral">
+                      <outcome p="0.5" name="immediate referral">
+                        <!--NOTE: this entire hospital tree is repeated several times-->
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+                        </multiple>
+                      </outcome>
+                      <outcome p="0.3" name="delayed referral">
+                        <!--NOTE: this entire hospital tree is repeated several times-->
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS_delay_24" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_108" dosage="AL"/>
+                        </multiple>
+                      </outcome>
+                      <outcome p="0.2" name="no referral">
+                        <noTreatment/>
+                      </outcome>
+                    </random>
+                  </positive>
+                  <negative>
+                    <!--NOTE: this entire referral tree is repeated several times-->
+                    <random name="referral">
+                      <outcome p="0.5" name="immediate referral">
+                        <!--NOTE: this entire hospital tree is repeated several times-->
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+                        </multiple>
+                      </outcome>
+                      <outcome p="0.3" name="delayed referral">
+                        <!--NOTE: this entire hospital tree is repeated several times-->
+                        <!--TODO: hospital entry-->
+                        <multiple>
+                          <random>
+                            <outcome p="0.75">
+                              <diagnostic diagnostic="RDT">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                            <outcome p="0.25">
+                              <diagnostic diagnostic="microscopy">
+                                <positive><noTreatment/><!-- treatment is below --></positive>
+                                <negative><noTreatment/><!-- treatment is below --></negative>
+                              </diagnostic>
+                            </outcome>
+                          </random>
+                          <treatPKPD schedule="AS_delay_24" dosage="AS"/>
+                          <treatPKPD schedule="AL_delay_108" dosage="AL"/>
+                        </multiple>
+                      </outcome>
+                      <outcome p="0.2" name="no referral">
+                        <noTreatment/>
+                      </outcome>
+                    </random>
+                  </negative>
+                </diagnostic>
+              </outcome>
+              <outcome p="0.5">
+                <!--NOTE: this entire referral tree is repeated several times-->
+                <random name="referral">
+                  <outcome p="0.5" name="immediate referral">
+                    <!--NOTE: this entire hospital tree is repeated several times-->
+                    <!--TODO: hospital entry-->
+                    <multiple>
+                      <random>
+                        <outcome p="0.75">
+                          <diagnostic diagnostic="RDT">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                        <outcome p="0.25">
+                          <diagnostic diagnostic="microscopy">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                      </random>
+                      <treatPKPD schedule="AS" dosage="AS"/>
+                      <treatPKPD schedule="AL_delay_84" dosage="AL"/>
+                    </multiple>
+                  </outcome>
+                  <outcome p="0.3" name="delayed referral">
+                    <!--NOTE: this entire hospital tree is repeated several times-->
+                    <!--TODO: hospital entry-->
+                    <multiple>
+                      <random>
+                        <outcome p="0.75">
+                          <diagnostic diagnostic="RDT">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                        <outcome p="0.25">
+                          <diagnostic diagnostic="microscopy">
+                            <positive><noTreatment/><!-- treatment is below --></positive>
+                            <negative><noTreatment/><!-- treatment is below --></negative>
+                          </diagnostic>
+                        </outcome>
+                      </random>
+                      <treatPKPD schedule="AS_delay_24" dosage="AS"/>
+                      <treatPKPD schedule="AL_delay_108" dosage="AL"/>
+                    </multiple>
+                  </outcome>
+                  <outcome p="0.2" name="no referral">
+                    <noTreatment/>
+                  </outcome>
+                </random>
+              </outcome>
+            </random>
+          </outcome>
+          <outcome p="0.5" name="no provider">
+            <noTreatment/>
+          </outcome>
+        </random>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>
@@ -1661,112 +1198,193 @@
     </nonVector>
   </entomology>
   <pharmacology>
-    <drug abbrev="AR">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4</max_killing_rate>
-          <IC50>0.0023</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000023</negligible_concentration>
-        <half_life>0.175</half_life>
-        <vol_dist>17.4</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="AS">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4.6</max_killing_rate>
-          <IC50>0.0016</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000016</negligible_concentration>
-        <half_life>0.042</half_life>
-        <vol_dist>2.75</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="DHQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4.6</max_killing_rate>
-          <IC50>0.0009</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000016</negligible_concentration>
-        <half_life>0.035</half_life>
-        <vol_dist>8</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="CQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.02</IC50>
-          <slope>1.6</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.00036</negligible_concentration>
-        <half_life>30.006</half_life>
-        <vol_dist>300</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="LU">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.100</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.001</negligible_concentration>
-        <half_life>4.332</half_life>
-        <vol_dist>21</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="MQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.027</IC50>
-          <slope>5</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.005</negligible_concentration>
-        <half_life>13.078</half_life>
-        <vol_dist>20.8</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="PQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.088</IC50>
-          <slope>6</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.005</negligible_concentration>
-        <half_life>23.105</half_life>
-        <vol_dist>150</vol_dist>
-      </PK>
-    </drug>
+    <treatments>
+      <schedule name="AL_full">
+        <medicate drug="AR" hour="0" mg="20"/>
+        <medicate drug="LU" hour="0" mg="120"/>
+        <medicate drug="AR" hour="8" mg="20"/>
+        <medicate drug="LU" hour="8" mg="120"/>
+        <medicate drug="AR" hour="24" mg="20"/>
+        <medicate drug="LU" hour="24" mg="120"/>
+        <medicate drug="AR" hour="36" mg="20"/>
+        <medicate drug="LU" hour="36" mg="120"/>
+        <medicate drug="AR" hour="48" mg="20"/>
+        <medicate drug="LU" hour="48" mg="120"/>
+        <medicate drug="AR" hour="60" mg="20"/>
+        <medicate drug="LU" hour="60" mg="120"/>
+      </schedule>
+      <schedule name="AL_miss_last">
+        <medicate drug="AR" hour="0" mg="20"/>
+        <medicate drug="LU" hour="0" mg="120"/>
+        <medicate drug="AR" hour="8" mg="20"/>
+        <medicate drug="LU" hour="8" mg="120"/>
+        <medicate drug="AR" hour="24" mg="20"/>
+        <medicate drug="LU" hour="24" mg="120"/>
+        <medicate drug="AR" hour="36" mg="20"/>
+        <medicate drug="LU" hour="36" mg="120"/>
+      </schedule>
+      <schedule name="AS">
+        <medicate drug="AS" duration="0.001" hour="0" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="12" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="24" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="48" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="72" mg="2.4"/>
+      </schedule>
+      <schedule name="AL_delay_84">
+        <medicate drug="AR" hour="84" mg="20"/>
+        <medicate drug="LU" hour="84" mg="120"/>
+        <medicate drug="AR" hour="96" mg="20"/>
+        <medicate drug="LU" hour="96" mg="120"/>
+        <medicate drug="AR" hour="108" mg="20"/>
+        <medicate drug="LU" hour="108" mg="120"/>
+        <medicate drug="AR" hour="120" mg="20"/>
+        <medicate drug="LU" hour="120" mg="120"/>
+        <medicate drug="AR" hour="132" mg="20"/>
+        <medicate drug="LU" hour="132" mg="120"/>
+        <medicate drug="AR" hour="144" mg="20"/>
+        <medicate drug="LU" hour="144" mg="120"/>
+      </schedule>
+      <schedule name="AS_delay_24">
+        <medicate drug="AS" duration="0.001" hour="24" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="36" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="48" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="72" mg="2.4"/>
+        <medicate drug="AS" duration="0.001" hour="96" mg="2.4"/>
+      </schedule>
+      <schedule name="AL_delay_108">
+        <medicate drug="AR" hour="108" mg="20"/>
+        <medicate drug="LU" hour="108" mg="120"/>
+        <medicate drug="AR" hour="120" mg="20"/>
+        <medicate drug="LU" hour="120" mg="120"/>
+        <medicate drug="AR" hour="132" mg="20"/>
+        <medicate drug="LU" hour="132" mg="120"/>
+        <medicate drug="AR" hour="144" mg="20"/>
+        <medicate drug="LU" hour="144" mg="120"/>
+        <medicate drug="AR" hour="156" mg="20"/>
+        <medicate drug="LU" hour="156" mg="120"/>
+        <medicate drug="AR" hour="168" mg="20"/>
+        <medicate drug="LU" hour="168" mg="120"/>
+      </schedule>
+      <dosages name="AL">
+        <age lowerbound="0" dose_mult="1"/>
+        <age lowerbound="3" dose_mult="2"/>
+        <age lowerbound="9" dose_mult="3"/>
+        <age lowerbound="15" dose_mult="4"/>
+        <age lowerbound="30" dose_mult="4"/>
+      </dosages>
+      <dosages name="AS">
+        <age lowerbound="0" dose_mult="1"/>
+      </dosages>
+    </treatments>
+    <drugs>
+      <drug abbrev="AR">
+        <PD>
+          <phenotype>
+            <max_killing_rate>4</max_killing_rate>
+            <IC50>0.0023</IC50>
+            <slope>4</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000023</negligible_concentration>
+          <half_life>0.175</half_life>
+          <vol_dist>17.4</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="AS">
+        <PD>
+          <phenotype>
+            <max_killing_rate>4.6</max_killing_rate>
+            <IC50>0.0016</IC50>
+            <slope>4</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000016</negligible_concentration>
+          <half_life>0.042</half_life>
+          <vol_dist>2.75</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="DHQ">
+        <PD>
+          <phenotype>
+            <max_killing_rate>4.6</max_killing_rate>
+            <IC50>0.0009</IC50>
+            <slope>4</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000016</negligible_concentration>
+          <half_life>0.035</half_life>
+          <vol_dist>8</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="CQ">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.02</IC50>
+            <slope>1.6</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.00036</negligible_concentration>
+          <half_life>30.006</half_life>
+          <vol_dist>300</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="LU">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.100</IC50>
+            <slope>4</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.001</negligible_concentration>
+          <half_life>4.332</half_life>
+          <vol_dist>21</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="MQ">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.027</IC50>
+            <slope>5</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.005</negligible_concentration>
+          <half_life>13.078</half_life>
+          <vol_dist>20.8</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="PQ">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.088</IC50>
+            <slope>6</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.005</negligible_concentration>
+          <half_life>23.105</half_life>
+          <vol_dist>150</vol_dist>
+        </PK>
+      </drug>
+    </drugs>
   </pharmacology>
+  <diagnostics>
+    <diagnostic name="microscopy">
+      <stochastic dens_50="20" specificity="0.75"/>
+    </diagnostic>
+    <diagnostic name="RDT">
+      <stochastic dens_50="50" specificity="0.942"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="MOLINEAUX_WITHIN_HOST_MODEL" value="true"/>
@@ -1774,7 +1392,7 @@
       <option name="CLINICAL_EVENT_SCHEDULER" value="true"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="14"/>
+    <clinical healthSystemMemory="14d"/>
     <!-- run id=740 parameterization id=243641 sampling date=2010-08-21 11:14:03 lossfunction=82.879291 -->
     <human>
       <availabilityToMosquitoes>
@@ -1818,7 +1436,7 @@
         <group lowerbound="20.0" value="60.0"/>
       </weight>
     </human>
-    <parameters interval="1" iseed="0" latentp="15">
+    <parameters interval="1" iseed="0" latentp="15d">
       <parameter include="0" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter include="0" name="Estar" number="2" value="0.03247"/>
       <parameter include="1" name="Simm" number="3" value="0.267285"/>

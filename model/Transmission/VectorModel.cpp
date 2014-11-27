@@ -22,6 +22,7 @@
 #include "Population.h"
 #include "Host/Human.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Genotypes.h"
 #include "Monitoring/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
@@ -39,7 +40,7 @@ using namespace OM::util;
 double VectorModel::meanPopAvail (const Population& population) {
     double sumRelativeAvailability = 0.0;
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->getAgeInYears());
+        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->age(sim::now()).inYears());
     }
     if( population.size() > 0 ){
         return sumRelativeAvailability / population.size();     // mean-rel-avail
@@ -82,7 +83,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
         const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->getAgeInYears() );
+            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->age(sim::now()).inYears() );
         }
         stream << '\t' << total / population.size();
     }
@@ -111,7 +112,7 @@ void VectorModel::ctsNetInsecticideContent (const Population& population, ostrea
 //     double meanVar = 0.0;
 //     int n = 0;
 //     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= TimeStep(0) ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
 //             ++n;
 //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
 //         }
@@ -159,9 +160,9 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
-VectorModel::VectorModel (const scnXml::EntoData& entoData,
+VectorModel::VectorModel (const scnXml::Entomology& entoData,
                           const scnXml::Vector vectorData, int populationSize) :
-    TransmissionModel( entoData ),
+    TransmissionModel( entoData, WithinHost::Genotypes::N() ),
     initIterations(0), numSpecies(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.
@@ -306,27 +307,27 @@ void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
 #endif
 
 
-TimeStep VectorModel::minPreinitDuration () {
+SimTime VectorModel::minPreinitDuration () {
     if ( interventionMode == forcedEIR ) {
-        return TimeStep(0);
+        return sim::zero();
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return TimeStep::fromYears( 55 );
+    return sim::fromYearsI( 55 );
 }
-TimeStep VectorModel::expectedInitDuration (){
-    return TimeStep::fromYears( 1 );
+SimTime VectorModel::expectedInitDuration (){
+    return sim::oneYear();
 }
 
-TimeStep VectorModel::initIterate () {
+SimTime VectorModel::initIterate () {
     if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
-        return TimeStep(0); // no initialization to do
+        return sim::zero(); // no initialization to do
     }
     if( initIterations < 0 ){
         assert( interventionMode = dynamicEIR );
         simulationMode = dynamicEIR;
-        return TimeStep(0);
+        return sim::zero();
     }
     
     ++initIterations;
@@ -346,37 +347,49 @@ TimeStep VectorModel::initIterate () {
     // to be enough (but I may be wrong).
     if( needIterate )
         // stabilization + 5 years data-collection time:
-        return TimeStep::fromYears( 1 ) + TimeStep::fromYears(5);
+        return sim::oneYear() + sim::fromYearsI(5);
     else
-        return TimeStep::fromYears( 1 );
+        return sim::oneYear();
 }
 
-double VectorModel::calculateEIR(Host::Human& human, double ageYears) {
+double VectorModel::calculateEIR(Host::Human& human, double ageYears,
+        vector<double>& EIR)
+{
     PerHost& host = human.perHostTransmission;
     host.update( human );
     if (simulationMode == forcedEIR){
-        return initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)]
-               * host.relativeAvailabilityHetAge (ageYears);
+        double eir = initialisationEIR[sim::ts0().moduloYearSteps()] *
+                host.relativeAvailabilityHetAge (ageYears);
+        EIR.assign( 1, eir );
+        return eir;
     }else{
         assert( simulationMode == dynamicEIR );
-        double simEIR = 0.0;
+        EIR.assign( WithinHost::Genotypes::N(), 0.0 );
         for (size_t i = 0; i < numSpecies; ++i) {
-            simEIR += species[i].calculateEIR (i, host);
+            species[i].calculateEIR( i, host, EIR );
         }
-        simEIR *= host.relativeAvailabilityAge (ageYears);
-        return simEIR;
+        vectors::scale( EIR, host.relativeAvailabilityAge (ageYears) );
+        return vectors::sum( EIR );
     }
 }
 
 
 // Every Global::interval days:
 void VectorModel::vectorUpdate (const Population& population) {
-    vector<double> popProbTransmission;
-    popProbTransmission.reserve( population.size() );
-    for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h ){
-        popProbTransmission.push_back( h->withinHostModel->probTransmissionToMosquito(
-            h->getAgeInTimeSteps(),
-            h->getVaccine().getFactor( interventions::Vaccine::TBV ) ) );
+    vector2D<double> popProbTransmission;
+    popProbTransmission.resize( population.size(), WithinHost::Genotypes::N() );
+    size_t i = 0;
+    for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i ){
+        const double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
+        WithinHost::WHInterface& whm = *h->withinHostModel;
+        double sumX;
+        const double pTrans = whm.probTransmissionToMosquito( tbvFac, &sumX );
+        if( WithinHost::Genotypes::N() == 1 ) popProbTransmission.at(i,0) = pTrans;
+        else for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
+            const double k = whm.probTransGenotype( pTrans, sumX, g );
+            assert( (boost::math::isfinite)(k) );
+            popProbTransmission.at(i,g) = k;
+        }
     }
     for (size_t i = 0; i < numSpecies; ++i){
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);
@@ -386,21 +399,19 @@ void VectorModel::update( const Population& population ) {
     TransmissionModel::updateKappa( population );
 }
 
-void VectorModel::checkSimMode() const{
+const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
     if( interventionMode != dynamicEIR ){
         throw xml_scenario_error("vector interventions can only be used in "
             "dynamic transmission mode (mode=\"dynamic\")");
     }
-}
-
-const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
-    checkSimMode();     //TODO: can probably eventually inline
     return speciesIndex;
 }
 
 void VectorModel::deployVectorPopInterv (size_t instance) {
-    checkSimMode();
-    
+    if( interventionMode != dynamicEIR ){
+        throw xml_scenario_error("vector interventions can only be used in "
+            "dynamic transmission mode (mode=\"dynamic\")");
+    }
     for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
         it->deployVectorPopInterv(instance);
     }
@@ -412,9 +423,10 @@ void VectorModel::uninfectVectors() {
 
 void VectorModel::summarize () {
     TransmissionModel::summarize ();
-
-    for (map<string,size_t>::const_iterator it = speciesIndex.begin(); it != speciesIndex.end(); ++it)
-        species[it->second].summarize (it->first);
+    
+    for (size_t i = 0; i < numSpecies; ++i){
+        species[i].summarize( i );
+    }
 }
 
 

@@ -146,6 +146,10 @@ xml_scenario_error::xml_scenario_error(const string& msg) :
     base_exception(msg, Error::XmlScenario)
 {}
 
+format_error::format_error(const string& msg) :
+    xml_scenario_error(msg)
+{}
+
 checkpoint_error::checkpoint_error(const string& msg) :
     traced_exception(msg, 0, 0, Error::Checkpoint)
 {}

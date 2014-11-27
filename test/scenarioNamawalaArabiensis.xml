@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="33" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -23,8 +23,8 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Test Moni">
-    <continuous duringInit="false" period="1">
+  <monitoring name="Test Moni" startDate="0000-1-1">
+    <continuous duringInit="false" period="5d">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>
@@ -46,9 +46,9 @@
       <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime>1</surveyTime>
-      <surveyTime>293</surveyTime>
-      <surveyTime>366</surveyTime>
+      <surveyTime>0000-1-6</surveyTime>
+      <surveyTime>0004-1-6</surveyTime>
+      <surveyTime>0005-1-6</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>
@@ -105,10 +105,10 @@
       </nonCompliersEffective>
       <treatmentActions>
         <QN name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
+          <clearInfections stage="blood" timesteps="5d"/>
         </QN>
         <SP name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
+          <clearInfections stage="blood" timesteps="5d"/>
         </SP>
       </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
@@ -166,7 +166,7 @@
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="28d"/>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -189,7 +189,7 @@
         <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="1" latentp="3">
+    <parameters interval="5" iseed="1" latentp="15d">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

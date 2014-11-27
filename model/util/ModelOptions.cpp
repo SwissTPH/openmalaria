@@ -33,6 +33,7 @@ namespace OM { namespace util {
     class OptionCodeMap {
 	// Lookup table to translate the strings used in the XML file to the internal enumerated values:
 	map<string,OptionCodes> codeMap;
+        set<string> ignoreOptions;
 	
     public:
 	OptionCodeMap () {
@@ -47,7 +48,7 @@ namespace OM { namespace util {
 	    codeMap["DUMMY_WITHIN_HOST_MODEL"] = DUMMY_WITHIN_HOST_MODEL;
 	    codeMap["PREDETERMINED_EPISODES"] = PREDETERMINED_EPISODES;
 	    codeMap["NON_MALARIA_FEVERS"] = NON_MALARIA_FEVERS;
-	    codeMap["INCLUDES_PK_PD"] = INCLUDES_PK_PD;
+            ignoreOptions.insert("INCLUDES_PK_PD");
 	    codeMap["CLINICAL_EVENT_SCHEDULER"] = CLINICAL_EVENT_SCHEDULER;
 	    codeMap["MUELLER_PRESENTATION_MODEL"] = MUELLER_PRESENTATION_MODEL;
 	    codeMap["TRANS_HET"] = TRANS_HET;
@@ -72,24 +73,29 @@ namespace OM { namespace util {
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
             codeMap["MOLINEAUX_PAIRWISE_SAMPLE"]=MOLINEAUX_PAIRWISE_SAMPLE;
-            codeMap["PROPHYLACTIC_DRUG_ACTION_MODEL"]=PROPHYLACTIC_DRUG_ACTION_MODEL;
+            ignoreOptions.insert("PROPHYLACTIC_DRUG_ACTION_MODEL");
             codeMap["VIVAX_SIMPLE_MODEL"] = VIVAX_SIMPLE_MODEL;
             codeMap["INDIRECT_MORTALITY_FIX"] = INDIRECT_MORTALITY_FIX;
 	}
 	
 	OptionCodes operator[] (const string s) {
 	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
-	    if (codeIt == codeMap.end()) {
-		ostringstream msg;
-                if( s == "PENALISATION_EPISODES" || s == "ATTENUATION_ASEXUAL_DENSITY" ){
-                    msg << "Please use schema 31 or earlier to use option "
-                        << s << "; it is not available in later versions.";
-                }else{
-                    msg << "Unrecognised model option: " << s;
+	    if( codeIt != codeMap.end() ) return codeIt->second;
+            if( ignoreOptions.count(s) ){
+                if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
+                    cerr << "Deprecation warning: model option " << s << " is no longer used" << endl;
                 }
-		throw xml_scenario_error(msg.str());
-	    }
-	    return codeIt->second;
+                return IGNORE;
+            }
+            
+            ostringstream msg;
+            if( s == "PENALISATION_EPISODES" || s == "ATTENUATION_ASEXUAL_DENSITY" ){
+                msg << "Please use schema 31 or earlier to use option "
+                    << s << "; it is not available in later versions.";
+            }else{
+                msg << "Unrecognised model option: " << s;
+            }
+            throw xml_scenario_error(msg.str());
 	}
 	// reverse-lookup in map; only used for error/debug printing so efficiency is unimportant
 	// doesn't ensure code is unique in the map either
@@ -116,7 +122,8 @@ namespace OM { namespace util {
 	
 	const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.getOption();
 	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
-	    options[codeMap[it->getName()]] = it->getValue();
+            OptionCodes opt = codeMap[it->getName()];
+            if( opt != IGNORE ) options[opt] = it->getValue();
 	}
 	
 #ifdef WITHOUT_BOINC
@@ -132,8 +139,9 @@ namespace OM { namespace util {
 #endif
 	
 	// Test for removed options
-        if( util::ModelOptions::option( IPTI_SP_MODEL ) )
+        if( util::ModelOptions::option(IPTI_SP_MODEL) ){
             throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
+        }
 	
 	// Test for incompatible options
 	
@@ -207,16 +215,12 @@ namespace OM { namespace util {
             .set(FIRST_LOCAL_MAXIMUM_GAMMA)
             .set(MEAN_DURATION_GAMMA);
         
-        incompatibilities[IPTI_SP_MODEL]
-            .set(PROPHYLACTIC_DRUG_ACTION_MODEL);
-        
         
         incompatibilities[VIVAX_SIMPLE_MODEL]
             .set( DUMMY_WITHIN_HOST_MODEL )
             .set( EMPIRICAL_WITHIN_HOST_MODEL )
             .set( MOLINEAUX_WITHIN_HOST_MODEL )
-            .set( PENNY_WITHIN_HOST_MODEL )
-            .set( IPTI_SP_MODEL );
+            .set( PENNY_WITHIN_HOST_MODEL );
         
 	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (options [i] && (options & incompatibilities[i]).any()) {
@@ -245,23 +249,19 @@ namespace OM { namespace util {
             options[UPDATE_DENSITY_GAMMA] ) )
             throw xml_scenario_error( "Penny model option used without PENNY_WITHIN_HOST_MODEL option" );
         
-        if( TimeStep::interval == 5 ){
+        if( sim::oneTS() == sim::fromDays(5) ){
             bitset<NUM_OPTIONS> require1DayTS;
             require1DayTS
-                .set( DUMMY_WITHIN_HOST_MODEL )
-                .set( INCLUDES_PK_PD )
-                .set( CLINICAL_EVENT_SCHEDULER )
-                .set( EMPIRICAL_WITHIN_HOST_MODEL )
-                .set( PENNY_WITHIN_HOST_MODEL );
+                .set( CLINICAL_EVENT_SCHEDULER );
             
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (options [i] && require1DayTS[i]) {
                     ostringstream msg;
-                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 1-day timestep.";
+                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 1-day time step.";
                     throw xml_scenario_error (msg.str());
                 }
             }
-        }else if( TimeStep::interval == 1 ){
+        }else if( sim::oneTS() == sim::fromDays(1) ){
             bitset<NUM_OPTIONS> require5DayTS;
             require5DayTS
                 .set( IPTI_SP_MODEL )
@@ -270,13 +270,13 @@ namespace OM { namespace util {
             for (size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (options [i] && require5DayTS[i]) {
                     ostringstream msg;
-                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day timestep.";
+                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day time step.";
                     throw xml_scenario_error (msg.str());
                 }
             }
         }else{
             ostringstream msg;
-            msg << "Timestep interval set to " << TimeStep::interval << " days but only 1 and 5 days are supported.";
+            msg << "Time step set to " << sim::oneTS().inDays() << " days but only 1 and 5 days are supported.";
             throw xml_scenario_error (msg.str());
         }
     }

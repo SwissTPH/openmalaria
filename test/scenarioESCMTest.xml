@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="32" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -81,6 +81,8 @@
         <!-- An example to show decisions, and how they select and modify a treatment schedule.
           This is not intended to be at all realistic, but just to test what the model can do.
           It might eliminate malaria, but might kill patients with drug-overdoses too! -->
+        <!-- NOTE Aug 2014: This can't be converted to the new representation
+        due to (a) the weird doseSize decision and (b) the delay. -->
         <decisions>
           <decision depends="case,p" name="test" values="none,microscopy,RDT">
             case(UC1){
@@ -98,32 +100,26 @@
             age(0-5): under5
             age(5-inf): over5
          </decision>
-          <decision depends="age5" name="treatment" values="MF_treat">
-            age5(under5): MF_treat
-            age5(over5): MF_treat
+          <decision depends="p" name="treatment" values="MF_treat,MF_treat_poor_adherence">
+            p(.7): MF_treat
+            p(.3): MF_treat_poor_adherence
           </decision>
-          <decision depends="treatment,age5,result" name="doseSize" values="0,1,10,100">
-            treatment(MF_treat){
-              age5(under5){
-                result(none): 100
-                result(negative): 0
-                result(positive): 10
-              }
-              age5(over5){
-                result(none): 1
-                result(negative): 0
-                result(positive): 100
-              }
+          <decision depends="age5,result" name="doseSize" values="0,1,10,100">
+            age5(under5){
+              result(none): 100
+              result(negative): 0
+              result(positive): 10
+            }
+            age5(over5){
+              result(none): 1
+              result(negative): 0
+              result(positive): 100
             }
           </decision>
           <decision depends="test" name="quality" values="full,half">
             test(none): half
             test(microscopy): full
             test(RDT): full
-          </decision>
-          <decision depends="p" name="adherence" values="full,missFirstDose">
-            p(.7): full
-            p(.3): missFirstDose
           </decision>
           <decision depends="p" name="delay" values="0,1,2">
             p(.6): 0
@@ -132,6 +128,26 @@
           </decision>
         </decisions>
         <treatments>
+          <treatment name="MF_treat_poor_adherence">
+            <schedule>
+              <medicate drug="MF" hour="12" mg="3000"/>
+            </schedule>
+            <modifier decision="quality">
+              <multiplyQty effect="MF(0.5)" value="half"/>
+              <multiplyQty effect="MF(1.0)" value="full"/>
+            </modifier>
+            <modifier decision="doseSize">
+              <multiplyQty effect="MF(0)" value="0"/>
+              <multiplyQty effect="MF(1.0)" value="1"/>
+              <multiplyQty effect="MF(10)" value="10"/>
+              <multiplyQty effect="MF(100)" value="100"/>
+            </modifier>
+            <modifier decision="delay">
+              <delay effect="MF(0)" value="0"/>
+              <delay effect="MF(24)" value="1"/>
+              <delay effect="MF(48)" value="2"/>
+            </modifier>
+          </treatment>
           <treatment name="MF_treat">
             <schedule>
               <medicate drug="MF" hour="0" mg="3000"/>
@@ -146,10 +162,6 @@
               <multiplyQty effect="MF(1.0)" value="1"/>
               <multiplyQty effect="MF(10)" value="10"/>
               <multiplyQty effect="MF(100)" value="100"/>
-            </modifier>
-            <modifier decision="adherence">
-              <selectTimeRange affectsCost="false" effect="MF(0-13)" value="full"/>
-              <selectTimeRange affectsCost="false" effect="MF(1-13)" value="missFirstDose"/>
             </modifier>
             <modifier decision="delay">
               <delay effect="MF(0)" value="0"/>
@@ -1066,21 +1078,22 @@
     </nonVector>
   </entomology>
   <pharmacology>
-    <drug abbrev="MF">
-      <PD>
-        <allele name="sensitive (rename)">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.6654</IC50>
-          <slope>2.5</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.006654</negligible_concentration>
-        <half_life>19.254</half_life>
-        <vol_dist>20.8</vol_dist>
-      </PK>
-    </drug>
+    <drugs>
+      <drug abbrev="MF">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.6654</IC50>
+            <slope>2.5</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.006654</negligible_concentration>
+          <half_life>19.254</half_life>
+          <vol_dist>20.8</vol_dist>
+        </PK>
+      </drug>
+    </drugs>
   </pharmacology>
   <model>
     <ModelOptions>

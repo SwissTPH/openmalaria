@@ -20,39 +20,31 @@
 
 #include "Host/Human.h"
 
+#include "Host/HumanHet.hpp"
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
 #include "WithinHost/WHInterface.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "Monitoring/Survey.h"
 #include "PopulationStats.h"
 #include "util/ModelOptions.h"
-#include "util/random.h"
+#include "util/vectors.h"
 #include "util/StreamValidator.h"
 #include "Population.h"
-#include <schema/scenario.h>
+#include "interventions/InterventionManager.hpp"
+#include "mon/reporting.h"
+#include "schema/scenario.h"
 
 namespace OM { namespace Host {
     using namespace OM::util;
-    using namespace Monitoring;
     using interventions::ComponentId;
     
-    bool opt_trans_het = false, opt_comorb_het = false, opt_treat_het = false,
-            opt_trans_treat_het = false, opt_comorb_treat_het = false,
-            opt_comorb_trans_het = false, opt_triple_het = false,
-            opt_report_only_at_risk = false;
+    bool opt_report_only_at_risk = false;
 
 // -----  Static functions  -----
 
-void Human::initHumanParameters( const Parameters& parameters, const scnXml::Scenario& scenario ) {    // static
-    opt_trans_het = util::ModelOptions::option (util::TRANS_HET);
-    opt_comorb_het = util::ModelOptions::option (util::COMORB_HET);
-    opt_treat_het = util::ModelOptions::option (util::TREAT_HET);
-    opt_trans_treat_het = util::ModelOptions::option (util::TRANS_TREAT_HET);
-    opt_comorb_treat_het = util::ModelOptions::option (util::COMORB_TREAT_HET);
-    opt_comorb_trans_het = util::ModelOptions::option (util::COMORB_TRANS_HET);
-    opt_triple_het = util::ModelOptions::option (util::TRIPLE_HET);
+void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario ){    // static
+    HumanHet::init();
     opt_report_only_at_risk = util::ModelOptions::option( util::REPORT_ONLY_AT_RISK );
     
     const scnXml::Model& model = scenario.getModel();
@@ -60,93 +52,36 @@ void Human::initHumanParameters( const Parameters& parameters, const scnXml::Sce
     Transmission::PerHost::init( model.getHuman().getAvailabilityToMosquitoes() );
     InfectionIncidenceModel::init( parameters );
     WithinHost::WHInterface::init( parameters, scenario );
-    Clinical::ClinicalModel::init( parameters, model );
-}
-
-void Human::clear() {   // static clear
-  Clinical::ClinicalModel::cleanup();
-  Transmission::PerHost::cleanup();
+    Clinical::ClinicalModel::init( parameters, scenario );
 }
 
 
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(Transmission::TransmissionModel& tm, TimeStep dateOfBirth) :
-    perHostTransmission(tm),
+Human::Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
-    _dateOfBirth(dateOfBirth),
+    m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
 {
   // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
-  assert( _dateOfBirth == TimeStep::simulation ||
-      (TimeStep::simulation == TimeStep(0) && _dateOfBirth < TimeStep::simulation));
+  assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
   
-  
-  /* Human heterogeneity; affects:
-   * _comorbidityFactor (stored in PathogenesisModel)
-   * _treatmentSeekingFactor (stored in CaseManagementModel)
-   * availabilityFactor (stored in Transmission::PerHost)
-   */
-  double comorbidityFactor = 1.0;
-  double treatmentSeekingFactor = 1.0;
-  double availabilityFactor = 1.0;
-  
-  if (opt_trans_het) {
-    availabilityFactor=0.2;
-    if (random::uniform_01() < 0.5) {
-      availabilityFactor=1.8;
-    }
-  }
-  if (opt_comorb_het) {
-    comorbidityFactor=0.2;
-    if (random::uniform_01() < 0.5) {
-      comorbidityFactor=1.8;
-    }   
-  }
-  if (opt_treat_het) {
-    treatmentSeekingFactor=0.2;
-    if (random::uniform_01() < 0.5) {            
-      treatmentSeekingFactor=1.8;
-    }   
-  }
-  if (opt_trans_treat_het) {
-    treatmentSeekingFactor=0.2;
-    availabilityFactor=1.8;
-    if (random::uniform_01()<0.5) {
-      treatmentSeekingFactor=1.8;
-      availabilityFactor=0.2;
-    }
-  } else if (opt_comorb_treat_het) {
-    if (random::uniform_01()<0.5) {
-      comorbidityFactor=1.8;
-      treatmentSeekingFactor=0.2;
-    } else {
-      comorbidityFactor=0.2;
-      treatmentSeekingFactor=1.8;
-    }
-  } else if (opt_comorb_trans_het) {
-    availabilityFactor=1.8;
-    comorbidityFactor=1.8;
-    if (random::uniform_01()<0.5) {
-      availabilityFactor=0.2;
-      comorbidityFactor=0.2;
-    }
-  } else if (opt_triple_het) {
-    availabilityFactor=1.8;
-    comorbidityFactor=1.8;
-    treatmentSeekingFactor=0.2;
-    if (random::uniform_01()<0.5) {
-      availabilityFactor=0.2;
-      comorbidityFactor=0.2;
-      treatmentSeekingFactor=1.8;
-    }
-  }
-  withinHostModel = WithinHost::WHInterface::createWithinHostModel( comorbidityFactor );
-  perHostTransmission.initialise (tm, availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
-  clinicalModel = Clinical::ClinicalModel::createClinicalModel (treatmentSeekingFactor);
+  HumanHet het = HumanHet::sample();
+  withinHostModel = WithinHost::WHInterface::createWithinHostModel( het.comorbidityFactor );
+  perHostTransmission.initialise (tm, het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
+  clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
 }
+
+Human::Human(SimTime dateOfBirth) :
+    withinHostModel(0),
+    infIncidence(0),
+    clinicalModel(0),
+    m_DOB(dateOfBirth),
+    m_cohortSet(0),
+    nextCtsDist(0)
+{}
 
 void Human::destroy() {
   delete infIncidence;
@@ -155,7 +90,9 @@ void Human::destroy() {
 }
 
 
-// -----  Non-static functions: per-timestep update  -----
+// -----  Non-static functions: per-time-step update  -----
+
+vector<double> EIR_per_genotype;        // cache (not thread safe)
 
 bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
 #ifdef WITHOUT_BOINC
@@ -163,39 +100,49 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
     if( doUpdate )
         ++PopulationStats::humanUpdates;
 #endif
-    TimeStep ageTimeSteps = TimeStep::simulation-_dateOfBirth;
-    if (clinicalModel->isDead(ageTimeSteps))
+    // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
+    SimTime age0 = age(sim::ts0());
+    if (clinicalModel->isDead(age0))
         return true;
     
     if (doUpdate){
-        util::streamValidate( ageTimeSteps.asInt() );
-        double ageYears = ageTimeSteps.inYears();
-        monitoringAgeGroup.update( ageYears );
+        util::streamValidate( age0.raw() );
+        // Ages at  the end of the update period respectively. In most cases
+        // the difference between this and age at the start is not especially
+        // important in the model design, but since we parameterised with
+        // ageYears1 we should stick with it.
+        double ageYears1 = age(sim::ts1()).inYears();
+        // monitoringAgeGroup is the group for the start of the time step.
+        monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
-        for( map<ComponentId,TimeStep>::iterator expIt =
+        for( map<ComponentId,SimTime>::iterator expIt =
             m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
         {
-            //  We use >= to test membership, < is inverse (see comment on m_subPopExp)
-            if( expIt->second < TimeStep::simulation ){
+            if( !(expIt->second >= sim::ts0()) ){       // membership expired
                 // don't flush reports
                 // report removal due to expiry
-                Survey::current().addInt(Report::MI_N_SP_REM_TOO_OLD, *this, 1 );
-                m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
+                mon::reportMHI( mon::MHR_SUB_POP_REM_TOO_OLD, *this, 1 );
+                m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
                 // erase element, but continue iteration (note: this is simpler in C++11)
-                map<ComponentId,TimeStep>::iterator toErase = expIt;
+                map<ComponentId,SimTime>::iterator toErase = expIt;
                 ++expIt;
                 m_subPopExp.erase( toErase );
             }else{
                 ++expIt;
             }
         }
-        double EIR = transmissionModel->getEIR( *this, ageYears, monitoringAgeGroup );
+        // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
+        double EIR = transmissionModel->getEIR( *this, age0, ageYears1,
+                EIR_per_genotype );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
-        withinHostModel->update(nNewInfs, ageYears, _vaccine.getFactor(interventions::Vaccine::BSV));
+        // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
+        withinHostModel->update(nNewInfs, EIR_per_genotype, ageYears1,
+                _vaccine.getFactor(interventions::Vaccine::BSV));
         
-        clinicalModel->update (*this, ageYears, ageTimeSteps);
-        clinicalModel->updateInfantDeaths (ageTimeSteps);
+        // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
+        clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
+        clinicalModel->updateInfantDeaths( age0 );
     }
     return false;
 }
@@ -217,7 +164,8 @@ void Human::summarize() {
         return;
     }
     
-    Survey::current().addInt( Report::MI_HOSTS, *this, 1);
+    mon::reportMHI( mon::MHR_HOSTS, *this, 1 );
+    mon::reportMHF( mon::MHF_AGE, *this, age(sim::now()).inYears() );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     
@@ -227,18 +175,17 @@ void Human::summarize() {
     }
 }
 
-void Human::reportDeployment( ComponentId id, TimeStep duration ){
-    if( duration <= TimeStep(0) ) return; // nothing to do
-    m_subPopExp[id] = TimeStep::simulation + duration;
-    m_cohortSet = Survey::updateCohortSet( m_cohortSet, id, true );
+void Human::reportDeployment( ComponentId id, SimTime duration ){
+    if( duration <= sim::zero() ) return; // nothing to do
+    m_subPopExp[id] = sim::nowOrTs1() + duration;
+    m_cohortSet = mon::updateCohortSet( m_cohortSet, id, true );
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
     const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
     for( vector<ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        map<ComponentId,TimeStep>::iterator expIt = m_subPopExp.find( *it );
+        SubPopT::iterator expIt = m_subPopExp.find( *it );
         if( expIt != m_subPopExp.end() ){
-            //  We use >= to test membership (see comment on m_subPopExp)
-            if( expIt->second >= TimeStep::simulation ){
+            if( expIt->second > sim::nowOrTs0() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment
                 // and onFirstInfection cohort options. Health system memory must
                 // be reset for this to work properly; in theory the memory should
@@ -246,9 +193,9 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
                 flushReports();     // reset HS memory
                 
                 // report removal due to first infection/bout/treatment
-                Survey::current().addInt(Report::MI_N_SP_REM_FIRST_EVENT, *this, 1 );
+                mon::reportMHI( mon::MHR_SUB_POP_REM_FIRST_EVENT, *this, 1 );
             }
-            m_cohortSet = Survey::updateCohortSet( m_cohortSet, expIt->first, false );
+            m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
             // remove (affects reporting, restrictToSubPop and cumulative deployment):
             m_subPopExp.erase( expIt );
         }

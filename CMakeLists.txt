@@ -178,7 +178,7 @@ include_directories (SYSTEM
   ${BOINC_INCLUDE_DIRS}
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
 
 add_executable (openMalaria model/openMalaria.cpp)

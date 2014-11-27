@@ -3,8 +3,8 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- standard types used -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
-           xmlns:om="http://openmalaria.org/schema/scenario_32"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_33"
+           xmlns:om="http://openmalaria.org/schema/scenario_33"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!-- Component and TriggeredDeployments would be in interventions.xsd, except
     that they are needed from healthSystem.xsd -->
@@ -47,7 +47,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="maxAge" type="xs:double" use="optional">
             <xs:annotation>
               <xs:documentation>
-                Maximum age of eligible humans (defaults to no limit)
+                Maximum age of eligible humans (defaults to no limit).
+                
+                Input is rounded to the nearest time step.
               </xs:documentation>
               <xs:appinfo>units:Years;min:0;name:Maximum age of eligible humans;</xs:appinfo>
             </xs:annotation>
@@ -55,7 +57,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="minAge" type="xs:double" default="0">
             <xs:annotation>
               <xs:documentation>
-                Minimum age of eligible humans (defaults to 0)
+                Minimum age of eligible humans (defaults to 0).
+                
+                Input is rounded to the nearest time step.
               </xs:documentation>
               <xs:appinfo>units:Years;min:0;name:Minimum age of eligible humans;</xs:appinfo>
             </xs:annotation>
@@ -75,32 +79,32 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="OptionSet">
     <xs:sequence>
-      <xs:element name="option" minOccurs="0" maxOccurs="unbounded">
-        <xs:complexType>
-          <xs:attribute name="name" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
-            Options define different model structures.
-                Option name. Must be one of a strictly defined set.
-                Options are not required to be listed if their default value is desired.
-              </xs:documentation>
-              <xs:appinfo>name:Model options required;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="value" type="xs:boolean" default="true">
-            <xs:annotation>
-              <xs:documentation>
-                Option value (true/false). Each option has a default value used
-                if the option is not listed (usually false but sometimes true).
-              </xs:documentation>
-            <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
-           </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="option" type="om:Option" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="doubleList">
+  <xs:complexType name="Option">
+    <xs:attribute name="name" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of an option (monitoring measure or model option).
+        </xs:documentation>
+        <xs:appinfo>name:Option name;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="value" type="xs:boolean" default="true">
+      <xs:annotation>
+        <xs:documentation>
+          Option on/off switch (true/false). Specifying value="true" is
+          the same as not specifying a value; specifying value="false"
+          explicitly turns the option off. If an option is not mentioned
+          at all, it is left at its default value (normally off, but
+          in a few cases, such as some bug-fix options, on).
+        </xs:documentation>
+      <xs:appinfo>name:Indicator of whether option is required;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="DoubleList">
     <xs:sequence>
       <xs:element name="item" maxOccurs="unbounded" type="xs:double" />
     </xs:sequence>
@@ -146,17 +150,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
-    <xs:attribute name="L" type="xs:double" use="required">
+    <xs:attribute name="L" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>
-          Scale parameter of distribution. With the smooth-compact (smooth
-          function with compact support), step and linear functions, this is the
-          age at which the parameter has decayed to 0; with the other three
-          functions, this is the age at which the parameter has decayed to half
-          its original value. Not used for constant decay (though must be
-          specified anyway).
+          (Time) scale parameter of distribution: this is either the age of
+          complete decay (smooth-compact, step and linear functions) or the age
+          at which the parameter has decayed to half its original value
+          (exponential, weibull and hill). Not used when function="constant"
+          (i.e. no decay).
+          
+          This value can be specified in years, days or steps (e.g. 2y, 180d or
+          100t). When the unit is not specified years are assumed. The value is
+          used without rounding except when sampling an age of decay, when the
+          rounding happens as late as possible.
         </xs:documentation>
-        <xs:appinfo>units:Years;min:0;name:L;</xs:appinfo>
+        <xs:appinfo>units:User-defined (defaults to years);min:0;name:L;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="k" type="xs:double" default="1.0">
@@ -284,7 +292,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="inputValue">
+  <xs:complexType name="DoubleValue">
     <xs:attribute name="value" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>A double-precision floating-point value.</xs:documentation>
@@ -292,12 +300,76 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="intValue">
+  <xs:complexType name="IntValue">
     <xs:attribute name="value" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>An integer value.</xs:documentation>
         <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
       </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="AgeGroupValues">
+    <xs:sequence>
+      <xs:element maxOccurs="unbounded" name="group">
+        <xs:annotation>
+          <xs:documentation>
+            A series of values according to age groups, each specified with
+            a lower-bound and a value. The first lower-bound specified must be
+            zero; a final upper-bound of infinity is added to complete the last
+            age group. At least one age group is required. Normally these are
+            interpolated by a continuous function (see interpolation attribute).
+          </xs:documentation>
+          <xs:appinfo>name:age group;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:complexContent>
+            <xs:extension base="om:DoubleValue">
+              <xs:attribute name="lowerbound" type="xs:double" use="required">
+                <xs:annotation>
+                  <xs:documentation>
+                    Lower bound of age group
+                  </xs:documentation>
+                  <xs:appinfo>units:Years;min:0;max:100;name:Lower bound;</xs:appinfo>
+                </xs:annotation>
+            </xs:attribute>
+            </xs:extension>
+          </xs:complexContent>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <!-- NOTE: would specify default="linear" except for a possible bug in Code
+    Synthesis' XSD associated with creating blank AgeGroupValues elements -->
+    <xs:attribute name="interpolation" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Interpolation algorithm. Normally it is desirable for age-based
+          values to be continuous w.r.t. age. By default linear interpolation
+          is used.
+          
+          With all algorithms except "none", the age groups are converted to a
+          set of points centred within each age range. Extra
+          points are added at each end (zero and infinity) to keep value
+          constant at both ends of the function. A zero-length age group may
+          be used as a kind of barrier to adjust the distribution; e.g. with
+          age group boundaries at 15, 20 and 25 years, a (linear) spline would
+          be drawn between ages 17.5 and 22.5, whereas with boundaries at
+          15, 20 and 20 years, a spline would be drawn between ages 17.5 and 20
+          years (may be desired if individuals are assumed to reach adult size
+          at 20).
+          
+          Algorithms:
+          1. none: input values are used directly
+          2. linear: straight lines (on an age vs. value graph) are used to
+          interpolate data points.
+        </xs:documentation>
+        <xs:appinfo>name:interpolation;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="none" />
+          <xs:enumeration value="linear" />
+        </xs:restriction>
+      </xs:simpleType>
     </xs:attribute>
   </xs:complexType>
 </xs:schema>

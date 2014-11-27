@@ -19,21 +19,17 @@ set (Model_CPP
   Clinical/CaseManagementCommon.cpp
   Clinical/EventScheduler.cpp
   Clinical/ESCaseManagement.cpp
-  Clinical/ESDecisionTree.cpp
-  Clinical/ESDecisionValue.cpp
+  Clinical/CMDecisionTree.cpp
   Clinical/ImmediateOutcomes.cpp
   Clinical/Episode.cpp
-  Clinical/parser.cpp
+  Clinical/DecisionTree5Day.cpp
+  Clinical/CM5DayCommon.cpp
   
-  PkPd/PkPdModel.cpp
-  #PkPd/HoshenPkPdModel.cpp
-  PkPd/LSTMPkPdModel.cpp
-  #PkPd/Drug/HoshenDrug.cpp
-  #PkPd/Drug/HoshenDrugType.cpp
+  PkPd/LSTMModel.cpp
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/Drug/LSTMDrugAllele.cpp
-  #PkPd/Proteome.cpp
+  PkPd/LSTMTreatments.cpp
   
   Transmission/TransmissionModel.cpp
   Transmission/NonVectorModel.cpp
@@ -54,6 +50,7 @@ set (Model_CPP
   WithinHost/WHVivax.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
+  WithinHost/Genotypes.cpp
   WithinHost/Infection/Infection.cpp
   WithinHost/Infection/DescriptiveInfection.cpp
   WithinHost/Infection/DummyInfection.cpp
@@ -64,6 +61,9 @@ set (Model_CPP
   WithinHost/Pathogenesis/Submodels.cpp
   WithinHost/Diagnostic.cpp
   WithinHost/Treatments.cpp
+  
+  mon/mon.cpp
+  mon/misc.cpp
   
   util/BoincWrapper.cpp
   util/timer.cpp
@@ -76,14 +76,12 @@ set (Model_CPP
   util/random.cpp
   util/StreamValidator.cpp
   util/AgeGroupInterpolation.cpp
-  util/TimeStep.cpp
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp
+  util/misc.cpp
   
   Monitoring/Continuous.cpp
-  Monitoring/Surveys.cpp
-  Monitoring/Survey.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp
@@ -93,7 +91,8 @@ set (Model_CPP
 )
 
 # Headers - only included so they show up in IDEs:
-file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/include/*.h")
+# This misses loads of headers. Fix if you care.
+file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/model/*.h")
 
 
 include_directories (SYSTEM
@@ -110,7 +109,7 @@ include_directories (SYSTEM
   ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (
-  ${CMAKE_SOURCE_DIR}/include ${CMAKE_BINARY_DIR}
+  ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
 
 add_library (model

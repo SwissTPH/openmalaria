@@ -23,7 +23,6 @@
 #include "Host/Human.h"
 #include "util/random.h"
 #include "util/errors.h"
-#include "Monitoring/Survey.h"
 #include "util/SpeciesIndexChecker.h"
 
 #include "R_nmath/qnorm.h"
@@ -31,13 +30,12 @@
 
 namespace OM { namespace interventions {
     using util::random::poisson;
-    using namespace Monitoring;
 
 vector<IRSComponent*> IRSComponent::componentsByIndex;
 
 IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
         const map<string,size_t>& species_name_map ) :
-        Transmission::HumanVectorInterventionComponent(id, Report::MI_IRS_CTS, Report::MI_IRS_TIMED)
+        Transmission::HumanVectorInterventionComponent(id)
 {
     initialInsecticide.setParams( elt.getInitialInsecticide() );
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
@@ -58,9 +56,9 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
     componentsByIndex[id.id] = this;
 }
 
-void IRSComponent::deploy( Host::Human& human, Deployment::Method method, VaccineLimits )const{
+void IRSComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
     human.perHostTransmission.deployComponent(*this);
-    Survey::current().addInt( reportMeasure(method), human, 1 );
+    mon::reportMHD( mon::MHD_IRS, human, method );
 }
 
 Component::Type IRSComponent::componentType()const{ return Component::IRS; }
@@ -225,7 +223,7 @@ HumanIRS::HumanIRS( const IRSComponent& params ) :
 }
 
 void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionComponent& params ) {
-    deployTime = TimeStep::simulation;
+    deployTime = sim::nowOrTs1();
     const IRSComponent* irsParams = dynamic_cast<const IRSComponent*>(&params);
     assert( irsParams != 0 );   // code error if this fails
     initialInsecticide = irsParams->sampleInitialInsecticide();

@@ -30,18 +30,15 @@ using namespace OM::util;
 
 // -----  PerHost static  -----
 
-AgeGroupInterpolation* PerHost::relAvailAge = AgeGroupInterpolation::dummyObject();
+AgeGroupInterpolator PerHost::relAvailAge;
 
 void PerHost::init ( const scnXml::AgeGroupValues& availabilityToMosquitoes ) {
-    relAvailAge = AgeGroupInterpolation::makeObject( availabilityToMosquitoes, "availabilityToMosquitoes" );
-}
-void PerHost::cleanup () {
-    AgeGroupInterpolation::freeObject( relAvailAge );
+    relAvailAge.set( availabilityToMosquitoes, "availabilityToMosquitoes" );
 }
 
 // -----  PerHost non-static -----
 
-PerHost::PerHost (const Transmission::TransmissionModel& tm) :
+PerHost::PerHost () :
         outsideTransmission(false),
         _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
@@ -78,7 +75,7 @@ void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
 
 
 // Note: in the case an intervention is not present, we can use the approximation
-// of Weibull decay over (TimeStep::simulation - TimeStep::never) timesteps
+// of Weibull decay over the time span now - sim::never()
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.

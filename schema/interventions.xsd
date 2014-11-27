@@ -2,13 +2,13 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_32"
-           xmlns:om="http://openmalaria.org/schema/scenario_32"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_33"
+           xmlns:om="http://openmalaria.org/schema/scenario_33"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="healthSystem.xsd"/>
   <xs:include schemaLocation="entomology.xsd"/>
   <xs:include schemaLocation="util.xsd"/>
-  <xs:complexType name="interventions">
+  <xs:complexType name="Interventions">
     <xs:all>
       <xs:element minOccurs="0" name="changeHS">
         <xs:annotation>
@@ -22,7 +22,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="om:healthSystem">
+                  <xs:extension base="om:HealthSystem">
                     <xs:annotation>
                       <xs:documentation>
                         A complete replacement health system. Replaces all previous properties.
@@ -30,13 +30,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       </xs:documentation>
                       <xs:appinfo>name:Timed replacement;</xs:appinfo>
                     </xs:annotation>
-                    <xs:attribute name="time" type="xs:int" use="required">
+                    <xs:attribute name="time" type="xs:string" use="required">
                       <xs:annotation>
                         <xs:documentation>
-                          Time-step at which this replacement occurs, starting
-                          from 0, the first intervention-period time-step.
+                          Time at which this replacement occurs. See doc on
+                          intervention period and on monitoring/startDate for
+                          details of how times work.
+                          
+                          Can be specified in steps, days, years, or as a date
+                          (examples: 15t, 75d, 0.2y, 2000-03-16).
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -70,7 +74,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
               <xs:complexType>
                 <xs:complexContent>
-                  <xs:extension base="om:nonVector">
+                  <xs:extension base="om:NonVector">
                     <xs:annotation>
                       <xs:documentation>
                         Replacement transmission levels. Disables feedback of
@@ -79,13 +83,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       </xs:documentation>
                       <xs:appinfo>name:Timed replacement;</xs:appinfo>
                     </xs:annotation>
-                    <xs:attribute name="time" type="xs:int" use="required">
+                    <xs:attribute name="time" type="xs:string" use="required">
                       <xs:annotation>
                         <xs:documentation>
-                          Time-step at which this replacement occurs, starting
-                          from 0, the first intervention-period time-step.
+                          Time at which this replacement occurs. See doc on
+                          intervention period and on monitoring/startDate for
+                          details of how times work.
+                          
+                          Can be specified in steps, days, years, or as a date
+                          (examples: 15t, 75d, 0.2y, 2000-03-16).
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
                   </xs:extension>
@@ -127,14 +135,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:element name="rate" minOccurs="1" maxOccurs="unbounded">
                     <xs:complexType>
                       <xs:complexContent>
-                        <xs:extension base="om:inputValue">
+                        <xs:extension base="om:DoubleValue">
                           <xs:annotation>
                             <xs:documentation>A time-rate pair.</xs:documentation>
                             <xs:appinfo>name:Rate;units:Imported cases per thousand people per year;</xs:appinfo>
                           </xs:annotation>
-                          <xs:attribute name="time" type="xs:int" use="required">
+                          <xs:attribute name="time" type="xs:string" use="required">
                             <xs:annotation>
-                              <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                              <xs:documentation>
+                                Time at which this importation rate becomes active.
+                                
+                                See doc on intervention period and on monitoring/startDate for
+                                details of how times work. Can be specified in steps, days,
+                                years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
+                              </xs:documentation>
+                              <xs:appinfo>name:Time of start;units:User defined (defauls to steps);min:0;</xs:appinfo>
                             </xs:annotation>
                           </xs:attribute>
                         </xs:extension>
@@ -142,16 +157,18 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     </xs:complexType>
                   </xs:element>
                 </xs:sequence>
-                <xs:attribute name="period" type="xs:int" default="0">
+                <xs:attribute name="period" type="xs:string" default="0">
                   <xs:annotation>
                     <xs:documentation>
                       If period is 0 (or effectively infinite), the last specified
                       value remains indefinitely in effect, otherwise the times of
                       all values specified must be less than the period, and values
-                      are repeated modulo period (timestep period+2 has same value
-                      as timestep 2, etc.).
+                      are repeated modulo period (the step at time 'period+2t'
+                      has same value as the step at '2t', etc.).
+                      
+                      Can be specified in steps (e.g. 1t) or days (e.g. 365d).
                     </xs:documentation>
-                    <xs:appinfo>name:Period of repetition;units:time-steps;min:0</xs:appinfo>
+                    <xs:appinfo>name:Period of repetition;units:User defined (default: steps);min:0</xs:appinfo>
                   </xs:annotation>
                 </xs:attribute>
               </xs:complexType>
@@ -188,13 +205,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:annotation>
                   <xs:appinfo>name:Timed occurrence;</xs:appinfo>
                 </xs:annotation>
-                <xs:attribute name="time" type="xs:int" use="required">
+                <xs:attribute name="time" type="xs:string" use="required">
                   <xs:annotation>
                     <xs:documentation>
-                      Time-step at which this intervention occurs, starting
-                      from 0, the first intervention-period time-step.
+                      Time at which this intervention occurs.
+                      
+                      See doc on intervention period and on monitoring/startDate for
+                      details of how times work. Can be specified in steps, days,
+                      years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
                     </xs:documentation>
-                    <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                    <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                   </xs:annotation>
                 </xs:attribute>
               </xs:complexType>
@@ -231,13 +251,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:annotation>
                   <xs:appinfo>name:Timed occurrence;</xs:appinfo>
                 </xs:annotation>
-                <xs:attribute name="time" type="xs:int" use="required">
+                <xs:attribute name="time" type="xs:string" use="required">
                   <xs:annotation>
                     <xs:documentation>
-                      Time-step at which this intervention occurs, starting
-                      from 0, the first intervention-period time-step.
+                      Time at which this intervention occurs.
+                      
+                      See doc on intervention period and on monitoring/startDate for
+                      details of how times work. Can be specified in steps, days,
+                      years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
                     </xs:documentation>
-                    <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+                    <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
                   </xs:annotation>
                 </xs:attribute>
               </xs:complexType>
@@ -338,7 +361,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="om:continuousList">
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="om:ContinuousList">
             <xs:annotation>
                 <xs:documentation>List of ages at which deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
@@ -346,10 +369,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 A sub-population restriction may be added as a property of the
                 list of continuous deployments.
                 </xs:documentation>
-                <xs:appinfo>type:list of elements;name:Age-based (continuous) deployment;</xs:appinfo>
+                <xs:appinfo>name:Age-based (continuous) deployment;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="om:massListWithCum">
+            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="om:MassListWithCum">
               <xs:annotation>
                 <xs:documentation>
                   List of timed deployments of the intervention (that is, of
@@ -377,27 +400,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:sequence>
       <xs:choice>
         <xs:element name="screen" type="om:Screen"/>
-        <xs:element name="MDA" type="om:MDAComponent"/>
-        <xs:element name="MDA1D" type="om:HSESCaseManagement">
-          <xs:annotation>
-            <xs:documentation>
-              Description of a MDA/MSAT intervention (Mass Screen and Treat is
-              just Mass Drug Administration with a diagnostic).
-              
-              This MDA/MSAT model piggy-backs the 1-day timestep case management
-              and drug models, and thus is only available when using a 1-day
-              timestep.
-              
-              Description of treatment type used by mass treatment option of
-              one-day case management model. Can be used to describe
-              one-size-fits-all mass drug dosing, age-based mass drug dosing and
-              screen-and-treat. Number of treatments given can be reported by
-              the nMDAs option.
-            </xs:documentation>
-            <xs:appinfo>name:Mass drug administration (with decision tree and drug PK/PD model);</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="PEV" type="om:vaccineDescription">
+        <xs:element name="treatSimple" type="om:DTTreatSimple"/>
+        <xs:element name="treatPKPD" type="om:DTTreatPKPD"/>
+        <xs:element name="decisionTree" type="om:DecisionTree"/>
+        <xs:element name="PEV" type="om:VaccineDescription">
           <xs:annotation>
             <xs:documentation>
               Pre-erythrocytic vaccine (PEV): prevents a proportion of infections
@@ -406,7 +412,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Vaccines;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="BSV" type="om:vaccineDescription">
+        <xs:element name="BSV" type="om:VaccineDescription">
           <xs:annotation>
             <xs:documentation>
               Blood-stage vaccine (BSV): acts as a killing factor on blood-stage
@@ -415,7 +421,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>name:Vaccines;</xs:appinfo>
           </xs:annotation>
         </xs:element>
-        <xs:element name="TBV" type="om:vaccineDescription">
+        <xs:element name="TBV" type="om:VaccineDescription">
           <xs:annotation>
             <xs:documentation>
               Transmission-blocking vaccine (TBV): one minus this scales the
@@ -617,6 +623,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           and health system events) but not beyond that. If this attribute is
           not given, the simulated human is a member until death or some other
           option triggers removal.
+          
+          Input is rounded to the nearest time step.
         </xs:documentation>
         <xs:appinfo>name:Remove from sub-population after;units:Years;min:0;</xs:appinfo>
       </xs:annotation>
@@ -640,77 +648,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:(Mass) screening;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="diagnostic" type="om:HSDiagnostic">
-        <xs:annotation>
-          <xs:documentation>
-            Description of the diagnostic test used by the screening.
-          </xs:documentation>
-          <xs:appinfo>name:Diagnostic;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="positive" type="om:TriggeredDeployments"/>
-      <xs:element name="negative" type="om:TriggeredDeployments"/>
+      <xs:element name="positive" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
+      <xs:element name="negative" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
     </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="MDAComponent">
-     <xs:annotation>
-      <xs:documentation>
-        Description of treatment deployed as an intervention (treatment is
-        usually a simple model of a drug's action, thus when deployed on mass
-        or via screening this becomes part of a mass drug administration (MDA)
-        or mass screen-and-treat (MSAT) intervention. For historical reasons
-        this is called "MDA" in the XML, not "treatment".
-        
-        For the 1-day timestep models, a more detailed model of drug action and
-        more flexible model of deployment decisions are available; see MDA1D.
-        
-        The model of action of this intervention is to select one option from a
-        list of treatment options (randomly when multiple are available) then
-        carry out the treatment option's actions (which may be to do nothing).
-      </xs:documentation>
-      <xs:appinfo>name:Treatment / (mass) drug administration;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="effects">
-        <xs:annotation>
-          <xs:documentation>
-            A list of treatment options. When treatment is to be given,
-            one option will be selected randomly (according to the
-            "pSelection" probability of selection parameters given), and
-            the actions of that option enacted.
-            
-            Multiple options are intended to allow simulation of drug
-            failure and varying patient adherence. An option may do
-            nothing.
-          </xs:documentation>
-          <xs:appinfo>name:Treatment options;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="option" maxOccurs="unbounded">
-              <xs:complexType>
-                <!-- Note: it may in the future be preferable to define
-                the option elsewhere and link to it via some identifier -->
-                <xs:complexContent>
-                  <xs:extension base="om:TreatmentOption">
-                    <xs:attribute name="pSelection" type="xs:double" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
-                          The probability of selection of this treatment
-                          option. The sum of probabilities of all options
-                          in the list should be 1.
-                        </xs:documentation>
-                        <xs:appinfo>name:Probability of selection;min:0;max:1;units:dimensionless;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
+    <xs:attribute name="diagnostic" type="xs:string" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Name of a parameterised diagnostic (see scenario/diagnostics).
+        </xs:documentation>
+        <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="VectorIntervention">
     <xs:annotation>
@@ -733,12 +681,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:sequence>
         </xs:complexType>
       </xs:element>
-      <xs:element minOccurs="0" name="timed" type="om:timedBaseList">
+      <xs:element minOccurs="0" name="timed" type="om:TimedBaseList">
         <xs:annotation>
           <xs:documentation>
             List of timed vector population intervention deployment
           </xs:documentation>
-          <xs:appinfo>type:list of elements;name:Vector population intervention deployment;</xs:appinfo>
+          <xs:appinfo>name:Vector population intervention deployment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
     </xs:sequence>
@@ -751,18 +699,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="timedBase">
-    <xs:attribute name="time" type="xs:int" use="required">
+  <xs:complexType name="TimedBase">
+    <xs:attribute name="time" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-          Time-step at which this intervention occurs, starting
-          from 0, the first intervention-period time-step.
+          Time at which this deployment occurs.
+          
+          See doc on intervention period and on monitoring/startDate for
+          details of how times work. Can be specified in steps, days,
+          years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
         </xs:documentation>
-        <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="deploymentBase">
+  <xs:complexType name="DeploymentBase">
     <xs:attribute name="coverage" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
@@ -797,22 +748,27 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="mass">
+  <xs:complexType name="MassDeployment">
     <xs:complexContent>
-      <xs:extension base="om:deploymentBase">
-        <xs:attribute name="time" type="xs:int" use="required">
+      <xs:extension base="om:DeploymentBase">
+        <xs:attribute name="time" type="xs:string" use="required">
           <xs:annotation>
             <xs:documentation>
-              Time-step at which this intervention occurs, starting
-              from 0, the first intervention-period time-step.
+              Time at which this deployment occurs.
+              
+              See doc on intervention period and on monitoring/startDate for
+              details of how times work. Can be specified in steps, days,
+              years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>name:Time;units:time-steps;min:0;</xs:appinfo>
+            <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
         <xs:attribute name="maxAge" type="xs:double" use="optional">
           <xs:annotation>
             <xs:documentation>
-              Maximum age of eligible individuals (defaults to no limit)
+              Maximum age of eligible individuals (defaults to no limit).
+              
+              Input is rounded to the nearest time step.
             </xs:documentation>
             <xs:appinfo>units:Years;min:0;name:Maximum age of eligible individuals;</xs:appinfo>
           </xs:annotation>
@@ -820,7 +776,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:attribute name="minAge" type="xs:double" default="0">
           <xs:annotation>
             <xs:documentation>
-              Minimum age of eligible individuals (defaults to 0)
+              Minimum age of eligible individuals (defaults to 0).
+              
+              Input is rounded to the nearest time step.
             </xs:documentation>
             <xs:appinfo>units:Years;min:0;name:Minimum age of eligible individuals;</xs:appinfo>
           </xs:annotation>
@@ -828,53 +786,64 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="continuousList">
+  <xs:complexType name="ContinuousList">
     <xs:sequence>
       <xs:element name="restrictToSubPop" type="om:RestrictToSubPop" minOccurs="0"/>
       <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="om:continuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="deploy" type="om:ContinuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="continuousDeployment">
+  <xs:complexType name="ContinuousDeployment">
     <xs:complexContent>
-      <xs:extension base="om:deploymentBase">
+      <xs:extension base="om:DeploymentBase">
         <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
           <xs:annotation>
             <xs:documentation>
-              Target age of intervention
+              Target age of intervention.
+              
+              Input is rounded to the nearest time step.
             </xs:documentation>
             <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="begin" type="xs:int" default="0">
+        <xs:attribute name="begin" type="xs:string" use="optional">
           <xs:annotation>
             <xs:documentation>
-              First timestep (from 0 at the beginning of the intervention period)
-              this item is active. Defaults to 0.
+              First time at which this deployment is active. If not specified,
+              deployment starts at the beginning of the intervention period.
+              
+              See doc on intervention period and on monitoring/startDate for
+              details of how times work. Can be specified in steps, days,
+              years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:First timestep active;</xs:appinfo>
+            <xs:appinfo>name:First time active;units:User defined (defauls to steps);</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
-        <xs:attribute name="end" type="xs:int" default="2147483647">
+        <xs:attribute name="end" type="xs:string" use="optional">
           <xs:annotation>
             <xs:documentation>
               End of the period during which the intervention is active (to be
-              exact, the first timestep of the intervention period at which the item
-              becomes inactive). Defaults to 2147483647.
+              exact, the first step of the intervention period at which the
+              item becomes inactive). If not specified, deployment never
+              ceases after starting during the simulation.
+              
+              See doc on intervention period and on monitoring/startDate for
+              details of how times work. Can be specified in steps, days,
+              years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>units:Timesteps;min:0;max:2147483647;name:End timestep;</xs:appinfo>
+            <xs:appinfo>units:User defined (defauls to steps);name:End step;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
-  <xs:complexType name="timedBaseList">
+  <xs:complexType name="TimedBaseList">
     <xs:sequence>
       <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="om:timedBase" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="deploy" type="om:TimedBase" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
-  <xs:complexType name="massListWithCum">
+  <xs:complexType name="MassListWithCum">
     <xs:sequence>
       <xs:element name="restrictToSubPop" minOccurs="0" type="om:RestrictToSubPop"/>
       <xs:element name="cumulativeCoverage" minOccurs="0">
@@ -915,7 +884,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:complexType>
       </xs:element>
       <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="om:mass" minOccurs="1" maxOccurs="unbounded"/>
+      <xs:element name="deploy" type="om:MassDeployment" minOccurs="1" maxOccurs="unbounded"/>
     </xs:sequence>
   </xs:complexType>
   <xs:complexType name="RestrictToSubPop">
@@ -951,7 +920,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="vaccineDescription">
+  <xs:complexType name="VaccineDescription">
     <xs:annotation>
       <xs:documentation>Description of a vaccine's effect</xs:documentation>
       <xs:appinfo>name:Vaccine descriptions;</xs:appinfo>
@@ -966,7 +935,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Decay of effect;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="efficacyB" type="om:inputValue">
+      <xs:element name="efficacyB" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Measure of variation in vaccine efficacy: efficacy is sampled from
@@ -976,7 +945,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Positive real;min:0.001;max:1.00E+06;name:Variance parameter for vaccine efficacy;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="om:inputValue">
+      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
             Mean efficacy values before decay (see efficacyB and decay parameter
@@ -995,7 +964,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Description</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="usage" type="om:inputValue">
+      <xs:element name="usage" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
           Usage of nets by humans, from 0 to 1.
@@ -1039,7 +1008,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Rips per existing hole per annum;min:0;name:Rate at which holes are enlarged;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="ripFactor" type="om:inputValue">
+      <xs:element name="ripFactor" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
           This factor expresses how important rips are in increasing the hole.
@@ -1252,7 +1221,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>
-            <xs:element name="deterrency" type="om:inputValue" minOccurs="0">
+            <xs:element name="deterrency" type="om:DoubleValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on attractiveness of humans to mosquitoes relative to
@@ -1265,7 +1234,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="preprandialKillingEffect" type="om:inputValue" minOccurs="0">
+            <xs:element name="preprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to bite a human
@@ -1280,7 +1249,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="postprandialKillingEffect" type="om:inputValue" minOccurs="0">
+            <xs:element name="postprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to escape from

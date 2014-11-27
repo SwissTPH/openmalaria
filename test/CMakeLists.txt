@@ -16,15 +16,15 @@ set (OM_BOXTEST_NAMES
   #disabled because of IPT:
   # 2 3 IPT VT
   1 4 5 6 9 10 11 12
-  1DayIntervs
   2ITNs
   Cohort
   EffectiveDrug
   Empirical
-  ESCMTest
+  # ESCMTest (cannot be updated to new format due to dropped features and weirdness)
   ESTS
   IRS30
   Molineaux
+  MolPairwise
   MSAT
   # disabled due to test failure (TODO: since when?)
   # MultiVecPopInterventions
@@ -42,6 +42,7 @@ set (OM_BOXTEST_NAMES
   VecMonthly
   VecTest
   Vivax
+  Genotypes
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

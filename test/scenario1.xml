@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  name="test D94" schemaVersion="32" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"  name="test D94" schemaVersion="33" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="80" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -23,8 +23,8 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Test Moni">
-    <continuous period="1">
+  <monitoring name="Test Moni" startDate="1234-12-31">
+    <continuous period="5d">
       <option name="recent births" value="true"/>
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
@@ -39,12 +39,13 @@
       <option name="nTreatments1" value="true"/>
       <option name="nTreatments2" value="true"/>
       <option name="nTreatments3" value="true"/>
+      <option name="sumAge" value="true"/>
     </SurveyOptions>
-    <surveys detectionLimit="2.5">
-      <surveyTime>1</surveyTime>
-      <surveyTime>4</surveyTime>
-      <surveyTime>20</surveyTime>
-      <surveyTime>60</surveyTime>
+    <surveys diagnostic="standard">
+      <surveyTime>1235-01-05</surveyTime>
+      <surveyTime>1235-01-20</surveyTime>
+      <surveyTime>1235-04-10</surveyTime>
+      <surveyTime>1235-10-27</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
@@ -73,8 +74,8 @@
   </monitoring>
   <interventions name="Change to monitoring HS">
     <changeHS>
-      <timedDeployment time="0">
-        <ImmediateOutcomes name="Test HS">
+      <timedDeployment time="1234-12-31">
+        <!-- ImmediateOutcomes name="Test HS">
           <drugRegimen firstLine="CQ" inpatient="AQ" secondLine="AQ"/>
           <initialACR>
             <CQ value="1"/>
@@ -109,7 +110,27 @@
           <pSelfTreatUncomplicated value="0"/>
           <pSeekOfficialCareUncomplicated2 value="1"/>
           <pSeekOfficialCareSevere value="1"/>
-        </ImmediateOutcomes>
+        </ImmediateOutcomes -->
+        <DecisionTree5Day name="Test HS">
+          <pSeekOfficialCareUncomplicated1 value="1"/>
+          <pSelfTreatUncomplicated value="0"/>
+          <pSeekOfficialCareUncomplicated2 value="1"/>
+          <pSeekOfficialCareSevere value="1"/>
+          <treeUCOfficial>
+            <random name="extra random number to closely model old behaviour">
+              <outcome p="1">
+                <treatSimple durationLiver="0" durationBlood="5d"/>
+              </outcome>
+            </random>
+          </treeUCOfficial>
+          <treeUCSelfTreat>
+            <noTreatment/>
+          </treeUCSelfTreat>
+          <cureRateSevere value="1"/>
+          <treatmentSevere>
+            <clearInfections stage="blood" timesteps="5d"/>
+          </treatmentSevere>
+        </DecisionTree5Day>
         <CFR>
           <group lowerbound="0" value="0.09189"/>
           <group lowerbound="0.25" value="0.0810811"/>
@@ -130,7 +151,7 @@
     </changeHS>
   </interventions>
   <healthSystem>
-    <ImmediateOutcomes name="no Treatment no Mortality">
+    <!-- ImmediateOutcomes name="no Treatment no Mortality">
       <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ"/>
       <initialACR>
         <CQ value="0"/>
@@ -165,7 +186,23 @@
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0"/>
       <pSeekOfficialCareSevere value="0"/>
-    </ImmediateOutcomes>
+    </ImmediateOutcomes -->
+    <DecisionTree5Day name="no Treatment no Mortality">
+      <pSeekOfficialCareUncomplicated1 value="0"/>
+      <pSelfTreatUncomplicated value="0"/>
+      <pSeekOfficialCareUncomplicated2 value="0"/>
+      <pSeekOfficialCareSevere value="0"/>
+      <treeUCOfficial>
+        <noTreatment/>
+      </treeUCOfficial>
+      <treeUCSelfTreat>
+        <noTreatment/>
+      </treeUCSelfTreat>
+      <cureRateSevere value="0"/>
+      <treatmentSevere>
+        <clearInfections stage="blood" timesteps="5d"/>
+      </treatmentSevere>
+    </DecisionTree5Day>
     <CFR>
       <group lowerbound="0" value="0"/>
     </CFR>
@@ -1031,12 +1068,17 @@
       <EIRDaily origin="monthly">0.1291</EIRDaily>
     </nonVector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="2.5"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="28d"/>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -1059,7 +1101,7 @@
         <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="1" latentp="3">
+    <parameters interval="5" iseed="1" latentp="15d">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

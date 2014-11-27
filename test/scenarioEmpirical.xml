@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="32" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="90" name="test" popSize="200">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -38,8 +38,8 @@
       <option name="nHospitalDeaths" value="true"/>
       <option name="nHospitalRecovs" value="true"/>
       <option name="nHospitalSeqs" value="true"/>
-      <option name="Clinical_RDTs" value="true"/>
-      <option name="Clinical_DrugUsage" value="true"/>
+      <option name="nTreatDiagnostics" value="true"/>
+      <!--TODO <option name="Clinical_DrugUsage" value="true"/> -->
       <option name="Clinical_FirstDayDeaths" value="true"/>
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
     </SurveyOptions>
@@ -76,95 +76,144 @@
     <EventScheduler>
       <!-- Simple partially-realistic (poorly researched) health system description (DH). -->
       <uncomplicated>
-        <decisions>
-          <decision depends="case,p" name="test" values="none,microscopy,RDT">
-            case(UC1){
-              p(.5): none
-              p(.3): microscopy
-              p(.2): RDT
-            }
-            case(UC2){
-              p(.4): none
-              p(.3): microscopy
-              p(.3): RDT
-            }
-          </decision>
-          <decision depends="result,p" name="treatment" values="MQ_treat,no_treat">
-            result(positive){
-              p(.9): MQ_treat
-              p(.1): no_treat
-            }
-            result(negative): no_treat
-            result(none) {
-              p(.5): MQ_treat
-              p(.5): no_treat
-            }
-          </decision>
-          <decision depends="age" name="bodyMass" values="5,20,60">
-            age(0-2): 5
-            age(2-6): 20
-            age(6-inf): 60
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="MQ_treat">
-            <schedule>
-              <medicate drug="MQ" hour="0" mg="20"/>
-            </schedule>
-            <modifier decision="bodyMass">
-              <multiplyQty effect="MQ(5)" value="5"/>
-              <multiplyQty effect="MQ(20)" value="20"/>
-              <multiplyQty effect="MQ(60)" value="60"/>
-            </modifier>
-          </treatment>
-          <treatment name="no_treat">
-            <schedule/>
-          </treatment>
-        </treatments>
+        <caseType>
+          <firstLine>
+            <random name="type of diagnostic">
+              <outcome p="0.25" name="no test, treat">
+                <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
+              </outcome>
+              <outcome p="0.25" name="no test, no treatment">
+                <noTreatment/>
+              </outcome>
+              <outcome p="0.3" name="microscopy test">
+                <diagnostic diagnostic="microscopy">
+                  <positive>
+                    <random>
+                      <outcome p="0.9">
+                        <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
+                      </outcome>
+                      <outcome p="0.1">
+                        <treatFailure/>
+                      </outcome>
+                    </random>
+                  </positive>
+                  <negative>
+                    <noTreatment/>
+                  </negative>
+                </diagnostic>
+              </outcome><!-- microscopy -->
+              <outcome p="0.2" name="RDT test">
+                <diagnostic diagnostic="RDT">
+                  <positive>
+                    <random>
+                      <outcome p="0.9">
+                        <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
+                      </outcome>
+                      <outcome p="0.1">
+                        <treatFailure/>
+                      </outcome>
+                    </random>
+                  </positive>
+                  <negative>
+                    <noTreatment/>
+                  </negative>
+                </diagnostic>
+              </outcome><!-- RDT -->
+            </random>
+          </firstLine>
+          <secondLine>
+            <random name="type of diagnostic">
+              <outcome p="0.2" name="no test, treat">
+                <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
+              </outcome>
+              <outcome p="0.2" name="no test, no treatment">
+                <noTreatment/>
+              </outcome>
+              <outcome p="0.3" name="microscopy test">
+                <diagnostic diagnostic="microscopy">
+                  <positive>
+                    <random>
+                      <outcome p="0.9">
+                        <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
+                      </outcome>
+                      <outcome p="0.1">
+                        <treatFailure/>
+                      </outcome>
+                    </random>
+                  </positive>
+                  <negative>
+                    <noTreatment/>
+                  </negative>
+                </diagnostic>
+              </outcome><!-- microscopy -->
+              <outcome p="0.3" name="RDT test">
+                <diagnostic diagnostic="RDT">
+                  <positive>
+                    <random>
+                      <outcome p="0.9">
+                        <treatPKPD schedule="MQ_treat" dosage="std_dosage"/>
+                      </outcome>
+                      <outcome p="0.1">
+                        <treatFailure/>
+                      </outcome>
+                    </random>
+                  </positive>
+                  <negative>
+                    <noTreatment/>
+                  </negative>
+                </diagnostic>
+              </outcome><!-- RDT -->
+            </random>
+          </secondLine>
+        </caseType>
       </uncomplicated>
       <complicated>
-        <decisions>
-          <decision depends="result,p" name="treatment" values="AS_sev,none">
-            result(positive) {
-              p(.9): AS_sev
-              p(.1): none
-            }
-            result(negative): none
-            result(none): none
-          </decision>
-          <!-- note: dependency on "p" causes an extra random number sample -->
-          <decision depends="p" name="hospitalisation" values="none,delayed,immediate">
-            immediate
-          </decision>
-          <decision depends="p" name="test" values="none,microscopy,RDT">
-            p(.3): none
-            p(.5): RDT
-            p(.2): microscopy
-          </decision>
-          <decision depends="age" name="bodyMass" values="5,20,60">
-            age(0-2): 5
-            age(2-6): 20
-            age(6-inf): 60
-          </decision>
-        </decisions>
-        <treatments>
-          <treatment name="AS_sev">
-            <schedule>
-              <medicate drug="AS" hour="0" mg="2.4"/>
-              <medicate drug="AS" hour="18" mg="2.4"/>
-              <medicate drug="AS" hour="36" mg="2.4"/>
-              <medicate drug="AS" hour="54" mg="2.4"/>
-            </schedule>
-            <modifier decision="bodyMass">
-              <multiplyQty effect="AS(5)" value="5"/>
-              <multiplyQty effect="AS(20)" value="20"/>
-              <multiplyQty effect="AS(60)" value="60"/>
-            </modifier>
-          </treatment>
-          <treatment name="none">
-            <schedule/>
-          </treatment>
-        </treatments>
+        <random>
+          <outcome p="0.3" name="no diagnostic">
+            <noTreatment/>
+            <!-- TODO: hospitalise -->
+          </outcome>
+          <outcome p="0.5" name="RDT">
+            <diagnostic diagnostic="RDT">
+              <positive>
+                <random>
+                  <outcome p="0.9">
+                    <treatPKPD schedule="AS_sev" dosage="std_dosage"/>
+                    <!-- TODO: hospitalise -->
+                  </outcome>
+                  <outcome p="0.1">
+                    <treatFailure/>
+                    <!-- TODO: hospitalise -->
+                  </outcome>
+                </random>
+              </positive>
+              <negative>
+                <noTreatment/>
+                <!-- TODO: hospitalise -->
+              </negative>
+            </diagnostic>
+          </outcome>
+          <outcome p="0.2" name="microscopy">
+            <diagnostic diagnostic="microscopy">
+              <positive>
+                <random>
+                  <outcome p="0.9">
+                    <treatPKPD schedule="AS_sev" dosage="std_dosage"/>
+                    <!-- TODO: hospitalise -->
+                  </outcome>
+                  <outcome p="0.1">
+                    <treatFailure/>
+                    <!-- TODO: hospitalise -->
+                  </outcome>
+                </random>
+              </positive>
+              <negative>
+                <noTreatment/>
+                <!-- TODO: hospitalise -->
+              </negative>
+            </diagnostic>
+          </outcome>
+        </random>
       </complicated>
       <ClinicalOutcomes>
         <maxUCSeekingMemory>3</maxUCSeekingMemory>
@@ -1051,82 +1100,103 @@
     </nonVector>
   </entomology>
   <pharmacology>
-    <drug abbrev="AR">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4</max_killing_rate>
-          <IC50>0.0023</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000023</negligible_concentration>
-        <half_life>0.175</half_life>
-        <vol_dist>17.4</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="AS">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>4.6</max_killing_rate>
-          <IC50>0.0016</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.000016</negligible_concentration>
-        <half_life>0.042</half_life>
-        <vol_dist>2.75</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="CQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.036</IC50>
-          <slope>1.6</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.00036</negligible_concentration>
-        <half_life>30.006</half_life>
-        <vol_dist>300</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="LR">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.100</IC50>
-          <slope>4</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.001</negligible_concentration>
-        <half_life>4.332</half_life>
-        <vol_dist>21</vol_dist>
-      </PK>
-    </drug>
-    <drug abbrev="MQ">
-      <PD>
-        <allele name="sensitive">
-          <initial_frequency>1</initial_frequency>
-          <max_killing_rate>3.45</max_killing_rate>
-          <IC50>0.5</IC50>
-          <slope>5</slope>
-        </allele>
-      </PD>
-      <PK>
-        <negligible_concentration>0.005</negligible_concentration>
-        <half_life>13.078</half_life>
-        <vol_dist>20.8</vol_dist>
-      </PK>
-    </drug>
+    <treatments>
+      <schedule name="MQ_treat">
+        <medicate drug="MQ" hour="0" mg="20"/>
+      </schedule>
+      <schedule name="AS_sev">
+        <medicate drug="AS" hour="0" mg="2.4"/>
+        <medicate drug="AS" hour="18" mg="2.4"/>
+        <medicate drug="AS" hour="36" mg="2.4"/>
+        <medicate drug="AS" hour="54" mg="2.4"/>
+      </schedule>
+      <dosages name="std_dosage">
+        <age lowerbound="0" dose_mult="5"/>
+        <age lowerbound="2" dose_mult="20"/>
+        <age lowerbound="6" dose_mult="60"/>
+      </dosages>
+    </treatments>
+    <drugs>
+      <drug abbrev="AR">
+        <PD>
+          <phenotype>
+            <max_killing_rate>4</max_killing_rate>
+            <IC50>0.0023</IC50>
+            <slope>4</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000023</negligible_concentration>
+          <half_life>0.175</half_life>
+          <vol_dist>17.4</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="AS">
+        <PD>
+          <phenotype>
+            <max_killing_rate>4.6</max_killing_rate>
+            <IC50>0.0016</IC50>
+            <slope>4</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.000016</negligible_concentration>
+          <half_life>0.042</half_life>
+          <vol_dist>2.75</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="CQ">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.036</IC50>
+            <slope>1.6</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.00036</negligible_concentration>
+          <half_life>30.006</half_life>
+          <vol_dist>300</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="LR">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.100</IC50>
+            <slope>4</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.001</negligible_concentration>
+          <half_life>4.332</half_life>
+          <vol_dist>21</vol_dist>
+        </PK>
+      </drug>
+      <drug abbrev="MQ">
+        <PD>
+          <phenotype>
+            <max_killing_rate>3.45</max_killing_rate>
+            <IC50>0.5</IC50>
+            <slope>5</slope>
+          </phenotype>
+        </PD>
+        <PK>
+          <negligible_concentration>0.005</negligible_concentration>
+          <half_life>13.078</half_life>
+          <vol_dist>20.8</vol_dist>
+        </PK>
+      </drug>
+    </drugs>
   </pharmacology>
+  <diagnostics>
+    <diagnostic name="microscopy">
+      <stochastic dens_50="20" specificity="0.75"/>
+    </diagnostic>
+    <diagnostic name="RDT">
+      <stochastic dens_50="50" specificity="0.942"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="EMPIRICAL_WITHIN_HOST_MODEL" value="true"/>

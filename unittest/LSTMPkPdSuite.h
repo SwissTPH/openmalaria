@@ -24,7 +24,7 @@
 #define Hmod_LSTMPkPdSuite
 
 #include <cxxtest/TestSuite.h>
-#include "PkPd/LSTMPkPdModel.h"
+#include "PkPd/LSTMModel.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <limits>
@@ -40,54 +40,56 @@ public:
     LSTMPkPdSuite() :
             proxy(0)
     {
-        proteome_ID = 0;                // 0 should work; we definitely don't want random allocation
+        genotype = 0;                // 0 should work; we definitely don't want random allocation
         // This is what a previously-used weight distribution gave us,
         // and is good enough for testing purposes:
         massAt21 = 55.4993;
     }
     
     void setUp () {
-	UnittestUtil::PkPdSuiteSetup(PkPdModel::LSTM_PKPD);
-	proxy = new LSTMPkPdModel ();
+        UnittestUtil::initTime(1);
+	UnittestUtil::PkPdSuiteSetup();
+	proxy = new LSTMModel ();
+        MF_index = LSTMDrugType::findDrug( "MF" );
     }
     void tearDown () {
 	delete proxy;
-	UnittestUtil::PkPdSuiteTearDown();
+        LSTMDrugType::clear();
     }
     
     void testNone () {
-	TS_ASSERT_EQUALS (proxy->getDrugFactor (proteome_ID), 1.0);
+	TS_ASSERT_EQUALS (proxy->getDrugFactor (genotype), 1.0);
     }
     
     void testOral () {
-	proxy->medicate ("MF", 3000, 0, NaN, massAt21);
-	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
+	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
+	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03564073617400945);
     }
     
     void testOralHalves () {	// the point being: check it can handle two doses at the same time-point correctly
         //Note: normally NaN is used for duration, but 0 should give same result
-	proxy->medicate ("MF", 1500, 0, 0, massAt21);
-	proxy->medicate ("MF", 1500, 0, 0, massAt21);
-	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
+	UnittestUtil::medicate( *proxy, MF_index, 1500, 0, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MF_index, 1500, 0, 0, massAt21 );
+	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03564073617400945);
     }
     
     void testOralSplit () {
-	proxy->medicate ("MF", 3000, 0, NaN, massAt21);
-	proxy->medicate ("MF", 0, 0.5, NaN, massAt21);	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
-	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
+	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
+	UnittestUtil::medicate( *proxy, MF_index, 0, 0.5, NaN, massAt21 );	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
+	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03564073617400945);
     }
     
     void testOralDecayed () {
-	proxy->medicate ("MF", 3000, 0, NaN, massAt21);
+	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
 	proxy->decayDrugs ();
-	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03601694155274731);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03601694155274731);
     }
     
     void testOral2Doses () {
-	proxy->medicate ("MF", 3000, 0, NaN, massAt21);
+	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
 	proxy->decayDrugs ();
-	proxy->medicate ("MF", 3000, 0, NaN, massAt21);
-	TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03245158219000328);
+	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
+	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03245158219000328);
     }
     
     // IV tests. MF may not be used as an IV drug, but our code doesn't care.
@@ -96,45 +98,46 @@ public:
         // dose. Code uses duration!=0 to enable IV mode so we use a small value;
         // if this is too small, however, the gsl_integration_qag function complains
         // it cannot reach the requested tolerance.
-        proxy->medicate ("MF", 3000/massAt21, 0, 1e-6, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor (proteome_ID), 0.03564073617400945);
+        UnittestUtil::medicate( *proxy, MF_index, 3000/massAt21, 0, 1e-6, massAt21 );
+        TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03564073617400945);
     }
     
     void testIV () {
         // IV over whole day
-        proxy->medicate ("MF", 50, 0, 1, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.10315895127530212);
+        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 1, massAt21 );
+        TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.10315895127530212);
     }
     
     void testIVSplit (){
         // As above, but split into two doses
-        proxy->medicate ("MF", 25, 0, 0.5, massAt21);
-        proxy->medicate ("MF", 25, 0.5, 0.5, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.10315895127530212);
+        UnittestUtil::medicate( *proxy, MF_index, 25, 0, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MF_index, 25, 0.5, 0.5, massAt21 );
+        TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.10315895127530212);
     }
     
     void testCombined (){
-        proxy->medicate ("MF", 50, 0, 0.5, massAt21);
-        proxy->medicate ("MF", 1500, 0.5, NaN, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.05850739976088096);
+        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MF_index, 1500, 0.5, NaN, massAt21 );
+        TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.05850739976088096);
     }
     
     void testSimultaneous (){
-        proxy->medicate ("MF", 1500, 0, NaN, massAt21);
-        proxy->medicate ("MF", 50, 0, 0.5, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.03545674227382148);
+        UnittestUtil::medicate( *proxy, MF_index, 1500, 0, NaN, massAt21 );
+        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 0.5, massAt21 );
+        TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.03545674227382148);
     }
     void testSimultaneousReversed (){
         // Note: IV dose registered first. Drug code must rearrange these to work correctly.
-        proxy->medicate ("MF", 50, 0, 0.5, massAt21);
-        proxy->medicate ("MF", 1500, 0, NaN, massAt21);
-        TS_ASSERT_APPROX (proxy->getDrugFactor(proteome_ID), 0.03545674227382148);
+        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MF_index, 1500, 0, NaN, massAt21 );
+        TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.03545674227382148);
     }
     
 private:
-    LSTMPkPdModel *proxy;
-    uint32_t proteome_ID;
+    LSTMModel *proxy;
+    uint32_t genotype;
     double massAt21;
+    size_t MF_index;
 };
 
 #endif

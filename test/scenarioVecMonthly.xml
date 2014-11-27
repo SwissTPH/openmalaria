@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="simple test of EIR input as monthly values" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="simple test of EIR input as monthly values" schemaVersion="33" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -44,32 +44,8 @@
       <option name="nTreatDeployments"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime>6</surveyTime>
-      <surveyTime>12</surveyTime>
-      <surveyTime>18</surveyTime>
-      <surveyTime>24</surveyTime>
-      <surveyTime>30</surveyTime>
-      <surveyTime>36</surveyTime>
-      <surveyTime>42</surveyTime>
-      <surveyTime>48</surveyTime>
-      <surveyTime>54</surveyTime>
-      <surveyTime>60</surveyTime>
-      <surveyTime>66</surveyTime>
-      <surveyTime>72</surveyTime>
-      <surveyTime>79</surveyTime>
-      <surveyTime>85</surveyTime>
-      <surveyTime>91</surveyTime>
-      <surveyTime>97</surveyTime>
-      <surveyTime>103</surveyTime>
-      <surveyTime>109</surveyTime>
-      <surveyTime>115</surveyTime>
-      <surveyTime>121</surveyTime>
-      <surveyTime>127</surveyTime>
-      <surveyTime>133</surveyTime>
-      <surveyTime>139</surveyTime>
-      <surveyTime>145</surveyTime>
-      <surveyTime>151</surveyTime>
-      <surveyTime>157</surveyTime>
+      <surveyTime repeatStep="30d" repeatEnd="365d">30d</surveyTime>
+      <surveyTime repeatStep="30d" repeatEnd="800d">395d</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>
@@ -99,13 +75,7 @@
   <interventions name="vector pop tests">
     <human>
       <component id="treat">
-        <MDA>
-          <effects>
-            <option name="simple treatment" pSelection="1">
-              <clearInfections timesteps="1" stage="blood"/>
-            </option>
-          </effects>
-        </MDA>
+        <treatSimple durationBlood="1t" durationLiver="0"/>
       </component>
     </human>
     <vectorPop>
@@ -242,6 +212,13 @@
       </anopheles>
     </vector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="neonatal">
+      <!-- 40 × estimated non-Garki bias (this should be the correct threshold
+        for neonatal mortalities data source) -->
+      <deterministic minDensity="7.0951428394982"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
@@ -250,7 +227,9 @@
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="6">
+      <NeonatalMortality diagnostic="neonatal"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>

@@ -80,16 +80,23 @@ public:
             return 0.0;
         return 1.0;
     }
-    TimeStep sampleAgeOfDecay () const{
-        return TimeStep::future;        // decay occurs "in the future" (don't use TimeStep::never because that is interpreted as being in the past)
+    SimTime sampleAgeOfDecay () const{
+        return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
     }
 };
+
+double readLToDays( const scnXml::DecayFunction& elt ){
+    if( !elt.getL().present() ){
+        throw util::xml_scenario_error( "decay function: attribute L required" );
+    }
+    return UnitParse::durationToDays(elt.getL().get(), UnitParse::YEARS);
+}
 
 class StepDecayFunction : public BaseHetDecayFunction {
 public:
     StepDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
+        invL( 1.0 / readLToDays(elt) )
     {}
     
     double getBaseTMult() const{
@@ -103,20 +110,19 @@ public:
         }
     }
     
-    TimeStep sampleAgeOfDecay () const{
-        return TimeStep( static_cast<int>(std::floor(1.0 / invL + 0.5)) /* C++11: std::round */ );
+    SimTime sampleAgeOfDecay () const{
+        return sim::roundToTSFromDays( 1.0 / invL );
     }
     
 private:
-    double invL;
+    double invL;        // 1 / days
 };
 
 class LinearDecayFunction : public BaseHetDecayFunction {
 public:
     LinearDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        L( TimeStep::fromYears( elt.getL() ) ),
-        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) )
+        invL( 1.0 / readLToDays(elt) )
     {}
     
     double getBaseTMult() const{
@@ -130,13 +136,12 @@ public:
         }
     }
     
-    TimeStep sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay () const{
         // Note: rounds to nearest. Object may decay instantly or at time L.
-        return L * random::uniform_01();
+        return sim::roundToTSFromDays(random::uniform_01() / invL);
     }
     
 private:
-    TimeStep L;
     double invL;
 };
 
@@ -144,7 +149,7 @@ class ExponentialDecayFunction : public BaseHetDecayFunction {
 public:
     ExponentialDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invLambda( log(2.0) / (elt.getL() * TimeStep::stepsPerYear) )
+        invLambda( log(2.0) / readLToDays(elt) )
     {
         util::streamValidate(invLambda);
     }
@@ -156,8 +161,8 @@ public:
         return exp( -effectiveAge );
     }
     
-    TimeStep sampleAgeOfDecay () const{
-        return TimeStep::fromNearest(-log(random::uniform_01())/invLambda);
+    SimTime sampleAgeOfDecay () const{
+        return sim::roundToTSFromDays( -log(random::uniform_01()) / invLambda );
     }
     
 private:
@@ -168,7 +173,7 @@ class WeibullDecayFunction : public BaseHetDecayFunction {
 public:
     WeibullDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        constOverLambda( pow(log(2.0),1.0/elt.getK()) / (elt.getL() * TimeStep::stepsPerYear) ),
+        constOverLambda( pow(log(2.0),1.0/elt.getK()) / readLToDays(elt) ),
         k( elt.getK() )
     {}
     
@@ -179,8 +184,8 @@ public:
         return exp( -pow(effectiveAge, k) );
     }
     
-    TimeStep sampleAgeOfDecay () const{
-        return TimeStep::fromNearest( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
+    SimTime sampleAgeOfDecay () const{
+        return sim::roundToTSFromDays( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
     }
     
 private:
@@ -192,7 +197,7 @@ class HillDecayFunction : public BaseHetDecayFunction {
 public:
     HillDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
+        invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() )
     {}
     
@@ -203,8 +208,8 @@ public:
         return 1.0 / (1.0 + pow(effectiveAge, k));
     }
     
-    TimeStep sampleAgeOfDecay () const{
-        return TimeStep::fromNearest( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
+    SimTime sampleAgeOfDecay () const{
+        return sim::roundToTSFromDays( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
 private:
@@ -215,7 +220,7 @@ class SmoothCompactDecayFunction : public BaseHetDecayFunction {
 public:
     SmoothCompactDecayFunction( const scnXml::DecayFunction& elt ) :
         BaseHetDecayFunction( elt ),
-        invL( 1.0 / (elt.getL() * TimeStep::stepsPerYear) ),
+        invL( 1.0 / readLToDays(elt) ),
         k( elt.getK() )
     {}
     
@@ -230,8 +235,8 @@ public:
         }
     }
     
-    TimeStep sampleAgeOfDecay () const{
-        return TimeStep::fromNearest( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
+    SimTime sampleAgeOfDecay () const{
+        return sim::roundToTSFromDays( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
     }
     
 private:

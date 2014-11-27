@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="32" wuID="12345" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="33" wuID="12345" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="80.389041096" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -30,16 +30,10 @@
       <option name="sumlogDens" value="true"/>
       <option name="nUncomp"/>
       <option name="simulatedEIR" value="true"/>
+      <option name="nMassScreenings"/>
     </SurveyOptions>
-    <surveys detectionLimit="2">
-      <surveyTime>14</surveyTime>
-      <surveyTime>28</surveyTime>
-      <surveyTime>42</surveyTime>
-      <surveyTime>56</surveyTime>
-      <surveyTime>70</surveyTime>
-      <surveyTime>84</surveyTime>
-      <surveyTime>98</surveyTime>
-      <surveyTime>112</surveyTime>
+    <surveys diagnostic="garki">
+      <surveyTime repeatStep="14t" repeatEnd="126t">14t</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="0.5"/>
@@ -58,7 +52,7 @@
   </monitoring>
   <interventions name="A2 Intervention">
     <changeEIR>
-      <timedDeployment eipDuration="10" time="0">
+      <timedDeployment eipDuration="10" time="0t">
         <EIRDaily origin="interpolate">0.00219</EIRDaily>
         <EIRDaily origin="interpolate">0.00210</EIRDaily>
         <EIRDaily origin="interpolate">0.00202</EIRDaily>
@@ -635,38 +629,25 @@
     </changeEIR>
     <human>
       <component id="treat">
-        <MDA>
-          <effects>
-            <option name="legacy effect" pSelection="1">
-              <clearInfections stage="both" timesteps="-1"/>
-            </option>
-          </effects>
-        </MDA>
+        <!-- legacy effect -->
+        <treatSimple durationLiver="-1t" durationBlood="-1t"/>
       </component>
       <component id="MSAT">
-        <screen>
-          <diagnostic>
-            <deterministic minDensity="20"/>
-          </diagnostic>
-          <positive>
-            <deploy>
-              <component id="treat"/>
-            </deploy>
-          </positive>
-          <negative/>
+        <screen diagnostic="deterministic">
+          <positive id="treat"/>
         </screen>
       </component>
       <deployment>
         <component id="MSAT"/>
         <timed>
-          <deploy coverage="1" time="0"/>
-          <deploy coverage="1" time="14"/>
-          <deploy coverage="1" time="28"/>
-          <deploy coverage="1" time="42"/>
-          <deploy coverage="1" time="56"/>
-          <deploy coverage="1" time="70"/>
-          <deploy coverage="1" time="84"/>
-          <deploy coverage="1" time="98"/>
+          <deploy coverage="1" time="0t"/>
+          <deploy coverage="1" time="14t"/>
+          <deploy coverage="1" time="28t"/>
+          <deploy coverage="1" time="42t"/>
+          <deploy coverage="1" time="56t"/>
+          <deploy coverage="1" time="70t"/>
+          <deploy coverage="1" time="84t"/>
+          <deploy coverage="1" time="98t"/>
         </timed>
       </deployment>
     </human>
@@ -688,7 +669,7 @@
       </nonCompliersEffective>
       <treatmentActions>
         <CQ name="simple (unused)">
-          <clearInfections stage="both" timesteps="1"/>
+          <clearInfections stage="both" timesteps="1t"/>
         </CQ>
       </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0"/>
@@ -1215,15 +1196,29 @@
       <EIRDaily origin="interpolate">0.00227</EIRDaily>
     </nonVector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="deterministic" units="Malariatherapy">
+      <!-- this diagnostic has no basis in reality -->
+      <deterministic minDensity="20"/>
+    </diagnostic>
+    <diagnostic name="garki" units="Garki">
+      <deterministic minDensity="2"/>
+    </diagnostic>
+    <diagnostic name="neonatal" units="Other">
+      <!-- detection limit 40 according to non-Garki method -->
+      <deterministic minDensity="40"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="COMORB_HET" value="true"/>
-      <option name="GARKI_DENSITY_BIAS" value="true"/>
       <option name="MAX_DENS_CORRECTION" value="false"/>
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="28d">
+      <NeonatalMortality diagnostic="neonatal"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -1246,7 +1241,7 @@
         <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="1" latentp="3">
+    <parameters interval="5" iseed="1" latentp="3t">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0507360000000001"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

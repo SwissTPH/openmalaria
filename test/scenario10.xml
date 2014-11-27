@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" name="Idete Incidence" schemaVersion="32" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" name="Idete Incidence" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="6.0" name="Ifakara" popSize="300">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -27,6 +27,7 @@
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nUncomp" value="true"/>
+      <option name="sumAge" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime>73</surveyTime>

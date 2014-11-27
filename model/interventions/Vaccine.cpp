@@ -26,7 +26,6 @@
 #include "util/ModelOptions.h"
 #include "schema/interventions.h"
 #include "util/StreamValidator.h"
-#include "Monitoring/Survey.h"
 
 #include <limits>
 #include <cmath>
@@ -34,13 +33,12 @@
 namespace OM {
 namespace interventions {
 using namespace OM::util;
-using namespace Monitoring;
 
 vector<VaccineComponent*> VaccineComponent::params;
 ComponentId VaccineComponent::reportComponent = ComponentId_pop;
 
 VaccineComponent::VaccineComponent( ComponentId component, const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
-        HumanInterventionComponent(component, Report::MI_VACCINATION_CTS, Report::MI_VACCINATION_TIMED),
+        HumanInterventionComponent(component),
         type(type),
         decayFunc(DecayFunction::makeObject( vd.getDecay(), "decay" )),
         efficacyB(vd.getEfficacyB().getValue())
@@ -63,12 +61,16 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
     params[component.id] = this;
 }
 
-void VaccineComponent::deploy(Host::Human& human, Deployment::Method method, VaccineLimits vaccLimits) const
+void VaccineComponent::deploy(Host::Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits) const
 {
     bool administered = human.getVaccine().possiblyVaccinate( human, id(), vaccLimits );
     if( administered && VaccineComponent::reportComponent == id() ){
-        Survey::current().addInt( reportMeasure(method), human, 1 );
+        mon::reportMHD( mon::MHD_VACCINATIONS, human, method );
     }
+    if( type == Vaccine::PEV ) mon::reportMHD( mon::MHD_PEV, human, method );
+    else if( type == Vaccine::BSV ) mon::reportMHD( mon::MHD_BSV, human, method );
+    else if( type == Vaccine::TBV ) mon::reportMHD( mon::MHD_TBV, human, method );
+    else assert( false );
 }
 
 Component::Type VaccineComponent::componentType() const
@@ -141,7 +143,7 @@ double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
     double factor = 1.0;
     for( EffectList::const_iterator effect = effects.begin(); effect != effects.end(); ++effect ){
         if( VaccineComponent::getParams(effect->component).type == type ){
-            TimeStep age = TimeStep::simulation - effect->timeLastDeployment;
+            SimTime age = sim::ts1() - effect->timeLastDeployment;  // implies age 1 TS on first use
             double decayFactor = VaccineComponent::getParams(effect->component)
                 .decayFunc->eval( age, effect->hetSample );
             factor *= 1.0 - effect->initialEfficacy * decayFactor;
@@ -177,7 +179,7 @@ bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
     util::streamValidate(effect->initialEfficacy);
     
     effect->numDosesAdministered = numDosesAdministered + 1;
-    effect->timeLastDeployment = TimeStep::simulation;
+    effect->timeLastDeployment = sim::nowOrTs1();
     
     return true;
 }

@@ -24,7 +24,9 @@
 
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Genotypes.h"
 #include "Monitoring/Continuous.h"
+#include "mon/info.h"
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
@@ -38,16 +40,23 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
-TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::EntoData& entoData, int populationSize) {
-  // EntoData contains either a list of at least one anopheles or a list of at
+inline size_t survInocsSize(size_t nGenotypes){
+    return mon::AgeGroup::numGroups() * mon::numCohortSets() * nGenotypes; }
+inline size_t survInocsIndex(size_t ageGroup, size_t cohortSet, size_t genotype){
+    return ageGroup + mon::AgeGroup::numGroups() *
+        (cohortSet + mon::numCohortSets() * genotype);
+}
+
+TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Entomology& entoData, int populationSize) {
+  // Entomology contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
-  const scnXml::EntoData::VectorOptional& vectorData = entoData.getVector();
+  const scnXml::Entomology::VectorOptional& vectorData = entoData.getVector();
 
   TransmissionModel *model;
   if (vectorData.present())
     model = new VectorModel(entoData, vectorData.get(), populationSize);
   else {
-      const scnXml::EntoData::NonVectorOptional& nonVectorData = entoData.getNonVector();
+      const scnXml::Entomology::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL ) ||
@@ -75,14 +84,15 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    stream<<'\t'<<initialisationEIR[mod_nn(TimeStep::simulation, TimeStep::stepsPerYear)];
+    //NOTE: because prevNow may be negative, we can't use mod_nn (hence moduloYearSteps):
+    stream<<'\t'<<initialisationEIR[util::mod(sim::prevNow() / sim::oneTS(), sim::stepsPerYear())];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
 }
 void TransmissionModel::ctsCbKappa (ostream& stream){
     // The latest time-step's kappa:
-    stream<<'\t'<<laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())];
+    stream<<'\t'<<laggedKappa[sim::now().moduloSteps(laggedKappa.size())];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
     stream<<'\t'<<numTransmittingHumans;
@@ -99,30 +109,25 @@ SimulationMode readMode(const string& str){
         // set automatically.
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
-TransmissionModel::TransmissionModel(const scnXml::EntoData& entoData) :
+TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
+                                     size_t nGenotypes) :
     simulationMode(forcedEIR),
     interventionMode(readMode(entoData.getMode())),
     laggedKappa(1, 0.0),        // if using non-vector model, it will resize this
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    adultAge(PerHost::adultAge()),
     tsAdultEntoInocs(0.0),
     tsAdultEIR(0.0),
     surveyInputEIR(0.0),
     surveySimulatedEIR(0.0),
+    adultAge(PerHost::adultAge()),
     numTransmittingHumans(0),
-    tsNumAdults(0),
-    timeStepNumEntoInocs (0)
+    tsNumAdults(0)
 {
-  initialisationEIR.assign (TimeStep::stepsPerYear, 0.0);
-  inoculationsPerAgeGroup.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
-  timeStepEntoInocs.assign (Monitoring::AgeGroup::getNumGroups(), 0.0);
-
-  // noOfAgeGroupsSharedMem must be at least as large as both of these to avoid
-  // memory corruption or extra tests when setting/copying values
-  noOfAgeGroupsSharedMem = std::max(Monitoring::AgeGroup::getNumGroups(), util::SharedGraphics::KappaArraySize);
-
+    initialisationEIR.assign (sim::stepsPerYear(), 0.0);
+    surveyInoculations.assign(survInocsSize(nGenotypes), 0.0);
+    
   using Monitoring::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
   Continuous.registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
@@ -135,32 +140,27 @@ TransmissionModel::~TransmissionModel () {
 
 
 double TransmissionModel::updateKappa (const Population& population) {
-    // We calculate kappa for output and non-vector model, and kappaByAge for
-    // the shared graphics.
-
+    // We calculate kappa for output and the non-vector model.
     double sumWt_kappa= 0.0;
     double sumWeight  = 0.0;
-    kappaByAge.assign (noOfAgeGroupsSharedMem, 0.0);
-    nByAge.assign (noOfAgeGroupsSharedMem, 0);
     numTransmittingHumans = 0;
 
     for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
-        double t = h->perHostTransmission.relativeAvailabilityHetAge(h->getAgeInYears());
-        sumWeight += t;
-        t *= h->withinHostModel->probTransmissionToMosquito( h->getAgeInTimeSteps(),
-                                                             h->getVaccine().getFactor( interventions::Vaccine::TBV ) );
-        sumWt_kappa += t;
-        if( t > 0.0 )
+        //NOTE: calculate availability relative to age at end of time step;
+        // not my preference but consistent with TransmissionModel::getEIR().
+        const double avail = h->perHostTransmission.relativeAvailabilityHetAge(
+            h->age(sim::ts1()).inYears());
+        sumWeight += avail;
+        const double tbvFactor = h->getVaccine().getFactor( interventions::Vaccine::TBV );
+        const double pTransmit = h->withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
+        const double riskTrans = avail * pTransmit;
+        sumWt_kappa += riskTrans;
+        if( riskTrans > 0.0 )
             ++numTransmittingHumans;
-
-        // kappaByAge and nByAge are used in the screensaver only
-        Monitoring::AgeGroup ag = h->getMonitoringAgeGroup();
-        kappaByAge[ag.i()] += t;
-        ++nByAge[ag.i()];
     }
 
 
-    size_t lKMod = mod_nn(TimeStep::simulation, laggedKappa.size());	// now
+    size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
     if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
@@ -172,79 +172,76 @@ double TransmissionModel::updateKappa (const Population& population) {
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
     }
     
-    int tmod = mod_nn(TimeStep::simulation, TimeStep::stepsPerYear);   // now
+    size_t tmod = sim::ts0().moduloYearSteps();
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod == 0) {
+    if (tmod == sim::stepsPerYear() - 1) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
-
-    // Shared graphics: report infectiousness
-    if (mod_nn(TimeStep::simulation, 6) ==  0) {
-        for (size_t i = 0; i < noOfAgeGroupsSharedMem; i++)
-            kappaByAge[i] /= nByAge[i];
-        util::SharedGraphics::copyKappa(&kappaByAge[0]);
-    }
-
-    // Sum up inoculations this timestep
-    for (size_t group = 0; group < timeStepEntoInocs.size(); ++group) {
-        inoculationsPerAgeGroup[group] += timeStepEntoInocs[group];
-        // Reset to zero:
-        timeStepEntoInocs[group] = 0.0;
-    }
-    timeStepNumEntoInocs = 0;
-
+    
     tsAdultEIR = tsAdultEntoInocs / tsNumAdults;
     tsAdultEntoInocs = 0.0;
     tsNumAdults = 0;
-
+    
     surveyInputEIR += initialisationEIR[tmod];
     surveySimulatedEIR += tsAdultEIR;
     
     return laggedKappa[lKMod];  // kappa now
 }
 
-double TransmissionModel::getEIR (Host::Human& human, double ageYears, OM::Monitoring::AgeGroup ageGroup) {
-  /* For the NonVector model, the EIR should just be multiplied by the
-   * availability. For the Vector model, the availability is also required
-   * for internal calculations, but again the EIR should be multiplied by the
-   * availability. */
-  double EIR = calculateEIR (human, ageYears);
-
-  //NOTE: timeStep*EntoInocs will rarely be used despite frequent updates here
-  timeStepEntoInocs[ageGroup.i()] += EIR;
-  timeStepNumEntoInocs ++;
-  if( ageYears >= adultAge ){
-     tsAdultEntoInocs += EIR;
-     tsNumAdults += 1;
-  }
-  util::streamValidate( EIR );
-  return EIR;
+double TransmissionModel::getEIR( Host::Human& human, SimTime age,
+                    double ageYears, vector<double>& EIR )
+{
+    /* For the NonVector model, the EIR should just be multiplied by the
+     * availability. For the Vector model, the availability is also required
+     * for internal calculations, but again the EIR should be multiplied by the
+     * availability. */
+    calculateEIR( human, ageYears, EIR );
+    util::streamValidate( EIR );
+    
+    for( size_t g = 0, nG = EIR.size(); g < nG; ++g ){
+        size_t index = survInocsIndex(human.monAgeGroup().i(), human.cohortSet(), g);
+        surveyInoculations[index] += EIR[g];
+    }
+    
+    double allEIR = vectors::sum( EIR );
+    if( age >= adultAge ){
+        tsAdultEntoInocs += allEIR;
+        tsNumAdults += 1;
+    }
+    return allEIR;
 }
 
 void TransmissionModel::summarize () {
-    Monitoring::Survey& survey = Monitoring::Survey::current();
-    survey.setNumTransmittingHosts(laggedKappa[mod_nn(TimeStep::simulation, laggedKappa.size())]);
-    survey.setAnnualAverageKappa(_annualAverageKappa);
-
-    survey.setInoculationsPerAgeGroup (inoculationsPerAgeGroup);        // Array contents must be copied.
-    inoculationsPerAgeGroup.assign (inoculationsPerAgeGroup.size(), 0.0);
-
-    double duration = (TimeStep::simulation-lastSurveyTime).asInt();
-    if( duration == 0.0 ){
-        if( !( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 ) ){
-            throw TRACED_EXCEPTION_DEFAULT( "non-zero EIR over zero duration??" );
+    mon::reportMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );
+    mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
+    
+    for( size_t ag = 0, nAg = mon::AgeGroup::numGroups(), cs = 0,
+        nCS = mon::numCohortSets(), g = 0, nG = surveyInoculations.size() / (nAg * nCS);
+        ag < nAg; ++ag )
+    {
+        for( cs = 0; cs < nCS; ++cs ){
+            for( g = 0; g < nG; ++ g ){
+                size_t index = survInocsIndex(ag, cs, g);
+                mon::reportMACGF( mon::MVF_INOCS, ag, cs, g, surveyInoculations[index] );
+            }
         }
+    }
+    surveyInoculations.assign( surveyInoculations.size(), 0.0 );
+    
+    double duration = (sim::now() - lastSurveyTime).inSteps();
+    if( duration == 0.0 ){
+        assert( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 );
         duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
     }
-    survey.setInputEIR (surveyInputEIR / duration);
-    survey.setSimulatedEIR (surveySimulatedEIR / duration);
-
+    mon::reportMF( mon::MVF_INPUT_EIR, surveyInputEIR / duration );
+    mon::reportMF( mon::MVF_SIM_EIR, surveySimulatedEIR / duration );
+    
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
-    lastSurveyTime = TimeStep::simulation;
+    lastSurveyTime = sim::now();
 }
 
 
@@ -266,12 +263,7 @@ void TransmissionModel::checkpoint (istream& stream) {
     lastSurveyTime & stream;
     numTransmittingHumans & stream;
     tsNumAdults & stream;
-    inoculationsPerAgeGroup & stream;
-    timeStepEntoInocs & stream;
-    timeStepNumEntoInocs & stream;
-    noOfAgeGroupsSharedMem & stream;
-    kappaByAge & stream;
-    nByAge & stream;
+    surveyInoculations & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     simulationMode & stream;
@@ -289,12 +281,7 @@ void TransmissionModel::checkpoint (ostream& stream) {
     lastSurveyTime & stream;
     numTransmittingHumans & stream;
     tsNumAdults & stream;
-    inoculationsPerAgeGroup & stream;
-    timeStepEntoInocs & stream;
-    timeStepNumEntoInocs & stream;
-    noOfAgeGroupsSharedMem & stream;
-    kappaByAge & stream;
-    nByAge & stream;
+    surveyInoculations & stream;
 }
 
 } }

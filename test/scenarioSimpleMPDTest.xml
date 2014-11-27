@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="32" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_32 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_32">
+<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="test D94" schemaVersion="33" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -24,7 +24,7 @@
     </ageGroup>
   </demography>
   <monitoring name="Test Moni">
-    <continuous duringInit="true" period="1">
+    <continuous duringInit="true" period="1t">
       <option name="input EIR" value="true"/>
       <option name="simulated EIR" value="true"/>
       <option name="human infectiousness" value="true"/>
@@ -57,9 +57,9 @@
       <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
-      <surveyTime>1</surveyTime>
-      <surveyTime>293</surveyTime>
-      <surveyTime>366</surveyTime>
+      <surveyTime>1t</surveyTime>
+      <surveyTime>293t</surveyTime>
+      <surveyTime>366t</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>
@@ -116,10 +116,10 @@
       </nonCompliersEffective>
       <treatmentActions>
         <QN name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
+          <clearInfections stage="blood" timesteps="1t"/>
         </QN>
         <SP name="clear blood-stage infections">
-          <clearInfections stage="blood" timesteps="1"/>
+          <clearInfections stage="blood" timesteps="1t"/>
         </SP>
       </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
@@ -175,6 +175,13 @@
       </anopheles>
     </vector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="neonatal">
+      <!-- 40 × estimated non-Garki bias (this should be the correct threshold
+        for neonatal mortalities data source) -->
+      <deterministic minDensity="7.0951428394982"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
@@ -184,7 +191,9 @@
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="true"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="6t">
+      <NeonatalMortality diagnostic="neonatal"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -207,7 +216,7 @@
         <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="1" latentp="3">
+    <parameters interval="5" iseed="1" latentp="3t">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

@@ -35,7 +35,7 @@ using namespace std;
 namespace OM { namespace PkPd {
     
 LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
-    typeData (&type),
+    typeData(type),
     concentration (0.0)
 {}
 
@@ -47,7 +47,7 @@ LSTMDrug::LSTMDrug(const LSTMDrugType& type) :
 // Overlapping IV doses are not supported.
 
 void LSTMDrug::medicate (double time, double qty, double bodyMass) {
-    double conc = qty / (typeData->getVolumeOfDistribution() * bodyMass);
+    double conc = qty / (typeData.getVolumeOfDistribution() * bodyMass);        // mg / l
     // multimap insertion: is ordered
     DoseMap::iterator lastInserted =
     doses.insert (doses.end(), make_pair (time, DoseParams( conc, 0 )));
@@ -109,20 +109,20 @@ void LSTMDrug::check_split_IV( DoseMap::iterator lastInserted ){
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
+double LSTMDrug::calculateDrugFactor(uint32_t genotype) {
     /* Survival factor of the parasite (this multiplies the parasite density).
     Calculated below for each time interval. */
     double totalFactor = 1.0;
     
     // Make a copy of concetration and use that over today. Don't adjust concentration because this
     // function may be called multiple times (or not at all) in a day.
-    double concentration_today = concentration;
+    double concentration_today = concentration; // mg / l
     
-    const LSTMDrugAllele& drugAllele = typeData->getAllele(proteome_ID);
+    const LSTMDrugPD& drugPD = typeData.getPD(genotype);
     
     // Make sure we have a dose at both time 0 and time 1
-    //TODO: analyse efficiency of this method
     //NOTE: this forces function to be non-const and not thread-safe over the same human (probably not an issue)
+    //TODO(performance): can we use a faster allocator? Or avoid allocating at all?
     if( doses.begin()->first != 0.0 ){
         doses.insert( doses.begin(), make_pair( 0.0, DoseParams() ) );
     }
@@ -139,12 +139,12 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
             // Oral dose
             concentration_today += dose->second.qty;
             
-            totalFactor *= drugAllele.calcFactor( *typeData, concentration_today, time_to_next );
+            totalFactor *= drugPD.calcFactor( typeData, concentration_today, time_to_next );
         } else {
             // IV dose
             assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
             
-            totalFactor *= drugAllele.calcFactorIV( *typeData, concentration_today, time_to_next, dose->second.qty );
+            totalFactor *= drugPD.calcFactorIV( typeData, concentration_today, time_to_next, dose->second.qty );
         }
         
         dose = next_dose;
@@ -158,7 +158,7 @@ double LSTMDrug::calculateDrugFactor(uint32_t proteome_ID) {
 
 bool LSTMDrug::updateConcentration () {
     // Make sure we have a dose at both time 0 and time 1
-    //TODO: analyse efficiency of this method
+    //TODO(performance): can we use a faster allocator? Or avoid allocating at all?
     if( doses.begin()->first != 0.0 ){
         doses.insert( doses.begin(), make_pair( 0.0, DoseParams() ) );
     }
@@ -174,12 +174,12 @@ bool LSTMDrug::updateConcentration () {
         if( dose->second.duration == 0.0 ){
             // Oral dose
             concentration += dose->second.qty;
-            typeData->updateConcentration( concentration, time_to_next );
+            typeData.updateConcentration( concentration, time_to_next );
         } else {
             // IV dose
             assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
             
-            typeData->updateConcentrationIV( concentration, time_to_next, dose->second.qty );
+            typeData.updateConcentrationIV( concentration, time_to_next, dose->second.qty );
         }
         
         dose = next_dose;
@@ -192,6 +192,7 @@ bool LSTMDrug::updateConcentration () {
     DoseMap::iterator firstTomorrow = doses.lower_bound( 1.0 );
     doses.erase( doses.begin(), firstTomorrow );
     
+    //TODO(performance): is there some way we can avoid copying here? Cache all possible simulated days?
     // Now we've removed today's doses, subtract a day from times of tomorrow's doses.
     // Keys are read-only, so we have to create a copy.
     DoseMap newDoses;
@@ -204,7 +205,7 @@ bool LSTMDrug::updateConcentration () {
     util::streamValidate( concentration );
     
     // return true when concentration is no longer significant:
-    return concentration < typeData->getNegligibleConcentration();
+    return concentration < typeData.getNegligibleConcentration();
 }
 
 }

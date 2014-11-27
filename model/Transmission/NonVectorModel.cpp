@@ -21,7 +21,8 @@
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
 #include "Host/Human.h"
-#include "Monitoring/Survey.h" // sim-end timestep
+#include "WithinHost/Genotypes.h"
+#include "mon/info.h"
 #include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
@@ -38,40 +39,43 @@ const double NonVectorModel::min_EIR_mult= 0.01;
 
 const int nYearsWarmupData = 5;
 
-NonVectorModel::NonVectorModel(const scnXml::EntoData& entoData, const scnXml::NonVector& nonVectorData) :
-    TransmissionModel(entoData),
-    nspore( TimeStep::fromDays( nonVectorData.getEipDuration() ) )
+NonVectorModel::NonVectorModel(const scnXml::Entomology& entoData,
+        const scnXml::NonVector& nonVectorData) :
+    TransmissionModel(entoData, 1/*this model doesn't support multiple genotypes*/),
+    nSpore( sim::fromDays( nonVectorData.getEipDuration() ) )
 {
-    laggedKappa.resize( nspore.asInt()+1, 0.0 );
+    laggedKappa.resize( nSpore.inSteps() + 1, 0.0 );
     
-    vector<int> nDays (TimeStep::stepsPerYear, 0);
+    vector<int> nDays (sim::stepsPerYear(), 0);
     //The minimum EIR allowed in the array. The product of the average EIR and a constant.
     double minEIR=min_EIR_mult*averageEIR(nonVectorData);
     
     const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
-    if( daily.size() < static_cast<size_t>(TimeStep::intervalsPerYear.inDays()) )
+    if( daily.size() < static_cast<size_t>(sim::oneYear().inDays()) )
         throw util::xml_scenario_error( "insufficient EIRDaily data for a year" );
     
-    for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
-        double EIRdaily = std::max((double)daily[mpcday], minEIR);
+    for( SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size());
+         mpcday < endDay; mpcday += sim::oneDay() )
+    {
+        double EIRdaily = std::max(static_cast<double>(daily[mpcday.inDays()]), minEIR);
         
-        // Index 1 (not 0) of initialisationEIR refers to the EIR affecting the
+        // Index 0 of initialisationEIR refers to the EIR affecting the
         // first day(s) of the year. Correspondingly, the first 1 or 5 values
         // of EIRDaily affect this (1- or 5-day) time-step.
-        size_t i1 = (mpcday / TimeStep::interval + 1) % TimeStep::stepsPerYear;
+        size_t i = mod_nn(mpcday.inSteps(), sim::stepsPerYear());
         
-        nDays[i1]++;
-        initialisationEIR[i1] += EIRdaily;
+        nDays[i] += 1;
+        initialisationEIR[i] += EIRdaily;
     }
     
     // Calculate total annual EIR
     // divide by number of records assigned to each interval (usually one per day)
-    for (TimeStep j(0);j<TimeStep::intervalsPerYear; ++j) {
-        initialisationEIR[j.asInt()] *= TimeStep::interval / (double)nDays[j.asInt()];
-        annualEIR += initialisationEIR[j.asInt()];
+    for( size_t indTS = 0; indTS < sim::stepsPerYear(); indTS += 1 ){
+        initialisationEIR[indTS] *= sim::oneTS().inDays() / static_cast<double>( nDays[indTS] );
+        annualEIR += initialisationEIR[indTS];
     }
     
-    initialKappa.assign( TimeStep::fromYears(nYearsWarmupData).asInt(), 0.0 );
+    initialKappa.assign( sim::fromYearsI(nYearsWarmupData).inSteps(), 0.0 );
 }
 
 NonVectorModel::~NonVectorModel () {}
@@ -92,7 +96,7 @@ void NonVectorModel::scaleEIR (double factor){
     annualEIR = vectors::sum( initialisationEIR );
 }
 #if 0
-void NonVectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
+void NonVectorModel::scaleXML_EIR (scnXml::Entomology& ed, double factor) const{
     assert( ed.getNonVector().present() );
     scnXml::NonVector::EIRDailySequence& daily = ed.getNonVector().get().getEIRDaily();
     
@@ -105,31 +109,30 @@ void NonVectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const{
 #endif
 
 
-TimeStep NonVectorModel::minPreinitDuration (){
+SimTime NonVectorModel::minPreinitDuration (){
     if( interventionMode == forcedEIR ){
-        return TimeStep(0);
+        return sim::zero();
     }
     // nYearsWarmupData years for data collection, 50 years stabilization
-    return TimeStep::fromYears(50) + TimeStep::fromYears(nYearsWarmupData);
+    return sim::fromYearsI(50) + sim::fromYearsI(nYearsWarmupData);
 }
-TimeStep NonVectorModel::expectedInitDuration (){
-    return TimeStep(0);
+SimTime NonVectorModel::expectedInitDuration (){
+    return sim::zero();
 }
-TimeStep NonVectorModel::initIterate (){
+SimTime NonVectorModel::initIterate (){
     simulationMode = interventionMode;
     if( simulationMode != dynamicEIR ){
-        return TimeStep(0);
+        return sim::zero();
     }
     
     // initialKappa is used in calculateEIR
-    size_t yearLen = TimeStep::fromYears(1).asInt();
-    assert( initialKappa.size() >= yearLen );
-    assert( mod_nn(initialKappa.size(), yearLen) == 0 );
-    for( size_t i=yearLen; i<initialKappa.size(); ++i ){
-        initialKappa[mod_nn(i , yearLen )] += initialKappa[ i ];
+    assert( initialKappa.size() >= sim::stepsPerYear() );
+    assert( mod_nn(initialKappa.size(), sim::stepsPerYear()) == 0 );
+    for( size_t i=sim::stepsPerYear(); i<initialKappa.size(); ++i ){
+        initialKappa[mod_nn(i , sim::stepsPerYear() )] += initialKappa[ i ];
     }
-    double factor = static_cast<double>(yearLen) / static_cast<double>(initialKappa.size());
-    initialKappa.resize( yearLen );
+    double factor = static_cast<double>(sim::stepsPerYear()) / static_cast<double>(initialKappa.size());
+    initialKappa.resize( sim::stepsPerYear() );
     for (size_t  i = 0; i < initialKappa.size(); ++i) {
         initialKappa[ i ] *= factor;
         // error check:
@@ -137,23 +140,23 @@ TimeStep NonVectorModel::initIterate (){
             throw TRACED_EXCEPTION ("initialKappa is invalid", util::Error::InitialKappa);
     }
     
-    return TimeStep(0); // nothing to do
+    return sim::zero(); // nothing to do
 }
 
 void NonVectorModel::changeEIRIntervention (
         const scnXml::NonVector& nonVectorData)
 {
-    // Note: requires TimeStep::interventionPeriod >= 0, but this can only be
+    // Note: requires sim::intervNow() >= sim::zero(), but this can only be
     // called in intervention period anyway.
   simulationMode = transientEIRknown;
   
-  if (nspore != TimeStep::fromDays( nonVectorData.getEipDuration() ))
+  if (nSpore != sim::fromDays( nonVectorData.getEipDuration() ))
       throw util::xml_scenario_error ("change-of-EIR intervention cannot change EIP duration");
   
   const scnXml::NonVector::EIRDailySequence& daily = nonVectorData.getEIRDaily();
-  vector<int> nDays ((daily.size()-1)/TimeStep::interval + 1, 0);
+  vector<int> nDays( sim::fromDays(daily.size()-1).inSteps() + 1, 0 );
   interventionEIR.assign (nDays.size(), 0.0);
-  size_t required_days = static_cast<size_t>(Monitoring::Survey::getFinalTimestep().inDays()+1);
+  size_t required_days = static_cast<size_t>(mon::finalSurveyTime().inDays()+1);
   if (daily.size() < required_days) {
     cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size()
         << "\nRequired: " << required_days << endl;
@@ -161,18 +164,20 @@ void NonVectorModel::changeEIRIntervention (
   }
   //The minimum EIR allowed in the array. The product of the average EIR and a constant.
   double minEIR=min_EIR_mult*averageEIR(nonVectorData);
-  for (size_t mpcday = 0; mpcday < daily.size(); ++mpcday) {
-    double EIRdaily = std::max((double)daily[mpcday], minEIR);
+  for( SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size());
+      mpcday < endDay; mpcday += sim::oneDay() )
+  {
+    double EIRdaily = std::max(static_cast<double>(daily[mpcday.inDays()]), minEIR);
     
-    // istep is the time period to which the day is assigned.  The result of the
-    // division is automatically rounded down to the next integer.
-    size_t istep = mpcday / TimeStep::interval;
+    // istep is the time period to which the day is assigned.
+    size_t istep = mpcday.inSteps();
     nDays[istep]++;
     interventionEIR[istep] += EIRdaily;
   }
   // divide by number of records assigned to each interval (usually one per day)
-  for (size_t i = 0; i < interventionEIR.size(); ++i)
-    interventionEIR[i] *= TimeStep::interval / nDays[i];
+  for (size_t i = 0; i < interventionEIR.size(); ++i){
+    interventionEIR[i] *= sim::oneTS().inDays() / static_cast<double>(nDays[i]);
+  }
   
   // I've no idea what this should be, so until someone asks it can be NaN.
   // It was -9.99 and later 0.0. It could of course be recalculated from interventionEIR.
@@ -198,50 +203,53 @@ void NonVectorModel::update (const Population& population) {
     double currentKappa = TransmissionModel::updateKappa( population );
     
     if( simulationMode == forcedEIR ){
-        initialKappa[mod_nn(TimeStep::simulation , initialKappa.size() )] = currentKappa;
+        initialKappa[sim::ts1().moduloSteps(initialKappa.size())] = currentKappa;
     }
 }
 
 
-double NonVectorModel::calculateEIR(Host::Human& human, double ageYears){
-  // where the full model, with estimates of human mosquito transmission is in use, use this:
-  double eir;
-  switch (simulationMode) {
-    case forcedEIR:
-      eir = initialisationEIR[mod_nn(TimeStep::simulation , TimeStep::stepsPerYear)];
-      break;
-    case transientEIRknown:
-      // where the EIR for the intervention phase is known, obtain this from
-      // the interventionEIR array (why -1? See interventionEIR declaration)
-      eir = interventionEIR[TimeStep::interventionPeriod.asInt() - 1];
-      break;
-    case dynamicEIR:
-      eir = initialisationEIR[mod_nn(TimeStep::simulation , TimeStep::stepsPerYear)];
-      if (TimeStep::interventionPeriod >= TimeStep(0)) {
-	  // we modulate the initialization based on the human infectiousness  timesteps ago in the
-	  // simulation relative to infectiousness at the same time-of-year, pre-intervention.
-	  // nspore gives the sporozoite development delay.
-	eir *=
-            laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())] /
-            initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)];
-      }
-      break;
-    default:	// Anything else.. don't continue silently
-      throw util::xml_scenario_error ("Invalid simulation mode");
-  }
-#ifndef NDEBUG
-  if (!(boost::math::isfinite)(eir)) {
-    ostringstream msg;
-    msg << "Error: non-vect eir is: " << eir
-	<< "\nlaggedKappa:\t"
-        << laggedKappa[mod_nn(TimeStep::simulation-nspore, laggedKappa.size())]
-	<< "\ninitialKappa:\t"
-        << initialKappa[mod_nn(TimeStep::simulation-nspore, TimeStep::stepsPerYear)]
-        << endl;
-    throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
-  }
-#endif
-  return eir * human.perHostTransmission.relativeAvailabilityHetAge (ageYears);
+double NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<double>& EIR){
+    EIR.resize( 1 );    // no support for per-genotype tracking in this model (possible, but we're lazy)
+    // where the full model, with estimates of human mosquito transmission is in use, use this:
+    switch (simulationMode) {
+        case forcedEIR:
+        EIR[0] = initialisationEIR[sim::ts0().moduloYearSteps()];
+        break;
+        case transientEIRknown:
+        // where the EIR for the intervention phase is known, obtain this from
+        // the interventionEIR array
+        EIR[0] = interventionEIR[sim::intervNow().inSteps()];
+        break;
+        case dynamicEIR:
+        EIR[0] = initialisationEIR[sim::ts0().moduloYearSteps()];
+        if (sim::intervNow() >= sim::zero()) {
+            // we modulate the initialization based on the human infectiousness time steps ago in the
+            // simulation relative to infectiousness at the same time-of-year, pre-intervention.
+            // nspore gives the sporozoite development delay.
+            size_t t = (sim::ts1()-nSpore).inSteps();
+            EIR[0] *=
+                laggedKappa[mod_nn(t, laggedKappa.size())] /
+                initialKappa[mod_nn(t, sim::stepsPerYear())];
+        }
+        break;
+        default:	// Anything else.. don't continue silently
+        throw util::xml_scenario_error ("Invalid simulation mode");
+    }
+    #ifndef NDEBUG
+    if (!(boost::math::isfinite)(EIR[0])) {
+        size_t t = (sim::ts1()-nSpore).inSteps();
+        ostringstream msg;
+        msg << "Error: non-vect eir is: " << EIR[0]
+            << "\nlaggedKappa:\t"
+            << laggedKappa[mod_nn(t, laggedKappa.size())]
+            << "\ninitialKappa:\t"
+            << initialKappa[mod_nn(t, sim::stepsPerYear())]
+            << endl;
+        throw TRACED_EXCEPTION(msg.str(),util::Error::InitialKappa);
+    }
+    #endif
+    EIR[0] *= human.perHostTransmission.relativeAvailabilityHetAge (ageYears);
+    return EIR[0];
 }
 
 
@@ -265,13 +273,13 @@ double NonVectorModel::averageEIR (const scnXml::NonVector& nonVectorData) {
 
 void NonVectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
-    nspore & stream;
+    nSpore & stream;
     interventionEIR & stream;
     initialKappa & stream;
 }
 void NonVectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
-    nspore & stream;
+    nSpore & stream;
     interventionEIR & stream;
     initialKappa & stream;
 }

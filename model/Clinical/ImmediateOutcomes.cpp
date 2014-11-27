@@ -19,9 +19,9 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
-#include "Monitoring/Survey.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -29,204 +29,15 @@
 namespace OM {
 namespace Clinical {
 using namespace ::OM::util;
-using namespace Monitoring;
-bool useDiagnosticUC = false;
-double ClinicalImmediateOutcomes::probGetsTreatment[Regimen::NUM];
-double ClinicalImmediateOutcomes::probParasitesCleared[Regimen::NUM];
-double ClinicalImmediateOutcomes::cureRate[Regimen::NUM];
-WithinHost::TreatmentId ClinicalImmediateOutcomes::treatments[Regimen::NUM];
+
+// These parameters are set by setHealthSystem() and do not need checkpointing.
+double ImmediateOutcomes::cureRateUCOfficial[ImmediateOutcomes::NumCaseTypes];
+double ImmediateOutcomes::cureRateUCSelfTreat[NumCaseTypes];
+WithinHost::TreatmentId ImmediateOutcomes::treatmentUC[NumCaseTypes];
+bool ImmediateOutcomes::useDiagnosticUC = false;
 
 
-// -----  static init  -----
-
-void ClinicalImmediateOutcomes::initParameters () {
-    if (util::ModelOptions::option (util::INCLUDES_PK_PD))
-        throw util::xml_scenario_error ("OldCaseManagement is not compatible with INCLUDES_PK_PD");
-}
-
-void ClinicalImmediateOutcomes::setHealthSystem (const scnXml::HealthSystem& healthSystem) {
-    if ( !healthSystem.getImmediateOutcomes().present() )
-        throw util::xml_scenario_error ("Expected ImmediateOutcomes section in healthSystem data (initial or intervention)");
-
-    setParasiteCaseParameters (healthSystem.getImmediateOutcomes().get());
-}
-
-
-// -----  construction and destruction  -----
-
-ClinicalImmediateOutcomes::ClinicalImmediateOutcomes (double tSF) :
-        _tLastTreatment (TimeStep::never),
-        _treatmentSeekingFactor (tSF)
-{}
-ClinicalImmediateOutcomes::~ClinicalImmediateOutcomes() {
-}
-
-
-// -----  other methods  -----
-
-void ClinicalImmediateOutcomes::massDrugAdministration( Human& human,
-        Monitoring::ReportMeasureI screeningReport,
-        Monitoring::ReportMeasureI drugReport )
-{
-    assert(false);      // should never be called
-}
-
-void ClinicalImmediateOutcomes::doClinicalUpdate (Human& human, double ageYears) {
-    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( ageYears );
-    Episode::State pgState = static_cast<Episode::State>( pg.state );
-
-    if (pgState & Episode::MALARIA) {
-        if (pgState & Episode::COMPLICATED){
-            severeMalaria (human, pgState, ageYears, _doomed);
-        }else if (indirectMortBugfix || !pg.indirectMortality) {
-            // NOTE: the "not indirect mortality" bit is a historical accident.
-            // Validity is debatable, but there's no point changing now.
-            // (This does affect tests.)
-            uncomplicatedEvent (human, pgState);
-        }
-
-    } else if (pgState & Episode::SICK) { // sick but not from malaria
-        uncomplicatedEvent (human, pgState);
-    }
-    
-    if (pg.indirectMortality && _doomed == 0)
-        _doomed = -TimeStep::interval;
-    
-    if( _tLastTreatment == TimeStep::simulation ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
-    }
-    if( pgState & Episode::SICK ){
-        human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_BOUT );
-    }
-}
-
-
-// -----  private  -----
-
-void ClinicalImmediateOutcomes::uncomplicatedEvent (
-    Human& human,
-    Episode::State pgState
-) {
-    latestReport.update (human, Episode::State( pgState ) );
-
-    Regimen::Type regimen = (_tLastTreatment + Episode::healthSystemMemory > TimeStep::simulation)
-                            ? Regimen::UC2 : Regimen::UC
-                            ;
-    
-    if ( probGetsTreatment[regimen]*_treatmentSeekingFactor > random::uniform_01() ) {
-        if( useDiagnosticUC ){
-            Survey::current().addInt( Report::MI_TREAT_DIAGNOSTICS, human, 1 );
-            if( !human.withinHostModel->diagnosticDefault() )
-                return; // negative outcome: no treatment
-        }
-        _tLastTreatment = TimeStep::simulation;
-        if ( regimen == Regimen::UC )
-            Survey::current().addInt( Report::MI_TREATMENTS_1, human, 1 );
-        if ( regimen == Regimen::UC2 )
-            Survey::current().addInt( Report::MI_TREATMENTS_2, human, 1 );
-
-        if (probParasitesCleared[regimen] > random::uniform_01()) {
-            // Could report Episode::RECOVERY to latestReport,
-            // but we don't report out-of-hospital recoveries anyway.
-            human.withinHostModel->treatment( human, treatments[regimen] );
-        } else {
-            // No change in parasitological status: treated outside of hospital
-        }
-        if( human.withinHostModel->optionalPqTreatment() )
-            Survey::current().addInt( Report::MI_PQ_TREATMENTS, human, 1 );
-    } else {
-        // No change in parasitological status: non-treated
-    }
-}
-
-void ClinicalImmediateOutcomes::severeMalaria (
-    Human &human,
-    Episode::State pgState,
-    double ageYears,
-    int& doomed
-) {
-    Regimen::Type regimen = Regimen::SEVERE;
-
-    double p2, p3, p4, p5, p6, p7;
-    // Probability of getting treatment (only part which is case managment):
-    p2 = probGetsTreatment[regimen] * _treatmentSeekingFactor;
-    // Probability of getting cured after getting treatment:
-    p3 = cureRate[regimen];
-    // p4 is the hospital case-fatality rate from Tanzania
-    p4 = caseFatality (ageYears);
-    // p5 here is the community threshold case-fatality rate
-    p5 = getCommunityCaseFatalityRate (p4);
-    // p6 is P(seq) for treated patients
-    p6 = pSequelaeInpatient (ageYears);
-    // p7 is P(seq) when parasites aren't cleared
-    p7 = p6;
-
-    double q[9];
-    // Community deaths
-    q[0] = (1 - p2) * p5;
-    // Community sequelae
-    q[1] = q[0] + (1 - p2) * (1 - p5) * p7;
-    // Community survival
-    q[2] = q[1] + (1 - p2) * (1 - p5) * (1 - p7);
-    // Parasitological failure deaths
-    q[3] = q[2] + p2 * (1 - p3) * p5;
-    // Parasitological failure sequelae
-    q[4] = q[3] + p2 * (1 - p3) * (1 - p5) * p7;
-    // Parasitological failure survivors
-    q[5] = q[4] + p2 * (1 - p3) * (1 - p5) * (1 - p7);
-    // Parasitological success deaths
-    q[6] = q[5] + p2 * p3 * p4;
-    // Parasitological success sequelae
-    q[7] = q[6] + p2 * p3 * (1 - p4) * p6;
-    // Parasitological success survival
-    q[8] = q[7] + p2 * p3 * (1 - p4) * (1 - p6);
-    /*
-    if (q(5).lt.1) stop
-    NOT TREATED
-    */
-
-    double prandom = random::uniform_01();
-
-    //NOTE: no diagnostics or PQ here; for now we only have severe when the patient dies
-    if (q[2] <= prandom) { // Patient gets in-hospital treatment
-        _tLastTreatment = TimeStep::simulation;
-        Survey::current().addInt( Report::MI_TREATMENTS_3, human, 1 );
-
-        Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
-        if (q[5] <= prandom) { // Parasites cleared (treated, in hospital)
-            human.withinHostModel->treatment( human, treatments[Regimen::SEVERE] );
-            if (q[6] > prandom) {
-                latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
-                doomed  = 4;
-            } else if (q[7] > prandom) { // Patient recovers, but with sequelae (don't report full recovery)
-                latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
-            } else { /*if (q[8] > prandom)*/
-                latestReport.update (human, Episode::State (stateTreated | Episode::RECOVERY));
-            }
-        } else { // Treated but parasites not cleared (in hospital)
-            if (q[3] > prandom) {
-                latestReport.update (human, Episode::State (stateTreated | Episode::DIRECT_DEATH));
-                doomed  = 4;
-            } else if (q[4] > prandom) { // sequelae without parasite clearance
-                latestReport.update (human, Episode::State (stateTreated | Episode::SEQUELAE));
-            } else { /*if (q[5] > prandom)*/
-                // No change in parasitological status: in-hospital patients
-                latestReport.update (human, pgState);
-            }
-        }
-    } else { // Not treated
-        if (q[0] > prandom) {
-            latestReport.update (human, Episode::State (pgState | Episode::DIRECT_DEATH));
-            doomed  = 4;
-        } else if (q[1] > prandom) {
-            latestReport.update (human, Episode::State (pgState | Episode::SEQUELAE));
-        } else { /*if (q[2] > prandom)*/
-            // No change in parasitological status: non-treated
-            latestReport.update (human, pgState);
-        }
-    }
-}
-
+// ———  static, utility functions  ———
 
 double getHealthSystemACRByName (const scnXml::TreatmentDetails& td, const string& drug)
 {
@@ -275,61 +86,49 @@ WithinHost::TreatmentId getHealthSystemTreatmentByName( const scnXml::TreatmentA
     return WithinHost::WHInterface::addTreatment( elt.get() );
 }
 
-void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmediateOutcomes& hsioData)
-{
-    const string &firstLine = hsioData.getDrugRegimen().getFirstLine(),
-        &secondLine = hsioData.getDrugRegimen().getSecondLine(),
-        &inpatient = hsioData.getDrugRegimen().getInpatient();
-    
-    // --- calculate cureRate ---
-    
-    //We get the ACR depending on the name of firstLineDrug.
-    cureRate[Regimen::UC] = getHealthSystemACRByName (hsioData.getInitialACR(), firstLine);
-    
-    //Calculate curerate 0
-    const double pSeekOfficialCareUncomplicated1 = hsioData.getPSeekOfficialCareUncomplicated1().getValue();
-    const double pSelfTreatment = hsioData.getPSelfTreatUncomplicated().getValue();
-    if (pSeekOfficialCareUncomplicated1 + pSelfTreatment > 0) {
-        double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
 
-        cureRate[Regimen::UC] = (cureRate[Regimen::UC] * pSeekOfficialCareUncomplicated1
-                       + cureRateSelfTreatment * pSelfTreatment)
-                      / (pSeekOfficialCareUncomplicated1 + pSelfTreatment);
+// ———  static, init  ———
+
+void ImmediateOutcomes::setHealthSystem (const scnXml::HSImmediateOutcomes& hsDescription) {
+    const string &firstLine = hsDescription.getDrugRegimen().getFirstLine(),
+        &secondLine = hsDescription.getDrugRegimen().getSecondLine(),
+        &inpatient = hsDescription.getDrugRegimen().getInpatient();
+    
+    // ———  calculate probability of getting treatment  ———
+
+    double accessUCOfficial1 = hsDescription.getPSeekOfficialCareUncomplicated1().getValue();
+    double accessUCOfficial2 = hsDescription.getPSeekOfficialCareUncomplicated2().getValue();
+    // Note: this asymmetry is historical, and probably matters little:
+    accessUCSelfTreat[FirstLine] = hsDescription.getPSelfTreatUncomplicated().getValue();
+    accessUCSelfTreat[SecondLine] = 0.0;
+    accessUCAny[FirstLine] = accessUCOfficial1 + accessUCSelfTreat[FirstLine];
+    accessUCAny[SecondLine] = accessUCOfficial1 + accessUCSelfTreat[SecondLine];
+    accessSevere = hsDescription.getPSeekOfficialCareSevere().getValue();
+    
+    if( accessUCOfficial1 < 0.0 || accessUCSelfTreat[FirstLine] < 0.0 || accessUCAny[FirstLine] > 1.0 ||
+        accessUCOfficial2 < 0.0 || accessUCSelfTreat[SecondLine] < 0.0 || accessUCAny[SecondLine] > 1.0 ||
+        accessSevere < 0.0 || accessSevere > 1.0 )
+    {
+        throw util::xml_scenario_error ("healthSystem: "
+            "pSeekOfficialCareUncomplicated1 and pSelfTreatUncomplicated must be"
+            " at least 0 and their sum must be at most 1, and"
+            "pSeekOfficialCareUncomplicated2 and pSeekOfficialCareSevere must "
+            "be in range [0,1]");
     }
+    
+    // ———  calculate probability of clearing parasites  ———
+    
+    const double complianceFirstLine = getHealthSystemACRByName (hsDescription.getCompliance(), firstLine);
+    const double complianceSecondLine = getHealthSystemACRByName (hsDescription.getCompliance(), secondLine);
 
-    cureRate[Regimen::UC2] = getHealthSystemACRByName (hsioData.getInitialACR(), secondLine);
+    const double cureRateFirstLine = getHealthSystemACRByName (hsDescription.getInitialACR(), firstLine);
+    const double cureRateSecondLine = getHealthSystemACRByName (hsDescription.getInitialACR(), secondLine);
 
-    cureRate[Regimen::SEVERE] = getHealthSystemACRByName (hsioData.getInitialACR(), inpatient);
+    const double nonCompliersEffectiveFirstLine = getHealthSystemACRByName (hsDescription.getNonCompliersEffective(), firstLine);
+    const double nonCompliersEffectiveSecondLine = getHealthSystemACRByName (hsDescription.getNonCompliersEffective(), secondLine);
 
-
-    // --- calculate probGetsTreatment ---
-
-    probGetsTreatment[Regimen::UC] = hsioData.getPSeekOfficialCareUncomplicated1().getValue() +
-            hsioData.getPSelfTreatUncomplicated().getValue();
-    probGetsTreatment[Regimen::UC2] = hsioData.getPSeekOfficialCareUncomplicated2().getValue();
-    probGetsTreatment[Regimen::SEVERE] = hsioData.getPSeekOfficialCareSevere().getValue();
-    if( !(
-        pSeekOfficialCareUncomplicated1 >= 0.0 && pSelfTreatment >= 0.0
-        && probGetsTreatment[Regimen::UC] <= 1.0
-        && probGetsTreatment[Regimen::UC2] >= 0.0 && probGetsTreatment[Regimen::UC2] <= 1.0
-        && probGetsTreatment[Regimen::SEVERE] >= 0.0 && probGetsTreatment[Regimen::SEVERE] <= 1.0
-    ) ){
-        throw util::xml_scenario_error ("healthSystem: pSeekOfficialCareXXX and pSelfTreatUncomplicated must be in range [0,1]");
-    }
-
-    // --- calculate probParasitesCleared ---
-
-    const double complianceFirstLine = getHealthSystemACRByName (hsioData.getCompliance(), firstLine);
-    const double complianceSecondLine = getHealthSystemACRByName (hsioData.getCompliance(), secondLine);
-
-    const double cureRateFirstLine = getHealthSystemACRByName (hsioData.getInitialACR(), firstLine);
-    const double cureRateSecondLine = getHealthSystemACRByName (hsioData.getInitialACR(), secondLine);
-
-    const double nonCompliersEffectiveFirstLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), firstLine);
-    const double nonCompliersEffectiveSecondLine = getHealthSystemACRByName (hsioData.getNonCompliersEffective(), secondLine);
-
-    const double complianceSelfTreatment = hsioData.getCompliance().getSelfTreatment().getValue();
-    const double cureRateSelfTreatment = hsioData.getInitialACR().getSelfTreatment().getValue();
+    const double complianceSelfTreatment = hsDescription.getCompliance().getSelfTreatment().getValue();
+    const double cureRateSelfTreatment = hsDescription.getInitialACR().getSelfTreatment().getValue();
     if( !(
         complianceSelfTreatment >= 0.0 && complianceSelfTreatment <= 1.0
         && cureRateSelfTreatment >= 0.0 && cureRateSelfTreatment <= 1.0
@@ -338,60 +137,76 @@ void ClinicalImmediateOutcomes::setParasiteCaseParameters (const scnXml::HSImmed
     }
     
     
-    //calculate probParasitesCleared 0
-    if ( (pSeekOfficialCareUncomplicated1 + pSelfTreatment) > 0) {
-        probParasitesCleared[Regimen::UC] = (pSeekOfficialCareUncomplicated1
-                                   * (complianceFirstLine * cureRateFirstLine
-                                      + (1 - complianceFirstLine) * nonCompliersEffectiveFirstLine)
-                                   + pSelfTreatment
-                                   * (complianceSelfTreatment * cureRateSelfTreatment
-                                      + (1 - complianceSelfTreatment) * nonCompliersEffectiveFirstLine))
-                                  / (pSeekOfficialCareUncomplicated1 + pSelfTreatment);
-    } else {
-        probParasitesCleared[Regimen::UC] = 0;
-    }
-
-    //calculate probParasitesCleared 1
-    probParasitesCleared[Regimen::UC2] = complianceSecondLine * cureRateSecondLine
-                              + (1 - complianceSecondLine)
-                              * nonCompliersEffectiveSecondLine;
-
-    //calculate probParasitesCleared 2 : cool :)
-    probParasitesCleared[Regimen::SEVERE] = 0;
+    cureRateUCOfficial[FirstLine] = complianceFirstLine * cureRateFirstLine
+            + (1 - complianceFirstLine) * nonCompliersEffectiveFirstLine;
+    cureRateUCOfficial[SecondLine] = complianceSecondLine * cureRateSecondLine
+            + (1 - complianceSecondLine) * nonCompliersEffectiveSecondLine;
+    cureRateUCSelfTreat[FirstLine] = complianceSelfTreatment * cureRateSelfTreatment
+            + (1 - complianceSelfTreatment) * nonCompliersEffectiveFirstLine;
+    cureRateUCSelfTreat[SecondLine] = 0.0;      // as with access, this is a historical asymmetry
     
-    treatments[Regimen::UC] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), firstLine);
-    if( secondLine == firstLine )
-        treatments[Regimen::UC2] = treatments[Regimen::UC];
-    else
-        treatments[Regimen::UC2] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), secondLine);
-    if( inpatient == firstLine )
-        treatments[Regimen::SEVERE] = treatments[Regimen::UC];
-    else if( inpatient == secondLine )
-        treatments[Regimen::SEVERE] = treatments[Regimen::UC2];
-    else
-        treatments[Regimen::SEVERE] = getHealthSystemTreatmentByName(hsioData.getTreatmentActions(), inpatient);
+    cureRateSevere = getHealthSystemACRByName (hsDescription.getInitialACR(), inpatient);
     
-    useDiagnosticUC = hsioData.getUseDiagnosticUC();
+    treatmentUC[FirstLine] = getHealthSystemTreatmentByName(hsDescription.getTreatmentActions(), firstLine);
     
-    if( hsioData.getPrimaquine().present() ){
+    if( secondLine == firstLine ) treatmentUC[SecondLine] = treatmentUC[FirstLine];
+    else treatmentUC[SecondLine] = getHealthSystemTreatmentByName(hsDescription.getTreatmentActions(), secondLine);
+    
+    if( inpatient == firstLine ) treatmentSevere = treatmentUC[FirstLine];
+    else if( inpatient == secondLine ) treatmentSevere = treatmentUC[SecondLine];
+    else treatmentSevere = getHealthSystemTreatmentByName(hsDescription.getTreatmentActions(), inpatient);
+    
+    useDiagnosticUC = hsDescription.getUseDiagnosticUC();
+    
+    if( hsDescription.getPrimaquine().present() ){
         if( !ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
             throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
-        WithinHost::WHVivax::setHSParameters( hsioData.getPrimaquine().get() );
+        WithinHost::WHVivax::setHSParameters( hsDescription.getPrimaquine().get() );
     }
 }
 
 
-// -----  protected  -----
+// ———  per-human, update  ———
 
-void ClinicalImmediateOutcomes::checkpoint (istream& stream) {
-    ClinicalModel::checkpoint (stream);
-    _tLastTreatment & stream;
-    _treatmentSeekingFactor & stream;
-}
-void ClinicalImmediateOutcomes::checkpoint (ostream& stream) {
-    ClinicalModel::checkpoint (stream);
-    _tLastTreatment & stream;
-    _treatmentSeekingFactor & stream;
+void ImmediateOutcomes::uncomplicatedEvent (
+    Human& human,
+    Episode::State pgState
+) {
+    latestReport.update (human, Episode::State( pgState ) );
+
+    // If last treatment prescribed was in recent memory, consider second line.
+    CaseType regimen = (m_tLastTreatment + healthSystemMemory > sim::ts0()) ?
+        SecondLine : FirstLine;
+    
+    double x = random::uniform_01();
+    if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
+        // UC1: official care OR self treatment
+        // UC2: official care only
+        
+        if( useDiagnosticUC ){
+            mon::reportMHI( mon::MHT_TREAT_DIAGNOSTICS, human, 1 );
+            if( !human.withinHostModel->diagnosticResult(WithinHost::diagnostics::monitoringDiagnostic()) )
+                return; // negative outcome: no treatment
+        }
+        
+        m_tLastTreatment = sim::ts0();
+        mon::reportMHI( measures[regimen], human, 1 );
+        
+        double p = ( x < accessUCSelfTreat[regimen] * m_treatmentSeekingFactor ) ?
+            cureRateUCSelfTreat[regimen] : cureRateUCOfficial[regimen];
+        if( random::bernoulli(p) ){
+            // Could report Episode::RECOVERY to latestReport,
+            // but we don't report out-of-hospital recoveries anyway.
+            human.withinHostModel->treatment( human, treatmentUC[regimen] );
+        } else {
+            // No change in parasitological status: treated outside of hospital
+        }
+        
+        if( human.withinHostModel->optionalPqTreatment() )
+            mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
+    } else {
+        // No change in parasitological status: non-treated
+    }
 }
 
 }

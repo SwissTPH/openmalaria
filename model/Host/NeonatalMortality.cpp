@@ -21,12 +21,15 @@
 #include "Host/NeonatalMortality.h"
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
+#include "WithinHost/Diagnostic.h"
 #include "util/random.h"
+#include "util/CommandLine.h"
+#include "schema/healthSystem.h"
 
 #include <cmath>
 
 namespace OM { namespace Host {
-    using namespace OM::util;
+using namespace OM::util;
 
 //Goodman estimated for neonatal mortality due to malaria in pregnancy
 const double gEst = 0.011;
@@ -47,10 +50,30 @@ double riskFromMaternalInfection = 0.0;
 /// Array of stored prevalences of mothers over last 5 months
 std::vector<double> prevByGestationalAge;
 
+/// Lower and upper bounds for potential mothers (as in model description)
+SimTime ageLb = sim::fromYearsI(20), ageUb = sim::fromYearsI(25);
 
-void NeonatalMortality::init() {
-    TimeStep timeStepsPer5Months( 150 / TimeStep::interval );
-    prevByGestationalAge.assign(timeStepsPer5Months.asInt(), 0.0);
+// The model is parameterised based on patency levels; the diagnostic
+// used for this may be important.
+const WithinHost::Diagnostic* neonatalDiagnostic = 0;
+
+
+void NeonatalMortality::init( const scnXml::Clinical& clinical ){
+    SimTime fiveMonths = sim::fromDays( 5 * 30 );
+    prevByGestationalAge.assign( fiveMonths.inSteps(), 0.0 );
+    
+    if( clinical.getNeonatalMortality().present() ){
+        neonatalDiagnostic = &WithinHost::diagnostics::get(
+            clinical.getNeonatalMortality().get().getDiagnostic() );
+    }else{
+        //NOTE: this is a compatibility option for older scenarios
+        if( CommandLine::option( CommandLine::DEPRECATION_WARNINGS ) ){
+            cerr << "Deprecation warning: specification of the diagnostic "
+                "used by the Neonatal Mortality model is recommended "
+                "(model/clinical/neonatalMortality)" << endl;
+        }
+        neonatalDiagnostic = &WithinHost::diagnostics::monitoringDiagnostic();
+    }
 }
 
 void NeonatalMortality::staticCheckpoint (istream& stream) {
@@ -73,20 +96,20 @@ void NeonatalMortality::update (const Population& population) {
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
     for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
-        //NOTE: this is based on last time-step's parasite densities but this
-        // time-step's age, which is a bit strange (though not very significant).
-        double ageYears = iter->getAgeInYears();
+        // diagnosticDefault() gives patency after the last time step's
+        // update, so it's appropriate to use age at the beginning of this step.
+        SimTime age = iter->age(sim::ts0());
+        
         // Note: since we're using a linked list, we have to iterate until we reach
         // the individuals we're interested in. Due to population structure, it's
         // probably quickest to start iterating from the oldest.
-        if(ageYears >= 25.0) continue;
-        if (ageYears < 20.0) break;	// Not interested in younger individuals.
+        if( age >= ageUb ) continue;
+        if( age < ageLb ) break;	// Not interested in younger individuals.
         
-        //TODO(diagnostic): detectibleInfection depends on the diagnostic used for
-        // reporting, but the one used should be that used to parameterise this model
         nCounter ++;
-        if (iter->withinHostModel->diagnosticDefault())
-        pCounter ++;
+        if( iter->withinHostModel->diagnosticResult(*neonatalDiagnostic) ){
+            pCounter ++;
+        }
     }
     
     // ———  calculate risk of neonatal mortality  ———
@@ -97,7 +120,7 @@ void NeonatalMortality::update (const Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = mod_nn(TimeStep::simulation, prevByGestationalAge.size());
+    size_t index = sim::ts0().moduloSteps(prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for (size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {
