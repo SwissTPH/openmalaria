@@ -42,6 +42,7 @@ set (OM_BOXTEST_NAMES
   VecMonthly
   VecTest
   Vivax
+  Genotypes
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Do" schemaVersion="33" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
-  <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="1000">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -33,12 +33,14 @@
       <option name="nSevere" value="false"/>
       <option name="innoculationsPerAgeGroup" byGenotype="true"/>
       <option name="Vector_Nv0" value="false"/>
-      <option name="Vector_Nv" value="false"/>
+      <option name="Vector_Nv" value="true"/>
       <option name="Vector_Ov" value="true"/>
       <option name="Vector_Sv" value="true"/>
       <option name="nInfectByGenotype"/>
       <option name="nPatentByGenotype"/>
       <option name="logDensByGenotype"/>
+      <option name="nHostDrugConcNonZero"/>
+      <option name="sumLogDrugConcNonZero"/>
     </SurveyOptions>
     <surveys diagnostic="standard">
       <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>
@@ -75,9 +77,9 @@
     <changeHS name="allow resistance">
       <timedDeployment time="1119-1-1">
         <DecisionTree5Day name="test system">
-          <pSeekOfficialCareUncomplicated1 value="0.6"/>
+          <pSeekOfficialCareUncomplicated1 value="0.2"/>
           <pSelfTreatUncomplicated value="0"/>
-          <pSeekOfficialCareUncomplicated2 value="0.6"/>
+          <pSeekOfficialCareUncomplicated2 value="0.2"/>
           <pSeekOfficialCareSevere value="0.48"/>
           <treeUCOfficial>
             <treatPKPD schedule="CQ_3_dose" dosage="CQ"/>
@@ -102,9 +104,9 @@
   </interventions>
   <healthSystem>
     <DecisionTree5Day name="test system">
-      <pSeekOfficialCareUncomplicated1 value="0.6"/>
+      <pSeekOfficialCareUncomplicated1 value="0.2"/>
       <pSelfTreatUncomplicated value="0"/>
-      <pSeekOfficialCareUncomplicated2 value="0.6"/>
+      <pSeekOfficialCareUncomplicated2 value="0.2"/>
       <pSeekOfficialCareSevere value="0.48"/>
       <treeUCOfficial>
         <treatSimple durationLiver="0" durationBlood="1t"/>
@@ -215,8 +217,7 @@
     <locus name="mdr">
       <!-- model three alleles, no real reason -->
       <allele name="sensitive" initialFrequency="0.5" fitness="1"/>
-      <allele name="resistant" initialFrequency="0.3" fitness="0.9"/>
-      <allele name="highly resistant" initialFrequency="0.2" fitness="0.5"/>
+      <allele name="resistant" initialFrequency="0.5" fitness="1"/>
     </locus>
   </parasiteGenetics>
   <diagnostics>
@@ -259,12 +260,6 @@
           </phenotype>
           <phenotype name="resistant">
             <restriction onLocus="mdr" toAllele="resistant"/>
-            <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.04</IC50>
-            <slope>1.6</slope>
-          </phenotype>
-          <phenotype name="highly resistant">
-            <restriction onLocus="mdr" toAllele="highly resistant"/>
             <max_killing_rate>3.45</max_killing_rate>
             <IC50>0.08</IC50>
             <slope>1.6</slope>
