@@ -246,8 +246,6 @@ protected:
    *
    * Not checkpointed; doesn't need to be except when a changeEIR intervention
    * occurs. */
-  //TODO: due to index units, it may be more efficient to use an array of
-  // length 365 even though only 1/5th entries would be used on 5-day time step
   vector<double> initialisationEIR; 
 
   /** The probability of infection of a mosquito at each bite.

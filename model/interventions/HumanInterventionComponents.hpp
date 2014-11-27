@@ -159,7 +159,8 @@ void TriggeredDeployments::SubList::deploy( Host::Human& human,
     // This may be used within a time step; in that case we use human age at
     // the beginning of the step since this gives the expected result with age
     // limits of 0 to 1 time step.
-    SimTime age = human.age(sim::nowOrTs1()/*TODO: should be now() but requires delayed triggered deployments*/);
+    //TODO: why does the above contradict what we do? Is this due to a date being shifted later?
+    SimTime age = human.age(sim::nowOrTs1());
     if( age >= minAge && age < maxAge ){
         if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
             HumanIntervention::deploy( human, method, vaccLimits );

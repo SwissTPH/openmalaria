@@ -73,7 +73,7 @@ namespace OM { namespace util {
             codeMap["VECTOR_LIFE_CYCLE_MODEL"]=VECTOR_LIFE_CYCLE_MODEL;
             codeMap["VECTOR_SIMPLE_MPD_MODEL"]=VECTOR_SIMPLE_MPD_MODEL;
             codeMap["MOLINEAUX_PAIRWISE_SAMPLE"]=MOLINEAUX_PAIRWISE_SAMPLE;
-            codeMap["PROPHYLACTIC_DRUG_ACTION_MODEL"]=PROPHYLACTIC_DRUG_ACTION_MODEL;
+            ignoreOptions.insert("PROPHYLACTIC_DRUG_ACTION_MODEL");
             codeMap["VIVAX_SIMPLE_MODEL"] = VIVAX_SIMPLE_MODEL;
             codeMap["INDIRECT_MORTALITY_FIX"] = INDIRECT_MORTALITY_FIX;
 	}
@@ -83,7 +83,7 @@ namespace OM { namespace util {
 	    if( codeIt != codeMap.end() ) return codeIt->second;
             if( ignoreOptions.count(s) ){
                 if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
-                    cerr << "Deprecation warning: model option INCLUDES_PK_PD is no longer used" << endl;
+                    cerr << "Deprecation warning: model option " << s << " is no longer used" << endl;
                 }
                 return IGNORE;
             }
@@ -141,9 +141,6 @@ namespace OM { namespace util {
 	// Test for removed options
         if( util::ModelOptions::option(IPTI_SP_MODEL) ){
             throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
-        }
-        if( util::ModelOptions::option(PROPHYLACTIC_DRUG_ACTION_MODEL) ){
-            cerr << "Warning: the PROPHYLACTIC_DRUG_ACTION_MODEL option no longer does anything." << endl;
         }
 	
 	// Test for incompatible options

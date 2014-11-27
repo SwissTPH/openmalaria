@@ -233,7 +233,7 @@ namespace OM { namespace util {
         VIVAX_SIMPLE_MODEL,
         
         /** No longer used. */
-        PROPHYLACTIC_DRUG_ACTION_MODEL,
+//         PROPHYLACTIC_DRUG_ACTION_MODEL,
         
         /** Bug fixes:
          * 

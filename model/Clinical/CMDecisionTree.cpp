@@ -167,7 +167,7 @@ private:
 /**
  * Choose a branch randomly.
  * 
- * TODO: can we re-order the trees such that this can be abstracted out or
+ * TODO(optimisation): can we re-order the trees such that this can be abstracted out or
  * used only once?
  */
 class CMDTRandom : public CMDecisionTree {

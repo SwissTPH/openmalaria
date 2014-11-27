@@ -43,7 +43,7 @@ public:
     
     // Constants:
     // v: number of variants per clone (one infection = one new clone); 50 in paper
-    //TODO: v should have a significant effect on performance, but reducing by,
+    //TODO(optimisation): v should have a significant effect on performance, but reducing by,
     // say, half, may not have a big effect on the model. Evaluate.
     static const size_t v = 50;
     // taus: used for the variantTranscending and variantSpecific array, 4 Molineaux time steps = 8 days

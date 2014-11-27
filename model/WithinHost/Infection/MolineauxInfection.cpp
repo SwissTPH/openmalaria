@@ -176,7 +176,7 @@ void MolineauxInfection::init( const Parameters& parameters ){
         
         // with gamma distribution shape and scale parameters has to be recalculated 
         if (util::ModelOptions::option (util::FIRST_LOCAL_MAXIMUM_GAMMA)) {
-            //TODO: review this variant (or discard)?
+            //NOTE: variant does not appear to work well (according to unit test stats)
             first_local_maximum_gamma = true;
             mean_shape_first_local_max = pow(mean_shape_first_local_max,2) / pow(sd_scale_first_local_max,2);
             sd_scale_first_local_max = pow(sd_scale_first_local_max,2) / mean_shape_first_local_max;
@@ -186,7 +186,7 @@ void MolineauxInfection::init( const Parameters& parameters ){
         
         // with gamma distribution shape and scale parameters has to be recalculated
         if(util::ModelOptions::option (util::MEAN_DURATION_GAMMA)) {
-            //TODO: review this variant (or discard)?
+            //NOTE: variant does not appear to work well (according to unit test stats)
             mean_duration_gamma = true;
             mean_shape_diff_pos_days = pow(mean_shape_diff_pos_days,2) / pow(sd_scale_diff_pos_days,2);
             sd_scale_diff_pos_days = pow(sd_scale_diff_pos_days,2) / mean_shape_diff_pos_days;

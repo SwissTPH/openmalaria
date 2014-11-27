@@ -44,9 +44,8 @@ public:
         if( deploymentTime < sim::zero() ){
             throw util::xml_scenario_error("timed intervention deployment: may not be negative");
         }else if( deploymentTime >= mon::finalSurveyTime() ){
-            //TODO(date): output as a date
-            cerr << "Warning: timed intervention deployment at time "<<(deploymentTime.inSteps());
-            cerr << " happens after last survey" << endl;
+            cerr << "Warning: timed intervention deployment at time "<<(deploymentTime.inDays());
+            cerr << " (days after start) happens after last survey" << endl;
         }
     }
     virtual ~TimedDeployment() {}
