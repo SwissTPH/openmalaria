@@ -21,6 +21,8 @@
 #ifndef Hmod_WH_Genotypes
 #define Hmod_WH_Genotypes
 
+#include <iostream>
+
 namespace OM { namespace WithinHost {
 
 /** Represents infection genotypes. */
@@ -74,6 +76,9 @@ public:
     
     /** Get the initial frequency of some genotype. */
     static double initialFreq( size_t genotype );
+    
+    static void staticCheckpoint( std::ostream& stream );
+    static void staticCheckpoint( std::istream& stream );
     
 private:
     static size_t N_genotypes;

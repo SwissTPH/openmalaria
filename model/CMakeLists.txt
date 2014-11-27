@@ -50,8 +50,8 @@ set (Model_CPP
   WithinHost/WHVivax.cpp
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
+  WithinHost/Genotypes.cpp
   WithinHost/Infection/Infection.cpp
-  WithinHost/Infection/CommonInfection.cpp
   WithinHost/Infection/DescriptiveInfection.cpp
   WithinHost/Infection/DummyInfection.cpp
   WithinHost/Infection/EmpiricalInfection.cpp

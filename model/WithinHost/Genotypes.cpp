@@ -31,14 +31,7 @@ namespace OM {
 namespace WithinHost {
 
 namespace GT /*for genotype impl details*/{
-enum SampleMode{
-    SAMPLE_FIRST,      // always choose first genotype (essentially the off switch)
-    SAMPLE_INITIAL,    // sample from initial probabilities
-    SAMPLE_TRACKING    // sample from tracked success at genotype level (no recombination)
-};
-// Mode to use now (until switched) and from the start of the intervention period.
-SampleMode current_mode = SAMPLE_FIRST, interv_mode = SAMPLE_FIRST;
-
+// ———  Model constants (after init)  ———
 // keys are cumulative probabilities; last entry should equal 1; values are genotype codes
 map<double,uint32_t> cum_initial_freqs;
 
@@ -83,6 +76,14 @@ struct LocusSet{
 };
 
 vector<Genotypes::Genotype> genotypes;
+// ———  Model variables  ———
+enum SampleMode{
+    SAMPLE_FIRST,      // always choose first genotype (essentially the off switch)
+    SAMPLE_INITIAL,    // sample from initial probabilities
+    SAMPLE_TRACKING    // sample from tracked success at genotype level (no recombination)
+};
+// Mode to use now (until switched) and from the start of the intervention period.
+SampleMode current_mode = SAMPLE_FIRST, interv_mode = SAMPLE_FIRST;
 }
 size_t Genotypes::N_genotypes = 1;
 
@@ -206,6 +207,22 @@ double Genotypes::initialFreq( size_t genotype ){
     }else{
         return GT::genotypes[genotype].init_freq;
     }
+}
+
+
+// ———  checkpointing  ———
+
+void Genotypes::staticCheckpoint( ostream& stream ){
+    int t = GT::current_mode;
+    t & stream;
+}
+void Genotypes::staticCheckpoint( istream& stream ){
+    int t;
+    t & stream;
+    GT::current_mode = static_cast<GT::SampleMode>(t);
+    assert( GT::current_mode == GT::SAMPLE_FIRST ||
+        GT::current_mode == GT::SAMPLE_INITIAL ||
+        GT::current_mode == GT::SAMPLE_TRACKING );
 }
 
 void CommonInfection::checkpoint(ostream& stream)
