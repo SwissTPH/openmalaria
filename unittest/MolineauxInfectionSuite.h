@@ -242,7 +242,7 @@ private:
             if( maxima_t.size() == 0 ) return;  // no local maxima — shouldn't happen
             log_1st_max[n] = maxima_ld[0];
             
-            size_t len_init = (maxima_t[0] - first_pos)/step + 1;
+            size_t len_init = static_cast<size_t>( (maxima_t[0] - first_pos)/step + 1 );
             vector<double> init_t_logdens( len_init * 2, 0 );
             for( size_t i = 0; i < len_init; i++ ){
                 size_t day = step*i + first_pos;
@@ -267,7 +267,7 @@ private:
                 log_intervals.push_back( log10(interval) );
             }
             GM_interv[n] = pow(gm, 1.0 / (maxima_t.size() - 1));
-            SD_log[n] = gsl_stats_sd( log_intervals.data(), 1, log_intervals.size() );
+            SD_log[n] = gsl_stats_sd( &log_intervals[0], 1, log_intervals.size() );
             
             size_t mid_pos = (first_pos + last_pos) / 2;  // average: this rounds down
             mid_pos = start + ((mid_pos - start)/step)*step;    // must be in sync with step

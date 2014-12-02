@@ -149,7 +149,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
         humanWarmupLength = population->_transmissionModel->minPreinitDuration();
     }
-    humanWarmupLength = sim::fromYearsI( ceil(humanWarmupLength.inYears()) );
+    humanWarmupLength = sim::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->_transmissionModel->expectedInitDuration()

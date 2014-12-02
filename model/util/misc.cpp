@@ -54,9 +54,10 @@ using util::CommandLine;
 // ———  Unit parsing stuff  ———
 namespace UnitParse {
 
-int longToInt( long x ){
+template<typename T>
+int castToInt( T x ){
     int y = static_cast<int>( x );
-    if( static_cast<long>( y ) != x ){
+    if( static_cast<T>( y ) != x ){
         throw util::format_error( "underflow/overflow" );
     }
     return y;
@@ -81,7 +82,7 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
             if( defUnit == DAYS ){
                 return sim::roundToTSFromDays( v );
             }else if( defUnit == STEPS ){
-                return sim::fromTS( longToInt(v) );
+                return sim::fromTS( castToInt(v) );
             }else{
                 throw SWITCH_DEFAULT_EXCEPTION;
             }
@@ -92,7 +93,7 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
         if( u == 'd' || u == 'D' ){
             return sim::roundToTSFromDays( v );
         }else if( u == 't' || u == 'T' ){
-            return sim::fromTS( longToInt(v) );
+            return sim::fromTS( castToInt(v) );
         }
         // otherwise, fall through to below
     }
@@ -135,7 +136,7 @@ SimTime readDuration( const std::string& str, DefaultUnit unit ){
     else if( v != std::floor(v) ){
         throw util::format_error( "fractional values are only allowed when the unit is years (e.g. 0.25y)" );
     }else if( unit == DAYS ) return sim::roundToTSFromDays( v );
-    else if( unit == STEPS ) return sim::fromTS( longToInt(v) );
+	else if( unit == STEPS ) return sim::fromTS( castToInt(v) );
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
@@ -200,7 +201,7 @@ void sim::init( const scnXml::Scenario& scenario ){
     SimTime::interval = scenario.getModel().getParameters().getInterval();
     SimTime::steps_per_year = sim::oneYear().inSteps();
     SimTime::years_per_step = 1.0 / SimTime::steps_per_year;
-    sim::max_human_age = sim::fromTS( scenario.getDemography().getMaximumAgeYrs() * SimTime::steps_per_year );
+    sim::max_human_age = sim::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
     if( scenario.getMonitoring().getStartDate().present() ){
         try{
             // on failure, this throws or returns sim::never()

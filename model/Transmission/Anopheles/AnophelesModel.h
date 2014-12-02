@@ -62,8 +62,7 @@ public:
     AnophelesModel () :
             mosqSeekingDuration(numeric_limits<double>::signaling_NaN()),
             mosqSeekingDeathRate(numeric_limits<double>::signaling_NaN()),
-            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
-            partialEIR(0.0)
+            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN())
     {}
     
     /** Called to initialise variables instead of a constructor. At this point,

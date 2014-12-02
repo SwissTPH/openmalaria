@@ -255,7 +255,7 @@ bool random::bernoulli(double prob){
 
 int random::uniform(int n){
     assert( (boost::math::isfinite)(n) );
-    return random::uniform_01() * n;
+    return static_cast<int>( random::uniform_01() * n );
 }
 
 double random::exponential(double mean){
