@@ -63,7 +63,7 @@ private:
     double time;        /// Time to medicate at, in days (0 means start of time step, may be >= 1 (thus not today))
     double duration;    /// Duration for IV purposes, in days (use 0 or NaN to indicate oral dose)
     
-    friend class Schedule;
+    friend struct Schedule;
     friend class LSTMModel;
     friend class ::UnittestUtil;
 };
