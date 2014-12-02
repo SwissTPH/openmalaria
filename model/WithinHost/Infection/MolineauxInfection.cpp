@@ -226,8 +226,8 @@ MolineauxInfection::MolineauxInfection(uint32_t genotype):
     
     if( pairwise_P_star_sample ){
         int patient = util::random::uniform( 35 );
-        Pc_star = k_c * case_specific_data[2 * patient + 1];
-        Pm_star = k_m * case_specific_data[2 * patient + 0];
+        Pc_star = static_cast<float>( k_c * case_specific_data[2 * patient + 1] );
+        Pm_star = static_cast<float>( k_m * case_specific_data[2 * patient + 0] );
     }else{
         // Sampling of the first local maxima:
         if( first_local_maximum_gamma ){

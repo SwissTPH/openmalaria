@@ -127,42 +127,42 @@ ostream& operator<< (ostream& out, vector<T> vec) {
 template<typename T, typename Alloc = std::allocator<T> >
 struct vector2D {
     typedef std::vector<T, Alloc> vec_t;
+	typedef typename vec_t::value_type val_t;
+	typedef typename vec_t::allocator_type alloc_t;
+	typedef typename vec_t::reference ref_t;
+	typedef typename vec_t::const_reference const_ref_t;
     
     vector2D() : v() {}
-    explicit vector2D(const typename vec_t::allocator_type& a) : stride(0), v(a) {}
+    explicit vector2D(const alloc_t& a) : stride(0), v(a) {}
     explicit vector2D(size_t n1, size_t n2,
-        const typename vec_t::value_type& value = typename vec_t::value_type(),
-        const typename vec_t::allocator_type& a = typename vec_t::allocator_type() )
+        const val_t& value = val_t(),
+        const alloc_t& a = alloc_t() )
             : stride(n2), v(static_cast<size_t>(n1 * n2), value, a) {}
     vector2D(const vector2D& x) : stride(x.strid), v(x.v) {}
     
-    inline void assign(size_t dim1, size_t dim2,
-        const typename vec_t::value_type& val)
-    {
+    inline void assign(size_t dim1, size_t dim2, const val_t& val){
         v.assign(dim1 * dim2, val);
         stride = dim2;
     }
 
     inline void resize(size_t dim1, size_t dim2,
-        typename vec_t::value_type x = typename vec_t::value_type())
+        val_t x = val_t())
     {
         v.resize( dim1 * dim2, x );
         stride = dim2;
     }
     
-    inline typename vec_t::reference
-    at(size_t n1, size_t n2){
+    inline ref_t at(size_t n1, size_t n2){
         return v[n1 * stride + n2];
     }
     
-    inline typename vec_t::const_reference
-    at(size_t n1, size_t n2) const{
+    inline const_ref_t at(size_t n1, size_t n2) const{
         return v[n1 * stride + n2];
     }
     
     inline vec_t& internal_vec(){ return v; }
     
-    inline void set_all( typename vec_t::value_type x ){
+    inline void set_all( val_t x ){
         v.assign( v.size(), x );
     }
     
