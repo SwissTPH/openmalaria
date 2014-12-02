@@ -18,7 +18,9 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+// Must not be included _after_ boost/math/special_functions/fpclassify.hpp
 #include <boost/math/nonfinite_num_facets.hpp>
+
 #include "mon/info.h"
 #include "mon/management.h"
 #include "mon/AgeGroup.h"
