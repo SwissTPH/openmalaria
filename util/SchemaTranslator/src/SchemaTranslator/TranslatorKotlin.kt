@@ -263,12 +263,14 @@ abstract class Translator(input: InputSource, options: Options) {
                 throw Exception("Method " + translateMeth + " not found")
             try{
                 val result = method.invoke(this) // invoke, may throw
-                when (result){
-                    // for backwards compatibility:
-                    is Boolean -> if (!result) throw DocumentException("Translation failed (no message)")
-                    // preferred:
-                    null /* returned by invoke when return type is void */ -> {/*do nothing*/}
-                    else -> throw Exception("Unexpected result value while updating to version ${schemaVersion}:  \"${result}\"")
+                if (result != null){    // null result implies success
+                    when (result){
+                        // for backwards compatibility:
+                        is Boolean -> {
+                            if (!result) throw DocumentException("Translation failed (no message)")
+                        }
+                        else -> throw Exception("Unexpected result value while updating to version ${schemaVersion}:  \"${result}\"")
+                    }
                 }
             }catch(e: InvocationTargetException){
                 // The called method threw an exception and invoke() wrapped
@@ -322,9 +324,7 @@ class TimedKey(cohort:Boolean, age:Double?) : Comparable<TimedKey>{
         }else if (other.age == null){
             1
         }else{
-            // Using !! here appears to be both necessary and unnecessary.
-            // Broken type checker makes us live with warnings.
-            java.lang.Double.compare(age!!, other.age!!)
+            java.lang.Double.compare(age, other.age)
         }
 }
 
@@ -347,7 +347,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         var cohortElt : Element? = null
         val interventions = getChildElementOpt(scenarioElement, "interventions")
         if (interventions != null){
-            val componentIdents : jet.MutableSet<String> = TreeSet<String>()
+            val componentIdents : kotlin.MutableSet<String> = TreeSet<String>()
             val humanComponents = ArrayList<Element>()
             val humanDeployments = ArrayList<Element>()
             fun componentIdent(suggestedIdent: String): String{

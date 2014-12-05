@@ -195,7 +195,7 @@ fun visitAllFiles(options: Options) : Unit {
     fun visit(input: File, outDir: File, top: Boolean){
         if (input.isDirectory()){
             var subDir = if (top) outDir else File(outDir, input.getName())
-            for( child in (input.list() as Array<String>)){
+            for( child in input.list() ){
                 visit(File(input, child), subDir, false)
             }
         }else{
@@ -246,7 +246,7 @@ fun updateDB(options: Options) {
                 translator.translateAndValidate()
                 val result : StreamResult = StreamResult(StringWriter())
                 translator.writeTo (result)
-                val translatedXML : String = result.getWriter()!!.toString()!!
+                val translatedXML : String = result.getWriter()!!.toString()
                 uprs.updateString("xml", translatedXML)
                             
                 uprs.updateRow()
