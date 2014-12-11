@@ -263,12 +263,14 @@ abstract class Translator(input: InputSource, options: Options) {
                 throw Exception("Method " + translateMeth + " not found")
             try{
                 val result = method.invoke(this) // invoke, may throw
-                when (result){
-                    // for backwards compatibility:
-                    is Boolean -> if (!result) throw DocumentException("Translation failed (no message)")
-                    // preferred:
-                    null /* returned by invoke when return type is void */ -> {/*do nothing*/}
-                    else -> throw Exception("Unexpected result value while updating to version ${schemaVersion}:  \"${result}\"")
+                if (result != null){    // null result implies success
+                    when (result){
+                        // for backwards compatibility:
+                        is Boolean -> {
+                            if (!result) throw DocumentException("Translation failed (no message)")
+                        }
+                        else -> throw Exception("Unexpected result value while updating to version ${schemaVersion}:  \"${result}\"")
+                    }
                 }
             }catch(e: InvocationTargetException){
                 // The called method threw an exception and invoke() wrapped
@@ -322,9 +324,7 @@ class TimedKey(cohort:Boolean, age:Double?) : Comparable<TimedKey>{
         }else if (other.age == null){
             1
         }else{
-            // Using !! here appears to be both necessary and unnecessary.
-            // Broken type checker makes us live with warnings.
-            java.lang.Double.compare(age!!, other.age!!)
+            java.lang.Double.compare(age, other.age)
         }
 }
 
@@ -347,7 +347,7 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         var cohortElt : Element? = null
         val interventions = getChildElementOpt(scenarioElement, "interventions")
         if (interventions != null){
-            val componentIdents : jet.MutableSet<String> = TreeSet<String>()
+            val componentIdents : kotlin.MutableSet<String> = TreeSet<String>()
             val humanComponents = ArrayList<Element>()
             val humanDeployments = ArrayList<Element>()
             fun componentIdent(suggestedIdent: String): String{
@@ -698,5 +698,65 @@ abstract class TranslatorKotlin(input: InputSource, options: Options) : Translat
         scenarioDocument.renameNode(scenarioElement, 
             "http://openmalaria.org/schema/scenario_32", "om:scenario")
         scenarioElement = scenarioDocument.getDocumentElement()!!
+    }
+    
+    /** Translate to schema 33.
+     *
+     * TODO: also "screen"
+     * 
+     * MDA descriptions changed as did 1-day TS health system configurations
+     * (the latter will not be automatically updated). Many other
+     * backwards-compatible changes occurred. */
+    public fun translate32To33(){
+        throw DocumentException("This function is incomplete. Suggest using translateXML.py instead.")
+        if (getChildElementOpt(getChildElement(scenarioElement, "healthSystem"), "EventScheduler") != null ){
+            throw DocumentException("Refusing to translate EventScheduler element to schema 33")
+        }
+        val interventions = getChildElementOpt(scenarioElement, "interventions")
+        if( interventions != null ){
+            val human = getChildElementOpt(interventions, "human")
+            if( human != null ){
+                for (comp in getChildElements(human, "component")){
+                    // Component MDA: replace with treatSimple
+                    val mda = getChildElementOpt(comp, "MDA")
+                    if( mda != null ){
+                        val eff = getChildElement(mda, "effects")
+                        val opts = getChildElements(eff, "option")
+                        if( opts.size == 1 ){
+                            val opt = opts[0]
+                            if( java.lang.Double.parseDouble(opt.getAttribute("pSelection")) != 1.0 ){
+                                throw DocumentException("Invalid document: MDA effects has single option, pSelection != 1")
+                            }
+                            if( getChildElementOpt(opt, "deploy") != null ){
+                                throw DocumentException("Lazily refusing to translate triggered deployment in MDA")
+                            }
+                            var durLiver = 0
+                            var durBlood = 0  // durations, in steps
+                            for (clearInf in getChildElements(opt, "clearInfections")){
+                                val ts = Integer.parseInt(clearInf.getAttribute("timesteps"))
+                                when (clearInf.getAttribute("stage")){
+                                    "liver" -> durLiver = ts
+                                    "blood" -> durBlood = ts
+                                    "both" -> {
+                                        durLiver = ts
+                                        durBlood = ts
+                                    }
+                                    else -> throw DocumentException("Invalid document: clearInfections' stage attribute should be liver, blood or both")
+                                }
+                            }
+                            val treatSimple = scenarioDocument.createElement("treatSimple")!!
+                            treatSimple.setAttribute("durationLiver", "${durLiver}t")
+                            treatSimple.setAttribute("durartionBlood", "${durBlood}t")
+                            comp.removeChild(opt)
+                            comp.appendChild(treatSimple)
+                        }else{
+                            throw DocumentException("Lazily refusing to translate MDA with number options > 1")
+                        }
+                    }else if( getChildElementOpt(comp, "MDA1D") != null ){
+                        throw DocumentException("Refusing to translate MDA1D element to schema 33")
+                    }
+                }
+            }
+        }
     }
 }

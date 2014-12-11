@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" name="Idete Incidence" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
+<?xml version='1.0' encoding='UTF-8'?>
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_33" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="49" name="Idete Incidence" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd">
   <demography maximumAgeYrs="6.0" name="Ifakara" popSize="300">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -29,8 +29,8 @@
       <option name="nUncomp" value="true"/>
       <option name="sumAge" value="true"/>
     </SurveyOptions>
-    <surveys detectionLimit="40">
-      <surveyTime>73</surveyTime>
+    <surveys diagnostic="standard">
+      <surveyTime>1y</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="0.25"/>
@@ -967,6 +967,14 @@
       <EIRDaily>1.8254</EIRDaily>
     </nonVector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="standard" units="Other">
+      <deterministic minDensity="40"/>
+    </diagnostic>
+    <diagnostic name="neonatal" units="Other">
+      <deterministic minDensity="40"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="MUELLER_PRESENTATION_MODEL" value="true"/>
@@ -974,7 +982,9 @@
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="6">
+      <NeonatalMortality diagnostic="neonatal"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>

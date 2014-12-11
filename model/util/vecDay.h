@@ -37,29 +37,29 @@ namespace util {
 template<typename T, typename Alloc = std::allocator<T> >
 struct vecDay {
     typedef std::vector<T, Alloc> vec_t;
+	typedef typename vec_t::value_type val_t;
+	typedef typename vec_t::allocator_type alloc_t;
+	typedef typename vec_t::reference ref_t;
+	typedef typename vec_t::const_reference const_ref_t;
     
     vecDay() : v() {}
-    explicit vecDay(const typename vec_t::allocator_type& a) : v(a) {}
-    explicit vecDay(SimTime n, const typename vec_t::value_type& value =
-        typename vec_t::value_type(), const typename vec_t::allocator_type& a =
-        typename vec_t::allocator_type() ) :
+    explicit vecDay(const alloc_t& a) : v(a) {}
+    explicit vecDay(SimTime n, const val_t& value = val_t(),
+		const alloc_t& a = alloc_t() ) :
         v(static_cast<size_t>(n.inDays()), value, a) {}
     vecDay(const vecDay& x) : v(x.v) {}
     
-    inline void assign(SimTime n, const typename vec_t::value_type& val){
+    inline void assign(SimTime n, const val_t& val){
         v.assign(n.inDays(), val); }
 
-    inline void resize(SimTime new_size, typename vec_t::value_type x = typename vec_t::value_type()){
+    inline void resize(SimTime new_size, val_t x = val_t()){
         v.resize( new_size.inDays(), x ); }
     
     inline SimTime size() const {
         return sim::fromDays(v.size()); }
     
-    inline typename vec_t::reference
-    operator[](SimTime n){ return v[n.inDays()]; }
-    
-    inline typename vec_t::const_reference
-    operator[](SimTime n) const{ return v[n.inDays()]; }
+    inline ref_t operator[](SimTime n){ return v[n.inDays()]; }
+    inline const_ref_t operator[](SimTime n) const{ return v[n.inDays()]; }
     
     /// Access
     const vec_t& internal()const{ return v; }
@@ -79,36 +79,33 @@ private:
 template<typename T, typename Alloc = std::allocator<T> >
 struct vecDay2D {
     typedef std::vector<T, Alloc> vec_t;
+	typedef typename vec_t::value_type val_t;
+	typedef typename vec_t::allocator_type alloc_t;
+	typedef typename vec_t::reference ref_t;
+	typedef typename vec_t::const_reference const_ref_t;
     
     vecDay2D() : v() {}
-    explicit vecDay2D(const typename vec_t::allocator_type& a) : stride(0), v(a) {}
-    explicit vecDay2D(SimTime n1, size_t n2,
-        const typename vec_t::value_type& value = typename vec_t::value_type(),
-        const typename vec_t::allocator_type& a = typename vec_t::allocator_type() )
-            : stride(n2), v(static_cast<size_t>(n1.inDays() * n2), value, a) {}
+    explicit vecDay2D(const alloc_t& a) : stride(0), v(a) {}
+    explicit vecDay2D(SimTime n1, size_t n2, const val_t& value = val_t(),
+		const alloc_t& a = alloc_t() ) :
+		stride(n2), v(static_cast<size_t>(n1.inDays() * n2), value, a) {}
     vecDay2D(const vecDay2D& x) : stride(x.stride), v(x.v) {}
     
-    inline void assign(SimTime dim1, size_t dim2,
-        const typename vec_t::value_type& val)
-    {
+    inline void assign(SimTime dim1, size_t dim2, const val_t& val){
         v.assign(dim1.inDays() * dim2, val);
         stride = dim2;
     }
 
-    inline void resize(SimTime dim1, size_t dim2,
-        typename vec_t::value_type x = typename vec_t::value_type())
-    {
+    inline void resize(SimTime dim1, size_t dim2, val_t x = val_t()){
         v.resize( dim1.inDays() * dim2, x );
         stride = dim2;
     }
     
-    inline typename vec_t::reference
-    at(SimTime n1, size_t n2){
+    inline ref_t at(SimTime n1, size_t n2){
         return v[n1.inDays() * stride + n2];
     }
     
-    inline typename vec_t::const_reference
-    at(SimTime n1, size_t n2) const{
+    inline const_ref_t at(SimTime n1, size_t n2) const{
         return v[n1.inDays() * stride + n2];
     }
     

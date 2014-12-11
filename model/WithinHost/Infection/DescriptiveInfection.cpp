@@ -134,7 +134,7 @@ SimTime DescriptiveInfection::infectionDuration() {
     // ((1+floor(dur))/interval); now it says the last interval is:
     // floor((1+dur)/interval)-1 = floor((dur+1-interval)/interval)
     // Is this reasonable, or should we change?
-    return sim::fromDays( 1.0 + dur ) - sim::oneTS();
+    return sim::fromDays( static_cast<int>(1.0 + dur) ) - sim::oneTS();
 }
 
 

@@ -170,6 +170,9 @@ inline std::ostream& operator<<( std::ostream& stream, const SimTime time ){
 inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
     return SimTime(util::mod_nn(lhs.d, rhs.d));
 }
+inline int floorToInt( double x ){
+	return static_cast<int>(std::floor(x));
+}
 
 /** Encapsulation of SimTime static members. */
 class sim {
@@ -267,7 +270,7 @@ public:
     
     /** Convert from years, rounding down to the next time step. */
     static inline SimTime fromYearsD(double years){
-        return fromTS( std::floor(stepsPerYear() * years) );
+        return fromTS( floorToInt(stepsPerYear() * years) );
     }
     
     /** Convert. */
@@ -275,7 +278,7 @@ public:
     
     /** Round to the nearest time-step, where input is in days. */
     static inline SimTime roundToTSFromDays(double days){
-        return fromTS(std::floor( days / SimTime::interval + 0.5 ));
+        return fromTS( floorToInt( days / SimTime::interval + 0.5 ));
     }
     //@}
     

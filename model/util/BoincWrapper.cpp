@@ -164,7 +164,7 @@ Checksum Checksum::generate (istream& fileStream) {
 #       error "For BOINC builds: insert checksum perturbation (compile with -DNO_CHECKSUM_PERTURB to ignore)."
 #       endif
 	
-	int n = fileStream.gcount ();
+	streamsize n = fileStream.gcount ();
 	if (n<=0) break;
 	bytes_read += n;
 	md5_append(&state, (unsigned char*) buf, n);
