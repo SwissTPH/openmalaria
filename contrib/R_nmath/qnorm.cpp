@@ -52,15 +52,8 @@
 #include <limits>
 #include <boost/math/special_functions/expm1.hpp>
 
-#ifdef _MSC_VER
-#define isnan(x) _isnan(x)
-#elif defined __APPLE__
-#ifndef isnan
-// This appears not to be defined on our old (10.5) mac
-#define isnan(x) (x!=x)
-#endif
-#endif
-#define ISNAN(x) (isnan(x)!=0)
+#include <boost/math/special_functions/fpclassify.hpp>
+#define ISNAN(x) (boost::math::isnan)(x)
 
 #define ML_NAN          std::numeric_limits<double>::quiet_NaN()
 #define ML_POSINF       std::numeric_limits<double>::infinity()

@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Full set of interventions" schemaVersion="33" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd" xmlns:om="http://openmalaria.org/schema/scenario_33">
+<?xml version='1.0' encoding='UTF-8'?>
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_33" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Full set of interventions" schemaVersion="33" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="150">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -386,105 +386,105 @@
       <option name="PROPHYLACTIC_DRUG_ACTION_MODEL" value="true"/>
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
-      <option name="NON_MALARIA_FEVERS" value="true"/> 
+      <option name="NON_MALARIA_FEVERS" value="true"/>
     </ModelOptions>
     <clinical healthSystemMemory="6">
-    <NonMalariaFevers>
-      <incidence> 
-      <group lowerbound="0" value="0.322769924518357"/>
-      <group lowerbound="0" value="0.308520194304172"/>
-      <group lowerbound="1" value="0.279441774808493"/>
-      <group lowerbound="2" value="0.250431781111273"/>
-      <group lowerbound="3" value="0.223285859756841"/>
-      <group lowerbound="4" value="0.199298352451799"/>
-      <group lowerbound="5" value="0.179376872365614"/>
-      <group lowerbound="6" value="0.163623659390782"/>
-      <group lowerbound="7" value="0.152227726923469"/>
-      <group lowerbound="8" value="0.145022785567758"/>
-      <group lowerbound="9" value="0.141493087461765"/>
-      <group lowerbound="10" value="0.140473293219353"/>
-      <group lowerbound="11" value="0.141109775159515"/>
-      <group lowerbound="12" value="0.142644475217328"/>
-      <group lowerbound="13" value="0.144335079395766"/>
-      <group lowerbound="14" value="0.145964032924869"/>
-      <group lowerbound="15" value="0.147708915135714"/>
-      <group lowerbound="16" value="0.149731543445568"/>
-      <group lowerbound="17" value="0.151887428568276"/>
-      <group lowerbound="18" value="0.154060663485195"/>
-      <group lowerbound="19" value="0.156179169710494"/>
-      <group lowerbound="20" value="0.158135015380583"/>
-      <group lowerbound="21" value="0.159704766482219"/>
-      <group lowerbound="22" value="0.160807788387655"/>
-      <group lowerbound="23" value="0.161427976448279"/>
-      <group lowerbound="24" value="0.161620429119137"/>
-      <group lowerbound="25" value="0.16144021875986"/>
-      <group lowerbound="26" value="0.160943264630612"/>
-      <group lowerbound="27" value="0.160217573697398"/>
-      <group lowerbound="28" value="0.159422614374451"/>
-      <group lowerbound="29" value="0.158542519631641"/>
-      <group lowerbound="30" value="0.157501217628248"/>
-      <group lowerbound="31" value="0.156175160594841"/>
-      <group lowerbound="32" value="0.154402302191411"/>
-      <group lowerbound="33" value="0.152102040636481"/>
-      <group lowerbound="34" value="0.14921450014676"/>
-      <group lowerbound="35" value="0.145714433541659"/>
-      <group lowerbound="36" value="0.141800502067518"/>
-      <group lowerbound="37" value="0.137916853907569"/>
-      <group lowerbound="38" value="0.134503529382102"/>
-      <group lowerbound="39" value="0.131746276580642"/>
-      <group lowerbound="40" value="0.12969902537497"/>
-      <group lowerbound="41" value="0.128398077347679"/>
-      <group lowerbound="42" value="0.127864136551891"/>
-      <group lowerbound="43" value="0.12804497197004"/>
-      <group lowerbound="44" value="0.128894055047661"/>
-      <group lowerbound="45" value="0.130350838992718"/>
-      <group lowerbound="46" value="0.132286605622701"/>
-      <group lowerbound="47" value="0.134599921072495"/>
-      <group lowerbound="48" value="0.137212726976988"/>
-      <group lowerbound="49" value="0.140035253913284"/>
-      <group lowerbound="50" value="0.142934573453621"/>
-      <group lowerbound="51" value="0.145830221511879"/>
-      <group lowerbound="52" value="0.148674810561069"/>
-      <group lowerbound="53" value="0.151497963594518"/>
-      <group lowerbound="54" value="0.15438856687865"/>
-      <group lowerbound="55" value="0.157403790093505"/>
-      <group lowerbound="56" value="0.16059513222516"/>
-      <group lowerbound="57" value="0.16402433342886"/>
-      <group lowerbound="58" value="0.16770481415944"/>
-      <group lowerbound="59" value="0.171626873047865"/>
-      <group lowerbound="60" value="0.175748327054247"/>
-      <group lowerbound="61" value="0.180030857856799"/>
-      <group lowerbound="62" value="0.184411365583771"/>
-      <group lowerbound="63" value="0.188816421789366"/>
-      <group lowerbound="64" value="0.19316997803338"/>
-      <group lowerbound="65" value="0.197435603275487"/>
-      <group lowerbound="66" value="0.201578808813379"/>
-      <group lowerbound="67" value="0.205556806881398"/>
-      <group lowerbound="68" value="0.209307183457343"/>
-      <group lowerbound="69" value="0.212783260344084"/>
-      <group lowerbound="70" value="0.215944154621391"/>
-      <group lowerbound="71" value="0.218749275266548"/>
-      <group lowerbound="72" value="0.221187990639016"/>
-      <group lowerbound="73" value="0.223361260399378"/>
-      <group lowerbound="74" value="0.225363436789592"/>
-      <group lowerbound="75" value="0.227254280093211"/>
-      <group lowerbound="76" value="0.229084576349576"/>
-      <group lowerbound="77" value="0.230891971097789"/>
-      <group lowerbound="78" value="0.232690225166173"/>
-      <group lowerbound="79" value="0.234484973338876"/>
-      <group lowerbound="80" value="0.236276361586796"/>
-      <group lowerbound="81" value="0.238064394629696"/>
-      <group lowerbound="82" value="0.239849077182917"/>
-      <group lowerbound="83" value="0.241630413957381"/>
-      <group lowerbound="84" value="0.243408409659591"/>
-      <group lowerbound="85" value="0.245183068991633"/>
-      <group lowerbound="86" value="0.246954396651183"/>
-      <group lowerbound="87" value="0.248722397331501"/>
-      <group lowerbound="88" value="0.250487075721441"/>
-      <group lowerbound="89" value="0.252248436505447"/>
-      <group lowerbound="90" value="0.253127874257909"/>
-      </incidence>
-    </NonMalariaFevers>
+      <NonMalariaFevers>
+        <incidence>
+          <group lowerbound="0" value="0.322769924518357"/>
+          <group lowerbound="0" value="0.308520194304172"/>
+          <group lowerbound="1" value="0.279441774808493"/>
+          <group lowerbound="2" value="0.250431781111273"/>
+          <group lowerbound="3" value="0.223285859756841"/>
+          <group lowerbound="4" value="0.199298352451799"/>
+          <group lowerbound="5" value="0.179376872365614"/>
+          <group lowerbound="6" value="0.163623659390782"/>
+          <group lowerbound="7" value="0.152227726923469"/>
+          <group lowerbound="8" value="0.145022785567758"/>
+          <group lowerbound="9" value="0.141493087461765"/>
+          <group lowerbound="10" value="0.140473293219353"/>
+          <group lowerbound="11" value="0.141109775159515"/>
+          <group lowerbound="12" value="0.142644475217328"/>
+          <group lowerbound="13" value="0.144335079395766"/>
+          <group lowerbound="14" value="0.145964032924869"/>
+          <group lowerbound="15" value="0.147708915135714"/>
+          <group lowerbound="16" value="0.149731543445568"/>
+          <group lowerbound="17" value="0.151887428568276"/>
+          <group lowerbound="18" value="0.154060663485195"/>
+          <group lowerbound="19" value="0.156179169710494"/>
+          <group lowerbound="20" value="0.158135015380583"/>
+          <group lowerbound="21" value="0.159704766482219"/>
+          <group lowerbound="22" value="0.160807788387655"/>
+          <group lowerbound="23" value="0.161427976448279"/>
+          <group lowerbound="24" value="0.161620429119137"/>
+          <group lowerbound="25" value="0.16144021875986"/>
+          <group lowerbound="26" value="0.160943264630612"/>
+          <group lowerbound="27" value="0.160217573697398"/>
+          <group lowerbound="28" value="0.159422614374451"/>
+          <group lowerbound="29" value="0.158542519631641"/>
+          <group lowerbound="30" value="0.157501217628248"/>
+          <group lowerbound="31" value="0.156175160594841"/>
+          <group lowerbound="32" value="0.154402302191411"/>
+          <group lowerbound="33" value="0.152102040636481"/>
+          <group lowerbound="34" value="0.14921450014676"/>
+          <group lowerbound="35" value="0.145714433541659"/>
+          <group lowerbound="36" value="0.141800502067518"/>
+          <group lowerbound="37" value="0.137916853907569"/>
+          <group lowerbound="38" value="0.134503529382102"/>
+          <group lowerbound="39" value="0.131746276580642"/>
+          <group lowerbound="40" value="0.12969902537497"/>
+          <group lowerbound="41" value="0.128398077347679"/>
+          <group lowerbound="42" value="0.127864136551891"/>
+          <group lowerbound="43" value="0.12804497197004"/>
+          <group lowerbound="44" value="0.128894055047661"/>
+          <group lowerbound="45" value="0.130350838992718"/>
+          <group lowerbound="46" value="0.132286605622701"/>
+          <group lowerbound="47" value="0.134599921072495"/>
+          <group lowerbound="48" value="0.137212726976988"/>
+          <group lowerbound="49" value="0.140035253913284"/>
+          <group lowerbound="50" value="0.142934573453621"/>
+          <group lowerbound="51" value="0.145830221511879"/>
+          <group lowerbound="52" value="0.148674810561069"/>
+          <group lowerbound="53" value="0.151497963594518"/>
+          <group lowerbound="54" value="0.15438856687865"/>
+          <group lowerbound="55" value="0.157403790093505"/>
+          <group lowerbound="56" value="0.16059513222516"/>
+          <group lowerbound="57" value="0.16402433342886"/>
+          <group lowerbound="58" value="0.16770481415944"/>
+          <group lowerbound="59" value="0.171626873047865"/>
+          <group lowerbound="60" value="0.175748327054247"/>
+          <group lowerbound="61" value="0.180030857856799"/>
+          <group lowerbound="62" value="0.184411365583771"/>
+          <group lowerbound="63" value="0.188816421789366"/>
+          <group lowerbound="64" value="0.19316997803338"/>
+          <group lowerbound="65" value="0.197435603275487"/>
+          <group lowerbound="66" value="0.201578808813379"/>
+          <group lowerbound="67" value="0.205556806881398"/>
+          <group lowerbound="68" value="0.209307183457343"/>
+          <group lowerbound="69" value="0.212783260344084"/>
+          <group lowerbound="70" value="0.215944154621391"/>
+          <group lowerbound="71" value="0.218749275266548"/>
+          <group lowerbound="72" value="0.221187990639016"/>
+          <group lowerbound="73" value="0.223361260399378"/>
+          <group lowerbound="74" value="0.225363436789592"/>
+          <group lowerbound="75" value="0.227254280093211"/>
+          <group lowerbound="76" value="0.229084576349576"/>
+          <group lowerbound="77" value="0.230891971097789"/>
+          <group lowerbound="78" value="0.232690225166173"/>
+          <group lowerbound="79" value="0.234484973338876"/>
+          <group lowerbound="80" value="0.236276361586796"/>
+          <group lowerbound="81" value="0.238064394629696"/>
+          <group lowerbound="82" value="0.239849077182917"/>
+          <group lowerbound="83" value="0.241630413957381"/>
+          <group lowerbound="84" value="0.243408409659591"/>
+          <group lowerbound="85" value="0.245183068991633"/>
+          <group lowerbound="86" value="0.246954396651183"/>
+          <group lowerbound="87" value="0.248722397331501"/>
+          <group lowerbound="88" value="0.250487075721441"/>
+          <group lowerbound="89" value="0.252248436505447"/>
+          <group lowerbound="90" value="0.253127874257909"/>
+        </incidence>
+      </NonMalariaFevers>
     </clinical>
     <human>
       <availabilityToMosquitoes>
