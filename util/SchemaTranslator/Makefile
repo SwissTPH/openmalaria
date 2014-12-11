@@ -31,6 +31,8 @@ TRK_CLASS=$(CP)/SchemaTranslator/TranslatorKotlin.class
 TRJ_CLASS=$(CP)/SchemaTranslator/TranslatorJava.class
 ST_CLASS=$(CP)/SchemaTranslator/SchemaTranslatorPackage.class
 
+MANIFEST=META-INF/MANIFEST.MF
+
 
 all :	jar
 jar : $(ST_JAR)
@@ -52,9 +54,9 @@ $(TRJ_CLASS) :	$(TRK_CLASS) $(TRJ_SRC)
 $(ST_CLASS) :	$(TRJ_CLASS) $(TRK_CLASS) $(ST_SRC)
 	$(KOTLINC)  -cp $(CP) -d $(CP) $(ST_SRC)
 
-$(ST_JAR) :	$(TRK_CLASS) $(TRJ_CLASS) $(ST_CLASS)
+$(ST_JAR) :	$(TRK_CLASS) $(TRJ_CLASS) $(ST_CLASS) $(MANIFEST)
 	mkdir -p bin
 	cp $(KOTLIN_RUNTIME) $(KT_JAR)
-	$(JAR) cfm $(ST_JAR) META-INF/MANIFEST.MF -C $(CP) SchemaTranslator
+	$(JAR) cfm $(ST_JAR) $(MANIFEST) -C $(CP) SchemaTranslator
 # Note: the Java-based jar and fastjar appear to handle options differently.
 # E.g. fastjar accepts c -f $ST_JAR -m META-INF/MANIFEST.MF -C ...
