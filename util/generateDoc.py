@@ -93,9 +93,11 @@ class XSDType:
     def type_spec(self):
         return self.name
     def has_elts(self):
-        return False
+        return True     # we don't have child elts but we do have a type
     def has_attrs(self):
         return False
+    def write_elt_spec(self, w):
+        w.line('    ' + self.name)
 
 class Node:
     """Base schema node"""
@@ -137,7 +139,7 @@ class ComplexType(Node):
             self.read_content(child)
         elif child.tag == xsdpre + 'simpleContent':
             assert self.children is None
-            self.children = 'none'
+            self.children = 'simple'    # this is only really to say we can't have another element
             self.read_content(child)
         elif child.tag == xsdpre + 'attribute':
             self.attrs.append(Attribute(child))
@@ -177,7 +179,7 @@ class ComplexType(Node):
                 assert self.base_type is not None or die('unknown type',self.base_name)
                 self.base_type.collect_elements(elements, stypes, parent)
             del self.base_name
-        if self.children is not None and self.children != 'none':
+        if self.children is not None and self.children != 'simple':
             self.collect_elts_rec(self.children, elements, stypes, parent)
     def collect_elts_rec(self, node, elements, stypes, parent):
         if isinstance(node, Element):
@@ -193,7 +195,7 @@ class ComplexType(Node):
     def has_attrs(self):
         return len(self.attrs) > 0
     def has_elts(self):
-        have_elts = self.children is not None and self.children != 'none'
+        have_elts = self.children is not None and self.children != 'simple'
         if not have_elts and self.base_type is not None:
             return self.base_type.has_elts()
         return have_elts
@@ -206,7 +208,7 @@ class ComplexType(Node):
     def write_elt_spec(self, w):
         if self.base_type is not None:
             self.base_type.write_elt_spec(w) #TODO: is this correct?
-        if self.children is not None and self.children != 'none':
+        elif self.children is not None and self.children != 'simple':
             self.write_elt_rec(self.children, w, 0)
     def write_elt_rec(self, node, w, depth):
         if isinstance(node, Element):
