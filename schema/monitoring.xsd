@@ -56,7 +56,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             List of survey times
           </xs:documentation>
-          <xs:appinfo>units:list of elements;name:Survey times (time steps);</xs:appinfo>
+          <xs:appinfo>name:Survey times (time steps);</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>

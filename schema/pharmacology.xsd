@@ -266,7 +266,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 A locus under which only a restricted set of alleles map to
                 this phenotype.
               </xs:documentation>
-              <xs:appinfo>Locus relevant to the mapping of alleles to this phenotype;</xs:appinfo>
+              <xs:appinfo>name:Locus relevant to the mapping of alleles to this phenotype;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="toAllele" type="xs:string" use="required">
@@ -276,7 +276,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 If multiple alleles under this locus should map to the same
                 phenotype, repeat the whole "restriction onLocus..." element.
               </xs:documentation>
-              <xs:appinfo>Alleles mapping to this phenotype;</xs:appinfo>
+              <xs:appinfo>name:Alleles mapping to this phenotype;</xs:appinfo>
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>

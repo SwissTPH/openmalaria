@@ -162,7 +162,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:element>
   <!--Parameters-->
   <xs:complexType name="Parameter">
-    <xs:attribute name="name" type="xs:string" use="required">
+    <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
         <xs:documentation>Name of parameter</xs:documentation>
         <xs:appinfo>units:string;name:Name of parameter;</xs:appinfo>
@@ -182,7 +182,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>units:Number;min:0;name:Parameter value;sweepable:true;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="include" type="xs:boolean">
+    <xs:attribute name="include" type="xs:boolean" use="optional">
       <xs:annotation>
         <xs:documentation>
           True if parameter is to be sampled in optimization

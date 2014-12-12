@@ -120,11 +120,11 @@ public:
     
     static const scnXml::Parameters& prepareParameters(){
         if( dummyXML::modelParams.getParameter().size() == 0 ){
-            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "non-garki density bias", 15, 0.177378570987455 ) );
-            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Molineaux first local max density mean", 34, 4.7601 ) );
-            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Molineaux first local max density sd", 35, 0.5008 ) );
-            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Diff positive days mean", 36, 2.2736 ) );
-            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( "Diff positive days sd", 37, 0.2315 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( 15, 0.177378570987455 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( 34, 4.7601 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( 35, 0.5008 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( 36, 2.2736 ) );
+            dummyXML::modelParams.getParameter().push_back( scnXml::Parameter( 37, 0.2315 ) );
         }
         return dummyXML::modelParams;
     }
