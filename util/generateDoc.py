@@ -31,14 +31,18 @@ class DocWriter:
     def __init__(self,f_out, schema_ver):
         self.f = f_out
         # write header
-        self.line('<wiki:comment>')
-        self.line('This page is generated automatically. Command:')
-        self.line(' '.join(sys.argv))
-        self.line('</wiki:comment>')
+        self.line('= XML technical documentation =')
+        self.line('This page is automatically generated from the following schema file: `'+schema_ver+'`.')
+        self.line('I recommend against editing it because edits will likely be lost later.')
         self.line()
-        self.line('# XML technical documentation')
-        self.line('Schema:',schema_ver)
-        self.line()
+        self.line('Key:')
+        self.line('<code>')
+        self.line('    required (one)')
+        self.line('  ? optional (zero or one)')
+        self.line('  * any number (zero or more)')
+        self.line('  + at least one')
+        self.line('  _ two or more occurrences {2,inf}')
+        self.line('</code>')
         self.line('<wiki:toc max_depth="3"/>')
     def finish(self):
         # write footer
@@ -56,8 +60,15 @@ def parse_appinfo(text):
             assert len(pair.strip()) == 0 or die('bad appinfo:', text)
     return result
 
+freq_symbs={
+    (1,1) : ' ',
+    (0,1) : '?',
+    (0,'inf') : '*',
+    (1,'inf') : '+'
+}
 xsdns = 'http://www.w3.org/2001/XMLSchema'
 xsdpre = '{' + xsdns + '}'
+
 def replace_pre(name):
     if name is None:
         return None
@@ -67,9 +78,23 @@ def replace_pre(name):
     else:
         return name
 
+class XSDType:
+    """for built-in types (int, string, etc.)"""
+    def __init__(self, name):
+        self.name = name
+    def collect_elements(self, elements, stypes, depth):
+        pass
+    def type_spec(self):
+        return self.name
+    def has_elts(self):
+        return False
+    def has_attrs(self):
+        return False
+
 class Node:
     """Base schema node"""
     def __init__(self, node):
+        #print('Parsing', node.tag, node.get('name'))
         for child in node:
             self.read_child(child)
     
@@ -85,7 +110,7 @@ class ComplexType(Node):
     def __init__(self, node):
         self.attrs = []
         self.children = None
-        self.base_type = None
+        self.base_name = None
         Node.__init__(self, node)
     
     def read_child(self, child):
@@ -126,23 +151,69 @@ class ComplexType(Node):
             if child.tag == xsdpre + 'extension':
                 #Our extensions add attributes and sometimes a (seq) element
                 # (where the base type is also seq or has no elements)
-                assert self.base_type is None
-                self.base_type = child.get('base')
+                assert self.base_name is None
+                self.base_name = replace_pre(child.get('base'))
                 for child2 in child:
                     self.read_child(child2)
     
-    def collect_elements(self, elements, schema_types):
-        if self.children != None:
-            self.collect_elements_recurse(self.children, elements, schema_types)
-    def collect_elements_recurse(self, node, elements, schema_types):
-        if node == 'none':
-            pass
-        elif isinstance(node,Element):
-            node.collect_elements(elements, schema_types)
+    def collect_elements(self, elements, stypes, depth):
+        if hasattr(self, 'base_name'):
+            for attr in self.attrs:
+                attr.set_type(stypes)
+            if self.base_name is None:
+                self.base_type = None
+            else:
+                self.base_type = stypes.get(self.base_name)
+                assert self.base_type is not None or die('unknown type',self.base_name)
+                self.base_type.collect_elements(elements, stypes, depth)
+            del self.base_name
+        if self.children is not None and self.children != 'none':
+            self.collect_elts_rec(self.children, elements, stypes, depth)
+    def collect_elts_rec(self, node, elements, stypes, depth):
+        if isinstance(node, Element):
+            node.collect_elements(elements, stypes, depth)
+            return []
         else:
-            assert len(node) == 2 and node[0] in ('all','seq','choice')
+            assert len(node) == 2
+            children=[]
             for child in node[1]:
-                self.collect_elements_recurse(child, elements, schema_types)
+                children += self.collect_elts_rec(child, elements, stypes, depth)
+            return children
+    
+    def has_attrs(self):
+        return len(self.attrs) > 0
+    def has_elts(self):
+        have_elts = self.children is not None and self.children != 'none'
+        if not have_elts and self.base_type is not None:
+            return self.base_type.has_elts()
+        return have_elts
+    def write_attr_spec(self, w):
+        for attr in self.attrs:
+            w.line(('  ?' if (attr.use == 'optional' or attr.default is not None) else '   '),
+                   attr.name + '=' + attr.type_spec())
+    def write_elt_spec(self, w):
+        if self.base_type is not None:
+            self.base_type.write_elt_spec(w) #TODO: is this correct?
+        if self.children is not None and self.children != 'none':
+            self.write_elt_rec(self.children, w, 0)
+    def write_elt_rec(self, node, w, depth):
+        if isinstance(node, Element):
+            symb = freq_symbs.get(node.occurs, '_')
+            post = '' if node.occurs in freq_symbs else ('{'+str(node.occurs[0])+','+str(node.occurs[1])+'}')
+            w.line('| '*depth + symb, '<' + node.name, '... />', post)
+        else:
+            assert len(node) == 2
+            mode = node[0]
+            if mode == 'all':
+                w.line('| '*depth + 'IN ANY ORDER:')
+            elif mode == 'seq':
+                w.line('| '*depth + 'IN THIS ORDER:')
+            elif mode == 'choice':
+                w.line('| '*depth + 'EXACTLY ONE OF:')
+            else:
+                assert False
+            for child in node[1]:
+                self.write_elt_rec(child, w, depth+1)
 
 class Attribute(Node):
     def __init__(self, node):
@@ -150,7 +221,7 @@ class Attribute(Node):
         self.mode = None
         self.default = node.get('default')
         self.use = node.get('use') # optional or required
-        if self.use != None and self.use not in ('optional', 'required'):
+        if self.use is not None and self.use not in ('optional', 'required'):
             die('bad use specification on attribute:', node.attrib)
         if (self.default is None) == (self.use is None):
             if self.use is None:
@@ -176,6 +247,29 @@ class Attribute(Node):
                     self.vals.append(child3.get('value'))
         else:
             Node.read_child(self, child)
+    
+    def set_type(self, stypes):
+        if hasattr(self,'type_name'):
+            if self.type_name is None:
+                self.t = None
+            else:
+                self.t = stypes.get(self.type_name)
+                assert self.t is not None or die('unknown type',self.type_name)
+            del self.type_name
+    
+    def type_spec(self):
+        rst=''
+        if self.mode == 'enum':
+            sep='('
+            for val in self.vals:
+                rst += sep + '"' + val + '"'
+                sep = ' or '
+            rst += ')'
+        else:
+            rst = self.t.type_spec()
+        if self.default is not None:
+            rst += ' DEFAULT VALUE ' + str(self.default)
+        return rst
 
 class Element(Node):
     """Represent an element type in the schema"""
@@ -195,18 +289,36 @@ class Element(Node):
         else:
             Node.read_child(self, child)
     
-    def collect_elements(self, elements, schema_types):
-        mytype = self.elt_type
-        if mytype is None:
-            mytype = schema_types.get(self.type_name)
-        assert mytype != None or die('type not found:', self.type_name)
-        elements.append((self.name,mytype))
-        # iterate over inline types (but not named types):
-        if self.elt_type != None:
-            self.elt_type.collect_elements(elements, schema_types)
+    def collect_elements(self, elements, stypes, depth):
+        self.depth = depth
+        if self in elements:
+            pass # TODO: should show something — ?
+        else:
+            elements.append(self)
+            
+            if self.elt_type is None:
+                self.elt_type = stypes.get(self.type_name)
+            assert self.elt_type is not None or die('type not found:', self.type_name)
+            self.elt_type.collect_elements(elements, stypes, depth + 1)
+    
+    def writedoc(self, w):
+        w.line()
+        title_mark = '=' * min(self.depth, 5)
+        w.line(title_mark, self.name, title_mark)
+        w.line('<code language="xml">')
+        has_attrs = self.elt_type.has_attrs()
+        has_elts = self.elt_type.has_elts()
+        w.line('<'+self.name+('' if has_attrs else ('>' if has_elts else '/>')))
+        if has_attrs:
+            self.elt_type.write_attr_spec(w)
+            w.line('    >' if has_elts else '    />')
+        if has_elts:
+            self.elt_type.write_elt_spec(w)
+            w.line('</'+self.name+'>')
+        w.line('</code>')
 
 def translate(f_in, f_out, schema_ver):
-    #w = DocWriter(f_out, schema_ver)
+    w = DocWriter(f_out, schema_ver)
     
     tree = ET.parse(f_in)
     root = tree.getroot()
@@ -220,27 +332,30 @@ def translate(f_in, f_out, schema_ver):
         # default ElementTree implementation doesn't let us access this, so guess:
         nsmap = { 'om' : targetns, 'xs' : xsdns }
     
-    schema_types = {}
+    stypes = {
+        xsdpre + 'boolean' : XSDType('boolean'),
+        xsdpre + 'int' : XSDType('int'),
+        xsdpre + 'integer' : XSDType('int'), # both are possible, don't think we care about the difference
+        xsdpre + 'double' : XSDType('double'),
+        xsdpre + 'string' : XSDType('string')
+    }
     omroot = None
     for child in root:
         if child.tag == xsdpre + 'complexType':
-            schema_types[ompre + child.get('name')] = ComplexType(child)
+            stypes[ompre + child.get('name')] = ComplexType(child)
         elif child.tag == xsdpre + 'element':
             assert omroot is None or die('schema contains multiple root elements')
             omroot = Element(child)
         else:
             die('unexpected tag in schema:', child.tag)
     
-    elements = []
-    omroot.collect_elements(elements, schema_types)
-    n_type_uses = {}
-    n_name_uses = {}
-    for (eltname, elttype) in elements:
-        n_type_uses[elttype] = n_type_uses.get(elttype, 0) + 1
-        n_name_uses[eltname] = n_name_uses.get(eltname, 0) + 1
-        print(eltname, n_name_uses[eltname], n_type_uses[elttype])
+    elements=[]
+    omroot.collect_elements(elements, stypes, 1)
     
-    #w.finish()
+    for elt in elements:
+        elt.writedoc(w)
+    
+    w.finish()
 
 def die(*args):
     print('Error: ', *args, file=sys.stderr)
@@ -259,7 +374,7 @@ def main():
     schema = args.schema[0] # always an array?
     schema_name = os.path.basename(schema)
     with open(schema, 'r') as f_in:
-        if args.output != None:
+        if args.output is not None:
             with open(args.output, 'w') as f_out:
                 translate(f_in, f_out, schema_name)
         else:
