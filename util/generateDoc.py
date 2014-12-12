@@ -43,7 +43,7 @@ class DocWriter:
         self.line('  ( jkl )+          at least one')
         self.line('  ( mno ){2,inf}    two or more occurrences')
         self.line('</code>')
-        self.line('<wiki:toc max_depth="3"/>')
+        #self.line('<wiki:toc max_depth="3"/>')
     def finish(self):
         # write footer
         pass
@@ -82,6 +82,7 @@ class XSDType:
     """for built-in types (int, string, etc.)"""
     def __init__(self, name):
         self.name = name
+        self.appinfo = {}
     def collect_elements(self, elements, stypes, depth):
         pass
     def type_spec(self):
@@ -94,13 +95,17 @@ class XSDType:
 class Node:
     """Base schema node"""
     def __init__(self, node):
+        self.doc = None
+        self.appinfo = {}
         #print('Parsing', node.tag, node.get('name'))
         for child in node:
             self.read_child(child)
     
     def read_child(self, child):
         if child.tag == xsdpre + 'annotation':
-            self.doc = child.find(xsdpre + 'documentation')
+            doc_node = child.find(xsdpre + 'documentation')
+            if doc_node is not None:
+                self.doc = doc_node.text
             self.appinfo = parse_appinfo(child.find(xsdpre + 'appinfo').text)
         else:
             die('unexpected child tag:', child.tag)
@@ -290,22 +295,23 @@ class Element(Node):
         else:
             Node.read_child(self, child)
     
-    def collect_elements(self, elements, stypes, depth):
-        self.depth = depth
+    def collect_elements(self, elements, stypes, parent):
         if self in elements:
-            pass # TODO: should show something — ?
+            elements.append(RepeatElement(self, parent))
         else:
+            self.parent = parent
             elements.append(self)
             
             if self.elt_type is None:
                 self.elt_type = stypes.get(self.type_name)
             assert self.elt_type is not None or die('type not found:', self.type_name)
-            self.elt_type.collect_elements(elements, stypes, depth + 1)
+            self.elt_type.collect_elements(elements, stypes, parent)
     
     def writedoc(self, w):
         w.line()
-        title_mark = '=' * min(self.depth, 5)
-        w.line(title_mark, self.name, title_mark)
+        name = self.appinfo.get('name', self.name)
+        w.line('==', name, '==')
+        w.line('===== specification =====')
         w.line('{{{')
         has_attrs = self.elt_type.has_attrs()
         has_elts = self.elt_type.has_elts()
@@ -317,6 +323,25 @@ class Element(Node):
             self.elt_type.write_elt_spec(w)
             w.line('</'+self.name+'>')
         w.line('}}}')
+        
+        #TODO: should we print both if both are present?
+        doc = self.doc if self.doc is not None else self.elt_type.doc
+        if doc is not None:
+            w.line()
+            w.line('===== documentation =====')
+            lines = doc.split('\n')
+            for line in lines:
+                w.line(line.lstrip())
+
+class RepeatElement:
+    def __init__(self, element, parent):
+        self.elt = element
+        self.parent = parent
+    
+    def writedoc(self, w):
+        name = self.elt.appinfo.get('name', self.elt.name)
+        w.line('==', name, '==')
+        w.line('See above')
 
 def translate(f_in, f_out, schema_ver):
     w = DocWriter(f_out, schema_ver)
