@@ -31,7 +31,7 @@ import argparse, os, sys
 
 # We should be able to use lxml or ElementTree. The former may have better formatting.
 try:
-    from lxml import etree as ET
+    import lxml.etree as ET
     using_lxml=True
 except ImportError:
     import xml.etree.ElementTree as ET
