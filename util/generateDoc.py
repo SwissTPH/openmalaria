@@ -68,7 +68,7 @@ freq_symbs={
 }
 xsdns = 'http://www.w3.org/2001/XMLSchema'
 xsdpre = '{' + xsdns + '}'
-
+headnames = set()
 def replace_pre(name):
     if name is None:
         return None
@@ -77,13 +77,18 @@ def replace_pre(name):
         return '{' + nsmap[parts[0]] + '}' + parts[1]
     else:
         return name
+def linkname(headname):
+    """Return a link name compatible with Google wiki"""
+    #FIXME: how to get correct base part of URL?
+    base='https://code.google.com/p/openmalaria/w/edit.do#'
+    return base + headname.replace(' ','_')
 
 class XSDType:
     """for built-in types (int, string, etc.)"""
     def __init__(self, name):
         self.name = name
         self.appinfo = {}
-    def collect_elements(self, elements, stypes, depth):
+    def collect_elements(self, elements, stypes, parent):
         pass
     def type_spec(self):
         return self.name
@@ -161,7 +166,7 @@ class ComplexType(Node):
                 for child2 in child:
                     self.read_child(child2)
     
-    def collect_elements(self, elements, stypes, depth):
+    def collect_elements(self, elements, stypes, parent):
         if hasattr(self, 'base_name'):
             for attr in self.attrs:
                 attr.set_type(stypes)
@@ -170,19 +175,19 @@ class ComplexType(Node):
             else:
                 self.base_type = stypes.get(self.base_name)
                 assert self.base_type is not None or die('unknown type',self.base_name)
-                self.base_type.collect_elements(elements, stypes, depth)
+                self.base_type.collect_elements(elements, stypes, parent)
             del self.base_name
         if self.children is not None and self.children != 'none':
-            self.collect_elts_rec(self.children, elements, stypes, depth)
-    def collect_elts_rec(self, node, elements, stypes, depth):
+            self.collect_elts_rec(self.children, elements, stypes, parent)
+    def collect_elts_rec(self, node, elements, stypes, parent):
         if isinstance(node, Element):
-            node.collect_elements(elements, stypes, depth)
+            node.collect_elements(elements, stypes, parent)
             return []
         else:
             assert len(node) == 2
             children=[]
             for child in node[1]:
-                children += self.collect_elts_rec(child, elements, stypes, depth)
+                children += self.collect_elts_rec(child, elements, stypes, parent)
             return children
     
     def has_attrs(self):
@@ -300,17 +305,26 @@ class Element(Node):
             elements.append(RepeatElement(self, parent))
         else:
             self.parent = parent
+            n = self.appinfo.get('name', self.name)
+            self.headname = n
+            global headnames
+            i = 1
+            while self.headname in headnames:
+                i += 1
+                self.headname = n + ' ('+str(i)+')'
+            headnames.add(self.headname)
             elements.append(self)
             
             if self.elt_type is None:
                 self.elt_type = stypes.get(self.type_name)
             assert self.elt_type is not None or die('type not found:', self.type_name)
-            self.elt_type.collect_elements(elements, stypes, parent)
+            self.elt_type.collect_elements(elements, stypes, self)
     
     def writedoc(self, w):
         w.line()
-        name = self.appinfo.get('name', self.name)
-        w.line('==', name, '==')
+        w.line('==', self.headname, '==')
+        w.line(self.breadcrumb(None))
+        w.line()
         w.line('===== specification =====')
         w.line('{{{')
         has_attrs = self.elt_type.has_attrs()
@@ -332,6 +346,11 @@ class Element(Node):
             lines = doc.split('\n')
             for line in lines:
                 w.line(line.lstrip())
+    
+    def breadcrumb(self, parent):
+        parent = self.parent if parent is None else parent
+        r = '' if parent is None else parent.breadcrumb(None) + ' → '
+        return r + '[' + linkname(self.headname) + ' ' + self.name + ']'
 
 class RepeatElement:
     def __init__(self, element, parent):
@@ -341,7 +360,9 @@ class RepeatElement:
     def writedoc(self, w):
         name = self.elt.appinfo.get('name', self.elt.name)
         w.line('==', name, '==')
-        w.line('See above')
+        w.line(self.elt.breadcrumb(self.parent))
+        w.line()
+        w.line('['+linkname(self.elt.headname), 'See above]')
 
 def translate(f_in, f_out, schema_ver):
     w = DocWriter(f_out, schema_ver)
@@ -376,7 +397,7 @@ def translate(f_in, f_out, schema_ver):
             die('unexpected tag in schema:', child.tag)
     
     elements=[]
-    omroot.collect_elements(elements, stypes, 1)
+    omroot.collect_elements(elements, stypes, None)
     
     for elt in elements:
         elt.writedoc(w)
