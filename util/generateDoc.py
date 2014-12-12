@@ -37,11 +37,11 @@ class DocWriter:
         self.line()
         self.line('Key:')
         self.line('<code>')
-        self.line('    required (one)')
-        self.line('  ? optional (zero or one)')
-        self.line('  * any number (zero or more)')
-        self.line('  + at least one')
-        self.line('  _ two or more occurrences {2,inf}')
+        self.line('    abc             required (one)')
+        self.line('  [ def ]           optional (zero or one)')
+        self.line('  ( ghi )*          any number (zero or more)')
+        self.line('  ( jkl )+          at least one')
+        self.line('  ( mno ){2,inf}    two or more occurrences')
         self.line('</code>')
         self.line('<wiki:toc max_depth="3"/>')
     def finish(self):
@@ -61,10 +61,10 @@ def parse_appinfo(text):
     return result
 
 freq_symbs={
-    (1,1) : ' ',
-    (0,1) : '?',
-    (0,'inf') : '*',
-    (1,'inf') : '+'
+    (1,1) : (' ', ''),
+    (0,1) : ('[', ']'),
+    (0,'inf') : ('(', ')*'),
+    (1,'inf') : ('(', ')+')
 }
 xsdns = 'http://www.w3.org/2001/XMLSchema'
 xsdpre = '{' + xsdns + '}'
@@ -189,8 +189,10 @@ class ComplexType(Node):
         return have_elts
     def write_attr_spec(self, w):
         for attr in self.attrs:
-            w.line(('  ?' if (attr.use == 'optional' or attr.default is not None) else '   '),
-                   attr.name + '=' + attr.type_spec())
+            if attr.use == 'optional' or attr.default:
+                w.line('  [', attr.type_spec(),('] DEFAULT VALUE '+str(attr.default) if attr.default is not None else ']'))
+            else:
+                w.line('   ', attr.type_spec(), ']')
     def write_elt_spec(self, w):
         if self.base_type is not None:
             self.base_type.write_elt_spec(w) #TODO: is this correct?
@@ -198,9 +200,10 @@ class ComplexType(Node):
             self.write_elt_rec(self.children, w, 0)
     def write_elt_rec(self, node, w, depth):
         if isinstance(node, Element):
-            symb = freq_symbs.get(node.occurs, '_')
-            post = '' if node.occurs in freq_symbs else ('{'+str(node.occurs[0])+','+str(node.occurs[1])+'}')
-            w.line('| '*depth + symb, '<' + node.name, '... />', post)
+            symbs = freq_symbs.get(node.occurs, None)
+            if symbs is None:
+                symbs = ('(', '){'+str(node.occurs[0])+','+str(node.occurs[1])+'}')
+            w.line('| '*depth + symbs[0], '<' + node.name, '... />', symbs[1])
         else:
             assert len(node) == 2
             mode = node[0]
@@ -258,7 +261,7 @@ class Attribute(Node):
             del self.type_name
     
     def type_spec(self):
-        rst=''
+        rst=self.name + '='
         if self.mode == 'enum':
             sep='('
             for val in self.vals:
@@ -266,9 +269,7 @@ class Attribute(Node):
                 sep = ' or '
             rst += ')'
         else:
-            rst = self.t.type_spec()
-        if self.default is not None:
-            rst += ' DEFAULT VALUE ' + str(self.default)
+            rst += self.t.type_spec()
         return rst
 
 class Element(Node):
@@ -305,17 +306,17 @@ class Element(Node):
         w.line()
         title_mark = '=' * min(self.depth, 5)
         w.line(title_mark, self.name, title_mark)
-        w.line('<code language="xml">')
+        w.line('{{{')
         has_attrs = self.elt_type.has_attrs()
         has_elts = self.elt_type.has_elts()
         w.line('<'+self.name+('' if has_attrs else ('>' if has_elts else '/>')))
         if has_attrs:
             self.elt_type.write_attr_spec(w)
-            w.line('    >' if has_elts else '    />')
+            w.line('  >' if has_elts else '  />')
         if has_elts:
             self.elt_type.write_elt_spec(w)
             w.line('</'+self.name+'>')
-        w.line('</code>')
+        w.line('}}}')
 
 def translate(f_in, f_out, schema_ver):
     w = DocWriter(f_out, schema_ver)
