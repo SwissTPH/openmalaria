@@ -20,7 +20,7 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """
 
-import argparse, sys, os.path
+import argparse, sys, os.path, re
 #try:
     #import lxml.etree as ET
 #except ImportError:
@@ -28,11 +28,14 @@ import xml.etree.ElementTree as ET
 
 class DocWriter:
     """Writes formatted text to a file"""
-    def __init__(self,f_out, schema_ver):
+    def __init__(self,f_out):
         self.f = f_out
+    def head(self, schema_file):
+        m = re.match('scenario[^0-9]*([0-9_]+)', schema_file)
+        ver = str(m.group(1))+' documentation' if m is not None else 'documentation (unknown version)'
         # write header
-        self.line('= XML technical documentation =')
-        self.line('This page is automatically generated from the following schema file: `'+schema_ver+'`.')
+        self.line('= Generated schema', ver, '=')
+        self.line('This page is automatically generated from the following schema file: `'+schema_file+'`.')
         self.line('I recommend against editing it because edits will likely be lost later.')
         self.line()
         self.line('Key:')
@@ -77,17 +80,17 @@ def replace_pre(name):
         return '{' + nsmap[parts[0]] + '}' + parts[1]
     else:
         return name
+linkbase='PLACEHOLDER' # note: if not specifying an output file, links will not work
 def linkname(headname):
     """Return a link name compatible with Google wiki"""
-    #FIXME: how to get correct base part of URL?
-    base='https://code.google.com/p/openmalaria/w/edit.do#'
-    return base + headname.replace(' ','_')
+    return linkbase + headname.replace(' ','_')
 
 class XSDType:
     """for built-in types (int, string, etc.)"""
     def __init__(self, name):
         self.name = name
         self.appinfo = {}
+        self.doc = None
     def collect_elements(self, elements, stypes, parent):
         pass
     def type_spec(self):
@@ -113,7 +116,9 @@ class Node:
             doc_node = child.find(xsdpre + 'documentation')
             if doc_node is not None:
                 self.doc = doc_node.text
-            self.appinfo = parse_appinfo(child.find(xsdpre + 'appinfo').text)
+            appinfo = child.find(xsdpre + 'appinfo')
+            if appinfo is not None and appinfo.text is not None:
+                self.appinfo = parse_appinfo(appinfo.text)
         else:
             die('unexpected child tag:', child.tag)
 
@@ -394,25 +399,29 @@ class RepeatElement:
         w.line()
         w.line('['+linkname(self.elt.headname), 'See above]')
 
-def translate(f_in, f_out, schema_ver):
-    w = DocWriter(f_out, schema_ver)
+def translate(f_in, f_out, schema_file):
+    w = DocWriter(f_out)
+    w.head(schema_file)
     
     tree = ET.parse(f_in)
     root = tree.getroot()
     assert root.tag == xsdpre + 'schema'
     targetns = root.get('targetNamespace')
-    ompre = '{' + targetns + '}'
+    ompre = '' if targetns is None else '{' + targetns + '}'
     global nsmap
     try:
         nsmap = root.nsmap
     except AttributeError:
         # default ElementTree implementation doesn't let us access this, so guess:
-        nsmap = { 'om' : targetns, 'xs' : xsdns }
+        nsmap = { 'xs' : xsdns }
+        if targetns is not None:
+            nsmap['om'] = targetns
     
     stypes = {
         xsdpre + 'boolean' : XSDType('boolean'),
         xsdpre + 'int' : XSDType('int'),
-        xsdpre + 'integer' : XSDType('int'), # both are possible, don't think we care about the difference
+        xsdpre + 'integer' : XSDType('integer'),
+        xsdpre + 'decimal' : XSDType('decimal'),
         xsdpre + 'double' : XSDType('double'),
         xsdpre + 'string' : XSDType('string')
     }
@@ -441,21 +450,50 @@ def die(*args):
 def main():
     parser = argparse.ArgumentParser(description="""This tool converts an
                         OpenMalaria schema file to a more readable documentation format.""")
-    parser.add_argument('schema', metavar='SCHEMA', nargs=1,
+    parser.add_argument('schema', metavar='SCHEMA', nargs='+',
                         help="Schema file to be translated")
     parser.add_argument('-o','--output', metavar='FILE', action='store',
                         help='File to output to (if not given, output is to stdout')
     args = parser.parse_args()
     # args.schema : file to translate
     # args.output : output file
-    schema = args.schema[0] # always an array?
-    schema_name = os.path.basename(schema)
-    with open(schema, 'r') as f_in:
-        if args.output is not None:
-            with open(args.output, 'w') as f_out:
-                translate(f_in, f_out, schema_name)
-        else:
-            translate(f_in, sys.stdout, schema_name)
+    global linkbase
+    if len(args.schema) == 1:
+        schema_name = os.path.basename(args.schema[0])
+        with open(args.schema[0], 'r') as f_in:
+            if args.output is not None:
+                linkbase = os.path.splitext(os.path.basename(args.output))[0]
+                with open(args.output, 'w') as f_out:
+                    translate(f_in, f_out, schema_name)
+            else:
+                translate(f_in, sys.stdout, schema_name)
+    else:
+        assert len(args.schema) > 1
+        assert args.output is None or die('cannot use -o / --output option with more than one input file')
+        generated=[]
+        for sch_file in args.schema:
+            print('Reading',sch_file,'...', file=sys.stderr)
+            schema = os.path.basename(sch_file)
+            m = re.match('scenario_([0-9_]+)\.xsd', schema)
+            assert m is not None or die('Schema file name does not match regular expression:',schema)
+            linkbase = 'GeneratedSchema'+str(m.group(1))+'Doc'
+            generated.append((linkbase,schema))
+            with open(sch_file, 'r') as f_in:
+                with open(linkbase + '.wiki', 'w') as f_out:
+                    translate(f_in, f_out, schema)
+        with open('GeneratedSchemaDocIndex.wiki', 'w') as f_out:
+            w = DocWriter(f_out)
+            w.line('= Generated Schema Documentation =')
+            w.line('This documentation was generated with the following command.')
+            w.line('Comments welcome but be warned edits will most likely be lost.')
+            w.line('{{{')
+            w.line(' '.join(sys.argv))
+            w.line('}}}')
+            w.line()
+            w.line('== Index ==')
+            for link, schema in generated:
+                w.line('  * [' + link + ' ' + schema + ']')
+            w.finish()
 
 if __name__ == "__main__":
     main()

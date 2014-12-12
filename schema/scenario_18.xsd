@@ -309,7 +309,7 @@
       <xs:documentation>Description of input EIR for
        one specific vector species in terms of a Fourier approximation
        to the ln of the EIR during the burn in period</xs:documentation>
-      <xs:appinfo>name;Description of input EIR for one vector;</xs:appinfo>
+      <xs:appinfo>name:Description of input EIR for one vector;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:element name="eir">
@@ -569,7 +569,7 @@
                 Detection limit for parasitemia
               </xs:documentation>
               <xs:appinfo>
-                units:parasites/micolitre;min:0;max:1000;name=Detection limit for parasitaemia;
+                units:parasites/micolitre;min:0;max:1000;name:Detection limit for parasitaemia;
               </xs:appinfo>
             </xs:annotation>
           </xs:attribute>
@@ -589,7 +589,7 @@
         <xs:documentation>
           Name of monitoring data
         </xs:documentation>
-        <xs:appinfo>units:string;name of monitoring information;</xs:appinfo>
+        <xs:appinfo>units:string;name:name of monitoring information;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -948,7 +948,7 @@
     <xs:attribute name="vaccineType" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>Type of vaccine</xs:documentation>
-        <xs:appinfo>units:Code;Type of vaccine;</xs:appinfo>
+        <xs:appinfo>units:Code;name:Type of vaccine;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
