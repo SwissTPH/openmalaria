@@ -93,7 +93,7 @@ class XSDType:
     def type_spec(self):
         return self.name
     def has_elts(self):
-        return True     # we don't have child elts but we do have a type
+        return 1        # we don't have child elts but we do have a type
     def has_attrs(self):
         return False
     def write_elt_spec(self, w):
@@ -121,7 +121,8 @@ class ComplexType(Node):
     """Represent a type in the schema"""
     def __init__(self, node):
         self.attrs = []
-        self.children = None
+        self.children = None # tree of child elements
+        self.elements = [] # flat list of child elements
         self.base_name = None
         Node.__init__(self, node)
     
@@ -150,7 +151,9 @@ class ComplexType(Node):
         result = []
         for child in parent:
             if child.tag == xsdpre + 'element':
-                result.append(Element(child))
+                elt = Element(child)
+                result.append(elt)
+                self.elements.append(elt)
             elif child.tag == xsdpre + 'choice':
                 result.append(('choice', self.read_elts(child)))
             else:
@@ -179,24 +182,14 @@ class ComplexType(Node):
                 assert self.base_type is not None or die('unknown type',self.base_name)
                 self.base_type.collect_elements(elements, stypes, parent)
             del self.base_name
-        if self.children is not None and self.children != 'simple':
-            self.collect_elts_rec(self.children, elements, stypes, parent)
-    def collect_elts_rec(self, node, elements, stypes, parent):
-        if isinstance(node, Element):
-            node.collect_elements(elements, stypes, parent)
-            return []
-        else:
-            assert len(node) == 2
-            children=[]
-            for child in node[1]:
-                children += self.collect_elts_rec(child, elements, stypes, parent)
-            return children
+        for child in self.elements:
+            child.collect_elements(elements, stypes, parent)
     
     def has_attrs(self):
         return len(self.attrs) > 0
     def has_elts(self):
-        have_elts = self.children is not None and self.children != 'simple'
-        if not have_elts and self.base_type is not None:
+        have_elts = 2 if len(self.elements) > 0 else 0
+        if have_elts == 0 and self.base_type is not None:
             return self.base_type.has_elts()
         return have_elts
     def write_attr_spec(self, w):
@@ -283,6 +276,28 @@ class Attribute(Node):
         else:
             rst += self.t.type_spec()
         return rst
+    
+    def writedoc(self, w):
+        w.line()
+        name = self.appinfo.get('name', self.name)
+        w.line('====', name, '====')
+        w.line('{{{')
+        w.line(self.type_spec())
+        w.line('}}}')
+        if 'units' in self.appinfo:
+            w.line('*Units:*', self.appinfo['units'])
+        if 'min' in self.appinfo:
+            w.line('*Min:*', self.appinfo['min'])
+        if 'max' in self.appinfo:
+            w.line('*Max:*', self.appinfo['max'])
+        if self.default:
+            w.line('*Default value:*', self.default)
+            
+        if self.doc is not None:
+            w.line()
+            lines = self.doc.split('\n')
+            for line in lines:
+                w.line(line.lstrip())
 
 class Element(Node):
     """Represent an element type in the schema"""
@@ -324,18 +339,19 @@ class Element(Node):
     
     def writedoc(self, w):
         w.line()
-        w.line('==', self.headname, '==')
+        w.line()
+        w.line('=', self.headname, '=')
         w.line(self.breadcrumb(None))
         w.line()
-        w.line('===== specification =====')
+        #w.line('===== specification =====')
         w.line('{{{')
-        has_attrs = self.elt_type.has_attrs()
-        has_elts = self.elt_type.has_elts()
-        w.line('<'+self.name+('' if has_attrs else ('>' if has_elts else '/>')))
-        if has_attrs:
+        have_attrs = self.elt_type.has_attrs()
+        have_elts = self.elt_type.has_elts()
+        w.line('<'+self.name+('' if have_attrs else ('>' if have_elts>0 else '/>')))
+        if have_attrs:
             self.elt_type.write_attr_spec(w)
-            w.line('  >' if has_elts else '  />')
-        if has_elts:
+            w.line('  >' if have_elts>0 else '  />')
+        if have_elts>0:
             self.elt_type.write_elt_spec(w)
             w.line('</'+self.name+'>')
         w.line('}}}')
@@ -344,10 +360,22 @@ class Element(Node):
         doc = self.doc if self.doc is not None else self.elt_type.doc
         if doc is not None:
             w.line()
-            w.line('===== documentation =====')
+            #w.line('===== documentation =====')
             lines = doc.split('\n')
             for line in lines:
                 w.line(line.lstrip())
+        
+        if have_attrs:
+            w.line()
+            w.line('=== Attributes ===')
+            for attr in self.elt_type.attrs:
+                attr.writedoc(w)
+        
+        if have_elts>1:
+            w.line()
+            w.line('=== Elements ===')
+            for elt in self.elt_type.elements:
+                w.line('  * [' + linkname(elt.headname) + ' ' + elt.name + ']')
     
     def breadcrumb(self, parent):
         parent = self.parent if parent is None else parent
