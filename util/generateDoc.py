@@ -30,11 +30,9 @@ class DocWriter:
     """Writes formatted text to a file"""
     def __init__(self,f_out):
         self.f = f_out
-    def head(self, schema_file):
-        m = re.match('scenario[^0-9]*([0-9_]+)', schema_file)
-        ver = str(m.group(1))+' documentation' if m is not None else 'documentation (unknown version)'
+    def head(self, schema_file, ver):
         # write header
-        self.line('= Generated schema', ver, '=')
+        self.line('= Generated schema', ver, 'documentation =')
         self.line('This page is automatically generated from the following schema file: `'+schema_file+'`.')
         self.line('I recommend against editing it because edits will likely be lost later.')
         self.line()
@@ -83,7 +81,7 @@ def replace_pre(name):
 linkbase='PLACEHOLDER' # note: if not specifying an output file, links will not work
 def linkname(headname):
     """Return a link name compatible with Google wiki"""
-    return linkbase + headname.replace(' ','_')
+    return linkbase + '#' + headname.replace(' ','_')
 
 class XSDType:
     """for built-in types (int, string, etc.)"""
@@ -202,7 +200,7 @@ class ComplexType(Node):
             if attr.use == 'optional' or attr.default:
                 w.line('  [', attr.type_spec(),('] DEFAULT VALUE '+str(attr.default) if attr.default is not None else ']'))
             else:
-                w.line('   ', attr.type_spec(), ']')
+                w.line('   ', attr.type_spec())
     def write_elt_spec(self, w):
         if self.base_type is not None:
             self.base_type.write_elt_spec(w) #TODO: is this correct?
@@ -384,7 +382,7 @@ class Element(Node):
     
     def breadcrumb(self, parent):
         parent = self.parent if parent is None else parent
-        r = '' if parent is None else parent.breadcrumb(None) + ' → '
+        r = '→ ' if parent is None else parent.breadcrumb(None) + ' → '
         return r + '[' + linkname(self.headname) + ' ' + self.name + ']'
 
 class RepeatElement:
@@ -399,9 +397,23 @@ class RepeatElement:
         w.line()
         w.line('['+linkname(self.elt.headname), 'See above]')
 
+class FixedAttribute:
+    def __init__(self, string):
+        self.string = string
+        self.use = 'required'
+        self.default = None
+    def set_type(self, stypes):
+        pass
+    def type_spec(self):
+        return self.string
+    def writedoc(self, w):
+        pass
+
 def translate(f_in, f_out, schema_file):
+    m = re.match('scenario[^0-9]*([0-9_]+)', schema_file)
+    ver = str(m.group(1)) if m is not None else '??'
     w = DocWriter(f_out)
-    w.head(schema_file)
+    w.head(schema_file, ver)
     
     tree = ET.parse(f_in)
     root = tree.getroot()
@@ -434,6 +446,18 @@ def translate(f_in, f_out, schema_file):
             omroot = Element(child)
         else:
             die('unexpected tag in schema:', child.tag)
+    
+    # handle namespace crap
+    omroot.elt_type.attrs.append(FixedAttribute(
+        'xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"'))
+    if targetns is None: # pre 32
+        omroot.elt_type.attrs.append(FixedAttribute(
+            'xsi:noNamespaceSchemaLocation="'+schema_file+'"'))
+    else:
+        omroot.elt_type.attrs.append(FixedAttribute(
+            'xmlns:om="http://openmalaria.org/schema/scenario_' + ver + '"'))
+        omroot.elt_type.attrs.append(FixedAttribute(
+            'xsi:schemaLocation="http://openmalaria.org/schema/scenario_'+ver+' '+schema_file+'"'))
     
     elements=[]
     omroot.collect_elements(elements, stypes, None)
