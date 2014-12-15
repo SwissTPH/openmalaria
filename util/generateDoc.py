@@ -50,6 +50,12 @@ class DocWriter:
         pass
     def line(self, *args):
         print(*args, file=self.f)
+    def doc(self, name, doc):
+        self.line()
+        self.line('==== Documentation ('+name+') ====')
+        lines = doc.split('\n')
+        for line in lines:
+            self.line(line.lstrip())
 
 def parse_appinfo(text):
     result = {}
@@ -99,6 +105,8 @@ class XSDType:
         return False
     def write_elt_spec(self, w):
         w.line('    ' + self.name)
+    def write_doc(self, w, docname):
+        pass
 
 class Node:
     """Base schema node"""
@@ -195,6 +203,18 @@ class ComplexType(Node):
         if have_elts == 0 and self.base_type is not None:
             return self.base_type.has_elts()
         return have_elts
+    def write_elt_links(self, w):
+        #w.line()
+        #w.line('=== Elements ===')
+        if self.base_type is not None:
+            self.base_type.write_elt_links(w)
+        for elt in self.elements:
+            w.line('  * [' + linkname(elt.headname) + ' ' + elt.name + ']')
+    def write_doc(self, w, docname):
+        if self.doc is not None:
+            w.doc(docname, self.doc)
+        if self.base_type is not None:
+            self.base_type.write_doc(w, 'base type')
     def write_attr_spec(self, w):
         for attr in self.attrs:
             if attr.use == 'optional' or attr.default:
@@ -359,26 +379,18 @@ class Element(Node):
             w.line('</'+self.name+'>')
         w.line('}}}')
         
-        #TODO: should we print both if both are present?
-        doc = self.doc if self.doc is not None else self.elt_type.doc
-        if doc is not None:
-            w.line()
-            #w.line('===== documentation =====')
-            lines = doc.split('\n')
-            for line in lines:
-                w.line(line.lstrip())
+        if have_elts>1:
+            self.elt_type.write_elt_links(w)
+        
+        if self.doc is not None:
+            w.doc('element', self.doc)
+        self.elt_type.write_doc(w, 'type')
         
         if have_attrs:
             w.line()
             w.line('=== Attributes ===')
             for attr in self.elt_type.attrs:
                 attr.writedoc(w)
-        
-        if have_elts>1:
-            w.line()
-            w.line('=== Elements ===')
-            for elt in self.elt_type.elements:
-                w.line('  * [' + linkname(elt.headname) + ' ' + elt.name + ']')
     
     def breadcrumb(self, parent):
         parent = self.parent if parent is None else parent
@@ -410,6 +422,10 @@ class FixedAttribute:
         pass
 
 def translate(f_in, f_out, schema_file):
+    global nsmap
+    global headnames
+    headnames=set() # reset
+    
     m = re.match('scenario[^0-9]*([0-9_]+)', schema_file)
     ver = str(m.group(1)) if m is not None else '??'
     w = DocWriter(f_out)
@@ -420,7 +436,6 @@ def translate(f_in, f_out, schema_file):
     assert root.tag == xsdpre + 'schema'
     targetns = root.get('targetNamespace')
     ompre = '' if targetns is None else '{' + targetns + '}'
-    global nsmap
     try:
         nsmap = root.nsmap
     except AttributeError:
