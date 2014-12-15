@@ -33,8 +33,14 @@ namespace OM { namespace WithinHost {
 // ———  Diagnostic (non-static)  ———
 
 Diagnostic::Diagnostic( const Parameters& parameters, const scnXml::Diagnostic& elt ){
+    dens_lim = numeric_limits<double>::quiet_NaN();
+    specificity = numeric_limits<double>::quiet_NaN();
+    
+    if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
+        return; // both parameters NaN (set above)
+    }
+    
     if( elt.getDeterministic().present() ){
-        specificity = numeric_limits<double>::quiet_NaN();
         dens_lim = elt.getDeterministic().get().getMinDensity();
     }else if( elt.getStochastic().present() ){
         dens_lim = elt.getStochastic().get().getDens_50();
@@ -42,7 +48,6 @@ Diagnostic::Diagnostic( const Parameters& parameters, const scnXml::Diagnostic& 
             // The equation used for stochastic diagnostics breaks down when
             // dens=dens_lim=0 and for other cases the deterministic model is
             // the same when dens_lim=0.
-            specificity = numeric_limits<double>::quiet_NaN();
         }else{
             specificity = elt.getStochastic().get().getSpecificity();
             if( specificity < 0.0 || specificity > 1.0 ){
