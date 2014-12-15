@@ -30,20 +30,41 @@ class DocWriter:
     """Writes formatted text to a file"""
     def __init__(self,f_out):
         self.f = f_out
+    
+    """wiki formatting functions"""
+    def heading(self, level, *title):
+        """level: 1 is biggest heading, 2 next, 5 smallest"""
+        tag = "=" * level
+        args=[tag]
+        args.extend(title)
+        args.append(tag)
+        self.line(*args)
+    def bold(self, text):
+        return '*' + text + '*'
+    def link(self, target, text):
+        """return text for a link, to be injected into a line"""
+        return '['+target+' '+text+']'
+    def bulleted(self, *args):
+        self.line('  *', *args)
+    def startcode(self):
+        self.line('{{{')
+    def endcode(self):
+        self.line('}}}')
+    
     def head(self, schema_file, ver):
         # write header
-        self.line('= Generated schema', ver, 'documentation =')
+        self.heading(1, 'Generated schema', ver, 'documentation')
         self.line('This page is automatically generated from the following schema file: `'+schema_file+'`.')
         self.line('I recommend against editing it because edits will likely be lost later.')
         self.line()
         self.line('Key:')
-        self.line('<code>')
+        self.startcode()
         self.line('    abc             required (one)')
         self.line('  [ def ]           optional (zero or one)')
         self.line('  ( ghi )*          any number (zero or more)')
         self.line('  ( jkl )+          at least one')
         self.line('  ( mno ){2,inf}    two or more occurrences')
-        self.line('</code>')
+        self.endcode()
         #self.line('<wiki:toc max_depth="3"/>')
     def finish(self):
         # write footer
@@ -52,7 +73,7 @@ class DocWriter:
         print(*args, file=self.f)
     def doc(self, name, doc):
         self.line()
-        self.line('==== Documentation ('+name+') ====')
+        self.heading(4, 'Documentation ('+name+')')
         lines = doc.split('\n')
         for line in lines:
             self.line(line.lstrip())
@@ -205,11 +226,11 @@ class ComplexType(Node):
         return have_elts
     def write_elt_links(self, w):
         #w.line()
-        #w.line('=== Elements ===')
+        #w.heading(3, 'Elements')
         if self.base_type is not None:
             self.base_type.write_elt_links(w)
         for elt in self.elements:
-            w.line('  * [' + linkname(elt.headname) + ' ' + elt.name + ']')
+            w.bulleted(w.link(linkname(elt.headname), elt.name))
     def write_doc(self, w, docname):
         if self.doc is not None:
             w.doc(docname, self.doc)
@@ -303,18 +324,18 @@ class Attribute(Node):
     def writedoc(self, w):
         w.line()
         name = self.appinfo.get('name', self.name)
-        w.line('====', name, '====')
-        w.line('{{{')
+        w.heading(4, name)
+        w.startcode()
         w.line(self.type_spec())
-        w.line('}}}')
+        w.endcode()
         if 'units' in self.appinfo:
-            w.line('*Units:*', self.appinfo['units'])
+            w.line(w.bold('Units:'), self.appinfo['units'])
         if 'min' in self.appinfo:
-            w.line('*Min:*', self.appinfo['min'])
+            w.line(w.bold('Min:'), self.appinfo['min'])
         if 'max' in self.appinfo:
-            w.line('*Max:*', self.appinfo['max'])
+            w.line(w.bold('Max:'), self.appinfo['max'])
         if self.default:
-            w.line('*Default value:*', self.default)
+            w.line(w.bold('Default value:'), self.default)
             
         if self.doc is not None:
             w.line()
@@ -363,11 +384,11 @@ class Element(Node):
     def writedoc(self, w):
         w.line()
         w.line()
-        w.line('=', self.headname, '=')
-        w.line(self.breadcrumb(None))
+        w.heading(1, self.headname)
+        w.line(self.breadcrumb(w, None))
         w.line()
-        #w.line('===== specification =====')
-        w.line('{{{')
+        #w.heading(5, 'specification')
+        w.startcode()
         have_attrs = self.elt_type.has_attrs()
         have_elts = self.elt_type.has_elts()
         w.line('<'+self.name+('' if have_attrs else ('>' if have_elts>0 else '/>')))
@@ -377,7 +398,7 @@ class Element(Node):
         if have_elts>0:
             self.elt_type.write_elt_spec(w)
             w.line('</'+self.name+'>')
-        w.line('}}}')
+        w.endcode()
         
         if have_elts>1:
             self.elt_type.write_elt_links(w)
@@ -388,14 +409,14 @@ class Element(Node):
         
         if have_attrs:
             w.line()
-            w.line('=== Attributes ===')
+            w.heading(3, 'Attributes')
             for attr in self.elt_type.attrs:
                 attr.writedoc(w)
     
-    def breadcrumb(self, parent):
+    def breadcrumb(self, w, parent):
         parent = self.parent if parent is None else parent
-        r = '→ ' if parent is None else parent.breadcrumb(None) + ' → '
-        return r + '[' + linkname(self.headname) + ' ' + self.name + ']'
+        r = '→ ' if parent is None else parent.breadcrumb(w, None) + ' → '
+        return r + w.link(linkname(self.headname), self.name)
 
 class RepeatElement:
     def __init__(self, element, parent):
@@ -404,10 +425,10 @@ class RepeatElement:
     
     def writedoc(self, w):
         name = self.elt.appinfo.get('name', self.elt.name)
-        w.line('==', name, '==')
-        w.line(self.elt.breadcrumb(self.parent))
+        w.heading(2, name)
+        w.line(self.elt.breadcrumb(w, self.parent))
         w.line()
-        w.line('['+linkname(self.elt.headname), 'See above]')
+        w.line(w.link(linkname(self.elt.headname), 'See above'))
 
 class FixedAttribute:
     def __init__(self, string):
@@ -522,16 +543,16 @@ def main():
                     translate(f_in, f_out, schema)
         with open('GeneratedSchemaDocIndex.wiki', 'w') as f_out:
             w = DocWriter(f_out)
-            w.line('= Generated Schema Documentation =')
+            w.heading(1, 'Generated Schema Documentation')
             w.line('This documentation was generated with the following command.')
             w.line('Comments welcome but be warned edits will most likely be lost.')
-            w.line('{{{')
+            w.startcode()
             w.line(' '.join(sys.argv))
-            w.line('}}}')
+            w.endcode()
             w.line()
-            w.line('== Index ==')
+            w.heading(2, 'Index')
             for link, schema in generated:
-                w.line('  * [' + link + ' ' + schema + ']')
+                w.bulleted(w.link(link, schema))
             w.finish()
 
 if __name__ == "__main__":
