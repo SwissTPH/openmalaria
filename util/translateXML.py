@@ -1,5 +1,7 @@
 #!/usr/bin/env python2
 # -*- coding: utf-8 -*-
+from __future__ import print_function
+
 """
 This file is part of OpenMalaria.
 
@@ -23,10 +25,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 Tool for translating OpenMalaria XML files from one version to the next
 
 Note: ElementTree appears to have bugs in Python 3.3, but works in 2.7
-Most of this code works in both Python 2.x and 3.x, with a little compatibilty option:
+Most of this code works in both Python 2.x and 3.x, with a little compatibilty
+option (print function).
 """
-from __future__ import print_function
-
 import argparse, os, sys
 
 # We should be able to use lxml or ElementTree. The former may have better formatting.
@@ -119,6 +120,8 @@ class Translator:
     def update(self,args):
         if args.mol5d_pairwise:
             self.enable_mol5d_pairwise()
+        if args.add_human_weight:
+            self.add_human_weight()
         while self.schema_ver < args.target_version:
             func_name = 'translate_' + str(self.schema_ver) + '_to_' + str(self.schema_ver+1)
             if not func_name in dir(self):      # do we have this function?
@@ -353,6 +356,34 @@ class Translator:
             mOpts.append(ET.Element('option', {'name':'MOLINEAUX_WITHIN_HOST_MODEL', 'value':'true'}))
         if not have_set_pairwise:
             mOpts.append(ET.Element('option', {'name':'MOLINEAUX_PAIRWISE_SAMPLE', 'value':'true'}))
+    
+    def add_human_weight(self):
+        model = self.root.find('model')
+        human = model.find('human')
+        weight = ET.Element('weight', {'multStdDev':'0.14'})
+        human.append(weight)
+        groups = [
+            ('0.0', '13.9856718'),
+            ('1.0', '18.30372108'),
+            ('2.0', '21.745749'),
+            ('3.0', '24.25753512'),
+            ('4.0', '26.06595444'),
+            ('5.0', '28.48868784'),
+            ('6.0', '30.84202788'),
+            ('7.0', '33.48638244'),
+            ('8.0', '35.20335432'),
+            ('9.0', '37.19394024'),
+            ('10.0', '40.1368962'),
+            ('11.0', '42.00539916'),
+            ('12.0', '44.53731348'),
+            ('13.0', '46.77769728'),
+            ('14.0', '49.48396092'),
+            ('15.0', '54.36'),
+            ('20.0', '60.0'),
+            ('20.0', '60.0')
+        ]
+        for (lb, val) in groups:
+            weight.append(ET.Element('group', {'lowerbound':lb, 'value':val}))
 
 def die(*args):
     print(*args, file=sys.stderr)
@@ -370,7 +401,7 @@ def readArgs():
     group.add_argument('-d','--dest', metavar='DIR', action='store', default=None,
                         help='Destination directory for translated scenarios')
     group.add_argument('-i', '--in-place', action='store_true', default=False,
-                        help='If set, files will be updated in-place (incompatible with -d option')
+                        help='If set, files will be updated in-place (incompatible with -d option)')
     group.add_argument('--db', metavar='DBNAME', action='store', default=None,
                        help='If set, files will be updated from the scenarios table of this database.')
     parser.add_argument('-u','--user', metavar='USER', action='store', default=None,
@@ -379,6 +410,8 @@ def readArgs():
                         help='[DB mode] If given, only scenarios with this run_id are updated; if not, all are updated.')
     parser.add_argument('--mol5d-pairwise', action='store_true', default=False,
                         help='Update XMLs using a 5-day time step to use the Molineaux model with pairwise sampling.')
+    parser.add_argument('--add-human-weight', action='store_true', default=False,
+                        help='Add scenario/model/human/weight data to scenarios')
     args = parser.parse_args()
     if args.dest and not os.path.isdir(args.dest):
         die('Not a directory:', args.dest)
@@ -459,6 +492,7 @@ def main():
     # args.user : database username or None
     # args.run_id : run_id for scenarios in DB
     # args.mol5d_pairwise : switch WHM, keep interval
+    # args.add_human_weight : add model data
     if args.db != None:
         if len(args.files) > 0:
             die('incompatible: DB mode and specifying files on the commandline')
