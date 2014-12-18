@@ -26,34 +26,69 @@ import argparse, sys, os.path, re
 #except ImportError:
 import xml.etree.ElementTree as ET
 
+linkbase='PLACEHOLDER' # note: if not specifying an output file, links will not work
+
 class DocWriter:
     """Writes formatted text to a file"""
     def __init__(self,f_out):
         self.f = f_out
     
-    """wiki formatting functions"""
-    def heading(self, level, *title):
+    #"""wiki formatting functions: Google Code wiki"""
+    #def heading(self, level, *title):
+        #"""level: 1 is biggest heading, 2 next, 5 smallest"""
+        #tag = "=" * level
+        #args=[tag]
+        #args.extend(title)
+        #args.append(tag)
+        #self.line(*args)
+    #def bold(self, text):
+        #return '*' + text + '*'
+    #def link(self, name, text, internal=True):
+        #"""return text for a link, to be injected into a line"""
+        ## Format compatible with Google wiki:
+        #if internal:
+            #target = linkbase + '#' + name.replace(' ', '_')
+        #else:
+            #target = name
+        #return '['+target+' '+text+']'
+    #def bulleted(self, *args):
+        #self.line('  *', *args)
+    #def startcode(self):
+        #self.line('{{{')
+    #def endcode(self):
+        #self.line('}}}')
+    
+    """wiki formatting functions: GitHub Markdown"""
+    def heading(self, level, text):
         """level: 1 is biggest heading, 2 next, 5 smallest"""
-        tag = "=" * level
-        args=[tag]
-        args.extend(title)
-        args.append(tag)
-        self.line(*args)
+        if level <= 2:
+            self.line(text)
+            char = '=' if level == 1 else '-'
+            self.line(char * max(len(text), 3))
+        else:
+            self.line('#' * level, text)
+        #self.line('<h'+str(level)+' id="'+text.replace(' ','_')+'">' + text + '</h'+str(level)+'>')
     def bold(self, text):
-        return '*' + text + '*'
-    def link(self, target, text):
+        return '**' + text + '**'
+    def link(self, name, text, internal=True):
         """return text for a link, to be injected into a line"""
-        return '['+target+' '+text+']'
+        # intended for internal links in HTML documents:
+        if internal:
+            # compatible with GitHub links:
+            target = '#' + name.lower().replace(' ','-').replace('(','').replace(')','').replace('/','').replace('|','').replace(',','')
+        else:
+            target = name
+        return '['+text+']('+target+')'
     def bulleted(self, *args):
-        self.line('  *', *args)
-    def startcode(self):
-        self.line('{{{')
+        self.line('*  ', *args)
+    def startcode(self, lang=''):
+        self.line('```' + lang)
     def endcode(self):
-        self.line('}}}')
+        self.line('```')
     
     def head(self, schema_file, ver):
         # write header
-        self.heading(1, 'Generated schema', ver, 'documentation')
+        self.heading(1, 'Generated schema '+ver+' documentation')
         self.line('This page is automatically generated from the following schema file: `'+schema_file+'`.')
         self.line('I recommend against editing it because edits will likely be lost later.')
         self.line()
@@ -105,10 +140,6 @@ def replace_pre(name):
         return '{' + nsmap[parts[0]] + '}' + parts[1]
     else:
         return name
-linkbase='PLACEHOLDER' # note: if not specifying an output file, links will not work
-def linkname(headname):
-    """Return a link name compatible with Google wiki"""
-    return linkbase + '#' + headname.replace(' ','_')
 
 class XSDType:
     """for built-in types (int, string, etc.)"""
@@ -230,7 +261,7 @@ class ComplexType(Node):
         if self.base_type is not None:
             self.base_type.write_elt_links(w)
         for elt in self.elements:
-            w.bulleted(w.link(linkname(elt.headname), elt.name))
+            w.bulleted(w.link(elt.headname, elt.name))
     def write_doc(self, w, docname):
         if self.doc is not None:
             w.doc(docname, self.doc)
@@ -325,7 +356,7 @@ class Attribute(Node):
         w.line()
         name = self.appinfo.get('name', self.name)
         w.heading(4, name)
-        w.startcode()
+        w.startcode('xml')
         w.line(self.type_spec())
         w.endcode()
         if 'units' in self.appinfo:
@@ -361,9 +392,13 @@ class Element(Node):
         else:
             Node.read_child(self, child)
     
+    def depth(self):
+        return 0 if self.parent is None else 1 + self.parent.depth()
+    
     def collect_elements(self, elements, stypes, parent):
         if self in elements:
-            elements.append(RepeatElement(self, parent))
+            if parent.depth() < self.parent.depth():
+                self.parent = parent
         else:
             self.parent = parent
             n = self.appinfo.get('name', self.name)
@@ -372,7 +407,7 @@ class Element(Node):
             i = 1
             while self.headname in headnames:
                 i += 1
-                self.headname = n + ' ('+str(i)+')'
+                self.headname = n + ' (n'+str(i)+')'
             headnames.add(self.headname)
             elements.append(self)
             
@@ -388,7 +423,7 @@ class Element(Node):
         w.line(self.breadcrumb(w, None))
         w.line()
         #w.heading(5, 'specification')
-        w.startcode()
+        w.startcode('xml')
         have_attrs = self.elt_type.has_attrs()
         have_elts = self.elt_type.has_elts()
         w.line('<'+self.name+('' if have_attrs else ('>' if have_elts>0 else '/>')))
@@ -416,19 +451,7 @@ class Element(Node):
     def breadcrumb(self, w, parent):
         parent = self.parent if parent is None else parent
         r = '→ ' if parent is None else parent.breadcrumb(w, None) + ' → '
-        return r + w.link(linkname(self.headname), self.name)
-
-class RepeatElement:
-    def __init__(self, element, parent):
-        self.elt = element
-        self.parent = parent
-    
-    def writedoc(self, w):
-        name = self.elt.appinfo.get('name', self.elt.name)
-        w.heading(2, name)
-        w.line(self.elt.breadcrumb(w, self.parent))
-        w.line()
-        w.line(w.link(linkname(self.elt.headname), 'See above'))
+        return r + w.link(self.headname, self.name)
 
 class FixedAttribute:
     def __init__(self, string):
@@ -539,20 +562,20 @@ def main():
             linkbase = 'GeneratedSchema'+str(m.group(1))+'Doc'
             generated.append((linkbase,schema))
             with open(sch_file, 'r') as f_in:
-                with open(linkbase + '.wiki', 'w') as f_out:
+                with open(linkbase + '.md', 'w') as f_out:
                     translate(f_in, f_out, schema)
-        with open('GeneratedSchemaDocIndex.wiki', 'w') as f_out:
+        with open('GeneratedSchemaDocIndex.md', 'w') as f_out:
             w = DocWriter(f_out)
             w.heading(1, 'Generated Schema Documentation')
             w.line('This documentation was generated with the following command.')
             w.line('Comments welcome but be warned edits will most likely be lost.')
-            w.startcode()
+            w.startcode('sh')
             w.line(' '.join(sys.argv))
             w.endcode()
             w.line()
             w.heading(2, 'Index')
             for link, schema in generated:
-                w.bulleted(w.link(link, schema))
+                w.bulleted(w.link(link, schema, internal=False))
             w.finish()
 
 if __name__ == "__main__":
