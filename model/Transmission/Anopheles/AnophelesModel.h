@@ -279,10 +279,9 @@ private:
 
     struct NHHParams {
         // α_i
-        // rate: humans encountered per day
+        // rate: hosts encountered per day
         double entoAvailability;
         // α_i * P_B_i * P_C_i * P_D_i
-        // units as for entoAvailability
         double probCompleteCycle;
     };
     /** Non-human host data. Doesn't need checkpointing. */

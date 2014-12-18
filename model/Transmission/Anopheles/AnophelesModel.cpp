@@ -63,144 +63,109 @@ string AnophelesModel::initialise (
 }
 
 
-/* Used by initAvailability to store temporary data. */
-class AnophelesNonHumanParams {
-public:
-    void operator= (const scnXml::NonHumanHosts& nnh)
-    {
-        name = nnh.getName();
-        relativeEntoAvailability = nnh.getMosqRelativeEntoAvailability().getValue();
-        probMosqBiting = nnh.getMosqProbBiting().getValue();
-        probMosqFindRestSite = nnh.getMosqProbFindRestSite().getValue();
-        probMosqSurvivalResting = nnh.getMosqProbResting().getValue();
-    }
-    
-    double prodBCD() const{	// P_B_i * P_C_i * P_D_i
-        return probMosqBiting * probMosqFindRestSite * probMosqSurvivalResting;
-    }
-    
-    string name;        // name of host type
-    double relativeEntoAvailability;            // ξ_i
-    double probMosqBiting;				// P_B_i
-    double probMosqFindRestSite;		// P_C_i
-    double probMosqSurvivalResting;	// P_D_i
-};
-
 void AnophelesModel::initAvailability(
     const scnXml::AnophelesParams& anoph,
     map<string, double>& nonHumanHostPopulations,
     int populationSize)
 {
-    // -----  Read XML data  -----
+    // Set parameters. Notation is as in: Parameter Values for Transmission
+    // Model, Chitnis et al. Sept 2010, equations (13), (14), (15).
     
-    const scnXml::AnophelesParams::NonHumanHostsSequence& otherHosts = anoph.getNonHumanHosts();
-    vector<AnophelesNonHumanParams> nonHumanElts;
-    nonHumanElts.resize (otherHosts.size());
-    for (size_t i = 0; i < otherHosts.size(); ++i) {
-        nonHumanElts[i] = otherHosts[i];
-    }
-    // read χ, P_B_1, P_C_1, P_D_1 and P_E_1; χ and P_E_1 are only needed to
-    // calculate availability while the others are normally sampled.
     const scnXml::Mosq& mosq = anoph.getMosq();
-    double mosqLaidEggsSameDayProp = mosq.getMosqLaidEggsSameDayProportion().getValue();
-    double probMosqSurvivalFeedingCycle = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
-    double humanBloodIndex = mosq.getMosqHumanBloodIndex().getValue();
-    double probBiting = mosq.getMosqProbBiting().getMean();
-    double probFindRestSite = mosq.getMosqProbFindRestSite().getMean();
-    double probResting = mosq.getMosqProbResting().getMean();
-    double probOvipositing = mosq.getMosqProbOvipositing().getValue();
+    const double A0 = mosq.getMosqLaidEggsSameDayProportion().getValue();
+    const double Pf = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
+    const double humanBloodIndex = mosq.getMosqHumanBloodIndex().getValue();    // χ (chi)
+    // Cycle probabilities, when biting a human:
+    const double P_B1 = mosq.getMosqProbBiting().getMean();
+    const double P_C1 = mosq.getMosqProbFindRestSite().getMean();
+    const double P_D1 = mosq.getMosqProbResting().getMean();
+    const double P_E1 = mosq.getMosqProbOvipositing().getValue();
     
     
     // -----  Calculate P_A, P_A1, P_A_n  -----
-    // Reference: Parameter Values for Transmission Model,
-    // Chitnis et al. Sept 2010, equations (13), (14), (15).
-    
     // Probability that a mosquito does not find a host and does not die in
     // one night of searching (P_A)
-    double initP_A  = 1.0 - mosqLaidEggsSameDayProp;
+    const double initP_A  = 1.0 - A0;
     // Probability that a mosquito encounters a human on a given night
-    double P_A1;
+    double P_A1 = numeric_limits<double>::quiet_NaN();
     // Probability that a mosquito encounters a non human host on a given night
     // (confusingly labelled P_Ah in paper)
-    double P_Ah;
+    double P_Ah = numeric_limits<double>::quiet_NaN();
 
-    if (nonHumanElts.empty()) {
-        // i.e. χ=1
-        
-        // A_0 * P_f
-        double pFedAndLaid = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
-        // P_B_i * P_C_i * P_D_i * P_E_i (for average human)
-        double pBiteRestOviposit = probBiting * probFindRestSite * probResting * probOvipositing;
-        P_A1 = pFedAndLaid / pBiteRestOviposit;
+    const scnXml::AnophelesParams::NonHumanHostsSequence& xmlSeqNNHs = anoph.getNonHumanHosts();
+    if( xmlSeqNNHs.empty() ){
+        // No non-human hosts: χ=1
+        P_A1 = A0 * Pf / (P_B1 * P_C1 * P_D1 * P_E1);
         P_Ah = 0.0;
     }else{
-        // i.e. χ<1
+        // Have non-human hosts: χ<1
         
         // let v = χ * P_D_1 * P_E_1; note that this is the average for humans
-        double v = humanBloodIndex * probResting * probOvipositing;
-        // let chi1 = 1 - χ
-        double chi1 = 1.0 - humanBloodIndex;
+        const double v = humanBloodIndex * P_D1 * P_E1;
+        const double chi1 = 1.0 - humanBloodIndex;    // 1 - χ
         
-        // Sxi is the sum of ξ_i across non-human hosts i
-        double Sxi = 0.0;
-        // let u_i = ξ_i * P_B_i * P_C_i
-        // Su is the sum of u_i across non-human hosts i
-        double Su = 0.0;
-        // let w_i = chi1 * P_D_i * P_E_i
-        // Suvw is the sum of u_i*(v+w_i) across non-human hosts i
-        double Suvw = 0.0;
+        double sum_xi = 0.0;    // sum rel. avail across NNHs; should be 1
+        double sum_u = 0.0;     // sum u across NNHs where u = xi * P_B * P_C
+        double sum_uvw = 0.0;   // sum u*(v+w) across NNHs where w = (1-χ)*P_D*P_E
         
-        typedef vector<AnophelesNonHumanParams>::const_iterator ItType;
-        for (ItType nhh = nonHumanElts.begin(); nhh != nonHumanElts.end(); ++nhh) {
-            Sxi += nhh->relativeEntoAvailability;
-            double u_i = nhh->relativeEntoAvailability * nhh->probMosqBiting * nhh->probMosqFindRestSite;
-            Su += u_i;
-            double w_i = chi1 * nhh->probMosqSurvivalResting * probOvipositing;
-            Suvw += u_i * (v + w_i);
+        foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
+            // availability of host relative to other non-human hosts:
+            const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
+            // cycle probabilities, when biting this type of host:
+            const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
+            const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
+            const double P_D_i = xmlNNH.getMosqProbResting().getValue();
+            sum_xi += xi_i;
+            const double u_i = xi_i * P_B_i * P_C_i;
+            sum_u += u_i;
+            const double w_i = chi1 * P_D_i * P_E1;
+            sum_uvw += u_i * (v + w_i);
         }
         
-        if ( !(Sxi>0.9999 && Sxi<1.0001) ){
+        if ( !(sum_xi>0.9999 && sum_xi<1.0001) ){
             throw xml_scenario_error (
                 "The sum of the relative entomological availability (ξ_i) "
                 "across non-human hosts must be 1!"
             );
         }
         
-        double A0Pf = mosqLaidEggsSameDayProp * probMosqSurvivalFeedingCycle;
-        // P_A1 = A_0 * P_f * χ * Su  ...
-        P_A1 = (A0Pf * humanBloodIndex * Su) /
-        // ...  over P_B_1 * P_C_1 * Suvw
-                (probBiting * probFindRestSite * Suvw);
-        // and this one's as written
-        P_Ah = (A0Pf * chi1) / Suvw;
+        // equations (14), (15) of paper:
+        P_A1 = (A0 * Pf * humanBloodIndex * sum_u) /
+                (P_B1 * P_C1 * sum_uvw);
+        P_Ah = (A0 * Pf * chi1) / sum_uvw;
     }
     
     
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
-    humanBase.setEntoAvailability(
-        calcEntoAvailability(populationSize, initP_A, P_A1));
+    humanBase.setEntoAvailability( calcEntoAvailability(populationSize, initP_A, P_A1) );
     
-    nonHumans.resize(nonHumanElts.size());
-    for( size_t i=0; i<nonHumanElts.size(); ++i ){
-        map<string, double>::const_iterator pop = nonHumanHostPopulations.find(nonHumanElts[i].name);
+    nonHumans.reserve(xmlSeqNNHs.size());
+    foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
+        map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
         if (pop == nonHumanHostPopulations.end()){
             throw xml_scenario_error ("There is no population size defined for "
             "at least one non human host type, please check the scenario file.");
         }
         
-        double nonHumanPopulationSize = pop->second;
-        double entoAvailability = calcEntoAvailability(nonHumanPopulationSize,
-                                                       initP_A,
-                                                       P_Ah*nonHumanElts[i].relativeEntoAvailability);
+        // population size for non-human host category:
+        const double N_i = pop->second;
+        // per-NNH parameters, as above:
+        const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
+        const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
+        const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
+        const double P_D_i = xmlNNH.getMosqProbResting().getValue();
+        const double entoAvailability = calcEntoAvailability(N_i, initP_A, P_Ah * xi_i);
         
-        nonHumans[i].entoAvailability = entoAvailability;
-        nonHumans[i].probCompleteCycle = entoAvailability * nonHumanElts[i].prodBCD();
+        NHHParams params;
+        params.entoAvailability = entoAvailability;
+        params.probCompleteCycle = entoAvailability * P_B_i * P_C_i * P_D_i;
+        nonHumans.push_back(params);
     }
     
-    // -----  Calculate death rate while seeking (µ_vA)  -----
+    // ———  set mosqSeekingDeathRate  ———
     // since sum_i(ξ_i)=1, sum_k(P_A_k)=P_A1+P_Ah
-    double mu1 = (1.0-initP_A-P_A1-P_Ah) / (1.-initP_A);
-    double mu2 = -log(initP_A) / mosqSeekingDuration;
+    const double mu1 = (1.0-initP_A-P_A1-P_Ah) / (1.-initP_A);
+    const double mu2 = -log(initP_A) / mosqSeekingDuration;
     mosqSeekingDeathRate = mu1 * mu2;
 }
 
