@@ -154,11 +154,12 @@ void AnophelesModel::initAvailability(
         const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
         const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
         const double P_D_i = xmlNNH.getMosqProbResting().getValue();
-        const double entoAvailability = calcEntoAvailability(N_i, initP_A, P_Ah * xi_i);
+        const double alpha_i = calcEntoAvailability(N_i, initP_A, P_Ah * xi_i);
         
         NHHParams params;
-        params.entoAvailability = entoAvailability;
-        params.probCompleteCycle = entoAvailability * P_B_i * P_C_i * P_D_i;
+        params.number = N_i;
+        params.entoAvailability = alpha_i;
+        params.probCompleteCycle = alpha_i * P_B_i * P_C_i * P_D_i;
         nonHumans.push_back(params);
     }
     
@@ -205,7 +206,7 @@ void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, dou
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
-        leaveSeekingStateRate += nhh->entoAvailability;
+        leaveSeekingStateRate += nhh->number * nhh->entoAvailability;
         initialP_df += nhh->probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
@@ -327,7 +328,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     }
 
     for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
-        leaveSeekingStateRate += nhh->entoAvailability;
+        leaveSeekingStateRate += nhh->number * nhh->entoAvailability;
         tsP_df += nhh->probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.

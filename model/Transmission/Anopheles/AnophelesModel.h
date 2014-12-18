@@ -278,11 +278,13 @@ private:
     double probMosqSurvivalOvipositing;
 
     struct NHHParams {
-        // α_i
-        // rate: hosts encountered per day
+        // N_i: number of hosts of this type
+        double number;  // yes, we allow fractional animals
+        // α_i: rate at which mosquitoes encouter one host of this type
         double entoAvailability;
         // α_i * P_B_i * P_C_i * P_D_i
         double probCompleteCycle;
+        
     };
     /** Non-human host data. Doesn't need checkpointing. */
     vector<NHHParams> nonHumans;
