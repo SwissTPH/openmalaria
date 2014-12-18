@@ -405,10 +405,10 @@ class Element(Node):
             self.headname = n
             global headnames
             i = 1
-            while self.headname in headnames:
+            while self.headname.lower() in headnames:
                 i += 1
                 self.headname = n + ' (n'+str(i)+')'
-            headnames.add(self.headname)
+            headnames.add(self.headname.lower())
             elements.append(self)
             
             if self.elt_type is None:
