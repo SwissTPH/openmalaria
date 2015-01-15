@@ -28,6 +28,19 @@ import xml.etree.ElementTree as ET
 
 linkbase='PLACEHOLDER' # note: if not specifying an output file, links will not work
 
+all_links = set()
+def make_link_from_name(name):
+    a = 'elt-' + name
+    global all_links
+    i = 1
+    link = a
+    while True:
+        if not link in all_links:
+            all_links.add(link)
+            return link
+        i += 1
+        link = a + '-' + str(i)
+
 class DocWriter:
     """Writes formatted text to a file"""
     def __init__(self,f_out):
@@ -43,13 +56,13 @@ class DocWriter:
         #self.line(*args)
     #def bold(self, text):
         #return '*' + text + '*'
-    #def link(self, name, text, internal=True):
+    #def link(self, target, text, internal=True):
         #"""return text for a link, to be injected into a line"""
         ## Format compatible with Google wiki:
         #if internal:
-            #target = linkbase + '#' + name.replace(' ', '_')
+            #target = linkbase + '#' + target
         #else:
-            #target = name
+            #target = target
         #return '['+target+' '+text+']'
     #def bulleted(self, *args):
         #self.line('  *', *args)
@@ -70,14 +83,14 @@ class DocWriter:
         #self.line('<h'+str(level)+' id="'+text.replace(' ','_')+'">' + text + '</h'+str(level)+'>')
     def bold(self, text):
         return '**' + text + '**'
-    def link(self, name, text, internal=True):
+    def link(self, target, text, internal=True):
         """return text for a link, to be injected into a line"""
         # intended for internal links in HTML documents:
         if internal:
             # compatible with GitHub links:
-            target = '#' + name.lower().replace(' ','-').replace('(','').replace(')','').replace('/','').replace('|','').replace(',','')
+            target = '#' + target
         else:
-            target = name
+            target = target
         return '['+text+']('+target+')'
     def bulleted(self, *args):
         self.line('*  ', *args)
@@ -131,7 +144,6 @@ freq_symbs={
 }
 xsdns = 'http://www.w3.org/2001/XMLSchema'
 xsdpre = '{' + xsdns + '}'
-headnames = set()
 def replace_pre(name):
     if name is None:
         return None
@@ -261,7 +273,7 @@ class ComplexType(Node):
         if self.base_type is not None:
             self.base_type.write_elt_links(w)
         for elt in self.elements:
-            w.bulleted(w.link(elt.headname, elt.name))
+            w.bulleted(w.link(elt.linkname, elt.name))
     def write_doc(self, w, docname):
         if self.doc is not None:
             w.doc(docname, self.doc)
@@ -401,14 +413,7 @@ class Element(Node):
                 self.parent = parent
         else:
             self.parent = parent
-            n = self.appinfo.get('name', self.name)
-            self.headname = n
-            global headnames
-            i = 1
-            while self.headname.lower() in headnames:
-                i += 1
-                self.headname = n + ' (n'+str(i)+')'
-            headnames.add(self.headname.lower())
+            self.linkname = make_link_from_name(self.name)
             elements.append(self)
             
             if self.elt_type is None:
@@ -419,7 +424,7 @@ class Element(Node):
     def writedoc(self, w):
         w.line()
         w.line()
-        w.heading(1, self.headname)
+        w.heading(1, '<a name="'+self.linkname+'"></a> ' + self.appinfo.get('name', self.name))
         w.line(self.breadcrumb(w, None))
         w.line()
         #w.heading(5, 'specification')
@@ -451,7 +456,7 @@ class Element(Node):
     def breadcrumb(self, w, parent):
         parent = self.parent if parent is None else parent
         r = '→ ' if parent is None else parent.breadcrumb(w, None) + ' → '
-        return r + w.link(self.headname, self.name)
+        return r + w.link(self.linkname, self.name)
 
 class FixedAttribute:
     def __init__(self, string):
@@ -467,8 +472,8 @@ class FixedAttribute:
 
 def translate(f_in, f_out, schema_file):
     global nsmap
-    global headnames
-    headnames=set() # reset
+    global all_links
+    all_links=set() # reset
     
     m = re.match('scenario[^0-9]*([0-9_]+)', schema_file)
     ver = str(m.group(1)) if m is not None else '??'
