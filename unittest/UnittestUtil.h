@@ -167,12 +167,12 @@ public:
 	//PkPdModel::init ();
 	
         // Drugs
-        scnXml::Phenotype phenotype ( 3.45 /* max_killing_rate */, 0.6654 /* IC50 */, 2.5 /* slope */ );
+        scnXml::Phenotype phenotype ( 3.45 /* max_killing_rate */, 0.027 /* IC50 */, 5.0 /* slope */ );
         
         scnXml::PD pd;
         pd.getPhenotype().push_back (phenotype);
         
-        scnXml::PK pk ( 0.006654 /* negligible_concentration */, 19.254 /* half_life */, 20.8 /* vol_dist */ );
+        scnXml::PK pk ( 0.005 /* negligible_concentration */, 13.078 /* half_life */, 20.8 /* vol_dist */ );
         
         scnXml::PKPDDrug drug ( pd, pk, "MF" /* abbrev */ );
         
