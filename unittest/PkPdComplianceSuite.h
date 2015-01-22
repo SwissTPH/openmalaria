@@ -50,20 +50,20 @@ public:
         UnittestUtil::initTime(1);
 	UnittestUtil::PkPdSuiteSetup();
 	proxy = new LSTMModel ();
-        MF_index = LSTMDrugType::findDrug( "MF" );
+        MQ_index = LSTMDrugType::findDrug( "MQ" );
     }
     void tearDown () {
         delete proxy;
         LSTMDrugType::clear();
     }
 
-    void testMF () {
+    void testMQ () {
         const double drug_factors[] = { 1, 0.031745814, 0.001007791, 0.000032,
             0.00000102, 3.22E-008 };
         TS_ASSERT_APPROX6 (proxy->getDrugFactor (genotype), drug_factors[0]);
         UnittestUtil::incrTime(sim::oneDay());
         proxy->decayDrugs();
-        UnittestUtil::medicate( *proxy, MF_index, 8300, 0, NaN, bodymass );
+        UnittestUtil::medicate( *proxy, MQ_index, 8300, 0, NaN, bodymass );
         TS_ASSERT_APPROX6 (proxy->getDrugFactor (genotype), drug_factors[1]);
     }
     
@@ -71,7 +71,7 @@ private:
     LSTMModel *proxy;
     uint32_t genotype;
     double bodymass;
-    size_t MF_index;
+    size_t MQ_index;
 };
 
 #endif

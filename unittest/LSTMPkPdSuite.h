@@ -50,7 +50,7 @@ public:
         UnittestUtil::initTime(1);
 	UnittestUtil::PkPdSuiteSetup();
 	proxy = new LSTMModel ();
-        MF_index = LSTMDrugType::findDrug( "MF" );
+        MQ_index = LSTMDrugType::findDrug( "MQ" );
     }
     void tearDown () {
 	delete proxy;
@@ -62,74 +62,74 @@ public:
     }
     
     void testOral () {
-	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, NaN, massAt21 );
 	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03174563638523168);
     }
     
     void testOralHalves () {	// the point being: check it can handle two doses at the same time-point correctly
         //Note: normally NaN is used for duration, but 0 should give same result
-	UnittestUtil::medicate( *proxy, MF_index, 1500, 0, 0, massAt21 );
-	UnittestUtil::medicate( *proxy, MF_index, 1500, 0, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, 0, massAt21 );
 	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03174563638523168);
     }
     
     void testOralSplit () {
-	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
-	UnittestUtil::medicate( *proxy, MF_index, 0, 0.5, NaN, massAt21 );	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, NaN, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 0, 0.5, NaN, massAt21 );	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
 	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03174563639140275);
     }
     
     void testOralDecayed () {
-	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, NaN, massAt21 );
 	proxy->decayDrugs ();
 	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03174563639501896);
     }
     
     void testOral2Doses () {
-	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, NaN, massAt21 );
 	proxy->decayDrugs ();
-	UnittestUtil::medicate( *proxy, MF_index, 3000, 0, NaN, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, NaN, massAt21 );
 	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03174563637686205);
     }
     
-    // IV tests. MF may not be used as an IV drug, but our code doesn't care.
+    // IV tests. MQ may not be used as an IV drug, but our code doesn't care.
     void testIVEquiv () {
         // As duration tends to zero, factor should tend to that for an oral
         // dose. Code uses duration!=0 to enable IV mode so we use a small value;
         // if this is too small, however, the gsl_integration_qag function complains
         // it cannot reach the requested tolerance.
-        UnittestUtil::medicate( *proxy, MF_index, 3000/massAt21, 0, 1e-6, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 3000/massAt21, 0, 1e-6, massAt21 );
         TS_ASSERT_APPROX (proxy->getDrugFactor (genotype), 0.03174563760775995);
     }
     
     void testIV () {
         // IV over whole day
-        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 1, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 50, 0, 1, massAt21 );
         TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.03308874286174752);
     }
     
     void testIVSplit (){
         // As above, but split into two doses
-        UnittestUtil::medicate( *proxy, MF_index, 25, 0, 0.5, massAt21 );
-        UnittestUtil::medicate( *proxy, MF_index, 25, 0.5, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 25, 0, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 25, 0.5, 0.5, massAt21 );
         TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.03308874286174755);
     }
     
     void testCombined (){
-        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 0.5, massAt21 );
-        UnittestUtil::medicate( *proxy, MF_index, 1500, 0.5, NaN, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 50, 0, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 1500, 0.5, NaN, massAt21 );
         TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.03241010934374807);
     }
     
     void testSimultaneous (){
-        UnittestUtil::medicate( *proxy, MF_index, 1500, 0, NaN, massAt21 );
-        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, NaN, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 50, 0, 0.5, massAt21 );
         TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.03174563640637330);
     }
     void testSimultaneousReversed (){
         // Note: IV dose registered first. Drug code must rearrange these to work correctly.
-        UnittestUtil::medicate( *proxy, MF_index, 50, 0, 0.5, massAt21 );
-        UnittestUtil::medicate( *proxy, MF_index, 1500, 0, NaN, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 50, 0, 0.5, massAt21 );
+        UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, NaN, massAt21 );
         TS_ASSERT_APPROX (proxy->getDrugFactor(genotype), 0.03174563640637330);
     }
     
@@ -137,7 +137,7 @@ private:
     LSTMModel *proxy;
     uint32_t genotype;
     double massAt21;
-    size_t MF_index;
+    size_t MQ_index;
 };
 
 #endif

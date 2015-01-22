@@ -174,7 +174,7 @@ public:
         
         scnXml::PK pk ( 0.005 /* negligible_concentration */, 13.078 /* half_life */, 20.8 /* vol_dist */ );
         
-        scnXml::PKPDDrug drug ( pd, pk, "MF" /* abbrev */ );
+        scnXml::PKPDDrug drug ( pd, pk, "MQ" /* abbrev */ );
         
         scnXml::Drugs drugs;
         drugs.getDrug().push_back (drug);
@@ -184,13 +184,13 @@ public:
         // Treatments
         scnXml::PKPDSchedule sched1("sched1");
         sched1.getMedicate().push_back(
-            scnXml::PKPDMedication("MF", 6 /*mg*/, 0 /*hour*/));
+            scnXml::PKPDMedication("MQ", 6 /*mg*/, 0 /*hour*/));
         
         scnXml::PKPDSchedule sched2("sched2");
         sched2.getMedicate().push_back(
-            scnXml::PKPDMedication("MF", 2 /*mg*/, 0 /*hour*/));
+            scnXml::PKPDMedication("MQ", 2 /*mg*/, 0 /*hour*/));
         sched2.getMedicate().push_back(
-            scnXml::PKPDMedication("MF", 5 /*mg*/, 12 /*hour*/));
+            scnXml::PKPDMedication("MQ", 5 /*mg*/, 12 /*hour*/));
         
         // a very basic dosage table, so that we can test it does what's expected
         scnXml::PKPDDosages dosage1("dosage1");
