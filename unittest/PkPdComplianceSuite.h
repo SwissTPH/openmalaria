@@ -58,20 +58,28 @@ public:
     }
 
     void testMQ () {
+        std::multimap<size_t, double> doses_for_day;
+        doses_for_day.insert(make_pair(0, 0));
+        doses_for_day.insert(make_pair(1, 0));
+        doses_for_day.insert(make_pair(2, 0));
         const double drug_factors[] = { 1, 0.031745814, 0.001007791, 0.000032,
             0.00000102, 3.22E-008 };
-        TS_ASSERT_APPROX6 (proxy->getDrugFactor (genotype), drug_factors[0]);
-        UnittestUtil::incrTime(sim::oneDay());
-        proxy->decayDrugs();
-        UnittestUtil::medicate( *proxy, MQ_index, 8300, 0, NaN, bodymass );
-        TS_ASSERT_APPROX6 (proxy->getDrugFactor (genotype), drug_factors[1]);
+        typedef std::multimap<size_t,double>::const_iterator iter;
+        for( size_t i = 0; i < 6; i++){
+            TS_ASSERT_APPROX6 (proxy->getDrugFactor (genotype), drug_factors[i]);
+            UnittestUtil::incrTime(sim::oneDay());
+            proxy->decayDrugs();
+            pair<iter, iter> doses_tmp = doses_for_day.equal_range(i);
+            for( iter it = doses_tmp.first; it != doses_tmp.second; it++){
+                UnittestUtil::medicate( *proxy, LSTMDrugType::findDrug( "MQ" ), 8300, it->second, NaN, bodymass );
+            }
+        }
     }
     
 private:
     LSTMModel *proxy;
     uint32_t genotype;
     double bodymass;
-    size_t MQ_index;
 };
 
 #endif
