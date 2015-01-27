@@ -113,6 +113,9 @@ public:
      */
     void medicate(double body_mass);
     
+    /** Get concentration of the drug at the beginning of the day. */
+    double getDrugConc (size_t drug_index) const;
+    
     /** This is how drugs act on infections.
      *
      * Each time step, on each infection, the parasite density is multiplied by

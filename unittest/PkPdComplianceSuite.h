@@ -32,8 +32,6 @@
 using namespace OM;
 using namespace OM::PkPd;
 
-#   define TS_ASSERT_APPROX6(x,y) ___TS_ASSERT_APPROX(__FILE__,__LINE__,x,y, 1e-6, 1e-6)
-
 class PkPdComplianceSuite : public CxxTest::TestSuite
 {
 public:
@@ -58,20 +56,32 @@ public:
     }
 
     void testMQ () {
+        const double dose = 8.3 * bodymass;   // 8.3 mg/kg * 50 kg
         std::multimap<size_t, double> doses_for_day;
         doses_for_day.insert(make_pair(0, 0));
         doses_for_day.insert(make_pair(1, 0));
         doses_for_day.insert(make_pair(2, 0));
+        const double drug_conc[] = { 0, 0.378440101, 0.737345129, 1.077723484,
+                1.022091411, 0.969331065 };
         const double drug_factors[] = { 1, 0.031745814, 0.001007791, 0.000032,
-            0.00000102, 3.22E-008 };
+                0.00000102, 3.22E-008 };
         typedef std::multimap<size_t,double>::const_iterator iter;
         for( size_t i = 0; i < 6; i++){
-            TS_ASSERT_APPROX6 (proxy->getDrugFactor (genotype), drug_factors[i]);
+            // before update (after last step):
+            //TODO: we think this should be 1 the first TWO steps if order is as we understand it:
+            TS_ASSERT_APPROX_TOL (proxy->getDrugFactor (genotype), drug_factors[i], 1e-4, 1e-4);
+//             double fac = proxy->getDrugFactor(genotype);
+            // update (two parts):
             UnittestUtil::incrTime(sim::oneDay());
             proxy->decayDrugs();
+            // after update:
+            TS_ASSERT_APPROX_TOL (proxy->getDrugConc(MQ_index), drug_conc[i], 1e-4, 1e-4);
+//             cout << "Conc, factor: " << proxy->getDrugConc(MQ_index) << ", " << fac << endl;
+            // medicate (take effect on next update):
             pair<iter, iter> doses_tmp = doses_for_day.equal_range(i);
             for( iter it = doses_tmp.first; it != doses_tmp.second; it++){
-                UnittestUtil::medicate( *proxy, LSTMDrugType::findDrug( "MQ" ), 8300, it->second, NaN, bodymass );
+                UnittestUtil::medicate( *proxy, MQ_index, dose, it->second,
+                        numeric_limits< double >::quiet_NaN(), bodymass );
             }
         }
     }
@@ -80,6 +90,7 @@ private:
     LSTMModel *proxy;
     uint32_t genotype;
     double bodymass;
+    size_t MQ_index;
 };
 
 #endif

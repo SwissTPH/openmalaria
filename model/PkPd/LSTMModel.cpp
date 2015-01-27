@@ -112,6 +112,15 @@ void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double d
     }
 }
 
+double LSTMModel::getDrugConc (size_t drug_index) const{
+    foreach( const LSTMDrug& drug, m_drugs ){
+        if (drug.getIndex() == drug_index){
+            return drug.getConcentration();
+        }
+    }
+    return 0.0;
+}
+
 double LSTMModel::getDrugFactor (uint32_t genotype) {
     double factor = 1.0; //no effect
     
