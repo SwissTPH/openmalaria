@@ -160,31 +160,98 @@ public:
     }
     
     static void PkPdSuiteSetup () {
-	ModelOptions::reset();
+        ModelOptions::reset();
         WithinHost::Genotypes::initSingle();
-	
-	//Note: we fudge this call since it's not so easy to falsely initialize scenario element.
-	//PkPdModel::init ();
-	
-        // Drugs
-        scnXml::Phenotype phenotype ( 3.45 /* max_killing_rate */, 0.027 /* IC50 */, 5.0 /* slope */ );
-        
-        scnXml::PD pd;
-        pd.getPhenotype().push_back (phenotype);
-        
-        scnXml::PK pk ( 0.005 /* negligible_concentration */, 13.078 /* half_life */, 20.8 /* vol_dist */ );
-        
-        scnXml::PKPDDrug drug ( pd, pk, "MQ" /* abbrev */ );
-        
+
+        //Note: we fudge this call since it's not so easy to falsely initialize         scenario element.
+        //PkPdModel::init ();
+
+        // Drugs:
         scnXml::Drugs drugs;
-        drugs.getDrug().push_back (drug);
+        // Artemether
+        scnXml::Phenotype phenotypeAR ( 27.6 /* max_killing_rate */, 0.0023 /* IC50 */, 
+            4.0 /* slope */ );
+        scnXml::PD pdAR;
+        pdAR.getPhenotype().push_back (phenotypeAR);
+        scnXml::PK pkAR ( 0.000023 /* negligible_concentration */, 0.175 /* half_life */, 
+            17.4 /* vol_dist */ );
+        scnXml::PKPDDrug drugAR ( pdAR, pkAR, "AR" /* abbrev */ );
+        
+        drugs.getDrug().push_back (drugAR);
+        
+        // Artesunate
+        scnXml::Phenotype phenotypeAS ( 27.6 /* max_killing_rate */, 0.0016 /* IC50 */, 
+            4.0 /* slope */ );
+        scnXml::PD pdAS;
+        pdAS.getPhenotype().push_back (phenotypeAS);
+        scnXml::PK pkAS ( 0.000016 /* negligible_concentration */, 0.042 /* half_life */, 
+            2.75 /* vol_dist */ );
+        scnXml::PKPDDrug drugAS ( pdAS, pkAS, "AS" /* abbrev */ );
+        
+        drugs.getDrug().push_back (drugAS);
+                
+        // Chloroquine
+        scnXml::Phenotype phenotypeCQ ( 3.45 /* max_killing_rate */, 0.02 /* IC50 */, 
+            1.6 /* slope */ );
+        scnXml::PD pdCQ;
+        pdCQ.getPhenotype().push_back (phenotypeCQ);
+        scnXml::PK pkCQ ( 0.00036 /* negligible_concentration */, 30.006 /* half_life */, 
+            300 /* vol_dist */ );
+        scnXml::PKPDDrug drugCQ ( pdCQ, pkCQ, "CQ" /* abbrev */ );
+        
+        drugs.getDrug().push_back (drugCQ);
+        
+        // Dihydroartemisinin
+        scnXml::Phenotype phenotypeDHA ( 27.6 /* max_killing_rate */, 0.009 /* IC50 */, 
+            4.0 /* slope */ );
+        scnXml::PD pdDHA;
+        pdDHA.getPhenotype().push_back (phenotypeDHA);
+        scnXml::PK pkDHA ( 0.000016 /* negligible_concentration */, 0.035 /* half_life */, 
+            1.49 /* vol_dist */ );
+        scnXml::PKPDDrug drugDHA ( pdDHA, pkDHA, "DHA" /* abbrev */ );
+        
+        drugs.getDrug().push_back (drugDHA);
+                
+        // Lumefantrine
+        scnXml::Phenotype phenotypeLF ( 3.45 /* max_killing_rate */, 0.032 /* IC50 */, 
+            4.0 /* slope */ );
+        scnXml::PD pdLF;
+        pdLF.getPhenotype().push_back (phenotypeLF);
+        scnXml::PK pkLF ( 0.00032 /* negligible_concentration */, 4.332 /* half_life */, 
+            21 /* vol_dist */ );
+        scnXml::PKPDDrug drugLF ( pdLF, pkLF, "LF" /* abbrev */ );
+        
+        drugs.getDrug().push_back (drugLF);
+        
+        // Mefloquine
+        scnXml::Phenotype phenotypeMQ ( 3.45 /* max_killing_rate */, 0.027 /* IC50 */, 
+            5.0 /* slope */ );
+        scnXml::PD pdMQ;
+        pdMQ.getPhenotype().push_back (phenotypeMQ);
+        scnXml::PK pkMQ ( 0.005 /* negligible_concentration */, 13.078 /* half_life */, 
+            20.8 /* vol_dist */ );
+        scnXml::PKPDDrug drugMQ ( pdMQ, pkMQ, "MQ" /* abbrev */ );
+        drugs.getDrug().push_back (drugMQ);
+        
+        // Piperaquine
+        scnXml::Phenotype phenotypePPQ ( 3.45 /* max_killing_rate */, 0.088 /* IC50 */, 
+            6.0 /* slope */ );
+        scnXml::PD pdPPQ;
+        pdPPQ.getPhenotype().push_back (phenotypePPQ);
+        scnXml::PK pkPPQ ( 0.005 /* negligible_concentration */, 23.105 /* half_life */, 
+            150 /* vol_dist */ );
+        scnXml::PKPDDrug drugPPQ ( pdPPQ, pkPPQ, "PPQ" /* abbrev */ );
+        
+        drugs.getDrug().push_back (drugPPQ);
+        
         
         PkPd::LSTMDrugType::init (drugs);
         
         // Treatments
         scnXml::PKPDSchedule sched1("sched1");
         sched1.getMedicate().push_back(
-            scnXml::PKPDMedication("MQ", 6 /*mg*/, 0 /*hour*/));
+            scnXml::PKPDMedication("MQ", 6 /*mg*/,0 /*hour*/ )
+        );
         
         scnXml::PKPDSchedule sched2("sched2");
         sched2.getMedicate().push_back(
