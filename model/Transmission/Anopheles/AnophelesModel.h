@@ -278,9 +278,7 @@ private:
     double probMosqSurvivalOvipositing;
 
     struct NHHParams {
-        // N_i: number of hosts of this type
-        double number;  // yes, we allow fractional animals
-        // α_i: rate at which mosquitoes encouter one host of this type
+        // N_i * α_i: rate at which mosquitoes encouter hosts of this type
         double entoAvailability;
         // α_i * P_B_i * P_C_i * P_D_i
         double probCompleteCycle;
