@@ -34,6 +34,8 @@ using std::multimap;
 using namespace OM;
 using namespace OM::PkPd;
 
+/** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
+ * model. Numbers should agree (up to rounding errors of around 5e-3). */
 class PkPdComplianceSuite : public CxxTest::TestSuite
 {
 public:
@@ -92,7 +94,7 @@ public:
             double fac = proxy->getDrugFactor(genotype);
             totalFac *= fac;
             cout << "\033[35m";
-            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 1e-3, 1e-9);
+            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-9);
             cout << "\033[0m";
             double errorF = totalFac - drug_factors[i];
             
@@ -103,13 +105,13 @@ public:
             // after update:
             double conc = proxy->getDrugConc(drugIndex);
             cout << "\033[36m";
-            TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 1e-4, 1e-9);
+            TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-9);
             cout << "\033[0m";
             double errorC = conc - drug_conc[i];
             cout << "\t Day " << i << ": " << \
-            "\033[33mfactor: " << fac << " [ " << errorF << " ]" << "\033[0m" << \
+            "\033[33mfactor (day 0 to " << i << "): " << totalFac << " [ " << errorF << " ]" << "\033[0m" << \
             ", \033[31mtotal / factor: " << totalFac / drug_factors[i] << "\033[0m" <<
-            ", \033[32mconc: " << conc << " [ " << errorC << " ]" << "\033[0m" <<  endl;
+            ", \033[32mconc: " << conc << " [ " << errorC << ", " << conc/drug_conc[i] << " ]" << "\033[0m" <<  endl;
             
             // medicate (take effect on next update):
             medicate( drugIndex, i );
@@ -128,9 +130,10 @@ public:
     void testAR () {
         const double dose = 1.7 * bodymass;   // 1.7 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
-        const double drug_conc[] = { 0, 0.0134895232, 0.0153520114, 
-            0.0156091637, 0.0156446685, 0.0156495706 };
-        const double drug_factors[] = { 1,1.0339328333924E-012, 1.06887289270302E-024,                                  1.10329635519261E-036, 4.73064069783747E-042, 4.73064069783747E-042 };
+        const double drug_conc[] = { 0.0, 0.0153520114,
+            0.0156446685, 0.01560247467, 0.000298342, 5.68734e-6 };
+        const double drug_factors[] = { 1,1.0339328333924E-012, 1.06887289270302E-024,
+            1.10329635519261E-036, 4.73064069783747E-042, 4.73064069783747E-042 };
         testDrugResults("AR", drug_conc, drug_factors);
     }
     
@@ -172,15 +175,16 @@ public:
         const double drug_conc[] = { 0, 0.378440101, 0.737345129, 1.077723484,
                 1.022091411, 0.969331065 };
         const double drug_factors[] = { 1, 0.031745814, 0.001007791, 0.000032,
-                0.00000102, 3.22E-008 };
+                1.02e-6, 3.22E-008 };
         testDrugResults("MQ", drug_conc, drug_factors);
     }
     
     void testPPQ (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
-        const double drug_conc[] = { 0, 0.116453464, 0.2294652081, 0.3391369503, 0.3291139387, 0.3193871518 };
-        const double drug_factors[] = { 1, 0.0317489204, 0.0010078915, 3.19962451330259E-005, 1.01574720279841E-006, 3.22451796939035E-008 };
+        const double drug_conc[] = { 0, 0.116453464, 0.2294652081, 0.339137, 0.3291139387, 0.3193871518 };
+        //TODO: these numbers are wrong
+        const double drug_factors[] = { 1, 0.9999797, 0.9987926, 0.9865442, 0.9764225, 0.9680462 };
         testDrugResults("PPQ", drug_conc, drug_factors);
     }
     
