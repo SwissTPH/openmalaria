@@ -22,6 +22,7 @@
 #define Hmod_LSTMPkPdModel
 
 #include "PkPd/Drug/LSTMDrug.h"
+#include "PkPd/Drug/LSTMDrugOneComp.h"
 
 namespace scnXml{
     class PKPDMedication;
@@ -155,7 +156,7 @@ private:
     void checkpoint (ostream& stream);
     
     /// Drugs with non-zero blood concentrations:
-    list<LSTMDrug> m_drugs;
+    list<LSTMDrugOneComp> m_drugs;
     
     /// All pending medications
     list<MedicateData> medicateQueue;
