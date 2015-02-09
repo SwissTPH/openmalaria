@@ -78,7 +78,7 @@ public:
     virtual void deploy (OM::Population&) {}
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << time << "\t\t\t\t\tdummy (no interventions)";
+        out << time.inSteps() << "t\t\t\t\t\tdummy (no interventions)";
     }
 #endif
 };
@@ -96,7 +96,7 @@ public:
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << time << "\t\t\t\t\tchange HS";
+        out << time.inSteps() << "t\t\t\t\t\tchange HS";
     }
 #endif
     
@@ -117,7 +117,7 @@ public:
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << time << "\t\t\t\t\tchange EIR";
+        out << time.inSteps() << "t\t\t\t\t\tchange EIR";
     }
 #endif
     
@@ -135,7 +135,7 @@ public:
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << time << "\t\t\t\t\tuninfect vectors";
+        out << time.inSteps() << "t\t\t\t\t\tuninfect vectors";
     }
 #endif
 };
@@ -256,8 +256,8 @@ public:
     
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << time << '\t'
-            << minAge << '\t' << maxAge << '\t';
+        out << time.inSteps() << "t\t"
+            << minAge.inYears() << "y\t" << maxAge.inYears() << "t\t";
         if( subPop == ComponentId_pop ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
@@ -339,7 +339,7 @@ public:
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
-        out << time << "\t\t\t\t\tvector";
+        out << time.inSteps() << "t\t\t\t\t\tvector";
     }
 #endif
 private:
@@ -366,7 +366,7 @@ public:
         if( deployAge <= sim::zero() ){
             ostringstream msg;
             msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
-            msg << " years corresponds to time step "<<deployAge;
+            msg << " years corresponds to time step " << deployAge.inSteps();
             msg << "; must be at least 1.";
             throw util::xml_scenario_error( msg.str() );
         }
@@ -408,10 +408,10 @@ public:
     
 #ifdef WITHOUT_BOINC
     inline void print_details( std::ostream& out )const{
-        out << begin << '\t';
+        out << begin.inSteps() << "t\t";
         if( end == sim::future() ) out << "(none)";
-        else out << end;
-        out << '\t' << deployAge << '\t';
+        else out << end.inSteps() << 't';
+        out << '\t' << deployAge.inYears() << "y\t";
         if( subPop == ComponentId_pop ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';

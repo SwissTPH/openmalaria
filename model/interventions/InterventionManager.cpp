@@ -22,6 +22,7 @@
 #include "Population.h"
 #include "util/random.h"
 #include "util/CommandLine.h"
+#include "util/timeConversions.h"
 #include "interventions/GVI.h"
 #include "interventions/IRS.h"
 #include "interventions/ITN.h"

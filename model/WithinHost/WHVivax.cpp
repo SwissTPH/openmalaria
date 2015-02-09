@@ -26,6 +26,7 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/checkpoint_containers.h"
+#include "util/timeConversions.h"
 #include <schema/scenario.h>
 #include <algorithm>
 #include <limits>

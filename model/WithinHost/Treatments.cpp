@@ -22,6 +22,7 @@
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/random.h"
+#include "util/timeConversions.h"
 #include "schema/healthSystem.h"
 
 namespace OM {

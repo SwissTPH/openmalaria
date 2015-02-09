@@ -25,6 +25,7 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
+#include "util/timeConversions.h"
 #include "interventions/Interfaces.hpp"
 
 #include <limits>

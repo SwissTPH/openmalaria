@@ -379,7 +379,7 @@ void Simulator::readCheckpoint() {
   }
   
   // Keep size of stderr.txt minimal with a short message, since this is a common message:
-  cerr << sim::now() << " RC" << endl;
+  cerr << sim::now().inSteps() << "t RC" << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))

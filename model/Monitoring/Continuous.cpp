@@ -26,6 +26,7 @@
 #include "util/errors.h"
 #include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
+#include "util/timeConversions.h"
 #include "schema/monitoring.h"
 
 #include <vector>
