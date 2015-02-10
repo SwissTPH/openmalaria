@@ -33,9 +33,9 @@
 using namespace std;
 
 namespace OM { namespace PkPd {
-    
-LSTMDrug::LSTMDrug()
-{}
+
+LSTMDrug::LSTMDrug() {}
+LSTMDrug::~LSTMDrug() {}
 
 // Create our list of doses. Optimise for the case where we only have 1 or less per day, but be able to handle more.
 // If two oral doses coincide, they can be combined but doing so is not essential.

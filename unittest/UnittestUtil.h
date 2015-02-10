@@ -29,6 +29,7 @@
 
 #include "Host/Human.h"
 #include "PkPd/LSTMModel.h"
+#include "PkPd/Drug/LSTMDrugType.h"
 #include "PkPd/LSTMTreatments.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"

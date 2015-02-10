@@ -51,7 +51,7 @@ void LSTMModel::checkpoint (istream& stream) {
     for (size_t i=0; i<numDrugs; ++i) {
         size_t index;
         index & stream;
-        m_drugs.push_back (LSTMDrugOneComp(LSTMDrugType::getDrug(index)));
+        m_drugs.push_back( new LSTMDrugOneComp(LSTMDrugType::getDrug(index)) );
         m_drugs.back() & stream;
     }
     medicateQueue & stream;
@@ -59,7 +59,7 @@ void LSTMModel::checkpoint (istream& stream) {
 
 void LSTMModel::checkpoint (ostream& stream) {
     m_drugs.size() & stream;
-    for (list<LSTMDrugOneComp>::iterator it=m_drugs.begin(); it!=m_drugs.end(); ++it) {
+    for (DrugVec::iterator it =m_drugs.begin(); it!=m_drugs.end(); ++it) {
         it->getIndex() & stream;
         (*it) & stream;
     }
@@ -96,28 +96,28 @@ void LSTMModel::medicate(double body_mass){
 }
 
 void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double duration, double bodyMass) {
-    list<LSTMDrugOneComp>::iterator drug = m_drugs.begin();
-    while (drug != m_drugs.end()) {
-        if (drug->getIndex() == typeIndex)
-        goto medicateGotDrug;
-        ++drug;
+    size_t j = 0;
+    for( ; j < m_drugs.size(); ++j ){
+        if (m_drugs[j].getIndex() == typeIndex)
+            goto medicateGotDrug;
     }
     // No match, so insert one:
-    m_drugs.push_front (LSTMDrugOneComp(LSTMDrugType::getDrug(typeIndex)));
-    drug = m_drugs.begin();	// the drug we just added
+    m_drugs.push_back( new LSTMDrugOneComp(LSTMDrugType::getDrug(typeIndex)) );
+    j = m_drugs.size() - 1;	// the drug we just added
     
     medicateGotDrug:
     if( duration > 0.0 ){
-        drug->medicateIV (time, duration, qty);
+        m_drugs[j].medicateIV (time, duration, qty);
     }else{      // 0 or NaN
-        drug->medicate (time, qty, bodyMass);
+        m_drugs[j].medicate (time, qty, bodyMass);
     }
 }
 
 double LSTMModel::getDrugConc (size_t drug_index) const{
-    foreach( const LSTMDrugOneComp& drug, m_drugs ){
-        if (drug.getIndex() == drug_index){
-            return drug.getConcentration();
+    for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
+            drug != end; ++drug ){
+        if (drug->getIndex() == drug_index){
+            return drug->getConcentration();
         }
     }
     return 0.0;
@@ -126,7 +126,7 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
 double LSTMModel::getDrugFactor (uint32_t genotype) {
     double factor = 1.0; //no effect
     
-    foreach( LSTMDrugOneComp& drug, m_drugs ){
+    foreach( LSTMDrug& drug, m_drugs ){
         double drugFactor = drug.calculateDrugFactor(genotype);
         factor *= drugFactor;
     }
@@ -136,21 +136,22 @@ double LSTMModel::getDrugFactor (uint32_t genotype) {
 // This may look complicated but its just some machinery to call updateConcentration() and return its result
 class DecayPredicate {
 public:
-    bool operator() (LSTMDrugOneComp& drug) {
+    bool operator() (LSTMDrug& drug) const{
         return drug.updateConcentration();
     }
 };
 void LSTMModel::decayDrugs () {
     // for each item in m_drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
-    m_drugs.remove_if (DecayPredicate());
+    m_drugs.erase_if(DecayPredicate());
 }
 
 void LSTMModel::summarize(const Host::Human& human) const{
-    foreach( const LSTMDrugOneComp& drug, m_drugs ){
-        assert( drug.getConcentration() > 0 );
-        size_t index = drug.getIndex();
+    for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
+            drug != end; ++drug ){
+        assert( drug->getConcentration() > 0 );
+        size_t index = drug->getIndex();
         mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
-        mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(drug.getConcentration()) );
+        mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(drug->getConcentration()) );
     }
 }
 

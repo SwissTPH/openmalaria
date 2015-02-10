@@ -42,6 +42,13 @@ LSTMDrugOneComp::LSTMDrugOneComp(const LSTMDrugType& type) :
 
 //LSTMDrugOneComp::~LSTMDrugOneComp(){}
 
+size_t LSTMDrugOneComp::getIndex() const {
+    return typeData.getIndex();
+}
+double LSTMDrugOneComp::getConcentration() const {
+    return concentration;
+}
+
 void LSTMDrugOneComp::medicate(double time, double qty, double bodyMass)
 {
     _medicate(time, qty, typeData.getVolumeOfDistribution() * bodyMass);

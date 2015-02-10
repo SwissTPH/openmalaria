@@ -22,7 +22,8 @@
 #define Hmod_LSTMPkPdModel
 
 #include "PkPd/Drug/LSTMDrug.h"
-#include "PkPd/Drug/LSTMDrugOneComp.h"
+
+#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace scnXml{
     class PKPDMedication;
@@ -32,6 +33,7 @@ namespace Host{
     class Human;
 }
 namespace PkPd {
+using boost::ptr_vector;
 
 struct MedicateData {
     MedicateData () :
@@ -155,8 +157,9 @@ private:
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
     
+    typedef ptr_vector<LSTMDrug> DrugVec;
     /// Drugs with non-zero blood concentrations:
-    list<LSTMDrugOneComp> m_drugs;
+    DrugVec m_drugs;
     
     /// All pending medications
     list<MedicateData> medicateQueue;
