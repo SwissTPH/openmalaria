@@ -34,6 +34,10 @@ using std::multimap;
 using namespace OM;
 using namespace OM::PkPd;
 
+// Use one of these to switch verbosity on/off:
+#define PCS_VERBOSE( x )
+//#define PCS_VERBOSE( x ) x
+
 /** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
  * model. Numbers should agree (up to rounding errors of around 5e-3). */
 class PkPdComplianceSuite : public CxxTest::TestSuite
@@ -45,7 +49,8 @@ public:
         genotype = 0;                // 0 should work; we definitely don't want random allocation
         bodymass = 50;
        
-        cout << "\n[ Unittest Output Legend: \033[35mDrug Factor\033[0m, \033[36mDrug Concentration\033[0m ]" << endl;
+        PCS_VERBOSE(cout << "\n[ Unittest Output Legend: \033[35mDrug "
+                "Factor\033[0m, \033[36mDrug Concentration\033[0m ]" << endl;)
     }
     
     void setUp () {
@@ -76,9 +81,8 @@ public:
         schedule.insert(make_pair(2, make_pair(0.5, dosage)));
     }
     
-    void assembleVariableDosageSchedule ( ){
-        //FIXME: 
-        // the only case for CQ, which needs 10, 10, 5 dosages instead of constant dosages
+    void assembleCQDosageSchedule ( ){
+        // only used for CQ, which needs 10, 10, 5 dosages instead of constant dosages
         schedule.clear();
         schedule.insert(make_pair(0, make_pair(0, 10)));
         schedule.insert(make_pair(1, make_pair(0, 10)));
@@ -87,16 +91,16 @@ public:
     
     void testDrugResults (string drugName, const double drug_conc[], const double drug_factors[]) {
         size_t drugIndex = LSTMDrugType::findDrug( drugName );
-        cout << "\n\033[32mTesting \033[1m" << drugName << ": " << endl;
+        PCS_VERBOSE(cout << "\n\033[32mTesting \033[1m" << drugName << ": " << endl;)
         double totalFac = 1;
         for( size_t i = 0; i < 6; i++){
             // before update (after last step):
             double fac = proxy->getDrugFactor(genotype);
             totalFac *= fac;
-            cout << "\033[35m";
+            PCS_VERBOSE(cout << "\033[35m";)
             TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-9);
-            cout << "\033[0m";
-            double errorF = totalFac - drug_factors[i];
+            PCS_VERBOSE(cout << "\033[0m";)
+            PCS_VERBOSE(double errorF = totalFac - drug_factors[i];)
             
             // update (two parts):
             UnittestUtil::incrTime(sim::oneDay());
@@ -104,14 +108,19 @@ public:
             
             // after update:
             double conc = proxy->getDrugConc(drugIndex);
-            cout << "\033[36m";
+            PCS_VERBOSE(cout << "\033[36m";)
             TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-9);
-            cout << "\033[0m";
-            double errorC = conc - drug_conc[i];
-            cout << "\t Day " << i << ": " << \
-            "\033[33mfactor (day 0 to " << i << "): " << totalFac << " [ " << errorF << " ]" << "\033[0m" << \
-            ", \033[31mtotal / factor: " << totalFac / drug_factors[i] << "\033[0m" <<
-            ", \033[32mconc: " << conc << " [ " << errorC << ", " << conc/drug_conc[i] << " ]" << "\033[0m" <<  endl;
+            PCS_VERBOSE(
+                cout << "\033[0m";
+                double errorC = conc - drug_conc[i];
+                cout << "\t Day " << i << ": "
+                    << "\033[33mfactor (day 0 to " << i << "): " << totalFac
+                    << " [ " << errorF << " ]" << "\033[0m"
+                    << ", \033[31mtotal / factor: "
+                    << totalFac / drug_factors[i] << "\033[0m"
+                    << ", \033[32mconc: " << conc << " [ " << errorC << ", "
+                    << conc/drug_conc[i] << " ]" << "\033[0m" <<  endl;
+            )
             
             // medicate (take effect on next update):
             medicate( drugIndex, i );
@@ -146,8 +155,7 @@ public:
     }
     
     void _testCQ () { 
-        //FIXME needs dosage 10, 10, 5. so third dose must be 5mg
-        assembleVariableDosageSchedule();
+        assembleCQDosageSchedule();
         const double drug_conc[] = { 0, 0.0786272312, 0.1554589687, 0.2305362134, 0.2252717988, 0.2201276 };
         const double drug_factors[] = { 1, 0.0580181371, 0.0021554332, 7.39575036687833E-005, 2.51535706689484E-006, 8.57663220896078E-008 };
         testDrugResults("CQ", drug_conc, drug_factors);
@@ -183,8 +191,8 @@ public:
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
         const double drug_conc[] = { 0, 0.116453464, 0.2294652081, 0.339137, 0.3291139387, 0.3193871518 };
-        //TODO: these numbers are wrong
-        const double drug_factors[] = { 1, 0.9999797, 0.9987926, 0.9865442, 0.9764225, 0.9680462 };
+        const double drug_factors[] = { 1, 0.0524514512, 0.0016818644,
+                5.344311603535E-005, 1.69855029226935E-006, 0.000000054 };
         testDrugResults("PPQ", drug_conc, drug_factors);
     }
     
