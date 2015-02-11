@@ -46,6 +46,7 @@ def update_source(filename, copyright):
     line_comment=False
     block_comment=False
     prev_slash=False # or prev_star
+    want_block=True # false once we have a block comment or set of line comments
     for c in fdata:
         i+=1
         if block_comment:
@@ -53,8 +54,8 @@ def update_source(filename, copyright):
             if prev_slash and c=='/':
                 block_comment=False
                 prev_slash=False
-                break # good behaviour to stop at end of first block comment?
-                # (or better to break after an empty line?)
+                want_block=False
+                # or: break to stop now (don't eat any new-lines)
             elif c=='*':
                 prev_slash=True
             else:
@@ -62,14 +63,14 @@ def update_source(filename, copyright):
         elif c in [' ','\t','\f','\v']:
             pass
         elif c in ['\r','\n']:
-            line_comment=False
-        elif c=='/':
+            line_comment=False # end of line
+        elif want_block and c=='/':
             if prev_slash:
                 line_comment=True
                 prev_slash=False
             else:
                 prev_slash=True
-        elif c=='*' and prev_slash:
+        elif want_block and c=='*' and prev_slash:
             prev_slash=False
             block_comment=True
         else:
@@ -113,7 +114,6 @@ def recursive_traversal(dir, copyright):
                 update_source(fullfn, copyright)
 
 
-cright = file("licence-template.txt","r+").read()
-recursive_traversal("include", cright)
+cright = file("util/licence-template.txt","r+").read()
 recursive_traversal("model", cright)
 exit()
