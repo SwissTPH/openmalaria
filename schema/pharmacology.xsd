@@ -6,7 +6,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <xs:schema targetNamespace="http://openmalaria.org/schema/scenario_33"
            xmlns:om="http://openmalaria.org/schema/scenario_33"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <!-- root element -->
+  <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="Pharmacology">
     <xs:annotation>
       <xs:documentation>
@@ -222,14 +222,26 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:mg/l;min:0;name:Drug concentration considered negligible;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="half_life" type="xs:double">
-              <xs:annotation>
-                <xs:documentation>
-                    Used to calculate elimination rate (which is: ln(2) / half_life).
-                  </xs:documentation>
-                <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
+            <xs:choice>
+              <xs:element name="half_life" type="xs:double">
+                <xs:annotation>
+                  <xs:documentation>
+                      Used to calculate elimination rate (which is: ln(2) / half_life).
+                    </xs:documentation>
+                  <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="k" type="om:LognormalSample">
+                <xs:annotation>
+                  <xs:documentation>
+                      Elimination rate; can be specified directly instead of as
+                      a half life. In this case it can also be sampled per-patient
+                      (with sigma > 0).
+                    </xs:documentation>
+                  <xs:appinfo>units:day^-1;min:0;name:Elimination rate constant (k);</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
             <xs:element name="vol_dist" type="xs:double">
               <xs:annotation>
                 <xs:documentation>
@@ -237,6 +249,68 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   </xs:documentation>
                 <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
               </xs:annotation>
+            </xs:element>
+            <xs:element name="compartment2" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  Optional element specifying conversion parameters to- and
+                  from- a second compartment.
+                </xs:documentation>
+                <xs:appinfo>name:Second compartment parameters;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:all>
+                  <xs:element name="k12" type="om:LognormalSample">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Absorbtion rate from the central compartment to
+                          compartment 2. It is sampled per-patient when sigma &gt; 0.
+                      </xs:documentation>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 2 (k12);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="k21" type="om:LognormalSample">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Absorbtion rate from compartment 2 to the central
+                          compartment. It is sampled per-patient when sigma &gt; 0.
+                      </xs:documentation>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 2 (k21);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:all>
+              </xs:complexType>
+            </xs:element>
+            <xs:element name="compartment3" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  Optional element specifying conversion parameters to- and
+                  from- a third compartment.
+                </xs:documentation>
+                <xs:appinfo>name:Third compartment parameters;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:all>
+                  <xs:element name="k13" type="om:LognormalSample">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Absorbtion rate from the central compartment to
+                          compartment 3. It is sampled per-patient when sigma &gt; 0.
+                      </xs:documentation>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 3 (k13);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="k31" type="om:LognormalSample">
+                    <xs:annotation>
+                      <xs:documentation>
+                          Absorbtion rate from compartment 3 to the central
+                          compartment. It is sampled per-patient when sigma &gt; 0.
+                      </xs:documentation>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 3 (k31);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:all>
+              </xs:complexType>
             </xs:element>
           </xs:sequence>
         </xs:complexType>

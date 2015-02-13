@@ -89,8 +89,19 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
     assert( pElt.size() > 0 );  // required by XSD
     
     negligible_concentration = drugData.getPK().getNegligible_concentration();
-    neg_elimination_rate_constant = -log(2.0) / drugData.getPK().getHalf_life();
+    if( drugData.getPK().getHalf_life().present() ){
+        neg_elimination_rate_constant = -log(2.0) / drugData.getPK().getHalf_life().get();
+    }else{
+        neg_elimination_rate_constant = -drugData.getPK().getK().get().getMean();
+        if( drugData.getPK().getK().get().getSigma() > 0 ){
+            throw util::unimplemented_exception("sampling PK parameters");
+        }
+    }
     vol_dist = drugData.getPK().getVol_dist();
+    if( drugData.getPK().getCompartment2().present() ||
+        drugData.getPK().getCompartment3().present() ){
+        throw util::unimplemented_exception("multi-compartment PK models");
+    }
     
     set<string> loci_per_phenotype;
     string first_phenotype_name;

@@ -174,8 +174,8 @@ public:
             4.0 /* slope */ );
         scnXml::PD pdAR;
         pdAR.getPhenotype().push_back (phenotypeAR);
-        scnXml::PK pkAR ( 1e-17 /* negligible_concentration */, 0.1750372 /* half_life */, 
-            17.4 /* vol_dist */ );
+        scnXml::PK pkAR ( 1e-17 /* negligible_concentration */, 17.4 /* vol_dist */ );
+        pkAR.setHalf_life(0.1750372);
         scnXml::PKPDDrug drugAR ( pdAR, pkAR, "AR" /* abbrev */ );
         
         drugs.getDrug().push_back (drugAR);
@@ -185,8 +185,8 @@ public:
             4.0 /* slope */ );
         scnXml::PD pdAS;
         pdAS.getPhenotype().push_back (phenotypeAS);
-        scnXml::PK pkAS ( 1e-17 /* negligible_concentration */, 0.04175585 /* half_life */, 
-            2.75 /* vol_dist */ );
+        scnXml::PK pkAS ( 1e-17 /* negligible_concentration */, 2.75 /* vol_dist */ );
+        pkAS.setHalf_life(0.04175585);
         scnXml::PKPDDrug drugAS ( pdAS, pkAS, "AS" /* abbrev */ );
         
         drugs.getDrug().push_back (drugAS);
@@ -196,8 +196,8 @@ public:
             1.6 /* slope */ );
         scnXml::PD pdCQ;
         pdCQ.getPhenotype().push_back (phenotypeCQ);
-        scnXml::PK pkCQ ( 0.00036 /* negligible_concentration */, 30.006 /* half_life */, 
-            300 /* vol_dist */ );
+        scnXml::PK pkCQ ( 0.00036 /* negligible_concentration */, 300 /* vol_dist */ );
+        pkCQ.setHalf_life(30.006);
         scnXml::PKPDDrug drugCQ ( pdCQ, pkCQ, "CQ" /* abbrev */ );
         
         drugs.getDrug().push_back (drugCQ);
@@ -207,8 +207,8 @@ public:
             4.0 /* slope */ );
         scnXml::PD pdDHA;
         pdDHA.getPhenotype().push_back (phenotypeDHA);
-        scnXml::PK pkDHA ( 1e-17 /* negligible_concentration */, 0.03500743 /* half_life */, 
-            1.49 /* vol_dist */ );
+        scnXml::PK pkDHA ( 1e-17 /* negligible_concentration */, 1.49 /* vol_dist */ );
+        pkDHA.setHalf_life(0.03500743);
         scnXml::PKPDDrug drugDHA ( pdDHA, pkDHA, "DHA" /* abbrev */ );
         
         drugs.getDrug().push_back (drugDHA);
@@ -218,8 +218,8 @@ public:
             4.0 /* slope */ );
         scnXml::PD pdLF;
         pdLF.getPhenotype().push_back (phenotypeLF);
-        scnXml::PK pkLF ( 0.00032 /* negligible_concentration */, 4.332 /* half_life */, 
-            21 /* vol_dist */ );
+        scnXml::PK pkLF ( 0.00032 /* negligible_concentration */, 21 /* vol_dist */ );
+        pkLF.setHalf_life(4.332);
         scnXml::PKPDDrug drugLF ( pdLF, pkLF, "LF" /* abbrev */ );
         
         drugs.getDrug().push_back (drugLF);
@@ -229,8 +229,8 @@ public:
             5.0 /* slope */ );
         scnXml::PD pdMQ;
         pdMQ.getPhenotype().push_back (phenotypeMQ);
-        scnXml::PK pkMQ ( 0.005 /* negligible_concentration */, 13.078 /* half_life */, 
-            20.8 /* vol_dist */ );
+        scnXml::PK pkMQ ( 0.005 /* negligible_concentration */, 20.8 /* vol_dist */ );
+        pkMQ.setHalf_life(13.078);
         scnXml::PKPDDrug drugMQ ( pdMQ, pkMQ, "MQ" /* abbrev */ );
         drugs.getDrug().push_back (drugMQ);
         
@@ -239,8 +239,8 @@ public:
             6.0 /* slope */ );
         scnXml::PD pdPPQ;
         pdPPQ.getPhenotype().push_back (phenotypePPQ);
-        scnXml::PK pkPPQ ( 0.005 /* negligible_concentration */, 23.105 /* half_life */, 
-            150 /* vol_dist */ );
+        scnXml::PK pkPPQ ( 0.005 /* negligible_concentration */, 150 /* vol_dist */ );
+        pkPPQ.setHalf_life(23.105);
         scnXml::PKPDDrug drugPPQ ( pdPPQ, pkPPQ, "PPQ" /* abbrev */ );
         
         drugs.getDrug().push_back (drugPPQ);
