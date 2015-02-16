@@ -32,12 +32,6 @@ namespace OM {
 namespace PkPd {
 struct DoseParams;
 }
-namespace util {
-namespace checkpoint {
-void operator& (multimap<double,PkPd::DoseParams> x, ostream& stream);
-void operator& (multimap<double,PkPd::DoseParams>& x, istream& stream);
-}
-}
 
 namespace PkPd {
 
