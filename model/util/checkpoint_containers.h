@@ -33,6 +33,12 @@ namespace checkpoint {
 
     ///@brief Operator& for stl containers
     //@{
+    template<class U, class V, class S>
+    void operator& (pair<U,V> x, S& stream) {
+        x.first & stream;
+        x.second & stream;
+    }
+    
     template<class T>
     void operator& (vector<T> x, ostream& stream) {
         x.size() & stream;

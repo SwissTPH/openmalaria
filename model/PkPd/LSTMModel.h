@@ -121,7 +121,7 @@ public:
      * Each time step, on each infection, the parasite density is multiplied by
      * the return value of this infection. The WithinHostModels are responsible
      * for clearing infections once the parasite density is negligible. */
-    double getDrugFactor (uint32_t genotype);
+    double getDrugFactor (uint32_t genotype) const;
     
     /** After any resident infections have been reduced by getDrugFactor(),
      * this function is called to update drug levels to their effective level

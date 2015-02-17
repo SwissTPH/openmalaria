@@ -117,11 +117,12 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
     return 0.0;
 }
 
-double LSTMModel::getDrugFactor (uint32_t genotype) {
+double LSTMModel::getDrugFactor (uint32_t genotype) const{
     double factor = 1.0; //no effect
     
-    foreach( LSTMDrug& drug, m_drugs ){
-        double drugFactor = drug.calculateDrugFactor(genotype);
+    for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
+            drug != end; ++drug ){
+        double drugFactor = drug->calculateDrugFactor(genotype);
         factor *= drugFactor;
     }
     return factor;

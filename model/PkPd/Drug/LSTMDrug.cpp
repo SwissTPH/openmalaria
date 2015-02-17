@@ -38,15 +38,20 @@ namespace PkPd {
 LSTMDrug::LSTMDrug() {}
 LSTMDrug::~LSTMDrug() {}
 
+bool comp(pair<double,double> lhs, double rhs){
+    return lhs.first < rhs;
+}
+
 // Create our list of doses. Optimise for the case where we only have 1 or less
 // per day, but be able to handle more.
 // If two doses coincide, they can be combined but doing so is not essential.
 
 void LSTMDrug::_medicate (double time, double qty, double volDist) {
     double conc = qty / volDist;        // mg / l
-    // multimap insertion: is ordered
-    DoseMap::iterator lastInserted =
-    doses.insert (doses.end(), make_pair (time, conc));
+    // Insert in the right position to maintain sorting:
+    DoseVec::iterator pos = lower_bound(doses.begin(), doses.end(), time, comp);
+    doses.insert(pos, make_pair (time, conc));
+    //TODO (C++11 only, different comp): assert(is_sorted(doses.begin(), doses.end(), comp));
 }
 
 }

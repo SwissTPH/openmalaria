@@ -24,8 +24,6 @@
 #include "Global.h"
 #include "util/checkpoint_containers.h"
 
-using namespace std;
-
 namespace OM {
 namespace PkPd {
 
@@ -71,7 +69,7 @@ public:
      * 
      * @param genotype An identifier for the genotype of the infection.
      */
-    virtual double calculateDrugFactor(uint32_t genotype) =0;
+    virtual double calculateDrugFactor(uint32_t genotype) const =0;
     
     /** Updates concentration variable and clears day's doses.
      *
@@ -101,15 +99,14 @@ protected:
     virtual void checkpoint (istream& stream){}
     virtual void checkpoint (ostream& stream){}
     
-    /// Key is time (days), value is concentration (mg / l)
-    typedef multimap<double,double> DoseMap;
+    /// First is time (days), second is additional concentration (mg / l)
+    typedef std::vector<std::pair<double,double> > DoseVec;
     
     /** List of each dose given today (and possibly tomorrow), ordered by time.
      * First parameter (key) is time in days, second is the dose concentration (mg/l).
      *
-     * Used in calculateDrugFactor temporarily,
-     * and in updateConcentration() to update concentration. */
-    DoseMap doses;
+     * Read in calculateDrugFactor, and updated in updateConcentration(). */
+    DoseVec doses;
 };
 
 }
