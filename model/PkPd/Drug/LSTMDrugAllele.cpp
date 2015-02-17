@@ -51,9 +51,9 @@ LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype, double elimination_r
     max_killing_rate = phenotype.getMax_killing_rate ();  
 }
 
-double LSTMDrugPD::calcFactor( const LSTMDrugType& drug, double& C1, double duration ) const{
-    double C0 = C1;
-    drug.updateConcentration( C1, duration );
+double LSTMDrugPD::calcFactor( const LSTMDrugType& drug, double& C0, double duration ) const{
+    // exponential decay of drug concentration
+    const double C1 = C0 * exp(drug.getNegElimintationRateConst() * duration);
     
     // From Hastings & Winter 2011 paper
     // Note: these look a little different from original equations because IC50_pow_slope
@@ -62,6 +62,7 @@ double LSTMDrugPD::calcFactor( const LSTMDrugType& drug, double& C1, double dura
     double denominator = IC50_pow_slope + pow(C0, slope);
     
     //TODO(performance): can we cache the value for each parameter combination?
+    C0 = C1;    // C0 is an in/out parameter
     return pow( numerator / denominator, power );       // unitless
 }
 

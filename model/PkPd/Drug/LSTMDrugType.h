@@ -148,13 +148,12 @@ public:
     inline double getNegligibleConcentration() const{
         return negligible_concentration;
     }
+    inline double getNegElimintationRateConst() const{
+        return neg_elimination_rate_constant;
+    }
     
     /** Return reference to correct drug-phenotype data. */
     const LSTMDrugPD& getPD( uint32_t genotype ) const;
-    
-    /** Decay concentration C0 over time duration (days) assuming no
-     * administration during this time. */
-    void updateConcentration( double& C0, double duration ) const;
     //@}
   
 private:

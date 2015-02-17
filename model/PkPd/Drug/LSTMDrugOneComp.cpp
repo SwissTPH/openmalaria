@@ -110,7 +110,8 @@ bool LSTMDrugOneComp::updateConcentration () {
     while (next_dose!=doses.end()) {
         double time_to_next = next_dose->first - dose->first;
         concentration += dose->second;
-        typeData.updateConcentration( concentration, time_to_next );
+        // exponential decay of drug concentration
+        concentration *= exp(typeData.getNegElimintationRateConst() * time_to_next);
         
         dose = next_dose;
         ++next_dose;

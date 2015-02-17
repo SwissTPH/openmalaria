@@ -232,10 +232,5 @@ const LSTMDrugPD& LSTMDrugType::getPD( uint32_t genotype ) const {
     return PD[genotype_mapping[genotype]];
 }
 
-void LSTMDrugType::updateConcentration( double& C0, double duration ) const {
-    // exponential decay of drug concentration
-    C0 *= exp(neg_elimination_rate_constant * duration);
-}
-
 }
 }
