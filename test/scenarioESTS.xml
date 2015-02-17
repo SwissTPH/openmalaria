@@ -1224,11 +1224,11 @@
         <medicate drug="LU" hour="36" mg="120"/>
       </schedule>
       <schedule name="AS">
-        <medicate drug="AS" duration="0.001" hour="0" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="12" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="24" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="48" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="72" mg="2.4"/>
+        <medicate drug="AS" hour="0" mg="2.4"/>
+        <medicate drug="AS" hour="12" mg="2.4"/>
+        <medicate drug="AS" hour="24" mg="2.4"/>
+        <medicate drug="AS" hour="48" mg="2.4"/>
+        <medicate drug="AS" hour="72" mg="2.4"/>
       </schedule>
       <schedule name="AL_delay_84">
         <medicate drug="AR" hour="84" mg="20"/>
@@ -1245,11 +1245,11 @@
         <medicate drug="LU" hour="144" mg="120"/>
       </schedule>
       <schedule name="AS_delay_24">
-        <medicate drug="AS" duration="0.001" hour="24" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="36" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="48" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="72" mg="2.4"/>
-        <medicate drug="AS" duration="0.001" hour="96" mg="2.4"/>
+        <medicate drug="AS" hour="24" mg="2.4"/>
+        <medicate drug="AS" hour="36" mg="2.4"/>
+        <medicate drug="AS" hour="48" mg="2.4"/>
+        <medicate drug="AS" hour="72" mg="2.4"/>
+        <medicate drug="AS" hour="96" mg="2.4"/>
       </schedule>
       <schedule name="AL_delay_108">
         <medicate drug="AR" hour="108" mg="20"/>
@@ -1273,7 +1273,7 @@
         <age lowerbound="30" dose_mult="4"/>
       </dosages>
       <dosages name="AS">
-        <age lowerbound="0" dose_mult="1"/>
+        <multiply by="kg"/>
       </dosages>
     </treatments>
     <drugs>

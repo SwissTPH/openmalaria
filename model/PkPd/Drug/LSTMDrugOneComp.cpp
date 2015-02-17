@@ -71,10 +71,10 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) {
     //NOTE: this forces function to be non-const and not thread-safe over the same human (probably not an issue)
     //TODO(performance): can we use a faster allocator? Or avoid allocating at all?
     if( doses.begin()->first != 0.0 ){
-        doses.insert( doses.begin(), make_pair( 0.0, DoseParams() ) );
+        doses.insert( doses.begin(), make_pair( 0.0, 0.0 ) );
     }
     if( doses.count( 1.0 ) == 0 ){
-        doses.insert( make_pair( 1.0, DoseParams() ) );
+        doses.insert( make_pair( 1.0, 0.0 ) );
     }
     
     DoseMap::const_iterator dose = doses.begin();
@@ -82,17 +82,8 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) {
     ++next_dose;
     while (next_dose!=doses.end()) {
         double time_to_next = next_dose->first - dose->first;
-        if( dose->second.duration == 0.0 ){
-            // Oral dose
-            concentration_today += dose->second.qty;
-            
-            totalFactor *= drugPD.calcFactor( typeData, concentration_today, time_to_next );
-        } else {
-            // IV dose
-            assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
-            
-            totalFactor *= drugPD.calcFactorIV( typeData, concentration_today, time_to_next, dose->second.qty );
-        }
+        concentration_today += dose->second;
+        totalFactor *= drugPD.calcFactor( typeData, concentration_today, time_to_next );
         
         dose = next_dose;
         ++next_dose;
@@ -107,10 +98,10 @@ bool LSTMDrugOneComp::updateConcentration () {
     // Make sure we have a dose at both time 0 and time 1
     //TODO(performance): can we use a faster allocator? Or avoid allocating at all?
     if( doses.begin()->first != 0.0 ){
-        doses.insert( doses.begin(), make_pair( 0.0, DoseParams() ) );
+        doses.insert( doses.begin(), make_pair( 0.0, 0.0 ) );
     }
     if( doses.count( 1.0 ) == 0 ){
-        doses.insert( make_pair( 1.0, DoseParams() ) );
+        doses.insert( make_pair( 1.0, 0.0 ) );
     }
     
     DoseMap::const_iterator dose = doses.begin();
@@ -118,16 +109,8 @@ bool LSTMDrugOneComp::updateConcentration () {
     ++next_dose;
     while (next_dose!=doses.end()) {
         double time_to_next = next_dose->first - dose->first;
-        if( dose->second.duration == 0.0 ){
-            // Oral dose
-            concentration += dose->second.qty;
-            typeData.updateConcentration( concentration, time_to_next );
-        } else {
-            // IV dose
-            assert( util::vectors::approxEqual(time_to_next, dose->second.duration) );
-            
-            typeData.updateConcentrationIV( concentration, time_to_next, dose->second.qty );
-        }
+        concentration += dose->second;
+        typeData.updateConcentration( concentration, time_to_next );
         
         dose = next_dose;
         ++next_dose;

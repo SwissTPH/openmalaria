@@ -22,46 +22,12 @@
 #define Hmod_LSTMDrug
 
 #include "Global.h"
+#include "util/checkpoint_containers.h"
 
 using namespace std;
 
 namespace OM {
-
 namespace PkPd {
-struct DoseParams;
-}
-namespace util {
-namespace checkpoint {
-void operator& (multimap<double,PkPd::DoseParams> x, ostream& stream);
-void operator& (multimap<double,PkPd::DoseParams>& x, istream& stream);
-}
-}
-
-namespace PkPd {
-
-/** Describes an oral or IV dose.
- *
- * If duration > 0, describes an IV dose. qty refers to the infusion rate
- * in mg/kg/day.
- *
- * If duration = 0, describes an oral dose. qty refers to the concentration
- * in mg/l.
- */
-struct DoseParams {
-    DoseParams() : qty(0.0), duration(0.0) {}
-    DoseParams( double r, double d ): qty(r), duration(d) {}
-    double qty;               // infusion rate (mg/kg/day) or dose size (mg/l)
-    //NOTE: duration is now only needed when checking for overlapping doses
-    // and not within factor/concentration calculation code.
-    double duration;  // units: days
-
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        qty & stream;
-        duration & stream;
-    }
-};
 
 /** A class holding pkpd drug use info.
  *
@@ -88,16 +54,6 @@ public:
      * @param bodyMass Body mass of patient, in kg
      */
     virtual void medicate (double time, double qty, double bodyMass) =0;
-    
-    /** Indicate a new medication via IV this time step.
-     *
-     * @param time Time of start of administration, in days (should be at least
-     *  0 and less than 1 (although time+duration may be greater than 1).
-     * @param duration Duration of IV, in days. Drug is assumed to be
-     *  administered at a constant rate of this duration.
-     * @param qty Quantity of active ingredient, in mg/kg
-     */
-    void medicateIV (double time, double duration, double qty);
     
     /** Get the concentration of the drug in the central compartment of the
      * model.
@@ -145,18 +101,11 @@ protected:
     virtual void checkpoint (istream& stream){}
     virtual void checkpoint (ostream& stream){}
     
-    typedef multimap<double,DoseParams> DoseMap;
-
-    /** Check whether an IV dose needs to be split into multiple doses
-     * (over two days or when an oral dose occurs in the middle).
-     * If necessary, split.
-     *
-     * Only check against lastInserted. */
-    void check_split_IV( DoseMap::iterator lastInserted );
-
-
+    /// Key is time (days), value is concentration (mg / l)
+    typedef multimap<double,double> DoseMap;
+    
     /** List of each dose given today (and possibly tomorrow), ordered by time.
-     * First parameter (key) is time in days, second describes dose.
+     * First parameter (key) is time in days, second is the dose concentration (mg/l).
      *
      * Used in calculateDrugFactor temporarily,
      * and in updateConcentration() to update concentration. */

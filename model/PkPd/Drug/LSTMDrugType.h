@@ -96,18 +96,6 @@ public:
      * @return survival factor (unitless)
      */
     double calcFactor( const LSTMDrugType& drug, double& C0, double duration ) const;
-    
-    /** Calculate a survival factor over the course of an intravenous transfusion.
-     * No other drug administration should happen during this time span.
-     *
-     * @param drug Reference to per-drug data
-     * @param C0 Concentration of drug in blood at start of IV. Will be
-     *  updated to correct concentration at end of IV. Units: mg/l
-     * @param duration Length of IV in days.
-     * @param rate Rate of drug administration (mg/kg/day)
-     * @return survival factor (unitless)
-     */
-    double calcFactorIV( const LSTMDrugType& drug, double& C0, double duration, double rate ) const;
 };
     
     
@@ -167,10 +155,6 @@ public:
     /** Decay concentration C0 over time duration (days) assuming no
      * administration during this time. */
     void updateConcentration( double& C0, double duration ) const;
-    /** Update concentration C0 over time duration (days) assuming an
-     * intravenous infusion at _rate rate (mg/kg/day) and no
-     * administration during this time. */
-    void updateConcentrationIV( double& C0, double duration, double rate ) const;
     //@}
   
 private:

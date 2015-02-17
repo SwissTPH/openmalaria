@@ -56,13 +56,17 @@ struct DosageTable {
      * usually be integers. IV doses, on the other hand, are given as mg/kg,
      * and this multilier will likely be one. */
     double getMultiplier( double key ){
-        map<double,double>::const_iterator it = table.upper_bound( key );
-        if( it == table.end() )
-            throw TRACED_EXCEPTION( "bad age/dosage table", util::Error::PkPd );
-        return it->second;
+        if( multMassKg ) return key;
+        else{
+            map<double,double>::const_iterator it = table.upper_bound( key );
+            if( it == table.end() )
+                throw TRACED_EXCEPTION( "bad age/dosage table", util::Error::PkPd );
+            return it->second;
+        }
     }
     
     bool useMass;       // false: dosing by age; true: dosing by body mass
+    bool multMassKg;    // multiply by mass instead of using table
     map<double,double> table;
 };
 

@@ -131,8 +131,8 @@ public:
             typedef multimap<size_t,pair<double, double> >::const_iterator iter;
             pair<iter, iter> doses_tmp = schedule.equal_range(i);
             for( iter it = doses_tmp.first; it != doses_tmp.second; it++){
-                UnittestUtil::medicate( *proxy, drugIndex, it->second.second, it->second.first,
-                        numeric_limits< double >::quiet_NaN(), bodymass );
+                const double time = it->second.first, qty = it->second.second;
+                UnittestUtil::medicate( *proxy, drugIndex, qty, time, bodymass );
             }
     }
     

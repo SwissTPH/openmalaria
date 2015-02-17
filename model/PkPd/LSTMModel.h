@@ -39,8 +39,7 @@ struct MedicateData {
     MedicateData () :
         drug(0),
         qty(numeric_limits< double >::signaling_NaN()),
-        time(numeric_limits< double >::signaling_NaN()),
-        duration(numeric_limits< double >::quiet_NaN())
+        time(numeric_limits< double >::signaling_NaN())
     {}
     
     /// Checkpointing
@@ -49,7 +48,6 @@ struct MedicateData {
         drug & stream;
         qty & stream;
         time & stream;
-        duration & stream;
     }
     
 private:
@@ -64,7 +62,6 @@ private:
     size_t drug;      /// Drug type index
     double qty;         /// Quantity of drug prescribed (mg when oral, mg/kg when IV)
     double time;        /// Time to medicate at, in days (0 means start of time step, may be >= 1 (thus not today))
-    double duration;    /// Duration for IV purposes, in days (use 0 or NaN to indicate oral dose)
     
     friend struct Schedule;
     friend class LSTMModel;
@@ -142,7 +139,6 @@ private:
      * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
      * \param qty The quantity in either mg (if oral dose) or mg/kg (if IV).
      * \param time Time in days since start of this time step to medicate at
-     * \param duration  Duration in days. 0 or an NaN indicates no duration.
      * \param bodyMass Weight of human in kg
      * 
      * Due to the fact we're using a discrete time step model, the case-management
@@ -152,7 +148,7 @@ private:
      * new infection densities) happens first; hence medicate() will always be
      * called after getDrugFactor in a time step, and a time of zero means the
      * dose has effect from the start of the following time step. */
-    void medicateDrug(size_t typeIndex, double qty, double time, double duration, double bodyMass);
+    void medicateDrug(size_t typeIndex, double qty, double time, double bodyMass);
   
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);

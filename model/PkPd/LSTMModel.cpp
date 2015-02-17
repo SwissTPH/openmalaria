@@ -86,7 +86,7 @@ void LSTMModel::medicate(double body_mass){
     while( it != medicateQueue.end() ){
         if( it->time < 1.0 ){   // Medicate medications to be prescribed starting at the next time-step
             // This function could be inlined, except for uses in testing:
-            medicateDrug (it->drug, it->qty, it->time, it->duration, body_mass);
+            medicateDrug (it->drug, it->qty, it->time, body_mass);
             it = medicateQueue.erase (it);
         }else{  // and decrement treatment seeking delay for the rest
             it->time -= 1.0;
@@ -95,22 +95,16 @@ void LSTMModel::medicate(double body_mass){
     }
 }
 
-void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double duration, double bodyMass) {
-    size_t j = 0;
-    for( ; j < m_drugs.size(); ++j ){
-        if (m_drugs[j].getIndex() == typeIndex)
-            goto medicateGotDrug;
+void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double bodyMass) {
+    foreach( LSTMDrug& drug, m_drugs ){
+        if (drug.getIndex() == typeIndex){
+            drug.medicate (time, qty, bodyMass);
+            return;
+        }
     }
     // No match, so insert one:
     m_drugs.push_back( new LSTMDrugOneComp(LSTMDrugType::getDrug(typeIndex)) );
-    j = m_drugs.size() - 1;	// the drug we just added
-    
-    medicateGotDrug:
-    if( duration > 0.0 ){
-        m_drugs[j].medicateIV (time, duration, qty);
-    }else{      // 0 or NaN
-        m_drugs[j].medicate (time, qty, bodyMass);
-    }
+    m_drugs.back().medicate (time, qty, bodyMass);
 }
 
 double LSTMModel::getDrugConc (size_t drug_index) const{

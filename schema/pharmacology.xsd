@@ -78,7 +78,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="drug" type="xs:string" use="required">
       <xs:annotation>
         <xs:documentation>
-      Abbreviated name of drug compound
+          Abbreviated name of drug compound
         </xs:documentation>
         <xs:appinfo>name:drug;</xs:appinfo>
       </xs:annotation>
@@ -86,11 +86,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="mg" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          Quantity of drug compound. For oral doses, this should be given in
-          mg, using a separate dosage table to adjust for age/weight. For IV
-          treatment, this should be given in mg/kg without a dosage table.
+          Quantity of drug compound in mg per *something*. A separate dosage
+          table must be used when medicating, which may specify multipliers of
+          this number based on patient age or weight.
         </xs:documentation>
-        <xs:appinfo>units:mg or mg/kg;name:Drug dose;</xs:appinfo>
+        <xs:appinfo>units:mg per something;name:Drug dose (mg with multiplier);</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="hour" type="xs:double" use="required">
@@ -100,16 +100,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         at (first dose should be at hour 0).
       </xs:documentation>
         <xs:appinfo>units:Hours;min:0;name:Time of administration;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="duration" type="xs:double" use="optional">
-      <xs:annotation>
-        <xs:documentation>
-        If this attribute is given, use IV administration instead of orally.
-        
-        Specifies the number of hours during which the dose is administered.
-      </xs:documentation>
-        <xs:appinfo>units:Hours;min:0;name:Duration of administration;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -130,6 +120,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:choice>
         <xs:element name="age" type="om:PKPDDosageRange" maxOccurs="unbounded"/>
         <xs:element name="bodymass" type="om:PKPDDosageRange" maxOccurs="unbounded"/>
+        <xs:element name="multiply" maxOccurs="1">
+          <xs:annotation>
+            <xs:documentation>
+              Multiply the dose by some quantity, such as patient weight.
+            </xs:documentation>
+            <xs:appinfo>name:Multiply dose;</xs:appinfo>
+          </xs:annotation>
+          <xs:complexType>
+            <xs:attribute name="by" use="required">
+              <xs:annotation>
+                <xs:documentation>
+                  Quantity to multiply the dose by. Only option is "kg"
+                  (patient weight in kg).
+                </xs:documentation>
+                <xs:appinfo>name:By what?;</xs:appinfo>
+              </xs:annotation>
+              <xs:simpleType>
+                <xs:restriction base="xs:string">
+                  <xs:enumeration value="kg"/>
+                </xs:restriction>
+              </xs:simpleType>
+            </xs:attribute>
+          </xs:complexType>
+        </xs:element>
       </xs:choice>
     </xs:sequence>
     <xs:attribute name="name" type="xs:string" use="required">
