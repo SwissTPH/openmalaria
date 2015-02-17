@@ -32,8 +32,9 @@ namespace PkPd {
  * Each human has an instance for each type of drug present in their blood. */
 class LSTMDrug {
 public:
-    /** Create a new instance. */
-    LSTMDrug ();
+    /// Create a new instance.
+    /// Volume of distribution must be specified here (from sample or mean).
+    LSTMDrug (double Vd);
     /// Obligatory virtual destructor on a virtual class
     virtual ~LSTMDrug();
     
@@ -71,10 +72,8 @@ public:
      */
     virtual double calculateDrugFactor(uint32_t genotype) const =0;
     
-    /** Updates concentration variable and clears day's doses.
-     *
-     * @returns true if concentration is negligible (this class instance can be removed). */
-    virtual bool updateConcentration () =0;
+    /** Updates concentration variable and clears day's doses. */
+    virtual void updateConcentration () =0;
     
     /// Checkpointing
     template<class S>
@@ -84,7 +83,8 @@ public:
     }
 
 protected:
-    /** Indicate a new medication this time step.
+    /** Indicate a new medication this time step, specifying volume of
+     * distribution directly.
      *
      * Converts qty in mg to concentration, and stores along with time (delay past
      * the start of the current time step) in the doses container.
@@ -94,19 +94,21 @@ protected:
      * @param qty Amount of active ingredient, in mg
      * @param volDist Volume of distribution in l
      */
-    void _medicate (double time, double qty, double volDist);
+    void medicate_vd (double time, double qty, double volDist);
     
     virtual void checkpoint (istream& stream){}
     virtual void checkpoint (ostream& stream){}
     
     /// First is time (days), second is additional concentration (mg / l)
     typedef std::vector<std::pair<double,double> > DoseVec;
-    
     /** List of each dose given today (and possibly tomorrow), ordered by time.
      * First parameter (key) is time in days, second is the dose concentration (mg/l).
      *
      * Read in calculateDrugFactor, and updated in updateConcentration(). */
     DoseVec doses;
+    
+    /// Volume of distribution, sampled when this class is first created.
+    double vol_dist;
 };
 
 }

@@ -44,25 +44,27 @@ LSTMDrugPD::Cache::Cache( double c, double d, double r ) :
     hash = hasher(c) ^ hasher(d) ^ hasher(r);
 }
 
-LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype, double elimination_rate_constant ){
+LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
     slope = phenotype.getSlope ();
-    power = phenotype.getMax_killing_rate () / (elimination_rate_constant * slope);
     IC50_pow_slope = pow(phenotype.getIC50 (), slope);
     max_killing_rate = phenotype.getMax_killing_rate ();  
+    if( phenotype.getIC50().getSigma() > 0.0 ){
+        throw util::unimplemented_exception("sampling IC50");
+    }
 }
 
-double LSTMDrugPD::calcFactor( const LSTMDrugType& drug, double& C0, double duration ) const{
-    // exponential decay of drug concentration
-    const double C1 = C0 * exp(drug.getNegElimintationRateConst() * duration);
+double LSTMDrugPD::calcFactor( double neg_elim_rate, double& C0, double duration ) const{
+    const double C1 = C0 * exp(neg_elim_rate * duration);
     
     // From Hastings & Winter 2011 paper
     // Note: these look a little different from original equations because IC50_pow_slope
-    // and power are calculated when read from the scenario document instead of here.
-    double numerator = IC50_pow_slope + pow(C1, slope);
-    double denominator = IC50_pow_slope + pow(C0, slope);
+    // is calculated when parameters are read from the scenario document instead of now.
+    const double numerator = IC50_pow_slope + pow(C1, slope);
+    const double denominator = IC50_pow_slope + pow(C0, slope);
     
     //TODO(performance): can we cache the value for each parameter combination?
     C0 = C1;    // C0 is an in/out parameter
+    const double power = max_killing_rate / (-neg_elim_rate * slope);
     return pow( numerator / denominator, power );       // unitless
 }
 

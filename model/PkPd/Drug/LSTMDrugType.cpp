@@ -90,17 +90,24 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
     
     negligible_concentration = drugData.getPK().getNegligible_concentration();
     if( drugData.getPK().getHalf_life().present() ){
-        neg_elimination_rate_constant = -log(2.0) / drugData.getPK().getHalf_life().get();
+        elimination_rate.setParams( log(2.0) / drugData.getPK().getHalf_life().get(), 0.0 );
     }else{
-        neg_elimination_rate_constant = -drugData.getPK().getK().get().getMean();
-        if( drugData.getPK().getK().get().getSigma() > 0 ){
-            throw util::unimplemented_exception("sampling PK parameters");
-        }
+        elimination_rate.setParams( drugData.getPK().getK().get() );
     }
-    vol_dist = drugData.getPK().getVol_dist();
-    if( drugData.getPK().getCompartment2().present() ||
-        drugData.getPK().getCompartment3().present() ){
+    vol_dist.setParams( drugData.getPK().getVol_dist(),
+                        drugData.getPK().getVol_dist().getSigma() );
+    if( drugData.getPK().getCompartment2().present() ){
+        k12.setParams( drugData.getPK().getCompartment2().get().getK12() );
+        k21.setParams( drugData.getPK().getCompartment2().get().getK21() );
+        if( drugData.getPK().getCompartment3().present() ){
+            k13.setParams( drugData.getPK().getCompartment3().get().getK13() );
+            k31.setParams( drugData.getPK().getCompartment3().get().getK31() );
+        }
+        // still not implemented yet:
         throw util::unimplemented_exception("multi-compartment PK models");
+    }else if( drugData.getPK().getCompartment3().present() ){
+        throw util::xml_scenario_error( "PK model specifies parameters for "
+                "compartment3 without compartment2" );
     }
     
     set<string> loci_per_phenotype;
@@ -169,7 +176,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             }
         }
         phenotype_restrictions.push_back( loc_alleles );
-        PD.push_back( new LSTMDrugPD( pElt[i], -neg_elimination_rate_constant ) );
+        PD.push_back( new LSTMDrugPD( pElt[i] ) );
     }
     
     if( loci_per_phenotype.size() == 0 ){

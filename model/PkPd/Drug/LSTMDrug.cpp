@@ -35,7 +35,7 @@ using namespace std;
 namespace OM {
 namespace PkPd {
 
-LSTMDrug::LSTMDrug() {}
+LSTMDrug::LSTMDrug(double Vd): vol_dist(Vd) {}
 LSTMDrug::~LSTMDrug() {}
 
 bool comp(pair<double,double> lhs, double rhs){
@@ -46,7 +46,7 @@ bool comp(pair<double,double> lhs, double rhs){
 // per day, but be able to handle more.
 // If two doses coincide, they can be combined but doing so is not essential.
 
-void LSTMDrug::_medicate (double time, double qty, double volDist) {
+void LSTMDrug::medicate_vd (double time, double qty, double volDist) {
     double conc = qty / volDist;        // mg / l
     // Insert in the right position to maintain sorting:
     DoseVec::iterator pos = lower_bound(doses.begin(), doses.end(), time, comp);

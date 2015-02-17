@@ -51,7 +51,7 @@ public:
     virtual void medicate (double time, double qty, double bodyMass);
     
     virtual double calculateDrugFactor(uint32_t genotype) const;
-    virtual bool updateConcentration ();
+    virtual void updateConcentration ();
     
 protected:
     virtual void checkpoint (istream& stream);
@@ -62,6 +62,9 @@ protected:
     
     /// Concentration in blood; units: mg / l.
     double concentration;
+    
+    /// Sampled elimination rate constant
+    double neg_elim_rate;
 };
 
 }

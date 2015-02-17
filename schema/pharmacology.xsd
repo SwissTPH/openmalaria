@@ -256,13 +256,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:annotation>
               </xs:element>
             </xs:choice>
-            <xs:element name="vol_dist" type="xs:double">
+            <xs:element name="vol_dist">
               <xs:annotation>
                 <xs:documentation>
                     Volume of Distribution
                   </xs:documentation>
-                <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution;</xs:appinfo>
+                <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution (Vd);</xs:appinfo>
               </xs:annotation>
+              <xs:complexType>
+                <xs:simpleContent>
+                  <xs:extension base="xs:double">
+                    <xs:attribute name="sigma" type="xs:double" default="0">
+                      <xs:annotation>
+                        <xs:documentation>
+                          Distribution parameter describing per-human variation of
+                          volume of distribution. If zero or not specified,
+                          the parameter is not sampled. See documentation of
+                          parent element.
+                        </xs:documentation>
+                        <xs:appinfo>name:Sigma parameter for per-human variation of Vd;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:simpleContent>
+              </xs:complexType>
             </xs:element>
             <xs:element name="compartment2" minOccurs="0">
               <xs:annotation>
@@ -377,13 +394,32 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="IC50" type="xs:double">
+      <xs:element name="IC50">
         <xs:annotation>
           <xs:documentation>
-              Half maximal effect concentration.
-            </xs:documentation>
+            Half maximal effect concentration. If sigma &gt; 0, the IC50 is
+            sampled for each infection from a log-normal distribution with mean
+            of this value and the sigma value specified, i.e.
+            X ~ log N( log(mean) - s^2 / 2, s^2 ) .
+          </xs:documentation>
           <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
         </xs:annotation>
+        <xs:complexType>
+          <xs:simpleContent>
+            <xs:extension base="xs:double">
+              <xs:attribute name="sigma" type="xs:double" default="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    Distribution parameter describing per-infection variation of
+                    IC50. If zero or not specified, the IC50 is not sampled. See
+                    documentation of parent element.
+                  </xs:documentation>
+                  <xs:appinfo>name:Sigma parameter for per-infection variation of IC50;</xs:appinfo>
+                </xs:annotation>
+              </xs:attribute>
+            </xs:extension>
+          </xs:simpleContent>
+        </xs:complexType>
       </xs:element>
       <xs:element name="slope" type="xs:double">
         <xs:annotation>

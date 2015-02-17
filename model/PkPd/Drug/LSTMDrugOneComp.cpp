@@ -35,9 +35,10 @@ using namespace std;
 namespace OM { namespace PkPd {
     
 LSTMDrugOneComp::LSTMDrugOneComp(const LSTMDrugType& type) :
-    LSTMDrug(),
+    LSTMDrug(type.sample_Vd()),
     typeData(type),
-    concentration (0.0)
+    concentration (0.0),
+    neg_elim_rate(-type.sample_k())
 {}
 
 //LSTMDrugOneComp::~LSTMDrugOneComp(){}
@@ -51,12 +52,14 @@ double LSTMDrugOneComp::getConcentration() const {
 
 void LSTMDrugOneComp::medicate(double time, double qty, double bodyMass)
 {
-    _medicate(time, qty, typeData.getVolumeOfDistribution() * bodyMass);
+    medicate_vd(time, qty, vol_dist * bodyMass);
 }
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
 double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) const {
+    if( concentration == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
+    
     /* Survival factor of the parasite (this multiplies the parasite density).
     Calculated below for each time interval. */
     double totalFactor = 1.0;
@@ -73,7 +76,7 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) const {
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
-                totalFactor *= drugPD.calcFactor( typeData, concentration_today, time_conc.first - time );
+                totalFactor *= drugPD.calcFactor( neg_elim_rate, concentration_today, time_conc.first - time );
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add dose (instantaneous absorbtion):
@@ -83,13 +86,15 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) const {
         }
     }
     if( time < 1.0 ){
-        totalFactor *= drugPD.calcFactor( typeData, concentration_today, 1.0 - time );
+        totalFactor *= drugPD.calcFactor( neg_elim_rate, concentration_today, 1.0 - time );
     }
     
     return totalFactor; // Drug effect per day per drug per parasite
 }
 
-bool LSTMDrugOneComp::updateConcentration () {
+void LSTMDrugOneComp::updateConcentration () {
+    if( concentration == 0.0 && doses.size() == 0 ) return;     // nothing to do
+    
     double time = 0.0;
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
@@ -98,7 +103,7 @@ bool LSTMDrugOneComp::updateConcentration () {
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
                 // exponential decay of drug concentration:
-                concentration *= exp(typeData.getNegElimintationRateConst() * (time_conc.first - time));
+                concentration *= exp(neg_elim_rate * (time_conc.first - time));
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add dose (instantaneous absorbtion):
@@ -110,15 +115,17 @@ bool LSTMDrugOneComp::updateConcentration () {
     }
     if( time < 1.0 ){
         // exponential decay of drug concentration:
-        concentration *= exp(typeData.getNegElimintationRateConst() * (1.0 - time));
+        concentration *= exp(neg_elim_rate * (1.0 - time));
     }
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
     doses.erase(doses.begin(), doses.begin() + doses_taken);
     
     util::streamValidate( concentration );
-    
-    // return true when concentration is no longer significant:
-    return concentration < typeData.getNegligibleConcentration();
+    if( concentration < typeData.getNegligibleConcentration() ){
+        // once negligible, try to optimise so that we don't have to do
+        // anything next time step
+        concentration = 0.0;
+    }
 }
 
 void LSTMDrugOneComp::checkpoint(ostream& stream){

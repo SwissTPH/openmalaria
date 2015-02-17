@@ -21,6 +21,9 @@
 #ifndef Hmod_LSTMDrugType
 #define Hmod_LSTMDrugType
 
+#include "Global.h"
+#include "util/sampler.h"
+
 #include <string>
 #include <deque>
 #include <vector>
@@ -30,7 +33,6 @@
 #include <map>
 #include <boost/unordered_set.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
-#include "Global.h"
 
 using namespace std;
 
@@ -39,7 +41,9 @@ namespace scnXml{
     class PKPDDrug;
     class Phenotype;
 }
-namespace OM { namespace PkPd {
+namespace OM {
+namespace PkPd {
+using util::LognormalSampler;
 
 class LSTMDrugType;
 
@@ -49,6 +53,36 @@ class LSTMDrugType;
  * Parasite genetics is specified elsewhere; we simply map genotype to
  * phenotype as well as describing phenotypes here. */
 class LSTMDrugPD {
+public:
+    /// Construct
+    LSTMDrugPD( const scnXml::Phenotype& phenotype );
+    
+    /** Calculate a survival factor induced by a drug already in the blood.
+     * It is expected that no drug doses are taken over the period for which
+     * this function calculates a drug factor.
+     * 
+     * @param neg_elim_rate -k (sampled)
+     * @param C0 Concentration of drug in blood at start of period. Will be
+     *  updated to correct concentration at end of period. Units: mg/l
+     * @param duration Length of IV in days.
+     * @return survival factor (unitless)
+     */
+    double calcFactor( double neg_elim_rate, double& C0, double duration ) const;
+    
+    /** Calculate a survival factor over the course of an intravenous transfusion.
+     * No other drug administration should happen during this time span.
+     *
+     * @param neg_elim_rate -k (sampled)
+     * @param vol_dist Vd (sampled)
+     * @param C0 Concentration of drug in blood at start of IV. Will be
+     *  updated to correct concentration at end of IV. Units: mg/l
+     * @param duration Length of IV in days.
+     * @param rate Rate of drug administration (mg/kg/day)
+     * @return survival factor (unitless)
+     */
+    double calcFactorIV( double neg_elim_rate, double vol_dist, double& C0, double duration, double rate ) const;
+    
+private:
     struct Cache {
         Cache( double c, double d, double r );
         
@@ -75,27 +109,10 @@ class LSTMDrugPD {
     
     /// Slope of the dose response curve (no unit)
     double slope;
-    /// Maximal drug killing rate per day / (elimination_rate_constant * slope) (no unit)
-    double power;
     /// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
     double IC50_pow_slope;
     /// Maximal drug killing rate per day (units: 1/days)
     double max_killing_rate;
-    
-public:
-    LSTMDrugPD( const scnXml::Phenotype& phenotype, double elimination_rate_constant );
-    
-    /** Calculate a survival factor induced by a drug already in the blood.
-     * It is expected that no drug doses are taken over the period for which
-     * this function calculates a drug factor.
-     * 
-     * @param drug Reference to per-drug data
-     * @param C0 Concentration of drug in blood at start of period. Will be
-     *  updated to correct concentration at end of period. Units: mg/l
-     * @param duration Length of IV in days.
-     * @return survival factor (unitless)
-     */
-    double calcFactor( const LSTMDrugType& drug, double& C0, double duration ) const;
 };
     
     
@@ -142,14 +159,14 @@ public:
     inline size_t getIndex() const {
         return index;
     }
-    inline double getVolumeOfDistribution() const{
-        return vol_dist;
-    }
     inline double getNegligibleConcentration() const{
         return negligible_concentration;
     }
-    inline double getNegElimintationRateConst() const{
-        return neg_elimination_rate_constant;
+    inline double sample_Vd() const{
+        return vol_dist.sample();
+    }
+    inline double sample_k() const{
+        return elimination_rate.sample();
     }
     
     /** Return reference to correct drug-phenotype data. */
@@ -167,6 +184,9 @@ private:
     /** A mapping from genotype codes to phenotypes for this drug. */
     vector<uint32_t> genotype_mapping;
     
+    // TODO: at the moment we're storing all PK & PD data regardless of which
+    // model is used. Evaluate whether this is sensible or not.
+    
     /* PD parameters (may vary based on infection genotype). */
     boost::ptr_vector<LSTMDrugPD> PD;
     
@@ -174,11 +194,13 @@ private:
     /** Concentration, below which drug is deemed not to have an effect and is
      * removed for performance reasons. (mg/l) */
     double negligible_concentration;
-    /** Terminal elimination rate constant (negated). Found using
-     * ln(2)/half_life. (1 / days) */
-    double neg_elimination_rate_constant;
     /// Volume of distribution (l/kg)
-    double vol_dist;
+    LognormalSampler vol_dist;
+    /** Terminal elimination rate constant (k). Equals ln(2)/half_life.
+     * Units: (1 / days) */
+    LognormalSampler elimination_rate;
+    /// Parameters for absorbtion rates in two- and three-compartment models.
+    LognormalSampler k12, k21, k13, k31;
     
     // Allow LSTMDrug to access private members
     friend class LSTMDrugPD;

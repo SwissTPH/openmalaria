@@ -128,25 +128,22 @@ double LSTMModel::getDrugFactor (uint32_t genotype) const{
     return factor;
 }
 
-// This may look complicated but its just some machinery to call updateConcentration() and return its result
-class DecayPredicate {
-public:
-    bool operator() (LSTMDrug& drug) const{
-        return drug.updateConcentration();
-    }
-};
 void LSTMModel::decayDrugs () {
-    // for each item in m_drugs, remove if DecayPredicate::operator() returns true (so calls decay()):
-    m_drugs.erase_if(DecayPredicate());
+    // Update concentrations for each drug.
+    // TODO: previously we removed drugs with negligible concentration here. What now, just set concentration to 0?
+    foreach( LSTMDrug& drug, m_drugs ){
+        drug.updateConcentration();
+    }
 }
 
 void LSTMModel::summarize(const Host::Human& human) const{
     for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        assert( drug->getConcentration() > 0 );
-        size_t index = drug->getIndex();
-        mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
-        mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(drug->getConcentration()) );
+        if( drug->getConcentration() > 0 ){
+            size_t index = drug->getIndex();
+            mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
+            mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(drug->getConcentration()) );
+        }
     }
 }
 
