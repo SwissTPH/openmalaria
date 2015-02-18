@@ -986,7 +986,7 @@
         <medicate drug="effective" hour="0" mg="1"/>
       </schedule>
       <dosages name="effective">
-        <age lowerbound="0" dose_mult="1"/>
+        <multiply by="kg"/>
       </dosages>
     </treatments>
     <drugs>

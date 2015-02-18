@@ -92,6 +92,9 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
     if( drugData.getPK().getHalf_life().present() ){
         elimination_rate.setParams( log(2.0) / drugData.getPK().getHalf_life().get(), 0.0 );
     }else{
+        if( !drugData.getPK().getK().present() ){
+            throw util::xml_scenario_error( "PK data must include either half_life or k" );
+        }
         elimination_rate.setParams( drugData.getPK().getK().get() );
     }
     vol_dist.setParams( drugData.getPK().getVol_dist(),
