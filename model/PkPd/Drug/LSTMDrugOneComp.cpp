@@ -130,9 +130,11 @@ void LSTMDrugOneComp::updateConcentration () {
 
 void LSTMDrugOneComp::checkpoint(ostream& stream){
     concentration & stream;
+    neg_elim_rate & stream;
 }
 void LSTMDrugOneComp::checkpoint(istream& stream){
     concentration & stream;
+    neg_elim_rate & stream;
 }
 
 }
