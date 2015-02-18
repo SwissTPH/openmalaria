@@ -1143,7 +1143,8 @@
         <PK>
           <negligible_concentration>0.005</negligible_concentration>
           <!-- high precision is to replicate results using half_life of 13.078 -->
-          <k mean="0.053001008" sigma="0"/>
+          <!-- sigma value comes from nowhere -->
+          <k mean="0.053001008" sigma="0.1"/>
           <vol_dist>20.8</vol_dist>
         </PK>
       </drug>
