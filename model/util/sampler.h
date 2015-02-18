@@ -98,7 +98,9 @@ namespace OM { namespace util {
         {}
         
         /** Set parameters such that samples taken are:
-         * X ~ log N( log(mean)-s²/2, s² )
+         * X ~ ln N( log(mean)-s²/2, s² )
+         * 
+         * Equivalent in R: rlnorm(n, log(m) - s*s/2, s)
          * 
          * @param mean Mean of sampled variates
          * @param s Square-root of variance of logarithm of sampled variates

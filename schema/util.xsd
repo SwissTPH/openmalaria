@@ -216,7 +216,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:documentation>
         Parameters of a log-normal distribution.
         
-        Variates are sampled as: X ~ log N( log(mean)-sigma²/2, sigma² ).
+        Variates are sampled as: X ~ ln N( log(mean)-sigma²/2, sigma² ).
+        
+        Equivalent R sample: rlnorm(n, log(m) - s*s/2, s)
       </xs:documentation>
       <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
     </xs:annotation>
