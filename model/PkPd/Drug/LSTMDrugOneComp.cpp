@@ -95,27 +95,19 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) const {
 void LSTMDrugOneComp::updateConcentration () {
     if( concentration == 0.0 && doses.size() == 0 ) return;     // nothing to do
     
-    double time = 0.0;
+    // exponential decay of drug concentration (portion without new doses):
+    concentration *= exp(neg_elim_rate);
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
     foreach( TimeConc& time_conc, doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
-            if( time < time_conc.first ){
-                // exponential decay of drug concentration:
-                concentration *= exp(neg_elim_rate * (time_conc.first - time));
-                time = time_conc.first;
-            }else{ assert( time == time_conc.first ); }
-            // add dose (instantaneous absorbtion):
-            concentration += time_conc.second;
+            // calculate decayed dose and add:
+            concentration += time_conc.second * exp(neg_elim_rate * (1.0 - time_conc.first));
             doses_taken += 1;
         }else /*i.e. tomorrow or later*/{
             time_conc.first -= 1.0;
         }
-    }
-    if( time < 1.0 ){
-        // exponential decay of drug concentration:
-        concentration *= exp(neg_elim_rate * (1.0 - time));
     }
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
     doses.erase(doses.begin(), doses.begin() + doses_taken);
