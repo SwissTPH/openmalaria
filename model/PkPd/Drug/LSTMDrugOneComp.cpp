@@ -96,6 +96,8 @@ void LSTMDrugOneComp::updateConcentration () {
     if( concentration == 0.0 && doses.size() == 0 ) return;     // nothing to do
     
     // exponential decay of drug concentration (portion without new doses):
+    //TODO: is it faster to pre-calculate this and either store an extra
+    // parameter or adapt uses of neg_elim_rate, etc. below?
     concentration *= exp(neg_elim_rate);
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;

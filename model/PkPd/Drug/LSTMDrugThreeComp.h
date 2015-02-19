@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_LSTMDrugOnComp
-#define Hmod_LSTMDrugOnComp
+#ifndef Hmod_LSTMDrugThreeComp
+#define Hmod_LSTMDrugThreeComp
 
 #include "Global.h"
 #include "PkPd/Drug/LSTMDrug.h"
@@ -32,18 +32,19 @@ namespace OM {
 namespace PkPd {
 struct DoseParams;
 }
-
 namespace PkPd {
 
-/** A class holding pkpd drug use info.
+/** A class holding PK and PD drug info, per human, per drug type.
  * 
- * One compartment model
- *
- * Each human has an instance for each type of drug present in their blood. */
-class LSTMDrugOneComp : public LSTMDrug {
+ * Three compartment model:
+ * 
+ * "Mathematical Expressions of the Pharmacokinetic and Pharmacodynamic Models
+ * implemented in the Monolix software", Julie Bertrand and France Mentré, Sept
+ * 2008. From page 37, in particular equation (1.72) p44. */
+class LSTMDrugThreeComp : public LSTMDrug {
 public:
     /** Create a new instance. */
-    LSTMDrugOneComp (const LSTMDrugType&);
+    LSTMDrugThreeComp (const LSTMDrugType&);
     
     virtual size_t getIndex() const;
     virtual double getConcentration() const;
@@ -61,11 +62,16 @@ protected:
     //TODO: does it still make sense to link this?
     const LSTMDrugType& typeData;
     
-    /// Concentration in blood; units: mg / l.
-    double concentration;
+    /// Concentrations in the blood and other compartments
+    /// See "Permutation of the three-compartment equation",
+    /// Diggory Hardy, Swiss TPH, February 3, 2015
+    //NOTE: We assume instantaneous absorbtion, thus do not need the ABC term
+    // (rationale: lets not complicate code without evidence of need)
+    double concA, concB, concC /*, concABC*/;
     
-    /// Sampled elimination rate constant
-    double neg_elim_rate;
+    /// Computed sampled constants
+    double alpha, beta, gamma;
+    double A, B, C;
 };
 
 }

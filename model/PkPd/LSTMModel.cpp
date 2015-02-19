@@ -96,6 +96,7 @@ void LSTMModel::medicate(double body_mass){
 }
 
 void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double bodyMass) {
+    //TODO: might be a little faster if m_drugs was pre-allocated with a slot for each drug type, using a null pointer
     foreach( LSTMDrug& drug, m_drugs ){
         if (drug.getIndex() == typeIndex){
             drug.medicate (time, qty, bodyMass);
@@ -139,10 +140,11 @@ void LSTMModel::decayDrugs () {
 void LSTMModel::summarize(const Host::Human& human) const{
     for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        if( drug->getConcentration() > 0 ){
+        double conc = drug->getConcentration();
+        if( conc > 0.0 ){
             size_t index = drug->getIndex();
             mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
-            mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(drug->getConcentration()) );
+            mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(conc) );
         }
     }
 }
