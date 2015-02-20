@@ -255,14 +255,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:appinfo>units:day^-1;min:0;name:Elimination rate constant (k);</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="k_a" type="xs:double" minOccurs="0">
+              <xs:element name="k_a" type="om:LognormalSample" minOccurs="0">
                 <xs:annotation>
                   <xs:documentation>
                     Absorbtion rate parameter. Currently only allowed for two
                     and three compartment models (i.e. when "compartment2"
                     parameters are specified), where it is required.
-                    
-                    TODO: determine details
                   </xs:documentation>
                   <xs:appinfo>name:Absorbtion rate constant (k_a);min:0;</xs:appinfo>
                 </xs:annotation>

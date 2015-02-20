@@ -173,8 +173,7 @@ public:
     inline double sample_k21() const{ return k21.sample(); }
     inline double sample_k13() const{ return k13.sample(); }
     inline double sample_k31() const{ return k31.sample(); }
-    //TODO: like this?
-    inline double k_a() const{ return absorbtion_rate; }
+    inline double sample_ka() const{ return absorbtion_rate.sample(); }
     
     /** Return reference to correct drug-phenotype data. */
     const LSTMDrugPD& getPD( uint32_t genotype ) const;
@@ -201,10 +200,10 @@ private:
     /** Concentration, below which drug is deemed not to have an effect and is
      * removed for performance reasons. (mg/l) */
     double negligible_concentration;
-    /// Absorbtion rate (currently fixed: TODO is this right?)
-    double absorbtion_rate;
     /// Volume of distribution (l/kg)
     LognormalSampler vol_dist;
+    /// Absorbtion rate
+    LognormalSampler absorbtion_rate;
     /** Terminal elimination rate constant (k). Equals ln(2)/half_life.
      * Units: (1 / days) */
     LognormalSampler elimination_rate;

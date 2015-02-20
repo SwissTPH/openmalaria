@@ -70,7 +70,7 @@ protected:
     double concA, concB, concC, concABC;
     
     // Computed sampled constants
-    double alpha, beta, gamma;
+    double na, nb, ng, nka;      // -α, -β, -γ, -k_a
     double A, B, C;
 };
 

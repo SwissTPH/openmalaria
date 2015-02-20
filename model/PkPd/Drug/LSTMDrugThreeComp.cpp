@@ -38,7 +38,8 @@ namespace OM { namespace PkPd {
 LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
     LSTMDrug(type.sample_Vd()),
     typeData(type),
-    concA(0.0), concB(0.0), concC(0.0), concABC(0.0)
+    concA(0.0), concB(0.0), concC(0.0), concABC(0.0),
+    nka(-type.sample_ka())
 {
     // These are from the Monolix article, pp38-39.
     const double k = type.sample_k();
@@ -54,15 +55,16 @@ LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
     const double rt = -third * p;
     const double r2 = 2.0 * sqrt(rt);
     const double phi = acos(-q / (rt * r2)) * third;
-    const double twopithree = 2.0 * third * boost::math::constants::pi<double>();
-    alpha = at - r2 * cos(phi);
-    beta = at - r2 * cos(phi + twopithree);
-    gamma = at - r2 * cos(phi + 2.0 * twopithree);
-    const double invV = 1.0 / type.sample_Vd();
-    // this assumes instantaneous absorbtion: k_a → ∞
-    A = invV * (k21 - alpha) * (k31 - alpha) / ((alpha - beta) * (alpha - gamma));
-    B = invV * (k21 - beta) * (k31 - beta) / ((beta - alpha) * (beta - gamma));
-    C = invV * (k21 - gamma) * (k31 - gamma) / ((gamma - beta) * (gamma - alpha));
+    const double pi23 = (2.0 / 3.0) * boost::math::constants::pi<double>();
+    // negative alpha, beta, gamma:
+    na = r2 * cos(phi) - at;
+    nb = r2 * cos(phi + pi23) - at;
+    ng = r2 * cos(phi + 2.0 * pi23) -at;
+    // A, B, C from Monolix 1.3.3 (p44):
+    const double kaV = -nka / type.sample_Vd();
+    A = kaV * (k21 + na) * (k31 + na) / ((na - nka) * (nb - na) * (ng - na));
+    B = kaV * (k21 + nb) * (k31 + nb) / ((nb - nka) * (na - nb) * (ng - nb));
+    C = kaV * (k21 + ng) * (k31 + ng) / ((ng - nka) * (nb - ng) * (na - ng));
 }
 
 size_t LSTMDrugThreeComp::getIndex() const {
@@ -93,10 +95,10 @@ void LSTMDrugThreeComp::updateConcentration () {
     // exponential decay of existing quantities:
     //TODO: is it faster to pre-calculate these and either store extra
     // parameters or adapt uses of alpha, beta, gamma, etc. below?
-    concA *= exp(-alpha);
-    concB *= exp(-beta);
-    concC *= exp(-gamma);
-    concABC *= exp(-typeData.k_a());
+    concA *= exp(na);
+    concB *= exp(nb);
+    concC *= exp(ng);
+    concABC *= exp(nka);
     
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
@@ -104,10 +106,10 @@ void LSTMDrugThreeComp::updateConcentration () {
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             // add dose (instantaneous absorbtion):
-            concA += A * time_conc.second * exp(-alpha * (1.0 - time_conc.first));
-            concB += B * time_conc.second * exp(-beta * (1.0 - time_conc.first));
-            concC += C * time_conc.second * exp(-gamma * (1.0 - time_conc.first));
-            concABC += (A + B + C) * time_conc.second * exp(-typeData.k_a() * (1.0 - time_conc.first));
+            concA += A * time_conc.second * exp(na * (1.0 - time_conc.first));
+            concB += B * time_conc.second * exp(nb * (1.0 - time_conc.first));
+            concC += C * time_conc.second * exp(ng * (1.0 - time_conc.first));
+            concABC += (A + B + C) * time_conc.second * exp(nka * (1.0 - time_conc.first));
             doses_taken += 1;
         }else /*i.e. tomorrow or later*/{
             time_conc.first -= 1.0;

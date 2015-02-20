@@ -126,13 +126,12 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                 "absorbtion rate parameter (k_a) when compartment2 is "
                 "present" );
         }
-        absorbtion_rate = pk.getK_a().get();
+        absorbtion_rate.setParams(pk.getK_a().get());
     }else{
         if( k12.isSet() ){
             throw util::xml_scenario_error( "PK models require an absorbtion "
                 "rate parameter (k_a) when compartment2 is present" );
         }
-        absorbtion_rate = numeric_limits<double>::quiet_NaN();
     }
     
     // ———  PD parameters  ———
