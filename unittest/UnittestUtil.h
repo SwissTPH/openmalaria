@@ -50,6 +50,38 @@ namespace OM {
     }
 }
 
+namespace xml_helpers{
+    /// Construct a helper for setting PK parameters
+    ///@param Vd Volume of distribution (l/kg)
+    ///@param hl Half-life of drug concentration (days)
+    ///@param negl_conc Negligible concentration of drug (mg/l)
+    struct PK1C{
+        PK1C(double Vd, double hl, double negl_conc):
+            Vd(Vd), hl(hl), negl_conc(negl_conc) {}
+        double Vd, hl, negl_conc;
+    };
+    /// Construct a helper for setting PD parameters
+    ///@param vmax Max killing rate
+    ///@param ic50 IC50
+    ///@param slope Slope (n)
+    struct PD{
+        PD(double vmax, double ic50, double slope):
+            vmax(vmax), ic50(ic50), slope(slope) {}
+        double vmax, ic50, slope;
+    };
+    /// Helper for constructing an XML element with parameters for some drug
+    ///@param abbrev Drug name (CQ, PPQ, AR, etc)
+    ///@param pk Helper struct with pharmaco-kinetic parameters
+    ///@param pd Helper struct with pharmaco-dynamic parameters
+    scnXml::PKPDDrug drug(const char *abbrev, PK1C pk, PD pd){
+        scnXml::PK xPK(pk.negl_conc, pk.Vd);
+        xPK.setHalf_life(pk.hl);
+        scnXml::PD xPD;
+        xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
+        return scnXml::PKPDDrug(xPD, xPK, abbrev);
+    }
+}
+
 namespace dummyXML{
     scnXml::DemogAgeGroup demAgeGroup(
         numeric_limits<double>::quiet_NaN() /* lower bound */ );
@@ -164,87 +196,40 @@ public:
         ModelOptions::reset();
         WithinHost::Genotypes::initSingle();
 
-        //Note: we fudge this call since it's not so easy to falsely initialize         scenario element.
+        //Note: we fudge this call since it's not so easy to falsely initialize scenario element.
         //PkPdModel::init ();
+        using namespace xml_helpers;
 
         // Drugs:
         scnXml::Drugs drugs;
-        // Artemether
-        scnXml::Phenotype phenotypeAR ( 27.6 /* max_killing_rate */, 0.0023 /* IC50 */, 
-            4.0 /* slope */ );
-        scnXml::PD pdAR;
-        pdAR.getPhenotype().push_back (phenotypeAR);
-        scnXml::PK pkAR ( 1e-17 /* negligible_concentration */, 17.4 /* vol_dist */ );
-        pkAR.setHalf_life(0.1750372);
-        scnXml::PKPDDrug drugAR ( pdAR, pkAR, "AR" /* abbrev */ );
         
-        drugs.getDrug().push_back (drugAR);
+        // Artemether (no conversion model)
+        drugs.getDrug().push_back(drug("AR",
+                PK1C(17.4 /*Vd*/, 0.1750372 /*hl*/, 1e-17 /*negl_conc*/),
+                PD(27.6 /* vmax */, 0.0023 /* IC50 */, 4.0 /* slope */ )));
         
-        // Artesunate
-        scnXml::Phenotype phenotypeAS ( 27.6 /* max_killing_rate */, 0.0016 /* IC50 */, 
-            4.0 /* slope */ );
-        scnXml::PD pdAS;
-        pdAS.getPhenotype().push_back (phenotypeAS);
-        scnXml::PK pkAS ( 1e-17 /* negligible_concentration */, 2.75 /* vol_dist */ );
-        pkAS.setHalf_life(0.04175585);
-        scnXml::PKPDDrug drugAS ( pdAS, pkAS, "AS" /* abbrev */ );
+        // Artesunate (no conversion model)
+        drugs.getDrug().push_back(drug("AS",
+                PK1C(2.75 /*Vd*/, 0.04175585 /*hl*/, 1e-17 /*negl_conc*/),
+                PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));
         
-        drugs.getDrug().push_back (drugAS);
-                
-        // Chloroquine
-        scnXml::Phenotype phenotypeCQ ( 3.45 /* max_killing_rate */, 0.02 /* IC50 */, 
-            1.6 /* slope */ );
-        scnXml::PD pdCQ;
-        pdCQ.getPhenotype().push_back (phenotypeCQ);
-        scnXml::PK pkCQ ( 0.00036 /* negligible_concentration */, 300 /* vol_dist */ );
-        pkCQ.setHalf_life(30.006);
-        scnXml::PKPDDrug drugCQ ( pdCQ, pkCQ, "CQ" /* abbrev */ );
+        // Dihydroartemisinin (when not a metabolite)
+        drugs.getDrug().push_back(drug("DHA",
+                PK1C(1.49 /*Vd*/, 0.03500743 /*hl*/, 1e-17 /*negl_conc*/),
+                PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
         
-        drugs.getDrug().push_back (drugCQ);
-        
-        // Dihydroartemisinin
-        scnXml::Phenotype phenotypeDHA ( 27.6 /* max_killing_rate */, 0.009 /* IC50 */, 
-            4.0 /* slope */ );
-        scnXml::PD pdDHA;
-        pdDHA.getPhenotype().push_back (phenotypeDHA);
-        scnXml::PK pkDHA ( 1e-17 /* negligible_concentration */, 1.49 /* vol_dist */ );
-        pkDHA.setHalf_life(0.03500743);
-        scnXml::PKPDDrug drugDHA ( pdDHA, pkDHA, "DHA" /* abbrev */ );
-        
-        drugs.getDrug().push_back (drugDHA);
-                
-        // Lumefantrine
-        scnXml::Phenotype phenotypeLF ( 3.45 /* max_killing_rate */, 0.032 /* IC50 */, 
-            4.0 /* slope */ );
-        scnXml::PD pdLF;
-        pdLF.getPhenotype().push_back (phenotypeLF);
-        scnXml::PK pkLF ( 0.00032 /* negligible_concentration */, 21 /* vol_dist */ );
-        pkLF.setHalf_life(4.332);
-        scnXml::PKPDDrug drugLF ( pdLF, pkLF, "LF" /* abbrev */ );
-        
-        drugs.getDrug().push_back (drugLF);
-        
-        // Mefloquine
-        scnXml::Phenotype phenotypeMQ ( 3.45 /* max_killing_rate */, 0.027 /* IC50 */, 
-            5.0 /* slope */ );
-        scnXml::PD pdMQ;
-        pdMQ.getPhenotype().push_back (phenotypeMQ);
-        scnXml::PK pkMQ ( 0.005 /* negligible_concentration */, 20.8 /* vol_dist */ );
-        pkMQ.setHalf_life(13.078);
-        scnXml::PKPDDrug drugMQ ( pdMQ, pkMQ, "MQ" /* abbrev */ );
-        drugs.getDrug().push_back (drugMQ);
-        
-        // Piperaquine
-        scnXml::Phenotype phenotypePPQ ( 3.45 /* max_killing_rate */, 0.088 /* IC50 */, 
-            6.0 /* slope */ );
-        scnXml::PD pdPPQ;
-        pdPPQ.getPhenotype().push_back (phenotypePPQ);
-        scnXml::PK pkPPQ ( 0.005 /* negligible_concentration */, 150 /* vol_dist */ );
-        pkPPQ.setHalf_life(23.105);
-        scnXml::PKPDDrug drugPPQ ( pdPPQ, pkPPQ, "PPQ" /* abbrev */ );
-        
-        drugs.getDrug().push_back (drugPPQ);
-        
+        drugs.getDrug().push_back(drug("CQ",    // Chloroquine
+                PK1C(300 /*Vd*/, 30.006 /*hl*/, 0.00036 /*negl_conc*/),
+                PD(3.45 /* vmax */, 0.02 /* IC50 */, 1.6 /* slope */ )));
+        drugs.getDrug().push_back(drug("LF",    // Lumefantrine
+                PK1C(21 /*Vd*/, 4.332 /*hl*/, 0.00032 /*negl_conc*/),
+                PD(3.45 /* vmax */, 0.032 /* IC50 */, 4.0 /* slope */ )));
+        drugs.getDrug().push_back(drug("MQ",    // Mefloquine
+                PK1C(20.8 /*Vd*/, 13.078 /*hl*/, 0.005 /*negl_conc*/),
+                PD(3.45 /* vmax */, 0.027 /* IC50 */, 5.0 /* slope */ )));
+        drugs.getDrug().push_back(drug("PPQ",   // Piperaquine
+                PK1C(150 /*Vd*/, 23.105 /*hl*/, 0.005 /*negl_conc*/),
+                PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
         
         PkPd::LSTMDrugType::init (drugs);
         

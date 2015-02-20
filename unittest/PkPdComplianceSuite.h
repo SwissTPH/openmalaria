@@ -187,7 +187,8 @@ public:
         testDrugResults("MQ", drug_conc, drug_factors);
     }
     
-    void testPPQ (){
+    // PPQ with a 1-compartment model (not preferred)
+    void testPPQ1C (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
         const double drug_conc[] = { 0, 0.116453464, 0.2294652081, 0.339137, 0.3291139387, 0.3193871518 };
