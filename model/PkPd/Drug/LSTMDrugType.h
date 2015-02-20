@@ -46,6 +46,7 @@ namespace PkPd {
 using util::LognormalSampler;
 
 class LSTMDrugType;
+class LSTMDrug;
 
 /** Drug PD parameters (specified per phenotype), as well as applicable
  * functions to calculate drug factors and concentrations.
@@ -141,8 +142,8 @@ public:
      * index if it doesn't throw. */
     static size_t findDrug(string abbreviation);
     
-    /** Get a drug by its index. */
-    static const LSTMDrugType& getDrug( size_t index );
+    /** Create a per-human drug module for a given drug index. */
+    static LSTMDrug* createInstance( size_t index );
     //@}
     
     
@@ -172,6 +173,8 @@ public:
     inline double sample_k21() const{ return k21.sample(); }
     inline double sample_k13() const{ return k13.sample(); }
     inline double sample_k31() const{ return k31.sample(); }
+    //TODO: like this?
+    inline double k_a() const{ return absorbtion_rate; }
     
     /** Return reference to correct drug-phenotype data. */
     const LSTMDrugPD& getPD( uint32_t genotype ) const;
@@ -198,6 +201,8 @@ private:
     /** Concentration, below which drug is deemed not to have an effect and is
      * removed for performance reasons. (mg/l) */
     double negligible_concentration;
+    /// Absorbtion rate (currently fixed: TODO is this right?)
+    double absorbtion_rate;
     /// Volume of distribution (l/kg)
     LognormalSampler vol_dist;
     /** Terminal elimination rate constant (k). Equals ln(2)/half_life.

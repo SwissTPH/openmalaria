@@ -38,7 +38,7 @@ namespace OM { namespace PkPd {
 LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
     LSTMDrug(type.sample_Vd()),
     typeData(type),
-    concA(0.0), concB(0.0), concC(0.0) /*, concABC(0.0)*/
+    concA(0.0), concB(0.0), concC(0.0), concABC(0.0)
 {
     // These are from the Monolix article, pp38-39.
     const double k = type.sample_k();
@@ -70,7 +70,7 @@ size_t LSTMDrugThreeComp::getIndex() const {
 }
 double LSTMDrugThreeComp::getConcentration() const {
     //NOTE: assuming no ABC term (see declaration of concA, concB, etc.).
-    return concA + concB + concC /*- concABC*/;
+    return concA + concB + concC - concABC;
 }
 
 void LSTMDrugThreeComp::medicate(double time, double qty, double bodyMass)
@@ -96,6 +96,7 @@ void LSTMDrugThreeComp::updateConcentration () {
     concA *= exp(-alpha);
     concB *= exp(-beta);
     concC *= exp(-gamma);
+    concABC *= exp(-typeData.k_a());
     
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
@@ -106,6 +107,7 @@ void LSTMDrugThreeComp::updateConcentration () {
             concA += A * time_conc.second * exp(-alpha * (1.0 - time_conc.first));
             concB += B * time_conc.second * exp(-beta * (1.0 - time_conc.first));
             concC += C * time_conc.second * exp(-gamma * (1.0 - time_conc.first));
+            concABC += (A + B + C) * time_conc.second * exp(-typeData.k_a() * (1.0 - time_conc.first));
             doses_taken += 1;
         }else /*i.e. tomorrow or later*/{
             time_conc.first -= 1.0;
@@ -121,7 +123,7 @@ void LSTMDrugThreeComp::updateConcentration () {
         concA = 0.0;
         concB = 0.0;
         concC = 0.0;
-        /*concABC = 0.0;*/
+        concABC = 0.0;
     }
 }
 
@@ -129,13 +131,13 @@ void LSTMDrugThreeComp::checkpoint(ostream& stream){
     concA & stream;
     concB & stream;
     concC & stream;
-    /*concABC & stream;*/
+    concABC & stream;
 }
 void LSTMDrugThreeComp::checkpoint(istream& stream){
     concA & stream;
     concB & stream;
     concC & stream;
-    /*concABC & stream;*/
+    concABC & stream;
 }
 
 }

@@ -62,14 +62,14 @@ protected:
     //TODO: does it still make sense to link this?
     const LSTMDrugType& typeData;
     
-    /// Concentrations in the blood and other compartments
-    /// See "Permutation of the three-compartment equation",
-    /// Diggory Hardy, Swiss TPH, February 3, 2015
+    // Concentrations in the blood and other compartments
+    // See "Permutation of the three-compartment equation",
+    // Diggory Hardy, Swiss TPH, February 3, 2015
     //NOTE: We assume instantaneous absorbtion, thus do not need the ABC term
     // (rationale: lets not complicate code without evidence of need)
-    double concA, concB, concC /*, concABC*/;
+    double concA, concB, concC, concABC;
     
-    /// Computed sampled constants
+    // Computed sampled constants
     double alpha, beta, gamma;
     double A, B, C;
 };

@@ -22,6 +22,8 @@
 #include "WithinHost/Genotypes.h"
 #include "util/errors.h"
 #include "util/random.h"
+#include "PkPd/Drug/LSTMDrugOneComp.h"
+#include "PkPd/Drug/LSTMDrugThreeComp.h"
 #include <schema/pharmacology.h>
 
 #include <cmath>
@@ -74,8 +76,15 @@ size_t LSTMDrugType::findDrug(string _abbreviation) {
     return it->second;
 }
 
-const LSTMDrugType& LSTMDrugType::getDrug(size_t index) {
-    return drugTypes[index];
+LSTMDrug* LSTMDrugType::createInstance(size_t index) {
+    LSTMDrugType& typeData = drugTypes[index];
+    if( typeData.k12.isSet() ){
+        // k21 is set when k12 is set; k13 and k31 may be set
+        return new LSTMDrugThreeComp( typeData );
+    }else{
+        // none of k12/k21/k13/k31 should be set in this case
+        return new LSTMDrugOneComp( typeData );
+    }
 }
 
 
@@ -85,43 +94,60 @@ const LSTMDrugType& LSTMDrugType::getDrug(size_t index) {
 LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         index (index)
 {
-    const scnXml::PD::PhenotypeSequence& pElt = drugData.getPD().getPhenotype();
-    assert( pElt.size() > 0 );  // required by XSD
-    
-    negligible_concentration = drugData.getPK().getNegligible_concentration();
-    if( drugData.getPK().getHalf_life().present() ){
-        elimination_rate.setParams( log(2.0) / drugData.getPK().getHalf_life().get(), 0.0 );
+    // ———  PK parameters  ———
+    const scnXml::PK& pk = drugData.getPK();
+    negligible_concentration = pk.getNegligible_concentration();
+    if( pk.getHalf_life().present() ){
+        elimination_rate.setParams( log(2.0) / pk.getHalf_life().get(), 0.0 );
     }else{
-        if( !drugData.getPK().getK().present() ){
+        if( !pk.getK().present() ){
             throw util::xml_scenario_error( "PK data must include either half_life or k" );
         }
-        elimination_rate.setParams( drugData.getPK().getK().get() );
+        elimination_rate.setParams( pk.getK().get() );
     }
-    vol_dist.setParams( drugData.getPK().getVol_dist(),
-                        drugData.getPK().getVol_dist().getSigma() );
-    if( drugData.getPK().getCompartment2().present() ){
-        k12.setParams( drugData.getPK().getCompartment2().get().getK12() );
-        k21.setParams( drugData.getPK().getCompartment2().get().getK21() );
-        if( drugData.getPK().getCompartment3().present() ){
-            k13.setParams( drugData.getPK().getCompartment3().get().getK13() );
-            k31.setParams( drugData.getPK().getCompartment3().get().getK31() );
+    vol_dist.setParams( pk.getVol_dist(),
+                        pk.getVol_dist().getSigma() );
+    if( pk.getCompartment2().present() ){
+        k12.setParams( pk.getCompartment2().get().getK12() );
+        k21.setParams( pk.getCompartment2().get().getK21() );
+        if( pk.getCompartment3().present() ){
+            k13.setParams( pk.getCompartment3().get().getK13() );
+            k31.setParams( pk.getCompartment3().get().getK31() );
         }
         // still not implemented yet:
         throw util::unimplemented_exception("multi-compartment PK models");
-    }else if( drugData.getPK().getCompartment3().present() ){
+    }else if( pk.getCompartment3().present() ){
         throw util::xml_scenario_error( "PK model specifies parameters for "
                 "compartment3 without compartment2" );
     }
+    if( pk.getK_a().present() ){
+        if( !k12.isSet() ){
+            throw util::xml_scenario_error( "PK models only allow an "
+                "absorbtion rate parameter (k_a) when compartment2 is "
+                "present" );
+        }
+        absorbtion_rate = pk.getK_a().get();
+    }else{
+        if( k12.isSet() ){
+            throw util::xml_scenario_error( "PK models require an absorbtion "
+                "rate parameter (k_a) when compartment2 is present" );
+        }
+        absorbtion_rate = numeric_limits<double>::quiet_NaN();
+    }
+    
+    // ———  PD parameters  ———
+    const scnXml::PD::PhenotypeSequence& pd = drugData.getPD().getPhenotype();
+    assert( pd.size() > 0 );  // required by XSD
     
     set<string> loci_per_phenotype;
     string first_phenotype_name;
-    size_t n_phenotypes = pElt.size();
+    size_t n_phenotypes = pd.size();
     PD.reserve (n_phenotypes);
     // per phenotype (first index), per locus-of-restriction (second list), a list of alleles
     vector<vector<vector<uint32_t> > > phenotype_restrictions;
     phenotype_restrictions.reserve( n_phenotypes );
     for (size_t i = 0; i < n_phenotypes; ++i) {
-        const scnXml::Phenotype& phenotype = pElt[i];
+        const scnXml::Phenotype& phenotype = pd[i];
         if( i == 0 ){
             if( phenotype.getName().present() )
                 first_phenotype_name = phenotype.getName().get();
@@ -179,11 +205,11 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             }
         }
         phenotype_restrictions.push_back( loc_alleles );
-        PD.push_back( new LSTMDrugPD( pElt[i] ) );
+        PD.push_back( new LSTMDrugPD( pd[i] ) );
     }
     
     if( loci_per_phenotype.size() == 0 ){
-        if( pElt.size() > 1 ){
+        if( pd.size() > 1 ){
             throw util::xml_scenario_error( "pharmacology/drugs/drug/pd/phenotype:"
                 " restrictions required when num. phenotypes > 1" );
         }else{

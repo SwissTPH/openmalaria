@@ -51,7 +51,7 @@ void LSTMModel::checkpoint (istream& stream) {
     for (size_t i=0; i<numDrugs; ++i) {
         size_t index;
         index & stream;
-        m_drugs.push_back( new LSTMDrugOneComp(LSTMDrugType::getDrug(index)) );
+        m_drugs.push_back( LSTMDrugType::createInstance(index) );
         m_drugs.back() & stream;
     }
     medicateQueue & stream;
@@ -104,7 +104,7 @@ void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double b
         }
     }
     // No match, so insert one:
-    m_drugs.push_back( new LSTMDrugOneComp(LSTMDrugType::getDrug(typeIndex)) );
+    m_drugs.push_back( LSTMDrugType::createInstance(typeIndex) );
     m_drugs.back().medicate (time, qty, bodyMass);
 }
 

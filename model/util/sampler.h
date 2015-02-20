@@ -123,6 +123,11 @@ namespace OM { namespace util {
             return sample.asLognormal( mu, sigma );
         }
         
+        /** Return true if and only if parameters have been set. */
+        inline bool isSet() const{
+            return mu == mu;    // mu is NaN iff not set
+        }
+        
     private:
         double mu, sigma;
     };
