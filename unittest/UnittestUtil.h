@@ -51,14 +51,23 @@ namespace OM {
 }
 
 namespace xml_helpers{
-    /// Construct a helper for setting PK parameters
+    /// Construct a helper for setting PK parameters (1-compartment model)
     ///@param Vd Volume of distribution (l/kg)
-    ///@param hl Half-life of drug concentration (days)
     ///@param negl_conc Negligible concentration of drug (mg/l)
-    struct PK1C{
-        PK1C(double Vd, double hl, double negl_conc):
+    ///@param hl Half-life of drug concentration (days)
+    struct PK1Chl{
+        PK1Chl(double Vd, double negl_conc, double hl):
             Vd(Vd), hl(hl), negl_conc(negl_conc) {}
         double Vd, hl, negl_conc;
+    };
+    /// Construct a helper for setting PK parameters (1-compartment model)
+    ///@param Vd Volume of distribution (l/kg)
+    ///@param negl_conc Negligible concentration of drug (mg/l)
+    ///@param k Elimination rate of drug (days^-1)
+    struct PK1C{
+        PK1C(double Vd, double negl_conc, double k):
+            Vd(Vd), negl_conc(negl_conc), k(k) {}
+        double Vd, negl_conc, k;
     };
     /// Construct a helper for setting PD parameters
     ///@param vmax Max killing rate
@@ -73,9 +82,20 @@ namespace xml_helpers{
     ///@param abbrev Drug name (CQ, PPQ, AR, etc)
     ///@param pk Helper struct with pharmaco-kinetic parameters
     ///@param pd Helper struct with pharmaco-dynamic parameters
-    scnXml::PKPDDrug drug(const char *abbrev, PK1C pk, PD pd){
+    scnXml::PKPDDrug drug(const char *abbrev, PK1Chl pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
         xPK.setHalf_life(pk.hl);
+        scnXml::PD xPD;
+        xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
+        return scnXml::PKPDDrug(xPD, xPK, abbrev);
+    }
+    /// Helper for constructing an XML element with parameters for some drug
+    ///@param abbrev Drug name (CQ, PPQ, AR, etc)
+    ///@param pk Helper struct with pharmaco-kinetic parameters
+    ///@param pd Helper struct with pharmaco-dynamic parameters
+    scnXml::PKPDDrug drug(const char *abbrev, PK1C pk, PD pd){
+        scnXml::PK xPK(pk.negl_conc, pk.Vd);
+        xPK.setK(scnXml::LognormalSample(pk.k, 0.0));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);
@@ -205,31 +225,32 @@ public:
         
         // Artemether (no conversion model)
         drugs.getDrug().push_back(drug("AR",
-                PK1C(17.4 /*Vd*/, 0.1750372 /*hl*/, 1e-17 /*negl_conc*/),
+                PK1C(17.4 /*Vd*/, 1e-17 /*negl_conc*/, 3.96 /*k*/),
                 PD(27.6 /* vmax */, 0.0023 /* IC50 */, 4.0 /* slope */ )));
         
         // Artesunate (no conversion model)
         drugs.getDrug().push_back(drug("AS",
-                PK1C(2.75 /*Vd*/, 0.04175585 /*hl*/, 1e-17 /*negl_conc*/),
+                PK1C(2.75 /*Vd*/, 1e-17 /*negl_conc*/, 16.6 /*k*/),
                 PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));
         
         // Dihydroartemisinin (when not a metabolite)
         drugs.getDrug().push_back(drug("DHA",
-                PK1C(1.49 /*Vd*/, 0.03500743 /*hl*/, 1e-17 /*negl_conc*/),
+                PK1C(1.49 /*Vd*/, 1e-17 /*negl_conc*/, 19.8 /*k*/),
                 PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
         
         drugs.getDrug().push_back(drug("CQ",    // Chloroquine
-                PK1C(300 /*Vd*/, 30.006 /*hl*/, 0.00036 /*negl_conc*/),
+                PK1Chl(300 /*Vd*/, 0.00036 /*negl_conc*/, 30.006 /*hl*/),
                 PD(3.45 /* vmax */, 0.02 /* IC50 */, 1.6 /* slope */ )));
         drugs.getDrug().push_back(drug("LF",    // Lumefantrine
-                PK1C(21 /*Vd*/, 4.332 /*hl*/, 0.00032 /*negl_conc*/),
+                PK1C(21 /*Vd*/, 0.00032 /*negl_conc*/, 0.16 /*k*/),
                 PD(3.45 /* vmax */, 0.032 /* IC50 */, 4.0 /* slope */ )));
         drugs.getDrug().push_back(drug("MQ",    // Mefloquine
-                PK1C(20.8 /*Vd*/, 13.078 /*hl*/, 0.005 /*negl_conc*/),
+                PK1Chl(20.8 /*Vd*/, 0.005 /*negl_conc*/, 13.078 /*hl*/),
                 PD(3.45 /* vmax */, 0.027 /* IC50 */, 5.0 /* slope */ )));
         drugs.getDrug().push_back(drug("PPQ",   // Piperaquine
-                PK1C(150 /*Vd*/, 23.105 /*hl*/, 0.005 /*negl_conc*/),
+                PK1C(150 /*Vd*/, 0.005 /*negl_conc*/, 0.03 /*k*/),
                 PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
+        
         
         PkPd::LSTMDrugType::init (drugs);
         
