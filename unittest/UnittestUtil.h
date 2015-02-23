@@ -70,6 +70,20 @@ namespace xml_helpers{
             Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent) {}
         double Vd, negl_conc, k, me;
     };
+    /// Construct a helper for setting PK parameters (2-compartment model)
+    ///@param Vd Volume of distribution (l/kg)
+    ///@param negl_conc Negligible concentration of drug (mg/l)
+    ///@param k Elimination rate of drug (days^-1)
+    ///@param m_exponent
+    ///@param ka Absorbtion rate from gut
+    ///@param a12 Absorbtion rate parameter a12
+    ///@param a21 Absorbtion rate parameter a21
+    struct PK2C{
+        PK2C(double Vd, double negl_conc, double k, double m_exponent,
+             double ka, double a12, double a21):
+            Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent), ka(ka), a12(a12), a21(a21) {}
+        double Vd, negl_conc, k, me, ka, a12, a21;
+    };
     /// Construct a helper for setting PD parameters
     ///@param vmax Max killing rate
     ///@param ic50 IC50
@@ -97,6 +111,23 @@ namespace xml_helpers{
     scnXml::PKPDDrug drug(const char *abbrev, PK1C pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
         xPK.setK(scnXml::LognormalSample(pk.k, 0.0));
+        xPK.setM_exponent(pk.me);
+        scnXml::PD xPD;
+        xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
+        return scnXml::PKPDDrug(xPD, xPK, abbrev);
+    }
+    /// Helper for constructing an XML element with parameters for some drug
+    ///@param abbrev Drug name (CQ, PPQ, AR, etc)
+    ///@param pk Helper struct with pharmaco-kinetic parameters
+    ///@param pd Helper struct with pharmaco-dynamic parameters
+    scnXml::PKPDDrug drug(const char *abbrev, PK2C pk, PD pd){
+        scnXml::PK xPK(pk.negl_conc, pk.Vd);
+        xPK.setK(scnXml::LognormalSample(pk.k, 0.0));
+        xPK.setCompartment2(scnXml::Compartment2(
+            scnXml::LognormalSample(pk.a12, 0.0),
+            scnXml::LognormalSample(pk.a21, 0.0)));
+        xPK.setM_exponent(pk.me);
+        xPK.setK_a(scnXml::LognormalSample(pk.ka, 0.0));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);
@@ -251,6 +282,10 @@ public:
         
         drugs.getDrug().push_back(drug("PPQ",   // Piperaquine, 1-compartment
                 PK1C(150 /*Vd*/, 0.005 /*negl_conc*/, 0.03 /*k*/, 0.0 /*m_exp*/),
+                PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
+        drugs.getDrug().push_back(drug("PPQ2",   // Piperaquine, Hodel2013 model
+                PK2C(150 /*Vd*/, 0.005 /*negl_conc*/, 0.6242774566473989 /*k*/, 0.25 /*m_exp*/,
+                    11.16 /*k_a*/, 8.46242774566474 /*a12*/, 3.3058064516129035 /*a21*/),
                 PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
 
         PkPd::LSTMDrugType::init (drugs);

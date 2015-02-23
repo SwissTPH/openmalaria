@@ -197,6 +197,17 @@ public:
         testDrugResults("PPQ", drug_conc, drug_factors);
     }
     
+    // PPQ with a 2-compartment model (Hodel2013)
+    void testPPQ_Hodel2013 (){
+        const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
+        assembleTripleDosageSchedule( dose );
+        const double drug_conc[] = { 0, 0.0724459062, 0.1218019809,
+            0.1561173647, 0.1081632036, 0.0768569742 };
+        const double drug_factors[] = { 1, 0.034225947, 0.001086594,
+            0.0000345, 0.0000011, 3.48E-008 };
+        testDrugResults("PPQ2", drug_conc, drug_factors);
+    }
+    
 private:
     LSTMModel *proxy;
     uint32_t genotype;

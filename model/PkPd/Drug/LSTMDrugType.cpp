@@ -116,8 +116,6 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             a13.setParams( pk.getCompartment3().get().getA13() );
             a31.setParams( pk.getCompartment3().get().getA31() );
         }
-        // still not implemented yet:
-        throw util::unimplemented_exception("multi-compartment PK models");
     }else if( pk.getCompartment3().present() ){
         throw util::xml_scenario_error( "PK model specifies parameters for "
                 "compartment3 without compartment2" );
