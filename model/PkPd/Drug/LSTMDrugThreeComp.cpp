@@ -24,41 +24,32 @@
 
 #include <boost/math/constants/constants.hpp>
 #include <gsl/gsl_integration.h>
+#include <limits>
 
 using namespace std;
 
 namespace OM { namespace PkPd {
-    
+
 LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
     LSTMDrug(type.sample_Vd()),
     typeData(type),
     concA(0.0), concB(0.0), concC(0.0), concABC(0.0),
-    nka(-type.sample_ka())
+    elim_sample(type.sample_elim_rate()),
+    a12(type.sample_a12()),
+    a21(type.sample_a21()),
+    a13(type.sample_a13()),
+    a31(type.sample_a31()),
+    nka(-type.sample_ka()),
+    kaV(-nka / type.sample_Vd()),
+    last_bm(numeric_limits<double>::quiet_NaN()),
+    na(numeric_limits<double>::quiet_NaN()),
+    nb(numeric_limits<double>::quiet_NaN()),
+    ng(numeric_limits<double>::quiet_NaN()),
+    A(numeric_limits<double>::quiet_NaN()),
+    B(numeric_limits<double>::quiet_NaN()),
+    C(numeric_limits<double>::quiet_NaN())
 {
     // These are from the Monolix article, pp38-39.
-    const double k = type.sample_k();
-    const double k12 = type.sample_k12(), k21 = type.sample_k21();
-    const double k13 = type.sample_k13(), k31 = type.sample_k31();
-    const double a0 = k*k21*k31;
-    const double a1 = k*k31 + k21*k31 + k21*k13 + k*k21 + k31*k12;
-    const double a2 = k + k12 + k13 + k21 + k31;
-    const double third = 1.0 / 3.0;
-    const double p = a1 - third * a2 * a2;
-    const double q = (2.0 / 27.0) * a2 * a2 * a2 - third * a1 * a2 + a0;
-    const double at = third * a2;
-    const double rt = -third * p;
-    const double r2 = 2.0 * sqrt(rt);
-    const double phi = acos(-q / (rt * r2)) * third;
-    const double pi23 = (2.0 / 3.0) * boost::math::constants::pi<double>();
-    // negative alpha, beta, gamma:
-    na = r2 * cos(phi) - at;
-    nb = r2 * cos(phi + pi23) - at;
-    ng = r2 * cos(phi + 2.0 * pi23) -at;
-    // A, B, C from Monolix 1.3.3 (p44):
-    const double kaV = -nka / type.sample_Vd();
-    A = kaV * (k21 + na) * (k31 + na) / ((na - nka) * (nb - na) * (ng - na));
-    B = kaV * (k21 + nb) * (k31 + nb) / ((nb - nka) * (na - nb) * (ng - nb));
-    C = kaV * (k21 + ng) * (k31 + ng) / ((ng - nka) * (nb - ng) * (na - ng));
 }
 
 size_t LSTMDrugThreeComp::getIndex() const {
@@ -72,6 +63,41 @@ double LSTMDrugThreeComp::getConcentration() const {
 void LSTMDrugThreeComp::medicate(double time, double qty, double bodyMass)
 {
     medicate_vd(time, qty, vol_dist * bodyMass);
+}
+
+void LSTMDrugThreeComp::updateCached(double bm) const{
+    if( last_bm == bm ) return;
+    
+    double k = elim_sample * pow(bm, typeData.neg_m_exponent());
+    const double k12 = a12 / bm, k21 = a21 / bm;
+    const double k13 = a13 / bm, k31 = a31 / bm;
+    
+    const double a0 = k*k21*k31;
+    const double a1 = k*k31 + k21*k31 + k21*k13 + k*k21 + k31*k12;
+    const double a2 = k + k12 + k13 + k21 + k31;
+    
+    const double third = 1.0 / 3.0;
+    const double p = a1 - third * a2 * a2;
+    const double q = (2.0 / 27.0) * a2 * a2 * a2 - third * a1 * a2 + a0;
+    
+    const double at = third * a2;
+    const double rt = -third * p;
+    const double r2 = 2.0 * sqrt(rt);
+    
+    const double phi = acos(-q / (rt * r2)) * third;
+    const double pi23 = (2.0 / 3.0) * boost::math::constants::pi<double>();
+    
+    // negative alpha, beta, gamma:
+    na = r2 * cos(phi) - at;
+    nb = r2 * cos(phi + pi23) - at;
+    ng = r2 * cos(phi + 2.0 * pi23) -at;
+    
+    // A, B, C from Monolix 1.3.3 (p44):
+    A = kaV * (k21 + na) * (k31 + na) / ((na - nka) * (nb - na) * (ng - na));
+    B = kaV * (k21 + nb) * (k31 + nb) / ((nb - nka) * (na - nb) * (ng - nb));
+    C = kaV * (k21 + ng) * (k31 + ng) / ((ng - nka) * (nb - ng) * (na - ng));
+    
+    last_bm = bm;
 }
 
 /// Parameters for func_fC
@@ -133,8 +159,9 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype) const {
+double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype, double body_mass) const {
     if( getConcentration() == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
+    updateCached(body_mass);
     
     Params_fC p;
     p.cA = concA;       p.cB = concB;   p.cC = concC;   p.cABC = concABC;
@@ -175,8 +202,9 @@ double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype) const {
     return totalFactor;
 }
 
-void LSTMDrugThreeComp::updateConcentration () {
+void LSTMDrugThreeComp::updateConcentration (double body_mass) {
     if( getConcentration() == 0.0 && doses.size() == 0 ) return;     // nothing to do
+    updateCached(body_mass);
     
     // exponential decay of existing quantities:
     //TODO(performance): is it faster to pre-calculate these and either store extra

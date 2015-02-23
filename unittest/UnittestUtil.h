@@ -64,10 +64,11 @@ namespace xml_helpers{
     ///@param Vd Volume of distribution (l/kg)
     ///@param negl_conc Negligible concentration of drug (mg/l)
     ///@param k Elimination rate of drug (days^-1)
+    ///@param m_exponent
     struct PK1C{
-        PK1C(double Vd, double negl_conc, double k):
-            Vd(Vd), negl_conc(negl_conc), k(k) {}
-        double Vd, negl_conc, k;
+        PK1C(double Vd, double negl_conc, double k, double m_exponent):
+            Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent) {}
+        double Vd, negl_conc, k, me;
     };
     /// Construct a helper for setting PD parameters
     ///@param vmax Max killing rate
@@ -225,33 +226,33 @@ public:
         
         // Artemether (no conversion model)
         drugs.getDrug().push_back(drug("AR",
-                PK1C(17.4 /*Vd*/, 1e-17 /*negl_conc*/, 3.96 /*k*/),
+                PK1C(17.4 /*Vd*/, 1e-17 /*negl_conc*/, 3.96 /*k*/, 0.0 /*m_exp*/),
                 PD(27.6 /* vmax */, 0.0023 /* IC50 */, 4.0 /* slope */ )));
         
         // Artesunate (no conversion model)
         drugs.getDrug().push_back(drug("AS",
-                PK1C(2.75 /*Vd*/, 1e-17 /*negl_conc*/, 16.6 /*k*/),
+                PK1C(2.75 /*Vd*/, 1e-17 /*negl_conc*/, 16.6 /*k*/, 0.0 /*m_exp*/),
                 PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));
         
         // Dihydroartemisinin (when not a metabolite)
         drugs.getDrug().push_back(drug("DHA",
-                PK1C(1.49 /*Vd*/, 1e-17 /*negl_conc*/, 19.8 /*k*/),
+                PK1C(1.49 /*Vd*/, 1e-17 /*negl_conc*/, 19.8 /*k*/, 0.0 /*m_exp*/),
                 PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
         
         drugs.getDrug().push_back(drug("CQ",    // Chloroquine
                 PK1Chl(300 /*Vd*/, 0.00036 /*negl_conc*/, 30.006 /*hl*/),
                 PD(3.45 /* vmax */, 0.02 /* IC50 */, 1.6 /* slope */ )));
         drugs.getDrug().push_back(drug("LF",    // Lumefantrine
-                PK1C(21 /*Vd*/, 0.00032 /*negl_conc*/, 0.16 /*k*/),
+                PK1C(21 /*Vd*/, 0.00032 /*negl_conc*/, 0.16 /*k*/, 0.0 /*m_exp*/),
                 PD(3.45 /* vmax */, 0.032 /* IC50 */, 4.0 /* slope */ )));
         drugs.getDrug().push_back(drug("MQ",    // Mefloquine
                 PK1Chl(20.8 /*Vd*/, 0.005 /*negl_conc*/, 13.078 /*hl*/),
                 PD(3.45 /* vmax */, 0.027 /* IC50 */, 5.0 /* slope */ )));
-        drugs.getDrug().push_back(drug("PPQ",   // Piperaquine
-                PK1C(150 /*Vd*/, 0.005 /*negl_conc*/, 0.03 /*k*/),
+        
+        drugs.getDrug().push_back(drug("PPQ",   // Piperaquine, 1-compartment
+                PK1C(150 /*Vd*/, 0.005 /*negl_conc*/, 0.03 /*k*/, 0.0 /*m_exp*/),
                 PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
-        
-        
+
         PkPd::LSTMDrugType::init (drugs);
         
         // Treatments

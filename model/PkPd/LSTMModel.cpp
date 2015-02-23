@@ -118,22 +118,22 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
     return 0.0;
 }
 
-double LSTMModel::getDrugFactor (uint32_t genotype) const{
+double LSTMModel::getDrugFactor (uint32_t genotype, double body_mass) const{
     double factor = 1.0; //no effect
     
     for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        double drugFactor = drug->calculateDrugFactor(genotype);
+        double drugFactor = drug->calculateDrugFactor(genotype, body_mass);
         factor *= drugFactor;
     }
     return factor;
 }
 
-void LSTMModel::decayDrugs () {
+void LSTMModel::decayDrugs (double body_mass) {
     // Update concentrations for each drug.
     // TODO: previously we removed drugs with negligible concentration here. What now, just set concentration to 0?
     foreach( LSTMDrug& drug, m_drugs ){
-        drug.updateConcentration();
+        drug.updateConcentration(body_mass);
     }
 }
 

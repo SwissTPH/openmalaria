@@ -69,11 +69,14 @@ public:
      * several times (for each infection) per time step, or not at all.
      * 
      * @param genotype An identifier for the genotype of the infection.
+     * @param body_mass Weight of patient in kg
      */
-    virtual double calculateDrugFactor(uint32_t genotype) const =0;
+    virtual double calculateDrugFactor(uint32_t genotype, double body_mass) const =0;
     
-    /** Updates concentration variable and clears day's doses. */
-    virtual void updateConcentration () =0;
+    /** Updates concentration variable and clears day's doses.
+     * 
+     * @param body_mass Weight of patient in kg */
+    virtual void updateConcentration (double body_mass) =0;
     
     /// Checkpointing
     template<class S>

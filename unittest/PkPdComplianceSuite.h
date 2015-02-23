@@ -95,7 +95,7 @@ public:
         double totalFac = 1;
         for( size_t i = 0; i < 6; i++){
             // before update (after last step):
-            double fac = proxy->getDrugFactor(genotype);
+            double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
             PCS_VERBOSE(cout << "\033[35m";)
             TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-9);
@@ -104,7 +104,7 @@ public:
             
             // update (two parts):
             UnittestUtil::incrTime(sim::oneDay());
-            proxy->decayDrugs();
+            proxy->decayDrugs(bodymass);
             
             // after update:
             double conc = proxy->getDrugConc(drugIndex);

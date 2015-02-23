@@ -240,32 +240,60 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:element name="half_life" type="xs:double">
                 <xs:annotation>
                   <xs:documentation>
-                      Used to calculate elimination rate (which is: ln(2) / half_life).
+                      Used to calculate elimination rate λ, calculated as
+                      λ = ln(2) / half_life. The basic form of decay is
+                      C(t) = C0 * exp(-λ*t).
+                      
+                      Alternatively, elimination rate can be specified via k
+                      and m_exponent.
                     </xs:documentation>
                   <xs:appinfo>units:days;min:0;name:drug half-life;</xs:appinfo>
                 </xs:annotation>
               </xs:element>
-              <xs:element name="k" type="om:LognormalSample">
-                <xs:annotation>
-                  <xs:documentation>
-                      Elimination rate; can be specified directly instead of as
-                      a half life. In this case it can also be sampled per-patient
-                      (with sigma > 0).
-                    </xs:documentation>
-                  <xs:appinfo>units:day^-1;min:0;name:Elimination rate constant (k);</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="k_a" type="om:LognormalSample" minOccurs="0">
-                <xs:annotation>
-                  <xs:documentation>
-                    Absorbtion rate parameter. Currently only allowed for two
-                    and three compartment models (i.e. when "compartment2"
-                    parameters are specified), where it is required.
-                  </xs:documentation>
-                  <xs:appinfo>name:Absorbtion rate constant (k_a);min:0;</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
+              <xs:sequence>
+                <xs:element name="k" type="om:LognormalSample">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Constant used to calculate the elimination rate λ, which
+                      is calculated as λ = k / (body_mass ^ m_exponent), where
+                      body_mass is the patient's weight in kg and m_exponent is
+                      the next parameter. The basic form of decay is
+                      C(t) = C0 * exp(-λ*t).
+                      
+                      If sigma > 0, k is sampled per-human from the log-normal
+                      distribution: ln N( ln(mean) - σ^2 / 2, σ^2).
+                      
+                      Alternatively, elimination rate can be specified via half_life.
+                      </xs:documentation>
+                    <xs:appinfo>units:day^-1;min:0;name:Constant associated with elimination rate (k);</xs:appinfo>
+                  </xs:annotation>
+                </xs:element>
+                <xs:element name="m_exponent" type="xs:double">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Constant used to calculate the elimination rate λ, which
+                      is calculated as λ = k / (body_mass ^ m_exponent), where
+                      body_mass is the patient's weight in kg and k is the
+                      previous parameter. The basic form of decay is
+                      C(t) = C0 * exp(-λ*t).
+                      
+                      Alternatively, elimination rate can be specified via half_life.
+                      </xs:documentation>
+                    <xs:appinfo>units:day^-1;min:0;name:Constant associated with elimination rate (m_exponent);</xs:appinfo>
+                  </xs:annotation>
+                </xs:element>
+              </xs:sequence>
             </xs:choice>
+            <xs:element name="k_a" type="om:LognormalSample" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  Absorbtion rate parameter. Currently only allowed for two
+                  and three compartment models (i.e. when "compartment2"
+                  parameters are specified), where it is required.
+                </xs:documentation>
+                <xs:appinfo>name:Absorbtion rate constant (k_a);min:0;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
             <xs:element name="vol_dist">
               <xs:annotation>
                 <xs:documentation>
@@ -301,22 +329,28 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="k12" type="om:LognormalSample">
+                  <xs:element name="a12" type="om:LognormalSample">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the central compartment to
-                          compartment 2. It is sampled per-patient when sigma &gt; 0.
+                          Absorbtion rate from the central compartment to the
+                          first periphery compartment (2). The parameter
+                          k12 = a12 / m where m is the body mass (kg).
+                          
+                          It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 2 (k12);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 2 (a12);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="k21" type="om:LognormalSample">
+                  <xs:element name="a21" type="om:LognormalSample">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from compartment 2 to the central
-                          compartment. It is sampled per-patient when sigma &gt; 0.
+                          Absorbtion rate from the first periphery compartment
+                          (2) to the central compartment. The parameter
+                          k21 = a21 / m where m is the body mass (kg).
+                          
+                          It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 2 (k21);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 2 (a21);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>
@@ -332,22 +366,28 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="k13" type="om:LognormalSample">
+                  <xs:element name="a13" type="om:LognormalSample">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the central compartment to
-                          compartment 3. It is sampled per-patient when sigma &gt; 0.
+                          Absorbtion rate from the central compartment to the
+                          second periphery compartment (3). The parameter
+                          k13 = a13 / m where m is the body mass (kg).
+                          
+                          It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 3 (k13);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 3 (a13);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="k31" type="om:LognormalSample">
+                  <xs:element name="a31" type="om:LognormalSample">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from compartment 3 to the central
-                          compartment. It is sampled per-patient when sigma &gt; 0.
+                          Absorbtion rate from the second periphery compartment
+                          (3) to the central compartment. The parameter
+                          k31 = a31 / m where m is the body mass (kg).
+                          
+                          It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 3 (k31);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 3 (a31);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>

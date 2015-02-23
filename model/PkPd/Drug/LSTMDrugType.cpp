@@ -78,11 +78,11 @@ size_t LSTMDrugType::findDrug(string _abbreviation) {
 
 LSTMDrug* LSTMDrugType::createInstance(size_t index) {
     LSTMDrugType& typeData = drugTypes[index];
-    if( typeData.k12.isSet() ){
-        // k21 is set when k12 is set; k13 and k31 may be set
+    if( typeData.a12.isSet() ){
+        // a21 is set when a12 is set; a13 and a31 may be set
         return new LSTMDrugThreeComp( typeData );
     }else{
-        // none of k12/k21/k13/k31 should be set in this case
+        // none of a12/a21/a13/a31 should be set in this case
         return new LSTMDrugOneComp( typeData );
     }
 }
@@ -99,20 +99,22 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
     negligible_concentration = pk.getNegligible_concentration();
     if( pk.getHalf_life().present() ){
         elimination_rate.setParams( log(2.0) / pk.getHalf_life().get(), 0.0 );
+        neg_m_exp = 0.0; // no dependence on body mass
     }else{
-        if( !pk.getK().present() ){
-            throw util::xml_scenario_error( "PK data must include either half_life or k" );
+        if( !(pk.getK().present() && pk.getM_exponent().present()) ){
+            throw util::xml_scenario_error( "PK data must include either half_life or (k and m_exponent)" );
         }
         elimination_rate.setParams( pk.getK().get() );
+        neg_m_exp = -pk.getM_exponent().get();
     }
     vol_dist.setParams( pk.getVol_dist(),
                         pk.getVol_dist().getSigma() );
     if( pk.getCompartment2().present() ){
-        k12.setParams( pk.getCompartment2().get().getK12() );
-        k21.setParams( pk.getCompartment2().get().getK21() );
+        a12.setParams( pk.getCompartment2().get().getA12() );
+        a21.setParams( pk.getCompartment2().get().getA21() );
         if( pk.getCompartment3().present() ){
-            k13.setParams( pk.getCompartment3().get().getK13() );
-            k31.setParams( pk.getCompartment3().get().getK31() );
+            a13.setParams( pk.getCompartment3().get().getA13() );
+            a31.setParams( pk.getCompartment3().get().getA31() );
         }
         // still not implemented yet:
         throw util::unimplemented_exception("multi-compartment PK models");
@@ -121,14 +123,14 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                 "compartment3 without compartment2" );
     }
     if( pk.getK_a().present() ){
-        if( !k12.isSet() ){
+        if( !a12.isSet() ){
             throw util::xml_scenario_error( "PK models only allow an "
                 "absorbtion rate parameter (k_a) when compartment2 is "
                 "present" );
         }
         absorbtion_rate.setParams(pk.getK_a().get());
     }else{
-        if( k12.isSet() ){
+        if( a12.isSet() ){
             throw util::xml_scenario_error( "PK models require an absorbtion "
                 "rate parameter (k_a) when compartment2 is present" );
         }

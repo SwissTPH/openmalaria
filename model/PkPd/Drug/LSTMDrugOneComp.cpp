@@ -38,7 +38,7 @@ LSTMDrugOneComp::LSTMDrugOneComp(const LSTMDrugType& type) :
     LSTMDrug(type.sample_Vd()),
     typeData(type),
     concentration (0.0),
-    neg_elim_rate(-type.sample_k())
+    neg_elim_sample(-type.sample_elim_rate())
 {}
 
 //LSTMDrugOneComp::~LSTMDrugOneComp(){}
@@ -57,7 +57,7 @@ void LSTMDrugOneComp::medicate(double time, double qty, double bodyMass)
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) const {
+double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass) const {
     if( concentration == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
     
     /* Survival factor of the parasite (this multiplies the parasite density).
@@ -67,6 +67,7 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) const {
     // Make a copy of concetration and use that over today. Don't adjust concentration because this
     // function may be called multiple times (or not at all) in a day.
     double concentration_today = concentration; // mg / l
+    double neg_elim_rate = neg_elim_sample * pow(body_mass, typeData.neg_m_exponent());
     
     const LSTMDrugPD& drugPD = typeData.getPD(genotype);
     
@@ -92,12 +93,13 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype) const {
     return totalFactor; // Drug effect per day per drug per parasite
 }
 
-void LSTMDrugOneComp::updateConcentration () {
+void LSTMDrugOneComp::updateConcentration( double body_mass ){
     if( concentration == 0.0 && doses.size() == 0 ) return;     // nothing to do
     
     // exponential decay of drug concentration (portion without new doses):
     //TODO: is it faster to pre-calculate this and either store an extra
     // parameter or adapt uses of neg_elim_rate, etc. below?
+    double neg_elim_rate = neg_elim_sample * pow(body_mass, typeData.neg_m_exponent());
     concentration *= exp(neg_elim_rate);
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
@@ -124,11 +126,11 @@ void LSTMDrugOneComp::updateConcentration () {
 
 void LSTMDrugOneComp::checkpoint(ostream& stream){
     concentration & stream;
-    neg_elim_rate & stream;
+    neg_elim_sample & stream;
 }
 void LSTMDrugOneComp::checkpoint(istream& stream){
     concentration & stream;
-    neg_elim_rate & stream;
+    neg_elim_sample & stream;
 }
 
 }

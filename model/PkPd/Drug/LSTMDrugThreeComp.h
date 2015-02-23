@@ -53,12 +53,15 @@ public:
     
     virtual void medicate (double time, double qty, double bodyMass);
     
-    virtual double calculateDrugFactor(uint32_t genotype) const;
-    virtual void updateConcentration ();
+    virtual double calculateDrugFactor(uint32_t genotype, double body_mass) const;
+    virtual void updateConcentration (double body_mass);
     
 protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
+    
+    // Update constants. bm: body mass (kg)
+    void updateCached(double bm) const;
     
     /// Always links a drug instance to its drug-type data
     //TODO: does it still make sense to link this?
@@ -67,13 +70,18 @@ protected:
     // Concentrations in the blood and other compartments
     // See "Permutation of the three-compartment equation",
     // Diggory Hardy, Swiss TPH, February 3, 2015
-    //NOTE: We assume instantaneous absorbtion, thus do not need the ABC term
-    // (rationale: lets not complicate code without evidence of need)
     double concA, concB, concC, concABC;
     
-    // Computed sampled constants
-    double na, nb, ng, nka;      // -α, -β, -γ, -k_a
-    double A, B, C;
+    // Sampled constants
+    const double elim_sample;
+    const double a12, a21, a13, a31;
+    const double nka, kaV;    // -k_a, another absorbtion parameter
+    
+    // Computed parameters, constant except for dependence on body mass
+    // (this is essentially a cache updated by updateCached())
+    mutable double last_bm;     // body mass at time of last calculation
+    mutable double na, nb, ng;      // -α, -β, -γ, -k_a
+    mutable double A, B, C;
     
 private:
     double calculateFactor(const Params_fC& p, double duration) const;
