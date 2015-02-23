@@ -23,17 +23,13 @@
 #include "util/errors.h"
 #include "schema/pharmacology.h"
 
-#include <cmath>
-#include <stdexcept>
 #include <boost/functional/hash.hpp>
-
-#include <gsl/gsl_integration.h>
-#include <fstream>
 
 using namespace std;
 
 namespace OM { namespace PkPd {
 
+//TODO: I think this Cache thing can be removed, though it may be useful as a template for 3-compartment/conversion models
 LSTMDrugPD::Cache::Cache( double c, double d, double r ) :
     C0(c), duration(d), rate(r),
     C1(numeric_limits<double>::signaling_NaN()),
@@ -45,9 +41,9 @@ LSTMDrugPD::Cache::Cache( double c, double d, double r ) :
 }
 
 LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
-    slope = phenotype.getSlope ();
-    IC50_pow_slope = pow(phenotype.getIC50 (), slope);
-    max_killing_rate = phenotype.getMax_killing_rate ();  
+    n = phenotype.getSlope ();
+    Kn = pow(phenotype.getIC50 (), n);
+    V = phenotype.getMax_killing_rate ();  
     if( phenotype.getIC50().getSigma() > 0.0 ){
         throw util::unimplemented_exception("sampling IC50");
     }
@@ -57,14 +53,14 @@ double LSTMDrugPD::calcFactor( double neg_elim_rate, double& C0, double duration
     const double C1 = C0 * exp(neg_elim_rate * duration);
     
     // From Hastings & Winter 2011 paper
-    // Note: these look a little different from original equations because IC50_pow_slope
+    // Note: these look a little different from original equations because Kn
     // is calculated when parameters are read from the scenario document instead of now.
-    const double numerator = IC50_pow_slope + pow(C1, slope);
-    const double denominator = IC50_pow_slope + pow(C0, slope);
+    const double numerator = Kn + pow(C1, n);
+    const double denominator = Kn + pow(C0, n);
     
     //TODO(performance): can we cache the value for each parameter combination?
     C0 = C1;    // C0 is an in/out parameter
-    const double power = max_killing_rate / (-neg_elim_rate * slope);
+    const double power = V / (-neg_elim_rate * n);
     return pow( numerator / denominator, power );       // unitless
 }
 

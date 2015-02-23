@@ -21,15 +21,9 @@
 #include "PkPd/Drug/LSTMDrugThreeComp.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
-#include "util/vectors.h"
 
-#include <assert.h>
-#include <cmath>
-#include <algorithm>
-#include <stdexcept>
-#include <sstream>
-#include <algorithm>
 #include <boost/math/constants/constants.hpp>
+#include <gsl/gsl_integration.h>
 
 using namespace std;
 
@@ -80,20 +74,112 @@ void LSTMDrugThreeComp::medicate(double time, double qty, double bodyMass)
     medicate_vd(time, qty, vol_dist * bodyMass);
 }
 
+/// Parameters for func_fC
+struct Params_fC {
+    double cA, cB, cC, cABC;    // concentration parameters
+    double na, nb, ng, nka;     // decay parameters
+    double n;       // slope: unitless
+    double V;       // max killing rate: unitless
+    double Kn;      // IC50^n: (mg/kg) ^ n
+};
+/** Function for calculating concentration and then killing function at time t
+ * 
+ * @param t The variable being integrated over (in this case, time since start
+ *      of day or last dose, units days)
+ * @param pp Pointer to a Params_fC struct
+ * @return killing rate (unitless)
+ */
+double func_fC( double t, void* pp ){
+    const Params_fC& p = *static_cast<const Params_fC*>( pp );
+    
+    // exponential decay of drug concentration:
+    const double concA = p.cA * exp(p.na * t);
+    const double concB = p.cB * exp(p.nb * t);
+    const double concC = p.cC * exp(p.ng * t);
+    const double concABC = p.cABC * exp(p.nka * t);
+    const double conc = concA + concB + concC - concABC;      // mg/l
+    
+    const double cn = pow(conc, p.n);        // (mg/l) ^ n
+    const double fC = p.V * cn / (cn + p.Kn);       // unitless
+    return fC;
+}
+double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) const{
+    gsl_function F;
+    F.function = &func_fC;
+    // gsl_function doesn't accept const; we re-apply const later
+    F.params = static_cast<void*>(const_cast<Params_fC*>(&p));
+    
+    // TODO: verify these error limits are sufficient.
+    const double abs_eps = 1e-3, rel_eps = 1e-3;
+    const int qag_rule = 2; // GSL_INTEG_GAUSS21 should be sufficient?
+    double intfC, err_eps;
+    
+    const size_t max_iterations = 1000;     // 100 seems enough, but no harm in using a higher value
+    gsl_integration_workspace *workspace = gsl_integration_workspace_alloc (max_iterations);
+    int r = gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps, max_iterations, qag_rule, workspace, &intfC, &err_eps);
+    if( r != 0 ){
+        throw TRACED_EXCEPTION( "calcFactorIV: error from gsl_integration_qag",util::Error::GSL );
+    }
+    if( err_eps > 1e-2 ){
+        // This could be a warning, except that warnings tend to be ignored.
+        ostringstream msg;
+        msg << "calcFactorIV: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
+        throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
+    }
+    gsl_integration_workspace_free (workspace); //TODO: don't always reallocate!
+    
+    return 1.0 / exp( intfC );  // drug factor
+}
+
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
 double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype) const {
     if( getConcentration() == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
     
-    //FIXME: calculate factor
-    return 1.0;
+    Params_fC p;
+    p.cA = concA;       p.cB = concB;   p.cC = concC;   p.cABC = concABC;
+    p.na = na;  p.nb = nb;      p.ng = ng;      p.nka = nka;
+    const LSTMDrugPD& pd = typeData.getPD(genotype);
+    p.n = pd.slope();   p.V = pd.max_killing_rate();    p.Kn = pd.IC50_pow_slope();
+    
+    double time = 0.0;  // time since start of day
+    double totalFactor = 1.0;   // survival factor for whole day
+    
+    typedef pair<double,double> TimeConc;
+    foreach( const TimeConc& time_conc, doses ){
+        // we iteratate through doses in time order (since doses are sorted)
+        if( time_conc.first < 1.0 /*i.e. today*/ ){
+            if( time < time_conc.first ){
+                double duration = time_conc.first - time;
+                totalFactor *= calculateFactor(p, duration);
+                p.cA *= exp(p.na * duration);
+                p.cB *= exp(p.nb * duration);
+                p.cC *= exp(p.ng * duration);
+                p.cABC *= exp(p.nka * duration);
+                time = time_conc.first;
+            }else{ assert( time == time_conc.first ); }
+            // add dose (instantaneous absorbtion):
+            p.cA += A * time_conc.second;
+            p.cB += B * time_conc.second;
+            p.cC += C * time_conc.second;
+            p.cABC += (A + B + C) * time_conc.second;
+            // add dose (instantaneous absorbtion):
+        }else /*i.e. tomorrow or later*/{
+            // ignore
+        }
+    }
+    if( time < 1.0 ){
+        totalFactor *= calculateFactor(p, 1.0 - time);
+    }
+    
+    return totalFactor;
 }
 
 void LSTMDrugThreeComp::updateConcentration () {
     if( getConcentration() == 0.0 && doses.size() == 0 ) return;     // nothing to do
     
     // exponential decay of existing quantities:
-    //TODO: is it faster to pre-calculate these and either store extra
+    //TODO(performance): is it faster to pre-calculate these and either store extra
     // parameters or adapt uses of alpha, beta, gamma, etc. below?
     concA *= exp(na);
     concB *= exp(nb);

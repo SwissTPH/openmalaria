@@ -34,6 +34,8 @@ struct DoseParams;
 }
 namespace PkPd {
 
+struct Params_fC;
+
 /** A class holding PK and PD drug info, per human, per drug type.
  * 
  * Three compartment model:
@@ -72,6 +74,11 @@ protected:
     // Computed sampled constants
     double na, nb, ng, nka;      // -α, -β, -γ, -k_a
     double A, B, C;
+    
+private:
+    double calculateFactor(const Params_fC& p, double duration) const;
+    
+    friend double func_fC( double t, void* pp );        // function used in calculateFactor
 };
 
 }

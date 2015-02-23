@@ -70,18 +70,9 @@ public:
      */
     double calcFactor( double neg_elim_rate, double& C0, double duration ) const;
     
-    /** Calculate a survival factor over the course of an intravenous transfusion.
-     * No other drug administration should happen during this time span.
-     *
-     * @param neg_elim_rate -k (sampled)
-     * @param vol_dist Vd (sampled)
-     * @param C0 Concentration of drug in blood at start of IV. Will be
-     *  updated to correct concentration at end of IV. Units: mg/l
-     * @param duration Length of IV in days.
-     * @param rate Rate of drug administration (mg/kg/day)
-     * @return survival factor (unitless)
-     */
-    double calcFactorIV( double neg_elim_rate, double vol_dist, double& C0, double duration, double rate ) const;
+    inline double slope() const{ return n; }
+    inline double IC50_pow_slope() const{ return Kn; }
+    inline double max_killing_rate() const{ return V; }
     
 private:
     struct Cache {
@@ -109,11 +100,11 @@ private:
     mutable CachedIV cachedIV;
     
     /// Slope of the dose response curve (no unit)
-    double slope;
+    double n;   // slope
     /// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
-    double IC50_pow_slope;
+    double Kn;  // IC50_pow_slope
     /// Maximal drug killing rate per day (units: 1/days)
-    double max_killing_rate;
+    double V;   // max_killing_rate;
 };
     
     
