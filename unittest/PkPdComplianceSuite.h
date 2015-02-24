@@ -208,6 +208,17 @@ public:
         testDrugResults("PPQ2", drug_conc, drug_factors);
     }
     
+    // PPQ with a 3-compartment model (Tarning 2012 AAC)
+    void testPPQ_Tarning2012AAC (){
+        const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
+        assembleTripleDosageSchedule( dose );
+        const double drug_conc[] = { 0, 0.0768788483, 0.1201694285,
+            0.1526774077, 0.1016986483, 0.0798269206 };
+        const double drug_factors[] = { 1, 0.0342175609, 0.0010863068,
+            3.44853898048478E-005, 1.09489352156011E-006, 3.47830222985575E-008 };
+        testDrugResults("PPQ3", drug_conc, drug_factors);
+    }
+    
 private:
     LSTMModel *proxy;
     uint32_t genotype;
