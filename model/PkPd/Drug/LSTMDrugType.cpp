@@ -115,6 +115,10 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         if( pk.getCompartment3().present() ){
             a13.setParams( pk.getCompartment3().get().getA13() );
             a31.setParams( pk.getCompartment3().get().getA31() );
+        }else{
+            // 2-compartment model: use 3-compartment code with these parameters set to zero
+            a13.setParams(0.0, 0.0);
+            a31.setParams(0.0, 0.0);
         }
     }else if( pk.getCompartment3().present() ){
         throw util::xml_scenario_error( "PK model specifies parameters for "
