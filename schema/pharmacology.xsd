@@ -251,7 +251,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:annotation>
               </xs:element>
               <xs:sequence>
-                <xs:element name="k" type="om:LognormalSample">
+                <xs:element name="k" type="om:SampledValue">
                   <xs:annotation>
                     <xs:documentation>
                       Constant used to calculate the elimination rate λ, which
@@ -278,13 +278,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       C(t) = C0 * exp(-λ*t).
                       
                       Alternatively, elimination rate can be specified via half_life.
-                      </xs:documentation>
+                      
+                      Note that in the case of a conversion model, this applies
+                      to *both* the elimination and the conversion rates.
+                    </xs:documentation>
                     <xs:appinfo>units:day^-1;min:0;name:Constant associated with elimination rate (m_exponent);</xs:appinfo>
                   </xs:annotation>
                 </xs:element>
               </xs:sequence>
             </xs:choice>
-            <xs:element name="k_a" type="om:LognormalSample" minOccurs="0">
+            <xs:element name="k_a" type="om:SampledValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                   Absorbtion rate parameter. Currently only allowed for two
@@ -329,7 +332,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="a12" type="om:LognormalSample">
+                  <xs:element name="a12" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorbtion rate from the central compartment to the
@@ -341,7 +344,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 2 (a12);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="a21" type="om:LognormalSample">
+                  <xs:element name="a21" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorbtion rate from the first periphery compartment
@@ -366,7 +369,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="a13" type="om:LognormalSample">
+                  <xs:element name="a13" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorbtion rate from the central compartment to the
@@ -378,7 +381,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 3 (a13);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="a31" type="om:LognormalSample">
+                  <xs:element name="a31" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorbtion rate from the second periphery compartment

@@ -127,7 +127,7 @@ namespace xml_helpers{
     ///@param pd Helper struct with pharmaco-dynamic parameters
     scnXml::PKPDDrug drug(const char *abbrev, PK1C pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
-        xPK.setK(scnXml::LognormalSample(pk.k, 0.0));
+        xPK.setK(scnXml::SampledValue(pk.k, "const"));
         xPK.setM_exponent(pk.me);
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
@@ -139,12 +139,12 @@ namespace xml_helpers{
     ///@param pd Helper struct with pharmaco-dynamic parameters
     scnXml::PKPDDrug drug(const char *abbrev, PK2C pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
-        xPK.setK(scnXml::LognormalSample(pk.k, 0.0));
+        xPK.setK(scnXml::SampledValue(pk.k, "const"));
         xPK.setCompartment2(scnXml::Compartment2(
-            scnXml::LognormalSample(pk.a12, 0.0),
-            scnXml::LognormalSample(pk.a21, 0.0)));
+            scnXml::SampledValue(pk.a12, "const"),
+            scnXml::SampledValue(pk.a21, "const")));
         xPK.setM_exponent(pk.me);
-        xPK.setK_a(scnXml::LognormalSample(pk.ka, 0.0));
+        xPK.setK_a(scnXml::SampledValue(pk.ka, "const"));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);
@@ -155,15 +155,15 @@ namespace xml_helpers{
     ///@param pd Helper struct with pharmaco-dynamic parameters
     scnXml::PKPDDrug drug(const char *abbrev, PK3C pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
-        xPK.setK(scnXml::LognormalSample(pk.k, 0.0));
+        xPK.setK(scnXml::SampledValue(pk.k, "const"));
         xPK.setCompartment2(scnXml::Compartment2(
-            scnXml::LognormalSample(pk.a12, 0.0),
-            scnXml::LognormalSample(pk.a21, 0.0)));
+            scnXml::SampledValue(pk.a12, "const"),
+            scnXml::SampledValue(pk.a21, "const")));
         xPK.setCompartment3(scnXml::Compartment3(
-            scnXml::LognormalSample(pk.a13, 0.0),
-            scnXml::LognormalSample(pk.a31, 0.0)));
+            scnXml::SampledValue(pk.a13, "const"),
+            scnXml::SampledValue(pk.a31, "const")));
         xPK.setM_exponent(pk.me);
-        xPK.setK_a(scnXml::LognormalSample(pk.ka, 0.0));
+        xPK.setK_a(scnXml::SampledValue(pk.ka, "const"));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);

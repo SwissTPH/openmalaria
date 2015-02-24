@@ -1128,7 +1128,7 @@
         <PK>
           <negligible_concentration>0.000016</negligible_concentration>
           <!-- high precision is to replicate results using half_life of 0.042 -->
-          <k mean="16.503504" sigma="0"/>
+          <k mean="16.503504" distr="const"/>
           <m_exponent>0.0</m_exponent>
           <vol_dist>2.75</vol_dist>
         </PK>
@@ -1144,8 +1144,8 @@
         <PK>
           <negligible_concentration>0.005</negligible_concentration>
           <!-- high precision is to replicate results using half_life of 13.078 -->
-          <!-- sigma value comes from nowhere -->
-          <k mean="0.053001008" sigma="0.1"/>
+          <!-- cv value comes 0.1/mean where sigma=0.1 comes from nowhere -->
+          <k mean="0.053001008" cv="1.8867566" distr="lnorm"/>
           <m_exponent>0.0</m_exponent>
           <vol_dist>20.8</vol_dist>
         </PK>

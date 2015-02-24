@@ -110,6 +110,7 @@ namespace OM { namespace util {
         inline void setParams( const scnXml::LognormalSample& elt ){
             setParams( elt.getMean(), elt.getSigma() );
         }
+        void setParams( const scnXml::SampledValue& elt );
         /** Set the mean, leave sigma unchanged. */
         void setMean( double mean );
         /** Scale the mean (i.e. multiply by a scalar). */
