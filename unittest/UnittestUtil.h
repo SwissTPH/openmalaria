@@ -323,12 +323,12 @@ public:
         drugs.getDrug().push_back(drug("PPQ2",   // Piperaquine, Hodel2013 model
                 PK2C(173 /*Vd*/, 5e-8 /*negl_conc*/, 0.6242774566473989 /*k*/, 0.25 /*m_exp*/,
                     11.16 /*k_a*/, 8.46242774566474 /*a12*/, 3.3058064516129035 /*a21*/),
-                PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
+                PD(3.45 /* vmax */, 0.020831339 /* IC50 */, 6.0 /* slope */ )));
         drugs.getDrug().push_back(drug("PPQ3",  // Piperaquine, Tarning 2012 AAC
                 PK3C(57.5625 /*Vd*/, 5e-8/*negl_conc, TODO*/, 16.314788273615637 /*k*/, 1.0 /*m_exp*/,
                     3.4825 /*k_a*/, 89.01628664495114 /*a12*/, 55.394594594594594 /*a21*/,
-                     43.36156351791531 /*a13*/, 26.983783783783785 /*a31*/),
-                PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
+                     43.36156351791531 /*a13*/, 3.8155414012738853 /*a31*/),
+                PD(3.45 /* vmax */, 0.020831339 /* IC50 */, 6.0 /* slope */ )));
         
         PkPd::LSTMDrugType::init (drugs);
         

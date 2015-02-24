@@ -75,13 +75,13 @@ protected:
     // Sampled constants
     const double elim_sample;
     const double a12, a21, a13, a31;
-    const double nka, kaV;    // -k_a, another absorbtion parameter
+    const double nka;    // -k_a
     
     // Computed parameters, constant except for dependence on body mass
     // (this is essentially a cache updated by updateCached())
     mutable double last_bm;     // body mass at time of last calculation
     mutable double na, nb, ng;      // -α, -β, -γ, -k_a
-    mutable double A, B, C;
+    mutable double AV, BV, CV;     // A*V, B*V, C*V where V is total volume of distribution (litres)
     
 private:
     double calculateFactor(const Params_fC& p, double duration) const;
