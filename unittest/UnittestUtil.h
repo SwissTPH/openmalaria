@@ -319,13 +319,12 @@ public:
         drugs.getDrug().push_back(drug("PPQ",   // Piperaquine, 1-compartment
                 PK1C(150 /*Vd*/, 0.005 /*negl_conc*/, 0.03 /*k*/, 0.0 /*m_exp*/),
                 PD(3.45 /* vmax */, 0.088 /* IC50 */, 6.0 /* slope */ )));
-        //TODO: negl_conc was 0.005
         drugs.getDrug().push_back(drug("PPQ2",   // Piperaquine, Hodel2013 model
-                PK2C(173 /*Vd*/, 5e-8 /*negl_conc*/, 0.6242774566473989 /*k*/, 0.25 /*m_exp*/,
+                PK2C(173 /*Vd*/, 0.005 /*negl_conc*/, 0.6242774566473989 /*k*/, 0.25 /*m_exp*/,
                     11.16 /*k_a*/, 8.46242774566474 /*a12*/, 3.3058064516129035 /*a21*/),
                 PD(3.45 /* vmax */, 0.020831339 /* IC50 */, 6.0 /* slope */ )));
         drugs.getDrug().push_back(drug("PPQ3",  // Piperaquine, Tarning 2012 AAC
-                PK3C(57.5625 /*Vd*/, 5e-8/*negl_conc, TODO*/, 16.314788273615637 /*k*/, 1.0 /*m_exp*/,
+                PK3C(57.5625 /*Vd*/, 0.005 /*negl_conc*/, 16.314788273615637 /*k*/, 1.0 /*m_exp*/,
                     3.4825 /*k_a*/, 89.01628664495114 /*a12*/, 55.394594594594594 /*a21*/,
                      43.36156351791531 /*a13*/, 3.8155414012738853 /*a31*/),
                 PD(3.45 /* vmax */, 0.020831339 /* IC50 */, 6.0 /* slope */ )));
