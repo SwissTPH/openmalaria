@@ -128,6 +128,10 @@ double func_fC( double t, void* pp ){
     const double fC = p.V * cn / (cn + p.Kn);       // unitless
     return fC;
 }
+const size_t GSL_INTG_MAX_ITER = 1000;     // 10 seems enough, but no harm in using a higher value
+gsl_integration_workspace *gsl_intgr_wksp = gsl_integration_workspace_alloc (GSL_INTG_MAX_ITER);
+//NOTE: we "should" free, but mem-leaks at end of program aren't really important
+// gsl_integration_workspace_free (gsl_intgr_wksp);
 double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) const{
     gsl_function F;
     F.function = &func_fC;
@@ -140,10 +144,8 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
     const int qag_rule = 1;     // alg 1 seems to be good enough
     double intfC, err_eps;
     
-    const size_t max_iterations = 1000;     // 10 seems enough, but no harm in using a higher value
-    gsl_integration_workspace *workspace = gsl_integration_workspace_alloc (max_iterations);
     int r = gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps,
-                                 max_iterations, qag_rule, workspace, &intfC, &err_eps);
+                                 GSL_INTG_MAX_ITER, qag_rule, gsl_intgr_wksp, &intfC, &err_eps);
     if( r != 0 ){
         throw TRACED_EXCEPTION( "calcFactorIV: error from gsl_integration_qag",util::Error::GSL );
     }
@@ -153,7 +155,6 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
         msg << "calcFactorIV: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
         throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
     }
-    gsl_integration_workspace_free (workspace); //TODO: don't always reallocate!
     
     return 1.0 / exp( intfC );  // drug factor
 }
