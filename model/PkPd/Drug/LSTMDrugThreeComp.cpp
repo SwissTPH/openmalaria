@@ -91,7 +91,6 @@ void LSTMDrugThreeComp::updateCached(double bm) const{
     nb = r2 * cos(phi + pi23) - at;
     ng = r2 * cos(phi + 2.0 * pi23) -at;
     
-    
     // A*V, B*V, C*V from Monolix 1.3.3 (p44):
     AV = -nka * (k21 + na) * (k31 + na) / ((na - nka) * (nb - na) * (ng - na));
     BV = -nka * (k21 + nb) * (k31 + nb) / ((nb - nka) * (na - nb) * (ng - nb));
@@ -135,18 +134,20 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
     // gsl_function doesn't accept const; we re-apply const later
     F.params = static_cast<void*>(const_cast<Params_fC*>(&p));
     
-    // TODO: verify these error limits are sufficient.
-    const double abs_eps = 1e-3, rel_eps = 1e-3;
-    const int qag_rule = 2; // GSL_INTEG_GAUSS21 should be sufficient?
+    // NOTE: tolerances are arbitrary, but seem to be sufficient
+    const double abs_eps = 1e-2, rel_eps = 1e-2;
+    // NOTE: 1 through 6 are different algorithms of increasing complexity
+    const int qag_rule = 1;     // alg 1 seems to be good enough
     double intfC, err_eps;
     
-    const size_t max_iterations = 1000;     // 100 seems enough, but no harm in using a higher value
+    const size_t max_iterations = 1000;     // 10 seems enough, but no harm in using a higher value
     gsl_integration_workspace *workspace = gsl_integration_workspace_alloc (max_iterations);
-    int r = gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps, max_iterations, qag_rule, workspace, &intfC, &err_eps);
+    int r = gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps,
+                                 max_iterations, qag_rule, workspace, &intfC, &err_eps);
     if( r != 0 ){
         throw TRACED_EXCEPTION( "calcFactorIV: error from gsl_integration_qag",util::Error::GSL );
     }
-    if( err_eps > 1e-2 ){
+    if( err_eps > 5e-2 ){
         // This could be a warning, except that warnings tend to be ignored.
         ostringstream msg;
         msg << "calcFactorIV: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
