@@ -89,8 +89,13 @@ public:
         schedule.insert(make_pair(2, make_pair(0, 5)));
     }
     
-    void testDrugResults (string drugName, const double drug_conc[], const double drug_factors[]) {
+    void testDrugResults (string drugName, string drug2Name,
+                          const double drug_conc[], const double drug2_conc[],
+                          const double drug_factors[])
+    {
+        bool secondDrug = drug2_conc != 0;
         size_t drugIndex = LSTMDrugType::findDrug( drugName );
+        size_t drug2Ind = secondDrug ? LSTMDrugType::findDrug( drug2Name ) : 0;
         PCS_VERBOSE(cout << "\n\033[32mTesting \033[1m" << drugName << ": " << endl;)
         double totalFac = 1;
         for( size_t i = 0; i < 6; i++){
@@ -108,23 +113,34 @@ public:
             
             // after update:
             double conc = proxy->getDrugConc(drugIndex);
+            double conc2 = secondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
             PCS_VERBOSE(cout << "\033[36m";)
             TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-9);
+            if( secondDrug ) TS_ASSERT_APPROX_TOL (conc2, drug2_conc[i], 5e-3, 1e-9);
             PCS_VERBOSE(
                 cout << "\033[0m";
                 double errorC = conc - drug_conc[i];
                 cout << "\t Day " << i << ": "
-                    << "\033[33mfactor (day 0 to " << i << "): " << totalFac
-                    << " [ " << errorF << " ]" << "\033[0m"
-                    << ", \033[31mtotal / factor: "
-                    << totalFac / drug_factors[i] << "\033[0m"
+                    << "\033[33mfactor " << totalFac << " [ " << errorF << " ]" << "\033[0m"
+                    << ", \033[31mtotal / factor: " << totalFac / drug_factors[i] << "\033[0m"
                     << ", \033[32mconc: " << conc << " [ " << errorC << ", "
-                    << conc/drug_conc[i] << " ]" << "\033[0m" <<  endl;
+                    << conc/drug_conc[i] << " ]";
+                if( secondDrug ){
+                    errorC = conc2 - drug2_conc[i];
+                    cout << ", conc2: " << conc2 << " [ " << errorC << " ]";
+                }
+                cout << "\033[0m" <<  endl;
             )
             
             // medicate (take effect on next update):
             medicate( drugIndex, i );
         }
+    }
+    
+    void testDrugResults (string drugName, const double drug_conc[],
+                          const double drug_factors[])
+    {
+        testDrugResults(drugName, "", drug_conc, 0, drug_factors);
     }
     
     void medicate ( size_t drugIndex,  size_t i) {
@@ -136,28 +152,48 @@ public:
             }
     }
     
-    void testAR () {
+    void testAR1 () { /* Artemether no conversion */
         const double dose = 1.7 * bodymass;   // 1.7 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
         const double drug_conc[] = { 0.0, 0.0153520114,
             0.0156446685, 0.01560247467, 0.000298342, 5.68734e-6 };
         const double drug_factors[] = { 1,1.0339328333924E-012, 1.06887289270302E-024,
             1.10329635519261E-036, 4.73064069783747E-042, 4.73064069783747E-042 };
-        testDrugResults("AR", drug_conc, drug_factors);
+        testDrugResults("AR1", drug_conc, drug_factors);
     }
     
-    void testAS () {
+    void testAR () { /* Artemether with conversion */
+        const double dose = 1.7 * bodymass;   // 1.7 mg/kg * 50 kg
+        assembleHexDosageSchedule(dose);
+        const double AR_conc[] = { 0, 0.0001825231, 0.0001825242, 0.0001825242, 1.15E-09, 7.19E-15 };
+        const double DHA_conc[] = { 0, 0.0002013126, 0.0002013139, 0.0002013139, 1.27E-09, 7.94E-15 };
+        const double drug_factors[] = { 1, 1.70E-07, 2.84E-14, 4.74E-21, 4.75E-21, 4.75E-21 };
+        testDrugResults("AR", "DHA_AR", AR_conc, DHA_conc, drug_factors);
+    }
+    
+    void testAS1 () { /* Artesunate no conversion */
         const double dose = 4 * bodymass;   // 4 mg/kg * 50 kg
         assembleTripleDosageSchedule(dose);
         const double drug_conc[] = { 0, 8.98E-008, 8.98E-008, 8.98E-008, 5.55E-015, 3.43E-022 };
         const double drug_factors[] = { 1, 0.000012, 1.45E-010, 1.75E-015,  1.75E-015, 1.75E-015 };
-        testDrugResults("AS", drug_conc, drug_factors);
+        testDrugResults("AS1", drug_conc, drug_factors);
+    }
+    
+    void testAS () { /* Artesunate with conversion */
+        const double dose = 4 * bodymass;   // 4 mg/kg * 50 kg
+        assembleTripleDosageSchedule(dose);
+        const double AS_conc[] = { 0, 2.30E-14, 2.30E-14, 2.30E-14, 8.25E-28, 2.95E-41 };
+        const double DHA_conc[] = { 0, 1.14E-10, 1.14E-10, 1.14E-10, 1.07E-21, 9.94E-33 };
+        const double drug_factors[] = { 1, 0.0005322908, 2.83E-07, 1.51E-10, 1.51E-10, 1.51E-10 };
+        testDrugResults("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
     void _testCQ () { 
         assembleCQDosageSchedule();
-        const double drug_conc[] = { 0, 0.0786272312, 0.1554589687, 0.2305362134, 0.2252717988, 0.2201276 };
-        const double drug_factors[] = { 1, 0.0580181371, 0.0021554332, 7.39575036687833E-005, 2.51535706689484E-006, 8.57663220896078E-008 };
+        const double drug_conc[] = { 0, 0.0786272312, 0.1554589687,
+            0.2305362134, 0.2252717988, 0.2201276 };
+        const double drug_factors[] = { 1, 0.0580181371, 0.0021554332,
+            7.39575036687833E-005, 2.51535706689484E-006, 8.57663220896078E-008 };
         testDrugResults("CQ", drug_conc, drug_factors);
     }
     

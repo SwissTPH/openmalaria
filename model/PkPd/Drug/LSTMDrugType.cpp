@@ -78,7 +78,9 @@ size_t LSTMDrugType::findDrug(string _abbreviation) {
 
 LSTMDrug* LSTMDrugType::createInstance(size_t index) {
     LSTMDrugType& typeData = drugTypes[index];
-    if( typeData.a12.isSet() ){
+    if( typeData.conversion_rate.isSet() ){
+        throw util::unimplemented_exception( "PK conversion model" );
+    }else if( typeData.a12.isSet() ){
         // a21 is set when a12 is set; a13 and a31 may be set
         return new LSTMDrugThreeComp( typeData );
     }else{
@@ -92,7 +94,7 @@ LSTMDrug* LSTMDrugType::createInstance(size_t index) {
 // -----  Non-static LSTMDrugType functions  -----
 
 LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
-        index (index)
+        index (index), metabolite(0)
 {
     // ———  PK parameters  ———
     const scnXml::PK& pk = drugData.getPK();
@@ -124,11 +126,24 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         throw util::xml_scenario_error( "PK model specifies parameters for "
                 "compartment3 without compartment2" );
     }
+    if( pk.getConversion().present() ){
+        if( a12.isSet() ){
+            throw util::xml_scenario_error( "PK conversion model is incompatible with 2/3-compartment model" );
+        }
+        const scnXml::Conversion& conv = pk.getConversion().get();
+        try{
+            metabolite = findDrug(conv.getMetabolite());
+        }catch( util::xml_scenario_error e ){
+            throw util::xml_scenario_error( "PK: metabolite drug not found; metabolite must be defined *before* parent drug!" );
+        }
+        conversion_rate.setParams( conv.getRate() );
+        molecular_weight_ratio = conv.getMolRatio();
+    }
     if( pk.getK_a().present() ){
-        if( !a12.isSet() ){
+        if( !a12.isSet() && !conversion_rate.isSet() ){
             throw util::xml_scenario_error( "PK models only allow an "
-                "absorbtion rate parameter (k_a) when compartment2 is "
-                "present" );
+                "absorbtion rate parameter (k_a) when compartment2 or "
+                " conversion parameters are present" );
         }
         absorbtion_rate.setParams(pk.getK_a().get());
     }else{

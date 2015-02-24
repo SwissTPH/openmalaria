@@ -290,12 +290,61 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="k_a" type="om:SampledValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
-                  Absorbtion rate parameter. Currently only allowed for two
-                  and three compartment models (i.e. when "compartment2"
-                  parameters are specified), where it is required.
+                  Absorbtion rate parameter. Not allowed for one compartment
+                  models, but required for two and three compartment models and
+                  one compartment with conversion model (for the parent drug
+                  only).
                 </xs:documentation>
                 <xs:appinfo>name:Absorbtion rate constant (k_a);min:0;</xs:appinfo>
               </xs:annotation>
+            </xs:element>
+            <xs:element name="conversion" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  Configures the parent drug in a conversion model.
+                  
+                  To use a conversion model, the parent drug should have this
+                  section defined as well as half-life or k (direct
+                  elimination; this may be zero) and k_a (absorbtion rate;
+                  this may be large).
+                  
+                  The metabolite drug should define half-life or k (elimination
+                  of metabolite), but not k_a (absorbtion rate) or this section
+                  (conversion). It is not possible for the metabolite to itself
+                  undergo conversion with the current models.
+                </xs:documentation>
+                <xs:appinfo>name:Conversion parameters (parent drug);</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:all>
+                  <xs:element name="metabolite" type="xs:string">
+                    <xs:annotation>
+                      <xs:documentation>
+                        The abbreviation of the metabolite drug (e.g. "DHA" or
+                        "DHA_AR").
+                      </xs:documentation>
+                      <xs:appinfo>name:Metabolite drug (abbreviation);</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="rate" type="om:SampledValue">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Rate of conversion of parent drug to metabolite.
+                      </xs:documentation>
+                      <xs:appinfo>name:Rate of conversion;unit:Per day;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                  <xs:element name="molRatio" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                        Ratio of molecular weights: molecular weight of the
+                        metabolite divided by molecular weight of the parent.
+                      </xs:documentation>
+                      <xs:appinfo>name:Molecular weight ratio;unit:unitless;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
+                </xs:all>
+              </xs:complexType>
             </xs:element>
             <xs:element name="vol_dist">
               <xs:annotation>

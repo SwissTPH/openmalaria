@@ -179,6 +179,9 @@ private:
      * struct object, not the index. */
     size_t index;
     
+    /// Index of metabolite
+    size_t metabolite;
+    
     /** A mapping from genotype codes to phenotypes for this drug. */
     vector<uint32_t> genotype_mapping;
     
@@ -194,6 +197,7 @@ private:
     double negligible_concentration;
     // Used to calculate elimination rate
     double neg_m_exp;
+    double molecular_weight_ratio;
     /// Volume of distribution (l/kg)
     LognormalSampler vol_dist;
     /// Absorbtion rate
@@ -201,6 +205,8 @@ private:
     /** Terminal elimination rate constant (k). Equals ln(2)/half_life.
      * Units: (1 / days) */
     LognormalSampler elimination_rate;
+    /// Convertion rate
+    LognormalSampler conversion_rate;
     /// Parameters for absorbtion rates in two- and three-compartment models.
     LognormalSampler a12, a21, a13, a31;
     

@@ -70,6 +70,22 @@ namespace xml_helpers{
             Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent) {}
         double Vd, negl_conc, k, me;
     };
+    /// Construct a helper for setting PK parameters (1-compartment plus conversion)
+    ///@param Vd Volume of distribution (l/kg)
+    ///@param negl_conc Negligible concentration of drug (mg/l)
+    ///@param k Direct elimination rate of drug (days^-1)
+    ///@param m_exponent
+    ///@param k_a Absorbtion rate
+    ///@param metabolite Abbreviation of metabolite drug
+    ///@param conv Conversion rate of drug (mg/l)
+    ///@param mwr Molecular weight ratio (metabolite weight / parent weight)
+    struct PKConv{
+        PKConv(double Vd, double negl_conc, double k, double m_exponent,
+            double k_a, const char *metabolite, double conv, double mwr):
+            Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent), ka(k_a), met(metabolite), conv(conv), mwr(mwr) {}
+        double Vd, negl_conc, k, me, ka, conv, mwr;
+        const char *met;
+    };
     /// Construct a helper for setting PK parameters (2-compartment model)
     ///@param Vd Volume of distribution (l/kg)
     ///@param negl_conc Negligible concentration of drug (mg/l)
@@ -129,6 +145,21 @@ namespace xml_helpers{
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
         xPK.setK(scnXml::SampledValue(pk.k, "const"));
         xPK.setM_exponent(pk.me);
+        scnXml::PD xPD;
+        xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
+        return scnXml::PKPDDrug(xPD, xPK, abbrev);
+    }
+    /// Helper for constructing an XML element with parameters for some drug
+    ///@param abbrev Drug name (CQ, PPQ, AR, etc)
+    ///@param pk Helper struct with pharmaco-kinetic parameters
+    ///@param pd Helper struct with pharmaco-dynamic parameters
+    scnXml::PKPDDrug drug(const char *abbrev, PKConv pk, PD pd){
+        scnXml::PK xPK(pk.negl_conc, pk.Vd);
+        xPK.setK(scnXml::SampledValue(pk.k, "const"));
+        xPK.setM_exponent(pk.me);
+        xPK.setK_a(scnXml::SampledValue(pk.ka, "const"));
+        xPK.setConversion(scnXml::Conversion(pk.met,
+            scnXml::SampledValue(pk.conv, "const"), pk.mwr));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);
@@ -292,13 +323,32 @@ public:
         scnXml::Drugs drugs;
         
         // Artemether (no conversion model)
-        drugs.getDrug().push_back(drug("AR",
+        drugs.getDrug().push_back(drug("AR1",
                 PK1C(17.4 /*Vd*/, 1e-17 /*negl_conc*/, 3.96 /*k*/, 0.0 /*m_exp*/),
                 PD(27.6 /* vmax */, 0.0023 /* IC50 */, 4.0 /* slope */ )));
+        // Artemether plus conversion to DHA
+        drugs.getDrug().push_back(drug("DHA_AR",
+                PK1C(15 /*Vd*/, 1e-17 /*negl_conc*/, 44.15 /*k*/, 0.0 /*m_exp*/),
+                PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
+        drugs.getDrug().push_back(drug("AR",
+                PKConv(46.6 /*Vd*/, 1e-17 /*negl_conc*/, 0 /*k*/, 0 /*m_exp*/, 
+                       23.98 /*absorbution rate*/, "DHA_AR" /*metabolite*/,
+                       11.98 /*conversion rate*/, 0.9547587 /*mol. weight ratio*/),
+                PD(27.6 /* vmax */, 0.0023 /* IC50 */, 4.0 /* slope */ )));
+        
         
         // Artesunate (no conversion model)
-        drugs.getDrug().push_back(drug("AS",
+        drugs.getDrug().push_back(drug("AS1",
                 PK1C(2.75 /*Vd*/, 1e-17 /*negl_conc*/, 16.6 /*k*/, 0.0 /*m_exp*/),
+                PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));
+        // Artesunate plus conversion to DHA
+        drugs.getDrug().push_back(drug("DHA_AS",
+                PK1C(15 /*Vd*/, 1e-17 /*negl_conc*/, 44.15 /*k*/, 0.0 /*m_exp*/),
+                PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
+        drugs.getDrug().push_back(drug("AS",
+                PKConv(7.1 /*Vd*/, 1e-17 /*negl_conc*/, 0 /*k*/, 0 /*m_exp*/,
+                       252 /*absorbution rate*/, "DHA_AS" /*metabolite*/,
+                       30.96 /*conversion rate*/, 0.741155 /*mol. weight ratio*/),
                 PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));
         
         // Dihydroartemisinin (when not a metabolite)
