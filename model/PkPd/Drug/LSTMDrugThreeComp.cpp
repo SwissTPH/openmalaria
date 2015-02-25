@@ -54,9 +54,9 @@ LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
 size_t LSTMDrugThreeComp::getIndex() const {
     return typeData.getIndex();
 }
-double LSTMDrugThreeComp::getConcentration() const {
-    //NOTE: assuming no ABC term (see declaration of concA, concB, etc.).
-    return concA + concB + concC - concABC;
+double LSTMDrugThreeComp::getConcentration(size_t index) const {
+    if( index == typeData.getIndex() ) return conc();
+    else return 0.0;
 }
 
 void LSTMDrugThreeComp::medicate(double time, double qty, double bodyMass)
@@ -162,7 +162,7 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
 double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype, double body_mass) const {
-    if( getConcentration() == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
+    if( conc() == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
     updateCached(body_mass);
     
     Params_fC p;
@@ -187,12 +187,11 @@ double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype, double body_mas
                 p.cABC *= exp(p.nka * duration);
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
-            // add dose (instantaneous absorbtion):
+            // add dose:
             p.cA += AV * time_conc.second;
             p.cB += BV * time_conc.second;
             p.cC += CV * time_conc.second;
             p.cABC += (AV + BV + CV) * time_conc.second;
-            // add dose (instantaneous absorbtion):
         }else /*i.e. tomorrow or later*/{
             // ignore
         }
@@ -205,7 +204,7 @@ double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype, double body_mas
 }
 
 void LSTMDrugThreeComp::updateConcentration (double body_mass) {
-    if( getConcentration() == 0.0 && doses.size() == 0 ) return;     // nothing to do
+    if( conc() == 0.0 && doses.size() == 0 ) return;     // nothing to do
     updateCached(body_mass);
     
     // exponential decay of existing quantities:
@@ -221,7 +220,7 @@ void LSTMDrugThreeComp::updateConcentration (double body_mass) {
     foreach( TimeConc& time_conc, doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
-            // add dose (instantaneous absorbtion):
+            // add dose:
             concA += AV * time_conc.second * exp(na * (1.0 - time_conc.first));
             concB += BV * time_conc.second * exp(nb * (1.0 - time_conc.first));
             concC += CV * time_conc.second * exp(ng * (1.0 - time_conc.first));
@@ -234,8 +233,8 @@ void LSTMDrugThreeComp::updateConcentration (double body_mass) {
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
     doses.erase(doses.begin(), doses.begin() + doses_taken);
     
-    util::streamValidate( getConcentration() );
-    if( getConcentration() < typeData.getNegligibleConcentration() ){
+    util::streamValidate( conc() );
+    if( conc() < typeData.getNegligibleConcentration() ){
         // once negligible, try to optimise so that we don't have to do
         // anything next time step
         concA = 0.0;
@@ -250,12 +249,38 @@ void LSTMDrugThreeComp::checkpoint(ostream& stream){
     concB & stream;
     concC & stream;
     concABC & stream;
+    elim_sample & stream;
+    a12 & stream;
+    a21 & stream;
+    a13 & stream;
+    a31 & stream;
+    nka & stream;
+    last_bm & stream;
+    na & stream;
+    nb & stream;
+    ng & stream;
+    AV & stream;
+    BV & stream;
+    CV & stream;
 }
 void LSTMDrugThreeComp::checkpoint(istream& stream){
     concA & stream;
     concB & stream;
     concC & stream;
     concABC & stream;
+    elim_sample & stream;
+    a12 & stream;
+    a21 & stream;
+    a13 & stream;
+    a31 & stream;
+    nka & stream;
+    last_bm & stream;
+    na & stream;
+    nb & stream;
+    ng & stream;
+    AV & stream;
+    BV & stream;
+    CV & stream;
 }
 
 }

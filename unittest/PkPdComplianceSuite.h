@@ -103,7 +103,7 @@ public:
             double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
             PCS_VERBOSE(cout << "\033[35m";)
-            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-9);
+            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-24);
             PCS_VERBOSE(cout << "\033[0m";)
             PCS_VERBOSE(double errorF = totalFac - drug_factors[i];)
             
@@ -116,7 +116,7 @@ public:
             double conc2 = secondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
             PCS_VERBOSE(cout << "\033[36m";)
             TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-9);
-            if( secondDrug ) TS_ASSERT_APPROX_TOL (conc2, drug2_conc[i], 5e-3, 1e-9);
+            if( secondDrug ) TS_ASSERT_APPROX_TOL (conc2, drug2_conc[i], 5e-3, 1e-24);
             PCS_VERBOSE(
                 cout << "\033[0m";
                 double errorC = conc - drug_conc[i];

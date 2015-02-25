@@ -49,7 +49,7 @@ public:
     LSTMDrugThreeComp (const LSTMDrugType&);
     
     virtual size_t getIndex() const;
-    virtual double getConcentration() const;
+    virtual double getConcentration(size_t index) const;
     
     virtual void medicate (double time, double qty, double bodyMass);
     
@@ -59,6 +59,10 @@ public:
 protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
+    
+    inline double conc() const{
+        return concA + concB + concC - concABC;
+    }
     
     // Update constants. bm: body mass (kg)
     void updateCached(double bm) const;
@@ -73,9 +77,9 @@ protected:
     double concA, concB, concC, concABC;
     
     // Sampled constants
-    const double elim_sample;
-    const double a12, a21, a13, a31;
-    const double nka;    // -k_a
+    double elim_sample;
+    double a12, a21, a13, a31;
+    double nka;    // -k_a
     
     // Computed parameters, constant except for dependence on body mass
     // (this is essentially a cache updated by updateCached())

@@ -18,8 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_LSTMDrugOnComp
-#define Hmod_LSTMDrugOnComp
+#ifndef Hmod_LSTMDrugConversion
+#define Hmod_LSTMDrugConversion
 
 #include "Global.h"
 #include "PkPd/Drug/LSTMDrug.h"
@@ -35,15 +35,17 @@ struct DoseParams;
 
 namespace PkPd {
 
+struct Params_convFactor;
+
 /** A class holding pkpd drug use info.
  * 
- * One compartment model
+ * Conversion model: two 1-compartment models with conversion.
  *
  * Each human has an instance for each type of drug present in their blood. */
-class LSTMDrugOneComp : public LSTMDrug {
+class LSTMDrugConversion : public LSTMDrug {
 public:
     /** Create a new instance. */
-    LSTMDrugOneComp (const LSTMDrugType&);
+    LSTMDrugConversion (const LSTMDrugType& parent, const LSTMDrugType& metabolite);
     
     virtual size_t getIndex() const;
     virtual double getConcentration(size_t index) const;
@@ -57,15 +59,31 @@ protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
     
-    /// Always links a drug instance to its drug-type data
-    //TODO: does it still make sense to link this?
-    const LSTMDrugType& typeData;
+    double calculateFactor(const Params_convFactor& p, double duration) const;
     
-    /// Concentration in blood; units: mg / l.
-    double concentration;
+    //TODO: do we need to link these?
+    const LSTMDrugType &parentType, &metaboliteType;
     
-    /// Sampled elimination rate constant
-    double neg_elim_sample;
+    /// Amount of parent drug in gut, parent drug in circulation and metabolite
+    // in circulation; units: mg. In the paper, these are labelled A, B, C.
+    //TODO: move metabolite data to a separate class object? Or not?
+    double qtyG, qtyP, qtyM;
+    
+    /// @brief Sampled elimination and conversion rate constants
+    //@{
+    /// Absorbtion rate constant (-x)
+    double nka;
+    /// Elimination rate constant for parent (-y * body_mass ^ m_exponent)
+    double nkP_sample;
+    /// Conversion rate constant (-z * body_mass ^ m_exponent)
+    double nconv_sample;
+    /// Elimination rate constant for metabolite (-k * body_mass ^ m_exponent)
+    double nkM_sample;
+    /// Volume of distribution of metabolite (parent's Vd uses vol_dist)
+    double vol_dist_metabolite;
+    /// Last body mass (kg)
+    double last_bm;
+    //@}
 };
 
 }

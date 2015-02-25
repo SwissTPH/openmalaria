@@ -29,6 +29,7 @@ set (Model_CPP
   PkPd/Drug/LSTMDrug.cpp
   PkPd/Drug/LSTMDrugOneComp.cpp
   PkPd/Drug/LSTMDrugThreeComp.cpp
+  PkPd/Drug/LSTMDrugConversion.cpp
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/Drug/LSTMDrugAllele.cpp
   PkPd/LSTMTreatments.cpp

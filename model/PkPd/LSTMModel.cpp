@@ -33,7 +33,7 @@
 
 namespace OM { namespace PkPd {
 
-// ———  static init functions  ———
+// ———  static  ———
 
 void LSTMModel::init( const scnXml::Scenario& scenario ){
     if (scenario.getPharmacology().present()) {
@@ -109,13 +109,12 @@ void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double b
 }
 
 double LSTMModel::getDrugConc (size_t drug_index) const{
+    double c = 0.0;
     for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        if (drug->getIndex() == drug_index){
-            return drug->getConcentration();
-        }
+        c += drug->getConcentration(drug_index);
     }
-    return 0.0;
+    return c;
 }
 
 double LSTMModel::getDrugFactor (uint32_t genotype, double body_mass) const{
@@ -138,13 +137,15 @@ void LSTMModel::decayDrugs (double body_mass) {
 }
 
 void LSTMModel::summarize(const Host::Human& human) const{
-    for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
-            drug != end; ++drug ){
-        double conc = drug->getConcentration();
-        if( conc > 0.0 ){
-            size_t index = drug->getIndex();
-            mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
-            mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(conc) );
+    const vector<size_t> &drugsInUse( LSTMDrugType::getDrugsInUse() );
+    foreach( size_t index, drugsInUse ){
+        for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
+                drug != end; ++drug ){
+            double conc = drug->getConcentration(index);
+            if( conc > 0.0 ){
+                mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
+                mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(conc) );
+            }
         }
     }
 }

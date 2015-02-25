@@ -54,11 +54,11 @@ public:
      */
     virtual void medicate (double time, double qty, double bodyMass) =0;
     
-    /** Get the concentration of the drug in the central compartment of the
-     * model.
+    /** Get the concentration of the given drug contained in this model (only
+     * compartments with active PD; zero if drug index doesn't match that used).
      * 
      * @returns Concentration in the blood serum, in mg/l. */
-    virtual double getConcentration() const =0;
+    virtual double getConcentration(size_t index) const =0;
     
     /** Returns the total drug factor for one drug over one day.
      *
@@ -102,7 +102,8 @@ protected:
     virtual void checkpoint (istream& stream){}
     virtual void checkpoint (ostream& stream){}
     
-    /// First is time (days), second is additional concentration (mg / l)
+    /// First is time (days), second is additional concentration (mg / l; for
+    /// one- and three-compartment models) or quantity (mg; for conversion model)
     typedef std::vector<std::pair<double,double> > DoseVec;
     /** List of each dose given today (and possibly tomorrow), ordered by time.
      * First parameter (key) is time in days, second is the dose concentration (mg/l).

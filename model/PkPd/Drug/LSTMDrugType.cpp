@@ -24,6 +24,7 @@
 #include "util/random.h"
 #include "PkPd/Drug/LSTMDrugOneComp.h"
 #include "PkPd/Drug/LSTMDrugThreeComp.h"
+#include "PkPd/Drug/LSTMDrugConversion.h"
 #include <schema/pharmacology.h>
 
 #include <cmath>
@@ -44,6 +45,8 @@ using WithinHost::Genotypes;
 typedef boost::ptr_vector<LSTMDrugType> DrugTypesT;
 DrugTypesT drugTypes;
 map<string,size_t> drugTypeNames;
+// List of all indices of drugs being used
+vector<size_t> drugsInUse;
 
 
 void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
@@ -68,18 +71,38 @@ size_t LSTMDrugType::numDrugTypes(){
     return drugTypes.size();
 }
 
+// Add index to drugsInUse if not already present. Not fast but doesn't need to be.
+void drugIsUsed(size_t index){
+    foreach( size_t i, drugsInUse ){
+        if( i == index ) return;        // already in list
+    }
+    drugsInUse.push_back(index);
+}
 size_t LSTMDrugType::findDrug(string _abbreviation) {
     map<string,size_t>::const_iterator it = drugTypeNames.find (_abbreviation);
     if (it == drugTypeNames.end())
         throw util::xml_scenario_error (string ("attempt to use drug without description: ").append(_abbreviation));
+    size_t index = it->second;
     
-    return it->second;
+    // We assume that drugs are used when and only when findDrug returns their
+    // index or they are a metabolite of a drug returned here.
+    drugIsUsed(index);
+    if( drugTypes[index].conversion_rate.isSet() /*conversion model used*/ ){
+        drugIsUsed(drugTypes[index].metabolite);
+    }
+    
+    return index;
+}
+
+const vector< size_t >& LSTMDrugType::getDrugsInUse(){
+    return drugsInUse;
 }
 
 LSTMDrug* LSTMDrugType::createInstance(size_t index) {
     LSTMDrugType& typeData = drugTypes[index];
     if( typeData.conversion_rate.isSet() ){
-        throw util::unimplemented_exception( "PK conversion model" );
+        LSTMDrugType& metaboliteData = drugTypes[typeData.metabolite];
+        return new LSTMDrugConversion( typeData, metaboliteData );
     }else if( typeData.a12.isSet() ){
         // a21 is set when a12 is set; a13 and a31 may be set
         return new LSTMDrugThreeComp( typeData );
@@ -94,7 +117,10 @@ LSTMDrug* LSTMDrugType::createInstance(size_t index) {
 // -----  Non-static LSTMDrugType functions  -----
 
 LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
-        index (index), metabolite(0)
+        index (index), metabolite(0),
+        negligible_concentration(numeric_limits<double>::quiet_NaN()),
+        neg_m_exp(numeric_limits<double>::quiet_NaN()),
+        mwr(numeric_limits<double>::quiet_NaN())
 {
     // ———  PK parameters  ———
     const scnXml::PK& pk = drugData.getPK();
@@ -137,7 +163,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             throw util::xml_scenario_error( "PK: metabolite drug not found; metabolite must be defined *before* parent drug!" );
         }
         conversion_rate.setParams( conv.getRate() );
-        molecular_weight_ratio = conv.getMolRatio();
+        mwr = conv.getMolRatio();
     }
     if( pk.getK_a().present() ){
         if( !a12.isSet() && !conversion_rate.isSet() ){

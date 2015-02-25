@@ -23,13 +23,6 @@
 #include "util/StreamValidator.h"
 #include "util/vectors.h"
 
-#include <assert.h>
-#include <cmath>
-#include <algorithm>
-#include <stdexcept>
-#include <sstream>
-#include <algorithm>
-
 using namespace std;
 
 namespace OM { namespace PkPd {
@@ -46,8 +39,9 @@ LSTMDrugOneComp::LSTMDrugOneComp(const LSTMDrugType& type) :
 size_t LSTMDrugOneComp::getIndex() const {
     return typeData.getIndex();
 }
-double LSTMDrugOneComp::getConcentration() const {
-    return concentration;
+double LSTMDrugOneComp::getConcentration(size_t index) const {
+    if( index == typeData.getIndex() ) return concentration;
+    else return 0.0;
 }
 
 void LSTMDrugOneComp::medicate(double time, double qty, double bodyMass)

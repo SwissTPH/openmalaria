@@ -343,10 +343,10 @@ public:
                 PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));
         // Artesunate plus conversion to DHA
         drugs.getDrug().push_back(drug("DHA_AS",
-                PK1C(15 /*Vd*/, 1e-17 /*negl_conc*/, 44.15 /*k*/, 0.0 /*m_exp*/),
+                PK1C(1.49 /*Vd*/, 1e-35 /*negl_conc*/, 25.4 /*k*/, 0.0 /*m_exp*/),
                 PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
         drugs.getDrug().push_back(drug("AS",
-                PKConv(7.1 /*Vd*/, 1e-17 /*negl_conc*/, 0 /*k*/, 0 /*m_exp*/,
+                PKConv(7.1 /*Vd*/, 1e-45 /*negl_conc*/, 0 /*k*/, 0 /*m_exp*/,
                        252 /*absorbution rate*/, "DHA_AS" /*metabolite*/,
                        30.96 /*conversion rate*/, 0.741155 /*mol. weight ratio*/),
                 PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));

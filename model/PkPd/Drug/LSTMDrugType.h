@@ -133,6 +133,9 @@ public:
      * index if it doesn't throw. */
     static size_t findDrug(string abbreviation);
     
+    /** Get a list of all drug types which are (possibly) being used. */
+    static const vector<size_t>& getDrugsInUse();
+    
     /** Create a per-human drug module for a given drug index. */
     static LSTMDrug* createInstance( size_t index );
     //@}
@@ -155,11 +158,15 @@ public:
         return negligible_concentration;
     }
     inline double neg_m_exponent() const{ return neg_m_exp; }
+    inline double molecular_weight_ratio() const{ return mwr; }
     inline double sample_Vd() const{
         return vol_dist.sample();
     }
     inline double sample_elim_rate() const{
         return elimination_rate.sample();
+    }
+    inline double sample_conv_rate() const{
+        return conversion_rate.sample();
     }
     inline double sample_a12() const{ return a12.sample(); }
     inline double sample_a21() const{ return a21.sample(); }
@@ -197,7 +204,7 @@ private:
     double negligible_concentration;
     // Used to calculate elimination rate
     double neg_m_exp;
-    double molecular_weight_ratio;
+    double mwr;      // set for parent, not metabolite
     /// Volume of distribution (l/kg)
     LognormalSampler vol_dist;
     /// Absorbtion rate
