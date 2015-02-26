@@ -84,8 +84,8 @@ double func_convFactor( double t, void* pp ){
     
     const double expAbsorb = exp(p.nka * t), expPLoss = exp(p.nl * t);
     const double qtyM = p.g * p.qtyG * expAbsorb + (p.h * p.qtyG - p.i * p.qtyP) * expPLoss +
-        (p.i * p.qtyP - p.g * p.qtyG + qtyM) * exp(p.nkM * t);
-    const double qtyP = p.f * p.qtyG * expAbsorb + (qtyP - p.f * p.qtyG) * expPLoss;
+        (p.i * p.qtyP - p.g * p.qtyG + p.qtyM) * exp(p.nkM * t);
+    const double qtyP = p.f * p.qtyG * expAbsorb + (p.qtyP - p.f * p.qtyG) * expPLoss;
     
     const double cP = qtyP * p.invVdP, cM = qtyM * p.invVdM;    // concentrations; mg/l
     
