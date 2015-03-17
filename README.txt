@@ -15,7 +15,7 @@ For testing and development, ideally use debug builds (which enable some
 asserts to do with simulation time usage).
 
 For further documentation, see the wiki:
-http://code.google.com/p/openmalaria/wiki/Start
+https://github.com/SwissTPH/openmalaria/blob/wiki/Start.md
 
 
 Code subdirs:
