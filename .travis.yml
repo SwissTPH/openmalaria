@@ -15,4 +15,4 @@ script:
 
 notifications:
   email:
-    - tobias.thuering@swisstph.ch
+    - tobias.thuering@unibas.ch
