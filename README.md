@@ -1,7 +1,7 @@
 Open Malaria
 ============
 
-[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg)](https://travis-ci.org/SwissTPH/openmalaria.svg)]
+[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg)](https://travis-ci.org/SwissTPH/openmalaria)
 
 License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 
@@ -9,11 +9,11 @@ License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 Build instructions:
 ===================
 
-`mkdir build && cd build
-ccmake ..
-Press 'c', look over options, press 'c' again and 'g'
-make -j4
-ctest -j4`
+`mkdir build && cd build`
+`ccmake ..`
+`Press 'c', look over options, press 'c' again and 'g'`
+`make -j4`
+`ctest -j4`
 
 For testing and development, ideally use debug builds (which enable some
 asserts to do with simulation time usage).
