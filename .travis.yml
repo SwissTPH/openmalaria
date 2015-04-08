@@ -15,4 +15,7 @@ script:
 
 notifications:
   email:
-    - tobias.thuering@unibas.ch
+    recipients:
+      - tobias.thuering@unibas.ch
+    on_success: change
+    on_failure: always
