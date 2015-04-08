@@ -1,6 +1,8 @@
 Open Malaria
 
-Licence: GPL v2 (see COPYING).
+[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg)](https://travis-ci.org/SwissTPH/openmalaria.svg)]
+
+License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 
 
 Brief build instructions:
