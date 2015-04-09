@@ -1,6 +1,6 @@
 This file lists significant changes in OpenMalaria from the point of view of
 users. It is however far from complete. The more complete changelog is on the
-wiki: http://code.google.com/p/openmalaria/wiki/Changelog
+wiki: https://github.com/SwissTPH/openmalaria/wiki/Changelog
 
 
 — 2014-11-?? — Schema 33 —
