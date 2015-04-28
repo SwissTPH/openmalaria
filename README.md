@@ -30,7 +30,7 @@ Code subdirs:
   * Third-party libraries, distributed under the same repo for convenience.
 
 * include/
-  * Header files associated with model.
+  * Header files associated with model. (only in old Versions, changed in this [commit](https://github.com/SwissTPH/openmalaria/commit/f31f1fdc06e99095f0581e9a18313f839c4d4f27))
 
 * model/
   * Source code for the malaria model.
