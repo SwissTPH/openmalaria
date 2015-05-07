@@ -1,7 +1,7 @@
 Open Malaria
 ============
 
-[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg)](https://travis-ci.org/SwissTPH/openmalaria)
+[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg)](https://travis-ci.org/SwissTPH/openmalaria) [![Build status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
 
 License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 
