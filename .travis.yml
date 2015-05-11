@@ -16,3 +16,15 @@ script:
 notifications:
   email:
     - tobias.thuering@unibas.ch
+
+deploy:
+  provider: releases
+  api_key:
+    secure: dOTDLZ10UHm3JoKODtlBMxChFaXOekUM69S2f6eoAt0ctjFPZXHic2aEUvabeZJqq8UX83xO1I0tGTX7DWMvxd7zPTQHcW9N3XxWvgChKxs4OSqRL7GnunI3iZPH8125ZCeMNuh+oCgf1DdfOy0uOgdygGKzvIYEFhd7c5gOH/I=
+  skip_cleanup: true
+  file:
+    - build/openMalaria
+    - build/schema/scenario_current.xsd
+  on:
+	tags: true
+    repo: SwissTPH/openmalaria
