@@ -204,7 +204,7 @@ namespace OM { namespace util {
                   <<DocumentLoader::SCHEMA_VERSION<<endl
                   <<"(oldest compatible: "<<DocumentLoader::SCHEMA_VERSION_OLDEST_COMPATIBLE
                   <<"). For more information, see"<<endl
-                  <<"https://github.com/SwissTPH/openmalaria/wiki/Start"<<endl<<endl
+                  <<"https://github.com/SwissTPH/openmalaria/wiki"<<endl<<endl
                   <<"OpenMalaria is copyright © 2005-2015 Swiss Tropical Institute and Liverpool"<<endl
                   <<"School Of Tropical Medicine."<<endl
                   <<"OpenMalaria comes with ABSOLUTELY NO WARRANTY. This is free software, and you"<<endl
