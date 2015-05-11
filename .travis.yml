@@ -26,5 +26,5 @@ deploy:
     - build/openMalaria
     - build/schema/scenario_current.xsd
   on:
-	tags: true
-    repo: SwissTPH/openmalaria
+	- tags: true
+    - repo: SwissTPH/openmalaria
