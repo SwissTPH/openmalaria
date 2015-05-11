@@ -89,7 +89,7 @@ public:
         schedule.insert(make_pair(2, make_pair(0, 5)));
     }
     
-    void testDrugResults (string drugName, string drug2Name,
+    void runDrugSimulations (string drugName, string drug2Name,
                           const double drug_conc[], const double drug2_conc[],
                           const double drug_factors[])
     {
@@ -137,10 +137,10 @@ public:
         }
     }
     
-    void testDrugResults (string drugName, const double drug_conc[],
+    void runDrugSimulations (string drugName, const double drug_conc[],
                           const double drug_factors[])
     {
-        testDrugResults(drugName, "", drug_conc, 0, drug_factors);
+        runDrugSimulations(drugName, "", drug_conc, 0, drug_factors);
     }
     
     void medicate ( size_t drugIndex,  size_t i) {
@@ -159,7 +159,7 @@ public:
             0.0156446685, 0.01560247467, 0.000298342, 5.68734e-6 };
         const double drug_factors[] = { 1,1.0339328333924E-012, 1.06887289270302E-024,
             1.10329635519261E-036, 4.73064069783747E-042, 4.73064069783747E-042 };
-        testDrugResults("AR1", drug_conc, drug_factors);
+        runDrugSimulations("AR1", drug_conc, drug_factors);
     }
     
     void testAR () { /* Artemether with conversion */
@@ -168,7 +168,7 @@ public:
         const double AR_conc[] = { 0, 0.0001825231, 0.0001825242, 0.0001825242, 1.15E-09, 7.19E-15 };
         const double DHA_conc[] = { 0, 0.0002013126, 0.0002013139, 0.0002013139, 1.27E-09, 7.94E-15 };
         const double drug_factors[] = { 1, 1.70E-07, 2.84E-14, 4.74E-21, 4.75E-21, 4.75E-21 };
-        testDrugResults("AR", "DHA_AR", AR_conc, DHA_conc, drug_factors);
+        runDrugSimulations("AR", "DHA_AR", AR_conc, DHA_conc, drug_factors);
     }
     
     void testAS1 () { /* Artesunate no conversion */
@@ -176,7 +176,7 @@ public:
         assembleTripleDosageSchedule(dose);
         const double drug_conc[] = { 0, 8.98E-008, 8.98E-008, 8.98E-008, 5.55E-015, 3.43E-022 };
         const double drug_factors[] = { 1, 0.000012, 1.45E-010, 1.75E-015,  1.75E-015, 1.75E-015 };
-        testDrugResults("AS1", drug_conc, drug_factors);
+        runDrugSimulations("AS1", drug_conc, drug_factors);
     }
     
     void testAS () { /* Artesunate with conversion */
@@ -185,7 +185,7 @@ public:
         const double AS_conc[] = { 0, 2.30E-14, 2.30E-14, 2.30E-14, 8.25E-28, 2.95E-41 };
         const double DHA_conc[] = { 0, 1.14E-10, 1.14E-10, 1.14E-10, 1.07E-21, 9.94E-33 };
         const double drug_factors[] = { 1, 0.0005322908, 2.83E-07, 1.51E-10, 1.51E-10, 1.51E-10 };
-        testDrugResults("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
+        runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
     void _testCQ () { 
@@ -194,7 +194,7 @@ public:
             0.2305362134, 0.2252717988, 0.2201276 };
         const double drug_factors[] = { 1, 0.0580181371, 0.0021554332,
             7.39575036687833E-005, 2.51535706689484E-006, 8.57663220896078E-008 };
-        testDrugResults("CQ", drug_conc, drug_factors);
+        runDrugSimulations("CQ", drug_conc, drug_factors);
     }
     
     void testDHA () {
@@ -202,7 +202,7 @@ public:
         assembleTripleDosageSchedule(dose);
         const double drug_conc[] = { 0, 6.76E-009, 6.76E-009, 6.76E-009, 1.7E-017, 4.28E-026 };
         const double drug_factors[] = { 1, 0.000355234, 0.000000126, 4.48E-011, 4.48E-011, 4.48E-011 };
-        testDrugResults("DHA", drug_conc, drug_factors);
+        runDrugSimulations("DHA", drug_conc, drug_factors);
     }
     
     void testLF () {
@@ -210,7 +210,7 @@ public:
         assembleHexDosageSchedule(dose);
         const double drug_conc[] = { 0, 1.014434363, 1.878878305, 2.615508841, 2.228789614, 1.899249226 };
         const double drug_factors[] = { 1, 0.031746317, 0.001007809, 0.000032, 0.00000102, 3.22E-008 };
-        testDrugResults("LF", drug_conc, drug_factors);
+        runDrugSimulations("LF", drug_conc, drug_factors);
     }
     
     void testMQ () {
@@ -220,7 +220,7 @@ public:
                 1.022091411, 0.969331065 };
         const double drug_factors[] = { 1, 0.031745814, 0.001007791, 0.000032,
                 1.02e-6, 3.22E-008 };
-        testDrugResults("MQ", drug_conc, drug_factors);
+        runDrugSimulations("MQ", drug_conc, drug_factors);
     }
     
     // PPQ with a 1-compartment model (not preferred)
@@ -230,7 +230,7 @@ public:
         const double drug_conc[] = { 0, 0.116453464, 0.2294652081, 0.339137, 0.3291139387, 0.3193871518 };
         const double drug_factors[] = { 1, 0.0524514512, 0.0016818644,
                 5.344311603535E-005, 1.69855029226935E-006, 0.000000054 };
-        testDrugResults("PPQ", drug_conc, drug_factors);
+        runDrugSimulations("PPQ", drug_conc, drug_factors);
     }
     
     // PPQ with a 2-compartment model (Hodel2013)
@@ -241,7 +241,7 @@ public:
             0.1561173647, 0.1081632036, 0.0768569742 };
         const double drug_factors[] = { 1, 0.034225947, 0.001086594,
             0.0000345, 0.0000011, 3.48E-008 };
-        testDrugResults("PPQ2", drug_conc, drug_factors);
+        runDrugSimulations("PPQ2", drug_conc, drug_factors);
     }
     
     // PPQ with a 3-compartment model (Tarning 2012 AAC)
@@ -252,7 +252,7 @@ public:
             0.1526774077, 0.1016986483, 0.0798269206 };
         const double drug_factors[] = { 1, 0.0342175609, 0.0010863068,
             3.44853898048478E-005, 1.09489352156011E-006, 3.47830222985575E-008 };
-        testDrugResults("PPQ3", drug_conc, drug_factors);
+        runDrugSimulations("PPQ3", drug_conc, drug_factors);
     }
     
 private:
