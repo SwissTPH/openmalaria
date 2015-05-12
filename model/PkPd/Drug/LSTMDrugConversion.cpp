@@ -114,7 +114,7 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
     F.params = static_cast<void*>(const_cast<Params_convFactor*>(&p));
     
     // NOTE: tolerances are arbitrary, but seem to be sufficient
-    const double abs_eps = 1e-2, rel_eps = 1e-2;
+    const double abs_eps = 1e-3, rel_eps = 1e-3;
     // NOTE: 1 through 6 are different algorithms of increasing complexity
     const int qag_rule = 1;     // alg 1 seems to be good enough
     double intfC, err_eps;
