@@ -92,7 +92,7 @@ double func_convFactor( double t, void* pp ){
     
     const double expAbsorb = exp(p.nka * t), expPLoss = exp(p.nl * t);
     const double qtyM = -p.g * p.qtyG * expAbsorb + (-p.h * p.qtyG - p.i * p.qtyP) * expPLoss +
-        (p.i * p.qtyP - p.j * p.qtyG + p.qtyM) * exp(p.nkM * t);
+        (p.i * p.qtyP + p.j * p.qtyG + p.qtyM) * exp(p.nkM * t);
     const double qtyP = p.f * p.qtyG * expAbsorb + (p.qtyP - p.f * p.qtyG) * expPLoss;
     
     const double cP = qtyP * p.invVdP, cM = qtyM * p.invVdM;    // concentrations; mg/l
@@ -175,7 +175,7 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
                 totalFactor *= calculateFactor(p, duration);
                 const double expAbsorb = exp(nka * duration), expPLoss = exp(p.nl * duration);
                 p.qtyM = -p.g * p.qtyG * expAbsorb + (-p.h * p.qtyG - p.i * p.qtyP) * expPLoss +
-                    (p.i * p.qtyP - p.j * p.qtyG + p.qtyM) * exp(p.nkM * duration);
+                    (p.i * p.qtyP + p.j * p.qtyG + p.qtyM) * exp(p.nkM * duration);
                 p.qtyP = p.f * p.qtyG * expAbsorb + (p.qtyP - p.f * p.qtyG) * expPLoss;
                 p.qtyG *= expAbsorb;
                 time = time_conc.first;
@@ -221,7 +221,7 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
             if( (duration = time_conc.first - time) > 0.0 ){
                 const double expAbsorb = exp(nka * duration), expPLoss = exp(nl * duration);
                 qtyM = -g * qtyG * expAbsorb + (-h * qtyG - i * qtyP) * expPLoss +
-                    (i * qtyP - j * qtyG + qtyM) * exp(nkM * duration);
+                    (i * qtyP + j * qtyG + qtyM) * exp(nkM * duration);
                 qtyP = f * qtyG * expAbsorb + (qtyP - f * qtyG) * expPLoss;
                 qtyG *= expAbsorb;
                 time = time_conc.first;
@@ -237,7 +237,7 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
         duration = 1.0 - time;
         const double expAbsorb = exp(nka * duration), expPLoss = exp(nl * duration);
         qtyM = -g * qtyG * expAbsorb + (-h * qtyG - i * qtyP) * expPLoss +
-            (i * qtyP - j * qtyG + qtyM) * exp(nkM * duration);
+            (i * qtyP + j * qtyG + qtyM) * exp(nkM * duration);
         qtyP = f * qtyG * expAbsorb + (qtyP - f * qtyG) * expPLoss;
         qtyG *= expAbsorb;
     }
