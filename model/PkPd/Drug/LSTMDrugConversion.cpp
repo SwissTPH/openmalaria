@@ -101,7 +101,7 @@ double func_convFactor( double t, void* pp ){
     const double fCP = p.VP * cnP / (cnP + p.KnP);       // unitless
     const double cnM = pow(cM, p.nM);        // (mg/l) ^ n
     const double fCM = p.VM * cnM / (cnM + p.KnM);       // unitless
-    return fCP * fCM;
+    return fCP + fCM;
 }
 const size_t GSL_INTG_CONV_MAX_ITER = 1000;     // 10 seems enough, but no harm in using a higher value
 gsl_integration_workspace *gsl_intgr_conv_wksp = gsl_integration_workspace_alloc (GSL_INTG_CONV_MAX_ITER);
@@ -117,7 +117,7 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
     const double abs_eps = 1e-3, rel_eps = 1e-3;
     // NOTE: 1 through 6 are different algorithms of increasing complexity
     const int qag_rule = 1;     // alg 1 seems to be good enough
-    double intfC, err_eps;
+    double intfC, err_eps;      // intfC will carry our result; err_eps is a measure of accuracy of the result
     
     int r = gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps,
                                  GSL_INTG_CONV_MAX_ITER, qag_rule, gsl_intgr_conv_wksp, &intfC, &err_eps);
@@ -131,7 +131,7 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
         throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
     }
     
-    return 1.0 / exp( intfC );  // drug factor
+    return exp( -intfC );  // drug factor
 }
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
