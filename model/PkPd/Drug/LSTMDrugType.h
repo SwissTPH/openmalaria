@@ -172,7 +172,7 @@ public:
     inline double sample_a21() const{ return a21.sample(); }
     inline double sample_a13() const{ return a13.sample(); }
     inline double sample_a31() const{ return a31.sample(); }
-    inline double sample_ka() const{ return absorbtion_rate.sample(); }
+    inline double sample_ka() const{ return absorption_rate.sample(); }
     
     /** Return reference to correct drug-phenotype data. */
     const LSTMDrugPD& getPD( uint32_t genotype ) const;
@@ -208,13 +208,13 @@ private:
     /// Volume of distribution (l/kg)
     LognormalSampler vol_dist;
     /// Absorbtion rate
-    LognormalSampler absorbtion_rate;
+    LognormalSampler absorption_rate;
     /** Terminal elimination rate constant (k). Equals ln(2)/half_life.
      * Units: (1 / days) */
     LognormalSampler elimination_rate;
     /// Convertion rate
     LognormalSampler conversion_rate;
-    /// Parameters for absorbtion rates in two- and three-compartment models.
+    /// Parameters for absorption rates in two- and three-compartment models.
     LognormalSampler a12, a21, a13, a31;
     
     // Allow LSTMDrug to access private members

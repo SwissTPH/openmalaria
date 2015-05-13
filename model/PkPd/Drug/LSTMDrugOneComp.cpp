@@ -74,7 +74,7 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass)
                 totalFactor *= drugPD.calcFactor( neg_elim_rate, concentration_today, time_conc.first - time );
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
-            // add dose (instantaneous absorbtion):
+            // add dose (instantaneous absorption):
             concentration_today += time_conc.second;
         }else/*i.e. tomorrow or later*/{
             break;

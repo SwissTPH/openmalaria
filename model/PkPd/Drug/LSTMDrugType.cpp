@@ -168,13 +168,13 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
     if( pk.getK_a().present() ){
         if( !a12.isSet() && !conversion_rate.isSet() ){
             throw util::xml_scenario_error( "PK models only allow an "
-                "absorbtion rate parameter (k_a) when compartment2 or "
+                "absorption rate parameter (k_a) when compartment2 or "
                 " conversion parameters are present" );
         }
-        absorbtion_rate.setParams(pk.getK_a().get());
+        absorption_rate.setParams(pk.getK_a().get());
     }else{
         if( a12.isSet() ){
-            throw util::xml_scenario_error( "PK models require an absorbtion "
+            throw util::xml_scenario_error( "PK models require an absorption "
                 "rate parameter (k_a) when compartment2 is present" );
         }
     }

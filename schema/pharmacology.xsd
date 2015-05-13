@@ -305,11 +305,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   
                   To use a conversion model, the parent drug should have this
                   section defined as well as half-life or k (direct
-                  elimination; this may be zero) and k_a (absorbtion rate;
+                  elimination; this may be zero) and k_a (absorption rate;
                   this may be large).
                   
                   The metabolite drug should define half-life or k (elimination
-                  of metabolite), but not k_a (absorbtion rate) or this section
+                  of metabolite), but not k_a (absorption rate) or this section
                   (conversion). It is not possible for the metabolite to itself
                   undergo conversion with the current models.
                 </xs:documentation>

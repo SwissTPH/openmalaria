@@ -333,7 +333,7 @@ public:
                 PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
         drugs.getDrug().push_back(drug("AR",
                 PKConv(46.6 /*Vd*/, 1e-17 /*negl_conc*/, 0 /*k*/, 0 /*m_exp*/, 
-                       23.98 /*absorbution rate*/, "DHA_AR" /*metabolite*/,
+                       23.98 /*absorption rate*/, "DHA_AR" /*metabolite*/,
                        11.98 /*conversion rate*/, 0.9547587 /*mol. weight ratio*/),
                 PD(27.6 /* vmax */, 0.0023 /* IC50 */, 4.0 /* slope */ )));
         
@@ -348,7 +348,7 @@ public:
                 PD(27.6 /* vmax */, 0.009 /* IC50 */, 4.0 /* slope */ )));
         drugs.getDrug().push_back(drug("AS",
                 PKConv(7.1 /*Vd*/, 1e-45 /*negl_conc*/, 0 /*k*/, 0 /*m_exp*/,
-                       252 /*absorbution rate*/, "DHA_AS" /*metabolite*/,
+                       252 /*absorption rate*/, "DHA_AS" /*metabolite*/,
                        30.96 /*conversion rate*/, 0.741155 /*mol. weight ratio*/),
                 PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ )));
         
