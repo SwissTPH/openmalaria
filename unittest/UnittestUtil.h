@@ -83,8 +83,9 @@ namespace xml_helpers{
         PKConv(double Vd, double negl_conc, double k, double m_exponent,
             double k_a, const char *metabolite, double conv, double mwr):
             Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent), ka(k_a), met(metabolite), conv(conv), mwr(mwr) {}
-        double Vd, negl_conc, k, me, ka, conv, mwr;
+        double Vd, negl_conc, k, me, ka;
         const char *met;
+        double conv, mwr;
     };
     /// Construct a helper for setting PK parameters (2-compartment model)
     ///@param Vd Volume of distribution (l/kg)
