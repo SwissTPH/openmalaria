@@ -153,7 +153,7 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
     
     p.f = nka / (p.nl - nka);     // x*A' /  (y+z-x)
     const double rz = parentType.molecular_weight_ratio() * nconv;
-    p.g = rz * nka / ((nka - p.nl) * (nka - p.nkM));
+    p.g = rz * p.nkM / ((nka - p.nl) * (nka - p.nkM));
     p.h = rz * nka / ((nka - p.nl) * (p.nkM - p.nl));
     p.i = rz / (p.nl - p.nkM);
     p.j = rz * nka / ((p.nkM - p.nl) * (p.nkM - nka));
