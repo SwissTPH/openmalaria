@@ -126,6 +126,15 @@ namespace BoincWrapper {
   
   void reportProgress (double progress) {
     boinc_fraction_done (progress);
+	// Changeset for CERN Compute Challenge 2015 (below)
+	//
+	// this writes a number which represents the progress
+	// into a file named progress
+	// progress should be a double with range 0 to 1
+	// see https://boinc.berkeley.edu/trac/wiki/BasicApi#progress for further reference
+	ofstream outfile ("progress");
+	outfile << progress << endl;
+	outfile.close();
   }
   
   int timeToCheckpoint() {
