@@ -7,7 +7,8 @@ before_install:
 
 install:
   - mkdir build && cd build
-  - export CXX_FLAGS="-DNO_CHECKSUM_PERTURB -DOM_BOINC_INTEGRATION=ON"
+  - export CXX_FLAGS="-DNO_CHECKSUM_PERTURB"
+  - export OM_BOINC_INTEGRATION="ON"
   - if [ -z "$BUILD_TYPE" ]; then export BUILD_TYPE=Release; fi
   - cmake ..
 
