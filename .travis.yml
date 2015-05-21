@@ -8,9 +8,11 @@ before_install:
 install:
   - mkdir build && cd build
   - cmake .. -DOM_BOINC_INTEGRATION=ON
+  - if [ -z "$BUILD_TYPE" ]; then export BUILD_TYPE=Release; fi
+  - export CXX_FLAGS="-DNO_CHECKSUM_PERTURB"
 
 script:
-  - make -j2 -DNO_CHECKSUM_PERTURB VERBOSE=1
+  - make -j2 CXX_FLAGS="${CXX_FLAGS} ${CXX_LINKER_FLAGS}" VERBOSE=1
   - ctest -j2
 
 notifications:
