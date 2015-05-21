@@ -8,9 +8,8 @@ before_install:
 install:
   - mkdir build && cd build
   - export CXX_FLAGS="-DNO_CHECKSUM_PERTURB"
-  - export OM_BOINC_INTEGRATION="ON"
   - if [ -z "$BUILD_TYPE" ]; then export BUILD_TYPE=Release; fi
-  - cmake ..
+  - cmake .. -DOM_BOINC_INTEGRATION=ON
 
 script:
   - make -j2 CXX_FLAGS="${CXX_FLAGS} ${CXX_LINKER_FLAGS}" VERBOSE=1
