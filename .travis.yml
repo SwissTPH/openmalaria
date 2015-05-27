@@ -25,7 +25,7 @@ deploy:
     secure: dOTDLZ10UHm3JoKODtlBMxChFaXOekUM69S2f6eoAt0ctjFPZXHic2aEUvabeZJqq8UX83xO1I0tGTX7DWMvxd7zPTQHcW9N3XxWvgChKxs4OSqRL7GnunI3iZPH8125ZCeMNuh+oCgf1DdfOy0uOgdygGKzvIYEFhd7c5gOH/I=
   skip_cleanup: true
   file:
-    openMalaria
-    schema/scenario_current.xsd
+    /home/travis/build/SwissTPH/openmalaria/build/openMalaria
+    /home/travis/build/SwissTPH/openmalaria/build/schema/scenario_current.xsd
   on:
     tags: true
