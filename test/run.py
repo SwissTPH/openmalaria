@@ -41,6 +41,9 @@ import compareOutput
 import compareCtsout
 import xml.sax.handler
 
+import psutil
+import multiprocessing
+
 class RunError(Exception):
     def __init__(self, value):
         self.value = value
@@ -329,11 +332,37 @@ You can pass options to openMalaria by first specifying -- (to end options passe
     
     return options,omOptions,toRun
 
+def om_exitcode(n):
+    if n == 0:
+        pass
+    else:
+        retVal = n
+
+def worker(name):
+    print("Running Scenario " + str(name))
+    return runScenario(ops, om_ops, name)
+
+def handler(toRun):
+    ncpu = psutil.cpu_count()
+    p = multiprocessing.Pool(max(ncpu,1))
+    try:
+        global retVal
+        retVal=0
+        r = p.map_async(worker, toRun, callback=om_exitcode)
+    except KeyboardInterrupt:
+        r.close()
+    # TODO: this hangs the parent process, implement a safe (^C) signal handling for stopping all processes
+    r.wait()
+    return retVal
 
 def main(args):
     try:
         (options,omOptions,toRun) = evalOptions (args[1:])
         
+        global ops, om_ops
+        ops=options
+        om_ops=omOptions
+
         if not toRun:
             for p in glob.iglob(os.path.join(testSrcDir,"scenario*.xml")):
                 f = os.path.basename(p)
@@ -341,12 +370,7 @@ def main(args):
                 assert ("scenario%s.xml" % n) == f
                 toRun.add(n)
         
-        retVal=0
-        for name in toRun:
-            r=runScenario(options,omOptions,name)
-            retVal = r if retVal == 0 else retVal
-        
-        return retVal
+        return handler(toRun)
     except RunError,e:
         print str(e)
         return -1
