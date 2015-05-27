@@ -8,9 +8,6 @@ before_install:
 install:
   - mkdir build && cd build
   - cmake .. -DOM_BOINC_INTEGRATION=ON
-  - export CXX_FLAGS="-DNO_CHECKSUM_PERTURB"
-  - env
-  - cat CMakeCache.txt
 
 script:
   - make -j2 VERBOSE=1

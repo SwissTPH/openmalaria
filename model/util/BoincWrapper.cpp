@@ -169,10 +169,6 @@ Checksum Checksum::generate (istream& fileStream) {
     while (1) {
 	fileStream.read (buf, 4096);
 	
-#       ifndef NO_CHECKSUM_PERTURB
-#       error "For BOINC builds: insert checksum perturbation (compile with -DNO_CHECKSUM_PERTURB to ignore)."
-#       endif
-	
 	streamsize n = fileStream.gcount ();
 	if (n<=0) break;
 	bytes_read += n;
