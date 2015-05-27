@@ -15,7 +15,7 @@ script:
   - export REL="CERN-release"
   - export ARCHIVE="openMalaria-CERN-"`uname -s`"-"`uname -i`".tar.gz"
   - mkdir ${REL}
-  - cp openMalaria test/densities.csv ${REL}/
+  - cp openMalaria ../test/densities.csv ${REL}/
   - cp schema/scenario_current.xsd ${REL}/scenario_33.xsd
   - tar cvzf ${ARCHIVE} ${REL}
 
