@@ -10,6 +10,8 @@ install:
   - cmake .. -DOM_BOINC_INTEGRATION=ON
   - if [ -z "$BUILD_TYPE" ]; then export BUILD_TYPE=Release; fi
   - export CXX_FLAGS="-DNO_CHECKSUM_PERTURB"
+  - env
+  - cat CMakeCache.txt
 
 script:
   - make -j2 CXX_FLAGS="${CXX_FLAGS} ${CXX_LINKER_FLAGS}" VERBOSE=1
