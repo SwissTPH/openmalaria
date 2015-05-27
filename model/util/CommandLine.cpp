@@ -205,6 +205,9 @@ namespace OM { namespace util {
                   <<"(oldest compatible: "<<DocumentLoader::SCHEMA_VERSION_OLDEST_COMPATIBLE
                   <<"). For more information, see"<<endl
                   <<"https://github.com/SwissTPH/openmalaria/wiki"<<endl<<endl
+                  <<"This is a special BOINC-enabled release for CERN's next computing challenge: https://test4theory.cern.ch/challenge/"<<endl<<endl
+                  <<"\tThis release adds per scenario run a \"progress\" file, which contains a number between 0 and 1 for progress tracking"<<endl<<endl
+                  <<"See https://github.com/SwissTPH/openmalaria/commit/115ae2c0814a69ddf8dedd79914ae1939b0b4ede"<<endl
                   <<"OpenMalaria is copyright © 2005-2015 Swiss Tropical Institute and Liverpool"<<endl
                   <<"School Of Tropical Medicine."<<endl
                   <<"OpenMalaria comes with ABSOLUTELY NO WARRANTY. This is free software, and you"<<endl

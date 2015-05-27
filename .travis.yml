@@ -10,7 +10,7 @@ install:
   - cmake .. -DOM_BOINC_INTEGRATION=ON
 
 script:
-  - make -j2 VERBOSE=1
+  - make -j2
   - ctest -j2
 
 notifications:
