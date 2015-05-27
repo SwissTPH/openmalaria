@@ -12,7 +12,8 @@ install:
 script:
   - make -j2
   - ctest -j2
-  - find build
+  - pwd
+  - find .
 
 notifications:
   email:
