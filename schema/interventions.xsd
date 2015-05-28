@@ -930,7 +930,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:annotation>
           <xs:documentation>
             Specification of decay of efficacy. Documentation: see DecayFunction type
-            or http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+            or https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
           </xs:documentation>
           <xs:appinfo>name:Decay of effect;</xs:appinfo>
         </xs:annotation>
@@ -1034,7 +1034,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:annotation>
           <xs:documentation>
           Decay curve for insecticide content of nets. Documentation: see DecayFunction
-          type or http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+          type or https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
           
           The distribution of decay rates over nets is covariant with the
           distribution of ripRate and holeRate over nets. This distribution is
@@ -1053,7 +1053,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
           Specifies the rate at which nets are disposed of over time.
           Documentation: see DecayFunction type or
-          http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+          https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
           
           In the current model, nets are disposed of randomly (no correlation
           with state of decay) such that the chance of each net surviving until
@@ -1210,7 +1210,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             Description of decay of all intervention effects.
             Documentation: see DecayFunction type or
-            http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+            https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
           </xs:documentation>
           <xs:appinfo>name:Decay;</xs:appinfo>
         </xs:annotation>
@@ -1314,7 +1314,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:annotation>
           <xs:documentation>
           Decay curve for insecticide content of IRS. Documentation: see DecayFunction
-          type or http://code.google.com/p/openmalaria/wiki/ModelDecayFunctions
+          type or https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
         </xs:documentation>
           <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
         </xs:annotation>

@@ -124,7 +124,7 @@ def main():
     initWorksheets("pharmacology", "Pharmacology")
     initWorksheets("model", "Model")
     tree = ElementTree()
-    tree.parse("../schema/scenario_30.xsd")
+    tree.parse("../schema/scenario_33.xsd")
     #we know that the first element in the schema defines scenario
     scenarioElement=tree.find("{http://www.w3.org/2001/XMLSchema}element")
     drillDown(scenarioElement,"",False)
