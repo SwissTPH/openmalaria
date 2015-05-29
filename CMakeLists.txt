@@ -27,6 +27,12 @@ set (OM_STD_LIBS )
 IF( ${CMAKE_COMPILER_IS_GNUCXX} )
   # This doesn't show up in the cache, but it is passed to gcc:
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+
+  option (OM_COVERAGE "Produce coverage into binary.")
+  if (OM_COVERAGE)
+    # Add coverage
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fprofile-arcs -ftest-coverage")
+  endif (OM_COVERAGE)
   
   option (OM_STATICALLY_LINK "Attempt to link libraries, including stdc++, statically.")
   if (OM_STATICALLY_LINK)
