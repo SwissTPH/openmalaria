@@ -7,7 +7,7 @@ before_install:
 
 install:
   - mkdir build && cd build
-  - cmake -DOM_COVERAGE=ON CMAKE_BUILD_TYPE=Develop ..
+  - cmake -DOM_COVERAGE=ON CMAKE_BUILD_TYPE=Release ..
 
 script:
   - make -j2
