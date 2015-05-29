@@ -1,12 +1,16 @@
 Open Malaria
 ============
 
-Master build:
-[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria) [![Build status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
+master builds:
 
-Develop build:
-[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=develop)](https://travis-ci.org/SwissTPH/openmalaria) [![Build status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/develop?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/develop)
 
+[![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
+
+develop builds:
+
+
+[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=develop)](https://travis-ci.org/SwissTPH/openmalaria)
+![Coverage Status](https://coveralls.io/repos/SwissTPH/openmalaria/badge.svg)
 
 
 License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
