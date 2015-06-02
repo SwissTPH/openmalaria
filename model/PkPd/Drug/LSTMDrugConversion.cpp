@@ -91,8 +91,8 @@ double func_convFactor( double t, void* pp ){
     const Params_convFactor& p = *static_cast<const Params_convFactor*>( pp );
     
     const double expAbsorb = exp(p.nka * t), expPLoss = exp(p.nl * t);
-    const double qtyM = -p.g * p.qtyG * expAbsorb + (-p.h * p.qtyG - p.i * p.qtyP) * expPLoss +
-        (p.i * p.qtyP + p.j * p.qtyG + p.qtyM) * exp(p.nkM * t);
+    const double qtyM = p.g * p.qtyG * expAbsorb + (p.h * p.qtyG - p.i * p.qtyP) * expPLoss +
+        (p.i * p.qtyP - p.j * p.qtyG + p.qtyM) * exp(p.nkM * t);
     const double qtyP = p.f * p.qtyG * expAbsorb + (p.qtyP - p.f * p.qtyG) * expPLoss;
     
     const double cP = qtyP * p.invVdP, cM = qtyM * p.invVdM;    // concentrations; mg/l
@@ -154,7 +154,7 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
     
     p.f = nka / (p.nl - nka);     // x*A' /  (y+z-x)
     const double rz = parentType.molecular_weight_ratio() * nconv;
-    p.g = rz * p.nkM / ((nka - p.nl) * (nka - p.nkM));
+    p.g = rz * nka / ((nka - p.nl) * (nka - p.nkM));
     p.h = rz * nka / ((nka - p.nl) * (p.nkM - p.nl));
     p.i = rz / (p.nl - p.nkM);
     p.j = rz * nka / ((p.nkM - p.nl) * (p.nkM - nka));
@@ -175,8 +175,8 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
                 double duration = time_conc.first - time;
                 totalFactor *= calculateFactor(p, duration);
                 const double expAbsorb = exp(nka * duration), expPLoss = exp(p.nl * duration);
-                p.qtyM = -p.g * p.qtyG * expAbsorb + (-p.h * p.qtyG - p.i * p.qtyP) * expPLoss +
-                    (p.i * p.qtyP + p.j * p.qtyG + p.qtyM) * exp(p.nkM * duration);
+                p.qtyM = p.g * p.qtyG * expAbsorb + (p.h * p.qtyG - p.i * p.qtyP) * expPLoss +
+                    (p.i * p.qtyP - p.j * p.qtyG + p.qtyM) * exp(p.nkM * duration);
                 p.qtyP = p.f * p.qtyG * expAbsorb + (p.qtyP - p.f * p.qtyG) * expPLoss;
                 p.qtyG *= expAbsorb;
                 time = time_conc.first;
@@ -221,8 +221,8 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( (duration = time_conc.first - time) > 0.0 ){
                 const double expAbsorb = exp(nka * duration), expPLoss = exp(nl * duration);
-                qtyM = -g * qtyG * expAbsorb + (-h * qtyG - i * qtyP) * expPLoss +
-                    (i * qtyP + j * qtyG + qtyM) * exp(nkM * duration);
+                qtyM = g * qtyG * expAbsorb + (h * qtyG - i * qtyP) * expPLoss +
+                    (i * qtyP - j * qtyG + qtyM) * exp(nkM * duration);
                 qtyP = f * qtyG * expAbsorb + (qtyP - f * qtyG) * expPLoss;
                 qtyG *= expAbsorb;
                 time = time_conc.first;
@@ -237,8 +237,8 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     if( time < 1.0 ){
         duration = 1.0 - time;
         const double expAbsorb = exp(nka * duration), expPLoss = exp(nl * duration);
-        qtyM = -g * qtyG * expAbsorb + (-h * qtyG - i * qtyP) * expPLoss +
-            (i * qtyP + j * qtyG + qtyM) * exp(nkM * duration);
+        qtyM = g * qtyG * expAbsorb + (h * qtyG - i * qtyP) * expPLoss +
+            (i * qtyP - j * qtyG + qtyM) * exp(nkM * duration);
         qtyP = f * qtyG * expAbsorb + (qtyP - f * qtyG) * expPLoss;
         qtyG *= expAbsorb;
     }
