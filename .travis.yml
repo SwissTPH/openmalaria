@@ -7,7 +7,7 @@ before_install:
 
 install:
   - mkdir build && cd build
-  - cmake -D CMAKE_BUILD_TYPE=Release ..
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
 
 script:
   - make -j2
@@ -23,7 +23,6 @@ deploy:
     secure: dOTDLZ10UHm3JoKODtlBMxChFaXOekUM69S2f6eoAt0ctjFPZXHic2aEUvabeZJqq8UX83xO1I0tGTX7DWMvxd7zPTQHcW9N3XxWvgChKxs4OSqRL7GnunI3iZPH8125ZCeMNuh+oCgf1DdfOy0uOgdygGKzvIYEFhd7c5gOH/I=
   skip_cleanup: true
   file:
-    build/openMalaria
-    build/schema/scenario_current.xsd
+    openMalaria
   on:
     tags: true
