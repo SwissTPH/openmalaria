@@ -3,5 +3,8 @@ install:
   - dir C:\projects\openmalaria\gsl
   - pushd zlib && git submodule init && git submodule update && cmake . & popd
   - dir C:\projects\openmalaria\zlib
+  - util\install-dep-windows\install-dependencies-win.bat && type xsd.log
+  - dir c:\projects\openmalaria\xsd
+  - dir c:\projects\openmalaria\boost_1_58_0
   - mkdir build-win && cd build-win && cmake -DCMAKE_BUILD_TYPE=Release ..
   - tree C:\projects\openmalaria

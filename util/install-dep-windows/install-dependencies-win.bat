@@ -1,6 +1,6 @@
 @echo on
 
-set install="C:\om_install"
+set install="C:\projects\openmalaria"
 
 echo %install%
 
