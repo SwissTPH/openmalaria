@@ -1,11 +1,5 @@
 install:
-  pushd gsl
-  git submodule init; git submodule sync
-  cmake
-  popd
-  dir gsl
-  pushd zlib
-  git submodule init; git submodule sync
-  cmake
-  popd
-  dir zlib
+  - pushd C:\projects\openmalaria\gsl; git submodule init; git submodule update; cmake .; popd
+  - dir C:\projects\openmalaria\gsl
+  - pushd C:\projects\openmalaria\zlib; git submodule init; git submodule update; cmake .; popd
+  - dir C:\projects\openmalaria\zlib
