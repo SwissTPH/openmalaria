@@ -1,0 +1,11 @@
+install:
+  pushd gsl
+  git submodule init; git submodule sync
+  cmake
+  popd
+  dir gsl
+  pushd zlib
+  git submodule init; git submodule sync
+  cmake
+  popd
+  dir zlib
