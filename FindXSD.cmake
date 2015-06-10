@@ -21,6 +21,7 @@ FIND_PATH(XSD_INCLUDE_DIRS xsd/cxx/parser/elements.hxx
   "C:/Program Files (x86)/CodeSynthesis XSD 3.3/include"
   "C:/Program Files (x86)/CodeSynthesis XSD 4.0/include"
   "/usr/local/Cellar/xsd/4.0.0/include"
+  ${CMAKE_SOURCE_DIR}/../xsd/include
   ${CMAKE_SOURCE_DIR}/../xsd/libxsd
 )
 
@@ -34,6 +35,7 @@ FIND_PROGRAM(XSD_EXECUTABLE
   "C:/Program Files (x86)/CodeSynthesis XSD 3.3/bin"
   "C:/Program Files (x86)/CodeSynthesis XSD 4.0/bin"
   "/usr/local/Cellar/xsd/4.0.0/bin"
+  ${CMAKE_SOURCE_DIR}/../xsd/bin
 )
 
 if (NOT XSD_INCLUDE_DIRS)
