@@ -1,5 +1,7 @@
 install:
-  - pushd C:\projects\openmalaria\gsl; git submodule init; git submodule update; cmake .; popd
+  - pushd gsl && git submodule init && git submodule update && cmake . & popd
   - dir C:\projects\openmalaria\gsl
-  - pushd C:\projects\openmalaria\zlib; git submodule init; git submodule update; cmake .; popd
+  - pushd zlib && git submodule init && git submodule update && cmake . & popd
   - dir C:\projects\openmalaria\zlib
+  - mkdir build-win && cd build-win && cmake -DCMAKE_BUILD_TYPE=Release ..
+  - tree C:\projects\openmalaria
