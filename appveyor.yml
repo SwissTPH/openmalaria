@@ -1,10 +1,9 @@
 install:
   - pushd gsl && git submodule init && git submodule update && cmake . & popd
-  - dir C:\projects\openmalaria\gsl
+  - tree gsl
   - pushd zlib && git submodule init && git submodule update && cmake . & popd
-  - dir C:\projects\openmalaria\zlib
+  - tree zlib
   - pushd util\install-dep-windows && install-dependencies-win.bat & type xsd.log & popd
-  - dir c:\projects\openmalaria\xsd
-  - dir c:\projects\openmalaria\boost_1_58_0
-  - mkdir build-win && cd build-win && cmake -DCMAKE_BUILD_TYPE=Release ..
+  - mkdir build-win && pushd build-win
+  - cmake -DCMAKE_BUILD_TYPE=Release -DGSL_LIB_OPT:FILEPATH="C:/projects/openmalaria/gsl/build/Release/gsl.lib" -DZ_LIBRARIES:FILEPATH="C:/projects/openmalaria/zlib/zlib/lib/zlib.lib" -DGSL_CBLAS_LIB_DBG:FILEPATH="GSL_CBLAS_LIB_DBG-NOTFOUND" -DBoost_DIR:PATH="Boost_DIR-NOTFOUND" -DXERCESC_LIB_OPT:FILEPATH="C:/projects/openmalaria/xsd/lib64/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="C:/projects/openmalaria/zlib/zlib/include" -DXERCESC_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="C:/projects/openmalaria/boost_1_58_0" -DGSL_INCLUDE_DIR:PATH="C:/projects/openmalaria/gsl/build" -DGSL_INCLUDE_DIR2:PATH="C:/projects/openmalaria/gsl/build/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="C:/projects/openmalaria/gsl/build/Release/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include" -DXERCESC_LIB_DBG:FILEPATH="XERCESC_LIB_DBG-NOTFOUND" -DXSD_EXECUTABLE:FILEPATH="C:/projects/openmalaria/xsd/bin/xsd.exe  ..
   - tree C:\projects\openmalaria
