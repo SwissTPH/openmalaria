@@ -8,7 +8,9 @@ cache:
   - C:\projects\openmalaria\xsd-4.0.msi -> appveyor.yml
 
 install:
-  - util\install-dep-windows\install-dependencies-win.bat
+  - pushd util\install-dep-windows\
+  - install-dependencies-win.bat
+  - popd
   - pushd gsl && git submodule init && git submodule update && cmake . & popd
   - pushd zlib && git submodule init && git submodule update && cmake . & popd
   - mkdir build-win && pushd build-win
