@@ -24,7 +24,7 @@ set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
 set (OM_STD_LIBS )
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
-IF( ${CMAKE_COMPILER_IS_GNUCXX} )
+if( ${CMAKE_COMPILER_IS_GNUCXX} )
   # This doesn't show up in the cache, but it is passed to gcc:
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
@@ -39,13 +39,13 @@ IF( ${CMAKE_COMPILER_IS_GNUCXX} )
     link_directories (${CMAKE_SOURCE_DIR}/lib)
     # Note: -static-libstdc++ is only available since GCC 4.5
     # See: http://www.trilithium.com/johan/2005/06/static-libstdc/
-    ADD_DEFINITIONS(-static-libgcc -static-libstdc++)
-    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
+    add_definitions(-static-libgcc -static-libstdc++)
+    set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
   endif (OM_STATICALLY_LINK)
-ENDIF( ${CMAKE_COMPILER_IS_GNUCXX} )
+endif( ${CMAKE_COMPILER_IS_GNUCXX} )
 
 option (BUILD_SHARED_LIBS "Link xsdcxx, model, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
-MARK_AS_ADVANCED (BUILD_SHARED_LIBS)
+mark_as_advanced (BUILD_SHARED_LIBS)
 
 if (MSVC)
   # This is now the OM_STATICALLY_LINK for windows
