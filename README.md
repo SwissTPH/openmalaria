@@ -2,17 +2,19 @@ Open Malaria
 ============
 
 This git-repository contains source-code for Open Malaria, a simulator program for studying malaria epidemiology and the impacts of interventions against malaria.
+------
 
 For further documentation, take a look at our [wiki](https://github.com/SwissTPH/openmalaria/wiki).
 
 The stable version of OpenMalaria supports schema version 33 and is currently maintained in the master branch.
--------------
+
+
 Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__ builds:
 
 [![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
 
 The development version of OpenMalaria supports the upcoming schema version 34 and is currently maintained in the development branch.
--------------
+
 Status of __[develop](https://github.com/SwissTPH/openmalaria/tree/develop)__ builds:
 
 
