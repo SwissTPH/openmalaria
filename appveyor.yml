@@ -4,36 +4,34 @@ environment:
   VisualStudioVersion: 12.0
 
 cache:
-  - C:\projects\openmalaria\boost_1_58_0.zip -> appveyor.yml
-  - C:\projects\openmalaria\xsd-4.0.msi -> appveyor.yml
+  - boost_1_58_0.zip -> appveyor.yml
+  - xsd-4.0.msi -> appveyor.yml
 
 install:
   - pushd util\install-dep-windows\ && install-dependencies-win.bat & popd
   - pushd gsl && git submodule init && git submodule update && cmake . & popd
   - pushd zlib && git submodule init && git submodule update && cmake . & popd
   - mkdir build-win && pushd build-win && cmake .. -DGSL_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="C:/projects/openmalaria/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="C:/projects/openmalaria/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="C:/projects/openmalaria/zlib" -DXERCESC_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="C:/projects/openmalaria/boost_1_58_0" -DGSL_INCLUDE_DIR:PATH="C:/projects/openmalaria/gsl" -DGSL_INCLUDE_DIR2:PATH="C:/projects/openmalaria/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include" -DXSD_EXECUTABLE:FILEPATH="C:/projects/openmalaria/xsd/bin/xsd.exe" & popd
-  - dir C:\projects\openmalaria & tree C:\projects\openmalaria\build-win
+  - dir . & tree build-win & dir build-win
 
 configuration: Release
 
 build:
-  project: OpenMalaria.sln
+  project: build-win\OpenMalaria.sln
   parallel: true
   verbosity: normal
 
 after_build:
   - dir build-win\Release\openMalaria.exe
   - build-win\Release\openMalaria.exe --version
-  - pushd build-win\unittest
-  - copy Release\unittest.exe ..
-  - popd
+  - copy build-win\unittest Release\unittest.exe ..
 
 test_script:
-  - unittest.exe
+  - build-win\unittest.exe
 
 artifacts:
-- path: Release\openMalaria.exe
-- path: schema\scenario_current.xsd
+- path: build-win\Release\openMalaria.exe
+- path: build-win\schema\scenario_current.xsd
 
 notifications:
 - provider: Email
