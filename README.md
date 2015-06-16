@@ -39,33 +39,18 @@ ctest -j4
 For testing and development, ideally use debug builds (which enable some
 asserts to do with simulation time usage).
 
-Code subdirs:
+Code subdirectories:
 =============
-* contrib/
-  * Third-party libraries, distributed under the same repo for convenience.
-
-* include/
-  * Header files associated with model. (only in old Versions, changed in this [commit](https://github.com/SwissTPH/openmalaria/commit/f31f1fdc06e99095f0581e9a18313f839c4d4f27))
-
-* model/
-  * Source code for the malaria model.
-
-* test/
-  * High-level testing: test scenarios with expected outputs. Also run-time files: densities.csv, scenario_?.xsd, Nv0scenario*.txt.
-
-* unittest/
-  * Low-level testing: unittests for the model using cxxunit.
-
-* util/
-  * Extra scripts associated with OpenMalaria.
-
-
-Scenario schema files (see schema/policy.txt for details):
-* schema/scenario.xsd :
-  * The latest (partial) schema file.
-* schema/entomology.xsd, schema/demography.xsd, etc :
-  * components of the latest schema, included from scenario.xsd.
-* schema/scenario_*.xsd :
-  * Copies of released schema versions, with all components inlined in the same file.
+|- dir    -|- description -|
+|----------|:-------------------------------------------------------------------------:|
+| contrib | Third-party libraries, distributed under the same repo for convenience.   |
+| model   | Source code for the malaria model.                                        |
+| test    | High-level testing: test scenarios with expected outputs. Also run-time files: densities.csv, scenario_?.xsd, Nv0scenario*.txt. |
+| unittest| Low-level testing: unittests for the model using cxxunit. |
+| util    | Extra scripts associated with OpenMalaria. |
+| schema  | scenario schema files (see schema/policy.txt for details) |
+| schema/scenario.xsd | The latest (partial) schema file. |
+| schema/entomology.xsd, schema/demography.xsd, etc | components of the latest schema, included from scenario.xsd. |
+| schema/scenario_*.xsd | Copies of released schema versions, with all components inlined in the same file. |
 
 This git repository is currently maintained by members of the [Dynamical Modelling Group](http://www.swisstph.ch/about-us/departments/epidemiology-and-public-health-eph/health-systems-research-and-dynamical-modelling/dynamical-modelling.html) of the __Swiss Tropical and Public Health institute__ and other collaborators.
