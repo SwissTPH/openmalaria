@@ -14,7 +14,7 @@ install:
   - pushd gsl && git submodule init && git submodule update && cmake . & popd
   - pushd zlib && git submodule init && git submodule update && cmake . & popd
   - mkdir build-win && pushd build-win
-  - cmake .. -DCMAKE_BUILD_TYPE=Release -DGSL_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="C:/projects/openmalaria/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="C:/projects/openmalaria/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="C:/projects/openmalaria/zlib" -DXERCESC_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="C:/projects/openmalaria/boost_1_58_0" -DGSL_INCLUDE_DIR:PATH="C:/projects/openmalaria/gsl" -DGSL_INCLUDE_DIR2:PATH="C:/projects/openmalaria/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include" -DXSD_EXECUTABLE:FILEPATH="C:/projects/openmalaria/xsd/bin/xsd.exe
+  - cmake .. -DCMAKE_BUILD_TYPE=Release -DGSL_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="C:/projects/openmalaria/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="C:/projects/openmalaria/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="C:/projects/openmalaria/zlib" -DXERCESC_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="C:/projects/openmalaria/boost_1_58_0" -DGSL_INCLUDE_DIR:PATH="C:/projects/openmalaria/gsl" -DGSL_INCLUDE_DIR2:PATH="C:/projects/openmalaria/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include" -DXSD_EXECUTABLE:FILEPATH="C:/projects/openmalaria/xsd/bin/xsd.exe"
   - popd
   - tree C:\projects\openmalaria
 
