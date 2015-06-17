@@ -3,9 +3,9 @@ clone_depth: 3
 environment: 
   VisualStudioVersion: 12.0
   matrix:
-  - GSL: gsl\GSL.sln
-  - ZLIB: zlib\ZLIB.sln
-  - OpenMalaria: build-win\OpenMalaria.sln
+  - solution_name: gsl\GSL.sln
+  - solution_name: zlib\ZLIB.sln
+  - solution_name: build-win\OpenMalaria.sln
 
 matrix:
   fast_finish: false
