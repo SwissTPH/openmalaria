@@ -19,7 +19,10 @@ $zip = $shell.NameSpace($gsl_lib)
 if((Test-Path $lib) -eq $false ){
     New-Item $lib -type directory
 }
-foreach($item in $zip.items())
-{
-  $shell.NameSpace($lib).copyhere($item)
+$gsl_file = $lib+"gsl.lib"
+if((Test-Path $gsl_file) -eq $false) {
+    foreach($item in $zip.items())
+    {
+      $shell.NameSpace($lib).copyhere($item)
+    }
 }

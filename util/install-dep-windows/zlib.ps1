@@ -19,7 +19,10 @@ $zip = $shell.NameSpace($zlib_lib)
 if((Test-Path $lib) -eq $false) {
     New-Item $lib -type directory
 }
-foreach($item in $zip.items())
-{
-  $shell.NameSpace($lib).copyhere($item)
+$zlib_file = $lib+"zlib.lib"
+if((Test-Path $zlib_file) -eq $false) {
+    foreach($item in $zip.items())
+    {
+      $shell.NameSpace($lib).copyhere($item)
+    }
 }

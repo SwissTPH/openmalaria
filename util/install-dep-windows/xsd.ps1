@@ -14,5 +14,8 @@ if((Test-Path $xsd_msi) -eq $false) {
     (new-object System.Net.WebClient).DownloadFile($xsd_dl,$xsd_msi)
 }
 
-# Install xsd+xerces-c package
-msiexec /passive BASEDIR=$install_path"xsd" /i $xsd_msi /lp xsd.log
+$xsd_i = $install_path+"xsd"
+if((Test-Path $xsd_i) -eq $false) {
+  # Install xsd+xerces-c package
+  msiexec /passive BASEDIR=$xsd_i /i $xsd_msi /lp xsd.log
+}
