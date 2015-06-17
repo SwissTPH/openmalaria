@@ -442,7 +442,7 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
 
 void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     util::checkpoint::header (stream);
-    if (stream == NULL || !stream.good())
+    if (!stream.good())
         throw util::checkpoint_error ("Unable to write to file");
     util::timer::startCheckpoint ();
     
