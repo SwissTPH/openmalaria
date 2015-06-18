@@ -11,7 +11,8 @@ REM xsd, xerces-c, boost by download
 REM gsl and zlib as submodules
 
 REM Installing gsl
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\gsl.ps1' -dir %install% -src 'https://github.com/tph-thuering/gsl/releases/download/gsl/gsl.lib.zip'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\gsl-lib.ps1' -dir %install% -src 'https://github.com/tph-thuering/gsl/releases/download/gsl/gsl-libs.zip'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\gsl-headers.ps1' -dir %install% -src 'https://github.com/tph-thuering/gsl/releases/download/gsl/gsl-headers.zip'"
 
 REM Installing zlib
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\zlib.ps1' -dir %install% -src 'https://github.com/tph-thuering/zlib/releases/download/zlib/zlib.lib.zip'"
