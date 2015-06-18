@@ -162,7 +162,7 @@ public:
         runDrugSimulations("AR1", drug_conc, drug_factors);
     }
     
-    void testAR () { /* Artemether with conversion */
+    void _testAR () { /* Artemether with conversion */
         const double dose = 1.7 * bodymass;   // 1.7 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
         const double AR_conc[] = { 0, 0.0001825231, 0.0001825242, 0.0001825242, 1.15E-09, 7.19E-15 };
@@ -179,7 +179,7 @@ public:
         runDrugSimulations("AS1", drug_conc, drug_factors);
     }
     
-    void testAS () { /* Artesunate with conversion */
+    void _testAS () { /* Artesunate with conversion */
         const double dose = 4 * bodymass;   // 4 mg/kg * 50 kg
         assembleTripleDosageSchedule(dose);
         const double AS_conc[] = { 0, 2.30E-14, 2.30E-14, 2.30E-14, 8.25E-28, 2.95E-41 };
