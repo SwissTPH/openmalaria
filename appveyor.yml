@@ -2,14 +2,7 @@ clone_depth: 3
 
 environment: 
   VisualStudioVersion: 12.0
-  matrix:
-  - solution_name: gsl\GSL.sln
-  - solution_name: zlib\ZLIB.sln
-  - solution_name: build-win\OpenMalaria.sln
 
-matrix:
-  fast_finish: false
-  
 cache:
   - boost_1_58_0.zip -> appveyor.yml
   - xsd-4.0.msi -> appveyor.yml
@@ -27,8 +20,10 @@ before_build:
   - dir gsl gsl\gsl lib
   - dir gsl\gsl\gsl_vector.h gsl\gsl\gsl_errno.h gsl\gsl\gsl_cdf.h gsl\gsl\gsl_vector_double.h
 
-build_script:
-  - msbuild %solution_name%
+build:
+  project: build-win\OpenMalaria.sln
+  parallel: true
+  verbosity: normal
 
 after_build:
   - dir build-win\Release\openMalaria.exe
