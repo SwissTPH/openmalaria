@@ -42,7 +42,14 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(),
                                                   "interventions.human.IRS.description.insecticideDecay" );
-    double propUse = elt.getUsage().getValue();
+    // assume usage modifier is 100% if none is specified
+    double propUse;
+    if (elt.getUsage().present()) {
+        propUse = elt.getUsage().get().getValue();
+    }
+    else {
+        propUse = 1.0;
+    }
     if( !( propUse >= 0.0 && propUse <= 1.0 ) ){
         throw util::xml_scenario_error("ITN.description.usage: must be within range [0,1]");
     }

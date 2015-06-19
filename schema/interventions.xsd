@@ -964,7 +964,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Description</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue">
+      <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
           Usage of nets by humans, from 0 to 1.
@@ -1205,7 +1205,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="GVIDescription">
     <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue">
+      <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
           Usage of Generic vector interventions, from 0 to 1.
@@ -1306,7 +1306,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue">
+      <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
           Usage of Indoor residual spraying (IRS) interventions, from 0 to 1.

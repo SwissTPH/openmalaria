@@ -3435,7 +3435,7 @@
       <xs:appinfo>name:Description</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue">
+      <xs:element minOccurs="0" name="usage" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
           Usage of nets by humans, from 0 to 1.
@@ -3676,7 +3676,7 @@
   </xs:complexType>
   <xs:complexType name="GVIDescription">
     <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue">
+      <xs:element minOccurs="0" name="usage" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
           Usage of Generic vector interventions, from 0 to 1.
@@ -3777,7 +3777,7 @@
       <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue">
+      <xs:element minOccurs="0" name="usage" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
           Usage of Indoor residual spraying (IRS) interventions, from 0 to 1.
