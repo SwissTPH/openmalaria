@@ -42,13 +42,17 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(),
                                                   "interventions.human.IRS.description.insecticideDecay" );
+    double propUse = elt.getUsage().getValue();
+    if( !( propUse >= 0.0 && propUse <= 1.0 ) ){
+        throw util::xml_scenario_error("ITN.description.usage: must be within range [0,1]");
+    }
     
     typedef scnXml::IRSDescription::AnophelesParamsSequence AP;
     const AP& ap = elt.getAnophelesParams();
     species.resize( species_name_map.size() );
     util::SpeciesIndexChecker checker( "IRS intervention", species_name_map );
     for( AP::const_iterator it = ap.begin(); it != ap.end(); ++it ) {
-        species[checker.getIndex(it->getMosquito())].init (*it, maxInsecticide);
+        species[checker.getIndex(it->getMosquito())].init (*it, propUse, maxInsecticide);
     }
     checker.checkNoneMissed();
     
@@ -76,16 +80,19 @@ PerHostInterventionData* IRSComponent::makeHumanPart( istream& stream, Component
     return new HumanIRS( stream, id );
 }
 
-void IRSComponent::IRSAnopheles::init(const scnXml::IRSDescription::AnophelesParamsType& elt,
-                                   double maxInsecticide)
+void IRSComponent::IRSAnopheles::init(
+    const scnXml::IRSDescription::AnophelesParamsType& elt,
+    double proportionUse,
+    double maxInsecticide)
 {
     _relativeAttractiveness.init( elt.getDeterrency() );
     _preprandialKillingEffect.init( elt.getPreprandialKillingEffect(), false, maxInsecticide );
     _postprandialKillingEffect.init( elt.getPostprandialKillingEffect(), true, maxInsecticide );
+    assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
     assert( propActive >= 0.0 && propActive <= 1.0 );
-    proportionProtected = propActive;
+    proportionProtected = proportionUse * propActive;
     proportionUnprotected = 1.0 - proportionProtected;
 }
 

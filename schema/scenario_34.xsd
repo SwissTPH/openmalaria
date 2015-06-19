@@ -3676,6 +3676,14 @@
   </xs:complexType>
   <xs:complexType name="GVIDescription">
     <xs:sequence>
+      <xs:element name="usage" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+          Usage of Generic vector interventions, from 0 to 1.
+        </xs:documentation>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of generic vector interventions;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="decay" type="om:DecayFunction">
         <xs:annotation>
           <xs:documentation>
@@ -3769,6 +3777,14 @@
       <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
+      <xs:element name="usage" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+          Usage of Indoor residual spraying (IRS) interventions, from 0 to 1.
+        </xs:documentation>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of Indoor residual spraying (IRS) interventions;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="initialInsecticide" type="om:NormalSample">
         <xs:annotation>
           <xs:documentation>
