@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:om="http://openmalaria.org/schema/scenario_33" analysisNo="233" name="cut down version of VC's treatment seeking test scenario" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="cut down version of VC's treatment seeking test scenario" schemaVersion="34" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -126,21 +126,34 @@
               <random>
                 <outcome p="0.75">
                   <diagnostic diagnostic="RDT">
-                    <positive><noTreatment/><!-- treatment is below --></positive>
-                    <negative><noTreatment/><!-- treatment is below --></negative>
+                    <positive>
+                      <noTreatment/>
+                      <!-- treatment is below -->
+                    </positive>
+                    <negative>
+                      <noTreatment/>
+                      <!-- treatment is below -->
+                    </negative>
                   </diagnostic>
                 </outcome>
                 <outcome p="0.25">
                   <diagnostic diagnostic="microscopy">
-                    <positive><noTreatment/><!-- treatment is below --></positive>
-                    <negative><noTreatment/><!-- treatment is below --></negative>
+                    <positive>
+                      <noTreatment/>
+                      <!-- treatment is below -->
+                    </positive>
+                    <negative>
+                      <noTreatment/>
+                      <!-- treatment is below -->
+                    </negative>
                   </diagnostic>
                 </outcome>
               </random>
               <treatPKPD schedule="AS" dosage="AS"/>
               <treatPKPD schedule="AL_delay_84" dosage="AL"/>
             </multiple>
-          </outcome><!-- hospital -->
+          </outcome>
+          <!-- hospital -->
           <outcome p="0.3" name="lower level">
             <!--NOTE: VC's tree had 50% chance to use an RDT, 50% chance to use
             no diagnostic here. In all cases, the next step was either immediate
@@ -160,14 +173,26 @@
                           <random>
                             <outcome p="0.75">
                               <diagnostic diagnostic="RDT">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                             <outcome p="0.25">
                               <diagnostic diagnostic="microscopy">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                           </random>
@@ -182,14 +207,26 @@
                           <random>
                             <outcome p="0.75">
                               <diagnostic diagnostic="RDT">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                             <outcome p="0.25">
                               <diagnostic diagnostic="microscopy">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                           </random>
@@ -212,14 +249,26 @@
                           <random>
                             <outcome p="0.75">
                               <diagnostic diagnostic="RDT">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                             <outcome p="0.25">
                               <diagnostic diagnostic="microscopy">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                           </random>
@@ -234,14 +283,26 @@
                           <random>
                             <outcome p="0.75">
                               <diagnostic diagnostic="RDT">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                             <outcome p="0.25">
                               <diagnostic diagnostic="microscopy">
-                                <positive><noTreatment/><!-- treatment is below --></positive>
-                                <negative><noTreatment/><!-- treatment is below --></negative>
+                                <positive>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </positive>
+                                <negative>
+                                  <noTreatment/>
+                                  <!-- treatment is below -->
+                                </negative>
                               </diagnostic>
                             </outcome>
                           </random>
@@ -266,14 +327,26 @@
                       <random>
                         <outcome p="0.75">
                           <diagnostic diagnostic="RDT">
-                            <positive><noTreatment/><!-- treatment is below --></positive>
-                            <negative><noTreatment/><!-- treatment is below --></negative>
+                            <positive>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </positive>
+                            <negative>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </negative>
                           </diagnostic>
                         </outcome>
                         <outcome p="0.25">
                           <diagnostic diagnostic="microscopy">
-                            <positive><noTreatment/><!-- treatment is below --></positive>
-                            <negative><noTreatment/><!-- treatment is below --></negative>
+                            <positive>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </positive>
+                            <negative>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </negative>
                           </diagnostic>
                         </outcome>
                       </random>
@@ -288,14 +361,26 @@
                       <random>
                         <outcome p="0.75">
                           <diagnostic diagnostic="RDT">
-                            <positive><noTreatment/><!-- treatment is below --></positive>
-                            <negative><noTreatment/><!-- treatment is below --></negative>
+                            <positive>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </positive>
+                            <negative>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </negative>
                           </diagnostic>
                         </outcome>
                         <outcome p="0.25">
                           <diagnostic diagnostic="microscopy">
-                            <positive><noTreatment/><!-- treatment is below --></positive>
-                            <negative><noTreatment/><!-- treatment is below --></negative>
+                            <positive>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </positive>
+                            <negative>
+                              <noTreatment/>
+                              <!-- treatment is below -->
+                            </negative>
                           </diagnostic>
                         </outcome>
                       </random>
