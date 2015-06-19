@@ -290,12 +290,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="k_a" type="om:SampledValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
-                  Absorbtion rate parameter. Not allowed for one compartment
+                  Absorption rate parameter. Not allowed for one compartment
                   models, but required for two and three compartment models and
                   one compartment with conversion model (for the parent drug
                   only).
                 </xs:documentation>
-                <xs:appinfo>name:Absorbtion rate constant (k_a);min:0;</xs:appinfo>
+                <xs:appinfo>name:Absorption rate constant (k_a);min:0;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="conversion" minOccurs="0">
@@ -384,25 +384,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:element name="a12" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the central compartment to the
+                          Absorption rate from the central compartment to the
                           first periphery compartment (2). The parameter
                           k12 = a12 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 2 (a12);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (a12);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                   <xs:element name="a21" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the first periphery compartment
+                          Absorption rate from the first periphery compartment
                           (2) to the central compartment. The parameter
                           k21 = a21 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 2 (a21);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 2 (a21);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>
@@ -421,25 +421,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:element name="a13" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the central compartment to the
+                          Absorption rate from the central compartment to the
                           second periphery compartment (3). The parameter
                           k13 = a13 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 3 (a13);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (a13);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                   <xs:element name="a31" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the second periphery compartment
+                          Absorption rate from the second periphery compartment
                           (3) to the central compartment. The parameter
                           k31 = a31 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 3 (a31);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 3 (a31);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>
