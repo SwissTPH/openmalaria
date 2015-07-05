@@ -334,7 +334,8 @@ SimTime VectorModel::initIterate () {
     
     bool needIterate = false;
     for (size_t i = 0; i < numSpecies; ++i) {
-        needIterate = needIterate || species[i].initIterate ();
+        bool result = species[i].initIterate ();        // run for all species
+        needIterate = needIterate || result;    // set true if any species requires another iteration
     }
     if( needIterate == false ){
         initIterations = -1;
