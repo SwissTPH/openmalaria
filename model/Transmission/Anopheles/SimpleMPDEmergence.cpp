@@ -131,13 +131,20 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt, size_t spec
     LR::nOvipositingDelayed[species].assign( LR::developmentDuration[species], 0.0 );
     
     
-    // TODO: we're only using "species" as the key until we add proper resource type identifiers
+    // Resource type identifier. If not present, use species + 1000000 (unique).
+    size_t resTypeKey = species + 1000000;
+    if( elt.getResourceType().present() ){
+        int64_t k = elt.getResourceType().get().getValue();
+        if( k < 0 || k >= 1000000 )
+            throw util::xml_scenario_error( "entomology.vector.simpleMPD.resourceType must be between 0 and 999999" );
+        resTypeKey = k;
+    }
     for( resType = 0; ; ++resType ){
         if( resType < LR::resTypes.size() ){
-            if( LR::resTypes[resType] == species )
+            if( LR::resTypes[resType] == resTypeKey )
                 break;      // have our resType
         }else{
-            LR::resTypes.push_back( species );  // add new resource type
+            LR::resTypes.push_back( resTypeKey );  // add new resource type
             LR::resUsers.resize( LR::resTypes.size() );
             break;      // resType is LR::resTypes.size()
         }

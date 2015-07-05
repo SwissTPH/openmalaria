@@ -501,6 +501,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:annotation>
         <xs:complexType>
           <xs:all>
+            <xs:element name="resourceType" type="om:IntValue" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  If omitted or if the number is unique, larvae of this mosquito species do not
+                  compete with those of other species; if however two or more species have the
+                  same resource type, then their larvae compete over resources (meaning that
+                  emergence for one species may go up at the cost of other species).
+                  
+                  Should be a small integer.
+                </xs:documentation>
+                <xs:appinfo>name:Resource type;min:0;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
             <xs:element name="developmentDuration" type="om:IntValue">
               <xs:annotation>
                 <xs:documentation>

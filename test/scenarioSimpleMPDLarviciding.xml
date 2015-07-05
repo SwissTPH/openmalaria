@@ -209,6 +209,7 @@
           <developmentDuration value="11"/>
           <developmentSurvival value="0.6"/>
           <femaleEggsLaidByOviposit value="50"/>
+          <resourceType value="0"/>
         </simpleMPD>
         <nonHumanHosts name="unprotectedAnimals">
           <mosqRelativeEntoAvailability value="1.0"/>
@@ -242,6 +243,7 @@
           <developmentDuration value="11"/>
           <developmentSurvival value="0.6"/>
           <femaleEggsLaidByOviposit value="50"/>
+          <resourceType value="1"/>
         </simpleMPD>
         <nonHumanHosts name="unprotectedAnimals">
           <mosqRelativeEntoAvailability value="1.0"/>
