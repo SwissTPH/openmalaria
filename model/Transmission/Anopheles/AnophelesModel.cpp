@@ -40,8 +40,7 @@ string AnophelesModel::initialise (
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
     map<string, double>& nonHumanHostPopulations,
-    int populationSize
-)
+    int populationSize, size_t species )
 {
     // -----  Set model variables  -----
 
@@ -51,7 +50,7 @@ string AnophelesModel::initialise (
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
     humanBase = mosq;	// read human-specific parameters
 
-    transmission.initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq() );
+    transmission.initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq(), species );
     
     // Uses anoph.getNonHumanHosts() and anoph.getMosq():
     initAvailability( anoph, nonHumanHostPopulations, populationSize );

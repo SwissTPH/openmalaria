@@ -32,30 +32,123 @@ namespace Transmission {
 namespace Anopheles {
 using namespace OM::util;
 
+/// Larval resources global data
+namespace LR {
+    /// Types of resources; the value is the resource type identifier, and the index the key
+    vector<size_t> resTypes;
+    
+    /// For each resource type, a list of species sharing that resource
+    vector<vector<size_t> > resUsers;
+    
+    /** Mean number of female eggs laid when a mosquito oviposites.
+     * 
+     * Index: species. */
+    vector<double> fEggsLaidByOviposit;
+    
+    /** Duration of development (time from egg laying to emergence) in days.
+     * 
+     * Index: species. */
+    vector<SimTime> developmentDuration;
+    
+    /** Resources for mosquito larvae (or rather 1 over resources); γ(t) in
+     * model description.
+     * 
+     * Unlike model description, we allow special values 0 for no density
+     * dependence and infinity for zero emergence.
+     * 
+     * The first index t should correspond to the resources available to mosquitoes
+     * emerging at time t (i.e. same index in mosqEmergeRate). The second index is the resource
+     * type.
+     * 
+     * Has annual periodicity: length is 365. First value (index 0) corresponds
+     * to first day of year (1st Jan or something else if rebased). In 5-day
+     * time-step model values at indecies 0 through 4 are used to calculate the
+     * state at time-step 1.
+     * 
+     * Units: 1 / animals per day.
+     *
+     * Should be checkpointed. */
+    vecDay2D<double> invLarvalResources;
+    
+    /** Vector for storing values of nOvipositing for the last
+     * developmentDuration time steps. Second index 0 should correspond to
+     * nOvipositing developmentDuration days before
+     * get(0, dYear1, nOvipositing) is called.
+     * 
+     * First index is species. */
+    vector<vecDay<double> > nOvipositingDelayed;
+}
+
+void SimpleMPDEmergence::staticCheckpoint(size_t species, size_t resType, ostream& stream){
+    // Technically, we may write parts of invLarvalResources more than once, but who cares
+    for( SimTime t = sim::zero(); t < sim::oneYear(); t += sim::oneDay() ){
+        LR::invLarvalResources.at(t, resType) & stream;
+        LR::nOvipositingDelayed[species] & stream;
+    }
+}
+void SimpleMPDEmergence::staticCheckpoint(size_t species, size_t resType, istream& stream){
+    if( LR::invLarvalResources.size2() == 0 ){
+        LR::invLarvalResources.assign (sim::oneYear(), LR::resTypes.size(), 0.0);
+    }
+    for( SimTime t = sim::zero(); t < sim::oneYear(); t += sim::oneDay() ){
+        LR::invLarvalResources.at(t, resType) & stream;
+        LR::nOvipositingDelayed[species] & stream;
+    }
+}
+
 
 // -----  Initialisation of model, done before human warmup  ------
 
-SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) :
+SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt, size_t species) :
+    species(species),
     initNv0FromSv( numeric_limits<double>::quiet_NaN() )
 {
     quinquennialS_v.assign (sim::fromYearsI(5), 0.0);
     quinquennialOvipositing.assign (sim::fromYearsI(5), 0.0);
     mosqEmergeRate.assign (sim::oneYear(), 0.0);
-    invLarvalResources.assign (sim::oneYear(), 0.0);
     
-    developmentDuration = sim::fromDays(elt.getDevelopmentDuration().getValue());
-    if (!(developmentDuration > sim::zero()))
+    if( LR::developmentDuration.size() <= species ){
+        size_t newDim = (species == 0) ? 4 : species * 2;
+        LR::developmentDuration.resize( newDim, sim::zero() );
+        LR::nOvipositingDelayed.resize( newDim );
+        LR::fEggsLaidByOviposit.resize( newDim, numeric_limits<double>::quiet_NaN() );
+    }
+    
+    LR::developmentDuration[species] = sim::fromDays(elt.getDevelopmentDuration().getValue());
+    if (!(LR::developmentDuration[species] > sim::zero()))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentDuration: "
             "must be positive");
     probPreadultSurvival = elt.getDevelopmentSurvival().getValue();
     if (!(0.0 <= probPreadultSurvival && probPreadultSurvival <= 1.0))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentSurvival: "
             "must be a probability (in range [0,1]");
-    fEggsLaidByOviposit = elt.getFemaleEggsLaidByOviposit().getValue();
-    if (!(fEggsLaidByOviposit > 0.0))
+    
+    LR::fEggsLaidByOviposit[species] = elt.getFemaleEggsLaidByOviposit().getValue();
+    if (!(LR::fEggsLaidByOviposit[species] > 0.0))
         throw util::xml_scenario_error("entomology.vector.simpleMPD.femaleEggsLaidByOviposit: "
             "must be positive");
-    nOvipositingDelayed.assign (developmentDuration, 0.0);
+    
+    LR::nOvipositingDelayed[species].assign( LR::developmentDuration[species], 0.0 );
+    
+    
+    // TODO: we're only using "species" as the key until we add proper resource type identifiers
+    for( resType = 0; ; ++resType ){
+        if( resType < LR::resTypes.size() ){
+            if( LR::resTypes[resType] == species )
+                break;      // have our resType
+        }else{
+            LR::resTypes.push_back( species );  // add new resource type
+            LR::resUsers.resize( LR::resTypes.size() );
+            break;      // resType is LR::resTypes.size()
+        }
+    }
+    LR::resUsers[resType].push_back( species );
+}
+
+// static function
+void SimpleMPDEmergence::initShared(){
+    std::cerr << "Called initShared" << std::endl;
+    LR::invLarvalResources.assign (sim::oneYear(), LR::resTypes.size(), 0.0);
 }
 
 
@@ -63,6 +156,7 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) :
 
 void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTransmission& transmission ){
     // -----  Calculate required S_v based on desired EIR  -----
+    const SimTime devDur = LR::developmentDuration[species];
     
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
 
@@ -77,8 +171,8 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     // Initialise nOvipositingDelayed
     SimTime y1 = sim::oneYear();
     SimTime tau = transmission.getMosqRestDuration();
-    for( SimTime t = sim::zero(); t < developmentDuration; t += sim::oneDay() ){
-        nOvipositingDelayed[mod_nn(t+tau, developmentDuration)] =
+    for( SimTime t = sim::zero(); t < devDur; t += sim::oneDay() ){
+        LR::nOvipositingDelayed[species][mod_nn(t+tau, devDur)] =
             tsP_df * initNvFromSv * forcedS_v[t];
     }
     
@@ -86,12 +180,16 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     mosqEmergeRate = forcedS_v;
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     // Used when calculating invLarvalResources (but not a hard constraint):
-    assert(tau+developmentDuration <= y1);
+    assert(tau + devDur <= y1);
+    
     for( SimTime t = sim::zero(); t < sim::oneYear(); t += sim::oneDay() ){
-        double yt = fEggsLaidByOviposit * tsP_df * initNvFromSv *
-            forcedS_v[mod_nn(t + y1 - tau - developmentDuration, y1)];
-        invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
-            (mosqEmergeRate[t] * yt);
+        const double y = LR::fEggsLaidByOviposit[species] * tsP_df * initNvFromSv *
+            forcedS_v[mod_nn(t + y1 - tau - devDur, y1)];
+        const double lr = (probPreadultSurvival * y - mosqEmergeRate[t]) /
+            (mosqEmergeRate[t] * y);
+        // NOTE: we require that initShared() is called just before this function,
+        // thus using addition here is valid.
+        LR::invLarvalResources.at(t, resType) += lr;
     }
     
     // All set up to drive simulation from forcedS_v
@@ -101,6 +199,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
 // -----  Initialisation of model which is done after running the human warmup  -----
 
 bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
+    const SimTime devDur = LR::developmentDuration[species];
     // Try to match S_v against its predicted value. Don't try with N_v or O_v
     // because the predictions will change - would be chasing a moving target!
     // EIR comes directly from S_v, so should fit after we're done.
@@ -144,7 +243,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     
     // Finally, update nOvipositingDelayed and invLarvalResources
-    vectors::scale (nOvipositingDelayed, factor);
+    vectors::scale (LR::nOvipositingDelayed[species], factor);
     
     SimTime y1 = sim::oneYear(),
         y2 = sim::fromYearsI(2),
@@ -154,16 +253,19 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     assert(mosqEmergeRate.size() == y1);
     
     for( SimTime t = sim::zero(); t < y1; t += sim::oneDay() ){
-        SimTime ttj = t - developmentDuration;
+        SimTime ttj = t - devDur;
         // b · P_df · avg_N_v(t - θj - τ):
-        double yt = fEggsLaidByOviposit * 0.2 * (
+        const double y = LR::fEggsLaidByOviposit[species] * 0.2 * (
             quinquennialOvipositing[ttj + y1] +
             quinquennialOvipositing[ttj + y2] +
             quinquennialOvipositing[ttj + y3] +
             quinquennialOvipositing[ttj + y4] +
             quinquennialOvipositing[mod_nn(ttj + y5, y5)]);
-        invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
-            (mosqEmergeRate[t] * yt);
+        const double lr = (probPreadultSurvival * y - mosqEmergeRate[t]) /
+            (mosqEmergeRate[t] * y);
+        // NOTE: we require that initShared() is called just before this function,
+        // thus using addition here is valid.
+        LR::invLarvalResources.at(t, resType) += lr;
     }
     
     const double LIMIT = 0.1;
@@ -174,19 +276,34 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
 
 
 double SimpleMPDEmergence::update( SimTime d0, double nOvipositing, double S_v ){
-    SimTime d1 = d0 + sim::oneDay();
-    SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
+    const SimTime devDur = LR::developmentDuration[species];
+    const SimTime d1 = d0 + sim::oneDay();
+    const SimTime d5Year = mod_nn(d1, sim::fromYearsI(5));
     quinquennialS_v[d5Year] = S_v;
     
     // Simple Mosquito Population Dynamics model: emergence depends on the
     // adult population, resources available, and larviciding.
     // See: A Simple Periodically-Forced Difference Equation Model for
     // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
+    // Modified to allow larval-stage competition.
     
-    double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d1, developmentDuration)];
-    double emergence = interventionSurvival() * probPreadultSurvival * yt /
-        (1.0 + invLarvalResources[mod_nn(d0, sim::oneYear())] * yt);
-    nOvipositingDelayed[mod_nn(d1, developmentDuration)] = nOvipositing;
+    double y = 0.0, ybar = 0.0;
+    for( vector<size_t>::const_iterator it = LR::resUsers[resType].begin(),
+        end = LR::resUsers[resType].end(); it != end; ++it )
+    {
+        size_t spec = *it;
+        double fEggsLaid = LR::fEggsLaidByOviposit[spec] *
+            LR::nOvipositingDelayed[spec][mod_nn(d1, devDur)];
+        if( spec == species ){
+            y = fEggsLaid;
+        }
+        ybar += fEggsLaid;
+    }
+    
+    double emergence = interventionSurvival() * probPreadultSurvival * y /
+        (1.0 + ybar * LR::invLarvalResources.at(mod_nn(d0, sim::oneYear()), resType));
+    
+    LR::nOvipositingDelayed[species][mod_nn(d1, devDur)] = nOvipositing;
     quinquennialOvipositing[mod_nn(d1, sim::fromYearsI(5))] = nOvipositing;
     return emergence;
 }
@@ -198,8 +315,9 @@ double SimpleMPDEmergence::getResAvailability() const {
     double total = 0;
     for( SimTime i = start, end = start + sim::oneTS(); i < end; i += sim::oneDay() ){
         SimTime dYear1 = mod_nn(i, sim::oneYear());
-        total += 1.0 / invLarvalResources[dYear1];
+        total += 1.0 / LR::invLarvalResources.at(dYear1, resType);
     }
+    // Note: these measured resources may be shared; if so the same number is reported for competing species
     return total / sim::oneTS().inDays();
 }
 

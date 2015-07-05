@@ -28,41 +28,41 @@
 namespace OM { namespace util {
     
 void vectors::scale (vector<double>& vec, double a) {
-  for (size_t i = 0; i < vec.size(); ++i)
-    vec[i] *= a;
+    for (size_t i = 0; i < vec.size(); ++i)
+        vec[i] *= a;
 }
 void vectors::scale (vecDay<double>& vec, double a) {
-  for( SimTime i = sim::zero(); i < vec.size(); i += sim::oneDay() )
-    vec[i] *= a;
+    for( SimTime i = sim::zero(); i < vec.size(); i += sim::oneDay() )
+        vec[i] *= a;
 }
 void vectors::scale (vecDay2D<double>& vec, double a) {
-  scale(vec.internal_vec(), a);
+    scale(vec.internal_vec(), a);
 }
 
 double vectors::sum (const vector<double>& vec) {
-  double r = 0.0;
-  for (size_t i = 0; i < vec.size(); ++i)
-    r += vec[i];
-  return r;
+    double r = 0.0;
+    for (size_t i = 0; i < vec.size(); ++i)
+        r += vec[i];
+    return r;
 }
 double vectors::sum (const vecDay<double>& vec) {
-  double r = 0.0;
-  for( SimTime i = sim::zero(); i < vec.size(); i += sim::oneDay() )
-    r += vec[i];
-  return r;
+    double r = 0.0;
+    for( SimTime i = sim::zero(); i < vec.size(); i += sim::oneDay() )
+        r += vec[i];
+    return r;
 }
 
 double vectors::sum (const gsl_vector *vec) {
-  double r = 0.0;
-  for (size_t i = 0; i < vec->size; ++i)
-    r += gsl_vector_get( vec, i );
-  return r;
+    double r = 0.0;
+    for (size_t i = 0; i < vec->size; ++i)
+        r += gsl_vector_get( vec, i );
+    return r;
 }
 
 void vectors::addTo (vector<double>& x, vector<double>& y){
     assert( x.size() == y.size() );
     for( size_t i=0; i<x.size(); ++i ){
-	x[i] += y[i];
+        x[i] += y[i];
     }
 }
 
@@ -78,39 +78,39 @@ bool vectors::approxEqual (const double a, const double b, const double lim_fact
 }
 
 bool vectors::approxEqual (const vector<double>& vec1, const vector<double>& vec2, const double lim_fact) {
-  if (vec1.size() != vec2.size())
-    return false;
-  for (size_t i = 0; i < vec1.size(); ++i) {
-    if (!approxEqual (vec1[i], vec2[i], lim_fact))
-      return false;
-  }
-  return true;
+    if (vec1.size() != vec2.size())
+        return false;
+    for (size_t i = 0; i < vec1.size(); ++i) {
+        if (!approxEqual (vec1[i], vec2[i], lim_fact))
+            return false;
+    }
+    return true;
 }
 
 
 vector<double> vectors::gsl2std (const gsl_vector* vec) {
-  vector<double> ret (vec->size);
-  memcpy (&ret[0], vec->data, ret.size()*sizeof(double));
-  return ret;
+    vector<double> ret (vec->size);
+    memcpy (&ret[0], vec->data, ret.size()*sizeof(double));
+    return ret;
 }
 void vectors::gsl2std( const gsl_vector *vec, vector<double>& target ){
-  target.resize (vec->size);
-  memcpy (&target[0], vec->data, target.size()*sizeof(double));
+    target.resize (vec->size);
+    memcpy (&target[0], vec->data, target.size()*sizeof(double));
 }
 
 
 gsl_vector* vectors::std2gsl (const vector<double>& vec, size_t length) {
-  if (vec.size() != length)
-    throw TRACED_EXCEPTION_DEFAULT ("vectorStd2Gsl: vec has incorrect length");
-  gsl_vector* ret = gsl_vector_alloc (length);
-  memcpy (ret->data, &vec[0], length * sizeof(double));
-  return ret;
+    if (vec.size() != length)
+        throw TRACED_EXCEPTION_DEFAULT ("vectorStd2Gsl: vec has incorrect length");
+    gsl_vector* ret = gsl_vector_alloc (length);
+    memcpy (ret->data, &vec[0], length * sizeof(double));
+    return ret;
 }
 
 gsl_vector* vectors::std2gsl (const double* vec, size_t length) {
-  gsl_vector* ret = gsl_vector_alloc (length);
-  memcpy (ret->data, vec, length * sizeof(double));
-  return ret;
+    gsl_vector* ret = gsl_vector_alloc (length);
+    memcpy (ret->data, vec, length * sizeof(double));
+    return ret;
 }
 
 void vectors::logFourierCoefficients(const vector<double>& iArray, vector<double>& FC) {

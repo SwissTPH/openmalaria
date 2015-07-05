@@ -56,8 +56,13 @@ public:
     /** Initialise parameters and variables.
      * 
      * This is only a fraction of parameter initialisation; see also
-     * AnophelesModel::initialise. */
-    void initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt, const scnXml::Mosq& mosq );
+     * AnophelesModel::initialise.
+     * 
+     * @param species Index of species in list (numerical identifier, from 0 to num-species - 1)
+     */
+    void initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt,
+                      const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt,
+                      const scnXml::Mosq& mosq, size_t species );
     
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */

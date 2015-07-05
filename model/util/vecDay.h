@@ -101,6 +101,11 @@ struct vecDay2D {
         stride = dim2;
     }
     
+    inline SimTime size1() const {
+        return sim::fromDays(v.size() / stride); }
+    inline size_t size2() const {
+        return stride; }
+    
     inline ref_t at(SimTime n1, size_t n2){
         return v[n1.inDays() * stride + n2];
     }

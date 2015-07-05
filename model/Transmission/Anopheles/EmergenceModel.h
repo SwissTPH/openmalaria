@@ -41,7 +41,7 @@ class MosqTransmission;
  * water bodies.
  * 
  * This is an abstract class (i.e. interface). The following implementations
- * exist: FixedEmergence.
+ * exist: FixedEmergence, SimpleMPDEmergence, LCEmergence.
  */
 class EmergenceModel
 {

@@ -55,7 +55,13 @@ public:
     ///@brief Initialisation and destruction
     //@{
     /// Initialise and allocate memory
-    SimpleMPDEmergence(const scnXml::SimpleMPD& elt);
+    /// 
+    /// @param species Index of species in list (numerical identifier, from 0 to num-species - 1)
+    SimpleMPDEmergence(const scnXml::SimpleMPD& elt, size_t species);
+    
+    /// Static function which needs to be called exactly once before init2 or initIterate
+    /// is called for each species (but after the SimpleMPDEmergence constructor).
+    static void initShared();
 
     /** Latter part of AnophelesModel::init2.
      *
@@ -88,36 +94,37 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
-    
     /// Checkpointing
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
+        staticCheckpoint(species, resType, stream);
         mosqEmergeRate & stream;
         quinquennialS_v & stream;
         quinquennialOvipositing & stream;
         initNv0FromSv & stream;
-        developmentDuration & stream;
         probPreadultSurvival & stream;
-        fEggsLaidByOviposit & stream;
-        invLarvalResources & stream;
-        nOvipositingDelayed & stream;
+        species & stream;
+        resType & stream;
     }
     
-    // -----  model parameters (loaded from XML)  -----
+    static void staticCheckpoint(size_t species, size_t resType, ostream& stream);
+    static void staticCheckpoint(size_t species, size_t resType, istream& stream);
     
-    /** Duration of development (time from egg laying to emergence) in days. */
-    SimTime developmentDuration;
+    // -----  model parameters (loaded from XML)  -----
     
     /** Survival probability of a mosquito from egg to emergence in the absence
      * of density dependent mortality. */
     double probPreadultSurvival;
     
-    /** Mean number of female eggs laid when a mosquito oviposites. */
-    double fEggsLaidByOviposit;
-    
     
     // -----  parameters (constant after initialisation)  -----
+    
+    /// Index of this mosquito species (see VectorModel).
+    size_t species;
+    
+    /// Type of larval resources; used as key in internal LR namespace
+    size_t resType;
     
     ///@brief Descriptions of transmission, used primarily during warmup
     //@{
@@ -149,31 +156,6 @@ private:
      *
      * Should be checkpointed. */
     vecDay<double> mosqEmergeRate;
-    
-    /** Resources for mosquito larvae (or rather 1 over resources); γ(t) in
-     * model description.
-     * 
-     * Unlike model description, we allow special values 0 for no density
-     * dependence and infinity for zero emergence.
-     * 
-     * Index t should correspond to the resources available to mosquitoes
-     * emerging at t (i.e. same index in mosqEmergeRate).
-     * 
-     * Has annual periodicity: length is 365. First value (index 0) corresponds
-     * to first day of year (1st Jan or something else if rebased). In 5-day
-     * time-step model values at indecies 0 through 4 are used to calculate the
-     * state at time-step 1.
-     * 
-     * Units: 1 / animals per day.
-     *
-     * vecDay be checkpointed. */
-    vecDay<double> invLarvalResources;
-    
-    /** Vector for storing values of nOvipositing for the last
-     * developmentDuration time steps. Index 0 should correspond to
-     * nOvipositing developmentDuration days before
-     * get(0, dYear1, nOvipositing) is called. */
-    vecDay<double> nOvipositingDelayed;
 };
 
 }

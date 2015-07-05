@@ -74,11 +74,12 @@ public:
      * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
      * @param nonHumanHostPopulations Size of each non-human population
      * @param populationSize Size of human population (assumed constant)
+     * @param species Index of species in list (numerical identifier, from 0 to num-species - 1)
      */
     string initialise (const scnXml::AnophelesParams& anoph,
                        vector<double>& initialisationEIR,
                        map<string, double>& nonHumanHostPopulations,
-                       int populationSize);
+                       int populationSize, size_t species);
     
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
