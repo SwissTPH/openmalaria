@@ -154,7 +154,6 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt, size_t spec
 
 // static function
 void SimpleMPDEmergence::initShared(){
-    std::cerr << "Called initShared" << std::endl;
     LR::invLarvalResources.assign (sim::oneYear(), LR::resTypes.size(), 0.0);
 }
 
@@ -194,6 +193,10 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
             forcedS_v[mod_nn(t + y1 - tau - devDur, y1)];
         const double lr = (probPreadultSurvival * y - mosqEmergeRate[t]) /
             (mosqEmergeRate[t] * y);
+        if( lr < 1e-6 ){
+            std::cerr << "Low larval resources: " << lr << endl;
+            assert( false );
+        }
         // NOTE: we require that initShared() is called just before this function,
         // thus using addition here is valid.
         LR::invLarvalResources.at(t, resType) += lr;
@@ -270,6 +273,10 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
             quinquennialOvipositing[mod_nn(ttj + y5, y5)]);
         const double lr = (probPreadultSurvival * y - mosqEmergeRate[t]) /
             (mosqEmergeRate[t] * y);
+        if( lr < 1e-6 ){
+            std::cerr << "Low larval resources: " << lr << endl;
+            assert( false );
+        }
         // NOTE: we require that initShared() is called just before this function,
         // thus using addition here is valid.
         LR::invLarvalResources.at(t, resType) += lr;
@@ -309,6 +316,12 @@ double SimpleMPDEmergence::update( SimTime d0, double nOvipositing, double S_v )
     
     double emergence = interventionSurvival() * probPreadultSurvival * y /
         (1.0 + ybar * LR::invLarvalResources.at(mod_nn(d0, sim::oneYear()), resType));
+    
+    if( emergence > 1e6 ){      // for debugging
+        std::cerr << "Large emergence!\ny\t" << y << "\nρ\t" << interventionSurvival() * probPreadultSurvival
+            << "\n1/γ\t" << LR::invLarvalResources.at(mod_nn(d0, sim::oneYear()), resType) << endl;
+        assert(false);
+    }
     
     LR::nOvipositingDelayed[species][mod_nn(d1, devDur)] = nOvipositing;
     quinquennialOvipositing[mod_nn(d1, sim::fromYearsI(5))] = nOvipositing;
