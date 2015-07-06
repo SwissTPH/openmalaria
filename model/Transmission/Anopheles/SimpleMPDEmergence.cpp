@@ -57,8 +57,7 @@ namespace LR {
      * dependence and infinity for zero emergence.
      * 
      * The first index t should correspond to the resources available to mosquitoes
-     * emerging at time t (i.e. same index in mosqEmergeRate). The second index is the resource
-     * type.
+     * emerging at time t (i.e. same index in mosqEmergeRate). The second index is the species.
      * 
      * Has annual periodicity: length is 365. First value (index 0) corresponds
      * to first day of year (1st Jan or something else if rebased). In 5-day
@@ -79,19 +78,21 @@ namespace LR {
     vector<vecDay<double> > nOvipositingDelayed;
 }
 
-void SimpleMPDEmergence::staticCheckpoint(size_t species, size_t resType, ostream& stream){
-    // Technically, we may write parts of invLarvalResources more than once, but who cares
+void SimpleMPDEmergence::staticCheckpoint(size_t species, ostream& stream){
+    LR::invLarvalResources.size2() & stream;
     for( SimTime t = sim::zero(); t < sim::oneYear(); t += sim::oneDay() ){
-        LR::invLarvalResources.at(t, resType) & stream;
+        LR::invLarvalResources.at(t, species) & stream;
         LR::nOvipositingDelayed[species] & stream;
     }
 }
-void SimpleMPDEmergence::staticCheckpoint(size_t species, size_t resType, istream& stream){
+void SimpleMPDEmergence::staticCheckpoint(size_t species, istream& stream){
+    size_t dim2;
+    dim2 & stream;
     if( LR::invLarvalResources.size2() == 0 ){
-        LR::invLarvalResources.assign (sim::oneYear(), LR::resTypes.size(), 0.0);
+        LR::invLarvalResources.assign (sim::oneYear(), dim2, 0.0);
     }
     for( SimTime t = sim::zero(); t < sim::oneYear(); t += sim::oneDay() ){
-        LR::invLarvalResources.at(t, resType) & stream;
+        LR::invLarvalResources.at(t, species) & stream;
         LR::nOvipositingDelayed[species] & stream;
     }
 }
@@ -112,6 +113,7 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt, size_t spec
         LR::developmentDuration.resize( newDim, sim::zero() );
         LR::nOvipositingDelayed.resize( newDim );
         LR::fEggsLaidByOviposit.resize( newDim, numeric_limits<double>::quiet_NaN() );
+        LR::invLarvalResources.resize( sim::oneYear(), newDim );
     }
     
     LR::developmentDuration[species] = sim::fromDays(elt.getDevelopmentDuration().getValue());
@@ -150,11 +152,6 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt, size_t spec
         }
     }
     LR::resUsers[resType].push_back( species );
-}
-
-// static function
-void SimpleMPDEmergence::initShared(){
-    LR::invLarvalResources.assign (sim::oneYear(), LR::resTypes.size(), 0.0);
 }
 
 
@@ -197,9 +194,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
             std::cerr << "Low larval resources: " << lr << endl;
             assert( false );
         }
-        // NOTE: we require that initShared() is called just before this function,
-        // thus using addition here is valid.
-        LR::invLarvalResources.at(t, resType) += lr;
+        LR::invLarvalResources.at(t, species) = lr;
     }
     
     // All set up to drive simulation from forcedS_v
@@ -277,9 +272,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
             std::cerr << "Low larval resources: " << lr << endl;
             assert( false );
         }
-        // NOTE: we require that initShared() is called just before this function,
-        // thus using addition here is valid.
-        LR::invLarvalResources.at(t, resType) += lr;
+        LR::invLarvalResources.at(t, species) = lr;
     }
     
     const double LIMIT = 0.1;
@@ -301,7 +294,7 @@ double SimpleMPDEmergence::update( SimTime d0, double nOvipositing, double S_v )
     // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
     // Modified to allow larval-stage competition.
     
-    double y = 0.0, ybar = 0.0;
+    double y = 0.0, ygamma = 0.0;
     for( vector<size_t>::const_iterator it = LR::resUsers[resType].begin(),
         end = LR::resUsers[resType].end(); it != end; ++it )
     {
@@ -311,15 +304,15 @@ double SimpleMPDEmergence::update( SimTime d0, double nOvipositing, double S_v )
         if( spec == species ){
             y = fEggsLaid;
         }
-        ybar += fEggsLaid;
+        ygamma += fEggsLaid * LR::invLarvalResources.at(mod_nn(d0, sim::oneYear()), spec);
     }
     
     double emergence = interventionSurvival() * probPreadultSurvival * y /
-        (1.0 + ybar * LR::invLarvalResources.at(mod_nn(d0, sim::oneYear()), resType));
+        (1.0 + ygamma);
     
     if( emergence > 1e6 ){      // for debugging
         std::cerr << "Large emergence!\ny\t" << y << "\nρ\t" << interventionSurvival() * probPreadultSurvival
-            << "\n1/γ\t" << LR::invLarvalResources.at(mod_nn(d0, sim::oneYear()), resType) << endl;
+            << "\ny/γ\t" << ygamma << endl;
         assert(false);
     }
     
@@ -335,9 +328,10 @@ double SimpleMPDEmergence::getResAvailability() const {
     double total = 0;
     for( SimTime i = start, end = start + sim::oneTS(); i < end; i += sim::oneDay() ){
         SimTime dYear1 = mod_nn(i, sim::oneYear());
-        total += 1.0 / LR::invLarvalResources.at(dYear1, resType);
+        total += 1.0 / LR::invLarvalResources.at(dYear1, species);
     }
-    // Note: these measured resources may be shared; if so the same number is reported for competing species
+    // Note: these measured resources may be shared; if so the number reported still roughly
+    // corresponds to the species.
     return total / sim::oneTS().inDays();
 }
 

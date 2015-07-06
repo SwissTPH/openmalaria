@@ -19,7 +19,6 @@
  */
 
 #include "Transmission/VectorModel.h"
-#include "Transmission/Anopheles/SimpleMPDEmergence.h"
 #include "Population.h"
 #include "Host/Human.h"
 #include "WithinHost/WHInterface.h"
@@ -262,7 +261,6 @@ VectorModel::~VectorModel () {
 
 void VectorModel::init2 (const Population& population) {
     double mPA = meanPopAvail(population);
-    Anopheles::SimpleMPDEmergence::initShared();
     for (size_t i = 0; i < numSpecies; ++i) {
         species[i].init2 (i, population, mPA);
     }
@@ -335,7 +333,6 @@ SimTime VectorModel::initIterate () {
     ++initIterations;
     
     bool needIterate = false;
-    Anopheles::SimpleMPDEmergence::initShared();
     for (size_t i = 0; i < numSpecies; ++i) {
         bool result = species[i].initIterate ();        // run for all species
         needIterate = needIterate || result;    // set true if any species requires another iteration

@@ -59,10 +59,6 @@ public:
     /// @param species Index of species in list (numerical identifier, from 0 to num-species - 1)
     SimpleMPDEmergence(const scnXml::SimpleMPD& elt, size_t species);
     
-    /// Static function which needs to be called exactly once before init2 or initIterate
-    /// is called for each species (but after the SimpleMPDEmergence constructor).
-    static void initShared();
-
     /** Latter part of AnophelesModel::init2.
      *
      * @param tsP_A P_A for this time step.
@@ -98,7 +94,7 @@ private:
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
-        staticCheckpoint(species, resType, stream);
+        staticCheckpoint(species, stream);
         mosqEmergeRate & stream;
         quinquennialS_v & stream;
         quinquennialOvipositing & stream;
@@ -108,8 +104,8 @@ private:
         resType & stream;
     }
     
-    static void staticCheckpoint(size_t species, size_t resType, ostream& stream);
-    static void staticCheckpoint(size_t species, size_t resType, istream& stream);
+    static void staticCheckpoint(size_t species, ostream& stream);
+    static void staticCheckpoint(size_t species, istream& stream);
     
     // -----  model parameters (loaded from XML)  -----
     
