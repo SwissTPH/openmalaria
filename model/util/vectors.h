@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "util/checkpoint_containers.h"
+#include "util/errors.h"
 #include <gsl/gsl_vector.h>
 
 #ifndef M_PI
@@ -149,8 +150,13 @@ struct vector2D {
     inline void resize(size_t dim1, size_t dim2,
         val_t x = val_t())
     {
-        v.resize( dim1 * dim2, x );
-        stride = dim2;
+        if( v.size() == 0 || stride == dim2 ){
+            v.resize( dim1 * dim2, x );
+            stride = dim2;
+        }else{
+            //FIXME: need to move elements
+            throw util::unimplemented_exception( "vector2D: limited support for resize operations" );
+        }
     }
     
     inline ref_t at(size_t n1, size_t n2){
