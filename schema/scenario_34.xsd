@@ -2179,7 +2179,7 @@
       <xs:element name="SurveyOptions" type="om:MonitoringOptions">
         <xs:annotation>
           <xs:documentation>
-            List of all active survey options. See include/Survey.h for a list of
+            List of all active survey options. See model/mon/OutputMeasures.hpp for a list of
             supported outputs. Should also be on the wiki.
           </xs:documentation>
           <xs:appinfo>name:Name of quantity;</xs:appinfo>
