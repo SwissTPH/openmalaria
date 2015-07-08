@@ -11,6 +11,7 @@ install:
 
 script:
   - make -j2
+  - python test/run.py 1
   - ctest -j2
 
 notifications:
