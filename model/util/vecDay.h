@@ -22,7 +22,6 @@
 #define Hmod_OM_util_vecDay
 
 #include "Global.h"
-#include "util/errors.h"
 #include <vector>
 
 #if __cplusplus >= 201103L
@@ -98,19 +97,9 @@ struct vecDay2D {
     }
 
     inline void resize(SimTime dim1, size_t dim2, val_t x = val_t()){
-        if( dim2 == stride || v.size() == 0 ){
-            v.resize( dim1.inDays() * dim2, x );
-            stride = dim2;
-        }else{
-            //FIXME: need to move elements
-            throw util::unimplemented_exception( "vecDay2D: limited support for resize operations" );
-        }
+        v.resize( dim1.inDays() * dim2, x );
+        stride = dim2;
     }
-    
-    inline SimTime size1() const {
-        return sim::fromDays(v.size() / stride); }
-    inline size_t size2() const {
-        return stride; }
     
     inline ref_t at(SimTime n1, size_t n2){
         return v[n1.inDays() * stride + n2];

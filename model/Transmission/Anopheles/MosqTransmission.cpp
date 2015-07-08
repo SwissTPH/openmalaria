@@ -52,7 +52,7 @@ MosqTransmission::MosqTransmission() :
 
 void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt,
                                     const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt,
-                                    const scnXml::Mosq& mosq, size_t species ) {
+                                    const scnXml::Mosq& mosq ) {
     if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
         throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL not yet "
             "implemented. Use VECTOR_SIMPLE_MPD_MODEL instead.");
@@ -71,7 +71,7 @@ void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOpti
             throw util::xml_scenario_error(
                 "VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
                 "model parameters for each anopheles species");
-        emergence = boost::shared_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get(), species) );
+        emergence = boost::shared_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get()) );
     }else
         emergence = boost::shared_ptr<EmergenceModel>( new FixedEmergence() );
     

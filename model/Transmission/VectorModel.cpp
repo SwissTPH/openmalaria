@@ -184,7 +184,7 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
         string name = species[i].initialise (anophelesList[i],
                                              initialisationEIR,
                                              nonHumanHostPopulations,
-                                             populationSize, i);
+                                             populationSize);
         speciesIndex[name] = i;
     }
     
@@ -334,8 +334,7 @@ SimTime VectorModel::initIterate () {
     
     bool needIterate = false;
     for (size_t i = 0; i < numSpecies; ++i) {
-        bool result = species[i].initIterate ();        // run for all species
-        needIterate = needIterate || result;    // set true if any species requires another iteration
+        needIterate = needIterate || species[i].initIterate ();
     }
     if( needIterate == false ){
         initIterations = -1;
