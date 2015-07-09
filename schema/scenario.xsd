@@ -102,7 +102,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:documentation>
                     All model options (bug fixes, choices between models, etc.).                    
                     The list of recognised options can be found in the code at:
-                    include/util/ModelOptions.h and should also be in the wiki.
+                    model/util/ModelOptions.h and should also be in the wiki.
                   </xs:documentation>
                   <xs:appinfo>name:Model Options;</xs:appinfo>
                 </xs:annotation>

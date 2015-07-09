@@ -96,7 +96,7 @@
                   <xs:documentation>
                     All model options (bug fixes, choices between models, etc.).                    
                     The list of recognised options can be found in the code at:
-                    include/util/ModelOptions.h and should also be in the wiki.
+                    model/util/ModelOptions.h and should also be in the wiki.
                   </xs:documentation>
                   <xs:appinfo>name:Model Options;</xs:appinfo>
                 </xs:annotation>
@@ -2179,7 +2179,7 @@
       <xs:element name="SurveyOptions" type="om:MonitoringOptions">
         <xs:annotation>
           <xs:documentation>
-            List of all active survey options. See model/mon/OutputMeasures.hpp for a list of
+            List of all active survey options. See model/mon/OutputMeasures.h for a list of
             supported outputs. Should also be on the wiki.
           </xs:documentation>
           <xs:appinfo>name:Name of quantity;</xs:appinfo>
