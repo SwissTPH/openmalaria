@@ -162,6 +162,7 @@ public:
         runDrugSimulations("AR1", drug_conc, drug_factors);
     }
     
+	// FIXME: Enable this test once PKPD conversion code is ready
     void _testAR () { /* Artemether with conversion */
         const double dose = 1.7 * bodymass;   // 1.7 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
@@ -179,6 +180,7 @@ public:
         runDrugSimulations("AS1", drug_conc, drug_factors);
     }
     
+	// FIXME: Enable this test once PKPD conversion code is ready
     void _testAS () { /* Artesunate with conversion */
         const double dose = 4 * bodymass;   // 4 mg/kg * 50 kg
         assembleTripleDosageSchedule(dose);
@@ -188,7 +190,7 @@ public:
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
-    void _testCQ () { 
+    void testCQ () {
         assembleCQDosageSchedule();
         const double drug_conc[] = { 0, 0.0786272312, 0.1554589687,
             0.2305362134, 0.2252717988, 0.2201276 };
