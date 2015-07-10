@@ -4,18 +4,14 @@ compiler: gcc
 
 before_install:
   - sudo apt-get -qq install cmake build-essential python libgsl0-dev libboost-all-dev libxerces-c2-dev xsdcxx zlib1g-dev
-  - sudo pip install cpp-coveralls
 
 install:
   - mkdir build && cd build
-  - cmake -DOM_COVERAGE=ON CMAKE_BUILD_TYPE=Release ..
+  - cmake ..
 
 script:
   - make -j2
   - ctest -j2
-
-after_success:
-  - coveralls --exclude lib --exclude tests --gcov-options '\-lp'
 
 notifications:
   email:

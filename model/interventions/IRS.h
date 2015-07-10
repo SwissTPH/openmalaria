@@ -58,7 +58,8 @@ private:
             proportionProtected( numeric_limits<double>::signaling_NaN() ),
             proportionUnprotected( numeric_limits<double>::signaling_NaN() )
         {}
-        void init(const scnXml::IRSDescription::AnophelesParamsType& elt, double maxInsecticide);
+        void init(const scnXml::IRSDescription::AnophelesParamsType& elt,
+                 double proportionUse, double maxInsecticide);
         
         /// Get deterrency. See ComponentParams::effect for a more detailed description.
         inline double relativeAttractiveness( double insecticideContent )const{

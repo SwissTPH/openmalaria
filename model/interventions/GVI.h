@@ -68,7 +68,7 @@ private:
             preprandialKilling( numeric_limits<double>::signaling_NaN() ),
             postprandialKilling( numeric_limits<double>::signaling_NaN() )
         {}
-        void init(const scnXml::GVIDescription::AnophelesParamsType& elt);
+        void init(const scnXml::GVIDescription::AnophelesParamsType& elt, double proportionUse);
         
         /// Return x*proportionProtected + proportionUnprotected
         inline double byProtection(double x) const{

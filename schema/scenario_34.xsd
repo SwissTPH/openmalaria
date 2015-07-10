@@ -96,7 +96,7 @@
                   <xs:documentation>
                     All model options (bug fixes, choices between models, etc.).                    
                     The list of recognised options can be found in the code at:
-                    include/util/ModelOptions.h and should also be in the wiki.
+                    model/util/ModelOptions.h and should also be in the wiki.
                   </xs:documentation>
                   <xs:appinfo>name:Model Options;</xs:appinfo>
                 </xs:annotation>
@@ -2179,7 +2179,7 @@
       <xs:element name="SurveyOptions" type="om:MonitoringOptions">
         <xs:annotation>
           <xs:documentation>
-            List of all active survey options. See include/Survey.h for a list of
+            List of all active survey options. See model/mon/OutputMeasures.h for a list of
             supported outputs. Should also be on the wiki.
           </xs:documentation>
           <xs:appinfo>name:Name of quantity;</xs:appinfo>
@@ -3435,7 +3435,7 @@
       <xs:appinfo>name:Description</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue">
+      <xs:element minOccurs="0" name="usage" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
           Usage of nets by humans, from 0 to 1.
@@ -3676,6 +3676,14 @@
   </xs:complexType>
   <xs:complexType name="GVIDescription">
     <xs:sequence>
+      <xs:element minOccurs="0" name="usage" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+          Usage of Generic vector interventions, from 0 to 1.
+        </xs:documentation>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of generic vector interventions;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="decay" type="om:DecayFunction">
         <xs:annotation>
           <xs:documentation>
@@ -3769,6 +3777,14 @@
       <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
+      <xs:element minOccurs="0" name="usage" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+          Usage of Indoor residual spraying (IRS) interventions, from 0 to 1.
+        </xs:documentation>
+          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of Indoor residual spraying (IRS) interventions;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="initialInsecticide" type="om:NormalSample">
         <xs:annotation>
           <xs:documentation>
@@ -4932,12 +4948,12 @@
             <xs:element minOccurs="0" name="k_a" type="om:SampledValue">
               <xs:annotation>
                 <xs:documentation>
-                  Absorbtion rate parameter. Not allowed for one compartment
+                  Absorption rate parameter. Not allowed for one compartment
                   models, but required for two and three compartment models and
                   one compartment with conversion model (for the parent drug
                   only).
                 </xs:documentation>
-                <xs:appinfo>name:Absorbtion rate constant (k_a);min:0;</xs:appinfo>
+                <xs:appinfo>name:Absorption rate constant (k_a);min:0;</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element minOccurs="0" name="conversion">
@@ -5026,25 +5042,25 @@
                   <xs:element name="a12" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the central compartment to the
+                          Absorption rate from the central compartment to the
                           first periphery compartment (2). The parameter
                           k12 = a12 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 2 (a12);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (a12);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                   <xs:element name="a21" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the first periphery compartment
+                          Absorption rate from the first periphery compartment
                           (2) to the central compartment. The parameter
                           k21 = a21 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 2 (a21);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 2 (a21);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>
@@ -5063,25 +5079,25 @@
                   <xs:element name="a13" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the central compartment to the
+                          Absorption rate from the central compartment to the
                           second periphery compartment (3). The parameter
                           k13 = a13 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate to compartment 3 (a13);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (a13);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                   <xs:element name="a31" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
-                          Absorbtion rate from the second periphery compartment
+                          Absorption rate from the second periphery compartment
                           (3) to the central compartment. The parameter
                           k31 = a31 / m where m is the body mass (kg).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorbtion rate from compartment 3 (a31);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 3 (a31);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>
