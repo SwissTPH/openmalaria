@@ -96,7 +96,16 @@ public:
         bool secondDrug = drug2_conc != 0;
         size_t drugIndex = LSTMDrugType::findDrug( drugName );
         size_t drug2Ind = secondDrug ? LSTMDrugType::findDrug( drug2Name ) : 0;
-        PCS_VERBOSE(cout << "\n\033[32mTesting \033[1m" << drugName << ": " << endl;)
+        PCS_VERBOSE(
+            cout << "\n\033[32mTesting \033[1m" << drugName << ":" << endl
+                << "----" << endl
+                << "\033[0m| day"
+                << "\033[33m| factor | f_error "
+                << "\033[31m| f_rel_error "
+                << "\033[32m| concentration | c_error | c_rel_error"
+                << "\033[33m| concentration2 | c2_error |\033[0m" << endl
+                << "|----|---------|------|----------------|-------------|---------|------------|-----------|---------|" << endl;
+        )
         double totalFac = 1;
         for( size_t i = 0; i < 6; i++){
             // before update (after last step):
@@ -118,16 +127,20 @@ public:
             TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-18);
             if( secondDrug ) TS_ASSERT_APPROX_TOL (conc2, drug2_conc[i], 5e-3, 1e-9);
             PCS_VERBOSE(
-                cout << "\033[0m";
                 double errorC = conc - drug_conc[i];
-                cout << "\t Day " << i << ": "
-                    << "\033[33mfactor " << totalFac << " [ " << errorF << " ]" << "\033[0m"
-                    << ", \033[31mtotal / factor: " << totalFac / drug_factors[i] << "\033[0m"
-                    << ", \033[32mconc: " << conc << " [ " << errorC << ", "
-                    << conc/drug_conc[i] << " ]";
+                cout << "\033[0m"
+                    << "|" << i
+                    << "|\033[33m " << totalFac
+                    << "|" << errorF << "\033[0m"
+                    << "|\033[31m " << totalFac / drug_factors[i] << "\033[0m"
+                    << "|\033[32m " << conc
+                    << "|" << errorC
+                    << "|" << conc/drug_conc[i] << " \033[33m|";
                 if( secondDrug ){
                     errorC = conc2 - drug2_conc[i];
-                    cout << ", conc2: " << conc2 << " [ " << errorC << " ]";
+                    cout << " " << conc2 << " | " << errorC;
+                } else {
+                    cout << " | ";
                 }
                 cout << "\033[0m" <<  endl;
             )
