@@ -115,8 +115,8 @@ public:
             double conc = proxy->getDrugConc(drugIndex);
             double conc2 = secondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
             PCS_VERBOSE(cout << "\033[36m";)
-            TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-9);
-            if( secondDrug ) TS_ASSERT_APPROX_TOL (conc2, drug2_conc[i], 5e-3, 1e-24);
+            TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-18);
+            if( secondDrug ) TS_ASSERT_APPROX_TOL (conc2, drug2_conc[i], 5e-3, 1e-9);
             PCS_VERBOSE(
                 cout << "\033[0m";
                 double errorC = conc - drug_conc[i];
