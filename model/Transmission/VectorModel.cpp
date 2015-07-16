@@ -325,7 +325,6 @@ SimTime VectorModel::initIterate () {
         return sim::zero(); // no initialization to do
     }
     if( initIterations < 0 ){
-        assert( interventionMode = dynamicEIR );
         simulationMode = dynamicEIR;
         return sim::zero();
     }
