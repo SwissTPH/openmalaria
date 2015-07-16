@@ -107,7 +107,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 if( removeOpts.getOnFirstBout() ){
                     removeAtIds[SubPopRemove::ON_FIRST_BOUT].push_back( id );
                 }
-                if( removeOpts.getOnFirstTreatment() ){
+                if( removeOpts.getOnFirstInfection() ){
                     removeAtIds[SubPopRemove::ON_FIRST_INFECTION].push_back( id );
                 }
                 if( removeOpts.getOnFirstTreatment() ){
