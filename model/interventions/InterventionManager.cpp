@@ -36,7 +36,7 @@ namespace OM { namespace interventions {
 // ———  InterventionManager  ———
 
 // static memory:
-    
+
 std::map<std::string,ComponentId> InterventionManager::identifierMap;
 boost::ptr_vector<HumanInterventionComponent> InterventionManager::humanComponents;
 boost::ptr_vector<HumanIntervention> InterventionManager::humanInterventions;
@@ -44,6 +44,9 @@ ptr_vector<ContinuousHumanDeployment> InterventionManager::continuous;
 ptr_vector<TimedDeployment> InterventionManager::timed;
 uint32_t InterventionManager::nextTimed;
 OM::Host::ImportedInfections InterventionManager::importedInfections;
+
+// declared in HumanComponents.h:
+vector<ComponentId> removeAtIds[SubPopRemove::NUM];
 
 // static functions:
 
@@ -108,7 +111,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 if( removeOpts.getOnFirstBout() ){
                     removeAtIds[SubPopRemove::ON_FIRST_BOUT].push_back( id );
                 }
-                if( removeOpts.getOnFirstTreatment() ){
+                if( removeOpts.getOnFirstInfection() ){
                     removeAtIds[SubPopRemove::ON_FIRST_INFECTION].push_back( id );
                 }
                 if( removeOpts.getOnFirstTreatment() ){
