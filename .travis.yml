@@ -1,3 +1,11 @@
+os:
+  - linux
+  - osx
+
+matrix:
+  allow_failures:
+    - os: osx
+
 sudo: false
 
 language: cpp
@@ -22,7 +30,6 @@ install:
 
 script:
   - make -j2
-  - python test/run.py 1
   - ctest -j2
 
 notifications:
