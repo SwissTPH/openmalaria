@@ -43,6 +43,7 @@ set (OM_BOXTEST_NAMES
   VecTest
   Vivax
   Genotypes
+  SubPopRemoval
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)
