@@ -1,5 +1,4 @@
 os:
-  - linux
   - osx
 
 matrix:
@@ -13,8 +12,7 @@ language: cpp
 compiler: gcc
 
 before_install:
-  - [ "$TRAVIS_OS_NAME" == "osx" ] && brew update && brew install cmake gcc xerces-c cxxtest boost gsl xsd
-  - [ "$TRAVIS_OS_NAME" == "linux" ] && sudo apt-get install -qq cmake build-essential python libgsl0-dev libboost-all-dev libxerces-c2-dev xsdcxx zlib1g-dev
+  - brew update && brew install cmake gcc xerces-c cxxtest boost gsl xsd
 
 install:
   - mkdir build && cd build
@@ -22,8 +20,7 @@ install:
 
 script:
   - make -j2
-  - [ "$TRAVIS_OS_NAME" == "linux" ] && ctest -j2
-  - [ "$TRAVIS_OS_NAME" == "osx" ] && test/run.py 1
+  - test/run.py 1
 
 notifications:
   email:
