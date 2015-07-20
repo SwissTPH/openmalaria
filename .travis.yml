@@ -24,6 +24,8 @@ script:
   - make -j2
   - test "$TRAVIS_OS_NAME" == "linux" && ctest -j2 || echo "osx test follows"
   - test "$TRAVIS_OS_NAME" == "osx" && test/run.py 1 || echo "linux test has run"
+  - md5sum openMalaria
+  - sha256sum openMalaria
 
 notifications:
   email:
