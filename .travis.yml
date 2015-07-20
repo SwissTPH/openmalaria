@@ -38,3 +38,9 @@ deploy:
     openMalaria
   on:
     tags: true
+
+# blacklist
+branches:
+  except:
+    - appveyor-build
+    - binary-archive
