@@ -1,5 +1,4 @@
 os:
-  - linux
   - osx
 
 matrix:
@@ -22,6 +21,7 @@ install:
 
 script:
   - make -j2
+<<<<<<< HEAD
   - if [ "$TRAVIS_OS_NAME" == "linux" ] && ctest -j2
   - if [ "$TRAVIS_OS_NAME" == "osx" ] && test/run.py 1
 
