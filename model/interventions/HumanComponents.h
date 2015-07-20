@@ -56,7 +56,7 @@ namespace SubPopRemove{
 
 /** For each RemoveAtCode (excluding NUM), this is a list of all sub-population
  * identifiers for which the option is enabled. */
-static vector<ComponentId> removeAtIds[SubPopRemove::NUM];
+extern vector<ComponentId> removeAtIds[SubPopRemove::NUM];
 
 // ———  vaccines  ———
 
