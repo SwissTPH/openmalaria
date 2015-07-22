@@ -6,7 +6,7 @@ matrix:
   allow_failures:
     - os: osx
 
-sudo: true
+sudo: false
 
 language: cpp
 
