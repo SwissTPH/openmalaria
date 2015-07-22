@@ -12,9 +12,20 @@ language: cpp
 
 compiler: gcc
 
+addons:
+  apt:
+    packages:
+    - cmake
+    - build-essential
+    - python
+    - libgsl0-dev
+    - libboost-all-dev
+    - libxerces-c2-dev
+    - xsdcxx
+    - zlib1g-dev
+
 before_install:
-  - test "$TRAVIS_OS_NAME" == "osx" && brew update && brew install cmake gcc xerces-c cxxtest boost gsl xsd || echo "linux"
-  - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install -qq cmake build-essential python libgsl0-dev libboost-all-dev libxerces-c2-dev xsdcxx zlib1g-dev || echo "osx"
+  - test "$TRAVIS_OS_NAME" == "osx" && brew update && brew install cmake gcc xerces-c cxxtest boost gsl xsd || echo "ok: not osx"
 
 install:
   - mkdir build && cd build
