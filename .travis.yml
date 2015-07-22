@@ -35,8 +35,8 @@ script:
   - make -j2
   - test "$TRAVIS_OS_NAME" == "linux" && ctest -j2 || echo "osx test follows"
   - test "$TRAVIS_OS_NAME" == "osx" && test/run.py 1 || echo "linux test has run"
-  - md5sum openMalaria > openMalaria.md5
-  - sha256sum openMalaria > openMalaria.sha256
+  - md5sum openMalaria | tee openMalaria.md5
+  - sha256sum openMalaria | tee openMalaria.sha256
 
 notifications:
   email:
