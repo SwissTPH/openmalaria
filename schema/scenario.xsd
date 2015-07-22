@@ -275,7 +275,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:element>
       <xs:element name="hypnozoiteReleaseDelayDays">
         <xs:complexType>
-          <xs:attribute type="xs:double" use="required" name="min"/>
+          <xs:attribute type="xs:int" use="required" name="latentRelapseDays"/>
           <xs:attribute type="xs:double" use="required" name="mu"/>
           <xs:attribute type="xs:double" use="required" name="sigma"/>
         </xs:complexType>

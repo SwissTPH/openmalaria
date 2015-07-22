@@ -48,7 +48,7 @@ int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
 double muReleaseHypnozoite = numeric_limits<double>::signaling_NaN();   // units: days
 double sigmaReleaseHypnozoite = numeric_limits<double>::signaling_NaN();
-double minReleaseHypnozoite;    // units: days
+int latentRelapseDays;
 SimTime bloodStageProtectionLatency;
 double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
 double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
@@ -96,9 +96,10 @@ int sampleNHypnozoites(){
 // time to hypnozoite release after initial release:
 SimTime sampleReleaseDelay(){
     double delay;       // in days
+    double maximum = 16.0*30.0; // maximum of about 16 months in liver stage
     do{
         delay = util::random::log_normal( muReleaseHypnozoite, sigmaReleaseHypnozoite );
-    }while( delay < minReleaseHypnozoite );
+    }while( delay > maximum);
     return sim::roundToTSFromDays( delay );
 }
 
@@ -115,7 +116,7 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     releases.insert( sim::ts0() + latentP );
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
-        SimTime timeToRelease = sim::ts0() + latentP + sampleReleaseDelay();
+        SimTime timeToRelease = sim::ts0() + latentP + sim::roundToTSFromDays(latentRelapseDays) + sampleReleaseDelay();
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
@@ -471,7 +472,7 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     baseNumberHypnozoites = elt.getNumberHypnozoites().getBase();
     muReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMu();
     sigmaReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getSigma();
-    minReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMin();
+    latentRelapseDays = elt.getHypnozoiteReleaseDelayDays().getLatentRelapseDays();
     bloodStageProtectionLatency = sim::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
