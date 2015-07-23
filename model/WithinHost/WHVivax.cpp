@@ -106,6 +106,9 @@ SimTime sampleRandomReleaseDelay(){
     double mu, sigma;
     int maxcount = pow(10,6);
     int count = 0;
+    if(isnan(pSecondRelease)) {
+        pSecondRelease = 0.0;
+    }
     if( pSecondRelease == 0.0 ){
         // only calculate a random delay from firstRelease distribution
         mu = muFirstHypnozoiteRelease;
