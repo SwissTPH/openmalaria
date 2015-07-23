@@ -46,8 +46,6 @@ SimTime latentP;       // attribute on parameters block
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
 int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
-double muReleaseHypnozoite = numeric_limits<double>::signaling_NaN();   // units: days
-double sigmaReleaseHypnozoite = numeric_limits<double>::signaling_NaN();
 int latentRelapseDays;
 double muFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 double sigmaFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
@@ -105,8 +103,10 @@ SimTime sampleRandomReleaseDelay(){
     double delay;       // in days
     double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
     do{
-        delay = util::random::log_normal( muReleaseHypnozoite, sigmaReleaseHypnozoite );
-    }while( delay > liverStageMaximumDays);
+        delay = util::random::log_normal( muFirstHypnozoiteRelease, sigmaFirstHypnozoiteRelease );
+    }while( delay > liverStageMaximumDays || delay < 0 );
+    assert( delay >= 0 );
+    assert( delay < liverStageMaximumDays );
     return sim::roundToTSFromDays( delay );
 }
 
