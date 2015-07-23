@@ -327,7 +327,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:latent relapse days;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute type="xs:double" use="optional" name="psecondRelease" default="0">
+    <xs:attribute type="xs:double" use="optional" name="pSecondRelease" default="0">
       <xs:annotation>
         <xs:documentation>
         Probability of a second release. If undefined it is zero.

@@ -321,7 +321,7 @@
         <xs:appinfo>name:latent relapse days;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute default="0" name="psecondRelease" type="xs:double" use="optional">
+    <xs:attribute default="0" name="pSecondRelease" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
         Probability of a second release. If undefined it is zero.
