@@ -321,6 +321,14 @@
         <xs:appinfo>name:latent relapse days;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute default="0" name="psecondRelease" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+        Probability of a second release. If undefined it is zero.
+        </xs:documentation>
+        <xs:appinfo>name:latent relapse days;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="ProbVivaxEvent">
     <xs:attribute name="a" type="xs:double" use="required"/>

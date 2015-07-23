@@ -47,6 +47,7 @@ double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
 int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
 int latentRelapseDays;
+double pSecondRelease = numeric_limits<double>::signaling_NaN();
 double muFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 double sigmaFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 double muSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
@@ -102,11 +103,34 @@ int sampleNHypnozoites(){
 SimTime sampleRandomReleaseDelay(){
     double delay;       // in days
     double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
+    double mu, sigma;
+    int maxcount = pow(10,6);
+    int count = 0;
+    if( pSecondRelease == 0.0 ){
+        // only calculate a random delay from firstRelease distribution
+        mu = muFirstHypnozoiteRelease;
+        sigma = sigmaFirstHypnozoiteRelease;
+    } else if ( pSecondRelease == 1.0 ) {
+        // only calculate a random delay from secondRelease distribution
+        mu = muSecondHypnozoiteRelease;
+        sigma = sigmaSecondHypnozoiteRelease;
+    } else {
+        if( !random::bernoulli(pSecondRelease) ) {
+            mu = muFirstHypnozoiteRelease;
+            sigma = sigmaFirstHypnozoiteRelease;
+        } else {
+            mu = muSecondHypnozoiteRelease;
+            sigma = sigmaSecondHypnozoiteRelease;
+        }
+    }
     do{
-        delay = util::random::log_normal( muFirstHypnozoiteRelease, sigmaFirstHypnozoiteRelease );
-    }while( delay > liverStageMaximumDays || delay < 0 );
-    assert( delay >= 0 );
-    assert( delay < liverStageMaximumDays );
+        delay = util::random::log_normal( mu, sigma );
+        count++;
+    }while( (delay > liverStageMaximumDays || delay < 0 ) && count < maxcount );
+    if (count == maxcount) {
+        throw util::xml_scenario_error( "<vivax><hypnozoiteRelease>  [random delay calculation causes probably an indefinite loop]:\n The hypnozoite release distribution seems off, sigma of secondRelease could be too high. We except the hypnozoite to reside a maximum of 16 months in the liver stage. Sigma choose well, dear padawan." );
+    }
+    assert( delay >= 0 && delay < liverStageMaximumDays );
     return sim::roundToTSFromDays( delay );
 }
 
@@ -485,6 +509,11 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     if(hr.getSecondRelease().present()){
         muSecondHypnozoiteRelease = hr.getSecondRelease().get().getMu();
         sigmaSecondHypnozoiteRelease = hr.getSecondRelease().get().getSigma();
+        pSecondRelease = hr.getPSecondRelease();
+        if( pSecondRelease == 0.0){
+            std::cerr << "Warning: probability of second release is set to zero, although secondRelease element is present, will only calculate for a first release." << endl;
+        }
+        assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
     }
     bloodStageProtectionLatency = sim::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();

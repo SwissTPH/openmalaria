@@ -289,11 +289,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 
           latentP + latentRelapseDays + randomReleaseDelay
 
-        randomReleaseDelay is based on one or two lognormal distributions, which are defined in FirstRelease and optionally SecondRelease.
+        randomReleaseDelay is based on one or two lognormal distributions, which are defined in firstRelease and optionally secondRelease.
 
         You can define 2 release distributions, which get added together and represent the probability of hypnozoites which get released before winter (first release) or after (second release).
 
-        You can omit the SecondRelease element if no release to the blood happens after winter.
+        You can omit the secondRelease element if no release to the blood happens after winter.
       </xs:documentation>
       <xs:appinfo>name:Hypnozoite release;</xs:appinfo>
     </xs:annotation>
@@ -323,6 +323,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:annotation>
         <xs:documentation>
         Usually 15 days or 10 days (3 or 2 5-day timesteps).
+        </xs:documentation>
+        <xs:appinfo>name:latent relapse days;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute type="xs:double" use="optional" name="psecondRelease" default="0">
+      <xs:annotation>
+        <xs:documentation>
+        Probability of a second release. If undefined it is zero.
         </xs:documentation>
         <xs:appinfo>name:latent relapse days;</xs:appinfo>
       </xs:annotation>
