@@ -34,6 +34,7 @@ set (OM_BOXTEST_NAMES
   Penny
   # model deactivated: R_0
   Rach5IC
+  RemoveOn
   SimpleMPDLarviciding
   SimpleMPDTest
   VecFullTest

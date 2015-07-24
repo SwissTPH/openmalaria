@@ -1,0 +1,209 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="test by Ewan Cameron" schemaVersion="34" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="200">
+    <ageGroup lowerbound="0">
+     <group poppercent="3.474714994" upperbound="1"/>
+      <group poppercent="12.76004028" upperbound="5"/>
+      <group poppercent="14.52151394" upperbound="10"/>
+      <group poppercent="12.75565434" upperbound="15"/>
+      <group poppercent="10.83632374" upperbound="20"/>
+      <group poppercent="8.393312454" upperbound="25"/>
+      <group poppercent="7.001421452" upperbound="30"/>
+      <group poppercent="5.800587654" upperbound="35"/>
+      <group poppercent="5.102136612" upperbound="40"/>
+      <group poppercent="4.182561874" upperbound="45"/>
+      <group poppercent="3.339409351" upperbound="50"/>
+      <group poppercent="2.986112356" upperbound="55"/>
+      <group poppercent="2.555766582" upperbound="60"/>
+      <group poppercent="2.332763433" upperbound="65"/>
+      <group poppercent="1.77400255" upperbound="70"/>
+      <group poppercent="1.008525491" upperbound="75"/>
+      <group poppercent="0.74167341" upperbound="80"/>
+      <group poppercent="0.271863401" upperbound="85"/>
+      <group poppercent="0.161614642" upperbound="90"/>
+    </ageGroup>
+  </demography>
+  <monitoring name="Basic Outputs">
+    <SurveyOptions>
+      <option name="nHost" value="true"/>
+      <option name="nPatent" value="false"/>
+      <option name="nInfect" value="false"/>
+      <option name="inputEIR" value="false"/>
+      <option name="simulatedEIR" value="false"/>
+      <option name="nUncomp" value="false"/>
+      <option name="nSevere" value="false"/>
+      <option name="sumlogDens" value="false"/>
+    </SurveyOptions>
+    <surveys detectionLimit="42.1480363005719">
+      <surveyTime repeatStep="5d" repeatEnd="91.08y">90y</surveyTime>
+    </surveys>
+    <ageGroup lowerbound="0">
+      <group upperbound="2"/>
+      <group upperbound="5"/>
+      <group upperbound="10"/>
+      <group upperbound="90"/>
+    </ageGroup>
+    <cohorts>
+      <subPop id="never symptomatic" number="1"/>
+    </cohorts>
+  </monitoring>
+  <diagnostics>
+    <diagnostic name="deterministic">
+      <deterministic minDensity="1"/>
+    </diagnostic>
+    <diagnostic name="RDT">
+      <deterministic minDensity="1"/>
+    </diagnostic>
+  </diagnostics>
+  <interventions name="vector pop tests">
+    <human>
+      <component id="never symptomatic">
+        <recruitmentOnly/>
+        <subPopRemoval onFirstBout="true" onFirstTreatment="true" onFirstInfection="true"/>
+      </component>
+      <deployment>
+        <component id="never symptomatic"/>
+          <continuous>
+            <deploy targetAgeYrs="0.01" coverage="1.0"/>
+          </continuous>
+      </deployment>
+    </human>
+  </interventions>
+<!-- healthSystem standardSimplified.xml
+     Case management tree for use in simulations where this plays only a contextual role
+     Set the values of <pSeekOfficialCareUncomplicated1> and <pSeekOfficialCareUncomplicated2> and access to hospital care 
+         <pSeekOfficialCareSevere> to required values    
+-->
+ <healthSystem> 
+  <DecisionTree5Day name="Standard simplified">           
+    <!-- Access of 0.303 (t=5d) corresponds to effective coverage 0.6 (based on the standard mapping) -->                 
+    <pSeekOfficialCareUncomplicated1 value="1.0"/> 
+    <pSelfTreatUncomplicated value="0"/> 
+    <pSeekOfficialCareUncomplicated2 value="1.0"/> 
+    <!-- Access to hospital care set to standard value as per Ross et al, 2006 -->  
+    <pSeekOfficialCareSevere value="0.48"/> 
+    <treeUCOfficial>
+      <diagnostic diagnostic="RDT">
+        <positive>
+          <treatSimple durationLiver="0t" durationBlood="1t"/>
+        </positive>
+        <negative>
+          <noTreatment/>
+        </negative>
+      </diagnostic>
+    </treeUCOfficial>
+    <treeUCSelfTreat>
+      <treatSimple durationLiver="0t" durationBlood="1t"/>
+    </treeUCSelfTreat>
+    <cureRateSevere value="0.5"/>
+    <treatmentSevere/>
+  </DecisionTree5Day>
+  <CFR>
+    <group lowerbound="0.00" value="0.0918900"/>
+    <group lowerbound="0.25" value="0.0810811"/>
+    <group lowerbound="0.75" value="0.0648649"/>
+    <group lowerbound="1.50" value="0.0689189"/>
+    <group lowerbound="2.50" value="0.0675676"/>
+    <group lowerbound="3.50" value="0.0297297"/>
+    <group lowerbound="4.50" value="0.0459459"/>
+    <group lowerbound="7.50" value="0.0945946"/>
+    <group lowerbound="12.5" value="0.1243243"/>
+    <group lowerbound="15.0" value="0.1378378"/>
+  </CFR>
+    <pSequelaeInpatient interpolation="none">
+      <group lowerbound="0.0" value="0.0132"/>
+      <group lowerbound="5.0" value="0.005"/>
+    </pSequelaeInpatient>
+  </healthSystem>  
+  <entomology mode="dynamic" name="Vector">
+    <vector>
+      <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
+        <seasonality annualEIR="100" input="EIR">
+        <fourierSeries EIRRotateAngle="0">
+        <coeffic a="0" b="0"/>
+        <coeffic a="0" b="0"/>
+        </fourierSeries>
+        </seasonality>
+        <mosq minInfectedThreshold="0.1">
+          <mosqRestDuration value="3"/>
+          <extrinsicIncubationPeriod value="11"/>
+          <mosqLaidEggsSameDayProportion value="0.313"/>
+          <mosqSeekingDuration value="0.33"/>
+          <mosqSurvivalFeedingCycleProbability value="0.623"/>
+          <availabilityVariance value="0"/>
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <mosqProbResting mean="0.99" variance="0"/>
+          <mosqProbOvipositing value="0.88"/>
+          <mosqHumanBloodIndex value="1.0"/>
+        </mosq>
+      </anopheles>
+    </vector>
+  </entomology>
+  <model>
+    <ModelOptions>
+      <option name="LOGNORMAL_MASS_ACTION" value="false"/>
+      <option name="NO_PRE_ERYTHROCYTIC" value="false"/>
+      <option name="MAX_DENS_CORRECTION" value="false"/>
+      <option name="INNATE_MAX_DENS" value="false"/>
+      <option name="COMORB_HET" value="false"/>
+      <option name="COMORB_TREAT_HET" value="false"/>
+      <option name="TREAT_HET" value="false"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="6"/>
+    <human>
+      <availabilityToMosquitoes>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="90.0" value="1.0"/>
+      </availabilityToMosquitoes>
+    </human>
+    <parameters interval="5" iseed="61321" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.0502"/>
+      <parameter include="false" name="Estar" number="2" value="0.032"/>
+      <parameter include="false" name="Simm" number="3" value="0.0809506710366894"/>
+      <parameter include="false" name="Xstar_p" number="4" value="5301.79729516512"/>
+      <parameter include="false" name="gamma_p" number="5" value="0.867641953418309"/>
+      <parameter include="false" name="sigma2i" number="6" value="10.2"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="131250823.718489"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="150.118765348471"/>
+      <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="3.30642361247272"/>
+      <parameter include="false" name="decay_m" number="10" value="1.3115653955642"/>
+      <parameter include="false" name="sigma2_0" number="11" value="1.02918598519619"/>
+      <parameter include="false" name="Xstar_v" number="12" value="0.243544416255358"/>
+      <parameter include="false" name="Ystar2" number="13" value="6637.12420015078"/>
+      <parameter include="false" name="alpha" number="14" value="175013.800903478"/>
+      <parameter include="false" name="Density bias (non Garki)" number="15" value="0.18"/>
+      <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
+      <parameter include="false" name="log oddsr CF community" number="17" value="0.737"/>
+      <parameter include="false" name="Indirect risk cofactor" number="18" value="0.019"/>
+      <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.5"/>
+      <parameter include="false" name="Density bias (Garki)" number="20" value="4.8"/>
+      <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784000.0"/>
+      <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+      <parameter include="false" name="comorbidity intercept" number="24" value="0.092"/>
+      <parameter include="false" name="Ystar half life" number="25" value="0.27471760030155"/>
+      <parameter include="false" name="Ystar1" number="26" value="0.228063096434434"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+      <parameter include="false" name="Ystar0" number="28" value="1.17905916371677"/>
+      <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+      <parameter include="false" name="critical age for comorbidity" number="30" value="0.117"/>
+    </parameters>
+  </model>
+</om:scenario>
