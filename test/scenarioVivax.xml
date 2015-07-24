@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="34" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_34.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="34" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -646,10 +646,13 @@
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
       <bloodStageLengthDays weibullScale="115.0582" weibullShape="2.331"/>
-      <pEventPrimary a="0.9687" b="9.803"/>
-      <pEventSecondary a="0.2098" b="1.812"/>
-      <!-- probability of a clinical event being severe -->
-      <pEventIsSevere value="0.1"/>
+      <clinicalEvents>
+        <pPrimaryInfection a="0.9687" b="9.803"/>
+        <pRelapseOne a="0.2098" b="1.812"/>
+        <pRelapseTwoPlus a="0.2098" b="1.812"/>
+        <!-- probability of a clinical event being severe -->
+        <pEventIsSevere value="0.1"/>
+      </clinicalEvents>
     </vivax>
     <parameters interval="5" iseed="0" latentp="15d">
       <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
