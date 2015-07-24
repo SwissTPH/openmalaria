@@ -348,9 +348,9 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     // NOTE: currently no BSV model
     morbidity = Pathogenesis::NONE;
     uint32_t oldCumInf = cumPrimInf;
-    double oldpEvent = pEvent;
+    double oldpEvent = ( isnan(pEvent))? 1.0 : pEvent;
     // always use the first relapse probability for following relapses as a factor
-    double oldpRelapseEvent = pFirstRelapseEvent;
+    double oldpRelapseEvent = ( isnan(pFirstRelapseEvent))? 1.0 : pFirstRelapseEvent;
     list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
         VivaxBrood::UpdResult result = inf->update();
