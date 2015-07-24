@@ -55,10 +55,12 @@ double sigmaSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 SimTime bloodStageProtectionLatency;
 double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
 double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
-double pEventPrimA = numeric_limits<double>::signaling_NaN(),
-    pEventPrimB = numeric_limits<double>::signaling_NaN();
-double pEventSecA = numeric_limits<double>::signaling_NaN(),
-    pEventSecB = numeric_limits<double>::signaling_NaN();
+double pPrimaryA = numeric_limits<double>::signaling_NaN(),
+    pPrimaryB = numeric_limits<double>::signaling_NaN();
+double pRelapseOneA = numeric_limits<double>::signaling_NaN(),
+    pRelapseOneB = numeric_limits<double>::signaling_NaN();
+double pRelapseTwoA = numeric_limits<double>::signaling_NaN(),
+    pRelapseTwoB = numeric_limits<double>::signaling_NaN();
 double pEventIsSevere = numeric_limits<double>::signaling_NaN();
 
 // Set from healthSystem element:
@@ -142,6 +144,7 @@ SimTime sampleRandomReleaseDelay(){
 
 VivaxBrood::VivaxBrood( WHVivax *host ) :
         primaryHasStarted( false ),
+        relapseHasStarted( false ),
         hadEvent( false )
 {
     set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
@@ -183,12 +186,14 @@ void VivaxBrood::checkpoint( ostream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
     primaryHasStarted & stream;
+    relapseHasStarted & stream;
     hadEvent & stream;
 }
 VivaxBrood::VivaxBrood( istream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
     primaryHasStarted & stream;
+    relapseHasStarted & stream;
     hadEvent & stream;
 }
 
@@ -218,6 +223,10 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
         if( bloodStageClearDate + bloodStageProtectionLatency >= sim::ts0() ) continue;
         
+        if( !relapseHasStarted && primaryHasStarted ){
+            relapseHasStarted = true;
+            result.newRelapseBS = true;
+        }
         if( !primaryHasStarted ){
             primaryHasStarted = true;
             result.newPrimaryBS = true;
@@ -332,6 +341,9 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     // NOTE: currently no BSV model
     morbidity = Pathogenesis::NONE;
     uint32_t oldCumInf = cumPrimInf;
+    double oldpEvent = pEvent;
+    // always use the first relapse probability for following relapses as a factor
+    double oldpRelapseEvent = pFirstRelapseEvent;
     list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
         VivaxBrood::UpdResult result = inf->update();
@@ -344,15 +356,20 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             bool clinicalEvent;
             if( result.newPrimaryBS ){
                 // Blood stage is primary. oldCumInf wasn't updated yet.
-                double pEvent = pEventPrimA * pEventPrimB / (pEventPrimB+oldCumInf);
-                clinicalEvent = random::bernoulli( pEvent );
+                double pPrimaryInfEvent = pPrimaryA * pPrimaryB / (pPrimaryB+oldCumInf);
+                clinicalEvent = random::bernoulli( pPrimaryInfEvent );
                 inf->setHadEvent( clinicalEvent );
+            } else if ( result.newRelapseBS ){
+                // Blood stage is a relapse. oldCumInf wasn't updated yet.
+                double pFirstRelapseEvent = oldpEvent * (pRelapseOneA * pRelapseOneB / (pRelapseOneB + (oldCumInf-1)));
+                clinicalEvent = random::bernoulli( pFirstRelapseEvent );
+                inf->setHadRelapse( clinicalEvent );
             }else{
                 // Subtract 1 from oldCumInf to not count the current brood in
                 // the number of cumulative primary infections.
-                if( inf->hasHadEvent() ){
-                    double pEvent = pEventSecA * pEventSecB / (pEventSecB + (oldCumInf-1));
-                    clinicalEvent = random::bernoulli( pEvent );
+                if( inf->hasHadRelapse() ){
+                    double pSecondRelapseEvent = oldpRelapseEvent * (pRelapseTwoA * pRelapseTwoB / (pRelapseTwoB + (oldCumInf-1)));
+                    clinicalEvent = random::bernoulli( pSecondRelapseEvent );
                 }else{
                     // If the primary infection did not cause an event, there
                     // is 0 chance of a secondary causing an event in our model.
@@ -522,11 +539,14 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
     
-    pEventPrimA = elt.getPEventPrimary().getA();
-    pEventPrimB = elt.getPEventPrimary().getB();
-    pEventSecA = elt.getPEventSecondary().getA();
-    pEventSecB = elt.getPEventSecondary().getB();
-    pEventIsSevere = elt.getPEventIsSevere().getValue();
+    const scnXml::ClinicalEvents& ce = elt.getClinicalEvents();
+    pPrimaryA = ce.getPPrimaryInfection().getA();
+    pPrimaryB = ce.getPPrimaryInfection().getB();
+    pRelapseOneA = ce.getPRelapseOne().getA();
+    pRelapseOneB = ce.getPRelapseOne().getB();
+    pRelapseTwoA = ce.getPRelapseTwoPlus().getA();
+    pRelapseTwoB = ce.getPRelapseTwoPlus().getB();
+    pEventIsSevere = ce.getPEventIsSevere().getValue();
     
     initNHypnozoites();
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), true );

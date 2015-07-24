@@ -269,9 +269,7 @@
           <xs:attribute name="weibullShape" type="xs:double" use="required"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="pEventPrimary" type="om:ProbVivaxEvent"/>
-      <xs:element name="pEventSecondary" type="om:ProbVivaxEvent"/>
-      <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
+      <xs:element name="clinicalEvents" type="om:ClinicalEvents"/>
     </xs:all>
   </xs:complexType>
   <xs:complexType name="HypnozoiteRelease">
@@ -329,6 +327,20 @@
         <xs:appinfo>name:latent relapse days;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ClinicalEvents">
+    <xs:annotation>
+      <xs:documentation>
+        This elements holds all information about probabilites for clinical events from infections and relapses.
+      </xs:documentation>
+      <xs:appinfo>name:Vivax Clinical Events;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="pPrimaryInfection" type="om:ProbVivaxEvent"/>
+      <xs:element name="pRelapseOne" type="om:ProbVivaxEvent"/>
+      <xs:element name="pRelapseTwoPlus" type="om:ProbVivaxEvent"/>
+      <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ProbVivaxEvent">
     <xs:attribute name="a" type="xs:double" use="required"/>
