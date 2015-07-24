@@ -46,7 +46,8 @@ SimTime latentP;       // attribute on parameters block
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
 int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
-int latentRelapseDays;
+int latentRelapseDays1stRelease;
+int latentRelapseDays2ndRelease;
 double pSecondRelease = numeric_limits<double>::signaling_NaN();
 double muFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 double sigmaFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
@@ -79,8 +80,6 @@ VivaxBrood *sampleBrood = 0;
 // number of hypnozoites per brood:
 map<double,int> nHypnozoitesProbMap;
 void initNHypnozoites(){
-    // :TODO: @tph-thuering 2015-07-22 implement additional second release distribution
-
     assert(baseNumberHypnozoites <= 1 && baseNumberHypnozoites >= 0);
     double total = 0.0;
     for( int n = 0; n <= maxNumberHypnozoites; ++n )
@@ -108,6 +107,8 @@ SimTime sampleRandomReleaseDelay(){
     double mu, sigma;
     int maxcount = pow(10,6);
     int count = 0;
+    bool isFirstRelease;
+    int latentRelapseDays;
     if(isnan(pSecondRelease)) {
         pSecondRelease = 0.0;
     }
@@ -115,18 +116,26 @@ SimTime sampleRandomReleaseDelay(){
         // only calculate a random delay from firstRelease distribution
         mu = muFirstHypnozoiteRelease;
         sigma = sigmaFirstHypnozoiteRelease;
+        isFirstRelease = true;
     } else if ( pSecondRelease == 1.0 ) {
         // only calculate a random delay from secondRelease distribution
         mu = muSecondHypnozoiteRelease;
         sigma = sigmaSecondHypnozoiteRelease;
     } else {
-        if( !random::bernoulli(pSecondRelease) ) {
+        isFirstRelease = !random::bernoulli(pSecondRelease);
+        if( isFirstRelease ) {
             mu = muFirstHypnozoiteRelease;
             sigma = sigmaFirstHypnozoiteRelease;
         } else {
             mu = muSecondHypnozoiteRelease;
             sigma = sigmaSecondHypnozoiteRelease;
         }
+    }
+    if (isFirstRelease){
+        latentRelapseDays = latentRelapseDays1stRelease;
+    } else {
+        assert(!isnan(latentRelapseDays2ndRelease));
+        latentRelapseDays = latentRelapseDays2ndRelease;
     }
     do{
         delay = util::random::log_normal( mu, sigma );
@@ -136,7 +145,7 @@ SimTime sampleRandomReleaseDelay(){
         throw util::xml_scenario_error( "<vivax><hypnozoiteRelease>  [random delay calculation causes probably an indefinite loop]:\n The hypnozoite release distribution seems off, sigma of secondRelease could be too high. We except the hypnozoite to reside a maximum of 16 months in the liver stage. Sigma choose well, dear padawan." );
     }
     assert( delay >= 0 && delay < liverStageMaximumDays );
-    return sim::roundToTSFromDays( delay );
+    return sim::roundToTSFromDays( delay + latentRelapseDays );
 }
 
 
@@ -155,7 +164,7 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
         SimTime randomReleaseDelay = sampleRandomReleaseDelay();
-        SimTime timeToRelease = sim::ts0() + latentP + sim::roundToTSFromDays(latentRelapseDays) + randomReleaseDelay;
+        SimTime timeToRelease = sim::ts0() + latentP + randomReleaseDelay;
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
@@ -534,10 +543,11 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     maxNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getMax();
     baseNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getBase();
     const scnXml::HypnozoiteRelease& hr = elt.getHypnozoiteRelease();
-    latentRelapseDays = hr.getLatentRelapseDays();
+    latentRelapseDays1stRelease = hr.getFirstRelease().getLatentRelapseDays();
     muFirstHypnozoiteRelease = hr.getFirstRelease().getMu();
     sigmaFirstHypnozoiteRelease = hr.getFirstRelease().getSigma();
     if(hr.getSecondRelease().present()){
+        latentRelapseDays2ndRelease = hr.getSecondRelease().get().getLatentRelapseDays();
         muSecondHypnozoiteRelease = hr.getSecondRelease().get().getMu();
         sigmaSecondHypnozoiteRelease = hr.getSecondRelease().get().getSigma();
         pSecondRelease = hr.getPSecondRelease();

@@ -638,10 +638,10 @@
     </human>
     <vivax>
       <probBloodStageInfectiousToMosq value="0.25"/>
-      <hypnozoiteRelease latentRelapseDays="10">
+      <hypnozoiteRelease>
         <numberHypnozoites max="11" base="0.8"/>
         <!--scale a log-normal by adding log(factor) to mu, this is mu=2.92 in timesteps-->
-        <firstRelease mu="4.5294379" sigma="0.956"/>
+        <firstRelease mu="4.5294379" sigma="0.956" latentRelapseDays="10"/>
       </hypnozoiteRelease>
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->

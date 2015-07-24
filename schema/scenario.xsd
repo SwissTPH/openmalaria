@@ -314,17 +314,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute type="xs:double" use="required" name="base"/>
         </xs:complexType>
       </xs:element>
-      <xs:element type="om:NormalSample" name="firstRelease" maxOccurs="1" minOccurs="1"/>
-      <xs:element type="om:NormalSample" name="secondRelease" maxOccurs="1" minOccurs="0"/>
+      <xs:element type="om:HypnozoiteReleaseDistribution" name="firstRelease" maxOccurs="1" minOccurs="1"/>
+      <xs:element type="om:HypnozoiteReleaseDistribution" name="secondRelease" maxOccurs="1" minOccurs="0"/>
     </xs:all>
-    <xs:attribute type="xs:int" use="required" name="latentRelapseDays">
-      <xs:annotation>
-        <xs:documentation>
-        Usually 15 days or 10 days (3 or 2 5-day timesteps).
-        </xs:documentation>
-        <xs:appinfo>name:latent relapse days;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute type="xs:double" use="optional" name="pSecondRelease" default="0">
       <xs:annotation>
         <xs:documentation>
@@ -333,6 +325,20 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:latent relapse days;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="HypnozoiteReleaseDistribution">
+    <xs:complexContent>
+      <xs:extension base="om:NormalSample">
+        <xs:attribute type="xs:int" use="required" name="latentRelapseDays">
+          <xs:annotation>
+            <xs:documentation>
+            Usually 15 days or 10 days (3 or 2 5-day timesteps).
+            </xs:documentation>
+            <xs:appinfo>name:latent relapse days;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="ClinicalEvents">
     <xs:annotation>

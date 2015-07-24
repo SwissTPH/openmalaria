@@ -308,17 +308,9 @@
           <xs:attribute name="base" type="xs:double" use="required"/>
         </xs:complexType>
       </xs:element>
-      <xs:element maxOccurs="1" minOccurs="1" name="firstRelease" type="om:NormalSample"/>
-      <xs:element maxOccurs="1" minOccurs="0" name="secondRelease" type="om:NormalSample"/>
+      <xs:element maxOccurs="1" minOccurs="1" name="firstRelease" type="om:HypnozoiteReleaseDistribution"/>
+      <xs:element maxOccurs="1" minOccurs="0" name="secondRelease" type="om:HypnozoiteReleaseDistribution"/>
     </xs:all>
-    <xs:attribute name="latentRelapseDays" type="xs:int" use="required">
-      <xs:annotation>
-        <xs:documentation>
-        Usually 15 days or 10 days (3 or 2 5-day timesteps).
-        </xs:documentation>
-        <xs:appinfo>name:latent relapse days;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
     <xs:attribute default="0" name="pSecondRelease" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
@@ -327,6 +319,20 @@
         <xs:appinfo>name:latent relapse days;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="HypnozoiteReleaseDistribution">
+    <xs:complexContent>
+      <xs:extension base="om:NormalSample">
+        <xs:attribute name="latentRelapseDays" type="xs:int" use="required">
+          <xs:annotation>
+            <xs:documentation>
+            Usually 15 days or 10 days (3 or 2 5-day timesteps).
+            </xs:documentation>
+            <xs:appinfo>name:latent relapse days;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="ClinicalEvents">
     <xs:annotation>
