@@ -145,7 +145,8 @@ SimTime sampleRandomReleaseDelay(){
 VivaxBrood::VivaxBrood( WHVivax *host ) :
         primaryHasStarted( false ),
         relapseHasStarted( false ),
-        hadEvent( false )
+        hadEvent( false ),
+        hadRelapse( false )
 {
     set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
@@ -188,6 +189,7 @@ void VivaxBrood::checkpoint( ostream& stream ){
     primaryHasStarted & stream;
     relapseHasStarted & stream;
     hadEvent & stream;
+    hadRelapse & stream;
 }
 VivaxBrood::VivaxBrood( istream& stream ){
     releaseDates & stream;
@@ -195,6 +197,7 @@ VivaxBrood::VivaxBrood( istream& stream ){
     primaryHasStarted & stream;
     relapseHasStarted & stream;
     hadEvent & stream;
+    hadRelapse & stream;
 }
 
 
@@ -268,7 +271,11 @@ void VivaxBrood::treatmentLS(){
 
 // ———  per-host code  ———
 
-WHVivax::WHVivax( double comorbidityFactor ) : cumPrimInf(0) {
+WHVivax::WHVivax( double comorbidityFactor ) :
+    cumPrimInf(0),
+    pEvent( numeric_limits<double>::quiet_NaN() ),
+    pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() )
+{
     if( comorbidityFactor != 1.0 )
 #ifdef WHVivaxSamples
     if( sampleHost == 0 ){
@@ -490,6 +497,8 @@ void WHVivax::checkpoint(istream& stream){
     morbidity_i & stream;
     morbidity = static_cast<Pathogenesis::State>( morbidity_i );
     cumPrimInf & stream;
+    pEvent & stream;
+    pFirstRelapseEvent & stream;
 }
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
@@ -500,6 +509,8 @@ void WHVivax::checkpoint(ostream& stream){
     noPQ & stream;
     static_cast<int>( morbidity ) & stream;
     cumPrimInf & stream;
+    pEvent & stream;
+    pFirstRelapseEvent & stream;
 }
 
 char const*const not_impl = "feature not available in Vivax model";
