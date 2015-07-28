@@ -24,6 +24,8 @@
 #include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
 #include "util/DocumentLoader.h"
+/* if you get compile errors like "version.h not found", run CMake first */
+#include "util/version.h"
 
 #include <sstream>
 #include <iostream>
@@ -203,14 +205,13 @@ namespace OM { namespace util {
 	}
 	
 	if (cloVersion || cloHelp){
-            cerr<<"OpenMalaria simulator of malaria epidemiology and control, schema version "
-                  <<DocumentLoader::SCHEMA_VERSION<<endl
-                  <<"(oldest compatible: "<<DocumentLoader::SCHEMA_VERSION_OLDEST_COMPATIBLE
-                  <<"). For more information, see"<<endl
-                  <<"https://github.com/SwissTPH/openmalaria/wiki"<<endl<<endl
-                  <<"OpenMalaria is copyright © 2005-2015 Swiss Tropical Institute and Liverpool"<<endl
-                  <<"School Of Tropical Medicine."<<endl
-                  <<"OpenMalaria comes with ABSOLUTELY NO WARRANTY. This is free software, and you"<<endl
+            cerr<<"OpenMalaria simulator of malaria epidemiology and control."<<endl<< endl
+                  <<"For more information, see https://github.com/SwissTPH/openmalaria/wiki"<<endl<<endl
+                  <<"\tschema version: \t"   <<DocumentLoader::SCHEMA_VERSION<<endl
+                  <<"\tprogram version:\t" << util::semantic_version <<endl<<endl
+                  <<"OpenMalaria is copyright © 2005-2015 Swiss Tropical Institute"<<endl
+                  <<"and Liverpool School Of Tropical Medicine."<<endl
+                  <<"OpenMalaria comes with ABSOLUTELY NO WARRANTY. This is free software, and you"<<endl<<endl
                   <<"are welcome to redistribute it under certain conditions. See the file COPYING"<<endl
                   <<"or http://www.gnu.org/licenses/gpl-2.0.html for details of warranty or terms of"<<endl
                   <<"redistribution."<<endl<<endl;
