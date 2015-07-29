@@ -10,8 +10,6 @@ The stable version of OpenMalaria supports schema [schema version 33](https://gi
 
 You can download the latest release [#200](https://travis-ci.org/SwissTPH/openmalaria/builds/73175741) here: [schema-33.1](https://github.com/SwissTPH/openmalaria/tree/schema-33.1)
 
-This code is citable with DOI [![DOI](https://zenodo.org/badge/15670/SwissTPH/openmalaria.svg)](https://zenodo.org/badge/latestdoi/15670/SwissTPH/openmalaria)
-
 Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__ builds:
 
 [![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
