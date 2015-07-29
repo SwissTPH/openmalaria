@@ -8,6 +8,9 @@ For further documentation, take a look at our [wiki](https://github.com/SwissTPH
 
 The stable version of OpenMalaria supports schema [schema version 33](https://github.com/SwissTPH/openmalaria/wiki/GeneratedSchema33Doc) and is currently maintained in the __['master' branch](https://github.com/SwissTPH/openmalaria/tree/master)__.
 
+You can download the latest release [#200](https://travis-ci.org/SwissTPH/openmalaria/builds/73175741) here: [schema-33.1](https://github.com/SwissTPH/openmalaria/tree/schema-33.1)
+
+This code is citable with DOI [![DOI](https://zenodo.org/badge/15670/SwissTPH/openmalaria.svg)](https://zenodo.org/badge/latestdoi/15670/SwissTPH/openmalaria)
 
 Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__ builds:
 
