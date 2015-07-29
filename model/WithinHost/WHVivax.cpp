@@ -121,6 +121,7 @@ SimTime sampleRandomReleaseDelay(){
         // only calculate a random delay from secondRelease distribution
         mu = muSecondHypnozoiteRelease;
         sigma = sigmaSecondHypnozoiteRelease;
+        isFirstRelease = false;
     } else {
         isFirstRelease = !random::bernoulli(pSecondRelease);
         if( isFirstRelease ) {
