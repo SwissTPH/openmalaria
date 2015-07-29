@@ -94,8 +94,12 @@ find_package (Z)
 
 # suggested on windows: install boost such that paths are:
 # C:\Program Files\boost\boost_VER\boost\config.hpp
+# VER looks like 1_38_0 NOT 1.38.0
 # Add versions greater than 1.38 here:
-set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0" "1.40" "1.40.0" "1.41" "1.41.0" "1.41" "1.42.0"  "1.43.0" "1.44.0" "1.45.0")
+set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0"
+    "1.40" "1.40.0" "1.41" "1.41.0" "1.41" "1.42.0"
+    "1.43.0" "1.44.0" "1.45.0" "1.46.1" "1.47.0"
+    "1.50.0" "1.53.0" "1.54.0" "1.55.0" "1.56.0" "1.57.0" "1.58.0")
 #set (Boost_DEBUG)
 find_package( Boost 1.37.0 )
 if(Boost_FOUND)
@@ -186,6 +190,9 @@ include_directories (SYSTEM
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
+
+file(STRINGS version.txt OM_VERSION)
+configure_file(model/util/version.h.in ../model/util/version.h	@ONLY)
 
 add_executable (openMalaria model/openMalaria.cpp)
 

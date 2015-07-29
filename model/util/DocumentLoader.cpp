@@ -53,11 +53,9 @@ Checksum DocumentLoader::loadDocument (std::string lXmlFile){
     int scenarioVersion = scenario->getSchemaVersion();
     if (scenarioVersion < SCHEMA_VERSION) {
 	ostringstream msg;
-	msg<<lXmlFile<<" uses "
-	    << ((scenarioVersion < SCHEMA_VERSION_OLDEST_COMPATIBLE) ? "an" : "a potentially")
-	    <<" incompatible old schema version ("<<scenarioVersion<<"; current is "
+	msg<<lXmlFile<<" uses an incompatible old schema version ("<<scenarioVersion<<"; current is "
 	    <<SCHEMA_VERSION<<"). Use SchemaTranslator to update.";
-	if (scenarioVersion < SCHEMA_VERSION_OLDEST_COMPATIBLE) {
+	if (scenarioVersion < SCHEMA_VERSION) {
 	    throw util::xml_scenario_error (msg.str());
 	} else {
 	    cerr<<"Warning: "<<msg.str()<<endl;
