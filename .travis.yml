@@ -1,3 +1,7 @@
+env:
+  - global:
+    - BASE_URL="https://github.com/SwissTPH/openmalaria"
+
 os:
   - linux
   - osx
@@ -15,17 +19,28 @@ compiler: gcc
 addons:
   apt:
     packages:
-    - cmake
     - build-essential
+    - cmake
     - python
-    - libgsl0-dev
     - libboost-all-dev
+    - libgsl0-dev
     - libxerces-c2-dev
     - xsdcxx
     - zlib1g-dev
 
 before_install:
-  - test "$TRAVIS_OS_NAME" == "osx" && brew update && brew install cmake gcc xerces-c cxxtest boost gsl xsd || echo "not osx"
+  - test "$TRAVIS_OS_NAME" == "osx" \
+    && brew update \
+    && brew install \
+      boost  \
+      coreutils \
+      cmake  \
+      cxxtest  \
+      gcc \
+      gsl  \
+      xerces-c  \
+      xsd  \
+    || echo "not osx"
 
 install:
   - mkdir build && cd build
@@ -33,11 +48,29 @@ install:
 
 script:
   - make -j2
-  - ./openMalaria --version
-  - test "$TRAVIS_OS_NAME" == "linux" && ctest -j2 || echo "osx test follows"
-  - test "$TRAVIS_OS_NAME" == "osx" && test/run.py 1 || echo "linux test has run"
-  - md5sum openMalaria | tee openMalaria.md5
-  - sha256sum openMalaria | tee openMalaria.sha256
+  - ./openMalaria --version && ldd openMalaria
+  - test "$TRAVIS_OS_NAME" == "linux" \
+    && ctest -j2 \
+    && md5sum openMalaria | tee openMalaria.md5 \
+    && sha256sum openMalaria | tee openMalaria.sha256 \
+    || echo "osx test follows"
+  - test "$TRAVIS_OS_NAME" == "osx" \
+    && ctest -j2 \
+    && md5 openMalaria | tee openMalaria.md5 \
+    && /usr/local/bin/gsha256sum openMalaria | tee openMalaria.sha256 \
+    || echo "linux test has run"
+  - echo "[$TRAVIS_JOB_ID : {" \
+      "build: $BASE_URL/builds/$TRAVIS_BUILD_ID,\n" \
+      "commit: $BASE_URL/commits/$TRAVIS_BRANCH/$TRAVIS_COMMIT,\n" \
+      "job: $BASE_URL/jobs/$TRAVIS_JOB_ID,\n" \
+      "os: $TRAVIS_OS_NAME,\n" \
+      "tag: $TRAVIS_TAG\n" \
+      "}]" \
+      > travis-build.json
+  - test "x$TRAVIS_TAG" == "x" \
+    || tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz openMalaria* travis-build.json \
+    && rm -v openMalaria{,.sha256,.md5} travis-build.json
+
 
 notifications:
   email:
@@ -49,9 +82,7 @@ deploy:
     secure: dOTDLZ10UHm3JoKODtlBMxChFaXOekUM69S2f6eoAt0ctjFPZXHic2aEUvabeZJqq8UX83xO1I0tGTX7DWMvxd7zPTQHcW9N3XxWvgChKxs4OSqRL7GnunI3iZPH8125ZCeMNuh+oCgf1DdfOy0uOgdygGKzvIYEFhd7c5gOH/I=
   skip_cleanup: true
   file:
-    - openMalaria
-    - openMalaria.md5
-    - openMalaria.sha256
+    - openMalaria-*
   on:
     tags: true
 
