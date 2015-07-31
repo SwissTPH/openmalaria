@@ -29,18 +29,7 @@ addons:
     - zlib1g-dev
 
 before_install:
-  - test "$TRAVIS_OS_NAME" == "osx" \
-    && brew update \
-    && brew install \
-      boost  \
-      coreutils \
-      cmake  \
-      cxxtest  \
-      gcc \
-      gsl  \
-      xerces-c  \
-      xsd  \
-    || echo "not osx"
+  - test "$TRAVIS_OS_NAME" == "osx" && util/install-dep-osx.sh || echo "not installing osx dependencies"
 
 install:
   - mkdir build && pushd build
@@ -49,23 +38,16 @@ install:
 script:
   - make -j2
   - ./openMalaria --version && ldd openMalaria
-  - test "$TRAVIS_OS_NAME" == "linux" \
-    && ctest -j2 \
-    && md5sum openMalaria | tee openMalaria.md5 \
-    && sha256sum openMalaria | tee openMalaria.sha256 \
-    || echo "osx test follows"
-  - test "$TRAVIS_OS_NAME" == "osx" \
-    && ctest -j2 \
-    && md5 openMalaria | tee openMalaria.md5 \
-    && /usr/local/bin/gsha256sum openMalaria | tee openMalaria.sha256 \
-    || echo "linux test has run"
+  - ctest -j2
+  - ../util/generate-checksums.sh
   - popd
+
 after_success:
   - util/build-info.sh | tee travis-build.json
+  - echo $TRAVIS_TAG
   - test "x$TRAVIS_TAG" == "x" \
     || tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz build/openMalaria* travis-build.json \
     && rm -v build/openMalaria{,.sha256,.md5} travis-build.json
-
 
 notifications:
   email:
