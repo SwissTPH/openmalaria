@@ -4,6 +4,8 @@
 
 # Configure this file
 file(STRINGS ${CMAKE_SOURCE_DIR}/version.txt OM_VERSION)
+# make sure version.h gets rebuilt everytime cmake is run
+unset(${CMAKE_CURRENT_BINARY_DIR}/util/version.h CACHE)
 configure_file(
     ${CMAKE_CURRENT_SOURCE_DIR}/util/version.h.in
     ${CMAKE_CURRENT_BINARY_DIR}/util/version.h
