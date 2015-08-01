@@ -140,10 +140,48 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
 
   <xs:complexType name="Primaquine">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters for Primaquine treatment; for use with the Vivax model only.
+      </xs:documentation>
+      <xs:appinfo>name:Primquine treatment parameters (Vivax);</xs:appinfo>
+    </xs:annotation>
     <xs:all>
-      <xs:element name="pHumanCannotReceive" type="om:DoubleValue"/>
-      <xs:element name="pUseUncomplicated" type="om:DoubleValue"/>
-      <xs:element name="effectivenessOnUse" type="om:DoubleValue"/>
+      <xs:element name="pHumanCannotReceive" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            Chance that a human is determined to be unable to receive Primaquine
+            treatment. Treatment is neither reported or given for such humans.
+            
+            This is sampled once per human at birth.
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;
+            name:Probability that human is incompatible with Primaquine treatment;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pUseUncomplicated" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            Chance of Primaquine treatment being used for routine treatment of an
+            uncomplicated case.
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;name:Prob use in UC case;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectivenessOnUse" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            Chance that Primaquine treatment is effective.
+            
+            On application, a random variable is sampled against this probability.
+            If false, the treatment does nothing; if true, the treatment clears all
+            liver stage parasites. Where effectiveness is longer than a single
+            time step (prophylactic effect), this sample still only happens once
+            (thus either no effect or all liver stages cleared over multiple steps).
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;name:Effectiveness;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:all>
   </xs:complexType>
   

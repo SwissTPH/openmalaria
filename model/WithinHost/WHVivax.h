@@ -181,6 +181,9 @@ private:
     // The number of primary blood stage infections to have started since this
     // human was born.
     uint32_t cumPrimInf;
+    
+    // Either never or expiry time of treatment
+    SimTime treatExpiryLiver, treatExpiryBlood;
 
     friend class ::UnittestUtil;
 };

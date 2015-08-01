@@ -24,7 +24,6 @@
 #include "PkPd/LSTMTreatments.h"
 #include "util/random.h"
 #include "util/errors.h"
-#include "util/ModelOptions.h"
 #include "util/timeConversions.h"
 #include "interventions/Interfaces.hpp"
 
@@ -344,11 +343,6 @@ public:
             SimTime neg1 = -sim::oneTS();
             if( durL < neg1 || durB < neg1 ){
                 throw util::xml_scenario_error( "treatSimple: cannot have durationBlood or durationLiver less than -1" );
-            }
-            if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
-                if( durL != sim::zero() || durB != neg1 )
-                    throw util::unimplemented_exception( "vivax model only supports timestepsLiver=0, timestepsBlood=-1" );
-                // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
             }
             timeLiver = durL;
             timeBlood = durB;

@@ -296,8 +296,12 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     // NOTE: currently no BSV model
     morbidity = Pathogenesis::NONE;
     uint32_t oldCumInf = cumPrimInf;
+    bool treatmentLiver = treatExpiryLiver > sim::ts0();
+    bool treatmentBlood = treatExpiryBlood > sim::ts0();
     list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
+        if( treatmentLiver ) inf->treatmentLS();
+        if( treatmentBlood ) inf->treatmentBS();        // clearnace due to treatment; no protection against reemergence
         VivaxBrood::UpdResult result = inf->update();
         if( result.newPrimaryBS ) cumPrimInf += 1;
         
@@ -401,24 +405,27 @@ void WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
     // liver-stage treatment is only via "Primaquine" option, if at all
     if( timeLiver != sim::zero() ){
         if( pReceivePQ > 0.0 ){
+            //FIXME: decide how to do this — remove pReceivePQ maybe?
             throw util::xml_scenario_error("simple treatment for vivax liver "
             "stages is incompatible with case-management Primaquine option");
         }
-        if( timeLiver >= sim::zero() )
-            throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
-        for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
-            it->treatmentLS();
+        if( timeLiver >= sim::zero() ){
+            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
+        }else{
+            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+                it->treatmentLS();
+            }
         }
     }
     
     // there probably will be blood-stage treatment
     if( timeBlood < sim::zero() ){
+        // legacy mode: retroactive clearance
         for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
             it->treatmentBS();
         }
-    }else{
-        if( timeBlood != sim::zero() )
-            throw util::unimplemented_exception("simple treatment for vivax, except with timesteps=-1");
+    }else if( timeBlood > sim::zero() ){
+        treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
     }
 }
 
@@ -437,6 +444,8 @@ void WHVivax::checkpoint(istream& stream){
     morbidity_i & stream;
     morbidity = static_cast<Pathogenesis::State>( morbidity_i );
     cumPrimInf & stream;
+    treatExpiryLiver & stream;
+    treatExpiryBlood & stream;
 }
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
@@ -447,6 +456,8 @@ void WHVivax::checkpoint(ostream& stream){
     noPQ & stream;
     static_cast<int>( morbidity ) & stream;
     cumPrimInf & stream;
+    treatExpiryLiver & stream;
+    treatExpiryBlood & stream;
 }
 
 char const*const not_impl = "feature not available in Vivax model";
