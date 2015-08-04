@@ -12,7 +12,7 @@ sudo: false
 language: cpp
 
 compiler:
-  - gcc
+  - g++
   - clang
 
 addons:
@@ -35,7 +35,7 @@ install:
   - cmake -DCMAKE_BUILD_TYPE=Release ..
 
 script:
-  - make -j2
+  - CC=g++ make -j2
   - ./openMalaria --version
   - test "$TRAVIS_OS_NAME" == "linux" && ctest -j2 || echo "osx test follows"
   - test "$TRAVIS_OS_NAME" == "osx" && test/run.py 1 || echo "linux test has run"
