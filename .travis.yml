@@ -10,7 +10,9 @@ sudo: false
 
 language: cpp
 
-compiler: gcc
+compiler:
+  - clang
+  - g++
 
 addons:
   apt:
