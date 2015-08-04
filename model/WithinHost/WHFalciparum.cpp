@@ -33,7 +33,7 @@
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include "util/checkpoint_containers.h"
 #include "util/timeConversions.h"
 #include "schema/scenario.h"
@@ -142,7 +142,7 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX 
     
     // Include here the effect of transmission-blocking vaccination:
     pTransmit *= tbvFactor;
-    util::streamValidate( pTransmit );
+    //util::streamValidate( pTransmit );
     return pTransmit;
 }
 double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)

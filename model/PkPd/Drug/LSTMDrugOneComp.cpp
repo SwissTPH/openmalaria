@@ -20,7 +20,7 @@
 
 #include "PkPd/Drug/LSTMDrugOneComp.h"
 #include "util/errors.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include "util/vectors.h"
 
 using namespace std;
@@ -110,7 +110,7 @@ void LSTMDrugOneComp::updateConcentration( double body_mass ){
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
     doses.erase(doses.begin(), doses.begin() + doses_taken);
     
-    util::streamValidate( concentration );
+    //util::streamValidate( concentration );
     if( concentration < typeData.getNegligibleConcentration() ){
         // once negligible, try to optimise so that we don't have to do
         // anything next time step

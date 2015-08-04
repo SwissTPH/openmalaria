@@ -29,7 +29,7 @@
 #include "Monitoring/Continuous.h"
 #include "mon/info.h"
 #include "util/BoincWrapper.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include "util/CommandLine.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
@@ -200,7 +200,7 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
      * for internal calculations, but again the EIR should be multiplied by the
      * availability. */
     calculateEIR( human, ageYears, EIR );
-    util::streamValidate( EIR );
+    //util::streamValidate( EIR );
     
     for( size_t g = 0, nG = EIR.size(); g < nG; ++g ){
         size_t index = survInocsIndex(human.monAgeGroup().i(), human.cohortSet(), g);

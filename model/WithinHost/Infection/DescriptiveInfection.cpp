@@ -23,7 +23,7 @@
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 
 #include <sstream>
 #include <string>

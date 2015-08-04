@@ -29,7 +29,7 @@
 #include "PopulationStats.h"
 #include "util/ModelOptions.h"
 #include "util/vectors.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include "Population.h"
 #include "interventions/InterventionManager.hpp"
 #include "mon/reporting.h"
@@ -106,7 +106,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
         return true;
     
     if (doUpdate){
-        util::streamValidate( age0.raw() );
+        //util::streamValidate( age0.raw() );
         // Ages at  the end of the update period respectively. In most cases
         // the difference between this and age at the start is not especially
         // important in the model design, but since we parameterised with

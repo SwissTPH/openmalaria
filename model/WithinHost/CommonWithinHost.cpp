@@ -26,7 +26,7 @@
 #include "PopulationStats.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/random.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include "schema/scenario.h"
 
 #include <boost/algorithm/string.hpp>
@@ -217,7 +217,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
         pkpdModel.decayDrugs (body_mass);
     }
     
-    util::streamValidate(totalDensity);
+    //util::streamValidate(totalDensity);
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }
 

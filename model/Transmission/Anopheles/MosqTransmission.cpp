@@ -26,7 +26,7 @@
 #include "util/vectors.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include "schema/entomology.h"
 
 namespace OM {
@@ -245,7 +245,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     
     const double nOvipositing = P_df[ttau] * N_v[ttau];       // number ovipositing on this step
     const double newAdults = emergence->update( d0, nOvipositing, total_S_v );
-    util::streamValidate( newAdults );
+    //util::streamValidate( newAdults );
     
     // num seeking mosquitos is: new adults + those which didn't find a host
     // yesterday + those who found a host tau days ago and survived cycle:

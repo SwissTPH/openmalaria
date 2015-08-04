@@ -34,7 +34,7 @@
 #include "util/errors.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include <schema/scenario.h>
 
 #include <cmath>
@@ -183,7 +183,7 @@ void Population::createInitialHumans ()
 // -----  non-static methods: simulation loop  -----
 
 void Population::newHuman( SimTime dob ){
-    util::streamValidate( dob.raw() );
+    //util::streamValidate( dob.raw() );
     population.push_back( new Host::Human (*_transmissionModel, dob) );
     ++recentBirths;
 }

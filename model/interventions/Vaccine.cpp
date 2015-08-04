@@ -25,7 +25,7 @@
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "schema/interventions.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 
 #include <limits>
 #include <cmath>
@@ -96,14 +96,14 @@ double VaccineComponent::getInitialEfficacy (size_t numPrevDoses) const
         numPrevDoses = initialMeanEfficacy.size() - 1;
     double ime = initialMeanEfficacy[numPrevDoses];
     //NOTE(validation): With extra valiadation in random, the first difference is noticed here:
-    util::streamValidate(ime);
-    util::streamValidate(efficacyB);
+    //util::streamValidate(ime);
+    //util::streamValidate(efficacyB);
     if (ime == 0.0){
         return 0.0;
     } else if (ime < 1.0) {
         double result = random::betaWithMean (ime, efficacyB);
         //NOTE(validation):: Without extra validation in random, the first difference is noticed here:
-        util::streamValidate(result);
+        //util::streamValidate(result);
         //TODO(validation):: Why the difference? Bug in/limitation of StreamValidatior?
         // Extra memory allocation due to the extra logging causes some bad
         // memory usage to manifest differently? Am I forgetting to initialise
@@ -176,7 +176,7 @@ bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
     }
     
     effect->initialEfficacy = params.getInitialEfficacy(numDosesAdministered);
-    util::streamValidate(effect->initialEfficacy);
+    //util::streamValidate(effect->initialEfficacy);
     
     effect->numDosesAdministered = numDosesAdministered + 1;
     effect->timeLastDeployment = sim::nowOrTs1();

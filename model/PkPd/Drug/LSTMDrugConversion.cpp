@@ -20,7 +20,7 @@
 
 #include "PkPd/Drug/LSTMDrugConversion.h"
 #include "util/errors.h"
-#include "util/StreamValidator.h"
+//#include "util/StreamValidator.h"
 #include "util/vectors.h"
 
 #include <gsl/gsl_integration.h>
@@ -245,7 +245,7 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
     doses.erase(doses.begin(), doses.begin() + doses_taken);
     
-    util::streamValidate( qtyM );
+    //util::streamValidate( qtyM );
     if( qtyP < parentType.getNegligibleConcentration() &&
             qtyM < metaboliteType.getNegligibleConcentration() )
     {
