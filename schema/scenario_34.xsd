@@ -261,19 +261,7 @@
   <xs:complexType name="Vivax">
     <xs:all>
       <xs:element name="probBloodStageInfectiousToMosq" type="om:DoubleValue"/>
-      <xs:element name="numberHypnozoites">
-        <xs:complexType>
-          <xs:attribute name="max" type="xs:int" use="required"/>
-          <xs:attribute name="base" type="xs:double" use="required"/>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="hypnozoiteReleaseDelayDays">
-        <xs:complexType>
-          <xs:attribute name="min" type="xs:double" use="required"/>
-          <xs:attribute name="mu" type="xs:double" use="required"/>
-          <xs:attribute name="sigma" type="xs:double" use="required"/>
-        </xs:complexType>
-      </xs:element>
+      <xs:element name="hypnozoiteRelease" type="om:HypnozoiteRelease"/>
       <xs:element name="bloodStageProtectionLatency" type="om:DoubleValue"/>
       <xs:element name="bloodStageLengthDays">
         <xs:complexType>
@@ -281,10 +269,84 @@
           <xs:attribute name="weibullShape" type="xs:double" use="required"/>
         </xs:complexType>
       </xs:element>
-      <xs:element name="pEventPrimary" type="om:ProbVivaxEvent"/>
-      <xs:element name="pEventSecondary" type="om:ProbVivaxEvent"/>
-      <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
+      <xs:element name="clinicalEvents" type="om:ClinicalEvents"/>
     </xs:all>
+  </xs:complexType>
+  <xs:complexType name="HypnozoiteRelease">
+    <xs:annotation>
+      <xs:documentation>
+        This element defines probabilites when and how many hypnozoites are released from the liverstage into the blood.
+
+        The gap between the start of a new brood of hypnozoites and its release are defined as follows:
+
+          latentP + latentRelapseDays + randomReleaseDelay
+
+        randomReleaseDelay is based on one or two lognormal distributions, which are defined in firstRelease and optionally secondRelease.
+
+        You can define 2 release distributions, which get added together and represent the probability of hypnozoites which get released before winter (first release) or after (second release).
+
+        You can omit the secondRelease element if no release to the blood happens after winter.
+      </xs:documentation>
+      <xs:appinfo>name:Hypnozoite release;</xs:appinfo>
+    </xs:annotation>
+    <xs:all>
+      <xs:element maxOccurs="1" minOccurs="1" name="numberHypnozoites">
+        <xs:annotation>
+          <xs:documentation>
+            numberHypnozoites calculates the number of hypnozoites in the liver stage based on a base which is between 0 and 1.
+
+            This number is random based on the following distribution and normalized:
+
+             max
+              ∑ (base ^ n)
+            n = 0
+          </xs:documentation>
+          <xs:appinfo>name:Number of Hypnozoites;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute name="max" type="xs:int" use="required"/>
+          <xs:attribute name="base" type="xs:double" use="required"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element maxOccurs="1" minOccurs="1" name="firstRelease" type="om:HypnozoiteReleaseDistribution"/>
+      <xs:element maxOccurs="1" minOccurs="0" name="secondRelease" type="om:HypnozoiteReleaseDistribution"/>
+    </xs:all>
+    <xs:attribute default="0" name="pSecondRelease" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+        Probability of a second release. If undefined it is zero.
+        </xs:documentation>
+        <xs:appinfo>name:latent relapse days;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="HypnozoiteReleaseDistribution">
+    <xs:complexContent>
+      <xs:extension base="om:NormalSample">
+        <xs:attribute name="latentRelapseDays" type="xs:int" use="required">
+          <xs:annotation>
+            <xs:documentation>
+            Usually 15 days or 10 days (3 or 2 5-day timesteps).
+            </xs:documentation>
+            <xs:appinfo>name:latent relapse days;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ClinicalEvents">
+    <xs:annotation>
+      <xs:documentation>
+        This elements holds all information about probabilites for clinical events from infections and relapses.
+      </xs:documentation>
+      <xs:appinfo>name:Vivax Clinical Events;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="pPrimaryInfection" type="om:ProbVivaxEvent"/>
+      <xs:element name="pRelapseOne" type="om:ProbVivaxEvent"/>
+      <xs:element name="pRelapseTwoPlus" type="om:ProbVivaxEvent"/>
+      <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
+    </xs:sequence>
   </xs:complexType>
   <xs:complexType name="ProbVivaxEvent">
     <xs:attribute name="a" type="xs:double" use="required"/>
