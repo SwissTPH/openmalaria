@@ -5,12 +5,15 @@ os:
 matrix:
   allow_failures:
     - os: osx
+    - compiler: clang
 
 sudo: false
 
 language: cpp
 
-compiler: gcc
+compiler:
+  - gcc
+  - clang
 
 addons:
   apt:
