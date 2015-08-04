@@ -37,7 +37,7 @@
 
 #include "util/random.h"
 #include "util/errors.h"
-//#include "util/StreamValidator.h"
+#include "util/StreamValidator.h"
 #include "Global.h"
 
 #ifdef OM_RANDOM_USE_BOOST
@@ -114,7 +114,7 @@ struct generator_factory {
 // -----  set-up, tear-down and checkpointing  -----
 
 void random::seed (uint32_t seed) {
-     //util::streamValidate(seed);
+//     util::streamValidate(seed);
 # ifdef OM_RANDOM_USE_BOOST
     if (seed == 0) seed = 4357;	// gsl compatibility − ugh
     boost_generator.seed (seed);
@@ -175,24 +175,24 @@ double random::uniform_01 () {
 # else
         gsl_rng_uniform (rng.gsl_generator);
 # endif
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 
 double random::gauss (double mean, double std){
     double result = gsl_ran_gaussian(rng.gsl_generator,std)+mean;
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 double random::gauss (double std){
     double result = gsl_ran_gaussian(rng.gsl_generator,std);
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 
 double random::gamma (double a, double b){
     double result = gsl_ran_gamma(rng.gsl_generator, a, b);
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 
@@ -203,7 +203,7 @@ double random::log_normal (double mu, double sigma){
     return dist (boost_generator);
 # else*/
     double result = gsl_ran_lognormal (rng.gsl_generator, mu, sigma);
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 //# endif
 }
@@ -212,26 +212,26 @@ double random::sampleFromLogNormal(double normp, double meanlog, double stdlog){
     // Used for performance reasons. Calling GSL's log_normal 5 times is 50% slower.
     
     double zval = gsl_cdf_ugaussian_Pinv (normp);
-     //util::streamValidate(zval);
+//     util::streamValidate(zval);
     // Where normp is distributed uniformly over [0,1], this acts like a sample
     // from the log normal. Where normp has been transformed by raising the
     // uniform sample to the power of 1/(T-1), zval is distributed like a
     // uniform gauss times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
     // distr. function of a uniform gauss:
     double result = exp(meanlog+stdlog*zval);
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 
 double random::beta (double a, double b){
     double result = gsl_ran_beta (rng.gsl_generator,a,b);
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 double random::betaWithMean (double m, double b){
     //TODO(performance): could do this calculation externally, and feed in a,b instead of mean,b
     double a = m * b / (1.0 - m);
-     //util::streamValidate(a);
+//     util::streamValidate(a);
     return beta(a,b);
 }
 
@@ -241,7 +241,7 @@ int random::poisson(double lambda){
 	throw TRACED_EXCEPTION( "lambda is inf", Error::InfLambda );
     }
     int result = gsl_ran_poisson (rng.gsl_generator, lambda);
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 
@@ -249,7 +249,7 @@ bool random::bernoulli(double prob){
     assert( (boost::math::isfinite)(prob) );
     // return true iff our variate is less than the probability
     bool result =random::uniform_01() < prob;
-     //util::streamValidate(result);
+//     util::streamValidate(result);
     return result;
 }
 

@@ -20,7 +20,7 @@
 
 #include "util/DecayFunction.h"
 #include "util/errors.h"
-//#include "util/StreamValidator.h"
+#include "util/StreamValidator.h"
 #include "util/random.h"
 #include "util/timeConversions.h"
 
@@ -152,7 +152,7 @@ public:
         BaseHetDecayFunction( elt ),
         invLambda( log(2.0) / readLToDays(elt) )
     {
-        //util::streamValidate(invLambda);
+        util::streamValidate(invLambda);
     }
     
     double getBaseTMult() const{

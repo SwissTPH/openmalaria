@@ -20,7 +20,7 @@
 
 #include "PkPd/Drug/LSTMDrugThreeComp.h"
 #include "util/errors.h"
-//#include "util/StreamValidator.h"
+#include "util/StreamValidator.h"
 
 #include <boost/math/constants/constants.hpp>
 #include <gsl/gsl_integration.h>
@@ -233,7 +233,7 @@ void LSTMDrugThreeComp::updateConcentration (double body_mass) {
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
     doses.erase(doses.begin(), doses.begin() + doses_taken);
     
-    //util::streamValidate( conc() );
+    util::streamValidate( conc() );
     if( conc() < typeData.getNegligibleConcentration() ){
         // once negligible, try to optimise so that we don't have to do
         // anything next time step

@@ -25,7 +25,7 @@
 #include "mon/reporting.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
-//#include "util/StreamValidator.h"
+#include "util/StreamValidator.h"
 #include <schema/scenario.h>
 
 #include <limits>
@@ -164,7 +164,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     // Note: we use Episode::COMPLICATED instead of Episode::SEVERE.
     WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( ageYears );
     Episode::State newState = static_cast<Episode::State>( pg.state );
-    //util::streamValidate( (newState << 16) & pgState );
+    util::streamValidate( (newState << 16) & pgState );
     
     if ( sim::ts0() == timeOfRecovery ) {
 	if( pgState & Episode::DIRECT_DEATH ){

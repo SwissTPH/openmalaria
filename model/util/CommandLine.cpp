@@ -22,7 +22,7 @@
 #include "util/CommandLine.h"
 #include "util/errors.h"
 #include "util/BoincWrapper.h"
-//#include "util/StreamValidator.h"
+#include "util/StreamValidator.h"
 #include "util/DocumentLoader.h"
 /* if you get compile errors like "version.h not found", run CMake first */
 #include "util/version.h"

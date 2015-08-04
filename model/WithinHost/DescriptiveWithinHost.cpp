@@ -25,7 +25,7 @@
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/ModelOptions.h"
 #include "PopulationStats.h"
-//#include "util/StreamValidator.h"
+#include "util/StreamValidator.h"
 #include "util/errors.h"
 #include <cassert>
 
@@ -159,7 +159,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 
         ++inf;
     }
-    //util::streamValidate( totalDensity );
+    util::streamValidate( totalDensity );
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }
 
