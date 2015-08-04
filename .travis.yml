@@ -1,18 +1,43 @@
+os:
+  - linux
+  - osx
+
+matrix:
+  allow_failures:
+    - os: osx
+
+sudo: false
+
 language: cpp
 
 compiler: gcc
 
+addons:
+  apt:
+    packages:
+    - cmake
+    - build-essential
+    - python
+    - libgsl0-dev
+    - libboost-all-dev
+    - libxerces-c2-dev
+    - xsdcxx
+    - zlib1g-dev
+
 before_install:
-  - sudo apt-get -qq install cmake build-essential python libgsl0-dev libboost-all-dev libxerces-c-dev xsdcxx zlib1g-dev
+  - test "$TRAVIS_OS_NAME" == "osx" && brew update && brew install cmake gcc xerces-c cxxtest boost gsl xsd || echo "not osx"
 
 install:
   - mkdir build && cd build
-  - cmake -DCMAKE_BUILD_TYPE=Release -DOM_STATICALLY_LINK=TRUE ..
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
 
 script:
   - make -j2
-  - ldd openMalaria
-  - test/run.py Vivax
+  - ./openMalaria --version
+  - test "$TRAVIS_OS_NAME" == "linux" && ctest -j2 || echo "osx test follows"
+  - test "$TRAVIS_OS_NAME" == "osx" && test/run.py 1 || echo "linux test has run"
+  - md5sum openMalaria | tee openMalaria.md5
+  - sha256sum openMalaria | tee openMalaria.sha256
 
 notifications:
   email:
@@ -24,6 +49,14 @@ deploy:
     secure: dOTDLZ10UHm3JoKODtlBMxChFaXOekUM69S2f6eoAt0ctjFPZXHic2aEUvabeZJqq8UX83xO1I0tGTX7DWMvxd7zPTQHcW9N3XxWvgChKxs4OSqRL7GnunI3iZPH8125ZCeMNuh+oCgf1DdfOy0uOgdygGKzvIYEFhd7c5gOH/I=
   skip_cleanup: true
   file:
-    openMalaria
+    - openMalaria
+    - openMalaria.md5
+    - openMalaria.sha256
   on:
     tags: true
+
+# blacklist
+branches:
+  except:
+    - appveyor-build
+    - binary-archive
