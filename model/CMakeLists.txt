@@ -87,7 +87,6 @@ set (Model_CPP
   util/ModelOptions.cpp
   util/CommandLine.cpp
   util/random.cpp
-  util/StreamValidator.cpp
   util/AgeGroupInterpolation.cpp
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp
@@ -103,6 +102,9 @@ set (Model_CPP
   interventions/Vaccine.cpp
 )
 
+if (${OM_STREAM_VALIDATOR})
+  list(APPEND Model_CPP util/StreamValidator.cpp)
+endif (${OM_STREAM_VALIDATOR})
 # Headers - only included so they show up in IDEs:
 # This misses loads of headers. Fix if you care.
 file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/model/*.h")
