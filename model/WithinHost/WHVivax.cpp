@@ -27,6 +27,7 @@
 #include "util/errors.h"
 #include "util/checkpoint_containers.h"
 #include "util/timeConversions.h"
+#include "util/CommandLine.h"
 #include <schema/scenario.h>
 #include <algorithm>
 #include <limits>
@@ -467,9 +468,10 @@ void WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
     // liver-stage treatment is only via "Primaquine" option, if at all
     if( timeLiver != sim::zero() ){
         if( pReceivePQ > 0.0 ){
-            //FIXME: decide how to do this — remove pReceivePQ maybe?
+            // This is only really disallowed to prevent simultaneous treatment through both methods
             throw util::xml_scenario_error("simple treatment for vivax liver "
-            "stages is incompatible with case-management Primaquine option");
+            "stages is incompatible with case-management pUseUncomplicated "
+            "(Primaquine) option; it is suggested to use the former over the latter");
         }
         if( timeLiver >= sim::zero() ){
             treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
@@ -556,7 +558,8 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
         sigmaSecondHypnozoiteRelease = hr.getSecondRelease().get().getSigma();
         pSecondRelease = hr.getPSecondRelease();
         if( pSecondRelease == 0.0){
-            std::cerr << "Warning: probability of second release is set to zero, although secondRelease element is present, will only calculate for a first release." << endl;
+            std::cerr << "Warning: probability of second release is set to zero, "
+                "although secondRelease element is present, will only calculate for a first release." << endl;
         }
         assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
     }
@@ -583,7 +586,15 @@ void WHVivax::setHSParameters(const scnXml::Primaquine& elt){
         if( pHetNoPQ != elt.getPHumanCannotReceive().getValue() )
             throw util::xml_scenario_error( "changeHS cannot change pHumanCannotReceive value" );
     }
-    pReceivePQ = elt.getPUseUncomplicated().getValue();
+    if( elt.getPUseUncomplicated().present() ){
+        if( util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS) ){
+            cerr << "Deprecation warning: pUseUncomplicated is deprecated; it is "
+                "suggested to use the liver stage simple treatment option instead." << endl;
+        }
+        pReceivePQ = elt.getPUseUncomplicated().get().getValue();
+    }else{
+        pReceivePQ = 0.0;
+    }
     effectivenessPQ = elt.getEffectivenessOnUse().getValue();
 }
 

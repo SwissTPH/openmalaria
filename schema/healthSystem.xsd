@@ -159,9 +159,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             name:Probability that human is incompatible with Primaquine treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="pUseUncomplicated" type="om:DoubleValue">
+      <xs:element name="pUseUncomplicated" type="om:DoubleValue" minOccurs="0">
         <xs:annotation>
           <xs:documentation>
+            This feature is deprecated; it is suggested to use the "simple
+            treatment" feature configured to clear liver-stage parasites,
+            leaving this option unset or zero.
+            
             Chance of Primaquine treatment being used for routine treatment of an
             uncomplicated case.
           </xs:documentation>
