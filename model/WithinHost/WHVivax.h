@@ -164,8 +164,8 @@ public:
     
 protected:
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual bool treatSimple(SimTime timeLiver, SimTime timeBlood);
-    virtual bool optionalPqTreatment();
+    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
+    virtual void optionalPqTreatment( const Host::Human& human );
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

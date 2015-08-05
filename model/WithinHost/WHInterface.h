@@ -134,16 +134,12 @@ public:
     //TODO: remove this (use treatSimple instead)
     virtual void treatment( Host::Human& human, TreatmentId treatId ) =0;
     
-    /** Conditionally gives Primaquine as a treatment.
-     * 
-     * Returns true iff PQ is administered. Administered implies either fully
-     * effective or no effect, depending on another probability. Not
-     * administered implies no effect. */
-    virtual bool optionalPqTreatment() =0;
+    /// Conditionally gives Primaquine as a treatment. Reports as appropriate.
+    virtual void optionalPqTreatment( const Host::Human& human ) =0;
     
     /** Treat a patient via the simple treatment model. Return true if any
-     * blood-stage treatment is administered. */
-    virtual bool treatSimple(SimTime timeLiver, SimTime timeBlood) =0;
+     * blood-stage treatment is administered. Report any liver-stage treatments. */
+    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ) =0;
     
     /** Give a patient a course of drugs, via the Pk/Pd model
      * 

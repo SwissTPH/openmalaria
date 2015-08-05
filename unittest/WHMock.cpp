@@ -48,11 +48,11 @@ void WHMock::importInfection(){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-bool WHMock::optionalPqTreatment(){
+void WHMock::optionalPqTreatment(const Host::Human& human){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-bool WHMock::treatSimple(SimTime timeLiver, SimTime timeBlood){
+bool WHMock::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     nTreatments += 1;
     lastTimeLiver = timeLiver;
     lastTimeBlood = timeBlood;
