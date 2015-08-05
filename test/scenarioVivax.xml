@@ -638,16 +638,21 @@
     </human>
     <vivax>
       <probBloodStageInfectiousToMosq value="0.25"/>
-      <numberHypnozoites max="11" base="0.8"/>
-      <!--scale a log-normal by adding log(factor) to mu, this is mu=2.92 in timesteps-->
-      <hypnozoiteReleaseDelayDays mu="4.5294379" sigma="0.956" min="10"/>
+      <hypnozoiteRelease>
+        <numberHypnozoites max="11" base="0.8"/>
+        <!--scale a log-normal by adding log(factor) to mu, this is mu=2.92 in timesteps-->
+        <firstRelease mu="4.5294379" sigma="0.956" latentRelapseDays="10"/>
+      </hypnozoiteRelease>
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
       <bloodStageLengthDays weibullScale="115.0582" weibullShape="2.331"/>
-      <pEventPrimary a="0.9687" b="9.803"/>
-      <pEventSecondary a="0.2098" b="1.812"/>
-      <!-- probability of a clinical event being severe -->
-      <pEventIsSevere value="0.1"/>
+      <clinicalEvents>
+        <pPrimaryInfection a="0.9687" b="9.803"/>
+        <pRelapseOne a="0.2098" b="1.812"/>
+        <pRelapseTwoPlus a="0.2098" b="1.812"/>
+        <!-- probability of a clinical event being severe -->
+        <pEventIsSevere value="0.1"/>
+      </clinicalEvents>
     </vivax>
     <parameters interval="5" iseed="0" latentp="15d">
       <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
