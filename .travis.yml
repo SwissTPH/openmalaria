@@ -41,29 +41,23 @@ install:
 script:
   - make -j2
   - ./openMalaria --version && ldd openMalaria
-  - ctest -j2
-  - ../util/generate-checksums.sh
+  - ctest -j
   - popd
 
 after_success:
+  - util/generate-checksums.sh build
   - util/build-info.sh | tee travis-build.json
-  - echo $TRAVIS_TAG
-  - test "x$TRAVIS_TAG" == "x" \
-    || tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz build/openMalaria* travis-build.json \
-    && rm -v build/openMalaria{,.sha256,.md5} travis-build.json
 
-notifications:
-  email:
-    - tobias.thuering@unibas.ch
+before_deploy:
+  - tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz build/openMalaria* travis-build.json
+  - rm -v openMalaria{,.sha256,.md5} travis-build.json
 
 deploy:
   provider: releases
   api_key:
     secure: dOTDLZ10UHm3JoKODtlBMxChFaXOekUM69S2f6eoAt0ctjFPZXHic2aEUvabeZJqq8UX83xO1I0tGTX7DWMvxd7zPTQHcW9N3XxWvgChKxs4OSqRL7GnunI3iZPH8125ZCeMNuh+oCgf1DdfOy0uOgdygGKzvIYEFhd7c5gOH/I=
   skip_cleanup: true
-  file:
-    - openMalaria-osx.tar.gz
-    - openMalaria-linux.tar.gz
+  file: openMalaria-$TRAVIS_OS_NAME.tar.gz
   on:
     tags: true
 
@@ -73,3 +67,7 @@ branches:
     - appveyor-build
     - binary-archive
     
+notifications:
+  email:
+    - tobias.thuering@unibas.ch
+
