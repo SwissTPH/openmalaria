@@ -46,16 +46,22 @@ SimTime latentP;       // attribute on parameters block
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
 int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
-double muReleaseHypnozoite = numeric_limits<double>::signaling_NaN();   // units: days
-double sigmaReleaseHypnozoite = numeric_limits<double>::signaling_NaN();
-double minReleaseHypnozoite;    // units: days
+int latentRelapseDays1stRelease = 0;
+int latentRelapseDays2ndRelease = 0;
+double pSecondRelease = numeric_limits<double>::signaling_NaN();
+double muFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
+double sigmaFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
+double muSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
+double sigmaSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 SimTime bloodStageProtectionLatency;
 double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
 double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
-double pEventPrimA = numeric_limits<double>::signaling_NaN(),
-    pEventPrimB = numeric_limits<double>::signaling_NaN();
-double pEventSecA = numeric_limits<double>::signaling_NaN(),
-    pEventSecB = numeric_limits<double>::signaling_NaN();
+double pPrimaryA = numeric_limits<double>::signaling_NaN(),
+    pPrimaryB = numeric_limits<double>::signaling_NaN();
+double pRelapseOneA = numeric_limits<double>::signaling_NaN(),
+    pRelapseOneB = numeric_limits<double>::signaling_NaN();
+double pRelapseTwoA = numeric_limits<double>::signaling_NaN(),
+    pRelapseTwoB = numeric_limits<double>::signaling_NaN();
 double pEventIsSevere = numeric_limits<double>::signaling_NaN();
 
 // Set from healthSystem element:
@@ -74,6 +80,7 @@ VivaxBrood *sampleBrood = 0;
 // number of hypnozoites per brood:
 map<double,int> nHypnozoitesProbMap;
 void initNHypnozoites(){
+    assert(baseNumberHypnozoites <= 1 && baseNumberHypnozoites >= 0);
     double total = 0.0;
     for( int n = 0; n <= maxNumberHypnozoites; ++n )
         total += pow( baseNumberHypnozoites, n );
@@ -95,11 +102,43 @@ int sampleNHypnozoites(){
 
 // time to hypnozoite release after initial release:
 SimTime sampleReleaseDelay(){
-    double delay;       // in days
+    if(isnan(pSecondRelease)) {
+        pSecondRelease = 0.0;
+    }
+    bool isFirstRelease =
+            (pSecondRelease == 0.0) ? true :
+            ((pSecondRelease == 1.0) ? false :
+            !random::bernoulli(pSecondRelease) );
+    
+    double mu, sigma;
+    int latentRelapseDays;
+    if (isFirstRelease){
+        // only calculate a random delay from firstRelease distribution
+        mu = muFirstHypnozoiteRelease;
+        sigma = sigmaFirstHypnozoiteRelease;
+        latentRelapseDays = latentRelapseDays1stRelease;
+    } else {
+        // only calculate a random delay from secondRelease distribution
+        mu = muSecondHypnozoiteRelease;
+        sigma = sigmaSecondHypnozoiteRelease;
+        assert(!isnan(latentRelapseDays2ndRelease));
+        latentRelapseDays = latentRelapseDays2ndRelease;
+    }
+    
+    double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
+    double delay = numeric_limits<double>::quiet_NaN();       // in days
+    int count = 0;
+    int maxcount = pow(10,6);
+    
     do{
-        delay = util::random::log_normal( muReleaseHypnozoite, sigmaReleaseHypnozoite );
-    }while( delay < minReleaseHypnozoite );
-    return sim::roundToTSFromDays( delay );
+        delay = util::random::log_normal( mu, sigma );
+        count += 1;
+    }while( (delay > liverStageMaximumDays || delay < 0.0 ) && count < maxcount );
+    if (count == maxcount) {
+        throw util::xml_scenario_error( "<vivax><hypnozoiteRelease>  [random delay calculation causes probably an indefinite loop]:\n The hypnozoite release distribution seems off, sigma of secondRelease could be too high. We except the hypnozoite to reside a maximum of 16 months in the liver stage. Sigma choose well, dear padawan." );
+    }
+    assert( delay >= 0 && delay < liverStageMaximumDays );
+    return sim::roundToTSFromDays( delay + latentRelapseDays );
 }
 
 
@@ -107,7 +146,9 @@ SimTime sampleReleaseDelay(){
 
 VivaxBrood::VivaxBrood( WHVivax *host ) :
         primaryHasStarted( false ),
-        hadEvent( false )
+        relapseHasStarted( false ),
+        hadEvent( false ),
+        hadRelapse( false )
 {
     set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
@@ -115,7 +156,8 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     releases.insert( sim::ts0() + latentP );
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
-        SimTime timeToRelease = sim::ts0() + latentP + sampleReleaseDelay();
+        SimTime randomReleaseDelay = sampleReleaseDelay();
+        SimTime timeToRelease = sim::ts0() + latentP + randomReleaseDelay;
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
@@ -147,13 +189,17 @@ void VivaxBrood::checkpoint( ostream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
     primaryHasStarted & stream;
+    relapseHasStarted & stream;
     hadEvent & stream;
+    hadRelapse & stream;
 }
 VivaxBrood::VivaxBrood( istream& stream ){
     releaseDates & stream;
     bloodStageClearDate & stream;
     primaryHasStarted & stream;
+    relapseHasStarted & stream;
     hadEvent & stream;
+    hadRelapse & stream;
 }
 
 
@@ -182,6 +228,10 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         //NOTE: this is an immunity effect: should there be no immunity when a blood stage first emerges?
         if( bloodStageClearDate + bloodStageProtectionLatency >= sim::ts0() ) continue;
         
+        if( !relapseHasStarted && primaryHasStarted ){
+            relapseHasStarted = true;
+            result.newRelapseBS = true;
+        }
         if( !primaryHasStarted ){
             primaryHasStarted = true;
             result.newPrimaryBS = true;
@@ -223,7 +273,11 @@ void VivaxBrood::treatmentLS(){
 
 // ———  per-host code  ———
 
-WHVivax::WHVivax( double comorbidityFactor ) : cumPrimInf(0) {
+WHVivax::WHVivax( double comorbidityFactor ) :
+    cumPrimInf(0),
+    pEvent( numeric_limits<double>::quiet_NaN() ),
+    pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() )
+{
     if( comorbidityFactor != 1.0 )
 #ifdef WHVivaxSamples
     if( sampleHost == 0 ){
@@ -298,6 +352,9 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     uint32_t oldCumInf = cumPrimInf;
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
+    double oldpEvent = ( isnan(pEvent))? 1.0 : pEvent;
+    // always use the first relapse probability for following relapses as a factor
+    double oldpRelapseEvent = ( isnan(pFirstRelapseEvent))? 1.0 : pFirstRelapseEvent;
     list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
         if( treatmentLiver ) inf->treatmentLS();
@@ -312,15 +369,20 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             bool clinicalEvent;
             if( result.newPrimaryBS ){
                 // Blood stage is primary. oldCumInf wasn't updated yet.
-                double pEvent = pEventPrimA * pEventPrimB / (pEventPrimB+oldCumInf);
-                clinicalEvent = random::bernoulli( pEvent );
+                double pPrimaryInfEvent = pPrimaryA * pPrimaryB / (pPrimaryB+oldCumInf);
+                clinicalEvent = random::bernoulli( pPrimaryInfEvent );
                 inf->setHadEvent( clinicalEvent );
+            } else if ( result.newRelapseBS ){
+                // Blood stage is a relapse. oldCumInf wasn't updated yet.
+                double pFirstRelapseEvent = oldpEvent * (pRelapseOneA * pRelapseOneB / (pRelapseOneB + (oldCumInf-1)));
+                clinicalEvent = random::bernoulli( pFirstRelapseEvent );
+                inf->setHadRelapse( clinicalEvent );
             }else{
                 // Subtract 1 from oldCumInf to not count the current brood in
                 // the number of cumulative primary infections.
-                if( inf->hasHadEvent() ){
-                    double pEvent = pEventSecA * pEventSecB / (pEventSecB + (oldCumInf-1));
-                    clinicalEvent = random::bernoulli( pEvent );
+                if( inf->hasHadRelapse() ){
+                    double pSecondRelapseEvent = oldpRelapseEvent * (pRelapseTwoA * pRelapseTwoB / (pRelapseTwoB + (oldCumInf-1)));
+                    clinicalEvent = random::bernoulli( pSecondRelapseEvent );
                 }else{
                     // If the primary infection did not cause an event, there
                     // is 0 chance of a secondary causing an event in our model.
@@ -446,6 +508,8 @@ void WHVivax::checkpoint(istream& stream){
     cumPrimInf & stream;
     treatExpiryLiver & stream;
     treatExpiryBlood & stream;
+    pEvent & stream;
+    pFirstRelapseEvent & stream;
 }
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
@@ -458,6 +522,8 @@ void WHVivax::checkpoint(ostream& stream){
     cumPrimInf & stream;
     treatExpiryLiver & stream;
     treatExpiryBlood & stream;
+    pEvent & stream;
+    pFirstRelapseEvent & stream;
 }
 
 char const*const not_impl = "feature not available in Vivax model";
@@ -478,20 +544,34 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
         throw util::xml_scenario_error( "no vivax model description in scenario XML" );
     const scnXml::Vivax& elt = model.getVivax().get();
     probBloodStageInfectiousToMosq = elt.getProbBloodStageInfectiousToMosq().getValue();
-    maxNumberHypnozoites = elt.getNumberHypnozoites().getMax();
-    baseNumberHypnozoites = elt.getNumberHypnozoites().getBase();
-    muReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMu();
-    sigmaReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getSigma();
-    minReleaseHypnozoite = elt.getHypnozoiteReleaseDelayDays().getMin();
+    maxNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getMax();
+    baseNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getBase();
+    const scnXml::HypnozoiteRelease& hr = elt.getHypnozoiteRelease();
+    latentRelapseDays1stRelease = hr.getFirstRelease().getLatentRelapseDays();
+    muFirstHypnozoiteRelease = hr.getFirstRelease().getMu();
+    sigmaFirstHypnozoiteRelease = hr.getFirstRelease().getSigma();
+    if(hr.getSecondRelease().present()){
+        latentRelapseDays2ndRelease = hr.getSecondRelease().get().getLatentRelapseDays();
+        muSecondHypnozoiteRelease = hr.getSecondRelease().get().getMu();
+        sigmaSecondHypnozoiteRelease = hr.getSecondRelease().get().getSigma();
+        pSecondRelease = hr.getPSecondRelease();
+        if( pSecondRelease == 0.0){
+            std::cerr << "Warning: probability of second release is set to zero, although secondRelease element is present, will only calculate for a first release." << endl;
+        }
+        assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
+    }
     bloodStageProtectionLatency = sim::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
     
-    pEventPrimA = elt.getPEventPrimary().getA();
-    pEventPrimB = elt.getPEventPrimary().getB();
-    pEventSecA = elt.getPEventSecondary().getA();
-    pEventSecB = elt.getPEventSecondary().getB();
-    pEventIsSevere = elt.getPEventIsSevere().getValue();
+    const scnXml::ClinicalEvents& ce = elt.getClinicalEvents();
+    pPrimaryA = ce.getPPrimaryInfection().getA();
+    pPrimaryB = ce.getPPrimaryInfection().getB();
+    pRelapseOneA = ce.getPRelapseOne().getA();
+    pRelapseOneB = ce.getPRelapseOne().getB();
+    pRelapseTwoA = ce.getPRelapseTwoPlus().getA();
+    pRelapseTwoB = ce.getPRelapseTwoPlus().getB();
+    pEventIsSevere = ce.getPEventIsSevere().getValue();
     
     initNHypnozoites();
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), true );

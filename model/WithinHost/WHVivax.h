@@ -65,8 +65,8 @@ public:
     VivaxBrood( istream& stream );
     
     struct UpdResult{
-        UpdResult() : newPrimaryBS(false), newBS(false) {}
-        bool newPrimaryBS, newBS, isFinished;
+        UpdResult() : newPrimaryBS(false), newRelapseBS(false), newBS(false) {}
+        bool newPrimaryBS, newRelapseBS, newBS, isFinished;
     };
     /**
      * Do per time step update: remove finished blood stage infections and act
@@ -80,6 +80,8 @@ public:
     
     inline void setHadEvent( bool hadEvent ){ this->hadEvent = hadEvent; }
     inline bool hasHadEvent()const{ return hadEvent; }
+    inline void setHadRelapse( bool hadRelapse ){ this->hadRelapse = hadRelapse; }
+    inline bool hasHadRelapse()const{ return hadRelapse; }
     
     /** Equivalent to a blood stage existing. We do not model incidence of
      * gametocytes independently, thus this also tests existance of
@@ -107,9 +109,15 @@ private:
     
     // Whether the primary blood stage infection has started
     bool primaryHasStarted;
-    
+
+    // Whether the relapse blood stage infection has started
+    bool relapseHasStarted;
+
     // Whether any clinical event has been triggered by this brood
     bool hadEvent;
+
+    // Whether a relapse event has been triggered by this brood
+    bool hadRelapse;
 };
 
 /**
@@ -184,6 +192,11 @@ private:
     
     // Either never or expiry time of treatment
     SimTime treatExpiryLiver, treatExpiryBlood;
+
+    // The probability of a clinical event from a first infection
+    double pEvent;
+    // The probability of a clinical event from a relapse
+    double pFirstRelapseEvent;
 
     friend class ::UnittestUtil;
 };
