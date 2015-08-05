@@ -40,7 +40,8 @@ install:
 
 script:
   - make -j2
-  - ./openMalaria --version && ldd openMalaria
+  - ./openMalaria --version
+  - test "$TRAVIS_OS_NAME" == "linux" && ldd openMalaria || otool -L openMalaria
   - ctest -j
   - popd
 
