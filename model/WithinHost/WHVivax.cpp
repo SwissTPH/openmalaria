@@ -432,22 +432,15 @@ void WHVivax::clearImmunity(){
 }
 
 void WHVivax::treatment( Host::Human& human, TreatmentId treatId ){
-    //TODO: something less ugly than this. Possibly we should revise code to
-    // make Pf and Pv treatment models work more similarly.
-    // For now we rely on the check in Treatments::Treatments(...).
-    
-    // This means clear blood stage infection(s) but not liver stage.
-    for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
-        it->treatmentBS();
-    }
+    const Treatments& treat = Treatments::select( treatId );
+    treatSimple( human, treat.liverEffect(), treat.bloodEffect() );
     
     // triggered intervention deployments:
-    const Treatments& treat = Treatments::select( treatId );
     treat.deploy( human,
                   mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
-bool WHVivax::optionalPqTreatment(){
+void WHVivax::optionalPqTreatment( const Host::Human& human ){
     // PQ clears liver stages. We don't worry about the effect of PQ on
     // gametocytes, because these are always cleared by blood-stage drugs with
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
@@ -457,11 +450,10 @@ bool WHVivax::optionalPqTreatment(){
                 it->treatmentLS();
             }
         }
-        return true;    // chose to use PQ whether effective or not
+        mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
     }
-    return false;       // didn't use PQ
 }
-bool WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
+bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     //TODO: this should be implemented properly (allowing effects on next
     // update instead of now)
     
@@ -482,6 +474,7 @@ bool WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
                 }
             }
         }
+        mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
     }
     
     // there probably will be blood-stage treatment

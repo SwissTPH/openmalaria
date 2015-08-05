@@ -50,8 +50,8 @@ public:
     virtual bool summarize(const Host::Human& human)const;
     virtual void importInfection();
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual bool optionalPqTreatment();
-    virtual bool treatSimple(SimTime timeLiver, SimTime timeBlood);
+    virtual void optionalPqTreatment( const Host::Human& human );
+    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     virtual void treatPkPd(size_t schedule, size_t dosages, double age);
     virtual void update(int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;

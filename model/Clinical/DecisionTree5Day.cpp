@@ -101,8 +101,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
             mon::reportMHI( measures[regimen], human, 1 );
         }
         
-        if( human.withinHostModel->optionalPqTreatment() )
-            mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
+        human.withinHostModel->optionalPqTreatment(human);
     } else {
         // No care sought
     }
