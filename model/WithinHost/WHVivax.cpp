@@ -473,11 +473,13 @@ void WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
             "stages is incompatible with case-management pUseUncomplicated "
             "(Primaquine) option; it is suggested to use the former over the latter");
         }
-        if( timeLiver >= sim::zero() ){
-            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
-        }else{
-            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
-                it->treatmentLS();
+        if( !noPQ && (effectivenessPQ == 1.0 || random::bernoulli(effectivenessPQ)) ){
+            if( timeLiver >= sim::zero() ){
+                treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
+            }else{
+                for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+                    it->treatmentLS();
+                }
             }
         }
     }
