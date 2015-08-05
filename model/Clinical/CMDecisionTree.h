@@ -48,7 +48,7 @@ struct  CMHostData {
 /** All output data from the decision tree. */
 struct CMDTOut {
     CMDTOut(bool t) : treated(t) {}
-    bool treated;       // true iff some treatment was administered
+    bool treated;       // true iff some blood-stage treatment was administered
 };
 
 

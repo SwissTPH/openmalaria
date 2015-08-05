@@ -52,10 +52,11 @@ bool WHMock::optionalPqTreatment(){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::treatSimple(SimTime timeLiver, SimTime timeBlood){
+bool WHMock::treatSimple(SimTime timeLiver, SimTime timeBlood){
     nTreatments += 1;
     lastTimeLiver = timeLiver;
     lastTimeBlood = timeBlood;
+    return timeBlood != sim::zero();
 }
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages, double age){

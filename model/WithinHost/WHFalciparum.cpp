@@ -191,7 +191,7 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
                   mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
-void WHFalciparum::treatSimple(SimTime timeLiver, SimTime timeBlood){
+bool WHFalciparum::treatSimple(SimTime timeLiver, SimTime timeBlood){
     if( timeLiver != sim::zero() ){
         if( timeLiver < sim::zero() )
             clearInfections( Treatments::LIVER );
@@ -203,7 +203,9 @@ void WHFalciparum::treatSimple(SimTime timeLiver, SimTime timeBlood){
             clearInfections( Treatments::BLOOD );
         else
             treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
+        return true;    // blood stage treatment
     }
+    return false;    // no blood stage treatment
 }
 
 Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){

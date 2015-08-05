@@ -461,7 +461,7 @@ bool WHVivax::optionalPqTreatment(){
     }
     return false;       // didn't use PQ
 }
-void WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
+bool WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
     //TODO: this should be implemented properly (allowing effects on next
     // update instead of now)
     
@@ -485,14 +485,18 @@ void WHVivax::treatSimple(SimTime timeLiver, SimTime timeBlood){
     }
     
     // there probably will be blood-stage treatment
-    if( timeBlood < sim::zero() ){
-        // legacy mode: retroactive clearance
-        for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
-            it->treatmentBS();
+    if( timeBlood != sim::zero() ){
+        if( timeBlood < sim::zero() ){
+            // legacy mode: retroactive clearance
+            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+                it->treatmentBS();
+            }
+        }else{
+            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
         }
-    }else if( timeBlood > sim::zero() ){
-        treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
+        return true;    // blood stage treatment
     }
+    return false;    // no blood stage treatment
 }
 
 

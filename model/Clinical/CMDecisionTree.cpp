@@ -362,8 +362,8 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        hostData.withinHost().treatSimple( timeLiver, timeBlood );
-        return CMDTOut(true);
+        bool bsTreatment = hostData.withinHost().treatSimple( timeLiver, timeBlood );
+        return CMDTOut(bsTreatment);
     }
     
 private:

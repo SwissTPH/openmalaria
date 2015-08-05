@@ -141,8 +141,9 @@ public:
      * administered implies no effect. */
     virtual bool optionalPqTreatment() =0;
     
-    /** Treat a patient via the simple treatment model. */
-    virtual void treatSimple(SimTime timeLiver, SimTime timeBlood) =0;
+    /** Treat a patient via the simple treatment model. Return true if any
+     * blood-stage treatment is administered. */
+    virtual bool treatSimple(SimTime timeLiver, SimTime timeBlood) =0;
     
     /** Give a patient a course of drugs, via the Pk/Pd model
      * 
