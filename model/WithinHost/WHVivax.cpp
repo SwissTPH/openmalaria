@@ -579,23 +579,28 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     initNHypnozoites();
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), true );
 }
-void WHVivax::setHSParameters(const scnXml::Primaquine& elt){
-    if( pHetNoPQ != pHetNoPQ )// not set yet
-        pHetNoPQ = elt.getPHumanCannotReceive().getValue();
-    else{
-        if( pHetNoPQ != elt.getPHumanCannotReceive().getValue() )
-            throw util::xml_scenario_error( "changeHS cannot change pHumanCannotReceive value" );
-    }
-    if( elt.getPUseUncomplicated().present() ){
-        if( util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS) ){
-            cerr << "Deprecation warning: pUseUncomplicated is deprecated; it is "
-                "suggested to use the liver stage simple treatment option instead." << endl;
-        }
-        pReceivePQ = elt.getPUseUncomplicated().get().getValue();
-    }else{
+void WHVivax::setHSParameters(const scnXml::Primaquine* elt){
+    double oldPHetNoPQ = pHetNoPQ;
+    if( elt == 0 ){
+        pHetNoPQ = 0.0;
         pReceivePQ = 0.0;
+        effectivenessPQ = 1.0;  // sensible default: does not affect simple liver stage treatment option
+    }else{
+        pHetNoPQ = elt->getPHumanCannotReceive().getValue();
+        pReceivePQ = elt->getPUseUncomplicated().present() ?
+            elt->getPUseUncomplicated().get().getValue() :  0.0;
+        if( pReceivePQ > 0.0 ){
+            if( util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS) ){
+                cerr << "Deprecation warning: pUseUncomplicated is deprecated; it is "
+                    "suggested to use the liver stage simple treatment option instead." << endl;
+            }
+        }
+        effectivenessPQ = elt->getEffectivenessOnUse().getValue();
     }
-    effectivenessPQ = elt.getEffectivenessOnUse().getValue();
+    
+    if( !isnan(oldPHetNoPQ) && oldPHetNoPQ != pHetNoPQ ){
+        throw util::xml_scenario_error( "changeHS cannot change pHumanCannotReceive value" );
+    }
 }
 
 }

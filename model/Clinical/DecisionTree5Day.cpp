@@ -65,10 +65,12 @@ void DecisionTree5Day::setHealthSystem(const scnXml::HSDT5Day& hsDescription){
     cureRateSevere = hsDescription.getCureRateSevere().getValue();
     treatmentSevere = WHInterface::addTreatment( hsDescription.getTreatmentSevere() );
     
-    if( hsDescription.getPrimaquine().present() ){
-        if( !ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
-            throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
-        WithinHost::WHVivax::setHSParameters( hsDescription.getPrimaquine().get() );
+    if( ModelOptions::option(util::VIVAX_SIMPLE_MODEL) ){
+        WithinHost::WHVivax::setHSParameters(
+            hsDescription.getPrimaquine().present() ?
+            &hsDescription.getPrimaquine().get() : 0 );
+    }else if( hsDescription.getPrimaquine().present() ){
+        throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
     }
 }
 

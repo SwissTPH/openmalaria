@@ -143,6 +143,10 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:annotation>
       <xs:documentation>
         Parameters for Primaquine treatment; for use with the Vivax model only.
+        
+        Note: if this section is not listed, the following default values are
+        assumed: pHumanCannotReceive=0, pUseUncomplicated=0,
+        effectivenessOnUse=1.
       </xs:documentation>
       <xs:appinfo>name:Primquine treatment parameters (Vivax);</xs:appinfo>
     </xs:annotation>
