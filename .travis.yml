@@ -50,7 +50,6 @@ after_success:
 
 before_deploy:
   - tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz build/openMalaria* travis-build.json
-  - rm -v openMalaria{,.sha256,.md5} travis-build.json
 
 deploy:
   provider: releases
