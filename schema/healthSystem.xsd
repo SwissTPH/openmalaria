@@ -163,6 +163,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             name:Probability that human is incompatible with Primaquine treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
+      <xs:element name="ignoreCannotReceive" type="om:BooleanValue" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            If true, ignore pHumanCannotReceive and consider all humans eligible
+            for treatment; if false (or not specified), do not treat those demed
+            incompatible with Primaquine treatment.
+            
+            The point of this is that pHumanCannotReceive cannot be altered by
+            changeHS interventions, but this property can be.
+          </xs:documentation>
+          <xs:appinfo>name:Ignore Primaquine treatment incompatibility;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="pUseUncomplicated" type="om:DoubleValue" minOccurs="0">
         <xs:annotation>
           <xs:documentation>

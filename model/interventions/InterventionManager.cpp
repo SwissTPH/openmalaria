@@ -353,12 +353,13 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTim
     // Only redeploy those which happened before this time step.
     assert( nextTimed == 0 );
     while( timed[nextTimed].time < interventionTime ){
-        if( dynamic_cast<TimedChangeHSDeployment*>(&timed[nextTimed])!=0 ||
-            dynamic_cast<TimedChangeEIRDeployment*>(&timed[nextTimed])!=0 ){
+        TimedDeployment *deployment = &timed[nextTimed];
+        if( dynamic_cast<TimedChangeHSDeployment*>(deployment)!=0 ||
+            dynamic_cast<TimedChangeEIRDeployment*>(deployment)!=0 ){
             //Note: neither changeHS nor changeEIR interventions care what the
             //current time step is when they are deployed, so we don't need to
             //tell them the deployment time.
-            timed[nextTimed].deploy( population );
+            deployment->deploy( population );
         }
         nextTimed += 1;
     }

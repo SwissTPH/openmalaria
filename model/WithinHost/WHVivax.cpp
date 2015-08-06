@@ -66,6 +66,7 @@ double pRelapseTwoA = numeric_limits<double>::signaling_NaN(),
 double pEventIsSevere = numeric_limits<double>::signaling_NaN();
 
 // Set from healthSystem element:
+bool ignoreNoPQ = false;
 double pHetNoPQ = numeric_limits<double>::signaling_NaN();
 double pReceivePQ = numeric_limits<double>::signaling_NaN();
 double effectivenessPQ = numeric_limits<double>::signaling_NaN();
@@ -444,7 +445,7 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
     // PQ clears liver stages. We don't worry about the effect of PQ on
     // gametocytes, because these are always cleared by blood-stage drugs with
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
-    if (pReceivePQ > 0.0 && !noPQ && random::bernoulli(pReceivePQ)){
+    if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && random::bernoulli(pReceivePQ)){
         if( random::bernoulli(effectivenessPQ) ){
             for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
@@ -465,7 +466,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
             "stages is incompatible with case-management pUseUncomplicated "
             "(Primaquine) option; it is suggested to use the former over the latter");
         }
-        if( !noPQ && (effectivenessPQ == 1.0 || random::bernoulli(effectivenessPQ)) ){
+        if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || random::bernoulli(effectivenessPQ)) ){
             if( timeLiver >= sim::zero() ){
                 treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
             }else{
@@ -581,10 +582,13 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
 void WHVivax::setHSParameters(const scnXml::Primaquine* elt){
     double oldPHetNoPQ = pHetNoPQ;
     if( elt == 0 ){
+        ignoreNoPQ = false;
         pHetNoPQ = 0.0;
         pReceivePQ = 0.0;
         effectivenessPQ = 1.0;  // sensible default: does not affect simple liver stage treatment option
     }else{
+        ignoreNoPQ = elt->getIgnoreCannotReceive().present() ?
+            elt->getIgnoreCannotReceive().get().getValue() : false;
         pHetNoPQ = elt->getPHumanCannotReceive().getValue();
         pReceivePQ = elt->getPUseUncomplicated().present() ?
             elt->getPUseUncomplicated().get().getValue() :  0.0;
