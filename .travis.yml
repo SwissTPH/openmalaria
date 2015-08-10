@@ -42,7 +42,7 @@ script:
   - make -j2
   - ./openMalaria --version
   - test "$TRAVIS_OS_NAME" == "linux" && ldd openMalaria || otool -L openMalaria
-  - ./unittest
+  - pushd unittest && ./unittest && popd
   - popd
 
 after_success:
