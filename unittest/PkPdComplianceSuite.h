@@ -35,8 +35,8 @@ using namespace OM;
 using namespace OM::PkPd;
 
 // Use one of these to switch verbosity on/off:
-#define PCS_VERBOSE( x )
-//#define PCS_VERBOSE( x ) x
+//#define PCS_VERBOSE( x )
+#define PCS_VERBOSE( x ) x
 
 /** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
  * model. Numbers should agree (up to rounding errors of around 5e-3). */
