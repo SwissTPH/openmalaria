@@ -822,10 +822,69 @@
   </xs:complexType>
 
   <xs:complexType name="Primaquine">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters for Primaquine treatment; for use with the Vivax model only.
+        
+        Note: if this section is not listed, the following default values are
+        assumed: pHumanCannotReceive=0, pUseUncomplicated=0,
+        effectivenessOnUse=1.
+      </xs:documentation>
+      <xs:appinfo>name:Primquine treatment parameters (Vivax);</xs:appinfo>
+    </xs:annotation>
     <xs:all>
-      <xs:element name="pHumanCannotReceive" type="om:DoubleValue"/>
-      <xs:element name="pUseUncomplicated" type="om:DoubleValue"/>
-      <xs:element name="effectivenessOnUse" type="om:DoubleValue"/>
+      <xs:element name="pHumanCannotReceive" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            Chance that a human is determined to be unable to receive Primaquine
+            treatment. Treatment is neither reported or given for such humans.
+            
+            This is sampled once per human at birth.
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;
+            name:Probability that human is incompatible with Primaquine treatment;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="ignoreCannotReceive" type="om:BooleanValue">
+        <xs:annotation>
+          <xs:documentation>
+            If true, ignore pHumanCannotReceive and consider all humans eligible
+            for treatment; if false (or not specified), do not treat those demed
+            incompatible with Primaquine treatment.
+            
+            The point of this is that pHumanCannotReceive cannot be altered by
+            changeHS interventions, but this property can be.
+          </xs:documentation>
+          <xs:appinfo>name:Ignore Primaquine treatment incompatibility;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" name="pUseUncomplicated" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            This feature is deprecated; it is suggested to use the &quot;simple
+            treatment&quot; feature configured to clear liver-stage parasites,
+            leaving this option unset or zero.
+            
+            Chance of Primaquine treatment being used for routine treatment of an
+            uncomplicated case.
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;name:Prob use in UC case;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectivenessOnUse" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            Chance that Primaquine treatment is effective.
+            
+            On application, a random variable is sampled against this probability.
+            If false, the treatment does nothing; if true, the treatment clears all
+            liver stage parasites. Where effectiveness is longer than a single
+            time step (prophylactic effect), this sample still only happens once
+            (thus either no effect or all liver stages cleared over multiple steps).
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;name:Effectiveness;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:all>
   </xs:complexType>
   
@@ -2132,6 +2191,14 @@
     <xs:attribute name="value" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>An integer value.</xs:documentation>
+        <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="BooleanValue">
+    <xs:attribute name="value" type="xs:boolean" use="required">
+      <xs:annotation>
+        <xs:documentation>A boolean value.</xs:documentation>
         <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
