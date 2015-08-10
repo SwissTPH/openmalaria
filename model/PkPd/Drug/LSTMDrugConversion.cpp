@@ -102,7 +102,7 @@ double func_convFactor( double t, void* pp ){
     const double cnM = pow(cM, p.nM);        // (mg/l) ^ n
     const double fCM = p.VM * cnM / (cnM + p.KnM);       // unitless
 	// use the most effective killing factor, which is the one with the smallest number
-    return min(fCP,fCM);
+    return max(fCP,fCM);
 }
 const size_t GSL_INTG_CONV_MAX_ITER = 1000;     // 10 seems enough, but no harm in using a higher value
 gsl_integration_workspace *gsl_intgr_conv_wksp = gsl_integration_workspace_alloc (GSL_INTG_CONV_MAX_ITER);
