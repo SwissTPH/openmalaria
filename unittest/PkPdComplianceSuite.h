@@ -112,7 +112,7 @@ public:
             double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
             PCS_VERBOSE(cout << "\033[35m";)
-            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 1, 1e-3);
+            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-24);
             PCS_VERBOSE(cout << "\033[0m";)
             PCS_VERBOSE(double errorF = totalFac - drug_factors[i];)
             
