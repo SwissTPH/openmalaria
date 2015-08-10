@@ -101,7 +101,7 @@ double func_convFactor( double t, void* pp ){
     const double fCP = p.VP * cnP / (cnP + p.KnP);       // unitless
     const double cnM = pow(cM, p.nM);        // (mg/l) ^ n
     const double fCM = p.VM * cnM / (cnM + p.KnM);       // unitless
-	// use the most effective killing factor, which is the one with the smallest number
+    // use the most effective killing factor (from area under the drug kill curve), which is the one with the bigger number
     return max(fCP,fCM);
 }
 const size_t GSL_INTG_CONV_MAX_ITER = 1000;     // 10 seems enough, but no harm in using a higher value
