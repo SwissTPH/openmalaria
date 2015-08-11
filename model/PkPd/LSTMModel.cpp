@@ -110,10 +110,16 @@ void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double b
 
 double LSTMModel::getDrugConc (size_t drug_index) const{
     double c = 0.0;
+    double d = 0.0;
     for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        c += drug->getConcentration(drug_index);
+        d = drug->getConcentration(drug_index);
+        if(d <= 0.0){
+            cout << "ERROR! concentration is lower than zero: " << d << "with drug_index: " << drug_index << endl;
+        }
+        c += d;
     }
+    assert(c >= 0.0);
     return c;
 }
 
