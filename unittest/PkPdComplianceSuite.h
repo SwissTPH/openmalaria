@@ -201,7 +201,7 @@ public:
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
-    void _testCQ () {
+    void testCQ () {
         const double dose = 10 * bodymass;
         assembleCQDosageSchedule(dose);
         const double drug_conc[] = { 0.0, 0.03257216, 0.06440052, 0.07921600, 0.07740709, 0.07563948 };
@@ -218,7 +218,7 @@ public:
         runDrugSimulations("DHA", drug_conc, drug_factors);
     }
     
-    void _testLF () {
+    void testLF () {
         const double dose = 12 * bodymass;   // 12 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
         const double drug_conc[] = { 0, 1.014434363, 1.878878305, 2.615508841, 2.228789614, 1.899249226 };
@@ -226,7 +226,7 @@ public:
         runDrugSimulations("LF", drug_conc, drug_factors);
     }
     
-    void _testMQ () {
+    void testMQ () {
         const double dose = 8.3 * bodymass;   // 8.3 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose) ;
         const double drug_conc[] = { 0, 0.378440101, 0.737345129, 1.077723484,
@@ -237,7 +237,7 @@ public:
     }
     
     // PPQ with a 1-compartment model (not preferred)
-    void _testPPQ1C (){
+    void testPPQ1C (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
         const double drug_conc[] = { 0, 0.116453464, 0.2294652081, 0.339137, 0.3291139387, 0.3193871518 };
@@ -247,7 +247,7 @@ public:
     }
     
     // PPQ with a 2-compartment model (Hodel2013)
-    void _testPPQ_Hodel2013 (){
+    void testPPQ_Hodel2013 (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
         const double drug_conc[] = { 0, 0.0724459062, 0.1218019809,
@@ -258,7 +258,7 @@ public:
     }
     
     // PPQ with a 3-compartment model (Tarning 2012 AAC)
-    void _testPPQ_Tarning2012AAC (){
+    void testPPQ_Tarning2012AAC (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
         const double drug_conc[] = { 0, 0.0768788483, 0.1201694285,
