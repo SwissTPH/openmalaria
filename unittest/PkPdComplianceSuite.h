@@ -138,7 +138,7 @@ public:
                     << "|" << conc/drug_conc[i] << " \033[33m|";
                 if( secondDrug ){
                     errorC = conc2 - drug2_conc[i];
-                    cout << " " << conc2 << " | " << errorC;
+                    cout << " " << conc2 << " | " << errorC << "|";
                 } else {
                     cout << " | ";
                 }
