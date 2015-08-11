@@ -115,7 +115,7 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
             drug != end; ++drug ){
         d = drug->getConcentration(drug_index);
         if(d <= 0.0){
-            cout << "ERROR! concentration is lower than zero: " << d << "with drug_index: " << drug_index << endl;
+            cout << "ERROR! concentration is lower than zero: " << d << " drug_index: " << drug_index << endl;
         }
         c += d;
     }
