@@ -131,14 +131,15 @@ public:
                 cout << "\033[0m"
                     << "|" << i
                     << "|\033[33m " << totalFac
-                    << "|" << errorF << "\033[0m"
-                    << "|\033[31m " << totalFac / drug_factors[i] << "\033[0m"
+                    << "|\033[31m " << errorF
+                    << "| " << 100 - floor((totalFac / drug_factors[i] )*10000)/100 << "% \033[0m"
                     << "|\033[32m " << conc
-                    << "|" << errorC
-                    << "|" << conc/drug_conc[i] << " \033[33m|";
+                    << "|\033[31m " << errorC
+                    << "|" << 100 - floor((conc / drug_conc[i] )*10000)/100 << "% \033[33m|";
                 if( secondDrug ){
                     errorC = conc2 - drug2_conc[i];
-                    cout << " " << conc2 << " | " << errorC << "|";
+                    assert(conc2 >= 0.0);
+                    cout << " " << conc2 << " |\033[31m " << errorC << "|";
                 } else {
                     cout << " | ";
                 }
