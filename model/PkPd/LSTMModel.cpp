@@ -115,7 +115,10 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
             drug != end; ++drug ){
         d = drug->getConcentration(drug_index);
         if(d < 0.0){
-            cout << "ERROR! concentration is lower than zero: " << d << " drug_index: " << drug_index << endl;
+            // FIXME: @tph-thuering, 2015-08-11:
+            // This is trying to circumvent an issue we have with negative metabolite concentration values in the implementation of the conversion model. see #53
+            cerr << "ERROR! concentration is lower than zero, setting it to zero for now: " << d << " drug_index: " << drug_index << endl;
+            d = 0.0;
         }
         c += d;
     }

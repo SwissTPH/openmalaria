@@ -54,6 +54,8 @@ public:
     
     virtual double calculateDrugFactor(uint32_t genotype, double body_mass) const;
     virtual void updateConcentration (double body_mass);
+    double getMetaboliteConcentration() const;
+    double getParentConcentration() const;
     
 protected:
     virtual void checkpoint (istream& stream);
