@@ -226,18 +226,22 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     }
     last_bm = body_mass;
     
+    Params_convFactor p;
+    p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
+
     // decay "constants" (dependent on body mass):
     const double nkP = nkP_sample * pow(body_mass, parentType.neg_m_exponent());      // -y
     const double nconv = nconv_sample * pow(body_mass, parentType.neg_m_exponent());  // -z
-    const double nkM = nkM_sample * pow(body_mass, metaboliteType.neg_m_exponent());  // -k
-    const double nl = nkP + nconv;    // -(y + z)
+    p.nka = nka;        // -x
+    p.nkM = nkM_sample * pow(body_mass, metaboliteType.neg_m_exponent());  // -k
+    p.nl = nkP + nconv;    // -(y + z)
     
-    const double f = nka / (nl - nka);     // x*A' /  (y+z-x)
+    p.f = nka / (p.nl - nka);     // x*A' /  (y+z-x)
     const double rz = parentType.molecular_weight_ratio() * nconv;
-    const double g = rz * nka / ((nka - nl) * (nka - nkM));
-    const double h = rz * nka / ((nka - nl) * (nkM - nl));
-    const double i = rz / (nl - nkM);
-    const double j = rz * nka / ((nkM - nl) * (nkM - nka));
+    p.g = rz * nka / ((nka - p.nl) * (nka - p.nkM));
+    p.h = rz * nka / ((nka - p.nl) * (p.nkM - p.nl));
+    p.i = rz / (p.nl - p.nkM);
+    p.j = rz * nka / ((p.nkM - p.nl) * (p.nkM - nka));
     
     double time = 0.0, duration;
     size_t doses_taken = 0;
@@ -246,10 +250,9 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( (duration = time_conc.first - time) > 0.0 ){
-                const double expAbsorb = exp(nka * duration), expPLoss = exp(nl * duration);
-                qtyM = g * qtyG * expAbsorb + (h * qtyG - i * qtyP) * expPLoss -
-                    (i * qtyP - j * qtyG + qtyM) * exp(nkM * duration);
-                qtyP = f * qtyG * expAbsorb + (qtyP - f * qtyG) * expPLoss;
+                const double expAbsorb = exp(nka * duration), expPLoss = exp(p.nl * duration);
+                qtyM = calculateMetaboliteQuantity(p, qtyG, qtyP, qtyM, expAbsorb, expPLoss, duration);
+                qtyP = calculateParentQuantity(p, qtyG, qtyP, expAbsorb, expPLoss);
                 qtyG *= expAbsorb;
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
@@ -262,10 +265,9 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     }
     if( time < 1.0 ){
         duration = 1.0 - time;
-        const double expAbsorb = exp(nka * duration), expPLoss = exp(nl * duration);
-        qtyM = g * qtyG * expAbsorb + (h * qtyG - i * qtyP) * expPLoss -
-            (i * qtyP - j * qtyG + qtyM) * exp(nkM * duration);
-        qtyP = f * qtyG * expAbsorb + (qtyP - f * qtyG) * expPLoss;
+        const double expAbsorb = exp(nka * duration), expPLoss = exp(p.nl * duration);
+        qtyM = calculateMetaboliteQuantity(p, qtyG, qtyP, qtyM, expAbsorb, expPLoss, duration);
+        qtyP = calculateParentQuantity(p, qtyG, qtyP, expAbsorb, expPLoss);
         qtyG *= expAbsorb;
     }
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
