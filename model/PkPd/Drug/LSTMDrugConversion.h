@@ -65,7 +65,8 @@ protected:
     
     //TODO: do we need to link these?
     const LSTMDrugType &parentType, &metaboliteType;
-    
+
+    void setParameters(Params_convFactor& p, double nka, const LSTMDrugType& parentType, double nconv_sample, double nkP_sample, const LSTMDrugType& metaboliteType, double nkM_sample, double body_mass) const;
     /// Amount of parent drug in gut, parent drug in circulation and metabolite
     // in circulation; units: mg. In the paper, these are labelled A, B, C.
     //TODO: move metabolite data to a separate class object? Or not?

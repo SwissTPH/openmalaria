@@ -171,20 +171,7 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
     
     Params_convFactor p;
     p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
-    
-    // decay "constants" (dependent on body mass):
-    const double nkP = nkP_sample * pow(body_mass, parentType.neg_m_exponent());      // -y
-    const double nconv = nconv_sample * pow(body_mass, parentType.neg_m_exponent());  // -z
-    p.nka = nka;        // -x
-    p.nkM = nkM_sample * pow(body_mass, metaboliteType.neg_m_exponent());  // -k
-    p.nl = nkP + nconv;    // -(y + z)
-    
-    p.f = nka / (p.nl - nka);     // x*A' /  (y+z-x)
-    const double rz = parentType.molecular_weight_ratio() * nconv;
-    p.g = rz * nka / ((nka - p.nl) * (nka - p.nkM));
-    p.h = rz * nka / ((nka - p.nl) * (p.nkM - p.nl));
-    p.i = rz / (p.nl - p.nkM);
-    p.j = rz * nka / ((p.nkM - p.nl) * (p.nkM - nka));
+    setParameters(p, nka, parentType, nconv_sample, nkP_sample, metaboliteType, nkM_sample, body_mass);
     
     p.invVdP = 1.0 / (vol_dist * body_mass); p.invVdM = 1.0 / (vol_dist_metabolite * body_mass);
     const LSTMDrugPD& pdP = parentType.getPD(genotype), &pdM = metaboliteType.getPD(genotype);
@@ -220,15 +207,7 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
     return totalFactor;
 }
 
-void LSTMDrugConversion::updateConcentration( double body_mass ){
-    if( qtyG == 0.0 && qtyP == 0.0 && qtyM == 0.0 && doses.size() == 0 ){
-        return; // nothing to do
-    }
-    last_bm = body_mass;
-    
-    Params_convFactor p;
-    p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
-
+void LSTMDrugConversion::setParameters(Params_convFactor& p, double nka, const LSTMDrugType& parentType, double nconv_sample, double nkP_sample, const LSTMDrugType& metaboliteType, double nkM_sample, double body_mass) const{
     // decay "constants" (dependent on body mass):
     const double nkP = nkP_sample * pow(body_mass, parentType.neg_m_exponent());      // -y
     const double nconv = nconv_sample * pow(body_mass, parentType.neg_m_exponent());  // -z
@@ -242,6 +221,17 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     p.h = rz * nka / ((nka - p.nl) * (p.nkM - p.nl));
     p.i = rz / (p.nl - p.nkM);
     p.j = rz * nka / ((p.nkM - p.nl) * (p.nkM - nka));
+}
+
+void LSTMDrugConversion::updateConcentration( double body_mass ){
+    if( qtyG == 0.0 && qtyP == 0.0 && qtyM == 0.0 && doses.size() == 0 ){
+        return; // nothing to do
+    }
+    last_bm = body_mass;
+    
+    Params_convFactor p;
+    p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
+    setParameters(p, nka, parentType, nconv_sample, nkP_sample, metaboliteType, nkM_sample, body_mass);
     
     double time = 0.0, duration;
     size_t doses_taken = 0;
