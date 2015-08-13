@@ -132,10 +132,10 @@ public:
                     << "|" << i
                     << "|\033[33m " << totalFac
                     << "|\033[31m " << errorF
-                    << "| " << 100 - floor((totalFac / drug_factors[i] )*10000)/100 << "% \033[0m"
+                    << "| " << (totalFac / drug_factors[i] - 1) * 100 << "% \033[0m"
                     << "|\033[32m " << conc
                     << "|\033[31m " << errorC
-                    << "|" << 100 - floor((conc / drug_conc[i] )*10000)/100 << "% \033[33m|";
+                    << "|" << (conc / drug_conc[i] - 1) * 100 << "% \033[33m|";
                 if( secondDrug ){
                     errorC = conc2 - drug2_conc[i];
                     assert(conc2 >= 0.0);
