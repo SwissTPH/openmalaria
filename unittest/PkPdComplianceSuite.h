@@ -187,11 +187,11 @@ public:
                 // calculate relative and absolute differences to expected values
 
                 f_abs_error = res_Fac[i] - drug_factors[i];
-                f_rel_error = floor((res_Fac[i] / drug_factors[i] -1 )*10000)/100;
+                f_rel_error = floor((res_Fac[i] / drug_factors[i] -1 )*1000000)/10000;
                 c_abs_error = res_Conc[i] - drug_conc[i];
-                c_rel_error = floor((res_Conc[i] / drug_conc[i] - 1 )*10000)/100;
+                c_rel_error = floor((res_Conc[i] / drug_conc[i] - 1 )*1000000)/10000;
                 c2_abs_error = secondDrug ? res_Conc2[i] - drug2_conc[i] : 0.0;
-                c2_rel_error = secondDrug ? floor((res_Conc2[i] / drug2_conc[i] - 1 )*10000)/100: 0.0;
+                c2_rel_error = secondDrug ? floor((res_Conc2[i] / drug2_conc[i] - 1 )*1000000)/10000: 0.0;
 
                 // (parent) drug debug
                 drugDebugOutputLine(secondDrug, i, res_Fac[i], f_abs_error, f_rel_error, res_Conc[i], c_abs_error, c_rel_error, "P", fmt);
