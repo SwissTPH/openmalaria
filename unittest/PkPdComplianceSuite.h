@@ -24,6 +24,7 @@
 #define Hmod_PkPdComplianceSuite
 
 #include <cxxtest/TestSuite.h>
+#include <boost/format.hpp>
 #include "PkPd/LSTMModel.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
@@ -31,6 +32,7 @@
 
 using std::pair;
 using std::multimap;
+using boost::format;
 using namespace OM;
 using namespace OM::PkPd;
 
@@ -93,50 +95,50 @@ public:
         double factor, f_error, f_rel_error;
     };
     
-    void drugDebugOutputHeader(bool secondDrug, string drugName, string drug2Name){
+    string drugDebugOutputHeader(bool secondDrug, string drugName){
         /*
         *   Verbose output is formatted in markdown, so it can be used in a github-wiki.
         */
+        string white = "\033[0m";
+        string yellow = "\033[33m";
+        string green = "\033[32m"; // TODO check if really green
+        string red = "\033[31m";
         // title
-        cout << drugName << endl << "----" << endl;
+        if ( secondDrug ){
+            cout << drugName << endl << "----" << endl;
+        }
+        string fm = white + "|%1$=3d|"
+            + yellow + "%|14t|%2$-12d|" + red + "%|32t|%3$+-12d|" + red + "%|50t|%4$+-12d|"
+            + green  + "%|68t|%5$-12d|" + red + "%|86t|%6$+-12d|" + red + "%|102t|%7$+-12d|";
+        if ( secondDrug ) {
+            fm += white + "%|120t|%8$=4s|";
+        }
+        fm += white + "\n";
         // head row
-        if( secondDrug ) {
-            cout << "\033[0m| type ";
+        if ( !secondDrug ){
+            cout << format(fm) % "day" % "factor" % "f_abs_error" % "f_rel_err %" % "conc" % "c_abs_error" % "c_rel_err %";
+            //fmter % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error;
+        } else {
+            cout << format(fm) % "day" % "factor" % "f_abs_error" % "f_rel_err %" % "conc" % "c_abs_error" % "c_rel_err %" % "type";
+            //fmter % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error % type;
         }
-        cout << "\033[0m| day "
-            << "\033[33m| factor "
-            << "\033[31m| f_abs_error "
-            << "\033[31m| f_rel_error "
-            << "\033[33m| concentration "
-            << "\033[31m| c_abs_error "
-            << "\033[31m| c_rel_error |" << endl;
         // head row separator
-        if( secondDrug ) {
-            cout << "\033[0m|------";
+        string sfill = "------------";
+        if ( !secondDrug ){
+            cout << format(fm) % "---" % sfill % sfill % sfill % sfill % sfill % sfill;
+        } else {
+            cout << format(fm) % "---" % sfill % sfill % sfill % sfill % sfill % sfill % "----";
         }
-        cout <<  "\033[0m|-----"
-            << "\033[33m|--------"
-            << "\033[31m|-------------"
-            << "\033[31m|-------------"
-            << "\033[33m|---------------"
-            << "\033[31m|-------------"
-            << "\033[31m|-------------|" << endl;
+        return fm;
     }
     
-    void drugDebugOutputLine(bool secondDrug, string type, size_t i, double totalFac, double f_abs_error, double f_rel_error, double conc, double c_abs_error, double c_rel_error) {
+    void drugDebugOutputLine(bool secondDrug, size_t day, double factor, double f_abs_error, double f_rel_error, double concentration, double c_abs_error, double c_rel_error, string type, string fm) {
         
-        cout << "\033[0m";
-        if ( secondDrug ) {
-            cout << "|" << type;
+        if ( !secondDrug ){
+            cout << format(fm) % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error;
+        } else {
+            cout << format(fm) % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error % type;
         }
-        cout << "|" << i
-        << "\033[33m| " << totalFac
-        << "\033[31m| " << f_abs_error
-        << "| " << f_rel_error << "% \033[0m"
-        << "\033[32m| " << conc
-        << "\033[31m| " << c_abs_error
-        << "|" << c_rel_error << "% \033[33m|";
-        cout << "\033[0m" <<  endl;
     }
     
     void runDrugSimulations (string drugName, string drug2Name,
@@ -180,7 +182,7 @@ public:
         }
         double c_abs_error = 0.0, c_rel_error = 0.0, f_abs_error = 0.0,  f_rel_error = 0.0, c2_abs_error = 0.0, c2_rel_error = 0.0;
         PCS_VERBOSE(
-            drugDebugOutputHeader(secondDrug, drugName, secondDrug ? drugName : "");
+            string fmt = drugDebugOutputHeader(secondDrug, drugName);
             for( size_t i = 0; i < maxDays; i++){
                 // calculate relative and absolute differences to expected values
 
@@ -192,11 +194,11 @@ public:
                 c2_rel_error = secondDrug ? floor((res_Conc2[i] / drug2_conc[i] - 1 )*10000)/100: 0.0;
 
                 // (parent) drug debug
-                drugDebugOutputLine(secondDrug, "P", i, res_Fac[i], f_abs_error, f_rel_error, res_Conc[i], c_abs_error, c_rel_error);
+                drugDebugOutputLine(secondDrug, i, res_Fac[i], f_abs_error, f_rel_error, res_Conc[i], c_abs_error, c_rel_error, "P", fmt);
 
                 // metabolite debug
                 if( secondDrug ) {
-                    drugDebugOutputLine(true, "M", i, res_Fac[i], f_abs_error, f_rel_error, res_Conc2[i], c2_abs_error, c2_rel_error);
+                    drugDebugOutputLine(true, i, res_Fac[i], f_abs_error, f_rel_error, res_Conc2[i], c2_abs_error, c2_rel_error, "M", fmt);
                 }
             }
         )
