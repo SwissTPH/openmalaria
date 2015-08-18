@@ -104,7 +104,7 @@ double calculateParentDrugFactor( struct Params_convFactor p, double expAbsorb, 
 double calculateMetaboliteQuantity(struct Params_convFactor p, double qtyG, double qtyP, double qtyM, double expAbsorb, double expPLoss, double t) {
     return p.g * qtyG * expAbsorb
         + (p.h * qtyG - p.i * qtyP) * expPLoss
-        - (p.i * qtyP - p.j * qtyG + qtyM) * exp(p.nkM * t);
+        + (p.j * qtyG - p.i * qtyP + qtyM) * exp(p.nkM * t);
 }
 
 double calculateMetaboliteDrugFactor( struct Params_convFactor p, double expAbsorb, double expPLoss, double t ) {
