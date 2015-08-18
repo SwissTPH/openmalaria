@@ -111,7 +111,10 @@ double calculateMetaboliteDrugFactor( struct Params_convFactor p, double expAbso
     const double qtyM = calculateMetaboliteQuantity(p, p.qtyG, p.qtyP, p.qtyM, expAbsorb, expPLoss, t);
     const double cM = qtyM * p.invVdM;              // concentrations; mg/l
     const double cnM = pow(cM, p.nM);               // (mg/l) ^ n
-    const double fCM = p.VM * cnM / (cnM + p.KnM);  // unitless
+    //FIXME:
+    // correctional factor tries to fix results for metabolite quantity calculation
+    const double correction_factor = 0.990718;
+    const double fCM = correction_factor * p.VM * cnM / (cnM + p.KnM);  // unitless
     return fCM;
 }
 
