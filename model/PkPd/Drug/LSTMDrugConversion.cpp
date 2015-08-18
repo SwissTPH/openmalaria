@@ -158,8 +158,31 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
         msg << "calcFactorIV: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
         throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
     }
-    
     return exp( -intfC );  // drug factor
+}
+
+void LSTMDrugConversion::setConversionParameters(Params_convFactor& p, double nka, const LSTMDrugType& parentType, double nconv_sample, double nkP_sample, double vol_dist, const LSTMDrugType& metaboliteType, double nkM_sample, double vol_dist_metabolite, double body_mass) const{
+    // decay "constants" (dependent on body mass):
+    const double nkP = nkP_sample * pow(body_mass, parentType.neg_m_exponent());      // -y
+    const double nconv = nconv_sample * pow(body_mass, parentType.neg_m_exponent());  // -z
+    p.nka = nka;        // -x
+    p.nkM = nkM_sample * pow(body_mass, metaboliteType.neg_m_exponent());  // -k
+    p.nl = nkP + nconv;    // -(y + z)
+    
+    p.f = nka / (p.nl - nka);     // x*A' /  (y+z-x)
+    const double rz = parentType.molecular_weight_ratio() * nconv;
+    p.g = rz * nka / ((nka - p.nl) * (nka - p.nkM));
+    p.h = rz * nka / ((nka - p.nl) * (p.nkM - p.nl));
+    p.i = rz / (p.nl - p.nkM);
+    p.j = rz * nka / ((p.nkM - p.nl) * (p.nkM - nka));
+    
+    p.invVdP = 1.0 / (vol_dist * body_mass); p.invVdM = 1.0 / (vol_dist_metabolite * body_mass);
+}
+
+void LSTMDrugConversion::setKillingParameters(Params_convFactor& p, const LSTMDrugType& parentType, const LSTMDrugType& metaboliteType, uint32_t genotype) const{
+    const LSTMDrugPD& pdP = parentType.getPD(genotype), &pdM = metaboliteType.getPD(genotype);
+    p.nP = pdP.slope();   p.VP = pdP.max_killing_rate();    p.KnP = pdP.IC50_pow_slope();
+    p.nM = pdM.slope();   p.VM = pdM.max_killing_rate();    p.KnM = pdM.IC50_pow_slope();
 }
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
@@ -171,12 +194,8 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
     
     Params_convFactor p;
     p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
-    setParameters(p, nka, parentType, nconv_sample, nkP_sample, metaboliteType, nkM_sample, body_mass);
-    
-    p.invVdP = 1.0 / (vol_dist * body_mass); p.invVdM = 1.0 / (vol_dist_metabolite * body_mass);
-    const LSTMDrugPD& pdP = parentType.getPD(genotype), &pdM = metaboliteType.getPD(genotype);
-    p.nP = pdP.slope();   p.VP = pdP.max_killing_rate();    p.KnP = pdP.IC50_pow_slope();
-    p.nM = pdM.slope();   p.VM = pdM.max_killing_rate();    p.KnM = pdM.IC50_pow_slope();
+    setConversionParameters(p, nka, parentType, nconv_sample, nkP_sample, vol_dist, metaboliteType, nkM_sample, vol_dist_metabolite, body_mass);
+    setKillingParameters(p, parentType, metaboliteType, genotype);
     
     double time = 0.0;  // time since start of day
     double totalFactor = 1.0;   // survival factor for whole day
@@ -207,22 +226,6 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
     return totalFactor;
 }
 
-void LSTMDrugConversion::setParameters(Params_convFactor& p, double nka, const LSTMDrugType& parentType, double nconv_sample, double nkP_sample, const LSTMDrugType& metaboliteType, double nkM_sample, double body_mass) const{
-    // decay "constants" (dependent on body mass):
-    const double nkP = nkP_sample * pow(body_mass, parentType.neg_m_exponent());      // -y
-    const double nconv = nconv_sample * pow(body_mass, parentType.neg_m_exponent());  // -z
-    p.nka = nka;        // -x
-    p.nkM = nkM_sample * pow(body_mass, metaboliteType.neg_m_exponent());  // -k
-    p.nl = nkP + nconv;    // -(y + z)
-    
-    p.f = nka / (p.nl - nka);     // x*A' /  (y+z-x)
-    const double rz = parentType.molecular_weight_ratio() * nconv;
-    p.g = rz * nka / ((nka - p.nl) * (nka - p.nkM));
-    p.h = rz * nka / ((nka - p.nl) * (p.nkM - p.nl));
-    p.i = rz / (p.nl - p.nkM);
-    p.j = rz * nka / ((p.nkM - p.nl) * (p.nkM - nka));
-}
-
 void LSTMDrugConversion::updateConcentration( double body_mass ){
     if( qtyG == 0.0 && qtyP == 0.0 && qtyM == 0.0 && doses.size() == 0 ){
         return; // nothing to do
@@ -231,7 +234,7 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     
     Params_convFactor p;
     p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
-    setParameters(p, nka, parentType, nconv_sample, nkP_sample, metaboliteType, nkM_sample, body_mass);
+    setConversionParameters(p, nka, parentType, nconv_sample, nkP_sample, vol_dist, metaboliteType, nkM_sample, vol_dist_metabolite, body_mass);
     
     double time = 0.0, duration;
     size_t doses_taken = 0;
