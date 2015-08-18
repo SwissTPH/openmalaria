@@ -37,8 +37,8 @@ using namespace OM;
 using namespace OM::PkPd;
 
 // Use one of these to switch verbosity on/off:
-//#define PCS_VERBOSE( x )
-#define PCS_VERBOSE( x ) x
+#define PCS_VERBOSE( x )
+//#define PCS_VERBOSE( x ) x
 
 /** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
  * model. Numbers should agree (up to rounding errors of around 5e-3). */
@@ -156,7 +156,7 @@ public:
         size_t drugIndex = LSTMDrugType::findDrug( drugName );
         size_t drug2Ind = secondDrug ? LSTMDrugType::findDrug( drug2Name ) : 0;
         size_t maxDays = 6;
-        double res_Fac[maxDays];
+        PCS_VERBOSE(double res_Fac[maxDays];)
         double res_Conc[maxDays];
         double res_Conc2[maxDays];
         double totalFac = 1;
@@ -165,7 +165,7 @@ public:
             double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
             TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-24);
-            res_Fac[i] = totalFac;
+            PCS_VERBOSE(res_Fac[i] = totalFac;)
             
             // update (two parts):
             UnittestUtil::incrTime(sim::oneDay());
@@ -180,7 +180,7 @@ public:
             // medicate (take effect on next update):
             medicate( drugIndex, i );
         }
-        double c_abs_error = 0.0, c_rel_error = 0.0, f_abs_error = 0.0,  f_rel_error = 0.0, c2_abs_error = 0.0, c2_rel_error = 0.0;
+        PCS_VERBOSE( double c_abs_error = c_rel_error = f_abs_error = f_rel_error = c2_abs_error = c2_rel_error = 0.0; )
         PCS_VERBOSE(
             string fmt = drugDebugOutputHeader(secondDrug, drugName);
             for( size_t i = 0; i < maxDays; i++){
