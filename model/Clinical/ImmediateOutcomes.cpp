@@ -160,10 +160,10 @@ void ImmediateOutcomes::setHealthSystem (const scnXml::HSImmediateOutcomes& hsDe
     
     if( ModelOptions::option(util::VIVAX_SIMPLE_MODEL) ){
         WithinHost::WHVivax::setHSParameters(
-            hsDescription.getPrimaquine().present() ?
-            &hsDescription.getPrimaquine().get() : 0 );
-    }else if( hsDescription.getPrimaquine().present() ){
-        throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
+            hsDescription.getLiverStageDrug().present() ?
+            &hsDescription.getLiverStageDrug().get() : 0 );
+    }else if( hsDescription.getLiverStageDrug().present() ){
+        throw util::xml_scenario_error( "health-system's liverStageDrug element only supported by vivax" );
     }
 }
 

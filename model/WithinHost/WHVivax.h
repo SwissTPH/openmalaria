@@ -32,7 +32,7 @@ using namespace std;
 class UnittestUtil;
 
 namespace scnXml{
-    class Primaquine;
+    class LiverStageDrug;
 }
 namespace OM {
 namespace WithinHost {
@@ -135,9 +135,9 @@ public:
     
     /** Called when health system parameters are loaded.
      * 
-     * If no "primaquine" parameters are present, this is still called but with null pointer.
+     * If no "LiverStageDrug" parameters are present, this is still called but with null pointer.
      */
-    static void setHSParameters( const scnXml::Primaquine* );
+    static void setHSParameters( const scnXml::LiverStageDrug* );
     //@}
 
     /// @brief Constructors, destructors and checkpointing functions

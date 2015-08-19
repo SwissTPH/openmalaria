@@ -451,20 +451,20 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
                 it->treatmentLS();
             }
         }
-        mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
+        mon::reportMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
 }
 bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     //TODO: this should be implemented properly (allowing effects on next
     // update instead of now)
     
-    // liver-stage treatment is only via "Primaquine" option, if at all
+    // liver-stage treatment is only via "LiverStageDrug" option, if at all
     if( timeLiver != sim::zero() ){
         if( pReceivePQ > 0.0 ){
             // This is only really disallowed to prevent simultaneous treatment through both methods
             throw util::xml_scenario_error("simple treatment for vivax liver "
             "stages is incompatible with case-management pUseUncomplicated "
-            "(Primaquine) option; it is suggested to use the former over the latter");
+            "(liverStageDrug) option; it is suggested to use the former over the latter");
         }
         if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || random::bernoulli(effectivenessPQ)) ){
             if( timeLiver >= sim::zero() ){
@@ -475,7 +475,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
                 }
             }
         }
-        mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
+        mon::reportMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
     
     // there probably will be blood-stage treatment
@@ -579,7 +579,7 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     initNHypnozoites();
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), true );
 }
-void WHVivax::setHSParameters(const scnXml::Primaquine* elt){
+void WHVivax::setHSParameters(const scnXml::LiverStageDrug* elt){
     double oldPHetNoPQ = pHetNoPQ;
     if( elt == 0 ){
         ignoreNoPQ = false;

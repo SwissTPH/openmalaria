@@ -74,7 +74,7 @@ enum Measure{
     // Number of treatments for non-malaria infections. Units: treatments (whole courses)
     MHT_NMF_TREATMENTS /* also known as antibiotics */,
     // Number of treatments of primaquine. Units: treatments (whole courses)
-    MHT_PQ_TREATMENTS,
+    MHT_LS_TREATMENTS,
     // Number of diagnostics used during treatment. Units: diagnostics
     MHT_TREAT_DIAGNOSTICS,
     
