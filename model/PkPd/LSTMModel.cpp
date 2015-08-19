@@ -110,10 +110,19 @@ void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double b
 
 double LSTMModel::getDrugConc (size_t drug_index) const{
     double c = 0.0;
+    double d = 0.0;
     for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        c += drug->getConcentration(drug_index);
+        d = drug->getConcentration(drug_index);
+        if(d < 0.0){
+            // FIXME: @tph-thuering, 2015-08-11:
+            // This is trying to circumvent an issue we have with negative metabolite concentration values in the implementation of the conversion model. see #53
+            cerr << "ERROR! concentration is lower than zero, setting it to zero for now: " << d << " drug_index: " << drug_index << endl;
+            d = 0.0;
+        }
+        c += d;
     }
+    assert(c >= 0.0);
     return c;
 }
 

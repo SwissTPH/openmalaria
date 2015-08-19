@@ -472,8 +472,7 @@ double ITNComponent::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIn
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
     assert( killingEffect <= 1.0 );
-    assert( survivalFactor >= 0.0 );
-    assert( survivalFactor <= 1.0 );
+    // survivalFactor might be out of bounds due to precision error, see #49
     if (survivalFactor < 0.0)
         return 0.0;
     else if (survivalFactor > 1.0)
