@@ -147,12 +147,12 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
     int r = gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps,
                                  GSL_INTG_MAX_ITER, qag_rule, gsl_intgr_wksp, &intfC, &err_eps);
     if( r != 0 ){
-        throw TRACED_EXCEPTION( "calcFactorIV: error from gsl_integration_qag",util::Error::GSL );
+        throw TRACED_EXCEPTION( "calculateFactor: error from gsl_integration_qag",util::Error::GSL );
     }
     if( err_eps > 5e-2 ){
         // This could be a warning, except that warnings tend to be ignored.
         ostringstream msg;
-        msg << "calcFactorIV: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
+        msg << "calculateFactor: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
         throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
     }
     
