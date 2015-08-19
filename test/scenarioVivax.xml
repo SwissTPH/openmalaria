@@ -40,7 +40,7 @@
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
       <option name="annAvgK" value="true"/>
-      <option name="nPQTreatments" value="true"/>
+      <option name="nLiverStageTreatments" value="true"/>
       <option name="nTreatDiagnostics"/>
     </SurveyOptions>
     <surveys diagnostic="standard">
@@ -117,12 +117,12 @@
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>
       <pSeekOfficialCareSevere value="1"/>
-      <primaquine>
+      <liverStageDrug>
         <pHumanCannotReceive value="0.3"/>
         <pUseUncomplicated value="0.95"/>
         <effectivenessOnUse value="0.775"/>
         <!-- 1 - 0.18 / 0.8 -->
-      </primaquine>
+      </liverStageDrug>
     </ImmediateOutcomes>
     <CFR>
       <!-- CFR=1 so that all severe cases result in death -->

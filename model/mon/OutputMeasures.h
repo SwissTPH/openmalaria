@@ -346,8 +346,8 @@ void defineOutMeasures(){
     namedOutMeasures["nSubPopRemovalFirstEvent"] =
         OutMeasure::humanAC( 62, MHR_SUB_POP_REM_FIRST_EVENT, false );
     /** Report the number of liver-stage treatments (likely Primaquine) administered. */
-    namedOutMeasures["nPQTreatments"] =
-        OutMeasure::humanAC( 63, MHT_PQ_TREATMENTS, false );
+    namedOutMeasures["nLiverStageTreatments"] =
+        OutMeasure::humanAC( 63, MHT_LS_TREATMENTS, false );
     /** Report the number of diagnostics used during treatment.
      * 
      * This is not the same as Clinical_RDTs + Clinical_Microscopy: those

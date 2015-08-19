@@ -4,6 +4,11 @@ wiki: https://github.com/SwissTPH/openmalaria/wiki/Changelog
 
 — 2015-06-19 — Schema 34 —
 
+## Vivax changes
+
+<primaquine> has been renamed to <liverStageDrug>
+Monitoring option nPQTreatments has been renamed to nLiverStageTreatments
+
 ## Backwards-compatible schema changes
 
 Intervention usage:

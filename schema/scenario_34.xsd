@@ -821,28 +821,28 @@
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="Primaquine">
+  <xs:complexType name="LiverStageDrug">
     <xs:annotation>
       <xs:documentation>
-        Parameters for Primaquine treatment; for use with the Vivax model only.
+        Parameters for drug treatment which have an effect on the liver-stage of parasites (Primaquine and potentially Tafenoquine); for use with the Vivax model only.
         
         Note: if this section is not listed, the following default values are
         assumed: pHumanCannotReceive=0, pUseUncomplicated=0,
         effectivenessOnUse=1.
       </xs:documentation>
-      <xs:appinfo>name:Primquine treatment parameters (Vivax);</xs:appinfo>
+      <xs:appinfo>name:Liver stage drug treatment parameters (Vivax);</xs:appinfo>
     </xs:annotation>
     <xs:all>
       <xs:element name="pHumanCannotReceive" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
-            Chance that a human is determined to be unable to receive Primaquine
+            Chance that a human is determined to be unable to receive liver-stage drug
             treatment. Treatment is neither reported or given for such humans.
             
             This is sampled once per human at birth.
           </xs:documentation>
           <xs:appinfo>units:Probability;min:0;max:1;
-            name:Probability that human is incompatible with Primaquine treatment;</xs:appinfo>
+            name:Probability that human is incompatible with liver-stage drug treatment;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="ignoreCannotReceive" type="om:BooleanValue">
@@ -850,12 +850,12 @@
           <xs:documentation>
             If true, ignore pHumanCannotReceive and consider all humans eligible
             for treatment; if false (or not specified), do not treat those demed
-            incompatible with Primaquine treatment.
+            incompatible with liver-stage drug treatment.
             
             The point of this is that pHumanCannotReceive cannot be altered by
             changeHS interventions, but this property can be.
           </xs:documentation>
-          <xs:appinfo>name:Ignore Primaquine treatment incompatibility;</xs:appinfo>
+          <xs:appinfo>name:Ignore liver-stage drug treatment incompatibility;</xs:appinfo>
         </xs:annotation>
       </xs:element>
       <xs:element minOccurs="0" name="pUseUncomplicated" type="om:DoubleValue">
@@ -865,7 +865,7 @@
             treatment&quot; feature configured to clear liver-stage parasites,
             leaving this option unset or zero.
             
-            Chance of Primaquine treatment being used for routine treatment of an
+            Chance of liver-stage drug treatment being used for routine treatment of an
             uncomplicated case.
           </xs:documentation>
           <xs:appinfo>units:Probability;min:0;max:1;name:Prob use in UC case;</xs:appinfo>
@@ -874,7 +874,7 @@
       <xs:element name="effectivenessOnUse" type="om:DoubleValue">
         <xs:annotation>
           <xs:documentation>
-            Chance that Primaquine treatment is effective.
+            Chance that liver-stage drug treatment is effective.
             
             On application, a random variable is sampled against this probability.
             If false, the treatment does nothing; if true, the treatment clears all
@@ -1020,7 +1020,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="primaquine" type="om:Primaquine"/>
+      <xs:element minOccurs="0" name="liverStageDrug" type="om:LiverStageDrug"/>
     </xs:all>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
@@ -1151,7 +1151,7 @@
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element minOccurs="0" name="primaquine" type="om:Primaquine"/>
+      <xs:element minOccurs="0" name="liverStageDrug" type="om:LiverStageDrug"/>
       <xs:element name="treeUCOfficial" type="om:DecisionTree"/>
       <xs:element name="treeUCSelfTreat" type="om:DecisionTree"/>
       <xs:element name="cureRateSevere" type="om:DoubleValue">
