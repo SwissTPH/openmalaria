@@ -45,14 +45,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     ripFactor = elt.getRipFactor().getValue();
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
     attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
-    // assume usage modifier is 100% if none is specified
-    double propUse;
-    if (elt.getUsage().present()) {
-        propUse = elt.getUsage().get().getValue();
-    }
-    else {
-        propUse = 1.0;
-    }
+    double propUse = elt.getUsage().getValue();
     if( !( propUse >= 0.0 && propUse <= 1.0 ) ){
         throw util::xml_scenario_error("ITN.description.proportionUse: must be within range [0,1]");
     }
@@ -472,8 +465,7 @@ double ITNComponent::ITNAnopheles::SurvivalFactor::survivalFactor( double holeIn
     double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
     double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
     assert( killingEffect <= 1.0 );
-    assert( survivalFactor >= 0.0 );
-    assert( survivalFactor <= 1.0 );
+    // survivalFactor might be out of bounds due to precision error, see #49
     if (survivalFactor < 0.0)
         return 0.0;
     else if (survivalFactor > 1.0)
