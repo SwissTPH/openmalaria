@@ -21,5 +21,5 @@ REM Installing xsd + xerces-c
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\xsd.ps1' -dir %install% -src 'http://www.codesynthesis.com/download/xsd/4.0/windows/i686/xsd-4.0.msi'"
 
 REM Installing boost
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\boost.ps1' -dir %install% -src 'http://netcologne.dl.sourceforge.net/project/boost/boost/1.58.0/boost_1_58_0.zip'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\boost.ps1' -dir %install% -src 'http://www.malariacontrol.net/openmalaria/libs/boost1.55-reduced.zip'"
 
