@@ -70,9 +70,9 @@ void LSTMModel::checkpoint (ostream& stream) {
 // ———  non-static simulation time functions  ———
 
 void LSTMModel::prescribe(size_t schedule, size_t dosage, double age, double body_mass){
-    const DosageTable& table = dosages[dosage];
+    DosageTable& table = dosages[dosage];
     double key = table.useMass ? body_mass : age;
-    double doseMult = dosages[dosage].getMultiplier( key );
+    double doseMult = table.getMultiplier( key );
     foreach( MedicateData& medicateData, schedules[schedule].medications ){
         medicateQueue.push_back( medicateData.multiplied(doseMult) );
     }

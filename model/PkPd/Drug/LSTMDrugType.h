@@ -65,40 +65,16 @@ public:
      * @param neg_elim_rate -k (sampled)
      * @param C0 Concentration of drug in blood at start of period. Will be
      *  updated to correct concentration at end of period. Units: mg/l
-     * @param duration Length of IV in days.
+     * @param duration Timespan over which the factor is being calculated. Units: days.
      * @return survival factor (unitless)
      */
-    double calcFactor( double neg_elim_rate, double& C0, double duration ) const;
+    double calcFactor( double neg_elim_rate, double* C0, double duration ) const;
     
     inline double slope() const{ return n; }
     inline double IC50_pow_slope() const{ return Kn; }
     inline double max_killing_rate() const{ return V; }
     
 private:
-    struct Cache {
-        Cache( double c, double d, double r );
-        
-        // hash, used as a way of organizing in a map
-        size_t hash;
-        // inputs:
-        double C0, duration, rate;
-        // cached outputs:
-        double C1, drugFactor;
-        
-        // check inputs are equal (used to assert relation):
-        bool operator== (const Cache& rhs) const{
-            return C0 == rhs.C0 && duration == rhs.duration && rate == rhs.rate;
-        }
-    };
-    struct Cache_hash : std::unary_function<Cache, std::size_t> {
-        std::size_t operator()(Cache const& c) const {
-            return c.hash;
-        }
-    };
-
-    typedef boost::unordered_set<Cache,Cache_hash> CachedIV;
-    mutable CachedIV cachedIV;
-    
     /// Slope of the dose response curve (no unit)
     double n;   // slope
     /// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)

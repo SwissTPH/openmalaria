@@ -71,7 +71,7 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass)
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
-                totalFactor *= drugPD.calcFactor( neg_elim_rate, concentration_today, time_conc.first - time );
+                totalFactor *= drugPD.calcFactor( neg_elim_rate, &concentration_today, time_conc.first - time );
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add dose (instantaneous absorption):
@@ -81,7 +81,7 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass)
         }
     }
     if( time < 1.0 ){
-        totalFactor *= drugPD.calcFactor( neg_elim_rate, concentration_today, 1.0 - time );
+        totalFactor *= drugPD.calcFactor( neg_elim_rate, &concentration_today, 1.0 - time );
     }
     
     return totalFactor; // Drug effect per day per drug per parasite
