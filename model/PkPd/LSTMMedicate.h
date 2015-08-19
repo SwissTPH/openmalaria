@@ -51,10 +51,8 @@ struct DosageTable {
     
     /** Get dosage multilier from age or body mass.
      * 
-     * Dosings may be given either by age or by body mass. It is assumed that
-     * doses are given orally as some number of pills, thus multipliers will
-     * usually be integers. IV doses, on the other hand, are given as mg/kg,
-     * and this multilier will likely be one. */
+     * Dosings may be given as a table using age or body mass as the key (first
+     * column), or dose may be specified as mg drug / kg body mass. */
     double getMultiplier( double key ){
         if( multMassKg ) return key;
         else{

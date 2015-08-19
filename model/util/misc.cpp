@@ -27,6 +27,7 @@
 
 #include <cstdlib>
 #include <boost/xpressive/xpressive.hpp>
+#include <iomanip>
 
 using namespace boost::xpressive;
 

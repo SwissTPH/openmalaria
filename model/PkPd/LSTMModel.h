@@ -60,7 +60,7 @@ private:
     }
     
     size_t drug;      /// Drug type index
-    double qty;         /// Quantity of drug prescribed (mg when oral, mg/kg when IV)
+    double qty;         /// Quantity of drug prescribed in mg
     double time;        /// Time to medicate at, in days (0 means start of time step, may be >= 1 (thus not today))
     
     friend struct Schedule;
@@ -139,7 +139,7 @@ private:
      * time steps, until rendered ineffective by decayDrugs().
      *
      * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
-     * \param qty The quantity in either mg (if oral dose) or mg/kg (if IV).
+     * \param qty The quantity in mg
      * \param time Time in days since start of this time step to medicate at
      * \param bodyMass Weight of human in kg
      * 

@@ -36,7 +36,7 @@ namespace OM { namespace interventions {
 // ———  InterventionManager  ———
 
 // static memory:
-    
+
 std::map<std::string,ComponentId> InterventionManager::identifierMap;
 boost::ptr_vector<HumanInterventionComponent> InterventionManager::humanComponents;
 boost::ptr_vector<HumanIntervention> InterventionManager::humanInterventions;
@@ -44,6 +44,9 @@ ptr_vector<ContinuousHumanDeployment> InterventionManager::continuous;
 ptr_vector<TimedDeployment> InterventionManager::timed;
 uint32_t InterventionManager::nextTimed;
 OM::Host::ImportedInfections InterventionManager::importedInfections;
+
+// declared in HumanComponents.h:
+vector<ComponentId> removeAtIds[SubPopRemove::NUM];
 
 // static functions:
 
@@ -108,7 +111,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 if( removeOpts.getOnFirstBout() ){
                     removeAtIds[SubPopRemove::ON_FIRST_BOUT].push_back( id );
                 }
-                if( removeOpts.getOnFirstTreatment() ){
+                if( removeOpts.getOnFirstInfection() ){
                     removeAtIds[SubPopRemove::ON_FIRST_INFECTION].push_back( id );
                 }
                 if( removeOpts.getOnFirstTreatment() ){
@@ -350,12 +353,13 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTim
     // Only redeploy those which happened before this time step.
     assert( nextTimed == 0 );
     while( timed[nextTimed].time < interventionTime ){
-        if( dynamic_cast<TimedChangeHSDeployment*>(&timed[nextTimed])!=0 ||
-            dynamic_cast<TimedChangeEIRDeployment*>(&timed[nextTimed])!=0 ){
+        TimedDeployment *deployment = &timed[nextTimed];
+        if( dynamic_cast<TimedChangeHSDeployment*>(deployment)!=0 ||
+            dynamic_cast<TimedChangeEIRDeployment*>(deployment)!=0 ){
             //Note: neither changeHS nor changeEIR interventions care what the
             //current time step is when they are deployed, so we don't need to
             //tell them the deployment time.
-            timed[nextTimed].deploy( population );
+            deployment->deploy( population );
         }
         nextTimed += 1;
     }

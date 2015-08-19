@@ -2,6 +2,16 @@
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
+# Configure this file
+file(STRINGS ${CMAKE_SOURCE_DIR}/version.txt OM_VERSION)
+# make sure version.h gets rebuilt everytime cmake is run
+unset(${CMAKE_CURRENT_BINARY_DIR}/util/version.h CACHE)
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/util/version.h.in
+    ${CMAKE_CURRENT_BINARY_DIR}/util/version.h
+    @ONLY
+)
+
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
   Simulator.cpp
@@ -77,7 +87,6 @@ set (Model_CPP
   util/ModelOptions.cpp
   util/CommandLine.cpp
   util/random.cpp
-  util/StreamValidator.cpp
   util/AgeGroupInterpolation.cpp
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp
@@ -93,6 +102,9 @@ set (Model_CPP
   interventions/Vaccine.cpp
 )
 
+if (${OM_STREAM_VALIDATOR})
+  list(APPEND Model_CPP util/StreamValidator.cpp)
+endif (${OM_STREAM_VALIDATOR})
 # Headers - only included so they show up in IDEs:
 # This misses loads of headers. Fix if you care.
 file (GLOB_RECURSE Model_H "${CMAKE_SOURCE_DIR}/model/*.h")
@@ -106,7 +118,8 @@ include_directories (SYSTEM
   ${Boost_INCLUDE_DIRS}
   ${SPIRIT_INCLUDE_DIRS}
   ${BOINC_INCLUDE_DIRS}
-
+  
+  ${CMAKE_BINARY_DIR}/model
   ${CMAKE_SOURCE_DIR}/contrib
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
   ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
@@ -118,6 +131,7 @@ include_directories (
 add_library (model
   ${Model_CPP}
   ${Model_H}
+  ${CMAKE_CURRENT_BINARY_DIR}/util/version.h
 )
 
 if (MSVC)

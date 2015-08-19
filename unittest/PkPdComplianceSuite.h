@@ -24,6 +24,7 @@
 #define Hmod_PkPdComplianceSuite
 
 #include <cxxtest/TestSuite.h>
+#include <boost/format.hpp>
 #include "PkPd/LSTMModel.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
@@ -31,6 +32,7 @@
 
 using std::pair;
 using std::multimap;
+using boost::format;
 using namespace OM;
 using namespace OM::PkPd;
 
@@ -81,12 +83,62 @@ public:
         schedule.insert(make_pair(2, make_pair(0.5, dosage)));
     }
     
-    void assembleCQDosageSchedule ( ){
+    void assembleCQDosageSchedule ( double dosage ){
         // only used for CQ, which needs 10, 10, 5 dosages instead of constant dosages
         schedule.clear();
-        schedule.insert(make_pair(0, make_pair(0, 10)));
-        schedule.insert(make_pair(1, make_pair(0, 10)));
-        schedule.insert(make_pair(2, make_pair(0, 5)));
+        schedule.insert(make_pair(0, make_pair(0, dosage)));
+        schedule.insert(make_pair(1, make_pair(0, dosage)));
+        schedule.insert(make_pair(2, make_pair(0, dosage/2)));
+    }
+    
+    struct debugDrugSimulations {
+        double factor, f_error, f_rel_error;
+    };
+    
+    string drugDebugOutputHeader(bool secondDrug, string drugName){
+        /*
+        *   Verbose output is formatted in markdown, so it can be used in a github-wiki.
+        */
+        string white = "\033[0m";
+        string yellow = "\033[33m";
+        string green = "\033[32m"; // TODO check if really green
+        string red = "\033[31m";
+        // title
+        if ( secondDrug ){
+            cout << drugName << endl << "----" << endl;
+        }
+        string fm = white + "|%1$=3d|"
+            + yellow + "%|14t|%2$-12d|" + red + "%|32t|%3$+-12d|" + red + "%|50t|%4$+-12d|"
+            + green  + "%|68t|%5$-12d|" + red + "%|86t|%6$+-12d|" + red + "%|102t|%7$+-12d|";
+        if ( secondDrug ) {
+            fm += white + "%|120t|%8$=4s|";
+        }
+        fm += white + "\n";
+        // head row
+        if ( !secondDrug ){
+            cout << format(fm) % "day" % "factor" % "f_abs_error" % "f_rel_err %" % "conc" % "c_abs_error" % "c_rel_err %";
+            //fmter % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error;
+        } else {
+            cout << format(fm) % "day" % "factor" % "f_abs_error" % "f_rel_err %" % "conc" % "c_abs_error" % "c_rel_err %" % "type";
+            //fmter % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error % type;
+        }
+        // head row separator
+        string sfill = "------------";
+        if ( !secondDrug ){
+            cout << format(fm) % "---" % sfill % sfill % sfill % sfill % sfill % sfill;
+        } else {
+            cout << format(fm) % "---" % sfill % sfill % sfill % sfill % sfill % sfill % "----";
+        }
+        return fm;
+    }
+    
+    void drugDebugOutputLine(bool secondDrug, size_t day, double factor, double f_abs_error, double f_rel_error, double concentration, double c_abs_error, double c_rel_error, string type, string fm) {
+        
+        if ( !secondDrug ){
+            cout << format(fm) % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error;
+        } else {
+            cout << format(fm) % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error % type;
+        }
     }
     
     void runDrugSimulations (string drugName, string drug2Name,
@@ -94,47 +146,63 @@ public:
                           const double drug_factors[])
     {
         bool secondDrug = drug2_conc != 0;
+        PCS_VERBOSE(
+            cout << "\n\033[32mTesting \033[1m" << drugName ;
+            if( secondDrug ) {
+                cout << " - " << drug2Name << " Conversion";
+            }
+            cout <<  endl << "====\033[0m" << endl;
+        )
         size_t drugIndex = LSTMDrugType::findDrug( drugName );
         size_t drug2Ind = secondDrug ? LSTMDrugType::findDrug( drug2Name ) : 0;
-        PCS_VERBOSE(cout << "\n\033[32mTesting \033[1m" << drugName << ": " << endl;)
+        size_t maxDays = 6;
+        PCS_VERBOSE(double res_Fac[maxDays];)
+        double res_Conc[maxDays];
+        double res_Conc2[maxDays];
         double totalFac = 1;
-        for( size_t i = 0; i < 6; i++){
+        for( size_t i = 0; i < maxDays; i++){
             // before update (after last step):
             double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
-            PCS_VERBOSE(cout << "\033[35m";)
             TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-24);
-            PCS_VERBOSE(cout << "\033[0m";)
-            PCS_VERBOSE(double errorF = totalFac - drug_factors[i];)
+            PCS_VERBOSE(res_Fac[i] = totalFac;)
             
             // update (two parts):
             UnittestUtil::incrTime(sim::oneDay());
             proxy->decayDrugs(bodymass);
             
             // after update:
-            double conc = proxy->getDrugConc(drugIndex);
-            double conc2 = secondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
-            PCS_VERBOSE(cout << "\033[36m";)
-            TS_ASSERT_APPROX_TOL (conc, drug_conc[i], 5e-3, 1e-9);
-            if( secondDrug ) TS_ASSERT_APPROX_TOL (conc2, drug2_conc[i], 5e-3, 1e-24);
-            PCS_VERBOSE(
-                cout << "\033[0m";
-                double errorC = conc - drug_conc[i];
-                cout << "\t Day " << i << ": "
-                    << "\033[33mfactor " << totalFac << " [ " << errorF << " ]" << "\033[0m"
-                    << ", \033[31mtotal / factor: " << totalFac / drug_factors[i] << "\033[0m"
-                    << ", \033[32mconc: " << conc << " [ " << errorC << ", "
-                    << conc/drug_conc[i] << " ]";
-                if( secondDrug ){
-                    errorC = conc2 - drug2_conc[i];
-                    cout << ", conc2: " << conc2 << " [ " << errorC << " ]";
-                }
-                cout << "\033[0m" <<  endl;
-            )
+            res_Conc[i] = proxy->getDrugConc(drugIndex);
+            TS_ASSERT_APPROX_TOL (res_Conc[i], drug_conc[i], 5e-3, 1e-18);
+            res_Conc2[i] = secondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
+            if( secondDrug ) TS_ASSERT_APPROX_TOL (res_Conc2[i], drug2_conc[i], 5e-3, 1e-9);
             
             // medicate (take effect on next update):
             medicate( drugIndex, i );
         }
+        PCS_VERBOSE( double c_abs_error = c_rel_error = f_abs_error = f_rel_error = c2_abs_error = c2_rel_error = 0.0; )
+        PCS_VERBOSE(
+            string fmt = drugDebugOutputHeader(secondDrug, drugName);
+            for( size_t i = 0; i < maxDays; i++){
+                // calculate relative and absolute differences to expected values
+
+                f_abs_error = res_Fac[i] - drug_factors[i];
+                f_rel_error = floor((res_Fac[i] / drug_factors[i] -1 )*1000000)/10000;
+                c_abs_error = res_Conc[i] - drug_conc[i];
+                c_rel_error = floor((res_Conc[i] / drug_conc[i] - 1 )*1000000)/10000;
+                c2_abs_error = secondDrug ? res_Conc2[i] - drug2_conc[i] : 0.0;
+                c2_rel_error = secondDrug ? floor((res_Conc2[i] / drug2_conc[i] - 1 )*1000000)/10000: 0.0;
+
+                // (parent) drug debug
+                drugDebugOutputLine(secondDrug, i, res_Fac[i], f_abs_error, f_rel_error, res_Conc[i], c_abs_error, c_rel_error, "P", fmt);
+
+                // metabolite debug
+                if( secondDrug ) {
+                    drugDebugOutputLine(true, i, res_Fac[i], f_abs_error, f_rel_error, res_Conc2[i], c2_abs_error, c2_rel_error, "M", fmt);
+                }
+            }
+        )
+
     }
     
     void runDrugSimulations (string drugName, const double drug_conc[],
@@ -162,13 +230,12 @@ public:
         runDrugSimulations("AR1", drug_conc, drug_factors);
     }
     
-	// FIXME: Enable this test once PKPD conversion code is ready
-    void _testAR () { /* Artemether with conversion */
+    void testAR () { /* Artemether with conversion */
         const double dose = 1.7 * bodymass;   // 1.7 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
         const double AR_conc[] = { 0, 0.0001825231, 0.0001825242, 0.0001825242, 1.15E-09, 7.19E-15 };
         const double DHA_conc[] = { 0, 0.0002013126, 0.0002013139, 0.0002013139, 1.27E-09, 7.94E-15 };
-        const double drug_factors[] = { 1, 1.70E-07, 2.84E-14, 4.74E-21, 4.75E-21, 4.75E-21 };
+        const double drug_factors[] = { 1, 1.695240e-07, 2.838147e-14, 4.740015e-21, 4.751478e-21, 4.751478e-21 };
         runDrugSimulations("AR", "DHA_AR", AR_conc, DHA_conc, drug_factors);
     }
     
@@ -180,20 +247,20 @@ public:
         runDrugSimulations("AS1", drug_conc, drug_factors);
     }
     
-	// FIXME: Enable this test once PKPD conversion code is ready
-    void _testAS () { /* Artesunate with conversion */
+    void testAS () { /* Artesunate with conversion */
         const double dose = 4 * bodymass;   // 4 mg/kg * 50 kg
         assembleTripleDosageSchedule(dose);
         const double AS_conc[] = { 0, 2.30E-14, 2.30E-14, 2.30E-14, 8.25E-28, 2.95E-41 };
         const double DHA_conc[] = { 0, 1.14E-10, 1.14E-10, 1.14E-10, 1.07E-21, 9.94E-33 };
-        const double drug_factors[] = { 1, 0.0005322908, 2.83E-07, 1.51E-10, 1.51E-10, 1.51E-10 };
+        const double drug_factors[] = { 1, 5.322908e-04, 2.833335e-07, 1.508160e-10, 1.508160e-10, 1.508160e-10 };
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
-    void testCQ () {
-        assembleCQDosageSchedule();
-        const double drug_conc[] = { 0, 0.0786272312, 0.1554589687,
-            0.2305362134, 0.2252717988, 0.2201276 };
+    // FIXME: #118
+    void _testCQ () {
+        const double dose = 10 * bodymass;
+        assembleCQDosageSchedule(dose);
+        const double drug_conc[] = { 0.0, 0.03257216, 0.06440052, 0.07921600, 0.07740709, 0.07563948 };
         const double drug_factors[] = { 1, 0.0580181371, 0.0021554332,
             7.39575036687833E-005, 2.51535706689484E-006, 8.57663220896078E-008 };
         runDrugSimulations("CQ", drug_conc, drug_factors);

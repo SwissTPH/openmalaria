@@ -54,6 +54,8 @@ public:
     
     virtual double calculateDrugFactor(uint32_t genotype, double body_mass) const;
     virtual void updateConcentration (double body_mass);
+    double getMetaboliteConcentration() const;
+    double getParentConcentration() const;
     
 protected:
     virtual void checkpoint (istream& stream);
@@ -63,7 +65,9 @@ protected:
     
     //TODO: do we need to link these?
     const LSTMDrugType &parentType, &metaboliteType;
-    
+
+    void setConversionParameters(Params_convFactor& p, double nka, const LSTMDrugType& parentType, double nconv_sample, double nkP_sample, double vol_dist, const LSTMDrugType& metaboliteType, double nkM_sample, double vol_dist_metabolite, double body_mass) const;
+    void setKillingParameters(Params_convFactor& p, const LSTMDrugType& parentType, const LSTMDrugType& metaboliteType, uint32_t genotype) const;
     /// Amount of parent drug in gut, parent drug in circulation and metabolite
     // in circulation; units: mg. In the paper, these are labelled A, B, C.
     //TODO: move metabolite data to a separate class object? Or not?

@@ -29,17 +29,6 @@ using namespace std;
 
 namespace OM { namespace PkPd {
 
-//TODO: I think this Cache thing can be removed, though it may be useful as a template for 3-compartment/conversion models
-LSTMDrugPD::Cache::Cache( double c, double d, double r ) :
-    C0(c), duration(d), rate(r),
-    C1(numeric_limits<double>::signaling_NaN()),
-    drugFactor(numeric_limits<double>::signaling_NaN())
-{
-    // Generate hash using XOR and boost::hash
-    boost::hash<double> hasher;
-    hash = hasher(c) ^ hasher(d) ^ hasher(r);
-}
-
 LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
     n = phenotype.getSlope ();
     Kn = pow(phenotype.getIC50 (), n);
@@ -49,7 +38,8 @@ LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
     }
 }
 
-double LSTMDrugPD::calcFactor( double neg_elim_rate, double& C0, double duration ) const{
+double LSTMDrugPD::calcFactor( double neg_elim_rate, double* conc, double duration ) const{
+    const double C0 = *conc;
     const double C1 = C0 * exp(neg_elim_rate * duration);
     
     // From Hastings & Winter 2011 paper
@@ -57,10 +47,9 @@ double LSTMDrugPD::calcFactor( double neg_elim_rate, double& C0, double duration
     // is calculated when parameters are read from the scenario document instead of now.
     const double numerator = Kn + pow(C1, n);
     const double denominator = Kn + pow(C0, n);
-    
-    //TODO(performance): can we cache the value for each parameter combination?
-    C0 = C1;    // C0 is an in/out parameter
     const double power = V / (-neg_elim_rate * n);
+    
+    *conc = C1;    // conc is an in/out parameter
     return pow( numerator / denominator, power );       // unitless
 }
 

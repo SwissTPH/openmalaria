@@ -61,13 +61,13 @@ public:
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
     // No PQ treatment for falciparum in current models:
-    virtual bool optionalPqTreatment(){ return false; }
+    virtual void optionalPqTreatment( const Host::Human& human ){}
     
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual void treatSimple(SimTime timeLiver, SimTime timeBlood);
+    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     
     virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
 
