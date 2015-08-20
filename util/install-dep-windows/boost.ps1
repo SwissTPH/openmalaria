@@ -4,7 +4,7 @@ param(
 )
 
 $install_path = $dir+"\"
-$boost_token = 'boost_1_58_0'
+$boost_token = 'boost_1_55_0'
 $boost_zip = $install_path+$boost_token+'.zip'
 $boost_dl = $src.AbsoluteUri
 $boost_install_dir = $install_path + $boost_token
