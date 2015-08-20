@@ -1,10 +1,11 @@
 param(
 [string]$dir,
-[System.Uri]$src
+[System.Uri]$src,
+[string]$version
 )
 
 $install_path = $dir+"\"
-$boost_token = 'boost_1_55_0'
+$boost_token = 'boost_'+$version
 $boost_zip = $install_path+$boost_token+'.zip'
 $boost_dl = $src.AbsoluteUri
 $boost_install_dir = $install_path + $boost_token

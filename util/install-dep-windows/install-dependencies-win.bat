@@ -11,10 +11,10 @@ REM xsd, xerces-c, boost by download
 REM gsl and zlib as submodules
 
 REM Installing boost
-PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\boost.ps1' -dir %install% -src 'https://github.com/boostorg/boost/archive/boost-1.55.0.zip'"
+PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\boost.ps1' -dir %install% -src 'https://github.com/boostorg/boost/archive/boost-1.58.0.zip' -version '1_58_0'"
 dir %install%\boost*\*
-mkdir %install%\boost_1_55_0
-move %install%\boost-boost-1.55.0\libs %install%\boost_1_55_0\
+mkdir %install%\boost_1_58_0
+move %install%\boost-boost-1.58.0\libs %install%\boost_1_58_0\
 
 mkdir %install%\lib
 REM Installing gsl libs
