@@ -26,8 +26,10 @@ echo "copying gsl_version.h"
 if((Test-Path $gsl_file) -eq $false) {
     foreach($item in $zip.items())
     {
-	  echo "Copying "$item.Name
-      $shell.NameSpace($lib).copyhere($item)
+      if(($item.Name -imatch ".*.h")){
+	      echo 'Copying '$item.Name
+          $shell.NameSpace($lib).copyhere($item)
+      }
     }
 }
 
