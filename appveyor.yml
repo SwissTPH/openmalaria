@@ -9,6 +9,7 @@ cache:
 
 install:
   - git submodule init && git submodule update
+  - type .git\config
   - pushd util\install-dep-windows\ && install-dependencies-win.bat & popd
   - pushd gsl && cmake . & popd
   - pushd zlib && cmake . & popd
