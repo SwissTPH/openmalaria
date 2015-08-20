@@ -16,10 +16,13 @@ if((Test-Path $gsl_lib) -eq $false) {
 $lib = $install_path+"gsl\gsl\"
 $shell = new-object -com shell.application
 $zip = $shell.NameSpace($gsl_lib)
+
+echo "creating new directory: "$lib
 if((Test-Path $lib) -eq $false ){
     New-Item $lib -type directory
 }
 $gsl_file = $lib+"gsl_version.h"
+echo "copying gsl_version.h"
 if((Test-Path $gsl_file) -eq $false) {
     foreach($item in $zip.items())
     {
