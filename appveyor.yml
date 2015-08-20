@@ -20,6 +20,7 @@ configuration: Release
 before_build:
   - dir gsl gsl\gsl lib
   - dir gsl\gsl\gsl_vector.h gsl\gsl\gsl_errno.h gsl\gsl\gsl_cdf.h gsl\gsl\gsl_vector_double.h
+  - set PATH=C:\Program Files (x86)\MSBuild\14.0\Bin;%PATH%
 
 build:
   project: build-win\OpenMalaria.sln
