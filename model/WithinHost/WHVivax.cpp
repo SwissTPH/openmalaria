@@ -130,7 +130,7 @@ SimTime sampleReleaseDelay(){
     double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
     double delay = numeric_limits<double>::quiet_NaN();       // in days
     int count = 0;
-    int maxcount = pow(10,6);
+    int maxcount = (int)pow(10,6);
     
     do{
         delay = util::random::log_normal( mu, sigma );
