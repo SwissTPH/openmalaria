@@ -20,6 +20,7 @@ if((Test-Path $boost_install_dir) -eq $false) {
     $zip = $shell.NameSpace($boost_zip)
     foreach($item in $zip.items())
     {
+     echo 'Copying '$item.Name
      $shell.NameSpace($install_path).copyhere($item)
     }
 }
