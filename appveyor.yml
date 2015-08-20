@@ -1,7 +1,7 @@
 clone_depth: 12
 
 environment: 
-  VisualStudioVersion: 12.0
+  VisualStudioVersion: 14.0
 
 cache:
   - xsd-4.0.msi -> appveyor.yml
