@@ -23,6 +23,7 @@ $gsl_file = $lib+"gsl.lib"
 if((Test-Path $gsl_file) -eq $false) {
     foreach($item in $zip.items())
     {
+      echo "Copying "$item.Name
       $shell.NameSpace($lib).copyhere($item)
     }
 }
