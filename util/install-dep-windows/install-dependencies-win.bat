@@ -12,8 +12,8 @@ REM gsl and zlib as submodules
 
 REM Installing boost
 PowerShell -NoProfile -ExecutionPolicy Bypass -Command "& '.\boost.ps1' -dir %install% -src 'http://www.malariacontrol.net/openmalaria/libs/boost1.55-reduced.zip'"
-mkdir boost_1_55_0
-move boost boost_1_55_0/
+mkdir %install%\boost_1_55_0
+move %install%\boost %install%\boost_1_55_0\
 
 mkdir %install%\lib
 REM Installing gsl libs
