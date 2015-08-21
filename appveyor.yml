@@ -29,11 +29,11 @@ build:
 
 after_build:
   - dir build-win\Release\openMalaria.exe
-  - build-win\Release\openMalaria.exe --version
-  - copy build-win\unittest Release\unittest.exe ..
+  - copy build-win\unittest\Release\unittest.exe build-win\unittest\unittest.exe
 
 test_script:
-  - build-win\unittest.exe
+  - build-win\Release\openMalaria.exe --version
+  - build-win\unittest\unittest.exe
 
 artifacts:
 - path: build-win\Release\openMalaria.exe
