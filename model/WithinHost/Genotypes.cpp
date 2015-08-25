@@ -202,7 +202,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
                 j != i->alleles.end(); ++j ){
                 map<string,int>::iterator it = longest.find(allele_codes[*j].first);
                 assert( it != longest.end() );
-                size_t len_allele = allele_codes[*j].second.length();
+                uint32_t len_allele = allele_codes[*j].second.length();
                 if( len_allele > it->second ) it->second = len_allele;
             }
         }
