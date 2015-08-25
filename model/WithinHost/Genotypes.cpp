@@ -219,6 +219,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         }
         
 //         string fm = "|%1$-12d|%|14t|%2$-12d|";
+        cout << endl;
         stringstream fmt;
         fmt << "|%8d|";
         for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
@@ -251,7 +252,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
             }
             
             fmtr.clear();
-            fmtr % i;
+            fmtr % (i*100000);
             for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
                 map<string,string>::const_iterator la = locus_allele.find( *it );
                 assert( la != locus_allele.end() );
