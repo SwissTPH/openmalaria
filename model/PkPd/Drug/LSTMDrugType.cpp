@@ -22,6 +22,7 @@
 #include "WithinHost/Genotypes.h"
 #include "util/errors.h"
 #include "util/random.h"
+#include "util/CommandLine.h"
 #include "PkPd/Drug/LSTMDrugOneComp.h"
 #include "PkPd/Drug/LSTMDrugThreeComp.h"
 #include "PkPd/Drug/LSTMDrugConversion.h"
@@ -302,6 +303,28 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                     "restrictive: no phenotype matching some genotype");
             }
             genotype_mapping[j] = phenotype;
+        }
+        #ifdef WITHOUT_BOINC
+        if( util::CommandLine::option( util::CommandLine::PRINT_GENOTYPES ) ){
+            cout << endl;
+            // Debug output to see which genotypes correspond to phenotypes
+            cout << "Phenotype mapping: " << endl << "----------" << endl;
+            boost::format fmtr("|%8d|%14d|");
+            cout << (fmtr % "genotype" % "phenotype") << endl;
+            cout << (fmtr % "--------" % "-------------") << endl;
+            uint32_t genotype = 0;
+            stringstream phenotypeName;
+            for( vector<uint32_t>::const_iterator phen = genotype_mapping.begin(); phen !=genotype_mapping.end(); ++phen ){
+                phenotypeName.str("");
+                if(pd[*phen].getName().present()){
+                    phenotypeName << pd[*phen].getName().get();
+                } else {
+                    phenotypeName << "no: " << *phen;
+                }
+                cout << (fmtr % (genotype*100000) % phenotypeName.str() ) << endl;
+                genotype += 1;
+            }
+        #endif
         }
     }
 }
