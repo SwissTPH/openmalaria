@@ -186,7 +186,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         }
         
         // determine our columns
-        map<string,int> longest;      // longest name in column; key is locus
+        map<string,uint32_t> longest;      // longest name in column; key is locus
         for( vector<Genotype>::const_iterator i = GT::genotypes.begin(),
             iend = GT::genotypes.end(); i != iend; ++i )
         {
@@ -200,7 +200,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
             
             for( set<uint32_t>::const_iterator j = i->alleles.begin();
                 j != i->alleles.end(); ++j ){
-                map<string,int>::iterator it = longest.find(allele_codes[*j].first);
+                map<string,uint32_t>::iterator it = longest.find(allele_codes[*j].first);
                 assert( it != longest.end() );
                 uint32_t len_allele = allele_codes[*j].second.length();
                 if( len_allele > it->second ) it->second = len_allele;
@@ -260,14 +260,6 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
             fmtr % genotype.init_freq % genotype.fitness;
             cout << fmtr << endl;
         }
-        
-        // Bar at bottom of table:
-        fmtr.clear();
-        fmtr % "--------";
-        for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
-            fmtr % string(longest[*it], '-');
-        }
-        cout << (fmtr % "---------" % "-------") << endl;
     }
     #endif
 }
