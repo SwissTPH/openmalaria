@@ -1,6 +1,0 @@
-[submodule "zlib"]
-	path = zlib
-	url = https://github.com/commontk/zlib.git
-[submodule "gsl"]
-	path = gsl
-	url = https://github.com/ampl/gsl
