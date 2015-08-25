@@ -111,6 +111,9 @@ namespace OM { namespace util {
                 } else if (clo == "print-survey-times") {
                     options.set (PRINT_SURVEY_TIMES);
                     options.set (SKIP_SIMULATION);
+                } else if (clo == "print-genotypes") {
+                    options.set (PRINT_GENOTYPES);
+                    options.set (SKIP_SIMULATION);
 		} else if (clo == "sample-interpolations") {
 		    options.set (SAMPLE_INTERPOLATIONS);
 		    options.set (SKIP_SIMULATION);
@@ -239,6 +242,8 @@ namespace OM { namespace util {
 	    << "			Print intervention deployment details and exit." << endl
 	    << "    --print-survey-times" << endl
 	    << "			Print out the times of all surveys and exit." << endl
+            << "    --print-genotypes" << endl
+            << "                        Print out genotype ids and exit." << endl
 	    << "    --sample-interpolations" <<endl
 	    << "			Output samples of all used age-group data according to active"<<endl
 	    << "			interpolation method and exit."<<endl
