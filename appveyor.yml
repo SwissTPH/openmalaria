@@ -13,7 +13,7 @@ install:
   - dir boost_1_55_0\*
   - pushd gsl && cmake . & popd
   - pushd zlib && cmake . & popd
-  - mkdir build-win && pushd build-win && cmake .. -DGSL_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="C:/projects/openmalaria/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="C:/projects/openmalaria/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="C:/projects/openmalaria/zlib" -DXERCESC_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="C:/projects/openmalaria/boost_1_55_0" -DGSL_INCLUDE_DIR:PATH="C:/projects/openmalaria/gsl" -DGSL_INCLUDE_DIR2:PATH="C:/projects/openmalaria/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="C:/projects/openmalaria/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="C:/projects/openmalaria/xsd/include" -DXSD_EXECUTABLE:FILEPATH="C:/projects/openmalaria/xsd/bin/xsd.exe" & popd
+  - mkdir build-win && pushd build-win && cmake .. -DGSL_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/zlib" -DXERCESC_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/boost_1_55_0" -DGSL_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/gsl" -DGSL_INCLUDE_DIR2:PATH="%APPVEYOR_BUILD_FOLDER%/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include" -DXSD_EXECUTABLE:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/bin/xsd.exe" & popd
 
 configuration: Release
 
@@ -28,7 +28,7 @@ build:
   verbosity: normal
 
 after_build:
-  - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd"
+  - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd"
 artifacts:
 - path: openMalaria-windows.zip
 
@@ -39,3 +39,12 @@ notifications:
   on_build_success: true
   on_build_failure: false
   on_build_status_changed: true
+
+deploy:
+- provider: GitHub
+  auth_token:
+    secure: QDHrqei4LL5ihC0nST2nAf3uCpjvNyKHH11V53o/lpnX5JZLq/gY41iJm9FIQ+Vr
+  artifact: openMalaria-windows.zip
+  draft: true
+  on:
+    APPVEYOR_REPO_TAG: true
