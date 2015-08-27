@@ -28,11 +28,9 @@ build:
   verbosity: normal
 
 after_build:
-  - dir build-win\Release\openMalaria.exe
-
+  - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd"
 artifacts:
-- path: build-win\Release\openMalaria.exe
-- path: build-win\schema\scenario_current.xsd
+- path: openMalaria-windows.zip
 
 notifications:
 - provider: Email
