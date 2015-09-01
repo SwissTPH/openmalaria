@@ -32,7 +32,7 @@ build:
   verbosity: normal
 
 after_build:
-  - $tn=@(get-itemproperty -path "HKLM\Software\Wow6432Node\Microsoft\VisualStudio\14.0\Setup\vs").ProductDir; $tn
+  - $tn=@(get-itemproperty -path "HKLM\Software\Wow6432Node\Microsoft\VisualStudio\14.0\Setup\vs").ProductDir; echo $tn
   - pushd ${tn}\VC\bin
   - dumpbin.exe /dependents "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe"
   - popd
