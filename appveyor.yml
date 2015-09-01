@@ -5,6 +5,10 @@ environment:
 
 cache:
   - xsd-4.0.msi -> appveyor.yml
+  - boost_1_55_0.zip -> appveyor.yml
+  - gsl-libs.zip -> appveyor.yml
+  - gsl-headers.zip -> appveyor.yml
+  - zlib.lib.zip -> appveyor.yml
 
 install:
   - git config --global core.autocrlf true
