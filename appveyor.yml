@@ -32,12 +32,7 @@ build:
   verbosity: normal
 
 after_build:
-  - ps: |
-    if(true){
-      pushd "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"
-      .\dumpbin.exe /dependents $env:APPVEYOR_BUILD_FOLDER"\build-win\Release\openMalaria.exe"
-      popd
-    }
+  - ps: pushd "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"; .\dumpbin.exe /dependents $env:APPVEYOR_BUILD_FOLDER"\build-win\Release\openMalaria.exe"; popd
   - cmd: ECHO build-log: https://ci.appveyor.com/project/tph-thuering/openmalaria/build/%APPVEYOR_BUILD_ID%
   - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd"
 artifacts:
