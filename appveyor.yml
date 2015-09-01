@@ -32,7 +32,8 @@ build:
   verbosity: normal
 
 after_build:
-  - $vs=@(get-itemproperty -path "HKLM\Software\Wow6432Node\Microsoft\VisualStudio\14.0\Setup\vs").ProductDir; $vs
+  - $vs=@(get-itemproperty -path "HKLM\Software\Wow6432Node\Microsoft\VisualStudio\14.0\Setup\vs").ProductDir
+  - echo $vs
   - 'C:\Program Files\VisualStudio\14.0\VC\bin\dumpbin' /dependents "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe"
   - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd"
 artifacts:
