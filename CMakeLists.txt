@@ -19,7 +19,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 # -----  Compile options  -----
 
 # C++11 would be nice, but we have to compile for relatively old platforms
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+if (NOT MSVC)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+endif (NOT MSVC)
 
 set (OM_STD_LIBS )
 
