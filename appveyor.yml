@@ -1,7 +1,9 @@
-clone_depth: 12
+clone_depth: 30
 
-environment: 
+environment:
   VisualStudioVersion: 14.0
+
+os: Visual Studio 2015
 
 cache:
   - xsd-4.0.msi -> appveyor.yml
