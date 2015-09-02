@@ -8,8 +8,8 @@ $gsl_lib = $install_path+'gsl-libs.zip'
 $gsl_dl = $src.AbsoluteUri
 
 if((Test-Path $gsl_lib) -eq $false) {
-    echo "Downloading compiled gsl library"
-    echo $gsl_dl' -> '$gsl_lib
+    Write-Verbose "Downloading compiled gsl library"
+    Write-Verbose $gsl_dl' -> '$gsl_lib
     (new-object System.Net.WebClient).DownloadFile($gsl_dl,$gsl_lib)
 }
 
@@ -21,9 +21,10 @@ if((Test-Path $lib) -eq $false ){
 }
 $gsl_file = $lib+"gsl.lib"
 if((Test-Path $gsl_file) -eq $false) {
+    Write-Verbose "Extracting files"
     foreach($item in $zip.items())
     {
-      echo "Copying "$item.Name
       $shell.NameSpace($lib).copyhere($item)
     }
+    Write-Verbose "Done."
 }

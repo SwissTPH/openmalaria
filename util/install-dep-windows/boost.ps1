@@ -11,7 +11,7 @@ $boost_dl = $src.AbsoluteUri
 $boost_install_dir = $install_path + $boost_token
 
 if((Test-Path $boost_zip) -eq $false) {
-  echo "Downloading boost package"
+  Write-Verbose "Downloading boost package"
   (new-object System.Net.WebClient).DownloadFile($boost_dl,$boost_zip)
 }
 
@@ -19,9 +19,10 @@ if((Test-Path $boost_install_dir) -eq $false) {
     # Install boost zipped package
     $shell = new-object -com shell.application
     $zip = $shell.NameSpace($boost_zip)
+    Write-Verbose "Extracting boost archive"
     foreach($item in $zip.items())
     {
-     echo 'Copying '$item.Name
      $shell.NameSpace($install_path).copyhere($item)
     }
+    Write-Verbose "Done."
 }
