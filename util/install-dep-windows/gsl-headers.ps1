@@ -22,12 +22,12 @@ if((Test-Path $lib) -eq $false ){
     New-Item $lib -type directory
 }
 $gsl_file = $lib+"gsl_version.h"
-echo "copying gsl_version.h"
 if((Test-Path $gsl_file) -eq $false) {
+    Write-Host 'Copying files'+$gsl_file
     foreach($item in $zip.items())
     {
       if(($item.Name -imatch ".*.h")){
-	      echo 'Copying '$item.Name
+          Write-Host '.'
           $shell.NameSpace($lib).copyhere($item)
       }
     }
