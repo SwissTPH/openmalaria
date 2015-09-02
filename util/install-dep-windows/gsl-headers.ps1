@@ -17,13 +17,13 @@ $lib = $install_path+"gsl\gsl\"
 $shell = new-object -com shell.application
 $zip = $shell.NameSpace($gsl_lib)
 
-Write-Verbose "creating new directory: "$lib
+Write-Verbose "creating new directory: $lib"
 if((Test-Path $lib) -eq $false ){
     New-Item $lib -type directory
 }
 $gsl_file = $lib+"gsl_version.h"
 if((Test-Path $gsl_file) -eq $false) {
-    Write-Verbose 'Extracting files from '+$gsl_file
+    Write-Verbose "Extracting files from $gsl_file"
     foreach($item in $zip.items())
     {
       if(($item.Name -imatch ".*.h")){

@@ -17,6 +17,7 @@ if((Test-Path $xsd_msi) -eq $false) {
 $xsd_i = $install_path+"xsd"
 if((Test-Path $xsd_i) -eq $false) {
   # Install xsd+xerces-c package
-  Write-Verbose "Installing" $xsd_msi
+  Write-Verbose "Installing $xsd_msi"
   msiexec /passive BASEDIR=$xsd_i /i $xsd_msi /lp xsd.log
+  Write-Verbose "Done."
 }
