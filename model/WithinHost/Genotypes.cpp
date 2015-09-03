@@ -175,7 +175,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
             GT::alleleCodes.begin(), iend = GT::alleleCodes.end(); i != iend; ++i )
         {
             const string locus = i->first;
-            for( map<string, u_int32_t>::const_iterator j = i->second.begin(),
+            for( map<string, uint32_t>::const_iterator j = i->second.begin(),
                 jend = i->second.end(); j != jend; ++j )
             {
                 uint32_t code = j->second;
