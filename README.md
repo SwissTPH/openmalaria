@@ -18,12 +18,15 @@ The development version of OpenMalaria supports the upcoming [schema version 34]
 Status of __[develop](https://github.com/SwissTPH/openmalaria/tree/develop)__ builds:
 
 
-[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=develop)](https://travis-ci.org/SwissTPH/openmalaria)
-![Coverage Status](https://coveralls.io/repos/SwissTPH/openmalaria/badge.svg)
+[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=develop)](https://travis-ci.org/SwissTPH/openmalaria) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/develop?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/develop)
 
+Code Coverage: ![Coverage Status](https://coveralls.io/repos/SwissTPH/openmalaria/badge.svg)
 
 License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 
+Installation instructions:
+==================
+See [INSTALLATION](https://github.com/openmalaria/wiki/Installation).
 
 Build instructions:
 ===================
