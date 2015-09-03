@@ -13,7 +13,6 @@ cache:
   - zlib.lib.zip -> appveyor.yml
 
 install:
-  - git config --global core.autocrlf true
   - git submodule init && git submodule update
   - pushd util\install-dep-windows\ && install-dependencies-win.bat & popd
   - pushd gsl && cmake . & popd
