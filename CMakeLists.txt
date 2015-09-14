@@ -193,9 +193,6 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
 
-file(STRINGS version.txt OM_VERSION)
-configure_file(model/util/version.h.in ../model/util/version.h	@ONLY)
-
 add_executable (openMalaria model/openMalaria.cpp)
 
 target_link_libraries (openMalaria

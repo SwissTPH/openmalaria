@@ -10,7 +10,6 @@ Also find our code on zenodo, with DOI-references: [![DOI](https://zenodo.org/ba
 
 The stable version of OpenMalaria supports schema [schema version 34](https://github.com/SwissTPH/openmalaria/wiki/GeneratedSchema34Doc) and is currently maintained in the __['master' branch](https://github.com/SwissTPH/openmalaria/tree/master)__.
 
-You can download the latest build [#200](https://travis-ci.org/SwissTPH/openmalaria/builds/73175741) here: [schema-33.1](https://github.com/SwissTPH/openmalaria/tree/schema-33.1)
 
 Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__ builds:
 
