@@ -2,8 +2,8 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_33"
-           xmlns:om="http://openmalaria.org/schema/scenario_33"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_34"
+           xmlns:om="http://openmalaria.org/schema/scenario_34"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="Monitoring">
@@ -45,7 +45,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="SurveyOptions" type="om:MonitoringOptions">
         <xs:annotation>
           <xs:documentation>
-            List of all active survey options. See include/Survey.h for a list of
+            List of all active survey options. See model/mon/OutputMeasures.h for a list of
             supported outputs. Should also be on the wiki.
           </xs:documentation>
           <xs:appinfo>name:Name of quantity;</xs:appinfo>
@@ -56,7 +56,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:documentation>
             List of survey times
           </xs:documentation>
-          <xs:appinfo>units:list of elements;name:Survey times (time steps);</xs:appinfo>
+          <xs:appinfo>name:Survey times (time steps);</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
           <xs:sequence>

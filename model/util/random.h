@@ -51,7 +51,14 @@ namespace random {
     /** This function returns a random variate from the gamma distribution. */
     double gamma (double a, double b);
     
-    /** This function returns a random variate from the lognormal distribution. */
+    /** This function returns a random variate from the lognormal distribution.
+     * 
+     * Mean is log(mean) - (sigma^2)/2.
+     * Variance is (exp(sigma^2) - 1)*exp(2mu+sigma^2).
+     * 
+     * @param mu mean-log
+     * @param sigma sigma-log
+     */
     double log_normal (double mu, double sigma);
     
     /** Used for performance reasons. Calling rngLogNormal 5 times is 50% slower. */

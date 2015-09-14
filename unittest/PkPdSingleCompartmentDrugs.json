@@ -1,0 +1,56 @@
+{
+"reference": "List of drugs see: https://code.google.com/p/openmalaria/source/browse/v33/pkpd.xml?repo=snippets for definitions",
+"description": "singleCompartmentDrugs",
+"drugs" : { 
+    "AR" : { 
+        "name": "Artemether",
+        "dose_amount": 1.7, 
+        "dose_time" : [ 0, 0.5, 1, 1.5, 2, 2.5 ],
+        "expected_concentration_per_day": [ 0, 0.0134895232, 0.0153520114, 
+    0.0156091637, 0.0156446685, 0.0156495706 ],
+        "expected_drug_factor_per_day": [ 1, 1.0339328333924E-012, 1.06887289270302E-024,                                  1.10329635519261E-036, 4.73064069783747E-042, 4.73064069783747E-042 ]
+    },
+    "AS": { 
+        "name": "Artesunate",
+        "dose_mg_per_kg": 4,
+        "dose_time" : [ 0, 1, 2 ],
+        "expected_concentration_per_day": [ 0, 8.98E-008, 8.98E-008, 8.98E-008, 5.55E-015, 3.43E-022 ] ,
+        "expected_drug_factor_per_day": [1, 0.000012, 1.45E-010, 1.75E-015,  1.75E-015, 1.75E-015 ]
+    },
+    "CQ" : { 
+        "name": "Chloroquine",
+        "dose_mg_per_kg": [ 10, 10, 5 ],
+        "dose_time" : [ 0, 1, 2 ],
+        "expected_concentration_per_day": [0, 0.0786272312, 0.1554589687, 0.2305362134, 0.2252717988, 0.2201276 ],
+        "expected_drug_factor_per_day": [1, 0.0580181371, 0.0021554332, 7.39575036687833E-005, 2.51535706689484E-006, 8.57663220896078E-008 ]
+    },
+    "DHA": { 
+        "name": "Dihydroartemisinin",
+        "dose_mg_per_kg": 4,
+        "dose_time" : [ 0, 1, 2 ],
+        "expected_concentration_per_day": [ 0, 6.76E-009, 6.76E-009, 6.76E-009, 1.7E-017, 4.28E-026 ],
+        "expected_drug_factor_per_day": [1, 0.000355234, 0.000000126, 4.48E-011, 4.48E-011, 4.48E-011 ]
+    },
+    "LF": { 
+        "name": "Lumefantrine",
+        "dose_mg_per_kg": 12,
+        "dose_time" : [ 0, 0.5, 1, 1.5, 2, 2.5 ],
+        "expected_concentration_per_day": [ 0, 1.014434363, 1.878878305, 2.615508841, 2.228789614, 1.899249226 ],
+        "expected_drug_factor_per_day": [ 1, 0.031746317, 0.001007809, 0.000032, 0.00000102, 3.22E-008 ]
+    },
+    "MQ" : { 
+        "name:": "Mefloquine",
+        "dose_mg_per_kg": 8.3,
+        "dose_time" : [ 0, 1, 2 ],
+        "expected_concentration_per_day": [0, 0.378440101, 0.737345129, 1.077723484, 1.022091411, 0.969331065 ],
+        "expected_drug_factor_per_day": [1, 0.031745814, 0.001007791, 0.000032, 0.00000102, 3.22E-008 ]
+    },
+    "PPQ" : { 
+        "name": "Piperaquine",
+        "dose_mg_per_kg": 18,
+        "dose_time" : [ 0, 1, 2 ],
+        "expected_concentration_per_day": [0, 0.116453464, 0.2294652081, 0.3391369503, 0.3291139387, 0.3193871518 ],
+        "expected_drug_factor_per_day": [1, 0.0317489204, 0.0010078915, 3.19962451330259E-005, 1.01574720279841E-006, 3.22451796939035E-008 ]
+    }
+}
+}

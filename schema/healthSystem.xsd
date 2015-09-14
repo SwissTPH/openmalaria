@@ -3,8 +3,8 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- HealthSystem & Clinical data -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_33"
-           xmlns:om="http://openmalaria.org/schema/scenario_33"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_34"
+           xmlns:om="http://openmalaria.org/schema/scenario_34"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   
@@ -139,11 +139,70 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:sequence>
   </xs:complexType>
 
-  <xs:complexType name="Primaquine">
+  <xs:complexType name="LiverStageDrug">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters for drug treatment which have an effect on the liver-stage of parasites (Primaquine and potentially Tafenoquine); for use with the Vivax model only.
+        
+        Note: if this section is not listed, the following default values are
+        assumed: pHumanCannotReceive=0, pUseUncomplicated=0,
+        effectivenessOnUse=1.
+      </xs:documentation>
+      <xs:appinfo>name:Liver stage drug treatment parameters (Vivax);</xs:appinfo>
+    </xs:annotation>
     <xs:all>
-      <xs:element name="pHumanCannotReceive" type="om:DoubleValue"/>
-      <xs:element name="pUseUncomplicated" type="om:DoubleValue"/>
-      <xs:element name="effectivenessOnUse" type="om:DoubleValue"/>
+      <xs:element name="pHumanCannotReceive" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            Chance that a human is determined to be unable to receive liver-stage drug
+            treatment. Treatment is neither reported or given for such humans.
+            
+            This is sampled once per human at birth.
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;
+            name:Probability that human is incompatible with liver-stage drug treatment;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="ignoreCannotReceive" type="om:BooleanValue" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            If true, ignore pHumanCannotReceive and consider all humans eligible
+            for treatment; if false (or not specified), do not treat those demed
+            incompatible with liver-stage drug treatment.
+            
+            The point of this is that pHumanCannotReceive cannot be altered by
+            changeHS interventions, but this property can be.
+          </xs:documentation>
+          <xs:appinfo>name:Ignore liver-stage drug treatment incompatibility;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="pUseUncomplicated" type="om:DoubleValue" minOccurs="0">
+        <xs:annotation>
+          <xs:documentation>
+            This feature is deprecated; it is suggested to use the "simple
+            treatment" feature configured to clear liver-stage parasites,
+            leaving this option unset or zero.
+            
+            Chance of liver-stage drug treatment being used for routine treatment of an
+            uncomplicated case.
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;name:Prob use in UC case;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="effectivenessOnUse" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            Chance that liver-stage drug treatment is effective.
+            
+            On application, a random variable is sampled against this probability.
+            If false, the treatment does nothing; if true, the treatment clears all
+            liver stage parasites. Where effectiveness is longer than a single
+            time step (prophylactic effect), this sample still only happens once
+            (thus either no effect or all liver stages cleared over multiple steps).
+          </xs:documentation>
+          <xs:appinfo>units:Probability;min:0;max:1;name:Effectiveness;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
     </xs:all>
   </xs:complexType>
   
@@ -279,7 +338,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="primaquine" type="om:Primaquine" minOccurs="0"/>
+      <xs:element name="liverStageDrug" type="om:LiverStageDrug" minOccurs="0"/>
     </xs:all>
     <xs:attribute name="name" type="xs:string" use="optional">
       <xs:annotation>
@@ -410,7 +469,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="primaquine" type="om:Primaquine" minOccurs="0"/>
+      <xs:element name="liverStageDrug" type="om:LiverStageDrug" minOccurs="0"/>
       <xs:element name="treeUCOfficial" type="om:DecisionTree"/>
       <xs:element name="treeUCSelfTreat" type="om:DecisionTree"/>
       <xs:element name="cureRateSevere" type="om:DoubleValue">

@@ -19,9 +19,9 @@
  */
 
 #include "WithinHost/Treatments.h"
-#include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "util/random.h"
+#include "util/timeConversions.h"
 #include "schema/healthSystem.h"
 
 namespace OM {
@@ -61,11 +61,6 @@ Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
                 throw util::format_error( "timesteps must be ≥ 1 or have special value -1" );
             }
             Stages stage = stageFromString( it->getStage() );
-            if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
-                if( stage != BLOOD || len != -sim::oneTS() )
-                    throw util::unimplemented_exception( "vivax model requires treatments configured as blood-stage with timesteps=-1" );
-                // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
-            }
             if( stage & LIVER ){
                 if( timeLiver != sim::zero() )   // existing treatment configuration
                     throw util::format_error( "multiple specification of liver stage effect" );

@@ -82,6 +82,7 @@ set (OM_CXXTEST_HEADERS
   MolineauxInfectionSuite.h
   #MosqLifeCycleSuite.h
   UtilVectorsSuite.h
+  PkPdComplianceSuite.h
 )
 
 #Appears to be problems with this on windows...

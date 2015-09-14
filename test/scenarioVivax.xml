@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_33" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="33" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="34" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -40,7 +40,7 @@
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
       <option name="annAvgK" value="true"/>
-      <option name="nPQTreatments" value="true"/>
+      <option name="nLiverStageTreatments" value="true"/>
       <option name="nTreatDiagnostics"/>
     </SurveyOptions>
     <surveys diagnostic="standard">
@@ -88,8 +88,10 @@
     <ImmediateOutcomes name="Tanzania ACT" useDiagnosticUC="true">
       <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
       <initialACR>
-        <ACT value="0.85"/><!-- what is cure rate of blood-stage drugs? -->
-        <QN value="0"/><!-- no treatment for severe (can change so long as CFR=1) -->
+        <ACT value="0.85"/>
+        <!-- what is cure rate of blood-stage drugs? -->
+        <QN value="0"/>
+        <!-- no treatment for severe (can change so long as CFR=1) -->
         <selfTreatment value="0"/>
       </initialACR>
       <compliance>
@@ -115,11 +117,12 @@
       <pSelfTreatUncomplicated value="0"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>
       <pSeekOfficialCareSevere value="1"/>
-      <primaquine>
+      <liverStageDrug>
         <pHumanCannotReceive value="0.3"/>
         <pUseUncomplicated value="0.95"/>
-        <effectivenessOnUse value="0.775"/><!-- 1 - 0.18 / 0.8 -->
-      </primaquine>
+        <effectivenessOnUse value="0.775"/>
+        <!-- 1 - 0.18 / 0.8 -->
+      </liverStageDrug>
     </ImmediateOutcomes>
     <CFR>
       <!-- CFR=1 so that all severe cases result in death -->
@@ -635,16 +638,21 @@
     </human>
     <vivax>
       <probBloodStageInfectiousToMosq value="0.25"/>
-      <numberHypnozoites max="11" base="0.8"/>
-      <!--scale a log-normal by adding log(factor) to mu, this is mu=2.92 in timesteps-->
-      <hypnozoiteReleaseDelayDays mu="4.5294379" sigma="0.956" min="10"/>
+      <hypnozoiteRelease>
+        <numberHypnozoites max="11" base="0.8"/>
+        <!--scale a log-normal by adding log(factor) to mu, this is mu=2.92 in timesteps-->
+        <firstRelease mu="4.5294379" sigma="0.956" latentRelapseDays="10"/>
+      </hypnozoiteRelease>
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
       <bloodStageLengthDays weibullScale="115.0582" weibullShape="2.331"/>
-      <pEventPrimary a="0.9687" b="9.803"/>
-      <pEventSecondary a="0.2098" b="1.812"/>
-      <!-- probability of a clinical event being severe -->
-      <pEventIsSevere value="0.1"/>
+      <clinicalEvents>
+        <pPrimaryInfection a="0.9687" b="9.803"/>
+        <pRelapseOne a="0.2098" b="1.812"/>
+        <pRelapseTwoPlus a="0.2098" b="1.812"/>
+        <!-- probability of a clinical event being severe -->
+        <pEventIsSevere value="0.1"/>
+      </clinicalEvents>
     </vivax>
     <parameters interval="5" iseed="0" latentp="15d">
       <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>

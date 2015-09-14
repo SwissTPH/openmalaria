@@ -159,14 +159,10 @@ private:
     static size_t steps_per_year;
     static double years_per_step;
     
-    friend std::ostream& operator<<( std::ostream&, const SimTime );
     friend SimTime mod_nn( const SimTime, const SimTime );
     friend class sim;
 };
 
-inline std::ostream& operator<<( std::ostream& stream, const SimTime time ){
-    return( stream << time.d );
-}
 inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
     return SimTime(util::mod_nn(lhs.d, rhs.d));
 }
@@ -304,54 +300,6 @@ private:
     friend class Simulator;
     friend class ::UnittestUtil;
 };
-
-/** Encapsulation of code to parse times with units from strings.
- * 
- * The goal of this is (a) to make entering values in the scenario documents
- * easier and (b) to avoid confusion.
- * 
- * Use is being implemented by (a) changing existing values in the schema to
- * use this without breaking backwards compatibility (by allowing the unit to
- * be omitted), and (b) by requiring new values be specified with unit. */
-namespace UnitParse {
-    enum DefaultUnit {
-        NONE,   // error if not specified
-        DAYS,   // assume days
-        YEARS,  // assume years
-        STEPS,  // assume steps
-    };
-    
-    /** Parse a short duration from a string found in the input document.
-     * 
-     * Supports units of days (5d), and steps (2t) with integer values,
-     * rounding inputs to the nearest time step.
-     * 
-     * Call sim::init() first. */
-    SimTime readShortDuration( const std::string& str, DefaultUnit defUnit );
-    
-    /** Like readShortDuration(), but also allow inputs to be in fractional
-     * years.
-     * 
-     * Call sim::init() first. */
-    SimTime readDuration( const std::string& str, DefaultUnit defUnit );
-    
-    /** Like readDuration(), but without rounding. Output is in days and may
-     * not be an integer.
-     * 
-     * Call sim::init() first. */
-    double durationToDays( const std::string& str, DefaultUnit defUnit );
-    
-    /** Read a date or relative time specifier found in the XML; dates are
-     * rebased relative to a starting date so that they work the same as other
-     * ways of specifying intervention-period time from the point of view of
-     * code using this function.
-     * 
-     * Supports dates (e.g. 2015-10-08) as well as times relative to the start
-     * of the intervention period (as readDuration will parse). Returns a time
-     * to be compared against sim::intervNow(). Again, the result is rounded to
-     * the nearest time step. */
-    SimTime readDate( const std::string& str, DefaultUnit defUnit );
-}
 
 }
 #endif

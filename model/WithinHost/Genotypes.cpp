@@ -23,7 +23,9 @@
 #include "util/random.h"
 #include "util/errors.h"
 #include "util/vectors.h"
+#include "util/CommandLine.h"
 #include "schema/scenario.h"
+
 
 #include <boost/format.hpp>
 
@@ -102,6 +104,16 @@ void Genotypes::initSingle()
     N_genotypes = 1;
 }
 
+// utility function: does a vector contain an element?
+template<class T>
+bool contains(const vector<T>& vec, const T& x){
+    typedef typename vector<T>::const_iterator it_t;
+    for( it_t it = vec.begin(), end = vec.end(); it != end; ++it ){
+        if( *it == x ) return true;
+    }
+    return false;
+}
+
 void Genotypes::init( const scnXml::Scenario& scenario ){
     if( scenario.getParasiteGenetics().present() ){
         const scnXml::ParasiteGenetics& genetics =
@@ -143,18 +155,114 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
             GT::cum_initial_freqs.insert( make_pair(cum_p, genotype_id) );
         }
         
-        // Test cum_p is approx. 1.0 in case the input tree is wrong. We require no
-        // less than one to make sure generated random numbers are not greater than
-        // the last option.
-        if (cum_p < 1.0 || cum_p > 1.001){
+        // Test cum_p is approx. 1.0 in case the input tree is wrong.
+        if (cum_p < 0.999 || cum_p > 1.001){
             throw util::xml_scenario_error ( (
                 boost::format("decision tree (random node): expected probability sum to be 1.0 but found %2%")
                 %cum_p
             ).str() );
         }
+        // last cum_p might be slightless less than 1 due to arithmetic errors; add a failsafe:
+        GT::cum_initial_freqs[1.0] = GT::genotypes.size() - 1;
     }else{
         initSingle();
     }
+    #ifdef WITHOUT_BOINC
+    if( util::CommandLine::option( util::CommandLine::PRINT_GENOTYPES ) ){
+        // reorganise GT::alleleCodes so that we can look up codes, not names
+        vector<pair<string,string> > allele_codes( GT::cum_initial_freqs.size() );
+        for( map<string, map<string, uint32_t> >::const_iterator i =
+            GT::alleleCodes.begin(), iend = GT::alleleCodes.end(); i != iend; ++i )
+        {
+            const string locus = i->first;
+            for( map<string, uint32_t>::const_iterator j = i->second.begin(),
+                jend = i->second.end(); j != jend; ++j )
+            {
+                uint32_t code = j->second;
+                const string allele = j->first;
+                assert( code < allele_codes.size() );
+                allele_codes[code] = make_pair( locus, allele );
+            }
+        }
+        
+        // determine our columns
+        map<string,uint32_t> longest;      // longest name in column; key is locus
+        for( vector<Genotype>::const_iterator i = GT::genotypes.begin(),
+            iend = GT::genotypes.end(); i != iend; ++i )
+        {
+            if( longest.size() == 0 ){
+                for( set<uint32_t>::const_iterator j = i->alleles.begin();
+                    j != i->alleles.end(); ++j ){
+                    const string& locus = allele_codes[*j].first;
+                    longest[locus] = locus.length();  // locus name is included in column
+                }
+            }else assert( longest.size() == i->alleles.size() );
+            
+            for( set<uint32_t>::const_iterator j = i->alleles.begin();
+                j != i->alleles.end(); ++j ){
+                map<string,uint32_t>::iterator it = longest.find(allele_codes[*j].first);
+                assert( it != longest.end() );
+                uint32_t len_allele = allele_codes[*j].second.length();
+                if( len_allele > it->second ) it->second = len_allele;
+            }
+        }
+        
+        // find original loci order
+        vector<string> loci;
+        loci.reserve( longest.size() );
+        for( size_t i = 0; loci.size() < longest.size(); ++i ){
+            assert( i < allele_codes.size() );
+            const string& locus = allele_codes[i].first;
+            if( !contains(loci, locus) ){
+                loci.push_back( locus );
+            }
+        }
+        
+//         string fm = "|%1$-12d|%|14t|%2$-12d|";
+        cout << endl;
+        stringstream fmt;
+        fmt << "|%8d|";
+        for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
+            fmt << "%" << longest[*it] << "s|";
+        }
+        fmt << "%9.3f|%7.3f|";
+        
+        // Table header:
+        boost::format fmtr(fmt.str());
+        fmtr % "Genotype";
+        for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
+            fmtr % *it;
+        }
+        cout << (fmtr % "init freq" % "fitness") << endl;
+        
+        // Bar under header:
+        fmtr.clear();
+        fmtr % "--------";
+        for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
+            fmtr % string(longest[*it], '-');
+        }
+        cout << (fmtr % "---------" % "-------") << endl;
+        
+        for( size_t i = 0; i < GT::genotypes.size(); ++i ){
+            const Genotype& genotype = GT::genotypes[i];
+            map<string,string> locus_allele;    // to find allele for each locus
+            for( set<uint32_t>::const_iterator a = genotype.alleles.begin(); a != genotype.alleles.end(); ++a ){
+                assert( *a < allele_codes.size() );
+                locus_allele[allele_codes[*a].first] = allele_codes[*a].second;
+            }
+            
+            fmtr.clear();
+            fmtr % (i*100000);
+            for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
+                map<string,string>::const_iterator la = locus_allele.find( *it );
+                assert( la != locus_allele.end() );
+                fmtr % la->second;
+            }
+            fmtr % genotype.init_freq % genotype.fitness;
+            cout << fmtr << endl;
+        }
+    }
+    #endif
 }
 
 void Genotypes::startMainSim(){

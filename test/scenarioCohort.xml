@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:om="http://openmalaria.org/schema/scenario_33" analysisNo="233" name="Do" schemaVersion="33" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_33 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Do" schemaVersion="34" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -23,7 +23,8 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Test Moni" startDate="0000-01-01"><!-- no reason we can't pretent we're in year 0 -->
+  <monitoring name="Test Moni" startDate="0000-01-01">
+    <!-- no reason we can't pretent we're in year 0 -->
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nExpectd" value="true"/>
@@ -130,7 +131,8 @@
                     <noTreatment/>
                   </negative>
                 </diagnostic>
-              </outcome><!-- microscopy -->
+              </outcome>
+              <!-- microscopy -->
               <outcome p="0.2" name="RDT test">
                 <diagnostic diagnostic="RDT">
                   <positive>
@@ -147,7 +149,8 @@
                     <noTreatment/>
                   </negative>
                 </diagnostic>
-              </outcome><!-- RDT -->
+              </outcome>
+              <!-- RDT -->
             </random>
           </firstLine>
           <secondLine>
@@ -174,7 +177,8 @@
                     <noTreatment/>
                   </negative>
                 </diagnostic>
-              </outcome><!-- microscopy -->
+              </outcome>
+              <!-- microscopy -->
               <outcome p="0.3" name="RDT test">
                 <diagnostic diagnostic="RDT">
                   <positive>
@@ -191,7 +195,8 @@
                     <noTreatment/>
                   </negative>
                 </diagnostic>
-              </outcome><!-- RDT -->
+              </outcome>
+              <!-- RDT -->
             </random>
           </secondLine>
         </caseType>

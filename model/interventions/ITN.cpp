@@ -45,7 +45,14 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     ripFactor = elt.getRipFactor().getValue();
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
     attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
-    double propUse = elt.getUsage().getValue();
+    // assume usage modifier is 100% if none is specified
+    double propUse;
+    if (elt.getUsage().present()) {
+        propUse = elt.getUsage().get().getValue();
+    }
+    else {
+        propUse = 1.0;
+    }
     if( !( propUse >= 0.0 && propUse <= 1.0 ) ){
         throw util::xml_scenario_error("ITN.description.proportionUse: must be within range [0,1]");
     }

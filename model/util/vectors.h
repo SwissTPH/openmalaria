@@ -22,6 +22,7 @@
 #define Hmod_UtilVectors
 
 #include "Global.h"
+#include "util/checkpoint_containers.h"
 #include <gsl/gsl_vector.h>
 #include "util/checkpoint_containers.h"
 

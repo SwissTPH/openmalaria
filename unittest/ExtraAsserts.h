@@ -55,10 +55,10 @@
 #include <limits>
 #include <cmath>
 
-
+// Note: cxxtest already defines those macros, use a trailing underscore to avoid redefinition
 // Check for NaN:
-#   define TS_ASSERT_IS_NAN(x) _TS_ASSERT_DIFFERS(__FILE__,__LINE__,x,x)
-#   define TSM_ASSERT_IS_NAN(m,x) _TSM_ASSERT_DIFFERS(__FILE__,__LINE__,m,x,x)
+#   define TS_ASSERT_IS_NAN_(x) _TS_ASSERT_DIFFERS(__FILE__,__LINE__,x,x)
+#   define TSM_ASSERT_IS_NAN_(m,x) _TSM_ASSERT_DIFFERS(__FILE__,__LINE__,m,x,x)
 
 
 // TS_ASSERT_APPROX
@@ -187,7 +187,7 @@ namespace ExtraAsserts {
       TS_ASSERT_EQUALS (Inf, Inf);
       TS_ASSERT_EQUALS (-Inf, -Inf);
       
-      TS_ASSERT_IS_NAN (Inf - Inf);
+      TS_ASSERT_IS_NAN_ (Inf - Inf);
     }
     
     /// Check ExtraAsserts::approx works as expected.

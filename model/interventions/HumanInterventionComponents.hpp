@@ -253,7 +253,7 @@ public:
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
         mon::reportMHD( mon::MHD_TREAT, human, method );
-        human.withinHostModel->treatSimple( timeLiver, timeBlood );
+        human.withinHostModel->treatSimple( human, timeLiver, timeBlood );
     }
     
     virtual Component::Type componentType() const{ return Component::TREAT_SIMPLE; }

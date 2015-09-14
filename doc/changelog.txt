@@ -2,6 +2,20 @@ This file lists significant changes in OpenMalaria from the point of view of
 users. It is however far from complete. The more complete changelog is on the
 wiki: https://github.com/SwissTPH/openmalaria/wiki/Changelog
 
+— 2015-06-19 — Schema 34 —
+
+## Vivax changes
+
+<primaquine> has been renamed to <liverStageDrug>
+Monitoring option nPQTreatments has been renamed to nLiverStageTreatments
+
+## Backwards-compatible schema changes
+
+Intervention usage:
+
+<GVI> and <IRS> now have an optional <usage> element.
+ITN's <usage> child element  is now optional too.
+It is assumed, that when no <usage> child is given, the usage modifier is 100% (proportion of use for a given intervention, which modifies the protectional effect).
 
 — 2014-11-?? — Schema 33 —
 

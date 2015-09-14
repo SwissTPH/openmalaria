@@ -169,11 +169,11 @@ void defineOutMeasures(){
     /// Sum of the pyrogenic threshold
     namedOutMeasures["sumPyrogenThresh"] =
         OutMeasure::humanAC( 10, MHF_PYROGENIC_THRESHOLD, true );
-    /// number of treatments (1st line)
+    /// number of blood-stage treatments (1st line)
     namedOutMeasures["nTreatments1"] = OutMeasure::humanAC( 11, MHT_TREATMENTS_1, false );
-    /// number of treatments (2nd line)
+    /// number of blood-stage treatments (2nd line)
     namedOutMeasures["nTreatments2"] = OutMeasure::humanAC( 12, MHT_TREATMENTS_2, false );
-    /// number of treatments (inpatient)
+    /// number of blood-stage treatments (inpatient)
     namedOutMeasures["nTreatments3"] = OutMeasure::humanAC( 13, MHT_TREATMENTS_3, false );
     /// number of episodes (uncomplicated)
     namedOutMeasures["nUncomp"] =
@@ -345,9 +345,9 @@ void defineOutMeasures(){
      * infection/bout/treatment (see onFirstBout & co). */
     namedOutMeasures["nSubPopRemovalFirstEvent"] =
         OutMeasure::humanAC( 62, MHR_SUB_POP_REM_FIRST_EVENT, false );
-    /** Report the number of Primaquine treatments given. */
-    namedOutMeasures["nPQTreatments"] =
-        OutMeasure::humanAC( 63, MHT_PQ_TREATMENTS, false );
+    /** Report the number of liver-stage treatments (likely Primaquine) administered. */
+    namedOutMeasures["nLiverStageTreatments"] =
+        OutMeasure::humanAC( 63, MHT_LS_TREATMENTS, false );
     /** Report the number of diagnostics used during treatment.
      * 
      * This is not the same as Clinical_RDTs + Clinical_Microscopy: those

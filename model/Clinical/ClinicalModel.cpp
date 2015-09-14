@@ -29,6 +29,7 @@
 #include "util/ModelOptions.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
+#include "util/timeConversions.h"
 #include "schema/scenario.h"
 
 namespace OM { namespace Clinical {

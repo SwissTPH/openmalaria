@@ -6,25 +6,28 @@ This git-repository contains source-code for Open Malaria, a simulator program f
 
 For further documentation, take a look at our [wiki](https://github.com/SwissTPH/openmalaria/wiki).
 
-The stable version of OpenMalaria supports schema [schema version 33](https://github.com/SwissTPH/openmalaria/wiki/GeneratedSchema33Doc) and is currently maintained in the __['master' branch](https://github.com/SwissTPH/openmalaria/tree/master)__.
+Also find our code on zenodo, with DOI-references: [![DOI](https://zenodo.org/badge/15670/SwissTPH/openmalaria.svg)](https://zenodo.org/badge/latestdoi/15670/SwissTPH/openmalaria)
 
-You can download the latest build [#200](https://travis-ci.org/SwissTPH/openmalaria/builds/73175741) here: [schema-33.1](https://github.com/SwissTPH/openmalaria/tree/schema-33.1)
+The stable version of OpenMalaria supports schema [schema version 34](https://github.com/SwissTPH/openmalaria/wiki/GeneratedSchema34Doc) and is currently maintained in the __['master' branch](https://github.com/SwissTPH/openmalaria/tree/master)__.
+
+You can download the latest build here: [schema-34.0](https://github.com/SwissTPH/openmalaria/releases/tag/schema-34.0)
 
 Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__ builds:
 
 [![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
 
-The development version of OpenMalaria supports the upcoming [schema version 34](https://github.com/SwissTPH/openmalaria/wiki/GeneratedSchema34Doc) and is currently maintained in the __['develop' branch](https://github.com/SwissTPH/openmalaria/tree/develop)__.
-
 Status of __[develop](https://github.com/SwissTPH/openmalaria/tree/develop)__ builds:
 
 
-[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=develop)](https://travis-ci.org/SwissTPH/openmalaria)
-![Coverage Status](https://coveralls.io/repos/SwissTPH/openmalaria/badge.svg)
+[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=develop)](https://travis-ci.org/SwissTPH/openmalaria) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/develop?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/develop)
 
+Code Coverage: ![Coverage Status](https://coveralls.io/repos/SwissTPH/openmalaria/badge.svg)
 
 License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 
+Installation instructions:
+==================
+See [INSTALLATION](https://github.com/openmalaria/wiki/Installation).
 
 Build instructions:
 ===================

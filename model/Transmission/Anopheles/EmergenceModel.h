@@ -188,8 +188,7 @@ protected:
     
     /** @brief Intervention parameters
      *
-     * Would need to be checkpointed for main simulation; not used during
-     * initialisation period (so could be reinitialised). */
+     * Checkpointed. */
     //@{
     /// Description of intervention killing effects on emerging pupae
     vector<util::SimpleDecayingValue> emergenceReduction;

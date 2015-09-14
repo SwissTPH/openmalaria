@@ -32,7 +32,7 @@ using namespace std;
 class UnittestUtil;
 
 namespace scnXml{
-    class Primaquine;
+    class LiverStageDrug;
 }
 namespace OM {
 namespace WithinHost {
@@ -65,8 +65,8 @@ public:
     VivaxBrood( istream& stream );
     
     struct UpdResult{
-        UpdResult() : newPrimaryBS(false), newBS(false) {}
-        bool newPrimaryBS, newBS, isFinished;
+        UpdResult() : newPrimaryBS(false), newRelapseBS(false), newBS(false) {}
+        bool newPrimaryBS, newRelapseBS, newBS, isFinished;
     };
     /**
      * Do per time step update: remove finished blood stage infections and act
@@ -80,6 +80,8 @@ public:
     
     inline void setHadEvent( bool hadEvent ){ this->hadEvent = hadEvent; }
     inline bool hasHadEvent()const{ return hadEvent; }
+    inline void setHadRelapse( bool hadRelapse ){ this->hadRelapse = hadRelapse; }
+    inline bool hasHadRelapse()const{ return hadRelapse; }
     
     /** Equivalent to a blood stage existing. We do not model incidence of
      * gametocytes independently, thus this also tests existance of
@@ -107,9 +109,15 @@ private:
     
     // Whether the primary blood stage infection has started
     bool primaryHasStarted;
-    
+
+    // Whether the relapse blood stage infection has started
+    bool relapseHasStarted;
+
     // Whether any clinical event has been triggered by this brood
     bool hadEvent;
+
+    // Whether a relapse event has been triggered by this brood
+    bool hadRelapse;
 };
 
 /**
@@ -125,8 +133,11 @@ public:
     /// Initialise static parameters
     static void init( const OM::Parameters& parameters, const scnXml::Model& model );
     
-    /** Set health system parameters (stored in this class for convenience). */
-    static void setHSParameters( const scnXml::Primaquine& );
+    /** Called when health system parameters are loaded.
+     * 
+     * If no "LiverStageDrug" parameters are present, this is still called but with null pointer.
+     */
+    static void setHSParameters( const scnXml::LiverStageDrug* );
     //@}
 
     /// @brief Constructors, destructors and checkpointing functions
@@ -153,8 +164,8 @@ public:
     
 protected:
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual void treatSimple(SimTime timeLiver, SimTime timeBlood);
-    virtual bool optionalPqTreatment();
+    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
+    virtual void optionalPqTreatment( const Host::Human& human );
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
@@ -181,6 +192,14 @@ private:
     // The number of primary blood stage infections to have started since this
     // human was born.
     uint32_t cumPrimInf;
+    
+    // Either never or expiry time of treatment
+    SimTime treatExpiryLiver, treatExpiryBlood;
+
+    // The probability of a clinical event from a first infection
+    double pEvent;
+    // The probability of a clinical event from a relapse
+    double pFirstRelapseEvent;
 
     friend class ::UnittestUtil;
 };

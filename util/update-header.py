@@ -1,6 +1,28 @@
-#!/usr/bin/env python
-# Find and replace likely copyright headers in .cpp/.h files.
-# Customise the directories to traverse below.
+#!/usr/bin/env python2
+# -*- coding: utf-8 -*-
+"""
+This file is part of OpenMalaria.
+
+Copyright (C) 2005-2014 Swiss Tropical Institute
+
+OpenMalaria is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation; either version 2 of the License, or (at
+your option) any later version.
+
+This program is distributed in the hope that it will be useful, but
+WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program; if not, write to the Free Software
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
+"""
+"""
+Find and replace likely copyright headers in .cpp/.h files.
+Customise the directories to traverse below.
+"""
 
 import os
 
@@ -24,6 +46,7 @@ def update_source(filename, copyright):
     line_comment=False
     block_comment=False
     prev_slash=False # or prev_star
+    want_block=True # false once we have a block comment or set of line comments
     for c in fdata:
         i+=1
         if block_comment:
@@ -31,8 +54,8 @@ def update_source(filename, copyright):
             if prev_slash and c=='/':
                 block_comment=False
                 prev_slash=False
-                break # good behaviour to stop at end of first block comment?
-                # (or better to break after an empty line?)
+                want_block=False
+                # or: break to stop now (don't eat any new-lines)
             elif c=='*':
                 prev_slash=True
             else:
@@ -40,14 +63,14 @@ def update_source(filename, copyright):
         elif c in [' ','\t','\f','\v']:
             pass
         elif c in ['\r','\n']:
-            line_comment=False
-        elif c=='/':
+            line_comment=False # end of line
+        elif want_block and c=='/':
             if prev_slash:
                 line_comment=True
                 prev_slash=False
             else:
                 prev_slash=True
-        elif c=='*' and prev_slash:
+        elif want_block and c=='*' and prev_slash:
             prev_slash=False
             block_comment=True
         else:
@@ -91,7 +114,6 @@ def recursive_traversal(dir, copyright):
                 update_source(fullfn, copyright)
 
 
-cright = file("licence-template.txt","r+").read()
-recursive_traversal("include", cright)
+cright = file("util/licence-template.txt","r+").read()
 recursive_traversal("model", cright)
 exit()

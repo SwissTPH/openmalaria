@@ -63,6 +63,9 @@ namespace OM { namespace util {
             /** Warn on use of deprecated features; that is recommend the use
              * of replacement features. */
             DEPRECATION_WARNINGS,
+            /** Print times of all surveys. */
+            PRINT_SURVEY_TIMES,
+            PRINT_GENOTYPES,
 	    NUM_OPTIONS
 	};
 	

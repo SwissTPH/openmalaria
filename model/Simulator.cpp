@@ -379,7 +379,7 @@ void Simulator::readCheckpoint() {
   }
   
   // Keep size of stderr.txt minimal with a short message, since this is a common message:
-  cerr << sim::now() << " RC" << endl;
+  cerr << sim::now().inSteps() << "t RC" << endl;
   
   // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
   if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))
@@ -442,7 +442,7 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
 
 void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     util::checkpoint::header (stream);
-    if (stream == NULL || !stream.good())
+    if (!stream.good())
         throw util::checkpoint_error ("Unable to write to file");
     util::timer::startCheckpoint ();
     

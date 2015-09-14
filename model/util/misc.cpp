@@ -21,11 +21,13 @@
 #include "Global.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
-#include "schema/scenario.h"
 #include "util/CommandLine.h"
+#include "util/timeConversions.h"
+#include "schema/scenario.h"
 
 #include <cstdlib>
 #include <boost/xpressive/xpressive.hpp>
+#include <iomanip>
 
 using namespace boost::xpressive;
 
@@ -54,6 +56,14 @@ using util::CommandLine;
 // ———  Unit parsing stuff  ———
 namespace UnitParse {
 
+static int monthLen[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+static int monthStart[] = { // offsets of start of month from start of year
+    0 /*Jan*/, 31, 59, 90,
+    120 /*May*/, 151, 181, 212,
+    243 /*Sept*/, 273, 304, 334,
+    365 /*next year: stop condition in formatDate*/
+};
+
 template<typename T>
 int castToInt( T x ){
     int y = static_cast<int>( x );
@@ -61,6 +71,10 @@ int castToInt( T x ){
         throw util::format_error( "underflow/overflow" );
     }
     return y;
+}
+
+bool haveDate(){
+    return interv_start_date != sim::never();
 }
 
 SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
@@ -153,12 +167,6 @@ double durationToDays( const std::string& str, DefaultUnit unit ){
  * but encounters definite format errors. */
 SimTime parseDate( const std::string& str ){
     static sregex dateRx = sregex::compile ( "(\\d{4})-(\\d{1,2})-(\\d{1,2})" );
-    static int monthLen[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
-    static int monthStart[] = { // offsets of start of month from start of year
-        0 /*Jan*/, 31, 59, 90,
-        120 /*May*/, 151, 181, 212,
-        243 /*Sept*/, 273, 304, 334
-    };
     smatch rx_what;
     if( regex_match(str, rx_what, dateRx) ){
         int year = std::atoi(rx_what[1].str().c_str()),
@@ -170,6 +178,9 @@ SimTime parseDate( const std::string& str ){
         // We can't overflow: the largest year possible is 9999 which is about
         // 3.6 million days; an int is good to more than 1e9.
         // We should also round to the nearest step
+        // Inconsistency: time "zero" is 0000-01-01, not 0001-01-01. Since
+        // dates are always relative to another date, the extra year doesn't
+        // actually affect anything.
         return sim::fromYearsI(year) + sim::roundToTSFromDays(monthStart[month-1] + day - 1);
     }else{
         return sim::never();
@@ -192,6 +203,25 @@ SimTime readDate( const std::string& str, DefaultUnit defUnit ){
         }
         return readDuration( str, defUnit );
     }
+}
+
+void formatDate( ostream& stream, SimTime time ){
+    if( interv_start_date == sim::never() ){
+        throw TRACED_EXCEPTION( "formatDate() called without start date", util::Error::NoStartDate );
+    }
+    SimTime date = interv_start_date + time;
+    assert( date >= sim::zero() );
+    int year = date / sim::oneYear();
+    assert( year >= 0 );
+    int remainder = (date - sim::oneYear() * year).inDays();
+    int month = 0;
+    while( remainder >= monthStart[month+1] ) ++month;
+    remainder -= monthStart[month];
+    assert( month < 12 && remainder < monthLen[month] );
+    // Inconsistency in year vs month and day: see parseDate()
+    stream << setfill('0') << setw(4) << year << '-'
+            << setw(2) << (month+1) << '-' << (remainder+1)
+            << setw(0) << setfill(' ');
 }
 
 }       // end of UnitParse namespace

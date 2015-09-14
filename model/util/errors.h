@@ -87,6 +87,7 @@ namespace OM { namespace util {
         SwitchDefault,
         InputResource,
         PkPd,
+        NoStartDate,
         Max
     }; }
     namespace Messages {

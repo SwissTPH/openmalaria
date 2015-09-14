@@ -98,7 +98,9 @@ namespace OM { namespace util {
         {}
         
         /** Set parameters such that samples taken are:
-         * X ~ log N( log(mean)-s²/2, s² )
+         * X ~ ln N( log(mean)-s²/2, s² )
+         * 
+         * Equivalent in R: rlnorm(n, log(m) - s*s/2, s)
          * 
          * @param mean Mean of sampled variates
          * @param s Square-root of variance of logarithm of sampled variates
@@ -108,6 +110,7 @@ namespace OM { namespace util {
         inline void setParams( const scnXml::LognormalSample& elt ){
             setParams( elt.getMean(), elt.getSigma() );
         }
+        void setParams( const scnXml::SampledValue& elt );
         /** Set the mean, leave sigma unchanged. */
         void setMean( double mean );
         /** Scale the mean (i.e. multiply by a scalar). */
@@ -119,6 +122,11 @@ namespace OM { namespace util {
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
             return sample.asLognormal( mu, sigma );
+        }
+        
+        /** Return true if and only if parameters have been set. */
+        inline bool isSet() const{
+            return mu == mu;    // mu is NaN iff not set
         }
         
     private:
@@ -166,4 +174,3 @@ namespace OM { namespace util {
     
 } }
 #endif
-

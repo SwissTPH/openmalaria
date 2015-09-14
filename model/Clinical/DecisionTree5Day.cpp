@@ -65,10 +65,12 @@ void DecisionTree5Day::setHealthSystem(const scnXml::HSDT5Day& hsDescription){
     cureRateSevere = hsDescription.getCureRateSevere().getValue();
     treatmentSevere = WHInterface::addTreatment( hsDescription.getTreatmentSevere() );
     
-    if( hsDescription.getPrimaquine().present() ){
-        if( !ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
-            throw util::xml_scenario_error( "health-system's primaquine element only supported by vivax" );
-        WithinHost::WHVivax::setHSParameters( hsDescription.getPrimaquine().get() );
+    if( ModelOptions::option(util::VIVAX_SIMPLE_MODEL) ){
+        WithinHost::WHVivax::setHSParameters(
+            hsDescription.getLiverStageDrug().present() ?
+            &hsDescription.getLiverStageDrug().get() : 0 );
+    }else if( hsDescription.getLiverStageDrug().present() ){
+        throw util::xml_scenario_error( "health-system's liverStageDrug element only supported by vivax" );
     }
 }
 
@@ -99,8 +101,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
             mon::reportMHI( measures[regimen], human, 1 );
         }
         
-        if( human.withinHostModel->optionalPqTreatment() )
-            mon::reportMHI( mon::MHT_PQ_TREATMENTS, human, 1 );
+        human.withinHostModel->optionalPqTreatment(human);
     } else {
         // No care sought
     }

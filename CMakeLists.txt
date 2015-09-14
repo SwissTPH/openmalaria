@@ -19,12 +19,14 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 # -----  Compile options  -----
 
 # C++11 would be nice, but we have to compile for relatively old platforms
-set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+if (NOT MSVC)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+endif (NOT MSVC)
 
 set (OM_STD_LIBS )
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
-IF( ${CMAKE_COMPILER_IS_GNUCXX} )
+if( ${CMAKE_COMPILER_IS_GNUCXX} )
   # This doesn't show up in the cache, but it is passed to gcc:
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
 
@@ -39,13 +41,13 @@ IF( ${CMAKE_COMPILER_IS_GNUCXX} )
     link_directories (${CMAKE_SOURCE_DIR}/lib)
     # Note: -static-libstdc++ is only available since GCC 4.5
     # See: http://www.trilithium.com/johan/2005/06/static-libstdc/
-    ADD_DEFINITIONS(-static-libgcc -static-libstdc++)
-    SET(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
+    add_definitions(-static-libgcc -static-libstdc++)
+    set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
   endif (OM_STATICALLY_LINK)
-ENDIF( ${CMAKE_COMPILER_IS_GNUCXX} )
+endif( ${CMAKE_COMPILER_IS_GNUCXX} )
 
 option (BUILD_SHARED_LIBS "Link xsdcxx, model, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
-MARK_AS_ADVANCED (BUILD_SHARED_LIBS)
+mark_as_advanced (BUILD_SHARED_LIBS)
 
 if (MSVC)
   # This is now the OM_STATICALLY_LINK for windows
@@ -153,7 +155,7 @@ endif (OM_BOINC_INTEGRATION)
 # -----  Compile-time optional features  -----
 # (must come before add_subdirectory (model))
 
-option (OM_STREAM_VALIDATOR "Compile in StreamValidator (see include/util/StreamValidator.h for usage notes)" OFF)
+option (OM_STREAM_VALIDATOR "Compile in StreamValidator (see model/util/StreamValidator.h for usage notes)" OFF)
 if (OM_STREAM_VALIDATOR)
   add_definitions (-DOM_STREAM_VALIDATOR)
 endif (OM_STREAM_VALIDATOR)
@@ -190,9 +192,6 @@ include_directories (SYSTEM
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
-
-file(STRINGS version.txt OM_VERSION)
-configure_file(model/util/version.h.in ../model/util/version.h	@ONLY)
 
 add_executable (openMalaria model/openMalaria.cpp)
 

@@ -3,8 +3,8 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- standard types used -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_33"
-           xmlns:om="http://openmalaria.org/schema/scenario_33"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_34"
+           xmlns:om="http://openmalaria.org/schema/scenario_34"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!-- Component and TriggeredDeployments would be in interventions.xsd, except
     that they are needed from healthSystem.xsd -->
@@ -216,7 +216,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:documentation>
         Parameters of a log-normal distribution.
         
-        Variates are sampled as: X ~ log N( log(mean)-sigma²/2, sigma² ).
+        Variates are sampled as: X ~ ln N( log(mean)-sigma²/2, sigma² ).
+        
+        Equivalent R sample: rlnorm(n, log(m) - s*s/2, s)
       </xs:documentation>
       <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
     </xs:annotation>
@@ -292,6 +294,57 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
+  <xs:complexType name="SampledValue">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of some distribution. The mean is that provided and the
+        standard deviation is cv*mean.
+        
+        Log-normal:
+        σ = cv * mean ;
+        μ = ln(mean) - σ² / 2 ;
+        X ~ ln N( μ, σ² ) ;
+        equivalent R sample: rlnorm(1, log(mean) - ((cv * mean)^2) / 2, cv * mean).
+      </xs:documentation>
+      <xs:appinfo>name:Distribution parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="mean" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The mean of the distribution.
+        </xs:documentation>
+        <xs:appinfo>units:(same as base units);name:mean;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="cv" type="xs:double" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Coefficient of variance (mean * cv gives standard deviation).
+          
+          Must be specified when distribution is not constant.
+        </xs:documentation>
+        <xs:appinfo>name:Coefficient of variance;units:unitless;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="distr" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          Selects the distribution to use.
+          
+          const: constant (no distribution). Setting cv=0 has the same behaviour.
+          
+          lnorm: log-normal distribution
+        </xs:documentation>
+        <xs:appinfo>name:Distribution;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="lnorm" />
+          <xs:enumeration value="const" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
   <xs:complexType name="DoubleValue">
     <xs:attribute name="value" type="xs:double" use="required">
       <xs:annotation>
@@ -304,6 +357,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="value" type="xs:int" use="required">
       <xs:annotation>
         <xs:documentation>An integer value.</xs:documentation>
+        <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="BooleanValue">
+    <xs:attribute name="value" type="xs:boolean" use="required">
+      <xs:annotation>
+        <xs:documentation>A boolean value.</xs:documentation>
         <xs:appinfo>name:Input parameter value;exposed:false;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>

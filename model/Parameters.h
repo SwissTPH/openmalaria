@@ -44,6 +44,9 @@ public:
         CUMULATIVE_H_STAR = 8,
         NEG_LOG_ONE_MINUS_ALPHA_M = 9,
         DECAY_M = 10,
+        //@}
+        /// @b DescriptiveInfection specific
+        //@{
         SIGMA0_SQ = 11,
         X_NU_STAR = 12,
         //@}
@@ -52,22 +55,22 @@ public:
         Y_STAR_SQ = 13,
         ALPHA = 14,
         //@}
-        DENSITY_BIAS_NON_GARKI = 15,        ///< Used in WithinHostModel
+        DENSITY_BIAS_NON_GARKI = 15,        ///< Used in Diagnostic
         BASELINE_AVAILABILITY_SHAPE = 16,   ///< Used in InfectionIncidenceModel
         LOG_ODDS_RATIO_CF_COMMUNITY = 17,   ///< Used in CaseManagementModel
         INDIRECT_RISK_COFACTOR = 18,        ///< Used in PathogenesisModel
         NON_MALARIA_INFANT_MORTALITY = 19,  ///< Used in Summary
-        DENSITY_BIAS_GARKI = 20,            ///< Used in WithinHostModel
+        DENSITY_BIAS_GARKI = 20,            ///< Used in Diagnostic
         SEVERE_MALARIA_THRESHHOLD = 21,     ///< Used in PathogenesisModel
-        IMMUNITY_PENALTY = 22,              ///< Used in WithinHostModel
-        IMMUNE_EFFECTOR_DECAY = 23,         ///< Used in WithinHostModel
+        IMMUNITY_PENALTY = 22,              ///< Used in WHFalciparum
+        IMMUNE_EFFECTOR_DECAY = 23,         ///< Used in WHFalciparum
         /// @b Used in PathogenesisModel
         //@{
         COMORBIDITY_INTERCEPT = 24,
         Y_STAR_HALF_LIFE = 25,
         Y_STAR_1 = 26,
         //@}
-        ASEXUAL_IMMUNITY_DECAY = 27,        ///< Used in WithinHostModel
+        ASEXUAL_IMMUNITY_DECAY = 27,        ///< Used in WHFalciparum
         /// @b Used in PathogenesisModel
         //@{
         Y_STAR_0 = 28,
@@ -76,16 +79,16 @@ public:
         MUELLER_RATE_MULTIPLIER = 31,
         MUELLER_DENSITY_EXPONENT = 32,
         //@}
-        /// v in "Case Fatality Rate proposal" TODO: reference
+        /// EventScheduler: v in "Case Fatality Rate proposal"
         CFR_SCALE_FACTOR = 33,
         
-        // Parameters fitting for Molineaux within host model
+        /// @b Molineaux: sampling parameters (not pairwise mode only)
         MEAN_LOCAL_MAX_DENSITY = 34,
         SD_LOCAL_MAX_DENSITY = 35,
         MEAN_DIFF_POS_DAYS = 36,
         SD_DIFF_POS_DAYS = 37,
         
-        /// exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day, with Event Scheduler model
+        /// EventScheduler: exp(-CFR_NEG_LOG_ALPHA) is the proportion of deaths occuring on the first day
         CFR_NEG_LOG_ALPHA = 38,
         MAX
     };

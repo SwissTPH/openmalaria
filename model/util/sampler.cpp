@@ -48,6 +48,21 @@ void LognormalSampler::setParams( double mean, double s ){
     mu = log(mean) - 0.5*s*s;
     sigma = s;
 }
+void LognormalSampler::setParams(const scnXml::SampledValue& elt){
+    if( elt.getDistr() == "const" ){
+        mu = log(elt.getMean());
+        sigma = 0.0;
+    }else if( elt.getDistr() == "lnorm" ){
+        if( !elt.getCv().present() ){
+            throw util::xml_scenario_error( "attribute \"cv\" required for sampled value where distr=\"ln\"" );
+        }
+        sigma = elt.getCv().get() * elt.getMean();
+        mu = log(elt.getMean()) - 0.5 * sigma * sigma;
+    }else{
+        throw SWITCH_DEFAULT_EXCEPTION;
+    }
+}
+
 void LognormalSampler::setMean( double mean ){
     mu = log(mean) - 0.5*sigma*sigma;
 }

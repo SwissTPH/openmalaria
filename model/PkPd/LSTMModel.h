@@ -23,6 +23,8 @@
 
 #include "PkPd/Drug/LSTMDrug.h"
 
+#include <boost/ptr_container/ptr_vector.hpp>
+
 namespace scnXml{
     class PKPDMedication;
 }
@@ -31,13 +33,13 @@ namespace Host{
     class Human;
 }
 namespace PkPd {
+using boost::ptr_vector;
 
 struct MedicateData {
     MedicateData () :
         drug(0),
         qty(numeric_limits< double >::signaling_NaN()),
-        time(numeric_limits< double >::signaling_NaN()),
-        duration(numeric_limits< double >::quiet_NaN())
+        time(numeric_limits< double >::signaling_NaN())
     {}
     
     /// Checkpointing
@@ -46,7 +48,6 @@ struct MedicateData {
         drug & stream;
         qty & stream;
         time & stream;
-        duration & stream;
     }
     
 private:
@@ -59,9 +60,8 @@ private:
     }
     
     size_t drug;      /// Drug type index
-    double qty;         /// Quantity of drug prescribed (mg when oral, mg/kg when IV)
+    double qty;         /// Quantity of drug prescribed in mg
     double time;        /// Time to medicate at, in days (0 means start of time step, may be >= 1 (thus not today))
-    double duration;    /// Duration for IV purposes, in days (use 0 or NaN to indicate oral dose)
     
     friend struct Schedule;
     friend class LSTMModel;
@@ -113,18 +113,23 @@ public:
      */
     void medicate(double body_mass);
     
+    /** Get concentration of the drug at the beginning of the day.
+     * 
+     * For unit testing. Not optimised. */
+    double getDrugConc (size_t drug_index) const;
+    
     /** This is how drugs act on infections.
      *
      * Each time step, on each infection, the parasite density is multiplied by
      * the return value of this infection. The WithinHostModels are responsible
      * for clearing infections once the parasite density is negligible. */
-    double getDrugFactor (uint32_t genotype);
+    double getDrugFactor (uint32_t genotype, double body_mass) const;
     
     /** After any resident infections have been reduced by getDrugFactor(),
      * this function is called to update drug levels to their effective level
      * at the end of the day, as well as clear data once drug concentrations
      * become negligible. */
-    void decayDrugs ();
+    void decayDrugs (double body_mass);
     
     /** Make summaries of drug concentration data. */
     void summarize( const Host::Human& human ) const;
@@ -134,9 +139,8 @@ private:
      * time steps, until rendered ineffective by decayDrugs().
      *
      * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
-     * \param qty The quantity in either mg (if oral dose) or mg/kg (if IV).
+     * \param qty The quantity in mg
      * \param time Time in days since start of this time step to medicate at
-     * \param duration  Duration in days. 0 or an NaN indicates no duration.
      * \param bodyMass Weight of human in kg
      * 
      * Due to the fact we're using a discrete time step model, the case-management
@@ -146,13 +150,14 @@ private:
      * new infection densities) happens first; hence medicate() will always be
      * called after getDrugFactor in a time step, and a time of zero means the
      * dose has effect from the start of the following time step. */
-    void medicateDrug(size_t typeIndex, double qty, double time, double duration, double bodyMass);
+    void medicateDrug(size_t typeIndex, double qty, double time, double bodyMass);
   
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
     
+    typedef ptr_vector<LSTMDrug> DrugVec;
     /// Drugs with non-zero blood concentrations:
-    list<LSTMDrug> m_drugs;
+    DrugVec m_drugs;
     
     /// All pending medications
     list<MedicateData> medicateQueue;

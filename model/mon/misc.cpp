@@ -29,6 +29,7 @@
 #include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
+#include "util/timeConversions.h"
 #include "schema/monitoring.h"
 
 #include "WithinHost/Diagnostic.h"
@@ -55,7 +56,7 @@ void initSurveyTimes( const OM::Parameters& parameters,
     const scnXml::Surveys::SurveyTimeSequence& survs =
         monitoring.getSurveys().getSurveyTime();
     
-    impl::surveyTimes.reserve (survs.size());
+    impl::surveyTimes.reserve (survs.size());   // insufficient reservation if repetitions are used
     for (size_t i = 0; i < survs.size(); ++i) {
         const scnXml::SurveyTime& surv = survs[i];
         try{
@@ -82,8 +83,32 @@ void initSurveyTimes( const OM::Parameters& parameters,
             throw util::xml_scenario_error( string("surveyTime: ").append(e.message()) );
         }
     }
+    // sort times:
     sort( impl::surveyTimes.begin(), impl::surveyTimes.end() );
-    impl::nSurveys = impl::surveyTimes.size();
+    // remove duplicates:
+    vector<SimTime>::iterator newEnd = unique( impl::surveyTimes.begin(), impl::surveyTimes.end() );
+    impl::nSurveys = distance(impl::surveyTimes.begin(), newEnd);
+    if( impl::nSurveys < impl::surveyTimes.size() ){
+        std::cerr << "Warning: " << (impl::surveyTimes.size() - impl::nSurveys)
+                << " duplicate survey times omitted. Survey numbers do not "
+                "include these." << std::endl
+                << "Note: the OpenMalaria v33 release will not work correctly "
+                "with this XML." << std::endl;
+    }
+    impl::surveyTimes.resize( impl::nSurveys );
+    
+    if( util::CommandLine::option( util::CommandLine::PRINT_SURVEY_TIMES ) ){
+        bool haveDate = UnitParse::haveDate();
+        std::cout << "Survey\tsteps\tdays";
+        if( haveDate ) std::cout << "\tdate";
+        std::cout << std::endl;
+        for( size_t i = 0; i < impl::nSurveys; ++i ){
+            std::cout << (i+1) << '\t' << impl::surveyTimes[i].inSteps()
+                    << '\t' << impl::surveyTimes[i].inDays();
+            if( haveDate ) std::cout << '\t' << impl::surveyTimes[i];
+            std::cout << std::endl;
+        }
+    }
     
     if( monitoring.getCohorts().present() ){
         // this needs to be set early, but we can't set cohortSubPopIds until after InterventionManager is initialised

@@ -193,7 +193,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 double survivalFactor = survivalFactor_part *
                     (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y) *
-                    pkpdModel.getDrugFactor((*inf)->genotype());
+                    pkpdModel.getDrugFactor((*inf)->genotype(), body_mass);
                 // update, may result in termination of infection:
                 expires = (*inf)->update(survivalFactor, now, body_mass);
             }
@@ -214,7 +214,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
                 ++inf;
             }
         }
-        pkpdModel.decayDrugs ();
+        pkpdModel.decayDrugs (body_mass);
     }
     
     util::streamValidate(totalDensity);
