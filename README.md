@@ -10,12 +10,11 @@ Also find our code on zenodo, with DOI-references: [![DOI](https://zenodo.org/ba
 
 The stable version of OpenMalaria supports schema [schema version 34](https://github.com/SwissTPH/openmalaria/wiki/GeneratedSchema34Doc) and is currently maintained in the __['master' branch](https://github.com/SwissTPH/openmalaria/tree/master)__.
 
+You can download the latest build here: [schema-34.0](https://github.com/SwissTPH/openmalaria/releases/tag/schema-34.0)
 
 Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__ builds:
 
 [![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria) [![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
-
-The development version of OpenMalaria supports the upcoming [schema version 35](https://github.com/SwissTPH/openmalaria/wiki/GeneratedCurrentSchemaDoc) and is currently maintained in the __['develop' branch](https://github.com/SwissTPH/openmalaria/tree/develop)__.
 
 Status of __[develop](https://github.com/SwissTPH/openmalaria/tree/develop)__ builds:
 
