@@ -119,7 +119,7 @@ ostream& operator<< (ostream& out, vector<T> vec) {
   out << '[';
   if (vec.size())
     out << vec[0];
-  for (size_t i = 1; i < vec.size(); ++i)
+  for(size_t i = 1; i < vec.size(); ++i)
     out << ", " << vec[i];
   out << ']';
   return out;

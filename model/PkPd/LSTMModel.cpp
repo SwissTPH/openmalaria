@@ -48,7 +48,7 @@ void LSTMModel::checkpoint (istream& stream) {
     size_t numDrugs;	// type must be same as m_drugs.size()
     numDrugs & stream;
     util::checkpoint::validateListSize (numDrugs);
-    for (size_t i=0; i<numDrugs; ++i) {
+    for(size_t i=0; i<numDrugs; ++i) {
         size_t index;
         index & stream;
         m_drugs.push_back( LSTMDrugType::createInstance(index) );
@@ -59,7 +59,7 @@ void LSTMModel::checkpoint (istream& stream) {
 
 void LSTMModel::checkpoint (ostream& stream) {
     m_drugs.size() & stream;
-    for (DrugVec::iterator it =m_drugs.begin(); it!=m_drugs.end(); ++it) {
+    for(DrugVec::iterator it =m_drugs.begin(); it!=m_drugs.end(); ++it) {
         it->getIndex() & stream;
         (*it) & stream;
     }

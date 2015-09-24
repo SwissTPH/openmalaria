@@ -220,7 +220,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                     
                     double uVariate = random::uniform_01();
                     size_t i = 0;       // units: days
-                    for (; i < cumDailyPrImmUCTS.size(); ++i){
+                    for(; i < cumDailyPrImmUCTS.size(); ++i){
                         if( uVariate < cumDailyPrImmUCTS[i] ){
                             goto gotDelay;
                         }

@@ -61,7 +61,7 @@ namespace OM { namespace util {
 	
 	/* Simple command line parser. Seems to work fine.
 	* If an extension is wanted, http://tclap.sourceforge.net/ looks good. */
-	for (int i = 1; i < argc; ++i) {
+	for(int i = 1; i < argc; ++i) {
 	    string clo = argv[i];
 	    
 	    // starts "--"
@@ -160,7 +160,7 @@ namespace OM { namespace util {
 		    cloError = true;
 		}
 	    } else if (clo.size() >= 1 && *clo.data() == '-') {	// single - (not --)
-		for (size_t j = 1; j < clo.size(); ++j) {
+		for(size_t j = 1; j < clo.size(); ++j) {
 		    if (clo[j] == 'p') {
 			if (j + 1 != clo.size())
 			    throw cmd_exception ("a path must be given as next argument after -p");

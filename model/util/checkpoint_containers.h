@@ -104,7 +104,7 @@ namespace checkpoint {
         validateListSize (l);
         x.clear ();
         typename map<S,T>::iterator pos = x.begin ();
-        for (size_t i = 0; i < l; ++i) {
+        for(size_t i = 0; i < l; ++i) {
             S s;
             T t;
             s & stream;

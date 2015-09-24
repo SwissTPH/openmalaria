@@ -171,9 +171,9 @@ bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge, do
   double amplificationPerCycle;
   double localDensity;	// density before scaling by _overallMultiplier
   size_t ageDays = bsAge.inDays();
-  for (int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
+  for(int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
     double logDensity;
-    for (int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
+    for(int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
       double b_1=random::gauss(_mu_beta1[ageDays],_sigma_beta1[ageDays]);
       double b_2=random::gauss(_mu_beta2[ageDays],_sigma_beta2[ageDays]);
       double b_3=random::gauss(_mu_beta3[ageDays],_sigma_beta3[ageDays]);

@@ -133,7 +133,7 @@ SimTime NonVectorModel::initIterate (){
     }
     double factor = static_cast<double>(sim::stepsPerYear()) / static_cast<double>(initialKappa.size());
     initialKappa.resize( sim::stepsPerYear() );
-    for (size_t  i = 0; i < initialKappa.size(); ++i) {
+    for(size_t  i = 0; i < initialKappa.size(); ++i) {
         initialKappa[ i ] *= factor;
         // error check:
         if (!(initialKappa[i] > 0.0))     // if not positive
@@ -175,7 +175,7 @@ void NonVectorModel::changeEIRIntervention (
     interventionEIR[istep] += EIRdaily;
   }
   // divide by number of records assigned to each interval (usually one per day)
-  for (size_t i = 0; i < interventionEIR.size(); ++i){
+  for(size_t i = 0; i < interventionEIR.size(); ++i){
     interventionEIR[i] *= sim::oneTS().inDays() / static_cast<double>(nDays[i]);
   }
   
@@ -259,7 +259,7 @@ double NonVectorModel::averageEIR (const scnXml::NonVector& nonVectorData) {
     // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
     double valaverageEIR=0.0;
     size_t i = 0;
-    for (const scnXml::NonVector::EIRDailySequence& daily =
+    for(const scnXml::NonVector::EIRDailySequence& daily =
         nonVectorData.getEIRDaily(); i < daily.size(); ++i)
     {
         valaverageEIR += (double)daily[i];

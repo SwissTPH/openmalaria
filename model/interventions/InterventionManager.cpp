@@ -288,7 +288,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
-                for ( It it = seq.begin(); it != seq.end(); ++it ) {
+                for( It it = seq.begin(); it != seq.end(); ++it ) {
                     SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     timed.push_back( new TimedVectorDeployment( date, instance ) );
                 }

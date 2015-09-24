@@ -252,7 +252,7 @@ MolineauxInfection::MolineauxInfection(uint32_t genotype):
 MolineauxInfection::Variant::Variant () :
         Pi1(0.0), Pi2(0.0), Si_summation(0.0)
 {
-    for (size_t tau=0; tau<taus; tau++){
+    for(size_t tau=0; tau<taus; tau++){
         lagged_Pi[tau] =  0.0;
     }
 }
@@ -332,7 +332,7 @@ bool MolineauxInfection::updateDensity( double survival_factor, SimTime age_BS, 
     double Si[v];       // calculate value for each variant
     double sum_qj_Sj=0.0;       // simultaneously calculation summataion in equation 4
     
-    for (size_t i = 0; i < v; i++){
+    for(size_t i = 0; i < v; i++){
         if( i < variants.size() ){
             // 4.a) Update the sum in (6) based on the last step's value
             //note: sigma_decay = exp(-2*sigma)
@@ -395,11 +395,11 @@ MolineauxInfection::MolineauxInfection (istream& stream) :
         CommonInfection(stream)
 {
     Sm_summation & stream;
-    for (size_t i=0;i<v;i++) {
+    for(size_t i=0;i<v;i++) {
         mi[i] & stream;
     }
     variants & stream;
-    for (size_t j=0;j<taus;j++){
+    for(size_t j=0;j<taus;j++){
         lagged_Pc[j] & stream;
     }
     Pc_star & stream;
@@ -410,11 +410,11 @@ void MolineauxInfection::checkpoint (ostream& stream) {
     CommonInfection::checkpoint (stream);
 
     Sm_summation & stream;
-    for (size_t i=0;i<v;i++) {
+    for(size_t i=0;i<v;i++) {
         mi[i] & stream;
     }
     variants & stream;
-    for (size_t j=0;j<taus;j++){
+    for(size_t j=0;j<taus;j++){
         lagged_Pc[j] & stream;
     }
     Pc_star & stream;

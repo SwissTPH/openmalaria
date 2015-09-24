@@ -53,7 +53,7 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
 
     const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
     initialMeanEfficacy.resize (ies.size());
-    for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
+    for(size_t i = 0; i < initialMeanEfficacy.size(); ++i)
         initialMeanEfficacy[i] = ies[i].getValue();
     
     if( params.size() <= component.id ) params.resize( component.id + 1 );

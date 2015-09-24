@@ -57,7 +57,7 @@ void initSurveyTimes( const OM::Parameters& parameters,
         monitoring.getSurveys().getSurveyTime();
     
     impl::surveyTimes.reserve (survs.size());   // insufficient reservation if repetitions are used
-    for (size_t i = 0; i < survs.size(); ++i) {
+    for(size_t i = 0; i < survs.size(); ++i) {
         const scnXml::SurveyTime& surv = survs[i];
         try{
             std::string s = surv;
@@ -185,7 +185,7 @@ void AgeGroup::init (const scnXml::Monitoring& monitoring) {
     
     // The last age group includes individuals too old for reporting
     upperBound.resize( groups.size() + 1 );
-    for (size_t i = 0;i < groups.size(); ++i) {
+    for(size_t i = 0;i < groups.size(); ++i) {
         // convert to SimTime, rounding down to the next time step
         upperBound[i] = sim::fromYearsD( groups[i].getUpperbound() );
     }

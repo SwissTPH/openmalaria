@@ -303,7 +303,7 @@ WHVivax::~WHVivax(){
 double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
     assert( sumX == 0 );
-    for (list<VivaxBrood>::const_iterator inf = infections.begin();
+    for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
@@ -324,7 +324,7 @@ bool WHVivax::summarize(const Host::Human& human) const{
     // (patent) infections are reported by genotype, even though we don't have
     // genotype in this model
     mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
-    for (list<VivaxBrood>::const_iterator inf = infections.begin();
+    for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf) 
     {
         if (inf->isPatent()){
@@ -413,7 +413,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
 bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
     //TODO(monitoring): this shouldn't ignore the diagnostic (especially since
     // it should always return true if diagnostic.density=0)
-    for (list<VivaxBrood>::const_iterator inf = infections.begin();
+    for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if (inf->isPatent())
