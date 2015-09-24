@@ -501,7 +501,7 @@ const CMDecisionTree& CMDTRandom::create(
     CMDTRandom* result = new CMDTRandom();
     
     double cum_p = 0.0;
-    BOOST_FOREACH( const scnXml::Outcome& outcome, node.getOutcome() ){
+    foreach( const scnXml::Outcome& outcome, node.getOutcome() ){
         cum_p += outcome.getP();
         result->branches.insert( make_pair(cum_p, &CMDecisionTree::create( outcome, isUC )) );
     }

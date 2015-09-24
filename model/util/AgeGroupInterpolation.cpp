@@ -88,7 +88,7 @@ namespace OM { namespace util {
             assert(pos == dataGroups.end());
 
             double greatestLbound = -1.0;
-            BOOST_FOREACH( const scnXml::Group& group, ageGroups.getGroup() ){
+            foreach( const scnXml::Group& group, ageGroups.getGroup() ){
                 double lbound = group.getLowerbound();
                 if( lbound >= greatestLbound ){
                     greatestLbound = lbound;

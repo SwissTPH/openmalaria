@@ -56,7 +56,7 @@ struct eDFunctor
       throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
     w = 2*M_PI / T(p);
     fn = (fc.size()-1)/2;
-    BOOST_FOREACH (T& sample, logSamples) {
+    foreach (T& sample, logSamples) {
       sample = log (sample);	// compare logarithms of EIR to make differentiation easier
     }
   }

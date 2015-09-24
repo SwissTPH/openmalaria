@@ -82,7 +82,7 @@ Population::Population(const scnXml::Entomology& entoData, size_t populationSize
     // Age groups are currently hard-coded.
     ctsDemogAgeGroups += 1.0, 5.0, 10.0, 15.0, 25.0;
     ostringstream ctsDemogTitle;
-    BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
+    foreach( double ubound, ctsDemogAgeGroups ){
         ctsDemogTitle << "\thost % ≤ " << ubound;
     }
     Continuous.registerCallback( "host demography", ctsDemogTitle.str(),
@@ -263,7 +263,7 @@ void Population::ctsHosts (ostream& stream){
 void Population::ctsHostDemography (ostream& stream){
     Population::ConstReverseIter it = population.crbegin();
     int cumCount = 0;
-    BOOST_FOREACH( double ubound, ctsDemogAgeGroups ){
+    foreach( double ubound, ctsDemogAgeGroups ){
         while( it != population.crend() && it->age(sim::now()).inYears() < ubound ){
             ++cumCount;
             ++it;

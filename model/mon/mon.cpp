@@ -287,7 +287,7 @@ public:
     // Checkpointing
     void checkpoint( ostream& stream ){
         reports.size() & stream;
-        BOOST_FOREACH (T& y, reports) {
+        foreach (T& y, reports) {
             y & stream;
         }
         // mIndices and outMeasures are constant after initialisation
@@ -299,7 +299,7 @@ public:
             throw util::checkpoint_error( "mon::reports: invalid list size" );
         }
         reports.resize (l);
-        BOOST_FOREACH (T& y, reports) {
+        foreach (T& y, reports) {
             y & stream;
         }
         // mIndices and outMeasures are constant after initialisation

@@ -50,7 +50,7 @@ namespace checkpoint {
         if( size_check != x.size() )
             throw TRACED_EXCEPTION_DEFAULT( "stream too long!" );
         size32 & stream;       // write 32-bit unsigned int (size_t is platform dependent!)
-        BOOST_FOREACH (T& y, x) {
+        foreach (T& y, x) {
             y & stream;
         }
     }
@@ -60,7 +60,7 @@ namespace checkpoint {
         size32 & stream; // read uint32_t, not whatever size_t is
         validateListSize (size32, 100000000L);
         x.resize( size32 );
-        BOOST_FOREACH (T& y, x) {
+        foreach (T& y, x) {
             y & stream;
         }
     }
