@@ -27,6 +27,12 @@ if (NOT MSVC)
   endif(CMAKE_CXX_COMPILER_VERSION GREATER 4.3)
 endif (NOT MSVC)
 
+# to cross-compile to asm.js:
+# set EMSCRIPTEN=/usr/share/emscripten or e.g. c:/Programs/Emscripten
+if (EMSCRIPTEN)
+  set (CMAKE_TOOLCHAIN_FILE "${EMSCRIPTEN}/cmake/Modules/Platform/Emscripten.cmake")
+endif (EMSCRIPTEN)
+
 set (OM_STD_LIBS )
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
