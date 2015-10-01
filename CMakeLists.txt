@@ -18,9 +18,13 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
 # -----  Compile options  -----
 
-# C++11 would be nice, but we have to compile for relatively old platforms
+# C++11 is nice
 if (NOT MSVC)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  if(CMAKE_CXX_COMPILER_VERSION GREATER 4.3)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+  elseif(CMAKE_CXX_COMPILER_VERSION LESS 4.3)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
+  endif(CMAKE_CXX_COMPILER_VERSION GREATER 4.3)
 endif (NOT MSVC)
 
 set (OM_STD_LIBS )
