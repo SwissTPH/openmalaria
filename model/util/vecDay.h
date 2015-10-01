@@ -25,7 +25,7 @@
 #include <vector>
 
 #if __cplusplus >= 201103L
-#error "vecDay should be updated if switching to a later C++ version"
+#warning "vecDay should be updated if switching to a later C++ version"
 #endif
 
 namespace OM {

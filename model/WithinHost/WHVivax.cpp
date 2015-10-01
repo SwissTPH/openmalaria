@@ -104,7 +104,7 @@ int sampleNHypnozoites(){
 
 // time to hypnozoite release after initial release:
 SimTime sampleReleaseDelay(){
-    if(isnan(pSecondRelease)) {
+    if(std::isnan(pSecondRelease)) {
         pSecondRelease = 0.0;
     }
     bool isFirstRelease =
@@ -354,9 +354,9 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     uint32_t oldCumInf = cumPrimInf;
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
-    double oldpEvent = ( isnan(pEvent))? 1.0 : pEvent;
+    double oldpEvent = ( std::isnan(pEvent))? 1.0 : pEvent;
     // always use the first relapse probability for following relapses as a factor
-    double oldpRelapseEvent = ( isnan(pFirstRelapseEvent))? 1.0 : pFirstRelapseEvent;
+    double oldpRelapseEvent = ( std::isnan(pFirstRelapseEvent))? 1.0 : pFirstRelapseEvent;
     list<VivaxBrood>::iterator inf = infections.begin();
     while( inf != infections.end() ){
         if( treatmentLiver ) inf->treatmentLS();
@@ -601,7 +601,7 @@ void WHVivax::setHSParameters(const scnXml::LiverStageDrug* elt){
         effectivenessPQ = elt->getEffectivenessOnUse().getValue();
     }
     
-    if( !isnan(oldPHetNoPQ) && oldPHetNoPQ != pHetNoPQ ){
+    if( !std::isnan(oldPHetNoPQ) && oldPHetNoPQ != pHetNoPQ ){
         throw util::xml_scenario_error( "changeHS cannot change pHumanCannotReceive value" );
     }
 }
