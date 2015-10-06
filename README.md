@@ -27,7 +27,7 @@ License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 
 Installation instructions:
 ==================
-See [INSTALLATION](https://github.com/openmalaria/wiki/Installation).
+See [INSTALLATION](https://github.com/SwissTPH/openmalaria/wiki/Installation).
 
 Build instructions:
 ===================
