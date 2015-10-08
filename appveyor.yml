@@ -3,9 +3,16 @@ clone_depth: 30
 environment:
   VisualStudioVersion: 14.0
 
+configuration: Release
+
 platform:
   - x86
-  - Any CPU
+  - x64
+
+matrix:
+  allow_failures:
+    - platform: x64
+      configuration: Release
 
 os: Visual Studio 2015
 
@@ -24,8 +31,6 @@ install:
   - cmd: echo "Dependencies installed and configured"
   - cmd: echo "Configure openMalaria build and generate solution file 'OpenMalaria.sln' with CMake"
   - mkdir build-win && pushd build-win && cmake .. -DGSL_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/zlib" -DXERCESC_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/boost_1_55_0" -DGSL_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/gsl" -DGSL_INCLUDE_DIR2:PATH="%APPVEYOR_BUILD_FOLDER%/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include" -DXSD_EXECUTABLE:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/bin/xsd.exe" & popd
-
-configuration: Release
 
 build:
   project: build-win\OpenMalaria.sln
