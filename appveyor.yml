@@ -42,7 +42,13 @@ after_build:
   - cmd: ECHO build-id":" %APPVEYOR_BUILD_ID% >> %APPVEYOR_BUILD_FOLDER%\appveyor.log
   - cmd: ECHO build-name":" %APPVEYOR_BUILD_NAME% >> %APPVEYOR_BUILD_FOLDER%\appveyor.log
   - ps: pushd "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"; .\dumpbin.exe /dependents $env:APPVEYOR_BUILD_FOLDER"\build-win\Release\openMalaria.exe" > $env:APPVEYOR_BUILD_FOLDER"\dependencies.txt"; popd
-  - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd" "%APPVEYOR_BUILD_FOLDER%\appveyor.log" "%APPVEYOR_BUILD_FOLDER%\dependencies.txt" "%APPVEYOR_BUILD_FOLDER%\test\autoRegressionParameters.csv" "%APPVEYOR_BUILD_FOLDER%\test\densities.csv"
+  - cmd: mkdir "%APPVEYOR_BUILD_FOLDER%\x86"
+  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\vcruntime140.dll" "%APPVEYOR_BUILD_FOLDER%\x86\vcruntime140.dll"
+  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\msvcp140.dll" "%APPVEYOR_BUILD_FOLDER%\x86\msvcp140.dll"
+  - cmd: mkdir "%APPVEYOR_BUILD_FOLDER%\x64"
+  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x64\Microsoft.VC140.CRT\vcruntime140.dll" "%APPVEYOR_BUILD_FOLDER%\x64\vcruntime140.dll"
+  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x64\Microsoft.VC140.CRT\msvcp140.dll" "%APPVEYOR_BUILD_FOLDER%\x64\msvcp140.dll"
+  - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd" "%APPVEYOR_BUILD_FOLDER%\appveyor.log" "%APPVEYOR_BUILD_FOLDER%\dependencies.txt" "%APPVEYOR_BUILD_FOLDER%\test\autoRegressionParameters.csv" "%APPVEYOR_BUILD_FOLDER%\test\densities.csv" "%APPVEYOR_BUILD_FOLDER%\x86" "%APPVEYOR_BUILD_FOLDER%\x64"
 
 artifacts:
 - path: openMalaria-windows.zip
