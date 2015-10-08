@@ -31,6 +31,8 @@ addons:
     - xsdcxx
     - zlib1g-dev
 
+cache: apt
+
 before_install:
   - test "$TRAVIS_OS_NAME" == "osx" && util/install-dep-osx.sh || echo "not installing osx dependencies"
 
