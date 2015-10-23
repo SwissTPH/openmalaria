@@ -1,3 +1,4 @@
+[![Stories in Ready](https://badge.waffle.io/SwissTPH/openmalaria.png?label=ready&title=Ready)](https://waffle.io/SwissTPH/openmalaria)
 Open Malaria
 ============
 
