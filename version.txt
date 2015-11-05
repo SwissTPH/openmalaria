@@ -1,1 +1,1 @@
-schema-34.0
+schema-34.0-add-sse2-support#62
