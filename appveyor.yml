@@ -42,7 +42,12 @@ after_build:
 artifacts:
 artifacts:
   - path: openMalaria-windows.zip
+    name: openMalaria-windows
+    type: zip
+
   - path: openMalaria-windows-no-libs.zip
+    name: openMalaria-window-no-libs
+    type: zip
 
 notifications:
 - provider: Email
