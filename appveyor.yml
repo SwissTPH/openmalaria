@@ -60,7 +60,8 @@ deploy:
 - provider: GitHub
   auth_token:
     secure: QDHrqei4LL5ihC0nST2nAf3uCpjvNyKHH11V53o/lpnX5JZLq/gY41iJm9FIQ+Vr
-  artifact: /.*\.zip/  
+  artifact: openMalaria-windows.zip, openMalaria-windows-no-libs.zip
   draft: true
+  prerelease: true
   on:
     APPVEYOR_REPO_TAG: true
