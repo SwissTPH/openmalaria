@@ -40,9 +40,9 @@ after_build:
   - 7z a openMalaria-windows-no-libs.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd" "%APPVEYOR_BUILD_FOLDER%\appveyor.log" "%APPVEYOR_BUILD_FOLDER%\dependencies.txt" "%APPVEYOR_BUILD_FOLDER%\test\autoRegressionParameters.csv" "%APPVEYOR_BUILD_FOLDER%\test\densities.csv" "%APPVEYOR_BUILD_FOLDER%\..\util\example\example_scenario.xml" "%APPVEYOR_BUILD_FOLDER%\..\util\example\run-example-scenario.bat"
 
 artifacts:
-- path:
-  - openMalaria-windows.zip
-  - openMalaria-windows-no-libs.zip
+artifacts:
+  - path: openMalaria-windows.zip
+  - path: openMalaria-windows-no-libs.zip
 
 notifications:
 - provider: Email
