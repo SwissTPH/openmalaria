@@ -121,7 +121,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
             if( !(expIt->second >= sim::ts0()) ){       // membership expired
                 // don't flush reports
                 // report removal due to expiry
-                mon::reportMHI( mon::MHR_SUB_POP_REM_TOO_OLD, *this, 1 );
+                mon::reportEventMHI( mon::MHR_SUB_POP_REM_TOO_OLD, *this, 1 );
                 m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
                 // erase element, but continue iteration (note: this is simpler in C++11)
                 map<ComponentId,SimTime>::iterator toErase = expIt;
@@ -164,12 +164,12 @@ void Human::summarize() {
         return;
     }
     
-    mon::reportMHI( mon::MHR_HOSTS, *this, 1 );
-    mon::reportMHF( mon::MHF_AGE, *this, age(sim::now()).inYears() );
+    mon::reportStatMHI( mon::MHR_HOSTS, *this, 1 );
+    mon::reportStatMHF( mon::MHF_AGE, *this, age(sim::now()).inYears() );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     
-    if( patent ){
+    if( patent && mon::isReported() ){
         // this should happen after all other reporting!
         removeFirstEvent( interventions::SubPopRemove::ON_FIRST_INFECTION );
     }
@@ -193,7 +193,7 @@ void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
                 flushReports();     // reset HS memory
                 
                 // report removal due to first infection/bout/treatment
-                mon::reportMHI( mon::MHR_SUB_POP_REM_FIRST_EVENT, *this, 1 );
+                mon::reportEventMHI( mon::MHR_SUB_POP_REM_FIRST_EVENT, *this, 1 );
             }
             m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
             // remove (affects reporting, restrictToSubPop and cumulative deployment):

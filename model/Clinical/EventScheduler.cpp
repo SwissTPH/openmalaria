@@ -252,12 +252,12 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
         if( auxOut.treated ){	// I.E. some treatment was given
             timeLastTreatment = sim::ts0();
             if( pgState & Episode::COMPLICATED ){
-                mon::reportMHI( mon::MHT_TREATMENTS_3, human, 1 );
+                mon::reportEventMHI( mon::MHT_TREATMENTS_3, human, 1 );
             }else{
                 if( pgState & Episode::SECOND_CASE ){
-                    mon::reportMHI( mon::MHT_TREATMENTS_2, human, 1 );
+                    mon::reportEventMHI( mon::MHT_TREATMENTS_2, human, 1 );
                 }else{
-                    mon::reportMHI( mon::MHT_TREATMENTS_1, human, 1 );
+                    mon::reportEventMHI( mon::MHT_TREATMENTS_1, human, 1 );
                 }
             }
         }

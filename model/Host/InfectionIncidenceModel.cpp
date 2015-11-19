@@ -167,7 +167,7 @@ double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
 }
 
 void InfectionIncidenceModel::summarize (const Host::Human& human) {
-    mon::reportMHF( mon::MHF_EXPECTED_INFECTED, human, m_pInfected );
+    mon::reportStatMHF( mon::MHF_EXPECTED_INFECTED, human, m_pInfected );
 }
 
 
@@ -240,7 +240,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
         // cerr<<"warning at time "<<TimeStep::simulation<<": introducing "<<n<<" infections in an individual"<<endl;
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
-    mon::reportMHI( mon::MHR_NEW_INFECTIONS, human, n );
+    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, n );
     ctsNewInfections += n;
     return n;
   }

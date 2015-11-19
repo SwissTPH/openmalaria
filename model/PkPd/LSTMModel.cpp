@@ -152,8 +152,8 @@ void LSTMModel::summarize(const Host::Human& human) const{
                 drug != end; ++drug ){
             double conc = drug->getConcentration(index);
             if( conc > 0.0 ){
-                mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
-                mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(conc) );
+                mon::reportStatMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
+                mon::reportStatMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(conc) );
             }
         }
     }

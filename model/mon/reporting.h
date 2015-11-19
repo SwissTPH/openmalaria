@@ -187,40 +187,46 @@ namespace Deploy {
     };
 }
 
-/// Report some value (integer) to the current survey.
-void reportMI( Measure measure, int val );
+// 'Stat' reports are for measures which can be repeated in another survey.
+// 'Event' reports are for tallies which would be missed if not saved at the time of reporting.
+// reportMSACI passes the survey number so doesn't need to specify
+
+// /// Report some value (integer) to the current survey.
+// void reportMI( Measure measure, int val );
 /// Report some value (floating point) to the current survey.
-void reportMF( Measure measure, double val );
+void reportStatMF( Measure measure, double val );
+/// Report some tally (additive integer) for some human to the current survey.
+void reportEventMHI( Measure measure, const Host::Human& human, int val );
 /// Report some value (integer) for some human to the current survey.
-void reportMHI( Measure measure, const Host::Human& human, int val );
+void reportStatMHI( Measure measure, const Host::Human& human, int val );
 /// Report some value (integer) for some survey, age group and cohort set
 void reportMSACI( Measure measure, size_t survey, AgeGroup ageGroup,
                   uint32_t cohortSet, int val );
 /// Report some value (integer) for some human and genotype to the current survey.
-void reportMHGI( Measure measure, const Host::Human& human, size_t genotype,
+void reportStatMHGI( Measure measure, const Host::Human& human, size_t genotype,
                  int val );
 /// Report some value (integer) for some human and drug index to the current survey.
-void reportMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
+void reportStatMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
                 int val );
 /// Report one deployment for some human to the current survey.
-void reportMHD( Measure measure, const Host::Human& human,
+void reportEventMHD( Measure measure, const Host::Human& human,
                 Deploy::Method method );
 
 /// Report some value (floating point) for some human to the current survey.
-void reportMHF( Measure measure, const Host::Human& human, double val );
+void reportStatMHF( Measure measure, const Host::Human& human, double val );
 /// Report some value (floating point) for the current survey and some age
 /// group and cohort set
-void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
+void reportStatMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
                   size_t genotpye, double val );
 /// Report some value (floating point) for some human and genotype to the current survey.
-void reportMHGF( Measure measure, const Host::Human& human, size_t genotype,
+void reportStatMHGF( Measure measure, const Host::Human& human, size_t genotype,
                  double val );
 /// Report some value (floating point) for some human and drug index to the current survey.
-void reportMHPF( Measure measure, const Host::Human& human, size_t drugIndex, double val );
+void reportStatMHPF( Measure measure, const Host::Human& human, size_t drugIndex, double val );
 /// Report some value (floating point) by vector species to the current survey.
-void reportMSF( Measure measure, size_t species, double val );
+void reportStatMSF( Measure measure, size_t species, double val );
 /// Report some value (floating point) by genotype to the current survey.
-void reportMSGF( Measure measure, size_t species, size_t genotype, double val );
+void reportStatMSGF( Measure measure, size_t species, size_t genotype, double val );
 
 /// Query whether an output measure is used.
 /// This function is not fast, so it is recommended to cache the result.
