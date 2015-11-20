@@ -170,9 +170,7 @@
       <deployment name="Extended ITNs">
         <component id="ITN"/>
         <timed>
-          <deploy coverage="0.20" time="146"/>
-          <deploy coverage="0.20" time="438"/>
-          <deploy coverage="0.20" time="730"/>
+          <deploy coverage="0.20" time="146" repeatStep="292t" repeatEnd="731t"/>
           <deploy coverage="0.20" time="1168"/>
         </timed>
       </deployment>

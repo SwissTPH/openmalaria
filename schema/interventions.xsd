@@ -783,6 +783,28 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:appinfo>units:Years;min:0;name:Minimum age of eligible individuals;</xs:appinfo>
           </xs:annotation>
         </xs:attribute>
+        <xs:attribute name="repeatStep" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>See repeatEnd's documentation.</xs:documentation>
+            <xs:appinfo>name:Step of repetition;units:User defined;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="repeatEnd" type="xs:string" use="optional">
+          <xs:annotation>
+            <xs:documentation>
+              Either both repeatStep and repeatEnd should be present
+              or neither. If present, the deployment is repeated every
+              repeatStep timesteps (i.e. if t0 is the initial time
+              and x is repeatStep, depolyments are done at times t0,
+              t0+x, t0+2*x, ...), ending before repeatEnd
+              (final repetition is the one before repeatEnd).
+              
+              Note that repeatEnd may be specified as a date but
+              repeatStep must be a duration (days, steps or years).
+            </xs:documentation>
+            <xs:appinfo>name:End of repetition (exclusive);units:User defined;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
