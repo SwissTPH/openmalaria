@@ -256,13 +256,11 @@ public:
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
-    // FIXME: #118
-    void _testCQ () {
+    void testCQ () {
         const double dose = 10 * bodymass;
         assembleCQDosageSchedule(dose);
         const double drug_conc[] = { 0.0, 0.03257216, 0.06440052, 0.07921600, 0.07740709, 0.07563948 };
-        const double drug_factors[] = { 1, 0.0580181371, 0.0021554332,
-            7.39575036687833E-005, 2.51535706689484E-006, 8.57663220896078E-008 };
+        const double drug_factors[] = { 1, 9.259311e-02, 4.623815e-03, 2.057661e-04, 9.262133e-06, 4.218529e-07 };
         runDrugSimulations("CQ", drug_conc, drug_factors);
     }
     
