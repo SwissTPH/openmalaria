@@ -319,20 +319,20 @@ double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
 
 bool WHVivax::summarize(const Host::Human& human) const{
     if( infections.size() == 0 ) return false;  // no infections: not patent, nothing to report
-    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+    mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
     bool patentHost = false;
     // (patent) infections are reported by genotype, even though we don't have
     // genotype in this model
-    mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
+    mon::reportStatMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
     for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf) 
     {
         if (inf->isPatent()){
-            mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+            mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
             patentHost = true;
         }
     }
-    if( patentHost ) mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+    if( patentHost ) mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
     return patentHost;
 }
 
@@ -451,7 +451,7 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
                 it->treatmentLS();
             }
         }
-        mon::reportMHI( mon::MHT_LS_TREATMENTS, human, 1 );
+        mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
 }
 bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
@@ -475,7 +475,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
                 }
             }
         }
-        mon::reportMHI( mon::MHT_LS_TREATMENTS, human, 1 );
+        mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
     
     // there probably will be blood-stage treatment

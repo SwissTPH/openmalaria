@@ -242,14 +242,14 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
     pkpdModel.summarize( human );
     
     if( infections.size() > 0 ){
-        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
         if( reportInfectedOrPatentInfected ){
             for(std::list<CommonInfection*>::const_iterator inf =
                 infections.begin(); inf != infections.end(); ++inf) {
                 uint32_t genotype = (*inf)->genotype();
-                mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
+                mon::reportStatMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
                 if( diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity() ) ){
-                    mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
+                    mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
                 }
             }
         }
@@ -270,10 +270,10 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
                     ++inf;
                 }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
                 // we had at least one infection of this genotype
-                mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
+                mon::reportStatMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
                 if( diagnostics::monitoringDiagnostic().isPositive(dens) ){
-                    mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
-                    mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
+                    mon::reportStatMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
+                    mon::reportStatMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
                 }
             }
         }
@@ -283,8 +283,8 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
     if( diagnostics::monitoringDiagnostic().isPositive(totalDensity) ){
-        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
-        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent
     }
     return false;       // not patent

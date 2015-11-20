@@ -180,7 +180,7 @@ public:
     
     /// Reports to monitoring, nothing else
     virtual void deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits ) const{
-        mon::reportMHD( mon::MHD_RECRUIT, human, method );
+        mon::reportEventMHD( mon::MHD_RECRUIT, human, method );
     }
     
     virtual Component::Type componentType() const{
@@ -204,7 +204,7 @@ public:
     {}
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits ) const{
-        mon::reportMHD( mon::MHD_SCREEN, human, method );
+        mon::reportEventMHD( mon::MHD_SCREEN, human, method );
         if( human.withinHostModel->diagnosticResult(diagnostic) ){
             positive.deploy( human, method, vaccLimits );
         }else{
@@ -252,7 +252,7 @@ public:
     }
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
-        mon::reportMHD( mon::MHD_TREAT, human, method );
+        mon::reportEventMHD( mon::MHD_TREAT, human, method );
         human.withinHostModel->treatSimple( human, timeLiver, timeBlood );
     }
     
@@ -280,7 +280,7 @@ public:
     }
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
-        mon::reportMHD( mon::MHD_TREAT, human, method );
+        mon::reportEventMHD( mon::MHD_TREAT, human, method );
         human.withinHostModel->treatPkPd( schedule, dosage, delay_h );
     }
     
@@ -310,7 +310,7 @@ public:
                 human.age(sim::nowOrTs1()).inYears(),
                 Clinical::Episode::NONE /*parameter not needed*/) );
         if( out.treated ){
-            mon::reportMHD( mon::MHD_TREAT, human, method );
+            mon::reportEventMHD( mon::MHD_TREAT, human, method );
         }
     }
     

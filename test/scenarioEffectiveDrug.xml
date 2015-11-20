@@ -43,6 +43,7 @@
       <option name="Clinical_HospitalFirstDayDeaths" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="2.5">
+      <surveyTime reported="false" repeatStep="365t" repeatEnd="3650t">0t</surveyTime>
       <surveyTime>3650</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">

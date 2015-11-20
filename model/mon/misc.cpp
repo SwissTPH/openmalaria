@@ -43,11 +43,22 @@ namespace mon {
 
 // ———  surveys  ———
 
+struct SurveyTime {
+    SimTime time;       // time of survey
+    size_t num; // if NOT_USED, the survey is not reported; if greater, this is the survey number
+    
+    /// Construct
+    SurveyTime(SimTime time, size_t num) : time(time), num(num) {}
+    
+    inline bool isReported() const { return num != NOT_USED; }
+};
+
 namespace impl{
     // Constants or defined during init:
-    size_t nSurveys = 0;
+    size_t nSurveys = 0;        // number of reported surveys
     size_t nCohortSets = 1;     // default: just the whole population
-    vector<SimTime> surveyTimes;        // times of all surveys (from XML)
+    extern size_t surveyIndex;     // index in surveyTimes of next survey
+    vector<SurveyTime> surveyTimes;     // times of surveys
 }
 
 void initSurveyTimes( const OM::Parameters& parameters,
@@ -56,13 +67,15 @@ void initSurveyTimes( const OM::Parameters& parameters,
     const scnXml::Surveys::SurveyTimeSequence& survs =
         monitoring.getSurveys().getSurveyTime();
     
-    impl::surveyTimes.reserve (survs.size());   // insufficient reservation if repetitions are used
+    map<SimTime, bool> surveys;        // times of all surveys (from XML) and whether these are reporting
+    
     for(size_t i = 0; i < survs.size(); ++i) {
         const scnXml::SurveyTime& surv = survs[i];
         try{
             std::string s = surv;
             boost::algorithm::trim(s);
             SimTime cur = UnitParse::readDate( s, UnitParse::STEPS );
+            bool reporting = surv.getReported();
             if( surv.getRepeatStep().present() != surv.getRepeatEnd().present() ){
                 throw util::xml_scenario_error( "surveyTime: use of repeatStep or repeatEnd without other" );
             }
@@ -73,39 +86,53 @@ void initSurveyTimes( const OM::Parameters& parameters,
                 }
                 SimTime end = UnitParse::readDate( surv.getRepeatEnd().get(), UnitParse::NONE );
                 while(cur < end){
-                    impl::surveyTimes.push_back( cur );
+                    if( reporting ){
+                        surveys[cur] = true;
+                    }else{
+                        surveys.insert(make_pair(cur, false));        // does not override existing pair with key 'cur'
+                    }
                     cur += step;
                 }
             }else{
-                impl::surveyTimes.push_back( cur );
+                if( reporting ){
+                    surveys[cur] = true;
+                }else{
+                    surveys.insert(make_pair(cur, false));        // does not override existing pair with key 'cur'
+                }
             }
         }catch( const util::format_error& e ){
             throw util::xml_scenario_error( string("surveyTime: ").append(e.message()) );
         }
     }
-    // sort times:
-    sort( impl::surveyTimes.begin(), impl::surveyTimes.end() );
-    // remove duplicates:
-    vector<SimTime>::iterator newEnd = unique( impl::surveyTimes.begin(), impl::surveyTimes.end() );
-    impl::nSurveys = distance(impl::surveyTimes.begin(), newEnd);
-    if( impl::nSurveys < impl::surveyTimes.size() ){
-        std::cerr << "Warning: " << (impl::surveyTimes.size() - impl::nSurveys)
-                << " duplicate survey times omitted. Survey numbers do not "
-                "include these." << std::endl
-                << "Note: the OpenMalaria v33 release will not work correctly "
-                "with this XML." << std::endl;
+    
+    impl::surveyTimes.clear();
+    impl::surveyTimes.reserve(surveys.size());
+    size_t n = 0;
+    for( map<SimTime, bool>::const_iterator it = surveys.begin(); it != surveys.end(); ++it ){
+        size_t num = NOT_USED;
+        if( it->second ){
+            num = n;
+            n += 1;
+        }
+        impl::surveyTimes.push_back(SurveyTime(it->first, num));
     }
-    impl::surveyTimes.resize( impl::nSurveys );
+    impl::nSurveys = n;
+    
+    if( impl::surveyTimes.size() > 0 && !impl::surveyTimes.back().isReported() ){
+        std::cerr << "Warning: the last survey is unreported. Having surveys beyond the last reported survey is pointless." << std::endl;
+    }
     
     if( util::CommandLine::option( util::CommandLine::PRINT_SURVEY_TIMES ) ){
         bool haveDate = UnitParse::haveDate();
         std::cout << "Survey\tsteps\tdays";
         if( haveDate ) std::cout << "\tdate";
         std::cout << std::endl;
-        for( size_t i = 0; i < impl::nSurveys; ++i ){
-            std::cout << (i+1) << '\t' << impl::surveyTimes[i].inSteps()
-                    << '\t' << impl::surveyTimes[i].inDays();
-            if( haveDate ) std::cout << '\t' << impl::surveyTimes[i];
+        for( size_t i = 0; i < impl::surveyTimes.size(); ++i ){
+            const SurveyTime& survTime = impl::surveyTimes[i];
+            if( !survTime.isReported() ) continue;
+            std::cout << (survTime.num+1) << '\t' << survTime.time.inSteps()
+                    << '\t' << survTime.time.inDays();
+            if( haveDate ) std::cout << '\t' << survTime.time;
             std::cout << std::endl;
         }
     }
@@ -120,28 +147,36 @@ void initSurveyTimes( const OM::Parameters& parameters,
     internal::initReporting( scenario );
 }
 
-void initMainSim(){
-    if( impl::nSurveys > 0 ){
-        impl::currentSurvey = 0;
-        impl::nextSurveyTime = impl::surveyTimes[impl::currentSurvey];
-    }
-}
-void concludeSurvey(){
-    impl::currentSurvey += 1;
-    if( impl::currentSurvey >= impl::nSurveys ){
-        // After the last survey has completed:
-        impl::currentSurvey = NOT_USED;
+void updateSurveyNumbers() {
+    if( impl::surveyIndex >= impl::surveyTimes.size() ){
+        impl::survNumEvent = NOT_USED;
+        impl::survNumStat = NOT_USED;
         impl::nextSurveyTime = sim::future();
     }else{
-        impl::nextSurveyTime = impl::surveyTimes[impl::currentSurvey];
+        for( size_t i = impl::surveyIndex; i < impl::surveyTimes.size(); ++i ){
+            impl::survNumEvent = impl::surveyTimes[i].num;  // set to survey number or NOT_USED; this happens at least once!
+            if( impl::survNumEvent != NOT_USED ) break;        // stop at first reported survey
+        }
+        const SurveyTime& nextSurvey = impl::surveyTimes[impl::surveyIndex];
+        impl::survNumStat = nextSurvey.num;     // may be NOT_USED; this is intended
+        impl::nextSurveyTime = nextSurvey.time;
     }
+}
+void initMainSim(){
+    impl::surveyIndex = 0;
+    impl::isInit = true;
+    updateSurveyNumbers();
+}
+void concludeSurvey(){
+    impl::surveyIndex += 1;
+    updateSurveyNumbers();
 }
 
 SimTime nextSurveyTime(){
     return impl::nextSurveyTime;
 }
 SimTime finalSurveyTime(){
-    return impl::surveyTimes[impl::surveyTimes.size()-1];
+    return impl::surveyTimes[impl::surveyTimes.size()-1].time;
 }
 
 void writeSurveyData ()

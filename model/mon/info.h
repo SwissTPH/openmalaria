@@ -30,11 +30,12 @@ namespace OM {
 namespace mon {
 // Not 'private' but still not for use externally:
 namespace impl {
-    // Consts (set during init):
-    extern size_t nSurveys;
+    // Consts (set during program start-up):
+    extern size_t nSurveys;     // number of reported surveys
     extern size_t nCohortSets;
     // Variables (checkpointed):
-    extern size_t currentSurvey;
+    extern bool isInit; // set true after "initialisation" survey at intervention time 0
+    extern size_t survNumEvent, survNumStat;
     extern SimTime nextSurveyTime;
 }
 
@@ -44,9 +45,15 @@ const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
 /** Line end character. Use Unix line endings to save a little size. */
 const char lineEnd = '\n';
 
-/// The current survey number (can be passed back to report functions taking
+/// The current survey number (can be passed back to 'event' report functions taking
 /// survey times). May have the special value NOT_USED.
-inline size_t currentSurvey(){ return impl::currentSurvey; }
+inline size_t eventSurveyNumber(){ return impl::survNumEvent; }
+
+/// Whether the current survey is reported.
+/// 
+/// Exception: there is a dummy survey at intervention time 0 which is not
+/// reported but acts like it is to set survey variables.
+inline bool isReported(){ return !impl::isInit || impl::survNumStat != NOT_USED; }
 
 /** Time the current (next) survey ends at, or sim::never() if no more
  * surveys take place. */

@@ -39,7 +39,9 @@ namespace mon {
 
 namespace impl {
     // Accumulators, variables:
-    size_t currentSurvey = NOT_USED;
+    bool isInit = false;
+    size_t surveyIndex = 0;     // index in surveyTimes of next survey
+    size_t survNumEvent = NOT_USED, survNumStat = NOT_USED;
     SimTime nextSurveyTime = sim::future();
 }
 
@@ -503,11 +505,19 @@ void internal::write( ostream& stream ){
 
 // Report functions: each reports to all usable stores (i.e. correct data type
 // and where parameters don't have to be fabricated).
-void reportMI( Measure measure, int val ){
-    storeI.report( val, measure, impl::currentSurvey, 0, 0, 0, 0, 0 );
+// void reportMI( Measure measure, int val ){
+//     storeI.report( val, measure, impl::currentSurvey, 0, 0, 0, 0, 0 );
+// }
+void reportEventMHI( Measure measure, const Host::Human& human, int val ){
+    const size_t survey = impl::survNumEvent;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeI.report( val, measure, survey, 0, 0, 0, 0, 0 );
+    storeAI.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
+    storeCI.report( val, measure, survey, 0, human.cohortSet(), 0, 0, 0 );
+    storeACI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
 }
-void reportMHI( Measure measure, const Host::Human& human, int val ){
-    const size_t survey = impl::currentSurvey;
+void reportStatMHI( Measure measure, const Host::Human& human, int val ){
+    const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monAgeGroup().i();
     storeI.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeAI.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
@@ -522,10 +532,10 @@ void reportMSACI( Measure measure, size_t survey,
     storeCI.report( val, measure, survey, 0, cohortSet, 0, 0, 0 );
     storeACI.report( val, measure, survey, ageGroup.i(), cohortSet, 0, 0, 0 );
 }
-void reportMHGI( Measure measure, const Host::Human& human, size_t genotype,
+void reportStatMHGI( Measure measure, const Host::Human& human, size_t genotype,
                  int val )
 {
-    const size_t survey = impl::currentSurvey;
+    const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monAgeGroup().i();
     storeI.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeAI.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
@@ -536,10 +546,10 @@ void reportMHGI( Measure measure, const Host::Human& human, size_t genotype,
     storeCGI.report( val, measure, survey, 0, human.cohortSet(), 0, genotype, 0 );
     storeACGI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, genotype, 0 );
 }
-void reportMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
+void reportStatMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
                 int val )
 {
-    const size_t survey = impl::currentSurvey;
+    const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monAgeGroup().i();
     storeI.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeAI.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
@@ -552,11 +562,11 @@ void reportMHPI( Measure measure, const Host::Human& human, size_t drugIndex,
 }
 // Deployment reporting uses a different function to handle the method
 // (mostly to make other types of report faster).
-void reportMHD( Measure measure, const Host::Human& human,
+void reportEventMHD( Measure measure, const Host::Human& human,
                 Deploy::Method method )
 {
     const int val = 1;  // always report 1 deployment
-    const size_t survey = impl::currentSurvey;
+    const size_t survey = impl::survNumEvent;
     size_t ageIndex = human.monAgeGroup().i();
     storeI.deploy( val, measure, survey, 0, 0, method );
     storeAI.deploy( val, measure, survey, ageIndex, 0, method );
@@ -570,21 +580,21 @@ void reportMHD( Measure measure, const Host::Human& human,
     storeACI.deploy( val, measure, survey, ageIndex, human.cohortSet(), method );
 }
 
-void reportMF( Measure measure, double val ){
-    storeF.report( val, measure, impl::currentSurvey, 0, 0, 0, 0, 0 );
+void reportStatMF( Measure measure, double val ){
+    storeF.report( val, measure, impl::survNumStat, 0, 0, 0, 0, 0 );
 }
-void reportMHF( Measure measure, const Host::Human& human, double val ){
-    const size_t survey = impl::currentSurvey;
+void reportStatMHF( Measure measure, const Host::Human& human, double val ){
+    const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monAgeGroup().i();
     storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeAF.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
     storeCF.report( val, measure, survey, 0, human.cohortSet(), 0, 0, 0 );
     storeACF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
 }
-void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
+void reportStatMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
                   size_t genotype, double val )
 {
-    const size_t survey = impl::currentSurvey;
+    const size_t survey = impl::survNumStat;
     storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeAF.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
     storeCF.report( val, measure, survey, 0, cohortSet, 0, 0, 0 );
@@ -594,8 +604,8 @@ void reportMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
     storeCGF.report( val, measure, survey, 0, cohortSet, 0, genotype, 0 );
     storeACGF.report( val, measure, survey, ageIndex, cohortSet, 0, genotype, 0 );
 }
-void reportMHPF( Measure measure, const Host::Human& human, size_t drug, double val ){
-    const size_t survey = impl::currentSurvey;
+void reportStatMHPF( Measure measure, const Host::Human& human, size_t drug, double val ){
+    const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monAgeGroup().i();
     storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeAF.report( val, measure, survey, ageIndex, 0, 0, 0, 0 );
@@ -606,19 +616,19 @@ void reportMHPF( Measure measure, const Host::Human& human, size_t drug, double 
     storeCPF.report( val, measure, survey, 0, human.cohortSet(), 0, 0, drug );
     storeACPF.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, drug );
 }
-void reportMHGF( Measure measure, const Host::Human& human, size_t genotype,
+void reportStatMHGF( Measure measure, const Host::Human& human, size_t genotype,
                  double val )
 {
-    reportMACGF( measure, human.monAgeGroup().i(), human.cohortSet(),
+    reportStatMACGF( measure, human.monAgeGroup().i(), human.cohortSet(),
                  genotype, val );
 }
-void reportMSF( Measure measure, size_t species, double val ){
-    const size_t survey = impl::currentSurvey;
+void reportStatMSF( Measure measure, size_t species, double val ){
+    const size_t survey = impl::survNumStat;
     storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeSF.report( val, measure, survey, 0, 0, species, 0, 0 );
 }
-void reportMSGF( Measure measure, size_t species, size_t genotype, double val ){
-    const size_t survey = impl::currentSurvey;
+void reportStatMSGF( Measure measure, size_t species, size_t genotype, double val ){
+    const size_t survey = impl::survNumStat;
     storeF.report( val, measure, survey, 0, 0, 0, 0, 0 );
     storeGF.report( val, measure, survey, 0, 0, 0, genotype, 0 );
     storeSF.report( val, measure, survey, 0, 0, species, 0, 0 );
@@ -655,7 +665,10 @@ bool isUsedM( Measure measure ){
 }
 
 void checkpoint( ostream& stream ){
-    impl::currentSurvey & stream;
+    impl::isInit & stream;
+    impl::surveyIndex & stream;
+    impl::survNumEvent & stream;
+    impl::survNumStat & stream;
     impl::nextSurveyTime & stream;
     
     storeI.checkpoint(stream);
@@ -687,7 +700,10 @@ void checkpoint( ostream& stream ){
     storeSGF.checkpoint(stream);
 }
 void checkpoint( istream& stream ){
-    impl::currentSurvey & stream;
+    impl::isInit & stream;
+    impl::surveyIndex & stream;
+    impl::survNumEvent & stream;
+    impl::survNumStat & stream;
     impl::nextSurveyTime & stream;
     
     storeI.checkpoint(stream);

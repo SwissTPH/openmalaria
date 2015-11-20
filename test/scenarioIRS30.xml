@@ -46,8 +46,9 @@
       <option name="nMDAs" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="200">
-      <surveyTime>1t</surveyTime>
-      <surveyTime repeatStep="6t" repeatEnd="150t">6t</surveyTime>
+      <surveyTime reported="false" repeatStep="18t" repeatEnd="150t">0</surveyTime>
+      <surveyTime reported="true">1t</surveyTime>
+      <surveyTime reported="true" repeatStep="6t" repeatEnd="150t">6t</surveyTime>
     </surveys>
     <ageGroup lowerbound="0">
       <group upperbound="1"/>

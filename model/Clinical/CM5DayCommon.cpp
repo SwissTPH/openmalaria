@@ -142,7 +142,7 @@ void CM5DayCommon::severeMalaria (
     //NOTE: we do not model diagnostics in this case
     if( prandom >= q[2] ){      // treated in hospital
         m_tLastTreatment = sim::ts0();
-        mon::reportMHI( mon::MHT_TREATMENTS_3, human, 1 );
+        mon::reportEventMHI( mon::MHT_TREATMENTS_3, human, 1 );
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         
         if( prandom >= q[5] ){  // treatment successful at clearing parasites

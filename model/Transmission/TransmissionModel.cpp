@@ -216,8 +216,10 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
 }
 
 void TransmissionModel::summarize () {
-    mon::reportMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );
-    mon::reportMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
+    mon::reportStatMF( mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())] );
+    mon::reportStatMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
+    
+    if( !mon::isReported() ) return;    // cannot use counters below when not reporting
     
     for( size_t ag = 0, nAg = mon::AgeGroup::numGroups(), cs = 0,
         nCS = mon::numCohortSets(), g = 0, nG = surveyInoculations.size() / (nAg * nCS);
@@ -226,7 +228,7 @@ void TransmissionModel::summarize () {
         for( cs = 0; cs < nCS; ++cs ){
             for( g = 0; g < nG; ++ g ){
                 size_t index = survInocsIndex(ag, cs, g);
-                mon::reportMACGF( mon::MVF_INOCS, ag, cs, g, surveyInoculations[index] );
+                mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, g, surveyInoculations[index] );
             }
         }
     }
@@ -237,8 +239,8 @@ void TransmissionModel::summarize () {
         assert( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 );
         duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
     }
-    mon::reportMF( mon::MVF_INPUT_EIR, surveyInputEIR / duration );
-    mon::reportMF( mon::MVF_SIM_EIR, surveySimulatedEIR / duration );
+    mon::reportStatMF( mon::MVF_INPUT_EIR, surveyInputEIR / duration );
+    mon::reportStatMF( mon::MVF_SIM_EIR, surveySimulatedEIR / duration );
     
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
