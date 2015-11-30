@@ -361,8 +361,61 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:complexType>
           <xs:sequence>
             <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
+            <xs:element name="condition" minOccurs="0" maxOccurs="unbounded">
+              <xs:annotation>
+                <xs:documentation>
+                  If conditions are specified, deployment of this intervention will only go ahead
+                  if all specified conditions are true. Condition statements are evaluated only
+                  during surveys, so deployment is enabled or disabled depending on the results
+                  of the most recent survey. So called *unreported surveys* can be used to
+                  reevaluate conditions without increasing granularity of output.
+                  
+                  Conditions are evaluated for the whole population, not for individual age-groups
+                  or cohorts.
+                  
+                  This affects all types of deployment.
+                </xs:documentation>
+                <xs:appinfo>name:Condition;</xs:appinfo>
+              </xs:annotation>
+              <xs:complexType>
+                <xs:attribute name="measure" type="xs:string" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The monitoring measure to test. Not all measures are available for use.
+                    </xs:documentation>
+                    <xs:appinfo>name:Measure;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="minValue" type="xs:double" use="optional">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Minimum value. If specified, the measured variable must be greater than this
+                      value for the condition to be satisfied.
+                    </xs:documentation>
+                    <xs:appinfo>name:Minimum value;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="maxValue" type="xs:double" use="optional">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Maximum value. If specified, the measured variable must be less than this
+                      value for the condition to be satisfied.
+                    </xs:documentation>
+                    <xs:appinfo>name:Maximum value;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+                <xs:attribute name="initialState" type="xs:boolean" use="required">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Whether this condition is considered true or false before updated by a survey.
+                    </xs:documentation>
+                    <xs:appinfo>name:Initial state;</xs:appinfo>
+                  </xs:annotation>
+                </xs:attribute>
+              </xs:complexType>
+            </xs:element>
             <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="om:ContinuousList">
-            <xs:annotation>
+              <xs:annotation>
                 <xs:documentation>List of ages at which deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
                 

@@ -105,7 +105,7 @@ struct OutMeasure{
 // These are all output measures set by a name in the XML
 // Example: nHosts
 typedef std::map<std::string,OutMeasure> NamedMeasureMapT;
-NamedMeasureMapT namedOutMeasures;
+extern NamedMeasureMapT namedOutMeasures;
 
 void findNamedMeasuresUsing( Measure m, ostream& msg ){
     int nMatches = 0;

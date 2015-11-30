@@ -32,6 +32,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "WithinHost/Diagnostic.h"
 #include "PkPd/LSTMTreatments.h"
+#include "mon/info.h"
 #include "util/random.h"
 #include <schema/healthSystem.h>
 #include <schema/interventions.h>
@@ -46,7 +47,9 @@ using WithinHost::diagnostics;
 bool componentCmp(const HumanInterventionComponent *a, const HumanInterventionComponent *b){
     return a->componentType() < b->componentType();
 }
-HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Component>& componentList ){
+HumanIntervention::HumanIntervention(
+    const xsd::cxx::tree::sequence<scnXml::Component>& componentList )
+{
     components.reserve( componentList.size() );
     for( xsd::cxx::tree::sequence<scnXml::Component>::const_iterator it = componentList.begin(),
         end = componentList.end(); it != end; ++it )
@@ -67,6 +70,39 @@ HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Com
      * order of their deployments is still dependent on the order in the XML
      * file. */
     std::stable_sort( components.begin(), components.end(), componentCmp );
+}
+HumanIntervention::HumanIntervention(
+    const xsd::cxx::tree::sequence<scnXml::Component>& componentList,
+    const xsd::cxx::tree::sequence<scnXml::Condition>& conditionList )
+{
+    components.reserve( componentList.size() );
+    for( xsd::cxx::tree::sequence<scnXml::Component>::const_iterator it = componentList.begin(),
+        end = componentList.end(); it != end; ++it )
+    {
+        ComponentId id = InterventionManager::getComponentId( it->getId() );
+        const HumanInterventionComponent* component = &InterventionManager::getComponent( id );
+        components.push_back( component );
+    }
+    
+    /** Sort components according to a standard order.
+     * 
+     * The point of this is to make results repeatable even when users change
+     * the ordering of a list of intervention's components (since getting
+     * repeatable results out of OpenMalaria is often a headache anyway, we
+     * might as well at least remove this hurdle).
+     * 
+     * Note that when multiple interventions are deployed simultaneously, the
+     * order of their deployments is still dependent on the order in the XML
+     * file. */
+    std::stable_sort( components.begin(), components.end(), componentCmp );
+    
+    for( xsd::cxx::tree::sequence<scnXml::Condition>::const_iterator it = conditionList.begin(),
+        end = conditionList.end(); it != end; ++it )
+    {
+        double min = it->getMinValue().present() ? it->getMinValue().get() : -numeric_limits<double>::infinity();
+        double max = it->getMaxValue().present() ? it->getMaxValue().get() : numeric_limits<double>::infinity();
+        conditions.push_back(mon::setupCondition( it->getMeasure(), min, max, it->getInitialState() ));
+    }
 }
 HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTDeploy>& componentList ){
     components.reserve( componentList.size() );
@@ -94,6 +130,11 @@ HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTD
 void HumanIntervention::deploy( Human& human, mon::Deploy::Method method,
     VaccineLimits vaccLimits ) const
 {
+    foreach( size_t cond, conditions ){
+        // Abort deployment if any condition is false.
+        if( !mon::checkCondition(cond) ) return;
+    }
+    
     for( vector<const HumanInterventionComponent*>::const_iterator it = components.begin();
             it != components.end(); ++it )
     {
