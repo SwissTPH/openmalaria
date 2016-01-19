@@ -61,6 +61,8 @@ namespace impl{
     vector<SurveyTime> surveyTimes;     // times of surveys
 }
 
+void updateConditions();        // defined in mon.cpp
+
 void initSurveyTimes( const OM::Parameters& parameters,
                    const scnXml::Scenario& scenario,
                    const scnXml::Monitoring& monitoring ){
@@ -168,6 +170,7 @@ void initMainSim(){
     updateSurveyNumbers();
 }
 void concludeSurvey(){
+    updateConditions();
     impl::surveyIndex += 1;
     updateSurveyNumbers();
 }

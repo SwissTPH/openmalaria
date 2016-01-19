@@ -169,7 +169,8 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         {
             const scnXml::Deployment& elt = *it;
             // 2.a intervention components
-            HumanIntervention *intervention = new HumanIntervention( elt.getComponent() );
+            HumanIntervention *intervention = new HumanIntervention( elt.getComponent(),
+                elt.getCondition() );
             
             // 2.b intervention deployments
             for( scnXml::Deployment::ContinuousConstIterator ctsIt = elt.getContinuous().begin();

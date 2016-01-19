@@ -23,6 +23,7 @@
 
 #include "Global.h"     // SimTime
 
+#include <string>
 #include <boost/integer_traits.hpp>
 
 /** This header provides information from the reporting system. */
@@ -69,6 +70,21 @@ SimTime finalSurveyTime();
 
 /// The number of cohort sets
 inline size_t numCohortSets(){ return impl::nCohortSets; }
+
+/// Create a condition. This is a variable updated whenever concludeSurvey() is
+/// called, and set true when the given measure is above the minimum and below
+/// the maximum value specified, and set false otherwise. This measure is not
+/// segregated by age group or other categorisation.
+/// 
+/// A key is returned; use this in future calls to checkCondition().
+/// 
+/// This should only be called before the simulation is started but after
+/// initSurveyTimes() is called.
+size_t setupCondition( const std::string& measureName, double minValue,
+                     double maxValue, bool initialState );
+
+/// Check a condition variable (set during the last survey).
+bool checkCondition( size_t conditionKey );
 
 /** Humans should store a "cohort set" identifier which is initially 0.
  * Whenever a human gains or loses membership status in some
