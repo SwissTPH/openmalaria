@@ -107,7 +107,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
     
     if (doUpdate){
         util::streamValidate( age0.raw() );
-        // Ages at  the end of the update period respectively. In most cases
+        // Age at  the end of the update period. In most cases
         // the difference between this and age at the start is not especially
         // important in the model design, but since we parameterised with
         // ageYears1 we should stick with it.

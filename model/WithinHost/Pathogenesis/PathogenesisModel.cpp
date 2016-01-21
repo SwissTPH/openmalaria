@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/Pathogenesis/Submodels.h"
+#include "mon/reporting.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
@@ -99,19 +100,25 @@ PathogenesisModel::PathogenesisModel(double cF) :
         _comorbidityFactor(cF)
 {}
 
-Pathogenesis::StatePair PathogenesisModel::determineState (double ageYears, double timeStepMaxDensity, double endDensity) {
+Pathogenesis::StatePair PathogenesisModel::determineState(Host::Human& human,
+        double ageYears, double timeStepMaxDensity, double endDensity, bool isDoomed)
+{
     double pMalariaFever = getPEpisode(timeStepMaxDensity, endDensity);
     StatePair result;
     //TODO(performance): would using a single RNG sample and manipulating probabilities be faster?
     //Decide whether a clinical episode occurs and if so, which type
     if( random::bernoulli( pMalariaFever ) ){
-        double prSevereEpisode = timeStepMaxDensity / (timeStepMaxDensity + pg_severeMalThreshold);
-        double comorb_factor = _comorbidityFactor / (1.0 + ageYears * pg_inv_critAgeComorb);
+        const double prSevereEpisode = timeStepMaxDensity / (timeStepMaxDensity + pg_severeMalThreshold);
+        const double comorb_factor = _comorbidityFactor / (1.0 + ageYears * pg_inv_critAgeComorb);
+        const double pCoinfection = pg_comorbIntercept * comorb_factor;
+        
+        // Expectation of a severe bout:
+        const double exSevere = prSevereEpisode + (1.0 - prSevereEpisode) * pCoinfection;
+        mon::reportStatMHF( mon::MHF_EXPECTED_SEVERE, human, exSevere );
         
         if( random::bernoulli( prSevereEpisode ) )
             result.state = STATE_SEVERE;
         else {
-            double pCoinfection = pg_comorbIntercept * comorb_factor;
             if( random::bernoulli( pCoinfection ) )
                 result.state = STATE_COINFECTION;
             else
@@ -122,6 +129,13 @@ Pathogenesis::StatePair PathogenesisModel::determineState (double ageYears, doub
         // IndirectRisk is the probability of dying from the indirect effects
         // of malaria conditional on not having an acute attack of malaria
         double indirectRisk = pg_indirRiskCoFactor * comorb_factor;
+        if( !isDoomed ){
+            mon::reportStatMHF( mon::MHF_EXPECTED_INDIRECT_DEATHS, human, indirectRisk );
+        }
+        //NOTE: we could only evaluate indirectMortality if not already doomed,
+        // except that (a) it affects random numbers, and (b) it affects
+        // evaluation of uncomplicated cases with the 5-day HS when
+        // indirectMortBugfix is not enabled.
         if( random::bernoulli( indirectRisk ) )
             result.indirectMortality = true;        
     }else{

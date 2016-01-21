@@ -80,7 +80,7 @@ void WHMock::treatment( Host::Human& human, TreatmentId treatId ){
     nTreatments += 1;
 }
 
-Pathogenesis::StatePair WHMock::determineMorbidity( double ageYears ){
+Pathogenesis::StatePair WHMock::determineMorbidity( Host::Human& human, double ageYears, bool isDoomed ){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 

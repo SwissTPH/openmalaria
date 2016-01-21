@@ -162,7 +162,8 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
     WHInterface& withinHostModel = *human.withinHostModel;
     // Run pathogenesisModel
     // Note: we use Episode::COMPLICATED instead of Episode::SEVERE.
-    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( ageYears );
+    const bool isDoomed = doomed != NOT_DOOMED;
+    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( human, ageYears, isDoomed );
     Episode::State newState = static_cast<Episode::State>( pg.state );
     util::streamValidate( (newState << 16) & pgState );
     
@@ -174,7 +175,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    latestReport.update (human, pgState);
         } else {
 	    if ( pgState & Episode::COMPLICATED ) {
-		if( random::uniform_01() < pSequelaeInpatient.eval( ageYears ) ){
+                const double pSequelae = pSequelaeInpatient.eval( ageYears );
+                mon::reportStatMHF( mon::MHF_EXPECTED_SEQUELAE, human, pSequelae );
+		if( random::uniform_01() < pSequelae ){
 		    pgState = Episode::State (pgState | Episode::SEQUELAE);
                 }else{
 		    pgState = Episode::State (pgState | Episode::RECOVERY);
@@ -274,10 +277,14 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	if( (pgState & Episode::COMPLICATED)
 	    && !(pgState & Episode::DIRECT_DEATH)
 	) {
+            const bool inHospital = true /*FIXME auxOut.hospitalisation == CMAuxOutput::IMMEDIATE */;
 	    double pDeath = caseFatalityRate.eval( ageYears );
 	    // community fatality rate when not in hospital or delayed hospital entry
-	    /*FIXME if( auxOut.hospitalisation != CMAuxOutput::IMMEDIATE )
-                pDeath = getCommunityCFR( pDeath );*/
+            if( !inHospital )
+                pDeath = getCommunityCFR( pDeath );
+            mon::reportStatMHF( mon::MHF_EXPECTED_DIRECT_DEATHS, human, pDeath );
+            if( inHospital )
+                mon::reportStatMHF( mon::MHF_EXPECTED_HOSPITAL_DEATHS, human, pDeath );
 	    if (random::uniform_01() < pDeath) {
 		pgState = Episode::State (pgState | Episode::DIRECT_DEATH | Episode::EVENT_FIRST_DAY);
 		// Human is killed at end of time at risk
@@ -362,6 +369,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 		// community fatality rate when not in hospital
 		if( !(pgState & Episode::EVENT_IN_HOSPITAL) )
 		    pDeath = getCommunityCFR( pDeath );
+                mon::reportStatMHF( mon::MHF_EXPECTED_DIRECT_DEATHS, human, pDeath );
+                if( pgState & Episode::EVENT_IN_HOSPITAL )
+                    mon::reportStatMHF( mon::MHF_EXPECTED_HOSPITAL_DEATHS, human, pDeath );
 		if (random::uniform_01() < pDeath) {
 		    pgState = Episode::State (pgState | Episode::DIRECT_DEATH);
 		    // Human is killed at end of time at risk

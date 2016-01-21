@@ -278,7 +278,8 @@ void VivaxBrood::treatmentLS(){
 WHVivax::WHVivax( double comorbidityFactor ) :
     cumPrimInf(0),
     pEvent( numeric_limits<double>::quiet_NaN() ),
-    pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() )
+    pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() ),
+    pSevere( 0.0 )
 {
     if( comorbidityFactor != 1.0 )
 #ifdef WHVivaxSamples
@@ -344,6 +345,8 @@ void WHVivax::importInfection(){
 void WHVivax::update(int nNewInfs, vector<double>&,
         double ageInYears, double)
 {
+    pSevere = 0.0;
+    
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )
         infections.push_back( VivaxBrood( this ) );
@@ -393,6 +396,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             }
             
             if( clinicalEvent ){
+                pSevere = pSevere + (1.0 - pSevere) * pEventIsSevere;
                 if( random::bernoulli( pEventIsSevere ) )
                     morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_SEVERE );
                 else
@@ -422,7 +426,8 @@ bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
     return false;
 }
 
-Pathogenesis::StatePair WHVivax::determineMorbidity(double ageYears){
+Pathogenesis::StatePair WHVivax::determineMorbidity( Host::Human& human, double ageYears, bool ){
+    mon::reportStatMHF( mon::MHF_EXPECTED_SEVERE, human, pSevere );
     Pathogenesis::StatePair result;     // no indirect mortality in the vivax model
     result.state = morbidity;
     return result;

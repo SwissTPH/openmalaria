@@ -151,6 +151,16 @@ enum Measure{
     // Sum of log of drug concentration in (human) blood where > 0.
     // Per age group, cohort and drug type. Units: log(mg/l)
     MHF_LOG_DRUG_CONC,
+    // Expected direct deaths
+    MHF_EXPECTED_DIRECT_DEATHS,
+    // Expected hospital deaths
+    MHF_EXPECTED_HOSPITAL_DEATHS,
+    // Expected indirect deaths
+    MHF_EXPECTED_INDIRECT_DEATHS,
+    // Expected number of sequelae
+    MHF_EXPECTED_SEQUELAE,
+    // Expected severe bouts
+    MHF_EXPECTED_SEVERE,
     
     // ———  MVF: vector (transmission) measures (doubles)  ———
     // Infectiousness of human population to mosquitoes
