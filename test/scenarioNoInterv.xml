@@ -57,6 +57,11 @@
       <option name="Vector_Sv" value="true"/>
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
+      <option name="expectedDirectDeaths"/>
+      <option name="expectedHospitalDeaths"/>
+      <option name="expectedIndirectDeaths"/>
+      <option name="expectedSequelae"/>
+      <option name="expectedSevere"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-1-6</surveyTime>

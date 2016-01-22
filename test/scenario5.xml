@@ -46,6 +46,10 @@
       <option name="nEPIVaccinations" value="true"/>
       <option name="allCauseIMR" value="true"/>
       <option name="annAvgK" value="true"/>
+      <option name="expectedDirectDeaths"/>
+      <option name="expectedIndirectDeaths"/>
+      <option name="expectedSequelae"/>
+      <option name="expectedSevere"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>

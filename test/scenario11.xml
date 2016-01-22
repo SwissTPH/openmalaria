@@ -34,6 +34,9 @@
       <option name="nSevere" value="true"/>
       <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
+      <option name="expectedDirectDeaths"/>
+      <option name="expectedIndirectDeaths"/>
+      <option name="expectedSevere"/>
     </SurveyOptions>
     <surveys detectionLimit="2">
       <surveyTime>290</surveyTime>
