@@ -186,7 +186,7 @@ bool WHFalciparum::treatSimple( const Host::Human& human, SimTime timeLiver, Sim
             clearInfections( Treatments::LIVER );
         else
             treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
-        mon::reportMHI( mon::MHT_LS_TREATMENTS, human, 1 );
+        mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
     if( timeBlood != sim::zero() ){
         if( timeBlood < sim::zero() )
@@ -198,9 +198,11 @@ bool WHFalciparum::treatSimple( const Host::Human& human, SimTime timeLiver, Sim
     return false;    // no blood stage treatment
 }
 
-Pathogenesis::StatePair WHFalciparum::determineMorbidity(double ageYears){
-    Pathogenesis::StatePair result =
-            pathogenesisModel->determineState( ageYears, timeStepMaxDensity, totalDensity );
+Pathogenesis::StatePair WHFalciparum::determineMorbidity( Host::Human& human,
+        double ageYears, bool isDoomed )
+{
+    Pathogenesis::StatePair result = pathogenesisModel->determineState( human,
+            ageYears, timeStepMaxDensity, totalDensity, isDoomed );
     
     /* Note: this model can easily be re-enabled, but is not used and not considered to be a good model.
     if( (result.state & Pathogenesis::MALARIA) && util::ModelOptions::option( util::PENALISATION_EPISODES ) ){

@@ -184,9 +184,11 @@ public:
      * 
      * This function is called after update() every time step.
      * 
+     * @param human A reference to the human, used when reporting
      * @param ageYears Age of human host in years
+     * @param isDoomed True if the human is already doomed to die, used for reporting
      */
-    virtual Pathogenesis::StatePair determineMorbidity( double ageYears ) =0;
+    virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed ) =0;
 
     /// Special intervention: clears all immunity
     virtual void clearImmunity() =0;

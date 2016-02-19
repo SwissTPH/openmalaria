@@ -23,6 +23,7 @@
 
 #include "Global.h"     // SimTime
 
+#include <string>
 #include <boost/integer_traits.hpp>
 
 /** This header provides information from the reporting system. */
@@ -30,11 +31,12 @@ namespace OM {
 namespace mon {
 // Not 'private' but still not for use externally:
 namespace impl {
-    // Consts (set during init):
-    extern size_t nSurveys;
+    // Consts (set during program start-up):
+    extern size_t nSurveys;     // number of reported surveys
     extern size_t nCohortSets;
     // Variables (checkpointed):
-    extern size_t currentSurvey;
+    extern bool isInit; // set true after "initialisation" survey at intervention time 0
+    extern size_t survNumEvent, survNumStat;
     extern SimTime nextSurveyTime;
 }
 
@@ -44,9 +46,15 @@ const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
 /** Line end character. Use Unix line endings to save a little size. */
 const char lineEnd = '\n';
 
-/// The current survey number (can be passed back to report functions taking
+/// The current survey number (can be passed back to 'event' report functions taking
 /// survey times). May have the special value NOT_USED.
-inline size_t currentSurvey(){ return impl::currentSurvey; }
+inline size_t eventSurveyNumber(){ return impl::survNumEvent; }
+
+/// Whether the current survey is reported.
+/// 
+/// Exception: there is a dummy survey at intervention time 0 which is not
+/// reported but acts like it is to set survey variables.
+inline bool isReported(){ return !impl::isInit || impl::survNumStat != NOT_USED; }
 
 /** Time the current (next) survey ends at, or sim::never() if no more
  * surveys take place. */
@@ -62,6 +70,21 @@ SimTime finalSurveyTime();
 
 /// The number of cohort sets
 inline size_t numCohortSets(){ return impl::nCohortSets; }
+
+/// Create a condition. This is a variable updated whenever concludeSurvey() is
+/// called, and set true when the given measure is above the minimum and below
+/// the maximum value specified, and set false otherwise. This measure is not
+/// segregated by age group or other categorisation.
+/// 
+/// A key is returned; use this in future calls to checkCondition().
+/// 
+/// This should only be called before the simulation is started but after
+/// initSurveyTimes() is called.
+size_t setupCondition( const std::string& measureName, double minValue,
+                     double maxValue, bool initialState );
+
+/// Check a condition variable (set during the last survey).
+bool checkCondition( size_t conditionKey );
 
 /** Humans should store a "cohort set" identifier which is initially 0.
  * Whenever a human gains or loses membership status in some

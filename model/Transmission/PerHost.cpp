@@ -49,7 +49,7 @@ void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
     VectorModel* vTM = dynamic_cast<VectorModel*> (&tm);
     if (vTM != 0) {
         species.resize (vTM->numSpecies);
-        for (size_t i = 0; i < vTM->numSpecies; ++i)
+        for(size_t i = 0; i < vTM->numSpecies; ++i)
             species[i].initialise (vTM->species[i].getHumanBaseParams(), availabilityFactor);
     }
 }

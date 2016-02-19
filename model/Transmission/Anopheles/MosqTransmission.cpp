@@ -325,11 +325,11 @@ void MosqTransmission::summarize( size_t species )const{
     // the last time step values at sim::now() and four previos were set.
     // One plus last, plus (0 mod N_v_length) to avoid negatives:
     SimTime end = sim::now() + sim::oneDay() + N_v_length;
-    mon::reportMSF( mon::MVF_LAST_NV0, species, getLastN_v0() );
-    mon::reportMSF( mon::MVF_LAST_NV, species, sum1(N_v, end, N_v_length) );
+    mon::reportStatMSF( mon::MVF_LAST_NV0, species, getLastN_v0() );
+    mon::reportStatMSF( mon::MVF_LAST_NV, species, sum1(N_v, end, N_v_length) );
     for( size_t g = 0; g < Genotypes::N(); ++g ){
-        mon::reportMSGF( mon::MVF_LAST_OV, species, g, sum3(O_v, g, end, N_v_length) );
-        mon::reportMSGF( mon::MVF_LAST_SV, species, g, sum3(S_v, g, end, N_v_length) );
+        mon::reportStatMSGF( mon::MVF_LAST_OV, species, g, sum3(O_v, g, end, N_v_length) );
+        mon::reportStatMSGF( mon::MVF_LAST_SV, species, g, sum3(S_v, g, end, N_v_length) );
     }
 }
 

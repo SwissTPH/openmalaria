@@ -31,6 +31,8 @@ addons:
     - xsdcxx
     - zlib1g-dev
 
+cache: apt
+
 before_install:
   - test "$TRAVIS_OS_NAME" == "osx" && util/install-dep-osx.sh || echo "not installing osx dependencies"
 
@@ -52,7 +54,8 @@ after_success:
 before_deploy:
   - mv -v build/schema/scenario_current.xsd .
   - mv -v build/openMalaria* .
-  - tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz openMalaria* scenario_current.xsd test/autoRegressionParameters.csv test/densities.csv travis-build.json
+  - cp util/example/run-example-scenario.sh util/example/example_scenario.xml .
+  - tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz openMalaria* scenario_current.xsd test/autoRegressionParameters.csv test/densities.csv travis-build.json run-example-scenario.sh example_scenario.xml
 
 deploy:
   provider: releases

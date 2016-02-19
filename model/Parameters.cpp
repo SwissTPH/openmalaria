@@ -32,7 +32,7 @@ namespace OM {
 Parameters::Parameters( const scnXml::Parameters& parameters ){
     // set parameters
     const scnXml::Parameters::ParameterSequence& paramSeq = parameters.getParameter();
-    for (scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
+    for(scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
         int i = it->getNumber();
         if (i < 0 || i >= MAX)
             continue;   // ignore the parameter; no real point in making this an error

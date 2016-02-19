@@ -48,7 +48,7 @@ void LSTMModel::checkpoint (istream& stream) {
     size_t numDrugs;	// type must be same as m_drugs.size()
     numDrugs & stream;
     util::checkpoint::validateListSize (numDrugs);
-    for (size_t i=0; i<numDrugs; ++i) {
+    for(size_t i=0; i<numDrugs; ++i) {
         size_t index;
         index & stream;
         m_drugs.push_back( LSTMDrugType::createInstance(index) );
@@ -59,7 +59,7 @@ void LSTMModel::checkpoint (istream& stream) {
 
 void LSTMModel::checkpoint (ostream& stream) {
     m_drugs.size() & stream;
-    for (DrugVec::iterator it =m_drugs.begin(); it!=m_drugs.end(); ++it) {
+    for(DrugVec::iterator it =m_drugs.begin(); it!=m_drugs.end(); ++it) {
         it->getIndex() & stream;
         (*it) & stream;
     }
@@ -152,8 +152,8 @@ void LSTMModel::summarize(const Host::Human& human) const{
                 drug != end; ++drug ){
             double conc = drug->getConcentration(index);
             if( conc > 0.0 ){
-                mon::reportMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
-                mon::reportMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(conc) );
+                mon::reportStatMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );
+                mon::reportStatMHPF( mon::MHF_LOG_DRUG_CONC, human, index, log(conc) );
             }
         }
     }

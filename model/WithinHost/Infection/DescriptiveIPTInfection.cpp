@@ -40,7 +40,7 @@ void DescriptiveIPTInfection::initParameters (const scnXml::IPTDescription& xmlI
   genotypes.reserve (genotypesData.size());
   
   double genotypeCumFreq = 0.0;
-  for (scnXml::IPTDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it) {
+  for(scnXml::IPTDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it) {
     genotypes.push_back( GenotypeData(it, genotypeCumFreq) );
   }
   assert( genotypes.size() == genotypesData.size() );
@@ -77,7 +77,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep lastSPdose) :
     double rndSample=(random::uniform_01());
     double lowerBound = 0.0;
     //This Loop assigns the infection a genotype according to its frequency
-    for (size_t genotypeCounter=0; genotypeCounter < genotypes.size(); genotypeCounter++){
+    for(size_t genotypeCounter=0; genotypeCounter < genotypes.size(); genotypeCounter++){
       if (rndSample >= lowerBound && rndSample < genotypes[genotypeCounter].cumFreq){
 	proteome_ID=genotypeCounter;
 	break;

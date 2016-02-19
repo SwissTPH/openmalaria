@@ -640,14 +640,7 @@
       <deployment>
         <component id="MSAT"/>
         <timed>
-          <deploy coverage="1" time="0t"/>
-          <deploy coverage="1" time="14t"/>
-          <deploy coverage="1" time="28t"/>
-          <deploy coverage="1" time="42t"/>
-          <deploy coverage="1" time="56t"/>
-          <deploy coverage="1" time="70t"/>
-          <deploy coverage="1" time="84t"/>
-          <deploy coverage="1" time="98t"/>
+          <deploy coverage="1" time="0t" repeatStep="14t" repeatEnd="99t"/>
         </timed>
       </deployment>
     </human>

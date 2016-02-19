@@ -42,25 +42,14 @@
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
       <group upperbound="2"/>
-      <group upperbound="3"/>
-      <group upperbound="4"/>
       <group upperbound="5"/>
-      <group upperbound="6"/>
-      <group upperbound="7"/>
-      <group upperbound="8"/>
-      <group upperbound="9"/>
       <group upperbound="10"/>
-      <group upperbound="11"/>
-      <group upperbound="12"/>
-      <group upperbound="13"/>
-      <group upperbound="14"/>
-      <group upperbound="15"/>
       <group upperbound="20"/>
-      <group upperbound="25"/>
       <group upperbound="30"/>
       <group upperbound="40"/>
       <group upperbound="50"/>
       <group upperbound="60"/>
+      <group upperbound="70"/>
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>

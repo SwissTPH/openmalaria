@@ -105,7 +105,7 @@ struct OutMeasure{
 // These are all output measures set by a name in the XML
 // Example: nHosts
 typedef std::map<std::string,OutMeasure> NamedMeasureMapT;
-NamedMeasureMapT namedOutMeasures;
+extern NamedMeasureMapT namedOutMeasures;
 
 void findNamedMeasuresUsing( Measure m, ostream& msg ){
     int nMatches = 0;
@@ -178,7 +178,7 @@ void defineOutMeasures(){
     /// number of episodes (uncomplicated)
     namedOutMeasures["nUncomp"] =
         OutMeasure::humanAC( 14, MHE_UNCOMPLICATED_EPISODES, false );
-    /// number of episodes (severe)
+    /// Number of severe episodes (severe malaria or malaria + coinfection)
     namedOutMeasures["nSevere"] =
         OutMeasure::humanAC( 15, MHE_SEVERE_EPISODES, false );
     /// cases with sequelae
@@ -390,6 +390,65 @@ void defineOutMeasures(){
      * non-zero concentration. */
     namedOutMeasures["sumLogDrugConcNonZero"] =
         OutMeasure::humanACP( 73, MHF_LOG_DRUG_CONC, true );
+    /** Expected number of direct malaria deaths, from those with severe
+     * disease.
+     *
+     * This is calculated as the sum over all steps in the reporting period of
+     * the sum over humans with severe malaria of the probability of direct
+     * death from malaria. */
+    namedOutMeasures["expectedDirectDeaths"] =
+        OutMeasure::humanAC( 74, MHF_EXPECTED_DIRECT_DEATHS, true );
+    /** Expected number of direct malaria deaths which occur in hospital.
+     * 
+     * This is the a subset of `expectedDirectDeaths` and the same notes apply.
+     */
+    namedOutMeasures["expectedHospitalDeaths"] =
+        OutMeasure::humanAC( 75, MHF_EXPECTED_HOSPITAL_DEATHS, true );
+    /** Expected number of indirect malaria deaths, from sick humans.
+     * 
+     * This is calculated as the sum over all steps in the reporting period of
+     * the sum over humans with a malaria bout (severe or not) of the
+     * proability of indirect death due to malaria, assuming that they do not
+     * die of another cause in the mean-time.
+     * 
+     * Note that indirect death is only possible in the simulation when the
+     * individual is sick, so the expemctation of this event is the same as were
+     * it applied to all humans (sick or not).
+     * 
+     * It does not quite tally with reports of indirect death, since the
+     * probability of indirect death is calculated ahead of the actual death
+     * and death may occur earlier for another reason (direct death,
+     * outmigration).
+     * 
+     * Humans already 'doomed' to die as an 'indirect mortality' are excluded
+     * from the sum. */
+    namedOutMeasures["expectedIndirectDeaths"] =
+        OutMeasure::humanAC( 76, MHF_EXPECTED_INDIRECT_DEATHS, true );
+    /** Expected number of sequelae, from those with severe disease.
+     * 
+     * This is calculated as the sum over all steps in the reporting period of
+     * the sum over humans with severe malaria of the probability of sequelae
+     * occuring, assuming the human "recovers" from the bout.
+     */
+    namedOutMeasures["expectedSequelae"] =
+        OutMeasure::humanAC( 77, MHF_EXPECTED_SEQUELAE, true );
+    /** Expected number of severe bouts of malaria.
+     * 
+     * This is calculated as the sum over all steps in the reporting period of
+     * the sum over humans with a malaria bout (severe or not) of the bout
+     * becoming severe. For the 5-day time-step this is calculated once per
+     * bout (which lasts one time-step). For other time-steps exact behaviour
+     * is not yet defined.
+     * 
+     * This includes both "severe malaria" and "complications due to
+     * coinfection" (the same as the `nSevere` output).
+     * 
+     * Note that this has the same expectation as the probability of a severe
+     * bout when not already given that there will be a malaria bout, but may
+     * be more noisy.
+     */
+    namedOutMeasures["expectedSevere"] =
+        OutMeasure::humanAC( 78, MHF_EXPECTED_SEVERE, true );
 }
 
 }

@@ -53,7 +53,7 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
 
     const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
     initialMeanEfficacy.resize (ies.size());
-    for (size_t i = 0; i < initialMeanEfficacy.size(); ++i)
+    for(size_t i = 0; i < initialMeanEfficacy.size(); ++i)
         initialMeanEfficacy[i] = ies[i].getValue();
     
     if( params.size() <= component.id ) params.resize( component.id + 1 );
@@ -65,11 +65,11 @@ void VaccineComponent::deploy(Host::Human& human, mon::Deploy::Method method, Va
 {
     bool administered = human.getVaccine().possiblyVaccinate( human, id(), vaccLimits );
     if( administered && VaccineComponent::reportComponent == id() ){
-        mon::reportMHD( mon::MHD_VACCINATIONS, human, method );
+        mon::reportEventMHD( mon::MHD_VACCINATIONS, human, method );
     }
-    if( type == Vaccine::PEV ) mon::reportMHD( mon::MHD_PEV, human, method );
-    else if( type == Vaccine::BSV ) mon::reportMHD( mon::MHD_BSV, human, method );
-    else if( type == Vaccine::TBV ) mon::reportMHD( mon::MHD_TBV, human, method );
+    if( type == Vaccine::PEV ) mon::reportEventMHD( mon::MHD_PEV, human, method );
+    else if( type == Vaccine::BSV ) mon::reportEventMHD( mon::MHD_BSV, human, method );
+    else if( type == Vaccine::TBV ) mon::reportEventMHD( mon::MHD_TBV, human, method );
     else assert( false );
 }
 

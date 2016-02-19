@@ -100,7 +100,7 @@ namespace OM { namespace util {
 	// reverse-lookup in map; only used for error/debug printing so efficiency is unimportant
 	// doesn't ensure code is unique in the map either
 	string toString (const OptionCodes code) {
-	    for (map<string,OptionCodes>::iterator codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
+	    for(map<string,OptionCodes>::iterator codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
 		if (codeIt->second == code)
 		    return codeIt->first;
 	    }
@@ -121,7 +121,7 @@ namespace OM { namespace util {
 	options = defaultOptSet;
 	
 	const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.getOption();
-	for (scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
+	for(scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
             OptionCodes opt = codeMap[it->getName()];
             if( opt != IGNORE ) options[opt] = it->getValue();
 	}
@@ -130,7 +130,7 @@ namespace OM { namespace util {
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
 	    cout << "Non-default model options:";
-	    for (int i = 0; i < NUM_OPTIONS; ++i) {
+	    for(int i = 0; i < NUM_OPTIONS; ++i) {
 		if (options[i] != defaultOptSet[i])
 		    cout << "\t" << codeMap.toString(OptionCodes(i)) << "=" << options[i];
 	    }
@@ -222,13 +222,13 @@ namespace OM { namespace util {
             .set( MOLINEAUX_WITHIN_HOST_MODEL )
             .set( PENNY_WITHIN_HOST_MODEL );
         
-	for (size_t i = 0; i < NUM_OPTIONS; ++i) {
+	for(size_t i = 0; i < NUM_OPTIONS; ++i) {
 	    if (options [i] && (options & incompatibilities[i]).any()) {
 		ostringstream msg;
 		msg << "Incompatible model options: " << codeMap.toString(OptionCodes(i)) << "=" << options[i]
 			<< " is incompatible with flags:";
 		bitset<NUM_OPTIONS> incompat = (options & incompatibilities[i]);
-		for (int j = 0; j < NUM_OPTIONS; ++j) {
+		for(int j = 0; j < NUM_OPTIONS; ++j) {
 		    if (incompat[j])
 			msg << "\t" << codeMap.toString(OptionCodes(j)) << "=" << options[j];
 		}
@@ -254,7 +254,7 @@ namespace OM { namespace util {
             require1DayTS
                 .set( CLINICAL_EVENT_SCHEDULER );
             
-            for (size_t i = 0; i < NUM_OPTIONS; ++i) {
+            for(size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (options [i] && require1DayTS[i]) {
                     ostringstream msg;
                     msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 1-day time step.";
@@ -267,7 +267,7 @@ namespace OM { namespace util {
                 .set( IPTI_SP_MODEL )
                 .set( REPORT_ONLY_AT_RISK );
             
-            for (size_t i = 0; i < NUM_OPTIONS; ++i) {
+            for(size_t i = 0; i < NUM_OPTIONS; ++i) {
                 if (options [i] && require5DayTS[i]) {
                     ostringstream msg;
                     msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day time step.";

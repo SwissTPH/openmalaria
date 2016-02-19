@@ -92,7 +92,7 @@ void minimizeCalc_rss(double (*func) (double,double), double param1,double param
     gsl_multimin_fminimizer *minimizer = gsl_multimin_fminimizer_alloc (T, 2);
     gsl_multimin_fminimizer_set (minimizer, &minex_func, initialValues, stepSize);
     
-    for (size_t iter = 0; iter < 100; ++iter) {
+    for(size_t iter = 0; iter < 100; ++iter) {
         if (gsl_multimin_fminimizer_iterate(minimizer))
             throw TRACED_EXCEPTION ("gsl_multimin_fminimizer_iterate failed",util::Error::GSL);
         
@@ -126,13 +126,13 @@ void AgeStructure::estimateRemovalRates( const scnXml::Demography& demography ){
     ageGroupBounds[0] = 0.0;
     ageGroupBounds[1] = 1.0 / 12.0;
     ageGroupPercent[0] = 0.0;
-    for (size_t i = 1;i < ngroups; i++) {
+    for(size_t i = 1;i < ngroups; i++) {
 	ageGroupBounds[i+1] = group[i-1].getUpperbound();
 	ageGroupPercent[i] = group[i-1].getPoppercent();
 	sumperc += ageGroupPercent[i];
     }
     sumperc = 100.0 / sumperc; // multiplier to get percentages
-    for (size_t i = 0;i < ngroups; i++) {
+    for(size_t i = 0;i < ngroups; i++) {
 	ageGroupPercent[i]  = ageGroupPercent[i] * sumperc;
     }
     /*
@@ -180,7 +180,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
     vector<double> M(ngroups,0);
     vector<double> pred(ngroups,0);
     
-    for (size_t i = 0; i < ngroups - 1; i++) {
+    for(size_t i = 0; i < ngroups - 1; i++) {
 	double midpt = (ageGroupBounds[i+1] + ageGroupBounds[i]) * 0.5;
 	double M1 = mu0 * (1.0 - exp (-alpha0 * midpt)) / alpha0;
 	double M2 = mu1 * (exp (alpha1 * midpt) - 1.0) / alpha1;
@@ -189,7 +189,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 	* exp (-rho * midpt - M[i]);
 	sumpred += pred[i];
     }
-    for (size_t i = 0; i < ngroups - 1; i++) {
+    for(size_t i = 0; i < ngroups - 1; i++) {
 	pred[i] = pred[i] / sumpred * 100.0;
     }
     double L_inf = exp (-rho * 0.5 - M[1]);
@@ -200,7 +200,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
     ageGroupPercent[1] = perc_inf - ageGroupPercent[0];
     
     double result = 0.0;
-    for (size_t i = 0; i < ngroups - 1; i++) {
+    for(size_t i = 0; i < ngroups - 1; i++) {
 	double residual = log (pred[i]) - log (ageGroupPercent[i]);
 	result += residual * residual;
     }
@@ -210,7 +210,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
-    for (size_t j=1;j < cumAgeProp.size(); ++j) {
+    for(size_t j=1;j < cumAgeProp.size(); ++j) {
 	SimTime age = sim::fromTS( cumAgeProp.size() - j - 1 );
 	double ageYears = age.inYears();
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
@@ -223,7 +223,7 @@ void AgeStructure::calcCumAgeProp ()
 	cumAgeProp[j] = cumAgeProp[j-1] + predperc;
     }
     double totalCumPC = cumAgeProp[cumAgeProp.size()-1];
-    for (size_t j=1;j < cumAgeProp.size(); ++j) {
+    for(size_t j=1;j < cumAgeProp.size(); ++j) {
 	//Scale using the total cumAgeProp
 	cumAgeProp[j] = cumAgeProp[j] / totalCumPC;
     }

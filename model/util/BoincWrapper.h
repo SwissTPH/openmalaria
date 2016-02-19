@@ -77,7 +77,7 @@ public:
     
     /// Copy ctor to make sure it copies data, not pointers
     Checksum (const Checksum& that) {
-	for (int i = 0; i < 16; ++i)
+	for(int i = 0; i < 16; ++i)
 	    data[i] = that.data[i];
     }
     
@@ -87,12 +87,12 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-	for (int i = 0; i < 16; ++i)
+	for(int i = 0; i < 16; ++i)
 	    data[i] & stream;
     }
     
     bool operator!= (Checksum& that) {
-	for (int i = 0; i < 16; ++i)
+	for(int i = 0; i < 16; ++i)
 	    if (data[i] != that.data[i])
 		return true;
 	return false;

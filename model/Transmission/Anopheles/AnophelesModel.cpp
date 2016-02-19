@@ -200,7 +200,7 @@ void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, dou
     // P_dif; here we assume that P_E is constant.
     double initialP_df = 0.0;
 
-    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
+    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::now()).inYears());
         leaveSeekingStateRate += prod;
@@ -209,7 +209,7 @@ void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, dou
         initialP_df += prod * host.probMosqResting(humanBase, sIndex);
     }
 
-    for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
+    for(vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
         leaveSeekingStateRate += nhh->entoAvailability;
         initialP_df += nhh->probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's
@@ -316,7 +316,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double tsP_df = 0.0;
     vector<double> tsP_dif( WithinHost::Genotypes::N(), 0.0 );
     size_t i = 0;
-    for (Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
+    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
@@ -331,7 +331,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         }
     }
 
-    for (vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
+    for(vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
         leaveSeekingStateRate += nhh->entoAvailability;
         tsP_df += nhh->probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's

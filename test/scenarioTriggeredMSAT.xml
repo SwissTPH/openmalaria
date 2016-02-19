@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="99" name="Vacc with EIRDaily factor=1.0 with halfLifeYrs value=0.5" schemaVersion="34" wuID="53630539" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
-  <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="200">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -29,29 +29,26 @@
       <option name="nInfect" value="true"/>
       <option name="nExpectd" value="true"/>
       <option name="nPatent" value="true"/>
-      <option name="sumLogPyrogenThres" value="true"/>
+      <option name="sumLogPyrogenThres" value="false"/>
       <option name="sumlogDens" value="true"/>
       <option name="totalInfs" value="true"/>
       <option name="nTransmit" value="true"/>
       <option name="totalPatentInf" value="true"/>
-      <option name="sumPyrogenThresh" value="true"/>
+      <option name="sumPyrogenThresh" value="false"/>
       <option name="nTreatments1" value="true"/>
-      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments2" value="false"/>
       <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="nSeq" value="true"/>
-      <option name="nIndDeaths" value="true"/>
-      <option name="nDirDeaths" value="true"/>
-      <option name="nEPIVaccinations" value="true"/>
+      <option name="nSeq" value="false"/>
+      <option name="nIndDeaths" value="false"/>
+      <option name="nDirDeaths" value="false"/>
       <option name="allCauseIMR" value="true"/>
       <option name="annAvgK" value="true"/>
-      <option name="expectedDirectDeaths"/>
-      <option name="expectedIndirectDeaths"/>
-      <option name="expectedSequelae"/>
-      <option name="expectedSevere"/>
+      <option name="nMassScreenings"/><!-- currently this isn't output from a decisionTree; it should be fixed! -->
+      <option name="nMDAs"/>
     </SurveyOptions>
-    <surveys detectionLimit="40">
+    <surveys diagnostic="standard">
       <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>
       <surveyTime repeatStep="1y" repeatEnd="20.027y">19t</surveyTime>
       <surveyTime repeatStep="1y" repeatEnd="20.027y">37t</surveyTime>
@@ -59,60 +56,44 @@
     </surveys>
     <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
-      <group upperbound="2"/>
       <group upperbound="5"/>
       <group upperbound="10"/>
       <group upperbound="20"/>
-      <group upperbound="30"/>
-      <group upperbound="40"/>
       <group upperbound="50"/>
-      <group upperbound="60"/>
-      <group upperbound="70"/>
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="BSVPEVTBV Ref EPI modified modified">
+  <interventions name="triggered MSAT">
     <human>
-      <component id="TBV">
-        <TBV>
-          <decay L="0.5" function="exponential"/>
-          <efficacyB value="10"/>
-          <initialEfficacy value="0.4"/>
-          <initialEfficacy value="0.46"/>
-          <initialEfficacy value="0.52"/>
-        </TBV>
-      </component>
-      <component id="BSV">
-        <BSV>
-          <decay L="0.5" function="exponential"/>
-          <efficacyB value="10"/>
-          <initialEfficacy value="0.4"/>
-          <initialEfficacy value="0.46"/>
-          <initialEfficacy value="0.52"/>
-        </BSV>
-      </component>
-      <component id="PEV">
-        <PEV>
-          <decay L="0.5" function="exponential"/>
-          <efficacyB value="10"/>
-          <initialEfficacy value="0.4"/>
-          <initialEfficacy value="0.46"/>
-          <initialEfficacy value="0.52"/>
-        </PEV>
+      <component id="MSAT">
+        <decisionTree>
+          <diagnostic diagnostic="RDT">
+            <positive>
+              <random>
+                <outcome p="0.9">
+                  <treatSimple durationLiver="0" durationBlood="20d"/>
+                </outcome>
+                <outcome p="0.1">
+                  <treatFailure/>
+                </outcome>
+              </random>
+            </positive>
+            <negative>
+              <noTreatment/>
+            </negative>
+          </diagnostic>
+        </decisionTree>
       </component>
       <deployment>
-        <component id="TBV"/>
-        <component id="BSV"/>
-        <component id="PEV"/>
-        <continuous>
-          <deploy coverage="0.95" targetAgeYrs="0.0833" vaccMaxCumDoses="1" vaccMinPrevDoses="0"/>
-          <deploy coverage="0.95" targetAgeYrs="0.17" vaccMaxCumDoses="2" vaccMinPrevDoses="1"/>
-          <deploy coverage="0.99" targetAgeYrs="0.25" vaccMaxCumDoses="3" vaccMinPrevDoses="2"/>
-          <deploy coverage="0.99" targetAgeYrs="1.25" vaccMaxCumDoses="4" vaccMinPrevDoses="3"/>
-          <deploy coverage="0.99" targetAgeYrs="2.25" vaccMaxCumDoses="5" vaccMinPrevDoses="4"/>
-          <deploy coverage="0.99" targetAgeYrs="3.25" vaccMaxCumDoses="6" vaccMinPrevDoses="5"/>
-          <deploy coverage="0.99" targetAgeYrs="4.25" vaccMaxCumDoses="7" vaccMinPrevDoses="6"/>
-        </continuous>
+        <component id="MSAT"/>
+        <!-- Note: lower transmission and a lower threshold would be more
+        "realistic" but this still shows deployment *some of the time*.
+        Note 2: nUncomp cannot be used so we use nTreatments1 as an approximation. -->
+        <condition measure="nTreatments1" minValue="80" initialState="true"/>
+        <timed>
+          <deploy coverage="0.8" time="19t" repeatStep="1y" repeatEnd="20.027y"/>
+          <deploy coverage="0.8" time="37t" repeatStep="1y" repeatEnd="20.027y"/>
+        </timed>
       </deployment>
     </human>
   </interventions>
@@ -136,15 +117,15 @@
       </nonCompliersEffective>
       <treatmentActions>
         <ACT name="legacy (emulate pre-32 treatment)">
-          <clearInfections stage="both" timesteps="-1"/>
+          <clearInfections stage="both" timesteps="-1t"/>
         </ACT>
         <QN name="legacy (emulate pre-32 treatment)">
-          <clearInfections stage="both" timesteps="-1"/>
+          <clearInfections stage="both" timesteps="-1t"/>
         </QN>
       </treatmentActions>
-      <pSeekOfficialCareUncomplicated1 value="0.04"/>
-      <pSelfTreatUncomplicated value="0.01"/>
-      <pSeekOfficialCareUncomplicated2 value="0.04"/>
+      <pSeekOfficialCareUncomplicated1 value="0.4"/>
+      <pSelfTreatUncomplicated value="0.5"/>
+      <pSeekOfficialCareUncomplicated2 value="0.4"/>
       <pSeekOfficialCareSevere value="0.48"/>
     </ImmediateOutcomes>
     <CFR>
@@ -164,7 +145,7 @@
       <group lowerbound="5.0" value="0.005"/>
     </pSequelaeInpatient>
   </healthSystem>
-  <entomology mode="dynamic" name="Namawala1_16*1.0">
+  <entomology mode="dynamic" name="Namawala1_16*1.0" scaledAnnualEIR="20">
     <nonVector eipDuration="10">
       <EIRDaily origin="Namawala Pre">0.011646449</EIRDaily>
       <EIRDaily origin="Namawala Pre">0.012176484</EIRDaily>
@@ -533,13 +514,23 @@
       <EIRDaily origin="Namawala Pre">0.0042975824</EIRDaily>
     </nonVector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="40"/>
+    </diagnostic>
+    <diagnostic name="RDT">
+      <stochastic dens_50="50" specificity=".942"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="MAX_DENS_CORRECTION" value="false"/>
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="30d">
+      <NeonatalMortality diagnostic="standard"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0.0" value="0.225940909648"/>
@@ -562,7 +553,7 @@
         <group lowerbound="20.0" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="0" latentp="3">
+    <parameters interval="5" iseed="0" latentp="15d">
       <parameter include="false" name="        '-ln(1-Sinf)'   " number="1" value="0.050736"/>
       <parameter include="false" name="        Estar   " number="2" value="0.03247"/>
       <parameter include="false" name="        Simm    " number="3" value="0.1447"/>

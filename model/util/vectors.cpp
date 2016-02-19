@@ -28,7 +28,7 @@
 namespace OM { namespace util {
     
 void vectors::scale (vector<double>& vec, double a) {
-  for (size_t i = 0; i < vec.size(); ++i)
+  for(size_t i = 0; i < vec.size(); ++i)
     vec[i] *= a;
 }
 void vectors::scale (vecDay<double>& vec, double a) {
@@ -41,7 +41,7 @@ void vectors::scale (vecDay2D<double>& vec, double a) {
 
 double vectors::sum (const vector<double>& vec) {
   double r = 0.0;
-  for (size_t i = 0; i < vec.size(); ++i)
+  for(size_t i = 0; i < vec.size(); ++i)
     r += vec[i];
   return r;
 }
@@ -54,7 +54,7 @@ double vectors::sum (const vecDay<double>& vec) {
 
 double vectors::sum (const gsl_vector *vec) {
   double r = 0.0;
-  for (size_t i = 0; i < vec->size; ++i)
+  for(size_t i = 0; i < vec->size; ++i)
     r += gsl_vector_get( vec, i );
   return r;
 }
@@ -80,7 +80,7 @@ bool vectors::approxEqual (const double a, const double b, const double lim_fact
 bool vectors::approxEqual (const vector<double>& vec1, const vector<double>& vec2, const double lim_fact) {
   if (vec1.size() != vec2.size())
     return false;
-  for (size_t i = 0; i < vec1.size(); ++i) {
+  for(size_t i = 0; i < vec1.size(); ++i) {
     if (!approxEqual (vec1[i], vec2[i], lim_fact))
       return false;
   }
@@ -115,7 +115,7 @@ gsl_vector* vectors::std2gsl (const double* vec, size_t length) {
 
 void vectors::logFourierCoefficients(const vector<double>& iArray, vector<double>& FC) {
     logDFT(iArray, FC);
-    for (size_t i=1; i<FC.size(); ++i)
+    for(size_t i=1; i<FC.size(); ++i)
         FC[i] *= 2;
 }
 
@@ -131,10 +131,10 @@ void vectors::logDFT(const vector<double>& iArray, vector<double>& FC) {
     double w = 2.0 * M_PI / T;
     FC.assign(FC.size(), 0.0);
     
-    for (size_t t = 0; t < T; ++t) {
+    for(size_t t = 0; t < T; ++t) {
         double val = log( iArray[t] );
         FC[0] += val;
-        for (size_t n = 1; n < N; ++n ){
+        for(size_t n = 1; n < N; ++n ){
             FC[2*n-1] += val * cos(w*n*t);
             FC[2*n  ] += val * sin(w*n*t);
         }
@@ -157,7 +157,7 @@ void vectors::expIDFT( vecDay< double >& tArray, const std::vector< double >& FC
     for( SimTime t = sim::zero(); t < T2; t += sim::oneDay() ){
         double temp = FC[0];
         double wt = w*t.inDays() - rAngle;
-        for (size_t n = 1; n < N; ++n) {
+        for(size_t n = 1; n < N; ++n) {
             temp += FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
         }
         tArray[t] = exp(temp);

@@ -64,7 +64,7 @@ void EmergenceModel::initEIR(
         FSCoeffic.reserve (2*fsCoeffic.size() + 1);
 
         FSCoeffic.push_back( 0.0 );     // value doesn't matter; EIR will be scaled
-        for ( scnXml::FourierSeries::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ) {
+        for( scnXml::FourierSeries::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ) {
             FSCoeffic.push_back( it->getA() );
             FSCoeffic.push_back( it->getB() );
         }
@@ -83,13 +83,13 @@ void EmergenceModel::initEIR(
         assert( seq.size() == N_m );    // enforced by schema
         vector<double> months(N_m);
         double sum = 0.0;
-        for ( size_t i = 0; i < N_m; ++i ) {
+        for( size_t i = 0; i < N_m; ++i ) {
             months[i] = seq[i];
             sum += months[i];
         }
         // arbitrary minimum we allow (cannot have zeros since we take the logarithm)
         double min = sum/1000.0;
-        for ( size_t i = 0; i < N_m; ++i ) {
+        for( size_t i = 0; i < N_m; ++i ) {
             if ( months[i] < min )
                 months[i] = min;
         }

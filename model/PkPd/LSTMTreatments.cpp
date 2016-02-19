@@ -72,7 +72,7 @@ map<string,size_t> dosagesNames;
 void LSTMTreatments::init(const scnXml::Treatments& data){
     schedules.resize( data.getSchedule().size() );
     size_t i = 0;
-    BOOST_FOREACH( const scnXml::PKPDSchedule& schedule, data.getSchedule() ){
+    foreach( const scnXml::PKPDSchedule& schedule, data.getSchedule() ){
         schedules[i].load( schedule.getMedicate() );
         scheduleNames[schedule.getName()] = i;
         i += 1;
@@ -80,7 +80,7 @@ void LSTMTreatments::init(const scnXml::Treatments& data){
     
     dosages.resize( data.getDosages().size() );
     i = 0;
-    BOOST_FOREACH( const scnXml::PKPDDosages& elt, data.getDosages() ){
+    foreach( const scnXml::PKPDDosages& elt, data.getDosages() ){
         if( elt.getAge().size() ) dosages[i].load( elt.getAge(), false );
         else if( elt.getBodymass().size() ) dosages[i].load( elt.getBodymass(), true );
         else{

@@ -56,7 +56,7 @@ struct eDFunctor
       throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
     w = 2*M_PI / T(p);
     fn = (fc.size()-1)/2;
-    BOOST_FOREACH (T& sample, logSamples) {
+    foreach (T& sample, logSamples) {
       sample = log (sample);	// compare logarithms of EIR to make differentiation easier
     }
   }
@@ -68,7 +68,7 @@ struct eDFunctor
     // Calculate inverse discrete Fourier transform
     // TODO(vec lifecycle): This may not interpolate sensibly. See for example
     // https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Trigonometric_interpolation_polynomial
-    for (size_t t=0; t<p; ++t) {
+    for(size_t t=0; t<p; ++t) {
       T wt = w*t+fcR+d;
       T val = fc[0], dval = 0.0, ddval = 0.0;
       for(size_t n=1;n<=fn; ++n){

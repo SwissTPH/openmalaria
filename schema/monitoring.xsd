@@ -105,6 +105,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                         <xs:appinfo>name:End of repetition (exclusive);units:User defined;</xs:appinfo>
                       </xs:annotation>
                     </xs:attribute>
+                    <xs:attribute name="reported" type="xs:boolean" default="true">
+                      <xs:annotation>
+                        <xs:documentation>For normal surveys, reporting=true. If set false,
+                          quantities are measured but not reported. The reason for doing this is
+                          to update conditions set on reportable measures.
+                          
+                          Multiple surveys may be given here for the same date, e.g. if using
+                          "repeatStep" for both reporting and non-reporting surveys. These are
+                          combined such that a maximum of one survey is carried out per time-step,
+                          and the survey is reported if any of the listed surveys for this date is
+                          configured as "reporting".
+                          
+                          Note that adding non-reporting surveys will not affect value output by
+                          reported surveys, with the exception that generated psuedo-random numbers
+                          may be altered (specifically, when any stochastic diagnostics are used in
+                          surveys).
+                        </xs:documentation>
+                      </xs:annotation>
+                    </xs:attribute>
                   </xs:extension>
                 </xs:simpleContent>
               </xs:complexType>
