@@ -35,7 +35,7 @@ namespace OM { namespace util {
 class DocumentLoader {
 public:
     /// Current schema version.
-    static const int SCHEMA_VERSION = 34;
+    static const int SCHEMA_VERSION = 35;
     
     DocumentLoader () : documentChanged(false), scenario(NULL) {}
     

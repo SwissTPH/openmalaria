@@ -27,9 +27,10 @@ foreach (XSD_NAME ${SCHEMA_NAMES})
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${XSD_NAME}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${XSD_NAME}.h
     COMMAND ${XSD_EXECUTABLE} cxx-tree
         --type-naming ucc --function-naming java
-        --namespace-map http://openmalaria.org/schema/scenario_34=scnXml
-        --generate-serialization
-        --generate-doxygen --generate-intellisense
+        --namespace-map http://openmalaria.org/schema/scenario_35=scnXml
+#         --generate-serialization
+        --generate-doxygen
+        --generate-intellisense
         --hxx-suffix .h --cxx-suffix .cpp
         ${XSD_FILE}
     MAIN_DEPENDENCY ${XSD_FILE}
