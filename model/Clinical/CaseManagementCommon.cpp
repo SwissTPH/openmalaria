@@ -35,6 +35,8 @@ util::AgeGroupInterpolator caseFatalityRate;
 util::AgeGroupInterpolator pSequelaeInpatient;
 
 ///@brief Infant death summaries (checkpointed).
+///
+/// Declared 'extern' in header.
 //@{
 vector<int> infantDeaths;
 vector<int> infantIntervalsAtRisk;

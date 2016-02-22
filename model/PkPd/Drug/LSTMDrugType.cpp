@@ -191,7 +191,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
     // per phenotype (first index), per locus-of-restriction (second list), a list of alleles
     vector<vector<vector<uint32_t> > > phenotype_restrictions;
     phenotype_restrictions.reserve( n_phenotypes );
-    for (size_t i = 0; i < n_phenotypes; ++i) {
+    for(size_t i = 0; i < n_phenotypes; ++i) {
         const scnXml::Phenotype& phenotype = pd[i];
         if( i == 0 ){
             if( phenotype.getName().present() )

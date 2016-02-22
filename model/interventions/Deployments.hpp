@@ -242,7 +242,7 @@ public:
     }
     
     virtual void deploy (OM::Population& population) {
-        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
+        for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
@@ -295,7 +295,7 @@ public:
         // Cumulative case: bring target group's coverage up to target coverage
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally subPop
-        for (Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
+        for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
                 if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
@@ -314,7 +314,7 @@ public:
             // selected from the list unprotected.
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
             cerr << "cum deployment: prop protected " << propProtected << "; additionalCoverage " << additionalCoverage << "; total " << total << endl;
-            for (vector<Host::Human*>::iterator iter = unprotected.begin();
+            for(vector<Host::Human*>::iterator iter = unprotected.begin();
                  iter != unprotected.end(); ++iter)
             {
                 if( util::random::uniform_01() < additionalCoverage ){

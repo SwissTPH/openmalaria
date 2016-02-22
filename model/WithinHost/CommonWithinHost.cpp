@@ -97,7 +97,7 @@ CommonWithinHost::~CommonWithinHost() {
 // -----  Simple infection adders/removers  -----
 
 void CommonWithinHost::clearInfections( Treatments::Stages stage ){
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+    for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
         if( stage == Treatments::BOTH ||
             (stage == Treatments::LIVER && !(*inf)->bloodStage()) ||
             (stage == Treatments::BLOOD && (*inf)->bloodStage())
@@ -118,7 +118,7 @@ void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages, double age){
     pkpdModel.prescribe( schedule, dosages, age, mass );
 }
 void CommonWithinHost::clearImmunity() {
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+    for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (*inf)->clearImmunity();
     }
     m_cumulative_h = 0.0;
@@ -158,7 +158,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     PopulationStats::allowedInfections += nNewInfs;
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
-    for ( int i=0; i<nNewInfs; ++i ) {
+    for( int i=0; i<nNewInfs; ++i ) {
         infections.push_back(createInfection (Genotypes::sampleGenotype(genotype_weights)));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
@@ -186,7 +186,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
         
         double sumLogDens = 0.0;
         
-        for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
+        for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end();) {
             // Note: this is only one treatment model; there is also the PK/PD model
             bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);
             
@@ -242,14 +242,14 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
     pkpdModel.summarize( human );
     
     if( infections.size() > 0 ){
-        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
         if( reportInfectedOrPatentInfected ){
-            for (std::list<CommonInfection*>::const_iterator inf =
+            for(std::list<CommonInfection*>::const_iterator inf =
                 infections.begin(); inf != infections.end(); ++inf) {
                 uint32_t genotype = (*inf)->genotype();
-                mon::reportMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
+                mon::reportStatMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
                 if( diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity() ) ){
-                    mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
+                    mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
                 }
             }
         }
@@ -270,10 +270,10 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
                     ++inf;
                 }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
                 // we had at least one infection of this genotype
-                mon::reportMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
+                mon::reportStatMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
                 if( diagnostics::monitoringDiagnostic().isPositive(dens) ){
-                    mon::reportMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
-                    mon::reportMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
+                    mon::reportStatMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
+                    mon::reportStatMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
                 }
             }
         }
@@ -283,8 +283,8 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
     if( diagnostics::monitoringDiagnostic().isPositive(totalDensity) ){
-        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
-        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent
     }
     return false;       // not patent
@@ -295,7 +295,7 @@ void CommonWithinHost::checkpoint (istream& stream) {
     WHFalciparum::checkpoint (stream);
     hetMassMultiplier & stream;
     pkpdModel & stream;
-    for (int i = 0; i < numInfs; ++i) {
+    for(int i = 0; i < numInfs; ++i) {
         infections.push_back (checkpointedInfection (stream));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
@@ -305,7 +305,7 @@ void CommonWithinHost::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
     hetMassMultiplier & stream;
     pkpdModel & stream;
-    for (std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+    for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         (**inf) & stream;
     }
 }

@@ -169,7 +169,8 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         {
             const scnXml::Deployment& elt = *it;
             // 2.a intervention components
-            HumanIntervention *intervention = new HumanIntervention( elt.getComponent() );
+            HumanIntervention *intervention = new HumanIntervention( elt.getComponent(),
+                elt.getCondition() );
             
             // 2.b intervention deployments
             for( scnXml::Deployment::ContinuousConstIterator ctsIt = elt.getContinuous().begin();
@@ -217,23 +218,64 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                     complement = timedIt->getRestrictToSubPop().get().getComplement();
                 }
                 try{
+                    multimap<SimTime, const scnXml::MassDeployment*> deployTimes;
+                    for( scnXml::MassListWithCum::DeployConstIterator it2 =
+                            timedIt->getDeploy().begin(), end2 =
+                            timedIt->getDeploy().end(); it2 != end2; ++it2 )
+                    {
+                        SimTime date = UnitParse::readDate(it2->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                        
+                        if( it2->getRepeatStep().present() != it2->getRepeatEnd().present() ){
+                            throw util::xml_scenario_error( "deploy: use of repeatStep or repeatEnd without other" );
+                        }
+                        if( it2->getRepeatStep().present() ){
+                            SimTime step = UnitParse::readDuration( it2->getRepeatStep().get(), UnitParse::NONE );
+                            if( step < sim::oneTS() ){
+                                throw util::xml_scenario_error( "deploy: repeatStep must be >= 1" );
+                            }
+                            SimTime end = UnitParse::readDate( it2->getRepeatEnd().get(), UnitParse::NONE );
+                            while(date < end){
+                                deployTimes.insert(make_pair(date, &*it2));
+                                date += step;
+                            }
+                        }else{
+                            deployTimes.insert(make_pair(date, &*it2));
+                        }
+                    }
+                    SimTime lastTime = sim::never();
+                    for( multimap<SimTime, const scnXml::MassDeployment*>::const_iterator deploy =
+                        deployTimes.begin(), dpEnd = deployTimes.end(); deploy != dpEnd; ++deploy )
+                    {
+                        if( deploy->first == lastTime ){
+                            ostringstream msg;
+                            msg << "Timed deployment of components ";
+                            bool first = true;
+                            for( xsd::cxx::tree::sequence<scnXml::Component>::const_iterator cp =
+                                elt.getComponent().begin(), cpEnd = elt.getComponent().end(); cp != cpEnd; ++cp )
+                            {
+                                if( !first ){ msg << ", "; }else{ first=false; }
+                                msg << cp->getId();
+                            }
+                            msg << " has multiple deplyoments at time " << lastTime.inSteps() << "t";
+                            if( UnitParse::haveDate() ){ msg << " (" << lastTime << ")"; }
+                            throw util::xml_scenario_error(msg.str());
+                        }
+                        lastTime = deploy->first;
+                    }
+                    
                     if( timedIt->getCumulativeCoverage().present() ){
                         const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
                         ComponentId cumCovComponent = getComponentId( cumCov.getComponent() );
-                        for( scnXml::MassListWithCum::DeployConstIterator it2 =
-                                timedIt->getDeploy().begin(), end2 =
-                                timedIt->getDeploy().end(); it2 != end2; ++it2 )
+                        for( multimap<SimTime, const scnXml::MassDeployment*>::const_iterator deploy =
+                            deployTimes.begin(), end = deployTimes.end(); deploy != end; ++deploy )
                         {
-                            SimTime date = UnitParse::readDate(it2->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-                            timed.push_back( new TimedCumulativeHumanDeployment( date, *it2, intervention, subPop, complement, cumCovComponent ) );
+                            timed.push_back( new TimedCumulativeHumanDeployment( deploy->first, *deploy->second, intervention, subPop, complement, cumCovComponent ) );
                         }
                     }else{
-                        for( scnXml::MassListWithCum::DeployConstIterator it2 =
-                                timedIt->getDeploy().begin(), end2 =
-                                timedIt->getDeploy().end(); it2 != end2; ++it2 )
+                        for( multimap<SimTime, const scnXml::MassDeployment*>::const_iterator deploy =
+                            deployTimes.begin(), end = deployTimes.end(); deploy != end; ++deploy )
                         {
-                            SimTime date = UnitParse::readDate(it2->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-                            timed.push_back( new TimedHumanDeployment( date, *it2, intervention, subPop, complement ) );
+                            timed.push_back( new TimedHumanDeployment( deploy->first, *deploy->second, intervention, subPop, complement ) );
                         }
                     }
                 }catch( const util::format_error& e ){
@@ -288,7 +330,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
-                for ( It it = seq.begin(); it != seq.end(); ++it ) {
+                for( It it = seq.begin(); it != seq.end(); ++it ) {
                     SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     timed.push_back( new TimedVectorDeployment( date, instance ) );
                 }

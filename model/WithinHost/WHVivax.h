@@ -158,7 +158,7 @@ public:
     
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
 
-    virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
+    virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool );
     
     virtual void clearImmunity();
     
@@ -200,6 +200,9 @@ private:
     double pEvent;
     // The probability of a clinical event from a relapse
     double pFirstRelapseEvent;
+    
+    // Used for reporting; updated by update()
+    double pSevere;
 
     friend class ::UnittestUtil;
 };

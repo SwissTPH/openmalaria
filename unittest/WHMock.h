@@ -56,7 +56,7 @@ public:
     virtual void update(int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
-    virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
+    virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );
     virtual void clearImmunity();
     virtual double getCumulative_h() const;
     virtual double getCumulative_Y() const;

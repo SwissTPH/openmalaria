@@ -137,10 +137,23 @@ private:
 /** A description of a human intervention (as a list of components). */
 class HumanIntervention {
 public:
-    /** Create from a list of XML elements: <component id="..."/> **/
-    explicit HumanIntervention( const xsd::cxx::tree::sequence<scnXml::Component>& componentList );
-    /** Create from a list of XML elements: <deploy component="..."/> **/
-    explicit HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTDeploy>& componentList );
+    //NOTE: it would be preferable to use named constructors rather than rely
+    // on selection of the correct overloaded constructor here, but doing so
+    // would result in an extra copy without C++11's move semantics.
+    
+    /** Create from a list of XML elements: list of intervention components
+     * with unconditional deployment (for triggered deployments). **/
+    explicit HumanIntervention(
+        const xsd::cxx::tree::sequence<scnXml::Component>& componentList );
+    /** Create from a list of XML elements: list of intervention components
+     * and list of conditions of deployment. **/
+    explicit HumanIntervention(
+        const xsd::cxx::tree::sequence<scnXml::Component>& componentList,
+        const xsd::cxx::tree::sequence<scnXml::Condition>& conditionList );
+    /** Create from a list of XML elements: list of intervention components
+     * with unconditional deployment (for triggered deployments). **/
+    explicit HumanIntervention(
+        const xsd::cxx::tree::sequence<scnXml::DTDeploy>& componentList );
     
     /** Deploy all components to a pre-selected human. */
     void deploy( Host::Human& human, mon::Deploy::Method method,
@@ -153,6 +166,8 @@ public:
 protected:
     // List of pointers to components. Does not manage memory (InterventionManager::humanComponents does that).
     vector<const HumanInterventionComponent*> components;
+    // List of conditions of deployment. All must be satisfied to deploy.
+    vector<size_t> conditions;
 };
 
 //TODO: this class is likely more complicated than it needs to be (e.g. SubList

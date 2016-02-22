@@ -138,7 +138,7 @@ namespace OM { namespace Monitoring {
 	
 	if( isCheckpoint ){
 	    scnXml::OptionSet::OptionSequence sOSeq = ctsOpt.get().getOption();
-	    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
+	    for(scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 		registered_t::const_iterator reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
 		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
@@ -172,7 +172,7 @@ namespace OM { namespace Monitoring {
                 ctsOStream << "simulation time\t";
 	    ctsOStream << "timestep";   //TODO: change to days or remove or leave?
 	    scnXml::OptionSet::OptionSequence sOSeq = ctsOpt.get().getOption();
-	    for (scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
+	    for(scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 		registered_t::const_iterator reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
 		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );

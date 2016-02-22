@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="34" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
-  <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_35" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="35" xsi:schemaLocation="http://openmalaria.org/schema/scenario_35 scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -50,39 +50,67 @@
       <surveyTime repeatStep="1y" repeatEnd="1371-1-11">1351-10-3</surveyTime>
     </surveys>
     <ageGroup lowerbound="0.0">
-      <group upperbound="0.25"/>
-      <group upperbound="0.5"/>
-      <group upperbound="0.75"/>
       <group upperbound="1"/>
-      <group upperbound="1.5"/>
-      <group upperbound="2"/>
-      <group upperbound="3"/>
-      <group upperbound="4"/>
       <group upperbound="5"/>
-      <group upperbound="6"/>
-      <group upperbound="7"/>
-      <group upperbound="8"/>
-      <group upperbound="9"/>
       <group upperbound="10"/>
-      <group upperbound="12"/>
-      <group upperbound="14"/>
-      <group upperbound="16"/>
-      <group upperbound="18"/>
       <group upperbound="20"/>
-      <group upperbound="25"/>
-      <group upperbound="30"/>
-      <group upperbound="35"/>
       <group upperbound="40"/>
-      <group upperbound="45"/>
-      <group upperbound="50"/>
-      <group upperbound="55"/>
-      <group upperbound="60"/>
-      <group upperbound="65"/>
-      <group upperbound="70"/>
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="none">
+  <interventions name="enable selective PQ">
+    <changeHS>
+      <timedDeployment time="1361-1-1">
+        <ImmediateOutcomes name="Tanzania ACT" useDiagnosticUC="true">
+          <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
+          <initialACR>
+            <ACT value="0.85"/>
+            <!-- what is cure rate of blood-stage drugs? -->
+            <QN value="0"/>
+            <!-- no treatment for severe (can change so long as CFR=1) -->
+            <selfTreatment value="0"/>
+          </initialACR>
+          <compliance>
+            <ACT value="1"/>
+            <QN value="1"/>
+            <selfTreatment value="1"/>
+          </compliance>
+          <nonCompliersEffective>
+            <ACT value="0"/>
+            <QN value="0"/>
+            <selfTreatment value="0"/>
+          </nonCompliersEffective>
+          <treatmentActions>
+            <ACT name="clear blood-stage infections">
+              <clearInfections stage="blood" timesteps="-1t"/>
+            </ACT>
+            <QN name="clear blood-stage infections">
+              <clearInfections stage="blood" timesteps="-1t"/>
+            </QN>
+          </treatmentActions>
+          <!--set as desired... -->
+          <pSeekOfficialCareUncomplicated1 value="0.04"/>
+          <pSelfTreatUncomplicated value="0"/>
+          <pSeekOfficialCareUncomplicated2 value="0.04"/>
+          <pSeekOfficialCareSevere value="1"/>
+          <liverStageDrug>
+            <pHumanCannotReceive value="0.3"/>
+            <ignoreCannotReceive value="false"/>
+            <pUseUncomplicated value="0.95"/>
+            <effectivenessOnUse value="0.775"/>
+            <!-- 1 - 0.18 / 0.8 -->
+          </liverStageDrug>
+        </ImmediateOutcomes>
+        <CFR>
+          <!-- CFR=1 so that all severe cases result in death -->
+          <group lowerbound="0" value="1"/>
+        </CFR>
+        <pSequelaeInpatient>
+          <!-- no sequelae -->
+          <group lowerbound="0.0" value="0"/>
+        </pSequelaeInpatient>
+      </timedDeployment>
+    </changeHS>
   </interventions>
   <healthSystem>
     <ImmediateOutcomes name="Tanzania ACT" useDiagnosticUC="true">
@@ -119,6 +147,7 @@
       <pSeekOfficialCareSevere value="1"/>
       <liverStageDrug>
         <pHumanCannotReceive value="0.3"/>
+        <ignoreCannotReceive value="true"/>
         <pUseUncomplicated value="0.95"/>
         <effectivenessOnUse value="0.775"/>
         <!-- 1 - 0.18 / 0.8 -->

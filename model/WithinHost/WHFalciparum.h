@@ -69,7 +69,7 @@ public:
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     
-    virtual Pathogenesis::StatePair determineMorbidity( double ageYears );
+    virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );
 
     inline double getCumulative_h() const {
         return m_cumulative_h;

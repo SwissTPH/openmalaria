@@ -2,8 +2,8 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_34"
-           xmlns:om="http://openmalaria.org/schema/scenario_34"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_35"
+           xmlns:om="http://openmalaria.org/schema/scenario_35"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="demography.xsd"/>
   <xs:include schemaLocation="monitoring.xsd"/>
@@ -317,7 +317,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element type="om:HypnozoiteReleaseDistribution" name="firstRelease" maxOccurs="1" minOccurs="1"/>
       <xs:element type="om:HypnozoiteReleaseDistribution" name="secondRelease" maxOccurs="1" minOccurs="0"/>
     </xs:all>
-    <xs:attribute type="xs:double" use="optional" name="pSecondRelease" default="0">
+    <xs:attribute type="xs:double" name="pSecondRelease" default="0">
       <xs:annotation>
         <xs:documentation>
         Probability of a second release. If undefined it is zero.

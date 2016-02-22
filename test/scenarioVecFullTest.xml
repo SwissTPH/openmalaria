@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Full set of interventions" schemaVersion="34" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_35" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Full set of interventions" schemaVersion="35" xsi:schemaLocation="http://openmalaria.org/schema/scenario_35 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="150">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -73,35 +73,16 @@
       <surveyTime repeatStep="1y" repeatEnd="20.027y">37t</surveyTime>
       <surveyTime repeatStep="1y" repeatEnd="20.027y">55t</surveyTime>
     </surveys>
-    <ageGroup lowerbound="0">
-      <group upperbound="0.25"/>
-      <group upperbound="0.5"/>
-      <group upperbound="0.75"/>
+    <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
-      <group upperbound="1.5"/>
       <group upperbound="2"/>
-      <group upperbound="3"/>
-      <group upperbound="4"/>
       <group upperbound="5"/>
-      <group upperbound="6"/>
-      <group upperbound="7"/>
-      <group upperbound="8"/>
-      <group upperbound="9"/>
       <group upperbound="10"/>
-      <group upperbound="12"/>
-      <group upperbound="14"/>
-      <group upperbound="16"/>
-      <group upperbound="18"/>
       <group upperbound="20"/>
-      <group upperbound="25"/>
       <group upperbound="30"/>
-      <group upperbound="35"/>
       <group upperbound="40"/>
-      <group upperbound="45"/>
       <group upperbound="50"/>
-      <group upperbound="55"/>
       <group upperbound="60"/>
-      <group upperbound="65"/>
       <group upperbound="70"/>
       <group upperbound="99"/>
     </ageGroup>

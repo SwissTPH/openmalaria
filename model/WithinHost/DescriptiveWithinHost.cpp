@@ -59,7 +59,7 @@ void DescriptiveWithinHostModel::loadInfection(istream& stream) {
 }
 
 void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
-    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
+    for(std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
         if( stage == Treatments::BOTH ||
             (stage == Treatments::LIVER && !inf->bloodStage()) ||
             (stage == Treatments::BLOOD && inf->bloodStage())
@@ -75,7 +75,7 @@ void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
 // -----  Interventions  -----
 
 void DescriptiveWithinHostModel::clearImmunity() {
-    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+    for(std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
         inf->clearImmunity();
     }
     m_cumulative_h = 0.0;
@@ -109,7 +109,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     PopulationStats::allowedInfections += nNewInfs;
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
-    for ( int i=0; i<nNewInfs; ++i ) {
+    for( int i=0; i<nNewInfs; ++i ) {
         infections.push_back(DescriptiveInfection());
     }
     assert( numInfs == static_cast<int>(infections.size()) );
@@ -128,7 +128,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
     
-    for (std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
+    for(std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
         // CommonWithinHost.cpp, but a few changes would be needed:
         // INNATE_MAX_DENS and MAX_DENS_CORRECTION would need to be required
@@ -170,15 +170,15 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
     pathogenesisModel->summarize( human );
     
     if( infections.size() > 0 ){
-        mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+        mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
         // (patent) infections are reported by genotype, even though we don't have
         // genotype in this model
-        mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
+        mon::reportStatMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
         if( reportPatentInfected ){
-            for (std::list<DescriptiveInfection>::const_iterator inf =
+            for(std::list<DescriptiveInfection>::const_iterator inf =
                 infections.begin(); inf != infections.end(); ++inf) {
             if( diagnostics::monitoringDiagnostic().isPositive( inf->getDensity() ) ){
-                    mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+                    mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
                 }
             }
         }
@@ -188,8 +188,8 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
     if( diagnostics::monitoringDiagnostic().isPositive(totalDensity) ){
-        mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
-        mon::reportMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+        mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent
     }
     return false;       // not patent
@@ -200,14 +200,14 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
 
 void DescriptiveWithinHostModel::checkpoint (istream& stream) {
     WHFalciparum::checkpoint (stream);
-    for (int i=0; i<numInfs; ++i) {
+    for(int i=0; i<numInfs; ++i) {
         loadInfection(stream);  // create infections using a virtual function call
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
-    BOOST_FOREACH (DescriptiveInfection& inf, infections) {
+    foreach (DescriptiveInfection& inf, infections) {
         inf & stream;
     }
 }

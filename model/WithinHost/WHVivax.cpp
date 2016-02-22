@@ -278,7 +278,8 @@ void VivaxBrood::treatmentLS(){
 WHVivax::WHVivax( double comorbidityFactor ) :
     cumPrimInf(0),
     pEvent( numeric_limits<double>::quiet_NaN() ),
-    pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() )
+    pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() ),
+    pSevere( 0.0 )
 {
     if( comorbidityFactor != 1.0 )
 #ifdef WHVivaxSamples
@@ -303,7 +304,7 @@ WHVivax::~WHVivax(){
 double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
     assert( sumX == 0 );
-    for (list<VivaxBrood>::const_iterator inf = infections.begin();
+    for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
@@ -319,20 +320,20 @@ double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
 
 bool WHVivax::summarize(const Host::Human& human) const{
     if( infections.size() == 0 ) return false;  // no infections: not patent, nothing to report
-    mon::reportMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
+    mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
     bool patentHost = false;
     // (patent) infections are reported by genotype, even though we don't have
     // genotype in this model
-    mon::reportMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
-    for (list<VivaxBrood>::const_iterator inf = infections.begin();
+    mon::reportStatMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
+    for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf) 
     {
         if (inf->isPatent()){
-            mon::reportMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
+            mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
             patentHost = true;
         }
     }
-    if( patentHost ) mon::reportMHI( mon::MHR_PATENT_HOSTS, human, 1 );
+    if( patentHost ) mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
     return patentHost;
 }
 
@@ -344,6 +345,8 @@ void WHVivax::importInfection(){
 void WHVivax::update(int nNewInfs, vector<double>&,
         double ageInYears, double)
 {
+    pSevere = 0.0;
+    
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )
         infections.push_back( VivaxBrood( this ) );
@@ -393,6 +396,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             }
             
             if( clinicalEvent ){
+                pSevere = pSevere + (1.0 - pSevere) * pEventIsSevere;
                 if( random::bernoulli( pEventIsSevere ) )
                     morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_SEVERE );
                 else
@@ -413,7 +417,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
 bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
     //TODO(monitoring): this shouldn't ignore the diagnostic (especially since
     // it should always return true if diagnostic.density=0)
-    for (list<VivaxBrood>::const_iterator inf = infections.begin();
+    for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if (inf->isPatent())
@@ -422,7 +426,8 @@ bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
     return false;
 }
 
-Pathogenesis::StatePair WHVivax::determineMorbidity(double ageYears){
+Pathogenesis::StatePair WHVivax::determineMorbidity( Host::Human& human, double ageYears, bool ){
+    mon::reportStatMHF( mon::MHF_EXPECTED_SEVERE, human, pSevere );
     Pathogenesis::StatePair result;     // no indirect mortality in the vivax model
     result.state = morbidity;
     return result;
@@ -451,7 +456,7 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
                 it->treatmentLS();
             }
         }
-        mon::reportMHI( mon::MHT_LS_TREATMENTS, human, 1 );
+        mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
 }
 bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
@@ -475,7 +480,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
                 }
             }
         }
-        mon::reportMHI( mon::MHT_LS_TREATMENTS, human, 1 );
+        mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
     
     // there probably will be blood-stage treatment

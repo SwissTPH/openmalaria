@@ -62,7 +62,8 @@ CM5DayCommon::CM5DayCommon (double tSF) :
 // ———  per-human, update  ———
 
 void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
-    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( ageYears );
+    const bool isDoomed = doomed != NOT_DOOMED;
+    WithinHost::Pathogenesis::StatePair pg = human.withinHostModel->determineMorbidity( human, ageYears, isDoomed );
     Episode::State pgState = static_cast<Episode::State>( pg.state );
 
     if (pgState & Episode::MALARIA) {
@@ -74,7 +75,6 @@ void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
             // (This does affect tests.)
             uncomplicatedEvent (human, pgState);
         }
-
     } else if (pgState & Episode::SICK) { // sick but not from malaria
         uncomplicatedEvent (human, pgState);
     }
@@ -132,17 +132,27 @@ void CM5DayCommon::severeMalaria (
     q[7] = q[6] + p2 * p3 * (1 - p4) * p6;
     // In-hospital parasitological success survival
     q[8] = q[7] + p2 * p3 * (1 - p4) * (1 - p6);
-    /*
-    if (q(5).lt.1) stop
-    NOT TREATED
-    */
+    
+    // Expectation of death is:
+    // double exDeath = (q[6] - q[5]) + (q[3] - q[2]) + q[0];
+    // expanded, separating in-hospital and without (q[0]):
+    const double exHospitalDeath = p2 * (p3 * p4 + (1 - p3) * p5b);
+    const double exDeath = exHospitalDeath + (1 - p2) * p5a;
+    mon::reportStatMHF( mon::MHF_EXPECTED_HOSPITAL_DEATHS, human, exHospitalDeath );
+    mon::reportStatMHF( mon::MHF_EXPECTED_DIRECT_DEATHS, human, exDeath );
+    
+    // Expectation of sequelae is:
+    // double exSeq = (q[7] - q[6]) + (q[4] - q[3]) + (q[1] - q[0]);
+    // expanded and simplified, noting that p7 == p6 :
+    const double exSeq = (p2 * (p3 * (1 - p4) + (1 - p3) * (1 - p5b)) + (1 - p2) * (1 - p5a)) * p6;
+    mon::reportStatMHF( mon::MHF_EXPECTED_SEQUELAE, human, exSeq );
 
     double prandom = random::uniform_01();
-
+    
     //NOTE: we do not model diagnostics in this case
     if( prandom >= q[2] ){      // treated in hospital
         m_tLastTreatment = sim::ts0();
-        mon::reportMHI( mon::MHT_TREATMENTS_3, human, 1 );
+        mon::reportEventMHI( mon::MHT_TREATMENTS_3, human, 1 );
         Episode::State stateTreated = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);
         
         if( prandom >= q[5] ){  // treatment successful at clearing parasites

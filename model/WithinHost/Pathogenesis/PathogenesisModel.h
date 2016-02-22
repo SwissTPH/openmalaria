@@ -54,7 +54,8 @@ public:
      *
      * May introduce severe or uncomplicated cases of malaria, as well as non-
      * malaria fevers. */
-    StatePair determineState(double ageYears, double timeStepMaxDensity, double endDensity);
+    StatePair determineState( Host::Human& human, double ageYears,
+            double timeStepMaxDensity, double endDensity, bool isDoomed );
     
     /** For Vivax: determine the chance of a NMF and sample, returning either
      * NONE or STATE_NMF. */

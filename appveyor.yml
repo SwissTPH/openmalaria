@@ -3,6 +3,8 @@ clone_depth: 30
 environment:
   VisualStudioVersion: 14.0
 
+configuration: Release
+
 os: Visual Studio 2015
 
 cache:
@@ -21,8 +23,6 @@ install:
   - cmd: echo "Configure openMalaria build and generate solution file 'OpenMalaria.sln' with CMake"
   - mkdir build-win && pushd build-win && cmake .. -DGSL_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/zlib" -DXERCESC_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/boost_1_55_0" -DGSL_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/gsl" -DGSL_INCLUDE_DIR2:PATH="%APPVEYOR_BUILD_FOLDER%/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include" -DXSD_EXECUTABLE:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/bin/xsd.exe" & popd
 
-configuration: Release
-
 build:
   project: build-win\OpenMalaria.sln
   parallel: true
@@ -33,10 +33,14 @@ after_build:
   - cmd: ECHO build-id":" %APPVEYOR_BUILD_ID% >> %APPVEYOR_BUILD_FOLDER%\appveyor.log
   - cmd: ECHO build-name":" %APPVEYOR_BUILD_NAME% >> %APPVEYOR_BUILD_FOLDER%\appveyor.log
   - ps: pushd "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"; .\dumpbin.exe /dependents $env:APPVEYOR_BUILD_FOLDER"\build-win\Release\openMalaria.exe" > $env:APPVEYOR_BUILD_FOLDER"\dependencies.txt"; popd
-  - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd" "%APPVEYOR_BUILD_FOLDER%\appveyor.log" "%APPVEYOR_BUILD_FOLDER%\dependencies.txt" "%APPVEYOR_BUILD_FOLDER%\test\autoRegressionParameters.csv" "%APPVEYOR_BUILD_FOLDER%\test\densities.csv"
+  - cmd: mkdir "%APPVEYOR_BUILD_FOLDER%\x86"
+  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\vcruntime140.dll" "%APPVEYOR_BUILD_FOLDER%\x86\vcruntime140.dll"
+  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\msvcp140.dll" "%APPVEYOR_BUILD_FOLDER%\x86\msvcp140.dll"
+  - 7z a openMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c_3_1_vc120.dll" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd" "%APPVEYOR_BUILD_FOLDER%\appveyor.log" "%APPVEYOR_BUILD_FOLDER%\dependencies.txt" "%APPVEYOR_BUILD_FOLDER%\test\autoRegressionParameters.csv" "%APPVEYOR_BUILD_FOLDER%\test\densities.csv" "%APPVEYOR_BUILD_FOLDER%\x86" "%APPVEYOR_BUILD_FOLDER%\util\example\example_scenario.xml" "%APPVEYOR_BUILD_FOLDER%\util\example\run-example-scenario.bat"
+  - 7z a openMalaria-windows-no-libs.zip "%APPVEYOR_BUILD_FOLDER%\build-win\Release\openMalaria.exe" "%APPVEYOR_BUILD_FOLDER%\README.md" "%APPVEYOR_BUILD_FOLDER%\build-win\schema\scenario_current.xsd" "%APPVEYOR_BUILD_FOLDER%\appveyor.log" "%APPVEYOR_BUILD_FOLDER%\dependencies.txt" "%APPVEYOR_BUILD_FOLDER%\test\autoRegressionParameters.csv" "%APPVEYOR_BUILD_FOLDER%\test\densities.csv" "%APPVEYOR_BUILD_FOLDER%\util\example\example_scenario.xml" "%APPVEYOR_BUILD_FOLDER%\util\example\run-example-scenario.bat"
 
 artifacts:
-- path: openMalaria-windows.zip
+  - path: openMalaria-windows.zip, openMalaria-windows-no-libs.zip
 
 notifications:
 - provider: Email
@@ -47,10 +51,11 @@ notifications:
   on_build_status_changed: true
 
 deploy:
-- provider: GitHub
+  provider: GitHub
   auth_token:
     secure: QDHrqei4LL5ihC0nST2nAf3uCpjvNyKHH11V53o/lpnX5JZLq/gY41iJm9FIQ+Vr
-  artifact: openMalaria-windows.zip
+  artifact: openMalaria-windows.zip, openMalaria-windows-no-libs.zip
   draft: true
+  prerelease: true
   on:
-    APPVEYOR_REPO_TAG: true
+    appveyor_repo_tag: true

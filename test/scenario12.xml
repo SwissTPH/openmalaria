@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_34" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="34" wuID="12345" xsi:schemaLocation="http://openmalaria.org/schema/scenario_34 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_35" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="35" wuID="12345" xsi:schemaLocation="http://openmalaria.org/schema/scenario_35 scenario_current.xsd">
   <demography maximumAgeYrs="80.389041096" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -640,14 +640,7 @@
       <deployment>
         <component id="MSAT"/>
         <timed>
-          <deploy coverage="1" time="0t"/>
-          <deploy coverage="1" time="14t"/>
-          <deploy coverage="1" time="28t"/>
-          <deploy coverage="1" time="42t"/>
-          <deploy coverage="1" time="56t"/>
-          <deploy coverage="1" time="70t"/>
-          <deploy coverage="1" time="84t"/>
-          <deploy coverage="1" time="98t"/>
+          <deploy coverage="1" time="0t" repeatStep="14t" repeatEnd="99t"/>
         </timed>
       </deployment>
     </human>
