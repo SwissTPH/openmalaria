@@ -209,9 +209,9 @@ void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, dou
         initialP_df += prod * host.probMosqResting(humanBase, sIndex);
     }
 
-    for(vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
-        leaveSeekingStateRate += nhh->entoAvailability;
-        initialP_df += nhh->probCompleteCycle;
+    foreach( const NHHParams& nhh, nonHumans ){
+        leaveSeekingStateRate += nhh.entoAvailability;
+        initialP_df += nhh.probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
@@ -306,9 +306,8 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
     double leaveSeekingStateRate = mosqSeekingDeathRate;
-    for( vector<util::SimpleDecayingValue>::const_iterator it=seekingDeathRateIntervs.begin();
-        it != seekingDeathRateIntervs.end(); ++it ){
-        leaveSeekingStateRate *= 1.0 + it->current_value( sim::ts0() );
+    foreach( const util::SimpleDecayingValue& increase, seekingDeathRateIntervs ){
+        leaveSeekingStateRate *= 1.0 + increase.current_value( sim::ts0() );
     }
 
     // NC's non-autonomous model provides two methods for calculating P_df and
@@ -330,10 +329,10 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
             tsP_dif[genotype] += prod * popProbTransmission.at(i, genotype);
         }
     }
-
-    for(vector<NHHParams>::const_iterator nhh = nonHumans.begin(); nhh != nonHumans.end(); ++nhh) {
-        leaveSeekingStateRate += nhh->entoAvailability;
-        tsP_df += nhh->probCompleteCycle;
+    
+    foreach( const NHHParams& nhh, nonHumans ){
+        leaveSeekingStateRate += nhh.entoAvailability;
+        tsP_df += nhh.probCompleteCycle;
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
@@ -343,9 +342,8 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
 
     double baseP_df = P_Ai_base * probMosqSurvivalOvipositing;
-    for( vector<util::SimpleDecayingValue>::const_iterator it=probDeathOvipositingIntervs.begin();
-        it != probDeathOvipositingIntervs.end(); ++it ){
-        baseP_df *= 1.0 - it->current_value( sim::ts0() );
+    foreach( const util::SimpleDecayingValue& pDeath, probDeathOvipositingIntervs ){
+        baseP_df *= 1.0 - pDeath.current_value( sim::ts0() );
     }
     tsP_df  *= baseP_df;
     vectors::scale( tsP_dif, baseP_df );
@@ -358,9 +356,8 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
-    for( SimTime d0 = sim::ts0(), end = sim::ts0() + sim::oneTS();
-        d0 < end; d0 += sim::oneDay() )
-    {
+    const SimTime nextTS = sim::ts0() + sim::oneTS();
+    for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += sim::oneDay() ){
         transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, partialEIR, P_Ai_base );
     }
 }
