@@ -254,6 +254,13 @@ void AnophelesModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
         probDeathOvipositingIntervs[instance].set (elt2.getInitial(), elt2.getDecay(), "probDeathOvipositing");
     }
 }
+void AnophelesModel::initVectorTrap(const scnXml::Description1& desc, size_t instance){
+    assert(trapParams.size() == instance);      // if triggered, this is a code error not XML
+    TrapParams params;
+    params.relAvail = desc.getRelativeAvailability().getValue();
+    params.availDecay= DecayFunction::makeObject(desc.getDecayOfAvailability(), "decayOfAvailability");
+    trapParams.push_back(params);
+}
 
 void AnophelesModel::deployVectorPopInterv (size_t instance){
     transmission.emergence->deployVectorPopInterv(instance);
@@ -261,6 +268,17 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
     assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
     seekingDeathRateIntervs[instance].deploy( sim::now() );
     probDeathOvipositingIntervs[instance].deploy( sim::now() );
+}
+void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime lifespan){
+    assert(instance < trapParams.size());
+    TrapData data;
+    data.instance = instance;
+    double adultAvail = humanBase.entoAvailability.mean();
+    data.initialAvail = number * adultAvail * trapParams[instance].relAvail;
+    data.availHet = trapParams[instance].availDecay->hetSample();
+    data.deployTime = sim::now();
+    data.expiry = sim::now() + lifespan;
+    baitedTraps.push_back(data);
 }
 
 
@@ -320,13 +338,14 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
         //TODO: even stranger since popProbTransmission comes from the previous time step
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::ts1()).inYears());
-        leaveSeekingStateRate += prod;
-        prod *= host.probMosqBiting(humanBase, sIndex)
+        const double avail = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::ts1()).inYears());
+        leaveSeekingStateRate += avail;
+        const double P_df = avail
+                * host.probMosqBiting(humanBase, sIndex)
                 * host.probMosqResting(humanBase, sIndex);
-        tsP_df += prod;
+        tsP_df += P_df;
         for( size_t genotype = 0; genotype < WithinHost::Genotypes::N(); ++genotype ){
-            tsP_dif[genotype] += prod * popProbTransmission.at(i, genotype);
+            tsP_dif[genotype] += P_df * popProbTransmission.at(i, genotype);
         }
     }
     
@@ -336,7 +355,19 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         // Note: in model, we do the same for tsP_dif, except in this case it's
         // multiplied by infectiousness of host to mosquito which is zero.
     }
-
+    
+    for( list<TrapData>::iterator it = baitedTraps.begin(); it != baitedTraps.end(); ){
+        if( sim::ts0() > it->expiry ){
+            baitedTraps.erase(it);
+            continue;
+        }
+        SimTime age = sim::ts0() - it->deployTime;
+        double decayCoeff = trapParams[it->instance].availDecay->eval( age, it->availHet );
+        leaveSeekingStateRate += it->initialAvail * decayCoeff;
+        // tsP_df doesn't change: mosquitoes do not survive traps
+        it++;
+    }
+    
     // Probability of a mosquito not finding a host this day:
     double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
     double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;

@@ -38,7 +38,10 @@ public:
   
   virtual void init2 (const Population& population);
   
-  virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name );
+  virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list,
+        size_t instance, const string& name );
+  virtual void initVectorTrap( const scnXml::VectorTrap::DescriptionSequence list,
+        size_t instance, const scnXml::VectorTrap::NameOptional name );
   
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::Entomology&, double factor) const;
@@ -64,6 +67,7 @@ public:
   virtual const map<string,size_t>& getSpeciesIndexMap();
   
   virtual void deployVectorPopInterv (size_t instance);
+  virtual void deployVectorTrap( size_t instance, double number, SimTime lifespan );
   
   virtual void uninfectVectors();
   
