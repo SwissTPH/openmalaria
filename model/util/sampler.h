@@ -116,6 +116,8 @@ namespace OM { namespace util {
         /** Scale the mean (i.e. multiply by a scalar). */
         void scaleMean( double scalar );
         
+        /** Get the mean. */
+        double mean() const;
         /** Sample a value. */
         double sample() const;
         

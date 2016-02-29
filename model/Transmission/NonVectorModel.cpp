@@ -87,9 +87,16 @@ void NonVectorModel::init2 (const Population&) {
 
 const char* viError = "vector model interventions can not be used with the non-vector model";
 void NonVectorModel::initVectorInterv( const scnXml::Description::AnophelesSequence& list,
-                                       size_t instance, const string& name ) {
+        size_t instance, const string& name )
+{
     throw util::xml_scenario_error( viError );
 }
+void NonVectorModel::initVectorTrap( const scnXml::VectorTrap::DescriptionSequence list,
+        size_t instance, const scnXml::VectorTrap::NameOptional name )
+{
+    throw util::xml_scenario_error( viError );
+}
+
 
 void NonVectorModel::scaleEIR (double factor){
     vectors::scale( initialisationEIR, factor );
@@ -196,6 +203,9 @@ void NonVectorModel::uninfectVectors(){
 }
 
 void NonVectorModel::deployVectorPopInterv (size_t instance) {
+  throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::deployVectorTrap(size_t instance, double number, SimTime lifespan){
   throw util::xml_scenario_error (viError);
 }
 

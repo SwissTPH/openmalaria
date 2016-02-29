@@ -346,6 +346,26 @@ private:
     size_t inst;
 };
 
+class TimedTrapDeployment : public TimedDeployment {
+public:
+    TimedTrapDeployment( SimTime deployTime, double ratio, SimTime lifespan ) :
+        TimedDeployment(deployTime), ratio(ratio), lifespan(lifespan)
+    {}
+    virtual void deploy (OM::Population& population) {
+        double number = population.size() * ratio;
+        population.transmissionModel().deployVectorTrap(inst, number, lifespan);
+    }
+#ifdef WITHOUT_BOINC
+    virtual void print_details( std::ostream& out )const{
+        out << time.inSteps() << "t\t\t\t\t\tvector trap";
+    }
+#endif
+private:
+    size_t inst;
+    double ratio;
+    SimTime lifespan;
+};
+
 // ———  ContinuousHumanDeployment  ———
 
 /** Interface for continuous deployment of an intervention. */

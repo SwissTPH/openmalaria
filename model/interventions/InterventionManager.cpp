@@ -338,6 +338,22 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             }
         }
     }
+    if( intervElt.getVectorTrap().present() ){
+        size_t instance = 0;
+        foreach( const scnXml::VectorTrap& trap, intervElt.getVectorTrap().get().getIntervention() ){
+            population._transmissionModel->initVectorTrap(
+                    trap.getDescription(), instance, trap.getName() );
+            if( trap.getTimed().present() ) {
+                foreach( const scnXml::Deploy1 deploy, trap.getTimed().get().getDeploy() ){
+                    SimTime time = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
+                    double ratio = deploy.getRatioToHumans();
+                    SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
+                    timed.push_back( new TimedTrapDeployment( time, ratio, lifespan ) );
+                }
+            }
+            instance += 1;
+        }
+    }
 
     // lists must be sorted, increasing
     // For reproducability, we need to use stable_sort, not sort.
