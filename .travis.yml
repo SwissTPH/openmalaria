@@ -11,7 +11,8 @@ matrix:
     - os: osx
     - compiler: clang
 
-sudo: false
+sudo: required
+dist: trusty
 
 language: cpp
 
