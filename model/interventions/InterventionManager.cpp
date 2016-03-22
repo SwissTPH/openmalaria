@@ -326,7 +326,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
-                population._transmissionModel->initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
+                population.transmissionModel().initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
@@ -341,7 +341,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
     if( intervElt.getVectorTrap().present() ){
         size_t instance = 0;
         foreach( const scnXml::VectorTrap& trap, intervElt.getVectorTrap().get().getIntervention() ){
-            population._transmissionModel->initVectorTrap(
+            population.transmissionModel().initVectorTrap(
                     trap.getDescription(), instance, trap.getName() );
             if( trap.getTimed().present() ) {
                 foreach( const scnXml::Deploy1 deploy, trap.getTimed().get().getDeploy() ){

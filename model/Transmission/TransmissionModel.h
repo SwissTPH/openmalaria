@@ -28,9 +28,6 @@
 #include <fstream>
 #include <string.h>
 
-// Define these to print out various arrays:
-//#define TransmissionModel_PrintSmoothArray
-
 namespace OM {
     class Summary;
     class Population;
@@ -71,7 +68,7 @@ enum SimulationMode {
 };
 
 
-//! Abstract base class, defines behaviour of transmission models
+/// Abstract base class, defines behaviour of transmission models
 class TransmissionModel {
 public:
   ///@brief Creation, destruction and checkpointing
@@ -319,3 +316,4 @@ private:
 
 } }
 #endif
+
