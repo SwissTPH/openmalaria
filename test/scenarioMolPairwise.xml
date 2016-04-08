@@ -24,7 +24,7 @@
     </ageGroup>
   </demography>
   <monitoring name="NDmo" startDate="1111-1-1">
-    <SurveyOptions>
+    <SurveyOptions onlyNewEpisode="true">
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>
       <option name="sumlogDens" value="true"/>
