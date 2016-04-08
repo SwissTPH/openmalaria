@@ -106,6 +106,8 @@ struct OutMeasure{
 // Example: nHosts
 typedef std::map<std::string,OutMeasure> NamedMeasureMapT;
 extern NamedMeasureMapT namedOutMeasures;
+// These are all measures available for use in deployment conditions:
+extern set<Measure> validCondMeasures;
 
 void findNamedMeasuresUsing( Measure m, ostream& msg ){
     int nMatches = 0;
@@ -449,6 +451,28 @@ void defineOutMeasures(){
      */
     namedOutMeasures["expectedSevere"] =
         OutMeasure::humanAC( 78, MHF_EXPECTED_SEVERE, true );
+    
+    // Now initialise valid condition measures:
+    foreach( const NamedMeasureMapT::value_type& v, namedOutMeasures ){
+        Measure m = v.second.m;
+        // Not the following:
+        if( m == mon::MHE_SEVERE_EPISODES ||
+            m == mon::MHE_UNCOMPLICATED_EPISODES ||
+            m == mon::MHO_DIRECT_DEATHS ||
+            m == mon::MHO_HOSPITAL_DEATHS ||
+            m == mon::MHO_FIRST_DAY_DEATHS ||
+            m == mon::MHO_HOSPITAL_FIRST_DAY_DEATHS ||
+            m == mon::MHO_SEQUELAE ||
+            m == mon::MHO_HOSPITAL_SEQUELAE ||
+            m == mon::MHO_HOSPITAL_RECOVERIES ||
+            m == mon::MHE_NON_MALARIA_FEVERS ||
+            m == mon::MHO_NMF_DEATHS ||
+            m == mon::MHR_SUB_POP_REM_FIRST_EVENT ||
+            m == mon::MVF_INOCS ||
+            m == mon::MVF_INPUT_EIR ||
+            m == mon::MVF_SIM_EIR ) continue;
+        validCondMeasures.insert(m);
+    }
 }
 
 }

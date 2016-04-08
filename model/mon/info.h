@@ -33,7 +33,7 @@ namespace mon {
 namespace impl {
     // Consts (set during program start-up):
     extern size_t nSurveys;     // number of reported surveys
-    extern size_t nCohortSets;
+    extern size_t nCohorts;
     // Variables (checkpointed):
     extern bool isInit; // set true after "initialisation" survey at intervention time 0
     extern size_t survNumEvent, survNumStat;
@@ -69,7 +69,7 @@ SimTime nextSurveyTime();
 SimTime finalSurveyTime();
 
 /// The number of cohort sets
-inline size_t numCohortSets(){ return impl::nCohortSets; }
+inline size_t numCohortSets(){ return impl::nCohorts; }
 
 /// Create a condition. This is a variable updated whenever concludeSurvey() is
 /// called, and set true when the given measure is above the minimum and below
