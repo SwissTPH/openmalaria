@@ -39,6 +39,9 @@
       <option name="nInfectByGenotype"/>
       <option name="nPatentByGenotype"/>
       <option name="logDensByGenotype"/>
+      <option name="nInfectByGenotype" outputNumber="169" byAge="false" byCohort="false" byGenotype="true"/>
+      <option name="nPatentByGenotype" outputNumber="170" byAge="false" byCohort="false" byGenotype="true"/>
+      <option name="logDensByGenotype" outputNumber="171" byAge="false" byCohort="false" byGenotype="true"/>
       <option name="nHostDrugConcNonZero"/>
       <option name="sumLogDrugConcNonZero"/>
     </SurveyOptions>
