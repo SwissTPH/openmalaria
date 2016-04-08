@@ -23,6 +23,7 @@
 
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
+#include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
 #include "WithinHost/WHInterface.h"
 #include "mon/reporting.h"
@@ -44,10 +45,10 @@ public:
      * @param tSF Treatment-seeking factor. Normally 1 but allows simple heterogeneity.
      */
     CM5DayCommon (double tSF);
-
-    virtual bool notAtRisk() {
-        SimTime ageLastTreatment = sim::now() - m_tLastTreatment;
-        return ageLastTreatment > sim::zero() && ageLastTreatment <= sim::fromDays(20);
+    
+    virtual bool isExistingCase () {
+        // If treated in the recent past:
+        return sim::now() > m_tLastTreatment && sim::now() <= m_tLastTreatment + healthSystemMemory;
     }
     
 protected:

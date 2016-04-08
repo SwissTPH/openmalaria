@@ -286,6 +286,39 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:sequence>
       <xs:element name="option" type="om:MonitoringOption" minOccurs="0" maxOccurs="unbounded"/>
     </xs:sequence>
+    <xs:attribute name="onlyNewEpisode" type="xs:boolean" default="false">
+      <xs:annotation>
+        <xs:documentation>
+          If set, some statistics exclude humans who have been treated in the
+          recent past (precisely, when the time of last treatment was before
+          the current step and no more than health-system-memory days/steps
+          ago).
+          
+          This is a rough replacement for the REPORT_ONLY_AT_RISK option,
+          with one difference: the maximum age of treatment for
+          REPORT_ONLY_AT_RISK was fixed at 20 days.
+          
+          Affected measures include (as of version 35):
+          nHost (0),
+          nInfect(1),
+          nExpectd (2),
+          nPatent (3),
+          sumLogPyrogenThres (4),
+          sumlogDens (5),
+          totalInfs (6),
+          totalPatentInf (8),
+          sumPyrogenThresh (10),
+          nSubPopRemovalFirstEvent (62),
+          sumAge (68),
+          nInfectByGenotype (69),
+          nPatentByGenotype (70),
+          logDensByGenotype (71),
+          nHostDrugConcNonZero (72),
+          sumLogDrugConcNonZero (73).
+        </xs:documentation>
+        <xs:appinfo>name:Report only for new cases;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="MonitoringOption">
     <xs:complexContent>

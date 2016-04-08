@@ -154,8 +154,9 @@ ClinicalEventScheduler::ClinicalEventScheduler (double tSF) :
 
 // -----  other methods  -----
 
-bool ClinicalEventScheduler::notAtRisk() {
-    throw TRACED_EXCEPTION_DEFAULT("notAtRisk: not supported by 1-day time-step models");
+bool ClinicalEventScheduler::isExistingCase() {
+        // If treated in the recent past:
+        return sim::now() > timeLastTreatment && sim::now() <= timeLastTreatment + healthSystemMemory;
 }
 
 void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){

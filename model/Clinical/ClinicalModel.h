@@ -82,10 +82,9 @@ public:
      * infantDeaths arrays. */
     void updateInfantDeaths( SimTime age );
     
-    /** Special option to avoid reporting several things (mostly clinical
-     * events and number at risk) in the four time steps after a bout, since a
-     * further event during this time would not be considered a new bout. */
-    virtual bool notAtRisk() =0;
+    /** Special option to allow reports not to be delivered for existing cases
+     * (within health-system-memory and not new cases). */
+    virtual bool isExistingCase() =0;
     
     /// Force all pending summaries to be reported. Should only be called when
     /// class is about to be destroyed anyway to avoid affecting output.

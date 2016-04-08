@@ -49,7 +49,7 @@ public:
 
     ClinicalEventScheduler (double tSF);
     
-    virtual bool notAtRisk();
+    virtual bool isExistingCase();
 
 protected:
     virtual void doClinicalUpdate (Human& human, double ageYears);
