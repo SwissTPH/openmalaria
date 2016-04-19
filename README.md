@@ -15,13 +15,12 @@ For further documentation, take a look at our
 Also find our code on zenodo, with DOI-references:
 [![DOI](https://zenodo.org/badge/15670/SwissTPH/openmalaria.svg)](https://zenodo.org/badge/latestdoi/15670/SwissTPH/openmalaria)
 
-The stable version of OpenMalaria supports schema
-[schema version 35](https://github.com/SwissTPH/openmalaria/wiki/schema-35)
-and is currently maintained in the
-__['master' branch](https://github.com/SwissTPH/openmalaria/tree/master)__.
+Schema documentation for the XML input files can be found
+[on the wiki](https://github.com/SwissTPH/openmalaria/wiki/schema-Index)
+or in the `schema` folder (both past releases and development version).
 
 You can download the latest build here:
-[schema-35.0](https://github.com/SwissTPH/openmalaria/releases/tag/schema-35.0)
+[releases](https://github.com/SwissTPH/openmalaria/releases)
 
 Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__
 builds:
