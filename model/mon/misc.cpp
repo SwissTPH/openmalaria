@@ -132,10 +132,7 @@ void initSurveyTimes( const OM::Parameters& parameters,
         for( size_t i = 0; i < impl::surveyTimes.size(); ++i ){
             const SurveyTime& survTime = impl::surveyTimes[i];
             if( !survTime.isReported() ) continue;
-            std::cout << (survTime.num+1) << '\t' << survTime.time.inSteps()
-                    << '\t' << survTime.time.inDays();
-            if( haveDate ) std::cout << '\t' << survTime.time;
-            std::cout << std::endl;
+            std::cout << (survTime.num+1) << '\t' << survTime.time.date() << std::endl;
         }
     }
     

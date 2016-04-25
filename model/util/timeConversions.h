@@ -80,12 +80,6 @@ namespace UnitParse {
     void formatDate( ostream& stream, SimTime time );
 }
 
-/// Helper function for UnitParse::formatDate
-inline ostream& operator<<( ostream& stream, SimTime time ){
-    UnitParse::formatDate( stream, time );
-    return stream;
-}
-
 }
 
 #endif

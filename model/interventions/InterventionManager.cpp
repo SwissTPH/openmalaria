@@ -256,8 +256,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                                 if( !first ){ msg << ", "; }else{ first=false; }
                                 msg << cp->getId();
                             }
-                            msg << " has multiple deplyoments at time " << lastTime.inSteps() << "t";
-                            if( UnitParse::haveDate() ){ msg << " (" << lastTime << ")"; }
+                            msg << " has multiple deplyoments at time " << lastTime.date();
                             throw util::xml_scenario_error(msg.str());
                         }
                         lastTime = deploy->first;
