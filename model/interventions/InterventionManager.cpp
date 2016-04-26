@@ -347,7 +347,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                     SimTime time = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
                     double ratio = deploy.getRatioToHumans();
                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
-                    timed.push_back( new TimedTrapDeployment( time, ratio, lifespan ) );
+                    timed.push_back( new TimedTrapDeployment( time, instance, ratio, lifespan ) );
                 }
             }
             instance += 1;

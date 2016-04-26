@@ -27,6 +27,7 @@
 #include "util/errors.h"
 
 #include <cmath>
+#include <boost/format.hpp>
 
 namespace OM {
 namespace Transmission {
@@ -154,8 +155,8 @@ void AnophelesModel::initAvailability(
     foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
         map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
         if (pop == nonHumanHostPopulations.end()){
-            throw xml_scenario_error ("There is no population size defined for "
-            "at least one non human host type, please check the scenario file.");
+            throw xml_scenario_error ((boost::format("There is no population size defined for "
+            "non-human host type \"%1%\"") %xmlNNH.getName()).str());
         }
         
         // population size for non-human host category:
@@ -281,7 +282,6 @@ void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime li
     baitedTraps.push_back(data);
 }
 
-
 // Every sim::oneTS() days:
 void AnophelesModel::advancePeriod (const OM::Population& population,
                                      vector2D<double>& popProbTransmission,
@@ -358,7 +358,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     for( list<TrapData>::iterator it = baitedTraps.begin(); it != baitedTraps.end(); ){
         if( sim::ts0() > it->expiry ){
-            baitedTraps.erase(it);
+            it = baitedTraps.erase(it);
             continue;
         }
         SimTime age = sim::ts0() - it->deployTime;

@@ -348,8 +348,8 @@ private:
 
 class TimedTrapDeployment : public TimedDeployment {
 public:
-    TimedTrapDeployment( SimTime deployTime, double ratio, SimTime lifespan ) :
-        TimedDeployment(deployTime), ratio(ratio), lifespan(lifespan)
+    TimedTrapDeployment( SimTime deployTime, size_t instance, double ratio, SimTime lifespan ) :
+        TimedDeployment(deployTime), inst(instance), ratio(ratio), lifespan(lifespan)
     {}
     virtual void deploy (OM::Population& population) {
         double number = population.size() * ratio;
