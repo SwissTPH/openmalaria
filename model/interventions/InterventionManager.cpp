@@ -256,8 +256,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                                 if( !first ){ msg << ", "; }else{ first=false; }
                                 msg << cp->getId();
                             }
-                            msg << " has multiple deplyoments at time " << lastTime.inSteps() << "t";
-                            if( UnitParse::haveDate() ){ msg << " (" << lastTime << ")"; }
+                            msg << " has multiple deplyoments at time " << lastTime.date();
                             throw util::xml_scenario_error(msg.str());
                         }
                         lastTime = deploy->first;
@@ -326,7 +325,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
-                population._transmissionModel->initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
+                population.transmissionModel().initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
@@ -336,6 +335,22 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 }
                 instance++;
             }
+        }
+    }
+    if( intervElt.getVectorTrap().present() ){
+        size_t instance = 0;
+        foreach( const scnXml::VectorTrap& trap, intervElt.getVectorTrap().get().getIntervention() ){
+            population.transmissionModel().initVectorTrap(
+                    trap.getDescription(), instance, trap.getName() );
+            if( trap.getTimed().present() ) {
+                foreach( const scnXml::Deploy1 deploy, trap.getTimed().get().getDeploy() ){
+                    SimTime time = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
+                    double ratio = deploy.getRatioToHumans();
+                    SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
+                    timed.push_back( new TimedTrapDeployment( time, instance, ratio, lifespan ) );
+                }
+            }
+            instance += 1;
         }
     }
 

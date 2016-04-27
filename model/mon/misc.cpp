@@ -56,7 +56,7 @@ struct SurveyTime {
 namespace impl{
     // Constants or defined during init:
     size_t nSurveys = 0;        // number of reported surveys
-    size_t nCohortSets = 1;     // default: just the whole population
+    size_t nCohorts = 1;     // default: just the whole population
     extern size_t surveyIndex;     // index in surveyTimes of next survey
     vector<SurveyTime> surveyTimes;     // times of surveys
 }
@@ -132,16 +132,13 @@ void initSurveyTimes( const OM::Parameters& parameters,
         for( size_t i = 0; i < impl::surveyTimes.size(); ++i ){
             const SurveyTime& survTime = impl::surveyTimes[i];
             if( !survTime.isReported() ) continue;
-            std::cout << (survTime.num+1) << '\t' << survTime.time.inSteps()
-                    << '\t' << survTime.time.inDays();
-            if( haveDate ) std::cout << '\t' << survTime.time;
-            std::cout << std::endl;
+            std::cout << (survTime.num+1) << '\t' << survTime.time.date() << std::endl;
         }
     }
     
     if( monitoring.getCohorts().present() ){
         // this needs to be set early, but we can't set cohortSubPopIds until after InterventionManager is initialised
-        impl::nCohortSets = static_cast<uint32_t>(1) << monitoring.getCohorts().get().getSubPop().size();
+        impl::nCohorts = static_cast<uint32_t>(1) << monitoring.getCohorts().get().getSubPop().size();
     }
     
     mon::AgeGroup::init( monitoring );

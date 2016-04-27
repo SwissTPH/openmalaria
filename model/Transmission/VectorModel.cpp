@@ -267,11 +267,27 @@ void VectorModel::init2 (const Population& population) {
     simulationMode = forcedEIR;   // now we should be ready to start
 }
 
-void VectorModel::initVectorInterv( const scnXml::Description::AnophelesSequence& list, size_t instance, const string& name ) {
+void VectorModel::initVectorInterv( const scnXml::Description::AnophelesSequence& list,
+        size_t instance, const string& name )
+{
     SpeciesIndexChecker checker( name, speciesIndex );
-    for( scnXml::VectorIntervention::DescriptionType::AnophelesConstIterator it = list.begin(); it != list.end(); ++it ){
-        const string& name = it->getMosquito();
-        species[checker.getIndex(name)].initVectorInterv ( *it, instance );
+    foreach( const scnXml::VectorSpeciesIntervention& anoph, list ){
+        const string& mosq = anoph.getMosquito();
+        species[checker.getIndex(mosq)].initVectorInterv( anoph, instance );
+    }
+    checker.checkNoneMissed();
+}
+void VectorModel::initVectorTrap( const scnXml::VectorTrap::DescriptionSequence list,
+        size_t instance, const scnXml::VectorTrap::NameOptional name_opt )
+{
+    stringstream name_ss;
+    if( name_opt.present() ) name_ss << name_opt.get();
+    else name_ss << "vector trap intervention " << (instance+1);
+    string name = name_ss.str();
+    SpeciesIndexChecker checker( name, speciesIndex );
+    foreach( const scnXml::Description1& anoph, list ){
+        const string& mosq = anoph.getMosquito();
+        species[checker.getIndex(mosq)].initVectorTrap( anoph, instance );
     }
     checker.checkNoneMissed();
 }
@@ -399,21 +415,29 @@ void VectorModel::update( const Population& population ) {
     TransmissionModel::updateKappa( population );
 }
 
+const string vec_mode_err = "vector interventions can only be used in "
+            "dynamic transmission mode (mode=\"dynamic\")";
 const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
     if( interventionMode != dynamicEIR ){
-        throw xml_scenario_error("vector interventions can only be used in "
-            "dynamic transmission mode (mode=\"dynamic\")");
+        throw xml_scenario_error(vec_mode_err);
     }
     return speciesIndex;
 }
 
 void VectorModel::deployVectorPopInterv (size_t instance) {
     if( interventionMode != dynamicEIR ){
-        throw xml_scenario_error("vector interventions can only be used in "
-            "dynamic transmission mode (mode=\"dynamic\")");
+        throw xml_scenario_error(vec_mode_err);
     }
     for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
         it->deployVectorPopInterv(instance);
+    }
+}
+void VectorModel::deployVectorTrap( size_t instance, double number, SimTime lifespan ){
+    if( interventionMode != dynamicEIR ){
+        throw xml_scenario_error(vec_mode_err);
+    }
+    for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
+        it->deployVectorTrap( instance, number, lifespan );
     }
 }
 void VectorModel::uninfectVectors() {

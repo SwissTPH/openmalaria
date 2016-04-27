@@ -187,28 +187,12 @@ namespace OM { namespace util {
 	 * estimations from a probability function. */
 	GARKI_DENSITY_BIAS,
 	
-	/** Use the IPT(i) drug model (DescriptiveIPTWithinHost and
-	 * DescriptiveIPTInfection classes) with its simple SP model.
-	 * 
-	 * This has been removed; mass drug interventions can be used as a
+	/** This has been removed; mass drug interventions can be used as a
          * replacement. */
-	IPTI_SP_MODEL,
+// 	IPTI_SP_MODEL,
 	
-	/** Turn off reporting of several outputs for humans suffering a recent
-         * clinical episode and therefore not currently at risk of what would
-         * clinically be regarded as a separate episode.
-         * 
-         * <b>This is a compatibility option only.</b> It only works with the
-         * 5-day model and the length of the not-at-risk period is hard-coded,
-         * not dependant on the healthSystemMemory value.
-         * 
-         * This removes from several outputs all humans who recieved treatment
-         * during the previous 4 (5-day) time steps, who are therefore not
-         * currently at risk of an additional episode. Summaries affected include
-         * nHost, nInfect, nExpectd, nPatent, totalInfs, totalPatentInf, sumlogDens,
-         * nNewInfections, sumLogPyrogenThres, sumPyrogenThresh, and potentially
-         * other outputs added after writing this. */
-	REPORT_ONLY_AT_RISK,
+	/* Replaced by "onlyNewEpisode" attribute on SurveyOptions. */
+// 	REPORT_ONLY_AT_RISK,
         
         /** Turn on vector life-cycle model. Allows better larviciding and
          * vector population dynamics modelling.

@@ -53,6 +53,14 @@ SimTime sim::interv_time;
 using util::CommandLine;
 
 
+TimeDisplayHelper SimTime::date() const {
+    return TimeDisplayHelper(*this, TimeDisplayHelper::DATE);
+}
+/// Display as a duration with automatic units
+TimeDisplayHelper SimTime::duration() const {
+    return TimeDisplayHelper(*this, TimeDisplayHelper::DURATION);
+}
+
 // ———  Unit parsing stuff  ———
 namespace UnitParse {
 
@@ -205,27 +213,35 @@ SimTime readDate( const std::string& str, DefaultUnit defUnit ){
     }
 }
 
-void formatDate( ostream& stream, SimTime time ){
-    if( interv_start_date == sim::never() ){
-        throw TRACED_EXCEPTION( "formatDate() called without start date", util::Error::NoStartDate );
-    }
-    SimTime date = interv_start_date + time;
-    assert( date >= sim::zero() );
-    int year = date / sim::oneYear();
-    assert( year >= 0 );
-    int remainder = (date - sim::oneYear() * year).inDays();
-    int month = 0;
-    while( remainder >= monthStart[month+1] ) ++month;
-    remainder -= monthStart[month];
-    assert( month < 12 && remainder < monthLen[month] );
-    // Inconsistency in year vs month and day: see parseDate()
-    stream << setfill('0') << setw(4) << year << '-'
-            << setw(2) << (month+1) << '-' << (remainder+1)
-            << setw(0) << setfill(' ');
-}
-
 }       // end of UnitParse namespace
 
+
+ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay ){
+    if( timeDisplay.mode == TimeDisplayHelper::DATE && interv_start_date != sim::never() ){
+        // format as a date
+        SimTime date = interv_start_date + timeDisplay.time;
+        assert( date >= sim::zero() );
+        int year = date / sim::oneYear();
+        assert( year >= 0 );
+        int remainder = (date - sim::oneYear() * year).inDays();
+        int month = 0;
+        while( remainder >= UnitParse::monthStart[month+1] ) ++month;
+        remainder -= UnitParse::monthStart[month];
+        assert( month < 12 && remainder < UnitParse::monthLen[month] );
+        // Inconsistency in year vs month and day: see parseDate()
+        stream << setfill('0') << setw(4) << year << '-'
+                << setw(2) << (month+1) << '-' << (remainder+1)
+                << setw(0) << setfill(' ');
+    } else {
+        // format as a duration
+        if( timeDisplay.time.inDays() % SimTime::DAYS_IN_YEAR == 0 ){
+            stream << timeDisplay.time.inYears() << 'y';
+        } else {
+            stream << timeDisplay.time.inDays() << 'd';
+        }
+    }
+    return stream;
+}
 
 void sim::init( const scnXml::Scenario& scenario ){
     SimTime::interval = scenario.getModel().getParameters().getInterval();

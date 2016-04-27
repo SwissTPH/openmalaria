@@ -31,6 +31,7 @@
 
 #include <vector>
 #include <limits>
+#include <boost/shared_ptr.hpp>
 
 namespace OM {
     class Population;
@@ -103,6 +104,9 @@ public:
     /** Set up the non-host-specific interventions. */
     void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
     
+    /** Set up trap parameters. */
+    void initVectorTrap( const scnXml::Description1& desc, size_t instance );
+    
     /** Return base-line human parameters for the mosquito. */
     inline const Anopheles::PerHostBase& getHumanBaseParams () {
         return humanBase;
@@ -154,6 +158,12 @@ public:
     ///@brief Functions called to deploy interventions
     //@{
     void deployVectorPopInterv (size_t instance);
+    /// Deploy some traps
+    /// 
+    /// @param instance Index of this type of trap
+    /// @param number The number of traps to deploy
+    /// @param lifespan Time until these traps are removed/replaced/useless
+    void deployVectorTrap(size_t instance, double number, SimTime lifespan);
 
     inline void uninfectVectors() {
         transmission.uninfectVectors();
@@ -197,6 +207,7 @@ public:
         transmission & stream;
         seekingDeathRateIntervs & stream;
         probDeathOvipositingIntervs & stream;
+        baitedTraps & stream;
         partialEIR & stream;
     }
 
@@ -282,11 +293,20 @@ private:
         double entoAvailability;
         // α_i * P_B_i * P_C_i * P_D_i
         double probCompleteCycle;
-        
     };
     /** Non-human host data. Doesn't need checkpointing. */
     vector<NHHParams> nonHumans;
     //@}
+    
+    struct TrapParams {
+        // Initial availability of a trap relative to an adult
+        double relAvail;
+        // Decay of availability
+        // note: can't use "auto_ptr" inside a vector, otherwise that would suffice
+        boost::shared_ptr<util::DecayFunction> availDecay;
+    };
+    // Parameters for trap interventions. Doesn't need checkpointing.
+    vector<TrapParams> trapParams;
     
     
     // -----  model state (and some encapsulated parameters)  -----
@@ -306,6 +326,34 @@ private:
      * 
      * Value is probability of dying due to this intervention (so multiply survival by 1 - this). */
     vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
+    struct TrapData {
+        // index in trapParams
+        size_t instance;
+        // initial availability (avail per trap * num traps)
+        double initialAvail;
+        // parameter for decay of availability
+        DecayFuncHet availHet;
+        // deploy time (for decay function)
+        SimTime deployTime;
+        // date at which this intervention should be deleted
+        SimTime expiry;
+        
+        /// Checkpointing
+        template<class S>
+        void operator& (S& stream) {
+            instance & stream;
+            initialAvail & stream;
+            availHet & stream;
+            deployTime & stream;
+            expiry & stream;
+        }
+    };
+    /** Baited trap interventions.
+     * 
+     * This is the "full" availability: availability per trap times the number
+     * of traps. Each deployment has its own availiability along with expiry
+     * date; total availability is the sum. */
+    list<TrapData> baitedTraps;
     //@}
     
     /** Per time-step partial calculation of EIR, per genotype.

@@ -113,6 +113,7 @@ public:
     inline Transmission::TransmissionModel& transmissionModel() {
         return *_transmissionModel;
     }
+    /** Return const access to the transmission model. */
     inline const Transmission::TransmissionModel& transmissionModel() const {
         return *_transmissionModel;
     }
@@ -160,11 +161,9 @@ private:
     /// Births since last continuous output
     int recentBirths;
     //@}
-public:
     //! TransmissionModel model
     Transmission::TransmissionModel* _transmissionModel;
     
-private:
     /** The simulated human population
      *
      * The list of all humans, ordered from oldest to youngest. */

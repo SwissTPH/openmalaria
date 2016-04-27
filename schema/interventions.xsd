@@ -2,8 +2,8 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_35"
-           xmlns:om="http://openmalaria.org/schema/scenario_35"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_36"
+           xmlns:om="http://openmalaria.org/schema/scenario_36"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="healthSystem.xsd"/>
   <xs:include schemaLocation="entomology.xsd"/>
@@ -290,6 +290,31 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             confusion. XSD 1.1 does not have this limitation but still has
             limited support. -->
             <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="om:VectorIntervention"/>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="vectorTrap">
+        <xs:annotation>
+          <xs:documentation>
+            Traps attract and kill mosquitoes. They are modelled as a
+            non-human-host where the probability of mosquitoes surviving
+            feeding is zero (since otherwise the simulator would assume
+            surviving mosquitoes have had a blood meal), and where this
+            "host" is initially not present.
+            
+            Model: each type of trap has has an initial availability
+            relative to a human and a decay in availability. Each
+            deployment has a fixed maximum lifespan, after which the
+            traps from that deployment are removed (it is up to the
+            user whether this is after availability is effectively zero
+            or sooner, either coinciding with a redeployment or
+            causing a reduction in overall effectiveness of traps).
+          </xs:documentation>
+          <xs:appinfo>name:Baited trap</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="intervention" type="om:VectorTrap" minOccurs="1" maxOccurs="unbounded"/>
           </xs:sequence>
         </xs:complexType>
       </xs:element>
@@ -749,6 +774,128 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           Name of intervention (e.g. larviciding, sugar bait).
         </xs:documentation>
         <xs:appinfo>name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="VectorTrap">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters and deployment of one type of trap. In case multiple types
+        of trap are needed simultaneously, multiple elements can be used. Note
+        that different types of trap do not interact except that all will
+        attract mosquitoes.
+      </xs:documentation>
+      <xs:appinfo>name:Vector trap intervetion;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="description" minOccurs="1" maxOccurs="unbounded">
+        <xs:annotation>
+          <xs:documentation>
+            Parameters associated with a vector trap intervention, per
+            mosquito species.
+          </xs:documentation>
+          <xs:appinfo>name:Description;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="relativeAvailability" type="om:DoubleValue">
+              <xs:annotation>
+                <xs:documentation>
+                  Describes the availiability of a trap to a
+                  host-seeking mosquito relative to an average
+                  unprotected adult.
+                  
+                  I.e. if this parameter is 2, then each trap will on
+                  average attract twice as many mosquitoes as
+                  unprotected adults.
+                  
+                  This is the initial availability; it may decay
+                  towards zero depending on the configured
+                  decay function.
+                </xs:documentation>
+                <xs:appinfo>units:Proportion;name:Initial relative availability;min:0;max:inf;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="decayOfAvailability" type="om:DecayFunction">
+              <xs:annotation>
+                <xs:documentation>
+                  Describes how availability decays to zero.
+                  
+                  If decay heterogeneity/variance is used, there will be a
+                  sample once-per-deployment (i.e. all traps of the same
+                  deployment will be affected the same way). There is no
+                  support for variances between traps (except in this crude
+                  way, between deployments).
+                </xs:documentation>
+                <xs:appinfo>name:Decay of availability;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+          </xs:sequence>
+          <xs:attribute name="mosquito" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>
+                Name of the species/subspecies/variant.
+              </xs:documentation>
+              <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" name="timed">
+        <xs:annotation>
+          <xs:documentation>
+            List of timed vector trap intervention deployment
+          </xs:documentation>
+          <xs:appinfo>name:Vector trap intervention deployment;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:sequence>
+            <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
+              <xs:complexType>
+                <xs:complexContent>
+                  <xs:extension base="om:TimedBase">
+                    <xs:attribute name="ratioToHumans" type="xs:double" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                          The number of traps deployed, by this
+                          deployment, per adult human.
+                          
+                          E.g. if there are currently 100 traps and 1000
+                          humans, then a ratio of 0.1 will increase the
+                          number of traps to 200.
+                        </xs:documentation>
+                        <xs:appinfo>name:Ratio to humans;unit:dimensionless;min:0;max:inf;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                    <xs:attribute name="lifespan" type="xs:string" use="required">
+                      <xs:annotation>
+                        <xs:documentation>
+                      Life of the trap until replaced or removed, e.g.
+                      "73t" or "1y". After this time period, these traps
+                      will be removed from the simulation.
+                      
+                      New deployments do not automatically remove old
+                      traps. Existing traps cannot be refurbished in the
+                      model. It may make sense to make the end-of-life
+                      coincide with a new deployment.
+                        </xs:documentation>
+                        <xs:appinfo>name:Lifespan;units:Steps or Days or Years;</xs:appinfo>
+                      </xs:annotation>
+                    </xs:attribute>
+                  </xs:extension>
+                </xs:complexContent>
+              </xs:complexType>
+            </xs:element>
+          </xs:sequence>
+        </xs:complexType>
+      </xs:element>
+    </xs:sequence>
+    <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+        <xs:documentation>
+          Optional name for this type of trap
+        </xs:documentation>
+        <xs:appinfo>name:Descriptive name for type of trap;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
@@ -1581,7 +1728,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Enter the rate increase (i.e. if rate increases to 120% of normal,
             give 0.2). New death rate while seeking is old × (1 + increase)
             where increase is this factor given. Must have increas ≥ -1.
-           </xs:documentation>
+          </xs:documentation>
           <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
@@ -1601,7 +1748,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Describe an effect of increased mortality while ovipositing
             due to this intervention. Enter the probability of dying due to
             this intervention.
-           </xs:documentation>
+          </xs:documentation>
           <xs:appinfo>units:dimensionless;name:Proportion ovipositing mosquitoes killed;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
@@ -1625,7 +1772,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             also be used to increase emergence by giving a negative value.
             The emergence rate is "old rate" × (1 - factor) where factor is the
             value given here; thus, for example, using -1 will double emergence.
-           </xs:documentation>
+          </xs:documentation>
           <xs:appinfo>units:dimensionless;name:Proportion of emerging pupa killed;</xs:appinfo>
         </xs:annotation>
         <xs:complexType>
@@ -1638,7 +1785,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             </xs:annotation>
           </xs:attribute>
         </xs:complexType>
-      </xs:element> 
+      </xs:element>
     </xs:all>
     <xs:attribute name="mosquito" type="xs:string" use="required">
       <xs:annotation>

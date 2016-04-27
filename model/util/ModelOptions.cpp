@@ -62,8 +62,8 @@ namespace OM { namespace util {
             codeMap["MOLINEAUX_WITHIN_HOST_MODEL"] = MOLINEAUX_WITHIN_HOST_MODEL;
             codeMap["PENNY_WITHIN_HOST_MODEL"] = PENNY_WITHIN_HOST_MODEL;
             codeMap["GARKI_DENSITY_BIAS"] = GARKI_DENSITY_BIAS;
-            codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
-            codeMap["REPORT_ONLY_AT_RISK"] = REPORT_ONLY_AT_RISK;
+//             codeMap["IPTI_SP_MODEL"] = IPTI_SP_MODEL;
+//             codeMap["REPORT_ONLY_AT_RISK"] = REPORT_ONLY_AT_RISK;
 	    
 	    codeMap["MEAN_DURATION_GAMMA"] = MEAN_DURATION_GAMMA;
 	    codeMap["FIRST_LOCAL_MAXIMUM_GAMMA"]=FIRST_LOCAL_MAXIMUM_GAMMA;
@@ -92,6 +92,10 @@ namespace OM { namespace util {
             if( s == "PENALISATION_EPISODES" || s == "ATTENUATION_ASEXUAL_DENSITY" ){
                 msg << "Please use schema 31 or earlier to use option "
                     << s << "; it is not available in later versions.";
+            }else if( s == "IPTI_SP_MODEL" ){
+                msg << "The IPT model is no longer available. Use MDA instead.";
+            }else if( s == "REPORT_ONLY_AT_RISK" ){
+                msg << "Option " << s << " has been replaced by <SurveyOptions onlyNewEpisode=\"true\">.";
             }else{
                 msg << "Unrecognised model option: " << s;
             }
@@ -137,11 +141,6 @@ namespace OM { namespace util {
 	    cout << endl;
 	}
 #endif
-	
-	// Test for removed options
-        if( util::ModelOptions::option(IPTI_SP_MODEL) ){
-            throw util::xml_scenario_error( "The IPT model is no longer available. Use MDA instead." );
-        }
 	
 	// Test for incompatible options
 	
@@ -250,6 +249,7 @@ namespace OM { namespace util {
             throw xml_scenario_error( "Penny model option used without PENNY_WITHIN_HOST_MODEL option" );
         
         if( sim::oneTS() == sim::fromDays(5) ){
+            // 5 day TS is okay; some tests specific to this TS:
             bitset<NUM_OPTIONS> require1DayTS;
             require1DayTS
                 .set( CLINICAL_EVENT_SCHEDULER );
@@ -262,18 +262,7 @@ namespace OM { namespace util {
                 }
             }
         }else if( sim::oneTS() == sim::fromDays(1) ){
-            bitset<NUM_OPTIONS> require5DayTS;
-            require5DayTS
-                .set( IPTI_SP_MODEL )
-                .set( REPORT_ONLY_AT_RISK );
-            
-            for(size_t i = 0; i < NUM_OPTIONS; ++i) {
-                if (options [i] && require5DayTS[i]) {
-                    ostringstream msg;
-                    msg << "Model option " << codeMap.toString(OptionCodes(i)) << " is only compatible with a 5-day time step.";
-                    throw xml_scenario_error (msg.str());
-                }
-            }
+            // 1 day TS is also okay
         }else{
             ostringstream msg;
             msg << "Time step set to " << sim::oneTS().inDays() << " days but only 1 and 5 days are supported.";

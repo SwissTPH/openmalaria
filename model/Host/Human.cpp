@@ -39,13 +39,13 @@ namespace OM { namespace Host {
     using namespace OM::util;
     using interventions::ComponentId;
     
-    bool opt_report_only_at_risk = false;
+    bool surveyOnlyNewEp = false;
 
 // -----  Static functions  -----
 
 void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario ){    // static
     HumanHet::init();
-    opt_report_only_at_risk = util::ModelOptions::option( util::REPORT_ONLY_AT_RISK );
+    surveyOnlyNewEp = scenario.getMonitoring().getSurveyOptions().getOnlyNewEpisode();
     
     const scnXml::Model& model = scenario.getModel();
     // Init models used by humans:
@@ -157,10 +157,9 @@ void Human::clearImmunity(){
 
 
 void Human::summarize() {
-    // 5-day only, compatibility option:
-    if( opt_report_only_at_risk && clinicalModel->notAtRisk() ){
-        // This modifies the denominator to treat the 4*5 day intervals
-        // after a bout as 'not at risk' to match the IPTi trials
+    if( surveyOnlyNewEp && clinicalModel->isExistingCase() ){
+        // This modifies the denominator to treat the health-system-memory
+        // period immediately after a bout as 'not at risk'.
         return;
     }
     

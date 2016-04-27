@@ -1,6 +1,17 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_36" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="larviciding" schemaVersion="36" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_36 scenario_current.xsd">
-  <demography maximumAgeYrs="90" name="Ifakara" popSize="150">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_36" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vector traps test" schemaVersion="36" xsi:schemaLocation="http://openmalaria.org/schema/scenario_36 scenario_current.xsd">
+  <!--
+I would suggest that there are two steps here- getting something running in v35 for testing, and then adjusting it for simulating Rusinga.
+We need to include the full-life cycle model since there is clearly an effect on emergence rates at least for funestus, and this might be a good test of this as well as of the new v35 functionality.
+I presume we need to include the ITN distributions so that the initial vector lifespans are correct.
+
+For simulating Rusinga
+- the initial funestus-arabiensis ratio and seasonality pattern(s) should be set to those observed on Rusinga
+- a pre-intervention EIR of 50 would be OK as a starting point to get the simulations going, but then we need to adjust the pre-intervention EIR to give the correct initial prevalence.
+- we need to look up the recorded access to health care in the population surveys and use this to parameterise a health system change at the start of the program.
+- for software testing we only need one xml, but for simulating the Rusinga intervention we should have 81, one corresponding to each cluster in the trial, with the different clusters introducing OBTs 9 time units apart.
+  -->
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="200">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
       <group poppercent="12.76004028" upperbound="5"/>
@@ -23,20 +34,7 @@
       <group poppercent="0.161614642" upperbound="90"/>
     </ageGroup>
   </demography>
-  <monitoring name="Quarterly Surveys">
-    <continuous period="1">
-      <option name="input EIR" value="true"/>
-      <option name="simulated EIR" value="true"/>
-      <option name="N_v" value="true"/>
-      <option name="N_v0" value="true"/>
-      <option name="immunity h" value="true"/>
-      <option name="immunity Y" value="true"/>
-      <option name="new infections" value="true"/>
-      <option name="num transmitting humans" value="true"/>
-      <option name="S_v" value="true"/>
-      <option name="simulated EIR"/>
-      <option name="resource availability"/>
-    </continuous>
+  <monitoring name="Quarterly Surveys" startDate="2000-01-1">
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>
@@ -47,10 +45,7 @@
       <option name="nTreatments3" value="true"/>
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
-      <option name="nHospitalDeaths" value="true"/>
-      <option name="nIndDeaths" value="true"/>
       <option name="nDirDeaths" value="true"/>
-      <option name="nHospitalRecovs" value="true"/>
       <option name="annAvgK" value="true"/>
       <option name="Vector_Nv0" value="true"/>
       <option name="Vector_Nv" value="true"/>
@@ -58,113 +53,112 @@
       <option name="Vector_Sv" value="true"/>
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
+      <option name="allCauseIMR"/>
     </SurveyOptions>
-    <surveys detectionLimit="40">
-      <surveyTime repeatStep="1y" repeatEnd="20.027y">1t</surveyTime>
-      <surveyTime repeatStep="1y" repeatEnd="20.027y">19t</surveyTime>
-      <surveyTime repeatStep="1y" repeatEnd="20.027y">37t</surveyTime>
-      <surveyTime repeatStep="1y" repeatEnd="20.027y">55t</surveyTime>
+    <surveys diagnostic="standard">
+      <surveyTime repeatStep="1y" repeatEnd="2010-03-31">2000-01-05</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="2010-03-31">2000-04-05</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="2010-03-31">2000-07-04</surveyTime>
+      <surveyTime repeatStep="1y" repeatEnd="2010-03-31">2000-10-02</surveyTime>
     </surveys>
-    <ageGroup lowerbound="0">
-      <group upperbound="0.25"/>
-      <group upperbound="0.5"/>
-      <group upperbound="0.75"/>
+    <ageGroup lowerbound="0.0">
       <group upperbound="1"/>
-      <group upperbound="1.5"/>
       <group upperbound="2"/>
-      <group upperbound="3"/>
-      <group upperbound="4"/>
       <group upperbound="5"/>
-      <group upperbound="6"/>
-      <group upperbound="7"/>
-      <group upperbound="8"/>
-      <group upperbound="9"/>
       <group upperbound="10"/>
-      <group upperbound="12"/>
-      <group upperbound="14"/>
-      <group upperbound="16"/>
-      <group upperbound="18"/>
       <group upperbound="20"/>
-      <group upperbound="25"/>
       <group upperbound="30"/>
-      <group upperbound="35"/>
       <group upperbound="40"/>
-      <group upperbound="45"/>
       <group upperbound="50"/>
-      <group upperbound="55"/>
       <group upperbound="60"/>
-      <group upperbound="65"/>
       <group upperbound="70"/>
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
   <interventions name="Full Set">
-    <vectorPop>
-      <intervention name="simple larviciding translated from schema 30">
-        <!-- Example larviciding (made up values) -->
-        <description>
-          <anopheles mosquito="gambiae_ss">
-            <emergenceReduction initial=".8">
-              <decay L="0.2465753424657534" function="step"/>
-            </emergenceReduction>
-          </anopheles>
-          <anopheles mosquito="funestus">
-            <emergenceReduction initial=".8">
-              <decay L="0.2465753424657534" function="step"/>
-            </emergenceReduction>
-          </anopheles>
-          <anopheles mosquito="arabiensis">
-            <emergenceReduction initial=".8">
-              <decay L="0.2465753424657534" function="step"/>
-            </emergenceReduction>
-          </anopheles>
+    <human>
+      <component id="ITN" name="Extended ITNs">
+        <ITN>
+          <usage value="0.8"/>
+          <holeRate mean=".9" sigma=".8"/>
+          <ripRate mean=".7" sigma=".8"/>
+          <ripFactor value="0.4"/>
+          <initialInsecticide mu="70" sigma="20"/>
+          <insecticideDecay L="2.2y" function="exponential" mu="-0.32" sigma="0.8"/>
+          <attritionOfNets L="12y" function="smooth-compact" k="2"/>
+          <anophelesParams mosquito="gambiae_ss" propActive="1">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="funestus" propActive="1">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+          <anophelesParams mosquito="arabiensis" propActive="1">
+            <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.1" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
+            <preprandialKillingEffect baseFactor="0.09" holeFactor="0.57" holeScalingFactor="0.1" insecticideFactor="0.604" insecticideScalingFactor="0.1" interactionFactor="-0.424"/>
+            <postprandialKillingEffect baseFactor="0.10" holeFactor="0" holeScalingFactor="0.1" insecticideFactor="0.55" insecticideScalingFactor="0.1" interactionFactor="0"/>
+          </anophelesParams>
+        </ITN>
+      </component>
+      <deployment name="Extended ITNs">
+        <component id="ITN"/>
+        <timed>
+          <deploy coverage="0.8" time="2000-02-04"/>
+        </timed>
+      </deployment>
+    </human>
+    <vectorTrap>
+      <intervention name="Odour baited traps">
+        <description mosquito="gambiae_ss">
+          <relativeAvailability value="1"/>
+          <decayOfAvailability function="constant"/>
+        </description>
+        <description mosquito="funestus">
+          <relativeAvailability value="1"/>
+          <decayOfAvailability function="constant"/>
+        </description>
+        <description mosquito="arabiensis">
+          <relativeAvailability value="0.5"/>
+          <decayOfAvailability function="constant"/>
         </description>
         <timed>
-          <!-- Varied times of deployment with two-year breaks -->
-          <deploy time="0"/>
-          <deploy time="155"/>
-          <deploy time="310"/>
-          <deploy time="465"/>
-          <deploy time="620"/>
-          <deploy time="775"/>
-          <deploy time="931"/>
-          <deploy time="1086"/>
-          <deploy time="1241"/>
+          <deploy time="2002-01-01" ratioToHumans="0.2" lifespan="3y"/>
         </timed>
       </intervention>
-    </vectorPop>
+    </vectorTrap>
   </interventions>
   <healthSystem>
-    <DecisionTree5Day name="Tanzania ACT">
+    <ImmediateOutcomes name="Tanzania ACT">
+      <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
+      <initialACR>
+        <ACT value="0.85"/>
+        <QN value="0.998"/>
+        <selfTreatment value="0.63"/>
+      </initialACR>
+      <compliance>
+        <ACT value="0.9"/>
+        <selfTreatment value="0.85"/>
+      </compliance>
+      <nonCompliersEffective>
+        <ACT value="0"/>
+        <selfTreatment value="0"/>
+      </nonCompliersEffective>
+      <treatmentActions>
+        <ACT name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1t"/>
+        </ACT>
+        <QN name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1t"/>
+        </QN>
+      </treatmentActions>
       <pSeekOfficialCareUncomplicated1 value="0.04"/>
       <pSelfTreatUncomplicated value="0.01"/>
       <pSeekOfficialCareUncomplicated2 value="0.04"/>
       <pSeekOfficialCareSevere value="0.48"/>
-      <treeUCOfficial>
-        <random name="p cure">
-          <outcome p="0.765" name="90% compliance, 85% chance cure">
-            <treatSimple durationLiver="0" durationBlood="1t"/>
-          </outcome>
-          <outcome p="0.235">
-            <treatFailure/>
-          </outcome>
-        </random>
-      </treeUCOfficial>
-      <treeUCSelfTreat>
-        <random name="p cure">
-          <outcome p="0.5355" name="85% compliance, 63% chance cure">
-            <treatSimple durationLiver="0" durationBlood="5d"/>
-          </outcome>
-          <outcome p="0.4645">
-            <treatFailure/>
-          </outcome>
-        </random>
-      </treeUCSelfTreat>
-      <cureRateSevere value="0.998"/>
-      <treatmentSevere>
-        <clearInfections stage="blood" timesteps="5d"/>
-      </treatmentSevere>
-    </DecisionTree5Day>
+    </ImmediateOutcomes>
     <CFR>
       <group lowerbound="0" value="0.09189"/>
       <group lowerbound="0.25" value="0.0810811"/>
@@ -185,7 +179,7 @@
   <entomology mode="dynamic" name="Namawala">
     <vector>
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
-        <seasonality annualEIR="24.826144381650714" input="EIR">
+        <seasonality annualEIR="3.82" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="0.8968" b="2.678"/>
             <coeffic a="-0.4551" b="2.599"/>
@@ -204,21 +198,9 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.939"/>
         </mosq>
-        <simpleMPD>
-          <!-- Values are made up, not from field data! -->
-          <developmentDuration value="11"/>
-          <developmentSurvival value="0.6"/>
-          <femaleEggsLaidByOviposit value="50"/>
-        </simpleMPD>
-        <nonHumanHosts name="unprotectedAnimals">
-          <mosqRelativeEntoAvailability value="1.0"/>
-          <mosqProbBiting value="0.95"/>
-          <mosqProbFindRestSite value="0.95"/>
-          <mosqProbResting value="0.99"/>
-        </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
-        <seasonality annualEIR="77.00628873180102" input="EIR">
+        <seasonality annualEIR="11.84" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="-4.546" b="2.252"/>
             <coeffic a="-0.2198" b="-0.00743"/>
@@ -237,21 +219,9 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.98"/>
         </mosq>
-        <simpleMPD>
-          <!-- Values are made up, not from field data! -->
-          <developmentDuration value="11"/>
-          <developmentSurvival value="0.6"/>
-          <femaleEggsLaidByOviposit value="50"/>
-        </simpleMPD>
-        <nonHumanHosts name="unprotectedAnimals">
-          <mosqRelativeEntoAvailability value="1.0"/>
-          <mosqProbBiting value="0.95"/>
-          <mosqProbFindRestSite value="0.95"/>
-          <mosqProbResting value="0.99"/>
-        </nonHumanHosts>
       </anopheles>
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
-        <seasonality annualEIR="223.38512656454782" input="EIR">
+        <seasonality annualEIR="34.37" input="EIR">
           <fourierSeries EIRRotateAngle="0">
             <coeffic a="0.8968" b="2.678"/>
             <coeffic a="-0.4551" b="2.599"/>
@@ -270,31 +240,22 @@
           <mosqProbOvipositing value="0.88"/>
           <mosqHumanBloodIndex value="0.871"/>
         </mosq>
-        <simpleMPD>
-          <!-- Values are made up, not from field data! -->
-          <developmentDuration value="11"/>
-          <developmentSurvival value="0.6"/>
-          <femaleEggsLaidByOviposit value="50"/>
-        </simpleMPD>
-        <nonHumanHosts name="unprotectedAnimals">
-          <mosqRelativeEntoAvailability value="1.0"/>
-          <mosqProbBiting value="0.95"/>
-          <mosqProbFindRestSite value="0.95"/>
-          <mosqProbResting value="0.99"/>
-        </nonHumanHosts>
       </anopheles>
-      <nonHumanHosts name="unprotectedAnimals" number="1.0"/>
     </vector>
   </entomology>
+  <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="40"/>
+    </diagnostic>
+  </diagnostics>
   <model>
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
-      <option name="VECTOR_SIMPLE_MPD_MODEL" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-      <option name="INNATE_MAX_DENS" value="false"/>
-      <option name="INDIRECT_MORTALITY_FIX" value="true"/>
     </ModelOptions>
-    <clinical healthSystemMemory="6"/>
+    <clinical healthSystemMemory="30d">
+      <NeonatalMortality diagnostic="standard"/>
+    </clinical>
     <human>
       <availabilityToMosquitoes>
         <group lowerbound="0" value="0.7076"/>
@@ -303,7 +264,7 @@
         <group lowerbound="5" value="1.0"/>
       </availabilityToMosquitoes>
     </human>
-    <parameters interval="5" iseed="1" latentp="3">
+    <parameters interval="5" iseed="1" latentp="15d">
       <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
       <parameter include="false" name="Estar" number="2" value="0.03247"/>
       <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>

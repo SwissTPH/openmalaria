@@ -69,6 +69,9 @@ void LognormalSampler::setMean( double mean ){
 void LognormalSampler::scaleMean(double scalar){
     mu += log(scalar);
 }
+double LognormalSampler::mean() const{
+    return exp(mu + 0.5*sigma*sigma);
+}
 double LognormalSampler::sample() const{
     if( sigma > 0.0 ){
         return random::log_normal( mu, sigma );

@@ -41,6 +41,8 @@ namespace scnXml {
 
 namespace OM {
 
+struct TimeDisplayHelper;
+
 /******************************************************************************
  * Class encapsulating simulation time (as in days and dates, not time-of-day).
  * 
@@ -78,6 +80,18 @@ public:
     
     /// Convert to time steps (rounding down)
     inline int inSteps() const{ return d / interval; }
+    //@}
+    
+    ///@brief Display helpers
+    //@{
+    /// Display as a date if possible (otherwise as a duration)
+    /// 
+    /// Usage: `cout << "Occurs at << myTime.date() << endl`
+    TimeDisplayHelper date() const;
+    /// Display as a duration with automatic units
+    /// 
+    /// Usage: `cout << "Duration is << myTimeLen.duration() << endl`
+    TimeDisplayHelper duration() const;
     //@}
     
     ///@brief Simple arithmatic modifiers (all return a copy)
@@ -300,6 +314,20 @@ private:
     friend class Simulator;
     friend class ::UnittestUtil;
 };
+
+struct TimeDisplayHelper {
+    enum DisplayAs {
+        DATE,
+        DURATION,
+    };
+    SimTime time;
+    DisplayAs mode;
+    TimeDisplayHelper(SimTime time, DisplayAs mode) :
+        time(time), mode(mode) {}
+};
+/// Allows printing of a TimeDisplayHelper
+ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay );
+
 
 }
 #endif
