@@ -143,12 +143,14 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        mon::reportEventMHI( mon::MHT_TREAT_DIAGNOSTICS, hostData.human, 1 );
+        CMDTOut result;
         if( hostData.withinHost().diagnosticResult( diagnostic ) ){
-            return positive.exec( hostData );
+            result = positive.exec( hostData );
         }else{
-            return negative.exec( hostData );
+            result = negative.exec( hostData );
         }
+        result.screened = true;
+        return result;
     }
     
 private:
