@@ -88,27 +88,27 @@ struct Params_convFactor {
     double KnP, KnM;      // IC50^n: (mg/kg) ^ n
 };
 
-double calculateParentQuantity( struct Params_convFactor p, double qtyG, double qtyP, double expAbsorb, double expPLoss ) {
-    return p.f * qtyG * expAbsorb
-        + (qtyP - p.f * qtyG) * expPLoss;
+double calculateParentQuantity( struct Params_convFactor p, double expAbsorb, double expPLoss ) {
+    return p.f * p.qtyG * expAbsorb
+        + (p.qtyP - p.f * p.qtyG) * expPLoss;
 }
 
 double calculateParentDrugFactor( struct Params_convFactor p, double expAbsorb, double expPLoss ) {
-    const double qtyP = calculateParentQuantity(p, p.qtyG, p.qtyP, expAbsorb, expPLoss);
+    const double qtyP = calculateParentQuantity(p, expAbsorb, expPLoss);
     const double cP = qtyP * p.invVdP;                  // concentrations; mg/l*/
     const double cnP = pow(cP, p.nP);                   // (mg/l) ^ n
     const double fCP = p.VP * cnP / (cnP + p.KnP);      // unitless
     return fCP;
 }
 
-double calculateMetaboliteQuantity(struct Params_convFactor p, double qtyG, double qtyP, double qtyM, double expAbsorb, double expPLoss, double t) {
-    return p.g * qtyG * expAbsorb
-        + (p.h * qtyG - p.i * qtyP) * expPLoss
-        + (p.j * qtyG - p.i * qtyP + qtyM) * exp(p.nkM * t);
+double calculateMetaboliteQuantity(struct Params_convFactor p, double expAbsorb, double expPLoss, double t) {
+    return p.g * p.qtyG * expAbsorb
+        + (p.h * p.qtyG - p.i * p.qtyP) * expPLoss
+        + (p.j * p.qtyG - p.i * p.qtyP + p.qtyM) * exp(p.nkM * t);
 }
 
 double calculateMetaboliteDrugFactor( struct Params_convFactor p, double expAbsorb, double expPLoss, double t ) {
-    const double qtyM = calculateMetaboliteQuantity(p, p.qtyG, p.qtyP, p.qtyM, expAbsorb, expPLoss, t);
+    const double qtyM = calculateMetaboliteQuantity(p, expAbsorb, expPLoss, t);
     const double cM = qtyM * p.invVdM;              // concentrations; mg/l
     const double cnM = pow(cM, p.nM);               // (mg/l) ^ n
     const double fCM = p.VM * cnM / (cnM + p.KnM);  // unitless
@@ -161,7 +161,11 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
     return exp( -intfC );  // drug factor
 }
 
-void LSTMDrugConversion::setConversionParameters(Params_convFactor& p, double nka, const LSTMDrugType& parentType, double nconv_sample, double nkP_sample, double vol_dist, const LSTMDrugType& metaboliteType, double nkM_sample, double vol_dist_metabolite, double body_mass) const{
+void LSTMDrugConversion::setConversionParameters(Params_convFactor& p,
+        double body_mass) const
+{
+    p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
+    
     // decay "constants" (dependent on body mass):
     const double nkP = nkP_sample * pow(body_mass, parentType.neg_m_exponent());      // -y
     const double nconv = nconv_sample * pow(body_mass, parentType.neg_m_exponent());  // -z
@@ -179,10 +183,17 @@ void LSTMDrugConversion::setConversionParameters(Params_convFactor& p, double nk
     p.invVdP = 1.0 / (vol_dist * body_mass); p.invVdM = 1.0 / (vol_dist_metabolite * body_mass);
 }
 
-void LSTMDrugConversion::setKillingParameters(Params_convFactor& p, const LSTMDrugType& parentType, const LSTMDrugType& metaboliteType, uint32_t genotype) const{
-    const LSTMDrugPD& pdP = parentType.getPD(genotype), &pdM = metaboliteType.getPD(genotype);
-    p.nP = pdP.slope();   p.VP = pdP.max_killing_rate();    p.KnP = pdP.IC50_pow_slope();
-    p.nM = pdM.slope();   p.VM = pdM.max_killing_rate();    p.KnM = pdM.IC50_pow_slope();
+void LSTMDrugConversion::setKillingParameters(Params_convFactor& p,
+        uint32_t genotype) const
+{
+    const LSTMDrugPD& pdP = parentType.getPD(genotype), &pdM =
+            metaboliteType.getPD(genotype);
+    p.nP = pdP.slope();
+    p.VP = pdP.max_killing_rate();
+    p.KnP = pdP.IC50_pow_slope();
+    p.nM = pdM.slope();
+    p.VM = pdM.max_killing_rate();
+    p.KnM = pdM.IC50_pow_slope();
 }
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
@@ -193,9 +204,8 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
     }
     
     Params_convFactor p;
-    p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
-    setConversionParameters(p, nka, parentType, nconv_sample, nkP_sample, vol_dist, metaboliteType, nkM_sample, vol_dist_metabolite, body_mass);
-    setKillingParameters(p, parentType, metaboliteType, genotype);
+    setConversionParameters(p, body_mass);
+    setKillingParameters(p, genotype);
     
     double time = 0.0;  // time since start of day
     double totalFactor = 1.0;   // survival factor for whole day
@@ -208,8 +218,8 @@ double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_ma
                 double duration = time_conc.first - time;
                 totalFactor *= calculateFactor(p, duration);
                 const double expAbsorb = exp(nka * duration), expPLoss = exp(p.nl * duration);
-                p.qtyM = calculateMetaboliteQuantity(p, p.qtyG, p.qtyP, p.qtyM, expAbsorb, expPLoss, duration);
-                p.qtyP = calculateParentQuantity(p, p.qtyG, p.qtyP, expAbsorb, expPLoss);
+                p.qtyM = calculateMetaboliteQuantity(p, expAbsorb, expPLoss, duration);
+                p.qtyP = calculateParentQuantity(p, expAbsorb, expPLoss);
                 p.qtyG *= expAbsorb;
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
@@ -233,8 +243,7 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     last_bm = body_mass;
     
     Params_convFactor p;
-    p.qtyG = qtyG; p.qtyP = qtyP; p.qtyM = qtyM;
-    setConversionParameters(p, nka, parentType, nconv_sample, nkP_sample, vol_dist, metaboliteType, nkM_sample, vol_dist_metabolite, body_mass);
+    setConversionParameters(p, body_mass);
     
     double time = 0.0, duration;
     size_t doses_taken = 0;
@@ -244,13 +253,13 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( (duration = time_conc.first - time) > 0.0 ){
                 const double expAbsorb = exp(nka * duration), expPLoss = exp(p.nl * duration);
-                qtyM = calculateMetaboliteQuantity(p, qtyG, qtyP, qtyM, expAbsorb, expPLoss, duration);
-                qtyP = calculateParentQuantity(p, qtyG, qtyP, expAbsorb, expPLoss);
-                qtyG *= expAbsorb;
+                p.qtyM = calculateMetaboliteQuantity(p, expAbsorb, expPLoss, duration);
+                p.qtyP = calculateParentQuantity(p, expAbsorb, expPLoss);
+                p.qtyG *= expAbsorb;
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add to quantity of drug in gut:
-            qtyG += time_conc.second;   // units: mg
+            p.qtyG += time_conc.second;   // units: mg
             doses_taken += 1;
         }else /*i.e. tomorrow or later*/{
             time_conc.first -= 1.0;
@@ -259,12 +268,16 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     if( time < 1.0 ){
         duration = 1.0 - time;
         const double expAbsorb = exp(nka * duration), expPLoss = exp(p.nl * duration);
-        qtyM = calculateMetaboliteQuantity(p, qtyG, qtyP, qtyM, expAbsorb, expPLoss, duration);
-        qtyP = calculateParentQuantity(p, qtyG, qtyP, expAbsorb, expPLoss);
-        qtyG *= expAbsorb;
+        p.qtyM = calculateMetaboliteQuantity(p, expAbsorb, expPLoss, duration);
+        p.qtyP = calculateParentQuantity(p, expAbsorb, expPLoss);
+        p.qtyG *= expAbsorb;
     }
     //NOTE: would be faster if elements were stored in reverse order — though prescribing would probably be slower
     doses.erase(doses.begin(), doses.begin() + doses_taken);
+    
+    qtyM = p.qtyM;
+    qtyP = p.qtyP;
+    qtyG = p.qtyG;
     
     util::streamValidate( qtyM );
     if( qtyP < parentType.getNegligibleConcentration() &&
