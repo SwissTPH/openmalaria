@@ -280,8 +280,8 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     qtyG = p.qtyG;
     
     util::streamValidate( qtyM );
-    if( qtyP < parentType.getNegligibleConcentration() &&
-            qtyM < metaboliteType.getNegligibleConcentration() )
+    if( qtyP < parentType.getNegligibleConcentration() * body_mass * vol_dist &&
+            qtyM < metaboliteType.getNegligibleConcentration() * body_mass * vol_dist_metabolite )
     {
         // once negligible, try to optimise so that we don't have to do
         // anything next time step
