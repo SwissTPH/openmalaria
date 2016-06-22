@@ -37,11 +37,17 @@ using namespace OM;
 using namespace OM::PkPd;
 
 // Use one of these to switch verbosity on/off:
-#define PCS_VERBOSE( x )
-//#define PCS_VERBOSE( x ) x
+// #define PCS_VERBOSE( x )
+#define PCS_VERBOSE( x ) x
+
+// Tolerances. We require either abs(a/b-1) < REL_TOL or abs(a-b) < ABS_TOL.
+// Since double-precision can represent numbers as small as 10^-300 we expect
+// good absolute tolerance.
+#define PKPD_REL_TOL 1e-3
+#define PKPD_ABS_TOL 1e-200
 
 /** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
- * model. Numbers should agree (up to rounding errors of around 5e-3). */
+ * model. Numbers should agree (up to rounding errors). */
 class PkPdComplianceSuite : public CxxTest::TestSuite
 {
 public:
@@ -96,48 +102,61 @@ public:
     };
     
     string drugDebugOutputHeader(bool hasSecondDrug, string drugName){
+        // title extension
+        if ( hasSecondDrug ){
+            cout << drugName << endl << "----" << endl;
+        }
+        
         /*
         *   Verbose output is formatted in markdown, so it can be used in a github-wiki.
         */
         string white = "\033[0m";
         string yellow = "\033[33m";
-        string green = "\033[32m"; // TODO check if really green
+        string green = "\033[32m";
         string red = "\033[31m";
-        // title
-        if ( hasSecondDrug ){
-            cout << drugName << endl << "----" << endl;
-        }
+        
+        // Header: |day|conc|rel|abs|factor|rel|abs|
         string fm = white + "|%1$=3d|"
-            + yellow + "%|14t|%2$-12d|" + red + "%|32t|%3$+-12d|" + red + "%|50t|%4$+-12d|"
-            + green  + "%|68t|%5$-12d|" + red + "%|86t|%6$+-12d|" + red + "%|102t|%7$+-12d|";
+            + white + "%2$-12d|%3%%4$+-9d" + white + "|%5%%6$+-12d" + white + "|"
+            + white  + "%7$-12d|%8%%9$+-9d" + white + "|%10%%11$+-12d" + white + "|";
         if ( hasSecondDrug ) {
             fm += white + "%|120t|%8$=4s|";
         }
         fm += white + "\n";
         // head row
         if ( !hasSecondDrug ){
-            cout << format(fm) % "day" % "factor" % "f_abs_error" % "f_rel_err %" % "conc" % "c_abs_error" % "c_rel_err %";
-            //fmter % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error;
+            cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err";
         } else {
-            cout << format(fm) % "day" % "factor" % "f_abs_error" % "f_rel_err %" % "conc" % "c_abs_error" % "c_rel_err %" % "type";
-            //fmter % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error % type;
+            cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err" % "type";
         }
         // head row separator
         string sfill = "------------";
         if ( !hasSecondDrug ){
-            cout << format(fm) % "---" % sfill % sfill % sfill % sfill % sfill % sfill;
+            cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill;
         } else {
-            cout << format(fm) % "---" % sfill % sfill % sfill % sfill % sfill % sfill % "----";
+            cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill % "----";
         }
         return fm;
     }
     
-    void drugDebugOutputLine(bool hasSecondDrug, size_t day, double factor, double f_abs_error, double f_rel_error, double concentration, double c_abs_error, double c_rel_error, string type, string fm) {
-        
+    void drugDebugOutputLine(bool hasSecondDrug, size_t day,
+            double factor, double f_abs_error, double f_rel_error,
+            double concentration, double c_abs_error, double c_rel_error,
+            string type, string fm)
+    {
+        const char* green = "\033[32m";
+        const char* red = "\033[31m";
+        // rel errors are already percentages
+        const char* col_CR = abs(c_rel_error) > PKPD_REL_TOL * 100 ? red : green;
+        const char* col_CA = abs(c_abs_error) > PKPD_ABS_TOL ? red : green;
+        const char* col_FR = abs(f_rel_error) > PKPD_REL_TOL * 100 ? red : green;
+        const char* col_FA = abs(f_abs_error) > PKPD_ABS_TOL ? red : green;
         if ( !hasSecondDrug ){
-            cout << format(fm) % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error;
+            cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
+                    % factor % col_FR % f_rel_error % col_FA % f_abs_error;
         } else {
-            cout << format(fm) % day % factor % f_abs_error % f_rel_error % concentration % c_abs_error % c_rel_error % type;
+            cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
+                    % factor % col_FR % f_rel_error % col_FA % f_abs_error % type;
         }
     }
     
@@ -164,7 +183,7 @@ public:
             // before update (after last step):
             double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
-            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], 5e-3, 1e-24);
+            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], PKPD_REL_TOL, PKPD_ABS_TOL);
             PCS_VERBOSE(res_Fac[i] = totalFac;)
             
             // update (two parts):
@@ -173,9 +192,9 @@ public:
             
             // after update:
             res_Conc[i] = proxy->getDrugConc(drugIndex);
-            TS_ASSERT_APPROX_TOL (res_Conc[i], drug_conc[i], 5e-3, 1e-18);
+            TS_ASSERT_APPROX_TOL (res_Conc[i], drug_conc[i], PKPD_REL_TOL, PKPD_ABS_TOL);
             res_Conc2[i] = hasSecondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
-            if( hasSecondDrug ) TS_ASSERT_APPROX_TOL (res_Conc2[i], drug2_conc[i], 5e-3, 1e-9);
+            if( hasSecondDrug ) TS_ASSERT_APPROX_TOL (res_Conc2[i], drug2_conc[i], PKPD_REL_TOL, PKPD_ABS_TOL);
             
             // medicate (take effect on next update):
             medicate( drugIndex, i );
