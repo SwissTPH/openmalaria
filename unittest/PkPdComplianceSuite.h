@@ -266,7 +266,7 @@ public:
         assembleTripleDosageSchedule(dose);
         const double AS_conc[] = { 0, 2.301305e-14, 2.301305e-14, 2.301305e-14, 8.245500e-28, 2.954336e-41 };
         const double DHA_conc[] = { 0, 1.142491e-10, 1.142491e-10, 1.142491e-10, 1.067784e-21, 9.940541e-33 };
-        const double drug_factors[] = { 1, 5.322908e-04, 2.833335e-07, 1.508160e-10, 1.508160e-10, 1.508160e-10 };
+        const double drug_factors[] = { 1, 0.0005322908, 2.833335e-07, 1.508160e-10, 1.508160e-10, 1.508160e-10 };
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
@@ -281,8 +281,8 @@ public:
     void testDHA () {
         const double dose = 4 * bodymass;   // 4 mg/kg * 50 kg
         assembleTripleDosageSchedule(dose);
-        const double drug_conc[] = { 0, 6.76E-009, 6.76E-009, 6.76E-009, 1.7E-017, 4.28E-026 };
-        const double drug_factors[] = { 1, 0.000355234, 0.000000126, 4.48E-011, 4.48E-011, 4.48E-011 };
+        const double drug_conc[] = { 0, 6.758386e-09, 6.758386e-09, 6.758386e-09, 1.701423e-17, 4.28333e-26 };
+        const double drug_factors[] = { 1, 0.0003552336, 1.261909e-07,4.482726e-11, 4.482726e-11, 4.482726e-11 };
         runDrugSimulations("DHA", drug_conc, drug_factors);
     }
     
@@ -290,27 +290,24 @@ public:
         const double dose = 12 * bodymass;   // 12 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
         const double drug_conc[] = { 0, 1.014434363, 1.878878305, 2.615508841, 2.228789614, 1.899249226 };
-        const double drug_factors[] = { 1, 0.031746317, 0.001007809, 0.000032, 0.00000102, 3.22E-008 };
+        const double drug_factors[] = { 1, 0.031746317, 0.001007809, 3.199346e-05, 1.015654e-06, 3.224254e-08 };
         runDrugSimulations("LF", drug_conc, drug_factors);
     }
     
     void testMQ () {
         const double dose = 8.3 * bodymass;   // 8.3 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose) ;
-        const double drug_conc[] = { 0, 0.378440101, 0.737345129, 1.077723484,
-                1.022091411, 0.969331065 };
-        const double drug_factors[] = { 1, 0.031745814, 0.001007791, 0.000032,
-                1.02e-6, 3.22E-008 };
+        const double drug_conc[] = { 0, 0.378440101, 0.737345129, 1.077723484, 1.022091411, 0.969331065 };
+        const double drug_factors[] = { 1, 0.031745814, 0.001007791, 3.199298e-05, 1.015638e-06, 3.224205e-08 };
         runDrugSimulations("MQ", drug_conc, drug_factors);
     }
     
-    // PPQ with a 1-compartment model (not preferred)
+    // PPQ with a 1-compartment model (WinterHasting2011_single; not preferred)
     void testPPQ1C (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
         const double drug_conc[] = { 0, 0.116453464, 0.2294652081, 0.339137, 0.3291139387, 0.3193871518 };
-        const double drug_factors[] = { 1, 0.0524514512, 0.0016818644,
-                5.344311603535E-005, 1.69855029226935E-006, 0.000000054 };
+        const double drug_factors[] = { 1, 0.03174892, 0.001007891, 3.199625e-05, 1.015747e-06, 3.224518e-08 };
         runDrugSimulations("PPQ", drug_conc, drug_factors);
     }
     
@@ -318,10 +315,8 @@ public:
     void testPPQ_Hodel2013 (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
-        const double drug_conc[] = { 0, 0.0724459062, 0.1218019809,
-            0.1561173647, 0.1081632036, 0.0768569742 };
-        const double drug_factors[] = { 1, 0.034225947, 0.001086594,
-            0.0000345, 0.0000011, 3.48E-008 };
+        const double drug_conc[] = { 0, 0.0724459062, 0.1218019809, 0.1561173647, 0.1081632036, 0.0768569742 };
+        const double drug_factors[] = { 1, 0.03422595, 0.001086594, 3.449438e-05, 1.095144e-06, 3.479034e-08 };
         runDrugSimulations("PPQ2", drug_conc, drug_factors);
     }
     
@@ -329,10 +324,8 @@ public:
     void testPPQ_Tarning2012AAC (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
-        const double drug_conc[] = { 0, 0.0768788483, 0.1201694285,
-            0.1526774077, 0.1016986483, 0.0798269206 };
-        const double drug_factors[] = { 1, 0.0342175609, 0.0010863068,
-            3.44853898048478E-005, 1.09489352156011E-006, 3.47830222985575E-008 };
+        const double drug_conc[] = { 0, 0.0768788483, 0.1201694285, 0.1526774077, 0.1016986483, 0.0798269206 };
+        const double drug_factors[] = { 1, 0.0342175609, 0.0010863068, 3.44853898048478E-005, 1.09489352156011E-006, 3.47830222985575E-008 };
         runDrugSimulations("PPQ3", drug_conc, drug_factors);
     }
     
