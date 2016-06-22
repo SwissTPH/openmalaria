@@ -49,7 +49,7 @@ public:
             proxy(0)
     {
         genotype = 0;                // 0 should work; we definitely don't want random allocation
-        bodymass = 50;
+        bodymass = 50 /*kg*/;
        
         PCS_VERBOSE(cout << "\n[ Unittest Output Legend: \033[35mDrug "
                 "Factor\033[0m, \033[36mDrug Concentration\033[0m ]" << endl;)
@@ -249,8 +249,8 @@ public:
     void testAS () { /* Artesunate with conversion */
         const double dose = 4 * bodymass;   // 4 mg/kg * 50 kg
         assembleTripleDosageSchedule(dose);
-        const double AS_conc[] = { 0, 2.30E-14, 2.30E-14, 2.30E-14, 8.25E-28, 2.95E-41 };
-        const double DHA_conc[] = { 0, 1.14E-10, 1.14E-10, 1.14E-10, 1.07E-21, 9.94E-33 };
+        const double AS_conc[] = { 0, 2.301305e-14, 2.301305e-14, 2.301305e-14, 8.245500e-28, 2.954336e-41 };
+        const double DHA_conc[] = { 0, 1.142491e-10, 1.142491e-10, 1.142491e-10, 1.067784e-21, 9.940541e-33 };
         const double drug_factors[] = { 1, 5.322908e-04, 2.833335e-07, 1.508160e-10, 1.508160e-10, 1.508160e-10 };
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
