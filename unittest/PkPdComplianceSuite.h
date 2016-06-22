@@ -45,8 +45,9 @@ using namespace OM::PkPd;
 // the model is allowed to approximate to zero.
 // For drug factors, the absolute tolerance is set to 1e-40 which should be
 // more than sufficient; relative errors are seen with factors smaller than this.
-#define PKPD_REL_TOL 1e-3
-#define PKPD_FACT_ABS_TOL 1e-40
+#define PKPD_CONC_REL_TOL 1e-5
+#define PKPD_FACT_REL_TOL 1e-3
+#define PKPD_FACT_ABS_TOL 1e-20
 
 /** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
  * model. Numbers should agree (up to rounding errors). */
@@ -120,28 +121,19 @@ public:
         // Header: |day|conc|rel|abs|factor|rel|abs|
         string fm = white + "|%1$=3d|"
             + white + "%2$-12d|%3%%4$+-9d" + white + "|%5%%6$+-12d" + white + "|"
-            + white  + "%7$-12d|%8%%9$+-9d" + white + "|%10%%11$+-12d" + white + "|";
-        if ( hasSecondDrug ) {
-            fm += white + "%|120t|%8$=4s|";
-        }
+            + white  + "%7$-12d|%8%%9$+-9d" + white + "|%10%%11$+-12d" + white + "|"
+            + white + "%12$=4s|";
         fm += white + "\n";
         // head row
-        if ( !hasSecondDrug ){
-            cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err";
-        } else {
-            cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err" % "type";
-        }
+        const char * type = hasSecondDrug ? "type" : "";
+        cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err" % type;
         // head row separator
         string sfill = "------------";
-        if ( !hasSecondDrug ){
-            cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill;
-        } else {
-            cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill % "----";
-        }
+        cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill % "----";
         return fm;
     }
     
-    void drugDebugOutputLine(bool hasSecondDrug, size_t day,
+    void drugDebugOutputLine(size_t day,
             double factor, double f_abs_error, double f_rel_error,
             double concentration, double c_abs_error, double c_rel_error,
             double conc_abs_tol, string type, string fm)
@@ -149,17 +141,12 @@ public:
         const char* green = "\033[32m";
         const char* red = "\033[31m";
         // rel errors are already percentages
-        const char* col_CR = abs(c_rel_error) > PKPD_REL_TOL * 100 ? red : green;
+        const char* col_CR = abs(c_rel_error) > PKPD_CONC_REL_TOL * 100 ? red : green;
         const char* col_CA = abs(c_abs_error) > conc_abs_tol ? red : green;
-        const char* col_FR = abs(f_rel_error) > PKPD_REL_TOL * 100 ? red : green;
+        const char* col_FR = abs(f_rel_error) > PKPD_FACT_REL_TOL * 100 ? red : green;
         const char* col_FA = abs(f_abs_error) > PKPD_FACT_ABS_TOL ? red : green;
-        if ( !hasSecondDrug ){
-            cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
-                    % factor % col_FR % f_rel_error % col_FA % f_abs_error;
-        } else {
-            cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
-                    % factor % col_FR % f_rel_error % col_FA % f_abs_error % type;
-        }
+        cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
+                % factor % col_FR % f_rel_error % col_FA % f_abs_error % type;
     }
     
     void runDrugSimulations (string drugName, string drug2Name,
@@ -187,7 +174,7 @@ public:
             // before update (after last step):
             double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
-            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], PKPD_REL_TOL, PKPD_FACT_ABS_TOL);
+            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], PKPD_FACT_REL_TOL, PKPD_FACT_ABS_TOL);
             PCS_VERBOSE(res_Fac[i] = totalFac;)
             
             // update (two parts):
@@ -196,9 +183,9 @@ public:
             
             // after update:
             res_Conc[i] = proxy->getDrugConc(drugIndex);
-            TS_ASSERT_APPROX_TOL (res_Conc[i], drug_conc[i], PKPD_REL_TOL, conc_abs_tol);
+            TS_ASSERT_APPROX_TOL (res_Conc[i], drug_conc[i], PKPD_CONC_REL_TOL, conc_abs_tol);
             res_Conc2[i] = hasSecondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
-            if( hasSecondDrug ) TS_ASSERT_APPROX_TOL (res_Conc2[i], drug2_conc[i], PKPD_REL_TOL, conc_abs_tol2);
+            if( hasSecondDrug ) TS_ASSERT_APPROX_TOL (res_Conc2[i], drug2_conc[i], PKPD_CONC_REL_TOL, conc_abs_tol2);
             
             // medicate (take effect on next update):
             medicate( drugIndex, i );
@@ -216,13 +203,14 @@ public:
                 double c2_rel_error = hasSecondDrug ? floor((res_Conc2[i] / drug2_conc[i] - 1 )*1000000)/10000: 0.0;
 
                 // (parent) drug debug
-                drugDebugOutputLine(hasSecondDrug, i,
+                const char * type = hasSecondDrug ? "P" : "";
+                drugDebugOutputLine(i,
                         res_Fac[i], f_abs_error, f_rel_error, res_Conc[i],
-                        c_abs_error, c_rel_error, conc_abs_tol, "P", fmt);
+                        c_abs_error, c_rel_error, conc_abs_tol, type, fmt);
 
                 // metabolite debug
                 if( hasSecondDrug ) {
-                    drugDebugOutputLine(true, i,
+                    drugDebugOutputLine(i,
                             res_Fac[i], f_abs_error, f_rel_error,
                             res_Conc2[i], c2_abs_error, c2_rel_error, conc_abs_tol2, "M", fmt);
                 }
@@ -249,10 +237,10 @@ public:
     void testAR1 () { /* Artemether no conversion */
         const double dose = 1.7 * bodymass;   // 1.7 mg/kg * 50 kg
         assembleHexDosageSchedule(dose);
-        const double drug_conc[] = { 0.0, 0.0153520114,
-            0.0156446685, 0.01560247467, 0.000298342, 5.68734e-6 };
-        const double drug_factors[] = { 1,1.0339328333924E-012, 1.06887289270302E-024,
-            1.10329635519261E-036, 4.73064069783747E-042, 4.73064069783747E-042 };
+        const double drug_conc[] = { 0.0, 0.01535201,
+            0.01564467, 0.01565025, 0.0002983425, 5.687336e-06 };
+        const double drug_factors[] = { 1, 1.033933e-12, 1.068873e-24,
+            1.103296e-36, 4.730641e-42, 4.730641e-42 };
         runDrugSimulations("AR1", drug_conc, drug_factors);
     }
     
