@@ -41,10 +41,12 @@ using namespace OM::PkPd;
 #define PCS_VERBOSE( x ) x
 
 // Tolerances. We require either abs(a/b-1) < REL_TOL or abs(a-b) < ABS_TOL.
-// Since double-precision can represent numbers as small as 10^-300 we expect
-// good absolute tolerance.
+// For drug concentrations, negligible concentrations are defined, below which
+// the model is allowed to approximate to zero.
+// For drug factors, the absolute tolerance is set to 1e-40 which should be
+// more than sufficient; relative errors are seen with factors smaller than this.
 #define PKPD_REL_TOL 1e-3
-#define PKPD_ABS_TOL 1e-200
+#define PKPD_FACT_ABS_TOL 1e-40
 
 /** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
  * model. Numbers should agree (up to rounding errors). */
@@ -142,15 +144,15 @@ public:
     void drugDebugOutputLine(bool hasSecondDrug, size_t day,
             double factor, double f_abs_error, double f_rel_error,
             double concentration, double c_abs_error, double c_rel_error,
-            string type, string fm)
+            double conc_abs_tol, string type, string fm)
     {
         const char* green = "\033[32m";
         const char* red = "\033[31m";
         // rel errors are already percentages
         const char* col_CR = abs(c_rel_error) > PKPD_REL_TOL * 100 ? red : green;
-        const char* col_CA = abs(c_abs_error) > PKPD_ABS_TOL ? red : green;
+        const char* col_CA = abs(c_abs_error) > conc_abs_tol ? red : green;
         const char* col_FR = abs(f_rel_error) > PKPD_REL_TOL * 100 ? red : green;
-        const char* col_FA = abs(f_abs_error) > PKPD_ABS_TOL ? red : green;
+        const char* col_FA = abs(f_abs_error) > PKPD_FACT_ABS_TOL ? red : green;
         if ( !hasSecondDrug ){
             cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
                     % factor % col_FR % f_rel_error % col_FA % f_abs_error;
@@ -174,6 +176,8 @@ public:
         )
         size_t drugIndex = LSTMDrugType::findDrug( drugName );
         size_t drug2Ind = hasSecondDrug ? LSTMDrugType::findDrug( drug2Name ) : 0;
+        double conc_abs_tol = LSTMDrugType::get(drugIndex).getNegligibleConcentration();
+        double conc_abs_tol2 = hasSecondDrug ? LSTMDrugType::get(drug2Ind).getNegligibleConcentration() : 0;
         const size_t maxDays = 6;
         PCS_VERBOSE(double res_Fac[maxDays];)
         double res_Conc[maxDays];
@@ -183,7 +187,7 @@ public:
             // before update (after last step):
             double fac = proxy->getDrugFactor(genotype, bodymass);
             totalFac *= fac;
-            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], PKPD_REL_TOL, PKPD_ABS_TOL);
+            TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], PKPD_REL_TOL, PKPD_FACT_ABS_TOL);
             PCS_VERBOSE(res_Fac[i] = totalFac;)
             
             // update (two parts):
@@ -192,9 +196,9 @@ public:
             
             // after update:
             res_Conc[i] = proxy->getDrugConc(drugIndex);
-            TS_ASSERT_APPROX_TOL (res_Conc[i], drug_conc[i], PKPD_REL_TOL, PKPD_ABS_TOL);
+            TS_ASSERT_APPROX_TOL (res_Conc[i], drug_conc[i], PKPD_REL_TOL, conc_abs_tol);
             res_Conc2[i] = hasSecondDrug ? proxy->getDrugConc(drug2Ind) : 0.0;
-            if( hasSecondDrug ) TS_ASSERT_APPROX_TOL (res_Conc2[i], drug2_conc[i], PKPD_REL_TOL, PKPD_ABS_TOL);
+            if( hasSecondDrug ) TS_ASSERT_APPROX_TOL (res_Conc2[i], drug2_conc[i], PKPD_REL_TOL, conc_abs_tol2);
             
             // medicate (take effect on next update):
             medicate( drugIndex, i );
@@ -212,11 +216,15 @@ public:
                 double c2_rel_error = hasSecondDrug ? floor((res_Conc2[i] / drug2_conc[i] - 1 )*1000000)/10000: 0.0;
 
                 // (parent) drug debug
-                drugDebugOutputLine(hasSecondDrug, i, res_Fac[i], f_abs_error, f_rel_error, res_Conc[i], c_abs_error, c_rel_error, "P", fmt);
+                drugDebugOutputLine(hasSecondDrug, i,
+                        res_Fac[i], f_abs_error, f_rel_error, res_Conc[i],
+                        c_abs_error, c_rel_error, conc_abs_tol, "P", fmt);
 
                 // metabolite debug
                 if( hasSecondDrug ) {
-                    drugDebugOutputLine(true, i, res_Fac[i], f_abs_error, f_rel_error, res_Conc2[i], c2_abs_error, c2_rel_error, "M", fmt);
+                    drugDebugOutputLine(true, i,
+                            res_Fac[i], f_abs_error, f_rel_error,
+                            res_Conc2[i], c2_abs_error, c2_rel_error, conc_abs_tol2, "M", fmt);
                 }
             }
         )
