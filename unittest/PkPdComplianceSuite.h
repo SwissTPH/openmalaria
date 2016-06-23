@@ -37,17 +37,18 @@ using namespace OM;
 using namespace OM::PkPd;
 
 // Use one of these to switch verbosity on/off:
-// #define PCS_VERBOSE( x )
-#define PCS_VERBOSE( x ) x
+#define PCS_VERBOSE( x )
+// #define PCS_VERBOSE( x ) x
 
 // Tolerances. We require either abs(a/b-1) < REL_TOL or abs(a-b) < ABS_TOL.
 // For drug concentrations, negligible concentrations are defined, below which
 // the model is allowed to approximate to zero.
-// For drug factors, the absolute tolerance is set to 1e-40 which should be
-// more than sufficient; relative errors are seen with factors smaller than this.
+// For drug factors, we don't actually need a huge amount of precision in the
+// simulator (models can do at least 1e-3 relative precision, except that
+// required accuracy of the integration algorithms has been lowered for speed).
 #define PKPD_CONC_REL_TOL 1e-5
 #define PKPD_FACT_REL_TOL 1e-3
-#define PKPD_FACT_ABS_TOL 1e-20
+#define PKPD_FACT_ABS_TOL 1e-3
 
 /** Test outcomes from the PK/PD code in OpenMalaria with LSTM's external
  * model. Numbers should agree (up to rounding errors). */
@@ -266,7 +267,10 @@ public:
         assembleTripleDosageSchedule(dose);
         const double AS_conc[] = { 0, 2.301305e-14, 2.301305e-14, 2.301305e-14, 8.245500e-28, 2.954336e-41 };
         const double DHA_conc[] = { 0, 1.142491e-10, 1.142491e-10, 1.142491e-10, 1.067784e-21, 9.940541e-33 };
-        const double drug_factors[] = { 1, 0.0005322908, 2.833335e-07, 1.508160e-10, 1.508160e-10, 1.508160e-10 };
+        // These are the factors produced by Kay et al with a slightly different formula:
+        //const double drug_factors[] = { 1, 0.0005322908, 2.833335e-07, 1.508160e-10, 1.508160e-10, 1.508160e-10 };
+        //TODO: these values should ideally be reproduced externally by Kay & Hastings scripts:
+        const double drug_factors[] = { 1, 0.000515457, 2.65696e-07, 1.36955e-10, 1.36955e-10, 1.36955e-10 };
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     

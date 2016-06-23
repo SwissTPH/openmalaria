@@ -115,6 +115,7 @@ double calculateMetaboliteDrugFactor( struct Params_convFactor p, double expAbso
     return fCM;
 }
 
+// size_t intg_steps = 0;
 /** Function for calculating concentration and then killing function at time t
  * 
  * @param t The variable being integrated over (in this case, time since start
@@ -123,6 +124,7 @@ double calculateMetaboliteDrugFactor( struct Params_convFactor p, double expAbso
  * @return killing rate (unitless)
  */
 double func_convFactor( double t, void* pp ){
+//     intg_steps += 1;
     const Params_convFactor& p = *static_cast<const Params_convFactor*>( pp );
     const double expAbsorb = exp(p.nka * t), expPLoss = exp(p.nl * t);
     const double fCP = calculateParentDrugFactor( p, expAbsorb, expPLoss );
@@ -142,11 +144,12 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
     F.params = static_cast<void*>(const_cast<Params_convFactor*>(&p));
     
     // NOTE: tolerances are arbitrary, but seem to be sufficient
-    const double abs_eps = 1e-3, rel_eps = 1e-3;
+    const double abs_eps = 1e-2, rel_eps = 1e-2;
     // NOTE: 1 through 6 are different algorithms of increasing complexity
     const int qag_rule = 1;     // alg 1 seems to be good enough
     double intfC, err_eps;      // intfC will carry our result; err_eps is a measure of accuracy of the result
     
+//     intg_steps = 0;
     int r = gsl_integration_qag (&F, 0.0, duration, abs_eps, rel_eps,
                                  GSL_INTG_CONV_MAX_ITER, qag_rule, gsl_intgr_conv_wksp, &intfC, &err_eps);
     if( r != 0 ){
@@ -158,6 +161,8 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
         msg << "calculateFactor: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
         throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
     }
+//     cout << "integration steps: " << intg_steps << endl;
+//     cout << "duration: " << duration << ", AUC: " << intfC << endl;
     return exp( -intfC );  // drug factor
 }
 
