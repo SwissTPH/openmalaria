@@ -250,7 +250,7 @@ public:
         assembleHexDosageSchedule(dose);
         const double AR_conc[] = { 0, 0.0001825220, 0.0001825231, 0.0001825231, 1.146952e-09, 7.189475e-15 };
         const double DHA_conc[] = { 0, 0.0002013114, 0.0002013126, 0.0002013126, 1.266891e-09, 7.941293e-15 };
-        const double drug_factors[] = { 1, 1.695266e-07, 2.838279e-14, 4.740382e-21, 4.751845e-21, 4.751845e-21 };
+        const double drug_factors[] = { 1, 1.695266e-07, 2.838279e-14, 2.838279e-14, 2.838279e-14, 2.838279e-14 };
         runDrugSimulations("AR", "DHA_AR", AR_conc, DHA_conc, drug_factors);
     }
     
@@ -268,9 +268,7 @@ public:
         const double AS_conc[] = { 0, 2.301305e-14, 2.301305e-14, 2.301305e-14, 8.245500e-28, 2.954336e-41 };
         const double DHA_conc[] = { 0, 1.142491e-10, 1.142491e-10, 1.142491e-10, 1.067784e-21, 9.940541e-33 };
         // These are the factors produced by Kay et al with a slightly different formula:
-        //const double drug_factors[] = { 1, 0.0005322908, 2.833335e-07, 1.508160e-10, 1.508160e-10, 1.508160e-10 };
-        //TODO: these values should ideally be reproduced externally by Kay & Hastings scripts:
-        const double drug_factors[] = { 1, 0.000515457, 2.65696e-07, 1.36955e-10, 1.36955e-10, 1.36955e-10 };
+        const double drug_factors[] = { 1, 0.0005152782, 2.655117e-07, 1.368124e-10, 1.368124e-10, 1.368124e-10 };
         runDrugSimulations("AS", "DHA_AS", AS_conc, DHA_conc, drug_factors);
     }
     
@@ -320,7 +318,7 @@ public:
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
         const double drug_conc[] = { 0, 0.0724459062, 0.1218019809, 0.1561173647, 0.1081632036, 0.0768569742 };
-        const double drug_factors[] = { 1, 0.03422595, 0.001086594, 3.449438e-05, 1.095144e-06, 3.479034e-08 };
+        const double drug_factors[] = { 1, 0.03422595, 0.001086594, 3.449438e-05, 3.449438e-05, 3.449438e-05 };
         runDrugSimulations("PPQ2", drug_conc, drug_factors);
     }
     
