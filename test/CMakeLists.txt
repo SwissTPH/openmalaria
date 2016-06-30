@@ -22,7 +22,9 @@ set (OM_BOXTEST_NAMES
   Empirical
   # ESCMTest (cannot be updated to new format due to dropped features and weirdness)
   ESTS
+  Genotypes
   IRS30
+  KK_20150612
   Molineaux
   MolPairwise
   MSAT
@@ -36,14 +38,14 @@ set (OM_BOXTEST_NAMES
   Rach5IC
   SimpleMPDLarviciding
   SimpleMPDTest
+  SubPopRemoval
+  TrapTest
   VecFullTest
   # disabled because the vector lifecycle model isn't yet done:
   # VecLCMonthly VecLCTest
   VecMonthly
   VecTest
   Vivax
-  Genotypes
-  SubPopRemoval
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

@@ -112,7 +112,13 @@ namespace ExtraAsserts {
   
   /** Wrapper function. Used because implementation as a macro involves re-evaluation of x and y. */
   void assert_approx (const char *file, unsigned line, double x, double y, double r, double a) {
-      ___ETS_ASSERT_DELTA(file,line,x,y,ExtraAsserts::tolerance(x,y,r,a),0);
+    const double rel = fabs(x / y) - 1.0;
+    if (rel < r && rel > -r) {
+      // relative difference small enough; skip delta check
+      return;
+    }
+    // check absolute difference via the provided routine:
+    ___ETS_ASSERT_DELTA(file,line,x,y,a,"not approx equal");
   }
   
   /** Basic approximate equality test for doubles, using relative precision.

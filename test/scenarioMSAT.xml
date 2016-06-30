@@ -66,6 +66,7 @@
       <option name="nMassITNs" value="true"/>
       <option name="nMDAs" value="true"/>
       <option name="nNmfDeaths" value="true"/>
+      <option name="nMassScreenings"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
       <!-- we don't actually need many for testing -->

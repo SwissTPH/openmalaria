@@ -10,8 +10,12 @@ matrix:
   allow_failures:
     - os: osx
     - compiler: clang
+  exclude:
+    - os: osx
+      compiler: gcc
 
-sudo: false
+sudo: required
+dist: trusty
 
 language: cpp
 

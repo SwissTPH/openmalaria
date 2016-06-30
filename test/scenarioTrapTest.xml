@@ -75,7 +75,7 @@ For simulating Rusinga
       <group upperbound="99"/>
     </ageGroup>
   </monitoring>
-  <interventions name="Full Set">
+  <interventions name="ITN + OBT">
     <human>
       <component id="ITN" name="Extended ITNs">
         <ITN>

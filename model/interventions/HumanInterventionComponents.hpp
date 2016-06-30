@@ -353,6 +353,9 @@ public:
         if( out.treated ){
             mon::reportEventMHD( mon::MHD_TREAT, human, method );
         }
+        if( out.screened ){
+            mon::reportEventMHD( mon::MHD_SCREEN, human, method );
+        }
     }
     
     virtual Component::Type componentType() const{ return Component::CM_DT; }

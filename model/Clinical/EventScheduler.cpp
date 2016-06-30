@@ -265,6 +265,9 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                 }
             }
         }
+        if( auxOut.screened ){
+            mon::reportEventMHI( mon::MHT_TREAT_DIAGNOSTICS, human, 1 );
+        }
 	
 	if ( true /*FIXME auxOut.hospitalisation != CMAuxOutput::NONE*/ ) {	// in hospital
 	    pgState = Episode::State (pgState | Episode::EVENT_IN_HOSPITAL);

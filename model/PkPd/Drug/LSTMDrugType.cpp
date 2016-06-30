@@ -95,6 +95,10 @@ size_t LSTMDrugType::findDrug(string _abbreviation) {
     return index;
 }
 
+LSTMDrugType& LSTMDrugType::get(size_t index) { //static
+    return drugTypes.at(index);
+}
+
 const vector< size_t >& LSTMDrugType::getDrugsInUse(){
     return drugsInUse;
 }
