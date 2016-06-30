@@ -14,7 +14,8 @@ matrix:
     - os: osx
       compiler: gcc
 
-sudo: false
+sudo: required
+dist: trusty
 
 language: cpp
 
