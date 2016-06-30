@@ -109,6 +109,10 @@ public:
      * index if it doesn't throw. */
     static size_t findDrug(string abbreviation);
     
+    /** Get a reference to drug type data for some index. This can't be used
+     * to change the data. */
+    static LSTMDrugType& get(size_t index);
+    
     /** Get a list of all drug types which are (possibly) being used. */
     static const vector<size_t>& getDrugsInUse();
     
