@@ -12,7 +12,7 @@ matrix:
     - compiler: clang
   exclude:
     - os: osx
-      compiler: gcc
+    - compiler: gcc
 
 sudo: false
 
