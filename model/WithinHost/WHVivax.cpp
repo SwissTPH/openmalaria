@@ -281,14 +281,15 @@ WHVivax::WHVivax( double comorbidityFactor ) :
     pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() ),
     pSevere( 0.0 )
 {
-    if( comorbidityFactor != 1.0 )
+    if( comorbidityFactor != 1.0 ){
+        throw TRACED_EXCEPTION_DEFAULT( "This vivax model cannot be used with comorbidity heterogeneity" );
+    }
 #ifdef WHVivaxSamples
     if( sampleHost == 0 ){
         sampleHost = this;
         cout << "New host" << endl;
     }
 #endif
-        throw TRACED_EXCEPTION_DEFAULT( "This vivax model cannot be used with comorbidity heterogeneity" );
     noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
 }
 
