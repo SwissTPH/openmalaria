@@ -42,8 +42,8 @@ namespace Pathogenesis {
 
 class WHVivax;
 /**
- * A brood is the set of hypnozoites resulting from an innoculation, plus a
- * combined blood stage.
+ * A brood is the set of hypnozoites resulting from an innoculation, plus an
+ * associated blood stage.
  * 
  * In this model, if a hypnozoite releases while a blood stage infection
  * initiated by another hypnozoite from the same brood is active, the newly

@@ -158,6 +158,7 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     releases.insert( sim::ts0() + latentP );
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
+        //TODO: why do we have two latent periods (latentP + latentReleaseDays added in sampleReleaseDelay())?
         SimTime randomReleaseDelay = sampleReleaseDelay();
         SimTime timeToRelease = sim::ts0() + latentP + randomReleaseDelay;
         bool inserted = releases.insert( timeToRelease ).second;
@@ -372,7 +373,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             // Sample for each new blood stage infection: the chance of some
             // clinical event.
             
-            bool clinicalEvent;
+            bool clinicalEvent = false;
             if( result.newPrimaryBS ){
                 // Blood stage is primary. oldCumInf wasn't updated yet.
                 double pPrimaryInfEvent = pPrimaryA * pPrimaryB / (pPrimaryB+oldCumInf);
@@ -408,6 +409,8 @@ void WHVivax::update(int nNewInfs, vector<double>&,
         if( result.isFinished ) inf = infections.erase( inf );
         else ++inf;
     }
+    
+    //TODO were pEvent and pFirstRelapseEvent meant to get updated?
     
     //NOTE: currently we don't model co-infection or indirect deaths
     if( morbidity == Pathogenesis::NONE ){
@@ -568,7 +571,7 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
                 "although secondRelease element is present, will only calculate for a first release." << endl;
         }
         assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
-    }
+    } // else pSecondRelease is NaN and other values don't get used
     bloodStageProtectionLatency = sim::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
