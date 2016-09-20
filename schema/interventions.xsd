@@ -414,8 +414,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:attribute name="minValue" type="xs:double" use="optional">
                   <xs:annotation>
                     <xs:documentation>
-                      Minimum value. If specified, the measured variable must be greater than this
-                      value for the condition to be satisfied.
+                      Minimum value. If specified, the measured variable must be greater than 
+                      or equal to this value for the condition to be satisfied.
                     </xs:documentation>
                     <xs:appinfo>name:Minimum value;</xs:appinfo>
                   </xs:annotation>
@@ -423,8 +423,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:attribute name="maxValue" type="xs:double" use="optional">
                   <xs:annotation>
                     <xs:documentation>
-                      Maximum value. If specified, the measured variable must be less than this
-                      value for the condition to be satisfied.
+                      Maximum value. If specified, the measured variable must be less than or
+                      equal to this value for the condition to be satisfied.
                     </xs:documentation>
                     <xs:appinfo>name:Maximum value;</xs:appinfo>
                   </xs:annotation>
