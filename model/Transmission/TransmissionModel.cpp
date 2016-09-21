@@ -85,8 +85,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    //NOTE: because prevNow may be negative, we can't use mod_nn (hence moduloYearSteps):
-    stream<<'\t'<<initialisationEIR[util::mod(sim::prevNow() / sim::oneTS(), sim::stepsPerYear())];
+    int prevStep = (sim::now() - sim::oneTS()) / sim::oneTS();
+    //Note: prevStep may be negative, hence util::mod not mod_nn:
+    stream<<'\t'<<initialisationEIR[util::mod(prevStep, sim::stepsPerYear())];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;

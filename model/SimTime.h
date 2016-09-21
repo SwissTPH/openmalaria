@@ -205,17 +205,17 @@ public:
         assert(in_update);      // should only be used during updates
         return time1;
     }
-    /** Time during init, monitoring and intervention deployment (i.e. whenever
-     * a human or mosquito update is not in progress).
-     *
-     * This is equal to ts1() from the last update and ts0() from this update.
+    /**
+     * Time steps are mid-day to mid-day, and this is the time at mid-day (i.e.
+     * this equals ts1 from the last step and ts0 from the next one).
+     * 
+     * This is for monitoring and intervention deployment which happens between
+     * updates. Cannot be used during human or vector update.
      */
     static inline SimTime now(){
         assert(!in_update);     // only for use outside of step updates
         return time0;   // which is equal to time1 outside of updates, but that's a detail
     }
-    /** now() - 1 with same requirement only for use outside of updates. */
-    static inline SimTime prevNow(){ return now() - oneTS(); }
     /** During updates, this is ts0; between, this is now. */
     static inline SimTime nowOrTs0(){ return time0; }
     /** During updates, this is ts1; between, this is now. */
@@ -301,6 +301,22 @@ public:
     
 private:
     static void init( const scnXml::Scenario& scenario );
+    
+    // Start of update. Set in_update and increment time1.
+    static inline void start_update(){
+        time1 += oneTS();
+#ifndef NDEBUG
+        in_update = true;
+#endif
+    }
+    // Start of update. Set in_update and increment time1.
+    static inline void end_update(){
+#ifndef NDEBUG
+        in_update = false;
+#endif
+        time0 = time1;
+        interv_time += oneTS();
+    }
     
     static SimTime max_human_age;   // constant
     // Global variables
