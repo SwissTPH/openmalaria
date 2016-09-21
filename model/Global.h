@@ -40,7 +40,7 @@
 // explicit namespace usage avoids confusion with std versions available sometimes
 
 // Checkpointing and time-step operations are used _everywhere_:
-#include "SimTime.h"    // includes util/checkpoint.h and util/mod.h
+#include "sim.h"    // includes util/checkpoint.h and util/mod.h
 
 // foreach "keyword"
 #include <boost/foreach.hpp>

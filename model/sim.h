@@ -29,10 +29,6 @@
 #include "util/mod.h"
 #include "util/checkpoint.h"
 
-#include <iostream>
-#include <cassert>
-#include <string>
-
 class UnittestUtil;
 
 namespace scnXml {
@@ -249,7 +245,22 @@ inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
     return SimTime(util::mod_nn(lhs.d, rhs.d));
 }
 
-/** Encapsulation of SimTime static members. */
+struct TimeDisplayHelper {
+    enum DisplayAs {
+        DATE,
+        DURATION,
+    };
+    SimTime time;
+    DisplayAs mode;
+    TimeDisplayHelper(SimTime time, DisplayAs mode) :
+        time(time), mode(mode) {}
+};
+/// Allows printing of a TimeDisplayHelper
+ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay );
+
+
+
+/** Encapsulates static variables: sim time. */
 class sim {
 public:
     ///@brief Accessors, all returning a copy to make read-only
@@ -331,20 +342,6 @@ private:
     friend class Simulator;
     friend class ::UnittestUtil;
 };
-
-struct TimeDisplayHelper {
-    enum DisplayAs {
-        DATE,
-        DURATION,
-    };
-    SimTime time;
-    DisplayAs mode;
-    TimeDisplayHelper(SimTime time, DisplayAs mode) :
-        time(time), mode(mode) {}
-};
-/// Allows printing of a TimeDisplayHelper
-ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay );
-
 
 }
 #endif
