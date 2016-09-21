@@ -40,9 +40,9 @@ LCEmergence::LCEmergence() :
             initialP_A(numeric_limits<double>::quiet_NaN()),
             initialP_df(numeric_limits<double>::quiet_NaN())
 {
-    quinquennialP_dif.assign (sim::fromYearsI(5), 0.0);
+    quinquennialP_dif.assign (SimTime::fromYearsI(5), 0.0);
 #if 0
-    mosqEmergeRate.resize (sim::oneYear()); // Only needs to be done here if loading from checkpoint
+    mosqEmergeRate.resize (SimTime::oneYear()); // Only needs to be done here if loading from checkpoint
 #endif
 }
 
@@ -191,7 +191,7 @@ double LCEmergence::get( SimTime d0, SimTime dYear1, double nOvipositing ) {
 }
 
 void LCEmergence::updateStats( SimTime d1, double tsP_dif, double S_v ){
-    quinquennialP_dif[mod_nn(d1, sim::fromYearsI(5))] = tsP_dif;
+    quinquennialP_dif[mod_nn(d1, SimTime::fromYearsI(5))] = tsP_dif;
 }
 
 void LCEmergence::checkpoint (istream& stream){ (*this) & stream; }

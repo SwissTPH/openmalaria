@@ -32,7 +32,7 @@ void vectors::scale (vector<double>& vec, double a) {
     vec[i] *= a;
 }
 void vectors::scale (vecDay<double>& vec, double a) {
-  for( SimTime i = sim::zero(); i < vec.size(); i += sim::oneDay() )
+  for( SimTime i = SimTime::zero(); i < vec.size(); i += SimTime::oneDay() )
     vec[i] *= a;
 }
 void vectors::scale (vecDay2D<double>& vec, double a) {
@@ -47,7 +47,7 @@ double vectors::sum (const vector<double>& vec) {
 }
 double vectors::sum (const vecDay<double>& vec) {
   double r = 0.0;
-  for( SimTime i = sim::zero(); i < vec.size(); i += sim::oneDay() )
+  for( SimTime i = SimTime::zero(); i < vec.size(); i += SimTime::oneDay() )
     r += vec[i];
   return r;
 }
@@ -154,7 +154,7 @@ void vectors::expIDFT( vecDay< double >& tArray, const std::vector< double >& FC
     // Calculate inverse discrete Fourier transform
     // TODO: This may not interpolate sensibly. See for example
     // https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Trigonometric_interpolation_polynomial
-    for( SimTime t = sim::zero(); t < T2; t += sim::oneDay() ){
+    for( SimTime t = SimTime::zero(); t < T2; t += SimTime::oneDay() ){
         double temp = FC[0];
         double wt = w*t.inDays() - rAngle;
         for(size_t n = 1; n < N; ++n) {

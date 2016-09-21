@@ -89,7 +89,7 @@ namespace OM { namespace Monitoring {
     
     // List that we report.
     vector< Callback* > toReport;
-    SimTime ctsPeriod = sim::zero();
+    SimTime ctsPeriod = SimTime::zero();
     bool duringInit = false;
     
     
@@ -107,13 +107,13 @@ namespace OM { namespace Monitoring {
     void ContinuousType::init (const scnXml::Monitoring& monitoring, bool isCheckpoint) {
 	const scnXml::Monitoring::ContinuousOptional& ctsOpt = monitoring.getContinuous();
 	if( ctsOpt.present() == false ) {
-	    ctsPeriod = sim::zero();
+	    ctsPeriod = SimTime::zero();
 	    return;
 	}
 	try{
             //NOTE: if changing XSD, this should not have a default unit:
             ctsPeriod = UnitParse::readShortDuration( ctsOpt.get().getPeriod(), UnitParse::STEPS );
-            if( ctsPeriod < sim::oneTS() )
+            if( ctsPeriod < SimTime::oneTS() )
                 throw util::format_error("must be >= 1 time step");
         }catch( const util::format_error& e ){
             throw xml_scenario_error( string("monitoring/continuous/period: ").append(e.message()) );
@@ -187,7 +187,7 @@ namespace OM { namespace Monitoring {
     }
    
    void ContinuousType::finalise() {
-         if( ctsPeriod == sim::zero() )
+         if( ctsPeriod == SimTime::zero() )
              return;     // output disabled
 #ifndef WITHOUT_BOINC
         if (util::BoincWrapper::fileExists(compressedCtsoutName.c_str())){
@@ -203,13 +203,13 @@ namespace OM { namespace Monitoring {
 #endif
     }
     void ContinuousType::checkpoint (ostream& stream){
-        if( ctsPeriod == sim::zero() )
+        if( ctsPeriod == SimTime::zero() )
             return;	// output disabled
 	
 	streamOff & stream;
     }
     void ContinuousType::checkpoint (istream& stream){
-        if( ctsPeriod == sim::zero() )
+        if( ctsPeriod == SimTime::zero() )
             return;	// output disabled
 	
 	/* We attempt to resume output correctly after a reload by:
@@ -241,20 +241,20 @@ namespace OM { namespace Monitoring {
     }
     
     void ContinuousType::update (const Population& population){
-        if( ctsPeriod == sim::zero() )
+        if( ctsPeriod == SimTime::zero() )
             return;	// output disabled
         if( !duringInit ){
-            if( sim::intervNow() < sim::zero() || mod_nn(sim::intervNow(), ctsPeriod) != sim::zero() )
+            if( sim::intervNow() < SimTime::zero() || mod_nn(sim::intervNow(), ctsPeriod) != SimTime::zero() )
                 return;
         } else {
-            if( mod_nn(sim::now(), ctsPeriod) != sim::zero() )
+            if( mod_nn(sim::now(), ctsPeriod) != SimTime::zero() )
                 return;
             ctsOStream << sim::now().inSteps() << '\t';
         }
 	
 	util::BoincWrapper::beginCriticalSection();	// see comment in staticCheckpoint
 	
-        if( duringInit && sim::intervNow() < sim::zero() ){
+        if( duringInit && sim::intervNow() < SimTime::zero() ){
             ctsOStream << "nan";
         }else{
             ctsOStream << sim::intervNow().inSteps();

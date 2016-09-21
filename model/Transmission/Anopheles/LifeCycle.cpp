@@ -49,18 +49,18 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
     }
     
     // This is set later, by ResourceFitter class.
-    invLarvalResources.resize(sim::oneYear());
+    invLarvalResources.resize(SimTime::oneYear());
 }
 
 double LifeCycleParams::getResAvailability() const{
     double val = 0.0;
     // get resources available on the next time step
-    for( SimTime d = sim::now(), end = sim::now() + sim::oneTS(); d < end;
-            d += sim::oneDay() ){
-        val += 1.0 / invLarvalResources[mod_nn(d, sim::oneYear())];
+    for( SimTime d = sim::now(), end = sim::now() + SimTime::oneTS(); d < end;
+            d += SimTime::oneDay() ){
+        val += 1.0 / invLarvalResources[mod_nn(d, SimTime::oneYear())];
     }
     //TODO: why are units per time step?
-    return val / sim::oneTS().inDays();
+    return val / SimTime::oneTS().inDays();
 }
 
 void LifeCycle::init( const LifeCycleParams& lcParams ){
@@ -82,9 +82,9 @@ double LifeCycle::getResRequirements( const LifeCycleParams& lcParams ) const{
 double LifeCycle::updateEmergence( const LifeCycleParams& lcParams,
                                            double nOvipositingMosqs,
                                            SimTime d0 ){
-    SimTime d1 = d0 + sim::oneDay();
-    // Day of year. Note that d==sim::oneTS() corresponds to Jan 1st, index 0.
-    SimTime dYear1 = mod_nn(d0, sim::oneYear());
+    SimTime d1 = d0 + SimTime::oneDay();
+    // Day of year. Note that d==SimTime::oneTS() corresponds to Jan 1st, index 0.
+    SimTime dYear1 = mod_nn(d0, SimTime::oneYear());
     // num newly emerging adults comes from num new pupae pupalStageDuration days ago:
     size_t pupaeIndex = mod_nn(d1, lcParams.pupalStageDuration);
     double newAdults = lcParams.pSurvPupalStage * newPupae[pupaeIndex];

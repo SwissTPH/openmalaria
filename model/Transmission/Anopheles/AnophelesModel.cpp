@@ -282,7 +282,7 @@ void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime li
     baitedTraps.push_back(data);
 }
 
-// Every sim::oneTS() days:
+// Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod (const OM::Population& population,
                                      vector2D<double>& popProbTransmission,
                                      size_t sIndex,
@@ -387,8 +387,8 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
-    const SimTime nextTS = sim::ts0() + sim::oneTS();
-    for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += sim::oneDay() ){
+    const SimTime nextTS = sim::ts0() + SimTime::oneTS();
+    for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay() ){
         transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, partialEIR, P_Ai_base );
     }
 }

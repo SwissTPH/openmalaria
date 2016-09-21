@@ -39,9 +39,9 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
     const double maxProp = 0.999;       //NOTE: this could be exposed in XML, but probably doesn't need to be
     maxInsecticide = R::qnorm5(maxProp, initialInsecticide.getMu(), initialInsecticide.getSigma(), true, false);
     holeRate.setParams( elt.getHoleRate() );    // per year
-    holeRate.scaleMean( sim::yearsPerStep() );  // convert to per step
+    holeRate.scaleMean( SimTime::yearsPerStep() );  // convert to per step
     ripRate.setParams( elt.getRipRate() );
-    ripRate.scaleMean( sim::yearsPerStep() );
+    ripRate.scaleMean( SimTime::yearsPerStep() );
     ripFactor = elt.getRipFactor().getValue();
     insecticideDecay = DecayFunction::makeObject( elt.getInsecticideDecay(), "ITNDescription.insecticideDecay" );
     attritionOfNets = DecayFunction::makeObject( elt.getAttritionOfNets(), "ITNDescription.attritionOfNets" );
@@ -520,10 +520,10 @@ void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionComponent
 
 void HumanITN::update(Host::Human& human){
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
-    if( deployTime != sim::never() ){
+    if( deployTime != SimTime::never() ){
         // First use is at age 0 relative to ts0()
         if( sim::ts0() >= disposalTime ){
-            deployTime = sim::never();
+            deployTime = SimTime::never();
             human.removeFromSubPop(id());
             return;
         }
@@ -535,21 +535,21 @@ void HumanITN::update(Host::Human& human){
 }
 
 double HumanITN::relativeAttractiveness(size_t speciesIndex) const{
-    if( deployTime == sim::never() ) return 1.0;
+    if( deployTime == SimTime::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::preprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == sim::never() ) return 1.0;
+    if( deployTime == SimTime::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == sim::never() ) return 1.0;
+    if( deployTime == SimTime::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );

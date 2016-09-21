@@ -112,7 +112,7 @@ void VectorModel::ctsNetInsecticideContent (const Population& population, ostrea
 //     double meanVar = 0.0;
 //     int n = 0;
 //     for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= SimTime::zero() ){
 //             ++n;
 //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
 //         }
@@ -325,25 +325,25 @@ void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
 
 SimTime VectorModel::minPreinitDuration () {
     if ( interventionMode == forcedEIR ) {
-        return sim::zero();
+        return SimTime::zero();
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return sim::fromYearsI( 55 );
+    return SimTime::fromYearsI( 55 );
 }
 SimTime VectorModel::expectedInitDuration (){
-    return sim::oneYear();
+    return SimTime::oneYear();
 }
 
 SimTime VectorModel::initIterate () {
     if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
-        return sim::zero(); // no initialization to do
+        return SimTime::zero(); // no initialization to do
     }
     if( initIterations < 0 ){
         assert( interventionMode = dynamicEIR );
         simulationMode = dynamicEIR;
-        return sim::zero();
+        return SimTime::zero();
     }
     
     ++initIterations;
@@ -363,9 +363,9 @@ SimTime VectorModel::initIterate () {
     // to be enough (but I may be wrong).
     if( needIterate )
         // stabilization + 5 years data-collection time:
-        return sim::oneYear() + sim::fromYearsI(5);
+        return SimTime::oneYear() + SimTime::fromYearsI(5);
     else
-        return sim::oneYear();
+        return SimTime::oneYear();
 }
 
 double VectorModel::calculateEIR(Host::Human& human, double ageYears,

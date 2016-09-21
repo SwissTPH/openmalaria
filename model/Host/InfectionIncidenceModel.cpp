@@ -175,12 +175,12 @@ double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR,
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
   // Note that NegBinomMAII and LogNormalMAII supercede this model; see below
   return (Sinf+(1-Sinf) / 
-    (1 + effectiveEIR/sim::oneTS().inDays()*EstarInv)) *
+    (1 + effectiveEIR/SimTime::oneTS().inDays()*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
 double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans) {
   return (Sinf+(1-Sinf) / 
-    (1 + effectiveEIR/(sim::oneTS().inDays()*phTrans.relativeAvailabilityHet())*EstarInv)) *
+    (1 + effectiveEIR/(SimTime::oneTS().inDays()*phTrans.relativeAvailabilityHet())*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {

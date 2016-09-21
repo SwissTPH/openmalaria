@@ -103,7 +103,7 @@ private:
     // time of release, soonest last (i.e. last element is next one to release)
     vector<SimTime> releaseDates;
     
-    // Either sim::never() (no blood stage) or the start of the time step on
+    // Either SimTime::never() (no blood stage) or the start of the time step on
     // which the blood stage will clear.
     SimTime bloodStageClearDate;
     

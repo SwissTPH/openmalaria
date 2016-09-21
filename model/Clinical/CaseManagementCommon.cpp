@@ -26,7 +26,7 @@ namespace OM { namespace Clinical {
 
 bool indirectMortBugfix;
 
-SimTime healthSystemMemory( sim::never() );
+SimTime healthSystemMemory( SimTime::never() );
 
 //log odds ratio of case-fatality in community compared to hospital
 double oddsRatioThreshold;
@@ -51,13 +51,13 @@ void initCMCommon( const OM::Parameters& parameters, SimTime hsMemory ){
     indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
     healthSystemMemory = hsMemory;
     oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
-    infantDeaths.resize(sim::stepsPerYear());
-    infantIntervalsAtRisk.resize(sim::stepsPerYear());
+    infantDeaths.resize(SimTime::stepsPerYear());
+    infantIntervalsAtRisk.resize(SimTime::stepsPerYear());
     nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
 }
 
 void mainSimInitCMCommon () {
-    for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){
+    for( size_t i = 0; i < SimTime::stepsPerYear(); i += 1 ){
         Clinical::infantIntervalsAtRisk[i] = 0;
         Clinical::infantDeaths[i] = 0;
     }
@@ -82,7 +82,7 @@ double getCommunityCFR (double caseFatalityRatio){
 
 double infantAllCauseMort(){
     double infantPropSurviving=1.0;       // use to calculate proportion surviving
-    for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){
+    for( size_t i = 0; i < SimTime::stepsPerYear(); i += 1 ){
         // multiply by proportion of infants surviving at each interval
         infantPropSurviving *= double(infantIntervalsAtRisk[i] - infantDeaths[i])
             / double(infantIntervalsAtRisk[i]);

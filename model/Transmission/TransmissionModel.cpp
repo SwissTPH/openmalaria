@@ -85,9 +85,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    int prevStep = (sim::now() - sim::oneTS()) / sim::oneTS();
+    int prevStep = (sim::now() - SimTime::oneTS()) / SimTime::oneTS();
     //Note: prevStep may be negative, hence util::mod not mod_nn:
-    stream<<'\t'<<initialisationEIR[util::mod(prevStep, sim::stepsPerYear())];
+    stream<<'\t'<<initialisationEIR[util::mod(prevStep, SimTime::stepsPerYear())];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
@@ -127,7 +127,7 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
     numTransmittingHumans(0),
     tsNumAdults(0)
 {
-    initialisationEIR.assign (sim::stepsPerYear(), 0.0);
+    initialisationEIR.assign (SimTime::stepsPerYear(), 0.0);
     surveyInoculations.assign(survInocsSize(nGenotypes), 0.0);
     
   using Monitoring::Continuous;
@@ -178,7 +178,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod == sim::stepsPerYear() - 1) {
+    if (tmod == SimTime::stepsPerYear() - 1) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }

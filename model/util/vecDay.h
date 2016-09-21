@@ -56,7 +56,7 @@ struct vecDay {
         v.resize( new_size.inDays(), x ); }
     
     inline SimTime size() const {
-        return sim::fromDays(v.size()); }
+        return SimTime::fromDays(v.size()); }
     
     inline ref_t operator[](SimTime n){ return v[n.inDays()]; }
     inline const_ref_t operator[](SimTime n) const{ return v[n.inDays()]; }
@@ -156,9 +156,9 @@ namespace vectors{
 template<class T>
 ostream& operator<< (ostream& out, vecDay<T> vec) {
     out << '[';
-    if (vec.size() > sim::zero())
-        out << vec[sim::zero()];
-    for( SimTime i = sim::oneDay(), end = vec.size(); i < end; i += sim::oneDay() ){
+    if (vec.size() > SimTime::zero())
+        out << vec[SimTime::zero()];
+    for( SimTime i = SimTime::oneDay(), end = vec.size(); i < end; i += SimTime::oneDay() ){
         out << ", " << vec[i];
     }
     out << ']';

@@ -129,7 +129,7 @@ namespace OM { namespace util {
 			cloError = true;
 			break;
 		    }
-		    checkpoint_times.insert( sim::fromTS(time) );
+		    checkpoint_times.insert( SimTime::fromTS(time) );
 		} else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
 		    stringstream t;
 		    t << clo.substr (21);

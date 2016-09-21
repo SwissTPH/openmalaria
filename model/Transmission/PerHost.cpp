@@ -76,7 +76,7 @@ void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
 
 
 // Note: in the case an intervention is not present, we can use the approximation
-// of Weibull decay over the time span now - sim::never()
+// of Weibull decay over the time span now - SimTime::never()
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.

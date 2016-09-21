@@ -56,7 +56,7 @@ inline size_t eventSurveyNumber(){ return impl::survNumEvent; }
 /// reported but acts like it is to set survey variables.
 inline bool isReported(){ return !impl::isInit || impl::survNumStat != NOT_USED; }
 
-/** Time the current (next) survey ends at, or sim::never() if no more
+/** Time the current (next) survey ends at, or SimTime::never() if no more
  * surveys take place. */
 SimTime nextSurveyTime();
 

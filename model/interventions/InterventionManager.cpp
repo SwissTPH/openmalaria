@@ -105,7 +105,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             ComponentId id( humanComponents.size() );        // i.e. index of next item
             identifierMap.insert( make_pair(component.getId(), id) );
             
-            SimTime expireAfter = sim::future();
+            SimTime expireAfter = SimTime::future();
             if( component.getSubPopRemoval().present() ){
                 const scnXml::SubPopRemoval& removeOpts = component.getSubPopRemoval().get();
                 if( removeOpts.getOnFirstBout() ){
@@ -118,7 +118,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                     removeAtIds[SubPopRemove::ON_FIRST_TREATMENT].push_back( id );
                 }
                 if( removeOpts.getAfterYears().present() ){
-                    expireAfter = sim::fromYearsN( removeOpts.getAfterYears().get() );
+                    expireAfter = SimTime::fromYearsN( removeOpts.getAfterYears().get() );
                 }
             }
             
@@ -188,12 +188,12 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                     end2 = ctsSeq.end(); it2 != end2; ++it2 )
                 {
                     try{
-                        SimTime begin = sim::zero();    // intervention period starts at 0
+                        SimTime begin = SimTime::zero();    // intervention period starts at 0
                         if( it2->getBegin().present() ){
                             begin = UnitParse::readDate(it2->getBegin().get(),
                                                         UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         }
-                        SimTime end = sim::future();
+                        SimTime end = SimTime::future();
                         if( it2->getEnd().present() ){
                             end = UnitParse::readDate(it2->getEnd().get(),
                                                       UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
@@ -230,7 +230,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                         }
                         if( it2->getRepeatStep().present() ){
                             SimTime step = UnitParse::readDuration( it2->getRepeatStep().get(), UnitParse::NONE );
-                            if( step < sim::oneTS() ){
+                            if( step < SimTime::oneTS() ){
                                 throw util::xml_scenario_error( "deploy: repeatStep must be >= 1" );
                             }
                             SimTime end = UnitParse::readDate( it2->getRepeatEnd().get(), UnitParse::NONE );
@@ -242,7 +242,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                             deployTimes.insert(make_pair(date, &*it2));
                         }
                     }
-                    SimTime lastTime = sim::never();
+                    SimTime lastTime = SimTime::never();
                     for( multimap<SimTime, const scnXml::MassDeployment*>::const_iterator deploy =
                         deployTimes.begin(), dpEnd = deployTimes.end(); deploy != dpEnd; ++deploy )
                     {
@@ -424,7 +424,7 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTim
 
 
 void InterventionManager::deploy(OM::Population& population) {
-    if( sim::intervNow() < sim::zero() )
+    if( sim::intervNow() < SimTime::zero() )
         return;
     
     // deploy imported infections (not strictly speaking an intervention)

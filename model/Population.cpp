@@ -133,7 +133,7 @@ void Population::checkpoint (istream& stream)
     for(size_t i = 0; i < popSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( new Host::Human (*_transmissionModel, sim::zero()) );
+        population.push_back( new Host::Human (*_transmissionModel, SimTime::zero()) );
         population.back() & stream;
     }
     if (population.size() != popSize)
@@ -168,14 +168,14 @@ void Population::createInitialHumans ()
     {
         int targetPop = AgeStructure::targetCumPop( iage, populationSize );
         while (cumulativePop < targetPop) {
-            newHuman( sim::zero() - sim::fromTS(iage) );
+            newHuman( SimTime::zero() - SimTime::fromTS(iage) );
             ++cumulativePop;
         }
     }
     
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
-    assert( sim::now() == sim::zero() );      // assumed below
+    assert( sim::now() == SimTime::zero() );      // assumed below
     _transmissionModel->init2 (*this);
 }
 
@@ -354,7 +354,7 @@ void Population::ctsGVICoverage (ostream& stream){
 //     double meanVar = 0.0;
 //     int nNets = 0;
 //     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= SimTime::zero() ){
 //             ++nNets;
 //             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
 //         }

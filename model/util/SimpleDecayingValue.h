@@ -40,7 +40,7 @@ public:
     /** Default construction: always return 0. */
     SimpleDecayingValue() :
             initial(0.0),
-            deploy_t(sim::never()) {}
+            deploy_t(SimTime::never()) {}
     
     /** Configure from an XML element. */
     inline void set (double initial_value, const scnXml::DecayFunction& elt, const char* name){

@@ -74,8 +74,8 @@ enum Phase {
 // ———  Set-up & tear-down  ———
 
 Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
-    simPeriodEnd(sim::zero()),
-    totalSimDuration(sim::zero()),
+    simPeriodEnd(SimTime::zero()),
+    totalSimDuration(SimTime::zero()),
     phase(STARTING_PHASE),
     workUnitIdentifier(0),
     cksum(ck)
@@ -134,8 +134,8 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
 // ———  run simulations  ———
 
 void Simulator::start(const scnXml::Monitoring& monitoring){
-    sim::time0 = sim::zero();
-    sim::time1 = sim::zero();
+    sim::time0 = SimTime::zero();
+    sim::time1 = SimTime::zero();
     
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
@@ -149,13 +149,13 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
         humanWarmupLength = population->transmissionModel().minPreinitDuration();
     }
-    humanWarmupLength = sim::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
+    humanWarmupLength = SimTime::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
         + population->transmissionModel().expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
-        + mon::finalSurveyTime() + sim::oneTS();
-    assert( totalSimDuration + sim::never() < sim::zero() );
+        + mon::finalSurveyTime() + SimTime::oneTS();
+    assert( totalSimDuration + SimTime::never() < SimTime::zero() );
     
     if (isCheckpoint()) {
         Continuous.init( monitoring, true );
@@ -209,18 +209,18 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             simPeriodEnd = humanWarmupLength;
         } else if (phase == TRANSMISSION_INIT) {
             SimTime iterate = population->transmissionModel().initIterate();
-            if( iterate > sim::zero() ){
+            if( iterate > SimTime::zero() ){
                 simPeriodEnd += iterate;
                 --phase;        // repeat phase
             } else {
                 // nothing to do: start main phase immediately
             }
             // adjust estimation of final time step: end of current period + length of main phase
-            totalSimDuration = simPeriodEnd + mon::finalSurveyTime() + sim::oneTS();
+            totalSimDuration = simPeriodEnd + mon::finalSurveyTime() + SimTime::oneTS();
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
-            sim::interv_time = sim::zero();
+            sim::interv_time = SimTime::zero();
             population->preMainSimInit();
             population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
             mon::initMainSim();
@@ -236,13 +236,13 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             // ONE_LIFE_SPAN phase if already past time humanWarmupLength:
             // these are extra transmission inits, and we don't want to
             // checkpoint every one of them.
-            if( testCheckpointTime < sim::zero() && phase_mid > sim::now()
+            if( testCheckpointTime < SimTime::zero() && phase_mid > sim::now()
                 && (phase != ONE_LIFE_SPAN || sim::now() < humanWarmupLength)
             ){
                 testCheckpointTime = phase_mid;
                 // Test checkpoint: die a bit later than checkpoint for better
                 // resume testing (specifically, ctsout.txt).
-                testCheckpointDieTime = testCheckpointTime + sim::oneTS() + sim::oneTS();
+                testCheckpointDieTime = testCheckpointTime + SimTime::oneTS() + SimTime::oneTS();
             }
         }
     }
