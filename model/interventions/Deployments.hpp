@@ -111,7 +111,7 @@ public:
         newEIR( nv._clone() )
     {}
     virtual void deploy (OM::Population& population) {
-        population.transmissionModel().changeEIRIntervention( *newEIR );
+        sim::transmission().changeEIRIntervention( *newEIR );
         delete newEIR;
         newEIR = 0;
     }
@@ -131,7 +131,7 @@ public:
         TimedDeployment( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
-        population.transmissionModel().uninfectVectors();
+        sim::transmission().uninfectVectors();
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -335,7 +335,7 @@ public:
         inst(instance)
     {}
     virtual void deploy (OM::Population& population) {
-      population.transmissionModel().deployVectorPopInterv(inst);
+      sim::transmission().deployVectorPopInterv(inst);
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -353,7 +353,7 @@ public:
     {}
     virtual void deploy (OM::Population& population) {
         double number = population.size() * ratio;
-        population.transmissionModel().deployVectorTrap(inst, number, lifespan);
+        sim::transmission().deployVectorTrap(inst, number, lifespan);
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{

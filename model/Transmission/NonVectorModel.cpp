@@ -80,7 +80,7 @@ NonVectorModel::NonVectorModel(const scnXml::Entomology& entoData,
 
 NonVectorModel::~NonVectorModel () {}
 
-void NonVectorModel::init2 (const Population&) {
+void NonVectorModel::init2 () {
     // no set-up needed; just indicate we're ready to roll:
     simulationMode = forcedEIR;
 }
@@ -209,8 +209,8 @@ void NonVectorModel::deployVectorTrap(size_t instance, double number, SimTime li
   throw util::xml_scenario_error (viError);
 }
 
-void NonVectorModel::update (const Population& population) {
-    double currentKappa = TransmissionModel::updateKappa( population );
+void NonVectorModel::update () {
+    double currentKappa = TransmissionModel::updateKappa();
     
     if( simulationMode == forcedEIR ){
         initialKappa[sim::ts1().moduloSteps(initialKappa.size())] = currentKappa;

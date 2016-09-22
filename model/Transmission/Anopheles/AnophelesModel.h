@@ -91,15 +91,12 @@ public:
      * This is only called when a checkpoint is not loaded.
      *
      * @param sIndex Index in VectorModel::species of this class.
-     * @param population The human population
      * @param meanPopAvail The mean availability of age-based relative
      * availability of humans to mosquitoes across populations.
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void init2 (size_t sIndex,
-                   const OM::Population& population,
-                   double meanPopAvail);
+    void init2 (size_t sIndex, double meanPopAvail);
     
     /** Set up the non-host-specific interventions. */
     void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );

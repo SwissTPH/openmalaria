@@ -21,8 +21,6 @@
 #include "Population.h"
 #include "Monitoring/Continuous.h"
 
-#include "Transmission/TransmissionModel.h"
-
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
 #include "WithinHost/WHInterface.h"
@@ -30,6 +28,7 @@
 #include "WithinHost/Diagnostic.h"
 #include "Clinical/ClinicalModel.h"
 #include "Clinical/CaseManagementCommon.h"
+#include "Transmission/TransmissionModel.h"
 
 #include "util/errors.h"
 #include "util/random.h"
@@ -45,6 +44,7 @@ namespace OM
 {
     using namespace OM::util;
     using namespace boost::assign;
+    using Transmission::TransmissionModel;
 
 // -----  Population: static data / methods  -----
 
@@ -74,7 +74,7 @@ void Population::staticCheckpoint (ostream& stream)
 
 // -----  non-static methods: creation/destruction, checkpointing  -----
 
-Population::Population(const scnXml::Entomology& entoData, size_t populationSize)
+Population::Population(size_t populationSize)
     : populationSize (populationSize), recentBirths(0)
 {
     using Monitoring::Continuous;
@@ -111,8 +111,6 @@ Population::Population(const scnXml::Entomology& entoData, size_t populationSize
 //         MakeDelegate( this, &Population::ctsNetsOwned ) );
 //     Continuous.registerCallback( "mean hole index", "\tmean hole index",
 //         MakeDelegate( this, &Population::ctsNetHoleIndex ) );
-    
-    _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(entoData, populationSize);
 }
 
 Population::~Population()
@@ -120,29 +118,28 @@ Population::~Population()
     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
         iter->destroy();
     }
-    delete _transmissionModel;
 }
 
 void Population::checkpoint (istream& stream)
 {
-    size_t popSize; // must be type of population.size()
-    popSize & stream;
-    if (popSize > size_t (populationSize))
-        throw util::checkpoint_error(
-            (boost::format("pop size (%1%) exceeds that given in scenario.xml") %popSize).str() );
-    for(size_t i = 0; i < popSize && !stream.eof(); ++i) {
+    populationSize & stream;
+    recentBirths & stream;
+    
+    for(size_t i = 0; i < populationSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( new Host::Human (*_transmissionModel, SimTime::zero()) );
+        population.push_back( new Host::Human (SimTime::zero()) );
         population.back() & stream;
     }
-    if (population.size() != popSize)
+    if (population.size() != populationSize)
         throw util::checkpoint_error(
             (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
 }
 void Population::checkpoint (ostream& stream)
 {
-    population.size() & stream;
+    populationSize & stream;
+    recentBirths & stream;
+    
     for(Iter iter = population.begin(); iter != population.end(); ++iter)
         (*iter) & stream;
 }
@@ -155,7 +152,7 @@ void Population::preMainSimInit ()
     recentBirths = 0;
 }
 
-void Population::createInitialHumans ()
+void Population::createInitialHumans()
 {
     /* We create a whole population here, regardless of whether humans can
     survive until start of vector init (vector model needs a whole population
@@ -176,7 +173,6 @@ void Population::createInitialHumans ()
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
     assert( sim::now() == SimTime::zero() );      // assumed below
-    _transmissionModel->init2 (*this);
 }
 
 
@@ -184,7 +180,7 @@ void Population::createInitialHumans ()
 
 void Population::newHuman( SimTime dob ){
     util::streamValidate( dob.raw() );
-    population.push_back( new Host::Human (*_transmissionModel, dob) );
+    population.push_back( new Host::Human (dob) );
     ++recentBirths;
 }
 
@@ -195,10 +191,6 @@ void Population::update1( SimTime firstVecInitTS ){
     // (until humans old enough to be pregnate get updated and can be infected).
     Host::NeonatalMortality::update (*this);
     
-    // This should be called before humans contract new infections in the simulation step.
-    // This needs the whole population (it is an approximation before all humans are updated).
-    _transmissionModel->vectorUpdate (*this);
-
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
     //targetPop is the population size at time t allowing population growth
@@ -217,7 +209,7 @@ void Population::update1( SimTime firstVecInitTS ){
         // is the time step they die at (some code still runs on this step).
         SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
         bool updateHuman = lastPossibleTS >= firstVecInitTS;
-        bool isDead = iter->update(_transmissionModel, updateHuman);
+        bool isDead = iter->update(updateHuman);
         if( isDead ){
             iter->destroy();
             iter = population.erase (iter);
@@ -243,14 +235,11 @@ void Population::update1( SimTime firstVecInitTS ){
 
     // increase population size to targetPop
     while (cumPop < targetPop) {
-        newHuman( sim::ts1() );        // humans born at end of this time step = beginning of next
+        // humans born at end of this time step = beginning of next, hence ts1
+        newHuman( sim::ts1() );
         //++nCounter;
         ++cumPop;
     }
-    
-    // Doesn't matter whether non-updated humans are included (value isn't used
-    // before all humans are updated).
-    _transmissionModel->update (*this);
 }
 
 
@@ -367,7 +356,6 @@ void Population::newSurvey ()
     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
         iter->summarize();
     }
-    _transmissionModel->summarize();
 }
 
 void Population::flushReports (){

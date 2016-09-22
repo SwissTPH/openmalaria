@@ -50,7 +50,7 @@ vector<ComponentId> removeAtIds[SubPopRemove::NUM];
 
 // static functions:
 
-void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Population& population){
+void InterventionManager::init (const scnXml::Interventions& intervElt){
     nextTimed = 0;
     
     if( intervElt.getChangeHS().present() ){
@@ -83,7 +83,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
             }
         }
     }
-    Transmission::TransmissionModel& transmission = population.transmissionModel();
     // species_index_map is not available with the non-vector model or
     // non-dynamic mode, so setting it (lazily) also checks sim mode:
     const map<string,size_t>* species_index_map = 0;
@@ -139,15 +138,15 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
                 hiComponent = new VaccineComponent( id, component.getTBV().get(), Vaccine::TBV );
             }else if( component.getITN().present() ){
                 if( species_index_map == 0 )
-                    species_index_map = &transmission.getSpeciesIndexMap();
+                    species_index_map = &sim::transmission().getSpeciesIndexMap();
                 hiComponent = new ITNComponent( id, component.getITN().get(), *species_index_map );
             }else if( component.getIRS().present() ){
                 if( species_index_map == 0 )
-                    species_index_map = &transmission.getSpeciesIndexMap();
+                    species_index_map = &sim::transmission().getSpeciesIndexMap();
                 hiComponent = new IRSComponent( id, component.getIRS().get(), *species_index_map );
             }else if( component.getGVI().present() ){
                 if( species_index_map == 0 )
-                    species_index_map = &transmission.getSpeciesIndexMap();
+                    species_index_map = &sim::transmission().getSpeciesIndexMap();
                 hiComponent = new GVIComponent( id, component.getGVI().get(), *species_index_map );
             }else if( component.getRecruitmentOnly().present() ){
                 hiComponent = new RecruitmentOnlyComponent( id );
@@ -325,7 +324,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
         for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
-                population.transmissionModel().initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
+                sim::transmission().initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
@@ -340,7 +339,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, OM::Popu
     if( intervElt.getVectorTrap().present() ){
         size_t instance = 0;
         foreach( const scnXml::VectorTrap& trap, intervElt.getVectorTrap().get().getIntervention() ){
-            population.transmissionModel().initVectorTrap(
+            sim::transmission().initVectorTrap(
                     trap.getDescription(), instance, trap.getName() );
             if( trap.getTimed().present() ) {
                 foreach( const scnXml::Deploy1 deploy, trap.getTimed().get().getDeploy() ){
@@ -404,7 +403,7 @@ ComponentId InterventionManager::getComponentId( const string textId )
     return it->second;
 }
 
-void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTime interventionTime ){
+void InterventionManager::loadFromCheckpoint( SimTime interventionTime ){
     // We need to re-deploy changeHS and changeEIR interventions, but nothing
     // else. nextTimed should be zero so we can go through all past interventions.
     // Only redeploy those which happened before this time step.
@@ -416,7 +415,7 @@ void InterventionManager::loadFromCheckpoint( OM::Population& population, SimTim
             //Note: neither changeHS nor changeEIR interventions care what the
             //current time step is when they are deployed, so we don't need to
             //tell them the deployment time.
-            deployment->deploy( population );
+            deployment->deploy( sim::humanPop() );
         }
         nextTimed += 1;
     }

@@ -44,9 +44,9 @@ PerHost::PerHost () :
         _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
 }
-void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
+void PerHost::initialise (double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
-    VectorModel* vTM = dynamic_cast<VectorModel*> (&tm);
+    VectorModel* vTM = dynamic_cast<VectorModel*> (&sim::transmission());
     if (vTM != 0) {
         species.resize (vTM->numSpecies);
         for(size_t i = 0; i < vTM->numSpecies; ++i)

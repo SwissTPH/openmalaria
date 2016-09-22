@@ -185,7 +185,7 @@ void AnophelesModel::initAvailability(
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, double meanPopAvail)
+void AnophelesModel::init2 (size_t sIndex, double meanPopAvail)
 {
     // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
     
@@ -200,7 +200,8 @@ void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, dou
     // NC's non-autonomous model provides two methods for calculating P_df and
     // P_dif; here we assume that P_E is constant.
     double initialP_df = 0.0;
-
+    
+    const Population& population = sim::humanPop();
     for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         const OM::Transmission::PerHost& host = h->perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::now()).inYears());

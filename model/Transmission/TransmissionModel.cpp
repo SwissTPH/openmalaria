@@ -141,12 +141,13 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-double TransmissionModel::updateKappa (const Population& population) {
+double TransmissionModel::updateKappa () {
     // We calculate kappa for output and the non-vector model.
     double sumWt_kappa= 0.0;
     double sumWeight  = 0.0;
     numTransmittingHumans = 0;
 
+    const Population& population = sim::humanPop();
     for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().

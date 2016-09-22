@@ -24,13 +24,11 @@
 #include "Global.h"
 #include "PopulationAgeStructure.h"
 #include "Host/Human.h"
-#include "Transmission/TransmissionModel.h"
 
 #include <boost/ptr_container/ptr_list.hpp>
 #include <fstream>
 
 namespace scnXml{
-    class Entomology;
     class Scenario;
 }
 namespace OM {
@@ -48,26 +46,15 @@ public:
     static void staticCheckpoint (ostream& stream); ///< ditto
 
 
-    Population( const scnXml::Entomology& entoData, size_t populationSize );
+    Population( size_t populationSize );
     //! Clears human collection.
     ~Population();
-
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        populationSize & stream;
-	recentBirths & stream;
-        (*_transmissionModel) & stream;
-	
-        checkpoint (stream);
-    }
     
+    void checkpoint (istream& stream);
+    void checkpoint (ostream& stream);
     
-    /** Creates the initial population of Humans according to cumAgeProp.
-    *
-    * Also runs some transmission model initialisation (which needs to happen
-    * after a population has been created). */
-    void createInitialHumans ();
+    /** Creates the initial population of Humans according to cumAgeProp. */
+    void createInitialHumans();
     
     /** Initialisation run between initial one-lifespan run of simulation and
      * actual simulation. */
@@ -109,20 +96,11 @@ public:
         return populationSize;
     }
     //@}
-    /** Return access to the transmission model. */
-    inline Transmission::TransmissionModel& transmissionModel() {
-        return *_transmissionModel;
-    }
-    /** Return const access to the transmission model. */
-    inline const Transmission::TransmissionModel& transmissionModel() const {
-        return *_transmissionModel;
-    }
 
 private:
-    //! Creates initializes and add to the population list a new uninfected human
-    /*!
-       \param dob date of birth (usually current time)
-    */
+    /// Creates initializes and add to the population list a new uninfected human
+    /// 
+    /// @param dob date of birth (usually current time)
     void newHuman( SimTime dob );
     
     /// Delegate to print the number of hosts
@@ -147,9 +125,6 @@ private:
     /// Delegate to print the mean hole index of all bed nets
 //     void ctsNetHoleIndex (ostream& stream);
     
-    void checkpoint (istream& stream);
-    void checkpoint (ostream& stream);
-
 
     //! Size of the human population
     size_t populationSize;
@@ -161,8 +136,6 @@ private:
     /// Births since last continuous output
     int recentBirths;
     //@}
-    //! TransmissionModel model
-    Transmission::TransmissionModel* _transmissionModel;
     
     /** The simulated human population
      *

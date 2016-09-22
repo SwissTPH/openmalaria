@@ -37,8 +37,9 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-double VectorModel::meanPopAvail (const Population& population) {
+double VectorModel::meanPopAvail () {
     double sumRelativeAvailability = 0.0;
+    const Population& population = sim::humanPop();
     for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
         sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->age(sim::now()).inYears());
     }
@@ -259,10 +260,10 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
 VectorModel::~VectorModel () {
 }
 
-void VectorModel::init2 (const Population& population) {
-    double mPA = meanPopAvail(population);
+void VectorModel::init2 () {
+    double mPA = meanPopAvail();
     for(size_t i = 0; i < numSpecies; ++i) {
-        species[i].init2 (i, population, mPA);
+        species[i].init2 (i, mPA);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
@@ -391,8 +392,9 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
 
 
 // Every Global::interval days:
-void VectorModel::vectorUpdate (const Population& population) {
+void VectorModel::vectorUpdate () {
     vector2D<double> popProbTransmission;
+    const Population& population = sim::humanPop();
     popProbTransmission.resize( population.size(), WithinHost::Genotypes::N() );
     size_t i = 0;
     for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i ){
@@ -411,8 +413,8 @@ void VectorModel::vectorUpdate (const Population& population) {
         species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);
     }
 }
-void VectorModel::update( const Population& population ) {
-    TransmissionModel::updateKappa( population );
+void VectorModel::update() {
+    TransmissionModel::updateKappa();
 }
 
 const string vec_mode_err = "vector interventions can only be used in "

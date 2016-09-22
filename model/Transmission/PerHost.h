@@ -32,8 +32,7 @@
 
 namespace OM {
 namespace Transmission {
-    
-class TransmissionModel;
+
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::DecayFuncHet;
@@ -128,7 +127,7 @@ public:
     ///@brief Initialisation / checkpionting
     //@{
     PerHost ();
-    void initialise (TransmissionModel& tm, double availabilityFactor);
+    void initialise (double availabilityFactor);
     //@}
     
     /// Call once per time step. Updates net holes.

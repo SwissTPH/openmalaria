@@ -45,7 +45,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2 (const Population& population);
+  virtual void init2 ();
   
   virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list,
         size_t instance, const string& name );
@@ -59,8 +59,8 @@ public:
   virtual SimTime expectedInitDuration ();
   virtual SimTime initIterate ();
   
-  virtual void vectorUpdate (const Population& population);
-  virtual void update (const Population& population);
+  virtual void vectorUpdate ();
+  virtual void update ();
 
   virtual double calculateEIR( Host::Human& human, double ageYears,
         vector<double>& EIR );
@@ -78,7 +78,7 @@ protected:
     
 private:
     /** Return the mean availability of human population to mosquitoes. */
-    static double meanPopAvail (const Population& population);
+    static double meanPopAvail ();
     
   void ctsCbN_v0 (ostream& stream);
   void ctsCbP_A (ostream& stream);
