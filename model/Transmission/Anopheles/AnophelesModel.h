@@ -34,7 +34,6 @@
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
-    class Population;
 namespace Transmission {
 namespace Anopheles {
     using std::numeric_limits;
@@ -123,8 +122,6 @@ public:
     //@{
     /** Called per time-step. Does most of calculation of EIR.
      *
-     * @param population The human population; so we can sum up availability and
-     *  infectiousness.
      * @param popProbTransmission A two-dimensional vector of the probability
      *  of transmission to mosquito for each human host (first index, in same
      *  order as population) and for each parasite genotype (second index).
@@ -133,8 +130,7 @@ public:
      * @param sIndex Index of the type of mosquito in per-type/species lists.
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod( const OM::Population& population,
-                        vector2D<double>& popProbTransmission,
+    void advancePeriod(vector2D<double>& popProbTransmission,
                         size_t sIndex, bool isDynamic );
 
     /** Returns the EIR calculated by advancePeriod().

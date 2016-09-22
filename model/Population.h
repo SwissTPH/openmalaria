@@ -27,6 +27,7 @@
 
 #include <boost/ptr_container/ptr_list.hpp>
 #include <fstream>
+#include <utility>  // pair
 
 namespace scnXml{
     class Scenario;
@@ -91,6 +92,14 @@ public:
     inline ConstIter cend() const{ return population.cend(); }
     inline ConstReverseIter crbegin() const{ return population.crbegin(); }
     inline ConstReverseIter crend() const{ return population.crend(); }
+    // Pair of iterators (begin, end)
+    inline std::pair<Iter, Iter> range() {
+        return std::make_pair(population.begin(), population.end());
+    }
+    // Pair of const iterators (cbegin, cend)
+    inline std::pair<ConstIter, ConstIter> crange() const {
+        return std::make_pair(population.cbegin(), population.cend());
+    }
     /** Return the number of humans. */
     inline size_t size() const {
         return populationSize;

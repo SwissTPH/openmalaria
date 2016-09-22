@@ -39,12 +39,12 @@ using namespace OM::util;
 
 double VectorModel::meanPopAvail () {
     double sumRelativeAvailability = 0.0;
-    const Population& population = sim::humanPop();
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->age(sim::now()).inYears());
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
+        sumRelativeAvailability += human.perHostTransmission.relativeAvailabilityAge (human.age(sim::now()).inYears());
     }
-    if( population.size() > 0 ){
-        return sumRelativeAvailability / population.size();     // mean-rel-avail
+    int popSize = sim::humanPop().size();
+    if( popSize > 0 ){
+        return sumRelativeAvailability / popSize;     // mean-rel-avail
     }else{
         // value should be unimportant when no humans are available, though inf/nan is not acceptable
         return 1.0;
@@ -394,12 +394,11 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
 // Every Global::interval days:
 void VectorModel::vectorUpdate () {
     vector2D<double> popProbTransmission;
-    const Population& population = sim::humanPop();
-    popProbTransmission.resize( population.size(), WithinHost::Genotypes::N() );
+    popProbTransmission.resize( sim::humanPop().size(), WithinHost::Genotypes::N() );
     size_t i = 0;
-    for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i ){
-        const double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
-        WithinHost::WHInterface& whm = *h->withinHostModel;
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
+        const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        WithinHost::WHInterface& whm = *human.withinHostModel;
         double sumX;
         const double pTrans = whm.probTransmissionToMosquito( tbvFac, &sumX );
         if( WithinHost::Genotypes::N() == 1 ) popProbTransmission.at(i,0) = pTrans;
@@ -408,9 +407,10 @@ void VectorModel::vectorUpdate () {
             assert( (boost::math::isfinite)(k) );
             popProbTransmission.at(i,g) = k;
         }
+        i += 1;
     }
     for(size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);
+        species[i].advancePeriod (popProbTransmission, i, simulationMode == dynamicEIR);
     }
 }
 void VectorModel::update() {

@@ -147,15 +147,14 @@ double TransmissionModel::updateKappa () {
     double sumWeight  = 0.0;
     numTransmittingHumans = 0;
 
-    const Population& population = sim::humanPop();
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
-        const double avail = h->perHostTransmission.relativeAvailabilityHetAge(
-            h->age(sim::ts1()).inYears());
+        const double avail = human.perHostTransmission.relativeAvailabilityHetAge(
+            human.age(sim::ts1()).inYears());
         sumWeight += avail;
-        const double tbvFactor = h->getVaccine().getFactor( interventions::Vaccine::TBV );
-        const double pTransmit = h->withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
+        const double tbvFactor = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        const double pTransmit = human.withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
         const double riskTrans = avail * pTransmit;
         sumWt_kappa += riskTrans;
         if( riskTrans > 0.0 )
@@ -164,12 +163,13 @@ double TransmissionModel::updateKappa () {
 
 
     size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
-    if( population.size() == 0 ){     // this is valid
+    if( sim::humanPop().size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
             ostringstream msg;
-            msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
+            msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa
+                    <<", "<<sim::humanPop().size();
             throw TRACED_EXCEPTION(msg.str(),util::Error::SumWeight);
         }
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;

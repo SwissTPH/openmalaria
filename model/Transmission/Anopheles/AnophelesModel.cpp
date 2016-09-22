@@ -201,10 +201,9 @@ void AnophelesModel::init2 (size_t sIndex, double meanPopAvail)
     // P_dif; here we assume that P_E is constant.
     double initialP_df = 0.0;
     
-    const Population& population = sim::humanPop();
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
-        const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::now()).inYears());
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
+        const OM::Transmission::PerHost& host = human.perHostTransmission;
+        double prod = host.entoAvailabilityFull (humanBase, sIndex, human.age(sim::now()).inYears());
         leaveSeekingStateRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
@@ -230,7 +229,8 @@ void AnophelesModel::init2 (size_t sIndex, double meanPopAvail)
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
-    transmission.emergence->init2( initialP_A, initialP_df, population.size() * meanPopAvail / sumPFindBite, transmission );
+    transmission.emergence->init2( initialP_A, initialP_df,
+            sim::humanPop().size() * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
 }
@@ -284,7 +284,7 @@ void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime li
 }
 
 // Every SimTime::oneTS() days:
-void AnophelesModel::advancePeriod (const OM::Population& population,
+void AnophelesModel::advancePeriod (
                                      vector2D<double>& popProbTransmission,
                                      size_t sIndex,
                                      bool isDynamic) {
@@ -305,7 +305,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
 
       P_Ai[t] = (1 - P_A[t]) α_i[t] / sum_{h in hosts} α_h[t]
     (letting N_h[t] == 1 for all h,t). The only part of this varying per-host is
-      α_i[t] = host.entoAvailability (index, h->getAgeInYears())
+      α_i[t] = host.entoAvailability (index, human.getAgeInYears())
       Let P_Ai_base[t] = (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA).
 
     Note that although the model allows α_i and P_B_i to vary per-day, they only
@@ -334,12 +334,12 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     double tsP_df = 0.0;
     vector<double> tsP_dif( WithinHost::Genotypes::N(), 0.0 );
     size_t i = 0;
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
-        const OM::Transmission::PerHost& host = h->perHostTransmission;
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
+        const OM::Transmission::PerHost& host = human.perHostTransmission;
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
         //TODO: even stranger since popProbTransmission comes from the previous time step
-        const double avail = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::ts1()).inYears());
+        const double avail = host.entoAvailabilityFull (humanBase, sIndex, human.age(sim::ts1()).inYears());
         leaveSeekingStateRate += avail;
         const double P_df = avail
                 * host.probMosqBiting(humanBase, sIndex)
@@ -348,6 +348,7 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         for( size_t genotype = 0; genotype < WithinHost::Genotypes::N(); ++genotype ){
             tsP_dif[genotype] += P_df * popProbTransmission.at(i, genotype);
         }
+        i += 1;
     }
     
     foreach( const NHHParams& nhh, nonHumans ){
