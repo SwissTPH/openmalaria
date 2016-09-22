@@ -77,9 +77,6 @@ protected:
     virtual void checkpoint (ostream& stream);
     
 private:
-    /** Return the mean availability of human population to mosquitoes. */
-    static double meanPopAvail ();
-    
   void ctsCbN_v0 (ostream& stream);
   void ctsCbP_A (ostream& stream);
   void ctsCbP_df (ostream& stream);

@@ -37,20 +37,6 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-double VectorModel::meanPopAvail () {
-    double sumRelativeAvailability = 0.0;
-    foreach(const Host::Human& human, sim::humanPop().crange()) {
-        sumRelativeAvailability += human.perHostTransmission.relativeAvailabilityAge (human.age(sim::now()).inYears());
-    }
-    int popSize = sim::humanPop().size();
-    if( popSize > 0 ){
-        return sumRelativeAvailability / popSize;     // mean-rel-avail
-    }else{
-        // value should be unimportant when no humans are available, though inf/nan is not acceptable
-        return 1.0;
-    }
-}
-
 void VectorModel::ctsCbN_v0 (ostream& stream) {
     for(size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastN_v0();
@@ -261,9 +247,20 @@ VectorModel::~VectorModel () {
 }
 
 void VectorModel::init2 () {
-    double mPA = meanPopAvail();
+    double sumRelativeAvailability = 0.0;
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
+        sumRelativeAvailability +=
+                human.perHostTransmission.relativeAvailabilityAge (human.age(sim::now()).inYears());
+    }
+    int popSize = sim::humanPop().size();
+    // value should be unimportant when no humans are available, though inf/nan is not acceptable
+    double meanPopAvail = 1.0;
+    if( popSize > 0 ){
+        meanPopAvail = sumRelativeAvailability / popSize;    // mean-rel-avail
+    }
+    
     for(size_t i = 0; i < numSpecies; ++i) {
-        species[i].init2 (i, mPA);
+        species[i].init2 (i, meanPopAvail);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
