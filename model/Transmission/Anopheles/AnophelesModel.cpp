@@ -189,38 +189,21 @@ void AnophelesModel::initAvailability(
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void AnophelesModel::init2 (size_t sIndex, double meanPopAvail)
+void AnophelesModel::init2 (int nHumans, double meanPopAvail,
+        double sum_avail, double sigma_f, double sigma_df)
 {
     // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
     
     // ν_A: rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
-    double leaveRate = mosqSeekingDeathRate;
-
-    // Input per-species EIR is the mean EIR experienced by a human adult.
-    // We use sumPFindBite below to get required S_v.
-    // Let sumPFindBite be sum_{i in population} (P_Ai * P_B_i):
-    double sumPFindBite = 0.0;
-    
-    // This is P_df * (α_i*N_i / P_Ai) / P_E,
-    // also sum_i α_i * N_i * P_Bi * P_Ci * P_Di
-    double sigma_df = 0.0;
-    
-    foreach(const Host::Human& human, sim::humanPop().crange()) {
-        const OM::Transmission::PerHost& host = human.perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, human.age(sim::now()).inYears());
-        leaveRate += prod;
-        prod *= host.probMosqBiting(humanBase, sIndex);
-        sumPFindBite += prod;
-        sigma_df += prod * host.probMosqResting(humanBase, sIndex);
-    }
-    
-    leaveRate += nhh_avail;
+    double leaveRate = sum_avail + nhh_avail + mosqSeekingDeathRate;
     sigma_df += nhh_sigma_df;
     
     // Probability of a mosquito not finding a host this day:
     double initialP_A = exp(-leaveRate * mosqSeekingDuration);
     double availDivisor = (1.0 - initialP_A) / leaveRate;   // α_d
-    sumPFindBite *= availDivisor;
+    // Input per-species EIR is the mean EIR experienced by a human adult.
+    // We use sumPFindBite below to get required S_v.
+    double sumPFindBite = sigma_f * availDivisor;
     double initialP_df  = sigma_df * availDivisor * probMosqSurvivalOvipositing;
     
     // -----  Calculate required S_v based on desired EIR  -----
@@ -229,7 +212,7 @@ void AnophelesModel::init2 (size_t sIndex, double meanPopAvail)
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
     transmission.emergence->init2( initialP_A, initialP_df,
-            sim::humanPop().size() * meanPopAvail / sumPFindBite, transmission );
+            nHumans * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
 }

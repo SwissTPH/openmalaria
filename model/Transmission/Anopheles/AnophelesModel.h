@@ -59,6 +59,7 @@ namespace Anopheles {
  * 
  * $\nu_A$ / ν_A / leaveRate = sum_i=1^n α_i N_i + μ_vA
  * $\alpha_d$ / α_d / availDivisor = P_Ai / (α_i N_i) = (1 - P_A) / ν_A
+ * $\sigma_{df}$ / σ_f / sigma_f = sum_i α_i N_i P_Bi
  * $\sigma_{df}$ / σ_df / sigma_df = sum_i α_i N_i P_Bi P_Ci P_Di
  * $\sigma_{dif}$ / σ_dif / sigma_dif = sum_i α_i N_i P_Bi P_Ci P_Di K_vi
  * 
@@ -104,13 +105,17 @@ public:
     /** Initialisation which must wait until a human population is available.
      * This is only called when a checkpoint is not loaded.
      *
-     * @param sIndex Index in VectorModel::species of this class.
+     * @param nHumans Human population size
      * @param meanPopAvail The mean availability of age-based relative
      * availability of humans to mosquitoes across populations.
+     * @param sum_avail sum_i α_i * N_i for human hosts i
+     * @param sigma_f sum_i α_i * N_i * P_Bi for human hosts i
+     * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void init2 (size_t sIndex, double meanPopAvail);
+    void init2 (int nHumans, double meanPopAvail,
+        double sum_avail, double sigma_f, double sigma_df);
     
     /** Set up the non-host-specific interventions. */
     void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
@@ -137,7 +142,7 @@ public:
     //@{
     /** Called per time-step. Does most of calculation of EIR.
      *
-     * @param sum_avail is the sum of availability of all humans
+     * @param sum_avail sum_i α_i * N_i for human hosts i
      * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
      * @param sigma_dif sum_i α_i * N_i * P_Bi * P_Ci * P_Di * Kvi for human hosts i; this vector is modified!
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.

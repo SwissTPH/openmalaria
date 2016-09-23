@@ -260,7 +260,21 @@ void VectorModel::init2 () {
     }
     
     for(size_t i = 0; i < numSpecies; ++i) {
-        species[i].init2 (i, meanPopAvail);
+        double sum_avail = 0.0;
+        double sigma_f = 0.0;
+        double sigma_df = 0.0;
+        
+        const Anopheles::PerHostBase& humanBase = species[i].getHumanBaseParams();
+        foreach(const Host::Human& human, sim::humanPop().crange()) {
+            const OM::Transmission::PerHost& host = human.perHostTransmission;
+            double prod = host.entoAvailabilityFull (humanBase, i, human.age(sim::now()).inYears());
+            sum_avail += prod;
+            prod *= host.probMosqBiting(humanBase, i);
+            sigma_f += prod;
+            sigma_df += prod * host.probMosqResting(humanBase, i);
+        }
+        
+        species[i].init2 (sim::humanPop().size(), meanPopAvail, sum_avail, sigma_f, sigma_df);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
