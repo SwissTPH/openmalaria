@@ -53,7 +53,20 @@ namespace Anopheles {
  *
  * Variable names largely come from Nakul Chitnis's paper:
  * "A mathematical model for the dynamics of malaria in mosquitoes feeding on
- * a heterogeneous host population" (3rd Oct. 2007). */
+ * a heterogeneous host population" (3rd Oct. 2007).
+ * 
+ * Some terminology extensions (not in paper):
+ * 
+ * $\nu_A$ / ν_A / leaveRate = sum_i=1^n α_i N_i + μ_vA
+ * $\alpha_d$ / α_d / availDivisor = P_Ai / (α_i N_i) = (1 - P_A) / ν_A
+ * $\sigma_{df}$ / σ_df / sigma_df = sum_i α_i N_i P_Ai P_Bi P_Ci P_Di
+ * $\sigma_{dif}$ / σ_dif / sigma_dif = sum_i α_i N_i P_Ai P_Bi P_Ci P_Di K_vi
+ * 
+ * Thus:
+ * 
+ * P_df = σ_df α_d P_E
+ * P_dif = σ_dif α_d P_E
+ */
 class AnophelesModel
 {
 public:
@@ -63,8 +76,8 @@ public:
             mosqSeekingDuration(numeric_limits<double>::signaling_NaN()),
             mosqSeekingDeathRate(numeric_limits<double>::signaling_NaN()),
             probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
-            nhhAvail(numeric_limits<double>::signaling_NaN()),
-            nhhCompleteCycle(numeric_limits<double>::signaling_NaN())
+            nhh_avail(numeric_limits<double>::signaling_NaN()),
+            nhh_sigma_df(numeric_limits<double>::signaling_NaN())
     {}
     
     /** Called to initialise variables instead of a constructor. At this point,
@@ -125,11 +138,11 @@ public:
     /** Called per time-step. Does most of calculation of EIR.
      *
      * @param sum_avail is the sum of availability of all humans
-     * @param tsP_df P_df from this step (see model doc)
-     * @param tsP_dif P_dif from this step (see model doc)
+     * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
+     * @param sigma_dif sum_i α_i * N_i * P_Bi * P_Ci * P_Di * Kvi for human hosts i; this vector is modified!
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (double sum_avail, double tsP_df, vector<double>& tsP_dif, bool isDynamic);
+    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, bool isDynamic);
 
     /// Intermediatary from vector model equations used to calculate EIR
     inline vector<double>& getPartialEIR() { return partialEIR; }
@@ -270,10 +283,10 @@ private:
     double probMosqSurvivalOvipositing;
 
     // sum_i N_i * α_i for i in NHH types: total availability of non-human hosts
-    double nhhAvail;
-    // sum_i N_i * α_i * P_B_i * P_C_i * P_D_i * P_E for i in NHH types: chance feeding
+    double nhh_avail;
+    // sum_i N_i * α_i * P_B_i * P_C_i * P_D_i for i in NHH types: chance feeding
     // and surviving a complete cycle across all non-human hosts
-    double nhhCompleteCycle;
+    double nhh_sigma_df;
     //@}
     
     struct TrapParams {

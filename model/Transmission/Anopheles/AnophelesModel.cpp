@@ -154,8 +154,8 @@ void AnophelesModel::initAvailability(
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
     humanBase.setEntoAvailability( (P_A1 / populationSize) * availFactor );
     
-    nhhAvail = 0.0;
-    nhhCompleteCycle = 0.0;
+    nhh_avail = 0.0;
+    nhh_sigma_df = 0.0;
     foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
 //         map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
 //         if (pop == nonHumanHostPopulations.end()){
@@ -173,10 +173,8 @@ void AnophelesModel::initAvailability(
         const double P_Ahi = P_Ah * xi_i;       // probability of encountering this type of NNH on a given night
         const double avail_i = P_Ahi * availFactor; // N_i * α_i
         
-        nhhAvail += avail_i;    // N * α
-        // TODO: multiply P_E1 in following:
-        // NOTE: N_i was previously not included, but N_i = 1 for all NHHs in all test scenarios
-        nhhCompleteCycle += avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
+        nhh_avail += avail_i;    // N * α
+        nhh_sigma_df += avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
         // Note: we would do the same for P_dif except that it's multiplied by
         // infectiousness of host to mosquito which is zero.
     }
@@ -195,36 +193,35 @@ void AnophelesModel::init2 (size_t sIndex, double meanPopAvail)
 {
     // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
     
-    // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
-    double leaveSeekingStateRate = mosqSeekingDeathRate;
+    // ν_A: rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
+    double leaveRate = mosqSeekingDeathRate;
 
     // Input per-species EIR is the mean EIR experienced by a human adult.
     // We use sumPFindBite below to get required S_v.
     // Let sumPFindBite be sum_{i in population} (P_Ai * P_B_i):
     double sumPFindBite = 0.0;
-
-    // NC's non-autonomous model provides two methods for calculating P_df and
-    // P_dif; here we assume that P_E is constant.
-    double initialP_df = 0.0;
+    
+    // This is P_df * (α_i*N_i / P_Ai) / P_E,
+    // also sum_i α_i * N_i * P_Bi * P_Ci * P_Di
+    double sigma_df = 0.0;
     
     foreach(const Host::Human& human, sim::humanPop().crange()) {
         const OM::Transmission::PerHost& host = human.perHostTransmission;
         double prod = host.entoAvailabilityFull (humanBase, sIndex, human.age(sim::now()).inYears());
-        leaveSeekingStateRate += prod;
+        leaveRate += prod;
         prod *= host.probMosqBiting(humanBase, sIndex);
         sumPFindBite += prod;
-        initialP_df += prod * host.probMosqResting(humanBase, sIndex);
+        sigma_df += prod * host.probMosqResting(humanBase, sIndex);
     }
     
-    leaveSeekingStateRate += nhhAvail;
-    initialP_df += nhhCompleteCycle;
+    leaveRate += nhh_avail;
+    sigma_df += nhh_sigma_df;
     
     // Probability of a mosquito not finding a host this day:
-    double initialP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - initialP_A) / leaveSeekingStateRate;
-    sumPFindBite *= P_Ai_base;
-    initialP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-    
+    double initialP_A = exp(-leaveRate * mosqSeekingDuration);
+    double availDivisor = (1.0 - initialP_A) / leaveRate;   // α_d
+    sumPFindBite *= availDivisor;
+    double initialP_df  = sigma_df * availDivisor * probMosqSurvivalOvipositing;
     
     // -----  Calculate required S_v based on desired EIR  -----
     // Last parameter is a multiplication factor for S_v/EIR. First we multiply
@@ -287,7 +284,7 @@ void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime li
 
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod (
-        double sum_avail, double tsP_df, vector<double>& tsP_dif, bool isDynamic)
+        double sum_avail, double sigma_df, vector<double>& sigma_dif, bool isDynamic)
 {
     transmission.emergence->update();
     
@@ -307,15 +304,15 @@ void AnophelesModel::advancePeriod (
       P_Ai[t] = (1 - P_A[t]) α_i[t] / sum_{h in hosts} α_h[t]
     (letting N_h[t] == 1 for all h,t). The only part of this varying per-host is
       α_i[t] = host.entoAvailability (index, human.getAgeInYears())
-      Let P_Ai_base[t] = (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA).
+      Let availDivisor[t] = (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA).
 
     Note that although the model allows α_i and P_B_i to vary per-day, they only
     vary per time step of the main simulation. Hence:
-      EIR = (sum_{t=...} S_v[t] * P_Ai_base[t]) * α_i * P_B_i
+      EIR = (sum_{t=...} S_v[t] * availDivisor[t]) * α_i * P_B_i
 
-    Since S_v[t] * P_Ai_base[t] does not vary per individual, we calculate this
+    Since S_v[t] * availDivisor[t] does not vary per individual, we calculate this
     per time step of the main simulation as partialEIR:
-      partialEIR = (sum_{t=...} S_v[t] * P_Ai_base[t])
+      partialEIR = (sum_{t=...} S_v[t] * availDivisor[t])
 
     Hence calculateEIR() only needs to do the following:
       EIR = partialEIR * α_i * P_B_i
@@ -324,15 +321,15 @@ void AnophelesModel::advancePeriod (
 
     // -----  Calculate P_A, P_Ai, P_df, P_dif based on human pop  -----
     
-    // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
-    double leaveSeekingStateRate = mosqSeekingDeathRate;
+    // ν_A: rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
+    double leaveRate = mosqSeekingDeathRate;
     foreach( const util::SimpleDecayingValue& increase, seekingDeathRateIntervs ){
-        leaveSeekingStateRate *= 1.0 + increase.current_value( sim::ts0() );
+        leaveRate *= 1.0 + increase.current_value( sim::ts0() );
     }
-    leaveSeekingStateRate += sum_avail;
+    leaveRate += sum_avail;
     
-    leaveSeekingStateRate += nhhAvail;
-    tsP_df += nhhCompleteCycle;
+    leaveRate += nhh_avail;
+    sigma_df += nhh_sigma_df;
     
     for( list<TrapData>::iterator it = baitedTraps.begin(); it != baitedTraps.end(); ){
         if( sim::ts0() > it->expiry ){
@@ -341,21 +338,23 @@ void AnophelesModel::advancePeriod (
         }
         SimTime age = sim::ts0() - it->deployTime;
         double decayCoeff = trapParams[it->instance].availDecay->eval( age, it->availHet );
-        leaveSeekingStateRate += it->initialAvail * decayCoeff;
-        // tsP_df doesn't change: mosquitoes do not survive traps
+        leaveRate += it->initialAvail * decayCoeff;
+        // sigma_df doesn't change: mosquitoes do not survive traps
         it++;
     }
     
     // Probability of a mosquito not finding a host this day:
-    double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
-
-    double baseP_df = P_Ai_base * probMosqSurvivalOvipositing;
+    double tsP_A = exp(-leaveRate * mosqSeekingDuration);
+    double availDivisor = (1.0 - tsP_A) / leaveRate;    // α_d
+    
+    // alphaE (α_E) is α_d * P_E, where P_E may be adjusted by interventions
+    double alphaE = availDivisor * probMosqSurvivalOvipositing;
     foreach( const util::SimpleDecayingValue& pDeath, probDeathOvipositingIntervs ){
-        baseP_df *= 1.0 - pDeath.current_value( sim::ts0() );
+        alphaE *= 1.0 - pDeath.current_value( sim::ts0() );
     }
-    tsP_df  *= baseP_df;
-    vectors::scale( tsP_dif, baseP_df );
+    double tsP_df  = sigma_df * alphaE;
+    // from now, sigma_dif becomes P_dif (but we can't simply rename):
+    vectors::scale( sigma_dif, alphaE );
     
     
     // Summed per day:
@@ -367,7 +366,7 @@ void AnophelesModel::advancePeriod (
     // simulation uses one or five day time steps.
     const SimTime nextTS = sim::ts0() + SimTime::oneTS();
     for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay() ){
-        transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, partialEIR, P_Ai_base );
+        transmission.update( d0, tsP_A, tsP_df, sigma_dif, isDynamic, partialEIR, availDivisor );
     }
 }
 
