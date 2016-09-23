@@ -352,32 +352,32 @@ SimTime VectorModel::initIterate () {
         // allow forcing equilibrium mode like with non-vector model
         return SimTime::zero(); // no initialization to do
     }
-    if( initIterations < 0 ){
+    if( initIterations < 0 ){   // flag: init & stabilisation done
+        //TODO: we should perhaps check that EIR gets reproduced correctly?
         assert( interventionMode = dynamicEIR );
         simulationMode = dynamicEIR;
         return SimTime::zero();
     }
     
     ++initIterations;
-    
-    bool needIterate = false;
-    for(size_t i = 0; i < numSpecies; ++i) {
-        needIterate = needIterate || species[i].initIterate ();
-    }
-    if( needIterate == false ){
-        initIterations = -1;
-    }
     if( initIterations > 10 ){
         throw TRACED_EXCEPTION("Transmission warmup exceeded 10 iterations!",util::Error::VectorWarmup);
     }
     
-    // Time to let parameters settle after each iteration. I would expect one year
-    // to be enough (but I may be wrong).
-    if( needIterate )
+    bool needIterate = false;
+    for(size_t i = 0; i < numSpecies; ++i) {
+        //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
+        needIterate = needIterate || species[i].initIterate ();
+    }
+    
+    if( needIterate ){
         // stabilization + 5 years data-collection time:
         return SimTime::oneYear() + SimTime::fromYearsI(5);
-    else
+    } else {
+        // One year stabilisation, then we're finished:
+        initIterations = -1;
         return SimTime::oneYear();
+    }
 }
 
 double VectorModel::calculateEIR(Host::Human& human, double ageYears,

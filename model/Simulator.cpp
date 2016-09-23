@@ -221,8 +221,11 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         
         ++phase;        // advance to next phase
         if (phase == ONE_LIFE_SPAN) {
+            // Start human warm-up
             simPeriodEnd = humanWarmupLength;
+            
         } else if (phase == TRANSMISSION_INIT) {
+            // Start or continuation of transmission init cycle (after one life span)
             SimTime iterate = sim::transmission().initIterate();
             if( iterate > SimTime::zero() ){
                 simPeriodEnd += iterate;
@@ -232,6 +235,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             }
             // adjust estimation of final time step: end of current period + length of main phase
             totalSimDuration = simPeriodEnd + mon::finalSurveyTime() + SimTime::oneTS();
+            
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
@@ -239,10 +243,12 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             sim::humanPop().preMainSimInit();
             sim::transmission().summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
             mon::initMainSim();
+            
         } else if (phase == END_SIM) {
             cerr << "sim end" << endl;
             break;
         }
+        
         if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
             // First of middle of next phase, or current value (from command line) triggers a checkpoint.
             SimTime phase_mid = sim::now() + (simPeriodEnd - sim::now()) * 0.5;
