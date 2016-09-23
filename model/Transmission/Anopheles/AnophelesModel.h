@@ -59,8 +59,8 @@ namespace Anopheles {
  * 
  * $\nu_A$ / ν_A / leaveRate = sum_i=1^n α_i N_i + μ_vA
  * $\alpha_d$ / α_d / availDivisor = P_Ai / (α_i N_i) = (1 - P_A) / ν_A
- * $\sigma_{df}$ / σ_df / sigma_df = sum_i α_i N_i P_Ai P_Bi P_Ci P_Di
- * $\sigma_{dif}$ / σ_dif / sigma_dif = sum_i α_i N_i P_Ai P_Bi P_Ci P_Di K_vi
+ * $\sigma_{df}$ / σ_df / sigma_df = sum_i α_i N_i P_Bi P_Ci P_Di
+ * $\sigma_{dif}$ / σ_dif / sigma_dif = sum_i α_i N_i P_Bi P_Ci P_Di K_vi
  * 
  * Thus:
  * 
