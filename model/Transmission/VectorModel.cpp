@@ -417,48 +417,58 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
 
 // Every Global::interval days:
 void VectorModel::vectorUpdate () {
-    vector2D<double> popProbTransmission;
-    popProbTransmission.resize( sim::humanPop().size(), WithinHost::Genotypes::N() );
-    size_t i = 0;
+    const size_t nGenotypes = WithinHost::Genotypes::N();
+    vector<double> probTransmission;
+    vector<double> sum_avail( numSpecies, 0.0 );
+    vector<double> sigma_df( numSpecies, 0.0 );
+    vector<vector<double> > sigma_dif( numSpecies );
+    vector<const Anopheles::PerHostBase*> humanBases;
+    humanBases.reserve( numSpecies );
+    for(size_t s = 0; s < numSpecies; ++s){
+        humanBases.push_back( &species[s].getHumanBaseParams() );
+        sigma_dif[s].assign( nGenotypes, 0.0 );
+    }
+    
+    size_t h = 0;
     foreach(const Host::Human& human, sim::humanPop().crange()) {
-        const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        const OM::Transmission::PerHost& host = human.perHostTransmission;
         WithinHost::WHInterface& whm = *human.withinHostModel;
+        const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        
+        probTransmission.assign( nGenotypes, 0.0 );
         double sumX;
         const double pTrans = whm.probTransmissionToMosquito( tbvFac, &sumX );
-        if( WithinHost::Genotypes::N() == 1 ) popProbTransmission.at(i,0) = pTrans;
-        else for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
+        if( nGenotypes == 1 ) probTransmission[0] = pTrans;
+        else for( size_t g = 0; g < nGenotypes; ++g ){
             const double k = whm.probTransGenotype( pTrans, sumX, g );
             assert( (boost::math::isfinite)(k) );
-            popProbTransmission.at(i,g) = k;
-        }
-        i += 1;
-    }
-    for(size_t i = 0; i < numSpecies; ++i){
-        // NC's non-autonomous model provides two methods for calculating sigma_df and
-        // partialP_dif; here we assume that P_E is constant.
-        double sum_avail = 0.0;
-        double sigma_df = 0.0;
-        vector<double> sigma_dif( WithinHost::Genotypes::N(), 0.0 );
-        size_t h = 0;
-        const Anopheles::PerHostBase& humanBase = species[i].getHumanBaseParams();
-        foreach(const Host::Human& human, sim::humanPop().crange()) {
-            const OM::Transmission::PerHost& host = human.perHostTransmission;
-            //NOTE: calculate availability relative to age at end of time step;
-            // not my preference but consistent with TransmissionModel::getEIR().
-            //TODO: even stranger since popProbTransmission comes from the previous time step
-            const double avail = host.entoAvailabilityFull (humanBase, i, human.age(sim::ts1()).inYears());
-            sum_avail += avail;
-            const double df = avail
-                    * host.probMosqBiting(humanBase, i)
-                    * host.probMosqResting(humanBase, i);
-            sigma_df += df;
-            for( size_t genotype = 0; genotype < WithinHost::Genotypes::N(); ++genotype ){
-                sigma_dif[genotype] += df * popProbTransmission.at(h, genotype);
-            }
-            h += 1;
+            probTransmission[g] = k;
         }
         
-        species[i].advancePeriod (sum_avail, sigma_df, sigma_dif, simulationMode == dynamicEIR);
+        for(size_t s = 0; s < numSpecies; ++s){
+            //NOTE: calculate availability relative to age at end of time step;
+            // not my preference but consistent with TransmissionModel::getEIR().
+            //TODO: even stranger since probTransmission comes from the previous time step
+            const double avail = host.entoAvailabilityFull (*humanBases[s], s,
+                    human.age(sim::ts1()).inYears());
+            sum_avail[s] += avail;
+            const double df = avail
+                    * host.probMosqBiting(*humanBases[s], s)
+                    * host.probMosqResting(*humanBases[s], s);
+            sigma_df[s] += df;
+            for( size_t g = 0; g < nGenotypes; ++g ){
+                sigma_dif[s][g] += df * probTransmission[g];
+            }
+        }
+        
+        h += 1;
+    }
+    
+    for(size_t s = 0; s < numSpecies; ++s){
+        species[s].advancePeriod (sum_avail[s],
+                sigma_df[s],
+                sigma_dif[s],
+                simulationMode == dynamicEIR);
     }
 }
 void VectorModel::update() {
