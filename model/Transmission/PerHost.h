@@ -226,6 +226,15 @@ public:
      * to restore transmission. */
     //@}
     
+    ///@brief Convenience wrappers around several functions
+    //@{
+    /// entoAvailabilityHetVecItv * probMosqBiting
+    inline double availBite (const Anopheles::PerHostBase& base, size_t speciesIndex) const{
+        return entoAvailabilityHetVecItv(base, speciesIndex) *
+                probMosqBiting(base, speciesIndex);
+    }
+    //@}
+    
     ///@brief Miscellaneous
     //@{
     /** Get the age at which individuals are considered adults (i.e. where

@@ -285,9 +285,8 @@ void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime li
 
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod (
-                                     vector2D<double>& popProbTransmission,
-                                     size_t sIndex,
-                                     bool isDynamic) {
+        double sum_avail, double tsP_df, vector<double>& tsP_dif, bool isDynamic)
+{
     transmission.emergence->update();
     
     /* Largely equations correspond to Nakul Chitnis's model in
@@ -328,28 +327,7 @@ void AnophelesModel::advancePeriod (
     foreach( const util::SimpleDecayingValue& increase, seekingDeathRateIntervs ){
         leaveSeekingStateRate *= 1.0 + increase.current_value( sim::ts0() );
     }
-
-    // NC's non-autonomous model provides two methods for calculating P_df and
-    // P_dif; here we assume that P_E is constant.
-    double tsP_df = 0.0;
-    vector<double> tsP_dif( WithinHost::Genotypes::N(), 0.0 );
-    size_t i = 0;
-    foreach(const Host::Human& human, sim::humanPop().crange()) {
-        const OM::Transmission::PerHost& host = human.perHostTransmission;
-        //NOTE: calculate availability relative to age at end of time step;
-        // not my preference but consistent with TransmissionModel::getEIR().
-        //TODO: even stranger since popProbTransmission comes from the previous time step
-        const double avail = host.entoAvailabilityFull (humanBase, sIndex, human.age(sim::ts1()).inYears());
-        leaveSeekingStateRate += avail;
-        const double P_df = avail
-                * host.probMosqBiting(humanBase, sIndex)
-                * host.probMosqResting(humanBase, sIndex);
-        tsP_df += P_df;
-        for( size_t genotype = 0; genotype < WithinHost::Genotypes::N(); ++genotype ){
-            tsP_dif[genotype] += P_df * popProbTransmission.at(i, genotype);
-        }
-        i += 1;
-    }
+    leaveSeekingStateRate += sum_avail;
     
     foreach( const NHHParams& nhh, nonHumans ){
         leaveSeekingStateRate += nhh.entoAvailability;
@@ -392,26 +370,6 @@ void AnophelesModel::advancePeriod (
     const SimTime nextTS = sim::ts0() + SimTime::oneTS();
     for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay() ){
         transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, partialEIR, P_Ai_base );
-    }
-}
-
-void AnophelesModel::calculateEIR( size_t sIndex,
-        OM::Transmission::PerHost& host, vector<double>& EIR )
-{
-#ifdef WITHOUT_BOINC
-    if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
-        cerr<<"partialEIR is not a number; "<<sIndex<<endl;
-    }
-#endif
-    /* Calculates EIR per individual (hence N_i == 1).
-     *
-     * See comment in AnophelesModel::advancePeriod for method. */
-    double entoFactor = host.entoAvailabilityHetVecItv (humanBase, sIndex)
-            * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
-    
-    assert( EIR.size() == partialEIR.size() );
-    for( size_t g = 0; g < EIR.size(); ++g ){
-        EIR[g] += partialEIR[g] * entoFactor;
     }
 }
 

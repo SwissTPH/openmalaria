@@ -379,10 +379,23 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
     }else{
         assert( simulationMode == dynamicEIR );
         EIR.assign( WithinHost::Genotypes::N(), 0.0 );
+        const double ageFactor = host.relativeAvailabilityAge (ageYears);
         for(size_t i = 0; i < numSpecies; ++i) {
-            species[i].calculateEIR( i, host, EIR );
+            vector<double>& partialEIR = species[i].getPartialEIR();
+#ifdef WITHOUT_BOINC
+            assert( EIR.size() == partialEIR.size() );
+            if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
+                cerr<<"partialEIR is not a number; "<<i<<endl;
+            }
+#endif
+            /* Calculates EIR per individual (hence N_i == 1).
+             *
+             * See comment in AnophelesModel::advancePeriod for method. */
+            double entoFactor = ageFactor * host.availBite(species[i].getHumanBaseParams(), i);
+            for( size_t g = 0; g < EIR.size(); ++g ){
+                EIR[g] += partialEIR[g] * entoFactor;
+            }
         }
-        vectors::scale( EIR, host.relativeAvailabilityAge (ageYears) );
         return vectors::sum( EIR );
     }
 }
@@ -407,7 +420,31 @@ void VectorModel::vectorUpdate () {
         i += 1;
     }
     for(size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (popProbTransmission, i, simulationMode == dynamicEIR);
+        // NC's non-autonomous model provides two methods for calculating P_df and
+        // P_dif; here we assume that P_E is constant.
+        double sum_avail = 0.0;
+        double tsP_df = 0.0;
+        vector<double> tsP_dif( WithinHost::Genotypes::N(), 0.0 );
+        size_t h = 0;
+        const Anopheles::PerHostBase& humanBase = species[i].getHumanBaseParams();
+        foreach(const Host::Human& human, sim::humanPop().crange()) {
+            const OM::Transmission::PerHost& host = human.perHostTransmission;
+            //NOTE: calculate availability relative to age at end of time step;
+            // not my preference but consistent with TransmissionModel::getEIR().
+            //TODO: even stranger since popProbTransmission comes from the previous time step
+            const double avail = host.entoAvailabilityFull (humanBase, i, human.age(sim::ts1()).inYears());
+            sum_avail += avail;
+            const double P_df = avail
+                    * host.probMosqBiting(humanBase, i)
+                    * host.probMosqResting(humanBase, i);
+            tsP_df += P_df;
+            for( size_t genotype = 0; genotype < WithinHost::Genotypes::N(); ++genotype ){
+                tsP_dif[genotype] += P_df * popProbTransmission.at(h, genotype);
+            }
+            h += 1;
+        }
+        
+        species[i].advancePeriod (sum_avail, tsP_df, tsP_dif, simulationMode == dynamicEIR);
     }
 }
 void VectorModel::update() {

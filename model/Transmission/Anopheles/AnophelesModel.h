@@ -122,29 +122,15 @@ public:
     //@{
     /** Called per time-step. Does most of calculation of EIR.
      *
-     * @param popProbTransmission A two-dimensional vector of the probability
-     *  of transmission to mosquito for each human host (first index, in same
-     *  order as population) and for each parasite genotype (second index).
-     *  This is simply a cache, since calling probTransmissionToMosquito() is
-     *  expensive.
-     * @param sIndex Index of the type of mosquito in per-type/species lists.
+     * @param sum_avail is the sum of availability of all humans
+     * @param tsP_df P_df from this step (see model doc)
+     * @param tsP_dif P_dif from this step (see model doc)
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod(vector2D<double>& popProbTransmission,
-                        size_t sIndex, bool isDynamic );
+    void advancePeriod (double sum_avail, double tsP_df, vector<double>& tsP_dif, bool isDynamic);
 
-    /** Returns the EIR calculated by advancePeriod().
-     *
-     * Could be extended to allow input EIR driven initialisation on a per-species
-     * level instead of the whole simulation, but that doesn't appear worth doing.
-     *
-     * @param sIndex Index of this in VectorModel::species
-     * @param host PerHost of the human requesting this EIR.
-     * @param EIR Vector of EIR per genotype; function adds to this to
-     *  eventually yield the EIR per genotype summed across species.
-     */
-    void calculateEIR (size_t sIndex, Transmission::PerHost& host,
-            vector<double>& EIR );
+    /// Intermediatary from vector model equations used to calculate EIR
+    inline vector<double>& getPartialEIR() { return partialEIR; }
     //@}
 
 
