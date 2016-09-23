@@ -174,7 +174,9 @@ void AnophelesModel::initAvailability(
         const double avail_i = P_Ahi * availFactor; // N_i * α_i
         
         nhhAvail += avail_i;    // N * α
-        nhhCompleteCycle += avail_i * P_B_i * P_C_i * P_D_i * P_E1;    // term in P_df series
+        // TODO: multiply P_E1 in following:
+        // NOTE: N_i was previously not included, but N_i = 1 for all NHHs in all test scenarios
+        nhhCompleteCycle += avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
         // Note: we would do the same for P_dif except that it's multiplied by
         // infectiousness of host to mosquito which is zero.
     }
