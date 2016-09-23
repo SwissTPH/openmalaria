@@ -295,7 +295,7 @@ uint32_t Genotypes::sampleGenotype( vector<double>& genotype_weights ){
         assert( GT::current_mode == GT::SAMPLE_TRACKING );
         assert( genotype_weights.size() == N_genotypes );
         double weight_sum = util::vectors::sum( genotype_weights );
-        assert( weight_sum > 0.0 && weight_sum < 1e5 );        // possible loss of precision or other error
+        assert( weight_sum >= 0.0 && weight_sum < 1e5 );        // possible loss of precision or other error
         double sample = util::random::uniform_01() * weight_sum;
         double cum = 0.0;
         for( size_t g = 0; g < N_genotypes; ++g ){
