@@ -157,10 +157,10 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
     const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
     const scnXml::Vector::NonHumanHostsSequence nonHumansList = vectorData.getNonHumanHosts();
 
-    map<string, double> nonHumanHostPopulations;
-
-    for(size_t i = 0; i<nonHumansList.size(); i++)
-        nonHumanHostPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
+//     map<string, double> nonHumanHostPopulations;
+//     for(size_t i = 0; i<nonHumansList.size(); i++) {
+//         nonHumanHostPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
+//     }
 
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
@@ -170,7 +170,7 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
     for(size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
                                              initialisationEIR,
-                                             nonHumanHostPopulations,
+//                                              nonHumanHostPopulations,
                                              populationSize);
         speciesIndex[name] = i;
     }

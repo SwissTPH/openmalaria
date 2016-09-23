@@ -40,7 +40,7 @@ using namespace OM::util;
 string AnophelesModel::initialise (
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
-    map<string, double>& nonHumanHostPopulations,
+//     map<string, double>& nonHumanHostPopulations,
     int populationSize
 )
 {
@@ -55,7 +55,7 @@ string AnophelesModel::initialise (
     transmission.initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq() );
     
     // Uses anoph.getNonHumanHosts() and anoph.getMosq():
-    initAvailability( anoph, nonHumanHostPopulations, populationSize );
+    initAvailability( anoph, /*nonHumanHostPopulations,*/ populationSize );
     
     // Uses anoph.getSeasonality() and three attributes:
     transmission.emergence->initEIR( anoph, initialisationEIR, transmission.getEIPDuration() );
@@ -66,7 +66,7 @@ string AnophelesModel::initialise (
 
 void AnophelesModel::initAvailability(
     const scnXml::AnophelesParams& anoph,
-    map<string, double>& nonHumanHostPopulations,
+//     map<string, double>& nonHumanHostPopulations,
     int populationSize)
 {
     // Set parameters. Notation is as in: Parameter Values for Transmission
@@ -74,9 +74,11 @@ void AnophelesModel::initAvailability(
     
     const scnXml::Mosq& mosq = anoph.getMosq();
     // A: Host seeking
-    // Proportion of mosquitoes host seeking on same day as ovipositing:
+    // Proportion of host-seeking parous mosquitoes (those who have laid eggs)
+    // which laid eggs that day:
     const double A0 = mosq.getMosqLaidEggsSameDayProportion().getValue();
-    // Probability that the mosquito survives the feeding cycle:
+    // Probability that the mosquito survives the feeding cycle.
+    // Note: Pf = M, the parous rate (prop mosqs which have laid eggs):
     const double Pf = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
     const double humanBloodIndex = mosq.getMosqHumanBloodIndex().getValue();    // χ (chi)
     // Cycle probabilities, when biting a human:
@@ -91,16 +93,17 @@ void AnophelesModel::initAvailability(
     
     
     // -----  Calculate P_A, P_A1, P_A_n  -----
-    // Probability that a mosquito does not find a host and does not die in
-    // one night of searching (P_A)
+    // P_A is prob that a mosq is still host seeking after 1 day. It is also the
+    // proportion of parous mosquitoes who have waited at least 1 day since
+    // laying, thus 1 - P_A = A0.
     const double initP_A  = 1.0 - A0;
-    // This times the probability of encountering this type of host on a given
-    // night divided by the number of that type of host is the availability of
-    // this type of host.
+    // This is multiplied by the probability of encountering some type of host
+    // on a given night is the total availability of this type of host (N_i * α_i).
+    // Note: P_Ai = α_i * N_i / availFactor
     const double  availFactor = -log(initP_A) / (mosqSeekingDuration * (1.0 - initP_A));
     // Probability that a mosquito encounters a human on a given night
     double P_A1 = numeric_limits<double>::quiet_NaN();
-    // Probability that a mosquito encounters a non human host on a given night
+    // Probability that a mosquito encounters any non human host on a given night
     // (confusingly labelled P_Ah in paper)
     double P_Ah = numeric_limits<double>::quiet_NaN();
 
@@ -121,7 +124,7 @@ void AnophelesModel::initAvailability(
         double sum_uvw = 0.0;   // sum u*(v+w) across NNHs where w = (1-χ)*P_D*P_E
         
         foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
-            // availability of host relative to other non-human hosts:
+            // availability population of hosts of this type relative to other non-human hosts:
             const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
             // cycle probabilities, when biting this type of host:
             const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
@@ -151,33 +154,36 @@ void AnophelesModel::initAvailability(
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
     humanBase.setEntoAvailability( (P_A1 / populationSize) * availFactor );
     
-    nonHumans.reserve(xmlSeqNNHs.size());
+    nhhAvail = 0.0;
+    nhhCompleteCycle = 0.0;
     foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
-        map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
-        if (pop == nonHumanHostPopulations.end()){
-            throw xml_scenario_error ((boost::format("There is no population size defined for "
-            "non-human host type \"%1%\"") %xmlNNH.getName()).str());
-        }
+//         map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
+//         if (pop == nonHumanHostPopulations.end()){
+//             throw xml_scenario_error ((boost::format("There is no population size defined for "
+//             "non-human host type \"%1%\"") %xmlNNH.getName()).str());
+//         }
         
         // population size for non-human host category:
-        const double N_i = pop->second;
+//         const double N_i = pop->second;
         // per-NNH parameters, as above:
         const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
         const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
         const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
         const double P_D_i = xmlNNH.getMosqProbResting().getValue();
         const double P_Ahi = P_Ah * xi_i;       // probability of encountering this type of NNH on a given night
-        const double alpha_i = (P_Ahi / N_i) * availFactor;
+        const double avail_i = P_Ahi * availFactor; // N_i * α_i
         
-        NHHParams params;
-        params.entoAvailability = N_i * alpha_i;
-        params.probCompleteCycle = alpha_i * P_B_i * P_C_i * P_D_i;
-        nonHumans.push_back(params);
+        nhhAvail += avail_i;    // N * α
+        // TODO: multiply P_E1 in following:
+        // NOTE: N_i was previously not included, but N_i = 1 for all NHHs in all test scenarios
+        nhhCompleteCycle += avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
+        // Note: we would do the same for P_dif except that it's multiplied by
+        // infectiousness of host to mosquito which is zero.
     }
     
     // ———  set mosqSeekingDeathRate  ———
-    // since sum_i(ξ_i)=1, sum_k(P_A_k)=P_A1+P_Ah
-    const double mu1 = (1.0-initP_A-P_A1-P_Ah) / (1.-initP_A);
+    // Note: sum_k( P_Ak ) = P_A1 + P_Ah
+    const double mu1 = (1.0 - (initP_A + P_A1 + P_Ah)) / (1.0 - initP_A);
     const double mu2 = -log(initP_A) / mosqSeekingDuration;
     mosqSeekingDeathRate = mu1 * mu2;
 }
@@ -209,13 +215,9 @@ void AnophelesModel::init2 (size_t sIndex, double meanPopAvail)
         sumPFindBite += prod;
         initialP_df += prod * host.probMosqResting(humanBase, sIndex);
     }
-
-    foreach( const NHHParams& nhh, nonHumans ){
-        leaveSeekingStateRate += nhh.entoAvailability;
-        initialP_df += nhh.probCompleteCycle;
-        // Note: in model, we do the same for tsP_dif, except in this case it's
-        // multiplied by infectiousness of host to mosquito which is zero.
-    }
+    
+    leaveSeekingStateRate += nhhAvail;
+    initialP_df += nhhCompleteCycle;
     
     // Probability of a mosquito not finding a host this day:
     double initialP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
@@ -329,12 +331,8 @@ void AnophelesModel::advancePeriod (
     }
     leaveSeekingStateRate += sum_avail;
     
-    foreach( const NHHParams& nhh, nonHumans ){
-        leaveSeekingStateRate += nhh.entoAvailability;
-        tsP_df += nhh.probCompleteCycle;
-        // Note: in model, we do the same for tsP_dif, except in this case it's
-        // multiplied by infectiousness of host to mosquito which is zero.
-    }
+    leaveSeekingStateRate += nhhAvail;
+    tsP_df += nhhCompleteCycle;
     
     for( list<TrapData>::iterator it = baitedTraps.begin(); it != baitedTraps.end(); ){
         if( sim::ts0() > it->expiry ){

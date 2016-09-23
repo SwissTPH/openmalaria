@@ -62,7 +62,9 @@ public:
     AnophelesModel () :
             mosqSeekingDuration(numeric_limits<double>::signaling_NaN()),
             mosqSeekingDeathRate(numeric_limits<double>::signaling_NaN()),
-            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN())
+            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
+            nhhAvail(numeric_limits<double>::signaling_NaN()),
+            nhhCompleteCycle(numeric_limits<double>::signaling_NaN())
     {}
     
     /** Called to initialise variables instead of a constructor. At this point,
@@ -77,7 +79,7 @@ public:
      */
     string initialise (const scnXml::AnophelesParams& anoph,
                        vector<double>& initialisationEIR,
-                       map<string, double>& nonHumanHostPopulations,
+//                        map<string, double>& nonHumanHostPopulations,
                        int populationSize);
     
     /** Scale the internal EIR representation by factor; used as part of
@@ -206,7 +208,7 @@ private:
      */
     void initAvailability(
         const scnXml::AnophelesParams& anoph,
-        map<string, double>& nonHumanHostPopulations,
+//         map<string, double>& nonHumanHostPopulations,
         int populationSize);
 
     /** Calculates the human ento availability
@@ -267,14 +269,11 @@ private:
      * an alternative. */
     double probMosqSurvivalOvipositing;
 
-    struct NHHParams {
-        // N_i * α_i: rate at which mosquitoes encouter hosts of this type
-        double entoAvailability;
-        // α_i * P_B_i * P_C_i * P_D_i
-        double probCompleteCycle;
-    };
-    /** Non-human host data. Doesn't need checkpointing. */
-    vector<NHHParams> nonHumans;
+    // sum_i N_i * α_i for i in NHH types: total availability of non-human hosts
+    double nhhAvail;
+    // sum_i N_i * α_i * P_B_i * P_C_i * P_D_i * P_E for i in NHH types: chance feeding
+    // and surviving a complete cycle across all non-human hosts
+    double nhhCompleteCycle;
     //@}
     
     struct TrapParams {
