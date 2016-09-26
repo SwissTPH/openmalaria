@@ -421,12 +421,12 @@ void VectorModel::vectorUpdate () {
     vector<double> probTransmission;
     vector<double> sum_avail( numSpecies, 0.0 );
     vector<double> sigma_df( numSpecies, 0.0 );
-    vector<vector<double> > sigma_dif( numSpecies );
+    vector2D<double> sigma_dif( numSpecies, nGenotypes, 0.0 );
+    
     vector<const Anopheles::PerHostBase*> humanBases;
     humanBases.reserve( numSpecies );
     for(size_t s = 0; s < numSpecies; ++s){
         humanBases.push_back( &species[s].getHumanBaseParams() );
-        sigma_dif[s].assign( nGenotypes, 0.0 );
     }
     
     size_t h = 0;
@@ -457,17 +457,23 @@ void VectorModel::vectorUpdate () {
                     * host.probMosqResting(*humanBases[s], s);
             sigma_df[s] += df;
             for( size_t g = 0; g < nGenotypes; ++g ){
-                sigma_dif[s][g] += df * probTransmission[g];
+                sigma_dif.at(s, g) += df * probTransmission[g];
             }
         }
         
         h += 1;
     }
     
+    vector<double> sigma_dif_species;
     for(size_t s = 0; s < numSpecies; ++s){
+        // Copy slice to new array:
+        typedef vector<double>::const_iterator const_iter_t;
+        std::pair<const_iter_t, const_iter_t> range = sigma_dif.range_at1(s);
+        sigma_dif_species.assign(range.first, range.second);
+        
         species[s].advancePeriod (sum_avail[s],
                 sigma_df[s],
-                sigma_dif[s],
+                sigma_dif_species,
                 simulationMode == dynamicEIR);
     }
 }

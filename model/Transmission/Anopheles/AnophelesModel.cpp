@@ -207,7 +207,7 @@ void AnophelesModel::init2 (int nHumans, double meanPopAvail,
     double initialP_df  = sigma_df * availDivisor * probMosqSurvivalOvipositing;
     
     // -----  Calculate required S_v based on desired EIR  -----
-    // Last parameter is a multiplication factor for S_v/EIR. First we multiply
+    // Third parameter is a multiplication factor for S_v/EIR. First we multiply
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
