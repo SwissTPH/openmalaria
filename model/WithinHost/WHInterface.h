@@ -103,8 +103,8 @@ public:
      * @param tbvFactor Probability that transmission is not blocked by a
      *  "transmission blocking vaccine".
      * @param sumX Optional out parameter for usage with
-     *  pTransGenotype(). Pointer may be zero if not required, and is
-     *  expected to be zero when not using WHFalciparum.
+     *  pTransGenotype(). Pointer may be zero if not required. May be ignored
+     *  if the local implementation of pTransGenotype does not require it.
      * @returns the probability of this human infecting a feeding mosquito.
      * 
      * Calculates the value during the call, which is expensive (cache externally

@@ -436,7 +436,7 @@ void VectorModel::vectorUpdate () {
         const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );
         
         probTransmission.assign( nGenotypes, 0.0 );
-        double sumX;
+        double sumX = numeric_limits<double>::quiet_NaN();
         const double pTrans = whm.probTransmissionToMosquito( tbvFac, &sumX );
         if( nGenotypes == 1 ) probTransmission[0] = pTrans;
         else for( size_t g = 0; g < nGenotypes; ++g ){

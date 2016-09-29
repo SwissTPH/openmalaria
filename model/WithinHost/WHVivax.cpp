@@ -305,7 +305,6 @@ WHVivax::~WHVivax(){
 
 double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
-    assert( sumX == 0 );
     for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
