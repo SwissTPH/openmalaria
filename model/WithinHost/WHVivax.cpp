@@ -155,12 +155,12 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
     // primary blood stage plus hypnozoites (relapses)
-    releases.insert( sim::ts0() + latentP );
+    releases.insert( sim::nowOrTs0() + latentP );
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
         //TODO: why do we have two latent periods (latentP + latentReleaseDays added in sampleReleaseDelay())?
         SimTime randomReleaseDelay = sampleReleaseDelay();
-        SimTime timeToRelease = sim::ts0() + latentP + randomReleaseDelay;
+        SimTime timeToRelease = sim::nowOrTs0() + latentP + randomReleaseDelay;
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
