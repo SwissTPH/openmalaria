@@ -94,7 +94,10 @@ private:
   void ctsCbResRequirements (ostream& stream);
   
   
-    /// Number of iterations performed during initialization, or negative when done.
+    /// Number of iterations performed during initialization.
+    /// 
+    /// Special cases: 0 during initial one-human-lifespan warmup, <0 after
+    /// initialisation.
     int initIterations;
     
   /** @brief Access to per (anopheles) species data.
@@ -121,6 +124,13 @@ private:
    * Other data read from XML should look up the name here and use the index
    * found. Doesn't need checkpointing. */
   map<string,size_t> speciesIndex;
+  //@}
+  
+  /// @brief Saved data for use in initialisation / fitting cycle
+  //@{
+    util::vecDay2D<double> saved_sum_avail;
+    util::vecDay2D<double> saved_sigma_df;
+    util::vecDay3D<double> saved_sigma_dif;
   //@}
   
   friend class PerHost;

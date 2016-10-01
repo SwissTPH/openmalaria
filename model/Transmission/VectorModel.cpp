@@ -247,6 +247,11 @@ VectorModel::~VectorModel () {
 }
 
 void VectorModel::init2 () {
+    SimTime data_save_len = SimTime::oneDay();  // we don't need to save anything at first
+    saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
+    saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
+    saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
+    
     double sumRelativeAvailability = 0.0;
     foreach(const Host::Human& human, sim::humanPop().crange()) {
         sumRelativeAvailability +=
@@ -352,11 +357,37 @@ SimTime VectorModel::initIterate () {
         // allow forcing equilibrium mode like with non-vector model
         return SimTime::zero(); // no initialization to do
     }
-    if( initIterations < 0 ){   // flag: init & stabilisation done
-        //TODO: we should perhaps check that EIR gets reproduced correctly?
-        assert( interventionMode = dynamicEIR );
-        simulationMode = dynamicEIR;
-        return SimTime::zero();
+    
+    // This function is called repeatedly until vector initialisation is
+    // complete (signalled by returning 0).
+    int initState = 0;
+    if( initIterations == 0 && saved_sum_avail.size1() == SimTime::oneDay() ) {
+        // First time called: we need to do some data collection
+        initState = 1;
+    } else if( initIterations >= 0 ){
+        // Next, while generated EIR is not close to that required,
+        // try adjusting emergence parameters, do a stabilisation phase then data collection phase, then repeat.
+        initState = 2;
+    } else if( initIterations < 0 ){
+        // Finally, we're done.
+        initState = 3;
+    }
+    
+    if( initState == 1 || initState == 3 ){
+        // When starting the iteration phase, we switch to five years worth of data; otherwise we only keep one day.
+        SimTime data_save_len = /*initState == 1 ? SimTime::fromYearsI(5) :*/ SimTime::oneDay();
+        saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
+        saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
+        saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
+        
+//         if( initState == 1 ){
+//             return SimTime::fromYearsI(5);
+//         }
+        if( initState == 3 ){
+            //TODO: we should perhaps check that EIR gets reproduced correctly?
+            simulationMode = dynamicEIR;
+            return SimTime::zero();
+        }
     }
     
     ++initIterations;
@@ -418,10 +449,11 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
 // Every Global::interval days:
 void VectorModel::vectorUpdate () {
     const size_t nGenotypes = WithinHost::Genotypes::N();
+    SimTime popDataInd = mod_nn(sim::ts0(), saved_sum_avail.size1());
     vector<double> probTransmission;
-    vector<double> sum_avail( numSpecies, 0.0 );
-    vector<double> sigma_df( numSpecies, 0.0 );
-    vector2D<double> sigma_dif( numSpecies, nGenotypes, 0.0 );
+    saved_sum_avail.assign_at1(popDataInd, 0.0);
+    saved_sigma_df.assign_at1(popDataInd, 0.0);
+    saved_sigma_dif.assign_at1(popDataInd, 0.0);
     
     vector<const Anopheles::PerHostBase*> humanBases;
     humanBases.reserve( numSpecies );
@@ -451,13 +483,13 @@ void VectorModel::vectorUpdate () {
             //TODO: even stranger since probTransmission comes from the previous time step
             const double avail = host.entoAvailabilityFull (*humanBases[s], s,
                     human.age(sim::ts1()).inYears());
-            sum_avail[s] += avail;
+            saved_sum_avail.at(popDataInd, s) += avail;
             const double df = avail
                     * host.probMosqBiting(*humanBases[s], s)
                     * host.probMosqResting(*humanBases[s], s);
-            sigma_df[s] += df;
+            saved_sigma_df.at(popDataInd, s) += df;
             for( size_t g = 0; g < nGenotypes; ++g ){
-                sigma_dif.at(s, g) += df * probTransmission[g];
+                saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
             }
         }
         
@@ -468,11 +500,11 @@ void VectorModel::vectorUpdate () {
     for(size_t s = 0; s < numSpecies; ++s){
         // Copy slice to new array:
         typedef vector<double>::const_iterator const_iter_t;
-        std::pair<const_iter_t, const_iter_t> range = sigma_dif.range_at1(s);
+        std::pair<const_iter_t, const_iter_t> range = saved_sigma_dif.range_at12(popDataInd, s);
         sigma_dif_species.assign(range.first, range.second);
         
-        species[s].advancePeriod (sum_avail[s],
-                sigma_df[s],
+        species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
+                saved_sigma_df.at(popDataInd, s),
                 sigma_dif_species,
                 simulationMode == dynamicEIR);
     }
@@ -524,11 +556,17 @@ void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
     species & stream;
+    saved_sum_avail & stream;
+    saved_sigma_df & stream;
+    saved_sigma_dif & stream;
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
     species & stream;
+    saved_sum_avail & stream;
+    saved_sigma_df & stream;
+    saved_sigma_dif & stream;
 }
 
 }
