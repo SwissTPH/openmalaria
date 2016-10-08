@@ -65,27 +65,6 @@ void DocumentLoader::saveDocument()
     if (documentChanged) {
         // We don't use this any more, so reduce executable size a bit
         cerr << "Error: document saving support is disabled" << endl;
-//         // get the "basename" (file name without path) of xmlFileName as a C string:
-//         const char* lastFS = strrchr (xmlFileName.c_str(), '/');
-//         const char* lastBS = strrchr (xmlFileName.c_str(), '\\');
-//         const char* baseName = lastBS > lastFS ? lastBS : lastFS;
-//         if (baseName == NULL) // no path separator found; use whole string
-//             baseName = xmlFileName.c_str();
-//         else
-//             ++baseName;  // start at next character
-// 	
-//         ofstream outStream (baseName);
-// 	// Set schema file. Unfortunately we don't know what it was in input
-// 	// file, so this is only a guess.
-//         ostringstream schema;
-//         schema << "scenario_" << SCHEMA_VERSION << ".xsd";
-// 
-//         xml_schema::NamespaceInfomap map;
-//         map[""].name = "";
-//         map[""].schema = schema.str();
-//         scnXml::serializeScenario (outStream, *scenario, map);
-// 
-//         outStream.close();
     }
 }
 
