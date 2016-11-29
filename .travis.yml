@@ -50,6 +50,7 @@ script:
   - test "$TRAVIS_OS_NAME" == "linux" && ldd openMalaria || otool -L openMalaria
   - echo "Running example_scenario.xml"
   - cp schema/scenario_current.xsd .
+  - cp ../test/densities.csv .
   - cp ../util/example/example_scenario.xml .
   - cp ../util/example/run-example-scenario.sh .
   - ./run-example-scenario.sh
