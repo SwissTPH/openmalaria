@@ -33,19 +33,9 @@ vector<ITNComponent*> ITNComponent::componentsByIndex;
 // —————  utility classes (internal use only)  —————
 
 
-factors::SurvivalFactor::SurvivalFactor() :
-    BF( numeric_limits< double >::signaling_NaN() ),
-    HF( numeric_limits< double >::signaling_NaN() ),
-    PF( numeric_limits< double >::signaling_NaN() ),
-    IF( numeric_limits< double >::signaling_NaN() ),
-    holeScaling( numeric_limits< double >::signaling_NaN() ),
-    insecticideScaling( numeric_limits< double >::signaling_NaN() ),
-    invBaseSurvival( numeric_limits< double >::signaling_NaN() )
-{}
-
 void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
                                                    double maxInsecticide, const char* eltName,
-                                                   bool raTwoStageConstraints){
+                                                   bool attractivenessConstraints){
     BF = elt.getBaseFactor();
     HF = elt.getHoleFactor();
     PF = elt.getInsecticideFactor();
@@ -66,9 +56,9 @@ void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
     // see below
     double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
     
-    if( raTwoStageConstraints ){
+    if( attractivenessConstraints ){
         // Note: the following argument is a modification of the one below
-        // (when !raTwoStageConstraints). The original may make more sense.
+        // (when !attractivenessConstraints). The original may make more sense.
     /* We want K ≥ 0 where K is the killing factor:
     K=BF+HF×h+PF×p+IF×h×p, with h and p defined as:
     h=exp(-holeIndex×holeScalingFactor),
@@ -249,20 +239,16 @@ double factors::SurvivalFactor::survivalFactor( double holeIndex, double insecti
 }
 
 
-factors::RADeterrency::RADeterrency(const scnXml::ITNDeterrency& elt,
-                                                   double maxInsecticide) :
-    lHF( numeric_limits< double >::signaling_NaN() ),
-    lPF( numeric_limits< double >::signaling_NaN() ),
-    lIF( numeric_limits< double >::signaling_NaN() ),
-    holeScaling( numeric_limits< double >::signaling_NaN() ),
-    insecticideScaling( numeric_limits< double >::signaling_NaN() )
+void factors::RelativeAttractiveness::initSingleStage(
+        const scnXml::ITNDeterrency& elt, double maxInsecticide)
 {
+    model = SINGLE_STAGE;
     double HF = elt.getHoleFactor();
     double PF = elt.getInsecticideFactor();
     double IF = elt.getInteractionFactor();
-    holeScaling = elt.getHoleScalingFactor();
-    insecticideScaling = elt.getInsecticideScalingFactor();
-    if( !(holeScaling>=0.0 && insecticideScaling>=0.0) ){
+    a.holeScaling = elt.getHoleScalingFactor();
+    a.insecticideScaling = elt.getInsecticideScalingFactor();
+    if( !(a.holeScaling>=0.0 && a.insecticideScaling>=0.0) ){
         throw util::xml_scenario_error("ITN.description.anophelesParams.deterrency: expected scaling factors to be non-negative");
     }
     
@@ -299,7 +285,7 @@ factors::RADeterrency::RADeterrency(const scnXml::ITNDeterrency& elt,
     // Print out a warning if nets may increase transmission, but only in
     // non-BOINC mode, since it is not unreasonable and volunteers often
     // mistake this kind of warning as indicating a problem.
-    double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
+    double pmax = 1.0 - exp(-maxInsecticide * a.insecticideScaling);
     if( !( HF > 0.0 && PF > 0.0 && IF > 0.0 &&
             HF <= 1.0 && PF <= 1.0 && HF*pow(PF*IF,pmax) <= 1.0 ) )
     {
@@ -322,17 +308,17 @@ factors::RADeterrency::RADeterrency(const scnXml::ITNDeterrency& elt,
         cerr.flush();
     }
 #endif
-    lHF = log( HF );
-    lPF = log( PF );
-    lIF = log( IF );
+    a.lHF = log( HF );
+    a.lPF = log( PF );
+    a.lIF = log( IF );
 }
 
-factors::RATwoStageDeterrency::RATwoStageDeterrency(
-        const scnXml::TwoStageDeterrency& elt, double maxInsecticide) :
-    useLogitEqns(false)
+void factors::RelativeAttractiveness::initTwoStage (
+        const scnXml::TwoStageDeterrency& elt, double maxInsecticide)
 {
     b.lPFEntering = numeric_limits<double>::quiet_NaN();
     if (elt.getEntering().present()) {
+        model = TWO_STAGE;
         const double PF = elt.getEntering().get().getInsecticideFactor();
         b.insecticideScalingEntering = elt.getEntering().get().getInsecticideScalingFactor();
         if( !( PF > 0.0) ){
@@ -354,7 +340,7 @@ factors::RATwoStageDeterrency::RATwoStageDeterrency(
         * where PF is the insecticide factor, with p∈[0,1] defined as:
         *  p=1−exp(-insecticideContent*insecticideScalingFactor).
         * We therefore just need PF ≤ 1. */
-    #ifdef WITHOUT_BOINC
+#ifdef WITHOUT_BOINC
         // Print out a warning if ITNs may increase transmission, but only in
         // non-BOINC mode, since it is not unreasonable and volunteers often
         // mistake this kind of warning as indicating a problem.
@@ -366,41 +352,46 @@ factors::RATwoStageDeterrency::RATwoStageDeterrency(
             cerr << "  0<insecticideFactor≤1\n";
             cerr.flush();
         }
-    #endif
+#endif
         b.lPFEntering = log( PF );
     } else {
         assert( elt.getEnteringLogit().present() );
-        useLogitEqns = true;
+        model = TWO_STAGE_LOGIT;
         c.entBaseFactor = elt.getEnteringLogit().get().getBaseFactor();
         c.entInsecticideFactor = elt.getEnteringLogit().get().getInsecticideFactor();
+#ifdef WITHOUT_BOINC
         if (c.entInsecticideFactor > 0.0) {
             cerr << "ITN.description.anophelesParams.twoStageDeterrency.enteringLogit: \n"
                 << "insecticideFactor should be negative to for nets to reduce chance of entering."
                 << endl;
         }
+#endif
         // pre-calculate for efficieny:
         c.pEnt0Inv = (exp(c.entBaseFactor) + 1.0) / exp(c.entBaseFactor);
     }
     
-    pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking", true );
+    // Note: b.pAttacking and c.pAttacking overlap, so we can use either:
+    b.pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking", true );
 }
 
-double factors::RADeterrency::relativeAttractiveness( double holeIndex, double insecticideContent )const {
-    double holeComponent = exp(-holeIndex*holeScaling);
-    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
-    double relAvail = exp( lHF*holeComponent + lPF*insecticideComponent + lIF*holeComponent*insecticideComponent );
-    assert( relAvail>=0.0 );
-    return relAvail;
-}
-
-double factors::RATwoStageDeterrency::relativeAttractiveness(
-        double holeIndex, double insecticideContent )const
+double factors::RelativeAttractiveness::relativeAttractiveness (
+        double holeIndex, double insecticideContent) const
 {
-    // This is essentially a combination of the relative attractiveness as used
-    // by IRS and a killing factor.
+    if (model == SINGLE_STAGE) {
+        double holeComponent = exp(-holeIndex * a.holeScaling);
+        double insecticideComponent = 1.0 - exp(-insecticideContent * a.insecticideScaling);
+        double relAvail = exp(a.lHF * holeComponent
+                + a.lPF * insecticideComponent
+                + a.lIF * holeComponent * insecticideComponent );
+        assert( relAvail>=0.0 );
+        return relAvail;
+    }
     
     double factor = numeric_limits<double>::quiet_NaN();
-    if (!useLogitEqns) {
+    if (model == TWO_STAGE) {
+        // This is essentially a combination of the relative attractiveness as used
+        // by IRS and a killing factor.
+        
         // Note that an alternative, simpler, model could have been used, but was
         // not for consistency with other models. Alternative (here we don't take
         // the logarithm of PF):
@@ -410,6 +401,7 @@ double factors::RATwoStageDeterrency::relativeAttractiveness(
         const double pEnt = exp(b.lPFEntering * insecticideComponent);
         factor = pEnt;
     } else {
+        assert (model == TWO_STAGE_LOGIT);
         const double p = log(insecticideContent + 1.0);
         // We directly take the exponential (this is exp(logit.pEnt0):
         const double q = exp(c.entBaseFactor + c.entInsecticideFactor * p);
@@ -418,7 +410,8 @@ double factors::RATwoStageDeterrency::relativeAttractiveness(
     }
     assert( factor >= 0.0 );
     
-    const double rel_pAtt = pAttacking.rel_pAtt( holeIndex, insecticideContent );
+    // Note: b.pAttacking and c.pAttacking overlap, so we can use either:
+    const double rel_pAtt = b.pAttacking.rel_pAtt( holeIndex, insecticideContent );
     return factor * rel_pAtt;
 }
 
@@ -493,13 +486,11 @@ void ITNComponent::ITNAnopheles::init(
     double maxInsecticide)
 {
     assert( relAttractiveness.get() == 0 );       // double init
-    if (elt.getDeterrency().present())
-        relAttractiveness = boost::shared_ptr<factors::RelativeAttractiveness>(
-            new factors::RADeterrency( elt.getDeterrency().get(), maxInsecticide ));
-    else{
+    if (elt.getDeterrency().present()) {
+        relAttractiveness.initSingleStage(elt.getDeterrency().get(), maxInsecticide);
+    } else {
         assert (elt.getTwoStageDeterrency().present());
-        relAttractiveness = boost::shared_ptr<factors::RelativeAttractiveness>(
-            new factors::RATwoStageDeterrency( elt.getTwoStageDeterrency().get(), maxInsecticide ));
+        relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide);
     }
     preprandialKillingEffect.init( elt.getPreprandialKillingEffect(),
                                     maxInsecticide,

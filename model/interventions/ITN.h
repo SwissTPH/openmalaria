@@ -41,18 +41,16 @@ namespace interventions {
 namespace factors {
     class SurvivalFactor {
     public:
-        SurvivalFactor();
-        
         /** Set parameters.
         * 
         * It is checked that parameters lie in a suitible range, giving a
         * survival factor between 0 and 1.
         * 
-        * @param raTwoStageConstraints If true, use the constraints for
-        *   use with RATwoStageDeterrency, otherwise use the usual constraints.
+        * @param attractivenessConstraints If true, use the constraints for
+        *   use with two-stage deterrency, otherwise use the usual constraints.
         */
         void init(const scnXml::ITNKillingEffect& elt, double maxInsecticide,
-                    const char* eltName, bool raTwoStageConstraints);
+                    const char* eltName, bool attractivenessConstraints);
         
         /** Part of survival factor, used by new ITN deterrency model. */
         double rel_pAtt( double holeIndex, double insecticideContent )const;
@@ -68,61 +66,52 @@ namespace factors {
     };
 
     class RelativeAttractiveness {
+        enum DeterrencyModel {
+            NO_MODEL, SINGLE_STAGE, TWO_STAGE, TWO_STAGE_LOGIT
+        };
     public:
-        virtual ~RelativeAttractiveness() {}
+        RelativeAttractiveness() : model(0) {}
+        
+        /** Set parameters for single-stage deterrency model.
+         * 
+         * It is checked that input parameters lie in a range such that
+         * the relative availability is always in the range (0,1] — that is,
+         * the deterrent can never be perfect, but can have zero effect. */
+        void initSingleStage(const scnXml::ITNDeterrency& elt, double maxInsecticide);
+        
+        /** Set parameters for two-stage deterrency model.
+         * 
+         * It is checked that input parameters lie in a range such that
+         * the relative availability is always in the range (0,1] — that is,
+         * the deterrent can never be perfect, but can have zero effect. */
+        void initTwoStage(const scnXml::TwoStageDeterrency& elt, double maxInsecticide);
         
         /** Calculate effect. Range of output is any value ≥ 0.
-            * 
-            * 0 implies a fully effective deterrent, 0.5 a 50% effective
-            * deterrent, 1 has no effect, >1 attracts extra mosquitoes. */
-        virtual double relativeAttractiveness( double holeIndex, double insecticideContent )const =0;
-    };
-
-    class RADeterrency : public RelativeAttractiveness {
-    public:
-        virtual ~RADeterrency() {}
+         * 
+         * 0 implies a fully effective deterrent, 0.5 a 50% effective
+         * deterrent, 1 has no effect, >1 attracts extra mosquitoes. */
+        double relativeAttractiveness (double holeIndex, double insecticideContent) const;
         
-        /** Set parameters.
-        * 
-        * It is checked that input parameters lie in a range such that
-        * the relative availability is always in the range (0,1] — that is,
-        * the deterrent can never be perfect, but can have zero effect. */
-        RADeterrency(const scnXml::ITNDeterrency& elt, double maxInsecticide);
-        
-        virtual double relativeAttractiveness( double holeIndex, double insecticideContent ) const;
-        
-    protected:
-        double lHF, lPF, lIF;      // logs of hole, insecticide and interaction factors
-        double holeScaling, insecticideScaling;
-    };
-
-    class RATwoStageDeterrency : public RelativeAttractiveness {
-    public:
-        virtual ~RATwoStageDeterrency() {}
-        
-        /** Set parameters.
-        * 
-        * It is checked that input parameters lie in a range such that
-        * the relative availability is always in the range (0,1] — that is,
-        * the deterrent can never be perfect, but can have zero effect. */
-        RATwoStageDeterrency(const scnXml::TwoStageDeterrency& elt, double maxInsecticide);
-        
-        virtual double relativeAttractiveness( double holeIndex, double insecticideContent ) const;
-        
-    protected:
-        bool useLogitEqns;      // new formula, using logit
+    private:
         union {
+            struct {
+                double lHF, lPF, lIF;      // logs of hole, insecticide and interaction factors
+                double holeScaling, insecticideScaling;
+            } a;
             struct {
                 double lPFEntering;      // log of insecticide factor
                 double insecticideScalingEntering;
+                double _pad;
+                SurvivalFactor pAttacking;
             } b;
             struct {
                 double entBaseFactor;
                 double entInsecticideFactor;
                 double pEnt0Inv;
+                SurvivalFactor pAttacking;
             } c;
         };
-        SurvivalFactor pAttacking;
+        int model;
     };
 }
 
@@ -158,7 +147,7 @@ public:
         /// Get deterrency. See ComponentParams::effect for a more detailed description.
         /// Range: ≥0 where 0=fullly deter, 1=no effect, >1 = attract
         inline double relativeAttractiveness( double holeIndex, double insecticideContent )const{
-            return byProtection( relAttractiveness->relativeAttractiveness( holeIndex, insecticideContent ) );
+            return byProtection( relAttractiveness.relativeAttractiveness( holeIndex, insecticideContent ) );
         }
         /// Get killing effect on mosquitoes before feeding.
         /// See ComponentParams::effect for a more detailed description.
@@ -179,7 +168,7 @@ public:
     private:
         double proportionProtected;
         double proportionUnprotected;
-        boost::shared_ptr<factors::RelativeAttractiveness> relAttractiveness;
+        factors::RelativeAttractiveness relAttractiveness;
         factors::SurvivalFactor preprandialKillingEffect;
         factors::SurvivalFactor postprandialKillingEffect;
         
