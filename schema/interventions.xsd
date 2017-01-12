@@ -1334,37 +1334,41 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                             factor and 
                             p=1−exp(-insecticideContent×insecticideScalingFactor).
                           </xs:documentation>
-                          <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
+                          <xs:appinfo>units:dimensionless;name:Deterrency: entering;</xs:appinfo>
                         </xs:annotation>
                       </xs:element>
                       <xs:element name="enteringLogit" type="om:ITNEnteringDeterrencyLogit">
                         <xs:annotation>
                           <xs:documentation>
-                            pEnt represents the relative probability of entering due to insecticide in the hut:
-                                                    pEnt=exp(logit.pEnt)/(exp(logit.pEnt)+1)
-                            logit.pEnt = B+P*p
-                                                    where B is the basefactor (without net); P is
-                            insecticide factor, and p=log(insecticideContent+1).
-                                                    Without a net, probability of entering a house 
-                                                    pEnt0=exp(logit.pEnt0)/(exp(logit.pEnt0)+1)
-                                                    logit.pEnt0 = B
-                                                    Entering of mosquitoes is adjusted via multiplication by pEnt / pEnt0.
-                                                    To keep this in the range [0,1], we (normally) require that pEnt ≤ pEnt0 and thus P ≤ 0 and give a warning if this is not fulfilled.
-                                                  </xs:documentation>
-                          <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
+                            pEnt represents the relative probability of entering due to insecticide
+                            in the hut:
+                                pEnt = exp(logit.pEnt) / (exp(logit.pEnt) + 1)
+                                logit.pEnt = B + P * p
+                            where B is the basefactor (without net); P is insecticide factor, and
+                                p = log(insecticideContent+1).
+                            Without a net, probability of entering a house is
+                                pEnt0 = exp(logit.pEnt0) / (exp(logit.pEnt0) + 1)
+                                logit.pEnt0 = B
+                            Entering of mosquitoes is adjusted via multiplication by pEnt / pEnt0.
+                            To keep this in the range [0,1], we (normally) require that
+                                pEnt ≤ pEnt0
+                            and thus P ≤ 0 and give a warning if this is not fulfilled.
+                          </xs:documentation>
+                          <xs:appinfo>units:dimensionless;name:Deterrency: entering (logit model);</xs:appinfo>
                         </xs:annotation>
                       </xs:element>
                     </xs:choice>
                     <xs:element name="attacking" type="om:ITNKillingEffect">
                       <xs:annotation>
                         <xs:documentation>
-                          pAtt represents the relative probability of attacking a human
-                          after entering a house due to ITNs (i.e. of feeding/dying vs.
-                          flying off): pAtt = B + H×h + P×p + I×h×p
-                          where B is the base (without net) probability; H, P and
-                          I are the hole, insecticide and interaction factors
-                          respectively, h=exp(-holeIndex×holeScalingFactor) and
-                          p=1−exp(-insecticideContent×insecticideScalingFactor).
+                          pAtt represents the relative probability of attacking a human after
+                          entering a house due to ITNs (i.e. of feeding/dying vs. flying off):
+                              pAtt = B + H×h + P×p + I×h×p
+                          where B is the base (without net) probability; H, P and I are the hole,
+                          insecticide and interaction factors respectively,
+                              h=exp(-holeIndex × holeScalingFactor)
+                          and
+                              p=1 - exp(-insecticideContent × insecticideScalingFactor).
                         </xs:documentation>
                         <xs:appinfo>units:dimensionless;name:RA (attacking)</xs:appinfo>
                       </xs:annotation>
