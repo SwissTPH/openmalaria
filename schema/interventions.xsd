@@ -1319,24 +1319,42 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   account that mosquitoes do not always bite indoors.
                   
                   This deterrency model multiplies human attractiveness by
-                  pEnt×pAtt divided by a base factor to normalise the output to
-                  1 when there are no nets.
+                  pEnt×pAtt.
                   </xs:documentation>
                   <xs:appinfo>units:dimensionless;name:Relative attractiveness;</xs:appinfo>
                 </xs:annotation>
                 <xs:complexType>
-                  <xs:all>
-                    <xs:element name="entering" type="om:IRSDeterrency">
-                      <xs:annotation>
-                        <xs:documentation>
-                          pEnt represents the relative probability of entering due to
-                          ITNs: pEnt = exp(log(P)×p) where P is the insecticide
-                          factor and 
-                          p=1−exp(-insecticideContent×insecticideScalingFactor).
-                        </xs:documentation>
-                        <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
+                  <xs:sequence>
+                    <xs:choice>
+                      <xs:element name="entering" type="om:IRSDeterrency">
+                        <xs:annotation>
+                          <xs:documentation>
+                            pEnt represents the relative probability of entering due to
+                            ITNs: pEnt = exp(log(P)×p) where P is the insecticide
+                            factor and 
+                            p=1−exp(-insecticideContent×insecticideScalingFactor).
+                          </xs:documentation>
+                          <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
+                        </xs:annotation>
+                      </xs:element>
+                      <xs:element name="enteringLogit" type="om:ITNEnteringDeterrencyLogit">
+                        <xs:annotation>
+                          <xs:documentation>
+                            pEnt represents the relative probability of entering due to insecticide in the hut:
+                                                    pEnt=exp(logit.pEnt)/(exp(logit.pEnt)+1)
+                            logit.pEnt = B+P*p
+                                                    where B is the basefactor (without net); P is
+                            insecticide factor, and p=log(insecticideContent+1).
+                                                    Without a net, probability of entering a house 
+                                                    pEnt0=exp(logit.pEnt0)/(exp(logit.pEnt0)+1)
+                                                    logit.pEnt0 = B
+                                                    Entering of mosquitoes is adjusted via multiplication by pEnt / pEnt0.
+                                                    To keep this in the range [0,1], we (normally) require that pEnt ≤ pEnt0 and thus P ≤ 0 and give a warning if this is not fulfilled.
+                                                  </xs:documentation>
+                          <xs:appinfo>units:dimensionless;name:RA (entering)</xs:appinfo>
+                        </xs:annotation>
+                      </xs:element>
+                    </xs:choice>
                     <xs:element name="attacking" type="om:ITNKillingEffect">
                       <xs:annotation>
                         <xs:documentation>
@@ -1351,7 +1369,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                         <xs:appinfo>units:dimensionless;name:RA (attacking)</xs:appinfo>
                       </xs:annotation>
                     </xs:element>
-                  </xs:all>
+                  </xs:sequence>
                 </xs:complexType>
               </xs:element>
             </xs:choice>
@@ -1656,6 +1674,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
       <xs:annotation>
         <xs:appinfo>units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="ITNEnteringDeterrencyLogit">
+    <xs:attribute name="baseFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          See parent element documentation
+        </xs:documentation>
+        <xs:appinfo>units:none;name:Base factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="insecticideFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          See parent element documentation
+        </xs:documentation>
+        <xs:appinfo>units:none;name:Insecticide factor;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>

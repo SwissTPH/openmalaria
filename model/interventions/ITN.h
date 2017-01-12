@@ -110,8 +110,18 @@ namespace factors {
         virtual double relativeAttractiveness( double holeIndex, double insecticideContent ) const;
         
     protected:
-        double lPFEntering;      // log of insecticide factor
-        double insecticideScalingEntering;
+        bool useLogitEqns;      // new formula, using logit
+        union {
+            struct {
+                double lPFEntering;      // log of insecticide factor
+                double insecticideScalingEntering;
+            } b;
+            struct {
+                double entBaseFactor;
+                double entInsecticideFactor;
+                double pEnt0Inv;
+            } c;
+        };
         SurvivalFactor pAttacking;
     };
 }

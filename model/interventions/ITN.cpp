@@ -329,44 +329,58 @@ factors::RADeterrency::RADeterrency(const scnXml::ITNDeterrency& elt,
 
 factors::RATwoStageDeterrency::RATwoStageDeterrency(
         const scnXml::TwoStageDeterrency& elt, double maxInsecticide) :
-    lPFEntering( numeric_limits< double >::signaling_NaN() ),
-    insecticideScalingEntering( numeric_limits< double >::signaling_NaN() )
+    useLogitEqns(false)
 {
-    double PF = elt.getEntering().getInsecticideFactor();
-    insecticideScalingEntering = elt.getEntering().getInsecticideScalingFactor();
-    if( !( PF > 0.0) ){
-        // we take the log of PF, so it must be positive
-        ostringstream msg;
-        msg << "ITN.description.anophelesParams.twoStageDeterrency.entering: insecticideFactor must be positive since we take its logarithm.";
-        throw util::xml_scenario_error( msg.str() );
+    b.lPFEntering = numeric_limits<double>::quiet_NaN();
+    if (elt.getEntering().present()) {
+        const double PF = elt.getEntering().get().getInsecticideFactor();
+        b.insecticideScalingEntering = elt.getEntering().get().getInsecticideScalingFactor();
+        if( !( PF > 0.0) ){
+            // we take the log of PF, so it must be positive
+            ostringstream msg;
+            msg << "ITN.description.anophelesParams.twoStageDeterrency.entering: insecticideFactor must be positive since we take its logarithm.";
+            throw util::xml_scenario_error( msg.str() );
+        }
+        
+        /* We need to ensure the relative availability is non-negative. However,
+        * since it's an exponentiated value, it always will be.
+        * 
+        * If we don't want ITNs to be able to increase transmission, the following
+        * limits could also be applied. In general, however, there is no reason
+        * ITNs couldn't make individuals more attractive to mosquitoes.
+        * 
+        * To ensure relative availability is at most one: relative availability is
+        *  exp( log(PF)*p ) = PF^p
+        * where PF is the insecticide factor, with p∈[0,1] defined as:
+        *  p=1−exp(-insecticideContent*insecticideScalingFactor).
+        * We therefore just need PF ≤ 1. */
+    #ifdef WITHOUT_BOINC
+        // Print out a warning if ITNs may increase transmission, but only in
+        // non-BOINC mode, since it is not unreasonable and volunteers often
+        // mistake this kind of warning as indicating a problem.
+        if( !( PF <= 1.0 ) ) {
+            cerr << "Note: since the following bounds are not met, the IRS could make humans more\n";
+            cerr << "attractive to mosquitoes than they would be without IRS.\n";
+            cerr << "This note is only shown by non-BOINC executables.\n";
+            cerr << "IRS.description.anophelesParams.deterrency: bounds not met:\n";
+            cerr << "  0<insecticideFactor≤1\n";
+            cerr.flush();
+        }
+    #endif
+        b.lPFEntering = log( PF );
+    } else {
+        assert( elt.getEnteringLogit().present() );
+        useLogitEqns = true;
+        c.entBaseFactor = elt.getEnteringLogit().get().getBaseFactor();
+        c.entInsecticideFactor = elt.getEnteringLogit().get().getInsecticideFactor();
+        if (c.entInsecticideFactor > 0.0) {
+            cerr << "ITN.description.anophelesParams.twoStageDeterrency.enteringLogit: \n"
+                << "insecticideFactor should be negative to for nets to reduce chance of entering."
+                << endl;
+        }
+        // pre-calculate for efficieny:
+        c.pEnt0Inv = (exp(c.entBaseFactor) + 1.0) / exp(c.entBaseFactor);
     }
-    
-    /* We need to ensure the relative availability is non-negative. However,
-     * since it's an exponentiated value, it always will be.
-     * 
-     * If we don't want ITNs to be able to increase transmission, the following
-     * limits could also be applied. In general, however, there is no reason
-     * ITNs couldn't make individuals more attractive to mosquitoes.
-     * 
-     * To ensure relative availability is at most one: relative availability is
-     *  exp( log(PF)*p ) = PF^p
-     * where PF is the insecticide factor, with p∈[0,1] defined as:
-     *  p=1−exp(-insecticideContent*insecticideScalingFactor).
-     * We therefore just need PF ≤ 1. */
-#ifdef WITHOUT_BOINC
-    // Print out a warning if ITNs may increase transmission, but only in
-    // non-BOINC mode, since it is not unreasonable and volunteers often
-    // mistake this kind of warning as indicating a problem.
-    if( !( PF <= 1.0 ) ) {
-        cerr << "Note: since the following bounds are not met, the IRS could make humans more\n";
-        cerr << "attractive to mosquitoes than they would be without IRS.\n";
-        cerr << "This note is only shown by non-BOINC executables.\n";
-        cerr << "IRS.description.anophelesParams.deterrency: bounds not met:\n";
-        cerr << "  0<insecticideFactor≤1\n";
-        cerr.flush();
-    }
-#endif
-    lPFEntering = log( PF );
     
     pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking", true );
 }
@@ -385,19 +399,27 @@ double factors::RATwoStageDeterrency::relativeAttractiveness(
     // This is essentially a combination of the relative attractiveness as used
     // by IRS and a killing factor.
     
-    // Note that an alternative, simpler, model could have been used, but was
-    // not for consistency with other models. Alternative (here we don't take
-    // the logarithm of PF):
-    // pEnt = 1 - PFEntering × insecticideComponent
+    double factor = numeric_limits<double>::quiet_NaN();
+    if (!useLogitEqns) {
+        // Note that an alternative, simpler, model could have been used, but was
+        // not for consistency with other models. Alternative (here we don't take
+        // the logarithm of PF):
+        // pEnt = 1 - PFEntering × insecticideComponent
+        
+        const double insecticideComponent = 1.0 - exp(-insecticideContent * b.insecticideScalingEntering);
+        const double pEnt = exp(b.lPFEntering * insecticideComponent);
+        factor = pEnt;
+    } else {
+        const double p = log(insecticideContent + 1.0);
+        // We directly take the exponential (this is exp(logit.pEnt0):
+        const double q = exp(c.entBaseFactor + c.entInsecticideFactor * p);
+        const double pEnt = q / (q + 1.0);
+        factor = pEnt * c.pEnt0Inv;
+    }
+    assert( factor >= 0.0 );
     
-    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScalingEntering);
-    double pEnt = exp( lPFEntering*insecticideComponent );
-    assert( pEnt >= 0.0 );
-    
-    double rel_pAtt = pAttacking.rel_pAtt( holeIndex, insecticideContent );
-    double relAttr = pEnt * rel_pAtt;
-    assert( relAttr >= 0.0 );
-    return relAttr;
+    const double rel_pAtt = pAttacking.rel_pAtt( holeIndex, insecticideContent );
+    return factor * rel_pAtt;
 }
 
 
