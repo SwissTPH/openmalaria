@@ -26,6 +26,7 @@
 #include "util/sampler.h"
 #include "schema/interventions.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/optional.hpp>
 
 namespace OM {
 namespace interventions {
@@ -41,16 +42,19 @@ namespace interventions {
 namespace factors {
     class SurvivalFactor {
     public:
-        /** Set parameters.
-        * 
-        * It is checked that parameters lie in a suitible range, giving a
-        * survival factor between 0 and 1.
-        * 
-        * @param attractivenessConstraints If true, use the constraints for
-        *   use with two-stage deterrency, otherwise use the usual constraints.
-        */
+        /// Set parameters.
+        /// 
+        /// It is checked that parameters lie in a suitible range, giving a
+        /// survival factor between 0 and 1.
+        /// 
+        /// @param attractivenessConstraints If true, use the constraints for
+        /// use with two-stage deterrency, otherwise use the usual constraints.
         void init(const scnXml::ITNKillingEffect& elt, double maxInsecticide,
                     const char* eltName, bool attractivenessConstraints);
+        
+        /// Variant to set paramters for the logit model.
+        void initLogit(const scnXml::ITNEffectLogit& elt,
+                                                   double maxHoleIndex);
         
         /** Part of survival factor, used by new ITN deterrency model. */
         double rel_pAtt( double holeIndex, double insecticideContent )const;
@@ -60,9 +64,19 @@ namespace factors {
         double survivalFactor( double holeIndex, double insecticideContent )const;
         
     private:
-        double BF, HF, PF, IF;  // base, hole, insecticide and interaction factors
-        double holeScaling, insecticideScaling;
-        double invBaseSurvival; // stored for performance only; ≥1
+        union {
+            struct {
+                double BF, HF, PF, IF;  // base, hole, insecticide and interaction factors
+                double holeScaling, insecticideScaling;
+                double invBaseSurvival; // stored for performance only; ≥1
+            } a;
+            struct {
+                double BF, HF, PF, IF;
+                double hMax;
+                double pAtt0Inv;
+            } b;
+        };
+        bool useLogitEqns;
     };
 
     class RelativeAttractiveness {
@@ -84,7 +98,9 @@ namespace factors {
          * It is checked that input parameters lie in a range such that
          * the relative availability is always in the range (0,1] — that is,
          * the deterrent can never be perfect, but can have zero effect. */
-        void initTwoStage(const scnXml::TwoStageDeterrency& elt, double maxInsecticide);
+        void initTwoStage(const scnXml::TwoStageDeterrency& elt,
+                          double maxInsecticide,
+                          boost::optional<double> holeIndexMax);
         
         /** Calculate effect. Range of output is any value ≥ 0.
          * 

@@ -1294,6 +1294,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:element name="anophelesParams" maxOccurs="unbounded">
         <xs:complexType>
           <xs:sequence>
+            <xs:element name="holeIndexMax" type="om:DoubleValue" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                  Used by logit attacking and killing models only, holeIndexMax
+                  is a user defined maximum hole index (typically, the total surface area of a net).
+                </xs:documentation>
+                <xs:appinfo>units:in same unit as holeIndex;name:maximum of holed surface area that has an effect (comparable to no net)</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
             <xs:choice>
               <xs:element name="deterrency" type="om:ITNDeterrency">
                 <xs:annotation>
@@ -1358,21 +1367,49 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                         </xs:annotation>
                       </xs:element>
                     </xs:choice>
-                    <xs:element name="attacking" type="om:ITNKillingEffect">
-                      <xs:annotation>
-                        <xs:documentation>
-                          pAtt represents the relative probability of attacking a human after
-                          entering a house due to ITNs (i.e. of feeding/dying vs. flying off):
-                              pAtt = B + H×h + P×p + I×h×p
-                          where B is the base (without net) probability; H, P and I are the hole,
-                          insecticide and interaction factors respectively,
-                              h=exp(-holeIndex × holeScalingFactor)
-                          and
-                              p=1 - exp(-insecticideContent × insecticideScalingFactor).
-                        </xs:documentation>
-                        <xs:appinfo>units:dimensionless;name:RA (attacking)</xs:appinfo>
-                      </xs:annotation>
-                    </xs:element>
+                    <xs:choice>
+                      <xs:element name="attacking" type="om:ITNKillingEffect">
+                        <xs:annotation>
+                          <xs:documentation>
+                            pAtt represents the relative probability of attacking a human after
+                            entering a house due to ITNs (i.e. of feeding/dying vs. flying off):
+                                pAtt = B + H×h + P×p + I×h×p
+                            where B is the base (without net) probability; H, P and I are the hole,
+                            insecticide and interaction factors respectively,
+                                h=exp(-holeIndex × holeScalingFactor)
+                            and
+                                p=1 - exp(-insecticideContent × insecticideScalingFactor).
+                          </xs:documentation>
+                          <xs:appinfo>units:dimensionless;name:Deterrency: attacking;</xs:appinfo>
+                        </xs:annotation>
+                      </xs:element>
+                      <xs:element name="attackingLogit" type="om:ITNEffectLogit">
+                        <xs:annotation>
+                          <xs:documentation>
+                            pAtt represents the relative probability of attacking a human
+                            after entering a house due to ITNs (i.e. of feeding/dying vs.
+                            flying off):
+                                pAtt = exp(logit.pAtt) / (exp(logit.pAtt) + 1)
+                                logit.pAtt = B + H×min(h, hMax) + P×p + I×min(h, hMax)×p
+                            where B is the base factor (without net); H, P and
+                            I are the hole, insecticide and interaction factors
+                            respectively, and:
+                                h = log(holeIndex + 1)
+                                p = log(insecticideContent + 1)
+                            Without a net, probability of attacking a human
+                            after entering a house is
+                                pAtt0 = exp(logit.pAtt0) / (exp(logit.pAtt0) + 1)
+                                logit.pAtt0 = B + H×hMax
+                            where hMax=log(holeIndexMax + 1) and holeIndexMax is a user defined
+                            maximum hole index (typically, the total surface area of a net).
+                            Attacking of mosquitoes is adjusted via multiplication by pAtt / pAtt0.
+                            This may be larger and smaller than 1 (but will not be negative).
+                            By definition (through the logit transformation) pAtt0 > 0.  
+                          </xs:documentation>
+                          <xs:appinfo>units:dimensionless;name:Deterrency: attacking (logit model);</xs:appinfo>
+                        </xs:annotation>
+                      </xs:element>
+                    </xs:choice>
                   </xs:sequence>
                 </xs:complexType>
               </xs:element>
@@ -1750,6 +1787,28 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         </xs:attribute>
       </xs:extension>
     </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="ITNEffectLogit">
+    <xs:attribute name="baseFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:dimensionless;name:Base factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="insecticideFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:none;name:Insecticide factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="holeFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:none;name:Hole factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="interactionFactor" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:appinfo>units:none;name:Interaction factor;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   <xs:complexType name="VectorSpeciesIntervention">
     <xs:annotation>

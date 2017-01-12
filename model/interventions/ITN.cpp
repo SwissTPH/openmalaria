@@ -36,25 +36,25 @@ vector<ITNComponent*> ITNComponent::componentsByIndex;
 void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
                                                    double maxInsecticide, const char* eltName,
                                                    bool attractivenessConstraints){
-    BF = elt.getBaseFactor();
-    HF = elt.getHoleFactor();
-    PF = elt.getInsecticideFactor();
-    IF = elt.getInteractionFactor();
-    holeScaling = elt.getHoleScalingFactor();
-    insecticideScaling = elt.getInsecticideScalingFactor();
-    invBaseSurvival = 1.0 / (1.0 - BF);
-    if( !( BF >= 0.0 && BF < 1.0) ){
+    a.BF = elt.getBaseFactor();
+    a.HF = elt.getHoleFactor();
+    a.PF = elt.getInsecticideFactor();
+    a.IF = elt.getInteractionFactor();
+    a.holeScaling = elt.getHoleScalingFactor();
+    a.insecticideScaling = elt.getInsecticideScalingFactor();
+    a.invBaseSurvival = 1.0 / (1.0 - a.BF);
+    if( !( a.BF >= 0.0 && a.BF < 1.0) ){
         ostringstream msg;
         msg << eltName << ": expected baseFactor to be in range [0,1]";
         throw util::xml_scenario_error( msg.str() );
     }
-    if( !(holeScaling>=0.0 && insecticideScaling>=0.0) ){
+    if( !(a.holeScaling>=0.0 && a.insecticideScaling>=0.0) ){
         ostringstream msg;
         msg << eltName << ": expected scaling factors to be non-negative";
         throw util::xml_scenario_error( msg.str() );
     }
     // see below
-    double pmax = 1.0-exp(-maxInsecticide*insecticideScaling);
+    double pmax = 1.0-exp(-maxInsecticide * a.insecticideScaling);
     
     if( attractivenessConstraints ){
         // Note: the following argument is a modification of the one below
@@ -113,17 +113,17 @@ void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
     impose a maximum value on the initial insecticide content, Pmax, such that
     the probability of sampling a value from our parameterise normal
     distribution greater than Pmax is 0.001. */
-        if( !( BF+HF >= 0.0
-            && BF+PF*pmax >= 0.0
-            && BF+HF+(PF+IF)*pmax >= 0.0 ) )
+        if( !( a.BF + a.HF >= 0.0
+            && a.BF + a.PF * pmax >= 0.0
+            && a.BF + a.HF + (a.PF + a.IF) * pmax >= 0.0 ) )
         {
             ostringstream msg;
             msg << eltName << ": bounds not met:";
-            if( !(BF+HF >= 0.0) )
+            if( !(a.BF + a.HF >= 0.0) )
                 msg << " baseFactor+holeFactor≥0";
-            if( !(BF+PF*pmax >= 0.0) )
+            if( !(a.BF + a.PF * pmax >= 0.0) )
                 msg << " baseFactor+"<<pmax<<"×insecticideFactor≥0";
-            if( !(PF+HF+(PF+IF)*pmax >= 0.0) )
+            if( !(a.PF + a.HF + (a.PF + a.IF) * pmax >= 0.0) )
                 msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
             throw util::xml_scenario_error( msg.str() );
         }
@@ -193,42 +193,76 @@ void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
     impose a maximum value on the initial insecticide content, Pmax, such that
     the probability of sampling a value from our parameterise normal
     distribution greater than Pmax is 0.001. */
-        if( !( BF+HF <= 1.0 && HF >= 0.0
-            && BF+PF*pmax <= 1.0 && PF >= 0.0
-            && BF+HF+(PF+IF)*pmax <= 1.0 && HF+(PF+IF)*pmax >= 0.0 ) )
+        if( !( a.BF + a.HF <= 1.0 && a.HF >= 0.0
+            && a.BF + a.PF * pmax <= 1.0 && a.PF >= 0.0
+            && a.BF + a.HF + (a.PF + a.IF) * pmax <= 1.0 && a.HF + (a.PF + a.IF) * pmax >= 0.0 ) )
         {
             ostringstream msg;
             msg << eltName << ": bounds not met:";
-            if( !(BF+HF<=1.0) )
+            if( !(a.BF+a.HF<=1.0) )
                 msg << " baseFactor+holeFactor≤1";
-            if( !(HF>=0.0) )
+            if( !(a.HF>=0.0) )
                 msg << " holeFactor≥0";
-            if( !(BF+PF*pmax<=1.0) )
+            if( !(a.BF+a.PF*pmax<=1.0) )
                 msg << " baseFactor+"<<pmax<<"×insecticideFactor≤1";
-            if( !(PF>=0.0) )
+            if( !(a.PF>=0.0) )
                 msg << " insecticideFactor≥0";      // if this fails, we know pmax>0 (since it is in any case non-negative) — well, or an NaN
-            if( !(PF+HF+(PF+IF)*pmax<=1.0) )
+            if( !(a.PF+a.HF+(a.PF+a.IF)*pmax<=1.0) )
                 msg << " baseFactor+holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≤1";
-            if( !(HF+(PF+IF)*pmax>=0.0) )
+            if( !(a.HF+(a.PF+a.IF)*pmax>=0.0) )
                 msg << " holeFactor+"<<pmax<<"×(insecticideFactor+interactionFactor)≥0";
             throw util::xml_scenario_error( msg.str() );
         }
     }
 }
 
+void factors::SurvivalFactor::initLogit(const scnXml::ITNEffectLogit& elt,
+                                                   double holeIndexMax){
+    a.BF = elt.getBaseFactor();
+    a.HF = elt.getHoleFactor();
+    a.PF = elt.getInsecticideFactor();
+    a.IF = elt.getInteractionFactor();
+    b.hMax = log(holeIndexMax + 1.0);
+    const double x = exp(b.BF + b.HF * b.hMax);
+    b.pAtt0Inv = (x + 1.0) / x;
+}
+
 double factors::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
-    double holeComponent = exp(-holeIndex*holeScaling);
-    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
-    double pAtt = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    assert( pAtt >= 0.0 );
-    return pAtt / BF;
+    if (!useLogitEqns) {
+        const double holeComponent = exp(-holeIndex * a.holeScaling);
+        const double insecticideComponent = 1.0 - exp(-insecticideContent * a.insecticideScaling);
+        const double pAtt = a.BF
+                + a.HF * holeComponent
+                + a.PF * insecticideComponent
+                + a.IF * holeComponent * insecticideComponent;
+        assert( pAtt >= 0.0 );
+        return pAtt / a.BF;
+    } else {
+        const double holeComponent = min(log(holeIndex + 1.0), b.hMax);
+        const double insecticideComponent = log(insecticideContent + 1.0);
+        const double x = exp(b.BF
+                + b.HF * holeComponent
+                + b.PF * insecticideComponent
+                + b.IF * holeComponent * insecticideComponent);
+        const double pAtt = x / (x + 1.0);
+        
+        // By construction, this is non-negative:
+        return pAtt * b.pAtt0Inv;
+
+    }
 }
 
 double factors::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
-    double holeComponent = exp(-holeIndex*holeScaling);
-    double insecticideComponent = 1.0 - exp(-insecticideContent*insecticideScaling);
-    double killingEffect = BF + HF*holeComponent + PF*insecticideComponent + IF*holeComponent*insecticideComponent;
-    double survivalFactor = (1.0 - killingEffect) * invBaseSurvival;
+    assert (!useLogitEqns);
+    
+    double holeComponent = exp(-holeIndex * a.holeScaling);
+    double insecticideComponent = 1.0 - exp(-insecticideContent * a.insecticideScaling);
+    double killingEffect = a.BF
+            + a.HF * holeComponent
+            + a.PF * insecticideComponent
+            + a.IF * holeComponent * insecticideComponent;
+    
+    double survivalFactor = (1.0 - killingEffect) * a.invBaseSurvival;
     assert( killingEffect <= 1.0 );
     // survivalFactor might be out of bounds due to precision error, see #49
     if (survivalFactor < 0.0)
@@ -314,7 +348,8 @@ void factors::RelativeAttractiveness::initSingleStage(
 }
 
 void factors::RelativeAttractiveness::initTwoStage (
-        const scnXml::TwoStageDeterrency& elt, double maxInsecticide)
+        const scnXml::TwoStageDeterrency& elt, double maxInsecticide,
+        boost::optional<double> holeIndexMax)
 {
     b.lPFEntering = numeric_limits<double>::quiet_NaN();
     if (elt.getEntering().present()) {
@@ -371,7 +406,15 @@ void factors::RelativeAttractiveness::initTwoStage (
     }
     
     // Note: b.pAttacking and c.pAttacking overlap, so we can use either:
-    b.pAttacking.init( elt.getAttacking(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking", true );
+    if (elt.getAttacking().present()) {
+        b.pAttacking.init( elt.getAttacking().get(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking", true );
+    } else {
+        assert (elt.getAttackingLogit().present());
+        if (!holeIndexMax) {
+            throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit attacking deterrency");
+        }
+        b.pAttacking.initLogit(elt.getAttackingLogit().get(), *holeIndexMax);
+    }
 }
 
 double factors::RelativeAttractiveness::relativeAttractiveness (
@@ -399,6 +442,8 @@ double factors::RelativeAttractiveness::relativeAttractiveness (
         
         const double insecticideComponent = 1.0 - exp(-insecticideContent * b.insecticideScalingEntering);
         const double pEnt = exp(b.lPFEntering * insecticideComponent);
+        // In this model, effect with 0 insectice, pEnt0 = exp(0) = 1, hence we don't need to
+        // divide by a denominator like in the logit model:
         factor = pEnt;
     } else {
         assert (model == TWO_STAGE_LOGIT);
@@ -486,11 +531,16 @@ void ITNComponent::ITNAnopheles::init(
     double maxInsecticide)
 {
     assert( relAttractiveness.get() == 0 );       // double init
+    boost::optional<double> holeIndexMax;
+    if (elt.getHoleIndexMax().present()) {
+        holeIndexMax = elt.getHoleIndexMax().get().getValue();
+    }
+    
     if (elt.getDeterrency().present()) {
         relAttractiveness.initSingleStage(elt.getDeterrency().get(), maxInsecticide);
     } else {
         assert (elt.getTwoStageDeterrency().present());
-        relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide);
+        relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide, holeIndexMax);
     }
     preprandialKillingEffect.init( elt.getPreprandialKillingEffect(),
                                     maxInsecticide,
