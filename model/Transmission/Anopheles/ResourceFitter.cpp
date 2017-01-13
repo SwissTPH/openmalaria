@@ -113,7 +113,7 @@ ResourceFitter::ResourceFitter( const MosqTransmission& transData,
     initial_guess = gsl_vector_alloc( 1 );
     gsl_vector_set_all( initial_guess, lcParams.estimatedLarvalResources );
     buf = gsl_vector_alloc( invLarvalResources.size() );
-    samples.resize( sim::oneYear().inDays() );
+    samples.resize( SimTime::oneYear().inDays() );
     assert( buf->size == samples.size() );
     
     debugOutput = forceDebug || CommandLine::option( CommandLine::DEBUG_VECTOR_FITTING );
@@ -146,7 +146,7 @@ void ResourceFitter::targetS_vWithP_dif( const vector<double>& S_v,
     fitTarget = FT_S_V;
     target = S_v;
     
-    annualP_dif.assign( sim::oneYear().inDays(), 0 );
+    annualP_dif.assign( SimTime::oneYear().inDays(), 0 );
     assert( mod_pp(sampledP_dif.size(), annualP_dif.size()) == 0 );
     for( size_t i=0; i<sampledP_dif.size(); ++i )
         annualP_dif[ mod_pp(i, annualP_dif.size()) ] += sampledP_dif[ i ];
@@ -323,9 +323,9 @@ void ResourceFitter::simulate1Year()
     //FIXME: I think we need to re-init the life cycle model too?
     //lifeCycle.init( lcParams );
     
-    SimTime lastDDifferent = sim::zero();
-    for( SimTime d = sim::fromDays(1), end = sim::fromYearsI(10); d < end; d += sim::oneDay() ){
-        size_t dYear = mod_pp(d.inDays(), sim::oneYear().inDays());
+    SimTime lastDDifferent = SimTime::zero();
+    for( SimTime d = SimTime::fromDays(1), end = SimTime::fromYearsI(10); d < end; d += SimTime::oneDay() ){
+        size_t dYear = mod_pp(d.inDays(), SimTime::oneYear().inDays());
         double S_v = transmission.update( d, P_A, P_df, annualP_dif[dYear], false, debugOutput );
         
         if( fitTarget == FT_EMERGENCE ){
@@ -335,7 +335,7 @@ void ResourceFitter::simulate1Year()
             if( !similar( samples[ dYear ], S_v, 1.001 ) )
                 lastDDifferent = d;
             samples[ dYear ] = S_v;
-            if( d - lastDDifferent >= sim::oneYear() ){
+            if( d - lastDDifferent >= SimTime::oneYear() ){
                 return;     // we're done
             }
         }else{

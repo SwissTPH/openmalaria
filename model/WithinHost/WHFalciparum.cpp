@@ -62,7 +62,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
     asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
     
-    y_lag_len = sim::daysToSteps(20);
+    y_lag_len = SimTime::daysToSteps(20);
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
@@ -117,8 +117,8 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX 
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to index to ensure positive.
-    const int i10 = (sim::ts0() - sim::fromDays(10) + sim::oneTS()).inSteps() + y_lag_len;
-    const int i5d = sim::daysToSteps(5);
+    const int i10 = (sim::ts0() - SimTime::fromDays(10) + SimTime::oneTS()).inSteps() + y_lag_len;
+    const int i5d = SimTime::daysToSteps(5);
     const int i10d = 2 * i5d;
     // Sum lagged densities across genotypes:
     double y10 = 0.0, y15 = 0.0, y20 = 0.0;
@@ -156,8 +156,8 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to index to ensure positive.
-    const int i10 = (sim::ts0() - sim::fromDays(10) + sim::oneTS()).inSteps() + y_lag_len;
-    const int i5d = sim::daysToSteps(5);
+    const int i10 = (sim::ts0() - SimTime::fromDays(10) + SimTime::oneTS()).inSteps() + y_lag_len;
+    const int i5d = SimTime::daysToSteps(5);
     const int i10d = 2 * i5d;
     const double x =
         PTM_beta1 * m_y_lag.at(mod_nn(i10, y_lag_len), genotype) +
@@ -181,15 +181,15 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
 bool WHFalciparum::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
-    if( timeLiver != sim::zero() ){
-        if( timeLiver < sim::zero() )
+    if( timeLiver != SimTime::zero() ){
+        if( timeLiver < SimTime::zero() )
             clearInfections( Treatments::LIVER );
         else
             treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
         mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
-    if( timeBlood != sim::zero() ){
-        if( timeBlood < sim::zero() )
+    if( timeBlood != SimTime::zero() ){
+        if( timeBlood < SimTime::zero() )
             clearInfections( Treatments::BLOOD );
         else
             treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );

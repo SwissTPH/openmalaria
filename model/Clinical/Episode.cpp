@@ -32,7 +32,7 @@ Episode::~Episode ()
 
 void Episode::flush() {
     report();
-    time = sim::never();
+    time = SimTime::never();
 }
 
 
@@ -52,7 +52,7 @@ void Episode::update (const Host::Human& human, Episode::State newState)
 }
 
 void Episode::report () {
-    if (time < sim::zero())        // Nothing to report
+    if (time < SimTime::zero())        // Nothing to report
         return;
     
     // Reports malarial/non-malarial UC fever dependent on cause, not diagnosis.
@@ -105,7 +105,7 @@ void Episode::report () {
 
 void Episode::operator& (istream& stream) {
     time & stream;
-    if (time > sim::zero()) {
+    if (time > SimTime::zero()) {
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;
@@ -116,7 +116,7 @@ void Episode::operator& (istream& stream) {
 }
 void Episode::operator& (ostream& stream) {
     time & stream;
-    if (time >= sim::zero()) {
+    if (time >= SimTime::zero()) {
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;

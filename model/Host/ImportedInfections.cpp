@@ -31,7 +31,7 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     try{
         //NOTE: if changing XSD, this should not have a default unit:
         period = UnitParse::readDuration( tElt.getPeriod(), UnitParse::STEPS );
-        if( period < sim::zero() ){
+        if( period < SimTime::zero() ){
             throw util::format_error( "cannot be negative" );
         }
     }catch( const util::format_error& e ){
@@ -41,16 +41,16 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     try{
         for( scnXml::ImportedInfections::TimedType::RateSequence::const_iterator it = tElt.getRate().begin(); it != tElt.getRate().end(); ++it ){
             SimTime time = UnitParse::readDate( it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/ );
-            if( period != sim::zero() && time >= period ){
+            if( period != SimTime::zero() && time >= period ){
                 throw util::format_error( "cannot be greater than period when period is not zero" );
             }
             // convert to per-time-step, per-person
-            double rateVal = it->getValue() * sim::yearsPerStep() * (1.0 / 1000.0);
+            double rateVal = it->getValue() * SimTime::yearsPerStep() * (1.0 / 1000.0);
             rate.push_back( Rate( time, rateVal ) );
         }
         sort( rate.begin(), rate.end() );
         if( rate.size() > 0 ){
-            if( period != sim::zero() && rate[0].time != sim::zero() ){
+            if( period != SimTime::zero() && rate[0].time != SimTime::zero() ){
                 throw util::xml_scenario_error( "must specify rate at time zero when period is not zero" );
             }
             // remove useless repeated entries from list
@@ -72,8 +72,8 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
 void ImportedInfections::import( Population& population ){
     if( rate.size() == 0 ) return;      // no imported infections
     SimTime now = sim::intervNow();
-    assert( now >= sim::zero() );
-    if( period > sim::zero() ){
+    assert( now >= SimTime::zero() );
+    if( period > SimTime::zero() ){
         now = mod_nn(now, period);
     }
     if( rate[lastIndex].time > now ){

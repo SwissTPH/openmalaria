@@ -160,7 +160,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 {
     rho = initialRho;
 
-    rho = rho * (0.01 * sim::yearsPerStep());
+    rho = rho * (0.01 * SimTime::yearsPerStep());
     if (rho != 0.0)
 	// Issue: in this case the total population size differs from populationSize,
 	// however, some code currently uses this as the total population size.
@@ -211,7 +211,7 @@ void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
     for(size_t j=1;j < cumAgeProp.size(); ++j) {
-	SimTime age = sim::fromTS( cumAgeProp.size() - j - 1 );
+	SimTime age = SimTime::fromTS( cumAgeProp.size() - j - 1 );
 	double ageYears = age.inYears();
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
 	double M2s = (mu1 * (exp (alpha1 * ageYears) - 1.0) / alpha1);

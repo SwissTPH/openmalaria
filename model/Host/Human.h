@@ -33,9 +33,6 @@ namespace scnXml {
     class Scenario;
 }
 namespace OM {
-namespace Transmission {
-    class TransmissionModel;
-}
 namespace Clinical {
     class ClinicalModel;
 }
@@ -55,9 +52,8 @@ public:
   //@{
   /** Initialise all variables of a human datatype.
    * 
-   * \param tm Transmission model reference (to initialize TM code)
    * \param dateOfBirth date of birth (usually start of next time step) */
-  Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth);
+  Human(SimTime dateOfBirth);
 
   /** Destructor
    * 
@@ -89,11 +85,10 @@ public:
   
   /** Main human update.
    *
-   * @param transmissionModel Pointer to transmission data.
    * @param doUpdate If false, returns immediately after is-dead check.
    * @returns True if the individual is dead (too old or otherwise killed).
    */
-  bool update(OM::Transmission::TransmissionModel* transmissionModel, bool doUpdate);
+  bool update(bool doUpdate);
   //@}
   
   ///@brief Deploy "intervention" functions
@@ -188,7 +183,8 @@ public:
   
 private:
   /// Hacky constructor for use in testing. Test code must do further initialisation as necessary.
-  Human(SimTime dateOfBirth);
+  /// Param 'dummy' isn't used but is just to allow overloading against usual constructor
+  Human(SimTime dateOfBirth, int dummy);
   
   /// The InfectionIncidenceModel translates per-host EIR into new infections
   InfectionIncidenceModel *infIncidence;

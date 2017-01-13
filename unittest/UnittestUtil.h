@@ -259,7 +259,7 @@ public:
         sim::init( dummyXML::scenario );
         
         // we could just use zero, but we may spot more errors by using some weird number
-        sim::time0 = sim::fromYearsN(83.2591);
+        sim::time0 = SimTime::fromYearsN(83.2591);
         sim::time1 = sim::time0;
 #ifndef NDEBUG
         sim::in_update = true;  // may not always be correct but we're more interested in getting around this check than using it in unit tests
@@ -409,7 +409,7 @@ public:
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     // But do set latentP.
     static void Infection_init_latentP_and_NaN () {
-	Infection::latentP = sim::fromDays(15);
+	Infection::latentP = SimTime::fromDays(15);
 	Infection::invCumulativeYstar = numeric_limits<double>::quiet_NaN();
 	Infection::invCumulativeHstar = numeric_limits<double>::quiet_NaN();
 	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
@@ -417,7 +417,7 @@ public:
     }
     static void Infection_init_5day () {
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
-	Infection::latentP = sim::fromDays(15);
+	Infection::latentP = SimTime::fromDays(15);
 	Infection::invCumulativeYstar = 1.0 / 68564384.7102;
 	Infection::invCumulativeHstar = 1.0 / 71.676733;
 	Infection::alpha_m = 1.0 - exp(- 2.411434);
@@ -485,7 +485,7 @@ public:
     }
     
     static auto_ptr<Host::Human> createHuman(SimTime dateOfBirth){
-        return auto_ptr<Host::Human>( new Host::Human(dateOfBirth) );
+        return auto_ptr<Host::Human>( new Host::Human(dateOfBirth, 0) );
     }
     static void setHumanWH(Host::Human& human, WithinHost::WHInterface *wh){
         human.withinHostModel = wh;

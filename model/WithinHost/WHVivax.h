@@ -42,8 +42,8 @@ namespace Pathogenesis {
 
 class WHVivax;
 /**
- * A brood is the set of hypnozoites resulting from an innoculation, plus a
- * combined blood stage.
+ * A brood is the set of hypnozoites resulting from an innoculation, plus an
+ * associated blood stage.
  * 
  * In this model, if a hypnozoite releases while a blood stage infection
  * initiated by another hypnozoite from the same brood is active, the newly
@@ -103,7 +103,7 @@ private:
     // time of release, soonest last (i.e. last element is next one to release)
     vector<SimTime> releaseDates;
     
-    // Either sim::never() (no blood stage) or the start of the time step on
+    // Either SimTime::never() (no blood stage) or the start of the time step on
     // which the blood stage will clear.
     SimTime bloodStageClearDate;
     

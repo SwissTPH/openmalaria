@@ -336,13 +336,13 @@ private:
 class CMDTTreatSimple : public CMDecisionTree {
 public:
     CMDTTreatSimple( const scnXml::DTTreatSimple& elt ) :
-        timeLiver(sim::zero()), timeBlood(sim::zero())
+        timeLiver(SimTime::zero()), timeBlood(SimTime::zero())
     {
         //NOTE: this code is currently identical to that in SimpleTreatComponent
         try{
             SimTime durL = UnitParse::readShortDuration( elt.getDurationLiver(), UnitParse::NONE ),
                 durB = UnitParse::readShortDuration( elt.getDurationBlood(), UnitParse::NONE );
-            SimTime neg1 = -sim::oneTS();
+            SimTime neg1 = -SimTime::oneTS();
             if( durL < neg1 || durB < neg1 ){
                 throw util::xml_scenario_error( "treatSimple: cannot have durationBlood or durationLiver less than -1" );
             }

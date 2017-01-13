@@ -41,7 +41,7 @@ EmergenceModel::EmergenceModel() :
             initOvFromSv(numeric_limits<double>::quiet_NaN()),
             emergenceSurvival(1.0)
 {
-    forcedS_v.resize (sim::oneYear());
+    forcedS_v.resize (SimTime::oneYear());
 }
 
 void EmergenceModel::initEIR(
@@ -55,7 +55,7 @@ void EmergenceModel::initEIR(
         //TODO
     }
     // EIR for this species, with index 0 refering to value over first interval
-    vecDay<double> speciesEIR (sim::oneYear());
+    vecDay<double> speciesEIR (SimTime::oneYear());
 
     if ( seasonality.getFourierSeries().present() ) {
         const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
@@ -129,9 +129,9 @@ void EmergenceModel::initEIR(
     
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
-    for( SimTime i = sim::zero(); i < sim::oneYear(); i += sim::oneDay() ){
+    for( SimTime i = SimTime::zero(); i < SimTime::oneYear(); i += SimTime::oneDay() ){
         // index 0 of initialisationEIR corresponds to first period of year
-        initialisationEIR[mod_nn(i.inSteps(), sim::stepsPerYear())] += speciesEIR[i];
+        initialisationEIR[mod_nn(i.inSteps(), SimTime::stepsPerYear())] += speciesEIR[i];
     }
     
 #ifdef WITHOUT_BOINC
@@ -152,7 +152,7 @@ void EmergenceModel::scaleEIR( double factor ) {
 }
 
 
-// Every sim::oneTS() days:
+// Every SimTime::oneTS() days:
 void EmergenceModel::update () {
     emergenceSurvival = 1.0;
     for( size_t i = 0; i < emergenceReduction.size(); ++i ){

@@ -179,7 +179,7 @@ public:
             PCS_VERBOSE(res_Fac[i] = totalFac;)
             
             // update (two parts):
-            UnittestUtil::incrTime(sim::oneDay());
+            UnittestUtil::incrTime(SimTime::oneDay());
             proxy->decayDrugs(bodymass);
             
             // after update:

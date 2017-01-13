@@ -46,7 +46,7 @@ void DescriptiveWithinHostModel::initDescriptive(){
 DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor ) :
         WHFalciparum( comorbidityFactor )
 {
-    assert( sim::oneTS() == sim::fromDays(5) );
+    assert( SimTime::oneTS() == SimTime::fromDays(5) );
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
@@ -155,7 +155,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 
         double density = inf->getDensity();
         totalDensity += density;
-        m_cumulative_Y += sim::oneTS().inDays() * density;
+        m_cumulative_Y += SimTime::oneTS().inDays() * density;
 
         ++inf;
     }

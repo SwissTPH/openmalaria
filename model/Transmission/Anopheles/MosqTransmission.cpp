@@ -38,9 +38,9 @@ using WithinHost::Genotypes;
 // -----  Initialisation of model, done before human warmup  ------
 
 MosqTransmission::MosqTransmission() :
-        mosqRestDuration(sim::zero()),
-        EIPDuration(sim::zero()),
-        N_v_length(sim::zero()),
+        mosqRestDuration(SimTime::zero()),
+        EIPDuration(SimTime::zero()),
+        N_v_length(SimTime::zero()),
         minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
         timeStep_N_v0(0.0)
 {
@@ -78,9 +78,9 @@ void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOpti
     
     // -----  Set model variables  -----
 
-    mosqRestDuration = sim::fromDays(mosq.getMosqRestDuration().getValue());
-    EIPDuration = sim::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
-    if (sim::oneDay() > mosqRestDuration || mosqRestDuration * 2 >= EIPDuration) {
+    mosqRestDuration = SimTime::fromDays(mosq.getMosqRestDuration().getValue());
+    EIPDuration = SimTime::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
+    if (SimTime::oneDay() > mosqRestDuration || mosqRestDuration * 2 >= EIPDuration) {
         //TODO: limit was EIPDuration >= mosqRestDuration >= 1
         // but in usage of ftauArray this wasn't enough. Check why.
         throw util::xml_scenario_error ("Code expects EIPDuration > 2*mosqRestDuration >= 2");
@@ -94,15 +94,15 @@ void MosqTransmission::initialise ( const scnXml::AnophelesParams::LifeCycleOpti
     // Set up fArray and ftauArray. Each step, all elements not set here are
     // calculated, even if they aren't directly used in the end;
     // however all calculated values are used in calculating the next value.
-    fArray.resize(EIPDuration-mosqRestDuration+sim::oneDay());
-    fArray[sim::zero()] = 1.0;
+    fArray.resize(EIPDuration-mosqRestDuration+SimTime::oneDay());
+    fArray[SimTime::zero()] = 1.0;
     ftauArray.resize(EIPDuration);
-    for( SimTime i = sim::zero(); i < mosqRestDuration; i += sim::oneDay() ){
+    for( SimTime i = SimTime::zero(); i < mosqRestDuration; i += SimTime::oneDay() ){
         ftauArray[i] = 0.0;
     }
     ftauArray[mosqRestDuration] = 1.0;
     uninfected_v.resize(N_v_length);
-    uninfected_v[sim::zero()] = numeric_limits<double>::quiet_NaN();    // index not used
+    uninfected_v[SimTime::zero()] = numeric_limits<double>::quiet_NaN();    // index not used
 }
 
 void MosqTransmission::initIterateScale ( double factor ){
@@ -125,7 +125,7 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
     
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
     assert( N_v_length <= forcedS_v.size() );
-    for( SimTime t = sim::zero(); t < N_v_length; t += sim::oneDay() ){
+    for( SimTime t = SimTime::zero(); t < N_v_length; t += SimTime::oneDay() ){
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
         N_v[t] = forcedS_v[t] * initNvFromSv;
@@ -141,7 +141,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
         const vector<double> tsP_dif, bool isDynamic,
         vector<double>& partialEIR, double EIR_factor )
 {
-    SimTime d1 = d0 + sim::oneDay();    // end of step
+    SimTime d1 = d0 + SimTime::oneDay();    // end of step
     
     // We add N_v_length so that we can use mod_nn() instead of mod().
     SimTime d1Mod = d1 + N_v_length;
@@ -161,36 +161,36 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     
     //BEGIN cache calculation: fArray, ftauArray, uninfected_v
     // Set up array with n in 1..θ_s−τ for f(d1Mod-n) (NDEMD eq. 1.6)
-    for( SimTime n = sim::oneDay(); n <= mosqRestDuration; n += sim::oneDay() ){
+    for( SimTime n = SimTime::oneDay(); n <= mosqRestDuration; n += SimTime::oneDay() ){
         const SimTime tn = mod_nn(d1Mod-n, N_v_length);
-        fArray[n] = fArray[n-sim::oneDay()] * P_A[tn];
+        fArray[n] = fArray[n-SimTime::oneDay()] * P_A[tn];
     }
     fArray[mosqRestDuration] += P_df[ttau];
     
     const SimTime fAEnd = EIPDuration-mosqRestDuration;
-    for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fAEnd; n += sim::oneDay() ){
+    for( SimTime n = mosqRestDuration+SimTime::oneDay(); n <= fAEnd; n += SimTime::oneDay() ){
         const SimTime tn = mod_nn(d1Mod-n, N_v_length);
         fArray[n] =
             P_df[tn] * fArray[n - mosqRestDuration]
-            + P_A[tn] * fArray[n-sim::oneDay()];
+            + P_A[tn] * fArray[n-SimTime::oneDay()];
     }
     
     // Set up array with n in 1..θ_s−1 for f_τ(d1Mod-n) (NDEMD eq. 1.7)
     const SimTime fProdEnd = mosqRestDuration * 2;
-    for( SimTime n = mosqRestDuration+sim::oneDay(); n <= fProdEnd; n += sim::oneDay() ){
+    for( SimTime n = mosqRestDuration+SimTime::oneDay(); n <= fProdEnd; n += SimTime::oneDay() ){
         SimTime tn = mod_nn(d1Mod-n, N_v_length);
-        ftauArray[n] = ftauArray[n-sim::oneDay()] * P_A[tn];
+        ftauArray[n] = ftauArray[n-SimTime::oneDay()] * P_A[tn];
     }
     ftauArray[fProdEnd] += P_df[mod_nn(d1Mod-fProdEnd, N_v_length)];
 
-    for( SimTime n = fProdEnd+sim::oneDay(); n < EIPDuration; n += sim::oneDay() ){
+    for( SimTime n = fProdEnd+SimTime::oneDay(); n < EIPDuration; n += SimTime::oneDay() ){
         SimTime tn = mod_nn(d1Mod-n, N_v_length);
         ftauArray[n] =
             P_df[tn] * ftauArray[n - mosqRestDuration]
-            + P_A[tn] * ftauArray[n-sim::oneDay()];
+            + P_A[tn] * ftauArray[n-SimTime::oneDay()];
     }
     
-    for( SimTime d = sim::oneDay(); d < N_v_length; d += sim::oneDay() ){
+    for( SimTime d = SimTime::oneDay(); d < N_v_length; d += SimTime::oneDay() ){
         SimTime t = mod_nn(d1Mod - d, N_v_length);
         double sum = N_v[t];
         for( size_t i = 0; i < Genotypes::N(); ++i ) sum -= O_v.at(t,i);
@@ -211,7 +211,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
         //BEGIN S_v
         double sum = 0.0;
         const SimTime ts = d1Mod - EIPDuration;
-        for( SimTime l = sim::oneDay(); l < mosqRestDuration; l += sim::oneDay() ){
+        for( SimTime l = SimTime::oneDay(); l < mosqRestDuration; l += SimTime::oneDay() ){
             const SimTime tsl = mod_nn(ts - l, N_v_length); // index d1Mod - theta_s - l
             sum += P_dif.at(tsl,genotype) * P_df[ttau] * (uninfected_v[EIPDuration+l]) *
                     ftauArray[EIPDuration+l-mosqRestDuration];
@@ -279,37 +279,37 @@ double sum1( const vecDay<double>& arr, SimTime end, SimTime N_v_length ){
     double val = 0.0;
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
-    for( SimTime d1 = end - sim::oneTS(); d1 < end; d1 += sim::oneDay() ){
+    for( SimTime d1 = end - SimTime::oneTS(); d1 < end; d1 += SimTime::oneDay() ){
         val += arr[mod_nn(d1, N_v_length)];
     }
-    return val / sim::oneTS().inDays();
+    return val / SimTime::oneTS().inDays();
 }
 double sum2( const vecDay2D<double>& arr, SimTime end, SimTime N_v_length ){
     double val = 0.0;
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
-    for( SimTime d1 = end - sim::oneTS(); d1 < end; d1 += sim::oneDay() ){
+    for( SimTime d1 = end - SimTime::oneTS(); d1 < end; d1 += SimTime::oneDay() ){
         SimTime i1 = mod_nn(d1, N_v_length);
         for( size_t g = 0; g < Genotypes::N(); ++g ){
             val += arr.at(i1, g);
         }
     }
-    return val / sim::oneTS().inDays();
+    return val / SimTime::oneTS().inDays();
 }
 double sum3( const vecDay2D<double>& arr, size_t g, SimTime end, SimTime N_v_length ){
     double val = 0.0;
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
-    for( SimTime d1 = end - sim::oneTS(); d1 < end; d1 += sim::oneDay() ){
+    for( SimTime d1 = end - SimTime::oneTS(); d1 < end; d1 += SimTime::oneDay() ){
         val += arr.at(mod_nn(d1, N_v_length), g);
     }
-    return val / sim::oneTS().inDays();
+    return val / SimTime::oneTS().inDays();
 }
 double MosqTransmission::getLastVecStat( VecStat vs )const{
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
     // One plus last, plus (0 mod N_v_length) to avoid negatives:
-    SimTime end = sim::now() + sim::oneDay() + N_v_length;
+    SimTime end = sim::now() + SimTime::oneDay() + N_v_length;
     switch( vs ){
         case PA: return sum1(P_A, end, N_v_length);
         case PDF: return sum1(P_df, end, N_v_length);
@@ -324,7 +324,7 @@ void MosqTransmission::summarize( size_t species )const{
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
     // One plus last, plus (0 mod N_v_length) to avoid negatives:
-    SimTime end = sim::now() + sim::oneDay() + N_v_length;
+    SimTime end = sim::now() + SimTime::oneDay() + N_v_length;
     mon::reportStatMSF( mon::MVF_LAST_NV0, species, getLastN_v0() );
     mon::reportStatMSF( mon::MVF_LAST_NV, species, sum1(N_v, end, N_v_length) );
     for( size_t g = 0; g < Genotypes::N(); ++g ){

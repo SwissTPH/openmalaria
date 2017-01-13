@@ -32,7 +32,7 @@ namespace Host {
 
     class ImportedInfections {
     public:
-        ImportedInfections() : period(sim::zero()), lastIndex(0) {}
+        ImportedInfections() : period(SimTime::zero()), lastIndex(0) {}
         
         /** Initialise, passing intervention description
          * 

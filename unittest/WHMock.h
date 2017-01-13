@@ -67,7 +67,7 @@ public:
     // This mock class counts the number of times treatment() was called. Read/write this as you like.
     int nTreatments;
     
-    // The last treatment time-spans used by the simple treatment model. sim::never() if not used.
+    // The last treatment time-spans used by the simple treatment model. SimTime::never() if not used.
     SimTime lastTimeLiver, lastTimeBlood;
     
     // Lists medications and drugs in the body

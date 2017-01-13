@@ -59,22 +59,22 @@ void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth) :
+Human::Human(SimTime dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
     m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
 {
-  // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
-  assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
-  
-  HumanHet het = HumanHet::sample();
-  withinHostModel = WithinHost::WHInterface::createWithinHostModel( het.comorbidityFactor );
-  perHostTransmission.initialise (tm, het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
-  clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
+    // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
+    assert( m_DOB == sim::nowOrTs1() || (sim::now() == SimTime::zero() && m_DOB < sim::now()) );
+    
+    HumanHet het = HumanHet::sample();
+    withinHostModel = WithinHost::WHInterface::createWithinHostModel( het.comorbidityFactor );
+    perHostTransmission.initialise (het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
+    clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
 }
 
-Human::Human(SimTime dateOfBirth) :
+Human::Human(SimTime dateOfBirth, int dummy) :
     withinHostModel(0),
     infIncidence(0),
     clinicalModel(0),
@@ -84,9 +84,9 @@ Human::Human(SimTime dateOfBirth) :
 {}
 
 void Human::destroy() {
-  delete infIncidence;
-  delete withinHostModel;
-  delete clinicalModel;
+    delete infIncidence;
+    delete withinHostModel;
+    delete clinicalModel;
 }
 
 
@@ -94,7 +94,7 @@ void Human::destroy() {
 
 vector<double> EIR_per_genotype;        // cache (not thread safe)
 
-bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
+bool Human::update(bool doUpdate) {
 #ifdef WITHOUT_BOINC
     ++PopulationStats::humanUpdateCalls;
     if( doUpdate )
@@ -132,7 +132,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
             }
         }
         // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
-        double EIR = transmissionModel->getEIR( *this, age0, ageYears1,
+        double EIR = sim::transmission().getEIR( *this, age0, ageYears1,
                 EIR_per_genotype );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
@@ -141,7 +141,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
                 _vaccine.getFactor(interventions::Vaccine::BSV));
         
         // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
-        clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
+        clinicalModel->update( *this, ageYears1, age0 == SimTime::zero() );
         clinicalModel->updateInfantDeaths( age0 );
     }
     return false;
@@ -175,7 +175,7 @@ void Human::summarize() {
 }
 
 void Human::reportDeployment( ComponentId id, SimTime duration ){
-    if( duration <= sim::zero() ) return; // nothing to do
+    if( duration <= SimTime::zero() ) return; // nothing to do
     m_subPopExp[id] = sim::nowOrTs1() + duration;
     m_cohortSet = mon::updateCohortSet( m_cohortSet, id, true );
 }

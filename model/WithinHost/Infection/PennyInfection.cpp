@@ -195,7 +195,7 @@ PennyInfection::PennyInfection(uint32_t protID):
 
 bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double ){
     int ageDays = bsAge.inDays();       // lazy
-    if( bsAge == sim::zero() ){
+    if( bsAge == SimTime::zero() ){
         // assign initial densities (Y circulating, X sequestered)
         size_t today = mod_nn(ageDays, delta_C);
         

@@ -41,7 +41,7 @@ public:
     explicit TimedDeployment(SimTime deploymentTime) :
             time( deploymentTime )
     {
-        if( deploymentTime < sim::zero() ){
+        if( deploymentTime < SimTime::zero() ){
             throw util::xml_scenario_error("timed intervention deployment: may not be negative");
         }else if( deploymentTime >= mon::finalSurveyTime() ){
             cerr << "Warning: timed intervention deployment at time "<<(deploymentTime.inDays());
@@ -67,13 +67,13 @@ public:
 class DummyTimedDeployment : public TimedDeployment {
 public:
     DummyTimedDeployment() :
-        TimedDeployment( sim::zero() )
+        TimedDeployment( SimTime::zero() )
     {
         // TimedDeployment's ctor checks that the deployment time-step is
         // within the intervention period. We want this time to be after the
         // last time-step, so set the time here after TimedDeployment's ctor
         // check has been done (hacky).
-        time = sim::future();
+        time = SimTime::future();
     }
     virtual void deploy (OM::Population&) {}
 #ifdef WITHOUT_BOINC
@@ -111,7 +111,7 @@ public:
         newEIR( nv._clone() )
     {}
     virtual void deploy (OM::Population& population) {
-        population.transmissionModel().changeEIRIntervention( *newEIR );
+        sim::transmission().changeEIRIntervention( *newEIR );
         delete newEIR;
         newEIR = 0;
     }
@@ -131,7 +131,7 @@ public:
         TimedDeployment( deployTime )
     {}
     virtual void deploy (OM::Population& population) {
-        population.transmissionModel().uninfectVectors();
+        sim::transmission().uninfectVectors();
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -230,13 +230,13 @@ public:
                            ComponentId subPop, bool complement ) :
         TimedDeployment( date ),
         HumanDeploymentBase( mass, intervention, subPop, complement ),
-        minAge( sim::fromYearsN( mass.getMinAge() ) ),
-        maxAge( sim::future() )
+        minAge( SimTime::fromYearsN( mass.getMinAge() ) ),
+        maxAge( SimTime::future() )
     {
         if( mass.getMaxAge().present() )
-            maxAge = sim::fromYearsN( mass.getMaxAge().get() );
+            maxAge = SimTime::fromYearsN( mass.getMaxAge().get() );
             
-        if( minAge < sim::zero() || maxAge < minAge ){
+        if( minAge < SimTime::zero() || maxAge < minAge ){
             throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
         }
     }
@@ -335,7 +335,7 @@ public:
         inst(instance)
     {}
     virtual void deploy (OM::Population& population) {
-      population.transmissionModel().deployVectorPopInterv(inst);
+      sim::transmission().deployVectorPopInterv(inst);
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -353,7 +353,7 @@ public:
     {}
     virtual void deploy (OM::Population& population) {
         double number = population.size() * ratio;
-        population.transmissionModel().deployVectorTrap(inst, number, lifespan);
+        sim::transmission().deployVectorTrap(inst, number, lifespan);
     }
 #ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
@@ -378,12 +378,12 @@ public:
                                  ComponentId subPop, bool complement ) :
             HumanDeploymentBase( elt, intervention, subPop, complement ),
             begin( begin ), end( end ),
-            deployAge( sim::fromYearsN( elt.getTargetAgeYrs() ) )
+            deployAge( SimTime::fromYearsN( elt.getTargetAgeYrs() ) )
     {
-        if( begin < sim::zero() || end < begin ){
+        if( begin < SimTime::zero() || end < begin ){
             throw util::xml_scenario_error("continuous intervention must have 0 <= begin <= end");
         }
-        if( deployAge <= sim::zero() ){
+        if( deployAge <= SimTime::zero() ){
             ostringstream msg;
             msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
             msg << " years corresponds to time step " << deployAge.inSteps();
@@ -429,7 +429,7 @@ public:
 #ifdef WITHOUT_BOINC
     inline void print_details( std::ostream& out )const{
         out << begin.inSteps() << "t\t";
-        if( end == sim::future() ) out << "(none)";
+        if( end == SimTime::future() ) out << "(none)";
         else out << end.inSteps() << 't';
         out << '\t' << deployAge.inYears() << "y\t";
         if( subPop == ComponentId_pop ) out << "(none)";

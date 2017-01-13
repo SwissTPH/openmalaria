@@ -83,7 +83,7 @@ void initSurveyTimes( const OM::Parameters& parameters,
             }
             if( surv.getRepeatStep().present() ){
                 SimTime step = UnitParse::readDuration( surv.getRepeatStep().get(), UnitParse::NONE );
-                if( step < sim::oneTS() ){
+                if( step < SimTime::oneTS() ){
                     throw util::xml_scenario_error( "surveyTime: repeatStep must be >= 1" );
                 }
                 SimTime end = UnitParse::readDate( surv.getRepeatEnd().get(), UnitParse::NONE );
@@ -150,7 +150,7 @@ void updateSurveyNumbers() {
     if( impl::surveyIndex >= impl::surveyTimes.size() ){
         impl::survNumEvent = NOT_USED;
         impl::survNumStat = NOT_USED;
-        impl::nextSurveyTime = sim::future();
+        impl::nextSurveyTime = SimTime::future();
     }else{
         for( size_t i = impl::surveyIndex; i < impl::surveyTimes.size(); ++i ){
             impl::survNumEvent = impl::surveyTimes[i].num;  // set to survey number or NOT_USED; this happens at least once!
@@ -222,9 +222,9 @@ void AgeGroup::init (const scnXml::Monitoring& monitoring) {
     upperBound.resize( groups.size() + 1 );
     for(size_t i = 0;i < groups.size(); ++i) {
         // convert to SimTime, rounding down to the next time step
-        upperBound[i] = sim::fromYearsD( groups[i].getUpperbound() );
+        upperBound[i] = SimTime::fromYearsD( groups[i].getUpperbound() );
     }
-    upperBound[groups.size()] = sim::future();
+    upperBound[groups.size()] = SimTime::future();
 }
 
 void AgeGroup::update (SimTime age) {

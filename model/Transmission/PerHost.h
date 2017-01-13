@@ -32,8 +32,7 @@
 
 namespace OM {
 namespace Transmission {
-    
-class TransmissionModel;
+
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::DecayFuncHet;
@@ -78,7 +77,7 @@ public:
     inline interventions::ComponentId id() const { return m_id; }
     
     /// Return true if this component is deployed (i.e. currently active)
-    inline bool isDeployed() const{ return deployTime != sim::never(); }
+    inline bool isDeployed() const{ return deployTime != SimTime::never(); }
     
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
@@ -96,7 +95,7 @@ protected:
     /// Checkpointing: write
     virtual void checkpoint( ostream& stream ) =0;
     
-    SimTime deployTime;        // time of deployment or sim::never()
+    SimTime deployTime;        // time of deployment or SimTime::never()
     interventions::ComponentId m_id;       // component id; don't change
 };
 
@@ -128,7 +127,7 @@ public:
     ///@brief Initialisation / checkpionting
     //@{
     PerHost ();
-    void initialise (TransmissionModel& tm, double availabilityFactor);
+    void initialise (double availabilityFactor);
     //@}
     
     /// Call once per time step. Updates net holes.
@@ -227,12 +226,21 @@ public:
      * to restore transmission. */
     //@}
     
+    ///@brief Convenience wrappers around several functions
+    //@{
+    /// entoAvailabilityHetVecItv * probMosqBiting
+    inline double availBite (const Anopheles::PerHostBase& base, size_t speciesIndex) const{
+        return entoAvailabilityHetVecItv(base, speciesIndex) *
+                probMosqBiting(base, speciesIndex);
+    }
+    //@}
+    
     ///@brief Miscellaneous
     //@{
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
     static inline SimTime adultAge() {
-        return sim::fromYearsD( relAvailAge.firstGlobalMaximum() );
+        return SimTime::fromYearsD( relAvailAge.firstGlobalMaximum() );
     }
     
     /** Get whether the user has any active deployments of interventions of

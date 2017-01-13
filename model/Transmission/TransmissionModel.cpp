@@ -85,8 +85,9 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 
 // The times here should be for the last updated index of arrays:
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
-    //NOTE: because prevNow may be negative, we can't use mod_nn (hence moduloYearSteps):
-    stream<<'\t'<<initialisationEIR[util::mod(sim::prevNow() / sim::oneTS(), sim::stepsPerYear())];
+    int prevStep = (sim::now() - SimTime::oneTS()) / SimTime::oneTS();
+    //Note: prevStep may be negative, hence util::mod not mod_nn:
+    stream<<'\t'<<initialisationEIR[util::mod(prevStep, SimTime::stepsPerYear())];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
@@ -126,7 +127,7 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
     numTransmittingHumans(0),
     tsNumAdults(0)
 {
-    initialisationEIR.assign (sim::stepsPerYear(), 0.0);
+    initialisationEIR.assign (SimTime::stepsPerYear(), 0.0);
     surveyInoculations.assign(survInocsSize(nGenotypes), 0.0);
     
   using Monitoring::Continuous;
@@ -140,20 +141,20 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-double TransmissionModel::updateKappa (const Population& population) {
+double TransmissionModel::updateKappa () {
     // We calculate kappa for output and the non-vector model.
     double sumWt_kappa= 0.0;
     double sumWeight  = 0.0;
     numTransmittingHumans = 0;
 
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
-        const double avail = h->perHostTransmission.relativeAvailabilityHetAge(
-            h->age(sim::ts1()).inYears());
+        const double avail = human.perHostTransmission.relativeAvailabilityHetAge(
+            human.age(sim::ts1()).inYears());
         sumWeight += avail;
-        const double tbvFactor = h->getVaccine().getFactor( interventions::Vaccine::TBV );
-        const double pTransmit = h->withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
+        const double tbvFactor = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        const double pTransmit = human.withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
         const double riskTrans = avail * pTransmit;
         sumWt_kappa += riskTrans;
         if( riskTrans > 0.0 )
@@ -162,12 +163,13 @@ double TransmissionModel::updateKappa (const Population& population) {
 
 
     size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
-    if( population.size() == 0 ){     // this is valid
+    if( sim::humanPop().size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
             ostringstream msg;
-            msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa<<", "<<population.size();
+            msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa
+                    <<", "<<sim::humanPop().size();
             throw TRACED_EXCEPTION(msg.str(),util::Error::SumWeight);
         }
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
@@ -177,7 +179,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod == sim::stepsPerYear() - 1) {
+    if (tmod == SimTime::stepsPerYear() - 1) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }

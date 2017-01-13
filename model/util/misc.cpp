@@ -82,7 +82,7 @@ int castToInt( T x ){
 }
 
 bool haveDate(){
-    return interv_start_date != sim::never();
+    return interv_start_date != SimTime::never();
 }
 
 SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
@@ -94,7 +94,7 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
     if( len == str.size() ){
         // no unit given; examine our policy:
         if( v == 0 ){   // don't need a unit in this case
-            return sim::zero();
+            return SimTime::zero();
         }else if( defUnit == NONE ){
             throw util::format_error( "unit required but not given (try e.g. 5d or 12t)" );
         }else{
@@ -102,9 +102,9 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
                 cerr << "Deprecation warning: duration \"" << str << "\" specified without unit; it is recommended to do so (e.g. 5d or 1t)" << endl;
             }
             if( defUnit == DAYS ){
-                return sim::roundToTSFromDays( v );
+                return SimTime::roundToTSFromDays( v );
             }else if( defUnit == STEPS ){
-                return sim::fromTS( castToInt(v) );
+                return SimTime::fromTS( castToInt(v) );
             }else{
                 throw SWITCH_DEFAULT_EXCEPTION;
             }
@@ -113,9 +113,9 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
         // one extra character found; is this a unit?
         char u = str[len];
         if( u == 'd' || u == 'D' ){
-            return sim::roundToTSFromDays( v );
+            return SimTime::roundToTSFromDays( v );
         }else if( u == 't' || u == 'T' ){
-            return sim::fromTS( castToInt(v) );
+            return SimTime::fromTS( castToInt(v) );
         }
         // otherwise, fall through to below
     }
@@ -154,24 +154,24 @@ double parseDurationAndUnit( const std::string& str, DefaultUnit& unit ){
 SimTime readDuration( const std::string& str, DefaultUnit unit ){
     double v = parseDurationAndUnit( str, unit );
     
-    if( unit == YEARS ) return sim::fromYearsN( v );
+    if( unit == YEARS ) return SimTime::fromYearsN( v );
     else if( v != std::floor(v) ){
         throw util::format_error( "fractional values are only allowed when the unit is years (e.g. 0.25y)" );
-    }else if( unit == DAYS ) return sim::roundToTSFromDays( v );
-	else if( unit == STEPS ) return sim::fromTS( castToInt(v) );
+    }else if( unit == DAYS ) return SimTime::roundToTSFromDays( v );
+	else if( unit == STEPS ) return SimTime::fromTS( castToInt(v) );
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 double durationToDays( const std::string& str, DefaultUnit unit ){
     double v = parseDurationAndUnit( str, unit );
     
-    if( unit == YEARS ) return v * sim::oneYear().inDays();
+    if( unit == YEARS ) return v * SimTime::oneYear().inDays();
     else if( unit == DAYS ) return v;
-    else if( unit == STEPS ) return v * sim::oneTS().inDays();
+    else if( unit == STEPS ) return v * SimTime::oneTS().inDays();
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-/** Returns sim::never() when it doesn't recognise a date. Throws when it does
+/** Returns SimTime::never() when it doesn't recognise a date. Throws when it does
  * but encounters definite format errors. */
 SimTime parseDate( const std::string& str ){
     static sregex dateRx = sregex::compile ( "(\\d{4})-(\\d{1,2})-(\\d{1,2})" );
@@ -189,16 +189,16 @@ SimTime parseDate( const std::string& str ){
         // Inconsistency: time "zero" is 0000-01-01, not 0001-01-01. Since
         // dates are always relative to another date, the extra year doesn't
         // actually affect anything.
-        return sim::fromYearsI(year) + sim::roundToTSFromDays(monthStart[month-1] + day - 1);
+        return SimTime::fromYearsI(year) + SimTime::roundToTSFromDays(monthStart[month-1] + day - 1);
     }else{
-        return sim::never();
+        return SimTime::never();
     }
 }
 
 SimTime readDate( const std::string& str, DefaultUnit defUnit ){
     SimTime date = parseDate( str );
-    if( date != sim::never() ){
-        if( interv_start_date == sim::never() ){
+    if( date != SimTime::never() ){
+        if( interv_start_date == SimTime::never() ){
             throw util::format_error( "must set monitoring/startDate when using dates" );
         }else if( date < interv_start_date ){
             throw util::format_error( "date of event is before the start of monitoring" );
@@ -217,13 +217,13 @@ SimTime readDate( const std::string& str, DefaultUnit defUnit ){
 
 
 ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay ){
-    if( timeDisplay.mode == TimeDisplayHelper::DATE && interv_start_date != sim::never() ){
+    if( timeDisplay.mode == TimeDisplayHelper::DATE && interv_start_date != SimTime::never() ){
         // format as a date
         SimTime date = interv_start_date + timeDisplay.time;
-        assert( date >= sim::zero() );
-        int year = date / sim::oneYear();
+        assert( date >= SimTime::zero() );
+        int year = date / SimTime::oneYear();
         assert( year >= 0 );
-        int remainder = (date - sim::oneYear() * year).inDays();
+        int remainder = (date - SimTime::oneYear() * year).inDays();
         int month = 0;
         while( remainder >= UnitParse::monthStart[month+1] ) ++month;
         remainder -= UnitParse::monthStart[month];
@@ -245,14 +245,14 @@ ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay ){
 
 void sim::init( const scnXml::Scenario& scenario ){
     SimTime::interval = scenario.getModel().getParameters().getInterval();
-    SimTime::steps_per_year = sim::oneYear().inSteps();
+    SimTime::steps_per_year = SimTime::oneYear().inSteps();
     SimTime::years_per_step = 1.0 / SimTime::steps_per_year;
-    sim::max_human_age = sim::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
+    sim::max_human_age = SimTime::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
     if( scenario.getMonitoring().getStartDate().present() ){
         try{
-            // on failure, this throws or returns sim::never()
+            // on failure, this throws or returns SimTime::never()
             interv_start_date = UnitParse::parseDate( scenario.getMonitoring().getStartDate().get() );
-            if( interv_start_date == sim::never() ){
+            if( interv_start_date == SimTime::never() ){
                 throw util::format_error( "invalid format (expected YYYY-MM-DD)" );
             }
         }catch( const util::format_error& e ){
@@ -260,7 +260,7 @@ void sim::init( const scnXml::Scenario& scenario ){
         }
     }
     
-    sim::interv_time = sim::never();    // large negative number
+    sim::interv_time = SimTime::never();    // large negative number
 }
 
 }

@@ -58,7 +58,7 @@ public:
      * first update (though due to the latent period densities will still be
      * low). */
     inline bool bloodStage() const{
-        return sim::latestTs0() - m_startDate > sim::fromDays(5);
+        return sim::latestTs0() - m_startDate > SimTime::fromDays(5);
     }
     
     /// Get the density of the infection as of the last update

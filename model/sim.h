@@ -28,10 +28,7 @@
 
 #include "util/mod.h"
 #include "util/checkpoint.h"
-
-#include <iostream>
-#include <cassert>
-#include <string>
+#include <memory>
 
 class UnittestUtil;
 
@@ -40,8 +37,17 @@ namespace scnXml {
 }
 
 namespace OM {
+class Population;
+namespace Transmission {
+    class TransmissionModel;
+}
+using Transmission::TransmissionModel;
 
 struct TimeDisplayHelper;
+
+inline int floorToInt( double x ){
+	return static_cast<int>(std::floor(x));
+}
 
 /******************************************************************************
  * Class encapsulating simulation time (as in days and dates, not time-of-day).
@@ -59,10 +65,74 @@ class SimTime {
     explicit SimTime( int days ) : d(days) {}
     
 public:
+    ///@brief Static constructors, for convenience
+    //@{
+    /** Duration zero. */
+    static inline SimTime zero(){ return SimTime(0); }
+    
+    /** One day. */
+    static inline SimTime oneDay(){ return SimTime(1); }
+    
+    /** One year. See SimTime::DAYS_IN_YEAR. */
+    static inline SimTime oneYear(){ return SimTime(SimTime::DAYS_IN_YEAR); }
+    
+    /** Special value representing a time point always in the past, such that
+     * never() + x < zero() and x - never() will not to overflow for all valid
+     * simulation times x (including any value now() may take as well as
+     * never() and future()). */
+    static inline SimTime never(){ return SimTime(); }
+    
+    /** Special value representing a time point always in the future, such that
+     * now() < future() and now() + future() does not overflow. */
+    static inline SimTime future(){ return SimTime(0x3FFFFFFF); }
+    
+    /** Duration in days. Should be fast (currently no conversion required). */
+    static inline SimTime fromDays(int days){ return SimTime(days); }
+    
+    /** Convert from a whole number of years. */
+    static inline SimTime fromYearsI(int years){
+        return SimTime(SimTime::DAYS_IN_YEAR * years);
+    }
+    
+    /** Convert from years to nearest time step. */
+    static inline SimTime fromYearsN(double years){
+        return roundToTSFromDays(SimTime::DAYS_IN_YEAR * years);
+    }
+    
+    /** Convert from years, rounding down to the next time step. */
+    static inline SimTime fromYearsD(double years){
+        return fromTS( floorToInt(stepsPerYear() * years) );
+    }
+    
+    /** Convert. */
+    static inline SimTime fromTS(int ts){ return oneTS() * ts; }
+    
+    /** Round to the nearest time-step, where input is in days. */
+    static inline SimTime roundToTSFromDays(double days){
+        return fromTS( floorToInt( days / SimTime::interval + 0.5 ));
+    }
+    //@}
+    
+    ///@brief Conversion functions, for convenience
+    //@{
+    /** One time step (currently either one or five days). */
+    static inline SimTime oneTS(){ return SimTime(SimTime::interval); }
+    
+    /** The number of time steps in one year. */
+    static inline size_t stepsPerYear(){ return SimTime::steps_per_year; }
+    
+    /** A cached value: one year divided by one time step. */
+    static inline double yearsPerStep(){ return SimTime::years_per_step; }
+    /** Convert some number of days to some number of time steps (integer
+     * division). */
+    static inline int daysToSteps(int days){ return days / SimTime::interval; }
+    //@}
+    
+    
     /// Number of days in a year; defined as 365 (leap years are not simulated).
     enum { DAYS_IN_YEAR = 365 };
     
-    /** Default construction; same as sim::never(). */
+    /** Default construction; same as SimTime::never(). */
     SimTime() : d(-0x3FFFFFFF) {}
     
     ///@brief Conversions to other types/units
@@ -180,14 +250,26 @@ private:
 inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
     return SimTime(util::mod_nn(lhs.d, rhs.d));
 }
-inline int floorToInt( double x ){
-	return static_cast<int>(std::floor(x));
-}
 
-/** Encapsulation of SimTime static members. */
+struct TimeDisplayHelper {
+    enum DisplayAs {
+        DATE,
+        DURATION,
+    };
+    SimTime time;
+    DisplayAs mode;
+    TimeDisplayHelper(SimTime time, DisplayAs mode) :
+        time(time), mode(mode) {}
+};
+/// Allows printing of a TimeDisplayHelper
+ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay );
+
+
+
+/** Encapsulates static variables: sim time, population, transmission model. */
 class sim {
 public:
-    ///@brief Accessors, all returning a copy to make read-only
+    ///@brief SimTime accessors, all returning a copy to make read-only
     //@{
     /** Time at the beginning of a time step update.
      *
@@ -205,23 +287,23 @@ public:
         assert(in_update);      // should only be used during updates
         return time1;
     }
-    /** Time during init, monitoring and intervention deployment (i.e. whenever
-     * a human or mosquito update is not in progress).
-     *
-     * This is equal to ts1() from the last update and ts0() from this update.
+    /**
+     * Time steps are mid-day to mid-day, and this is the time at mid-day (i.e.
+     * this equals ts1 from the last step and ts0 from the next one).
+     * 
+     * This is for monitoring and intervention deployment which happens between
+     * updates. Cannot be used during human or vector update.
      */
     static inline SimTime now(){
         assert(!in_update);     // only for use outside of step updates
         return time0;   // which is equal to time1 outside of updates, but that's a detail
     }
-    /** now() - 1 with same requirement only for use outside of updates. */
-    static inline SimTime prevNow(){ return now() - oneTS(); }
     /** During updates, this is ts0; between, this is now. */
     static inline SimTime nowOrTs0(){ return time0; }
     /** During updates, this is ts1; between, this is now. */
     static inline SimTime nowOrTs1(){ return time1; }
     /** During updates, this is ts0; between, it is now - 1. */
-    static inline SimTime latestTs0(){ return time1 - oneTS(); }
+    static inline SimTime latestTs0(){ return time1 - SimTime::oneTS(); }
     
     /** Time relative to the intervention period. Some events are defined
      * relative to this time rather than simulation time, and since the
@@ -232,75 +314,41 @@ public:
      * at which time it jumps to zero. */
     static inline SimTime intervNow(){ return interv_time; }
     
-    /** One time step (currently either one or five days). */
-    static inline SimTime oneTS(){ return SimTime(SimTime::interval); }
-    
-    /** The number of time steps in one year. */
-    static inline size_t stepsPerYear(){ return SimTime::steps_per_year; }
-    
-    /** A cached value: one year divided by one time step. */
-    static inline double yearsPerStep(){ return SimTime::years_per_step; }
-    
     static inline SimTime maxHumanAge(){ return max_human_age; }
     //@}
     
-    ///@brief Constructors, for convenience
+    ///@brief Population variables (globals)
     //@{
-    /** Duration zero. */
-    static inline SimTime zero(){ return SimTime(0); }
-    
-    /** One day. */
-    static inline SimTime oneDay(){ return SimTime(1); }
-    
-    /** One year. See SimTime::DAYS_IN_YEAR. */
-    static inline SimTime oneYear(){ return SimTime(SimTime::DAYS_IN_YEAR); }
-    
-    /** Special value representing a time point always in the past, such that
-     * never() + x < zero() and x - never() will not to overflow for all valid
-     * simulation times x (including any value now() may take as well as
-     * never() and future()). */
-    static inline SimTime never(){ return SimTime(); }
-    
-    /** Special value representing a time point always in the future, such that
-     * now() < future() and now() + future() does not overflow. */
-    static inline SimTime future(){ return SimTime(0x3FFFFFFF); }
-    
-    /** Duration in days. Should be fast (currently no conversion required). */
-    static inline SimTime fromDays(int days){ return SimTime(days); }
-    
-    /** Convert from a whole number of years. */
-    static inline SimTime fromYearsI(int years){
-        return SimTime(SimTime::DAYS_IN_YEAR * years);
+    /// Human population
+    static Population& humanPop() {
+        assert(p_humanPop.get() != 0);
+        return *p_humanPop;
     }
-    
-    /** Convert from years to nearest time step. */
-    static inline SimTime fromYearsN(double years){
-        return roundToTSFromDays(SimTime::DAYS_IN_YEAR * years);
+    /// Transmission model (& vector population, if using)
+    static TransmissionModel& transmission() {
+        assert(p_transmission.get() != 0);
+        return *p_transmission;
     }
-    
-    /** Convert from years, rounding down to the next time step. */
-    static inline SimTime fromYearsD(double years){
-        return fromTS( floorToInt(stepsPerYear() * years) );
-    }
-    
-    /** Convert. */
-    static inline SimTime fromTS(int ts){ return oneTS() * ts; }
-    
-    /** Round to the nearest time-step, where input is in days. */
-    static inline SimTime roundToTSFromDays(double days){
-        return fromTS( floorToInt( days / SimTime::interval + 0.5 ));
-    }
-    //@}
-    
-    ///@brief Conversion functions, for convenience
-    //@{
-    /** Convert some number of days to some number of time steps (integer
-     * division). */
-    static inline int daysToSteps(int days){ return days / SimTime::interval; }
     //@}
     
 private:
     static void init( const scnXml::Scenario& scenario );
+    
+    // Start of update. Set in_update and increment time1.
+    static inline void start_update(){
+        time1 += SimTime::oneTS();
+#ifndef NDEBUG
+        in_update = true;
+#endif
+    }
+    // Start of update. Set in_update and increment time1.
+    static inline void end_update(){
+#ifndef NDEBUG
+        in_update = false;
+#endif
+        time0 = time1;
+        interv_time += SimTime::oneTS();
+    }
     
     static SimTime max_human_age;   // constant
     // Global variables
@@ -311,23 +359,12 @@ private:
     static SimTime time1;
     static SimTime interv_time;
     
+    static std::auto_ptr<Population> p_humanPop;
+    static std::auto_ptr<TransmissionModel> p_transmission;
+    
     friend class Simulator;
     friend class ::UnittestUtil;
 };
-
-struct TimeDisplayHelper {
-    enum DisplayAs {
-        DATE,
-        DURATION,
-    };
-    SimTime time;
-    DisplayAs mode;
-    TimeDisplayHelper(SimTime time, DisplayAs mode) :
-        time(time), mode(mode) {}
-};
-/// Allows printing of a TimeDisplayHelper
-ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay );
-
 
 }
 #endif
