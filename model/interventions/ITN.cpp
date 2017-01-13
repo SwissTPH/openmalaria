@@ -35,7 +35,8 @@ vector<ITNComponent*> ITNComponent::componentsByIndex;
 
 void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
                                                    double maxInsecticide, const char* eltName,
-                                                   bool attractivenessConstraints){
+                                                   bool isDeterrent){
+    useLogitEqns = false;
     a.BF = elt.getBaseFactor();
     a.HF = elt.getHoleFactor();
     a.PF = elt.getInsecticideFactor();
@@ -56,9 +57,9 @@ void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
     // see below
     double pmax = 1.0-exp(-maxInsecticide * a.insecticideScaling);
     
-    if( attractivenessConstraints ){
+    if( isDeterrent ){
         // Note: the following argument is a modification of the one below
-        // (when !attractivenessConstraints). The original may make more sense.
+        // (when !isDeterrent). The original may make more sense.
     /* We want K ≥ 0 where K is the killing factor:
     K=BF+HF×h+PF×p+IF×h×p, with h and p defined as:
     h=exp(-holeIndex×holeScalingFactor),
@@ -217,14 +218,33 @@ void factors::SurvivalFactor::init(const scnXml::ITNKillingEffect& elt,
 }
 
 void factors::SurvivalFactor::initLogit(const scnXml::ITNEffectLogit& elt,
-                                                   double holeIndexMax){
-    a.BF = elt.getBaseFactor();
-    a.HF = elt.getHoleFactor();
-    a.PF = elt.getInsecticideFactor();
-    a.IF = elt.getInteractionFactor();
+                                                   double holeIndexMax,
+                                                   bool isDeterrent)
+{
+    useLogitEqns = true;
+    b.BF = elt.getBaseFactor();
+    b.HF = elt.getHoleFactor();
+    b.PF = elt.getInsecticideFactor();
+    b.IF = elt.getInteractionFactor();
     b.hMax = log(holeIndexMax + 1.0);
     const double x = exp(b.BF + b.HF * b.hMax);
-    b.pAtt0Inv = (x + 1.0) / x;
+    if (isDeterrent) {
+        // pAtt0 =x/(x+1); this is 1/pAtt0:
+        b.invBaseEffect = (x + 1.0) / x;
+    } else {
+        // K0 = x/(x+1), so 1/(1-K0) = x+1:
+        b.invBaseEffect = x + 1.0;
+        
+#ifdef WITHOUT_BOINC
+        // We expect K >= K0 and deduce these "advisory limits":
+        if (b.PF < 0.0 || b.PF + b.IF * b.hMax < 0.0) {
+            cerr << "ITN.description.anophelesParams.*KillingEffectLogit: expected"
+                << "\n(insecticide) P >= 0, found P = " << b.PF
+                << "\n(interaction) P+I*log(holeIndexMax+1) >= 0, found " << b.PF + b.IF * b.hMax
+                << endl;
+        }
+#endif
+    }
 }
 
 double factors::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
@@ -247,29 +267,39 @@ double factors::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideCo
         const double pAtt = x / (x + 1.0);
         
         // By construction, this is non-negative:
-        return pAtt * b.pAtt0Inv;
-
+        return pAtt * b.invBaseEffect;
     }
 }
 
 double factors::SurvivalFactor::survivalFactor( double holeIndex, double insecticideContent )const {
-    assert (!useLogitEqns);
-    
-    double holeComponent = exp(-holeIndex * a.holeScaling);
-    double insecticideComponent = 1.0 - exp(-insecticideContent * a.insecticideScaling);
-    double killingEffect = a.BF
-            + a.HF * holeComponent
-            + a.PF * insecticideComponent
-            + a.IF * holeComponent * insecticideComponent;
-    
-    double survivalFactor = (1.0 - killingEffect) * a.invBaseSurvival;
-    assert( killingEffect <= 1.0 );
-    // survivalFactor might be out of bounds due to precision error, see #49
-    if (survivalFactor < 0.0)
-        return 0.0;
-    else if (survivalFactor > 1.0)
-        return 1.0;
-    return survivalFactor;
+    if (!useLogitEqns) {
+        double holeComponent = exp(-holeIndex * a.holeScaling);
+        double insecticideComponent = 1.0 - exp(-insecticideContent * a.insecticideScaling);
+        double killingEffect = a.BF
+                + a.HF * holeComponent
+                + a.PF * insecticideComponent
+                + a.IF * holeComponent * insecticideComponent;
+        
+        double survivalFactor = (1.0 - killingEffect) * a.invBaseSurvival;
+        assert( killingEffect <= 1.0 );
+        // survivalFactor might be out of bounds due to precision error, see #49
+        if (survivalFactor < 0.0)
+            return 0.0;
+        else if (survivalFactor > 1.0)
+            return 1.0;
+        return survivalFactor;
+    } else {
+        const double holeComponent = min(log(holeIndex + 1.0), b.hMax);
+        const double insecticideComponent = log(insecticideContent + 1.0);
+        const double x = exp(b.BF
+                + b.HF * holeComponent
+                + b.PF * insecticideComponent
+                + b.IF * holeComponent * insecticideComponent);
+        // K = x/(x+1), so (1-K) = 1/(x+1):
+        const double surv = 1.0 / (x + 1.0);
+        
+        return surv * b.invBaseEffect;
+    }
 }
 
 
@@ -407,13 +437,16 @@ void factors::RelativeAttractiveness::initTwoStage (
     
     // Note: b.pAttacking and c.pAttacking overlap, so we can use either:
     if (elt.getAttacking().present()) {
-        b.pAttacking.init( elt.getAttacking().get(), maxInsecticide, "ITN.description.anophelesParams.twoStageDeterrency.attacking", true );
+        b.pAttacking.init(elt.getAttacking().get(),
+                          maxInsecticide,
+                          "ITN.description.anophelesParams.twoStageDeterrency.attacking",
+                          true);
     } else {
         assert (elt.getAttackingLogit().present());
         if (!holeIndexMax) {
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit attacking deterrency");
         }
-        b.pAttacking.initLogit(elt.getAttackingLogit().get(), *holeIndexMax);
+        b.pAttacking.initLogit(elt.getAttackingLogit().get(), *holeIndexMax, true);
     }
 }
 
@@ -530,7 +563,6 @@ void ITNComponent::ITNAnopheles::init(
     double proportionUse,
     double maxInsecticide)
 {
-    assert( relAttractiveness.get() == 0 );       // double init
     boost::optional<double> holeIndexMax;
     if (elt.getHoleIndexMax().present()) {
         holeIndexMax = elt.getHoleIndexMax().get().getValue();
@@ -542,12 +574,34 @@ void ITNComponent::ITNAnopheles::init(
         assert (elt.getTwoStageDeterrency().present());
         relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide, holeIndexMax);
     }
-    preprandialKillingEffect.init( elt.getPreprandialKillingEffect(),
-                                    maxInsecticide,
-                                    "ITN.description.anophelesParams.preprandialKillingFactor", false );
-    postprandialKillingEffect.init( elt.getPostprandialKillingEffect(),
-                                    maxInsecticide,
-                                    "ITN.description.anophelesParams.postprandialKillingFactor", false );
+    if (elt.getPreprandialKillingEffect().present()) {
+        preprandialKillingEffect.init(elt.getPreprandialKillingEffect().get(),
+                                      maxInsecticide,
+                                      "ITN.description.anophelesParams.preprandialKillingFactor",
+                                      false);
+    } else {
+        assert (elt.getPreprandialKillingEffectLogit().present());
+        if (!holeIndexMax) {
+            throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit killing effect");
+        }
+        preprandialKillingEffect.initLogit(elt.getPreprandialKillingEffectLogit().get(),
+                                           *holeIndexMax,
+                                           false);
+    }
+    if (elt.getPostprandialKillingEffect().present()) {
+        postprandialKillingEffect.init(elt.getPostprandialKillingEffect().get(),
+                                       maxInsecticide,
+                                       "ITN.description.anophelesParams.postprandialKillingFactor",
+                                       false);
+    } else {
+        assert (elt.getPostprandialKillingEffectLogit().present());
+        if (!holeIndexMax) {
+            throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit killing effect");
+        }
+        postprandialKillingEffect.initLogit(elt.getPostprandialKillingEffectLogit().get(),
+                                            *holeIndexMax,
+                                            false);
+    }
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
     double propActive = elt.getPropActive();

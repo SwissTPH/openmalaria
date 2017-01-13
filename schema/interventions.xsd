@@ -1414,48 +1414,98 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:complexType>
               </xs:element>
             </xs:choice>
-            <xs:element name="preprandialKillingEffect" type="om:ITNKillingEffect">
-              <xs:annotation>
-                <xs:documentation>
-                Effect of net on survival mosquitoes as they seek to bite a human
-                after choosing that human, relative to the same person not
-                sleeping under a net. Parameterisations should take into
-                account that mosquitoes do not always bite indoors.
-                
-                Killing proportion is calculated as K = B + H×h + P×p + I×h×p
-                where B is the base (without net) probability of death,
-                H, P and I are the hole, insecticide and interaction factors
-                respectively, h=exp(-holeIndex×holeScalingFactor) and
-                p=1−exp(-insecticideContent×insecticideScalingFactor).
-                
-                Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
-                To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
-                B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
-                </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="postprandialKillingEffect" type="om:ITNKillingEffect">
-              <xs:annotation>
-                <xs:documentation>
-                Effect of net on survival mosquitoes as they seek to escape from
-                a human host and rest after a blood meal, relative to the same
-                person not sleeping under a net. Parameterisations should take
-                into account that mosquitoes do not always bite indoors.
-                
-                Killing proportion is calculated as K = B + H×h + P×p + I×h×p
-                where B is the base (without net) probability of death,
-                H, P and I are the hole, insecticide and interaction factors
-                respectively, h=exp(-holeIndex×holeScalingFactor) and
-                p=1−exp(-insecticideContent×insecticideScalingFactor).
-                
-                Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
-                To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
-                B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
+            <xs:choice>
+              <xs:element name="preprandialKillingEffect" type="om:ITNKillingEffect">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on survival mosquitoes as they seek to bite a human
+                  after choosing that human, relative to the same person not
+                  sleeping under a net. Parameterisations should take into
+                  account that mosquitoes do not always bite indoors.
+                  
+                  Killing proportion is calculated as K = B + H×h + P×p + I×h×p
+                  where B is the base (without net) probability of death,
+                  H, P and I are the hole, insecticide and interaction factors
+                  respectively, h=exp(-holeIndex×holeScalingFactor) and
+                  p=1−exp(-insecticideContent×insecticideScalingFactor).
+                  
+                  Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
+                  To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
+                  B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
+                  </xs:documentation>
+                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="preprandialKillingEffectLogit" type="om:ITNEffectLogit">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on survival mosquitoes as they seek to bite a human
+                  after choosing that human, relative to the same person not
+                  sleeping under a net.                 
+                  Killing proportion is calculated as 
+                      K=exp(logit.K)/(exp(logit.K)+1)
+                      logit.K = B + H×min(h,hMax) + P×p + I×min(h,hMax)×p
+                  where B is the basefactor (without net),
+                  H, P and I are the hole, insecticide and interaction factors
+                  respectively, h=log(holeIndex+1) and
+                  p=log(insecticideContent+1).
+                  Without a net, the killing proportion
+                      K0=exp(logit.K0)/(exp(logit.K0)+1)
+                      logit.K0 = B + H×hMax
+                  where hMax=log(holeIndexMax+1) and holeIndexMax is a user defined maximum hole index (typically, the total surface area of a net).
+                  Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
+                  To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
+                  </xs:documentation>
+                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
+            <xs:choice>
+              <xs:element name="postprandialKillingEffect" type="om:ITNKillingEffect">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on survival mosquitoes as they seek to escape from
+                  a human host and rest after a blood meal, relative to the same
+                  person not sleeping under a net. Parameterisations should take
+                  into account that mosquitoes do not always bite indoors.
+                  
+                  Killing proportion is calculated as K = B + H×h + P×p + I×h×p
+                  where B is the base (without net) probability of death,
+                  H, P and I are the hole, insecticide and interaction factors
+                  respectively, h=exp(-holeIndex×holeScalingFactor) and
+                  p=1−exp(-insecticideContent×insecticideScalingFactor).
+                  
+                  Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
+                  To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
+                  B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
+                  </xs:documentation>
+                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="postprandialKillingEffectLogit" type="om:ITNEffectLogit">
+                <xs:annotation>
+                  <xs:documentation>
+                  Effect of net on survival mosquitoes as they seek to escape from
+                  a human host and rest after a blood meal, relative to the same
+                  person not sleeping under a net.
+                  Killing proportion is calculated as 
+                      K=exp(logit.K)/(exp(logit.K)+1)
+                      logit.K = B + H×min(h,hMax) + P×p + I×min(h,hMax)×p
+                  where B is the basefactor (without net),
+                  H, P and I are the hole, insecticide and interaction factors
+                  respectively, h=log(holeIndex+1) and
+                  p=log(insecticideContent+1).
+                  Without a net, the killing proportion
+                      K0=exp(logit.K0)/(exp(logit.K0)+1)
+                      logit.K0 = B + H×hMax
+                  where hMax=log(holeIndexMax+1) and holeIndexMax is a user defined maximum hole index (typically, the total surface area of a net).
+                  Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
+                  To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
                 </xs:documentation>
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
           </xs:sequence>
           <xs:attribute name="mosquito" type="xs:string" use="required">
             <xs:annotation>
@@ -1791,21 +1841,36 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="ITNEffectLogit">
     <xs:attribute name="baseFactor" type="xs:double" use="required">
       <xs:annotation>
+        <xs:documentation>
+          Logit of the probability (e.g. of death, of entry, of attacking) without intervention.
+        </xs:documentation>
         <xs:appinfo>units:dimensionless;name:Base factor;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="insecticideFactor" type="xs:double" use="required">
       <xs:annotation>
+        <xs:documentation>
+          Coefficient of log(insecticide content+1) in a generalized linear model with logit link
+          function.
+        </xs:documentation>
         <xs:appinfo>units:none;name:Insecticide factor;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="holeFactor" type="xs:double" use="required">
       <xs:annotation>
+        <xs:documentation>
+          Coefficient of log(total holed surface area (in cm2) +1) in a generalized linear model
+          with logit link function.
+        </xs:documentation>
         <xs:appinfo>units:none;name:Hole factor;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="interactionFactor" type="xs:double" use="required">
       <xs:annotation>
+        <xs:documentation>
+          Coefficient of the interaction term of log(total holed surface area (in cm2) +1) with
+          log(insecticide content+1) in a generalized linear model with logit link function.
+        </xs:documentation>
         <xs:appinfo>units:none;name:Interaction factor;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>

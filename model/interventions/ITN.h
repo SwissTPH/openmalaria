@@ -47,14 +47,23 @@ namespace factors {
         /// It is checked that parameters lie in a suitible range, giving a
         /// survival factor between 0 and 1.
         /// 
-        /// @param attractivenessConstraints If true, use the constraints for
-        /// use with two-stage deterrency, otherwise use the usual constraints.
+        /// @param elt  Element from XML
+        /// @param maxInsecticide
+        /// @param eltName  Element name (used in error messages)
+        /// @param isDeterrent True when used to describe a deterrency effect, false when used to
+        ///     describe a killing effect.
         void init(const scnXml::ITNKillingEffect& elt, double maxInsecticide,
                     const char* eltName, bool attractivenessConstraints);
         
         /// Variant to set paramters for the logit model.
+        /// 
+        /// @param elt  Element from XML
+        /// @param maxHoleIndex Parameter from parent element in XML
+        /// @param isDeterrent True when used to describe a deterrency effect, false when used to
+        ///     describe a killing effect.
         void initLogit(const scnXml::ITNEffectLogit& elt,
-                                                   double maxHoleIndex);
+                                                   double maxHoleIndex,
+                                                   bool isDeterrent);
         
         /** Part of survival factor, used by new ITN deterrency model. */
         double rel_pAtt( double holeIndex, double insecticideContent )const;
@@ -73,7 +82,7 @@ namespace factors {
             struct {
                 double BF, HF, PF, IF;
                 double hMax;
-                double pAtt0Inv;
+                double invBaseEffect;   // 1 over base effect
             } b;
         };
         bool useLogitEqns;
