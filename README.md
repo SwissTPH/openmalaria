@@ -48,6 +48,7 @@ when releasing a new version):
 
 *   DocumentLoader.h
 *   schema/scenario.xsd, demography.xsd, etc. (all XSD files without a version number)
+*   schema/CMakeLists.txt (namespace-map)
 *   copy build/schema/scenario_current.xsd to schema/scenario_XX.xsd
 *   test/*.xml — update http://openmalaria.org/schema/scenario_XX and (optionally) schemaVersion="XX"
 *   version.txt — needed for build service
