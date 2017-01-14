@@ -65,12 +65,12 @@ namespace BoincWrapper {
   }
   
   int lastPercent = -1;	// last _integer_ percentage value
-  void reportProgress (double progress) {
-      int percent = static_cast<int>(std::ceil( progress * 100.0 ));
+  void reportProgress (int now, int duration) {
+      int percent = (now * 100) / duration;
       if( percent != lastPercent ){	// avoid huge amounts of output for performance/log-file size reasons
 	  lastPercent = percent;
 	// \r cleans line. Then we print progress as a percentage.
-	cout << (boost::format("\r[%|3i|%%]\t") %std::ceil( progress * 100.0 )) << flush;
+	cout << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
       }
   }
   int timeToCheckpoint() {
@@ -124,9 +124,11 @@ namespace BoincWrapper {
     return boinc_file_exists(path);
   }
   
-  void reportProgress (double progress) {
-    boinc_fraction_done (progress);
-  }
+    void reportProgress (int now, int duration) {
+        double progress = static_cast<double>(sim::now().raw()) /
+            static_cast<double>(totalSimDuration.raw());
+        boinc_fraction_done (progress);
+    }
   
   int timeToCheckpoint() {
     return boinc_time_to_checkpoint();

@@ -50,6 +50,31 @@ map<string,size_t> drugTypeNames;
 vector<size_t> drugsInUse;
 
 
+LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
+    n = phenotype.getSlope ();
+    Kn = pow(phenotype.getIC50 (), n);
+    V = phenotype.getMax_killing_rate ();  
+    if( phenotype.getIC50().getSigma() > 0.0 ){
+        throw util::unimplemented_exception("sampling IC50");
+    }
+}
+
+double LSTMDrugPD::calcFactor( double neg_elim_rate, double* conc, double duration ) const{
+    const double C0 = *conc;
+    const double C1 = C0 * exp(neg_elim_rate * duration);
+    
+    // From Hastings & Winter 2011 paper
+    // Note: these look a little different from original equations because Kn
+    // is calculated when parameters are read from the scenario document instead of now.
+    const double numerator = Kn + pow(C1, n);
+    const double denominator = Kn + pow(C0, n);
+    const double power = V / (-neg_elim_rate * n);
+    
+    *conc = C1;    // conc is an in/out parameter
+    return pow( numerator / denominator, power );       // unitless
+}
+
+
 void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
     foreach( const scnXml::PKPDDrug& drug, drugData.getDrug() ){
         const string& abbrev = drug.getAbbrev();

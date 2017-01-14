@@ -1,0 +1,320 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_37" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="wuITNIRS2_10.xml,cohort_coverage:cohort_coverage04,importedInfectionsrate:importedInfectionsrate11,LLINbrand:LLINbrandLifeNet,models:base,mosqHumanBloodIndex:mosqHumanBloodIndex0001,pSeekOfficialCareUncomplicated:pSeekOfficialCareUncomplicated44,scaledAnnualEIR:scaledAnnualEIR1.000,species:flavirostris,start:start04,seed:1" schemaVersion="37" xsi:schemaLocation="http://openmalaria.org/schema/scenario_37 scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
+    <ageGroup lowerbound="0">
+      <group poppercent="3.474714994" upperbound="1"/>
+      <group poppercent="12.76004028" upperbound="5"/>
+      <group poppercent="14.52151394" upperbound="10"/>
+      <group poppercent="12.75565434" upperbound="15"/>
+      <group poppercent="10.83632374" upperbound="20"/>
+      <group poppercent="8.393312454" upperbound="25"/>
+      <group poppercent="7.001421452" upperbound="30"/>
+      <group poppercent="5.800587654" upperbound="35"/>
+      <group poppercent="5.102136612" upperbound="40"/>
+      <group poppercent="4.182561874" upperbound="45"/>
+      <group poppercent="3.339409351" upperbound="50"/>
+      <group poppercent="2.986112356" upperbound="55"/>
+      <group poppercent="2.555766582" upperbound="60"/>
+      <group poppercent="2.332763433" upperbound="65"/>
+      <group poppercent="1.77400255" upperbound="70"/>
+      <group poppercent="1.008525491" upperbound="75"/>
+      <group poppercent="0.74167341" upperbound="80"/>
+      <group poppercent="0.271863401" upperbound="85"/>
+      <group poppercent="0.161614642" upperbound="90"/>
+    </ageGroup>
+  </demography>
+  <monitoring name="5-daily Surveys" startDate="2000-01-01">
+    <SurveyOptions>
+      <option name="nHost" value="true"/>
+      <option name="nPatent" value="true"/>
+      <option name="nTransmit" value="true"/>
+      <option name="nTreatments1" value="true"/>
+      <option name="nTreatments2" value="true"/>
+      <option name="nTreatments3" value="true"/>
+      <option name="nUncomp" value="true"/>
+      <option name="nSevere" value="true"/>
+      <option name="nSeq" value="true"/>
+      <option name="nHospitalDeaths" value="true"/>
+      <option name="nIndDeaths" value="true"/>
+      <option name="nDirDeaths" value="true"/>
+      <option name="nHospitalRecovs" value="true"/>
+      <option name="nHospitalSeqs" value="true"/>
+      <option name="annAvgK" value="true"/>
+      <option name="inputEIR" value="true"/>
+      <option name="simulatedEIR" value="true"/>
+    </SurveyOptions>
+    <surveys diagnostic="standard">
+      <surveyTime repeatEnd="2035-12-31" repeatStep="1y">2010-01-01</surveyTime>
+      <!--
+      <surveyTime repeatEnd="2035-12-31" repeatStep="1y">2010-04-01</surveyTime>
+      <surveyTime repeatEnd="2035-12-31" repeatStep="1y">2010-07-01</surveyTime>
+      <surveyTime repeatEnd="2035-12-31" repeatStep="1y">2010-10-01</surveyTime>
+      -->
+    </surveys>
+    <ageGroup lowerbound="0.0">
+      <group upperbound="99"/>
+    </ageGroup>
+  </monitoring>
+  <interventions name="LifeNet">
+    <importedInfections>
+      <timed>
+        <rate time="0" value="1"/>
+      </timed>
+    </importedInfections>
+    <human>
+      <component id="interventioncohort">
+        <!-- a cohort to apply multiple rounds to the same people, always -->
+        <recruitmentOnly/>
+        <subPopRemoval afterYears="90"/>
+        <!-- a lifetime -->
+      </component>
+      <component id="LifeNet" name="LifeNet on An. fluviatilis ">
+        <!-- from WHOPES 14th meeting report-->
+        <ITN>
+          <usage value="0.8"/>
+          <holeRate mean="3.25" sigma="0.7"/>
+          <ripRate mean="20" sigma="0.7"/>
+          <ripFactor value="1"/>
+          <initialInsecticide mu="8.5" sigma="0.2125"/>
+          <!-- WHOPES 14 found a Relative Standard Deviation of 2.5% at a mean of 7.02, thus sigma=0.025*8.5 for LifeNet-->
+          <insecticideDecay L="2.0" function="exponential" mu="-0.32" sigma="0.8"/>
+          <!-- Standard value is 1.5 year halflife, but 2 years may be reasonable-->
+          <attritionOfNets L="18.176" function="smooth-compact" k="18"/>
+          <!-- Standard value -->
+          <anophelesParams mosquito="flavirostris" propActive="0.4">
+            <holeIndexMax value="145200"/>
+            <twoStageDeterrency>
+                <enteringLogit baseFactor="4.0868" insecticideFactor="-2.8851"/>
+                <attackingLogit baseFactor="-0.75405" holeFactor="0.47219" insecticideFactor="1.47636" interactionFactor="-0.17521"/>
+          </twoStageDeterrency>
+          <preprandialKillingEffectLogit baseFactor="-3.00830" holeFactor="-0.34248" insecticideFactor="3.44955" interactionFactor="-0.08499"/>
+          <postprandialKillingEffectLogit baseFactor="-3.800727" holeFactor="-0.011861" insecticideFactor="3.231888" interactionFactor="0.008622"/>
+        </anophelesParams>
+      </ITN>
+      </component>
+      <deployment name="Intervention cohort deployment">
+        <component id="interventioncohort"/>
+        <continuous>
+          <deploy begin="2016-12-27" coverage="0.4" targetAgeYrs="0.0833"/>
+        </continuous>
+        <timed>
+          <deploy coverage="0.4" maxAge="90" minAge="0" time="2016-12-27"/>
+          <!-- "cohort_coverage" -->
+          <!-- the coverage and timing of the intervention e.g. IRS round should be specified here. The cohort should be recruited one time step earlier than the deployment of the intervention, e.g. 0t -->
+        </timed>
+      </deployment>
+      <deployment name="LLIN deployment">
+        <component id="LifeNet"/>
+        <timed>
+          <restrictToSubPop complement="false" id="interventioncohort"/>
+          <deploy coverage="1.0" repeatEnd="2035-12-31" repeatStep="2y" time="2017-04-01"/>
+          <!-- coverage should be 1.0 to have 100% coverage of the cohort subpopulation and timing of the IRS round -->
+        </timed>
+      </deployment>
+    </human>
+  </interventions>
+  <healthSystem>
+    <ImmediateOutcomes name="ACT is artemether lumefantrine AL" useDiagnosticUC="true">
+      <!-- the diagnostic used for deciding whether a fever case that seeks treatment gets antimalarial treatment is the same one as the one used in the 'surveys' element (e.g.: surveys diagnostic="standard")  -->
+      <drugRegimen firstLine="ACT" inpatient="QN" secondLine="ACT"/>
+      <initialACR>
+        <ACT value="0.85"/>
+        <QN value="0.998"/>
+        <selfTreatment value="0.0"/>
+      </initialACR>
+      <compliance>
+        <ACT value="0.83"/>
+        <!-- Rivera et al., 2014, non compliance was 17% -->
+        <selfTreatment value="0.66"/>
+        <!-- Rivera et al., 2014, non compliance was 17%, double this for self treatment -->
+      </compliance>
+      <nonCompliersEffective>
+        <ACT value="0"/>
+        <selfTreatment value="0"/>
+      </nonCompliersEffective>
+      <treatmentActions>
+        <!-- only from schema 32 -->
+        <ACT name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="2"/>
+          <!-- timesteps is the parameter value that determines until when the prophylactic effect lasts -->
+        </ACT>
+        <QN name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1"/>
+          <!-- half life of QN is less than 12 hours Treluyer et al., 1996 http://www.nature.com/pr/journal/v40/n4/full/pr19962927a.html  -->
+        </QN>
+      </treatmentActions>
+      <pSeekOfficialCareUncomplicated1 value="0.19489115"/>
+      <!-- "pSeekOfficialCareUncomplicated" -->
+      <pSelfTreatUncomplicated value="0.0"/>
+      <pSeekOfficialCareUncomplicated2 value="0.19489115"/>
+      <!-- "pSeekOfficialCareUncomplicated" -->
+      <pSeekOfficialCareSevere value="0.48"/>
+    </ImmediateOutcomes>
+    <CFR>
+      <group lowerbound="0" value="0.09189"/>
+      <group lowerbound="0.25" value="0.0810811"/>
+      <group lowerbound="0.75" value="0.0648649"/>
+      <group lowerbound="1.5" value="0.0689189"/>
+      <group lowerbound="2.5" value="0.0675676"/>
+      <group lowerbound="3.5" value="0.0297297"/>
+      <group lowerbound="4.5" value="0.0459459"/>
+      <group lowerbound="7.5" value="0.0945946"/>
+      <group lowerbound="12.5" value="0.1243243"/>
+      <group lowerbound="15" value="0.1378378"/>
+    </CFR>
+    <pSequelaeInpatient interpolation="none">
+      <group lowerbound="0.0" value="0.0132"/>
+      <group lowerbound="5.0" value="0.005"/>
+    </pSequelaeInpatient>
+  </healthSystem>
+  <entomology mode="dynamic" name="P.falciparum cases in Bataraza, Brooke's Point and Rizal in 2015" scaledAnnualEIR="1">
+    <!-- "scaledAnnualEIR" -->
+    <vector>
+      <anopheles mosquito="flavirostris" propInfected="0.078" propInfectious="0.000021">
+        <!-- Standard values -->
+        <seasonality annualEIR="1.000" input="EIR">
+          <!-- "annualEIR_flavirostris" -->
+          <monthlyValues smoothing="fourier">
+            <!-- 2015 P.f. passively detected cases in Bataraza, Brooke's Point and Rizal -->
+            <value>98</value>
+            <value>132</value>
+            <value>223</value>
+            <value>403</value>
+            <value>1156</value>
+            <value>953</value>
+            <value>755</value>
+            <value>403</value>
+            <value>293</value>
+            <value>149</value>
+            <value>116</value>
+            <value>107</value>
+          </monthlyValues>
+        </seasonality>
+        <mosq minInfectedThreshold="0.001">
+          <!-- Standard value -->
+          <mosqRestDuration value="2"/>
+          <!-- Catangui 1971 desrcibes 3 days, but early morning cattle baited trap catches (maybe emptied in the early morning) were counted as 3 days if e.g. collected on the morning of the 8th and eggs were observed on the morning of the 10th, whereas this spans 48 hours. Note that Catangui 1985 Bionomics of malaria vectors in The Philippines states: "The gonotrophic cylce is 48 hours" (!) -->
+          <extrinsicIncubationPeriod value="9"/>
+          <!-- Clements and Peterson, 1981 used 14d for falciparum in flavirostris, but MOSHKOVSKY (1946)S METHOD Duration (in days) = C / (average daily temperature-B) =111/(28.4-16)= 8.951613-->
+          <mosqLaidEggsSameDayProportion value="0.628"/>
+          <!-- Catangui 1971.  Note that  Charlwood et al., 2016 http://malariajournal.biomedcentral.com/articles/10.1186/s12936-016-1389-0 found a value of 0.60 for minimus in Pailin-->
+          <mosqSeekingDuration value="0.33"/>
+          <!-- Standard value -->
+          <mosqSurvivalFeedingCycleProbability value="0.534"/>
+          <!-- Torres et al., 1996 parous rate of 0.76 based on 200+7*200=1600 mosquitoes in Jan-Feb 1993. (0.76/0.72)*0.43=0.45 in comparison to maculatus. Clements and Peterson 1981 write:  "Catangui (1971) analysed the physiological age composition of a population of Anophelesflavirostris at Caloocan, Rizal, in the Philippines, dissecting 1663 females at bait between September and June. Ten percent of females survived 4 gonotrophic cycles, and over 2% survived 6 gonotrophic cycles. Catangui, F. P. (1971). Studies on the gonotrophic cycle of Anopheles minimus flavirostris and the application of physiological age grading technique on the same species. South East Asian Journal of Tropical Medicine and Public Health, 2, 384-392."   Thus crudely, 0.10^(1/4)=0.5623413, but they fitted  exp(-0.196)^3.5 = 0.5035864. However, the crude data show an average parous rate over a whole year of 0.566, and a fitted value is exp(-0.62810)=0.5336047. This was in a context of DDT spraying. -->
+          <availabilityVariance value="0"/>
+          <!-- Standard value -->
+          <mosqProbBiting mean="0.95" variance="0"/>
+          <!-- Standard value -->
+          <mosqProbFindRestSite mean="0.95" variance="0"/>
+          <!-- Standard value -->
+          <mosqProbResting mean="0.99" variance="0"/>
+          <!-- Standard value -->
+          <mosqProbOvipositing value="0.88"/>
+          <!-- Standard value -->
+          <mosqHumanBloodIndex value="0.1347068"/>
+          <!-- "mosqHumanBloodIndex.flavirostris" -->
+          <!-- Catangui 1985 Bionomics of malaria vectors in The Philippines based on Laurel 1931-1934. Note that Schultz 1993 found a man:carabao ratio of 1:8.19. Thus, with this preference level, with a density ratio of man:carbao of 1.275:1, this yields a HBI of 1.275/(1*1.275+1*8.19)=  0.1347 -->
+        </mosq>
+        <simpleMPD>
+          <developmentDuration value="13"/>
+          <!-- Catangui 1985 Bionomics of malaria vectors in The Philippines (average 8-14+48hrs hatching) -->
+          <developmentSurvival value="0.467"/>
+          <!-- Phasomkulsolsil 2012 value for minimus (related to flavirostris) was 46.7. For sawadwongporni (related to maculatus) on human blood was 79.1%. The value for dirus on human blood was 80.1. Note that cracens (related to dirus) was 87.3 -->
+          <femaleEggsLaidByOviposit value="43"/>
+          <!-- "43" Salazar, 1989 The malaria situation in The Philippines: a critique (State of the art Malaria) based on Catangui 1985 Bionomics of malaria vectors in The Philippines -->
+          <!-- minimum of product of femaleEggsLaidByOviposit and  developmentSurvival = 33 !!!-->
+        </simpleMPD>
+        <nonHumanHosts name="unprotectedAnimals">
+          <mosqRelativeEntoAvailability value="1.0"/>
+          <!-- Standard value -->
+          <mosqProbBiting value="0.95"/>
+          <!-- Standard value -->
+          <mosqProbFindRestSite value="0.95"/>
+          <!-- Standard value -->
+          <mosqProbResting value="0.99"/>
+          <!-- Standard value -->
+        </nonHumanHosts>
+      </anopheles>
+      <nonHumanHosts name="unprotectedAnimals" number="1.0"/>
+    </vector>
+  </entomology>
+  <diagnostics>
+    <diagnostic name="standard">
+      <deterministic minDensity="40"/>
+    </diagnostic>
+    <!-- Some stochastic models of diagnostics, parameterised with the help of Allan Shapira: -->
+    <diagnostic name="microscopy" units="Other">
+      <stochastic dens_50="20" specificity="0.75"/>
+    </diagnostic>
+    <diagnostic name="RDT" units="Other">
+      <stochastic dens_50="50" specificity="0.942"/>
+    </diagnostic>
+  </diagnostics>
+  <model>
+    <ModelOptions>
+      <option name="LOGNORMAL_MASS_ACTION" value="true"/>
+      <option name="VECTOR_SIMPLE_MPD_MODEL" value="true"/>
+      <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
+      <option name="PROPHYLACTIC_DRUG_ACTION_MODEL" value="false"/>
+      <option name="INNATE_MAX_DENS" value="false"/>
+      <option name="INDIRECT_MORTALITY_FIX" value="false"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="6">
+    </clinical>
+    <human>
+      <availabilityToMosquitoes>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="20.0" value="1.0"/>
+      </availabilityToMosquitoes>
+    </human>
+    <parameters interval="5" iseed="11" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="0.050736"/>
+      <parameter include="false" name="Estar" number="2" value="0.03247"/>
+      <parameter include="false" name="Simm" number="3" value="0.138161050830301"/>
+      <parameter include="false" name="Xstar_p" number="4" value="1514.385853233699891"/>
+      <parameter include="false" name="gamma_p" number="5" value="2.03692533424484"/>
+      <parameter include="false" name="sigma2i" number="6" value="10.173598698525799"/>
+      <parameter include="false" name="CumulativeYstar" number="7" value="35158523.31132510304451"/>
+      <parameter include="false" name="CumulativeHstar" number="8" value="97.334652723897705"/>
+      <parameter include="false" name="'-ln(1-alpha_m)'" number="9" value="2.33031045876193"/>
+      <parameter include="false" name="decay_m" number="10" value="2.53106547375805"/>
+      <parameter include="false" name="sigma2_0" number="11" value="0.655747311168152"/>
+      <parameter include="false" name="Xstar_v" number="12" value="0.916181104713054"/>
+      <parameter include="false" name="Ystar2" number="13" value="6502.26335600001039"/>
+      <parameter include="false" name="alpha" number="14" value="142601.912520000012591"/>
+      <parameter include="false" name="Density bias (non Garki)" number="15" value="0.177378570987455"/>
+      <parameter include="false" name="        sigma2        " number="16" value="0.05"/>
+      <parameter include="false" name="log oddsr CF community" number="17" value="0.736202"/>
+      <parameter include="false" name="Indirect risk cofactor" number="18" value="0.018777338"/>
+      <parameter include="false" name="Non-malaria infant mortality" number="19" value="49.539046599999999"/>
+      <parameter include="false" name="Density bias (Garki)" number="20" value="4.79610772546704"/>
+      <parameter include="false" name="Severe Malaria Threshhold" number="21" value="784455.599999999976717"/>
+      <parameter include="false" name="Immunity Penalty" number="22" value="1"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="0"/>
+      <parameter include="false" name="comorbidity intercept" number="24" value="0.0968"/>
+      <parameter include="false" name="Ystar half life" number="25" value="0.275437402"/>
+      <parameter include="false" name="Ystar1" number="26" value="0.596539864"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="0"/>
+      <parameter include="false" name="Ystar0" number="28" value="296.302437899999973"/>
+      <parameter include="false" name="Idete multiplier" number="29" value="2.797523626"/>
+      <parameter include="false" name="critical age for comorbidity" number="30" value="0.117383"/>
+    </parameters>
+  </model>
+</om:scenario>

@@ -140,7 +140,7 @@ SimTime sampleReleaseDelay(){
         throw util::xml_scenario_error( "<vivax><hypnozoiteRelease>  [random delay calculation causes probably an indefinite loop]:\n The hypnozoite release distribution seems off, sigma of secondRelease could be too high. We except the hypnozoite to reside a maximum of 16 months in the liver stage. Sigma choose well, dear padawan." );
     }
     assert( delay >= 0 && delay < liverStageMaximumDays );
-    return sim::roundToTSFromDays( delay + latentRelapseDays );
+    return SimTime::roundToTSFromDays( delay + latentRelapseDays );
 }
 
 
@@ -155,11 +155,12 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     set<SimTime> releases;     // used to initialise releaseDates; a set is better to use now but a vector later
     
     // primary blood stage plus hypnozoites (relapses)
-    releases.insert( sim::ts0() + latentP );
+    releases.insert( sim::nowOrTs0() + latentP );
     int numberHypnozoites = sampleNHypnozoites();
     for( int i = 0; i < numberHypnozoites; ){
+        //TODO: why do we have two latent periods (latentP + latentReleaseDays added in sampleReleaseDelay())?
         SimTime randomReleaseDelay = sampleReleaseDelay();
-        SimTime timeToRelease = sim::ts0() + latentP + randomReleaseDelay;
+        SimTime timeToRelease = sim::nowOrTs0() + latentP + randomReleaseDelay;
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
         // else: sample clash with an existing release date, so resample
@@ -241,7 +242,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         result.newBS = true;
         
         double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
-        bloodStageClearDate = sim::ts0() + sim::roundToTSFromDays( lengthDays );
+        bloodStageClearDate = sim::ts0() + SimTime::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
     }
@@ -254,7 +255,7 @@ void VivaxBrood::treatmentBS(){
     // Blood stage treatment: clear both asexual and sexual parasites from the
     // blood. NOTE: we assume infections removed via treatment do not leave
     // protective immunity since the patient was unable to self-clear.
-    bloodStageClearDate = sim::never();
+    bloodStageClearDate = SimTime::never();
 }
 
 void VivaxBrood::treatmentLS(){
@@ -281,14 +282,15 @@ WHVivax::WHVivax( double comorbidityFactor ) :
     pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() ),
     pSevere( 0.0 )
 {
-    if( comorbidityFactor != 1.0 )
+    if( comorbidityFactor != 1.0 ){
+        throw TRACED_EXCEPTION_DEFAULT( "This vivax model cannot be used with comorbidity heterogeneity" );
+    }
 #ifdef WHVivaxSamples
     if( sampleHost == 0 ){
         sampleHost = this;
         cout << "New host" << endl;
     }
 #endif
-        throw TRACED_EXCEPTION_DEFAULT( "This vivax model cannot be used with comorbidity heterogeneity" );
     noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
 }
 
@@ -303,7 +305,6 @@ WHVivax::~WHVivax(){
 
 double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
-    assert( sumX == 0 );
     for(list<VivaxBrood>::const_iterator inf = infections.begin();
          inf != infections.end(); ++inf)
     {
@@ -371,7 +372,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             // Sample for each new blood stage infection: the chance of some
             // clinical event.
             
-            bool clinicalEvent;
+            bool clinicalEvent = false;
             if( result.newPrimaryBS ){
                 // Blood stage is primary. oldCumInf wasn't updated yet.
                 double pPrimaryInfEvent = pPrimaryA * pPrimaryB / (pPrimaryB+oldCumInf);
@@ -407,6 +408,8 @@ void WHVivax::update(int nNewInfs, vector<double>&,
         if( result.isFinished ) inf = infections.erase( inf );
         else ++inf;
     }
+    
+    //TODO were pEvent and pFirstRelapseEvent meant to get updated?
     
     //NOTE: currently we don't model co-infection or indirect deaths
     if( morbidity == Pathogenesis::NONE ){
@@ -464,7 +467,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
     // update instead of now)
     
     // liver-stage treatment is only via "LiverStageDrug" option, if at all
-    if( timeLiver != sim::zero() ){
+    if( timeLiver != SimTime::zero() ){
         if( pReceivePQ > 0.0 ){
             // This is only really disallowed to prevent simultaneous treatment through both methods
             throw util::xml_scenario_error("simple treatment for vivax liver "
@@ -472,7 +475,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
             "(liverStageDrug) option; it is suggested to use the former over the latter");
         }
         if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || random::bernoulli(effectivenessPQ)) ){
-            if( timeLiver >= sim::zero() ){
+            if( timeLiver >= SimTime::zero() ){
                 treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
             }else{
                 for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
@@ -484,8 +487,8 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
     }
     
     // there probably will be blood-stage treatment
-    if( timeBlood != sim::zero() ){
-        if( timeBlood < sim::zero() ){
+    if( timeBlood != SimTime::zero() ){
+        if( timeBlood < SimTime::zero() ){
             // legacy mode: retroactive clearance
             for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentBS();
@@ -567,8 +570,8 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
                 "although secondRelease element is present, will only calculate for a first release." << endl;
         }
         assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
-    }
-    bloodStageProtectionLatency = sim::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
+    } // else pSecondRelease is NaN and other values don't get used
+    bloodStageProtectionLatency = SimTime::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
     bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
     

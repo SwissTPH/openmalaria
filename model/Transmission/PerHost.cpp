@@ -44,9 +44,9 @@ PerHost::PerHost () :
         _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
 }
-void PerHost::initialise (TransmissionModel& tm, double availabilityFactor) {
+void PerHost::initialise (double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
-    VectorModel* vTM = dynamic_cast<VectorModel*> (&tm);
+    VectorModel* vTM = dynamic_cast<VectorModel*> (&sim::transmission());
     if (vTM != 0) {
         species.resize (vTM->numSpecies);
         for(size_t i = 0; i < vTM->numSpecies; ++i)
@@ -76,7 +76,7 @@ void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
 
 
 // Note: in the case an intervention is not present, we can use the approximation
-// of Weibull decay over the time span now - sim::never()
+// of Weibull decay over the time span now - SimTime::never()
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.

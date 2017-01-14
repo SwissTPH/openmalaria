@@ -34,7 +34,6 @@
 #include <boost/shared_ptr.hpp>
 
 namespace OM {
-    class Population;
 namespace Transmission {
 namespace Anopheles {
     using std::numeric_limits;
@@ -54,7 +53,21 @@ namespace Anopheles {
  *
  * Variable names largely come from Nakul Chitnis's paper:
  * "A mathematical model for the dynamics of malaria in mosquitoes feeding on
- * a heterogeneous host population" (3rd Oct. 2007). */
+ * a heterogeneous host population" (3rd Oct. 2007).
+ * 
+ * Some terminology extensions (not in paper):
+ * 
+ * $\nu_A$ / ν_A / leaveRate = sum_i=1^n α_i N_i + μ_vA
+ * $\alpha_d$ / α_d / availDivisor = P_Ai / (α_i N_i) = (1 - P_A) / ν_A
+ * $\sigma_{df}$ / σ_f / sigma_f = sum_i α_i N_i P_Bi
+ * $\sigma_{df}$ / σ_df / sigma_df = sum_i α_i N_i P_Bi P_Ci P_Di
+ * $\sigma_{dif}$ / σ_dif / sigma_dif = sum_i α_i N_i P_Bi P_Ci P_Di K_vi
+ * 
+ * Thus:
+ * 
+ * P_df = σ_df α_d P_E
+ * P_dif = σ_dif α_d P_E
+ */
 class AnophelesModel
 {
 public:
@@ -63,7 +76,9 @@ public:
     AnophelesModel () :
             mosqSeekingDuration(numeric_limits<double>::signaling_NaN()),
             mosqSeekingDeathRate(numeric_limits<double>::signaling_NaN()),
-            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN())
+            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
+            nhh_avail(numeric_limits<double>::signaling_NaN()),
+            nhh_sigma_df(numeric_limits<double>::signaling_NaN())
     {}
     
     /** Called to initialise variables instead of a constructor. At this point,
@@ -78,7 +93,7 @@ public:
      */
     string initialise (const scnXml::AnophelesParams& anoph,
                        vector<double>& initialisationEIR,
-                       map<string, double>& nonHumanHostPopulations,
+//                        map<string, double>& nonHumanHostPopulations,
                        int populationSize);
     
     /** Scale the internal EIR representation by factor; used as part of
@@ -90,16 +105,17 @@ public:
     /** Initialisation which must wait until a human population is available.
      * This is only called when a checkpoint is not loaded.
      *
-     * @param sIndex Index in VectorModel::species of this class.
-     * @param population The human population
+     * @param nHumans Human population size
      * @param meanPopAvail The mean availability of age-based relative
      * availability of humans to mosquitoes across populations.
+     * @param sum_avail sum_i α_i * N_i for human hosts i
+     * @param sigma_f sum_i α_i * N_i * P_Bi for human hosts i
+     * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void init2 (size_t sIndex,
-                   const OM::Population& population,
-                   double meanPopAvail);
+    void init2 (int nHumans, double meanPopAvail,
+        double sum_avail, double sigma_f, double sigma_df);
     
     /** Set up the non-host-specific interventions. */
     void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
@@ -126,32 +142,15 @@ public:
     //@{
     /** Called per time-step. Does most of calculation of EIR.
      *
-     * @param population The human population; so we can sum up availability and
-     *  infectiousness.
-     * @param popProbTransmission A two-dimensional vector of the probability
-     *  of transmission to mosquito for each human host (first index, in same
-     *  order as population) and for each parasite genotype (second index).
-     *  This is simply a cache, since calling probTransmissionToMosquito() is
-     *  expensive.
-     * @param sIndex Index of the type of mosquito in per-type/species lists.
+     * @param sum_avail sum_i α_i * N_i for human hosts i
+     * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
+     * @param sigma_dif sum_i α_i * N_i * P_Bi * P_Ci * P_Di * Kvi for human hosts i; this vector is modified!
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod( const OM::Population& population,
-                        vector2D<double>& popProbTransmission,
-                        size_t sIndex, bool isDynamic );
+    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, bool isDynamic);
 
-    /** Returns the EIR calculated by advancePeriod().
-     *
-     * Could be extended to allow input EIR driven initialisation on a per-species
-     * level instead of the whole simulation, but that doesn't appear worth doing.
-     *
-     * @param sIndex Index of this in VectorModel::species
-     * @param host PerHost of the human requesting this EIR.
-     * @param EIR Vector of EIR per genotype; function adds to this to
-     *  eventually yield the EIR per genotype summed across species.
-     */
-    void calculateEIR (size_t sIndex, Transmission::PerHost& host,
-            vector<double>& EIR );
+    /// Intermediatary from vector model equations used to calculate EIR
+    inline vector<double>& getPartialEIR() { return partialEIR; }
     //@}
 
 
@@ -227,7 +226,7 @@ private:
      */
     void initAvailability(
         const scnXml::AnophelesParams& anoph,
-        map<string, double>& nonHumanHostPopulations,
+//         map<string, double>& nonHumanHostPopulations,
         int populationSize);
 
     /** Calculates the human ento availability
@@ -288,14 +287,11 @@ private:
      * an alternative. */
     double probMosqSurvivalOvipositing;
 
-    struct NHHParams {
-        // N_i * α_i: rate at which mosquitoes encouter hosts of this type
-        double entoAvailability;
-        // α_i * P_B_i * P_C_i * P_D_i
-        double probCompleteCycle;
-    };
-    /** Non-human host data. Doesn't need checkpointing. */
-    vector<NHHParams> nonHumans;
+    // sum_i N_i * α_i for i in NHH types: total availability of non-human hosts
+    double nhh_avail;
+    // sum_i N_i * α_i * P_B_i * P_C_i * P_D_i for i in NHH types: chance feeding
+    // and surviving a complete cycle across all non-human hosts
+    double nhh_sigma_df;
     //@}
     
     struct TrapParams {

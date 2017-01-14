@@ -2,8 +2,8 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_36"
-           xmlns:om="http://openmalaria.org/schema/scenario_36"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_37"
+           xmlns:om="http://openmalaria.org/schema/scenario_37"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="demography.xsd"/>
   <xs:include schemaLocation="monitoring.xsd"/>
@@ -109,7 +109,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:element>
               <xs:element name="clinical" type="om:Clinical" />
               <xs:element name="human" type="om:Human"/>
-              <xs:element name="vivax" type="om:Vivax" minOccurs="0"/>
+              <xs:element name="vivax" type="om:Vivax" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    This describes Vivax model parameters, and is required when using the
+                    VIVAX_SIMPLE_MODEL model option.
+                  </xs:documentation>
+                  <xs:appinfo>name:Vivax model parameters;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
               <xs:element name="parameters" type="om:Parameters">
                 <xs:annotation>
                   <xs:documentation>
@@ -266,10 +274,43 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   </xs:complexType>
   <xs:complexType name="Vivax">
     <xs:all>
-      <xs:element name="probBloodStageInfectiousToMosq" type="om:DoubleValue"/>
-      <xs:element name="hypnozoiteRelease" type="om:HypnozoiteRelease"/>
-      <xs:element name="bloodStageProtectionLatency" type="om:DoubleValue"/>
+      <xs:element name="probBloodStageInfectiousToMosq" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            The chance of a feeding mosquito becoming infected, given that the
+            host is patent. (This may be adjusted by transmission-blocking vaccines.)
+          </xs:documentation>
+          <xs:appinfo>name:Probability of mosquito infection;units:None;min:0;max:1;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="hypnozoiteRelease" type="om:HypnozoiteRelease">
+        <xs:annotation>
+          <xs:documentation>
+            Describes the number and times of hypnozoite releases.
+          </xs:documentation>
+          <xs:appinfo>name:Hypnozoite releases;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="bloodStageProtectionLatency" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            The length of time after expiry of a blood-stage infection during
+            which relapses from the same brood are supressed by the immune
+            system.
+            
+            This is rounded to the nearest time-step.
+          </xs:documentation>
+          <xs:appinfo>name:Blood stage protection latency;min:0;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
       <xs:element name="bloodStageLengthDays">
+        <xs:annotation>
+          <xs:documentation>
+            Parameters used to sample the length of blood-stage infections from
+            a Weibull distribution (scale parameter lambda, shape parameter k).
+          </xs:documentation>
+          <xs:appinfo>name:Blood stage length;units:Days;</xs:appinfo>
+        </xs:annotation>
         <xs:complexType>
           <xs:attribute type="xs:double" use="required" name="weibullScale"/>
           <xs:attribute type="xs:double" use="required" name="weibullShape"/>

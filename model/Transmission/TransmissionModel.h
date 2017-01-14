@@ -30,7 +30,6 @@
 
 namespace OM {
     class Summary;
-    class Population;
 namespace Host{ class Human; }
 namespace Transmission {
     class PerHost;
@@ -88,7 +87,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2( const Population& population ) =0;
+  virtual void init2() =0;
   
   /** Set up vector population interventions. */
   virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list,
@@ -145,12 +144,12 @@ public:
   /** Needs to be called each step of the simulation before Human::update().
    *
    * when the vector model is used this updates mosquito populations. */
-  virtual void vectorUpdate (const Population& population) {};
+  virtual void vectorUpdate () {};
   /** Needs to be called each time-step after Human::update().
    * 
    * Updates summary statistics related to transmission as well as the
    * the non-vector model (when in use). */
-  virtual void update (const Population& population) =0;
+  virtual void update () =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
@@ -222,7 +221,7 @@ protected:
   /** Needs to be called each time-step after Human::update() to update summary
    * statististics related to transmission. Also returns kappa (the average
    * human infectiousness weighted by availability to mosquitoes). */
-  double updateKappa (const Population& population);
+  double updateKappa ();
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);

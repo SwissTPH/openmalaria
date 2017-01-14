@@ -133,6 +133,8 @@ struct vector2D {
 	typedef typename vec_t::allocator_type alloc_t;
 	typedef typename vec_t::reference ref_t;
 	typedef typename vec_t::const_reference const_ref_t;
+	typedef typename vec_t::iterator iter_t;
+	typedef typename vec_t::const_iterator const_iter_t;
     
     vector2D() : v() {}
     explicit vector2D(const alloc_t& a) : stride(0), v(a) {}
@@ -160,6 +162,18 @@ struct vector2D {
     
     inline const_ref_t at(size_t n1, size_t n2) const{
         return v[n1 * stride + n2];
+    }
+    
+    /// Get the sequence of elements at n1 as an iterator pair
+    inline std::pair<iter_t, iter_t> range_at1(size_t n1) {
+        assert((n1+1) * stride <= v.size());
+        return std::make_pair( v.begin() + n1 * stride, v.begin() + (n1 + 1) * stride );
+    }
+    
+    /// Get the sequence of elements at n1 as an iterator pair
+    inline std::pair<const_iter_t, const_iter_t> range_at1(size_t n1) const{
+        assert((n1+1) * stride <= v.size());
+        return std::make_pair( v.cbegin() + n1 * stride, v.cbegin() + (n1 + 1) * stride );
     }
     
     inline vec_t& internal_vec(){ return v; }

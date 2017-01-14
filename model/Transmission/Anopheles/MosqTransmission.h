@@ -104,7 +104,7 @@ public:
     }
     /// Get mean emergence per day during last time-step
     inline double getLastN_v0 () const{
-        return timeStep_N_v0 / sim::oneTS().inDays();
+        return timeStep_N_v0 / SimTime::oneTS().inDays();
     }
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
@@ -203,7 +203,7 @@ private:
      *
      * Values at index ((d-1) mod N_v_length) are used to derive the state of
      * the population on day d. The state during days (t×I+1) through to ((t+1)×I)
-     * where t is sim::ts0() and I is sim::oneTS().inDays() is what
+     * where t is sim::ts0() and I is SimTime::oneTS().inDays() is what
      * drives the transmission at time-step t.
      * 
      * These arrays should be checkpointed. */

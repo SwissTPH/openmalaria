@@ -40,7 +40,7 @@ using namespace OM::util;
 string AnophelesModel::initialise (
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
-    map<string, double>& nonHumanHostPopulations,
+//     map<string, double>& nonHumanHostPopulations,
     int populationSize
 )
 {
@@ -55,7 +55,7 @@ string AnophelesModel::initialise (
     transmission.initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq() );
     
     // Uses anoph.getNonHumanHosts() and anoph.getMosq():
-    initAvailability( anoph, nonHumanHostPopulations, populationSize );
+    initAvailability( anoph, /*nonHumanHostPopulations,*/ populationSize );
     
     // Uses anoph.getSeasonality() and three attributes:
     transmission.emergence->initEIR( anoph, initialisationEIR, transmission.getEIPDuration() );
@@ -66,7 +66,7 @@ string AnophelesModel::initialise (
 
 void AnophelesModel::initAvailability(
     const scnXml::AnophelesParams& anoph,
-    map<string, double>& nonHumanHostPopulations,
+//     map<string, double>& nonHumanHostPopulations,
     int populationSize)
 {
     // Set parameters. Notation is as in: Parameter Values for Transmission
@@ -74,9 +74,11 @@ void AnophelesModel::initAvailability(
     
     const scnXml::Mosq& mosq = anoph.getMosq();
     // A: Host seeking
-    // Proportion of mosquitoes host seeking on same day as ovipositing:
+    // Proportion of host-seeking parous mosquitoes (those who have laid eggs)
+    // which laid eggs that day:
     const double A0 = mosq.getMosqLaidEggsSameDayProportion().getValue();
-    // Probability that the mosquito survives the feeding cycle:
+    // Probability that the mosquito survives the feeding cycle.
+    // Note: Pf = M, the parous rate (prop mosqs which have laid eggs):
     const double Pf = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
     const double humanBloodIndex = mosq.getMosqHumanBloodIndex().getValue();    // χ (chi)
     // Cycle probabilities, when biting a human:
@@ -91,16 +93,17 @@ void AnophelesModel::initAvailability(
     
     
     // -----  Calculate P_A, P_A1, P_A_n  -----
-    // Probability that a mosquito does not find a host and does not die in
-    // one night of searching (P_A)
+    // P_A is prob that a mosq is still host seeking after 1 day. It is also the
+    // proportion of parous mosquitoes who have waited at least 1 day since
+    // laying, thus 1 - P_A = A0.
     const double initP_A  = 1.0 - A0;
-    // This times the probability of encountering this type of host on a given
-    // night divided by the number of that type of host is the availability of
-    // this type of host.
+    // This is multiplied by the probability of encountering some type of host
+    // on a given night is the total availability of this type of host (N_i * α_i).
+    // Note: P_Ai = α_i * N_i / availFactor
     const double  availFactor = -log(initP_A) / (mosqSeekingDuration * (1.0 - initP_A));
     // Probability that a mosquito encounters a human on a given night
     double P_A1 = numeric_limits<double>::quiet_NaN();
-    // Probability that a mosquito encounters a non human host on a given night
+    // Probability that a mosquito encounters any non human host on a given night
     // (confusingly labelled P_Ah in paper)
     double P_Ah = numeric_limits<double>::quiet_NaN();
 
@@ -121,7 +124,7 @@ void AnophelesModel::initAvailability(
         double sum_uvw = 0.0;   // sum u*(v+w) across NNHs where w = (1-χ)*P_D*P_E
         
         foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
-            // availability of host relative to other non-human hosts:
+            // availability population of hosts of this type relative to other non-human hosts:
             const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
             // cycle probabilities, when biting this type of host:
             const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
@@ -151,33 +154,34 @@ void AnophelesModel::initAvailability(
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
     humanBase.setEntoAvailability( (P_A1 / populationSize) * availFactor );
     
-    nonHumans.reserve(xmlSeqNNHs.size());
+    nhh_avail = 0.0;
+    nhh_sigma_df = 0.0;
     foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
-        map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
-        if (pop == nonHumanHostPopulations.end()){
-            throw xml_scenario_error ((boost::format("There is no population size defined for "
-            "non-human host type \"%1%\"") %xmlNNH.getName()).str());
-        }
+//         map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
+//         if (pop == nonHumanHostPopulations.end()){
+//             throw xml_scenario_error ((boost::format("There is no population size defined for "
+//             "non-human host type \"%1%\"") %xmlNNH.getName()).str());
+//         }
         
         // population size for non-human host category:
-        const double N_i = pop->second;
+//         const double N_i = pop->second;
         // per-NNH parameters, as above:
         const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
         const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
         const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
         const double P_D_i = xmlNNH.getMosqProbResting().getValue();
         const double P_Ahi = P_Ah * xi_i;       // probability of encountering this type of NNH on a given night
-        const double alpha_i = (P_Ahi / N_i) * availFactor;
+        const double avail_i = P_Ahi * availFactor; // N_i * α_i
         
-        NHHParams params;
-        params.entoAvailability = N_i * alpha_i;
-        params.probCompleteCycle = alpha_i * P_B_i * P_C_i * P_D_i;
-        nonHumans.push_back(params);
+        nhh_avail += avail_i;    // N * α
+        nhh_sigma_df += avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
+        // Note: we would do the same for P_dif except that it's multiplied by
+        // infectiousness of host to mosquito which is zero.
     }
     
     // ———  set mosqSeekingDeathRate  ———
-    // since sum_i(ξ_i)=1, sum_k(P_A_k)=P_A1+P_Ah
-    const double mu1 = (1.0-initP_A-P_A1-P_Ah) / (1.-initP_A);
+    // Note: sum_k( P_Ak ) = P_A1 + P_Ah
+    const double mu1 = (1.0 - (initP_A + P_A1 + P_Ah)) / (1.0 - initP_A);
     const double mu2 = -log(initP_A) / mosqSeekingDuration;
     mosqSeekingDeathRate = mu1 * mu2;
 }
@@ -185,51 +189,30 @@ void AnophelesModel::initAvailability(
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void AnophelesModel::init2 (size_t sIndex, const OM::Population& population, double meanPopAvail)
+void AnophelesModel::init2 (int nHumans, double meanPopAvail,
+        double sum_avail, double sigma_f, double sigma_df)
 {
     // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
     
-    // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
-    double leaveSeekingStateRate = mosqSeekingDeathRate;
-
-    // Input per-species EIR is the mean EIR experienced by a human adult.
-    // We use sumPFindBite below to get required S_v.
-    // Let sumPFindBite be sum_{i in population} (P_Ai * P_B_i):
-    double sumPFindBite = 0.0;
-
-    // NC's non-autonomous model provides two methods for calculating P_df and
-    // P_dif; here we assume that P_E is constant.
-    double initialP_df = 0.0;
-
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h) {
-        const OM::Transmission::PerHost& host = h->perHostTransmission;
-        double prod = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::now()).inYears());
-        leaveSeekingStateRate += prod;
-        prod *= host.probMosqBiting(humanBase, sIndex);
-        sumPFindBite += prod;
-        initialP_df += prod * host.probMosqResting(humanBase, sIndex);
-    }
-
-    foreach( const NHHParams& nhh, nonHumans ){
-        leaveSeekingStateRate += nhh.entoAvailability;
-        initialP_df += nhh.probCompleteCycle;
-        // Note: in model, we do the same for tsP_dif, except in this case it's
-        // multiplied by infectiousness of host to mosquito which is zero.
-    }
+    // ν_A: rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
+    double leaveRate = sum_avail + nhh_avail + mosqSeekingDeathRate;
+    sigma_df += nhh_sigma_df;
     
     // Probability of a mosquito not finding a host this day:
-    double initialP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - initialP_A) / leaveSeekingStateRate;
-    sumPFindBite *= P_Ai_base;
-    initialP_df  *= P_Ai_base * probMosqSurvivalOvipositing;
-    
+    double initialP_A = exp(-leaveRate * mosqSeekingDuration);
+    double availDivisor = (1.0 - initialP_A) / leaveRate;   // α_d
+    // Input per-species EIR is the mean EIR experienced by a human adult.
+    // We use sumPFindBite below to get required S_v.
+    double sumPFindBite = sigma_f * availDivisor;
+    double initialP_df  = sigma_df * availDivisor * probMosqSurvivalOvipositing;
     
     // -----  Calculate required S_v based on desired EIR  -----
-    // Last parameter is a multiplication factor for S_v/EIR. First we multiply
+    // Third parameter is a multiplication factor for S_v/EIR. First we multiply
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
-    transmission.emergence->init2( initialP_A, initialP_df, population.size() * meanPopAvail / sumPFindBite, transmission );
+    transmission.emergence->init2( initialP_A, initialP_df,
+            nHumans * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
 }
@@ -282,11 +265,10 @@ void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime li
     baitedTraps.push_back(data);
 }
 
-// Every sim::oneTS() days:
-void AnophelesModel::advancePeriod (const OM::Population& population,
-                                     vector2D<double>& popProbTransmission,
-                                     size_t sIndex,
-                                     bool isDynamic) {
+// Every SimTime::oneTS() days:
+void AnophelesModel::advancePeriod (
+        double sum_avail, double sigma_df, vector<double>& sigma_dif, bool isDynamic)
+{
     transmission.emergence->update();
     
     /* Largely equations correspond to Nakul Chitnis's model in
@@ -304,16 +286,16 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
 
       P_Ai[t] = (1 - P_A[t]) α_i[t] / sum_{h in hosts} α_h[t]
     (letting N_h[t] == 1 for all h,t). The only part of this varying per-host is
-      α_i[t] = host.entoAvailability (index, h->getAgeInYears())
-      Let P_Ai_base[t] = (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA).
+      α_i[t] = host.entoAvailability (index, human.getAgeInYears())
+      Let availDivisor[t] = (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA).
 
     Note that although the model allows α_i and P_B_i to vary per-day, they only
     vary per time step of the main simulation. Hence:
-      EIR = (sum_{t=...} S_v[t] * P_Ai_base[t]) * α_i * P_B_i
+      EIR = (sum_{t=...} S_v[t] * availDivisor[t]) * α_i * P_B_i
 
-    Since S_v[t] * P_Ai_base[t] does not vary per individual, we calculate this
+    Since S_v[t] * availDivisor[t] does not vary per individual, we calculate this
     per time step of the main simulation as partialEIR:
-      partialEIR = (sum_{t=...} S_v[t] * P_Ai_base[t])
+      partialEIR = (sum_{t=...} S_v[t] * availDivisor[t])
 
     Hence calculateEIR() only needs to do the following:
       EIR = partialEIR * α_i * P_B_i
@@ -322,39 +304,15 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
 
     // -----  Calculate P_A, P_Ai, P_df, P_dif based on human pop  -----
     
-    // rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
-    double leaveSeekingStateRate = mosqSeekingDeathRate;
+    // ν_A: rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
+    double leaveRate = mosqSeekingDeathRate;
     foreach( const util::SimpleDecayingValue& increase, seekingDeathRateIntervs ){
-        leaveSeekingStateRate *= 1.0 + increase.current_value( sim::ts0() );
+        leaveRate *= 1.0 + increase.current_value( sim::ts0() );
     }
-
-    // NC's non-autonomous model provides two methods for calculating P_df and
-    // P_dif; here we assume that P_E is constant.
-    double tsP_df = 0.0;
-    vector<double> tsP_dif( WithinHost::Genotypes::N(), 0.0 );
-    size_t i = 0;
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i) {
-        const OM::Transmission::PerHost& host = h->perHostTransmission;
-        //NOTE: calculate availability relative to age at end of time step;
-        // not my preference but consistent with TransmissionModel::getEIR().
-        //TODO: even stranger since popProbTransmission comes from the previous time step
-        const double avail = host.entoAvailabilityFull (humanBase, sIndex, h->age(sim::ts1()).inYears());
-        leaveSeekingStateRate += avail;
-        const double P_df = avail
-                * host.probMosqBiting(humanBase, sIndex)
-                * host.probMosqResting(humanBase, sIndex);
-        tsP_df += P_df;
-        for( size_t genotype = 0; genotype < WithinHost::Genotypes::N(); ++genotype ){
-            tsP_dif[genotype] += P_df * popProbTransmission.at(i, genotype);
-        }
-    }
+    leaveRate += sum_avail;
     
-    foreach( const NHHParams& nhh, nonHumans ){
-        leaveSeekingStateRate += nhh.entoAvailability;
-        tsP_df += nhh.probCompleteCycle;
-        // Note: in model, we do the same for tsP_dif, except in this case it's
-        // multiplied by infectiousness of host to mosquito which is zero.
-    }
+    leaveRate += nhh_avail;
+    sigma_df += nhh_sigma_df;
     
     for( list<TrapData>::iterator it = baitedTraps.begin(); it != baitedTraps.end(); ){
         if( sim::ts0() > it->expiry ){
@@ -363,21 +321,23 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
         }
         SimTime age = sim::ts0() - it->deployTime;
         double decayCoeff = trapParams[it->instance].availDecay->eval( age, it->availHet );
-        leaveSeekingStateRate += it->initialAvail * decayCoeff;
-        // tsP_df doesn't change: mosquitoes do not survive traps
+        leaveRate += it->initialAvail * decayCoeff;
+        // sigma_df doesn't change: mosquitoes do not survive traps
         it++;
     }
     
     // Probability of a mosquito not finding a host this day:
-    double tsP_A = exp(-leaveSeekingStateRate * mosqSeekingDuration);
-    double P_Ai_base = (1.0 - tsP_A) / leaveSeekingStateRate;
-
-    double baseP_df = P_Ai_base * probMosqSurvivalOvipositing;
+    double tsP_A = exp(-leaveRate * mosqSeekingDuration);
+    double availDivisor = (1.0 - tsP_A) / leaveRate;    // α_d
+    
+    // alphaE (α_E) is α_d * P_E, where P_E may be adjusted by interventions
+    double alphaE = availDivisor * probMosqSurvivalOvipositing;
     foreach( const util::SimpleDecayingValue& pDeath, probDeathOvipositingIntervs ){
-        baseP_df *= 1.0 - pDeath.current_value( sim::ts0() );
+        alphaE *= 1.0 - pDeath.current_value( sim::ts0() );
     }
-    tsP_df  *= baseP_df;
-    vectors::scale( tsP_dif, baseP_df );
+    double tsP_df  = sigma_df * alphaE;
+    // from now, sigma_dif becomes P_dif (but we can't simply rename):
+    vectors::scale( sigma_dif, alphaE );
     
     
     // Summed per day:
@@ -387,29 +347,9 @@ void AnophelesModel::advancePeriod (const OM::Population& population,
     
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
-    const SimTime nextTS = sim::ts0() + sim::oneTS();
-    for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += sim::oneDay() ){
-        transmission.update( d0, tsP_A, tsP_df, tsP_dif, isDynamic, partialEIR, P_Ai_base );
-    }
-}
-
-void AnophelesModel::calculateEIR( size_t sIndex,
-        OM::Transmission::PerHost& host, vector<double>& EIR )
-{
-#ifdef WITHOUT_BOINC
-    if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
-        cerr<<"partialEIR is not a number; "<<sIndex<<endl;
-    }
-#endif
-    /* Calculates EIR per individual (hence N_i == 1).
-     *
-     * See comment in AnophelesModel::advancePeriod for method. */
-    double entoFactor = host.entoAvailabilityHetVecItv (humanBase, sIndex)
-            * host.probMosqBiting(humanBase, sIndex);        // probability of biting, once commited
-    
-    assert( EIR.size() == partialEIR.size() );
-    for( size_t g = 0; g < EIR.size(); ++g ){
-        EIR[g] += partialEIR[g] * entoFactor;
+    const SimTime nextTS = sim::ts0() + SimTime::oneTS();
+    for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay() ){
+        transmission.update( d0, tsP_A, tsP_df, sigma_dif, isDynamic, partialEIR, availDivisor );
     }
 }
 

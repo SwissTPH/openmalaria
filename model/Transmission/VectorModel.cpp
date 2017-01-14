@@ -37,19 +37,6 @@ namespace OM {
 namespace Transmission {
 using namespace OM::util;
 
-double VectorModel::meanPopAvail (const Population& population) {
-    double sumRelativeAvailability = 0.0;
-    for(Population::ConstIter h = population.cbegin(); h != population.cend(); ++h){
-        sumRelativeAvailability += h->perHostTransmission.relativeAvailabilityAge (h->age(sim::now()).inYears());
-    }
-    if( population.size() > 0 ){
-        return sumRelativeAvailability / population.size();     // mean-rel-avail
-    }else{
-        // value should be unimportant when no humans are available, though inf/nan is not acceptable
-        return 1.0;
-    }
-}
-
 void VectorModel::ctsCbN_v0 (ostream& stream) {
     for(size_t i = 0; i < numSpecies; ++i)
         stream << '\t' << species[i].getLastN_v0();
@@ -112,7 +99,7 @@ void VectorModel::ctsNetInsecticideContent (const Population& population, ostrea
 //     double meanVar = 0.0;
 //     int n = 0;
 //     for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= SimTime::zero() ){
 //             ++n;
 //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
 //         }
@@ -170,10 +157,10 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
     const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
     const scnXml::Vector::NonHumanHostsSequence nonHumansList = vectorData.getNonHumanHosts();
 
-    map<string, double> nonHumanHostPopulations;
-
-    for(size_t i = 0; i<nonHumansList.size(); i++)
-        nonHumanHostPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
+//     map<string, double> nonHumanHostPopulations;
+//     for(size_t i = 0; i<nonHumansList.size(); i++) {
+//         nonHumanHostPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
+//     }
 
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
@@ -183,7 +170,7 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
     for(size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],
                                              initialisationEIR,
-                                             nonHumanHostPopulations,
+//                                              nonHumanHostPopulations,
                                              populationSize);
         speciesIndex[name] = i;
     }
@@ -259,10 +246,40 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
 VectorModel::~VectorModel () {
 }
 
-void VectorModel::init2 (const Population& population) {
-    double mPA = meanPopAvail(population);
+void VectorModel::init2 () {
+    SimTime data_save_len = SimTime::oneDay();  // we don't need to save anything at first
+    saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
+    saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
+    saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
+    
+    double sumRelativeAvailability = 0.0;
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
+        sumRelativeAvailability +=
+                human.perHostTransmission.relativeAvailabilityAge (human.age(sim::now()).inYears());
+    }
+    int popSize = sim::humanPop().size();
+    // value should be unimportant when no humans are available, though inf/nan is not acceptable
+    double meanPopAvail = 1.0;
+    if( popSize > 0 ){
+        meanPopAvail = sumRelativeAvailability / popSize;    // mean-rel-avail
+    }
+    
     for(size_t i = 0; i < numSpecies; ++i) {
-        species[i].init2 (i, population, mPA);
+        double sum_avail = 0.0;
+        double sigma_f = 0.0;
+        double sigma_df = 0.0;
+        
+        const Anopheles::PerHostBase& humanBase = species[i].getHumanBaseParams();
+        foreach(const Host::Human& human, sim::humanPop().crange()) {
+            const OM::Transmission::PerHost& host = human.perHostTransmission;
+            double prod = host.entoAvailabilityFull (humanBase, i, human.age(sim::now()).inYears());
+            sum_avail += prod;
+            prod *= host.probMosqBiting(humanBase, i);
+            sigma_f += prod;
+            sigma_df += prod * host.probMosqResting(humanBase, i);
+        }
+        
+        species[i].init2 (sim::humanPop().size(), meanPopAvail, sum_avail, sigma_f, sigma_df);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
@@ -325,47 +342,73 @@ void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
 
 SimTime VectorModel::minPreinitDuration () {
     if ( interventionMode == forcedEIR ) {
-        return sim::zero();
+        return SimTime::zero();
     }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return sim::fromYearsI( 55 );
+    return SimTime::fromYearsI( 55 );
 }
 SimTime VectorModel::expectedInitDuration (){
-    return sim::oneYear();
+    return SimTime::oneYear();
 }
 
 SimTime VectorModel::initIterate () {
     if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
-        return sim::zero(); // no initialization to do
+        return SimTime::zero(); // no initialization to do
     }
-    if( initIterations < 0 ){
-        assert( interventionMode = dynamicEIR );
-        simulationMode = dynamicEIR;
-        return sim::zero();
+    
+    // This function is called repeatedly until vector initialisation is
+    // complete (signalled by returning 0).
+    int initState = 0;
+    if( initIterations == 0 && saved_sum_avail.size1() == SimTime::oneDay() ) {
+        // First time called: we need to do some data collection
+        initState = 1;
+    } else if( initIterations >= 0 ){
+        // Next, while generated EIR is not close to that required,
+        // try adjusting emergence parameters, do a stabilisation phase then data collection phase, then repeat.
+        initState = 2;
+    } else if( initIterations < 0 ){
+        // Finally, we're done.
+        initState = 3;
+    }
+    
+    if( initState == 1 || initState == 3 ){
+        // When starting the iteration phase, we switch to five years worth of data; otherwise we only keep one day.
+        SimTime data_save_len = /*initState == 1 ? SimTime::fromYearsI(5) :*/ SimTime::oneDay();
+        saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
+        saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
+        saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
+        
+//         if( initState == 1 ){
+//             return SimTime::fromYearsI(5);
+//         }
+        if( initState == 3 ){
+            //TODO: we should perhaps check that EIR gets reproduced correctly?
+            simulationMode = dynamicEIR;
+            return SimTime::zero();
+        }
     }
     
     ++initIterations;
-    
-    bool needIterate = false;
-    for(size_t i = 0; i < numSpecies; ++i) {
-        needIterate = needIterate || species[i].initIterate ();
-    }
-    if( needIterate == false ){
-        initIterations = -1;
-    }
     if( initIterations > 10 ){
         throw TRACED_EXCEPTION("Transmission warmup exceeded 10 iterations!",util::Error::VectorWarmup);
     }
     
-    // Time to let parameters settle after each iteration. I would expect one year
-    // to be enough (but I may be wrong).
-    if( needIterate )
+    bool needIterate = false;
+    for(size_t i = 0; i < numSpecies; ++i) {
+        //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
+        needIterate = needIterate || species[i].initIterate ();
+    }
+    
+    if( needIterate ){
         // stabilization + 5 years data-collection time:
-        return sim::oneYear() + sim::fromYearsI(5);
-    else
-        return sim::oneYear();
+        return SimTime::oneYear() + SimTime::fromYearsI(5);
+    } else {
+        // One year stabilisation, then we're finished:
+        initIterations = -1;
+        return SimTime::oneYear();
+    }
 }
 
 double VectorModel::calculateEIR(Host::Human& human, double ageYears,
@@ -381,38 +424,93 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
     }else{
         assert( simulationMode == dynamicEIR );
         EIR.assign( WithinHost::Genotypes::N(), 0.0 );
+        const double ageFactor = host.relativeAvailabilityAge (ageYears);
         for(size_t i = 0; i < numSpecies; ++i) {
-            species[i].calculateEIR( i, host, EIR );
+            vector<double>& partialEIR = species[i].getPartialEIR();
+#ifdef WITHOUT_BOINC
+            assert( EIR.size() == partialEIR.size() );
+            if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
+                cerr<<"partialEIR is not a number; "<<i<<endl;
+            }
+#endif
+            /* Calculates EIR per individual (hence N_i == 1).
+             *
+             * See comment in AnophelesModel::advancePeriod for method. */
+            double entoFactor = ageFactor * host.availBite(species[i].getHumanBaseParams(), i);
+            for( size_t g = 0; g < EIR.size(); ++g ){
+                EIR[g] += partialEIR[g] * entoFactor;
+            }
         }
-        vectors::scale( EIR, host.relativeAvailabilityAge (ageYears) );
         return vectors::sum( EIR );
     }
 }
 
 
 // Every Global::interval days:
-void VectorModel::vectorUpdate (const Population& population) {
-    vector2D<double> popProbTransmission;
-    popProbTransmission.resize( population.size(), WithinHost::Genotypes::N() );
-    size_t i = 0;
-    for( Population::ConstIter h = population.cbegin(); h != population.cend(); ++h, ++i ){
-        const double tbvFac = h->getVaccine().getFactor( interventions::Vaccine::TBV );
-        WithinHost::WHInterface& whm = *h->withinHostModel;
-        double sumX;
+void VectorModel::vectorUpdate () {
+    const size_t nGenotypes = WithinHost::Genotypes::N();
+    SimTime popDataInd = mod_nn(sim::ts0(), saved_sum_avail.size1());
+    vector<double> probTransmission;
+    saved_sum_avail.assign_at1(popDataInd, 0.0);
+    saved_sigma_df.assign_at1(popDataInd, 0.0);
+    saved_sigma_dif.assign_at1(popDataInd, 0.0);
+    
+    vector<const Anopheles::PerHostBase*> humanBases;
+    humanBases.reserve( numSpecies );
+    for(size_t s = 0; s < numSpecies; ++s){
+        humanBases.push_back( &species[s].getHumanBaseParams() );
+    }
+    
+    size_t h = 0;
+    foreach(const Host::Human& human, sim::humanPop().crange()) {
+        const OM::Transmission::PerHost& host = human.perHostTransmission;
+        WithinHost::WHInterface& whm = *human.withinHostModel;
+        const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        
+        probTransmission.assign( nGenotypes, 0.0 );
+        double sumX = numeric_limits<double>::quiet_NaN();
         const double pTrans = whm.probTransmissionToMosquito( tbvFac, &sumX );
-        if( WithinHost::Genotypes::N() == 1 ) popProbTransmission.at(i,0) = pTrans;
-        else for( size_t g = 0; g < WithinHost::Genotypes::N(); ++g ){
+        if( nGenotypes == 1 ) probTransmission[0] = pTrans;
+        else for( size_t g = 0; g < nGenotypes; ++g ){
             const double k = whm.probTransGenotype( pTrans, sumX, g );
             assert( (boost::math::isfinite)(k) );
-            popProbTransmission.at(i,g) = k;
+            probTransmission[g] = k;
         }
+        
+        for(size_t s = 0; s < numSpecies; ++s){
+            //NOTE: calculate availability relative to age at end of time step;
+            // not my preference but consistent with TransmissionModel::getEIR().
+            //TODO: even stranger since probTransmission comes from the previous time step
+            const double avail = host.entoAvailabilityFull (*humanBases[s], s,
+                    human.age(sim::ts1()).inYears());
+            saved_sum_avail.at(popDataInd, s) += avail;
+            const double df = avail
+                    * host.probMosqBiting(*humanBases[s], s)
+                    * host.probMosqResting(*humanBases[s], s);
+            saved_sigma_df.at(popDataInd, s) += df;
+            for( size_t g = 0; g < nGenotypes; ++g ){
+                saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
+            }
+        }
+        
+        h += 1;
     }
-    for(size_t i = 0; i < numSpecies; ++i){
-        species[i].advancePeriod (population, popProbTransmission, i, simulationMode == dynamicEIR);
+    
+    vector<double> sigma_dif_species;
+    for(size_t s = 0; s < numSpecies; ++s){
+        // Copy slice to new array:
+        typedef vector<double>::const_iterator const_iter_t;
+        std::pair<const_iter_t, const_iter_t> range = saved_sigma_dif.range_at12(popDataInd, s);
+        sigma_dif_species.assign(range.first, range.second);
+        
+        species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
+                saved_sigma_df.at(popDataInd, s),
+                sigma_dif_species,
+                simulationMode == dynamicEIR);
     }
 }
-void VectorModel::update( const Population& population ) {
-    TransmissionModel::updateKappa( population );
+void VectorModel::update() {
+    TransmissionModel::updateKappa();
 }
 
 const string vec_mode_err = "vector interventions can only be used in "
@@ -458,11 +556,17 @@ void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
     species & stream;
+    saved_sum_avail & stream;
+    saved_sigma_df & stream;
+    saved_sigma_dif & stream;
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
     initIterations & stream;
     species & stream;
+    saved_sum_avail & stream;
+    saved_sigma_df & stream;
+    saved_sigma_dif & stream;
 }
 
 }

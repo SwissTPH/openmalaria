@@ -3,8 +3,8 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- Drug parameters — PK, PD and resistance -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_36"
-           xmlns:om="http://openmalaria.org/schema/scenario_36"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_37"
+           xmlns:om="http://openmalaria.org/schema/scenario_37"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="Pharmacology">
@@ -106,20 +106,33 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="PKPDDosages">
     <xs:annotation>
       <xs:documentation>
-        A table for selecting a dose size given an age.
+        A table for selecting a dose size. There are several ways this can
+        work: using the patient's age or body mass in a look-up table to get a
+        multplier, or directly using body mass as the multiplier.
         
-        Categories must uniquely cover all ages from birth, with no upper
-        bound. Categories must be listed in order of age, increasing; the first
-        must have lower bound 0. Upper bounds are equal to the lower bound of
-        the next category, (but are exclusive where lower bounds are
-        inclusive); the last category has no upper bound.
+        The doses specified in "mg" in the treatment schedule are then
+        multiplied by this multiplier.
       </xs:documentation>
       <xs:appinfo>name:Dosage table;</xs:appinfo>
     </xs:annotation>
     <xs:sequence>
       <xs:choice>
-        <xs:element name="age" type="om:PKPDDosageRange" maxOccurs="unbounded"/>
-        <xs:element name="bodymass" type="om:PKPDDosageRange" maxOccurs="unbounded"/>
+        <xs:element name="age" type="om:PKPDDosageRange" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Select dose multiplier from a look-up table using the patient's age.
+            </xs:documentation>
+            <xs:appinfo>name:Look-up table (age);</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
+        <xs:element name="bodymass" type="om:PKPDDosageRange" maxOccurs="unbounded">
+          <xs:annotation>
+            <xs:documentation>
+              Select dose multiplier from a look-up table using the patient's body mass.
+            </xs:documentation>
+            <xs:appinfo>name:Look-up table (weight);</xs:appinfo>
+          </xs:annotation>
+        </xs:element>
         <xs:element name="multiply" maxOccurs="1">
           <xs:annotation>
             <xs:documentation>
@@ -158,20 +171,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="PKPDDosageRange">
     <xs:annotation>
       <xs:documentation>
-        Gives a dose multiplier for an age or body mass range.
+        A look-up table which uses patient age (in years) or weight (in kg) to
+        find a multiplier.
       </xs:documentation>
-      <xs:appinfo>name:Age range;</xs:appinfo>
+      <xs:appinfo>name:Age/weight range;</xs:appinfo>
     </xs:annotation>
     <xs:attribute name="lowerbound" type="xs:double" use="required">
       <xs:annotation>
-        <xs:appinfo>name:Lower bound (inclusive);min:0;units:years;</xs:appinfo>
+        <xs:appinfo>name:Lower bound (inclusive);min:0;units:years or kg;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
     <xs:attribute name="dose_mult" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          The dose size given in the schedule (in mg) is multiplied by
-          this value for patients falling into this age range when this
+          The dose size given in the schedule (in "mg") is multiplied by
+          this value for patients falling into this range when this
           dosage table is used.
         </xs:documentation>
         <xs:appinfo>name:Dose multiplier;min:0;</xs:appinfo>

@@ -46,7 +46,8 @@ namespace BoincWrapper {
   bool fileExists(const char* path);
   
   /// Report the proportion of work done
-  void reportProgress (double progress);
+  /// (progress is now / duration)
+  void reportProgress (int now, int duration);
   
   /// Returns true if it's time to write a checkpoint
   int timeToCheckpoint();

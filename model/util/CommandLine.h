@@ -79,7 +79,7 @@ namespace OM { namespace util {
 	static SimTime getNextCheckpointTime( SimTime now ) {
 	    set<SimTime>::iterator it = checkpoint_times.upper_bound( now );
 	    if( it == checkpoint_times.end() )
-		return sim::never();
+		return SimTime::never();
 	    else
 		return *it;
 	}

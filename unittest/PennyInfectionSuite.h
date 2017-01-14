@@ -80,7 +80,7 @@ public:
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
             TS_ASSERT_APPROX( infection->getDensity(), cirDens[iterations] );
             TS_ASSERT_APPROX( infection->seqDensity(ageDays), seqDens[iterations] );
-            now += sim::oneDay();
+            now += SimTime::oneDay();
             iterations+=1;
         }while(!extinct);
         TS_ASSERT_EQUALS( iterations, cirDens.size() );

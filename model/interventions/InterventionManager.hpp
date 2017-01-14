@@ -42,7 +42,7 @@ class TimedDeployment;
 class InterventionManager {
 public:
     /** Read XML descriptions. */
-    static void init(const scnXml::Interventions& intervElt, OM::Population& population);
+    static void init(const scnXml::Interventions& intervElt);
     
     /// Checkpointing
     template<class S>
@@ -57,7 +57,7 @@ public:
      * 
      * Serves to replace health-system and EIR where changeHS/changeEIR
      * interventions have been used. */
-    static void loadFromCheckpoint( OM::Population& population, SimTime interventionTime );
+    static void loadFromCheckpoint( SimTime interventionTime );
     
     /** @brief Deploy interventions
      *
