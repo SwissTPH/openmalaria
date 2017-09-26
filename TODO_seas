@@ -1,0 +1,14 @@
+Initialising seasonality:
+
+1) maybe adjust input EIR by clamping to some minimum?
+2) initial human warmup
+3) record human infectiousness over 5 years from forced EIR
+4) run just the vector model using this human infectiousness; fit output
+5) switch to dynamic mode and run for 5 years; if resulting EIR is not close to required, abort
+6) run main sim
+
+Emergence: use K + exp(fourier(FC))
+Fit: start with K=0 and one coefficient
+While not close to required output, add two coefficients and try fitting all parameters
+(up to some maximum number of coefficients)
+

@@ -1,0 +1,41 @@
+Have:
+
+OM integrates vector equations per timestep
+NC's code duplicates as an independent system of equations
+
+Want Nv0 / Lambda
+
+Fit: minimise Upsilon*x + Lambda - x
+Loss function: ||S_v - S_vT ||^2
+
+
+Option 1
+----------
+
+Decouple OM's vector equations from the human pop & timestep and use to drive a
+simple fitting cycle for Nv0.
+
+Advantages: less code duplication, less complex(?)
+
+Requires: providing Kvi and αi in some form
+
+
+Option 2
+------------
+
+Decouple OM_s vector equations and use to find a root of f(x) = Upsilon x + Lambda - x
+(in matrix form or otherwise).
+
+Advantages: explicit solution
+Disadvantages: matrix form is complex and possibly slow to calculate with;
+doing so otherwise may be difficult.
+
+Requires: providing Kvi and αi in some form
+
+
+Option 3
+--------------
+
+Reuse NC's code to calculate Nv0
+
+Requires: providing Kvi and αi

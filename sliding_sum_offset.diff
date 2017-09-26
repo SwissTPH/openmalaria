@@ -1,0 +1,202 @@
+diff --git a/model/Transmission/Anopheles/EmergenceModel.cpp b/model/Transmission/Anopheles/EmergenceModel.cpp
+index 7ba53d6..44edbf1 100644
+--- a/model/Transmission/Anopheles/EmergenceModel.cpp
++++ b/model/Transmission/Anopheles/EmergenceModel.cpp
+@@ -120,12 +120,12 @@ void EmergenceModel::initEIR(
+     
+     // Now we rescale to get an EIR of targetEIR.
+     // Calculate current sum as is usually done.
+-    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
++    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle, 0.0);
+     // And scale (also acts as a unit conversion):
+     FSCoeffic[0] += log( targetEIR / vectors::sum( speciesEIR ) );
+     
+     // Calculate forced EIR for pre-intervention phase from FSCoeffic:
+-    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle);
++    vectors::expIDFT (speciesEIR, FSCoeffic, EIRRotateAngle, 0.0);
+     
+     // Add to the TransmissionModel's EIR, used for the initalization phase.
+     // Note: sum stays the same, units changes to per-time-step.
+diff --git a/model/Transmission/Anopheles/FixedEmergence.cpp b/model/Transmission/Anopheles/FixedEmergence.cpp
+index caa15a7..60fd08c 100644
+--- a/model/Transmission/Anopheles/FixedEmergence.cpp
++++ b/model/Transmission/Anopheles/FixedEmergence.cpp
+@@ -53,7 +53,8 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTr
+     // Log-values: adding log is same as exponentiating, multiplying and taking
+     // the log again.
+     FSCoeffic[0] += log( EIRtoS_v);
+-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
++    // Initially use offset 0:
++    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle, 0.0);
+     
+     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
+     
+@@ -68,6 +69,20 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTr
+ // -----  Initialisation of model which is done after running the human warmup  -----
+ 
+ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
++    //TODO: investigate doing all this iteration without human updates — apart from lack of stochasticity it should get the same result much faster
++    
++    // Check how well transmission matches during month with least transmission
++    // (Using a 1-month window is an arbitrary choice.)
++    SimTime window = sim::fromDays(30);
++    std::pair<SimTime, double> min_forced = vec::min_sliding_sum(forcedS_v, window);
++    double min_obs = vec::sliding_sum(quinquennialS_v, min_forced.first, window);
++    double factor = min_forced.second / min_obs;
++    if( min_forced > 0.0 && (factor < 0.9 || factor > 1.1) ){
++        //TODO: how to adjust offset?
++        //TODO: I don't think we can just adjust this first... or last?
++        return true;    // need another iteration
++    }
++    
+     // Try to match S_v against its predicted value. Don't try with N_v or O_v
+     // because the predictions will change - would be chasing a moving target!
+     // EIR comes directly from S_v, so should fit after we're done.
+@@ -110,7 +125,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
+     //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
+     // annualS_v was already rotated by old value of FSRotateAngle, so increment:
+     FSRotateAngle -= rAngle;
+-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
++    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle, offset);
+     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
+     mosqEmergeRate = forcedS_v;
+     vectors::scale (mosqEmergeRate, initNv0FromSv);
+diff --git a/model/Transmission/Anopheles/LCEmergence.cpp b/model/Transmission/Anopheles/LCEmergence.cpp
+index b7b76ac..699f7bd 100644
+--- a/model/Transmission/Anopheles/LCEmergence.cpp
++++ b/model/Transmission/Anopheles/LCEmergence.cpp
+@@ -66,7 +66,7 @@ void LCEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTrans
+     // Log-values: adding log is same as exponentiating, multiplying and taking
+     // the log again.
+     FSCoeffic[0] += log( EIRtoS_v);
+-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
++    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle, 0.0);
+     
+     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
+     
+diff --git a/model/Transmission/Anopheles/SimpleMPDEmergence.cpp b/model/Transmission/Anopheles/SimpleMPDEmergence.cpp
+index a2b6c3b..0f7bbc9 100644
+--- a/model/Transmission/Anopheles/SimpleMPDEmergence.cpp
++++ b/model/Transmission/Anopheles/SimpleMPDEmergence.cpp
+@@ -70,7 +70,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
+     // Log-values: adding log is same as exponentiating, multiplying and taking
+     // the log again.
+     FSCoeffic[0] += log( EIRtoS_v);
+-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
++    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle, 0.0);
+     
+     transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
+     
+@@ -138,7 +138,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
+     //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
+     // annualS_v was already rotated by old value of FSRotateAngle, so increment:
+     FSRotateAngle -= rAngle;
+-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
++    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle, 0.0 /*TODO: also use offset here (assuming it works in fixed emergence)?*/);
+     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
+     mosqEmergeRate = forcedS_v;
+     vectors::scale (mosqEmergeRate, initNv0FromSv);
+diff --git a/model/util/vecDay.h b/model/util/vecDay.h
+index 6399c8d..2dd4d5a 100644
+--- a/model/util/vecDay.h
++++ b/model/util/vecDay.h
+@@ -23,6 +23,7 @@
+ 
+ #include "Global.h"
+ #include <vector>
++#include <pair>
+ 
+ #if __cplusplus >= 201103L
+ #error "vecDay should be updated if switching to a later C++ version"
+@@ -137,9 +138,20 @@ namespace vectors{
+   /// Return sum of all elements
+   double sum (const vecDay<double>& vec);
+   
++  /// Return the sum of elements from index x to x+l-1, wrapping if necessary.
++  /// 
++  /// Required: x and l must be between 0 and vec.size().
++  double sliding_sum (const vecDay<double>& vec, size_t x, size_t l);
++  
++  /// Return the offset x and total t of the minimum sliding sum of the vector
++  /// with length l
++  std::pair<size_t, double> min_sliding_sum (const vecDay<double>& vec, size_t l);
++  
+   /** The inverse of logDFT (or an approximation, when N&lt;T or
+    * tArray.size() ≠ T). Result may also be rotated.
+    * 
++   * Output is exp(fourier(FC, rAngle)) + offset.
++   * 
+    * (This was called calcExpFourierSeries, and does essentially the same
+    * thing.)
+    *
+@@ -148,8 +160,9 @@ namespace vectors{
+    * array used to calculate FC.
+    * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...); can be any length
+    * so long as it is odd.
+-   * @param rAngle Angle to rotate generated series by in radians: [0,2π] */
+-  void expIDFT (vecDay<double>& tArray, const vector<double>& FC, double rAngle);
++   * @param rAngle Angle to rotate generated series by in radians: [0,2π]
++   * @param offset This value is added to the array after exponentiation of the fourier series. */
++  void expIDFT (vecDay<double>& tArray, const vector<double>& FC, double rAngle, double offset);
+ }
+ 
+ /// Utility to print a vector (operator must be in namespace)
+diff --git a/model/util/vectors.cpp b/model/util/vectors.cpp
+index 76294a3..ad7feaa 100644
+--- a/model/util/vectors.cpp
++++ b/model/util/vectors.cpp
+@@ -59,6 +59,36 @@ double vectors::sum (const gsl_vector *vec) {
+   return r;
+ }
+ 
++double sliding_sum (const vecDay<double>& vec, SimTime x, SimTime l){
++    assert(x <= vec.size());
++    assert(l <= vec.size());
++    double r = 0.0;
++    SimTime end = vec.size();
++    for( SimTime i = x; i < vec.size(); i += sim::oneDay() ){
++        r += vec[i];
++    }
++    if( x + l > vec.size() ){
++        SimTime end = x + l - vec.size();
++        for( SimTime i = 0; i < end; i += sim::oneDay() ){
++            r += vec[i];
++        }
++    }
++}
++
++// May not be the fastest implementation but won't be used enough to matter
++std::pair<SimTime, double> min_sliding_sum (const vecDay<double>& vec, SimTime l) {
++    size_t min_x = 0;
++    double min_t = numeric_limits<double>::inf();
++    for( SimTime x = sim::zero(); x < vec.size(); x += sim::oneDay() ){
++        double t = sliding_sum(vec, x, l);
++        if( t < min_t ){
++            min_x = x;
++            min_t = t;
++        }
++    }
++    return std::make_pair(min_x, min_t);
++}
++
+ void vectors::addTo (vector<double>& x, vector<double>& y){
+     assert( x.size() == y.size() );
+     for( size_t i=0; i<x.size(); ++i ){
+@@ -142,7 +172,7 @@ void vectors::logDFT(const vector<double>& iArray, vector<double>& FC) {
+     scale(FC, 1.0 / T);
+ }
+ 
+-void vectors::expIDFT( vecDay< double >& tArray, const std::vector< double >& FC, double rAngle ){
++void vectors::expIDFT( vecDay< double >& tArray, const std::vector< double >& FC, double rAngle, double offset ){
+     if (mod_nn(FC.size(), 2) == 0)
+         throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
+     
+@@ -160,7 +190,7 @@ void vectors::expIDFT( vecDay< double >& tArray, const std::vector< double >& FC
+         for(size_t n = 1; n < N; ++n) {
+             temp += FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
+         }
+-        tArray[t] = exp(temp);
++        tArray[t] = exp(temp) + offset;
+     }
+ }
+ 

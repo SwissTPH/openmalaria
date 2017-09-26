@@ -1,0 +1,309 @@
+diff --git a/model/Transmission/VectorModel.cpp b/model/Transmission/VectorModel.cpp
+index fc0cdc1..9dbcafc 100644
+--- a/model/Transmission/VectorModel.cpp
++++ b/model/Transmission/VectorModel.cpp
+@@ -247,6 +247,11 @@ VectorModel::~VectorModel () {
+ }
+ 
+ void VectorModel::init2 () {
++    SimTime data_save_len = SimTime::oneDay();  // we don't need to save anything at first
++    saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
++    saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
++    saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
++    
+     double sumRelativeAvailability = 0.0;
+     foreach(const Host::Human& human, sim::humanPop().crange()) {
+         sumRelativeAvailability +=
+@@ -352,11 +357,37 @@ SimTime VectorModel::initIterate () {
+         // allow forcing equilibrium mode like with non-vector model
+         return SimTime::zero(); // no initialization to do
+     }
+-    if( initIterations < 0 ){   // flag: init & stabilisation done
+-        //TODO: we should perhaps check that EIR gets reproduced correctly?
+-        assert( interventionMode = dynamicEIR );
+-        simulationMode = dynamicEIR;
+-        return SimTime::zero();
++    
++    // This function is called repeatedly until vector initialisation is
++    // complete (signalled by returning 0).
++    int initState = 0;
++    if( initIterations == 0 && saved_sum_avail.size1() == SimTime::oneDay() ) {
++        // First time called: we need to do some data collection
++        initState = 1;
++    } else if( initIterations >= 0 ){
++        // Next, while generated EIR is not close to that required,
++        // try adjusting emergence parameters, do a stabilisation phase then data collection phase, then repeat.
++        initState = 2;
++    } else if( initIterations < 0 ){
++        // Finally, we're done.
++        initState = 3;
++    }
++    
++    if( initState == 1 || initState == 3 ){
++        // When starting the iteration phase, we switch to five years worth of data; otherwise we only keep one day.
++        SimTime data_save_len = /*initState == 1 ? SimTime::fromYearsI(5) :*/ SimTime::oneDay();
++        saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
++        saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
++        saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
++        
++//         if( initState == 1 ){
++//             return SimTime::fromYearsI(5);
++//         }
++        if( initState == 3 ){
++            //TODO: we should perhaps check that EIR gets reproduced correctly?
++            simulationMode = dynamicEIR;
++            return SimTime::zero();
++        }
+     }
+     
+     ++initIterations;
+@@ -418,10 +449,11 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
+ // Every Global::interval days:
+ void VectorModel::vectorUpdate () {
+     const size_t nGenotypes = WithinHost::Genotypes::N();
++    SimTime popDataInd = mod_nn(sim::ts0(), saved_sum_avail.size1());
+     vector<double> probTransmission;
+-    vector<double> sum_avail( numSpecies, 0.0 );
+-    vector<double> sigma_df( numSpecies, 0.0 );
+-    vector2D<double> sigma_dif( numSpecies, nGenotypes, 0.0 );
++    saved_sum_avail.assign_at1(popDataInd, 0.0);
++    saved_sigma_df.assign_at1(popDataInd, 0.0);
++    saved_sigma_dif.assign_at1(popDataInd, 0.0);
+     
+     vector<const Anopheles::PerHostBase*> humanBases;
+     humanBases.reserve( numSpecies );
+@@ -451,13 +483,13 @@ void VectorModel::vectorUpdate () {
+             //TODO: even stranger since probTransmission comes from the previous time step
+             const double avail = host.entoAvailabilityFull (*humanBases[s], s,
+                     human.age(sim::ts1()).inYears());
+-            sum_avail[s] += avail;
++            saved_sum_avail.at(popDataInd, s) += avail;
+             const double df = avail
+                     * host.probMosqBiting(*humanBases[s], s)
+                     * host.probMosqResting(*humanBases[s], s);
+-            sigma_df[s] += df;
++            saved_sigma_df.at(popDataInd, s) += df;
+             for( size_t g = 0; g < nGenotypes; ++g ){
+-                sigma_dif.at(s, g) += df * probTransmission[g];
++                saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
+             }
+         }
+         
+@@ -468,11 +500,11 @@ void VectorModel::vectorUpdate () {
+     for(size_t s = 0; s < numSpecies; ++s){
+         // Copy slice to new array:
+         typedef vector<double>::const_iterator const_iter_t;
+-        std::pair<const_iter_t, const_iter_t> range = sigma_dif.range_at1(s);
++        std::pair<const_iter_t, const_iter_t> range = saved_sigma_dif.range_at12(popDataInd, s);
+         sigma_dif_species.assign(range.first, range.second);
+         
+-        species[s].advancePeriod (sum_avail[s],
+-                sigma_df[s],
++        species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
++                saved_sigma_df.at(popDataInd, s),
+                 sigma_dif_species,
+                 simulationMode == dynamicEIR);
+     }
+@@ -524,11 +556,17 @@ void VectorModel::checkpoint (istream& stream) {
+     TransmissionModel::checkpoint (stream);
+     initIterations & stream;
+     species & stream;
++    saved_sum_avail & stream;
++    saved_sigma_df & stream;
++    saved_sigma_dif & stream;
+ }
+ void VectorModel::checkpoint (ostream& stream) {
+     TransmissionModel::checkpoint (stream);
+     initIterations & stream;
+     species & stream;
++    saved_sum_avail & stream;
++    saved_sigma_df & stream;
++    saved_sigma_dif & stream;
+ }
+ 
+ }
+diff --git a/model/Transmission/VectorModel.h b/model/Transmission/VectorModel.h
+index a43f7c2..ae8d231 100644
+--- a/model/Transmission/VectorModel.h
++++ b/model/Transmission/VectorModel.h
+@@ -94,7 +94,10 @@ private:
+   void ctsCbResRequirements (ostream& stream);
+   
+   
+-    /// Number of iterations performed during initialization, or negative when done.
++    /// Number of iterations performed during initialization.
++    /// 
++    /// Special cases: 0 during initial one-human-lifespan warmup, <0 after
++    /// initialisation.
+     int initIterations;
+     
+   /** @brief Access to per (anopheles) species data.
+@@ -123,6 +126,13 @@ private:
+   map<string,size_t> speciesIndex;
+   //@}
+   
++  /// @brief Saved data for use in initialisation / fitting cycle
++  //@{
++    util::vecDay2D<double> saved_sum_avail;
++    util::vecDay2D<double> saved_sigma_df;
++    util::vecDay3D<double> saved_sigma_dif;
++  //@}
++  
+   friend class PerHost;
+   friend class AnophelesModelSuite;
+ };
+diff --git a/model/util/vecDay.h b/model/util/vecDay.h
+index 88699d0..536a742 100644
+--- a/model/util/vecDay.h
++++ b/model/util/vecDay.h
+@@ -83,6 +83,8 @@ struct vecDay2D {
+ 	typedef typename vec_t::allocator_type alloc_t;
+ 	typedef typename vec_t::reference ref_t;
+ 	typedef typename vec_t::const_reference const_ref_t;
++	typedef typename vec_t::iterator iter_t;
++	typedef typename vec_t::const_iterator const_iter_t;
+     
+     vecDay2D() : v() {}
+     explicit vecDay2D(const alloc_t& a) : stride(0), v(a) {}
+@@ -95,7 +97,14 @@ struct vecDay2D {
+         v.assign(dim1.inDays() * dim2, val);
+         stride = dim2;
+     }
+-
++    
++    /// Set, at all positions where first index is n1
++    inline void assign_at1(SimTime n1, val_t x = val_t()){
++        iter_t begin = v.begin() + n1.inDays() * stride + 0;
++        iter_t end = begin + stride;
++        std::fill(begin, end, x);
++    }
++    
+     inline void resize(SimTime dim1, size_t dim2, val_t x = val_t()){
+         v.resize( dim1.inDays() * dim2, x );
+         stride = dim2;
+@@ -115,6 +124,19 @@ struct vecDay2D {
+         v.assign( v.size(), x );
+     }
+     
++    /// This is the product of all dimensions
++    inline size_t size_all() const{
++        return v.size();
++    }
++    /// Size of the first dimension
++    inline SimTime size1() const{
++        return SimTime::fromDays(v.size() / stride);
++    }
++    /// Size of the second dimension
++    inline size_t size2() const{
++        return stride;
++    }
++    
+     /// Checkpointing
+     template<class S>
+     void operator& (S& stream) {
+@@ -127,6 +149,85 @@ private:
+     vec_t v;
+ };
+ 
++/** A three-dimensional array whose first index has SimTime type (as vecDay) and
++ * second and third indices have size_t type. */
++template<typename T, typename Alloc = std::allocator<T> >
++struct vecDay3D {
++    typedef std::vector<T, Alloc> vec_t;
++	typedef typename vec_t::value_type val_t;
++	typedef typename vec_t::allocator_type alloc_t;
++	typedef typename vec_t::reference ref_t;
++	typedef typename vec_t::const_reference const_ref_t;
++	typedef typename vec_t::iterator iter_t;
++	typedef typename vec_t::const_iterator const_iter_t;
++    
++    vecDay3D() : v() {}
++    explicit vecDay3D(const alloc_t& a) : stride1(0), stride2(0), v(a) {}
++    explicit vecDay3D(SimTime n1, size_t n2, size_t n3,
++                const val_t& value = val_t(), const alloc_t& a = alloc_t() ) :
++		stride1(n2 * n3), stride2(n3), v(static_cast<size_t>(n1.inDays() * n2 * n3), value, a) {}
++    vecDay3D(const vecDay3D& x) : stride1(x.stride1), stride2(x.stride2), v(x.v) {}
++    
++    inline void assign(SimTime dim1, size_t dim2, size_t dim3, const val_t& val){
++        v.assign(dim1.inDays() * dim2 * dim3, val);
++        stride1 = dim2 * dim3;
++        stride2 = dim3;
++    }
++    
++    /// Set, at all positions where first index is n1
++    inline void assign_at1(SimTime n1, val_t x = val_t()){
++        iter_t begin = v.begin() + n1.inDays() * stride1 + 0 + 0;
++        iter_t end = begin + stride1;
++        std::fill(begin, end, x);
++    }
++    
++    inline void resize(SimTime dim1, size_t dim2, size_t dim3, val_t x = val_t()){
++        v.resize( dim1.inDays() * dim2 * dim3, x );
++        stride1 = dim2 * dim3;
++        stride2 = dim3;
++    }
++    
++    inline ref_t at(SimTime n1, size_t n2, size_t n3){
++        return v[n1.inDays() * stride1 + n2 * stride2 + n3];
++    }
++    
++    inline const_ref_t at(SimTime n1, size_t n2, size_t n3) const{
++        return v[n1.inDays() * stride1 + n2 * stride2 + n3];
++    }
++    
++    /// Get the sequence of elements at n1, n2 as an iterator pair
++    inline std::pair<iter_t, iter_t> range_at12(SimTime n1, size_t n2) {
++        size_t i = n1.inDays() * stride1 + n2 * stride2;
++        assert(i + stride2 < v.size());
++        return std::make_pair( v.begin() + i, v.begin() + i + stride2 );
++    }
++    
++    /// Get the sequence of elements at n1, n2 as an iterator pair
++    inline std::pair<const_iter_t, const_iter_t> range_at12(SimTime n1, size_t n2) const {
++        size_t i = n1.inDays() * stride1 + n2 * stride2;
++        assert(i + stride2 < v.size());
++        return std::make_pair( v.cbegin() + i, v.cbegin() + i + stride2 );
++    }
++    
++    inline vec_t& internal_vec(){ return v; }
++    
++    inline void set_all( typename vec_t::value_type x ){
++        v.assign( v.size(), x );
++    }
++    
++    /// Checkpointing
++    template<class S>
++    void operator& (S& stream) {
++        stride1 & stream;
++        stride2 & stream;
++        v & stream;
++    }
++    
++private:
++    size_t stride1, stride2;
++    vec_t v;
++};
++
+ namespace vectors{
+   /// Scale all elements of a vector by a in-situ
+   void scale (vecDay<double>& vec, double a);
+diff --git a/model/util/vectors.h b/model/util/vectors.h
+index 765fcd9..481b1fd 100644
+--- a/model/util/vectors.h
++++ b/model/util/vectors.h
+@@ -166,13 +166,13 @@ struct vector2D {
+     
+     /// Get the sequence of elements at n1 as an iterator pair
+     inline std::pair<iter_t, iter_t> range_at1(size_t n1) {
+-        assert(n1 * stride < v.size());
++        assert((n1+1) * stride < v.size());
+         return std::make_pair( v.begin() + n1 * stride, v.begin() + (n1 + 1) * stride );
+     }
+     
+     /// Get the sequence of elements at n1 as an iterator pair
+     inline std::pair<const_iter_t, const_iter_t> range_at1(size_t n1) const{
+-        assert(n1 * stride < v.size());
++        assert((n1+1) * stride < v.size());
+         return std::make_pair( v.cbegin() + n1 * stride, v.cbegin() + (n1 + 1) * stride );
+     }
+     

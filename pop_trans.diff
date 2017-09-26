@@ -1,0 +1,655 @@
+diff --git a/model/Host/Human.cpp b/model/Host/Human.cpp
+index 53fdb82..0a28081 100644
+--- a/model/Host/Human.cpp
++++ b/model/Host/Human.cpp
+@@ -38,6 +38,7 @@
+ namespace OM { namespace Host {
+     using namespace OM::util;
+     using interventions::ComponentId;
++    using Transmission::TransmissionModel;
+     
+     bool surveyOnlyNewEp = false;
+ 
+@@ -59,34 +60,35 @@ void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario
+ // -----  Non-static functions: creation/destruction, checkpointing  -----
+ 
+ // Create new human
+-Human::Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth) :
+-    infIncidence(InfectionIncidenceModel::createModel()),
+-    m_DOB(dateOfBirth),
+-    m_cohortSet(0),
+-    nextCtsDist(0)
++Human::Human(TransmissionModel& transmission, SimTime dateOfBirth) :
++        infIncidence(InfectionIncidenceModel::createModel()),
++        m_DOB(dateOfBirth),
++        m_cohortSet(0),
++        nextCtsDist(0)
+ {
+-  // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
+-  assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
+-  
+-  HumanHet het = HumanHet::sample();
+-  withinHostModel = WithinHost::WHInterface::createWithinHostModel( het.comorbidityFactor );
+-  perHostTransmission.initialise (tm, het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
+-  clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
++    // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
++    assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
++    
++    HumanHet het = HumanHet::sample();
++    withinHostModel = WithinHost::WHInterface::createWithinHostModel( het.comorbidityFactor );
++    perHostTransmission.initialise (transmission,
++        het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
++    clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
+ }
+ 
+ Human::Human(SimTime dateOfBirth) :
+-    withinHostModel(0),
+-    infIncidence(0),
+-    clinicalModel(0),
+-    m_DOB(dateOfBirth),
+-    m_cohortSet(0),
+-    nextCtsDist(0)
++        withinHostModel(0),
++        infIncidence(0),
++        clinicalModel(0),
++        m_DOB(dateOfBirth),
++        m_cohortSet(0),
++        nextCtsDist(0)
+ {}
+ 
+ void Human::destroy() {
+-  delete infIncidence;
+-  delete withinHostModel;
+-  delete clinicalModel;
++    delete infIncidence;
++    delete withinHostModel;
++    delete clinicalModel;
+ }
+ 
+ 
+@@ -94,7 +96,7 @@ void Human::destroy() {
+ 
+ vector<double> EIR_per_genotype;        // cache (not thread safe)
+ 
+-bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUpdate) {
++bool Human::update(TransmissionModel& transmission, bool doUpdate) {
+ #ifdef WITHOUT_BOINC
+     ++PopulationStats::humanUpdateCalls;
+     if( doUpdate )
+@@ -132,7 +134,7 @@ bool Human::update(Transmission::TransmissionModel* transmissionModel, bool doUp
+             }
+         }
+         // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
+-        double EIR = transmissionModel->getEIR( *this, age0, ageYears1,
++        double EIR = transmission.getEIR( *this, age0, ageYears1,
+                 EIR_per_genotype );
+         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
+         
+diff --git a/model/Host/Human.h b/model/Host/Human.h
+index 38136f6..839c82c 100644
+--- a/model/Host/Human.h
++++ b/model/Host/Human.h
+@@ -57,7 +57,7 @@ public:
+    * 
+    * \param tm Transmission model reference (to initialize TM code)
+    * \param dateOfBirth date of birth (usually start of next time step) */
+-  Human(Transmission::TransmissionModel& tm, SimTime dateOfBirth);
++  Human(Transmission::TransmissionModel& transmission, SimTime dateOfBirth);
+ 
+   /** Destructor
+    * 
+@@ -93,7 +93,7 @@ public:
+    * @param doUpdate If false, returns immediately after is-dead check.
+    * @returns True if the individual is dead (too old or otherwise killed).
+    */
+-  bool update(OM::Transmission::TransmissionModel* transmissionModel, bool doUpdate);
++  bool update(OM::Transmission::TransmissionModel& transmission, bool doUpdate);
+   //@}
+   
+   ///@brief Deploy "intervention" functions
+diff --git a/model/Population.cpp b/model/Population.cpp
+index 5b0167f..66f5133 100644
+--- a/model/Population.cpp
++++ b/model/Population.cpp
+@@ -21,8 +21,6 @@
+ #include "Population.h"
+ #include "Monitoring/Continuous.h"
+ 
+-#include "Transmission/TransmissionModel.h"
+-
+ #include "Host/Human.h"
+ #include "Host/NeonatalMortality.h"
+ #include "WithinHost/WHInterface.h"
+@@ -30,6 +28,7 @@
+ #include "WithinHost/Diagnostic.h"
+ #include "Clinical/ClinicalModel.h"
+ #include "Clinical/CaseManagementCommon.h"
++#include "Transmission/TransmissionModel.h"
+ 
+ #include "util/errors.h"
+ #include "util/random.h"
+@@ -45,6 +44,7 @@ namespace OM
+ {
+     using namespace OM::util;
+     using namespace boost::assign;
++    using Transmission::TransmissionModel;
+ 
+ // -----  Population: static data / methods  -----
+ 
+@@ -74,7 +74,7 @@ void Population::staticCheckpoint (ostream& stream)
+ 
+ // -----  non-static methods: creation/destruction, checkpointing  -----
+ 
+-Population::Population(const scnXml::Entomology& entoData, size_t populationSize)
++Population::Population(size_t populationSize)
+     : populationSize (populationSize), recentBirths(0)
+ {
+     using Monitoring::Continuous;
+@@ -111,8 +111,6 @@ Population::Population(const scnXml::Entomology& entoData, size_t populationSize
+ //         MakeDelegate( this, &Population::ctsNetsOwned ) );
+ //     Continuous.registerCallback( "mean hole index", "\tmean hole index",
+ //         MakeDelegate( this, &Population::ctsNetHoleIndex ) );
+-    
+-    _transmissionModel = Transmission::TransmissionModel::createTransmissionModel(entoData, populationSize);
+ }
+ 
+ Population::~Population()
+@@ -120,29 +118,28 @@ Population::~Population()
+     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
+         iter->destroy();
+     }
+-    delete _transmissionModel;
+ }
+ 
+-void Population::checkpoint (istream& stream)
++void Population::checkpoint (istream& stream, TransmissionModel& transmission)
+ {
+-    size_t popSize; // must be type of population.size()
+-    popSize & stream;
+-    if (popSize > size_t (populationSize))
+-        throw util::checkpoint_error(
+-            (boost::format("pop size (%1%) exceeds that given in scenario.xml") %popSize).str() );
+-    for(size_t i = 0; i < popSize && !stream.eof(); ++i) {
++    populationSize & stream;
++    recentBirths & stream;
++    
++    for(size_t i = 0; i < populationSize && !stream.eof(); ++i) {
+         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
+         // ctor and leaves less opportunity for uninitialized memory.
+-        population.push_back( new Host::Human (*_transmissionModel, sim::zero()) );
++        population.push_back( new Host::Human (transmission, sim::zero()) );
+         population.back() & stream;
+     }
+-    if (population.size() != popSize)
++    if (population.size() != populationSize)
+         throw util::checkpoint_error(
+             (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
+ }
+ void Population::checkpoint (ostream& stream)
+ {
+-    population.size() & stream;
++    assert(population.size() == populationSize);
++    populationSize & stream;
++    recentBirths & stream;
+     for(Iter iter = population.begin(); iter != population.end(); ++iter)
+         (*iter) & stream;
+ }
+@@ -155,7 +152,7 @@ void Population::preMainSimInit ()
+     recentBirths = 0;
+ }
+ 
+-void Population::createInitialHumans ()
++void Population::createInitialHumans( TransmissionModel& transmission )
+ {
+     /* We create a whole population here, regardless of whether humans can
+     survive until start of vector init (vector model needs a whole population
+@@ -168,7 +165,7 @@ void Population::createInitialHumans ()
+     {
+         int targetPop = AgeStructure::targetCumPop( iage, populationSize );
+         while (cumulativePop < targetPop) {
+-            newHuman( sim::zero() - sim::fromTS(iage) );
++            newHuman( sim::zero() - sim::fromTS(iage), transmission );
+             ++cumulativePop;
+         }
+     }
+@@ -176,29 +173,24 @@ void Population::createInitialHumans ()
+     // Vector setup dependant on human population structure (we *want* to
+     // include all humans, whether they'll survive to vector init phase or not).
+     assert( sim::now() == sim::zero() );      // assumed below
+-    _transmissionModel->init2 (*this);
+ }
+ 
+ 
+ // -----  non-static methods: simulation loop  -----
+ 
+-void Population::newHuman( SimTime dob ){
++void Population::newHuman( SimTime dob, TransmissionModel& transmission ){
+     util::streamValidate( dob.raw() );
+-    population.push_back( new Host::Human (*_transmissionModel, dob) );
++    population.push_back( new Host::Human (transmission, dob) );
+     ++recentBirths;
+ }
+ 
+-void Population::update1( SimTime firstVecInitTS ){
++void Population::update1( SimTime firstVecInitTS, TransmissionModel& transmission ){
+     // This should only use humans being updated: otherwise too small a proportion
+     // will be infected. However, we don't have another number to use instead.
+     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
+     // (until humans old enough to be pregnate get updated and can be infected).
+     Host::NeonatalMortality::update (*this);
+     
+-    // This should be called before humans contract new infections in the simulation step.
+-    // This needs the whole population (it is an approximation before all humans are updated).
+-    _transmissionModel->vectorUpdate (*this);
+-
+     //NOTE: other parts of code are not set up to handle changing population size. Also
+     // populationSize is assumed to be the _actual and exact_ population size by other code.
+     //targetPop is the population size at time t allowing population growth
+@@ -217,7 +209,7 @@ void Population::update1( SimTime firstVecInitTS ){
+         // is the time step they die at (some code still runs on this step).
+         SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
+         bool updateHuman = lastPossibleTS >= firstVecInitTS;
+-        bool isDead = iter->update(_transmissionModel, updateHuman);
++        bool isDead = iter->update(transmission, updateHuman);
+         if( isDead ){
+             iter->destroy();
+             iter = population.erase (iter);
+@@ -243,14 +235,11 @@ void Population::update1( SimTime firstVecInitTS ){
+ 
+     // increase population size to targetPop
+     while (cumPop < targetPop) {
+-        newHuman( sim::ts1() );        // humans born at end of this time step = beginning of next
++        // humans born at end of this time step = beginning of next, hence ts1
++        newHuman( sim::ts1(), transmission );
+         //++nCounter;
+         ++cumPop;
+     }
+-    
+-    // Doesn't matter whether non-updated humans are included (value isn't used
+-    // before all humans are updated).
+-    _transmissionModel->update (*this);
+ }
+ 
+ 
+@@ -367,7 +356,6 @@ void Population::newSurvey ()
+     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
+         iter->summarize();
+     }
+-    _transmissionModel->summarize();
+ }
+ 
+ void Population::flushReports (){
+diff --git a/model/Population.h b/model/Population.h
+index 0a0c4db..9100fce 100644
+--- a/model/Population.h
++++ b/model/Population.h
+@@ -24,17 +24,19 @@
+ #include "Global.h"
+ #include "PopulationAgeStructure.h"
+ #include "Host/Human.h"
+-#include "Transmission/TransmissionModel.h"
+ 
+ #include <boost/ptr_container/ptr_list.hpp>
+ #include <fstream>
+ 
+ namespace scnXml{
+-    class Entomology;
+     class Scenario;
+ }
+ namespace OM {
+     class Parameters;
++    namespace Transmission {
++        class TransmissionModel;
++    }
++    using Transmission::TransmissionModel;
+ 
+ //! The simulated human population
+ class Population
+@@ -48,26 +50,15 @@ public:
+     static void staticCheckpoint (ostream& stream); ///< ditto
+ 
+ 
+-    Population( const scnXml::Entomology& entoData, size_t populationSize );
++    Population( size_t populationSize );
+     //! Clears human collection.
+     ~Population();
+-
+-    /// Checkpointing
+-    template<class S>
+-    void operator& (S& stream) {
+-        populationSize & stream;
+-	recentBirths & stream;
+-        (*_transmissionModel) & stream;
+-	
+-        checkpoint (stream);
+-    }
+     
++    void checkpoint (istream& stream, TransmissionModel& transmission);
++    void checkpoint (ostream& stream);
+     
+-    /** Creates the initial population of Humans according to cumAgeProp.
+-    *
+-    * Also runs some transmission model initialisation (which needs to happen
+-    * after a population has been created). */
+-    void createInitialHumans ();
++    /** Creates the initial population of Humans according to cumAgeProp. */
++    void createInitialHumans( TransmissionModel& transmission );
+     
+     /** Initialisation run between initial one-lifespan run of simulation and
+      * actual simulation. */
+@@ -77,7 +68,7 @@ public:
+     /*!  Also updates the population-level measures such as infectiousness, and
+          the age-distribution by c outmigrating or creating new births if
+          necessary */
+-    void update1( SimTime firstVecInitTS );
++    void update1( SimTime firstVecInitTS, TransmissionModel& transmission );
+ 
+     //! Makes a survey
+     void newSurvey();
+@@ -109,21 +100,13 @@ public:
+         return populationSize;
+     }
+     //@}
+-    /** Return access to the transmission model. */
+-    inline Transmission::TransmissionModel& transmissionModel() {
+-        return *_transmissionModel;
+-    }
+-    /** Return const access to the transmission model. */
+-    inline const Transmission::TransmissionModel& transmissionModel() const {
+-        return *_transmissionModel;
+-    }
+ 
+ private:
+-    //! Creates initializes and add to the population list a new uninfected human
+-    /*!
+-       \param dob date of birth (usually current time)
+-    */
+-    void newHuman( SimTime dob );
++    /// Creates initializes and add to the population list a new uninfected human
++    /// 
++    /// @param dob date of birth (usually current time)
++    /// @param transmission transmission model
++    void newHuman( SimTime dob, TransmissionModel& transmission );
+     
+     /// Delegate to print the number of hosts
+     void ctsHosts (ostream& stream);
+@@ -147,9 +130,6 @@ private:
+     /// Delegate to print the mean hole index of all bed nets
+ //     void ctsNetHoleIndex (ostream& stream);
+     
+-    void checkpoint (istream& stream);
+-    void checkpoint (ostream& stream);
+-
+ 
+     //! Size of the human population
+     size_t populationSize;
+@@ -161,8 +141,6 @@ private:
+     /// Births since last continuous output
+     int recentBirths;
+     //@}
+-    //! TransmissionModel model
+-    Transmission::TransmissionModel* _transmissionModel;
+     
+     /** The simulated human population
+      *
+diff --git a/model/SimTime.h b/model/SimTime.h
+index 8beac6c..3d489c6 100644
+--- a/model/SimTime.h
++++ b/model/SimTime.h
+@@ -40,6 +40,11 @@ namespace scnXml {
+ }
+ 
+ namespace OM {
++class Population;
++namespace Transmission {
++    class TransmissionModel;
++}
++using Transmission::TransmissionModel;
+ 
+ struct TimeDisplayHelper;
+ 
+diff --git a/model/Simulator.cpp b/model/Simulator.cpp
+index b4b130a..f3d2d87 100644
+--- a/model/Simulator.cpp
++++ b/model/Simulator.cpp
+@@ -47,6 +47,7 @@
+ namespace OM {
+     using Monitoring::Continuous;
+     using interventions::InterventionManager;
++    using Transmission::TransmissionModel;
+ 
+ bool Simulator::startedFromCheckpoint;  // static
+ 
+@@ -107,13 +108,16 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
+     // genotypes (both from Human, from Population::init()) and
+     // Monitoring::AgeGroup (from Surveys.init()):
+     // Note: PerHost dependency can be postponed; it is only used to set adultAge
+-    population = auto_ptr<Population>(new Population( scenario.getEntomology(), scenario.getDemography().getPopSize() ));
++    humanPop = auto_ptr<Population>(
++            new Population( scenario.getDemography().getPopSize() ));
++    transmission = auto_ptr<TransmissionModel>(
++            TransmissionModel::createTransmissionModel(scenario.getEntomology(), humanPop->size()) );
+     
+     // Depends on transmission model (for species indexes):
+     // MDA1D may depend on health system (too complex to verify)
+-    interventions::InterventionManager::init( scenario.getInterventions(), *population );
++    interventions::InterventionManager::init( scenario.getInterventions(), *humanPop );
+     
+-    // Depends on interventions, PK/PD (from population):
++    // Depends on interventions, PK/PD (from humanPop):
+     Clinical::ClinicalModel::changeHS( scenario.getHealthSystem() );    // i.e. init health system
+     
+     // Depends on interventions:
+@@ -140,19 +144,19 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
+     // Make sure warmup period is at least as long as a human lifespan, as the
+     // length required by vector warmup, and is a whole number of years.
+     SimTime humanWarmupLength = sim::maxHumanAge();
+-    if( humanWarmupLength < population->transmissionModel().minPreinitDuration() ){
++    if( humanWarmupLength < transmission->minPreinitDuration() ){
+         cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
+         cerr << ") shorter than length of warm-up requested by" << endl;
+         cerr << "transmission model ("
+-            << population->transmissionModel().minPreinitDuration().inYears();
++            << transmission->minPreinitDuration().inYears();
+         cerr << "). Transmission may be unstable; perhaps use forced" << endl;
+         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
+-        humanWarmupLength = population->transmissionModel().minPreinitDuration();
++        humanWarmupLength = transmission->minPreinitDuration();
+     }
+     humanWarmupLength = sim::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
+     
+     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
+-        + population->transmissionModel().expectedInitDuration()
++        + transmission->expectedInitDuration()
+         // plus MAIN_PHASE: survey period plus one TS for last survey
+         + mon::finalSurveyTime() + sim::oneTS();
+     assert( totalSimDuration + sim::never() < sim::zero() );
+@@ -162,7 +166,8 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
+         readCheckpoint();
+     } else {
+         Continuous.init( monitoring, false );
+-        population->createInitialHumans();
++        humanPop->createInitialHumans(*transmission);
++        transmission->init2 (*humanPop);
+     }
+     // Set to either a checkpointing time step or min int value. We only need to
+     // set once, since we exit after a checkpoint triggered this way.
+@@ -173,7 +178,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
+     while (true){
+         // loop for steps within a phase
+         while (sim::now() < simPeriodEnd){
+-            // checkpoint
++            util::BoincWrapper::reportProgress(sim::now().raw(), totalSimDuration.raw());
+             if( util::BoincWrapper::timeToCheckpoint() || testCheckpointTime == sim::now() ){
+                 writeCheckpoint();
+                 util::BoincWrapper::checkpointCompleted();
+@@ -184,31 +189,38 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
+             
+             // Monitoring. sim::now() gives time of end of last step,
+             // and is when reporting happens in our time-series.
+-            Continuous.update( *population );
++            Continuous.update( *humanPop );
+             if( sim::intervNow() == mon::nextSurveyTime() ){
+-                population->newSurvey();
++                humanPop->newSurvey();
++                transmission->summarize();
+                 mon::concludeSurvey();
+             }
+             
+             // Deploy interventions, at time sim::now().
+-            InterventionManager::deploy( *population );
++            InterventionManager::deploy( *humanPop );
+             
+             // Time step updates. Time steps are mid-day to mid-day.
+             // sim::ts0() gives the date at the start of the step, sim::ts1() the date at the end.
+             sim::start_update();
+-            population->update1( humanWarmupLength );
+-            sim::end_update();
+             
+-            util::BoincWrapper::reportProgress(
+-                static_cast<double>(sim::now().raw()) /
+-                static_cast<double>(totalSimDuration.raw()) );
++            // This should be called before humans contract new infections in the simulation step.
++            // This needs the whole population (it is an approximation before all humans are updated).
++            transmission->vectorUpdate (*humanPop);
++            
++            humanPop->update1( humanWarmupLength, *transmission );
++            
++            // Doesn't matter whether non-updated humans are included (value isn't used
++            // before all humans are updated).
++            transmission->update (*humanPop);
++            
++            sim::end_update();
+         }
+         
+         ++phase;        // advance to next phase
+         if (phase == ONE_LIFE_SPAN) {
+             simPeriodEnd = humanWarmupLength;
+         } else if (phase == TRANSMISSION_INIT) {
+-            SimTime iterate = population->transmissionModel().initIterate();
++            SimTime iterate = transmission->initIterate();
+             if( iterate > sim::zero() ){
+                 simPeriodEnd += iterate;
+                 --phase;        // repeat phase
+@@ -221,8 +233,8 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
+             // Start MAIN_PHASE:
+             simPeriodEnd = totalSimDuration;
+             sim::interv_time = sim::zero();
+-            population->preMainSimInit();
+-            population->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
++            humanPop->preMainSimInit();
++            humanPop->newSurvey();       // Only to reset TransmissionModel::inoculationsPerAgeGroup
+             mon::initMainSim();
+         } else if (phase == END_SIM) {
+             cerr << "sim end" << endl;
+@@ -254,7 +266,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
+     
+     PopulationStats::print();
+     
+-    population->flushReports();        // ensure all Human instances report past events
++    humanPop->flushReports();        // ensure all Human instances report past events
+     mon::writeSurveyData();
+     Continuous.finalise();
+     
+@@ -376,10 +388,11 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
+         simPeriodEnd & stream;
+         totalSimDuration & stream;
+         phase & stream;
+-        (*population) & stream;
++        (*transmission) & stream;
++        humanPop->checkpoint(stream, *transmission);
+         PopulationStats::staticCheckpoint( stream );
+         InterventionManager::checkpoint( stream );
+-        InterventionManager::loadFromCheckpoint( *population, sim::interv_time );
++        InterventionManager::loadFromCheckpoint( *humanPop, sim::interv_time );
+         
+         // read last, because other loads may use random numbers or expect time
+         // to be negative
+@@ -430,7 +443,8 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
+     simPeriodEnd & stream;
+     totalSimDuration & stream;
+     phase & stream;
+-    (*population) & stream;
++    (*transmission) & stream;
++    humanPop->checkpoint(stream);
+     PopulationStats::staticCheckpoint( stream );
+     InterventionManager::checkpoint( stream );
+     
+diff --git a/model/Simulator.h b/model/Simulator.h
+index 6870669..aa2ab75 100644
+--- a/model/Simulator.h
++++ b/model/Simulator.h
+@@ -23,6 +23,7 @@
+ 
+ #include "Global.h"
+ #include "Population.h"
++#include "Transmission/TransmissionModel.h"
+ #include "util/BoincWrapper.h"
+ #include <memory>
+ using namespace std;
+@@ -66,7 +67,8 @@ private:
+     SimTime totalSimDuration;
+     int phase;  // only need be a class member because value is checkpointed
+     
+-    auto_ptr<Population> population;
++    auto_ptr<Population> humanPop;
++    auto_ptr<Transmission::TransmissionModel> transmission;
+     
+     /** This was used to prevent checksum cheats; now it is obseleted by cksum.
+      * NOTE: could be removed, but there's little point and could be
+diff --git a/model/util/BoincWrapper.cpp b/model/util/BoincWrapper.cpp
+index 3141761..77a4d58 100644
+--- a/model/util/BoincWrapper.cpp
++++ b/model/util/BoincWrapper.cpp
+@@ -65,12 +65,12 @@ namespace BoincWrapper {
+   }
+   
+   int lastPercent = -1;	// last _integer_ percentage value
+-  void reportProgress (double progress) {
+-      int percent = static_cast<int>(std::ceil( progress * 100.0 ));
++  void reportProgress (int now, int duration) {
++      int percent = (now * 100) / duration;
+       if( percent != lastPercent ){	// avoid huge amounts of output for performance/log-file size reasons
+ 	  lastPercent = percent;
+ 	// \r cleans line. Then we print progress as a percentage.
+-	cout << (boost::format("\r[%|3i|%%]\t") %std::ceil( progress * 100.0 )) << flush;
++	cout << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
+       }
+   }
+   int timeToCheckpoint() {
+@@ -124,9 +124,11 @@ namespace BoincWrapper {
+     return boinc_file_exists(path);
+   }
+   
+-  void reportProgress (double progress) {
+-    boinc_fraction_done (progress);
+-  }
++    void reportProgress (int now, int duration) {
++        double progress = static_cast<double>(sim::now().raw()) /
++            static_cast<double>(totalSimDuration.raw());
++        boinc_fraction_done (progress);
++    }
+   
+   int timeToCheckpoint() {
+     return boinc_time_to_checkpoint();
+diff --git a/model/util/BoincWrapper.h b/model/util/BoincWrapper.h
+index f4c2ffb..c90dce5 100644
+--- a/model/util/BoincWrapper.h
++++ b/model/util/BoincWrapper.h
+@@ -46,7 +46,8 @@ namespace BoincWrapper {
+   bool fileExists(const char* path);
+   
+   /// Report the proportion of work done
+-  void reportProgress (double progress);
++  /// (progress is now / duration)
++  void reportProgress (int now, int duration);
+   
+   /// Returns true if it's time to write a checkpoint
+   int timeToCheckpoint();
+@@ -104,4 +105,4 @@ private:
+ };
+ 
+ } }
+-#endif
+\ No newline at end of file
++#endif
