@@ -20,7 +20,12 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
 
 # C++11 would be nice, but we have to compile for relatively old platforms
 if (NOT MSVC)
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -msse2 -mfpmath=sse")
+  # Enable builds on Raspberry pi (although without optimizations)
+  if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98")
+  else (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++98 -msse2 -mfpmath=sse")
+  endif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
 endif (NOT MSVC)
 
 set (OM_STD_LIBS )
