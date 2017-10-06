@@ -152,16 +152,19 @@
             <deterrency value="0.56"/>
             <preprandialKillingEffect value="0"/>
             <postprandialKillingEffect value="0.24"/>
+            <fecundityReduction value="0.4"/>
           </anophelesParams>
           <anophelesParams mosquito="funestus" propActive="1">
             <deterrency value="0.56"/>
             <preprandialKillingEffect value="0"/>
             <postprandialKillingEffect value="0.24"/>
+            <fecundityReduction value="0.4"/>
           </anophelesParams>
           <anophelesParams mosquito="arabiensis" propActive="1">
             <deterrency value="0.56"/>
             <preprandialKillingEffect value="0"/>
             <postprandialKillingEffect value="0.24"/>
+            <fecundityReduction value="0.4"/>
           </anophelesParams>
         </GVI>
       </component>
