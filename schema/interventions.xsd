@@ -1456,7 +1456,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
                   To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
                   </xs:documentation>
-                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
+                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect (logit);</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:choice>
@@ -1502,7 +1502,33 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
                   To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect (logit);</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
+            <xs:choice>
+              <xs:element name="fecundityReduction" type="om:ITNKillingEffect" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    Effect of net on fertility of mosquitoes who survive feeding
+                    on a protected human, relative to an unprotected human.
+                    
+                    Fertility (number of eggs laid) is multiplied by (1-K) / (1-B),
+                    similar to killing effects. This is not allowed to be greater than 1.
+                  </xs:documentation>
+                  <xs:appinfo>name:Fecundity reduction;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="fecundityReductionLogit" type="om:ITNEffectLogit" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    Effect of net on fertility of mosquitoes who survive feeding
+                    on a protected human, relative to an unprotected human.
+                    
+                    Fertility (number of eggs laid) is multiplied by (1-K) / (1-K0),
+                    similar to killing effects. This is not allowed to be greater than 1.
+                  </xs:documentation>
+                  <xs:appinfo>name:Fecundity reduction (logit);</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:choice>
@@ -1563,7 +1589,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="deterrency" type="om:DoubleValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
-                Effect of IRS on attractiveness of humans to mosquitoes relative to
+                Effect of intervention on attractiveness of humans to mosquitoes relative to
                 an unprotected adult human. Parameterisations should take into
                 account that mosquitoes do not always bite indoors.
                 
@@ -1576,9 +1602,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="preprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
-                Effect of IRS on survival mosquitoes as they seek to bite a human
+                Effect of intervention on survival of mosquitoes as they seek to bite a human
                 after choosing that human, relative to the same person not
-                protected by IRS. Parameterisations should take into account
+                protected by the intervention. Parameterisations should take into account
                 that mosquitoes do not always bite indoors. This parameter has
                 been added since some data shows IRS to have a preprandial
                 killing effect.
@@ -1591,14 +1617,26 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="postprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
-                Effect of IRS on survival mosquitoes as they seek to escape from
+                Effect of intervention on survival of mosquitoes as they seek to escape from
                 a human host and rest after a blood meal, relative to the same
-                person not protected by IRS. Parameterisations should take
+                person not protected by the intervention. Parameterisations should take
                 into account that mosquitoes do not always bite indoors.
                 
                 Killing proportion is this factor multiplied by survival of effect.
                 </xs:documentation>
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="fecundityReduction" type="om:DoubleValue" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of intervention on fertility mosquitoes after successfully feeding on
+                a human host, relative to an unproteced human. Parameterisations should take
+                into account that mosquitoes do not always bite indoors.
+                
+                Fertility is multiplied by 1 - (fecundityReduction * decay).
+                </xs:documentation>
+                <xs:appinfo>min:0;name:Fecundity reduction effect</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>
@@ -1724,6 +1762,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
                 </xs:documentation>
                 <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="fecundityReduction" type="om:IRSKillingEffect" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>
+                Effect of IRS on fertility mosquitoes after successfully feeding on
+                a human host, relative to an unproteced human. Parameterisations should take
+                into account that mosquitoes do not always bite indoors.
+                
+                First, we calculate K = B + P×p where B is the
+                base (without protection) probability of death, and P is the
+                insecticide factor,
+                p=1−exp(-insecticideContent×insecticideScalingFactor).
+                
+                Fecundity is multiplied by (1−K) / (1−B). It is not allowed to be greater than 1.
+                To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
+                </xs:documentation>
+                <xs:appinfo>name:Fecundity reduction</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:sequence>

@@ -44,7 +44,7 @@ FixedEmergence::FixedEmergence() :
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTransmission& transmission ){
+void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission ){
     // -----  Calculate required S_v based on desired EIR  -----
     
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
@@ -55,7 +55,7 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTr
     FSCoeffic[0] += log( EIRtoS_v);
     vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     
-    transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
+    transmission.initState ( tsP_A, tsP_df, tsP_dff, initNvFromSv, initOvFromSv, forcedS_v );
     
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
     mosqEmergeRate = forcedS_v;

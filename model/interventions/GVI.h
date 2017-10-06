@@ -66,7 +66,8 @@ private:
             proportionUnprotected( numeric_limits<double>::signaling_NaN() ),
             deterrency( numeric_limits<double>::signaling_NaN() ),
             preprandialKilling( numeric_limits<double>::signaling_NaN() ),
-            postprandialKilling( numeric_limits<double>::signaling_NaN() )
+            postprandialKilling( numeric_limits<double>::signaling_NaN() ),
+            fecundityReduction( numeric_limits<double>::signaling_NaN() )
         {}
         void init(const scnXml::GVIDescription::AnophelesParamsType& elt, double proportionUse);
         
@@ -80,6 +81,7 @@ private:
         double deterrency;
         double preprandialKilling;
         double postprandialKilling;
+        double fecundityReduction;
         
         friend class HumanGVI;
     };
@@ -122,6 +124,8 @@ public:
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
     virtual double postprandialSurvivalFactor(size_t speciesIndex) const;
+    /// Get the mosquito fecundity multiplier (1 for no effect).
+    virtual double relFecundity(size_t speciesIndex) const;
     
 protected:
     virtual void checkpoint( ostream& stream );

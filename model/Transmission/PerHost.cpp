@@ -103,6 +103,14 @@ double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t spec
     return pRest;
 }
 
+double PerHost::relMosqFecundity (size_t speciesIndex) const {
+    double relFecundity = 1.0;
+    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+        relFecundity *= it->relFecundity( speciesIndex );
+    }
+    return relFecundity;
+}
+
 bool PerHost::hasActiveInterv(interventions::Component::Type type) const{
     for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         if( it->isDeployed() ){

@@ -65,6 +65,9 @@ namespace factors {
                                                    double maxHoleIndex,
                                                    bool isDeterrent);
         
+        /// Initialise the model to always return no effect (factor 1).
+        void init1();
+        
         /** Part of survival factor, used by new ITN deterrency model. */
         double rel_pAtt( double holeIndex, double insecticideContent )const;
         /** Calculate additional survival factor imposed by nets on pre-/post-
@@ -184,6 +187,10 @@ public:
         inline double postprandialSurvivalFactor( double holeIndex, double insecticideContent )const{
             return byProtection( postprandialKillingEffect.survivalFactor( holeIndex, insecticideContent ) );
         }
+        /// Get mosquito fecundity multiplier
+        inline double relFecundity( double holeIndex, double insecticideContent )const{
+            return byProtection( relFecundityEffect.survivalFactor( holeIndex, insecticideContent ) );
+        }
         
         /// Return x*proportionProtected + proportionUnprotected
         inline double byProtection(double x) const{
@@ -196,6 +203,7 @@ public:
         factors::RelativeAttractiveness relAttractiveness;
         factors::SurvivalFactor preprandialKillingEffect;
         factors::SurvivalFactor postprandialKillingEffect;
+        factors::SurvivalFactor relFecundityEffect;
         
         friend class HumanITN;
     };
@@ -248,6 +256,8 @@ public:
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
     virtual double postprandialSurvivalFactor(size_t speciesIndex) const;
+    /// Get the mosquito fecundity multiplier (1 for no effect).
+    virtual double relFecundity(size_t speciesIndex) const;
     
 protected:
     virtual void checkpoint( ostream& stream );

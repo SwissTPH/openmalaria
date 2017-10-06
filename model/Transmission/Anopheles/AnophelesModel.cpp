@@ -156,6 +156,7 @@ void AnophelesModel::initAvailability(
     
     nhh_avail = 0.0;
     nhh_sigma_df = 0.0;
+    nhh_sigma_dff = 0.0;
     foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
 //         map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
 //         if (pop == nonHumanHostPopulations.end()){
@@ -170,11 +171,14 @@ void AnophelesModel::initAvailability(
         const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
         const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
         const double P_D_i = xmlNNH.getMosqProbResting().getValue();
+        const double rel_fecundity = (xmlNNH.getHostFecundityFactor().present() ? xmlNNH.getHostFecundityFactor().get().getValue() : 1.0);
         const double P_Ahi = P_Ah * xi_i;       // probability of encountering this type of NNH on a given night
         const double avail_i = P_Ahi * availFactor; // N_i * α_i
         
         nhh_avail += avail_i;    // N * α
-        nhh_sigma_df += avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
+        const double df = avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
+        nhh_sigma_df += df;
+        nhh_sigma_dff += df * rel_fecundity;
         // Note: we would do the same for P_dif except that it's multiplied by
         // infectiousness of host to mosquito which is zero.
     }
@@ -190,13 +194,14 @@ void AnophelesModel::initAvailability(
 // -----  Initialisation of model which is done after creating initial humans  -----
 
 void AnophelesModel::init2 (int nHumans, double meanPopAvail,
-        double sum_avail, double sigma_f, double sigma_df)
+        double sum_avail, double sigma_f, double sigma_df, double sigma_dff)
 {
     // -----  Calculate P_A, P_Ai, P_df based on pop age structure  -----
     
     // ν_A: rate at which mosquitoes find hosts or die (i.e. leave host-seeking state)
     double leaveRate = sum_avail + nhh_avail + mosqSeekingDeathRate;
     sigma_df += nhh_sigma_df;
+    sigma_dff += nhh_sigma_dff;
     
     // Probability of a mosquito not finding a host this day:
     double initialP_A = exp(-leaveRate * mosqSeekingDuration);
@@ -205,13 +210,14 @@ void AnophelesModel::init2 (int nHumans, double meanPopAvail,
     // We use sumPFindBite below to get required S_v.
     double sumPFindBite = sigma_f * availDivisor;
     double initialP_df  = sigma_df * availDivisor * probMosqSurvivalOvipositing;
+    double initialP_dff  = sigma_dff * availDivisor * probMosqSurvivalOvipositing;
     
     // -----  Calculate required S_v based on desired EIR  -----
     // Third parameter is a multiplication factor for S_v/EIR. First we multiply
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
-    transmission.emergence->init2( initialP_A, initialP_df,
+    transmission.emergence->init2( initialP_A, initialP_df, initialP_dff,
             nHumans * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
@@ -267,7 +273,7 @@ void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime li
 
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod (
-        double sum_avail, double sigma_df, vector<double>& sigma_dif, bool isDynamic)
+        double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic)
 {
     transmission.emergence->update();
     
@@ -313,6 +319,7 @@ void AnophelesModel::advancePeriod (
     
     leaveRate += nhh_avail;
     sigma_df += nhh_sigma_df;
+    sigma_dff += nhh_sigma_dff;
     
     for( list<TrapData>::iterator it = baitedTraps.begin(); it != baitedTraps.end(); ){
         if( sim::ts0() > it->expiry ){
@@ -336,6 +343,7 @@ void AnophelesModel::advancePeriod (
         alphaE *= 1.0 - pDeath.current_value( sim::ts0() );
     }
     double tsP_df  = sigma_df * alphaE;
+    double tsP_dff = sigma_dff * alphaE;
     // from now, sigma_dif becomes P_dif (but we can't simply rename):
     vectors::scale( sigma_dif, alphaE );
     
@@ -349,7 +357,7 @@ void AnophelesModel::advancePeriod (
     // simulation uses one or five day time steps.
     const SimTime nextTS = sim::ts0() + SimTime::oneTS();
     for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay() ){
-        transmission.update( d0, tsP_A, tsP_df, sigma_dif, isDynamic, partialEIR, availDivisor );
+        transmission.update( d0, tsP_A, tsP_df, sigma_dif, tsP_dff, isDynamic, partialEIR, availDivisor );
     }
 }
 

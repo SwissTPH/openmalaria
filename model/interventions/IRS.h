@@ -65,15 +65,19 @@ private:
         inline double relativeAttractiveness( double insecticideContent )const{
             return _relativeAttractiveness.relativeAttractiveness( insecticideContent );
         }
-        /// Get killing effect on mosquitoes before feeding.
+        /// Get survival effect on mosquitoes before feeding.
         /// See ComponentParams::effect for a more detailed description.
         inline double preprandialSurvivalFactor( double insecticideContent )const{
             return _preprandialKillingEffect.survivalFactor( insecticideContent );
         }
-        /// Get killing effect on mosquitoes after they've eaten.
+        /// Get survival effect on mosquitoes after they've eaten.
         /// See ComponentParams::effect for a more detailed description.
         inline double postprandialSurvivalFactor( double insecticideContent )const{
             return _postprandialKillingEffect.survivalFactor( insecticideContent );
+        }
+        /// Get fecundity effect on mosquitoes surviving feeding
+        inline double fecundityEffect( double insecticideContent )const{
+            return _fecundityEffect.survivalFactor( insecticideContent );
         }
         
         /// Return x*proportionProtected + proportionUnprotected
@@ -114,6 +118,8 @@ private:
             * It is checked that parameters lie in a suitible range, giving a
             * survival factor between 0 and 1. */
             void init(const scnXml::IRSKillingEffect& elt, bool postPrandial, double maxInsecticide);
+            /// Initialise, such that factor returned is always 1 (i.e. no effect).
+            void init1();
             
             /** Calculate additional survival factor imposed by IRS on pre-/post-
             * prandial killing. Should be bounded to [0,1] and tend to 1 as the
@@ -129,6 +135,7 @@ private:
         RelativeAttractiveness _relativeAttractiveness;
         SurvivalFactor _preprandialKillingEffect;
         SurvivalFactor _postprandialKillingEffect;
+        SurvivalFactor _fecundityEffect;
         
         friend class HumanIRS;
     };
@@ -177,6 +184,8 @@ public:
     /// Get killing effect on mosquitoes after they've eaten.
     /// See ComponentParams::effect for a more detailed description.
     virtual double postprandialSurvivalFactor(size_t speciesIndex) const;
+    /// Get the mosquito fecundity multiplier (1 for no effect).
+    virtual double relFecundity(size_t speciesIndex) const;
     
 protected:
     virtual void checkpoint( ostream& stream );

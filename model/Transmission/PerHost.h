@@ -72,6 +72,8 @@ public:
     /** Get the killing effect on mosquitoes after they've eaten as a survival
      * multiplier. */
     virtual double postprandialSurvivalFactor(size_t speciesIndex) const =0;
+    /// Get the mosquito fecundity multiplier (1 for no effect).
+    virtual double relFecundity(size_t speciesIndex) const =0;
     
     /// Index of effect describing the intervention
     inline interventions::ComponentId id() const { return m_id; }
@@ -135,6 +137,8 @@ public:
     
     ///@brief Intervention controls
     //@{
+    /** Set true to remove human from transmission. Must set back to false
+     * to restore transmission. */
     inline void removeFromTransmission (bool s){
         outsideTransmission = s;
     }
@@ -215,15 +219,17 @@ public:
     }
     //@}
     
-    ///@brief Get killing effects of interventions pre/post biting
+    ///@brief Get effects of interventions pre/post biting
     //@{
     /** Probability of a mosquito succesfully biting a host (P_B_i). */
     double probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const;
     /** Probability of a mosquito succesfully finding a resting
      * place after biting and then resting (P_C_i * P_D_i). */
     double probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const;
-    /** Set true to remove human from transmission. Must set back to false
-     * to restore transmission. */
+    /** Multiplicative factor for the number of fertile eggs laid by mosquitoes
+     * after feeding on this host. Should be 1 normally, less than 1 to reduce
+     * fertility, greater than 1 to increase. */
+    double relMosqFecundity (size_t speciesIndex) const;
     //@}
     
     ///@brief Convenience wrappers around several functions
