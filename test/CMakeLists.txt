@@ -25,6 +25,8 @@ set (OM_BOXTEST_NAMES
   Genotypes
   IRS30
   KK_20150612
+  LifeNet1
+  LifeNet2
   Molineaux
   MolPairwise
   MSAT
@@ -40,6 +42,7 @@ set (OM_BOXTEST_NAMES
   SimpleMPDTest
   SubPopRemoval
   TrapTest
+  TriggeredMSAT
   VecFullTest
   # disabled because the vector lifecycle model isn't yet done:
   # VecLCMonthly VecLCTest
