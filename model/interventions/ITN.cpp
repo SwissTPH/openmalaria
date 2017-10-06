@@ -613,7 +613,12 @@ void ITNComponent::ITNAnopheles::init(
                                             *holeIndexMax,
                                             false);
     }
-    if (elt.getFecundityReductionLogit().present()) {
+    if (elt.getFecundityReduction().present()) {
+        relFecundityEffect.init(elt.getFecundityReduction().get(),
+                                maxInsecticide,
+                                "ITN.description.anophelesParams.fecundityReduction",
+                                false);
+    } else if (elt.getFecundityReductionLogit().present()) {
         if (!holeIndexMax) {
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit fecundity effect");
         }

@@ -1456,7 +1456,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
                   To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
                   </xs:documentation>
-                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
+                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect (logit);</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:choice>
@@ -1502,22 +1502,36 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
                   To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
+                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect (logit);</xs:appinfo>
                 </xs:annotation>
               </xs:element>
             </xs:choice>
-            <xs:element name="fecundityReductionLogit" type="om:ITNEffectLogit" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
-                  Effect of net on fertility of mosquitoes who survive feeding
-                  on a protected human, relative to an unprotected human.
-                  
-                  Fertility (number of eggs laid) is multiplied by (1-K) / (1-K0),
-                  similar to killing effects. This is not allowed to be greater than 1.
-                </xs:documentation>
-                <xs:appinfo>name:Fecundity reduction;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
+            <xs:choice>
+              <xs:element name="fecundityReduction" type="om:ITNKillingEffect" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    Effect of net on fertility of mosquitoes who survive feeding
+                    on a protected human, relative to an unprotected human.
+                    
+                    Fertility (number of eggs laid) is multiplied by (1-K) / (1-B),
+                    similar to killing effects. This is not allowed to be greater than 1.
+                  </xs:documentation>
+                  <xs:appinfo>name:Fecundity reduction;</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+              <xs:element name="fecundityReductionLogit" type="om:ITNEffectLogit" minOccurs="0">
+                <xs:annotation>
+                  <xs:documentation>
+                    Effect of net on fertility of mosquitoes who survive feeding
+                    on a protected human, relative to an unprotected human.
+                    
+                    Fertility (number of eggs laid) is multiplied by (1-K) / (1-K0),
+                    similar to killing effects. This is not allowed to be greater than 1.
+                  </xs:documentation>
+                  <xs:appinfo>name:Fecundity reduction (logit);</xs:appinfo>
+                </xs:annotation>
+              </xs:element>
+            </xs:choice>
           </xs:sequence>
           <xs:attribute name="mosquito" type="xs:string" use="required">
             <xs:annotation>
