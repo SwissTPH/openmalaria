@@ -72,6 +72,8 @@ public:
     /** Get the killing effect on mosquitoes after they've eaten as a survival
      * multiplier. */
     virtual double postprandialSurvivalFactor(size_t speciesIndex) const =0;
+    /// Get the mosquito fecundity multiplier (1 for no effect).
+    virtual double relFecundity(size_t speciesIndex) const =0;
     
     /// Index of effect describing the intervention
     inline interventions::ComponentId id() const { return m_id; }
@@ -227,7 +229,7 @@ public:
     /** Multiplicative factor for the number of fertile eggs laid by mosquitoes
      * after feeding on this host. Should be 1 normally, less than 1 to reduce
      * fertility, greater than 1 to increase. */
-    double relMosqFecundity () const;
+    double relMosqFecundity (size_t speciesIndex) const;
     //@}
     
     ///@brief Convenience wrappers around several functions

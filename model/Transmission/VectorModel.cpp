@@ -278,7 +278,7 @@ void VectorModel::init2 () {
             prod *= host.probMosqBiting(humanBase, i);
             sigma_f += prod;
             sigma_df += prod * host.probMosqResting(humanBase, i);
-            sigma_dff += prod * host.probMosqResting(humanBase, i) * host.relMosqFecundity();
+            sigma_dff += prod * host.probMosqResting(humanBase, i) * host.relMosqFecundity(i);
         }
         
         species[i].init2 (sim::humanPop().size(), meanPopAvail, sum_avail, sigma_f, sigma_df, sigma_dff);
@@ -494,7 +494,7 @@ void VectorModel::vectorUpdate () {
             for( size_t g = 0; g < nGenotypes; ++g ){
                 saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
             }
-            sigma_dff[s] += df * host.relMosqFecundity();
+            sigma_dff[s] += df * host.relMosqFecundity(s);
         }
         
         h += 1;

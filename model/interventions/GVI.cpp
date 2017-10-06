@@ -86,6 +86,7 @@ void GVIComponent::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesPar
     deterrency = elt.getDeterrency().present() ? elt.getDeterrency().get().getValue() : 0.0;
     preprandialKilling = elt.getPreprandialKillingEffect().present() ? elt.getPreprandialKillingEffect().get().getValue() : 0.0;
     postprandialKilling = elt.getPostprandialKillingEffect().present() ? elt.getPostprandialKillingEffect().get().getValue() : 0.0;
+    fecundityReduction = elt.getFecundityReduction().present() ? elt.getFecundityReduction().get().getValue() : 0.0;
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
     assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
@@ -129,6 +130,12 @@ double HumanGVI::postprandialSurvivalFactor(size_t speciesIndex) const{
     const GVIComponent& params = *GVIComponent::componentsByIndex[m_id.id];
     const GVIComponent::GVIAnopheles& anoph = params.species[speciesIndex];
     double effect = (1.0 - anoph.postprandialKilling * getEffectSurvival(params));
+    return anoph.byProtection( effect );
+}
+double HumanGVI::relFecundity(size_t speciesIndex) const{
+    const GVIComponent& params = *GVIComponent::componentsByIndex[m_id.id];
+    const GVIComponent::GVIAnopheles& anoph = params.species[speciesIndex];
+    double effect = (1.0 - anoph.fecundityReduction * getEffectSurvival(params));
     return anoph.byProtection( effect );
 }
 

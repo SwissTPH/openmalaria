@@ -95,6 +95,11 @@ void IRSComponent::IRSAnopheles::init(
     _relativeAttractiveness.init( elt.getDeterrency() );
     _preprandialKillingEffect.init( elt.getPreprandialKillingEffect(), false, maxInsecticide );
     _postprandialKillingEffect.init( elt.getPostprandialKillingEffect(), true, maxInsecticide );
+    if (elt.getFecundityReduction().present()) {
+        _fecundityEffect.init( elt.getFecundityReduction().get(), false/*TODO: err msg*/, maxInsecticide );
+    } else {
+        _fecundityEffect.init1();
+    }
     assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
@@ -197,6 +202,12 @@ void IRSComponent::IRSAnopheles::SurvivalFactor::init(const scnXml::IRSKillingEf
         throw util::xml_scenario_error( msg.str() );
     }
 }
+void IRSComponent::IRSAnopheles::SurvivalFactor::init1(){
+    BF = 0.0;
+    PF = 0.0;
+    insecticideScaling = 0.0;
+    invBaseSurvival = 1.0;
+}
 double IRSComponent::IRSAnopheles::RelativeAttractiveness::relativeAttractiveness(
         double insecticideContent
 ) const {
@@ -264,6 +275,12 @@ double HumanIRS::postprandialSurvivalFactor(size_t speciesIndex) const{
     const IRSComponent& params = *IRSComponent::componentsByIndex[m_id.id];
     const IRSComponent::IRSAnopheles& anoph = params.species[speciesIndex];
     double effect = anoph.postprandialSurvivalFactor( getInsecticideContent(params) );
+    return anoph.byProtection( effect );
+}
+double HumanIRS::relFecundity(size_t speciesIndex) const{
+    const IRSComponent& params = *IRSComponent::componentsByIndex[m_id.id];
+    const IRSComponent::IRSAnopheles& anoph = params.species[speciesIndex];
+    double effect = anoph.fecundityEffect( getInsecticideContent(params) );
     return anoph.byProtection( effect );
 }
 
