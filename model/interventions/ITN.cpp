@@ -247,6 +247,17 @@ void factors::SurvivalFactor::initLogit(const scnXml::ITNEffectLogit& elt,
     }
 }
 
+void factors::SurvivalFactor::init1() {
+    useLogitEqns = false;
+    a.invBaseSurvival = 1.0;
+    a.BF = 0.0;
+    a.HF = 0.0;
+    a.PF = 0.0;
+    a.IF = 0.0;
+    a.insecticideScaling = 0.0;
+    a.holeScaling = 0.0;
+}
+
 double factors::SurvivalFactor::rel_pAtt( double holeIndex, double insecticideContent )const {
     if (!useLogitEqns) {
         const double holeComponent = exp(-holeIndex * a.holeScaling);
@@ -602,6 +613,21 @@ void ITNComponent::ITNAnopheles::init(
                                             *holeIndexMax,
                                             false);
     }
+    if (elt.getFecundityReduction().present()) {
+        relFecundityEffect.init(elt.getFecundityReduction().get(),
+                                maxInsecticide,
+                                "ITN.description.anophelesParams.fecundityReduction",
+                                false);
+    } else if (elt.getFecundityReductionLogit().present()) {
+        if (!holeIndexMax) {
+            throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit fecundity effect");
+        }
+        relFecundityEffect.initLogit(elt.getFecundityReductionLogit().get(),
+                                     *holeIndexMax,
+                                     false);
+    } else {
+        relFecundityEffect.init1();
+    }
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
     double propActive = elt.getPropActive();
@@ -684,6 +710,12 @@ double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
+}
+double HumanITN::relFecundity(size_t speciesIndex) const{
+    if( deployTime == SimTime::never() ) return 1.0;
+    const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
+    const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
+    return anoph.relFecundity( holeIndex, getInsecticideContent(params) );
 }
 
 void HumanITN::checkpoint( ostream& stream ){

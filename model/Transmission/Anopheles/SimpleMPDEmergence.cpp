@@ -61,7 +61,7 @@ SimpleMPDEmergence::SimpleMPDEmergence(const scnXml::SimpleMPD& elt) :
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTransmission& transmission ){
+void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission ){
     // -----  Calculate required S_v based on desired EIR  -----
     
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
@@ -72,14 +72,14 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     FSCoeffic[0] += log( EIRtoS_v);
     vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     
-    transmission.initState ( tsP_A, tsP_df, initNvFromSv, initOvFromSv, forcedS_v );
+    transmission.initState ( tsP_A, tsP_df, tsP_dff, initNvFromSv, initOvFromSv, forcedS_v );
     
     // Initialise nOvipositingDelayed
     SimTime y1 = SimTime::oneYear();
     SimTime tau = transmission.getMosqRestDuration();
     for( SimTime t = SimTime::zero(); t < developmentDuration; t += SimTime::oneDay() ){
         nOvipositingDelayed[mod_nn(t+tau, developmentDuration)] =
-            tsP_df * initNvFromSv * forcedS_v[t];
+            tsP_dff * initNvFromSv * forcedS_v[t];
     }
     
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
@@ -88,7 +88,7 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double EIRtoS_v, Mo
     // Used when calculating invLarvalResources (but not a hard constraint):
     assert(tau+developmentDuration <= y1);
     for( SimTime t = SimTime::zero(); t < SimTime::oneYear(); t += SimTime::oneDay() ){
-        double yt = fEggsLaidByOviposit * tsP_df * initNvFromSv *
+        double yt = fEggsLaidByOviposit * tsP_dff * initNvFromSv *
             forcedS_v[mod_nn(t + y1 - tau - developmentDuration, y1)];
         invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
             (mosqEmergeRate[t] * yt);

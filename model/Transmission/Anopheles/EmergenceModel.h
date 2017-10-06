@@ -81,10 +81,11 @@ public:
      *
      * @param tsP_A P_A for initialisation; assumed constant when there are no interventions
      * @param tsP_df P_df for initialisation; assumed constant when there are no interventions
+     * @param tsP_dff P_dff for initialisation; assumed constant when there are no interventions
      * @param EIRtoS_v multiplication factor to convert input EIR into required
      * @param transmission reference to MosqTransmission object
      * S_v. */
-    virtual void init2( double tsP_A, double tsP_df, double EIRtoS_v, MosqTransmission& transmission ) =0;
+    virtual void init2( double tsP_A, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission ) =0;
     
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
