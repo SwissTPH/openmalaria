@@ -61,7 +61,7 @@ public:
     
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */
-    void initState ( double tsP_A, double tsP_df,
+    void initState ( double tsP_A, double tsP_df, double tsP_dff,
                      double initNvFromSv, double initOvFromSv,
                      const vecDay<double>& forcedS_v );
     
@@ -79,12 +79,14 @@ public:
      * @param tsP_A P_A for this time-step
      * @param tsP_df P_df for this time-step
      * @param tsP_dif P_dif for this time-step, per parasite genotype
+     * @param tsP_dff P_dff for this time step
      * @param partialEIR Vector, per genotype; after calculation, the latest
      *  S_v values are multiplied by EIR_factor and added to this.
      * @param EIR_factor see parameter partialEIR
      */
     void update( SimTime d0, double tsP_A, double tsP_df,
-                   const vector<double> tsP_dif, bool isDynamic,
+                   const vector<double> tsP_dif, double tsP_dff,
+                   bool isDynamic,
                    vector<double>& partialEIR, double EIR_factor );
     
     ///@brief Interventions and reporting
@@ -137,6 +139,7 @@ public:
         P_A & stream;
         P_df & stream;
         P_dif & stream;
+        P_dff & stream;
         N_v & stream;
         O_v & stream;
         S_v & stream;
@@ -218,6 +221,9 @@ private:
     /** P_dif is the probability of a mosquito finding a host, getting
      * infected, and successfully completing a feeding cycle. */
     vecDay2D<double> P_dif;
+    
+    /** Like P_df but including fertility factors */
+    vecDay<double> P_dff;
     
     /** Numbers of host-seeking mosquitos each day
      * 

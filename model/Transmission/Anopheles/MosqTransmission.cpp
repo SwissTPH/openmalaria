@@ -113,21 +113,23 @@ void MosqTransmission::initIterateScale ( double factor ){
     vectors::scale (S_v, factor);
 }
 
-void MosqTransmission::initState ( double tsP_A, double tsP_df,
+void MosqTransmission::initState ( double tsP_A, double tsP_df, double tsP_dff,
                                        double initNvFromSv, double initOvFromSv,
                                        const vecDay<double>& forcedS_v ){
-    N_v  .resize (N_v_length);
-    O_v  .resize (N_v_length, Genotypes::N());
-    S_v  .resize (N_v_length, Genotypes::N());
-    P_A  .resize (N_v_length);
-    P_df .resize (N_v_length);
+    N_v  .assign (N_v_length, numeric_limits<double>::quiet_NaN());
+    O_v  .assign (N_v_length, Genotypes::N(), numeric_limits<double>::quiet_NaN());
+    S_v  .assign (N_v_length, Genotypes::N(), numeric_limits<double>::quiet_NaN());
+    P_A  .assign (N_v_length, numeric_limits<double>::quiet_NaN());
+    P_df .assign (N_v_length, numeric_limits<double>::quiet_NaN());
     P_dif.assign (N_v_length, Genotypes::N(), 0.0);// humans start off with no infectiousness.. so just wait
+    P_dff.assign (N_v_length, numeric_limits<double>::quiet_NaN());
     
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
     assert( N_v_length <= forcedS_v.size() );
     for( SimTime t = SimTime::zero(); t < N_v_length; t += SimTime::oneDay() ){
         P_A[t] = tsP_A;
         P_df[t] = tsP_df;
+        P_dff[t] = tsP_dff;
         N_v[t] = forcedS_v[t] * initNvFromSv;
         for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
             S_v.at(t, genotype) = forcedS_v[t] * Genotypes::initialFreq(genotype);
@@ -138,7 +140,8 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df,
 
 
 void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
-        const vector<double> tsP_dif, bool isDynamic,
+        const vector<double> tsP_dif, double tsP_dff,
+        bool isDynamic,
         vector<double>& partialEIR, double EIR_factor )
 {
     SimTime d1 = d0 + SimTime::oneDay();    // end of step
@@ -155,6 +158,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     // present in each of the previous N_v_length - 1 positions of arrays.
     P_A[t1] = tsP_A;
     P_df[t1] = tsP_df;
+    P_dff[t1] = tsP_dff;
     for( size_t i = 0; i < Genotypes::N(); ++i )
         P_dif.at(t1,i) = tsP_dif[i];
     
@@ -243,7 +247,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
         //END S_v
     }
     
-    const double nOvipositing = P_df[ttau] * N_v[ttau];       // number ovipositing on this step
+    const double nOvipositing = P_dff[ttau] * N_v[ttau];       // number ovipositing on this step
     const double newAdults = emergence->update( d0, nOvipositing, total_S_v );
     util::streamValidate( newAdults );
     

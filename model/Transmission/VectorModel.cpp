@@ -268,6 +268,7 @@ void VectorModel::init2 () {
         double sum_avail = 0.0;
         double sigma_f = 0.0;
         double sigma_df = 0.0;
+        double sigma_dff = 0.0;
         
         const Anopheles::PerHostBase& humanBase = species[i].getHumanBaseParams();
         foreach(const Host::Human& human, sim::humanPop().crange()) {
@@ -277,9 +278,10 @@ void VectorModel::init2 () {
             prod *= host.probMosqBiting(humanBase, i);
             sigma_f += prod;
             sigma_df += prod * host.probMosqResting(humanBase, i);
+            sigma_dff += prod * host.probMosqResting(humanBase, i) * host.relMosqFecundity();
         }
         
-        species[i].init2 (sim::humanPop().size(), meanPopAvail, sum_avail, sigma_f, sigma_df);
+        species[i].init2 (sim::humanPop().size(), meanPopAvail, sum_avail, sigma_f, sigma_df, sigma_dff);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
@@ -454,6 +456,7 @@ void VectorModel::vectorUpdate () {
     saved_sum_avail.assign_at1(popDataInd, 0.0);
     saved_sigma_df.assign_at1(popDataInd, 0.0);
     saved_sigma_dif.assign_at1(popDataInd, 0.0);
+    vector<double> sigma_dff(numSpecies, 0.0);
     
     vector<const Anopheles::PerHostBase*> humanBases;
     humanBases.reserve( numSpecies );
@@ -491,6 +494,7 @@ void VectorModel::vectorUpdate () {
             for( size_t g = 0; g < nGenotypes; ++g ){
                 saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
             }
+            sigma_dff[s] += df * host.relMosqFecundity();
         }
         
         h += 1;
@@ -506,6 +510,7 @@ void VectorModel::vectorUpdate () {
         species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
                 saved_sigma_df.at(popDataInd, s),
                 sigma_dif_species,
+                sigma_dff[s],
                 simulationMode == dynamicEIR);
     }
 }

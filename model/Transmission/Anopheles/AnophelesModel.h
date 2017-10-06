@@ -78,7 +78,8 @@ public:
             mosqSeekingDeathRate(numeric_limits<double>::signaling_NaN()),
             probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
             nhh_avail(numeric_limits<double>::signaling_NaN()),
-            nhh_sigma_df(numeric_limits<double>::signaling_NaN())
+            nhh_sigma_df(numeric_limits<double>::signaling_NaN()),
+            nhh_sigma_dff(numeric_limits<double>::signaling_NaN())
     {}
     
     /** Called to initialise variables instead of a constructor. At this point,
@@ -111,11 +112,12 @@ public:
      * @param sum_avail sum_i α_i * N_i for human hosts i
      * @param sigma_f sum_i α_i * N_i * P_Bi for human hosts i
      * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
+     * @param sigma_dff sum_i α_i * N_i * P_Bi * P_Ci * P_Di * rel_mosq_fecundity for human hosts i
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
     void init2 (int nHumans, double meanPopAvail,
-        double sum_avail, double sigma_f, double sigma_df);
+        double sum_avail, double sigma_f, double sigma_df, double sigma_dff);
     
     /** Set up the non-host-specific interventions. */
     void initVectorInterv( const scnXml::VectorSpeciesIntervention& elt, size_t instance );
@@ -145,9 +147,10 @@ public:
      * @param sum_avail sum_i α_i * N_i for human hosts i
      * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
      * @param sigma_dif sum_i α_i * N_i * P_Bi * P_Ci * P_Di * Kvi for human hosts i; this vector is modified!
+     * @param sigma_dff sum_i α_i * N_i * P_Bi * P_Ci * P_Di * rel_mosq_fecundity for human hosts i
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
-    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, bool isDynamic);
+    void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic);
 
     /// Intermediatary from vector model equations used to calculate EIR
     inline vector<double>& getPartialEIR() { return partialEIR; }
@@ -292,6 +295,8 @@ private:
     // sum_i N_i * α_i * P_B_i * P_C_i * P_D_i for i in NHH types: chance feeding
     // and surviving a complete cycle across all non-human hosts
     double nhh_sigma_df;
+    // as above, but modified by fertility factors
+    double nhh_sigma_dff;
     //@}
     
     struct TrapParams {

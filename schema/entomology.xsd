@@ -471,8 +471,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             <xs:element name="femaleEggsLaidByOviposit" type="om:DoubleValue">
               <xs:annotation>
                 <xs:documentation>
-                  The total number of female eggs laid by a female
-                  mosquito at the conclusion to a feeding cycle.
+                  The total number of female eggs laid by a female mosquito at
+                  the conclusion to a feeding cycle, after feeding on an
+                  unprotected human (non-human hosts and protected humans
+                  use a multiplication factor to adjust this number for
+                  mosquitoes feeding on them).
                 </xs:documentation>
                 <xs:appinfo> units: Eggs per feeding cycle; name:Eggs laid by ovipositing mosquito;</xs:appinfo>
               </xs:annotation>
@@ -570,6 +573,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               <xs:annotation>
                 <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
                 <xs:appinfo>units:Proportion;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
+              </xs:annotation>
+            </xs:element>
+            <xs:element name="hostFecundityFactor" type="om:DoubleValue" minOccurs="0">
+              <xs:annotation>
+                <xs:documentation>Multiplicative factor for the number of fertile eggs laid by a
+                  mosquito after biting this type of host, relative to an unprotected human.
+                </xs:documentation>
+                <xs:appinfo>units:Proportion;name:Relative fecundity of biting mosquitoes;</xs:appinfo>
               </xs:annotation>
             </xs:element>
           </xs:all>

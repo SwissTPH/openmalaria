@@ -103,6 +103,11 @@ double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t spec
     return pRest;
 }
 
+double PerHost::relMosqFecundity () const {
+    // TODO: intervention effects
+    return 1.0;
+}
+
 bool PerHost::hasActiveInterv(interventions::Component::Type type) const{
     for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         if( it->isDeployed() ){
