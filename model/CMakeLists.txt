@@ -55,7 +55,7 @@ set (Model_CPP
   #Transmission/Anopheles/LCEmergence.cpp
   #Transmission/Anopheles/LifeCycle.cpp
   #Transmission/Anopheles/ResourceFitter.cpp
-  Transmission/Anopheles/PerHost.cpp
+  Transmission/Anopheles/PerHostAnoph.cpp
   
   WithinHost/WHInterface.cpp
   WithinHost/WHFalciparum.cpp

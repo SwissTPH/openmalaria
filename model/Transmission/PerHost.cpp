@@ -20,7 +20,7 @@
 
 #include "Transmission/PerHost.h"
 #include "Transmission/VectorModel.h"
-#include "Transmission/Anopheles/PerHost.h"
+#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "interventions/InterventionManager.hpp"
 #include "util/errors.h"
 #include "util/checkpoint.h"

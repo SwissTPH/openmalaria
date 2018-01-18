@@ -22,7 +22,7 @@
 #define Hmod_PerHost
 
 #include "Global.h"
-#include "Transmission/Anopheles/PerHost.h"
+#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "interventions/Interfaces.hpp"
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"

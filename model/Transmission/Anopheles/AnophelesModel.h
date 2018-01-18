@@ -22,7 +22,7 @@
 #define Hmod_AnophelesModel
 
 #include "Global.h"
-#include "Transmission/Anopheles/PerHost.h"
+#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "Transmission/PerHost.h"
 #include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"

@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Anopheles/PerHost.h"
+#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "util/errors.h"
 
 namespace OM {
