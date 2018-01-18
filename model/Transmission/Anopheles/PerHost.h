@@ -68,7 +68,7 @@ public:
 };
 
 /** Data needed for each human which is per-mosquito species. */
-class PerHost
+class PerHostAnoph
 {
 public:
     /** In lieu of a constructor initialises elements, using the passed base to

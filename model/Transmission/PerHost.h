@@ -34,6 +34,7 @@ namespace OM {
 namespace Transmission {
 
 using Anopheles::PerHostAnophParams;
+using Anopheles::PerHostAnoph;
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::DecayFuncHet;
@@ -270,7 +271,7 @@ private:
     void checkpointIntervs( ostream& stream );
     void checkpointIntervs( istream& stream );
     
-    vector<Anopheles::PerHost> species;
+    vector<PerHostAnoph> species;
     
     // Determines whether human is outside transmission
     bool outsideTransmission;

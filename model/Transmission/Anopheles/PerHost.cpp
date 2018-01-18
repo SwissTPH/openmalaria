@@ -27,7 +27,7 @@ namespace Anopheles {
 
 // ----- Per host, per species, non-static -----
 
-void PerHost::initialise (const PerHostAnophParams& base, double availabilityFactor)
+void PerHostAnoph::initialise (const PerHostAnophParams& base, double availabilityFactor)
 {
     entoAvailability = base.entoAvailability.sample() * availabilityFactor;
     probMosqBiting = base.probMosqBiting.sample();
