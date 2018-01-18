@@ -126,7 +126,7 @@ public:
     void initVectorTrap( const scnXml::Description1& desc, size_t instance );
     
     /** Return base-line human parameters for the mosquito. */
-    inline const Anopheles::PerHostBase& getHumanBaseParams () {
+    inline const PerHostAnophParams& getHumanBaseParams () {
         return humanBase;
     }
     
@@ -261,7 +261,7 @@ private:
      * descriptions.
      *
      * Read from XML by initialise; no need to checkpoint. */
-    Anopheles::PerHostBase humanBase;
+    PerHostAnophParams humanBase;
     
     
     /** Duration of host-seeking per day; the maximum fraction of a day that a

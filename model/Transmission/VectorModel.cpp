@@ -36,6 +36,7 @@
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
+using Anopheles::PerHostAnophParams;
 
 void VectorModel::ctsCbN_v0 (ostream& stream) {
     for(size_t i = 0; i < numSpecies; ++i)
@@ -67,7 +68,7 @@ void VectorModel::ctsCbS_v (ostream& stream) {
 }
 void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-        const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
+        const PerHostAnophParams& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
             total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->age(sim::now()).inYears() );
@@ -77,7 +78,7 @@ void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
 }
 void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
+	const PerHostAnophParams& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
             total += iter->perHostTransmission.probMosqBiting( params, i );
@@ -87,7 +88,7 @@ void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
 }
 void VectorModel::ctsCbP_CD (const Population& population, ostream& stream){
     for( size_t i = 0; i < numSpecies; ++i){
-	const Anopheles::PerHostBase& params = species[i].getHumanBaseParams();
+	const PerHostAnophParams& params = species[i].getHumanBaseParams();
         double total = 0.0;
         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
             total += iter->perHostTransmission.probMosqResting( params, i );
@@ -270,7 +271,7 @@ void VectorModel::init2 () {
         double sigma_df = 0.0;
         double sigma_dff = 0.0;
         
-        const Anopheles::PerHostBase& humanBase = species[i].getHumanBaseParams();
+        const PerHostAnophParams& humanBase = species[i].getHumanBaseParams();
         foreach(const Host::Human& human, sim::humanPop().crange()) {
             const OM::Transmission::PerHost& host = human.perHostTransmission;
             double prod = host.entoAvailabilityFull (humanBase, i, human.age(sim::now()).inYears());
@@ -458,7 +459,7 @@ void VectorModel::vectorUpdate () {
     saved_sigma_dif.assign_at1(popDataInd, 0.0);
     vector<double> sigma_dff(numSpecies, 0.0);
     
-    vector<const Anopheles::PerHostBase*> humanBases;
+    vector<const PerHostAnophParams*> humanBases;
     humanBases.reserve( numSpecies );
     for(size_t s = 0; s < numSpecies; ++s){
         humanBases.push_back( &species[s].getHumanBaseParams() );

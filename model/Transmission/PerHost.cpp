@@ -28,6 +28,7 @@
 namespace OM {
 namespace Transmission {
 using namespace OM::util;
+using Anopheles::PerHostAnophParams;
 
 // -----  PerHost static  -----
 
@@ -80,7 +81,7 @@ void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
-double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base,
+double PerHost::entoAvailabilityHetVecItv (const PerHostAnophParams& base,
                                 size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].getEntoAvailability();
     for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
@@ -88,14 +89,14 @@ double PerHost::entoAvailabilityHetVecItv (const Anopheles::PerHostBase& base,
     }
     return alpha_i;
 }
-double PerHost::probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::probMosqBiting (const PerHostAnophParams& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].getProbMosqBiting();
     for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
     }
     return P_B_i;
 }
-double PerHost::probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const {
+double PerHost::probMosqResting (const PerHostAnophParams& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].getProbMosqRest();
     for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         pRest *= it->postprandialSurvivalFactor( speciesIndex );

@@ -33,6 +33,7 @@
 namespace OM {
 namespace Transmission {
 
+using Anopheles::PerHostAnophParams;
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::DecayFuncHet;
@@ -200,7 +201,7 @@ public:
      * rate factors.)
      * 
      * Assume mean is human-to-vector availability rate factor. */
-    double entoAvailabilityHetVecItv( const Anopheles::PerHostBase& base, size_t speciesIndex ) const;
+    double entoAvailabilityHetVecItv( const PerHostAnophParams& base, size_t speciesIndex ) const;
     
     /** Availability rate of human to mosquitoes (α_i). Equals 
      * entoAvailabilityHetVecItv()*getRelativeAvailability().
@@ -210,7 +211,7 @@ public:
      * by the average availability of the population, which was incorrectly done
      * in the past. */
     inline double entoAvailabilityFull (
-        const Anopheles::PerHostBase& base,
+        const PerHostAnophParams& base,
         size_t speciesIndex,
         double ageYears
     ) const {
@@ -222,10 +223,10 @@ public:
     ///@brief Get effects of interventions pre/post biting
     //@{
     /** Probability of a mosquito succesfully biting a host (P_B_i). */
-    double probMosqBiting (const Anopheles::PerHostBase& base, size_t speciesIndex) const;
+    double probMosqBiting (const PerHostAnophParams& base, size_t speciesIndex) const;
     /** Probability of a mosquito succesfully finding a resting
      * place after biting and then resting (P_C_i * P_D_i). */
-    double probMosqResting (const Anopheles::PerHostBase& base, size_t speciesIndex) const;
+    double probMosqResting (const PerHostAnophParams& base, size_t speciesIndex) const;
     /** Multiplicative factor for the number of fertile eggs laid by mosquitoes
      * after feeding on this host. Should be 1 normally, less than 1 to reduce
      * fertility, greater than 1 to increase. */
@@ -235,7 +236,7 @@ public:
     ///@brief Convenience wrappers around several functions
     //@{
     /// entoAvailabilityHetVecItv * probMosqBiting
-    inline double availBite (const Anopheles::PerHostBase& base, size_t speciesIndex) const{
+    inline double availBite (const PerHostAnophParams& base, size_t speciesIndex) const{
         return entoAvailabilityHetVecItv(base, speciesIndex) *
                 probMosqBiting(base, speciesIndex);
     }
