@@ -32,7 +32,7 @@ namespace Anopheles {
  * mosquito species: intervention descriptions and model parameters.
  *
  * Parameters are read from XML, and the availability rate is adjusted. */
-class PerHostBase {
+class PerHostAnophParams {
 public:
     /** Set parameters from an XML element. */
     void operator= (const scnXml::Mosq& mosq);
@@ -68,12 +68,12 @@ public:
 };
 
 /** Data needed for each human which is per-mosquito species. */
-class PerHost
+class PerHostAnoph
 {
 public:
     /** In lieu of a constructor initialises elements, using the passed base to
      * get baseline parameters. */
-    void initialise (const PerHostBase& base, double availabilityFactor);
+    void initialise (const PerHostAnophParams& base, double availabilityFactor);
     
     /// Checkpointing
     template<class S>

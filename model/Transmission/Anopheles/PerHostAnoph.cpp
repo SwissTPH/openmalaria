@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "Transmission/Anopheles/PerHost.h"
+#include "Transmission/Anopheles/PerHostAnoph.h"
 #include "util/errors.h"
 
 namespace OM {
@@ -27,14 +27,14 @@ namespace Anopheles {
 
 // ----- Per host, per species, non-static -----
 
-void PerHost::initialise (const PerHostBase& base, double availabilityFactor)
+void PerHostAnoph::initialise (const PerHostAnophParams& base, double availabilityFactor)
 {
     entoAvailability = base.entoAvailability.sample() * availabilityFactor;
     probMosqBiting = base.probMosqBiting.sample();
     probMosqRest = base.probMosqFindRestSite.sample() * base.probMosqSurvivalResting.sample();
 }
 
-void PerHostBase::operator =(const scnXml::Mosq& mosq)
+void PerHostAnophParams::operator =(const scnXml::Mosq& mosq)
 {
     entoAvailability.setParams( numeric_limits<double>::quiet_NaN(),
                                 mosq.getAvailabilityVariance().getValue() );
