@@ -77,11 +77,11 @@ namespace OM { namespace util {
 	/** Return first checkpointing time step _greater than_ time step passed,
 	 * or min int value if no (more) checkpoint times. */
 	static SimTime getNextCheckpointTime( SimTime now ) {
-	    set<SimTime>::iterator it = checkpoint_times.upper_bound( now );
+	    set<int>::iterator it = checkpoint_times.upper_bound( now.inSteps() );
 	    if( it == checkpoint_times.end() )
 		return SimTime::never();
 	    else
-		return *it;
+		return SimTime::fromTS(*it);
 	}
 	
 	/** Prepend if path is relative, prepend it with clResourcePath.
@@ -127,8 +127,12 @@ namespace OM { namespace util {
         static string ctsoutName;
 	
 	/** Set of simulation times at which a checkpoint should be written and
-	* program should exit (to allow resume). */
-	static set<SimTime> checkpoint_times;
+	* program should exit (to allow resume).
+	* 
+	* Units: steps. (We don't use the SimTime type because these times are read
+	* before the step interval is set, and SimTime needs this to convert to days.)
+	*/
+	static set<int> checkpoint_times;
     };
 } }
 #endif
