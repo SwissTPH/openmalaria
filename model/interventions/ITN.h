@@ -25,7 +25,6 @@
 #include "Transmission/PerHost.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
-#include <boost/shared_ptr.hpp>
 #include <boost/optional.hpp>
 
 namespace OM {
@@ -213,8 +212,8 @@ public:
     LognormalSampler ripRate;	// rips per hole per step
     double maxInsecticide;		// maximum initial insecticide
     double ripFactor;			// factor expressing how significant rips are in comparison to holes
-    boost::shared_ptr<DecayFunction> insecticideDecay;
-    boost::shared_ptr<DecayFunction> attritionOfNets;
+    unique_ptr<DecayFunction> insecticideDecay;
+    unique_ptr<DecayFunction> attritionOfNets;
     vector<ITNAnopheles> species; // vector specific params
     
     // This is sparse vector: only indexes corresponding to ITN components are

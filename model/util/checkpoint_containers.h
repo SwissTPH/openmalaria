@@ -40,7 +40,7 @@ namespace checkpoint {
     }
     
     template<class T>
-    void operator& (vector<T> x, ostream& stream) {
+    void operator& (vector<T>& x, ostream& stream) {
         x.size() & stream;
         foreach (T& y, x) {
             y & stream;

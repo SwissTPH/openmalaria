@@ -37,7 +37,7 @@ public:
     /// Current schema version.
     static const int SCHEMA_VERSION = 38;
     
-    DocumentLoader () : documentChanged(false), scenario(NULL) {}
+    DocumentLoader () : documentChanged(false) {}
     
     /** @brief Reads the document in the xmlFile
     * 
@@ -77,7 +77,7 @@ private:
     std::string xmlFileName;
     
     /** @brief The xml data structure. */
-    auto_ptr<scnXml::Scenario> scenario;
+    unique_ptr<scnXml::Scenario> scenario;
 };
 
 } }

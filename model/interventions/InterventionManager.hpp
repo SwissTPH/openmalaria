@@ -84,6 +84,7 @@ public:
 private:
     // Map of textual identifiers to numeric identifiers for components
     static std::map<std::string,ComponentId> identifierMap;
+    // TODO: use C++11 move semantics
     // All human intervention components, indexed by a number. This list is used
     // during initialisation and thereafter only for memory management.
     static boost::ptr_vector<HumanInterventionComponent> humanComponents;

@@ -359,8 +359,8 @@ private:
     static SimTime time1;
     static SimTime interv_time;
     
-    static std::auto_ptr<Population> p_humanPop;
-    static std::auto_ptr<TransmissionModel> p_transmission;
+    static std::unique_ptr<Population> p_humanPop;
+    static std::unique_ptr<TransmissionModel> p_transmission;
     
     friend class Simulator;
     friend class ::UnittestUtil;

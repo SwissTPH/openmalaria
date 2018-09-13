@@ -23,7 +23,6 @@
 
 #include "Global.h"
 #include "util/DecayFunction.h"
-#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace util {
@@ -74,9 +73,7 @@ public:
     
 private:
     /** Description of decay of effects on emergence. */
-    //C++11: could use unique_ptr and implement move support
-    // For C++98 we cannot use auto_ptr because the class object needs to be stored in a vector
-    boost::shared_ptr<util::DecayFunction> decay;
+    unique_ptr<util::DecayFunction> decay;
     
     /** Initial value. Is initialised to 0. */
     double initial;

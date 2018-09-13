@@ -249,7 +249,7 @@ void AnophelesModel::initVectorTrap(const scnXml::Description1& desc, size_t ins
     TrapParams params;
     params.relAvail = desc.getRelativeAvailability().getValue();
     params.availDecay= DecayFunction::makeObject(desc.getDecayOfAvailability(), "decayOfAvailability");
-    trapParams.push_back(params);
+    trapParams.push_back(move(params));
 }
 
 void AnophelesModel::deployVectorPopInterv (size_t instance){

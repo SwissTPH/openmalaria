@@ -77,11 +77,11 @@ public:
      * @param elt XML element specifying which function to use and parameters
      * @param eltName Name of XML element (for reasonable error reporting)
      */
-    static auto_ptr<DecayFunction> makeObject(
+    static unique_ptr<DecayFunction> makeObject(
         const scnXml::DecayFunction& elt, const char* eltName
     );
     /** Return an object representing no decay (useful default). */
-    static auto_ptr<DecayFunction> makeConstantObject();
+    static unique_ptr<DecayFunction> makeConstantObject();
     
     /** Return a value in the range [0,1] describing remaining effectiveness of
      * the intervention.

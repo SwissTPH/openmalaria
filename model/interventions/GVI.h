@@ -26,7 +26,6 @@
 #include "util/DecayFunction.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
-#include <boost/shared_ptr.hpp>
 
 namespace OM { namespace interventions {
     using util::DecayFunction;
@@ -86,7 +85,7 @@ private:
         friend class HumanGVI;
     };
     
-    boost::shared_ptr<DecayFunction> decay;
+    unique_ptr<DecayFunction> decay;
     vector<GVIAnopheles> species;  // vector specific params
     
     // This is sparse vector: only indexes corresponding to a GVI component are used

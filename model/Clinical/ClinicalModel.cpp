@@ -56,7 +56,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& 
         if( scenario.getHealthSystem().getImmediateOutcomes().present() ){
             opt_imm_outcomes = true;
             
-            if( util::CommandLine::DEPRECATION_WARNINGS ){
+            if( util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS) ){
                 cerr << "Deprecation warning: healthSystem: use of ImmediateOutcomes can be replaced by the more flexible DecisionTree5Day (optional)" << endl;
             }
         }

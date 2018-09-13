@@ -155,6 +155,7 @@ private:
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
     
+    // TODO: use C++11 move semantics
     typedef ptr_vector<LSTMDrug> DrugVec;
     /// Drugs with non-zero blood concentrations:
     DrugVec m_drugs;

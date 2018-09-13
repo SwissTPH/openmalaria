@@ -144,7 +144,7 @@ void PerHost::checkpointIntervs( istream& stream ){
                 throw util::base_exception( "" );       // see catch block below
             PerHostInterventionData *v = params->makeHumanPart( stream, id );
             activeComponents.push_back( v );
-        }catch( util::base_exception e ){
+        }catch( util::base_exception& e ){
             // two causes, both boil down to index being wrong
             throw util::checkpoint_error( "bad value in checkpoint file" );
         }

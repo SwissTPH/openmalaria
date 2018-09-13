@@ -39,8 +39,7 @@ using UnitTest::WHMock;
 class CMDecisionTreeSuite : public CxxTest::TestSuite
 {
 public:
-    CMDecisionTreeSuite () :
-            whm(0), hd(0) {}
+    CMDecisionTreeSuite () {}
     ~CMDecisionTreeSuite () {}
     
     void setUp () {
@@ -257,9 +256,9 @@ public:
     }
     
 private:
-    auto_ptr<Host::Human> human;
-    auto_ptr<WHMock> whm;
-    auto_ptr<CMHostData> hd;
+    unique_ptr<Host::Human> human;
+    unique_ptr<WHMock> whm;
+    unique_ptr<CMHostData> hd;
 };
 
 #endif

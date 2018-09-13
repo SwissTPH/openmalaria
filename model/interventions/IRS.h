@@ -24,7 +24,6 @@
 #include "util/DecayFunction.h"
 #include "Transmission/PerHost.h"
 #include "schema/interventions.h"
-#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace interventions {
@@ -144,7 +143,7 @@ private:
     
     NormalSampler initialInsecticide;
     double maxInsecticide;              // maximum initial insecticide
-    boost::shared_ptr<DecayFunction> insecticideDecay;
+    unique_ptr<DecayFunction> insecticideDecay;
     vector<IRSAnopheles> species; // vector specific params
     
     // This is sparse vector: only indexes corresponding to a IRS component are used

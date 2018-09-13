@@ -132,7 +132,7 @@ public:
     
 private:
     scnXml::DecayFunction dfElt;
-    auto_ptr<DecayFunction> df;
+    unique_ptr<DecayFunction> df;
 };
 
 #endif

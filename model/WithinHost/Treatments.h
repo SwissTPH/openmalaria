@@ -81,6 +81,7 @@ public:
     
 private:
     // static:
+    // TODO: use C++11 move semantics
     static boost::ptr_vector<Treatments> treatments;
     
     // non-static:

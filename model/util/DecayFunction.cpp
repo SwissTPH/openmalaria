@@ -247,31 +247,31 @@ private:
 
 // -----  interface / static functions  -----
 
-auto_ptr<DecayFunction> DecayFunction::makeObject(
+unique_ptr<DecayFunction> DecayFunction::makeObject(
     const scnXml::DecayFunction& elt, const char* eltName
 ){
     // Type mostly equivalent to a std::string:
     const scnXml::Function& func = elt.getFunction();
     if( func == "constant" ){
-        return auto_ptr<DecayFunction>(new ConstantDecayFunction);
+        return unique_ptr<DecayFunction>(new ConstantDecayFunction);
     }else if( func == "step" ){
-        return auto_ptr<DecayFunction>(new StepDecayFunction( elt ));
+        return unique_ptr<DecayFunction>(new StepDecayFunction( elt ));
     }else if( func == "linear" ){
-        return auto_ptr<DecayFunction>(new LinearDecayFunction( elt ));
+        return unique_ptr<DecayFunction>(new LinearDecayFunction( elt ));
     }else if( func == "exponential" ){
-        return auto_ptr<DecayFunction>(new ExponentialDecayFunction( elt ));
+        return unique_ptr<DecayFunction>(new ExponentialDecayFunction( elt ));
     }else if( func == "weibull" ){
-        return auto_ptr<DecayFunction>(new WeibullDecayFunction( elt ));
+        return unique_ptr<DecayFunction>(new WeibullDecayFunction( elt ));
     }else if( func == "hill" ){
-        return auto_ptr<DecayFunction>(new HillDecayFunction( elt ));
+        return unique_ptr<DecayFunction>(new HillDecayFunction( elt ));
     }else if( func == "smooth-compact" ){
-        return auto_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
+        return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
     }else{
         throw util::xml_scenario_error( (boost::format( "decay function type %1% of %2% unrecognized" ) %func %eltName).str() );
     }
 }
-auto_ptr<DecayFunction> DecayFunction::makeConstantObject(){
-    return auto_ptr<DecayFunction>(new ConstantDecayFunction);
+unique_ptr<DecayFunction> DecayFunction::makeConstantObject(){
+    return unique_ptr<DecayFunction>(new ConstantDecayFunction);
 }
 
 

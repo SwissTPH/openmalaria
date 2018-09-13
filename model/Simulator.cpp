@@ -53,8 +53,8 @@ bool Simulator::startedFromCheckpoint;  // static
 
 const char* CHECKPOINT = "checkpoint";
 
-std::auto_ptr<Population> sim::p_humanPop;
-std::auto_ptr<TransmissionModel> sim::p_transmission;
+std::unique_ptr<Population> sim::p_humanPop;
+std::unique_ptr<TransmissionModel> sim::p_transmission;
 
 enum Phase {
     STARTING_PHASE = 0,
@@ -111,9 +111,9 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     // genotypes (both from Human, from Population::init()) and
     // Monitoring::AgeGroup (from Surveys.init()):
     // Note: PerHost dependency can be postponed; it is only used to set adultAge
-    sim::p_humanPop = auto_ptr<Population>(
+    sim::p_humanPop = unique_ptr<Population>(
             new Population( scenario.getDemography().getPopSize() ));
-    sim::p_transmission = auto_ptr<TransmissionModel>(
+    sim::p_transmission = unique_ptr<TransmissionModel>(
             TransmissionModel::createTransmissionModel(scenario.getEntomology(), sim::humanPop().size()) );
     
     // Depends on transmission model (for species indexes):

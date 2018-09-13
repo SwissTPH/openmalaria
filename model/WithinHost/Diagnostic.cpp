@@ -110,6 +110,7 @@ bool Diagnostic::isPositive( double dens ) const {
 
 // ———  diagnostics (static)  ———
 
+// TODO: use C++11 move semantics
 typedef boost::ptr_map<string,Diagnostic> Diagnostic_set;
 Diagnostic_set diagnostic_set;
 const Diagnostic* diagnostics::monitoring_diagnostic = 0;

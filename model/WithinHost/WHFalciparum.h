@@ -122,7 +122,7 @@ protected:
     vector2D<double> m_y_lag;
     
     /// The PathogenesisModel introduces illness dependant on parasite density
-    auto_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
+    unique_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;
     
     /// End of step on which treatment expires = start of first step after expiry
     SimTime treatExpiryLiver, treatExpiryBlood;
