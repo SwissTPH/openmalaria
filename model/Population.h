@@ -75,6 +75,7 @@ public:
     
     /// Type of population list. Store pointers to humans only to avoid copy
     /// operations which (AFAIAA) are otherwise required in C++98.
+    // TODO: use C++11 move semantics
     typedef boost::ptr_list<Host::Human> HumanPop;
     /// Iterator type of population
     typedef HumanPop::iterator Iter;

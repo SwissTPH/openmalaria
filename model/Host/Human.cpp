@@ -123,10 +123,8 @@ bool Human::update(bool doUpdate) {
                 // report removal due to expiry
                 mon::reportEventMHI( mon::MHR_SUB_POP_REM_TOO_OLD, *this, 1 );
                 m_cohortSet = mon::updateCohortSet( m_cohortSet, expIt->first, false );
-                // erase element, but continue iteration (note: this is simpler in C++11)
-                map<ComponentId,SimTime>::iterator toErase = expIt;
-                ++expIt;
-                m_subPopExp.erase( toErase );
+                // erase element, but continue iteration
+                expIt = m_subPopExp.erase( expIt );
             }else{
                 ++expIt;
             }

@@ -24,7 +24,8 @@
 #include "Global.h"
 #include <vector>
 
-#if __cplusplus >= 201103L
+#if __cplusplus >= 201402L
+// Update classes to mimic std::vector members
 #error "vecDay should be updated if switching to a later C++ version"
 #endif
 
@@ -37,17 +38,26 @@ namespace util {
 template<typename T, typename Alloc = std::allocator<T> >
 struct vecDay {
     typedef std::vector<T, Alloc> vec_t;
-	typedef typename vec_t::value_type val_t;
-	typedef typename vec_t::allocator_type alloc_t;
-	typedef typename vec_t::reference ref_t;
-	typedef typename vec_t::const_reference const_ref_t;
+    typedef typename vec_t::value_type val_t;
+    typedef typename vec_t::allocator_type alloc_t;
+    typedef typename vec_t::reference ref_t;
+    typedef typename vec_t::const_reference const_ref_t;
     
     vecDay() : v() {}
     explicit vecDay(const alloc_t& a) : v(a) {}
-    explicit vecDay(SimTime n, const val_t& value = val_t(),
-		const alloc_t& a = alloc_t() ) :
+    explicit vecDay(SimTime n, const val_t& value,
+        const alloc_t& a = alloc_t() ) :
         v(static_cast<size_t>(n.inDays()), value, a) {}
+    explicit vecDay(SimTime n) : v(static_cast<size_t>(n.inDays())) {}
     vecDay(const vecDay& x) : v(x.v) {}
+    vecDay(vecDay&& x) : v(move(x.v)) {}
+    
+    void operator= (const vecDay& x) {
+        v = x.v;
+    }
+    void operator= (vecDay&& x) {
+        v = move(x.v);
+    }
     
     inline void assign(SimTime n, const val_t& val){
         v.assign(n.inDays(), val); }
@@ -79,19 +89,27 @@ private:
 template<typename T, typename Alloc = std::allocator<T> >
 struct vecDay2D {
     typedef std::vector<T, Alloc> vec_t;
-	typedef typename vec_t::value_type val_t;
-	typedef typename vec_t::allocator_type alloc_t;
-	typedef typename vec_t::reference ref_t;
-	typedef typename vec_t::const_reference const_ref_t;
-	typedef typename vec_t::iterator iter_t;
-	typedef typename vec_t::const_iterator const_iter_t;
+    typedef typename vec_t::value_type val_t;
+    typedef typename vec_t::allocator_type alloc_t;
+    typedef typename vec_t::reference ref_t;
+    typedef typename vec_t::const_reference const_ref_t;
+    typedef typename vec_t::iterator iter_t;
+    typedef typename vec_t::const_iterator const_iter_t;
     
     vecDay2D() : v() {}
     explicit vecDay2D(const alloc_t& a) : stride(0), v(a) {}
-    explicit vecDay2D(SimTime n1, size_t n2, const val_t& value = val_t(),
-		const alloc_t& a = alloc_t() ) :
-		stride(n2), v(static_cast<size_t>(n1.inDays() * n2), value, a) {}
+    explicit vecDay2D(SimTime n1, size_t n2, const val_t& value,
+        const alloc_t& a = alloc_t() ) :
+        stride(n2), v(static_cast<size_t>(n1.inDays() * n2), value, a) {}
+    explicit vecDay2D(SimTime n1, size_t n2) :
+        stride(n2), v(static_cast<size_t>(n1.inDays() * n2)) {}
     vecDay2D(const vecDay2D& x) : stride(x.stride), v(x.v) {}
+    vecDay2D(vecDay2D&& x) : stride(move(x.stride)), v(move(x.v)) {}
+    
+    void operator= (vecDay2D&& x) {
+        stride = move(x.stride);
+        v = move(x.v);
+    }
     
     inline void assign(SimTime dim1, size_t dim2, const val_t& val){
         v.assign(dim1.inDays() * dim2, val);
@@ -154,19 +172,28 @@ private:
 template<typename T, typename Alloc = std::allocator<T> >
 struct vecDay3D {
     typedef std::vector<T, Alloc> vec_t;
-	typedef typename vec_t::value_type val_t;
-	typedef typename vec_t::allocator_type alloc_t;
-	typedef typename vec_t::reference ref_t;
-	typedef typename vec_t::const_reference const_ref_t;
-	typedef typename vec_t::iterator iter_t;
-	typedef typename vec_t::const_iterator const_iter_t;
+    typedef typename vec_t::value_type val_t;
+    typedef typename vec_t::allocator_type alloc_t;
+    typedef typename vec_t::reference ref_t;
+    typedef typename vec_t::const_reference const_ref_t;
+    typedef typename vec_t::iterator iter_t;
+    typedef typename vec_t::const_iterator const_iter_t;
     
     vecDay3D() : v() {}
     explicit vecDay3D(const alloc_t& a) : stride1(0), stride2(0), v(a) {}
     explicit vecDay3D(SimTime n1, size_t n2, size_t n3,
-                const val_t& value = val_t(), const alloc_t& a = alloc_t() ) :
-		stride1(n2 * n3), stride2(n3), v(static_cast<size_t>(n1.inDays() * n2 * n3), value, a) {}
+                const val_t& value, const alloc_t& a = alloc_t() ) :
+        stride1(n2 * n3), stride2(n3), v(static_cast<size_t>(n1.inDays() * n2 * n3), value, a) {}
+    explicit vecDay3D(SimTime n1, size_t n2, size_t n3) :
+        stride1(n2 * n3), stride2(n3), v(static_cast<size_t>(n1.inDays() * n2 * n3)) {}
     vecDay3D(const vecDay3D& x) : stride1(x.stride1), stride2(x.stride2), v(x.v) {}
+    vecDay3D(vecDay3D&& x) : stride1(move(x.stride1)), stride2(move(x.stride2)), v(move(x.v)) {}
+    
+    void operator= (vecDay3D&& x) {
+        stride1 = move(x.stride1);
+        stride1 = move(x.stride2);
+        v = move(x.v);
+    }
     
     inline void assign(SimTime dim1, size_t dim2, size_t dim3, const val_t& val){
         v.assign(dim1.inDays() * dim2 * dim3, val);

@@ -175,6 +175,7 @@ private:
     // TODO: at the moment we're storing all PK & PD data regardless of which
     // model is used. Evaluate whether this is sensible or not.
     
+    // TODO: use C++11 move semantics
     /* PD parameters (may vary based on infection genotype). */
     boost::ptr_vector<LSTMDrugPD> PD;
     

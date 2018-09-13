@@ -140,7 +140,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     FSRotateAngle -= rAngle;
     vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
-    mosqEmergeRate = forcedS_v;
+    mosqEmergeRate = move(forcedS_v);
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     
     // Finally, update nOvipositingDelayed and invLarvalResources

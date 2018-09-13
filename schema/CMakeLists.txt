@@ -26,6 +26,7 @@ foreach (XSD_NAME ${SCHEMA_NAMES})
   add_custom_command (
     OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${XSD_NAME}.cpp ${CMAKE_CURRENT_BINARY_DIR}/${XSD_NAME}.h
     COMMAND ${XSD_EXECUTABLE} cxx-tree
+        --std c++11
         --type-naming ucc --function-naming java
         --namespace-map http://openmalaria.org/schema/scenario_38=scnXml
 #         --generate-serialization

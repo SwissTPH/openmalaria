@@ -31,7 +31,6 @@
 
 #include <vector>
 #include <limits>
-#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace Transmission {
@@ -81,6 +80,38 @@ public:
             nhh_sigma_df(numeric_limits<double>::signaling_NaN()),
             nhh_sigma_dff(numeric_limits<double>::signaling_NaN())
     {}
+    
+    AnophelesModel (AnophelesModel&& o):
+            humanBase(move(o.humanBase)),
+            mosqSeekingDuration(move(o.mosqSeekingDuration)),
+            mosqSeekingDeathRate(move(o.mosqSeekingDeathRate)),
+            probMosqSurvivalOvipositing(move(o.probMosqSurvivalOvipositing)),
+            nhh_avail(move(o.nhh_avail)),
+            nhh_sigma_df(move(o.nhh_sigma_df)),
+            nhh_sigma_dff(move(o.nhh_sigma_dff)),
+            trapParams(move(o.trapParams)),
+            transmission(move(o.transmission)),
+            seekingDeathRateIntervs(move(o.seekingDeathRateIntervs)),
+            probDeathOvipositingIntervs(move(o.probDeathOvipositingIntervs)),
+            baitedTraps(move(o.baitedTraps)),
+            partialEIR(move(o.partialEIR))
+    {}
+    
+    void operator= (AnophelesModel&& o) {
+        humanBase = move(o.humanBase);
+        mosqSeekingDuration = move(o.mosqSeekingDuration);
+        mosqSeekingDeathRate = move(o.mosqSeekingDeathRate);
+        probMosqSurvivalOvipositing = move(o.probMosqSurvivalOvipositing);
+        nhh_avail = move(o.nhh_avail);
+        nhh_sigma_df = move(o.nhh_sigma_df);
+        nhh_sigma_dff = move(o.nhh_sigma_dff);
+        trapParams = move(o.trapParams);
+        transmission = move(o.transmission);
+        seekingDeathRateIntervs = move(o.seekingDeathRateIntervs);
+        probDeathOvipositingIntervs = move(o.probDeathOvipositingIntervs);
+        baitedTraps = move(o.baitedTraps);
+        partialEIR = move(o.partialEIR);
+    }
     
     /** Called to initialise variables instead of a constructor. At this point,
      * the size of the human population is known but that population has not
@@ -300,11 +331,13 @@ private:
     //@}
     
     struct TrapParams {
+        TrapParams(): relAvail(numeric_limits<double>::signaling_NaN()) {}
+        TrapParams(TrapParams&& o): relAvail(o.relAvail), availDecay(move(o.availDecay)) {}
+        
         // Initial availability of a trap relative to an adult
         double relAvail;
         // Decay of availability
-        // note: can't use "auto_ptr" inside a vector, otherwise that would suffice
-        boost::shared_ptr<util::DecayFunction> availDecay;
+        unique_ptr<util::DecayFunction> availDecay;
     };
     // Parameters for trap interventions. Doesn't need checkpointing.
     vector<TrapParams> trapParams;

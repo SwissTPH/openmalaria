@@ -42,7 +42,7 @@ using WithinHost::Genotypes;
 // -----  Static variables and functions  -----
 
 // The list of drugTypes drugs. Not checkpointed.
-//TODO: do we need to store by pointer?
+// TODO: use C++11 move semantics
 typedef boost::ptr_vector<LSTMDrugType> DrugTypesT;
 DrugTypesT drugTypes;
 map<string,size_t> drugTypeNames;
@@ -189,7 +189,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         const scnXml::Conversion& conv = pk.getConversion().get();
         try{
             metabolite = findDrug(conv.getMetabolite());
-        }catch( util::xml_scenario_error e ){
+        }catch( util::xml_scenario_error& e ){
             throw util::xml_scenario_error( "PK: metabolite drug not found; metabolite must be defined *before* parent drug!" );
         }
         conversion_rate.setParams( conv.getRate() );

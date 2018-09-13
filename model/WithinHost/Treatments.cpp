@@ -29,6 +29,7 @@ namespace WithinHost {
 
 // ———  static  ———
 
+// TODO: use C++11 move semantics
 boost::ptr_vector<Treatments> Treatments::treatments;
 
 TreatmentId Treatments::addTreatment( const scnXml::TreatmentOption& desc ){

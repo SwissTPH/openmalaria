@@ -166,7 +166,7 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
     numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
-    species.resize (numSpecies, AnophelesModel());
+    species.resize (numSpecies);
 
     for(size_t i = 0; i < numSpecies; ++i) {
         string name = species[i].initialise (anophelesList[i],

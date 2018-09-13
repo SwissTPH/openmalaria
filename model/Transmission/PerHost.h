@@ -28,7 +28,6 @@
 #include "util/DecayFunction.h"
 #include "util/checkpoint_containers.h"
 #include <boost/ptr_container/ptr_list.hpp>
-#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace Transmission {
@@ -280,6 +279,7 @@ private:
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
 
+    // TODO: use C++11 move semantics
     typedef boost::ptr_list<PerHostInterventionData> ListActiveComponents;
     ListActiveComponents activeComponents;
     

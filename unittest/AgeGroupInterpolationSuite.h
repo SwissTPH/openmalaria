@@ -35,7 +35,7 @@ public:
     AgeGroupInterpolationSuite () {
         // Set maximum age to 90 years:
         UnittestUtil::initTime( 5 );
-        agvElt = auto_ptr<scnXml::AgeGroupValues>(new scnXml::AgeGroupValues());
+        agvElt = unique_ptr<scnXml::AgeGroupValues>(new scnXml::AgeGroupValues());
         scnXml::AgeGroupValues::GroupSequence& seq = agvElt->getGroup();
         seq.resize( dataLen, scnXml::Group(0.0,0.0) );
         for( size_t i = 0; i < dataLen; ++i ){
@@ -82,7 +82,7 @@ private:
     static const double testAges[testLen];
     static const double piecewiseConstValues[testLen];
     static const double linearInterpValues[testLen];
-    auto_ptr<scnXml::AgeGroupValues> agvElt;
+    unique_ptr<scnXml::AgeGroupValues> agvElt;
 };
 
 const double AgeGroupInterpolationSuite::stdLbounds[] = {

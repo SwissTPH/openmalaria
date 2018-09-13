@@ -58,7 +58,7 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
     transmission.initState ( tsP_A, tsP_df, tsP_dff, initNvFromSv, initOvFromSv, forcedS_v );
     
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
-    mosqEmergeRate = forcedS_v;
+    mosqEmergeRate = move(forcedS_v);
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     
     // All set up to drive simulation from forcedS_v
@@ -112,7 +112,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     FSRotateAngle -= rAngle;
     vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
-    mosqEmergeRate = forcedS_v;
+    mosqEmergeRate = move(forcedS_v);
     vectors::scale (mosqEmergeRate, initNv0FromSv);
 
     const double LIMIT = 0.1;

@@ -484,8 +484,8 @@ public:
         pkpd.medicateQueue.clear();
     }
     
-    static auto_ptr<Host::Human> createHuman(SimTime dateOfBirth){
-        return auto_ptr<Host::Human>( new Host::Human(dateOfBirth, 0) );
+    static unique_ptr<Host::Human> createHuman(SimTime dateOfBirth){
+        return unique_ptr<Host::Human>( new Host::Human(dateOfBirth, 0) );
     }
     static void setHumanWH(Host::Human& human, WithinHost::WHInterface *wh){
         human.withinHostModel = wh;

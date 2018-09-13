@@ -23,7 +23,6 @@
 
 #include "interventions/HumanComponents.h"
 #include "schema/interventions.h"
-#include <boost/shared_ptr.hpp>
 
 namespace OM {
 namespace Host {
@@ -66,7 +65,7 @@ private:
     Vaccine::Types type;
     
     /// Function representing decay of effect
-    boost::shared_ptr<util::DecayFunction> decayFunc;
+    unique_ptr<util::DecayFunction> decayFunc;
 
     /* Vaccine type specific parameters
      * Initial mean efficacy, definition depends on vaccine type */

@@ -414,6 +414,7 @@ protected:
 // ———  static functions  ———
 
 // Memory management: lists all decisions and frees memory at program exit
+// TODO: use C++11 move semantics
 ptr_vector<CMDecisionTree> decision_library;
 
 // Saves a decision to decision_library, making it const.

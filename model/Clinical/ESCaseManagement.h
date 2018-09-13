@@ -26,12 +26,6 @@
 #include "WithinHost/WHInterface.h"
 #include "schema/pharmacology.h"
 
-#include <cassert>
-#include <list>
-#include <limits>
-#include <boost/ptr_container/ptr_unordered_map.hpp>
-#include <boost/ptr_container/ptr_vector.hpp>
-
 namespace OM { namespace Clinical {
 using WithinHost::WHInterface;
 

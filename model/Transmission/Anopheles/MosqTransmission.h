@@ -26,7 +26,6 @@
 #include "schema/entomology.h"
 
 #include <limits>
-#include <boost/shared_ptr.hpp>
 
 class MosqLifeCycleSuite;
 
@@ -52,6 +51,42 @@ public:
     ///@brief initialisation functions
     //@{
     MosqTransmission();
+    
+    MosqTransmission (MosqTransmission&& o):
+            emergence(move(o.emergence)),
+            mosqRestDuration(move(o.mosqRestDuration)),
+            EIPDuration(move(o.EIPDuration)),
+            N_v_length(move(o.N_v_length)),
+            minInfectedThreshold(move(o.minInfectedThreshold)),
+            P_A(move(o.P_A)),
+            P_df(move(o.P_df)),
+            P_dif(move(o.P_dif)),
+            P_dff(move(o.P_dff)),
+            N_v(move(o.N_v)),
+            S_v(move(o.S_v)),
+            fArray(move(o.fArray)),
+            ftauArray(move(o.ftauArray)),
+            uninfected_v(move(o.uninfected_v)),
+            timeStep_N_v0(move(o.timeStep_N_v0))
+    {}
+    
+    void operator= (MosqTransmission&& o) {
+            emergence = move(o.emergence);
+            mosqRestDuration = move(o.mosqRestDuration);
+            EIPDuration = move(o.EIPDuration);
+            N_v_length = move(o.N_v_length);
+            minInfectedThreshold = move(o.minInfectedThreshold);
+            P_A = move(o.P_A);
+            P_df = move(o.P_df);
+            P_dif = move(o.P_dif);
+            P_dff = move(o.P_dff);
+            N_v = move(o.N_v);
+            S_v = move(o.S_v);
+            fArray = move(o.fArray);
+            ftauArray = move(o.ftauArray);
+            uninfected_v = move(o.uninfected_v);
+            timeStep_N_v0 = move(o.timeStep_N_v0);
+    }
     
     /** Initialise parameters and variables.
      * 
@@ -153,7 +188,7 @@ public:
     /** @brief Emergence model
      * 
      * Code to calculate emergence of mosquitoes from water bodies goes here. */
-    boost::shared_ptr<EmergenceModel> emergence;
+    unique_ptr<EmergenceModel> emergence;
     
 private:
     // -----  parameters (constant after initialisation)  -----
