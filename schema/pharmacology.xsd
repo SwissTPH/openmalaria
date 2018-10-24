@@ -3,8 +3,8 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- Drug parameters — PK, PD and resistance -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_38"
-           xmlns:om="http://openmalaria.org/schema/scenario_38"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_39"
+           xmlns:om="http://openmalaria.org/schema/scenario_39"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="Pharmacology">
