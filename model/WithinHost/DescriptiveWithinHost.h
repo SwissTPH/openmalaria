@@ -60,7 +60,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
     // Doesn't do anything in this model:
-    virtual void treatPkPd(size_t schedule, size_t dosages, double age);
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age, double delay_d);
     
     /** The list of all infections this human has.
      * 

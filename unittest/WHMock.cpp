@@ -59,9 +59,9 @@ bool WHMock::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime t
     return timeBlood != SimTime::zero();
 }
 
-void WHMock::treatPkPd(size_t schedule, size_t dosages, double age){
+void WHMock::treatPkPd(size_t schedule, size_t dosages, double age, double delay_d){
     nTreatments += 1;
-    pkpd.prescribe( schedule, dosages, age, numeric_limits<double>::quiet_NaN() );
+    pkpd.prescribe( schedule, dosages, age, numeric_limits<double>::quiet_NaN(), delay_d );
 }
 
 void WHMock::update(int nNewInfs, vector<double>&, double ageInYears, double bsvFactor){

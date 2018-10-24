@@ -307,7 +307,7 @@ protected:
     
     virtual CMDTOut exec( CMHostData hostData ) const{
         foreach( const TreatInfo& treatment, treatments ){
-            hostData.withinHost().treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears );
+            hostData.withinHost().treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears, 0.0 );
         }
         return CMDTOut(true);
     }

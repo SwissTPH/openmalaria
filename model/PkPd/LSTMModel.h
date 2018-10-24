@@ -100,8 +100,9 @@ public:
      * @param dosages Index of a dosage table
      * @param age Age of human at start of time step in years
      * @param body_mass Mass of human in kg
+     * @param delay_d Delay of treatment in days
      */
-    void prescribe(size_t schedule, size_t dosages, double age, double body_mass);
+    void prescribe(size_t schedule, size_t dosages, double age, double body_mass, double delay_d);
     
     /** Medicate drugs: human takes prescribed drugs which are to be taken this
      * day.

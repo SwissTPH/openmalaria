@@ -150,7 +150,7 @@ public:
      * @param dosages Index of a dosage table
      * @param age Age of human in years
      */
-    virtual void treatPkPd(size_t schedule, size_t dosages, double age) =0;
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age, double delay_d) =0;
 
     /** Add new infections and update the parasite densities of existing
      * infections. Also update immune status.

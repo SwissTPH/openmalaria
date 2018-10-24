@@ -47,7 +47,7 @@ public:
     
     virtual void importInfection();
     
-    virtual void treatPkPd(size_t schedule, size_t dosages, double age);
+    virtual void treatPkPd(size_t schedule, size_t dosage, double age, double delay_d);
     virtual void clearImmunity();
     
     virtual void update (int nNewInfs, vector<double>& genotype_weights,

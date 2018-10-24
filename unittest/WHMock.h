@@ -52,7 +52,7 @@ public:
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual void optionalPqTreatment( const Host::Human& human );
     virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
-    virtual void treatPkPd(size_t schedule, size_t dosages, double age);
+    virtual void treatPkPd(size_t schedule, size_t dosages, double age, double delay_d);
     virtual void update(int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
