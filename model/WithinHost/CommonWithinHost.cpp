@@ -113,9 +113,9 @@ void CommonWithinHost::clearInfections( Treatments::Stages stage ){
 
 // -----  interventions -----
 
-void CommonWithinHost::treatPkPd(size_t schedule, size_t dosages, double age){
+void CommonWithinHost::treatPkPd(size_t schedule, size_t dosage, double age, double delay_d){
     double mass = massByAge.eval( age ) * hetMassMultiplier;
-    pkpdModel.prescribe( schedule, dosages, age, mass );
+    pkpdModel.prescribe( schedule, dosage, age, mass, delay_d );
 }
 void CommonWithinHost::clearImmunity() {
     for(std::list<CommonInfection*>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {

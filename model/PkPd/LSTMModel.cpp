@@ -69,12 +69,14 @@ void LSTMModel::checkpoint (ostream& stream) {
 
 // ———  non-static simulation time functions  ———
 
-void LSTMModel::prescribe(size_t schedule, size_t dosage, double age, double body_mass){
+void LSTMModel::prescribe(size_t schedule, size_t dosage, double age, double body_mass, double delay_d){
     DosageTable& table = dosages[dosage];
     double key = table.useMass ? body_mass : age;
     double doseMult = table.getMultiplier( key );
     foreach( MedicateData& medicateData, schedules[schedule].medications ){
-        medicateQueue.push_back( medicateData.multiplied(doseMult) );
+        MedicateData data = medicateData.multiplied(doseMult);
+        data.time += delay_d;
+        medicateQueue.push_back( std::move(data) );
     }
 }
 

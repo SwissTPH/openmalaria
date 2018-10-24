@@ -316,13 +316,14 @@ public:
         HumanInterventionComponent(id),
             schedule(PkPd::LSTMTreatments::findSchedule(elt.getSchedule())),
             dosage(PkPd::LSTMTreatments::findDosages(elt.getDosage())),
-            delay_h(elt.getDelay_h())
+            delay_d(elt.getDelay_h() / 24.0 /* convert to days */)
     {
     }
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
         mon::reportEventMHD( mon::MHD_TREAT, human, method );
-        human.withinHostModel->treatPkPd( schedule, dosage, delay_h );
+        double age = human.age(sim::nowOrTs1()).inYears();
+        human.withinHostModel->treatPkPd( schedule, dosage, age, delay_d );
     }
     
     virtual Component::Type componentType() const{ return Component::TREAT_PKPD; }
@@ -336,7 +337,7 @@ public:
 private:
     size_t schedule;        // index of the schedule
     size_t dosage;          // name of the dosage table
-    double delay_h;         // delay in hours
+    double delay_d;         // delay in days
 };
 
 class DecisionTreeComponent : public HumanInterventionComponent {
