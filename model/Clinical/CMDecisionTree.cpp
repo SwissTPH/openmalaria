@@ -526,7 +526,7 @@ const CMDecisionTree& CMDTAge::create(const scnXml::DTAge& node, bool isUC){
     CMDTAge* result = new CMDTAge();
     
     double lastAge = numeric_limits<double>::quiet_NaN();
-    const CMDecisionTree* lastNode;
+    const CMDecisionTree* lastNode = NULL;
     foreach( const scnXml::Age& age, node.getAge() ){
         if( lastAge != lastAge ){
             if( age.getLb() != 0.0 )
