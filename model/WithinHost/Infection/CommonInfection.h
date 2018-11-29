@@ -63,6 +63,8 @@ public:
 	    return updateDensity( survivalFactor, bsAge, body_mass );
     }
     
+    map<size_t, double> Kn; // IC50^slope per drug type, if sampled
+    
 protected:
     /** Update: calculate new density.
      *

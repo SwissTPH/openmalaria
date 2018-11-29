@@ -19,6 +19,7 @@
  */
 
 #include "PkPd/Drug/LSTMDrugOneComp.h"
+#include "WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
 #include "util/vectors.h"
@@ -51,7 +52,7 @@ void LSTMDrugOneComp::medicate(double time, double qty, double bodyMass)
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass) const {
+double LSTMDrugOneComp::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {
     if( concentration == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
     
     /* Survival factor of the parasite (this multiplies the parasite density).
@@ -63,7 +64,8 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass)
     double concentration_today = concentration; // mg / l
     double neg_elim_rate = neg_elim_sample * pow(body_mass, typeData.neg_m_exponent());
     
-    const LSTMDrugPD& drugPD = typeData.getPD(genotype);
+    const LSTMDrugPD& drugPD = typeData.getPD(inf->genotype());
+    const double Kn = drugPD.IC50_pow_slope(typeData.getIndex(), inf);
     
     double time = 0.0;
     typedef pair<double,double> TimeConc;
@@ -71,7 +73,7 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass)
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
-                totalFactor *= drugPD.calcFactor( neg_elim_rate, &concentration_today, time_conc.first - time );
+                totalFactor *= drugPD.calcFactor( Kn, neg_elim_rate, &concentration_today, time_conc.first - time );
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add dose (instantaneous absorption):
@@ -81,7 +83,7 @@ double LSTMDrugOneComp::calculateDrugFactor(uint32_t genotype, double body_mass)
         }
     }
     if( time < 1.0 ){
-        totalFactor *= drugPD.calcFactor( neg_elim_rate, &concentration_today, 1.0 - time );
+        totalFactor *= drugPD.calcFactor( Kn, neg_elim_rate, &concentration_today, 1.0 - time );
     }
     
     return totalFactor; // Drug effect per day per drug per parasite

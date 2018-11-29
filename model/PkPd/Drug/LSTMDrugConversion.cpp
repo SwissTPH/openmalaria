@@ -19,6 +19,7 @@
  */
 
 #include "PkPd/Drug/LSTMDrugConversion.h"
+#include "WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
 #include "util/vectors.h"
@@ -190,28 +191,29 @@ void LSTMDrugConversion::setConversionParameters(Params_convFactor& p,
 }
 
 void LSTMDrugConversion::setKillingParameters(Params_convFactor& p,
-        uint32_t genotype) const
+        WithinHost::CommonInfection *inf) const
 {
+    uint32_t genotype = inf->genotype();
     const LSTMDrugPD& pdP = parentType.getPD(genotype), &pdM =
             metaboliteType.getPD(genotype);
     p.nP = pdP.slope();
     p.VP = pdP.max_killing_rate();
-    p.KnP = pdP.IC50_pow_slope();
+    p.KnP = pdP.IC50_pow_slope(parentType.getIndex(), inf);
     p.nM = pdM.slope();
     p.VM = pdM.max_killing_rate();
-    p.KnM = pdM.IC50_pow_slope();
+    p.KnM = pdM.IC50_pow_slope(metaboliteType.getIndex(), inf);
 }
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugConversion::calculateDrugFactor(uint32_t genotype, double body_mass) const {
+double LSTMDrugConversion::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {
     if( qtyG == 0.0 && qtyP == 0.0 && qtyM == 0.0 && doses.size() == 0 ){
         return 1.0; // nothing to do
     }
     
     Params_convFactor p;
     setConversionParameters(p, body_mass);
-    setKillingParameters(p, genotype);
+    setKillingParameters(p, inf);
     
     double time = 0.0;  // time since start of day
     double totalFactor = 1.0;   // survival factor for whole day

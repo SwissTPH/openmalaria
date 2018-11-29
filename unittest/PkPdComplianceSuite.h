@@ -26,6 +26,7 @@
 #include <cxxtest/TestSuite.h>
 #include <boost/format.hpp>
 #include "PkPd/LSTMModel.h"
+#include "WithinHost/Infection/DummyInfection.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <limits>
@@ -58,7 +59,6 @@ public:
     PkPdComplianceSuite() :
             proxy(0)
     {
-        genotype = 0;                // 0 should work; we definitely don't want random allocation
         bodymass = 50 /*kg*/;
        
         PCS_VERBOSE(cout << "\n[ Unittest Output Legend: \033[35mDrug "
@@ -69,10 +69,12 @@ public:
         UnittestUtil::initTime(1);
         UnittestUtil::PkPdSuiteSetup();
         proxy = new LSTMModel ();
+        inf = createDummyInfection(0);
         schedule.clear();
     }
     
     void tearDown () {
+        delete inf;
         delete proxy;
         LSTMDrugType::clear();
     }
@@ -173,7 +175,7 @@ public:
         double totalFac = 1;
         for( size_t i = 0; i < maxDays; i++){
             // before update (after last step):
-            double fac = proxy->getDrugFactor(genotype, bodymass);
+            double fac = proxy->getDrugFactor(inf, bodymass);
             totalFac *= fac;
             TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], PKPD_FACT_REL_TOL, PKPD_FACT_ABS_TOL);
             PCS_VERBOSE(res_Fac[i] = totalFac;)
@@ -331,7 +333,7 @@ public:
     
 private:
     LSTMModel *proxy;
-    uint32_t genotype;
+    CommonInfection *inf;
     double bodymass;
     std::multimap<size_t, pair<double, double> > schedule; // < day, pair < part of day, dosage > >
 };

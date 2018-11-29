@@ -52,7 +52,7 @@ public:
     
     virtual void medicate (double time, double qty, double bodyMass);
     
-    virtual double calculateDrugFactor(uint32_t genotype, double body_mass) const;
+    virtual double calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const;
     virtual void updateConcentration (double body_mass);
     double getMetaboliteConcentration() const;
     double getParentConcentration() const;
@@ -89,7 +89,7 @@ protected:
     
 private:
     void setConversionParameters(Params_convFactor& p, double body_mass) const;
-    void setKillingParameters(Params_convFactor& p, uint32_t genotype) const;
+    void setKillingParameters(Params_convFactor& p, WithinHost::CommonInfection *inf) const;
 };
 
 }

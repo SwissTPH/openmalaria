@@ -25,6 +25,9 @@
 #include "util/checkpoint_containers.h"
 
 namespace OM {
+namespace WithinHost {
+    class CommonInfection;
+}
 namespace PkPd {
 
 /** A class holding pkpd drug use info.
@@ -68,10 +71,10 @@ public:
      * This doesn't adjust concentration because this function may be called
      * several times (for each infection) per time step, or not at all.
      * 
-     * @param genotype An identifier for the genotype of the infection.
+     * @param inf A pointer to the infection of interest
      * @param body_mass Weight of patient in kg
      */
-    virtual double calculateDrugFactor(uint32_t genotype, double body_mass) const =0;
+    virtual double calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const =0;
     
     /** Updates concentration variable and clears day's doses.
      * 

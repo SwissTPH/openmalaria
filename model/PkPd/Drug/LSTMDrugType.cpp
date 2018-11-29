@@ -20,6 +20,7 @@
 
 #include "PkPd/Drug/LSTMDrugType.h"
 #include "WithinHost/Genotypes.h"
+#include "WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
 #include "util/random.h"
 #include "util/CommandLine.h"
@@ -52,14 +53,11 @@ vector<size_t> drugsInUse;
 
 LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
     n = phenotype.getSlope ();
-    Kn = pow(phenotype.getIC50 (), n);
+    IC50.setParams(phenotype.getIC50 (), phenotype.getIC50().getSigma());
     V = phenotype.getMax_killing_rate ();  
-    if( phenotype.getIC50().getSigma() > 0.0 ){
-        throw util::unimplemented_exception("sampling IC50");
-    }
 }
 
-double LSTMDrugPD::calcFactor( double neg_elim_rate, double* conc, double duration ) const{
+double LSTMDrugPD::calcFactor( double Kn, double neg_elim_rate, double* conc, double duration ) const{
     const double C0 = *conc;
     const double C1 = C0 * exp(neg_elim_rate * duration);
     
@@ -72,6 +70,17 @@ double LSTMDrugPD::calcFactor( double neg_elim_rate, double* conc, double durati
     
     *conc = C1;    // conc is an in/out parameter
     return pow( numerator / denominator, power );       // unitless
+}
+
+double LSTMDrugPD::IC50_pow_slope(size_t index, WithinHost::CommonInfection *inf) const{
+    double Kn;  // gets sampled once per infection
+    if (inf->Kn.count(index) != 0) {
+        Kn = inf->Kn.at(index);
+    } else {
+        Kn = pow(IC50.sample(), n);
+        inf->Kn[index] = Kn;
+    }
+    return Kn;
 }
 
 
