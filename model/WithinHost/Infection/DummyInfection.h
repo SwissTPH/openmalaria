@@ -25,6 +25,9 @@
 
 namespace OM { namespace WithinHost {
 
+//! Create a dummy infection (used directly by unit test).
+CommonInfection* createDummyInfection (uint32_t protID);
+
 //!  Models of infection.
 /*!
   Models related to the within-host dynamics of infections.

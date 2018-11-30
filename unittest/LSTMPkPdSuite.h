@@ -25,6 +25,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "PkPd/LSTMModel.h"
+#include "WithinHost/Infection/DummyInfection.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <limits>
@@ -39,7 +40,6 @@ public:
     LSTMPkPdSuite() :
             proxy(0)
     {
-        genotype = 0;                // 0 should work; we definitely don't want random allocation
         // This is what a previously-used weight distribution gave us,
         // and is good enough for testing purposes:
         massAt21 = 55.4993;
@@ -49,50 +49,52 @@ public:
         UnittestUtil::initTime(1);
 	UnittestUtil::PkPdSuiteSetup();
 	proxy = new LSTMModel ();
+        inf = createDummyInfection(0);
         MQ_index = LSTMDrugType::findDrug( "MQ" );
     }
     void tearDown () {
+        delete inf;
 	delete proxy;
         LSTMDrugType::clear();
     }
     
     void testNone () {
-	TS_ASSERT_EQUALS (proxy->getDrugFactor (genotype, massAt21), 1.0);
+	TS_ASSERT_EQUALS (proxy->getDrugFactor (inf, massAt21), 1.0);
     }
     
     void testOral () {
 	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
-	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype, massAt21), 0.03174563638523168);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563638523168);
     }
     
     void testOralHalves () {	// the point being: check it can handle two doses at the same time-point correctly
 	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, massAt21 );
 	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, massAt21 );
-	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype, massAt21), 0.03174563638523168);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563638523168);
     }
     
     void testOralSplit () {
 	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
 	UnittestUtil::medicate( *proxy, MQ_index, 0, 0.5, massAt21 );	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
-	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype, massAt21), 0.03174563639140275);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563639140275);
     }
     
     void testOralDecayed () {
 	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
 	proxy->decayDrugs (massAt21);
-	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype, massAt21), 0.03174563639501896);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563639501896);
     }
     
     void testOral2Doses () {
 	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
 	proxy->decayDrugs (massAt21);
 	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
-	TS_ASSERT_APPROX (proxy->getDrugFactor (genotype, massAt21), 0.03174563637686205);
+	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563637686205);
     }
     
 private:
     LSTMModel *proxy;
-    uint32_t genotype;
+    CommonInfection *inf;
     double massAt21;
     size_t MQ_index;
 };

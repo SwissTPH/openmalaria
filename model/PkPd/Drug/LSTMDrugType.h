@@ -42,6 +42,9 @@ namespace scnXml{
     class Phenotype;
 }
 namespace OM {
+namespace WithinHost {
+    class CommonInfection;
+}
 namespace PkPd {
 using util::LognormalSampler;
 
@@ -62,27 +65,28 @@ public:
      * It is expected that no drug doses are taken over the period for which
      * this function calculates a drug factor.
      * 
+     * @param Kn IC50^slope, sampled per infection
      * @param neg_elim_rate -k (sampled)
      * @param C0 Concentration of drug in blood at start of period. Will be
      *  updated to correct concentration at end of period. Units: mg/l
      * @param duration Timespan over which the factor is being calculated. Units: days.
      * @return survival factor (unitless)
      */
-    double calcFactor( double neg_elim_rate, double* C0, double duration ) const;
+    double calcFactor( double Kn, double neg_elim_rate, double* C0, double duration ) const;
     
     inline double slope() const{ return n; }
-    inline double IC50_pow_slope() const{ return Kn; }
+    double IC50_pow_slope(size_t index, WithinHost::CommonInfection *inf) const;
     inline double max_killing_rate() const{ return V; }
     
 private:
     /// Slope of the dose response curve (no unit)
     double n;   // slope
-    /// Concentration with 50% of the maximal parasite killing to-the-power-of slope ((mg/l)^slope)
-    double Kn;  // IC50_pow_slope
+    /// Concentration with 50% of the maximal parasite killing
+    LognormalSampler IC50;  // IC50
     /// Maximal drug killing rate per day (units: 1/days)
     double V;   // max_killing_rate;
 };
-    
+
     
 /** Drug PK & PD parameters (one instance per drug type).
  * 
@@ -162,8 +166,8 @@ private:
     // non-copyable (due to allocation of members of drugPhenotype)
     LSTMDrugType( const LSTMDrugType& );
     
-    /** The drug index. Stored here since LTSMDrug stores a pointer to this
-     * struct object, not the index. */
+    /** The drug index in drugTypes and a unique identifier for the drug type.
+     * Stored here since LTSMDrug stores a pointer to this struct object, not the index. */
     size_t index;
     
     /// Index of metabolite

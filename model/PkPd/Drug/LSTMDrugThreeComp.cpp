@@ -19,6 +19,7 @@
  */
 
 #include "PkPd/Drug/LSTMDrugThreeComp.h"
+#include "WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
 
@@ -161,15 +162,16 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugThreeComp::calculateDrugFactor(uint32_t genotype, double body_mass) const {
+double LSTMDrugThreeComp::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {
     if( conc() == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
     updateCached(body_mass);
     
     Params_fC p;
     p.cA = concA;       p.cB = concB;   p.cC = concC;   p.cABC = concABC;
     p.na = na;  p.nb = nb;      p.ng = ng;      p.nka = nka;
-    const LSTMDrugPD& pd = typeData.getPD(genotype);
-    p.n = pd.slope();   p.V = pd.max_killing_rate();    p.Kn = pd.IC50_pow_slope();
+    const LSTMDrugPD& pd = typeData.getPD(inf->genotype());
+    p.n = pd.slope();   p.V = pd.max_killing_rate();
+    p.Kn = pd.IC50_pow_slope(typeData.getIndex(), inf);
     
     double time = 0.0;  // time since start of day
     double totalFactor = 1.0;   // survival factor for whole day

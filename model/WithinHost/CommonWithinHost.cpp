@@ -191,9 +191,9 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);
             
             if( !expires ){     /* no expiry due to simple treatment model; do update */
-                double survivalFactor = survivalFactor_part *
-                    (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y) *
-                    pkpdModel.getDrugFactor((*inf)->genotype(), body_mass);
+                const double drugFactor = pkpdModel.getDrugFactor(*inf, body_mass);
+                const double immFactor = (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y);
+                const double survivalFactor = survivalFactor_part * immFactor * drugFactor;
                 // update, may result in termination of infection:
                 expires = (*inf)->update(survivalFactor, now, body_mass);
             }

@@ -128,12 +128,12 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
     return c;
 }
 
-double LSTMModel::getDrugFactor (uint32_t genotype, double body_mass) const{
+double LSTMModel::getDrugFactor (WithinHost::CommonInfection *inf, double body_mass) const{
     double factor = 1.0; //no effect
     
     for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        double drugFactor = drug->calculateDrugFactor(genotype, body_mass);
+        double drugFactor = drug->calculateDrugFactor(inf, body_mass);
         factor *= drugFactor;
     }
     return factor;
