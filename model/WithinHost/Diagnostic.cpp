@@ -107,6 +107,11 @@ bool Diagnostic::isPositive( double dens ) const {
     }
 }
 
+bool Diagnostic::allowsFalsePositives() const{
+    if( (boost::math::isnan)(specificity) ) return dens_lim <= 0.0;
+    return specificity < 1.0;
+}
+
 
 // ———  diagnostics (static)  ———
 
