@@ -23,6 +23,7 @@
 #include "mon/management.h"
 #define H_OM_mon_cpp
 #include "mon/OutputMeasures.h"
+#include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
 #include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
@@ -449,6 +450,14 @@ void internal::initReporting( const scnXml::Scenario& scenario ){
                 throw util::xml_scenario_error( (boost::format("obsolete "
                     "survey option: %1%") %optElt.getName()).str() );
             } else TRACED_EXCEPTION_DEFAULT("invalid measure code");
+        }
+        
+        if( om.m == MHF_LOG_DENSITY || om.m == MHF_LOG_DENSITY_GENOTYPE){
+            if( WithinHost::diagnostics::monitoringDiagnostic().allowsFalsePositives() ){
+                throw util::xml_scenario_error( (boost::format("measure %1% "
+                    "may not be used when monitoring diagnostic sensitivity "
+                    "< 1") %optElt.getName()).str() );
+            }
         }
         
         // Categorisation can be disabled but not enabled. We check each now.

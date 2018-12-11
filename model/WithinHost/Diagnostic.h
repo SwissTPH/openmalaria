@@ -45,7 +45,10 @@ public:
         return specificity != that.specificity ||
             dens_lim != that.dens_lim;
     }
-        
+    
+    /// True if false positives are possible
+    bool allowsFalsePositives() const;
+    
 private:
     /** Construct from XML parameters. */
     Diagnostic( const Parameters& parameters, const scnXml::Diagnostic& elt );
