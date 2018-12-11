@@ -5,19 +5,14 @@ env:
     - SCHEMA="scenario_$SCHEMA_VERSION.xsd"
     - OMP_NUM_THREADS=4
 
-# TODO: OSX build
-
 os:
   - linux
-  #- osx
+  - osx
 
-#matrix:
-  #allow_failures:
-    #- os: osx
-    #- compiler: clang
-  #exclude:
-    #- os: osx
-    #- compiler: gcc
+matrix:
+  exclude:
+    - os: osx
+      compiler: gcc
 
 sudo: required
 dist: xenial
@@ -56,18 +51,15 @@ script:
   - echo "Testing release example"
   # We copy everything in this directory. The developer must update the XML to
   # work with the current schema version (USUALLY just updating the numbers).
-  - cp -a ../util/example/ .
-  - cp ../test/*.csv example/
+  - cp -r ../util/example ./
+  - cp ../test/*.csv example
   # NOTE: we expect the developer to copy schema/scenario_current.xsd to ../schema/$SCHEMA
   # when creating a new schema version. We DO NOT AUTOMATE this step because we do not want to
   # proliferate multiple incompatible versions of $SCHEMA.
   - echo "Using schema ../schema/$SCHEMA"
   - cp ../schema/$SCHEMA example/
   - cp openMalaria example/
-  - pushd example
-  - strip openMalaria
-  - ./run-example-scenario.sh
-  - popd
+  - pushd example && strip openMalaria && ./run-example-scenario.sh && popd
   - echo "Running test scenarios"
   - ctest -j4
   - popd
