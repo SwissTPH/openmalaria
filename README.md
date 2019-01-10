@@ -1,5 +1,6 @@
+[![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria)
+[![Windows Build Status](https://ci.appveyor.com/api/projects/status/dhardy/openmalaria)](https://ci.appveyor.com/project/dhardy/openmalaria)
 
-[![Stories in Ready](https://badge.waffle.io/SwissTPH/openmalaria.png?label=ready&title=Ready)](https://waffle.io/SwissTPH/openmalaria)
 Open Malaria
 ============
 
@@ -21,24 +22,6 @@ or in the `schema` folder (both past releases and development version).
 
 You can download the latest build here:
 [releases](https://github.com/SwissTPH/openmalaria/releases)
-
-Status of __[master](https://github.com/SwissTPH/openmalaria/tree/master)__
-builds:
-
-[![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/master?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/master)
-
-Status of __[develop](https://github.com/SwissTPH/openmalaria/tree/develop)__
-builds:
-
-
-[![Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=develop)](https://travis-ci.org/SwissTPH/openmalaria)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/8el77m2gg4aqqnqg/branch/develop?svg=true)](https://ci.appveyor.com/project/tph-thuering/openmalaria/branch/develop)
-
-Code Coverage:
-![Coverage Status](https://coveralls.io/repos/SwissTPH/openmalaria/badge.svg)
-
-License: [GPL v2](http://opensource.org/licenses/GPL-2.0) (see COPYING).
 
 Version
 ======
@@ -91,3 +74,11 @@ Code subdirectories:
 | schema/scenario_*.xsd | Copies of released schema versions, with all components inlined in the same file. |
 
 This git repository is currently maintained by members of the [Dynamical Modelling Group](http://www.swisstph.ch/about-us/departments/epidemiology-and-public-health-eph/health-systems-research-and-dynamical-modelling/dynamical-modelling.html) of the __Swiss Tropical and Public Health institute__ and other collaborators.
+
+
+License
+=====
+
+OpenMalaria is distributed under the terms of the
+[GPL v2](http://opensource.org/licenses/GPL-2.0) (also see [COPYING](COPYING)),
+or, (at your option) any later version.
