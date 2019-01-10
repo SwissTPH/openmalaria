@@ -74,8 +74,6 @@ before_deploy:
 
 deploy:
   provider: releases
-  api_key:
-    secure: "BdDntVHSompN+Qxz5Rz45VI4ZqhD72r6aPl166FADlnkIwS6N6FLWdqs51O7G5CpoMXEDvyYrjmRMZe/GYLIG9cmqmn/wUrWPO+PauGiIuG/D2dmfuUNvSTRcIe7UQLXrfP3yyfZPgqsH6pSnNEVopquQKy3KjzqepgriOJtbyY="
   skip_cleanup: true
   file: openMalaria-$TRAVIS_OS_NAME.tar.gz
   on:
