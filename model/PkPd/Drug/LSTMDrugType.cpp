@@ -165,6 +165,9 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
     const scnXml::PK& pk = drugData.getPK();
     negligible_concentration = pk.getNegligible_concentration();
     if( pk.getHalf_life().present() ){
+        if( pk.getK().present() || pk.getM_exponent().present() ){
+            throw util::xml_scenario_error( "PK data must specify one of half_life or (k, m_exponent); it specifies both" );
+        }
         elimination_rate.setParams( log(2.0) / pk.getHalf_life().get(), 0.0 );
         neg_m_exp = 0.0; // no dependence on body mass
     }else{
