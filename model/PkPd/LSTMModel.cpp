@@ -80,7 +80,7 @@ void LSTMModel::prescribe(size_t schedule, size_t dosage, double age, double bod
     }
 }
 
-void LSTMModel::medicate(double body_mass){
+void LSTMModel::medicate(){
     if( medicateQueue.empty() ) return;
     
     // Process pending medications (in interal queue) and apply/update:
@@ -88,7 +88,7 @@ void LSTMModel::medicate(double body_mass){
     while( it != medicateQueue.end() ){
         if( it->time < 1.0 ){   // Medicate medications to be prescribed starting at the next time-step
             // This function could be inlined, except for uses in testing:
-            medicateDrug (it->drug, it->qty, it->time, body_mass);
+            medicateDrug (it->drug, it->qty, it->time);
             it = medicateQueue.erase (it);
         }else{  // and decrement treatment seeking delay for the rest
             it->time -= 1.0;
@@ -97,17 +97,17 @@ void LSTMModel::medicate(double body_mass){
     }
 }
 
-void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time, double bodyMass) {
+void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time) {
     //TODO: might be a little faster if m_drugs was pre-allocated with a slot for each drug type, using a null pointer
     foreach( LSTMDrug& drug, m_drugs ){
         if (drug.getIndex() == typeIndex){
-            drug.medicate (time, qty, bodyMass);
+            drug.medicate (time, qty);
             return;
         }
     }
     // No match, so insert one:
     m_drugs.push_back( LSTMDrugType::createInstance(typeIndex) );
-    m_drugs.back().medicate (time, qty, bodyMass);
+    m_drugs.back().medicate (time, qty);
 }
 
 double LSTMModel::getDrugConc (size_t drug_index) const{

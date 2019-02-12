@@ -233,7 +233,7 @@ public:
             pair<iter, iter> doses_tmp = schedule.equal_range(i);
             for( iter it = doses_tmp.first; it != doses_tmp.second; it++){
                 const double time = it->second.first, qty = it->second.second;
-                UnittestUtil::medicate( *proxy, drugIndex, qty, time, bodymass );
+                UnittestUtil::medicate( *proxy, drugIndex, qty, time );
             }
     }
     

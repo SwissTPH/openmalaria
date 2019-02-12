@@ -50,7 +50,7 @@ public:
     virtual size_t getIndex() const;
     virtual double getConcentration(size_t index) const;
     
-    virtual void medicate (double time, double qty, double bodyMass);
+    virtual void medicate (double time, double qty);
     
     virtual double calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const;
     virtual void updateConcentration (double body_mass);

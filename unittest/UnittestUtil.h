@@ -476,8 +476,8 @@ public:
     }
     
     static void medicate(PkPd::LSTMModel& pkpd, size_t typeIndex, double qty,
-                         double time, double bodyMass){
-        pkpd.medicateDrug(typeIndex, qty, time, bodyMass);
+                         double time){
+        pkpd.medicateDrug(typeIndex, qty, time);
     }
     
     static void clearMedicateQueue( PkPd::LSTMModel& pkpd ){

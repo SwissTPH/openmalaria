@@ -63,32 +63,32 @@ public:
     }
     
     void testOral () {
-	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0 );
 	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563638523168);
     }
     
     void testOralHalves () {	// the point being: check it can handle two doses at the same time-point correctly
-	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, massAt21 );
-	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0 );
+	UnittestUtil::medicate( *proxy, MQ_index, 1500, 0 );
 	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563638523168);
     }
     
     void testOralSplit () {
-	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
-	UnittestUtil::medicate( *proxy, MQ_index, 0, 0.5, massAt21 );	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0 );
+	UnittestUtil::medicate( *proxy, MQ_index, 0, 0.5 );	// insert a second dose half way through the day: forces drug calculation to be split into half-days but shouldn't affect result
 	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563639140275);
     }
     
     void testOralDecayed () {
-	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0 );
 	proxy->decayDrugs (massAt21);
 	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563639501896);
     }
     
     void testOral2Doses () {
-	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0 );
 	proxy->decayDrugs (massAt21);
-	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0, massAt21 );
+	UnittestUtil::medicate( *proxy, MQ_index, 3000, 0 );
 	TS_ASSERT_APPROX (proxy->getDrugFactor (inf, massAt21), 0.03174563637686205);
     }
     

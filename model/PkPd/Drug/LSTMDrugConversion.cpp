@@ -64,11 +64,10 @@ double LSTMDrugConversion::getMetaboliteConcentration() const {
 }
 
 
-void LSTMDrugConversion::medicate(double time, double qty, double bodyMass)
+void LSTMDrugConversion::medicate(double time, double qty)
 {
-    // Note: we use second value of dose pair as quanity (mg) not concentration
     // TODO: this is correct in AS unittest (qty = 200 = 4 * 50), but why is qty mg/kg not mg?
-    medicate_vd(time, qty, 1.0);
+    medicate_vd(time, qty);
 }
 
 /// Parameters for func_convFactor and LSTMDrugConversion::calculateFactor

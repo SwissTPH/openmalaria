@@ -110,12 +110,10 @@ public:
     /** Medicate drugs: human takes prescribed drugs which are to be taken this
      * day.
      * 
-     * @param body_mass Mass of human in kg
-     * 
      * Note: poor adherence on the part of the patient is not modeled here; to
      * model, prescribe with a "poor adherence" schedule.
      */
-    void medicate(double body_mass);
+    void medicate();
     
     /** Get concentration of the drug at the beginning of the day.
      * 
@@ -145,7 +143,6 @@ private:
      * \param typeIndex The index of drug type data (what LSTMDrugType::findDrug() returns).
      * \param qty The quantity in mg
      * \param time Time in days since start of this time step to medicate at
-     * \param bodyMass Weight of human in kg
      * 
      * Due to the fact we're using a discrete time step model, the case-management
      * update (calling medicate) and within-host model update (calling
@@ -154,7 +151,7 @@ private:
      * new infection densities) happens first; hence medicate() will always be
      * called after getDrugFactor in a time step, and a time of zero means the
      * dose has effect from the start of the following time step. */
-    void medicateDrug(size_t typeIndex, double qty, double time, double bodyMass);
+    void medicateDrug(size_t typeIndex, double qty, double time);
   
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);

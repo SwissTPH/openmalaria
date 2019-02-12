@@ -182,7 +182,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     
     for( SimTime now = sim::ts0(), end = sim::ts0() + SimTime::oneTS(); now < end; now += SimTime::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
-        pkpdModel.medicate( body_mass );
+        pkpdModel.medicate();
         
         double sumLogDens = 0.0;
         

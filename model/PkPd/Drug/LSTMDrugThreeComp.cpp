@@ -60,9 +60,9 @@ double LSTMDrugThreeComp::getConcentration(size_t index) const {
     else return 0.0;
 }
 
-void LSTMDrugThreeComp::medicate(double time, double qty, double bodyMass)
+void LSTMDrugThreeComp::medicate(double time, double qty)
 {
-    medicate_vd(time, qty, vol_dist * bodyMass);
+    medicate_vd(time, qty);
 }
 
 void LSTMDrugThreeComp::updateCached(double bm) const{
@@ -190,10 +190,11 @@ double LSTMDrugThreeComp::calculateDrugFactor(WithinHost::CommonInfection *inf, 
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add dose:
-            p.cA += AV * time_conc.second;
-            p.cB += BV * time_conc.second;
-            p.cC += CV * time_conc.second;
-            p.cABC += (AV + BV + CV) * time_conc.second;
+            const double conc = time_conc.second / (vol_dist * body_mass);
+            p.cA += AV * conc;
+            p.cB += BV * conc;
+            p.cC += CV * conc;
+            p.cABC += (AV + BV + CV) * conc;
         }else /*i.e. tomorrow or later*/{
             // ignore
         }
@@ -223,10 +224,11 @@ void LSTMDrugThreeComp::updateConcentration (double body_mass) {
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             // add dose:
-            concA += AV * time_conc.second * exp(na * (1.0 - time_conc.first));
-            concB += BV * time_conc.second * exp(nb * (1.0 - time_conc.first));
-            concC += CV * time_conc.second * exp(ng * (1.0 - time_conc.first));
-            concABC += (AV + BV + CV) * time_conc.second * exp(nka * (1.0 - time_conc.first));
+            const double conc = time_conc.second / (vol_dist * body_mass);
+            concA += AV * conc * exp(na * (1.0 - time_conc.first));
+            concB += BV * conc * exp(nb * (1.0 - time_conc.first));
+            concC += CV * conc * exp(ng * (1.0 - time_conc.first));
+            concABC += (AV + BV + CV) * conc * exp(nka * (1.0 - time_conc.first));
             doses_taken += 1;
         }else /*i.e. tomorrow or later*/{
             time_conc.first -= 1.0;
