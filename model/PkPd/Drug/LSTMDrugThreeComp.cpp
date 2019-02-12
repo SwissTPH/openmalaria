@@ -45,9 +45,9 @@ LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
     na(numeric_limits<double>::quiet_NaN()),
     nb(numeric_limits<double>::quiet_NaN()),
     ng(numeric_limits<double>::quiet_NaN()),
-    AV(numeric_limits<double>::quiet_NaN()),
-    BV(numeric_limits<double>::quiet_NaN()),
-    CV(numeric_limits<double>::quiet_NaN())
+    A(numeric_limits<double>::quiet_NaN()),
+    B(numeric_limits<double>::quiet_NaN()),
+    C(numeric_limits<double>::quiet_NaN())
 {
     // These are from the Monolix article, pp38-39.
 }
@@ -65,12 +65,12 @@ void LSTMDrugThreeComp::medicate(double time, double qty)
     medicate_vd(time, qty);
 }
 
-void LSTMDrugThreeComp::updateCached(double bm) const{
-    if( last_bm == bm ) return;
+void LSTMDrugThreeComp::updateCached(double body_mass) const{
+    if( last_bm == body_mass ) return;
     
-    double k = elim_sample * pow(bm, typeData.neg_m_exponent());
-    const double k12 = a12 / bm, k21 = a21 / bm;
-    const double k13 = a13 / bm, k31 = a31 / bm;
+    double k = elim_sample * pow(body_mass, typeData.neg_m_exponent());
+    const double k12 = a12 / body_mass, k21 = a21 / body_mass;
+    const double k13 = a13 / body_mass, k31 = a31 / body_mass;
     
     const double a0 = k*k21*k31;
     const double a1 = k*k31 + k21*k31 + k21*k13 + k*k21 + k31*k12;
@@ -92,12 +92,13 @@ void LSTMDrugThreeComp::updateCached(double bm) const{
     nb = r2 * cos(phi + pi23) - at;
     ng = r2 * cos(phi + 2.0 * pi23) -at;
     
-    // A*V, B*V, C*V from Monolix 1.3.3 (p44):
-    AV = -nka * (k21 + na) * (k31 + na) / ((na - nka) * (nb - na) * (ng - na));
-    BV = -nka * (k21 + nb) * (k31 + nb) / ((nb - nka) * (na - nb) * (ng - nb));
-    CV = -nka * (k21 + ng) * (k31 + ng) / ((ng - nka) * (nb - ng) * (na - ng));
+    // A, B, C from Monolix 1.3.3 (p44):
+    const double kaOv = -nka / (vol_dist * body_mass);
+    A = kaOv * (k21 + na) * (k31 + na) / ((na - nka) * (nb - na) * (ng - na));
+    B = kaOv * (k21 + nb) * (k31 + nb) / ((nb - nka) * (na - nb) * (ng - nb));
+    C = kaOv * (k21 + ng) * (k31 + ng) / ((ng - nka) * (nb - ng) * (na - ng));
     
-    last_bm = bm;
+    last_bm = body_mass;
 }
 
 /// Parameters for func_fC
@@ -190,11 +191,10 @@ double LSTMDrugThreeComp::calculateDrugFactor(WithinHost::CommonInfection *inf, 
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add dose:
-            const double conc = time_conc.second / (vol_dist * body_mass);
-            p.cA += AV * conc;
-            p.cB += BV * conc;
-            p.cC += CV * conc;
-            p.cABC += (AV + BV + CV) * conc;
+            p.cA += A * time_conc.second;
+            p.cB += B * time_conc.second;
+            p.cC += C * time_conc.second;
+            p.cABC += (A + B + C) * time_conc.second;
         }else /*i.e. tomorrow or later*/{
             // ignore
         }
@@ -224,11 +224,11 @@ void LSTMDrugThreeComp::updateConcentration (double body_mass) {
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             // add dose:
-            const double conc = time_conc.second / (vol_dist * body_mass);
-            concA += AV * conc * exp(na * (1.0 - time_conc.first));
-            concB += BV * conc * exp(nb * (1.0 - time_conc.first));
-            concC += CV * conc * exp(ng * (1.0 - time_conc.first));
-            concABC += (AV + BV + CV) * conc * exp(nka * (1.0 - time_conc.first));
+            const double qty = time_conc.second;
+            concA += A * qty * exp(na * (1.0 - time_conc.first));
+            concB += B * qty * exp(nb * (1.0 - time_conc.first));
+            concC += C * qty * exp(ng * (1.0 - time_conc.first));
+            concABC += (A + B + C) * qty * exp(nka * (1.0 - time_conc.first));
             doses_taken += 1;
         }else /*i.e. tomorrow or later*/{
             time_conc.first -= 1.0;
@@ -263,9 +263,9 @@ void LSTMDrugThreeComp::checkpoint(ostream& stream){
     na & stream;
     nb & stream;
     ng & stream;
-    AV & stream;
-    BV & stream;
-    CV & stream;
+    A & stream;
+    B & stream;
+    C & stream;
 }
 void LSTMDrugThreeComp::checkpoint(istream& stream){
     concA & stream;
@@ -282,9 +282,9 @@ void LSTMDrugThreeComp::checkpoint(istream& stream){
     na & stream;
     nb & stream;
     ng & stream;
-    AV & stream;
-    BV & stream;
-    CV & stream;
+    A & stream;
+    B & stream;
+    C & stream;
 }
 
 }

@@ -85,7 +85,7 @@ protected:
     // (this is essentially a cache updated by updateCached())
     mutable double last_bm;     // body mass at time of last calculation
     mutable double na, nb, ng;      // -α, -β, -γ, -k_a
-    mutable double AV, BV, CV;     // A*V, B*V, C*V where V is total volume of distribution (litres)
+    mutable double A, B, C;     // A, B, C
     
 private:
     double calculateFactor(const Params_fC& p, double duration) const;
