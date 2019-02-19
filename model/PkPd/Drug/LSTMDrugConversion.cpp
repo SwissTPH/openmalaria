@@ -64,12 +64,6 @@ double LSTMDrugConversion::getMetaboliteConcentration() const {
 }
 
 
-void LSTMDrugConversion::medicate(double time, double qty)
-{
-    // TODO: this is correct in AS unittest (qty = 200 = 4 * 50), but why is qty mg/kg not mg?
-    medicate_vd(time, qty);
-}
-
 /// Parameters for func_convFactor and LSTMDrugConversion::calculateFactor
 struct Params_convFactor {
     // Quantities of parent in gut, parent in circulation and metabolite in

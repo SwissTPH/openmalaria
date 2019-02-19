@@ -45,11 +45,6 @@ double LSTMDrugOneComp::getConcentration(size_t index) const {
     else return 0.0;
 }
 
-void LSTMDrugOneComp::medicate(double time, double qty)
-{
-    medicate_vd(time, qty);
-}
-
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
 double LSTMDrugOneComp::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {

@@ -47,14 +47,13 @@ public:
     
     /** Indicate a new medication this time step.
      *
-     * Converts qty in mg to concentration, and stores along with time (delay past
-     * the start of the current time step) in the doses container.
+     * Stores (time, qty) pair in the doses container.
      * 
-     * @param time Time of administration, in days (should be at least 0 and
-     *  less than 1).
-     * @param qty Amount of active ingredient, in mg
+     * @param time Time of administration, as the delay since the start of the
+     *  current time step in units of days.
+     * @param qty Amount of active ingredient, in mg (total)
      */
-    virtual void medicate (double time, double qty) =0;
+    void medicate (double time, double qty);
     
     /** Get the concentration of the given drug contained in this model (only
      * compartments with active PD; zero if drug index doesn't match that used).
@@ -88,18 +87,6 @@ public:
     }
 
 protected:
-    /** Indicate a new medication this time step
-     *
-     * Stores (time, qty) pair in the doses container.
-     * along with time (delay past
-     * the start of the current time step) in the doses container.
-     * 
-     * @param time Time of administration, as the delay since the start of the
-     *  current time step in units of days.
-     * @param qty Amount of active ingredient, in mg
-     */
-    void medicate_vd (double time, double qty);
-    
     virtual void checkpoint (istream& stream){}
     virtual void checkpoint (ostream& stream){}
     

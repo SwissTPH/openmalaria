@@ -60,11 +60,6 @@ double LSTMDrugThreeComp::getConcentration(size_t index) const {
     else return 0.0;
 }
 
-void LSTMDrugThreeComp::medicate(double time, double qty)
-{
-    medicate_vd(time, qty);
-}
-
 void LSTMDrugThreeComp::updateCached(double body_mass) const{
     if( last_bm == body_mass ) return;
     
