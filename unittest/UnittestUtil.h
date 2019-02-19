@@ -93,13 +93,13 @@ namespace xml_helpers{
     ///@param k Elimination rate of drug (days^-1)
     ///@param m_exponent
     ///@param ka Absorbtion rate from gut
-    ///@param a12 Absorbtion rate parameter a12
-    ///@param a21 Absorbtion rate parameter a21
+    ///@param k12 Absorbtion rate parameter k12
+    ///@param k21 Absorbtion rate parameter k21
     struct PK2C{
         PK2C(double Vd, double negl_conc, double k, double m_exponent,
-             double ka, double a12, double a21):
-            Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent), ka(ka), a12(a12), a21(a21) {}
-        double Vd, negl_conc, k, me, ka, a12, a21;
+             double ka, double k12, double k21):
+            Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent), ka(ka), k12(k12), k21(k21) {}
+        double Vd, negl_conc, k, me, ka, k12, k21;
     };
     /// Construct a helper for setting PK parameters (2-compartment model)
     ///@param Vd Volume of distribution (l/kg)
@@ -107,16 +107,16 @@ namespace xml_helpers{
     ///@param k Elimination rate of drug (days^-1)
     ///@param m_exponent
     ///@param ka Absorbtion rate from gut
-    ///@param a12 Absorbtion rate parameter a12
-    ///@param a21 Absorbtion rate parameter a21
-    ///@param a13 Absorbtion rate parameter a13
-    ///@param a31 Absorbtion rate parameter a31
+    ///@param k12 Absorbtion rate parameter k12
+    ///@param k21 Absorbtion rate parameter k21
+    ///@param k13 Absorbtion rate parameter k13
+    ///@param k31 Absorbtion rate parameter k31
     struct PK3C{
         PK3C(double Vd, double negl_conc, double k, double m_exponent,
-             double ka, double a12, double a21, double a13, double a31):
+             double ka, double k12, double k21, double k13, double k31):
             Vd(Vd), negl_conc(negl_conc), k(k), me(m_exponent), ka(ka),
-            a12(a12), a21(a21), a13(a13), a31(a31) {}
-        double Vd, negl_conc, k, me, ka, a12, a21, a13, a31;
+            k12(k12), k21(k21), k13(k13), k31(k31) {}
+        double Vd, negl_conc, k, me, ka, k12, k21, k13, k31;
     };
     /// Construct a helper for setting PD parameters
     ///@param vmax Max killing rate
@@ -173,8 +173,8 @@ namespace xml_helpers{
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
         xPK.setK(scnXml::SampledValue(pk.k, "const"));
         xPK.setCompartment2(scnXml::Compartment2(
-            scnXml::SampledValue(pk.a12, "const"),
-            scnXml::SampledValue(pk.a21, "const")));
+            scnXml::SampledValue(pk.k12, "const"),
+            scnXml::SampledValue(pk.k21, "const")));
         xPK.setM_exponent(pk.me);
         xPK.setK_a(scnXml::SampledValue(pk.ka, "const"));
         scnXml::PD xPD;
@@ -189,11 +189,11 @@ namespace xml_helpers{
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
         xPK.setK(scnXml::SampledValue(pk.k, "const"));
         xPK.setCompartment2(scnXml::Compartment2(
-            scnXml::SampledValue(pk.a12, "const"),
-            scnXml::SampledValue(pk.a21, "const")));
+            scnXml::SampledValue(pk.k12, "const"),
+            scnXml::SampledValue(pk.k21, "const")));
         xPK.setCompartment3(scnXml::Compartment3(
-            scnXml::SampledValue(pk.a13, "const"),
-            scnXml::SampledValue(pk.a31, "const")));
+            scnXml::SampledValue(pk.k13, "const"),
+            scnXml::SampledValue(pk.k31, "const")));
         xPK.setM_exponent(pk.me);
         xPK.setK_a(scnXml::SampledValue(pk.ka, "const"));
         scnXml::PD xPD;
@@ -371,13 +371,13 @@ public:
                 PK1C(150 /*Vd*/, 0.005 /*negl_conc*/, 0.03 /*k*/, 0.0 /*m_exp*/),
                 PD(3.45 /* vmax */, 0.020831339 /* IC50 */, 6.0 /* slope */ )));
         drugs.getDrug().push_back(drug("PPQ2",   // Piperaquine, Hodel2013 model
-                PK2C(173 /*Vd*/, 0.005 /*negl_conc*/, 0.6242774566473989 /*k*/, 0.25 /*m_exp*/,
-                    11.16 /*k_a*/, 8.46242774566474 /*a12*/, 3.3058064516129035 /*a21*/),
+                PK2C(173 /*Vd*/, 0.005 /*negl_conc*/, 0.2452253 /*k*/, 0.25 /*m_exp*/,
+                    11.16 /*k_a*/, 0.2014864 /*k12*/, 0.07870968 /*k21*/),
                 PD(3.45 /* vmax */, 0.020831339 /* IC50 */, 6.0 /* slope */ )));
         drugs.getDrug().push_back(drug("PPQ3",  // Piperaquine, Tarning 2012 AAC
                 PK3C(57.5625 /*Vd*/, 0.005 /*negl_conc*/, 16.314788273615637 /*k*/, 1.0 /*m_exp*/,
-                    3.4825 /*k_a*/, 89.01628664495114 /*a12*/, 55.394594594594594 /*a21*/,
-                     43.36156351791531 /*a13*/, 3.8155414012738853 /*a31*/),
+                    3.4825 /*k_a*/, 1.854166666666667 /*k12*/, 1.1545945945945946 /*k21*/,
+                     0.9027777777777778 /*k13*/, 0.07948639559767655 /*k31*/),
                 PD(3.45 /* vmax */, 0.020831339 /* IC50 */, 6.0 /* slope */ )));
         
         PkPd::LSTMDrugType::init (drugs);

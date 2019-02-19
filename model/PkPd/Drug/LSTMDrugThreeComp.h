@@ -78,7 +78,7 @@ protected:
     
     // Sampled constants
     double elim_sample;
-    double a12, a21, a13, a31;
+    double k12, k21, k13, k31;
     double nka;    // -k_a
     
     // Computed parameters, constant except for dependence on body mass

@@ -36,10 +36,10 @@ LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
     typeData(type),
     concA(0.0), concB(0.0), concC(0.0), concABC(0.0),
     elim_sample(type.sample_elim_rate()),
-    a12(type.sample_a12()),
-    a21(type.sample_a21()),
-    a13(type.sample_a13()),
-    a31(type.sample_a31()),
+    k12(type.sample_k12()),
+    k21(type.sample_k21()),
+    k13(type.sample_k13()),
+    k31(type.sample_k31()),
     nka(-type.sample_ka()),
     last_bm(numeric_limits<double>::quiet_NaN()),
     na(numeric_limits<double>::quiet_NaN()),
@@ -69,8 +69,6 @@ void LSTMDrugThreeComp::updateCached(double body_mass) const{
     if( last_bm == body_mass ) return;
     
     double k = elim_sample * pow(body_mass, typeData.neg_m_exponent());
-    const double k12 = a12 / body_mass, k21 = a21 / body_mass;
-    const double k13 = a13 / body_mass, k31 = a31 / body_mass;
     
     const double a0 = k*k21*k31;
     const double a1 = k*k31 + k21*k31 + k21*k13 + k*k21 + k31*k12;
@@ -254,10 +252,10 @@ void LSTMDrugThreeComp::checkpoint(ostream& stream){
     concC & stream;
     concABC & stream;
     elim_sample & stream;
-    a12 & stream;
-    a21 & stream;
-    a13 & stream;
-    a31 & stream;
+    k12 & stream;
+    k21 & stream;
+    k13 & stream;
+    k31 & stream;
     nka & stream;
     last_bm & stream;
     na & stream;
@@ -273,10 +271,10 @@ void LSTMDrugThreeComp::checkpoint(istream& stream){
     concC & stream;
     concABC & stream;
     elim_sample & stream;
-    a12 & stream;
-    a21 & stream;
-    a13 & stream;
-    a31 & stream;
+    k12 & stream;
+    k21 & stream;
+    k13 & stream;
+    k31 & stream;
     nka & stream;
     last_bm & stream;
     na & stream;
