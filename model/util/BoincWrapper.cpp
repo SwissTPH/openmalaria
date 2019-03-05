@@ -48,10 +48,10 @@ namespace OM { namespace util {
 #ifdef WITHOUT_BOINC
 namespace BoincWrapper {
   void init () {
-    cout << "BoincWrapper: not using BOINC" << endl;
+    cerr << "BoincWrapper: not using BOINC" << endl;
   }
   void finish(int err) {
-      cout << '\r' << flush;	// clean last line of progress-output
+      cerr << '\r' << flush;	// clean last line of progress-output
     exit(err);	// doesn't return
   }
   
@@ -70,7 +70,7 @@ namespace BoincWrapper {
       if( percent != lastPercent ){	// avoid huge amounts of output for performance/log-file size reasons
 	  lastPercent = percent;
 	// \r cleans line. Then we print progress as a percentage.
-	cout << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
+	cerr << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
       }
   }
   int timeToCheckpoint() {
@@ -103,7 +103,7 @@ namespace BoincWrapper {
       exit (err);
     }
     // Probably we don't need to know this. Disable to compress stderr.txt:
-//     std::cout << "BoincWrapper: BOINC initialized" << std::endl;
+//     std::cerr << "BoincWrapper: BOINC initialized" << std::endl;
   }
   void finish(int err) {
     boinc_finish(err);	// doesn't return

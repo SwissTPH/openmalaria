@@ -152,10 +152,10 @@ public:
     inline double sample_conv_rate() const{
         return conversion_rate.sample();
     }
-    inline double sample_a12() const{ return a12.sample(); }
-    inline double sample_a21() const{ return a21.sample(); }
-    inline double sample_a13() const{ return a13.sample(); }
-    inline double sample_a31() const{ return a31.sample(); }
+    inline double sample_k12() const{ return k12.sample(); }
+    inline double sample_k21() const{ return k21.sample(); }
+    inline double sample_k13() const{ return k13.sample(); }
+    inline double sample_k31() const{ return k31.sample(); }
     inline double sample_ka() const{ return absorption_rate.sample(); }
     
     /** Return reference to correct drug-phenotype data. */
@@ -200,7 +200,7 @@ private:
     /// Convertion rate
     LognormalSampler conversion_rate;
     /// Parameters for absorption rates in two- and three-compartment models.
-    LognormalSampler a12, a21, a13, a31;
+    LognormalSampler k12, k21, k13, k31;
     
     // Allow LSTMDrug to access private members
     friend class LSTMDrugPD;

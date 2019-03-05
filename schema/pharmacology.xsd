@@ -395,28 +395,26 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="a12" type="om:SampledValue">
+                  <xs:element name="k12" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the central compartment to the
-                          first periphery compartment (2). The parameter
-                          k12 = a12 / m where m is the body mass (kg).
+                          first periphery compartment (2).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (a12);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (k12);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="a21" type="om:SampledValue">
+                  <xs:element name="k21" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the first periphery compartment
-                          (2) to the central compartment. The parameter
-                          k21 = a21 / m where m is the body mass (kg).
+                          (2) to the central compartment.
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 2 (a21);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 2 (k21);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>
@@ -432,28 +430,26 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="a13" type="om:SampledValue">
+                  <xs:element name="k13" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the central compartment to the
-                          second periphery compartment (3). The parameter
-                          k13 = a13 / m where m is the body mass (kg).
+                          second periphery compartment (3).
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (a13);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (k13);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="a31" type="om:SampledValue">
+                  <xs:element name="k31" type="om:SampledValue">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the second periphery compartment
-                          (3) to the central compartment. The parameter
-                          k31 = a31 / m where m is the body mass (kg).
+                          (3) to the central compartment.
                           
                           It is sampled per-patient when sigma &gt; 0.
                       </xs:documentation>
-                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 3 (a31);</xs:appinfo>
+                      <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 3 (k31);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
                 </xs:all>

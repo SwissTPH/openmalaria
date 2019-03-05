@@ -45,11 +45,6 @@ double LSTMDrugOneComp::getConcentration(size_t index) const {
     else return 0.0;
 }
 
-void LSTMDrugOneComp::medicate(double time, double qty, double bodyMass)
-{
-    medicate_vd(time, qty, vol_dist * bodyMass);
-}
-
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
 double LSTMDrugOneComp::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {
@@ -77,7 +72,7 @@ double LSTMDrugOneComp::calculateDrugFactor(WithinHost::CommonInfection *inf, do
                 time = time_conc.first;
             }else{ assert( time == time_conc.first ); }
             // add dose (instantaneous absorption):
-            concentration_today += time_conc.second;
+            concentration_today += time_conc.second / (vol_dist * body_mass);
         }else/*i.e. tomorrow or later*/{
             break;
         }
@@ -103,7 +98,7 @@ void LSTMDrugOneComp::updateConcentration( double body_mass ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             // calculate decayed dose and add:
-            concentration += time_conc.second * exp(neg_elim_rate * (1.0 - time_conc.first));
+            concentration += time_conc.second / (vol_dist * body_mass) * exp(neg_elim_rate * (1.0 - time_conc.first));
             doses_taken += 1;
         }else /*i.e. tomorrow or later*/{
             time_conc.first -= 1.0;

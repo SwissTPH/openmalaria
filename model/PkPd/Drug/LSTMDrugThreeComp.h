@@ -51,8 +51,6 @@ public:
     virtual size_t getIndex() const;
     virtual double getConcentration(size_t index) const;
     
-    virtual void medicate (double time, double qty, double bodyMass);
-    
     virtual double calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const;
     virtual void updateConcentration (double body_mass);
     
@@ -78,14 +76,14 @@ protected:
     
     // Sampled constants
     double elim_sample;
-    double a12, a21, a13, a31;
+    double k12, k21, k13, k31;
     double nka;    // -k_a
     
     // Computed parameters, constant except for dependence on body mass
     // (this is essentially a cache updated by updateCached())
     mutable double last_bm;     // body mass at time of last calculation
     mutable double na, nb, ng;      // -α, -β, -γ, -k_a
-    mutable double AV, BV, CV;     // A*V, B*V, C*V where V is total volume of distribution (litres)
+    mutable double A, B, C;     // A, B, C
     
 private:
     double calculateFactor(const Params_fC& p, double duration) const;

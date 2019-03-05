@@ -233,7 +233,7 @@ public:
             pair<iter, iter> doses_tmp = schedule.equal_range(i);
             for( iter it = doses_tmp.first; it != doses_tmp.second; it++){
                 const double time = it->second.first, qty = it->second.second;
-                UnittestUtil::medicate( *proxy, drugIndex, qty, time, bodymass );
+                UnittestUtil::medicate( *proxy, drugIndex, qty, time );
             }
     }
     
@@ -317,7 +317,7 @@ public:
     void testPPQ_Hodel2013 (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
-        const double drug_conc[] = { 0, 0.0724459062, 0.1218019809, 0.1561173647, 0.1081632036, 0.0768569742 };
+        const double drug_conc[] = { 0, 0.08022449, 0.1416033, 0.18962337, 0.14792303, 0.11829172 };
         const double drug_factors[] = { 1, 0.03422595, 0.001086594, 3.449438e-05, 1.095144e-06, 3.479034e-08 };
         runDrugSimulations("PPQ2", drug_conc, drug_factors);
     }
@@ -326,7 +326,7 @@ public:
     void testPPQ_Tarning2012AAC (){
         const double dose = 18 * bodymass;   // 18 mg/kg * 50 kg
         assembleTripleDosageSchedule( dose );
-        const double drug_conc[] = { 0, 0.0768788483, 0.1201694285, 0.1526774077, 0.1016986483, 0.0798269206 };
+        const double drug_conc[] = { 0, 0.075305088, 0.118119866, 0.150210662, 0.100426437, 0.078729041 };
         const double drug_factors[] = { 1, 0.03421756, 0.001086307, 3.448539e-05, 1.094894e-06, 3.478302e-08 };
         runDrugSimulations("PPQ3", drug_conc, drug_factors);
     }

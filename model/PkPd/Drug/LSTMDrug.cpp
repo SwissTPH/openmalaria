@@ -46,12 +46,11 @@ bool comp(pair<double,double> lhs, double rhs){
 // per day, but be able to handle more.
 // If two doses coincide, they can be combined but doing so is not essential.
 
-void LSTMDrug::medicate_vd (double time, double qty, double volDist) {
-    double conc = qty / volDist;        // mg / l
+void LSTMDrug::medicate(double time, double qty){
     // Insert in the right position to maintain sorting:
     DoseVec::iterator pos = lower_bound(doses.begin(), doses.end(), time, comp);
-    doses.insert(pos, make_pair (time, conc));
-    //TODO (C++11 only, different comp): assert(is_sorted(doses.begin(), doses.end(), comp));
+    doses.insert(pos, make_pair (time, qty));
+    assert(is_sorted(doses.begin(), doses.end(), comp));
 }
 
 }
