@@ -32,16 +32,12 @@
 #include <vector>
 #include <map>
 #include <boost/format.hpp>
-#include <boost/assign/std/vector.hpp> // for 'operator+=()'
-#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace OM { namespace Clinical {
 
 using WithinHost::Diagnostic;
 using WithinHost::diagnostics;
 using namespace OM::util;
-using namespace boost::assign;
-using boost::ptr_vector;
 using std::map;
 using std::vector;
 
@@ -410,9 +406,9 @@ protected:
 
 // ———  static functions  ———
 
-// Memory management: lists all decisions and frees memory at program exit
-// TODO: use C++11 move semantics
-ptr_vector<CMDecisionTree> decision_library;
+// Memory management: lists all decisions and frees memory at program exit.
+// We store pointers into this list, so elements must not move.
+vector<unique_ptr<CMDecisionTree>> decision_library;
 
 // Saves a decision to decision_library, making it const.
 // Also optimises away duplicates
@@ -420,16 +416,15 @@ const CMDecisionTree& save_decision( CMDecisionTree* decision ){
     // We search the library for a duplicate, and delete this one if there is
     // a duplicate. Note that this is not implemented efficiently, but a little
     // wasted time at start up is hardly a concern.
-    foreach( const CMDecisionTree& d, decision_library ){
-        if( d == *decision ){
-            delete decision;
-            return d;
+    foreach( auto& d, decision_library ){
+        if( *d == *decision ){
+            return *d;
         }
     }
     
     // No match: add to the library.
-    decision_library.push_back( decision );
-    return *decision;
+    decision_library.push_back( unique_ptr<CMDecisionTree>(decision) );
+    return *decision_library.back();
 }
 
 const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, bool isUC ){

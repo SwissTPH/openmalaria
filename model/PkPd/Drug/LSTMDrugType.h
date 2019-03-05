@@ -31,7 +31,6 @@
 #include <cassert>
 #include <memory>
 #include <map>
-#include <boost/ptr_container/ptr_vector.hpp>
 
 using namespace std;
 
@@ -59,6 +58,9 @@ class LSTMDrugPD {
 public:
     /// Construct
     LSTMDrugPD( const scnXml::Phenotype& phenotype );
+    
+    LSTMDrugPD(LSTMDrugPD&&) = default;
+    LSTMDrugPD& operator=(LSTMDrugPD&&) = default;
     
     /** Calculate a survival factor induced by a drug already in the blood.
      * It is expected that no drug doses are taken over the period for which
@@ -120,7 +122,7 @@ public:
     static const vector<size_t>& getDrugsInUse();
     
     /** Create a per-human drug module for a given drug index. */
-    static LSTMDrug* createInstance( size_t index );
+    static unique_ptr<LSTMDrug> createInstance( size_t index );
     //@}
     
     
@@ -133,6 +135,9 @@ public:
      */
     LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData);
     ~LSTMDrugType ();
+    
+    LSTMDrugType(LSTMDrugType&&) = default;
+    LSTMDrugType& operator=(LSTMDrugType&&) = default;
     
     inline size_t getIndex() const {
         return index;
@@ -179,9 +184,8 @@ private:
     // TODO: at the moment we're storing all PK & PD data regardless of which
     // model is used. Evaluate whether this is sensible or not.
     
-    // TODO: use C++11 move semantics
     /* PD parameters (may vary based on infection genotype). */
-    boost::ptr_vector<LSTMDrugPD> PD;
+    vector<LSTMDrugPD> PD;
     
     /*PK parameters required - varies with humans age and severity of disease*/
     /** Concentration, below which drug is deemed not to have an effect and is

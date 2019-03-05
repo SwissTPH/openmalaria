@@ -26,7 +26,6 @@
 #include "util/CommandLine.h"
 #include "schema/scenario.h"
 #include <limits>
-#include <boost/ptr_container/ptr_map.hpp>
 
 namespace OM { namespace WithinHost {
 
@@ -115,9 +114,7 @@ bool Diagnostic::allowsFalsePositives() const{
 
 // ———  diagnostics (static)  ———
 
-// TODO: use C++11 move semantics
-typedef boost::ptr_map<string,Diagnostic> Diagnostic_set;
-Diagnostic_set diagnostic_set;
+map<string, Diagnostic> diagnostic_set;
 const Diagnostic* diagnostics::monitoring_diagnostic = 0;
 
 void diagnostics::clear(){
@@ -128,7 +125,7 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
     if(scenario.getDiagnostics().present()){
         foreach( const scnXml::Diagnostic& diagnostic, scenario.getDiagnostics().get().getDiagnostic() ){
             string name = diagnostic.getName();     // conversion fails without this extra line
-            bool inserted = diagnostic_set.insert( name, new Diagnostic(parameters, diagnostic) ).second;
+            bool inserted = diagnostic_set.insert( make_pair(move(name), Diagnostic(parameters, diagnostic)) ).second;
             if( !inserted ){
                 throw util::xml_scenario_error( string("diagnostic with this name already set: ").append(diagnostic.getName()) );
             }
@@ -188,15 +185,15 @@ const Diagnostic& diagnostics::get( const string& name ){
     if( it == diagnostic_set.end() ){
         throw util::xml_scenario_error( string("diagnostic not found: ").append(name) );
     }
-    return *it->second;
+    return it->second;
 }
 
 const Diagnostic& diagnostics::make_deterministic(double minDens){
     string name = "";   // anything not matching an existing name is fine
     assert( diagnostic_set.count(name) == 0 );  // we shouldn't need to call make_deterministic more than once, so I think this will do
-    Diagnostic *diagnostic = new Diagnostic( minDens );
-    diagnostic_set.insert( name, diagnostic );
-    return *diagnostic;
+    auto ret = diagnostic_set.insert( make_pair(move(name), Diagnostic( minDens )) );
+    assert(ret.second);
+    return ret.first->second;
 }
 
 } }

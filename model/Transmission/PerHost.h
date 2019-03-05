@@ -27,7 +27,6 @@
 #include "util/AgeGroupInterpolation.h"
 #include "util/DecayFunction.h"
 #include "util/checkpoint_containers.h"
-#include <boost/ptr_container/ptr_list.hpp>
 
 namespace OM {
 namespace Transmission {

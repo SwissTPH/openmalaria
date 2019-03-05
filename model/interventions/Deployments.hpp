@@ -32,6 +32,8 @@
 
 namespace OM { namespace interventions {
 
+struct ByDeployTime;    // forward decl for friend
+
 // ———  TimedDeployment and derivatives  ———
 
 /** Interface for timed deployment of an intervention. */
@@ -49,10 +51,6 @@ public:
         }
     }
     virtual ~TimedDeployment() {}
-    
-    bool operator< (const TimedDeployment& that) const{
-        return this->time < that.time;
-    }
     
     virtual void deploy (OM::Population&) =0;
     
@@ -190,7 +188,7 @@ protected:
      *  to which deployment will be restricted
      */
     HumanDeploymentBase( const scnXml::DeploymentBase& deploy,
-                         const HumanIntervention* intervention,
+                         shared_ptr<const HumanIntervention> intervention,
                          ComponentId subPop, bool complement ) :
             coverage( deploy.getCoverage() ),
             subPop( subPop ),
@@ -211,7 +209,7 @@ protected:
     VaccineLimits vaccLimits;
     ComponentId subPop;      // ComponentId_pop if deployment is not restricted to a sub-population
     bool complement;
-    const HumanIntervention *intervention;
+    shared_ptr<const HumanIntervention> intervention;
 };
 
 /// Timed deployment of human-specific interventions
@@ -226,7 +224,7 @@ public:
      */
     TimedHumanDeployment( SimTime date,
                            const scnXml::MassDeployment& mass,
-                           const HumanIntervention* intervention,
+                           shared_ptr<const HumanIntervention> intervention,
                            ComponentId subPop, bool complement ) :
         TimedDeployment( date ),
         HumanDeploymentBase( mass, intervention, subPop, complement ),
@@ -283,7 +281,7 @@ public:
      */
     TimedCumulativeHumanDeployment( SimTime date,
                            const scnXml::MassDeployment& mass,
-                           const HumanIntervention* intervention,
+                           shared_ptr<const HumanIntervention> intervention,
                            ComponentId subPop, bool complement,
                            ComponentId cumCuvId ) :
         TimedHumanDeployment( date, mass, intervention, subPop, complement ),
@@ -372,7 +370,7 @@ public:
     /// Create, passing deployment age
     ContinuousHumanDeployment( SimTime begin, SimTime end,
                                  const ::scnXml::ContinuousDeployment& elt,
-                                 const HumanIntervention* intervention,
+                                 shared_ptr<const HumanIntervention> intervention,
                                  ComponentId subPop, bool complement ) :
             HumanDeploymentBase( elt, intervention, subPop, complement ),
             begin( begin ), end( end ),
@@ -394,11 +392,6 @@ public:
             msg << sim::maxHumanAge().inYears();
             throw util::xml_scenario_error( msg.str() );
         }
-    }
-    
-    /// For sorting
-    inline bool operator<( const ContinuousHumanDeployment& that )const{
-        return this->deployAge < that.deployAge;
     }
     
     /** Apply filters and potentially deploy.
@@ -440,6 +433,18 @@ public:
 protected:
     SimTime begin, end;    // first time step active and first time step no-longer active
     SimTime deployAge;
+    
+    friend ByDeployTime;
 };
+
+struct ByDeployTime {
+    bool operator() (const unique_ptr<TimedDeployment>& a, const unique_ptr<TimedDeployment>& b) const{
+        return a->time < b->time;
+    }
+    
+    bool operator()(const ContinuousHumanDeployment& a, const ContinuousHumanDeployment& b) const{
+        return a.deployAge < b.deployAge;
+    }
+} byDeployTime;
 
 } }

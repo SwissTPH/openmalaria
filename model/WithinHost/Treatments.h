@@ -24,8 +24,6 @@
 #include "WithinHost/WHInterface.h"
 #include "interventions/Interfaces.hpp"
 
-#include <boost/ptr_container/ptr_vector.hpp>
-
 using namespace std;
 
 namespace OM {
@@ -81,8 +79,7 @@ public:
     
 private:
     // static:
-    // TODO: use C++11 move semantics
-    static boost::ptr_vector<Treatments> treatments;
+    static vector<Treatments> treatments;
     
     // non-static:
     Treatments( const scnXml::TreatmentOption& elt );

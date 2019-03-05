@@ -30,7 +30,6 @@
 #include <schema/pharmacology.h>
 
 #include <cmath>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/format.hpp>
 
 using namespace std;
@@ -43,9 +42,7 @@ using WithinHost::Genotypes;
 // -----  Static variables and functions  -----
 
 // The list of drugTypes drugs. Not checkpointed.
-// TODO: use C++11 move semantics
-typedef boost::ptr_vector<LSTMDrugType> DrugTypesT;
-DrugTypesT drugTypes;
+vector<LSTMDrugType> drugTypes;
 map<string,size_t> drugTypeNames;
 // List of all indices of drugs being used
 vector<size_t> drugsInUse;
@@ -85,6 +82,7 @@ double LSTMDrugPD::IC50_pow_slope(size_t index, WithinHost::CommonInfection *inf
 
 
 void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
+    drugTypes.reserve(drugData.getDrug().size());
     foreach( const scnXml::PKPDDrug& drug, drugData.getDrug() ){
         const string& abbrev = drug.getAbbrev();
         // Check drug doesn't already exist
@@ -92,7 +90,7 @@ void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
             throw TRACED_EXCEPTION_DEFAULT (string ("Drug added twice: ").append(abbrev));
         
         size_t i = drugTypes.size();
-        drugTypes.push_back( new LSTMDrugType (i, drug) );
+        drugTypes.emplace_back( i, drug );
         drugTypeNames[abbrev] = i;
     }
 }
@@ -137,17 +135,17 @@ const vector< size_t >& LSTMDrugType::getDrugsInUse(){
     return drugsInUse;
 }
 
-LSTMDrug* LSTMDrugType::createInstance(size_t index) {
+unique_ptr<LSTMDrug> LSTMDrugType::createInstance(size_t index) {
     LSTMDrugType& typeData = drugTypes[index];
     if( typeData.conversion_rate.isSet() ){
         LSTMDrugType& metaboliteData = drugTypes[typeData.metabolite];
-        return new LSTMDrugConversion( typeData, metaboliteData );
+        return unique_ptr<LSTMDrug>(new LSTMDrugConversion( typeData, metaboliteData ));
     }else if( typeData.k12.isSet() ){
         // k21 is set when k12 is set; k13 and k31 may be set
-        return new LSTMDrugThreeComp( typeData );
+        return unique_ptr<LSTMDrug>(new LSTMDrugThreeComp( typeData ));
     }else{
         // none of k12/k21/k13/k31 should be set in this case
-        return new LSTMDrugOneComp( typeData );
+        return unique_ptr<LSTMDrug>(new LSTMDrugOneComp( typeData ));
     }
 }
 
@@ -291,7 +289,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             }
         }
         phenotype_restrictions.push_back( loc_alleles );
-        PD.push_back( new LSTMDrugPD( pd[i] ) );
+        PD.push_back( LSTMDrugPD( pd[i] ) );
     }
     
     if( loci_per_phenotype.size() == 0 ){
