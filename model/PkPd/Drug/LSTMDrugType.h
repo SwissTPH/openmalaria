@@ -164,7 +164,8 @@ public:
   
 private:
     // non-copyable (due to allocation of members of drugPhenotype)
-    LSTMDrugType( const LSTMDrugType& );
+    LSTMDrugType( const LSTMDrugType& ) = delete;
+    LSTMDrugType& operator= ( const LSTMDrugType& ) = delete;
     
     /** The drug index in drugTypes and a unique identifier for the drug type.
      * Stored here since LTSMDrug stores a pointer to this struct object, not the index. */

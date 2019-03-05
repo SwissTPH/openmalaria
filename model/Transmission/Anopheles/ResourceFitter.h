@@ -25,7 +25,6 @@
 #include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/LifeCycle.h"
 #include <gsl/gsl_vector.h>
-#include <boost/noncopyable.hpp>
 
 namespace OM {
 namespace Transmission {
@@ -38,7 +37,7 @@ double ResourceFitter_minimise_sampler( const gsl_vector *x, void *params );
 
 /// Container to run life-cycle model with fixed human inputs and run fitting
 /// algorithms.
-struct ResourceFitter : private boost::noncopyable {
+struct ResourceFitter {
     /** Store fixed parameters.
      * 
      * @param mosqTrans MosqTransmission object with parameters
@@ -56,6 +55,10 @@ struct ResourceFitter : private boost::noncopyable {
                     bool forceDebug = false
                   );
     ~ResourceFitter();
+    
+    // Prevent copying
+    ResourceFitter( const ResourceFitter& ) = delete;
+    ResourceFitter& operator= ( const ResourceFitter& ) = delete;
     
     // debugging function
     void printState();

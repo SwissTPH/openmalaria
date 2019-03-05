@@ -177,7 +177,9 @@ protected:
     virtual double getCumulative_Y() const;
     
 private:
-    WHVivax( const WHVivax& ) {}        // not copy constructible
+    // not copy constructible
+    WHVivax( const WHVivax& ) = delete;
+    WHVivax& operator= (const WHVivax& ) = delete;
     
     list<VivaxBrood> infections;
     
