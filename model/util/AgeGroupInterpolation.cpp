@@ -314,7 +314,7 @@ namespace OM { namespace util {
         }
     }
     void AgeGroupInterpolator::reset(){
-        assert( obj != NULL );  // should not do that
+        assert( obj != nullptr );  // should not do that
         if( obj != &AgeGroupDummy::singleton ){
             delete obj;
             obj = &AgeGroupDummy::singleton;
