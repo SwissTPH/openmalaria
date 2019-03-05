@@ -90,13 +90,13 @@ void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
     }
 }
 
-ClinicalModel* ClinicalModel::createClinicalModel (double tSF) {
+unique_ptr<ClinicalModel> ClinicalModel::createClinicalModel (double tSF) {
     if (opt_event_scheduler){
-        return new ClinicalEventScheduler (tSF);
+        return unique_ptr<ClinicalModel>(new ClinicalEventScheduler (tSF));
     }else if( opt_imm_outcomes ){
-        return new ImmediateOutcomes (tSF);
+        return unique_ptr<ClinicalModel>(new ImmediateOutcomes (tSF));
     }else{
-        return new DecisionTree5Day( tSF );
+        return unique_ptr<ClinicalModel>(new DecisionTree5Day( tSF ));
     }
 }
 

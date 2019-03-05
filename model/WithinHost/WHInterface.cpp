@@ -86,23 +86,18 @@ TreatmentId WHInterface::addTreatment(const scnXml::TreatmentOption& desc){
     return Treatments::addTreatment( desc );
 }
 
-WHInterface* WHInterface::createWithinHostModel ( double comorbidityFactor ) {
-    if( opt_vivax_simple ) return new WHVivax( comorbidityFactor );
-    if( opt_common_whm ) return new CommonWithinHost( comorbidityFactor );
-    return new DescriptiveWithinHostModel( comorbidityFactor );
+unique_ptr<WHInterface> WHInterface::createWithinHostModel ( double comorbidityFactor ) {
+    if( opt_vivax_simple ) {
+        return unique_ptr<WHInterface>(new WHVivax( comorbidityFactor ));
+    } else if( opt_common_whm ) {
+        return unique_ptr<WHInterface>(new CommonWithinHost( comorbidityFactor ));
+    } else {
+        return unique_ptr<WHInterface>(new DescriptiveWithinHostModel( comorbidityFactor ));
+    }
 }
 
 
 // -----  Non-static  -----
-
-WHInterface::WHInterface () :
-    numInfs(0)
-{
-}
-
-WHInterface::~WHInterface()
-{
-}
 
 
 void WHInterface::checkpoint (istream& stream) {

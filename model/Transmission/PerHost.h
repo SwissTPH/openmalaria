@@ -108,8 +108,9 @@ public:
     virtual ~HumanVectorInterventionComponent() {}
     
     /** Create a new object to store human-specific details of deployment. */
-    virtual PerHostInterventionData* makeHumanPart() const =0;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, interventions::ComponentId id ) const =0;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart() const =0;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream,
+            interventions::ComponentId id ) const =0;
 protected:
     explicit HumanVectorInterventionComponent(interventions::ComponentId id) :
             HumanInterventionComponent(id) {}
@@ -279,9 +280,7 @@ private:
     // entoAvailability param stored in HostMosquitoInteraction.
     double _relativeAvailabilityHet;
 
-    // TODO: use C++11 move semantics
-    typedef boost::ptr_list<PerHostInterventionData> ListActiveComponents;
-    ListActiveComponents activeComponents;
+    vector<unique_ptr<PerHostInterventionData>> activeComponents;
     
     static AgeGroupInterpolator relAvailAge;
 };

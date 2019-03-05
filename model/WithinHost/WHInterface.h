@@ -82,13 +82,16 @@ public:
     static TreatmentId addTreatment( const scnXml::TreatmentOption& desc );
 
     /// Create an instance using the appropriate model
-    static WHInterface* createWithinHostModel( double comorbidityFactor );
+    static unique_ptr<WHInterface> createWithinHostModel( double comorbidityFactor );
     //@}
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHInterface();
-    virtual ~WHInterface();
+    WHInterface(): numInfs(0) {}
+    virtual ~WHInterface() = default;
+    
+    WHInterface(WHInterface&&) = default;
+    WHInterface& operator=(WHInterface&&) = default;
 
     /// Checkpointing
     template<class S>

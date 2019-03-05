@@ -59,7 +59,7 @@ public:
     /** Return a new ClinicalModel.
      *
      * @param tSF	treatment seeking factor, passed to CaseManagementModel */
-    static ClinicalModel* createClinicalModel (double tSF);
+    static unique_ptr<ClinicalModel> createClinicalModel (double tSF);
     //@}
     
     /// Destructor

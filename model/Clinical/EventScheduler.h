@@ -26,7 +26,6 @@
 #include "Clinical/ESCaseManagement.h"
 #include "util/AgeGroupInterpolation.h"
 
-#include <boost/unordered_map.hpp>
 #include <list>
 
 namespace OM {

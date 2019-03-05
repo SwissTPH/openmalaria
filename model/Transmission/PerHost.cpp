@@ -56,18 +56,18 @@ void PerHost::initialise (double availabilityFactor) {
 }
 
 void PerHost::update(Host::Human& human){
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        it->update(human);
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        (*iter)->update(human);
     }
 }
 
 void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
     // This adds per-host per-intervention details to the host's data set.
     // This data is never removed since it can contain per-host heterogeneity samples.
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        if( it->id() == params.id() ){
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        if( (*iter)->id() == params.id() ){
             // already have a deployment for that description; just update it
-            it->redeploy( params );
+            (*iter)->redeploy( params );
             return;
         }
     }
@@ -84,38 +84,38 @@ void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
 double PerHost::entoAvailabilityHetVecItv (const PerHostAnophParams& base,
                                 size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].getEntoAvailability();
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        alpha_i *= it->relativeAttractiveness( speciesIndex );
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        alpha_i *= (*iter)->relativeAttractiveness( speciesIndex );
     }
     return alpha_i;
 }
 double PerHost::probMosqBiting (const PerHostAnophParams& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].getProbMosqBiting();
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        P_B_i *= (*iter)->preprandialSurvivalFactor( speciesIndex );
     }
     return P_B_i;
 }
 double PerHost::probMosqResting (const PerHostAnophParams& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].getProbMosqRest();
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        pRest *= it->postprandialSurvivalFactor( speciesIndex );
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        pRest *= (*iter)->postprandialSurvivalFactor( speciesIndex );
     }
     return pRest;
 }
 
 double PerHost::relMosqFecundity (size_t speciesIndex) const {
     double relFecundity = 1.0;
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        relFecundity *= it->relFecundity( speciesIndex );
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        relFecundity *= (*iter)->relFecundity( speciesIndex );
     }
     return relFecundity;
 }
 
 bool PerHost::hasActiveInterv(interventions::Component::Type type) const{
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        if( it->isDeployed() ){
-            if( interventions::InterventionManager::getComponent( it->id() ).componentType() == type )
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        if( (*iter)->isDeployed() ){
+            if( interventions::InterventionManager::getComponent( (*iter)->id() ).componentType() == type )
                 return true;
         }
     }
@@ -124,8 +124,8 @@ bool PerHost::hasActiveInterv(interventions::Component::Type type) const{
 
 void PerHost::checkpointIntervs( ostream& stream ){
     activeComponents.size() & stream;
-    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
-        *it & stream;
+    for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
+        *iter & stream;
     }
 }
 void PerHost::checkpointIntervs( istream& stream ){
@@ -142,8 +142,7 @@ void PerHost::checkpointIntervs( istream& stream ){
                 dynamic_cast<const HumanVectorInterventionComponent*>( &gen_params );
             if( params == 0 )
                 throw util::base_exception( "" );       // see catch block below
-            PerHostInterventionData *v = params->makeHumanPart( stream, id );
-            activeComponents.push_back( v );
+            activeComponents.push_back( params->makeHumanPart( stream, id ) );
         }catch( util::base_exception& e ){
             // two causes, both boil down to index being wrong
             throw util::checkpoint_error( "bad value in checkpoint file" );

@@ -31,7 +31,6 @@
 #include <cassert>
 #include <memory>
 #include <map>
-#include <boost/unordered_set.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
 
 using namespace std;

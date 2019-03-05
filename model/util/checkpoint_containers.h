@@ -30,7 +30,18 @@
 namespace OM {
 namespace util {
 namespace checkpoint {
-
+    ///@brief Operator& for smart pointers
+    //@{
+    template<class T>
+    void operator& (unique_ptr<T> & x, ostream& stream) {
+        (*x) & stream;
+    }
+    template<class T>
+    void operator& (unique_ptr<T>& x, istream& stream) {
+        (*x) & stream;
+    }
+    //@}
+    
     ///@brief Operator& for stl containers
     //@{
     template<class U, class V, class S>

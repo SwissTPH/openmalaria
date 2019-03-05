@@ -72,11 +72,11 @@ void GVIComponent::print_details( std::ostream& out )const{
 }
 #endif
 
-PerHostInterventionData* GVIComponent::makeHumanPart() const{
-    return new HumanGVI( *this );
+unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart() const{
+    return unique_ptr<PerHostInterventionData>(new HumanGVI( *this ));
 }
-PerHostInterventionData* GVIComponent::makeHumanPart( istream& stream, ComponentId id ) const{
-    return new HumanGVI( stream, id );
+unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart( istream& stream, ComponentId id ) const{
+    return unique_ptr<PerHostInterventionData>(new HumanGVI( stream, id ));
 }
 
 void GVIComponent::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt,

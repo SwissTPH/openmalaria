@@ -75,19 +75,13 @@ Human::Human(SimTime dateOfBirth) :
 }
 
 Human::Human(SimTime dateOfBirth, int dummy) :
-    withinHostModel(0),
-    infIncidence(0),
-    clinicalModel(0),
+    withinHostModel(nullptr),
+    infIncidence(nullptr),
+    clinicalModel(nullptr),
     m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
 {}
-
-void Human::destroy() {
-    delete infIncidence;
-    delete withinHostModel;
-    delete clinicalModel;
-}
 
 
 // -----  Non-static functions: per-time-step update  -----

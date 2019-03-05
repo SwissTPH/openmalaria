@@ -53,8 +53,8 @@ public:
     virtual void print_details( std::ostream& out )const;
 #endif
     
-    virtual PerHostInterventionData* makeHumanPart() const;
-    virtual PerHostInterventionData* makeHumanPart( istream& stream, ComponentId ) const;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart() const;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream, ComponentId ) const;
     
 private:
     /** Per mosquito-species parameters for generic vector intervention model. */

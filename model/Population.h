@@ -25,7 +25,7 @@
 #include "PopulationAgeStructure.h"
 #include "Host/Human.h"
 
-#include <boost/ptr_container/ptr_list.hpp>
+#include <list>
 #include <fstream>
 #include <utility>  // pair
 
@@ -48,8 +48,6 @@ public:
 
 
     Population( size_t populationSize );
-    //! Clears human collection.
-    ~Population();
     
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
@@ -73,10 +71,8 @@ public:
     /// Flush anything pending report. Should only be called just before destruction.
     void flushReports();
     
-    /// Type of population list. Store pointers to humans only to avoid copy
-    /// operations which (AFAIAA) are otherwise required in C++98.
-    // TODO: use C++11 move semantics
-    typedef boost::ptr_list<Host::Human> HumanPop;
+    /// Type of population list. Store pointers to humans only to avoid copy operations.
+    typedef list<Host::Human> HumanPop;
     /// Iterator type of population
     typedef HumanPop::iterator Iter;
     /// Const iterator type of population
