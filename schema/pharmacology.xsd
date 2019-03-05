@@ -357,6 +357,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>name:Molecular weight ratio;unit:unitless;</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
+                  <xs:element name="IC50_covaries" type="xs:boolean">
+                    <xs:annotation>
+                      <xs:documentation>
+                        If this is true, then the IC50 of parent and metabolite drugs will covary.
+                        If false, then the values will be sampled independently.
+                        
+                        That is, given that this is true and that the IC50 of both parent and
+                        metabolite drugs varies (sigma > 0), a single z-score will be sampled from
+                        the standard normal, allowing IC50_p = exp(mu_p + z*sigma_p) and
+                        IC50_m = exp(mu_m + z*sigma_m). (When sigma_p = sigma_m, this is
+                        equivalent to IC50_m = IC50_p * mean_m / mean_p.)
+                      </xs:documentation>
+                      <xs:appinfo>name:IC50 covaries;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
                 </xs:all>
               </xs:complexType>
             </xs:element>

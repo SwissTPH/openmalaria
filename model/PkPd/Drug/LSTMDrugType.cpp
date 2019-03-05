@@ -157,7 +157,8 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         index (index), metabolite(0),
         negligible_concentration(numeric_limits<double>::quiet_NaN()),
         neg_m_exp(numeric_limits<double>::quiet_NaN()),
-        mwr(numeric_limits<double>::quiet_NaN())
+        mwr(numeric_limits<double>::quiet_NaN()),
+        ic50_covaries(false)
 {
     // ———  PK parameters  ———
     const scnXml::PK& pk = drugData.getPK();
@@ -204,6 +205,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         }
         conversion_rate.setParams( conv.getRate() );
         mwr = conv.getMolRatio();
+        ic50_covaries = conv.getIC50_covaries();
     }
     if( pk.getK_a().present() ){
         if( !k12.isSet() && !conversion_rate.isSet() ){
