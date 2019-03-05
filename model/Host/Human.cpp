@@ -115,9 +115,7 @@ bool Human::update(bool doUpdate) {
         // monitoringAgeGroup is the group for the start of the time step.
         monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
-        for( map<ComponentId,SimTime>::iterator expIt =
-            m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
-        {
+        for( auto expIt = m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; ) {
             if( !(expIt->second >= sim::ts0()) ){       // membership expired
                 // don't flush reports
                 // report removal due to expiry
@@ -179,8 +177,8 @@ void Human::reportDeployment( ComponentId id, SimTime duration ){
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
     const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
-    for( vector<ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        SubPopT::iterator expIt = m_subPopExp.find( *it );
+    for( auto it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
+        auto expIt = m_subPopExp.find( *it );
         if( expIt != m_subPopExp.end() ){
             if( expIt->second > sim::nowOrTs0() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment

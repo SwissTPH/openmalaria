@@ -114,10 +114,10 @@ void drugIsUsed(size_t index){
     drugsInUse.push_back(index);
 }
 size_t LSTMDrugType::findDrug(string _abbreviation) {
-    map<string,size_t>::const_iterator it = drugTypeNames.find (_abbreviation);
-    if (it == drugTypeNames.end())
+    auto iter = drugTypeNames.find (_abbreviation);
+    if (iter == drugTypeNames.end())
         throw util::xml_scenario_error (string ("attempt to use drug without description: ").append(_abbreviation));
-    size_t index = it->second;
+    size_t index = iter->second;
     
     // We assume that drugs are used when and only when findDrug returns their
     // index or they are a metabolite of a drug returned here.
@@ -282,12 +282,12 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                     "has not been defined in parasiteGenetics section")
                     %restriction.getOnLocus() %restriction.getToAllele()).str() );
             }
-            map<string,size_t>::const_iterator it = loci.find(restriction.getOnLocus());
-            if( it == loci.end() ){
+            auto iter = loci.find(restriction.getOnLocus());
+            if( iter == loci.end() ){
                 loci[restriction.getOnLocus()] = loc_alleles.size();
                 loc_alleles.push_back( vector<uint32_t>(1,allele) );
             }else{
-                loc_alleles[it->second].push_back( allele );
+                loc_alleles[iter->second].push_back( allele );
             }
         }
         phenotype_restrictions.push_back( loc_alleles );
@@ -355,7 +355,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             cout << (fmtr % "--------" % "-------------") << endl;
             uint32_t genotype = 0;
             stringstream phenotypeName;
-            for( vector<uint32_t>::const_iterator phen = genotype_mapping.begin(); phen !=genotype_mapping.end(); ++phen ){
+            for( auto phen = genotype_mapping.begin(); phen !=genotype_mapping.end(); ++phen ){
                 phenotypeName.str("");
                 if(pd[*phen].getName().present()){
                     phenotypeName << pd[*phen].getName().get();

@@ -107,8 +107,7 @@ void Genotypes::initSingle()
 // utility function: does a vector contain an element?
 template<class T>
 bool contains(const vector<T>& vec, const T& x){
-    typedef typename vector<T>::const_iterator it_t;
-    for( it_t it = vec.begin(), end = vec.end(); it != end; ++it ){
+    for( auto it = vec.begin(), end = vec.end(); it != end; ++it ){
         if( *it == x ) return true;
     }
     return false;
@@ -171,11 +170,9 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
     if( util::CommandLine::option( util::CommandLine::PRINT_GENOTYPES ) ){
         // reorganise GT::alleleCodes so that we can look up codes, not names
         vector<pair<string,string> > allele_codes( GT::cum_initial_freqs.size() );
-        for( map<string, map<string, uint32_t> >::const_iterator i =
-            GT::alleleCodes.begin(), iend = GT::alleleCodes.end(); i != iend; ++i )
-        {
+        for( auto i = GT::alleleCodes.begin(), iend = GT::alleleCodes.end(); i != iend; ++i ) {
             const string locus = i->first;
-            for( map<string, uint32_t>::const_iterator j = i->second.begin(),
+            for( auto j = i->second.begin(),
                 jend = i->second.end(); j != jend; ++j )
             {
                 uint32_t code = j->second;
@@ -187,20 +184,20 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         
         // determine our columns
         map<string,uint32_t> longest;      // longest name in column; key is locus
-        for( vector<Genotype>::const_iterator i = GT::genotypes.begin(),
+        for( auto i = GT::genotypes.begin(),
             iend = GT::genotypes.end(); i != iend; ++i )
         {
             if( longest.size() == 0 ){
-                for( set<uint32_t>::const_iterator j = i->alleles.begin();
+                for( auto j = i->alleles.begin();
                     j != i->alleles.end(); ++j ){
                     const string& locus = allele_codes[*j].first;
                     longest[locus] = locus.length();  // locus name is included in column
                 }
             }else assert( longest.size() == i->alleles.size() );
             
-            for( set<uint32_t>::const_iterator j = i->alleles.begin();
+            for( auto j = i->alleles.begin();
                 j != i->alleles.end(); ++j ){
-                map<string,uint32_t>::iterator it = longest.find(allele_codes[*j].first);
+                auto it = longest.find(allele_codes[*j].first);
                 assert( it != longest.end() );
                 uint32_t len_allele = allele_codes[*j].second.length();
                 if( len_allele > it->second ) it->second = len_allele;
@@ -222,7 +219,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         cout << endl;
         stringstream fmt;
         fmt << "|%8d|";
-        for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
+        for( auto it = loci.begin(); it !=loci.end(); ++it ){
             fmt << "%" << longest[*it] << "s|";
         }
         fmt << "%9.3f|%7.3f|";
@@ -230,7 +227,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         // Table header:
         boost::format fmtr(fmt.str());
         fmtr % "Genotype";
-        for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
+        for( auto it = loci.begin(); it !=loci.end(); ++it ){
             fmtr % *it;
         }
         cout << (fmtr % "init freq" % "fitness") << endl;
@@ -238,7 +235,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         // Bar under header:
         fmtr.clear();
         fmtr % "--------";
-        for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
+        for( auto it = loci.begin(); it !=loci.end(); ++it ){
             fmtr % string(longest[*it], '-');
         }
         cout << (fmtr % "---------" % "-------") << endl;
@@ -246,15 +243,15 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         for( size_t i = 0; i < GT::genotypes.size(); ++i ){
             const Genotype& genotype = GT::genotypes[i];
             map<string,string> locus_allele;    // to find allele for each locus
-            for( set<uint32_t>::const_iterator a = genotype.alleles.begin(); a != genotype.alleles.end(); ++a ){
+            for( auto a = genotype.alleles.begin(); a != genotype.alleles.end(); ++a ){
                 assert( *a < allele_codes.size() );
                 locus_allele[allele_codes[*a].first] = allele_codes[*a].second;
             }
             
             fmtr.clear();
             fmtr % (i*100000);
-            for( vector<string>::const_iterator it = loci.begin(); it !=loci.end(); ++it ){
-                map<string,string>::const_iterator la = locus_allele.find( *it );
+            for( auto it = loci.begin(); it !=loci.end(); ++it ){
+                auto la = locus_allele.find( *it );
                 assert( la != locus_allele.end() );
                 fmtr % la->second;
             }
@@ -270,9 +267,9 @@ void Genotypes::startMainSim(){
 }
 
 uint32_t Genotypes::findAlleleCode(const string& locus, const string& allele){
-    map<string, map<string, uint32_t> >::const_iterator it = GT::alleleCodes.find(locus);
+    auto it = GT::alleleCodes.find(locus);
     if( it == GT::alleleCodes.end() ) return numeric_limits<uint32_t>::max();
-    map<string, uint32_t>::const_iterator it2 = it->second.find( allele );
+    auto it2 = it->second.find( allele );
     if( it2 == it->second.end() ) return numeric_limits<uint32_t>::max();
     return it2->second;
 }
@@ -288,7 +285,7 @@ uint32_t Genotypes::sampleGenotype( vector<double>& genotype_weights ){
             || genotype_weights.size() == 0 )
     {
         double sample = util::random::uniform_01();
-        map<double,uint32_t>::const_iterator it = GT::cum_initial_freqs.upper_bound( sample );
+        auto it = GT::cum_initial_freqs.upper_bound( sample );
         assert( it != GT::cum_initial_freqs.end() );
         return it->second;
     }else{

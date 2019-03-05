@@ -59,7 +59,7 @@ void DescriptiveWithinHostModel::loadInfection(istream& stream) {
 }
 
 void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
-    for(std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
+    for(auto inf = infections.begin(); inf != infections.end();) {
         if( stage == Treatments::BOTH ||
             (stage == Treatments::LIVER && !inf->bloodStage()) ||
             (stage == Treatments::BLOOD && inf->bloodStage())
@@ -75,7 +75,7 @@ void DescriptiveWithinHostModel::clearInfections( Treatments::Stages stage ){
 // -----  Interventions  -----
 
 void DescriptiveWithinHostModel::clearImmunity() {
-    for(std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end(); ++inf) {
+    for(auto inf = infections.begin(); inf != infections.end(); ++inf) {
         inf->clearImmunity();
     }
     m_cumulative_h = 0.0;
@@ -128,7 +128,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
     
-    for(std::list<DescriptiveInfection>::iterator inf = infections.begin(); inf != infections.end();) {
+    for(auto inf = infections.begin(); inf != infections.end();) {
         //NOTE: it would be nice to combine this code with that in
         // CommonWithinHost.cpp, but a few changes would be needed:
         // INNATE_MAX_DENS and MAX_DENS_CORRECTION would need to be required

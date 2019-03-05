@@ -119,7 +119,7 @@ public:
    * 
    * @param id Sub-population identifier. */
   inline bool isInSubPop( interventions::ComponentId id )const{
-      map<interventions::ComponentId,SimTime>::const_iterator it = m_subPopExp.find( id );
+      auto it = m_subPopExp.find( id );
       if( it == m_subPopExp.end() ) return false;       // no history of membership
       else return it->second > sim::nowOrTs0();   // added: has expired?
   }

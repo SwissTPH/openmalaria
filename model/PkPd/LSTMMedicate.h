@@ -56,10 +56,10 @@ struct DosageTable {
     double getMultiplier( double key ){
         if( multMassKg ) return key;
         else{
-            map<double,double>::const_iterator it = table.upper_bound( key );
-            if( it == table.end() )
+            auto iter = table.upper_bound( key );
+            if( iter == table.end() )
                 throw TRACED_EXCEPTION( "bad age/dosage table", util::Error::PkPd );
-            return it->second;
+            return iter->second;
         }
     }
     

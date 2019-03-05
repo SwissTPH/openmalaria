@@ -43,7 +43,7 @@ void LifeCycleParams::initLifeCycle( const scnXml::LifeCycle& lifeCycle ){
     larvaeResourceUsage.reserve( larvalStageDuration );
     effectCompetitionOnLarvae.reserve( larvalStageDuration );
     const scnXml::LarvalStage::DailySequence& larvDev = lifeCycle.getLarvalStage().getDaily();
-    for( scnXml::LarvalStage::DailyConstIterator it = larvDev.begin(); it!=larvDev.end(); ++it ){
+    for( auto it = larvDev.begin(); it!=larvDev.end(); ++it ){
         larvaeResourceUsage.push_back( it->getResourceUsage() );
         effectCompetitionOnLarvae.push_back( it->getEffectCompetition() );
     }

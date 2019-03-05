@@ -40,7 +40,7 @@ void DescriptiveIPTInfection::initParameters (const scnXml::IPTDescription& xmlI
   genotypes.reserve (genotypesData.size());
   
   double genotypeCumFreq = 0.0;
-  for(scnXml::IPTDescription::InfGenotypeConstIterator it = genotypesData.begin(); it != genotypesData.end(); ++it) {
+  for(auto it = genotypesData.begin(); it != genotypesData.end(); ++it) {
     genotypes.push_back( GenotypeData(it, genotypeCumFreq) );
   }
   assert( genotypes.size() == genotypesData.size() );

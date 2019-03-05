@@ -106,7 +106,7 @@ void ClinicalEventScheduler::setParameters(const scnXml::HSEventScheduler& esDat
     
     cumDailyPrImmUCTS.reserve( coData.getDailyPrImmUCTS().size() );
     double cumP = 0.0;
-    for( scnXml::ClinicalOutcomes::DailyPrImmUCTSConstIterator it = coData.getDailyPrImmUCTS().begin(); it != coData.getDailyPrImmUCTS().end(); ++it ){
+    for( auto it = coData.getDailyPrImmUCTS().begin(); it != coData.getDailyPrImmUCTS().end(); ++it ){
         cumP += *it;
         cumDailyPrImmUCTS.push_back( cumP );
     }

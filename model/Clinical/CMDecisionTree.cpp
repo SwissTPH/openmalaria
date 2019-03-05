@@ -69,9 +69,7 @@ protected:
     
     virtual CMDTOut exec( CMHostData hostData ) const{
         CMDTOut result(false);
-        for( Children_t::const_iterator it = children.begin(),
-            end = children.end(); it != end; ++it )
-        {
+        for( auto it = children.begin(), end = children.end(); it != end; ++it ) {
             CMDTOut r2 = (*it)->exec( hostData );
             result.treated = result.treated || r2.treated;
         }
@@ -182,7 +180,7 @@ protected:
         const CMDTRandom* p = dynamic_cast<const CMDTRandom*>( &that );
         if( p == 0 ) return false;      // different type of node
         if( branches.size() != p->branches.size() ) return false;
-        for( Branches_t::const_iterator it1 = branches.begin(), it2 = p->branches.begin();
+        for( auto it1 = branches.begin(), it2 = p->branches.begin();
             it1 != branches.end(); ++it1, ++it2 )
         {
             if( it1->first != it2->first ) return false;
@@ -192,7 +190,7 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        Branches_t::const_iterator it =branches.upper_bound( random::uniform_01() );
+        auto it =branches.upper_bound( random::uniform_01() );
         assert( it != branches.end() );
         return it->second->exec( hostData );
     }
@@ -218,7 +216,7 @@ protected:
         const CMDTAge* p = dynamic_cast<const CMDTAge*>( &that );
         if( p == 0 ) return false;      // different type of node
         if( branches.size() != p->branches.size() ) return false;
-        for( Branches_t::const_iterator it1 = branches.begin(), it2 = p->branches.begin();
+        for( auto it1 = branches.begin(), it2 = p->branches.begin();
             it1 != branches.end(); ++it1, ++it2 )
         {
             if( it1->first != it2->first ) return false;
@@ -229,7 +227,7 @@ protected:
     
     virtual CMDTOut exec( CMHostData hostData ) const{
         // age is that of human at start of time step (i.e. may be as low as 0)
-        Branches_t::const_iterator it = branches.upper_bound( hostData.ageYears );
+        auto it = branches.upper_bound( hostData.ageYears );
         if( it == branches.end() )
             throw TRACED_EXCEPTION( "bad age-based decision tree switch", util::Error::PkPd );
         return it->second->exec( hostData );
@@ -297,7 +295,7 @@ protected:
         const CMDTTreatPKPD* p = dynamic_cast<const CMDTTreatPKPD*>( &that );
         if( p == 0 ) return false;      // different type of node
         if( treatments.size() != p->treatments.size() ) return false;
-        for( vector<TreatInfo>::const_iterator it1 = treatments.begin(), it2 = p->treatments.begin();
+        for( auto it1 = treatments.begin(), it2 = p->treatments.begin();
             it1 != treatments.end(); ++it1, ++it2 )
         {
             if( *it1 != *it2 ) return false;
@@ -388,8 +386,7 @@ protected:
         const CMDTDeploy* p = dynamic_cast<const CMDTDeploy*>( &that );
         if( p == 0 ) return false;      // different type of node
         if( components.size() != p->components.size() ) return false;
-        for( vector<const interventions::HumanInterventionComponent*>::const_iterator
-            it1 = components.begin(), it2 = p->components.begin();
+        for( auto it1 = components.begin(), it2 = p->components.begin();
             it1 != components.end(); ++it1, ++it2 )
         {
             // here we can compare pointers since components are always de-duplicated

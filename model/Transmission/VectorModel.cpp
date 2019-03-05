@@ -141,7 +141,7 @@ void VectorModel::ctsCbResRequirements (ostream& stream) {
 }
 
 const string& reverseLookup (const map<string,size_t>& m, size_t i) {
-    for( map<string,size_t>::const_iterator it = m.begin(); it != m.end(); ++it ) {
+    for( auto it = m.begin(); it != m.end(); ++it ) {
         if ( it->second == i )
             return it->first;
     }
@@ -327,7 +327,7 @@ void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
     assert( ed.getVector().present() );
     scnXml::Vector::AnophelesSequence& anophelesList = ed.getVector().get().getAnopheles();
 
-    for( scnXml::Vector::AnophelesIterator it = anophelesList.begin();
+    for( auto it = anophelesList.begin();
             it != anophelesList.end(); ++it ) {
         if( it->getEIR().present() ){
             double old_a0 = it->getEIR().get().getA0();
@@ -504,8 +504,7 @@ void VectorModel::vectorUpdate () {
     vector<double> sigma_dif_species;
     for(size_t s = 0; s < numSpecies; ++s){
         // Copy slice to new array:
-        typedef vector<double>::const_iterator const_iter_t;
-        std::pair<const_iter_t, const_iter_t> range = saved_sigma_dif.range_at12(popDataInd, s);
+        auto range = saved_sigma_dif.range_at12(popDataInd, s);
         sigma_dif_species.assign(range.first, range.second);
         
         species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
@@ -532,7 +531,7 @@ void VectorModel::deployVectorPopInterv (size_t instance) {
     if( interventionMode != dynamicEIR ){
         throw xml_scenario_error(vec_mode_err);
     }
-    for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
+    for( auto it = species.begin(); it != species.end(); ++it ){
         it->deployVectorPopInterv(instance);
     }
 }
@@ -540,7 +539,7 @@ void VectorModel::deployVectorTrap( size_t instance, double number, SimTime life
     if( interventionMode != dynamicEIR ){
         throw xml_scenario_error(vec_mode_err);
     }
-    for( vector<AnophelesModel>::iterator it = species.begin(); it != species.end(); ++it ){
+    for( auto it = species.begin(); it != species.end(); ++it ){
         it->deployVectorTrap( instance, number, lifespan );
     }
 }

@@ -97,7 +97,7 @@ void initNHypnozoites(){
 int sampleNHypnozoites(){
     double x = util::random::uniform_01();
     // upper_bound finds the first key (cumulative probability) greater than x:
-    map<double,int>::const_iterator it = nHypnozoitesProbMap.upper_bound( x );
+    auto it = nHypnozoitesProbMap.upper_bound( x );
     assert( it != nHypnozoitesProbMap.end() );  // i.e. that we did find a real key
     return it->second;  // corresponding n
 }
@@ -173,7 +173,7 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     if( sampleHost == host && sampleBrood == 0 ){
         sampleBrood = this;
         cout << "New sample brood";
-        for( vector<SimTime>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+        for( auto it = releaseDates.begin(); it != releaseDates.end(); ++it )
             cout << '\t' << *it;
         cout << endl;
     }
@@ -220,7 +220,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
 #ifdef WHVivaxSamples
         if( sampleBrood == this ){
             cout << "Time\t" << sim::ts0();
-            for( vector<SimTime>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it )
+            for( auto it = releaseDates.begin(); it != releaseDates.end(); ++it )
                 cout << '\t' << *it;
             cout << endl;
         }
@@ -264,7 +264,7 @@ void VivaxBrood::treatmentLS(){
     /* partial clearance code, in case of need:
     vector<SimTime> survivingZoites;
     survivingZoites.reserve( releaseDates.size() );   // maximum size we need
-    for( vector<SimTime>::const_iterator it = releaseDates.begin(); it != releaseDates.end(); ++it ){
+    for( auto it = releaseDates.begin(); it != releaseDates.end(); ++it ){
         if( !random::bernoulli( pClearEachHypnozoite ) ){
             survivingZoites.push_back( *it );    // copy            
         }
@@ -305,7 +305,7 @@ WHVivax::~WHVivax(){
 
 double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
-    for(list<VivaxBrood>::const_iterator inf = infections.begin();
+    for(auto inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
@@ -326,9 +326,7 @@ bool WHVivax::summarize(const Host::Human& human) const{
     // (patent) infections are reported by genotype, even though we don't have
     // genotype in this model
     mon::reportStatMHGI( mon::MHR_INFECTIONS, human, 0, infections.size() );
-    for(list<VivaxBrood>::const_iterator inf = infections.begin();
-         inf != infections.end(); ++inf) 
-    {
+    for(auto inf = infections.begin(); inf != infections.end(); ++inf) {
         if (inf->isPatent()){
             mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
             patentHost = true;
@@ -361,7 +359,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     double oldpEvent = ( isnan(pEvent))? 1.0 : pEvent;
     // always use the first relapse probability for following relapses as a factor
     double oldpRelapseEvent = ( isnan(pFirstRelapseEvent))? 1.0 : pFirstRelapseEvent;
-    list<VivaxBrood>::iterator inf = infections.begin();
+    auto inf = infections.begin();
     while( inf != infections.end() ){
         if( treatmentLiver ) inf->treatmentLS();
         if( treatmentBlood ) inf->treatmentBS();        // clearnace due to treatment; no protection against reemergence
@@ -420,9 +418,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
 bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
     //TODO(monitoring): this shouldn't ignore the diagnostic (especially since
     // it should always return true if diagnostic.density=0)
-    for(list<VivaxBrood>::const_iterator inf = infections.begin();
-         inf != infections.end(); ++inf)
-    {
+    for(auto inf = infections.begin(); inf != infections.end(); ++inf) {
         if (inf->isPatent())
             return true;        // at least one patent infection
     }
@@ -455,7 +451,7 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
     if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && random::bernoulli(pReceivePQ)){
         if( random::bernoulli(effectivenessPQ) ){
-            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            for( auto it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
         }
@@ -478,7 +474,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
             if( timeLiver >= SimTime::zero() ){
                 treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
             }else{
-                for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+                for( auto it = infections.begin(); it != infections.end(); ++it ){
                     it->treatmentLS();
                 }
             }
@@ -490,7 +486,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
     if( timeBlood != SimTime::zero() ){
         if( timeBlood < SimTime::zero() ){
             // legacy mode: retroactive clearance
-            for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+            for( auto it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentBS();
             }
         }else{
@@ -524,7 +520,7 @@ void WHVivax::checkpoint(istream& stream){
 void WHVivax::checkpoint(ostream& stream){
     WHInterface::checkpoint(stream);
     infections.size() & stream;
-    for( list<VivaxBrood>::iterator it = infections.begin(); it != infections.end(); ++it ){
+    for( auto it = infections.begin(); it != infections.end(); ++it ){
         it->checkpoint( stream );
     }
     noPQ & stream;

@@ -56,7 +56,7 @@ void PerHost::initialise (double availabilityFactor) {
 }
 
 void PerHost::update(Host::Human& human){
-    for( ListActiveComponents::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         it->update(human);
     }
 }
@@ -64,7 +64,7 @@ void PerHost::update(Host::Human& human){
 void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
     // This adds per-host per-intervention details to the host's data set.
     // This data is never removed since it can contain per-host heterogeneity samples.
-    for( ListActiveComponents::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         if( it->id() == params.id() ){
             // already have a deployment for that description; just update it
             it->redeploy( params );
@@ -84,21 +84,21 @@ void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
 double PerHost::entoAvailabilityHetVecItv (const PerHostAnophParams& base,
                                 size_t speciesIndex) const {
     double alpha_i = species[speciesIndex].getEntoAvailability();
-    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         alpha_i *= it->relativeAttractiveness( speciesIndex );
     }
     return alpha_i;
 }
 double PerHost::probMosqBiting (const PerHostAnophParams& base, size_t speciesIndex) const {
     double P_B_i = species[speciesIndex].getProbMosqBiting();
-    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         P_B_i *= it->preprandialSurvivalFactor( speciesIndex );
     }
     return P_B_i;
 }
 double PerHost::probMosqResting (const PerHostAnophParams& base, size_t speciesIndex) const {
     double pRest = species[speciesIndex].getProbMosqRest();
-    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         pRest *= it->postprandialSurvivalFactor( speciesIndex );
     }
     return pRest;
@@ -106,14 +106,14 @@ double PerHost::probMosqResting (const PerHostAnophParams& base, size_t speciesI
 
 double PerHost::relMosqFecundity (size_t speciesIndex) const {
     double relFecundity = 1.0;
-    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         relFecundity *= it->relFecundity( speciesIndex );
     }
     return relFecundity;
 }
 
 bool PerHost::hasActiveInterv(interventions::Component::Type type) const{
-    for( ListActiveComponents::const_iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         if( it->isDeployed() ){
             if( interventions::InterventionManager::getComponent( it->id() ).componentType() == type )
                 return true;
@@ -124,7 +124,7 @@ bool PerHost::hasActiveInterv(interventions::Component::Type type) const{
 
 void PerHost::checkpointIntervs( ostream& stream ){
     activeComponents.size() & stream;
-    for( boost::ptr_list<PerHostInterventionData>::iterator it = activeComponents.begin(); it != activeComponents.end(); ++it ){
+    for( auto it = activeComponents.begin(); it != activeComponents.end(); ++it ){
         *it & stream;
     }
 }

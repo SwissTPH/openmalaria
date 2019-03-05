@@ -430,8 +430,7 @@ void internal::initReporting( const scnXml::Scenario& scenario ){
     foreach( const scnXml::MonitoringOption& optElt, optsElt.getOption() ){
         if( optElt.getValue() == false ) continue;      // option is disabled
         
-        NamedMeasureMapT::const_iterator it =
-            namedOutMeasures.find( optElt.getName() );
+        auto it = namedOutMeasures.find( optElt.getName() );
         if( it == namedOutMeasures.end() ){
             throw util::xml_scenario_error( (boost::format("unrecognised "
                 "survey option: %1%") %optElt.getName()).str() );
@@ -532,7 +531,7 @@ void internal::initReporting( const scnXml::Scenario& scenario ){
 size_t setupCondition( const string& measureName, double minValue,
                        double maxValue, bool initialState )
 {
-    NamedMeasureMapT::const_iterator it = namedOutMeasures.find( measureName );
+    auto it = namedOutMeasures.find( measureName );
     if( it == namedOutMeasures.end() ){
         throw util::xml_scenario_error( (boost::format("unrecognised measure: "
             "%1%") %measureName).str() );

@@ -32,22 +32,22 @@ namespace OM {
 Parameters::Parameters( const scnXml::Parameters& parameters ){
     // set parameters
     const scnXml::Parameters::ParameterSequence& paramSeq = parameters.getParameter();
-    for(scnXml::Parameters::ParameterConstIterator it = paramSeq.begin(); it != paramSeq.end(); ++it) {
-        int i = it->getNumber();
+    for(auto iter = paramSeq.begin(); iter != paramSeq.end(); ++iter) {
+        int i = iter->getNumber();
         if (i < 0 || i >= MAX)
             continue;   // ignore the parameter; no real point in making this an error
         Parameter parameter = static_cast<Parameter>(i);
-        if( !parameterValues.insert( make_pair( parameter, it->getValue() ) ).second )
+        if( !parameterValues.insert( make_pair( parameter, iter->getValue() ) ).second )
             throw util::xml_scenario_error( (format("parameter with index %1% described twice") %parameter).str() );
     }
 }
 
 
 double Parameters::operator[]( Parameter parameter )const{
-    std::map<Parameter, double>::const_iterator it = parameterValues.find( parameter );
-    if( it == parameterValues.end() )
+    auto iter = parameterValues.find( parameter );
+    if( iter == parameterValues.end() )
         throw util::xml_scenario_error( (format("parameter %1% required but not described") %parameter).str() );
-    return it->second;
+    return iter->second;
 }
 
 }

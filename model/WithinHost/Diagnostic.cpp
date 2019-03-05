@@ -184,7 +184,7 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
 }
 
 const Diagnostic& diagnostics::get( const string& name ){
-    Diagnostic_set::const_iterator it = diagnostic_set.find(name);
+    auto it = diagnostic_set.find(name);
     if( it == diagnostic_set.end() ){
         throw util::xml_scenario_error( string("diagnostic not found: ").append(name) );
     }

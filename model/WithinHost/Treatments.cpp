@@ -51,8 +51,7 @@ Treatments::Stages stageFromString( const std::string& str ){
 Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
     TriggeredDeployments(elt), timeLiver(SimTime::zero()), timeBlood(SimTime::zero())
 {
-    for( scnXml::TreatmentOption::ClearInfectionsConstIterator it =
-        elt.getClearInfections().begin(), end = elt.getClearInfections().end();
+    for( auto it = elt.getClearInfections().begin(), end = elt.getClearInfections().end();
         it != end; ++it )
     {
         try{
