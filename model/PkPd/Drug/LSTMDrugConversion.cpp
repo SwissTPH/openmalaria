@@ -201,14 +201,13 @@ void LSTMDrugConversion::setKillingParameters(Params_convFactor& p,
         p.KnP = inf->Kn.at(pIndex);
         p.KnM = inf->Kn.at(metaboliteType.getIndex());
     } else {
-        // First usage for this infection / treatment: sample, optionally with covariance.
-        auto normal = NormalSample::generate();
-        p.KnP = pdP.IC50_pow_slope(normal);
+        // First usage for this infection / treatment: sample, optionally with correlation.
+        auto zscore = NormalSample::generate();
+        p.KnP = pdP.IC50_pow_slope(zscore);
         inf->Kn[pIndex] = p.KnP;
-        if (!parentType.IC50_covaries()) {
-            normal = NormalSample::generate();
-        }
-        p.KnM = pdM.IC50_pow_slope(normal);
+        
+        auto metab_zscore = parentType.IC50_correlated_sample(zscore);
+        p.KnM = pdM.IC50_pow_slope(metab_zscore);
         inf->Kn[metaboliteType.getIndex()] = p.KnM;
     }
 }

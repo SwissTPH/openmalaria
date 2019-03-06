@@ -156,13 +156,13 @@ namespace xml_helpers{
     ///@param abbrev Drug name (CQ, PPQ, AR, etc)
     ///@param pk Helper struct with pharmaco-kinetic parameters
     ///@param pd Helper struct with pharmaco-dynamic parameters
-    scnXml::PKPDDrug drug(const char *abbrev, PKConv pk, PD pd, bool covaries){
+    scnXml::PKPDDrug drug(const char *abbrev, PKConv pk, PD pd, double IC50corr){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
         xPK.setK(scnXml::SampledValue(pk.k, "const"));
         xPK.setM_exponent(pk.me);
         xPK.setK_a(scnXml::SampledValue(pk.ka, "const"));
         xPK.setConversion(scnXml::Conversion(pk.met,
-            scnXml::SampledValue(pk.conv, "const"), pk.mwr, covaries));
+            scnXml::SampledValue(pk.conv, "const"), pk.mwr, IC50corr));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);
@@ -338,7 +338,7 @@ public:
                        23.98 /*absorption rate*/, "DHA_AR" /*metabolite*/,
                        11.98 /*conversion rate*/, 0.9547587 /*mol. weight ratio*/),
                 PD(27.6 /* vmax */, 0.0023 /* IC50 */, 4.0 /* slope */ ),
-                true));
+                1.0 /* IC50 correlation */));
         
         
         // Artesunate (no conversion model)
@@ -354,7 +354,7 @@ public:
                        252 /*absorption rate*/, "DHA_AS" /*metabolite*/,
                        30.96 /*conversion rate*/, 0.741155 /*mol. weight ratio*/),
                 PD(27.6 /* vmax */, 0.0016 /* IC50 */, 4.0 /* slope */ ),
-                true));
+                1.0 /* IC50 correlation */));
         
         // Dihydroartemisinin (when not a metabolite)
         drugs.getDrug().push_back(drug("DHA",

@@ -158,7 +158,8 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         negligible_concentration(numeric_limits<double>::quiet_NaN()),
         neg_m_exp(numeric_limits<double>::quiet_NaN()),
         mwr(numeric_limits<double>::quiet_NaN()),
-        ic50_covaries(false)
+        ic50_log_corr(numeric_limits<double>::quiet_NaN()),
+        ic50_corr_factor(numeric_limits<double>::quiet_NaN())
 {
     // ———  PK parameters  ———
     const scnXml::PK& pk = drugData.getPK();
@@ -205,7 +206,12 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         }
         conversion_rate.setParams( conv.getRate() );
         mwr = conv.getMolRatio();
-        ic50_covaries = conv.getIC50_covaries();
+        double correlation = conv.getIC50_log_correlation();
+        if( correlation < 0.0 || correlation > 1.0 ){
+            throw util::xml_scenario_error( "PK conversion model: IC50 correlation must be between 0 and 1" );
+        }
+        ic50_log_corr = correlation;
+        ic50_corr_factor = sqrt(1.0 - correlation * correlation);
     }
     if( pk.getK_a().present() ){
         if( !k12.isSet() && !conversion_rate.isSet() ){

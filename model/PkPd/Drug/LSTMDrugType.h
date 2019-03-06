@@ -79,7 +79,7 @@ public:
     inline double slope() const{ return n; }
     double IC50_pow_slope(size_t index, WithinHost::CommonInfection *inf) const;
     inline double IC50_pow_slope(NormalSample normal) const {
-        return pow(IC50.sample(), n);
+        return pow(IC50.sample(normal), n);
     }
     inline double max_killing_rate() const{ return V; }
     
@@ -151,7 +151,12 @@ public:
     }
     inline double neg_m_exponent() const{ return neg_m_exp; }
     inline double molecular_weight_ratio() const{ return mwr; }
-    inline bool IC50_covaries() const{ return ic50_covaries; }
+    
+    /// Generate IC50 sample of metabolite
+    inline NormalSample IC50_correlated_sample(NormalSample parent) const {
+        return NormalSample::generate_correlated(parent, ic50_log_corr, ic50_corr_factor);
+    }
+
     inline double sample_Vd() const{
         return vol_dist.sample();
     }
@@ -199,7 +204,8 @@ private:
     // Used to calculate elimination rate
     double neg_m_exp;
     double mwr;      // set for parent, not metabolite
-    bool ic50_covaries;
+    double ic50_log_corr;
+    double ic50_corr_factor;
     /// Volume of distribution (l/kg)
     LognormalSampler vol_dist;
     /// Absorbtion rate

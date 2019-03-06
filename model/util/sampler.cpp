@@ -31,8 +31,16 @@ double NormalSample::asNormal( double mu, double sigma )const{
 double NormalSample::asLognormal( double mu, double sigma )const{
     return exp( sigma*x + mu );
 }
+
 NormalSample NormalSample::generate() {
     return NormalSample( random::gauss(1.0) );
+}
+
+NormalSample NormalSample::generate_correlated(NormalSample base, double correlation, double factor) {
+    if( correlation == 1.0 ) { return base; }
+    
+    double e = random::gauss(factor);
+    return NormalSample( base.x * correlation + e );
 }
 
 void NormalSampler::setParams( double m, double s ){
