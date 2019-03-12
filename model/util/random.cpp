@@ -79,7 +79,7 @@ namespace OM { namespace util {
 	boost_generator.max(),	// max value
 	boost_generator.min(),	// min value
 	0,					// size of state; not used here
-	NULL,				// re-seed function; don't use
+	nullptr,				// re-seed function; don't use
 	&boost_rng_get,
 	&boost_rng_get_double_01
     };
@@ -96,7 +96,7 @@ struct generator_factory {
 	// that it allows use of distributions from both boost and GSL.
 	gsl_generator = new gsl_rng;
 	gsl_generator->type = &boost_mt_type;
-	gsl_generator->state = NULL;	// state is stored as static variables
+	gsl_generator->state = nullptr;	// state is stored as static variables
 #	else
 	//use the mersenne twister generator
 	gsl_generator = gsl_rng_alloc(gsl_rng_mt19937);
@@ -140,7 +140,7 @@ void random::checkpoint (istream& stream, int seedFileNumber) {
     ostringstream seedN;
     seedN << string("seed") << seedFileNumber;
     FILE * f = fopen(seedN.str().c_str(), "rb");
-    if (f == NULL)
+    if (f == nullptr)
 	throw checkpoint_error (string("load_rng_state: file not found: ").append(seedN.str()));
     if (gsl_rng_fread(f, rng.gsl_generator) != 0)
 	throw checkpoint_error ("gsl_rng_fread failed");

@@ -111,8 +111,7 @@ extern set<Measure> validCondMeasures;
 
 void findNamedMeasuresUsing( Measure m, ostream& msg ){
     int nMatches = 0;
-    for( NamedMeasureMapT::const_iterator it = namedOutMeasures.begin();
-        it != namedOutMeasures.end(); ++it ){
+    for( auto it = namedOutMeasures.begin(); it != namedOutMeasures.end(); ++it ){
         if( it->second.m == m ){
             if( nMatches > 0 ) msg << ", ";
             msg << it->first;

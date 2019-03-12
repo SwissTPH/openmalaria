@@ -54,16 +54,14 @@ public:
    * 
    * \param dateOfBirth date of birth (usually start of next time step) */
   Human(SimTime dateOfBirth);
-
-  /** Destructor
-   * 
-   * Note: this destructor does nothing in order to allow shallow copying of a
-   * Human into the population list. Human::destroy() does the real freeing and
-   * must be called explicitly. */
-  ~Human() {}
   
-  /// The real destructor
-  void destroy();
+  /// Allow move construction
+  Human(Human&&) = default;
+  Human& operator=(Human&&) = default;
+
+  /// Disable copying
+  Human(const Human&) = delete;
+  Human& operator=(const Human&) = delete;
   
   /// Checkpointing
   template<class S>
@@ -71,9 +69,9 @@ public:
       perHostTransmission & stream;
       // In this case these pointers each refer to one element not stored/pointed
       // from elsewhere, so this checkpointing technique works.
-      (*infIncidence) & stream;
-      (*withinHostModel) & stream;
-      (*clinicalModel) & stream;
+      infIncidence & stream;
+      withinHostModel & stream;
+      clinicalModel & stream;
       m_DOB & stream;
       _vaccine & stream;
       monitoringAgeGroup & stream;
@@ -119,7 +117,7 @@ public:
    * 
    * @param id Sub-population identifier. */
   inline bool isInSubPop( interventions::ComponentId id )const{
-      map<interventions::ComponentId,SimTime>::const_iterator it = m_subPopExp.find( id );
+      auto it = m_subPopExp.find( id );
       if( it == m_subPopExp.end() ) return false;       // no history of membership
       else return it->second > sim::nowOrTs0();   // added: has expired?
   }
@@ -179,7 +177,7 @@ public:
   Transmission::PerHost perHostTransmission;
   
   /// The WithinHostModel models parasite density and immunity
-  WithinHost::WHInterface *withinHostModel;
+  unique_ptr<WithinHost::WHInterface> withinHostModel;
   
 private:
   /// Hacky constructor for use in testing. Test code must do further initialisation as necessary.
@@ -187,12 +185,12 @@ private:
   Human(SimTime dateOfBirth, int dummy);
   
   /// The InfectionIncidenceModel translates per-host EIR into new infections
-  InfectionIncidenceModel *infIncidence;
+  unique_ptr<InfectionIncidenceModel> infIncidence;
   
   /** The ClinicalModel encapsulates pathogenesis (sickness status),
    * case management (medicating drugs)
    * and clinical outcomes (morbidity, reporting). */
-  Clinical::ClinicalModel *clinicalModel;
+  unique_ptr<Clinical::ClinicalModel> clinicalModel;
   //@}
   
   SimTime m_DOB;        // date of birth; humans are always born at the end of a time step

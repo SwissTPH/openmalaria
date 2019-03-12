@@ -33,7 +33,7 @@ size_t SpeciesIndexChecker::getIndex( string species ){
             << species << "\"";
         throw util::xml_scenario_error( msg.str() );
     }
-    map<string,size_t>::const_iterator sIndex = _indices.find( species );
+    auto sIndex = _indices.find( species );
     if( sIndex == _indices.end() ){
         ostringstream msg;
         msg << "Intervention \"" << _intervName
@@ -46,7 +46,7 @@ size_t SpeciesIndexChecker::getIndex( string species ){
 }
 
 void SpeciesIndexChecker::checkNoneMissed() const{
-    for( map<string,size_t>::const_iterator it = _indices.begin(); it != _indices.end(); ++it ){
+    for( auto it = _indices.begin(); it != _indices.end(); ++it ){
         if( found.count( it->first ) == 0 ){
             ostringstream msg;
             msg << "Intervention \"" << _intervName

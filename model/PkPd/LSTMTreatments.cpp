@@ -112,22 +112,22 @@ inline void invalidModel(){
 }
 size_t LSTMTreatments::findSchedule(const string& name){
     if( scheduleNames.size() == 0 ) invalidModel();
-    map<string,size_t>::const_iterator it = scheduleNames.find( name );
-    if( it == scheduleNames.end() ){
+    auto iter = scheduleNames.find( name );
+    if( iter == scheduleNames.end() ){
         throw util::xml_scenario_error(string("no treatment schedule with this name: ")
             .append(name));
     }
-    return it->second;
+    return iter->second;
 }
 
 size_t LSTMTreatments::findDosages(const string& name){
     if( dosagesNames.size() == 0 ) invalidModel();
-    map<string,size_t>::const_iterator it = dosagesNames.find( name );
-    if( it == dosagesNames.end() ){
+    auto iter = dosagesNames.find( name );
+    if( iter == dosagesNames.end() ){
         throw util::xml_scenario_error(string("no dosage table with this name: ")
             .append(name));
     }
-    return it->second;
+    return iter->second;
 }
 
 }

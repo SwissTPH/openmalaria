@@ -107,8 +107,7 @@ void NonVectorModel::scaleXML_EIR (scnXml::Entomology& ed, double factor) const{
     assert( ed.getNonVector().present() );
     scnXml::NonVector::EIRDailySequence& daily = ed.getNonVector().get().getEIRDaily();
     
-    for( scnXml::NonVector::EIRDailyIterator it = daily.begin();
-	it != daily.end(); ++it ){
+    for( auto it = daily.begin(); it != daily.end(); ++it ){
 	double old = *it;
 	*it = old * factor;
     }

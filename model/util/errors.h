@@ -151,7 +151,7 @@ namespace OM { namespace util {
         /** Create a stack-trace and store in this object.
          * 
          * @param msg Error message
-         * @param file File in which it occurred (may pass NULL)
+         * @param file File in which it occurred (may pass nullptr)
          * @param line Line of error (may pass 0)
          * @param start Index of first stack frame of interest. 0 is this
          * constructor, 1 the code creating this exception (usually the location

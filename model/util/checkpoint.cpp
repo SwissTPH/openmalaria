@@ -222,7 +222,7 @@ namespace OM { namespace util { namespace checkpoint {
     
     void operator& (const set<interventions::ComponentId>&x, ostream& stream){
         x.size() & stream;
-        for( set<interventions::ComponentId>::const_iterator it = x.begin(); it != x.end(); ++it )
+        for( auto it = x.begin(); it != x.end(); ++it )
             *it & stream;
     }
     void operator& (set<interventions::ComponentId>& x, istream& stream){
@@ -238,7 +238,7 @@ namespace OM { namespace util { namespace checkpoint {
     // map<S,T> — template doesn't work on gcc
     void operator& (const map<string,double>& x, ostream& stream) {
         x.size() & stream;
-        for(map<string,double>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+        for(auto pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
             pos->second & stream;
         }
@@ -248,7 +248,7 @@ namespace OM { namespace util { namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.clear ();
-        map<string,double>::iterator pos = x.begin ();
+        auto pos = x.begin ();
         for(size_t i = 0; i < l; ++i) {
             string s;
             double t;
@@ -260,7 +260,7 @@ namespace OM { namespace util { namespace checkpoint {
 
     void operator& (const map<double,double>& x, ostream& stream) {
         x.size() & stream;
-        for(map<double,double>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+        for(auto pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
             pos->second & stream;
         }
@@ -270,7 +270,7 @@ namespace OM { namespace util { namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.clear ();
-        map<double,double>::iterator pos = x.begin ();
+        auto pos = x.begin ();
         for(size_t i = 0; i < l; ++i) {
             double s, t;
             s & stream;
@@ -281,7 +281,7 @@ namespace OM { namespace util { namespace checkpoint {
 
     void operator& (const map<interventions::ComponentId,SimTime>& x, ostream& stream) {
         x.size() & stream;
-        for(map<interventions::ComponentId,SimTime>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+        for(auto pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
             pos->second.raw() & stream;
         }
@@ -291,7 +291,7 @@ namespace OM { namespace util { namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.clear ();
-        map<interventions::ComponentId,SimTime>::iterator pos = x.begin ();
+        auto pos = x.begin ();
         for(size_t i = 0; i < l; ++i) {
             interventions::ComponentId s( stream );
             SimTime t;
@@ -302,7 +302,7 @@ namespace OM { namespace util { namespace checkpoint {
 
     void operator& (const multimap<double,double>& x, ostream& stream) {
         x.size() & stream;
-        for(multimap<double,double>::const_iterator pos = x.begin (); pos != x.end() ; ++pos) {
+        for(auto pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
             pos->second & stream;
         }
@@ -312,7 +312,7 @@ namespace OM { namespace util { namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.clear ();
-        multimap<double,double>::iterator pos = x.begin ();
+        auto pos = x.begin ();
         for(size_t i = 0; i < l; ++i) {
             double s, t;
             s & stream;

@@ -190,7 +190,7 @@ void Checksum::writeToFile (string filename) {
     // Use C file commands, since these have clearer behaviour with binary data:
     FILE *f = fopen( filename.c_str(), "wb" );
     size_t written=0;
-    if( f != NULL )
+    if( f != nullptr )
 	written=fwrite( data, 1, 16, f );
     fclose( f );
     if( written != 16 )

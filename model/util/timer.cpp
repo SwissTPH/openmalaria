@@ -64,7 +64,7 @@ DWORD WINAPI write_cp_timer(PVOID arg) {
 void timer::startCheckpoint (){
   finishedCP=false;
   //setup windows thread
-  timer_threadCP = CreateThread(NULL, 0, write_cp_timer, NULL,0, &timer_threadId);
+  timer_threadCP = CreateThread(nullptr, 0, write_cp_timer, nullptr,0, &timer_threadId);
 }
 
 void timer::stopCheckpoint (){
@@ -102,7 +102,7 @@ void *write_cp_timer(void *arg) {
 void timer::startCheckpoint (){
   finishedCP=false;
   //setup pthread
-  res = pthread_create(&timer_thread, NULL, write_cp_timer, NULL);
+  res = pthread_create(&timer_thread, nullptr, write_cp_timer, nullptr);
 }
 
 void timer::stopCheckpoint (){

@@ -59,9 +59,9 @@ void LSTMModel::checkpoint (istream& stream) {
 
 void LSTMModel::checkpoint (ostream& stream) {
     m_drugs.size() & stream;
-    for(DrugVec::iterator it =m_drugs.begin(); it!=m_drugs.end(); ++it) {
-        it->getIndex() & stream;
-        (*it) & stream;
+    foreach( auto& drug, m_drugs ){
+        drug->getIndex() & stream;
+        drug & stream;
     }
     medicateQueue & stream;
 }
@@ -84,37 +84,36 @@ void LSTMModel::medicate(){
     if( medicateQueue.empty() ) return;
     
     // Process pending medications (in interal queue) and apply/update:
-    list<MedicateData>::iterator it = medicateQueue.begin();
-    while( it != medicateQueue.end() ){
-        if( it->time < 1.0 ){   // Medicate medications to be prescribed starting at the next time-step
+    auto iter = medicateQueue.begin();
+    while( iter != medicateQueue.end() ){
+        if( iter->time < 1.0 ){   // Medicate medications to be prescribed starting at the next time-step
             // This function could be inlined, except for uses in testing:
-            medicateDrug (it->drug, it->qty, it->time);
-            it = medicateQueue.erase (it);
+            medicateDrug (iter->drug, iter->qty, iter->time);
+            iter = medicateQueue.erase (iter);
         }else{  // and decrement treatment seeking delay for the rest
-            it->time -= 1.0;
-            ++it;
+            iter->time -= 1.0;
+            ++iter;
         }
     }
 }
 
 void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time) {
     //TODO: might be a little faster if m_drugs was pre-allocated with a slot for each drug type, using a null pointer
-    foreach( LSTMDrug& drug, m_drugs ){
-        if (drug.getIndex() == typeIndex){
-            drug.medicate (time, qty);
+    foreach( auto& drug, m_drugs ){
+        if (drug->getIndex() == typeIndex){
+            drug->medicate (time, qty);
             return;
         }
     }
     // No match, so insert one:
     m_drugs.push_back( LSTMDrugType::createInstance(typeIndex) );
-    m_drugs.back().medicate (time, qty);
+    (*m_drugs.back()).medicate (time, qty);
 }
 
 double LSTMModel::getDrugConc (size_t drug_index) const{
     double c = 0.0;
     double d = 0.0;
-    for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
-            drug != end; ++drug ){
+    foreach( auto& drug, m_drugs ){
         d = drug->getConcentration(drug_index);
         if(d < 0.0){
             // FIXME: @tph-thuering, 2015-08-11:
@@ -131,9 +130,9 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
 double LSTMModel::getDrugFactor (WithinHost::CommonInfection *inf, double body_mass) const{
     double factor = 1.0; //no effect
     
-    for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
+    for( auto drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        double drugFactor = drug->calculateDrugFactor(inf, body_mass);
+        double drugFactor = (*drug)->calculateDrugFactor(inf, body_mass);
         factor *= drugFactor;
     }
     return factor;
@@ -142,16 +141,15 @@ double LSTMModel::getDrugFactor (WithinHost::CommonInfection *inf, double body_m
 void LSTMModel::decayDrugs (double body_mass) {
     // Update concentrations for each drug.
     // TODO: previously we removed drugs with negligible concentration here. What now, just set concentration to 0?
-    foreach( LSTMDrug& drug, m_drugs ){
-        drug.updateConcentration(body_mass);
+    foreach( auto& drug, m_drugs ){
+        drug->updateConcentration(body_mass);
     }
 }
 
 void LSTMModel::summarize(const Host::Human& human) const{
     const vector<size_t> &drugsInUse( LSTMDrugType::getDrugsInUse() );
     foreach( size_t index, drugsInUse ){
-        for( DrugVec::const_iterator drug = m_drugs.begin(), end = m_drugs.end();
-                drug != end; ++drug ){
+        foreach( auto& drug, m_drugs ){
             double conc = drug->getConcentration(index);
             if( conc > 0.0 ){
                 mon::reportStatMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );

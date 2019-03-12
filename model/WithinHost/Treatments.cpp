@@ -29,13 +29,12 @@ namespace WithinHost {
 
 // ———  static  ———
 
-// TODO: use C++11 move semantics
-boost::ptr_vector<Treatments> Treatments::treatments;
+vector<Treatments> Treatments::treatments;
 
 TreatmentId Treatments::addTreatment( const scnXml::TreatmentOption& desc ){
-    Treatments* treatment = new Treatments( desc );
+    Treatments treatment( desc );
     TreatmentId id( treatments.size() );
-    treatments.push_back( treatment );
+    treatments.push_back( move(treatment) );
     return id;
 }
 
@@ -51,8 +50,7 @@ Treatments::Stages stageFromString( const std::string& str ){
 Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
     TriggeredDeployments(elt), timeLiver(SimTime::zero()), timeBlood(SimTime::zero())
 {
-    for( scnXml::TreatmentOption::ClearInfectionsConstIterator it =
-        elt.getClearInfections().begin(), end = elt.getClearInfections().end();
+    for( auto it = elt.getClearInfections().begin(), end = elt.getClearInfections().end();
         it != end; ++it )
     {
         try{

@@ -28,6 +28,7 @@
 #include "Monitoring/Continuous.h"
 #include "interventions/InterventionManager.hpp"
 #include "Population.h"
+#include "WithinHost/WHInterface.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
 #include "mon/management.h"

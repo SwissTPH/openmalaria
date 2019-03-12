@@ -69,7 +69,7 @@ void DocumentLoader::saveDocument()
 //         const char* lastFS = strrchr (xmlFileName.c_str(), '/');
 //         const char* lastBS = strrchr (xmlFileName.c_str(), '\\');
 //         const char* baseName = lastBS > lastFS ? lastBS : lastFS;
-//         if (baseName == NULL) // no path separator found; use whole string
+//         if (baseName == nullptr) // no path separator found; use whole string
 //             baseName = xmlFileName.c_str();
 //         else
 //             ++baseName;  // start at next character

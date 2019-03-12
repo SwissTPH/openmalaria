@@ -24,7 +24,6 @@
 #include "interventions/Interfaces.hpp"
 #include "Host/ImportedInfections.h"
 #include "schema/interventions.h"
-#include <boost/ptr_container/ptr_vector.hpp>
 
 namespace OM {
     class Population;
@@ -33,7 +32,6 @@ namespace OM {
     }
 
 namespace interventions {
-    using ::boost::ptr_vector;
 
 class ContinuousHumanDeployment;
 class TimedDeployment;
@@ -73,7 +71,7 @@ public:
     inline static const HumanInterventionComponent& getComponent( ComponentId id ){
         if( id.id >= humanComponents.size() )
             throw util::base_exception( "invalid component id" );
-        return humanComponents[id.id];
+        return *humanComponents[id.id];
     }
     
     /** Get a numeric ComponentId from the textual identifier used in the XML.
@@ -84,17 +82,13 @@ public:
 private:
     // Map of textual identifiers to numeric identifiers for components
     static std::map<std::string,ComponentId> identifierMap;
-    // TODO: use C++11 move semantics
     // All human intervention components, indexed by a number. This list is used
     // during initialisation and thereafter only for memory management.
-    static boost::ptr_vector<HumanInterventionComponent> humanComponents;
-    // All human interventions. These are stored here for memory management
-    // only (so that they are deleted when this class is destroyed).
-    static boost::ptr_vector<HumanIntervention> humanInterventions;
+    static vector<unique_ptr<HumanInterventionComponent>> humanComponents;
     // Continuous interventions, sorted by deployment age (weakly increasing)
-    static ptr_vector<ContinuousHumanDeployment> continuous;
+    static vector<ContinuousHumanDeployment> continuous;
     // List of all timed interventions. Should be sorted (time weakly increasing).
-    static ptr_vector<TimedDeployment> timed;
+    static vector<unique_ptr<TimedDeployment>> timed;
     static uint32_t nextTimed;  // not chcekpointed (see loadFromCheckpoint)
     
     // imported infections are not really interventions, and handled by a separate class

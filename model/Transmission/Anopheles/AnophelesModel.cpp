@@ -158,7 +158,7 @@ void AnophelesModel::initAvailability(
     nhh_sigma_df = 0.0;
     nhh_sigma_dff = 0.0;
     foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
-//         map<string, double>::const_iterator pop = nonHumanHostPopulations.find(xmlNNH.getName());
+//         auto pop = nonHumanHostPopulations.find(xmlNNH.getName());
 //         if (pop == nonHumanHostPopulations.end()){
 //             throw xml_scenario_error ((boost::format("There is no population size defined for "
 //             "non-human host type \"%1%\"") %xmlNNH.getName()).str());
@@ -321,7 +321,7 @@ void AnophelesModel::advancePeriod (
     sigma_df += nhh_sigma_df;
     sigma_dff += nhh_sigma_dff;
     
-    for( list<TrapData>::iterator it = baitedTraps.begin(); it != baitedTraps.end(); ){
+    for( auto it = baitedTraps.begin(); it != baitedTraps.end(); ){
         if( sim::ts0() > it->expiry ){
             it = baitedTraps.erase(it);
             continue;

@@ -51,12 +51,12 @@ public:
         UnittestUtil::setDiagnostics();
 
         UnittestUtil::EmpiricalWHM_setup();
-        whm.reset( new WHMock() );
-        ETS_ASSERT( whm.get() != 0 );
 
         human.reset( UnittestUtil::createHuman(SimTime::zero()).release() );
         ETS_ASSERT( human.get() != 0 );
-        UnittestUtil::setHumanWH( *human, whm.get() );
+        whm = dynamic_cast<WHMock*>(UnittestUtil::setHumanWH( *human,
+                unique_ptr<WithinHost::WHInterface>(new WHMock()) ));
+        ETS_ASSERT( whm != 0 );
 
         hd.reset( new CMHostData( *human, 21 /* any real age will do for most tests */,
                                       Episode::NONE ) );
@@ -66,7 +66,7 @@ public:
     }
     void tearDown () {
         human.reset();
-        whm.reset();
+        whm = nullptr;
         PkPd::LSTMDrugType::clear();
         PkPd::LSTMTreatments::clear();
     }
@@ -257,7 +257,7 @@ public:
     
 private:
     unique_ptr<Host::Human> human;
-    unique_ptr<WHMock> whm;
+    WHMock* whm;
     unique_ptr<CMHostData> hd;
 };
 

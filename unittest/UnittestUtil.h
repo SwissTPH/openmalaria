@@ -27,10 +27,12 @@
 #include "Global.h"
 #include "util/ModelOptions.h"
 
+#include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
 #include "PkPd/LSTMModel.h"
 #include "PkPd/Drug/LSTMDrugType.h"
 #include "PkPd/LSTMTreatments.h"
+#include "WithinHost/WHInterface.h"
 #include "WithinHost/Infection/Infection.h"
 #include "WithinHost/WHFalciparum.h"
 #include "WithinHost/Infection/MolineauxInfection.h"
@@ -487,8 +489,10 @@ public:
     static unique_ptr<Host::Human> createHuman(SimTime dateOfBirth){
         return unique_ptr<Host::Human>( new Host::Human(dateOfBirth, 0) );
     }
-    static void setHumanWH(Host::Human& human, WithinHost::WHInterface *wh){
-        human.withinHostModel = wh;
+    // Set the WithinHost model used by the human, and return a pointer to it. Do not delete this!
+    static WithinHost::WHInterface* setHumanWH(Host::Human& human, unique_ptr<WithinHost::WHInterface> wh){
+        human.withinHostModel = move(wh);
+        return &*human.withinHostModel;
     }
 };
 

@@ -75,19 +75,13 @@ Human::Human(SimTime dateOfBirth) :
 }
 
 Human::Human(SimTime dateOfBirth, int dummy) :
-    withinHostModel(0),
-    infIncidence(0),
-    clinicalModel(0),
+    withinHostModel(nullptr),
+    infIncidence(nullptr),
+    clinicalModel(nullptr),
     m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
 {}
-
-void Human::destroy() {
-    delete infIncidence;
-    delete withinHostModel;
-    delete clinicalModel;
-}
 
 
 // -----  Non-static functions: per-time-step update  -----
@@ -115,9 +109,7 @@ bool Human::update(bool doUpdate) {
         // monitoringAgeGroup is the group for the start of the time step.
         monitoringAgeGroup.update( age0 );
         // check sub-pop expiry
-        for( map<ComponentId,SimTime>::iterator expIt =
-            m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; )
-        {
+        for( auto expIt = m_subPopExp.begin(), expEnd = m_subPopExp.end(); expIt != expEnd; ) {
             if( !(expIt->second >= sim::ts0()) ){       // membership expired
                 // don't flush reports
                 // report removal due to expiry
@@ -179,8 +171,8 @@ void Human::reportDeployment( ComponentId id, SimTime duration ){
 }
 void Human::removeFirstEvent( interventions::SubPopRemove::RemoveAtCode code ){
     const vector<ComponentId>& removeAtList = interventions::removeAtIds[code];
-    for( vector<ComponentId>::const_iterator it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
-        SubPopT::iterator expIt = m_subPopExp.find( *it );
+    for( auto it = removeAtList.begin(), end = removeAtList.end(); it != end; ++it ){
+        auto expIt = m_subPopExp.find( *it );
         if( expIt != m_subPopExp.end() ){
             if( expIt->second > sim::nowOrTs0() ){
                 // removeFirstEvent() is used for onFirstBout, onFirstTreatment

@@ -30,7 +30,6 @@
 #include <schema/pharmacology.h>
 
 #include <cmath>
-#include <boost/ptr_container/ptr_vector.hpp>
 #include <boost/format.hpp>
 
 using namespace std;
@@ -43,9 +42,7 @@ using WithinHost::Genotypes;
 // -----  Static variables and functions  -----
 
 // The list of drugTypes drugs. Not checkpointed.
-// TODO: use C++11 move semantics
-typedef boost::ptr_vector<LSTMDrugType> DrugTypesT;
-DrugTypesT drugTypes;
+vector<LSTMDrugType> drugTypes;
 map<string,size_t> drugTypeNames;
 // List of all indices of drugs being used
 vector<size_t> drugsInUse;
@@ -85,6 +82,7 @@ double LSTMDrugPD::IC50_pow_slope(size_t index, WithinHost::CommonInfection *inf
 
 
 void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
+    drugTypes.reserve(drugData.getDrug().size());
     foreach( const scnXml::PKPDDrug& drug, drugData.getDrug() ){
         const string& abbrev = drug.getAbbrev();
         // Check drug doesn't already exist
@@ -92,7 +90,7 @@ void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
             throw TRACED_EXCEPTION_DEFAULT (string ("Drug added twice: ").append(abbrev));
         
         size_t i = drugTypes.size();
-        drugTypes.push_back( new LSTMDrugType (i, drug) );
+        drugTypes.emplace_back( i, drug );
         drugTypeNames[abbrev] = i;
     }
 }
@@ -114,10 +112,10 @@ void drugIsUsed(size_t index){
     drugsInUse.push_back(index);
 }
 size_t LSTMDrugType::findDrug(string _abbreviation) {
-    map<string,size_t>::const_iterator it = drugTypeNames.find (_abbreviation);
-    if (it == drugTypeNames.end())
+    auto iter = drugTypeNames.find (_abbreviation);
+    if (iter == drugTypeNames.end())
         throw util::xml_scenario_error (string ("attempt to use drug without description: ").append(_abbreviation));
-    size_t index = it->second;
+    size_t index = iter->second;
     
     // We assume that drugs are used when and only when findDrug returns their
     // index or they are a metabolite of a drug returned here.
@@ -137,17 +135,17 @@ const vector< size_t >& LSTMDrugType::getDrugsInUse(){
     return drugsInUse;
 }
 
-LSTMDrug* LSTMDrugType::createInstance(size_t index) {
+unique_ptr<LSTMDrug> LSTMDrugType::createInstance(size_t index) {
     LSTMDrugType& typeData = drugTypes[index];
     if( typeData.conversion_rate.isSet() ){
         LSTMDrugType& metaboliteData = drugTypes[typeData.metabolite];
-        return new LSTMDrugConversion( typeData, metaboliteData );
+        return unique_ptr<LSTMDrug>(new LSTMDrugConversion( typeData, metaboliteData ));
     }else if( typeData.k12.isSet() ){
         // k21 is set when k12 is set; k13 and k31 may be set
-        return new LSTMDrugThreeComp( typeData );
+        return unique_ptr<LSTMDrug>(new LSTMDrugThreeComp( typeData ));
     }else{
         // none of k12/k21/k13/k31 should be set in this case
-        return new LSTMDrugOneComp( typeData );
+        return unique_ptr<LSTMDrug>(new LSTMDrugOneComp( typeData ));
     }
 }
 
@@ -282,16 +280,16 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                     "has not been defined in parasiteGenetics section")
                     %restriction.getOnLocus() %restriction.getToAllele()).str() );
             }
-            map<string,size_t>::const_iterator it = loci.find(restriction.getOnLocus());
-            if( it == loci.end() ){
+            auto iter = loci.find(restriction.getOnLocus());
+            if( iter == loci.end() ){
                 loci[restriction.getOnLocus()] = loc_alleles.size();
                 loc_alleles.push_back( vector<uint32_t>(1,allele) );
             }else{
-                loc_alleles[it->second].push_back( allele );
+                loc_alleles[iter->second].push_back( allele );
             }
         }
         phenotype_restrictions.push_back( loc_alleles );
-        PD.push_back( new LSTMDrugPD( pd[i] ) );
+        PD.push_back( LSTMDrugPD( pd[i] ) );
     }
     
     if( loci_per_phenotype.size() == 0 ){
@@ -355,7 +353,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             cout << (fmtr % "--------" % "-------------") << endl;
             uint32_t genotype = 0;
             stringstream phenotypeName;
-            for( vector<uint32_t>::const_iterator phen = genotype_mapping.begin(); phen !=genotype_mapping.end(); ++phen ){
+            for( auto phen = genotype_mapping.begin(); phen !=genotype_mapping.end(); ++phen ){
                 phenotypeName.str("");
                 if(pd[*phen].getName().present()){
                     phenotypeName << pd[*phen].getName().get();

@@ -113,13 +113,6 @@ Population::Population(size_t populationSize)
 //         MakeDelegate( this, &Population::ctsNetHoleIndex ) );
 }
 
-Population::~Population()
-{
-    for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-        iter->destroy();
-    }
-}
-
 void Population::checkpoint (istream& stream)
 {
     populationSize & stream;
@@ -128,7 +121,7 @@ void Population::checkpoint (istream& stream)
     for(size_t i = 0; i < populationSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( new Host::Human (SimTime::zero()) );
+        population.push_back( Host::Human (SimTime::zero()) );
         population.back() & stream;
     }
     if (population.size() != populationSize)
@@ -180,7 +173,7 @@ void Population::createInitialHumans()
 
 void Population::newHuman( SimTime dob ){
     util::streamValidate( dob.raw() );
-    population.push_back( new Host::Human (dob) );
+    population.push_back( Host::Human (dob) );
     ++recentBirths;
 }
 
@@ -211,7 +204,6 @@ void Population::update1( SimTime firstVecInitTS ){
         bool updateHuman = lastPossibleTS >= firstVecInitTS;
         bool isDead = iter->update(updateHuman);
         if( isDead ){
-            iter->destroy();
             iter = population.erase (iter);
             continue;
         }
@@ -225,7 +217,6 @@ void Population::update1( SimTime firstVecInitTS ){
         // Also see targetPop = ... comment above
         if( cumPop > AgeStructure::targetCumPop(iter->age(sim::ts1()).inSteps(), targetPop) ){
             --cumPop;
-            iter->destroy();
             iter = population.erase (iter);
             continue;
         }
@@ -250,12 +241,12 @@ void Population::ctsHosts (ostream& stream){
     stream << '\t' << population.size();
 }
 void Population::ctsHostDemography (ostream& stream){
-    Population::ConstReverseIter it = population.crbegin();
+    auto iter = population.crbegin();
     int cumCount = 0;
     foreach( double ubound, ctsDemogAgeGroups ){
-        while( it != population.crend() && it->age(sim::now()).inYears() < ubound ){
+        while( iter != population.crend() && iter->age(sim::now()).inYears() < ubound ){
             ++cumCount;
-            ++it;
+            ++iter;
         }
         stream << '\t' << cumCount;
     }

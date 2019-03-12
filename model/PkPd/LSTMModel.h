@@ -23,8 +23,6 @@
 
 #include "PkPd/Drug/LSTMDrug.h"
 
-#include <boost/ptr_container/ptr_vector.hpp>
-
 namespace scnXml{
     class PKPDMedication;
 }
@@ -36,7 +34,6 @@ namespace WithinHost {
     class CommonInfection;
 }
 namespace PkPd {
-using boost::ptr_vector;
 
 struct MedicateData {
     MedicateData () :
@@ -156,10 +153,8 @@ private:
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
     
-    // TODO: use C++11 move semantics
-    typedef ptr_vector<LSTMDrug> DrugVec;
     /// Drugs with non-zero blood concentrations:
-    DrugVec m_drugs;
+    vector<unique_ptr<LSTMDrug>> m_drugs;
     
     /// All pending medications
     list<MedicateData> medicateQueue;

@@ -79,7 +79,7 @@ namespace OM { namespace util {
 	}
 	
 	OptionCodes operator[] (const string s) {
-	    map<string,OptionCodes>::iterator codeIt = codeMap.find (s);
+	    auto codeIt = codeMap.find (s);
 	    if( codeIt != codeMap.end() ) return codeIt->second;
             if( ignoreOptions.count(s) ){
                 if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
@@ -104,7 +104,7 @@ namespace OM { namespace util {
 	// reverse-lookup in map; only used for error/debug printing so efficiency is unimportant
 	// doesn't ensure code is unique in the map either
 	string toString (const OptionCodes code) {
-	    for(map<string,OptionCodes>::iterator codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
+	    for(auto codeIt = codeMap.begin(); codeIt != codeMap.end(); ++codeIt) {
 		if (codeIt->second == code)
 		    return codeIt->first;
 	    }
@@ -125,7 +125,7 @@ namespace OM { namespace util {
 	options = defaultOptSet;
 	
 	const scnXml::OptionSet::OptionSequence& optSeq = optionsElt.getOption();
-	for(scnXml::OptionSet::OptionConstIterator it = optSeq.begin(); it != optSeq.end(); ++it) {
+	for(auto it = optSeq.begin(); it != optSeq.end(); ++it) {
             OptionCodes opt = codeMap[it->getName()];
             if( opt != IGNORE ) options[opt] = it->getValue();
 	}

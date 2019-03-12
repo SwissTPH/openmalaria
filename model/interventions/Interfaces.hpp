@@ -128,7 +128,8 @@ protected:
     
 private:
     /** Don't copy (this may be possible but shouldn't be needed). */
-    HumanInterventionComponent( const HumanInterventionComponent& );
+    HumanInterventionComponent( const HumanInterventionComponent& ) = delete;
+    HumanInterventionComponent& operator= ( const HumanInterventionComponent& ) = delete;
     
     ComponentId m_id;
     SimTime m_duration;

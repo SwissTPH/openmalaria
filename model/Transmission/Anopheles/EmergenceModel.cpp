@@ -64,7 +64,7 @@ void EmergenceModel::initEIR(
         FSCoeffic.reserve (2*fsCoeffic.size() + 1);
 
         FSCoeffic.push_back( 0.0 );     // value doesn't matter; EIR will be scaled
-        for( scnXml::FourierSeries::CoefficConstIterator it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ) {
+        for( auto it=fsCoeffic.begin(); it!=fsCoeffic.end(); ++it ) {
             FSCoeffic.push_back( it->getA() );
             FSCoeffic.push_back( it->getB() );
         }

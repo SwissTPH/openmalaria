@@ -85,7 +85,7 @@ void minimizeCalc_rss(double (*func) (double,double), double param1,double param
     
     gsl_multimin_function minex_func;
     minex_func.f = &wCalcRSS;
-    minex_func.params = (void *) NULL;
+    minex_func.params = nullptr;
     minex_func.n = 2;
     
     const gsl_multimin_fminimizer_type *T =gsl_multimin_fminimizer_nmsimplex;
@@ -102,7 +102,7 @@ void minimizeCalc_rss(double (*func) (double,double), double param1,double param
             break;
     }
     // Call again to set final value.
-    wCalcRSS (minimizer->x, NULL);
+    wCalcRSS (minimizer->x, nullptr);
     
     gsl_vector_free(initialValues);
     gsl_vector_free(stepSize);

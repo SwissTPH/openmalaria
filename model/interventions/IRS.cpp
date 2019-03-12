@@ -80,11 +80,11 @@ void IRSComponent::print_details( std::ostream& out )const{
 }
 #endif
 
-PerHostInterventionData* IRSComponent::makeHumanPart() const{
-    return new HumanIRS( *this );
+unique_ptr<PerHostInterventionData> IRSComponent::makeHumanPart() const{
+    return unique_ptr<PerHostInterventionData>(new HumanIRS( *this ));
 }
-PerHostInterventionData* IRSComponent::makeHumanPart( istream& stream, ComponentId id ) const{
-    return new HumanIRS( stream, id );
+unique_ptr<PerHostInterventionData> IRSComponent::makeHumanPart( istream& stream, ComponentId id ) const{
+    return unique_ptr<PerHostInterventionData>(new HumanIRS( stream, id ));
 }
 
 void IRSComponent::IRSAnopheles::init(

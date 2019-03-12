@@ -84,7 +84,7 @@ namespace OM { namespace util {
                 ).str() );
             }
 
-            map<double,double>::iterator pos = dataGroups.begin();
+            auto pos = dataGroups.begin();
             assert(pos == dataGroups.end());
 
             double greatestLbound = -1.0;
@@ -114,20 +114,20 @@ namespace OM { namespace util {
 
         virtual double eval( double ageYears ) const {
             assert ( ageYears >= 0.0 );
-            map<double,double>::const_iterator it = dataGroups.upper_bound( ageYears );
+            auto it = dataGroups.upper_bound( ageYears );
             --it;   // previous point when ordered by age (it->first <= ageYears < (it+1)->first)
             return it->second;
         }
         
         virtual void scale( double factor ){
-            for( map<double,double>::iterator it = dataGroups.begin(); it != dataGroups.end(); ++it ){
+            for( auto it = dataGroups.begin(); it != dataGroups.end(); ++it ){
                 it->second *= factor;
             }
         }
 
         virtual double firstGlobalMaximum() {
             double age = 0.0, max = numeric_limits<double>::min();
-            for( map<double,double>::iterator it = dataGroups.begin(); it != dataGroups.end(); ++it ){
+            for( auto it = dataGroups.begin(); it != dataGroups.end(); ++it ){
                 if( it->second > max ){
                     max = it->second;
                     age = it->first;
@@ -152,8 +152,7 @@ namespace OM { namespace util {
                                      const char* eltName )
         {
             // Our read iterator
-            typedef scnXml::AgeGroupValues::GroupConstIterator GroupIt;
-            GroupIt it = ageGroups.getGroup().begin();
+            auto it = ageGroups.getGroup().begin();
 
             if( it == ageGroups.getGroup().end() ){
                 throw util::xml_scenario_error( (
@@ -169,7 +168,7 @@ namespace OM { namespace util {
             }
 
             // Our insert iterator (used for performance)
-            map<double,double>::iterator pos = dataPoints.begin();
+            auto pos = dataPoints.begin();
             assert(pos == dataPoints.end());
 
             double greatestLbound = 0.0;    // also last lbound: age groups must be ordered lowest to highest
@@ -194,7 +193,7 @@ namespace OM { namespace util {
         }
 
         virtual void scale( double factor ){
-            for( map<double,double>::iterator it = dataPoints.begin(); it != dataPoints.end(); ++it ){
+            for( auto it = dataPoints.begin(); it != dataPoints.end(); ++it ){
                 it->second *= factor;
             }
         }
@@ -229,7 +228,7 @@ namespace OM { namespace util {
             assert ( ageYears >= 0.0 );
             //TODO: optimise by putting (f1-f0)/(a1-a0) into the array and checking usage
             // Get the first point with age greater than ageYears:
-            map<double,double>::const_iterator it = dataPoints.upper_bound( ageYears );
+            auto it = dataPoints.upper_bound( ageYears );
             assert( it != dataPoints.end() );
             double a1 = it->first;  // a1 > ageYears
             double f1 = it->second;
@@ -241,7 +240,7 @@ namespace OM { namespace util {
 
         virtual double firstGlobalMaximum() {
             double age = 0.0, max = numeric_limits<double>::min();
-            for( map<double,double>::iterator it = dataPoints.begin(); it != dataPoints.end(); ++it ){
+            for( auto it = dataPoints.begin(); it != dataPoints.end(); ++it ){
                 if( it->second > max ){
                     max = it->second;
                     age = it->first;
@@ -268,7 +267,7 @@ namespace OM { namespace util {
             vector<double> x, y;
             x.reserve( dataPoints.size() );
             y.reserve( dataPoints.size() );
-            for( map<double,double>::const_iterator it=dataPoints.begin(); it!=dataPoints.end(); ++it ){
+            for( auto it=dataPoints.begin(); it!=dataPoints.end(); ++it ){
                 x.push_back( it->first );
                 y.push_back( it->second );
             }
@@ -315,7 +314,7 @@ namespace OM { namespace util {
         }
     }
     void AgeGroupInterpolator::reset(){
-        assert( obj != NULL );  // should not do that
+        assert( obj != nullptr );  // should not do that
         if( obj != &AgeGroupDummy::singleton ){
             delete obj;
             obj = &AgeGroupDummy::singleton;

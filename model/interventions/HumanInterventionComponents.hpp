@@ -51,9 +51,7 @@ HumanIntervention::HumanIntervention(
     const xsd::cxx::tree::sequence<scnXml::Component>& componentList )
 {
     components.reserve( componentList.size() );
-    for( xsd::cxx::tree::sequence<scnXml::Component>::const_iterator it = componentList.begin(),
-        end = componentList.end(); it != end; ++it )
-    {
+    for( auto it = componentList.begin(), end = componentList.end(); it != end; ++it ) {
         ComponentId id = InterventionManager::getComponentId( it->getId() );
         const HumanInterventionComponent* component = &InterventionManager::getComponent( id );
         components.push_back( component );
@@ -76,9 +74,7 @@ HumanIntervention::HumanIntervention(
     const xsd::cxx::tree::sequence<scnXml::Condition>& conditionList )
 {
     components.reserve( componentList.size() );
-    for( xsd::cxx::tree::sequence<scnXml::Component>::const_iterator it = componentList.begin(),
-        end = componentList.end(); it != end; ++it )
-    {
+    for( auto it = componentList.begin(), end = componentList.end(); it != end; ++it ) {
         ComponentId id = InterventionManager::getComponentId( it->getId() );
         const HumanInterventionComponent* component = &InterventionManager::getComponent( id );
         components.push_back( component );
@@ -96,9 +92,7 @@ HumanIntervention::HumanIntervention(
      * file. */
     std::stable_sort( components.begin(), components.end(), componentCmp );
     
-    for( xsd::cxx::tree::sequence<scnXml::Condition>::const_iterator it = conditionList.begin(),
-        end = conditionList.end(); it != end; ++it )
-    {
+    for( auto it = conditionList.begin(), end = conditionList.end(); it != end; ++it ) {
         double min = it->getMinValue().present() ? it->getMinValue().get() : -numeric_limits<double>::infinity();
         double max = it->getMaxValue().present() ? it->getMaxValue().get() : numeric_limits<double>::infinity();
         conditions.push_back(mon::setupCondition( it->getMeasure(), min, max, it->getInitialState() ));
@@ -106,9 +100,7 @@ HumanIntervention::HumanIntervention(
 }
 HumanIntervention::HumanIntervention( const xsd::cxx::tree::sequence<scnXml::DTDeploy>& componentList ){
     components.reserve( componentList.size() );
-    for( xsd::cxx::tree::sequence<scnXml::DTDeploy>::const_iterator it = componentList.begin(),
-        end = componentList.end(); it != end; ++it )
-    {
+    for( auto it = componentList.begin(), end = componentList.end(); it != end; ++it ) {
         ComponentId id = InterventionManager::getComponentId( it->getComponent() );
         const HumanInterventionComponent* component = &InterventionManager::getComponent( id );
         components.push_back( component );
@@ -135,9 +127,7 @@ void HumanIntervention::deploy( Human& human, mon::Deploy::Method method,
         if( !mon::checkCondition(cond) ) return;
     }
     
-    for( vector<const HumanInterventionComponent*>::const_iterator it = components.begin();
-            it != components.end(); ++it )
-    {
+    for( auto it = components.begin(); it != components.end(); ++it ) {
         const interventions::HumanInterventionComponent& component = **it;
         // we must report first, since it can change cohort and sub-population
         // which may affect what deployment does (at least in the case of reporting deployments)
@@ -149,8 +139,7 @@ void HumanIntervention::deploy( Human& human, mon::Deploy::Method method,
 #ifdef WITHOUT_BOINC
 void HumanIntervention::print_details( std::ostream& out )const{
     out << "human:";
-    for( vector<const HumanInterventionComponent*>::const_iterator it =
-        components.begin(); it != components.end(); ++it ){
+    for( auto it = components.begin(); it != components.end(); ++it ){
         out << '\t' << (*it)->id().id;
     }
 }
@@ -160,16 +149,14 @@ void HumanIntervention::print_details( std::ostream& out )const{
 
 TriggeredDeployments::TriggeredDeployments(const scnXml::TriggeredDeployments& elt){
     lists.reserve( elt.getDeploy().size() );
-    for( scnXml::TriggeredDeployments::DeployConstIterator it = elt.getDeploy().begin(),
-        end = elt.getDeploy().end(); it != end; ++it )
-    {
+    for( auto it = elt.getDeploy().begin(), end = elt.getDeploy().end(); it != end; ++it ) {
         lists.push_back( SubList( *it ) );
     }
 }
 void TriggeredDeployments::deploy(Human& human,
         mon::Deploy::Method method, VaccineLimits vaccLimits) const
 {
-    for( vector<SubList>::const_iterator it = lists.begin(); it != lists.end(); ++it ){
+    for( auto it = lists.begin(); it != lists.end(); ++it ){
         it->deploy( human, method, vaccLimits );
     }
 }

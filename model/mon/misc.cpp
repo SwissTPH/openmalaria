@@ -110,7 +110,7 @@ void initSurveyTimes( const OM::Parameters& parameters,
     impl::surveyTimes.clear();
     impl::surveyTimes.reserve(surveys.size());
     size_t n = 0;
-    for( map<SimTime, bool>::const_iterator it = surveys.begin(); it != surveys.end(); ++it ){
+    for( auto it = surveys.begin(); it != surveys.end(); ++it ){
         size_t num = NOT_USED;
         if( it->second ){
             num = n;
@@ -253,7 +253,7 @@ void initCohorts( const scnXml::Monitoring& monitoring )
     if( monitoring.getCohorts().present() ){
         const scnXml::Cohorts monCohorts = monitoring.getCohorts().get();
         uint32_t nextId = 0;
-        for( scnXml::Cohorts::SubPopConstIterator it = monCohorts.getSubPop().begin(),
+        for( auto it = monCohorts.getSubPop().begin(),
             end = monCohorts.getSubPop().end(); it != end; ++it )
         {
             ComponentId compId = interventions::InterventionManager::getComponentId( it->getId() );
@@ -275,7 +275,7 @@ void initCohorts( const scnXml::Monitoring& monitoring )
 }
 
 uint32_t updateCohortSet( uint32_t old, ComponentId subPop, bool isMember ){
-    map<ComponentId,uint32_t>::const_iterator it = cohortSubPopIds.find( subPop );
+    auto it = cohortSubPopIds.find( subPop );
     if( it == cohortSubPopIds.end() ) return old;       // sub-pop not used in cohorts
     uint32_t subPopId = static_cast<uint32_t>(1) << it->second;        // 1 bit positive
     return (old & ~subPopId) | (isMember ? subPopId : 0);

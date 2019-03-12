@@ -38,10 +38,9 @@ namespace OM { namespace interventions {
 // static memory:
 
 std::map<std::string,ComponentId> InterventionManager::identifierMap;
-boost::ptr_vector<HumanInterventionComponent> InterventionManager::humanComponents;
-boost::ptr_vector<HumanIntervention> InterventionManager::humanInterventions;
-ptr_vector<ContinuousHumanDeployment> InterventionManager::continuous;
-ptr_vector<TimedDeployment> InterventionManager::timed;
+vector<unique_ptr<HumanInterventionComponent>> InterventionManager::humanComponents;
+vector<ContinuousHumanDeployment> InterventionManager::continuous;
+vector<unique_ptr<TimedDeployment>> InterventionManager::timed;
 uint32_t InterventionManager::nextTimed;
 OM::Host::ImportedInfections InterventionManager::importedInfections;
 
@@ -57,11 +56,10 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
         const scnXml::ChangeHS& chs = intervElt.getChangeHS().get();
         if( chs.getTimedDeployment().size() > 0 ){
             // timed deployments:
-            typedef scnXml::ChangeHS::TimedDeploymentSequence::const_iterator It;
-            for( It it = chs.getTimedDeployment().begin(); it != chs.getTimedDeployment().end(); ++it ){
+            for( auto it = chs.getTimedDeployment().begin(); it != chs.getTimedDeployment().end(); ++it ){
                 try{
                     SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-                    timed.push_back( new TimedChangeHSDeployment( date, *it ) );
+                    timed.push_back( unique_ptr<TimedDeployment>(new TimedChangeHSDeployment( date, *it )) );
                 }catch( const util::format_error& e ){
                     throw util::xml_scenario_error( string("interventions/changeHS/timedDeployment/time: ").append(e.message()) );
                 }
@@ -72,11 +70,10 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
         const scnXml::ChangeEIR& eir = intervElt.getChangeEIR().get();
         if( eir.getTimedDeployment().size() > 0 ){
             // timed deployments:
-            typedef scnXml::ChangeEIR::TimedDeploymentSequence::const_iterator It;
-            for( It it = eir.getTimedDeployment().begin(); it != eir.getTimedDeployment().end(); ++it ){
+            for( auto it = eir.getTimedDeployment().begin(); it != eir.getTimedDeployment().end(); ++it ){
                 try{
                     SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-                    timed.push_back( new TimedChangeEIRDeployment( date, *it ) );
+                    timed.push_back( unique_ptr<TimedDeployment>(new TimedChangeEIRDeployment( date, *it )) );
                 }catch( const util::format_error& e ){
                     throw util::xml_scenario_error( string("interventions/changeEIR/timedDeployment/time: ").append(e.message()) );
                 }
@@ -90,10 +87,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
         const scnXml::HumanInterventions& human = intervElt.getHuman().get();
         
         // 1. Read components
-        for( scnXml::HumanInterventions::ComponentConstIterator it =
-                human.getComponent().begin(), end = human.getComponent().end();
-                it != end; ++it )
-        {
+        for( auto it = human.getComponent().begin(), end = human.getComponent().end(); it != end; ++it ) {
             const scnXml::HumanInterventionComponent& component = *it;
             if( identifierMap.count( component.getId() ) > 0 ){
                 ostringstream msg;
@@ -158,23 +152,17 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                     "child, didn't find it (perhaps I need updating)" );
             }
             hiComponent->setExpireAfter( expireAfter );
-            humanComponents.push_back( hiComponent );
+            humanComponents.push_back( unique_ptr<HumanInterventionComponent>(hiComponent) );
         }
         
         // 2. Read the list of deployments
-        for( scnXml::HumanInterventions::DeploymentConstIterator it =
-                human.getDeployment().begin(),
-                end = human.getDeployment().end(); it != end; ++it )
-        {
+        for( auto it = human.getDeployment().begin(), end = human.getDeployment().end(); it != end; ++it ) {
             const scnXml::Deployment& elt = *it;
             // 2.a intervention components
-            HumanIntervention *intervention = new HumanIntervention( elt.getComponent(),
-                elt.getCondition() );
+            auto intervention = shared_ptr<HumanIntervention>( new HumanIntervention(elt.getComponent(), elt.getCondition()) );
             
             // 2.b intervention deployments
-            for( scnXml::Deployment::ContinuousConstIterator ctsIt = elt.getContinuous().begin();
-                ctsIt != elt.getContinuous().end(); ++ctsIt )
-            {
+            for( auto ctsIt = elt.getContinuous().begin(); ctsIt != elt.getContinuous().end(); ++ctsIt ) {
                 ComponentId subPop = ComponentId_pop;
                 bool complement = false;
                 if( ctsIt->getRestrictToSubPop().present() ){
@@ -183,9 +171,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                     complement = ctsIt->getRestrictToSubPop().get().getComplement();
                 }
                 const scnXml::ContinuousList::DeploySequence& ctsSeq = ctsIt->getDeploy();
-                for( scnXml::ContinuousList::DeployConstIterator it2 = ctsSeq.begin(),
-                    end2 = ctsSeq.end(); it2 != end2; ++it2 )
-                {
+                for( auto it2 = ctsSeq.begin(), end2 = ctsSeq.end(); it2 != end2; ++it2 ) {
                     try{
                         SimTime begin = SimTime::zero();    // intervention period starts at 0
                         if( it2->getBegin().present() ){
@@ -197,8 +183,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                             end = UnitParse::readDate(it2->getEnd().get(),
                                                       UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         }
-                        continuous.push_back( new ContinuousHumanDeployment(
-                            begin, end, *it2, intervention, subPop, complement ) );
+                        continuous.push_back( ContinuousHumanDeployment( begin, end, *it2, intervention, subPop, complement ) );
                     }catch( const util::format_error& e ){
                         throw util::xml_scenario_error(
                             string("interventions/human/deployment/continuous/deploy: ")
@@ -206,9 +191,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                     }
                 }
             }
-            for( scnXml::Deployment::TimedConstIterator timedIt = elt.getTimed().begin();
-                timedIt != elt.getTimed().end(); ++timedIt )
-            {
+            for( auto timedIt = elt.getTimed().begin(); timedIt != elt.getTimed().end(); ++timedIt ) {
                 ComponentId subPop = ComponentId_pop;
                 bool complement = false;
                 if( timedIt->getRestrictToSubPop().present() ){
@@ -218,10 +201,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                 }
                 try{
                     multimap<SimTime, const scnXml::MassDeployment*> deployTimes;
-                    for( scnXml::MassListWithCum::DeployConstIterator it2 =
-                            timedIt->getDeploy().begin(), end2 =
-                            timedIt->getDeploy().end(); it2 != end2; ++it2 )
-                    {
+                    for( auto it2 = timedIt->getDeploy().begin(), end2 = timedIt->getDeploy().end(); it2 != end2; ++it2 ) {
                         SimTime date = UnitParse::readDate(it2->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         
                         if( it2->getRepeatStep().present() != it2->getRepeatEnd().present() ){
@@ -242,16 +222,12 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                         }
                     }
                     SimTime lastTime = SimTime::never();
-                    for( multimap<SimTime, const scnXml::MassDeployment*>::const_iterator deploy =
-                        deployTimes.begin(), dpEnd = deployTimes.end(); deploy != dpEnd; ++deploy )
-                    {
+                    for( auto deploy = deployTimes.begin(), dpEnd = deployTimes.end(); deploy != dpEnd; ++deploy ) {
                         if( deploy->first == lastTime ){
                             ostringstream msg;
                             msg << "Timed deployment of components ";
                             bool first = true;
-                            for( xsd::cxx::tree::sequence<scnXml::Component>::const_iterator cp =
-                                elt.getComponent().begin(), cpEnd = elt.getComponent().end(); cp != cpEnd; ++cp )
-                            {
+                            for( auto cp = elt.getComponent().begin(), cpEnd = elt.getComponent().end(); cp != cpEnd; ++cp ) {
                                 if( !first ){ msg << ", "; }else{ first=false; }
                                 msg << cp->getId();
                             }
@@ -264,23 +240,20 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                     if( timedIt->getCumulativeCoverage().present() ){
                         const scnXml::CumulativeCoverage& cumCov = timedIt->getCumulativeCoverage().get();
                         ComponentId cumCovComponent = getComponentId( cumCov.getComponent() );
-                        for( multimap<SimTime, const scnXml::MassDeployment*>::const_iterator deploy =
-                            deployTimes.begin(), end = deployTimes.end(); deploy != end; ++deploy )
-                        {
-                            timed.push_back( new TimedCumulativeHumanDeployment( deploy->first, *deploy->second, intervention, subPop, complement, cumCovComponent ) );
+                        for( auto deploy = deployTimes.begin(), end = deployTimes.end(); deploy != end; ++deploy ) {
+                            timed.push_back( unique_ptr<TimedDeployment>(new TimedCumulativeHumanDeployment(
+                                deploy->first, *deploy->second, intervention, subPop, complement, cumCovComponent )) );
                         }
                     }else{
-                        for( multimap<SimTime, const scnXml::MassDeployment*>::const_iterator deploy =
-                            deployTimes.begin(), end = deployTimes.end(); deploy != end; ++deploy )
-                        {
-                            timed.push_back( new TimedHumanDeployment( deploy->first, *deploy->second, intervention, subPop, complement ) );
+                        for( auto deploy = deployTimes.begin(), end = deployTimes.end(); deploy != end; ++deploy ) {
+                            timed.push_back( unique_ptr<TimedDeployment>(new TimedHumanDeployment(
+                                deploy->first, *deploy->second, intervention, subPop, complement )) );
                         }
                     }
                 }catch( const util::format_error& e ){
                     throw util::xml_scenario_error( string("interventions/human/deployment/timed/deploy/time: ").append(e.message()) );
                 }
             }
-            humanInterventions.push_back( intervention );
         }
     }
     if( intervElt.getImportedInfections().present() ){
@@ -298,8 +271,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
         if( elt.getTimedDeployment().size() > 0 ){
             Vaccine::verifyEnabledForR_0();
             // timed deployments:
-            typedef scnXml::InsertR_0Case::TimedDeploymentSequence::const_iterator It;
-            for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
+            for( auto it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
                 SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                 timed.push_back( new TimedR_0Deployment( date ) );
             }
@@ -310,10 +282,9 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
         const scnXml::UninfectVectors& elt = intervElt.getUninfectVectors().get();
         if( elt.getTimedDeployment().size() > 0 ){
             // timed deployments:
-            typedef scnXml::UninfectVectors::TimedDeploymentSequence::const_iterator It;
-            for( It it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
+            for( auto it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
                 SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-                timed.push_back( new TimedUninfectVectorsDeployment( date ) );
+                timed.push_back( unique_ptr<TimedDeployment>(new TimedUninfectVectorsDeployment( date )) );
             }
         }
     }
@@ -321,16 +292,15 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
         typedef scnXml::VectorPop::InterventionSequence SeqT;
         const SeqT& seq = intervElt.getVectorPop().get().getIntervention();
         size_t instance = 0;
-        for( SeqT::const_iterator it = seq.begin(), end = seq.end(); it != end; ++it ){
+        for( auto it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
                 sim::transmission().initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
-                typedef scnXml::TimedBaseList::DeploySequence::const_iterator It;
-                for( It it = seq.begin(); it != seq.end(); ++it ) {
+                for( auto it = seq.begin(); it != seq.end(); ++it ) {
                     SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-                    timed.push_back( new TimedVectorDeployment( date, instance ) );
+                    timed.push_back( unique_ptr<TimedDeployment>(new TimedVectorDeployment( date, instance )) );
                 }
                 instance++;
             }
@@ -346,7 +316,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                     SimTime time = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
                     double ratio = deploy.getRatioToHumans();
                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
-                    timed.push_back( new TimedTrapDeployment( time, instance, ratio, lifespan ) );
+                    timed.push_back( unique_ptr<TimedDeployment>(new TimedTrapDeployment( time, instance, ratio, lifespan )) );
                 }
             }
             instance += 1;
@@ -355,36 +325,30 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
 
     // lists must be sorted, increasing
     // For reproducability, we need to use stable_sort, not sort.
-    // NOTE: I'd rather use stable_sort, but it's not available. We also can't
-    // use std::stable_sort (from <algorithm>). Results are
-    // the same without as with a hacked BOOST version including stable_sort.
-    continuous.sort();
-    timed.sort();
+    stable_sort(continuous.begin(), continuous.end(), byDeployTime);
+    stable_sort(timed.begin(), timed.end(), byDeployTime);
     
     // make sure the list ends with something always in the future, so we don't
     // have to check nextTimed is within range:
-    timed.push_back( new DummyTimedDeployment() );
+    timed.push_back( unique_ptr<TimedDeployment>(new DummyTimedDeployment()) );
     
 #ifdef WITHOUT_BOINC
     if( util::CommandLine::option( util::CommandLine::PRINT_INTERVENTIONS ) ){
         cout << "Continuous deployments:" << endl
             << "begin\tend\tage\tsub pop\tcompl\tcoverag\tcomponents" << endl;
-        for( ptr_vector<ContinuousHumanDeployment>::const_iterator it =
-            continuous.begin(); it != continuous.end(); ++it ){
+        for( auto it = continuous.begin(); it != continuous.end(); ++it ){
             it->print_details( std::cout );
             cout << endl;
         }
         cout << "Timed deployments:" << endl
             << "time\tmin age\tmax age\tsub pop\tcompl\tcoverag\tcomponents" << endl;
-        for( ptr_vector<TimedDeployment>::const_iterator it =
-            timed.begin(); it != timed.end(); ++it ){
-            it->print_details( std::cout );
+        foreach( auto& deploy, timed ){
+            deploy->print_details( std::cout );
             cout << endl;
         }
         cout << "Human components:" << endl;
-        for( ptr_vector<HumanInterventionComponent>::const_iterator it =
-            humanComponents.begin(); it != humanComponents.end(); ++it ){
-            it->print_details( cout );
+        foreach( auto& component, humanComponents ){
+            component->print_details( cout );
             cout << endl;
         }
     }
@@ -393,7 +357,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
 
 ComponentId InterventionManager::getComponentId( const string textId )
 {
-    map<string,ComponentId>::const_iterator it = identifierMap.find( textId );
+    auto it = identifierMap.find( textId );
     if( it == identifierMap.end() ){
         ostringstream msg;
         msg << "unable to find an intervention component with id \""
@@ -408,8 +372,8 @@ void InterventionManager::loadFromCheckpoint( SimTime interventionTime ){
     // else. nextTimed should be zero so we can go through all past interventions.
     // Only redeploy those which happened before this time step.
     assert( nextTimed == 0 );
-    while( timed[nextTimed].time < interventionTime ){
-        TimedDeployment *deployment = &timed[nextTimed];
+    while( timed[nextTimed]->time < interventionTime ){
+        TimedDeployment *deployment = &*timed[nextTimed];
         if( dynamic_cast<TimedChangeHSDeployment*>(deployment)!=0 ||
             dynamic_cast<TimedChangeEIRDeployment*>(deployment)!=0 ){
             //Note: neither changeHS nor changeEIR interventions care what the
@@ -430,8 +394,8 @@ void InterventionManager::deploy(OM::Population& population) {
     importedInfections.import( population );
     
     // deploy timed interventions
-    while( timed[nextTimed].time <= sim::intervNow() ){
-        timed[nextTimed].deploy( population );
+    while( timed[nextTimed]->time <= sim::intervNow() ){
+        timed[nextTimed]->deploy( population );
         nextTimed += 1;
     }
     
