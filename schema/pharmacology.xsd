@@ -357,6 +357,26 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>name:Molecular weight ratio;unit:unitless;</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
+                  <xs:element name="IC50_log_correlation" type="xs:double">
+                    <xs:annotation>
+                      <xs:documentation>
+                        The IC50 values of parent and metabolite drugs may be
+                        sampled from the log-normal distribution (if sigma is greater than 0).
+                        This parameter controls correlation between these samples,
+                        measured in log-space.
+                        
+                        If this value is 1, samples are fully correlated: a single z-score is
+                        used to calculate both samples. If this is 0, two independent
+                        samples are used.
+                        
+                        Values between 0 and 1 (partial correlation) are supported;
+                        in this case IC50 values are sampled such that
+                        cor(log(x), log(y)) matches this value (where x, y are parent and
+                        metabolite IC50 values).
+                      </xs:documentation>
+                      <xs:appinfo>name:IC50 log correlation;min:0;max:1;</xs:appinfo>
+                    </xs:annotation>
+                  </xs:element>
                 </xs:all>
               </xs:complexType>
             </xs:element>

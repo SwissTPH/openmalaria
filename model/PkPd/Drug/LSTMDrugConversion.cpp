@@ -191,10 +191,25 @@ void LSTMDrugConversion::setKillingParameters(Params_convFactor& p,
             metaboliteType.getPD(genotype);
     p.nP = pdP.slope();
     p.VP = pdP.max_killing_rate();
-    p.KnP = pdP.IC50_pow_slope(parentType.getIndex(), inf);
     p.nM = pdM.slope();
     p.VM = pdM.max_killing_rate();
-    p.KnM = pdM.IC50_pow_slope(metaboliteType.getIndex(), inf);
+    
+    // Use custom code here because we need to handle covariance
+    auto pIndex = parentType.getIndex();
+    if (inf->Kn.count(pIndex) != 0) {
+        // Read cached values: IC50 ^ n
+        p.KnP = inf->Kn.at(pIndex);
+        p.KnM = inf->Kn.at(metaboliteType.getIndex());
+    } else {
+        // First usage for this infection / treatment: sample, optionally with correlation.
+        auto zscore = NormalSample::generate();
+        p.KnP = pdP.IC50_pow_slope(zscore);
+        inf->Kn[pIndex] = p.KnP;
+        
+        auto metab_zscore = parentType.IC50_correlated_sample(zscore);
+        p.KnM = pdM.IC50_pow_slope(metab_zscore);
+        inf->Kn[metaboliteType.getIndex()] = p.KnM;
+    }
 }
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?

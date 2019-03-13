@@ -42,6 +42,15 @@ namespace OM { namespace util {
         
         static NormalSample generate();
         
+        /// Generate a sample correlated with base.
+        /// 
+        /// @param base sample correlated against
+        /// @param correlation expected correlation between these parameters
+        ///     (note: if this is used to sample a log-normal, then the
+        ///     correlation is on the log-scale)
+        /// @param factor should equal sqrt(1 - correlation^2); may be cached
+        static NormalSample generate_correlated(NormalSample base, double correlation, double factor);
+        
     private:
         NormalSample( double variate ) : x(variate) {}
         
