@@ -297,50 +297,56 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="SampledValue">
     <xs:annotation>
       <xs:documentation>
-        Parameters of some distribution. The mean is that provided and the
-        standard deviation is cv*mean.
+        A parameter with optional heterogeneity.
         
-        Log-normal:
-        σ = cv * mean ;
-        μ = ln(mean) - σ² / 2 ;
-        X ~ ln N( μ, σ² ) ;
-        equivalent R sample: rlnorm(1, log(mean) - ((cv * mean)^2) / 2, cv * mean).
+        The mean value must be specified. Optionally, a distribution ("distr")
+        and coefficient of variation ("CV") may be specified.
       </xs:documentation>
-      <xs:appinfo>name:Distribution parameters;</xs:appinfo>
+      <xs:appinfo>name:Sampled value;</xs:appinfo>
     </xs:annotation>
     <xs:attribute name="mean" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          The mean of the distribution.
+          The (linear) mean value.
         </xs:documentation>
-        <xs:appinfo>units:(same as base units);name:mean;</xs:appinfo>
+        <xs:appinfo>name:mean;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="cv" type="xs:double" use="optional">
+    <xs:attribute name="CV" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
-          Coefficient of variance (mean * cv gives standard deviation).
+          The (linear) coefficient of variation.
           
-          Must be specified when distribution is not constant.
+          This value must be specified when a (non-constant) distribution is used.
+          
+          Note that specifying CV="0" has the same effect as distr="const" and
+          disables sampling of this parameter, even if distr is not "const". 
         </xs:documentation>
-        <xs:appinfo>name:Coefficient of variance;units:unitless;</xs:appinfo>
+        <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="distr" use="required">
+    <xs:attribute name="distr" use="optional" default="const">
       <xs:annotation>
         <xs:documentation>
-          Selects the distribution to use.
+          To allow heterogeneity, a distribution must be specified.
+          Note that not all parameters support all distributions, even if this
+          configuration appears to allow it.
           
-          const: constant (no distribution). Setting cv=0 has the same behaviour.
+          Valid options are as follows.
           
-          lnorm: log-normal distribution
+          "const": no variation or sampling. Specifying distr="const" has the
+          same effect as not specifying distr at all. CV should not be specified.
+          
+          "lognormal": the parameter is sampled from a log-normal distribution.
+          Note that the "mean" and "CV" values are linear (arithmetic) properties
+          of the distribution and not log-space properties.
         </xs:documentation>
         <xs:appinfo>name:Distribution;</xs:appinfo>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
-          <xs:enumeration value="lnorm" />
           <xs:enumeration value="const" />
+          <xs:enumeration value="lognormal" />
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>

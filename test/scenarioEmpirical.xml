@@ -1148,8 +1148,8 @@
         <PK>
           <negligible_concentration>0.005</negligible_concentration>
           <!-- high precision is to replicate results using half_life of 13.078 -->
-          <!-- cv value comes 0.1/mean where sigma=0.1 comes from nowhere -->
-          <k mean="0.053001008" cv="1.8867566" distr="lnorm"/>
+          <!-- CV is arbitrary -->
+          <k mean="0.053001008" CV="0.100250521615" distr="lognormal"/>
           <m_exponent>0.0</m_exponent>
           <vol_dist>20.8</vol_dist>
         </PK>

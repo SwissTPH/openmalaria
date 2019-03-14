@@ -141,6 +141,7 @@ namespace OM { namespace util {
         }
         
     private:
+        // log-space parameters
         double mu, sigma;
     };
     

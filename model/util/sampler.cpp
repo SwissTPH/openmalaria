@@ -25,6 +25,8 @@
 
 namespace OM { namespace util {
 
+// TODO: avoid sampling when CV=0
+
 double NormalSample::asNormal( double mu, double sigma )const{
     return sigma*x + mu;
 }
@@ -57,17 +59,28 @@ void LognormalSampler::setParams( double mean, double s ){
     sigma = s;
 }
 void LognormalSampler::setParams(const scnXml::SampledValue& elt){
+    const double m = elt.getMean();
     if( elt.getDistr() == "const" ){
-        mu = log(elt.getMean());
-        sigma = 0.0;
-    }else if( elt.getDistr() == "lnorm" ){
-        if( !elt.getCv().present() ){
-            throw util::xml_scenario_error( "attribute \"cv\" required for sampled value where distr=\"ln\"" );
+        if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
+            throw util::xml_scenario_error( "attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
         }
-        sigma = elt.getCv().get() * elt.getMean();
-        mu = log(elt.getMean()) - 0.5 * sigma * sigma;
+        mu = log(m);
+        sigma = 0.0;
+        return;
+    }
+    
+    if( !elt.getCV().present() ){
+        throw util::xml_scenario_error( "attribute \"CV\" required for sampled value when distr is not const" );
+    }
+    const double s = elt.getCV().get() * m;
+    
+    if( elt.getDistr() == "lognormal" ){
+        const double m2 = m*m;
+        const double s2 = s*s;
+        mu = log(m2 / sqrt(m2 + s2));
+        sigma = sqrt(log(1.0 + s2 / m2));
     }else{
-        throw SWITCH_DEFAULT_EXCEPTION;
+        throw SWITCH_DEFAULT_EXCEPTION; // disallowed by XSD
     }
 }
 
