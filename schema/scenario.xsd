@@ -368,18 +368,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="HypnozoiteReleaseDistribution">
-    <xs:complexContent>
-      <xs:extension base="om:NormalSample">
-        <xs:attribute type="xs:int" use="required" name="latentRelapseDays">
-          <xs:annotation>
-            <xs:documentation>
-            Usually 15 days or 10 days (3 or 2 5-day timesteps).
-            </xs:documentation>
-            <xs:appinfo>name:latent relapse days;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
+    <xs:annotation>
+      <xs:documentation>
+        Hypnozoites are released after latentRelapseDays plus an additional
+        delay sampled from the log-normal distribution with given (log-space)
+        mu, sigma parameters.
+      </xs:documentation>
+      <xs:appinfo>name:Hypnozoite release delay;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute type="xs:int" use="required" name="latentRelapseDays">
+      <xs:annotation>
+        <xs:documentation>
+        Usually 15 days or 10 days (3 or 2 5-day timesteps).
+        </xs:documentation>
+        <xs:appinfo>name:latent relapse days;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="mu" type="xs:double" use="required"/>
+    <xs:attribute name="sigma" type="xs:double" use="required"/>
   </xs:complexType>
   <xs:complexType name="ClinicalEvents">
     <xs:annotation>
