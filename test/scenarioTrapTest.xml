@@ -80,8 +80,8 @@ For simulating Rusinga
       <component id="ITN" name="Extended ITNs">
         <ITN>
           <usage value="0.8"/>
-          <holeRate mean=".9" sigma=".8"/>
-          <ripRate mean=".7" sigma=".8"/>
+          <holeRate mean="0.9" CV="0.946826741968" distr="lognormal"/>
+          <ripRate mean="0.7" CV="0.946826741968" distr="lognormal"/>
           <ripFactor value="0.4"/>
           <initialInsecticide mu="70" sigma="20"/>
           <insecticideDecay L="2.2y" function="exponential" mu="-0.32" sigma="0.8"/>

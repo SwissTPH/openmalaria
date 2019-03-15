@@ -1200,7 +1200,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="holeRate" type="om:LognormalSample">
+      <xs:element name="holeRate" type="om:SampledValue">
         <xs:annotation>
           <xs:documentation>
           The rate at which new holes are made in nets.
@@ -1214,7 +1214,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Holes per annum;min:0;name:Rate at which holes are made;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="ripRate" type="om:LognormalSample">
+      <xs:element name="ripRate" type="om:SampledValue">
         <xs:annotation>
           <xs:documentation>
           Each existing hole has a probability of being ripped bigger according
