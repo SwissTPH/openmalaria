@@ -25,8 +25,6 @@
 
 namespace OM { namespace util {
 
-// TODO: avoid sampling when CV=0
-
 double NormalSample::asNormal( double mu, double sigma )const{
     return sigma*x + mu;
 }
@@ -68,7 +66,9 @@ void NormalSampler::setParams(const scnXml::SampledValue& elt){
     sigma = elt.getCV().get() * mu;
 }
 double NormalSampler::sample() const{
-    //NOTE: should we sample when sigma==0?
+    if( sigma == 0.0 ){
+        return mu;
+    }
     return random::gauss( mu, sigma );
 }
 
@@ -123,10 +123,10 @@ double LognormalSampler::mean() const{
     return exp(mu + 0.5*sigma*sigma);
 }
 double LognormalSampler::sample() const{
-    if( sigma > 0.0 ){
-        return random::log_normal( mu, sigma );
-    }else{
+    if( sigma == 0.0 ){
         return exp( mu );
+    } else {
+        return random::log_normal( mu, sigma );
     }
 }
 

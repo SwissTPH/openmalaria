@@ -41,15 +41,7 @@ public:
     virtual double getBaseTMult() const =0;
     
     DecayFuncHet hetSample () const{
-        DecayFuncHet ret;
-        if( het.nonConst() ){
-            // TODO: this condition is just to avoid changing the number of random samples
-            ret.tMult = het.sample();
-        }else{
-            ret.tMult = 1.0;    // same answer as above but without using the random-number generator
-        }
-        ret.tMult *= getBaseTMult();
-        return ret;
+        return DecayFuncHet(het.sample() * getBaseTMult());
     }
     DecayFuncHet hetSample (NormalSample sample) const{
         return DecayFuncHet(het.sample(sample) * getBaseTMult());

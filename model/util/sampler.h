@@ -112,8 +112,6 @@ namespace OM { namespace util {
         
         /** Get the mean. */
         double mean() const;
-        /** Return true if this parameter has any variance. */
-        inline bool nonConst() const { return sigma > 0.0; }
         /** Sample a value. */
         double sample() const;
         
