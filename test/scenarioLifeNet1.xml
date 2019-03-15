@@ -75,8 +75,8 @@
           <holeRate mean="3.25" CV="0.795183136111" distr="lognormal"/>
           <ripRate mean="20" CV="0.795183136111" distr="lognormal"/>
           <ripFactor value="1"/>
-          <initialInsecticide mu="8.5" sigma="0.2125"/>
-          <!-- WHOPES 14 found a Relative Standard Deviation of 2.5% at a mean of 7.02, thus sigma=0.025*8.5 for LifeNet-->
+          <initialInsecticide mean="8.5" CV="0.025" distr="normal"/>
+          <!-- WHOPES 14 found a Relative Standard Deviation of 2.5% at a mean of 7.02, thus CV=0.025 -->
           <insecticideDecay L="2.0" function="exponential" mu="-0.32" sigma="0.8"/>
           <!-- Standard value is 1.5 year halflife, but 2 years may be reasonable-->
           <attritionOfNets L="18.176" function="smooth-compact" k="18"/>

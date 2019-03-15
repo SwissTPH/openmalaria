@@ -1241,7 +1241,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:none;min:0;name:Rip factor;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="initialInsecticide" type="om:NormalSample">
+      <xs:element name="initialInsecticide" type="om:SampledValue">
         <xs:annotation>
           <xs:documentation>
           The insecticide concentration of new nets is Gaussian distributed with
@@ -1683,7 +1683,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of Indoor residual spraying (IRS) interventions;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="initialInsecticide" type="om:NormalSample">
+      <xs:element name="initialInsecticide" type="om:SampledValue">
         <xs:annotation>
           <xs:documentation>
           The insecticide concentration of IRS (at time of spraying) is

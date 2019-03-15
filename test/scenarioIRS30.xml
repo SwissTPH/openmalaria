@@ -70,7 +70,7 @@
           <holeRate mean="0.9" CV="0.946826741968" distr="lognormal"/>
           <ripRate mean="0.7" CV="0.946826741968" distr="lognormal"/>
           <ripFactor value="0.4"/>
-          <initialInsecticide mu="70" sigma="20"/>
+          <initialInsecticide mean="70" CV="0.2857142857142857" distr="normal"/>
           <insecticideDecay L="2.2y" function="exponential" mu="-0.32" sigma="0.8"/>
           <attritionOfNets L="12y" function="smooth-compact" k="2"/>
           <anophelesParams mosquito="gambiae_ss">
@@ -83,7 +83,7 @@
       <component id="IRS" name="new param">
         <IRS>
           <!-- Initial insecticide: units are μg/cm²; no variance here -->
-          <initialInsecticide mu="118" sigma="0"/>
+          <initialInsecticide mean="118"/>
           <insecticideDecay L="0.15y" function="exponential"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency insecticideFactor="0.12" insecticideScalingFactor="0.05"/>

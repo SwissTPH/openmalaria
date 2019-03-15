@@ -73,9 +73,7 @@ namespace OM { namespace util {
          */
         void setParams( double m, double s );
         /** As above, using an XML element. */
-        inline void setParams( const scnXml::NormalSample& elt ){
-            setParams( elt.getMu(), elt.getSigma() );
-        }
+        void setParams( const scnXml::SampledValue& elt );
         
         /** Sample a value. */
         double sample() const;

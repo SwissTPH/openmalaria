@@ -49,6 +49,24 @@ void NormalSampler::setParams( double m, double s ){
     mu = m;
     sigma = s;
 }
+void NormalSampler::setParams(const scnXml::SampledValue& elt){
+    mu = elt.getMean();
+    if( elt.getDistr() == "const" ){
+        if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
+            throw util::xml_scenario_error( "attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
+        }
+        sigma = 0.0;
+        return;
+    }
+    
+    if( elt.getDistr() != "normal" ){
+        throw util::xml_scenario_error( "expected distr to be one of \"const\", \"lognormal\" (note: not all distributions are supported here)" );
+    }
+    if( !elt.getCV().present() ){
+        throw util::xml_scenario_error( "attribute \"CV\" required for sampled value when distr is not const" );
+    }
+    sigma = elt.getCV().get() * mu;
+}
 double NormalSampler::sample() const{
     //NOTE: should we sample when sigma==0?
     return random::gauss( mu, sigma );
@@ -80,7 +98,7 @@ void LognormalSampler::setParams(const scnXml::SampledValue& elt){
         mu = log(m2 / sqrt(m2 + s2));
         sigma = sqrt(log(1.0 + s2 / m2));
     }else{
-        throw SWITCH_DEFAULT_EXCEPTION; // disallowed by XSD
+        throw util::xml_scenario_error( "expected distr to be one of \"const\", \"lognormal\" (note: not all distributions are supported here)" );
     }
 }
 

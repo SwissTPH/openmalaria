@@ -211,32 +211,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="NormalSample">
-    <xs:annotation>
-      <xs:documentation>
-        Parameters of a normal distribution.
-        
-        Variates are sampled as: X ~ N( mu, sigma² ).
-      </xs:documentation>
-      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
-    </xs:annotation>
-    <xs:attribute name="mu" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          The mean of the normal distribution.
-        </xs:documentation>
-        <xs:appinfo>units:(same as base units);name:mu;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="sigma" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          The standard deviation of variates.
-        </xs:documentation>
-        <xs:appinfo>units:(same as base units);name:sigma;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
   <xs:complexType name="BetaMeanSample">
     <xs:annotation>
       <xs:documentation>
@@ -308,6 +282,9 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           "const": no variation or sampling. Specifying distr="const" has the
           same effect as not specifying distr at all. CV should not be specified.
           
+          "normal": the parameter is sampled from a normal distribution with
+          specified mean and CV.
+          
           "lognormal": the parameter is sampled from a log-normal distribution.
           Note that the "mean" and "CV" values are linear (arithmetic) properties
           of the distribution and not log-space properties.
@@ -317,6 +294,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:simpleType>
         <xs:restriction base="xs:string">
           <xs:enumeration value="const" />
+          <xs:enumeration value="normal" />
           <xs:enumeration value="lognormal" />
         </xs:restriction>
       </xs:simpleType>
