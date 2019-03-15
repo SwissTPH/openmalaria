@@ -1083,14 +1083,14 @@
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.6654</IC50>
+            <IC50 mean="0.6654"/>
             <slope>2.5</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.006654</negligible_concentration>
           <half_life>19.254</half_life>
-          <vol_dist>20.8</vol_dist>
+          <vol_dist mean="20.8"/>
         </PK>
       </drug>
     </drugs>

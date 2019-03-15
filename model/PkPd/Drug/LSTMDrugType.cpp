@@ -50,7 +50,7 @@ vector<size_t> drugsInUse;
 
 LSTMDrugPD::LSTMDrugPD( const scnXml::Phenotype& phenotype ){
     n = phenotype.getSlope ();
-    IC50.setParams(phenotype.getIC50 (), phenotype.getIC50().getSigma());
+    IC50.setParams( phenotype.getIC50() );
     V = phenotype.getMax_killing_rate ();  
 }
 
@@ -168,7 +168,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         if( pk.getK().present() || pk.getM_exponent().present() ){
             throw util::xml_scenario_error( "PK data must specify one of half_life or (k, m_exponent); it specifies both" );
         }
-        elimination_rate.setParams( log(2.0) / pk.getHalf_life().get(), 0.0 );
+        elimination_rate.setMeanCV( log(2.0) / pk.getHalf_life().get(), 0.0 );
         neg_m_exp = 0.0; // no dependence on body mass
     }else{
         if( !(pk.getK().present() && pk.getM_exponent().present()) ){
@@ -177,8 +177,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         elimination_rate.setParams( pk.getK().get() );
         neg_m_exp = -pk.getM_exponent().get();
     }
-    vol_dist.setParams( pk.getVol_dist(),
-                        pk.getVol_dist().getSigma() );
+    vol_dist.setParams( pk.getVol_dist() );
     if( pk.getCompartment2().present() ){
         k12.setParams( pk.getCompartment2().get().getK12() );
         k21.setParams( pk.getCompartment2().get().getK21() );
@@ -187,8 +186,9 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             k31.setParams( pk.getCompartment3().get().getK31() );
         }else{
             // 2-compartment model: use 3-compartment code with these parameters set to zero
-            k13.setParams(0.0, 0.0);
-            k31.setParams(0.0, 0.0);
+            // LognormalSampler supports 0,0 as a special case
+            k13.setMeanCV(0.0, 0.0);
+            k31.setMeanCV(0.0, 0.0);
         }
     }else if( pk.getCompartment3().present() ){
         throw util::xml_scenario_error( "PK model specifies parameters for "

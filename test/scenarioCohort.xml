@@ -1162,70 +1162,70 @@
         <PD>
           <phenotype>
             <max_killing_rate>4</max_killing_rate>
-            <IC50>0.0023</IC50>
+            <IC50 mean="0.0023"/>
             <slope>4</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.000023</negligible_concentration>
           <half_life>0.175</half_life>
-          <vol_dist>17.4</vol_dist>
+          <vol_dist mean="17.4"/>
         </PK>
       </drug>
       <drug abbrev="AS">
         <PD>
           <phenotype>
             <max_killing_rate>4.6</max_killing_rate>
-            <IC50>0.0016</IC50>
+            <IC50 mean="0.0016"/>
             <slope>4</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.000016</negligible_concentration>
           <half_life>0.042</half_life>
-          <vol_dist>2.75</vol_dist>
+          <vol_dist mean="2.75"/>
         </PK>
       </drug>
       <drug abbrev="CQ">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.036</IC50>
+            <IC50 mean="0.036"/>
             <slope>1.6</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.00036</negligible_concentration>
           <half_life>30.006</half_life>
-          <vol_dist>300</vol_dist>
+          <vol_dist mean="300"/>
         </PK>
       </drug>
       <drug abbrev="LR">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.100</IC50>
+            <IC50 mean="0.100"/>
             <slope>4</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.001</negligible_concentration>
           <half_life>4.332</half_life>
-          <vol_dist>21</vol_dist>
+          <vol_dist mean="21"/>
         </PK>
       </drug>
       <drug abbrev="MQ">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.5</IC50>
+            <IC50 mean="0.5"/>
             <slope>5</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.005</negligible_concentration>
           <half_life>13.078</half_life>
-          <vol_dist>20.8</vol_dist>
+          <vol_dist mean="20.8"/>
         </PK>
       </drug>
     </drugs>

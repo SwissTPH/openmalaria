@@ -104,15 +104,6 @@ namespace OM { namespace util {
             sigma( numeric_limits<double>::signaling_NaN() )
         {}
         
-        /** Set parameters such that samples taken are:
-         * X ~ ln N( log(mean)-s²/2, s² )
-         * 
-         * Equivalent in R: rlnorm(n, log(m) - s*s/2, s)
-         * 
-         * @param mean Mean of sampled variates
-         * @param s Square-root of variance of logarithm of sampled variates
-         */
-        void setParams( double mean, double s );    // TODO: remove
         void setParams( const scnXml::SampledValue& elt );
         /** Set log-normal parameters from mean and CV. */
         void setMeanCV( double mean, double CV );

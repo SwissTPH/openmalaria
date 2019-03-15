@@ -1125,7 +1125,7 @@
         <PD>
           <phenotype>
             <max_killing_rate>4.6</max_killing_rate>
-            <IC50>0.0016</IC50>
+            <IC50 mean="0.0016"/>
             <slope>4</slope>
           </phenotype>
         </PD>
@@ -1134,14 +1134,14 @@
           <!-- high precision is to replicate results using half_life of 0.042 -->
           <k mean="16.503504" distr="const"/>
           <m_exponent>0.0</m_exponent>
-          <vol_dist>2.75</vol_dist>
+          <vol_dist mean="2.75"/>
         </PK>
       </drug>
       <drug abbrev="MQ">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.5</IC50>
+            <IC50 mean="0.5"/>
             <slope>5</slope>
           </phenotype>
         </PD>
@@ -1151,7 +1151,7 @@
           <!-- CV is arbitrary -->
           <k mean="0.053001008" CV="0.100250521615" distr="lognormal"/>
           <m_exponent>0.0</m_exponent>
-          <vol_dist>20.8</vol_dist>
+          <vol_dist mean="20.8"/>
         </PK>
       </drug>
     </drugs>

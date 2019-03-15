@@ -72,10 +72,6 @@ double NormalSampler::sample() const{
     return random::gauss( mu, sigma );
 }
 
-void LognormalSampler::setParams( double mean, double s ){
-    mu = log(mean) - 0.5*s*s;
-    sigma = s;
-}
 void LognormalSampler::setParams(const scnXml::SampledValue& elt){
     const double mean = elt.getMean();
     if( elt.getDistr() == "const" ){
@@ -99,6 +95,20 @@ void LognormalSampler::setParams(const scnXml::SampledValue& elt){
 }
 
 void LognormalSampler::setMeanCV( double mean, double CV ){
+    if( CV == 0.0 ){
+        sigma = 0.0;
+        // as a special case, we can support mean == CV == 0
+        if( mean == 0.0 ){
+            mu = -numeric_limits<double>::infinity();
+        } else {
+            mu = log(mean);
+        }
+        return;
+    }
+    if( !(mean > 0.0 && CV > 0.0) ){
+        throw util::xml_scenario_error( "log-normal: required mean > 0 and CV ≥ 0" );
+    }
+    
     const double s = CV * mean;
     const double m2 = mean*mean;
     const double s2 = s*s;

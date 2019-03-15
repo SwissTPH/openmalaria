@@ -254,26 +254,26 @@
           <phenotype name="sensitive">
             <restriction onLocus="mdr" toAllele="sensitive"/>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.02</IC50>
+            <IC50 mean="0.02"/>
             <slope>1.6</slope>
           </phenotype>
           <phenotype name="resistant">
             <restriction onLocus="mdr" toAllele="resistant"/>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.04</IC50>
+            <IC50 mean="0.04"/>
             <slope>1.6</slope>
           </phenotype>
           <phenotype name="highly resistant">
             <restriction onLocus="mdr" toAllele="highly resistant"/>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.08</IC50>
+            <IC50 mean="0.08"/>
             <slope>1.6</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.00036</negligible_concentration>
           <half_life>30.006</half_life>
-          <vol_dist>300</vol_dist>
+          <vol_dist mean="300"/>
         </PK>
       </drug>
     </drugs>
