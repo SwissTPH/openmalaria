@@ -36,8 +36,10 @@ void PerHostAnoph::initialise (const PerHostAnophParams& base, double availabili
 
 void PerHostAnophParams::operator =(const scnXml::Mosq& mosq)
 {
-    entoAvailability.setParams( numeric_limits<double>::quiet_NaN(),
-                                mosq.getAvailabilityVariance().getValue() );
+    // TODO: entoAvailability does not need sampling, assuming we can enforce variance=0
+    if( mosq.getAvailabilityVariance().getValue() != 0.0 ){
+        throw util::xml_scenario_error( "non-zero availabilityVariance not supported" );
+    }
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );

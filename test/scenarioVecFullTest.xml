@@ -112,7 +112,7 @@
       </component>
       <component id="PEV">
         <PEV>
-          <decay L="10.0" function="exponential" mu="0" sigma="0.2"/>
+          <decay L="9.801986733036383" function="exponential" CV="0.202016767107"/>
           <efficacyB value="10"/>
           <initialEfficacy value="0.512"/>
           <initialEfficacy value="0.64"/>
@@ -126,7 +126,7 @@
           <ripRate mean="0.7" CV="0.946826741968" distr="lognormal"/>
           <ripFactor value="0.4"/>
           <initialInsecticide mean="70" CV="0.2857142857142857" distr="normal"/>
-          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <insecticideDecay L="2.2y" function="exponential" CV="0.946826741968"/>
           <attritionOfNets L="12" function="smooth-compact" k="2"/>
           <anophelesParams mosquito="gambiae_ss" propActive="1">
             <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>

@@ -77,7 +77,7 @@
           <ripFactor value="1"/>
           <initialInsecticide mean="8.5" CV="0.025" distr="normal"/>
           <!-- WHOPES 14 found a Relative Standard Deviation of 2.5% at a mean of 7.02, thus CV=0.025 -->
-          <insecticideDecay L="2.0" function="exponential" mu="-0.32" sigma="0.8"/>
+          <insecticideDecay L="2.0y" function="exponential" CV="0.946826741968"/>
           <!-- Standard value is 1.5 year halflife, but 2 years may be reasonable-->
           <attritionOfNets L="18.176" function="smooth-compact" k="18"/>
           <!-- Standard value -->

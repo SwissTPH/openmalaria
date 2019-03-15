@@ -77,12 +77,12 @@ void LognormalSampler::setParams( double mean, double s ){
     sigma = s;
 }
 void LognormalSampler::setParams(const scnXml::SampledValue& elt){
-    const double m = elt.getMean();
+    const double mean = elt.getMean();
     if( elt.getDistr() == "const" ){
         if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
             throw util::xml_scenario_error( "attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
         }
-        mu = log(m);
+        mu = log(mean);
         sigma = 0.0;
         return;
     }
@@ -90,20 +90,21 @@ void LognormalSampler::setParams(const scnXml::SampledValue& elt){
     if( !elt.getCV().present() ){
         throw util::xml_scenario_error( "attribute \"CV\" required for sampled value when distr is not const" );
     }
-    const double s = elt.getCV().get() * m;
     
     if( elt.getDistr() == "lognormal" ){
-        const double m2 = m*m;
-        const double s2 = s*s;
-        mu = log(m2 / sqrt(m2 + s2));
-        sigma = sqrt(log(1.0 + s2 / m2));
+        setMeanCV( mean, elt.getCV().get() );
     }else{
         throw util::xml_scenario_error( "expected distr to be one of \"const\", \"lognormal\" (note: not all distributions are supported here)" );
     }
 }
 
-void LognormalSampler::setMean( double mean ){
-    mu = log(mean) - 0.5*sigma*sigma;
+void LognormalSampler::setMeanCV( double mean, double CV ){
+    const double s = CV * mean;
+    const double m2 = mean*mean;
+    const double s2 = s*s;
+    
+    mu = log(m2 / sqrt(m2 + s2));
+    sigma = sqrt(log(1.0 + s2 / m2));
 }
 void LognormalSampler::scaleMean(double scalar){
     mu += log(scalar);

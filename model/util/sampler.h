@@ -114,13 +114,15 @@ namespace OM { namespace util {
          */
         void setParams( double mean, double s );    // TODO: remove
         void setParams( const scnXml::SampledValue& elt );
-        /** Set the mean, leave sigma unchanged. */
-        void setMean( double mean );
+        /** Set log-normal parameters from mean and CV. */
+        void setMeanCV( double mean, double CV );
         /** Scale the mean (i.e. multiply by a scalar). */
         void scaleMean( double scalar );
         
         /** Get the mean. */
         double mean() const;
+        /** Return true if this parameter has any variance. */
+        inline bool nonConst() const { return sigma > 0.0; }
         /** Sample a value. */
         double sample() const;
         

@@ -200,7 +200,7 @@
           <ripRate mean=".7" sigma=".8"/>
           <ripFactor value="0.4"/>
           <initialInsecticide mean="70" CV="0.2857142857142857" distr="normal"/>
-          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <insecticideDecay L="2.2y" function="exponential" CV="0.946826741968"/>
           <attritionOfNets L="12" function="smooth-compact" k="2"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>

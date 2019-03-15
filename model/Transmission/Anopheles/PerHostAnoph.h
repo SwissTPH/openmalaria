@@ -43,7 +43,7 @@ public:
      * This function doesn't need to exist, but helps make this fact obvious.
       */
     inline void setEntoAvailability(double entoAvailability){
-        this->entoAvailability.setMean( entoAvailability );
+        this->entoAvailability.setMeanCV( entoAvailability, 0.0 );
     }
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
