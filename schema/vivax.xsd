@@ -1,0 +1,144 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Schema for OpenMalaria input documents
+Copyright © 2005-2019 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
+Licence: GNU General Public Licence version 2 or later (see COPYING) -->
+<!-- standard types used -->
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_39"
+           xmlns:om="http://openmalaria.org/schema/scenario_39"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:include schemaLocation="util.xsd"/>
+  <xs:complexType name="Vivax">
+    <xs:all>
+      <xs:element name="probBloodStageInfectiousToMosq" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            The chance of a feeding mosquito becoming infected, given that the
+            host is patent. (This may be adjusted by transmission-blocking vaccines.)
+          </xs:documentation>
+          <xs:appinfo>name:Probability of mosquito infection;units:None;min:0;max:1;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="hypnozoiteRelease" type="om:HypnozoiteRelease">
+        <xs:annotation>
+          <xs:documentation>
+            Describes the number and times of hypnozoite releases.
+          </xs:documentation>
+          <xs:appinfo>name:Hypnozoite releases;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="bloodStageProtectionLatency" type="om:DoubleValue">
+        <xs:annotation>
+          <xs:documentation>
+            The length of time after expiry of a blood-stage infection during
+            which relapses from the same brood are supressed by the immune
+            system.
+            
+            This is rounded to the nearest time-step.
+          </xs:documentation>
+          <xs:appinfo>name:Blood stage protection latency;min:0;</xs:appinfo>
+        </xs:annotation>
+      </xs:element>
+      <xs:element name="bloodStageLengthDays">
+        <xs:annotation>
+          <xs:documentation>
+            Parameters used to sample the length of blood-stage infections from
+            a Weibull distribution (scale parameter lambda, shape parameter k).
+          </xs:documentation>
+          <xs:appinfo>name:Blood stage length;units:Days;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute type="xs:double" use="required" name="weibullScale"/>
+          <xs:attribute type="xs:double" use="required" name="weibullShape"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element name="clinicalEvents" type="om:ClinicalEvents"/>
+    </xs:all>
+  </xs:complexType>
+  <xs:complexType name="HypnozoiteRelease">
+    <xs:annotation>
+      <xs:documentation>
+        This element defines probabilites when and how many hypnozoites are released from the liverstage into the blood.
+
+        The gap between the start of a new brood of hypnozoites and its release are defined as follows:
+
+          latentP + latentRelapseDays + randomReleaseDelay
+
+        randomReleaseDelay is based on one or two lognormal distributions, which are defined in firstRelease and optionally secondRelease.
+
+        You can define 2 release distributions, which get added together and represent the probability of hypnozoites which get released before winter (first release) or after (second release).
+
+        You can omit the secondRelease element if no release to the blood happens after winter.
+      </xs:documentation>
+      <xs:appinfo>name:Hypnozoite release;</xs:appinfo>
+    </xs:annotation>
+    <xs:all>
+      <xs:element name="numberHypnozoites" maxOccurs="1" minOccurs="1">
+        <xs:annotation>
+          <xs:documentation>
+            numberHypnozoites calculates the number of hypnozoites in the liver stage based on a base which is between 0 and 1.
+
+            This number is random based on the following distribution and normalized:
+
+             max
+              ∑ (base ^ n)
+            n = 0
+          </xs:documentation>
+          <xs:appinfo>name:Number of Hypnozoites;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+          <xs:attribute type="xs:int" use="required" name="max"/>
+          <xs:attribute type="xs:double" use="required" name="base"/>
+        </xs:complexType>
+      </xs:element>
+      <xs:element type="om:HypnozoiteReleaseDistribution" name="firstRelease" maxOccurs="1" minOccurs="1"/>
+      <xs:element type="om:HypnozoiteReleaseDistribution" name="secondRelease" maxOccurs="1" minOccurs="0"/>
+    </xs:all>
+    <xs:attribute type="xs:double" name="pSecondRelease" default="0">
+      <xs:annotation>
+        <xs:documentation>
+        Probability of a second release. If undefined it is zero.
+        </xs:documentation>
+        <xs:appinfo>name:latent relapse days;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="HypnozoiteReleaseDistribution">
+    <xs:annotation>
+      <xs:documentation>
+        Hypnozoites are released after latentRelapseDays plus an additional
+        delay sampled from the log-normal distribution with given (log-space)
+        mu, sigma parameters.
+      </xs:documentation>
+      <xs:appinfo>name:Hypnozoite release delay;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute type="xs:int" use="required" name="latentRelapseDays">
+      <xs:annotation>
+        <xs:documentation>
+        Usually 15 days or 10 days (3 or 2 5-day timesteps).
+        </xs:documentation>
+        <xs:appinfo>name:latent relapse days;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="mu" type="xs:double" use="required"/>
+    <xs:attribute name="sigma" type="xs:double" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="ClinicalEvents">
+    <xs:annotation>
+      <xs:documentation>
+        This elements holds all information about probabilites for clinical events from infections and relapses.
+      </xs:documentation>
+      <xs:appinfo>name:Vivax Clinical Events;</xs:appinfo>
+    </xs:annotation>
+    <xs:sequence>
+      <xs:element name="pPrimaryInfection" type="om:ProbVivaxEvent"/>
+      <xs:element name="pRelapseOne" type="om:ProbVivaxEvent"/>
+      <xs:element name="pRelapseTwoPlus" type="om:ProbVivaxEvent"/>
+      <xs:element name="pEventIsSevere" type="om:DoubleValue"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="ProbVivaxEvent">
+    <xs:attribute name="a" type="xs:double" use="required"/>
+    <xs:attribute name="b" type="xs:double" use="required"/>
+  </xs:complexType>
+  
+</xs:schema>

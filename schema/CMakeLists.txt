@@ -12,6 +12,7 @@ set (SCHEMA_NAMES
   healthSystem
   entomology
   pharmacology
+  vivax
   util
 )
 set (SCHEMA_CPP "")
