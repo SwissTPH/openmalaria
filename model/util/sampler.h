@@ -22,6 +22,7 @@
 #define UTIL_SAMPLER
 
 #include "Global.h"
+#include "util/random.h"
 #include "schema/util.h"
 #include <limits>
 
@@ -136,7 +137,7 @@ namespace OM { namespace util {
         double mu, sigma;
     };
     
-    /** Sampler for beta distribution.
+    /** Sampler for the Beta distribution.
      *
      * Input may be alpha and beta or mean and variance. As a special case,
      * variance zero is also supported, meaning return the mean. */
@@ -173,6 +174,34 @@ namespace OM { namespace util {
         //Note: if b is 0, then alpha is mean. Otherwise a and b are
         //the expected (α,β) parameters to the beta distribution.
         double a, b;
+    };
+    
+    /** Sampler for the Weibull distribution. */
+    class WeibullSampler {
+    public:
+        WeibullSampler() :
+            scale( numeric_limits<double>::signaling_NaN() ),
+            shape( numeric_limits<double>::signaling_NaN() )
+        {}
+        
+        /** Set parameters from scale, shape. */
+        inline void setScaleShape( double lambda, double k ){
+            scale = lambda;
+            shape = k;
+        }
+        
+        /** Set parameters from an XML element. */
+        inline void setParams( const scnXml::WeibullSample& elt ){
+            setScaleShape( elt.getScale(), elt.getShape() );
+        }
+        
+        /** Sample a value. */
+        inline double sample() const{
+            return random::weibull( scale, shape );
+        }
+        
+    private:
+        double scale, shape;    // λ, k
     };
     
 } }

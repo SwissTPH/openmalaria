@@ -295,6 +295,44 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:extension>
     </xs:complexContent>
   </xs:complexType>
+  <xs:complexType name="WeibullSample">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of a Weibull distribution.
+      </xs:documentation>
+      <xs:appinfo>name:Weibull parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="scale" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The Weibull scale parameter (λ).
+        </xs:documentation>
+        <xs:appinfo>name:Scale;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="shape" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The Weibull shape parameter (k).
+        </xs:documentation>
+        <xs:appinfo>name:shape;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="distr" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          In this case, only "weibull" is allowed.
+        </xs:documentation>
+        <xs:appinfo>name:Distribution;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="weibull" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
   <xs:complexType name="DoubleValue">
     <xs:attribute name="value" type="xs:double" use="required">
       <xs:annotation>

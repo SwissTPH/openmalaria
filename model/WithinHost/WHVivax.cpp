@@ -28,6 +28,7 @@
 #include "util/checkpoint_containers.h"
 #include "util/timeConversions.h"
 #include "util/CommandLine.h"
+#include "util/sampler.h"
 #include <schema/scenario.h>
 #include <algorithm>
 #include <limits>
@@ -55,8 +56,7 @@ double sigmaFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 double muSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 double sigmaSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 SimTime bloodStageProtectionLatency;
-double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
-double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
+WeibullSampler bloodStageLength;    // units: days
 double pPrimaryA = numeric_limits<double>::signaling_NaN(),
     pPrimaryB = numeric_limits<double>::signaling_NaN();
 double pRelapseOneA = numeric_limits<double>::signaling_NaN(),
@@ -241,7 +241,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         }
         result.newBS = true;
         
-        double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
+        double lengthDays = bloodStageLength.sample();
         bloodStageClearDate = sim::ts0() + SimTime::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
@@ -568,8 +568,7 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
         assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
     } // else pSecondRelease is NaN and other values don't get used
     bloodStageProtectionLatency = SimTime::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
-    bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
-    bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
+    bloodStageLength.setParams(elt.getBloodStageLengthDays());
     
     const scnXml::ClinicalEvents& ce = elt.getClinicalEvents();
     pPrimaryA = ce.getPPrimaryInfection().getA();

@@ -38,7 +38,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>name:Blood stage protection latency;min:0;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="bloodStageLengthDays">
+      <xs:element name="bloodStageLengthDays" type="om:WeibullSample">
         <xs:annotation>
           <xs:documentation>
             Parameters used to sample the length of blood-stage infections from
@@ -46,10 +46,6 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           </xs:documentation>
           <xs:appinfo>name:Blood stage length;units:Days;</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:attribute type="xs:double" use="required" name="weibullScale"/>
-          <xs:attribute type="xs:double" use="required" name="weibullShape"/>
-        </xs:complexType>
       </xs:element>
       <xs:element name="clinicalEvents" type="om:ClinicalEvents"/>
     </xs:all>

@@ -674,7 +674,7 @@
       </hypnozoiteRelease>
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
-      <bloodStageLengthDays weibullScale="115.0582" weibullShape="2.331"/>
+      <bloodStageLengthDays scale="115.0582" shape="2.331" distr="weibull"/>
       <clinicalEvents>
         <pPrimaryInfection a="0.9687" b="9.803"/>
         <pRelapseOne a="0.2098" b="1.812"/>
