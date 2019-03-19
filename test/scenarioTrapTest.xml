@@ -191,7 +191,7 @@ For simulating Rusinga
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -212,7 +212,7 @@ For simulating Rusinga
           <mosqLaidEggsSameDayProportion value="0.616"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.611"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -233,7 +233,7 @@ For simulating Rusinga
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>

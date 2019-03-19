@@ -41,9 +41,11 @@ public:
      * parameters have been initialised.
      * 
      * This function doesn't need to exist, but helps make this fact obvious.
+     * 
+     * It should be called exactly once.
       */
-    inline void setEntoAvailability(double entoAvailability){
-        this->entoAvailability.setMeanCV( entoAvailability, 0.0 );
+    inline void scaleEntoAvailability(double entoAvailability){
+        this->entoAvailability.scaleMean( entoAvailability );
     }
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle

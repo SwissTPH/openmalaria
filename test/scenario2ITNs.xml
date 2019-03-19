@@ -260,7 +260,7 @@
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
           <mosqProbBiting mean="0.95" variance="0"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
           <mosqProbOvipositing value="0.88"/>

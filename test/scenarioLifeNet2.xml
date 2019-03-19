@@ -202,7 +202,7 @@
           <!-- Standard value -->
           <mosqSurvivalFeedingCycleProbability value="0.534"/>
           <!-- Torres et al., 1996 parous rate of 0.76 based on 200+7*200=1600 mosquitoes in Jan-Feb 1993. (0.76/0.72)*0.43=0.45 in comparison to maculatus. Clements and Peterson 1981 write:  "Catangui (1971) analysed the physiological age composition of a population of Anophelesflavirostris at Caloocan, Rizal, in the Philippines, dissecting 1663 females at bait between September and June. Ten percent of females survived 4 gonotrophic cycles, and over 2% survived 6 gonotrophic cycles. Catangui, F. P. (1971). Studies on the gonotrophic cycle of Anopheles minimus flavirostris and the application of physiological age grading technique on the same species. South East Asian Journal of Tropical Medicine and Public Health, 2, 384-392."   Thus crudely, 0.10^(1/4)=0.5623413, but they fitted  exp(-0.196)^3.5 = 0.5035864. However, the crude data show an average parous rate over a whole year of 0.566, and a fitted value is exp(-0.62810)=0.5336047. This was in a context of DDT spraying. -->
-          <availabilityVariance value="0"/>
+          <availability/>
           <!-- Standard value -->
           <mosqProbBiting mean="0.95" variance="0"/>
           <!-- Standard value -->

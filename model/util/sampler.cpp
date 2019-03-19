@@ -72,8 +72,12 @@ double NormalSampler::sample() const{
     return random::gauss( mu, sigma );
 }
 
-void LognormalSampler::setParams(const scnXml::SampledValue& elt){
+void LognormalSampler::setParams( const scnXml::SampledValue& elt ){
     const double mean = elt.getMean();
+    setParams( mean, elt );
+}
+
+void LognormalSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
     if( elt.getDistr() == "const" ){
         if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
             throw util::xml_scenario_error( "attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
@@ -109,12 +113,15 @@ void LognormalSampler::setMeanCV( double mean, double CV ){
         throw util::xml_scenario_error( "log-normal: required mean > 0 and CV ≥ 0" );
     }
     
-    const double s = CV * mean;
-    const double m2 = mean*mean;
-    const double s2 = s*s;
+    // The following formulae are derived from:
+    // X ~ lognormal(μ, σ)
+    // E(X) = exp(μ + σ² / 2)
+    // Var(X) = exp(σ² + 2μ)(exp(σ²) - 1)
+    // Var = CV * mean
     
-    mu = log(m2 / sqrt(m2 + s2));
-    sigma = sqrt(log(1.0 + s2 / m2));
+    const double a = 1 + CV * CV;
+    mu = log( mean / sqrt(a) );
+    sigma = sqrt(log(a));
 }
 void LognormalSampler::scaleMean(double scalar){
     mu += log(scalar);

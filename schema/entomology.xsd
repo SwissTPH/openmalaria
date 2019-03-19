@@ -349,12 +349,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 <xs:appinfo>units:Proportion;name:Probability that the mosquito survives the feeding cycle;</xs:appinfo>
               </xs:annotation>
             </xs:element>
-            <xs:element name="availabilityVariance" type="om:DoubleValue">
+            <xs:element name="availability" type="om:SampledValueCV">
               <xs:annotation>
-                <xs:documentation>Variance in availability rate of humans to
-                mosquitoes. The mean rate is calculated based on other parameters.
+                <xs:documentation>
+                  Optionally, entomological availability rate may be sampled per-human from a
+                  distribution. The distribution and coefficient of variability may be set here.
+                  The mean rate is calculated based on other parameters and not set directly.
+                  
+                  If no attributes are specified or distr="const" or CV="0" then there will be
+                  no heterogeneity.
                 </xs:documentation>
-                <xs:appinfo>name:Variance in human availability rate</xs:appinfo>
+                <xs:appinfo>name:Human availability rate heterogeneity</xs:appinfo>
               </xs:annotation>
             </xs:element>
             <xs:element name="mosqProbBiting" type="om:BetaMeanSample">

@@ -104,10 +104,16 @@ namespace OM { namespace util {
             sigma( numeric_limits<double>::signaling_NaN() )
         {}
         
+        /// Set parameters from XML element
         void setParams( const scnXml::SampledValue& elt );
+        /// Set specified mean and CV from XML element
+        void setParams( double mean, const scnXml::SampledValueCV& elt );
         /** Set log-normal parameters from mean and CV. */
         void setMeanCV( double mean, double CV );
-        /** Scale the mean (i.e. multiply by a scalar). */
+        /** Scale the mean (i.e. multiply by a scalar).
+         * 
+         * Note that sigma (when specified via CV) is independent of the mean,
+         * so one can safely multiply the mean without affecting CV. */
         void scaleMean( double scalar );
         
         /** Get the mean. */
