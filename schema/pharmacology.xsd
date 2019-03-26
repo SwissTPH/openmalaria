@@ -265,7 +265,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:annotation>
               </xs:element>
               <xs:sequence>
-                <xs:element name="k" type="om:SampledValue">
+                <xs:element name="k" type="om:SampledValueLN">
                   <xs:annotation>
                     <xs:documentation>
                       Constant used to calculate the elimination rate λ, which
@@ -301,7 +301,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:element>
               </xs:sequence>
             </xs:choice>
-            <xs:element name="k_a" type="om:SampledValue" minOccurs="0">
+            <xs:element name="k_a" type="om:SampledValueLN" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                   Absorption rate parameter. Not allowed for one compartment
@@ -340,7 +340,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>name:Metabolite drug (abbreviation);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="rate" type="om:SampledValue">
+                  <xs:element name="rate" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                         Rate of conversion of parent drug to metabolite.
@@ -380,7 +380,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:all>
               </xs:complexType>
             </xs:element>
-            <xs:element name="vol_dist" type="om:SampledValue">
+            <xs:element name="vol_dist" type="om:SampledValueLN">
               <xs:annotation>
                 <xs:documentation>
                     Volume of Distribution.
@@ -400,7 +400,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="k12" type="om:SampledValue">
+                  <xs:element name="k12" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the central compartment to the
@@ -411,7 +411,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (k12);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="k21" type="om:SampledValue">
+                  <xs:element name="k21" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the first periphery compartment
@@ -435,7 +435,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="k13" type="om:SampledValue">
+                  <xs:element name="k13" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the central compartment to the
@@ -446,7 +446,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (k13);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="k31" type="om:SampledValue">
+                  <xs:element name="k31" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the second periphery compartment
@@ -511,7 +511,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="IC50" type="om:SampledValue">
+      <xs:element name="IC50" type="om:SampledValueLN">
         <xs:annotation>
           <xs:documentation>
             Half maximal effect concentration.

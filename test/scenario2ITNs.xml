@@ -75,7 +75,7 @@
           <holeRate mean="0.9" CV="0.946826741968" distr="lognormal"/>
           <ripRate mean="0.7" CV="0.946826741968" distr="lognormal"/>
           <ripFactor value="0.4"/>
-          <initialInsecticide mean="70" CV="0.2857142857142857" distr="normal"/>
+          <initialInsecticide mean="70" SD="20" distr="normal"/>
           <insecticideDecay L="2.2y" function="exponential" CV="0.946826741968"/>
           <attritionOfNets function="constant" L="0"/>
           <!-- never (L ignored) -->
@@ -92,7 +92,7 @@
           <holeRate mean="0.9" CV="0.946826741968" distr="lognormal"/>
           <ripRate mean="0.7" CV="0.946826741968" distr="lognormal"/>
           <ripFactor value="0.4"/>
-          <initialInsecticide mean="700" CV="0.02857142857142857" distr="normal"/>
+          <initialInsecticide mean="700" SD="20" distr="normal"/>
           <insecticideDecay L="0.5" function="exponential"/>
           <attritionOfNets L="12" function="smooth-compact" k="2"/>
           <anophelesParams mosquito="gambiae_ss">

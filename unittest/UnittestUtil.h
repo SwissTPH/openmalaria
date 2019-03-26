@@ -146,7 +146,7 @@ namespace xml_helpers{
     ///@param pd Helper struct with pharmaco-dynamic parameters
     scnXml::PKPDDrug drug(const char *abbrev, PK1C pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
-        xPK.setK(scnXml::SampledValue(pk.k));
+        xPK.setK(scnXml::SampledValueLN(pk.k));
         xPK.setM_exponent(pk.me);
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
@@ -158,11 +158,11 @@ namespace xml_helpers{
     ///@param pd Helper struct with pharmaco-dynamic parameters
     scnXml::PKPDDrug drug(const char *abbrev, PKConv pk, PD pd, double IC50corr){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
-        xPK.setK(scnXml::SampledValue(pk.k));
+        xPK.setK(scnXml::SampledValueLN(pk.k));
         xPK.setM_exponent(pk.me);
-        xPK.setK_a(scnXml::SampledValue(pk.ka));
+        xPK.setK_a(scnXml::SampledValueLN(pk.ka));
         xPK.setConversion(scnXml::Conversion(pk.met,
-            scnXml::SampledValue(pk.conv), pk.mwr, IC50corr));
+            scnXml::SampledValueLN(pk.conv), pk.mwr, IC50corr));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);
@@ -173,12 +173,12 @@ namespace xml_helpers{
     ///@param pd Helper struct with pharmaco-dynamic parameters
     scnXml::PKPDDrug drug(const char *abbrev, PK2C pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
-        xPK.setK(scnXml::SampledValue(pk.k));
+        xPK.setK(scnXml::SampledValueLN(pk.k));
         xPK.setCompartment2(scnXml::Compartment2(
-            scnXml::SampledValue(pk.k12),
-            scnXml::SampledValue(pk.k21)));
+            scnXml::SampledValueLN(pk.k12),
+            scnXml::SampledValueLN(pk.k21)));
         xPK.setM_exponent(pk.me);
-        xPK.setK_a(scnXml::SampledValue(pk.ka));
+        xPK.setK_a(scnXml::SampledValueLN(pk.ka));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);
@@ -189,15 +189,15 @@ namespace xml_helpers{
     ///@param pd Helper struct with pharmaco-dynamic parameters
     scnXml::PKPDDrug drug(const char *abbrev, PK3C pk, PD pd){
         scnXml::PK xPK(pk.negl_conc, pk.Vd);
-        xPK.setK(scnXml::SampledValue(pk.k));
+        xPK.setK(scnXml::SampledValueLN(pk.k));
         xPK.setCompartment2(scnXml::Compartment2(
-            scnXml::SampledValue(pk.k12),
-            scnXml::SampledValue(pk.k21)));
+            scnXml::SampledValueLN(pk.k12),
+            scnXml::SampledValueLN(pk.k21)));
         xPK.setCompartment3(scnXml::Compartment3(
-            scnXml::SampledValue(pk.k13),
-            scnXml::SampledValue(pk.k31)));
+            scnXml::SampledValueLN(pk.k13),
+            scnXml::SampledValueLN(pk.k31)));
         xPK.setM_exponent(pk.me);
-        xPK.setK_a(scnXml::SampledValue(pk.ka));
+        xPK.setK_a(scnXml::SampledValueLN(pk.ka));
         scnXml::PD xPD;
         xPD.getPhenotype().push_back(scnXml::Phenotype(pd.vmax, pd.ic50, pd.slope));
         return scnXml::PKPDDrug(xPD, xPK, abbrev);

@@ -74,7 +74,7 @@ namespace OM { namespace util {
          */
         void setParams( double m, double s );
         /** As above, using an XML element. */
-        void setParams( const scnXml::SampledValue& elt );
+        void setParams( const scnXml::SampledValueN& elt );
         
         /** Sample a value. */
         double sample() const;
@@ -106,7 +106,7 @@ namespace OM { namespace util {
         {}
         
         /// Set parameters from XML element
-        void setParams( const scnXml::SampledValue& elt );
+        void setParams( const scnXml::SampledValueLN& elt );
         /// Set specified mean and CV from XML element
         void setParams( double mean, const scnXml::SampledValueCV& elt );
         /** Set log-normal parameters from mean and CV. */

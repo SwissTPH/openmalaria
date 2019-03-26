@@ -114,7 +114,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       <xs:appinfo>name:Hypnozoite release delay;</xs:appinfo>
     </xs:annotation>
     <xs:complexContent>
-      <xs:extension base="om:SampledValue">
+      <xs:extension base="om:SampledValueLN">
         <xs:attribute type="xs:double" use="required" name="latentRelapse">
           <xs:annotation>
             <xs:documentation>
