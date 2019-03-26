@@ -670,7 +670,7 @@
       <hypnozoiteRelease>
         <numberHypnozoites max="11" base="0.8"/>
         <!-- this is mean=2.92 in timesteps-->
-        <firstReleaseDays mean="146.40926719" CV="1.22234205353" distr="lognormal" latentRelapse="10"/>
+        <firstReleaseDays mean="14.6" CV="1.22" distr="lognormal" latentRelapse="10"/>
       </hypnozoiteRelease>
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
