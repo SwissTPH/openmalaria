@@ -669,8 +669,8 @@
       <probBloodStageInfectiousToMosq value="0.25"/>
       <hypnozoiteRelease>
         <numberHypnozoites max="11" base="0.8"/>
-        <!--scale a log-normal by adding log(factor) to mu, this is mu=2.92 in timesteps-->
-        <firstRelease mu="4.5294379" sigma="0.956" latentRelapseDays="10"/>
+        <!-- this is mean=2.92 in timesteps-->
+        <firstReleaseDays mean="146.40926719" CV="1.22234205353" distr="lognormal" latentRelapse="10"/>
       </hypnozoiteRelease>
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->

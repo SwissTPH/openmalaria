@@ -57,7 +57,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 
         The gap between the start of a new brood of hypnozoites and its release are defined as follows:
 
-          latentP + latentRelapseDays + randomReleaseDelay
+          latentP + latentRelapse + randomReleaseDelay
 
         randomReleaseDelay is based on one or two lognormal distributions, which are defined in firstRelease and optionally secondRelease.
 
@@ -86,8 +86,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute type="xs:double" use="required" name="base"/>
         </xs:complexType>
       </xs:element>
-      <xs:element type="om:HypnozoiteReleaseDistribution" name="firstRelease" maxOccurs="1" minOccurs="1"/>
-      <xs:element type="om:HypnozoiteReleaseDistribution" name="secondRelease" maxOccurs="1" minOccurs="0"/>
+      <xs:element type="om:HypnozoiteReleaseDistribution" name="firstReleaseDays" maxOccurs="1" minOccurs="1"/>
+      <xs:element type="om:HypnozoiteReleaseDistribution" name="secondReleaseDays" maxOccurs="1" minOccurs="0"/>
     </xs:all>
     <xs:attribute type="xs:double" name="pSecondRelease" default="0">
       <xs:annotation>
@@ -101,22 +101,30 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
   <xs:complexType name="HypnozoiteReleaseDistribution">
     <xs:annotation>
       <xs:documentation>
-        Hypnozoites are released after latentRelapseDays plus an additional
-        delay sampled from the log-normal distribution with given (log-space)
-        mu, sigma parameters.
+        Hypnozoites are released after a delay, calculated as:
+        roundToTSFromDays(delay + latentRelapse)
+        
+        Here, roundToTSFromDays rounds the input (in days) to the nearest timestep,
+        delay is sampled from a log-normal, and latentRelapse is the
+        parameter specified here.
+        
+        The delay is sampled from a log-normal distribution, parameterised via
+        the (linear) mean and CV (coefficient of variation) given here.
       </xs:documentation>
       <xs:appinfo>name:Hypnozoite release delay;</xs:appinfo>
     </xs:annotation>
-    <xs:attribute type="xs:int" use="required" name="latentRelapseDays">
-      <xs:annotation>
-        <xs:documentation>
-        Usually 15 days or 10 days (3 or 2 5-day timesteps).
-        </xs:documentation>
-        <xs:appinfo>name:latent relapse days;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="mu" type="xs:double" use="required"/>
-    <xs:attribute name="sigma" type="xs:double" use="required"/>
+    <xs:complexContent>
+      <xs:extension base="om:SampledValue">
+        <xs:attribute type="xs:double" use="required" name="latentRelapse">
+          <xs:annotation>
+            <xs:documentation>
+            Usually between 10 and 15 days.
+            </xs:documentation>
+            <xs:appinfo>name:latent relapse days;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
   </xs:complexType>
   <xs:complexType name="ClinicalEvents">
     <xs:annotation>
