@@ -22,6 +22,7 @@
 #define UTIL_SAMPLER
 
 #include "Global.h"
+#include "util/random.h"
 #include "schema/util.h"
 #include <limits>
 
@@ -73,9 +74,7 @@ namespace OM { namespace util {
          */
         void setParams( double m, double s );
         /** As above, using an XML element. */
-        inline void setParams( const scnXml::NormalSample& elt ){
-            setParams( elt.getMu(), elt.getSigma() );
-        }
+        void setParams( const scnXml::SampledValueN& elt );
         
         /** Sample a value. */
         double sample() const;
@@ -106,23 +105,16 @@ namespace OM { namespace util {
             sigma( numeric_limits<double>::signaling_NaN() )
         {}
         
-        /** Set parameters such that samples taken are:
-         * X ~ ln N( log(mean)-s²/2, s² )
+        /// Set parameters from XML element
+        void setParams( const scnXml::SampledValueLN& elt );
+        /// Set specified mean and CV from XML element
+        void setParams( double mean, const scnXml::SampledValueCV& elt );
+        /** Set log-normal parameters from mean and CV. */
+        void setMeanCV( double mean, double CV );
+        /** Scale the mean (i.e. multiply by a scalar).
          * 
-         * Equivalent in R: rlnorm(n, log(m) - s*s/2, s)
-         * 
-         * @param mean Mean of sampled variates
-         * @param s Square-root of variance of logarithm of sampled variates
-         */
-        void setParams( double mean, double s );
-        /** As above, using an XML element. */
-        inline void setParams( const scnXml::LognormalSample& elt ){
-            setParams( elt.getMean(), elt.getSigma() );
-        }
-        void setParams( const scnXml::SampledValue& elt );
-        /** Set the mean, leave sigma unchanged. */
-        void setMean( double mean );
-        /** Scale the mean (i.e. multiply by a scalar). */
+         * Note that sigma (when specified via CV) is independent of the mean,
+         * so one can safely multiply the mean without affecting CV. */
         void scaleMean( double scalar );
         
         /** Get the mean. */
@@ -141,10 +133,11 @@ namespace OM { namespace util {
         }
         
     private:
+        // log-space parameters
         double mu, sigma;
     };
     
-    /** Sampler for beta distribution.
+    /** Sampler for the Beta distribution.
      *
      * Input may be alpha and beta or mean and variance. As a special case,
      * variance zero is also supported, meaning return the mean. */
@@ -181,6 +174,34 @@ namespace OM { namespace util {
         //Note: if b is 0, then alpha is mean. Otherwise a and b are
         //the expected (α,β) parameters to the beta distribution.
         double a, b;
+    };
+    
+    /** Sampler for the Weibull distribution. */
+    class WeibullSampler {
+    public:
+        WeibullSampler() :
+            scale( numeric_limits<double>::signaling_NaN() ),
+            shape( numeric_limits<double>::signaling_NaN() )
+        {}
+        
+        /** Set parameters from scale, shape. */
+        inline void setScaleShape( double lambda, double k ){
+            scale = lambda;
+            shape = k;
+        }
+        
+        /** Set parameters from an XML element. */
+        inline void setParams( const scnXml::WeibullSample& elt ){
+            setScaleShape( elt.getScale(), elt.getShape() );
+        }
+        
+        /** Sample a value. */
+        inline double sample() const{
+            return random::weibull( scale, shape );
+        }
+        
+    private:
+        double scale, shape;    // λ, k
     };
     
 } }

@@ -36,8 +36,7 @@ void PerHostAnoph::initialise (const PerHostAnophParams& base, double availabili
 
 void PerHostAnophParams::operator =(const scnXml::Mosq& mosq)
 {
-    entoAvailability.setParams( numeric_limits<double>::quiet_NaN(),
-                                mosq.getAvailabilityVariance().getValue() );
+    entoAvailability.setParams( 1.0, mosq.getAvailability() );
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );

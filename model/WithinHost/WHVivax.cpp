@@ -28,6 +28,7 @@
 #include "util/checkpoint_containers.h"
 #include "util/timeConversions.h"
 #include "util/CommandLine.h"
+#include "util/sampler.h"
 #include <schema/scenario.h>
 #include <algorithm>
 #include <limits>
@@ -38,6 +39,42 @@ namespace WithinHost {
 
 using namespace OM::util;
 
+struct HypnozoiteReleaseDistribution: private LognormalSampler {
+    HypnozoiteReleaseDistribution() :
+        latentRelapse( numeric_limits<double>::signaling_NaN() )
+        {}
+    
+    /// Set parameters from XML element
+    void setParams( const scnXml::HypnozoiteReleaseDistribution& elt ) {
+        LognormalSampler::setParams( elt );
+        latentRelapse = elt.getLatentRelapse();
+    };
+    
+    /// Sample the time until next release
+    SimTime sampleReleaseDelay() const {
+        double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
+        double delay = numeric_limits<double>::quiet_NaN();       // in days
+        int count = 0;
+        int maxcount = 1e3;
+        
+        do{
+            delay = LognormalSampler::sample();
+            count += 1;
+            
+            if( count >= maxcount ){
+                throw util::xml_scenario_error( "<vivax><hypnozoiteRelease>  [random delay calculation causes probably an indefinite loop]:\n The hypnozoite release distribution seems off, sigma of secondRelease could be too high. We except the hypnozoite to reside a maximum of 16 months in the liver stage. Sigma choose well, dear padawan." );
+            }
+        } while( delay > liverStageMaximumDays || delay < 0.0  );
+        
+        assert( delay >= 0 && delay < liverStageMaximumDays );
+        return SimTime::roundToTSFromDays( delay + latentRelapse );
+    }
+    
+private:
+    double latentRelapse;   // days
+};
+
+
 // ———  parameters  ———
 
 // Set from the parameters block:
@@ -47,16 +84,10 @@ SimTime latentP;       // attribute on parameters block
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
 int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
-int latentRelapseDays1stRelease = 0;
-int latentRelapseDays2ndRelease = 0;
+HypnozoiteReleaseDistribution latentRelapse1st, latentRelapse2nd;
 double pSecondRelease = numeric_limits<double>::signaling_NaN();
-double muFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
-double sigmaFirstHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
-double muSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
-double sigmaSecondHypnozoiteRelease = numeric_limits<double>::signaling_NaN();
 SimTime bloodStageProtectionLatency;
-double bloodStageLengthWeibullScale = numeric_limits<double>::signaling_NaN();  // units: days
-double bloodStageLengthWeibullShape = numeric_limits<double>::signaling_NaN();
+WeibullSampler bloodStageLength;    // units: days
 double pPrimaryA = numeric_limits<double>::signaling_NaN(),
     pPrimaryB = numeric_limits<double>::signaling_NaN();
 double pRelapseOneA = numeric_limits<double>::signaling_NaN(),
@@ -104,43 +135,17 @@ int sampleNHypnozoites(){
 
 // time to hypnozoite release after initial release:
 SimTime sampleReleaseDelay(){
-    if(isnan(pSecondRelease)) {
-        pSecondRelease = 0.0;
+    bool isFirstRelease = true;
+    if( pSecondRelease == 1.0 ||
+        (pSecondRelease > 0.0 && random::bernoulli(pSecondRelease)) ){
+        isFirstRelease = false;
     }
-    bool isFirstRelease =
-            (pSecondRelease == 0.0) ? true :
-            ((pSecondRelease == 1.0) ? false :
-            !random::bernoulli(pSecondRelease) );
     
-    double mu, sigma;
-    int latentRelapseDays;
     if (isFirstRelease){
-        // only calculate a random delay from firstRelease distribution
-        mu = muFirstHypnozoiteRelease;
-        sigma = sigmaFirstHypnozoiteRelease;
-        latentRelapseDays = latentRelapseDays1stRelease;
+        return latentRelapse1st.sampleReleaseDelay();
     } else {
-        // only calculate a random delay from secondRelease distribution
-        mu = muSecondHypnozoiteRelease;
-        sigma = sigmaSecondHypnozoiteRelease;
-        assert(!isnan(latentRelapseDays2ndRelease));
-        latentRelapseDays = latentRelapseDays2ndRelease;
+        return latentRelapse2nd.sampleReleaseDelay();
     }
-    
-    double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
-    double delay = numeric_limits<double>::quiet_NaN();       // in days
-    int count = 0;
-    int maxcount = (int)pow(10,6);
-    
-    do{
-        delay = util::random::log_normal( mu, sigma );
-        count += 1;
-    }while( (delay > liverStageMaximumDays || delay < 0.0 ) && count < maxcount );
-    if (count == maxcount) {
-        throw util::xml_scenario_error( "<vivax><hypnozoiteRelease>  [random delay calculation causes probably an indefinite loop]:\n The hypnozoite release distribution seems off, sigma of secondRelease could be too high. We except the hypnozoite to reside a maximum of 16 months in the liver stage. Sigma choose well, dear padawan." );
-    }
-    assert( delay >= 0 && delay < liverStageMaximumDays );
-    return SimTime::roundToTSFromDays( delay + latentRelapseDays );
 }
 
 
@@ -241,7 +246,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         }
         result.newBS = true;
         
-        double lengthDays = random::weibull( bloodStageLengthWeibullScale, bloodStageLengthWeibullShape );
+        double lengthDays = bloodStageLength.sample();
         bloodStageClearDate = sim::ts0() + SimTime::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
@@ -553,23 +558,14 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
     maxNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getMax();
     baseNumberHypnozoites = elt.getHypnozoiteRelease().getNumberHypnozoites().getBase();
     const scnXml::HypnozoiteRelease& hr = elt.getHypnozoiteRelease();
-    latentRelapseDays1stRelease = hr.getFirstRelease().getLatentRelapseDays();
-    muFirstHypnozoiteRelease = hr.getFirstRelease().getMu();
-    sigmaFirstHypnozoiteRelease = hr.getFirstRelease().getSigma();
-    if(hr.getSecondRelease().present()){
-        latentRelapseDays2ndRelease = hr.getSecondRelease().get().getLatentRelapseDays();
-        muSecondHypnozoiteRelease = hr.getSecondRelease().get().getMu();
-        sigmaSecondHypnozoiteRelease = hr.getSecondRelease().get().getSigma();
+    latentRelapse1st.setParams(hr.getFirstReleaseDays());
+    if(hr.getSecondReleaseDays().present()){
+        latentRelapse2nd.setParams(hr.getSecondReleaseDays().get());
         pSecondRelease = hr.getPSecondRelease();
-        if( pSecondRelease == 0.0){
-            std::cerr << "Warning: probability of second release is set to zero, "
-                "although secondRelease element is present, will only calculate for a first release." << endl;
-        }
         assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
     } // else pSecondRelease is NaN and other values don't get used
     bloodStageProtectionLatency = SimTime::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
-    bloodStageLengthWeibullScale = elt.getBloodStageLengthDays().getWeibullScale();
-    bloodStageLengthWeibullShape = elt.getBloodStageLengthDays().getWeibullShape();
+    bloodStageLength.setParams(elt.getBloodStageLengthDays());
     
     const scnXml::ClinicalEvents& ce = elt.getClinicalEvents();
     pPrimaryA = ce.getPPrimaryInfection().getA();

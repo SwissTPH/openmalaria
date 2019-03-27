@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_39" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Mass screen-and-treat and ITNs" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_39 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Mass screen-and-treat and ITNs" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="test" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -131,11 +131,11 @@
       <component id="ITN" name="Extended ITNs">
         <ITN>
           <usage value="0.8"/>
-          <holeRate mean=".9" sigma=".8"/>
-          <ripRate mean=".7" sigma=".8"/>
+          <holeRate mean="0.9" CV="0.946826741968" distr="lognormal"/>
+          <ripRate mean="0.7" CV="0.946826741968" distr="lognormal"/>
           <ripFactor value="0.4"/>
-          <initialInsecticide mu="70" sigma="20"/>
-          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <initialInsecticide mean="70" SD="20" distr="normal"/>
+          <insecticideDecay L="2.2y" function="exponential" CV="0.946826741968"/>
           <attritionOfNets L="12" function="smooth-compact" k="2"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
@@ -334,7 +334,7 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -361,7 +361,7 @@
           <mosqLaidEggsSameDayProportion value="0.616"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.611"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -388,7 +388,7 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -460,98 +460,98 @@
         <PD>
           <phenotype>
             <max_killing_rate>4</max_killing_rate>
-            <IC50>0.0023</IC50>
+            <IC50 mean="0.0023"/>
             <slope>4</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.000023</negligible_concentration>
           <half_life>0.175</half_life>
-          <vol_dist>17.4</vol_dist>
+          <vol_dist mean="17.4"/>
         </PK>
       </drug>
       <drug abbrev="AS">
         <PD>
           <phenotype>
             <max_killing_rate>4.6</max_killing_rate>
-            <IC50>0.0016</IC50>
+            <IC50 mean="0.0016"/>
             <slope>4</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.000016</negligible_concentration>
           <half_life>0.042</half_life>
-          <vol_dist>2.75</vol_dist>
+          <vol_dist mean="2.75"/>
         </PK>
       </drug>
       <drug abbrev="DHQ">
         <PD>
           <phenotype>
             <max_killing_rate>4.6</max_killing_rate>
-            <IC50>0.0009</IC50>
+            <IC50 mean="0.0009"/>
             <slope>4</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.000016</negligible_concentration>
           <half_life>0.035</half_life>
-          <vol_dist>8</vol_dist>
+          <vol_dist mean="8"/>
         </PK>
       </drug>
       <drug abbrev="CQ">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.02</IC50>
+            <IC50 mean="0.02"/>
             <slope>1.6</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.00036</negligible_concentration>
           <half_life>30.006</half_life>
-          <vol_dist>300</vol_dist>
+          <vol_dist mean="300"/>
         </PK>
       </drug>
       <drug abbrev="LU">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.100</IC50>
+            <IC50 mean="0.100"/>
             <slope>4</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.001</negligible_concentration>
           <half_life>4.332</half_life>
-          <vol_dist>21</vol_dist>
+          <vol_dist mean="21"/>
         </PK>
       </drug>
       <drug abbrev="MQ">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.027</IC50>
+            <IC50 mean="0.027"/>
             <slope>5</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.005</negligible_concentration>
           <half_life>13.078</half_life>
-          <vol_dist>20.8</vol_dist>
+          <vol_dist mean="20.8"/>
         </PK>
       </drug>
       <drug abbrev="PQ">
         <PD>
           <phenotype>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.088</IC50>
+            <IC50 mean="0.088"/>
             <slope>6</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.005</negligible_concentration>
           <half_life>23.105</half_life>
-          <vol_dist>150</vol_dist>
+          <vol_dist mean="150"/>
         </PK>
       </drug>
     </drugs>

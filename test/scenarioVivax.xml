@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_39" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_39 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vivax test" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -669,12 +669,12 @@
       <probBloodStageInfectiousToMosq value="0.25"/>
       <hypnozoiteRelease>
         <numberHypnozoites max="11" base="0.8"/>
-        <!--scale a log-normal by adding log(factor) to mu, this is mu=2.92 in timesteps-->
-        <firstRelease mu="4.5294379" sigma="0.956" latentRelapseDays="10"/>
+        <!-- this is mean=2.92 in timesteps-->
+        <firstReleaseDays mean="14.6" CV="1.22" distr="lognormal" latentRelapse="10"/>
       </hypnozoiteRelease>
       <bloodStageProtectionLatency value="10"/>
       <!--scale a Weibull just by multiplying the scale, this is scale=23.01164 in timesteps-->
-      <bloodStageLengthDays weibullScale="115.0582" weibullShape="2.331"/>
+      <bloodStageLengthDays scale="115.0582" shape="2.331" distr="weibull"/>
       <clinicalEvents>
         <pPrimaryInfection a="0.9687" b="9.803"/>
         <pRelapseOne a="0.2098" b="1.812"/>

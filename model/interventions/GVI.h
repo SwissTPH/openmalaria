@@ -30,7 +30,6 @@
 namespace OM { namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
-    using util::NormalSampler;
     using util::LognormalSampler;
     using Transmission::PerHostInterventionData;
 

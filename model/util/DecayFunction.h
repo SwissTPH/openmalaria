@@ -42,6 +42,7 @@ namespace util {
  * sampled by DecayFunction::hetSample() before use. */
 class DecayFuncHet {
     double tMult;
+    DecayFuncHet(double tMult): tMult(tMult) {}
 public:
     /** Default value: should make all eval() calls return 0 (i.e. infinitely
      * old deployment). */

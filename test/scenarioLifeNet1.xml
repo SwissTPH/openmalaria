@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_39" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="wuITNIRS2_10.xml,cohort_coverage:cohort_coverage04,importedInfectionsrate:importedInfectionsrate11,LLINbrand:LLINbrandLifeNet,models:base,mosqHumanBloodIndex:mosqHumanBloodIndex0001,pSeekOfficialCareUncomplicated:pSeekOfficialCareUncomplicated44,scaledAnnualEIR:scaledAnnualEIR1.000,species:flavirostris,start:start04,seed:1" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_39 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="wuITNIRS2_10.xml,cohort_coverage:cohort_coverage04,importedInfectionsrate:importedInfectionsrate11,LLINbrand:LLINbrandLifeNet,models:base,mosqHumanBloodIndex:mosqHumanBloodIndex0001,pSeekOfficialCareUncomplicated:pSeekOfficialCareUncomplicated44,scaledAnnualEIR:scaledAnnualEIR1.000,species:flavirostris,start:start04,seed:1" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -72,12 +72,12 @@
         <!-- from WHOPES 14th meeting report-->
         <ITN>
           <usage value="0.8"/>
-          <holeRate mean="3.25" sigma="0.7"/>
-          <ripRate mean="20" sigma="0.7"/>
+          <holeRate mean="3.25" CV="0.795183136111" distr="lognormal"/>
+          <ripRate mean="20" CV="0.795183136111" distr="lognormal"/>
           <ripFactor value="1"/>
-          <initialInsecticide mu="8.5" sigma="0.2125"/>
-          <!-- WHOPES 14 found a Relative Standard Deviation of 2.5% at a mean of 7.02, thus sigma=0.025*8.5 for LifeNet-->
-          <insecticideDecay L="2.0" function="exponential" mu="-0.32" sigma="0.8"/>
+          <initialInsecticide mean="8.5" SD="0.2125" distr="normal"/>
+          <!-- WHOPES 14 found a Relative Standard Deviation of 2.5% at a mean of 7.02, thus CV=0.025 -->
+          <insecticideDecay L="2.0y" function="exponential" CV="0.946826741968"/>
           <!-- Standard value is 1.5 year halflife, but 2 years may be reasonable-->
           <attritionOfNets L="18.176" function="smooth-compact" k="18"/>
           <!-- Standard value -->
@@ -201,7 +201,7 @@
           <!-- Standard value -->
           <mosqSurvivalFeedingCycleProbability value="0.534"/>
           <!-- Torres et al., 1996 parous rate of 0.76 based on 200+7*200=1600 mosquitoes in Jan-Feb 1993. (0.76/0.72)*0.43=0.45 in comparison to maculatus. Clements and Peterson 1981 write:  "Catangui (1971) analysed the physiological age composition of a population of Anophelesflavirostris at Caloocan, Rizal, in the Philippines, dissecting 1663 females at bait between September and June. Ten percent of females survived 4 gonotrophic cycles, and over 2% survived 6 gonotrophic cycles. Catangui, F. P. (1971). Studies on the gonotrophic cycle of Anopheles minimus flavirostris and the application of physiological age grading technique on the same species. South East Asian Journal of Tropical Medicine and Public Health, 2, 384-392."   Thus crudely, 0.10^(1/4)=0.5623413, but they fitted  exp(-0.196)^3.5 = 0.5035864. However, the crude data show an average parous rate over a whole year of 0.566, and a fitted value is exp(-0.62810)=0.5336047. This was in a context of DDT spraying. -->
-          <availabilityVariance value="0"/>
+          <availability/>
           <!-- Standard value -->
           <mosqProbBiting mean="0.95" variance="0"/>
           <!-- Standard value -->

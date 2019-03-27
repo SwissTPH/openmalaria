@@ -152,7 +152,7 @@ void AnophelesModel::initAvailability(
     
     
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
-    humanBase.setEntoAvailability( (P_A1 / populationSize) * availFactor );
+    humanBase.scaleEntoAvailability( (P_A1 / populationSize) * availFactor );
     
     nhh_avail = 0.0;
     nhh_sigma_df = 0.0;

@@ -32,34 +32,19 @@ namespace OM {
 namespace util {
 
 class BaseHetDecayFunction : public DecayFunction {
-    double mu, sigma;
+    LognormalSampler het;
 public:
-    BaseHetDecayFunction( const scnXml::DecayFunction& elt ) :
-        mu( elt.getMu() ), sigma( elt.getSigma() )
-    {
-        if( mu != 0.0 && sigma == 0.0 ){
-            cerr << "Warning: for some decay function mu != 0 while sigma = 0 (or unspecified); in this case the mu parameter has no effect" << endl;
-        }
+    BaseHetDecayFunction( const scnXml::DecayFunction& elt ){
+        het.setMeanCV( 1.0, elt.getCV() );
     }
     
     virtual double getBaseTMult() const =0;
     
     DecayFuncHet hetSample () const{
-        DecayFuncHet ret;
-        if(sigma>0.0){
-            ret.tMult = random::log_normal( mu, sigma );
-        }else{
-            assert(sigma==0.0);
-            ret.tMult = 1.0;    // same answer as above but without using the random-number generator
-        }
-        ret.tMult *= getBaseTMult();
-        return ret;
+        return DecayFuncHet(het.sample() * getBaseTMult());
     }
     DecayFuncHet hetSample (NormalSample sample) const{
-        DecayFuncHet ret;
-        ret.tMult = sample.asLognormal( mu, sigma );
-        ret.tMult *= getBaseTMult();
-        return ret;
+        return DecayFuncHet(het.sample(sample) * getBaseTMult());
     }
 };
 

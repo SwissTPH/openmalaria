@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_39" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="larviciding" schemaVersion="38" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_39 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="0" name="larviciding" schemaVersion="38" wuID="0" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="150">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -197,7 +197,7 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -230,7 +230,7 @@
           <mosqLaidEggsSameDayProportion value="0.616"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.611"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -263,7 +263,7 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>

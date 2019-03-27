@@ -47,32 +47,81 @@ void NormalSampler::setParams( double m, double s ){
     mu = m;
     sigma = s;
 }
+void NormalSampler::setParams(const scnXml::SampledValueN& elt){
+    mu = elt.getMean();
+    if( elt.getDistr() == "const" ){
+        if( elt.getSD().present() && elt.getSD().get() != 0.0) {
+            throw util::xml_scenario_error( "attribute SD must be zero or omitted when distr=\"const\" or is omitted" );
+        }
+        sigma = 0.0;
+        return;
+    }
+    
+    if( elt.getDistr() != "normal" ){
+        throw util::xml_scenario_error( "expected distr to be one of \"const\", \"lognormal\" (note: not all distributions are supported here)" );
+    }
+    if( !elt.getSD().present() ){
+        throw util::xml_scenario_error( "attribute \"SD\" required for sampled normal value when distr is not const" );
+    }
+    sigma = elt.getSD().get();
+}
 double NormalSampler::sample() const{
-    //NOTE: should we sample when sigma==0?
+    if( sigma == 0.0 ){
+        return mu;
+    }
     return random::gauss( mu, sigma );
 }
 
-void LognormalSampler::setParams( double mean, double s ){
-    mu = log(mean) - 0.5*s*s;
-    sigma = s;
+void LognormalSampler::setParams( const scnXml::SampledValueLN& elt ){
+    const double mean = elt.getMean();
+    setParams( mean, elt );
 }
-void LognormalSampler::setParams(const scnXml::SampledValue& elt){
+
+void LognormalSampler::setParams( double mean, const scnXml::SampledValueCV& elt ){
     if( elt.getDistr() == "const" ){
-        mu = log(elt.getMean());
-        sigma = 0.0;
-    }else if( elt.getDistr() == "lnorm" ){
-        if( !elt.getCv().present() ){
-            throw util::xml_scenario_error( "attribute \"cv\" required for sampled value where distr=\"ln\"" );
+        if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
+            throw util::xml_scenario_error( "attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
         }
-        sigma = elt.getCv().get() * elt.getMean();
-        mu = log(elt.getMean()) - 0.5 * sigma * sigma;
+        mu = log(mean);
+        sigma = 0.0;
+        return;
+    }
+    
+    if( !elt.getCV().present() ){
+        throw util::xml_scenario_error( "attribute \"CV\" required for sampled value when distr is not const" );
+    }
+    
+    if( elt.getDistr() == "lognormal" ){
+        setMeanCV( mean, elt.getCV().get() );
     }else{
-        throw SWITCH_DEFAULT_EXCEPTION;
+        throw util::xml_scenario_error( "expected distr to be one of \"const\", \"lognormal\" (note: not all distributions are supported here)" );
     }
 }
 
-void LognormalSampler::setMean( double mean ){
-    mu = log(mean) - 0.5*sigma*sigma;
+void LognormalSampler::setMeanCV( double mean, double CV ){
+    if( CV == 0.0 ){
+        sigma = 0.0;
+        // as a special case, we can support mean == CV == 0
+        if( mean == 0.0 ){
+            mu = -numeric_limits<double>::infinity();
+        } else {
+            mu = log(mean);
+        }
+        return;
+    }
+    if( !(mean > 0.0 && CV > 0.0) ){
+        throw util::xml_scenario_error( "log-normal: required mean > 0 and CV ≥ 0" );
+    }
+    
+    // The following formulae are derived from:
+    // X ~ lognormal(μ, σ)
+    // E(X) = exp(μ + σ² / 2)
+    // Var(X) = exp(σ² + 2μ)(exp(σ²) - 1)
+    // Var = CV * mean
+    
+    const double a = 1 + CV * CV;
+    mu = log( mean / sqrt(a) );
+    sigma = sqrt(log(a));
 }
 void LognormalSampler::scaleMean(double scalar){
     mu += log(scalar);
@@ -81,10 +130,10 @@ double LognormalSampler::mean() const{
     return exp(mu + 0.5*sigma*sigma);
 }
 double LognormalSampler::sample() const{
-    if( sigma > 0.0 ){
-        return random::log_normal( mu, sigma );
-    }else{
+    if( sigma == 0.0 ){
         return exp( mu );
+    } else {
+        return random::log_normal( mu, sigma );
     }
 }
 

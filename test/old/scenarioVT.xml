@@ -199,8 +199,8 @@
           <holeRate mean=".9" sigma=".8"/>
           <ripRate mean=".7" sigma=".8"/>
           <ripFactor value="0.4"/>
-          <initialInsecticide mu="70" sigma="20"/>
-          <insecticideDecay L="2.2" function="exponential" mu="-0.32" sigma="0.8"/>
+          <initialInsecticide mean="70" SD="20" distr="normal"/>
+          <insecticideDecay L="2.2y" function="exponential" CV="0.946826741968"/>
           <attritionOfNets L="12" function="smooth-compact" k="2"/>
           <anophelesParams mosquito="gambiae_ss">
             <deterrency holeFactor="0.5" holeScalingFactor="0.1" insecticideFactor="0.67" insecticideScalingFactor="0.1" interactionFactor="1.492537"/>
@@ -345,7 +345,7 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -372,7 +372,7 @@
           <mosqLaidEggsSameDayProportion value="0.616"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.611"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>
@@ -399,7 +399,7 @@
           <mosqLaidEggsSameDayProportion value="0.313"/>
           <mosqSeekingDuration value="0.33"/>
           <mosqSurvivalFeedingCycleProbability value="0.623"/>
-          <availabilityVariance value="0"/>
+          <availability/>
           <mosqProbBiting mean="0.95" variance="0"/>
           <mosqProbFindRestSite mean="0.95" variance="0"/>
           <mosqProbResting mean="0.99" variance="0"/>

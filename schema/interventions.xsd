@@ -2,8 +2,8 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_39"
-           xmlns:om="http://openmalaria.org/schema/scenario_39"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_40"
+           xmlns:om="http://openmalaria.org/schema/scenario_40"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="healthSystem.xsd"/>
   <xs:include schemaLocation="entomology.xsd"/>
@@ -1200,7 +1200,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="holeRate" type="om:LognormalSample">
+      <xs:element name="holeRate" type="om:SampledValueLN">
         <xs:annotation>
           <xs:documentation>
           The rate at which new holes are made in nets.
@@ -1214,7 +1214,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:Holes per annum;min:0;name:Rate at which holes are made;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="ripRate" type="om:LognormalSample">
+      <xs:element name="ripRate" type="om:SampledValueLN">
         <xs:annotation>
           <xs:documentation>
           Each existing hole has a probability of being ripped bigger according
@@ -1241,7 +1241,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:none;min:0;name:Rip factor;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="initialInsecticide" type="om:NormalSample">
+      <xs:element name="initialInsecticide" type="om:SampledValueN">
         <xs:annotation>
           <xs:documentation>
           The insecticide concentration of new nets is Gaussian distributed with
@@ -1683,7 +1683,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of Indoor residual spraying (IRS) interventions;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="initialInsecticide" type="om:NormalSample">
+      <xs:element name="initialInsecticide" type="om:SampledValueN">
         <xs:annotation>
           <xs:documentation>
           The insecticide concentration of IRS (at time of spraying) is

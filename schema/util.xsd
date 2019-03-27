@@ -3,8 +3,8 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- standard types used -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_39"
-           xmlns:om="http://openmalaria.org/schema/scenario_39"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_40"
+           xmlns:om="http://openmalaria.org/schema/scenario_40"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <!-- Component and TriggeredDeployments would be in interventions.xsd, except
     that they are needed from healthSystem.xsd -->
@@ -176,94 +176,66 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>min:0;name:k;units:none;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="mu" type="xs:double" default="0">
+    <xs:attribute name="CV" type="xs:double" default="0">
       <xs:annotation>
         <xs:documentation>
-        If sigma is non-zero, heterogeneity of decay is introduced via a random
-        variable sampled from the log-normal distribution with mu and sigma as
-        specified. Both mu and sigma default to zero when not specified.
+        If CV is non-zero, heterogeneity of decay is introduced via a random
+        variable sampled from the log-normal distribution. This distribution is
+        parameterised with mean=1 and CV as given.
         
-        The decay rate is multiplied by this variable (effectively, the
-        half-life is divided by it).
-        
-        Note that with m=0, the median of the variable and the median value of
-        L is unchanged, and thus the time at which the median decay amongst the
-        population of decaying objects reaches half (assuming exponential,
-        Weibull or Hill decay) is L. With m=-½σ² (negative half sigma squared)
-        the mean of the variable will be 1 and mean of the half-life L, but the
-        time at which mean decay of the population has reached half may not be
-        L.
+        The effective age of decay is the real age multiplied by this variable
+        (for decay functions with a half-life, this is equivalent to dividing
+        the half-life by the variable).
         </xs:documentation>
-        <xs:appinfo>min:0;name:μ (mu);</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="sigma" type="xs:double" default="0">
-      <xs:annotation>
-        <xs:documentation>
-        If sigma is non-zero, heterogeneity of decay is introduced via a random
-        variable sampled from the log-normal distribution with mu and sigma as
-        specified. Both mu and sigma default to zero when not specified.
-        
-        The decay rate is multiplied by this variable (effectively, the
-        half-life is divided by it).
-        </xs:documentation>
-        <xs:appinfo>min:0;name:σ (sigma);</xs:appinfo>
+        <xs:appinfo>min:0;name:Coefficient of Variation;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="LognormalSample">
+  <xs:complexType name="SampledValueN">
     <xs:annotation>
       <xs:documentation>
-        Parameters of a log-normal distribution.
+        A parameter with optional heterogeneity.
         
-        Variates are sampled as: X ~ ln N( log(mean)-sigma²/2, sigma² ).
-        
-        Equivalent R sample: rlnorm(n, log(m) - s*s/2, s)
+        Optionally, a distribution ("distr") and standard of deviation ("SD") may be specified.
       </xs:documentation>
-      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
+      <xs:appinfo>name:Sampled value (normal);</xs:appinfo>
     </xs:annotation>
     <xs:attribute name="mean" type="xs:double" use="required">
       <xs:annotation>
         <xs:documentation>
-          The mean of the lognormal distribution.
+          The mean value.
         </xs:documentation>
-        <xs:appinfo>units:(same as base units);name:mean;</xs:appinfo>
+        <xs:appinfo>name:mean;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="sigma" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Sigma parameter of the lognormal distribution; sigma squared is the
-          variance of the log of samples.
-        </xs:documentation>
-        <xs:appinfo>name:sigma;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="NormalSample">
-    <xs:annotation>
-      <xs:documentation>
-        Parameters of a normal distribution.
-        
-        Variates are sampled as: X ~ N( mu, sigma² ).
-      </xs:documentation>
-      <xs:appinfo>name:Log-normal parameters;</xs:appinfo>
-    </xs:annotation>
-    <xs:attribute name="mu" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          The mean of the normal distribution.
-        </xs:documentation>
-        <xs:appinfo>units:(same as base units);name:mu;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="sigma" type="xs:double" use="required">
+    <xs:attribute name="SD" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
           The standard deviation of variates.
         </xs:documentation>
-        <xs:appinfo>units:(same as base units);name:sigma;</xs:appinfo>
+        <xs:appinfo>name:standard deviation;</xs:appinfo>
       </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="distr" use="optional" default="const">
+      <xs:annotation>
+        <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          
+          Valid options are as follows.
+          
+          "const": no variation or sampling. Specifying distr="const" has the
+          same effect as not specifying distr at all.
+          
+          "normal": the parameter is sampled from a normal distribution.
+        </xs:documentation>
+        <xs:appinfo>name:Distribution;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="const" />
+          <xs:enumeration value="normal" />
+        </xs:restriction>
+      </xs:simpleType>
     </xs:attribute>
   </xs:complexType>
   <xs:complexType name="BetaMeanSample">
@@ -294,53 +266,110 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:annotation>
     </xs:attribute>
   </xs:complexType>
-  <xs:complexType name="SampledValue">
+  <xs:complexType name="SampledValueCV">
     <xs:annotation>
       <xs:documentation>
-        Parameters of some distribution. The mean is that provided and the
-        standard deviation is cv*mean.
+        A parameter with optional heterogeneity.
         
-        Log-normal:
-        σ = cv * mean ;
-        μ = ln(mean) - σ² / 2 ;
-        X ~ ln N( μ, σ² ) ;
-        equivalent R sample: rlnorm(1, log(mean) - ((cv * mean)^2) / 2, cv * mean).
+        The mean cannot be specified (unless this type is extended).
+        Optionally, a distribution ("distr") and coefficient of variation ("CV") may be specified.
       </xs:documentation>
-      <xs:appinfo>name:Distribution parameters;</xs:appinfo>
+      <xs:appinfo>name:Sampled value (log normal);</xs:appinfo>
     </xs:annotation>
-    <xs:attribute name="mean" type="xs:double" use="required">
+    <xs:attribute name="CV" type="xs:double" use="optional">
       <xs:annotation>
         <xs:documentation>
-          The mean of the distribution.
+          The (linear) coefficient of variation.
+          
+          This value must be specified when a (non-constant) distribution is used.
+          
+          Note that specifying CV="0" has the same effect as distr="const" and
+          disables sampling of this parameter, even if distr is not "const". 
         </xs:documentation>
-        <xs:appinfo>units:(same as base units);name:mean;</xs:appinfo>
+        <xs:appinfo>name:Coefficient of variation;units:unitless;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="cv" type="xs:double" use="optional">
+    <xs:attribute name="distr" use="optional" default="const">
       <xs:annotation>
         <xs:documentation>
-          Coefficient of variance (mean * cv gives standard deviation).
+          To allow heterogeneity, a distribution must be specified.
           
-          Must be specified when distribution is not constant.
-        </xs:documentation>
-        <xs:appinfo>name:Coefficient of variance;units:unitless;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="distr" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          Selects the distribution to use.
+          Valid options are as follows.
           
-          const: constant (no distribution). Setting cv=0 has the same behaviour.
+          "const": no variation or sampling. Specifying distr="const" has the
+          same effect as not specifying distr at all.
           
-          lnorm: log-normal distribution
+          "lognormal": the parameter is sampled from a log-normal distribution.
+          Note that the "mean" and "CV" values are linear (arithmetic) properties
+          of the distribution and not log-space properties.
         </xs:documentation>
         <xs:appinfo>name:Distribution;</xs:appinfo>
       </xs:annotation>
       <xs:simpleType>
         <xs:restriction base="xs:string">
-          <xs:enumeration value="lnorm" />
           <xs:enumeration value="const" />
+          <xs:enumeration value="lognormal" />
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+  <xs:complexType name="SampledValueLN">
+    <xs:annotation>
+      <xs:documentation>
+        A parameter with optional log-normal heterogeneity.
+        
+        The mean value must be specified. Optionally, a distribution ("distr")
+        and coefficient of variation ("CV") may be specified.
+      </xs:documentation>
+      <xs:appinfo>name:Sampled value;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexContent>
+      <xs:extension base="om:SampledValueCV">
+        <xs:attribute name="mean" type="xs:double" use="required">
+          <xs:annotation>
+            <xs:documentation>
+              The (linear) mean value.
+            </xs:documentation>
+            <xs:appinfo>name:mean;</xs:appinfo>
+          </xs:annotation>
+        </xs:attribute>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  <xs:complexType name="WeibullSample">
+    <xs:annotation>
+      <xs:documentation>
+        Parameters of a Weibull distribution.
+      </xs:documentation>
+      <xs:appinfo>name:Weibull parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:attribute name="scale" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The Weibull scale parameter (λ).
+        </xs:documentation>
+        <xs:appinfo>name:Scale;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="shape" type="xs:double" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          The Weibull shape parameter (k).
+        </xs:documentation>
+        <xs:appinfo>name:shape;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="distr" use="required">
+      <xs:annotation>
+        <xs:documentation>
+          To allow heterogeneity, a distribution must be specified.
+          In this case, only "weibull" is allowed.
+        </xs:documentation>
+        <xs:appinfo>name:Distribution;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="weibull" />
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>

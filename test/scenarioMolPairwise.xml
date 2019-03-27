@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_39" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Do" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_39 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Do" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="100">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -489,26 +489,26 @@
           <phenotype name="sensitive">
             <restriction onLocus="mdr" toAllele="sensitive"/>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.02</IC50>
+            <IC50 mean="0.02"/>
             <slope>1.6</slope>
           </phenotype>
           <phenotype name="resistant">
             <restriction onLocus="mdr" toAllele="resistant"/>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>0.2</IC50>
+            <IC50 mean="0.2"/>
             <slope>1.6</slope>
           </phenotype>
           <phenotype name="highly resistant">
             <restriction onLocus="mdr" toAllele="highly resistant"/>
             <max_killing_rate>3.45</max_killing_rate>
-            <IC50>2</IC50>
+            <IC50 mean="2"/>
             <slope>1.6</slope>
           </phenotype>
         </PD>
         <PK>
           <negligible_concentration>0.00036</negligible_concentration>
           <half_life>30.006</half_life>
-          <vol_dist>300</vol_dist>
+          <vol_dist mean="300"/>
         </PK>
       </drug>
     </drugs>

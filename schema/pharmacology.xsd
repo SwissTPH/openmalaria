@@ -3,8 +3,8 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- Drug parameters — PK, PD and resistance -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_39"
-           xmlns:om="http://openmalaria.org/schema/scenario_39"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_40"
+           xmlns:om="http://openmalaria.org/schema/scenario_40"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="util.xsd"/>
   <xs:complexType name="Pharmacology">
@@ -265,7 +265,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:annotation>
               </xs:element>
               <xs:sequence>
-                <xs:element name="k" type="om:SampledValue">
+                <xs:element name="k" type="om:SampledValueLN">
                   <xs:annotation>
                     <xs:documentation>
                       Constant used to calculate the elimination rate λ, which
@@ -274,7 +274,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       the next parameter. The basic form of decay is
                       C(t) = C0 * exp(-λ*t).
                       
-                      If sigma > 0, k is sampled per-human from the log-normal
+                      If CV > 0, k is sampled per-human from the log-normal
                       distribution: ln N( ln(mean) - σ^2 / 2, σ^2).
                       
                       Alternatively, elimination rate can be specified via half_life.
@@ -301,7 +301,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:element>
               </xs:sequence>
             </xs:choice>
-            <xs:element name="k_a" type="om:SampledValue" minOccurs="0">
+            <xs:element name="k_a" type="om:SampledValueLN" minOccurs="0">
               <xs:annotation>
                 <xs:documentation>
                   Absorption rate parameter. Not allowed for one compartment
@@ -340,7 +340,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       <xs:appinfo>name:Metabolite drug (abbreviation);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="rate" type="om:SampledValue">
+                  <xs:element name="rate" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                         Rate of conversion of parent drug to metabolite.
@@ -361,7 +361,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                     <xs:annotation>
                       <xs:documentation>
                         The IC50 values of parent and metabolite drugs may be
-                        sampled from the log-normal distribution (if sigma is greater than 0).
+                        sampled from the log-normal distribution (if CV is greater than 0).
                         This parameter controls correlation between these samples,
                         measured in log-space.
                         
@@ -380,30 +380,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 </xs:all>
               </xs:complexType>
             </xs:element>
-            <xs:element name="vol_dist">
+            <xs:element name="vol_dist" type="om:SampledValueLN">
               <xs:annotation>
                 <xs:documentation>
-                    Volume of Distribution
+                    Volume of Distribution.
+                    
+                    If CV &gt; 0 this is sampled from a log-normal distribution.
                   </xs:documentation>
                 <xs:appinfo>units:l/kg;min:0;name:Volume of Distribution (Vd);</xs:appinfo>
               </xs:annotation>
-              <xs:complexType>
-                <xs:simpleContent>
-                  <xs:extension base="xs:double">
-                    <xs:attribute name="sigma" type="xs:double" default="0">
-                      <xs:annotation>
-                        <xs:documentation>
-                          Distribution parameter describing per-human variation of
-                          volume of distribution. If zero or not specified,
-                          the parameter is not sampled. See documentation of
-                          parent element.
-                        </xs:documentation>
-                        <xs:appinfo>name:Sigma parameter for per-human variation of Vd;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:simpleContent>
-              </xs:complexType>
             </xs:element>
             <xs:element name="compartment2" minOccurs="0">
               <xs:annotation>
@@ -415,24 +400,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="k12" type="om:SampledValue">
+                  <xs:element name="k12" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the central compartment to the
                           first periphery compartment (2).
                           
-                          It is sampled per-patient when sigma &gt; 0.
+                          It is sampled per-patient when CV &gt; 0.
                       </xs:documentation>
                       <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 2 (k12);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="k21" type="om:SampledValue">
+                  <xs:element name="k21" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the first periphery compartment
                           (2) to the central compartment.
                           
-                          It is sampled per-patient when sigma &gt; 0.
+                          It is sampled per-patient when CV &gt; 0.
                       </xs:documentation>
                       <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 2 (k21);</xs:appinfo>
                     </xs:annotation>
@@ -450,24 +435,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               </xs:annotation>
               <xs:complexType>
                 <xs:all>
-                  <xs:element name="k13" type="om:SampledValue">
+                  <xs:element name="k13" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the central compartment to the
                           second periphery compartment (3).
                           
-                          It is sampled per-patient when sigma &gt; 0.
+                          It is sampled per-patient when CV &gt; 0.
                       </xs:documentation>
                       <xs:appinfo>units:day^-1;min:0;name:Absorption rate to compartment 3 (k13);</xs:appinfo>
                     </xs:annotation>
                   </xs:element>
-                  <xs:element name="k31" type="om:SampledValue">
+                  <xs:element name="k31" type="om:SampledValueLN">
                     <xs:annotation>
                       <xs:documentation>
                           Absorption rate from the second periphery compartment
                           (3) to the central compartment.
                           
-                          It is sampled per-patient when sigma &gt; 0.
+                          It is sampled per-patient when CV &gt; 0.
                       </xs:documentation>
                       <xs:appinfo>units:day^-1;min:0;name:Absorption rate from compartment 3 (k31);</xs:appinfo>
                     </xs:annotation>
@@ -526,32 +511,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:appinfo>units:1/days;min:0;name:Maximal parasite killing rate;</xs:appinfo>
         </xs:annotation>
       </xs:element>
-      <xs:element name="IC50">
+      <xs:element name="IC50" type="om:SampledValueLN">
         <xs:annotation>
           <xs:documentation>
-            Half maximal effect concentration. If sigma &gt; 0, the IC50 is
-            sampled for each infection from a log-normal distribution with mean
-            of this value and the sigma value specified, i.e.
-            X ~ log N( log(mean) - s^2 / 2, s^2 ) .
+            Half maximal effect concentration.
+            
+            If CV &gt; 0, the IC50 is sampled from a log-normal distribution.
           </xs:documentation>
           <xs:appinfo>units:mg/l;min:0;name:IC50;</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:simpleContent>
-            <xs:extension base="xs:double">
-              <xs:attribute name="sigma" type="xs:double" default="0">
-                <xs:annotation>
-                  <xs:documentation>
-                    Distribution parameter describing per-infection variation of
-                    IC50. If zero or not specified, the IC50 is not sampled. See
-                    documentation of parent element.
-                  </xs:documentation>
-                  <xs:appinfo>name:Sigma parameter for per-infection variation of IC50;</xs:appinfo>
-                </xs:annotation>
-              </xs:attribute>
-            </xs:extension>
-          </xs:simpleContent>
-        </xs:complexType>
       </xs:element>
       <xs:element name="slope" type="xs:double">
         <xs:annotation>

@@ -12,6 +12,7 @@ set (SCHEMA_NAMES
   healthSystem
   entomology
   pharmacology
+  vivax
   util
 )
 set (SCHEMA_CPP "")
@@ -28,7 +29,7 @@ foreach (XSD_NAME ${SCHEMA_NAMES})
     COMMAND ${XSD_EXECUTABLE} cxx-tree
         --std c++11
         --type-naming ucc --function-naming java
-        --namespace-map http://openmalaria.org/schema/scenario_39=scnXml
+        --namespace-map http://openmalaria.org/schema/scenario_40=scnXml
 #         --generate-serialization
         --generate-doxygen
         --generate-intellisense
