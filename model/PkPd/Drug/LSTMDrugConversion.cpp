@@ -137,8 +137,9 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
     // gsl_function doesn't accept const; we re-apply const later
     F.params = static_cast<void*>(const_cast<Params_convFactor*>(&p));
     
-    // NOTE: tolerances are arbitrary, but seem to be sufficient
-    const double abs_eps = 1e-2, rel_eps = 1e-2;
+    // We use exp(-result), so small absolute differences can matter (but also
+    // using smaller abs_eps is cheap). We likely don't need high rel precision.
+    const double abs_eps = 1e-5, rel_eps = 1e-2;
     // NOTE: 1 through 6 are different algorithms of increasing complexity
     const int qag_rule = 1;     // alg 1 seems to be good enough
     double intfC, err_eps;      // intfC will carry our result; err_eps is a measure of accuracy of the result
@@ -149,12 +150,7 @@ double LSTMDrugConversion::calculateFactor(const Params_convFactor& p, double du
     if( r != 0 ){
         throw TRACED_EXCEPTION( "calculateFactor: error from gsl_integration_qag",util::Error::GSL );
     }
-    if( err_eps > 5e-2 ){
-        // This could be a warning, except that warnings tend to be ignored.
-        ostringstream msg;
-        msg << "calculateFactor: error epsilon is large: "<<err_eps<<" (integral is "<<intfC<<")";
-        throw TRACED_EXCEPTION( msg.str(), util::Error::GSL );
-    }
+    // Testing err_eps is redundant with GSL's built-in tests
 //     cout << "integration steps: " << intg_steps << endl;
 //     cout << "duration: " << duration << ", AUC: " << intfC << endl;
     return exp( -intfC );  // drug factor

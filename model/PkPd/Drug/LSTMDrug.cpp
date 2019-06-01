@@ -38,8 +38,8 @@ namespace PkPd {
 LSTMDrug::LSTMDrug(double Vd): vol_dist(Vd) {}
 LSTMDrug::~LSTMDrug() {}
 
-bool comp(pair<double,double> lhs, double rhs){
-    return lhs.first < rhs;
+bool comp(pair<double,double> lhs, pair<double,double> rhs){
+    return lhs.first < rhs.first;
 }
 
 // Create our list of doses. Optimise for the case where we only have 1 or less
@@ -48,8 +48,9 @@ bool comp(pair<double,double> lhs, double rhs){
 
 void LSTMDrug::medicate(double time, double qty){
     // Insert in the right position to maintain sorting:
-    auto pos = lower_bound(doses.begin(), doses.end(), time, comp);
-    doses.insert(pos, make_pair (time, qty));
+    auto elt = make_pair (time, qty);
+    auto pos = lower_bound(doses.begin(), doses.end(), elt, comp);
+    doses.insert(pos, move(elt));
     assert(is_sorted(doses.begin(), doses.end(), comp));
 }
 
