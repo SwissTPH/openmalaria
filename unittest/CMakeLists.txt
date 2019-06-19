@@ -3,47 +3,12 @@
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
 find_package (Python)
-find_program (PERL_EXECUTABLE perl
-  DOC "Path to perl. Only one of perl or python is needed.")
 
-if (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
-  option (OM_CXXTEST_USE_PYTHON "Use python instead of perl to generate unittest code." OFF)
-  if (OM_CXXTEST_USE_PYTHON)
-    set (OM_CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
-    set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.py)
-  else (OM_CXXTEST_USE_PYTHON)
-    set (OM_CXXTEST_INTERPRETER ${PERL_EXECUTABLE})
-    set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.pl)
-  endif (OM_CXXTEST_USE_PYTHON)
-else (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
-  if (PERL_EXECUTABLE)
-   set (OM_CXXTEST_INTERPRETER ${PERL_EXECUTABLE})
-   set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.pl)
-  else (PERL_EXECUTABLE)
-    if (PYTHON_EXECUTABLE)
-      set (OM_CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
-      set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/cxxtestgen.py)
-    else (PYTHON_EXECUTABLE)
-      set (OM_CXXTEST_INTERPRETER "NOTFOUND")
-    endif (PYTHON_EXECUTABLE)
-  endif (PERL_EXECUTABLE)
-endif (PERL_EXECUTABLE AND PYTHON_EXECUTABLE)
+set (OM_CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
+set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/bin/cxxtestgen)
 
-option (OM_CXXTEST_GUI "Draw a graphical progress bar" OFF)
 # We want abort-on-fail for safety checks (like bad memory accesses) to work
 set (OM_CXXTEST_OPTIONS --have-std --have-eh --abort-on-fail)
-if (OM_CXXTEST_GUI)
-  # also supports QT, but that has more dependencies.
-  if (WIN32)
-    set (OM_CXXTEST_OPTIONS ${OM_CXXTEST_OPTIONS} --gui=Win32Gui)
-  elseif (UNIX)
-    set (OM_CXXTEST_OPTIONS ${OM_CXXTEST_OPTIONS} --gui=X11Gui)
-    find_library (OM_CXXTEST_GUI_LIB X11)
-    if (NOT OM_CXXTEST_GUI_LIB)
-      message (SEND_ERROR "Requested use of a gui, but can't find X11 library${OM_CXXTEST_GUI_LIB}!")
-    endif (NOT OM_CXXTEST_GUI_LIB)
-  endif (WIN32)
-endif (OM_CXXTEST_GUI)
 
 
 # For yaml-cpp: I did use this to read in data for the AnophelesModel unittest.
@@ -95,7 +60,7 @@ if (OM_CXXTEST_INTERPRETER)
     VERBATIM
   )
 else (OM_CXXTEST_INTERPRETER)
-  message (SEND_ERROR "Unable to find perl or python executable. Thus I can't build tests.cpp which is required to run the unittests.")
+  message (SEND_ERROR "Unable to find python executable. Thus I can't build tests.cpp which is required to run the unittests.")
 endif (OM_CXXTEST_INTERPRETER)
 
 # These files are needed to run various infection model tests:
@@ -147,9 +112,7 @@ if (MSVC)
   )
 endif (MSVC)
 
-add_test (unittest unittest -keep)
-set_tests_properties (unittest
-  PROPERTIES PASS_REGULAR_EXPRESSION "^Running [0-9]+ tests.*OK![ \r\n]*$")
+add_test (unittest unittest)
 
 mark_as_advanced (
   OM_CXXTEST_OPTIONS
