@@ -19,7 +19,7 @@
  */
 
 // must be included first to avoid compiler error (incompatible with fpclassify which is included from Global.h?)
-#include <boost/math/nonfinite_num_facets.hpp>
+#include <boost/math/special_functions/nonfinite_num_facets.hpp>
 
 #include "Monitoring/Continuous.h"
 #include "mon/info.h"   // lineEnd

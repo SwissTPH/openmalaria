@@ -18,9 +18,3 @@ FastDelegate_src
     Version:	1.5 (30-Mar-05)
     Licence:	Public domain.
     Source:	http://www.codeproject.com/KB/cpp/FastDelegate.aspx
-
-floating_point_utilities_v3
-    Floating Point Utilities, for platform-consistant output and reading of NaN and infinite values.
-    Licence:	boost licence (see http://www.boost.org/LICENSE_1_0.txt)
-    Source:	http://www.boostpro.com/vault/index.php?&directory=Math%20-%20Numerics
-  

@@ -101,13 +101,11 @@ find_package (Z)
 # suggested on windows: install boost such that paths are:
 # C:\Program Files\boost\boost_VER\boost\config.hpp
 # VER looks like 1_38_0 NOT 1.38.0
-# Add versions greater than 1.38 here:
-# set (Boost_ADDITIONAL_VERSIONS "1.39" "1.39.0"
-#     "1.40" "1.40.0" "1.41" "1.41.0" "1.41" "1.42.0"
-#     "1.43.0" "1.44.0" "1.45.0" "1.46.1" "1.47.0"
-#     "1.50.0" "1.53.0" "1.54.0" "1.55.0" "1.56.0" "1.57.0" "1.58.0")
+# Add additional versions here when needed:
+# set (Boost_ADDITIONAL_VERSIONS "1.54.0" "1.55.0" "1.56.0" "1.57.0" "1.58.0")
 #set (Boost_DEBUG)
-find_package( Boost 1.37.0 )
+# We require 1.54: first version including nonfinite_num_facets.hpp
+find_package( Boost 1.54.0 )
 if(NOT Boost_FOUND)
     message (FATAL_ERROR "Unable to find boost headers! Please install libboost-dev or boost from boost.org (preferably at least version 1.41)")
 endif(NOT Boost_FOUND)
