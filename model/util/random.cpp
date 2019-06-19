@@ -33,7 +33,7 @@
  */
 
 // Define to use boost as the underlying generator:
-//#define OM_RANDOM_USE_BOOST
+#define OM_RANDOM_USE_BOOST
 
 #include "util/random.h"
 #include "util/errors.h"
@@ -61,8 +61,8 @@
 namespace OM { namespace util {
 
 # ifdef OM_RANDOM_USE_BOOST
-    static boost::mt19937 boost_generator;
-    static boost::uniform_01<boost::mt19937&> rng_uniform01 (boost_generator);
+    static boost::random::mt19937 boost_generator;
+    static boost::random::uniform_01<boost::random::mt19937&> rng_uniform01 (boost_generator);
     
     long unsigned int boost_rng_get (void*) {
 	BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
@@ -198,8 +198,8 @@ double random::gamma (double a, double b){
 
 double random::log_normal (double mu, double sigma){
 /*# ifdef OM_RANDOM_USE_BOOST
-    // This doesn't work: boost version takes mean and sigma while gsl version takes mu and sigma.
-    boost::lognormal_distribution<> dist (mean, std);
+    // Produces different results to the GSL distribution:
+    boost::random::lognormal_distribution<> dist (mean, std);
     return dist (boost_generator);
 # else*/
     double result = gsl_ran_lognormal (rng.gsl_generator, mu, sigma);
