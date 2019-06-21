@@ -191,9 +191,7 @@ double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Tran
 double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
     double meanlog = log(effectiveEIR * susceptibility()) - inf_rate_offset;
-    //TODO: use random::log_normal instead (equivalent but different sample)
-    return random::max_multi_log_normal(0.0, 1, meanlog, inf_rate_shape_param);
-//     return random::log_normal(meanlog, inf_rate_shape_param);
+    return random::log_normal(meanlog, inf_rate_shape_param);
 }
 
 double InfectionIncidenceModel::susceptibility () {
