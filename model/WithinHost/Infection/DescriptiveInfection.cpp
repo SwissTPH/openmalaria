@@ -173,25 +173,17 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         n.b. AJTM p.9 eq 9 implies that we sample the log of the density from a normal with mean equal to
         the log of the predicted density.  If we really did the latter then this bias correction is not needed.
         */
-        double meanlog = log(m_density) - stdlog*stdlog / 2.0;
         if (stdlog > 0.0000001) {
             // Calculate the expected density on the day of sampling:
+            double meanlog = log(m_density) - stdlog*stdlog / 2.0;
             m_density = random::log_normal(meanlog, stdlog);
-            // Calculate additional samples for T-1 days (T=SimTime::oneTS().inDays()):
-            if( true /*was SimTime::oneTS().inDays() > 1, which is always true in this model*/ ){
-                double normp = pow( random::uniform_01(), 1.0 / (SimTime::oneTS().inDays() - 1) );
-                /*
-                To mimic sampling T-1 repeated values, we transform the sampling
-                distribution and use only one sampled value, which has the sampling
-                distribution of the maximum of T-1 values sampled from a uniform.
-                The probability density function of this sampled random var is distributed
-                according to a skewed distribution (defined in [0,1]) where the
-                exponent (1/(T-1)) arises because each of T-1 sampled
-                values would have this probability of being the maximum.
-                */
-                timeStepMaxDensity = random::sampleFromLogNormal(normp, meanlog, stdlog);
+            // Calculate additional samples for T-1 days (T=days per step):
+            if( true /*SimTime::oneTS().inDays() > 1, always true for this model*/ ){
+                timeStepMaxDensity = random::max_multi_log_normal (m_density,
+                        SimTime::oneTS().inDays() - 1, meanlog, stdlog);
+            } else {
+                timeStepMaxDensity = m_density;
             }
-            timeStepMaxDensity = std::max(m_density, timeStepMaxDensity);
         }
         if (timeStepMaxDensity > maxDens && notPrintedMDWarning){
             cerr << "TSMD hit limit:\t" << m_density << ",\t" << timeStepMaxDensity << endl;

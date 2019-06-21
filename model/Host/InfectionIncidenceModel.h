@@ -96,7 +96,12 @@ public:
    * 2. Calculates the updated values of the pre-erythrocytic exposure.
    * 
    * Secondly calculates the number of new infections to introduce via a
-   * stochastic process. */
+   * stochastic process.
+   * 
+   * @param human   Reference to human
+   * @param effectiveEIR    EIR adjusted for availability (age, het,
+   *        outside transmission due to hospitalisation)
+   */
   int numNewInfections(const OM::Host::Human& human, double effectiveEIR);
   
 protected:

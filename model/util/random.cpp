@@ -56,10 +56,8 @@
 #   endif
 #endif
 
-// TODO: find alternative for sampleFromLogNormal without GSL
-#include <gsl/gsl_cdf.h>
-
 #if !defined OM_RANDOM_USE_BOOST_DIST
+#include <gsl/gsl_cdf.h>
 #include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #endif
@@ -218,28 +216,38 @@ double random::gamma (double a, double b){
     return result;
 }
 
-double random::log_normal (double mu, double sigma){
+double random::log_normal (double meanlog, double stdlog){
 # ifdef OM_RANDOM_USE_BOOST_DIST
-    boost::random::lognormal_distribution<> dist (mu, sigma);
+    boost::random::lognormal_distribution<> dist (meanlog, stdlog);
     double result = dist (boost_generator);
 # else
-    double result = gsl_ran_lognormal (rng.gsl_generator, mu, sigma);
+    double result = gsl_ran_lognormal (rng.gsl_generator, meanlog, stdlog);
 # endif
 //     util::streamValidate(result);
     return result;
 }
 
-double random::sampleFromLogNormal(double normp, double meanlog, double stdlog){
+double random::max_multi_log_normal (double start, int n, double meanlog, double stdlog){
+    double result = start;
+# ifdef OM_RANDOM_USE_BOOST_DIST
+    // We don't have a CDF available, so take log-normal samples
+    for (int i = 0; i < n; ++i) {
+        double sample = log_normal(meanlog, stdlog);
+        if (sample > result) result = sample;
+    }
+# else
     // Used for performance reasons. Calling GSL's log_normal 5 times is 50% slower.
-    
+    // For random variables X1, .., Xn with identical distribution X and
+    // Mn = max(X1, .., Xn), the CDF:
+    //      F_Mn(x) = P(Mn ≤ x)
+    //              = P(X1 ≤ x) P(X2 ≤ x) .. P(Xn ≤ x)
+    //              = F_X(x) ^ n
+    // Thus for u = F_Mn(x) = F_X(x) ^ n, u^(1/n) = F_X(x).
+    double normp = pow( random::uniform_01(), 1.0 / n );
     double zval = gsl_cdf_ugaussian_Pinv (normp);
-//     util::streamValidate(zval);
-    // Where normp is distributed uniformly over [0,1], this acts like a sample
-    // from the log normal. Where normp has been transformed by raising the
-    // uniform sample to the power of 1/(T-1), zval is distributed like a
-    // uniform gauss times 4* F(x,0,1)^3, where F(x,0,1) ist the cummulative
-    // distr. function of a uniform gauss:
-    double result = exp(meanlog+stdlog*zval);
+    double multi_sample = exp(meanlog + stdlog * zval);
+    result = std::max(result, multi_sample);
+# endif
 //     util::streamValidate(result);
     return result;
 }

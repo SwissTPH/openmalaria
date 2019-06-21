@@ -56,10 +56,17 @@ namespace random {
      * @param mu mean-log
      * @param sigma sigma-log
      */
-    double log_normal (double mu, double sigma);
+    double log_normal (double meanlog, double stdlog);
     
-    /** Used for performance reasons. Calling rngLogNormal 5 times is 50% slower. */
-    double sampleFromLogNormal (double normp, double meanlog, double stdlog);
+    /** Return the maximum over multiple log-normal samples.
+     *
+     * @param start Initial value for running maximum (returns max of this and
+     *      all samples)
+     * @param n Number of samples
+     * @param meanlog mean of underlying Gaussian
+     * @param stdlog standard deviation of underlying Gaussian
+     */
+    double max_multi_log_normal (double start, int n, double meanlog, double stdlog);
     
     /** This function returns a random variate from the beta distribution. */
     double beta(double a, double b);
