@@ -33,13 +33,13 @@ double NormalSample::asLognormal( double mu, double sigma )const{
 }
 
 NormalSample NormalSample::generate() {
-    return NormalSample( random::gauss(1.0) );
+    return NormalSample( random::gauss(0.0, 1.0) );
 }
 
 NormalSample NormalSample::generate_correlated(NormalSample base, double correlation, double factor) {
     if( correlation == 1.0 ) { return base; }
     
-    double e = random::gauss(factor);
+    double e = random::gauss(0.0, factor);
     return NormalSample( base.x * correlation + e );
 }
 

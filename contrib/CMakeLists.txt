@@ -13,10 +13,6 @@ include_directories (SYSTEM
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/contrib/gzstream
-  ${CMAKE_SOURCE_DIR}/contrib/cxxtest
-  ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
-  ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
-  ${CMAKE_SOURCE_DIR}/contrib/R_nmath
 )
 
 add_library (contrib
