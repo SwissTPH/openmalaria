@@ -28,7 +28,6 @@
 #include "WithinHost/Genotypes.h"
 #include "Monitoring/Continuous.h"
 #include "mon/info.h"
-#include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
 #include "util/vectors.h"
@@ -71,13 +70,11 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
       assert( vectors::approxEqual( model->annualEIR, entoData.getScaledAnnualEIR().get() ) );
   }
 
-#ifdef WITHOUT_BOINC
   if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
       //Note: after internal scaling (which doesn't imply exit)
       //but before external scaling.
       cout << "Total annual EIR: "<<model->annualEIR<<endl;
   }
-#endif
 
   return model;
 }

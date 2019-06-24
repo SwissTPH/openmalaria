@@ -130,7 +130,6 @@ namespace OM { namespace util {
             if( opt != IGNORE ) options[opt] = it->getValue();
 	}
 	
-#ifdef WITHOUT_BOINC
 	// Print non-default model options:
 	if (CommandLine::option (CommandLine::PRINT_MODEL_OPTIONS)) {
 	    cout << "Non-default model options:";
@@ -140,7 +139,6 @@ namespace OM { namespace util {
 	    }
 	    cout << endl;
 	}
-#endif
 	
 	// Test for incompatible options
 	

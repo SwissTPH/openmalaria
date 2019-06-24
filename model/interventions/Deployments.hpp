@@ -54,9 +54,7 @@ public:
     
     virtual void deploy (OM::Population&) =0;
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const =0;
-#endif
     
     // Read access required in this file; don't really need protection:
     SimTime time;
@@ -74,11 +72,9 @@ public:
         time = SimTime::future();
     }
     virtual void deploy (OM::Population&) {}
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tdummy (no interventions)";
     }
-#endif
 };
 
 class TimedChangeHSDeployment : public TimedDeployment {
@@ -92,11 +88,9 @@ public:
         delete newHS;
         newHS = 0;
     }
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tchange HS";
     }
-#endif
     
 private:
     scnXml::HealthSystem *newHS;
@@ -113,11 +107,9 @@ public:
         delete newEIR;
         newEIR = 0;
     }
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tchange EIR";
     }
-#endif
     
 private:
     scnXml::NonVector *newEIR;
@@ -131,38 +123,10 @@ public:
     virtual void deploy (OM::Population& population) {
         sim::transmission().uninfectVectors();
     }
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tuninfect vectors";
     }
-#endif
 };
-
-#if 0
-class TimedR_0Deployment : public TimedDeployment {
-public:
-    TimedR_0Deployment( SimTime deployTime ) :
-        TimedDeployment( deployTime )
-    {}
-    virtual void deploy (OM::Population& population) {
-        int i = (int)std::floor (util::random::uniform_01() * population.size());        // pick a human
-        Population::Iter it = population.begin();
-        while (i > 0){  // find human (can't use population[i])
-            ++it;
-            --i;
-        }
-        assert( i == 0 );
-        assert( it != population.end() );
-        it->R_0Vaccines();
-        it->addInfection();
-    }
-#ifdef WITHOUT_BOINC
-    virtual void print_details( std::ostream& out )const{
-        out << time << "\t\t\t\t\tR_0 special";
-    }
-#endif
-};
-#endif
 
 void VaccineLimits::set( const scnXml::DeploymentBase& deploy ){
     if( deploy.getVaccMinPrevDoses().present() ){
@@ -252,7 +216,6 @@ public:
         }
     }
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t"
             << minAge.inYears() << "y\t" << maxAge.inYears() << "t\t";
@@ -261,7 +224,6 @@ public:
         out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );
     }
-#endif
     
 protected:
     // restrictions on deployment
@@ -333,11 +295,10 @@ public:
     virtual void deploy (OM::Population& population) {
       sim::transmission().deployVectorPopInterv(inst);
     }
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tvector";
     }
-#endif
+    
 private:
     size_t inst;
 };
@@ -351,11 +312,10 @@ public:
         double number = population.size() * ratio;
         sim::transmission().deployVectorTrap(inst, number, lifespan);
     }
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tvector trap";
     }
-#endif
+    
 private:
     size_t inst;
     double ratio;
@@ -417,7 +377,6 @@ public:
         return true;
     }
     
-#ifdef WITHOUT_BOINC
     inline void print_details( std::ostream& out )const{
         out << begin.inSteps() << "t\t";
         if( end == SimTime::future() ) out << "(none)";
@@ -428,7 +387,6 @@ public:
         out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );
     }
-#endif
     
 protected:
     SimTime begin, end;    // first time step active and first time step no-longer active

@@ -81,12 +81,10 @@ Component::Type VaccineComponent::componentType() const
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-#ifdef WITHOUT_BOINC
 void VaccineComponent::print_details(ostream& out) const
 {
         out << id().id << "\t" << (type == Vaccine::PEV ? "PEV" : (type == Vaccine::BSV ? "BSV" : "TBV"));
 }
-#endif
 
 double VaccineComponent::getInitialEfficacy (size_t numPrevDoses) const
 {

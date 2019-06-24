@@ -136,14 +136,12 @@ void HumanIntervention::deploy( Human& human, mon::Deploy::Method method,
     }
 }
 
-#ifdef WITHOUT_BOINC
 void HumanIntervention::print_details( std::ostream& out )const{
     out << "human:";
     for( auto it = components.begin(); it != components.end(); ++it ){
         out << '\t' << (*it)->id().id;
     }
 }
-#endif
 
 // ———  Utilities  ———
 
@@ -215,11 +213,9 @@ public:
         return Component::RECRUIT_ONLY;
     }
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << id().id << "\tRecruit only";
     }
-#endif
 };
 
 class ScreenComponent : public HumanInterventionComponent {
@@ -242,11 +238,9 @@ public:
     
     virtual Component::Type componentType() const{ return Component::SCREEN; }
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << id().id << "\tScreen";
     }
-#endif
     
 private:
     const Diagnostic& diagnostic;
@@ -286,11 +280,9 @@ public:
     
     virtual Component::Type componentType() const{ return Component::TREAT_SIMPLE; }
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << id().id << "\ttreatSimple";
     }
-#endif
     
 private:
     SimTime timeLiver, timeBlood;
@@ -315,11 +307,9 @@ public:
     
     virtual Component::Type componentType() const{ return Component::TREAT_PKPD; }
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << id().id << "\ttreatPKPD";
     }
-#endif
     
 private:
     size_t schedule;        // index of the schedule
@@ -348,11 +338,9 @@ public:
     
     virtual Component::Type componentType() const{ return Component::CM_DT; }
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << id().id << "\tDecision tree";
     }
-#endif
     
 private:
     const Clinical::CMDecisionTree& tree;
@@ -370,11 +358,9 @@ public:
     
     virtual Component::Type componentType() const{ return Component::CLEAR_IMMUNITY; }
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const{
         out << id().id << "\tclear immunity";
     }
-#endif
 };
 
 } }

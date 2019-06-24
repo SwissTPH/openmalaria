@@ -153,7 +153,6 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
         if (util::ModelOptions::option (util::GARKI_DENSITY_BIAS)) {
             densitybias = parameters[Parameters::DENSITY_BIAS_GARKI];
         } else {
-#ifdef WITHOUT_BOINC
             if( scenario.getAnalysisNo().present() ){
                 int analysisNo = scenario.getAnalysisNo().get();
                 if ((analysisNo >= 22) && (analysisNo <= 30)) {
@@ -162,7 +161,6 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
                         "specify the option GARKI_DENSITY_BIAS; if not, nothing's wrong." << endl;
                 }
             }
-#endif
             densitybias = parameters[Parameters::DENSITY_BIAS_NON_GARKI];
         }
         double detectionLimit = surveys.getDetectionLimit().get() * densitybias;

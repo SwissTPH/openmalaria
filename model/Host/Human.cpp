@@ -89,11 +89,10 @@ Human::Human(SimTime dateOfBirth, int dummy) :
 vector<double> EIR_per_genotype;        // cache (not thread safe)
 
 bool Human::update(bool doUpdate) {
-#ifdef WITHOUT_BOINC
     ++PopulationStats::humanUpdateCalls;
     if( doUpdate )
         ++PopulationStats::humanUpdates;
-#endif
+    
     // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
     SimTime age0 = age(sim::ts0());
     if (clinicalModel->isDead(age0))

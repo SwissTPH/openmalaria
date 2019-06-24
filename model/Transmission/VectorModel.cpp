@@ -430,12 +430,12 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
         const double ageFactor = host.relativeAvailabilityAge (ageYears);
         for(size_t i = 0; i < numSpecies; ++i) {
             vector<double>& partialEIR = species[i].getPartialEIR();
-#ifdef WITHOUT_BOINC
+            
             assert( EIR.size() == partialEIR.size() );
             if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
                 cerr<<"partialEIR is not a number; "<<i<<endl;
             }
-#endif
+            
             /* Calculates EIR per individual (hence N_i == 1).
              *
              * See comment in AnophelesModel::advancePeriod for method. */

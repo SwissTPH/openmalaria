@@ -32,7 +32,6 @@
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
 #include "mon/management.h"
-#include "util/BoincWrapper.h"
 #include "util/timer.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
@@ -43,6 +42,7 @@
 
 #include <fstream>
 #include <gzstream/gzstream.h>
+#include <boost/format.hpp>
 
 
 namespace OM {
@@ -78,12 +78,10 @@ enum Phase {
 
 // ———  Set-up & tear-down  ———
 
-Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
+Simulator::Simulator( const scnXml::Scenario& scenario ) :
     simPeriodEnd(SimTime::zero()),
     totalSimDuration(SimTime::zero()),
-    phase(STARTING_PHASE),
-    workUnitIdentifier(0),
-    cksum(ck)
+    phase(STARTING_PHASE)
 {
     // ———  Initialise static data  ———
     
@@ -128,10 +126,6 @@ Simulator::Simulator( util::Checksum ck, const scnXml::Scenario& scenario ) :
     mon::initCohorts( scenario.getMonitoring() );
     
     // ———  End of static data initialisation  ———
-    
-    // Set work unit identifier, if we have one.
-    if( scenario.getWuID().present() )
-        workUnitIdentifier = scenario.getWuID().get();
     
     ifstream checkpointFile(CHECKPOINT,ios::in);
     // If not open, file doesn't exist (or is inaccessible)
@@ -178,14 +172,21 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now() );
     SimTime testCheckpointDieTime = testCheckpointTime;        // kill program at same time
     
+    int lastPercent = -1;	// last _integer_ percentage value
+    
     // phase loop
     while (true){
         // loop for steps within a phase
         while (sim::now() < simPeriodEnd){
-            util::BoincWrapper::reportProgress(sim::now().raw(), totalSimDuration.raw());
-            if( util::BoincWrapper::timeToCheckpoint() || testCheckpointTime == sim::now() ){
+            int percent = (sim::now() * 100) / totalSimDuration;
+            if( percent != lastPercent ){	// avoid huge amounts of output for performance/log-file size reasons
+                lastPercent = percent;
+                // \r cleans line. Then we print progress as a percentage.
+                cerr << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
+            }
+            
+            if( testCheckpointTime == sim::now() ){
                 writeCheckpoint();
-                util::BoincWrapper::checkpointCompleted();
             }
             if( testCheckpointDieTime == sim::now() ){
                 throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
@@ -269,16 +270,11 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         }
     }
     
-    // Open a critical section; should prevent app kill while/after writing
-    // output.txt, which we don't currently handle well.
-    // Note: we don't end this critical section; we simply exit.
-    util::BoincWrapper::beginCriticalSection();
-    
+    cerr << '\r' << flush;	// clean last line of progress-output
     PopulationStats::print();
     
     sim::humanPop().flushReports();        // ensure all Human instances report past events
     mon::writeSurveyData();
-    Continuous.finalise();
     
 # ifdef OM_STREAM_VALIDATOR
     util::StreamValidator.saveStream();
@@ -409,14 +405,6 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         sim::time0 & stream;
         sim::time1 & stream;
         util::random::checkpoint (stream, checkpointNum);
-        
-        // Check scenario.xml and checkpoint files correspond:
-        int oldWUID = workUnitIdentifier;
-        util::Checksum oldCksum(cksum);
-        workUnitIdentifier & stream;
-        cksum & stream;
-        if (workUnitIdentifier != oldWUID || cksum != oldCksum)
-            throw util::checkpoint_error ("mismatched checkpoint");
     } catch (const util::checkpoint_error& e) { // append " (pos X of Y bytes)"
         ostringstream pos;
         pos<<" (pos "<<stream.tellg()<<" of ";
@@ -461,8 +449,6 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     sim::time0 & stream;
     sim::time1 & stream;
     util::random::checkpoint (stream, checkpointNum);
-    workUnitIdentifier & stream;
-    cksum & stream;
     
     util::timer::stopCheckpoint ();
     if (stream.fail())

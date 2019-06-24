@@ -24,7 +24,6 @@
 #include "Global.h"
 #include "Population.h"
 #include "Transmission/TransmissionModel.h"
-#include "util/BoincWrapper.h"
 using namespace std;
 
 namespace scnXml{
@@ -40,7 +39,7 @@ namespace interventions{
 class Simulator{
 public: 
     //!  Inititalise all step specific constants and variables.
-    Simulator( util::Checksum ck, const scnXml::Scenario& scenario );
+    Simulator( const scnXml::Scenario& scenario );
     
     //! Entry point to simulation.
     void start(const scnXml::Monitoring& monitoring);
@@ -65,14 +64,6 @@ private:
     SimTime simPeriodEnd;
     SimTime totalSimDuration;
     int phase;  // only need be a class member because value is checkpointed
-    
-    /** This was used to prevent checksum cheats; now it is obseleted by cksum.
-     * NOTE: could be removed, but there's little point and could be
-     * complications for the BOINC server. */
-    int workUnitIdentifier;
-    
-    // Stored so that it can be verified across checkpoints
-    util::Checksum cksum;
     
     static bool startedFromCheckpoint;
     

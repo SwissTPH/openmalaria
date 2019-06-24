@@ -27,7 +27,6 @@ namespace OM {
     boost::int64_t PopulationStats::humanUpdates =0;
     
     void PopulationStats::print() {
-#	ifdef WITHOUT_BOINC
 	long double x = 100.0 * (totalInfections - allowedInfections) / totalInfections;
 	cerr
 	    << "Total/allowed infections: "
@@ -43,9 +42,6 @@ namespace OM {
 	    <<"\t("<<x<<"% skipped)"
 	    <<endl
 	;
-#	else	// use reduced-output mode
-	cerr<<"T/A: "<<totalInfections<<"/"<<allowedInfections<<endl;
-#	endif
     }
     
     void PopulationStats::staticCheckpoint (istream& stream){

@@ -111,16 +111,6 @@ if(NOT Boost_FOUND)
 endif(NOT Boost_FOUND)
 
 
-# Find BOINC:
-
-option (OM_BOINC_INTEGRATION "Set to enable integration of the BOINC client (otherwise it's not used).")
-if (OM_BOINC_INTEGRATION)
-  find_package (BOINC)
-else (OM_BOINC_INTEGRATION)
-  add_definitions (-DWITHOUT_BOINC)
-endif (OM_BOINC_INTEGRATION)
-
-
 # -----  Compile-time optional features  -----
 # (must come before add_subdirectory (model))
 

@@ -19,7 +19,6 @@
  */
 
 #include "util/DocumentLoader.h"
-#include "util/BoincWrapper.h"
 #include "util/errors.h"
 
 #include <iostream>
@@ -30,7 +29,7 @@
 
 namespace OM { namespace util {
 
-Checksum DocumentLoader::loadDocument (std::string lXmlFile){
+void DocumentLoader::loadDocument (std::string lXmlFile){
     xmlFileName = lXmlFile;
     //Parses the document
     
@@ -46,7 +45,6 @@ Checksum DocumentLoader::loadDocument (std::string lXmlFile){
 	throw util::xml_scenario_error (msg);
     }
     scenario = scnXml::parseScenario (fileStream);
-    util::Checksum cksum = util::Checksum::generate (fileStream);
     fileStream.close ();
     int scenarioVersion = scenario->getSchemaVersion();
     if (scenarioVersion < SCHEMA_VERSION) {
@@ -57,7 +55,6 @@ Checksum DocumentLoader::loadDocument (std::string lXmlFile){
     }
     if (scenarioVersion > SCHEMA_VERSION)
         throw util::xml_scenario_error ("Error: new schema version unsupported");
-    return cksum;
 }
 
 void DocumentLoader::saveDocument()

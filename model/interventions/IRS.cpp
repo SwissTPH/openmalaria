@@ -73,12 +73,10 @@ void IRSComponent::deploy( Host::Human& human, mon::Deploy::Method method, Vacci
 }
 
 Component::Type IRSComponent::componentType()const{ return Component::IRS; }
-    
-#ifdef WITHOUT_BOINC
+
 void IRSComponent::print_details( std::ostream& out )const{
     out << id().id << "\tIRS";
 }
-#endif
 
 unique_ptr<PerHostInterventionData> IRSComponent::makeHumanPart() const{
     return unique_ptr<PerHostInterventionData>(new HumanIRS( *this ));

@@ -50,10 +50,6 @@ namespace Monitoring {
 	 * Callbacks should be registered before init() is called. */
 	void init (const scnXml::Monitoring& monitoring, bool isCheckpoint);
         
-        /** When compiled in BOINC mode, this copies data to the final
-         * compressing output file. Otherwise it does nothing. */
-        void finalise();
-        
         /// Checkpointing
         template<class S>
         void operator& (S& stream) {

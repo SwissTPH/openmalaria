@@ -332,7 +332,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
     // have to check nextTimed is within range:
     timed.push_back( unique_ptr<TimedDeployment>(new DummyTimedDeployment()) );
     
-#ifdef WITHOUT_BOINC
     if( util::CommandLine::option( util::CommandLine::PRINT_INTERVENTIONS ) ){
         cout << "Continuous deployments:" << endl
             << "begin\tend\tage\tsub pop\tcompl\tcoverag\tcomponents" << endl;
@@ -352,7 +351,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
             cout << endl;
         }
     }
-#endif
 }
 
 ComponentId InterventionManager::getComponentId( const string textId )

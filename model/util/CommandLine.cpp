@@ -21,7 +21,6 @@
 #include "Global.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
-#include "util/BoincWrapper.h"
 #include "util/StreamValidator.h"
 #include "util/DocumentLoader.h"
 /* if you get compile errors like "version.h not found", run CMake first */
@@ -82,6 +81,8 @@ namespace OM { namespace util {
 			throw cmd_exception ("--output argument may only be given once");
 		    }
 		    outputName = parseNextArg (argc, argv, i);
+                } else if (clo == "compress-output") {
+                    options.set (COMPRESS_OUTPUT);
                 } else if (clo == "ctsout") {
                     if (ctsoutName != ""){
                         throw cmd_exception ("--ctsout argument may only be given once");
@@ -194,6 +195,8 @@ namespace OM { namespace util {
 			options.set (TEST_DUPLICATE_CHECKPOINTS);
                     } else if (clo[j] == 'v') {
                         cloVersion = true;
+                    } else if (clo[j] == 'z') {
+                        options.set (COMPRESS_OUTPUT);
                     } else if (clo[j] == 'h') {
                         cloHelp = true;
 		    } else {
@@ -230,6 +233,7 @@ namespace OM { namespace util {
 	    << "    --ctsout file.txt	Uses file.txt as ctsout file name. If not given, ctsout.txt is used." << endl
 	    << " -n --name NAME		Equivalent to --scenario scenarioNAME.xml --output outputNAME.txt \\"<<endl
 	    << "			--ctsout ctsoutNAME.txt" <<endl
+	    << " -z --compress-output	Compress output with gzip (writes output.txt.gz)." << endl
 	    << "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
 	    << "    --deprecation-warnings" << endl
 	    << "			Warn about the use of features deemed error-prone and where" << endl
@@ -293,10 +297,6 @@ namespace OM { namespace util {
 	if (ctsoutName == ""){
             ctsoutName = "ctsout.txt";
         }
-#ifndef WITHOUT_BOINC
-	outputName.append(".gz");
-        ctsoutName.append(".gz");
-#endif
 
 	return scenarioFile;
     }
@@ -312,7 +312,7 @@ namespace OM { namespace util {
 	    ret = resourcePath;
 	}
 	ret.append (path);
-	return BoincWrapper::resolveFile (ret);
+	return ret;
     }
     
     /* These check parameters are as expected. They only really serve to make

@@ -24,7 +24,6 @@
 #include "Monitoring/Continuous.h"
 #include "mon/info.h"   // lineEnd
 #include "util/errors.h"
-#include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
 #include "util/timeConversions.h"
 #include "schema/monitoring.h"
@@ -39,14 +38,8 @@ namespace OM { namespace Monitoring {
     using namespace fastdelegate;
     using util::xml_scenario_error;
     
-    /// File we send uncompressed output to
+    /// File we output to
     string cts_filename;
-#ifndef WITHOUT_BOINC
-    /// At end of simulation, compress the output file. Don't compress data as
-    /// it's output, because gzstream doesn't support seeking, which is needed
-    /// for checkpoint resume.
-    string compressedCtsoutName;
-#endif
     /// This is used to output some statistics in a tab-deliminated-value file.
     /// (It used to be csv, but German Excel can't open csv directly.)
     fstream ctsOStream;
@@ -122,13 +115,7 @@ namespace OM { namespace Monitoring {
         if( ctsOpt.get().getDuringInit().present() )
             duringInit = ctsOpt.get().getDuringInit().get();
         
-        cts_filename = util::BoincWrapper::resolveFile(util::CommandLine::getCtsoutName());
-#ifndef WITHOUT_BOINC
-        // redirect output to a temporary file; copy and compress this to the
-        // final output at end of simulation
-        compressedCtsoutName = cts_filename;
-        cts_filename = "ctsout_temp.txt";
-#endif
+        cts_filename = util::CommandLine::getCtsoutName();
         
 	// This locale ensures uniform formatting of nans and infs on all platforms.
 	locale old_locale;
@@ -156,14 +143,6 @@ namespace OM { namespace Monitoring {
 	    streamStart = ctsOStream.tellp();
 	    // we set position later, in staticCheckpoint
 	}else{
-#ifndef WITHOUT_BOINC
-	    if (util::BoincWrapper::fileExists(cts_filename.c_str())){
-		// It could be from an old run. But we won't remove/truncate
-		// existing files as a security precaution for running on BOINC.
-		throw util::base_exception (string("File ").append(cts_filename).append(" exists!"),util::Error::FileExists);
-            }
-#endif
-	    
 	    ctsOStream.open( cts_filename.c_str(), ios::binary|ios::out );
 	    streamStart = ctsOStream.tellp();
 	    ctsOStream << "##\t##" << endl;	// live-graph needs a deliminator specifier when it's not a comma
@@ -185,23 +164,7 @@ namespace OM { namespace Monitoring {
 	    streamOff = ctsOStream.tellp() - streamStart;
 	}
     }
-   
-   void ContinuousType::finalise() {
-         if( ctsPeriod == SimTime::zero() )
-             return;     // output disabled
-#ifndef WITHOUT_BOINC
-        if (util::BoincWrapper::fileExists(compressedCtsoutName.c_str())){
-            throw util::base_exception(string("File ").append(compressedCtsoutName).append(" exists!"),util::Error::FileExists);
-        }
-        ctsOStream.close();
-        ifstream origFile(cts_filename.c_str());
-        if( !origFile.is_open() ){
-            throw util::base_exception(string("Temporary file ").append(cts_filename).append(" not found!"),util::Error::FileIO);
-        }
-        ogzstream finalFile(compressedCtsoutName.c_str());
-        finalFile << origFile.rdbuf();
-#endif
-    }
+
     void ContinuousType::checkpoint (ostream& stream){
         if( ctsPeriod == SimTime::zero() )
             return;	// output disabled
@@ -252,8 +215,6 @@ namespace OM { namespace Monitoring {
             ctsOStream << sim::now().inSteps() << '\t';
         }
 	
-	util::BoincWrapper::beginCriticalSection();	// see comment in staticCheckpoint
-	
         if( duringInit && sim::intervNow() < SimTime::zero() ){
             ctsOStream << "nan";
         }else{
@@ -266,6 +227,5 @@ namespace OM { namespace Monitoring {
 	ctsOStream << mon::lineEnd << flush;
 	
 	streamOff = ctsOStream.tellp() - streamStart;
-	util::BoincWrapper::endCriticalSection();
     }
 } }

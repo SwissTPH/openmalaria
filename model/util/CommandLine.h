@@ -49,6 +49,8 @@ namespace OM { namespace util {
 	    COMPRESS_CHECKPOINTS,
 	    /** Do initialisation and error checks, but don't run simulation. */
 	    SKIP_SIMULATION,
+            /** Compress output.txt file. */
+            COMPRESS_OUTPUT,
 	    /** Print the annual EIR. */
 	    PRINT_ANNUAL_EIR,
             /** Outputs samples from the active interpolation methods of all
@@ -84,9 +86,7 @@ namespace OM { namespace util {
 		return SimTime::fromTS(*it);
 	}
 	
-	/** Prepend if path is relative, prepend it with clResourcePath.
-	* Then passes the resulting (or original) path through
-	* BoincWrapper::resolveFile() and returns the result. */
+	/** If path is relative, prepend it with clResourcePath. */
 	static string lookupResource (const string& path);
 	
         /** Get the name of the output file. */
