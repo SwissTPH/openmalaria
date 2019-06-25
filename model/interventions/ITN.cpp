@@ -361,7 +361,6 @@ void factors::RelativeAttractiveness::initSingleStage(
     {
         cerr << "Note: since the following bounds are not met, the ITN could make humans more\n";
         cerr << "attractive to mosquitoes than they would be without a net.\n";
-        cerr << "This note is only shown by non-BOINC executables.\n";
         cerr << "ITN.description.anophelesParams.deterrency: bounds not met:\n";
         if( !(HF>0.0) )
             cerr << "  holeFactor>0\n";
@@ -414,7 +413,6 @@ void factors::RelativeAttractiveness::initTwoStage (
         if( !( PF <= 1.0 ) ) {
             cerr << "Note: since the following bounds are not met, the IRS could make humans more\n";
             cerr << "attractive to mosquitoes than they would be without IRS.\n";
-            cerr << "This note is only shown by non-BOINC executables.\n";
             cerr << "IRS.description.anophelesParams.deterrency: bounds not met:\n";
             cerr << "  0<insecticideFactor≤1\n";
             cerr.flush();

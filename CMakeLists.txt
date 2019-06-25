@@ -136,16 +136,14 @@ if (UNIX)
     message (SEND_ERROR "PThread library not found")
   endif (NOT PTHREAD_LIBRARIES)
 endif (UNIX)
-mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
+mark_as_advanced (PTHREAD_LIBRARIES)
 
-message (STATUS "BOINC includes: ${BOINC_INCLUDE_DIRS}")
 include_directories (SYSTEM
   ${XSD_INCLUDE_DIRS}
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  ${BOINC_INCLUDE_DIRS}
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
@@ -161,7 +159,6 @@ target_link_libraries (openMalaria
   ${XERCESC_LIBRARIES}
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
-  ${BOINC_LIBRARIES}
   ${OM_STD_LIBS}
 )
 

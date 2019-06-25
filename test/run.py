@@ -150,10 +150,8 @@ def runScenario(options,omOptions,name):
     ctsoutGzFile=os.path.join(simDir,"ctsout.txt.gz")
     checkFile=os.path.join(simDir,"checkpoint")
     
-    # Link or copy required files.
-    # The schema file only needs to be copied in BOINC mode, since otherwise the
-    # scenario is opened with a path and the schema can be found in the same
-    # directory. We copy it anyway.
+    # Link or copy required files. The schema file needs to be available in the
+    # working directory, while other files are found via the resource path.
     scenario_xsd=os.path.join(simDir,schemaName)
     linkOrCopy (scenarioSchema, scenario_xsd)
     
@@ -201,7 +199,7 @@ def runScenario(options,omOptions,name):
     
     if options.cleanup:
         os.remove(scenario_xsd)
-        for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?")) + [os.path.join(simDir,"init_data.xml"),os.path.join(simDir,"boinc_finish_called"),os.path.join(simDir,"scenario.sum")]):
+        for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?")) + [os.path.join(simDir,"init_data.xml"),os.path.join(simDir,"scenario.sum")]):
             if os.path.isfile(f):
                 os.remove(f)
     
