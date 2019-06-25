@@ -33,9 +33,7 @@ after_build:
   - cmd: ECHO "build-log:" https://ci.appveyor.com/project/%APPVEYOR_ACCOUNT_NAME%/openmalaria/builds/%APPVEYOR_BUILD_ID% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
   - cmd: ECHO "build-version:" %APPVEYOR_BUILD_VERSION% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
   - cmd: ECHO "worker-image:" %APPVEYOR_BUILD_WORKER_IMAGE% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
-  - cmd: mv %APPVEYOR_BUILD_FOLDER%\build\Release\openMalaria.exe %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c*.dll %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - cmd: copy %APPVEYOR_BUILD_FOLDER%\README.md %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: mkdir %APPVEYOR_BUILD_FOLDER%\OpenMalaria\schema
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\schema\scenario_*.xsd %APPVEYOR_BUILD_FOLDER%\OpenMalaria\schema
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\test\*.csv %APPVEYOR_BUILD_FOLDER%\OpenMalaria
@@ -44,6 +42,7 @@ after_build:
   - cmd: mkdir "%APPVEYOR_BUILD_FOLDER%\OpenMalaria\x86"
   - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\vcruntime140.dll" "%APPVEYOR_BUILD_FOLDER%\OpenMalaria\x86\vcruntime140.dll"
   - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\msvcp140.dll" "%APPVEYOR_BUILD_FOLDER%\OpenMalaria\x86\msvcp140.dll"
+  - cmd: mv %APPVEYOR_BUILD_FOLDER%\build\Release\openMalaria.exe %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - 7z a OpenMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\OpenMalaria"
 
 artifacts:

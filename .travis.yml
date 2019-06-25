@@ -52,6 +52,7 @@ script:
   # We copy everything in this directory. The developer must update the XML to
   # work with the current schema version (USUALLY just updating the numbers).
   - cp -r ../util/example ./
+  - cp ../version.txt example/
   - cp ../test/*.csv example/
   # NOTE: we expect the developer to copy schema/scenario_current.xsd to ../schema/$SCHEMA
   # when creating a new schema version. We DO NOT AUTOMATE this step because we do not want to
