@@ -101,7 +101,6 @@ target_link_libraries (unittest
   ${XERCESC_LIBRARIES}
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
-  ${BOINC_LIBRARIES}
   ${OM_STD_LIBS}
 )
 

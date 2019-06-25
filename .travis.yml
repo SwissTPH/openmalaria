@@ -42,7 +42,7 @@ before_install:
 
 install:
   - mkdir build && pushd build
-  - cmake -DCMAKE_BUILD_TYPE=Release ..
+  - cmake -DCMAKE_BUILD_TYPE=Release -DOM_COPY_LIBS=1 ..
 
 script:
   - make -j4
@@ -52,13 +52,15 @@ script:
   # We copy everything in this directory. The developer must update the XML to
   # work with the current schema version (USUALLY just updating the numbers).
   - cp -r ../util/example ./
-  - cp ../test/*.csv example
+  - cp ../version.txt example/
+  - cp ../test/*.csv example/
   # NOTE: we expect the developer to copy schema/scenario_current.xsd to ../schema/$SCHEMA
   # when creating a new schema version. We DO NOT AUTOMATE this step because we do not want to
   # proliferate multiple incompatible versions of $SCHEMA.
   - echo "Using schema ../schema/$SCHEMA"
   - cp ../schema/$SCHEMA example/
   - cp openMalaria example/
+  - cp *.so example/
   - pushd example && strip openMalaria && ./run-example-scenario.sh && popd
   - echo "Running test scenarios"
   - ctest -j4

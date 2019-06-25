@@ -255,7 +255,7 @@ namespace OM { namespace util {
 	    << "			be specified more than once. Overrides --checkpoint option."<<endl
 	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl
 	    << "			period, exiting after completing each"<<endl
-	    << "			checkpoint. Doesn't require BOINC to do the checkpointing." <<endl
+	    << "			checkpoint." <<endl
 	    << " -d --checkpoint-duplicates"<<endl
 	    << "			Write a checkpoint immediately after reading, which should be" <<endl
 	    << "			identical to that read." <<endl

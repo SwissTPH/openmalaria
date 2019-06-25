@@ -104,8 +104,7 @@ namespace OM { namespace util {
 	* @returns The name of the scenario XML file to use.
 	*
 	* Throws cmd_exit in the case a help message is printed. Help
-	* is printed to cout, which necessitate calling this function
-	* before BOINC is initialised.
+	* is printed to cout.
 	* 
 	* In other cases command-line parameters cause variables to be set in Global
 	* to achieve the desired result. */

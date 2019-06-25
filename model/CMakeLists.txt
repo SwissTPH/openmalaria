@@ -115,7 +115,6 @@ include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${SPIRIT_INCLUDE_DIRS}
-  ${BOINC_INCLUDE_DIRS}
   
   ${CMAKE_BINARY_DIR}/model
   ${CMAKE_SOURCE_DIR}/contrib

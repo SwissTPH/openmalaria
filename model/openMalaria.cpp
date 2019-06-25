@@ -30,8 +30,7 @@
 
 using namespace OM;
 
-/** main() — initializes and shuts down BOINC, loads scenario XML and
- * runs simulation. */
+/// main() — loads scenario XML and runs simulation
 int main(int argc, char* argv[]) {
     int exitStatus = EXIT_SUCCESS;
     string scenarioFile;

@@ -175,11 +175,8 @@ namespace OM { namespace Monitoring {
         if( ctsPeriod == SimTime::zero() )
             return;	// output disabled
 	
-	/* We attempt to resume output correctly after a reload by:
-	 *
-	 * (a) recording the last position, and relocating there
-	 * (b) trying to avoid kills during writing of a line, by using
-	 *  BOINC critical sections.
+	/* We attempt to resume output correctly after a reload by recording
+	 * the last position, and relocating there.
 	 * 
 	 * (Keeping results in memory until end of sim would be another,
 	 * slightly safer, option, but loses real-time output.) */

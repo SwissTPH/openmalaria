@@ -136,16 +136,14 @@ if (UNIX)
     message (SEND_ERROR "PThread library not found")
   endif (NOT PTHREAD_LIBRARIES)
 endif (UNIX)
-mark_as_advanced (BOINC_LIBRARIES PTHREAD_LIBRARIES)
+mark_as_advanced (PTHREAD_LIBRARIES)
 
-message (STATUS "BOINC includes: ${BOINC_INCLUDE_DIRS}")
 include_directories (SYSTEM
   ${XSD_INCLUDE_DIRS}
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
-  ${BOINC_INCLUDE_DIRS}
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
@@ -161,7 +159,6 @@ target_link_libraries (openMalaria
   ${XERCESC_LIBRARIES}
   ${Z_LIBRARIES}
   ${PTHREAD_LIBRARIES}
-  ${BOINC_LIBRARIES}
   ${OM_STD_LIBS}
 )
 
@@ -171,6 +168,21 @@ if (MSVC)
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )
 endif (MSVC)
+
+# Dependencies from outside this repository are linked dynamically. Since we
+# cannot be sure deployment systems have the same versions, we copy the ones
+# from the build system, and add an rpath entry to link from the current dir.
+option (OM_COPY_LIBS "Copy linked library files")
+if (OM_COPY_LIBS)
+  set_target_properties (openMalaria PROPERTIES
+    LINK_FLAGS "-Wl,-rpath,\"\$ORIGIN\"")
+  foreach (lib ${GSL_LIBRARIES} ${XERCESC_LIBRARIES} ${Z_LIBRARIES})
+    configure_file (${lib} ${CMAKE_BINARY_DIR} COPYONLY)
+  endforeach (lib)
+endif (OM_COPY_LIBS)
+
+# add_executable (pVivax model/Pv_mod/Source.cpp)
+# target_link_libraries (pVivax libpvivax)
 
 
 # -----  OM_BOXTEST - black-box & unit testing  -----
