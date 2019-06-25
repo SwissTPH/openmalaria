@@ -25,7 +25,6 @@
 #define Hmod_util_DocumentLoader
 
 #include "Global.h"
-#include "util/BoincWrapper.h"
 #include <schema/scenario.h>
 #include <string>
 #include <memory>
@@ -42,7 +41,7 @@ public:
     /** @brief Reads the document in the xmlFile
     * 
     * Throws on failure. */
-    util::Checksum loadDocument(std::string);
+    void loadDocument(std::string);
     
     /** Save any changes which occurred to the document, if
         * documentChanged is true. */

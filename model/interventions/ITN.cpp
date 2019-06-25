@@ -235,7 +235,6 @@ void factors::SurvivalFactor::initLogit(const scnXml::ITNEffectLogit& elt,
         // K0 = x/(x+1), so 1/(1-K0) = x+1:
         b.invBaseEffect = x + 1.0;
         
-#ifdef WITHOUT_BOINC
         // We expect K >= K0 and deduce these "advisory limits":
         if (b.PF < 0.0 || b.PF + b.IF * b.hMax < 0.0) {
             cerr << "ITN.description.anophelesParams.*KillingEffectLogit: expected"
@@ -243,7 +242,6 @@ void factors::SurvivalFactor::initLogit(const scnXml::ITNEffectLogit& elt,
                 << "\n(interaction) P+I*log(holeIndexMax+1) >= 0, found " << b.PF + b.IF * b.hMax
                 << endl;
         }
-#endif
     }
 }
 
@@ -356,10 +354,7 @@ void factors::RelativeAttractiveness::initSingleStage(
      *
      * Weaker limits would not be sufficient, as with the argument for the
      * limits of killing effect arguments below. */
-#ifdef WITHOUT_BOINC
-    // Print out a warning if nets may increase transmission, but only in
-    // non-BOINC mode, since it is not unreasonable and volunteers often
-    // mistake this kind of warning as indicating a problem.
+    // Print out a warning if nets may increase transmission.
     double pmax = 1.0 - exp(-maxInsecticide * a.insecticideScaling);
     if( !( HF > 0.0 && PF > 0.0 && IF > 0.0 &&
             HF <= 1.0 && PF <= 1.0 && HF*pow(PF*IF,pmax) <= 1.0 ) )
@@ -382,7 +377,6 @@ void factors::RelativeAttractiveness::initSingleStage(
             cerr << "  holeFactor×(insecticideFactor×interactionFactor)^"<<pmax<<"≤1\n";
         cerr.flush();
     }
-#endif
     a.lHF = log( HF );
     a.lPF = log( PF );
     a.lIF = log( IF );
@@ -416,10 +410,7 @@ void factors::RelativeAttractiveness::initTwoStage (
         * where PF is the insecticide factor, with p∈[0,1] defined as:
         *  p=1−exp(-insecticideContent*insecticideScalingFactor).
         * We therefore just need PF ≤ 1. */
-#ifdef WITHOUT_BOINC
-        // Print out a warning if ITNs may increase transmission, but only in
-        // non-BOINC mode, since it is not unreasonable and volunteers often
-        // mistake this kind of warning as indicating a problem.
+        // Print out a warning if ITNs may increase transmission.
         if( !( PF <= 1.0 ) ) {
             cerr << "Note: since the following bounds are not met, the IRS could make humans more\n";
             cerr << "attractive to mosquitoes than they would be without IRS.\n";
@@ -428,20 +419,17 @@ void factors::RelativeAttractiveness::initTwoStage (
             cerr << "  0<insecticideFactor≤1\n";
             cerr.flush();
         }
-#endif
         b.lPFEntering = log( PF );
     } else {
         assert( elt.getEnteringLogit().present() );
         model = TWO_STAGE_LOGIT;
         c.entBaseFactor = elt.getEnteringLogit().get().getBaseFactor();
         c.entInsecticideFactor = elt.getEnteringLogit().get().getInsecticideFactor();
-#ifdef WITHOUT_BOINC
         if (c.entInsecticideFactor > 0.0) {
             cerr << "ITN.description.anophelesParams.twoStageDeterrency.enteringLogit: \n"
                 << "insecticideFactor should be negative to for nets to reduce chance of entering."
                 << endl;
         }
-#endif
         // pre-calculate for efficieny:
         c.pEnt0Inv = (exp(c.entBaseFactor) + 1.0) / exp(c.entBaseFactor);
     }
@@ -555,12 +543,10 @@ void ITNComponent::deploy( Host::Human& human, mon::Deploy::Method method, Vacci
 Component::Type ITNComponent::componentType() const{
     return Component::ITN;
 }
-    
-#ifdef WITHOUT_BOINC
+
 void ITNComponent::print_details( std::ostream& out )const{
     out << id().id << "\tITN";
 }
-#endif
 
 unique_ptr<PerHostInterventionData> ITNComponent::makeHumanPart() const{
     return unique_ptr<PerHostInterventionData>(new HumanITN( *this ));

@@ -166,7 +166,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
     }else{
         initSingle();
     }
-    #ifdef WITHOUT_BOINC
+    
     if( util::CommandLine::option( util::CommandLine::PRINT_GENOTYPES ) ){
         // reorganise GT::alleleCodes so that we can look up codes, not names
         vector<pair<string,string> > allele_codes( GT::cum_initial_freqs.size() );
@@ -259,7 +259,6 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
             cout << fmtr << endl;
         }
     }
-    #endif
 }
 
 void Genotypes::startMainSim(){

@@ -82,7 +82,6 @@ namespace OM { namespace util {
         NumNewInfections,
         InitialKappa,
         VectorWarmup,
-        Checksum,
         CommandLine,
         SumWeight,
         VectorFitting,

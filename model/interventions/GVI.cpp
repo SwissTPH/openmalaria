@@ -65,12 +65,10 @@ void GVIComponent::deploy( Host::Human& human, mon::Deploy::Method method, Vacci
 }
 
 Component::Type GVIComponent::componentType()const{ return Component::GVI; }
-    
-#ifdef WITHOUT_BOINC
+
 void GVIComponent::print_details( std::ostream& out )const{
     out << id().id << "\tGVI";
 }
-#endif
 
 unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart() const{
     return unique_ptr<PerHostInterventionData>(new HumanGVI( *this ));

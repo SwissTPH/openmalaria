@@ -154,9 +154,7 @@ public:
     
     virtual Component::Type componentType() const;
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
-#endif
     
     virtual unique_ptr<PerHostInterventionData> makeHumanPart() const;
     virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream, ComponentId id ) const;

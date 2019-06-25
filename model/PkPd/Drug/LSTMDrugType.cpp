@@ -351,7 +351,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             }
             genotype_mapping[j] = phenotype;
         }
-        #ifdef WITHOUT_BOINC
+        
         if( util::CommandLine::option( util::CommandLine::PRINT_GENOTYPES ) ){
             cout << endl;
             // Debug output to see which genotypes correspond to phenotypes
@@ -371,7 +371,6 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                 cout << (fmtr % (genotype*100000) % phenotypeName.str() ) << endl;
                 genotype += 1;
             }
-        #endif
         }
     }
 }

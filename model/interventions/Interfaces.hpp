@@ -108,9 +108,7 @@ public:
      * to be fast. */
     virtual Component::Type componentType() const=0;
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const =0;
-#endif
     
     // Only for use by InterventionManager:
     inline void setExpireAfter( SimTime duration ){
@@ -160,9 +158,7 @@ public:
     void deploy( Host::Human& human, mon::Deploy::Method method,
         VaccineLimits vaccLimits ) const;
     
-#ifdef WITHOUT_BOINC
     void print_details( std::ostream& out )const;
-#endif
     
 protected:
     // List of pointers to components. Does not manage memory (InterventionManager::humanComponents does that).

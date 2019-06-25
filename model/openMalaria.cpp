@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "util/BoincWrapper.h"
 #include "util/DocumentLoader.h"
 
 #include "Global.h"
@@ -42,30 +41,19 @@ int main(int argc, char* argv[]) {
         
         scenarioFile = util::CommandLine::parse (argc, argv);   // parse arguments
         
-        util::BoincWrapper::init();     // BOINC init
-        
         // Load the scenario document:
         scenarioFile = util::CommandLine::lookupResource (scenarioFile);
         util::DocumentLoader documentLoader;
-        util::Checksum cksum = documentLoader.loadDocument(scenarioFile);
+        documentLoader.loadDocument(scenarioFile);
         
         // Set up the simulator
-        Simulator simulator( cksum, documentLoader.document() );
+        Simulator simulator( documentLoader.document() );
         
         // Save changes to the document if any occurred.
         documentLoader.saveDocument();
         
         if ( !util::CommandLine::option(util::CommandLine::SKIP_SIMULATION) )
             simulator.start(documentLoader.document().getMonitoring());
-        
-        // Write scenario checksum, only if simulation completed.
-        // Writing it earlier breaks checkpointing.
-        cksum.writeToFile (util::BoincWrapper::resolveFile ("scenario.sum"));
-        
-        // We call boinc_finish before cleanup since it should help ensure
-        // app isn't killed between writing output.txt and calling boinc_finish,
-        // and may speed up exit.
-        util::BoincWrapper::finish(exitStatus);	// Never returns
         
         // simulation's destructor runs
     } catch (const OM::util::cmd_exception& e) {
@@ -86,11 +74,7 @@ int main(int argc, char* argv[]) {
     } catch (const OM::util::traced_exception& e) {
         cerr << "Code error: " << e.what() << endl;
         cerr << e << flush;
-#ifdef WITHOUT_BOINC
-        // Don't print this on BOINC, because if it's a problem we should find
-        // it anyway!
         cerr << "This is likely an error in the C++ code. Please report!" << endl;
-#endif
         exitStatus = e.getCode();
     } catch (const OM::util::xml_scenario_error& e) {
         cerr << "Error: " << e.what() << endl;
@@ -111,10 +95,5 @@ int main(int argc, char* argv[]) {
     if( errno != 0 )
         std::perror( "OpenMalaria" );
     
-    // In case of fatal error, we call boinc_finish here:
-    if( exitStatus != 0 )
-        util::BoincWrapper::finish(exitStatus);	// Never returns
-    // In a few cases (e.g. stopping due to the --checkpoint option), we exit
-    // here. In this case we shouldn't call boinc_finish (it breaks tests).
     return exitStatus;
 }

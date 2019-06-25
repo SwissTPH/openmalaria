@@ -134,12 +134,10 @@ void EmergenceModel::initEIR(
         initialisationEIR[mod_nn(i.inSteps(), SimTime::stepsPerYear())] += speciesEIR[i];
     }
     
-#ifdef WITHOUT_BOINC
     if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {
         cout << "Annual EIR for "<<anoph.getMosquito()
              << ": "<<vectors::sum( speciesEIR )<<endl;
     }
-#endif
 
     // Set other data used for mosqEmergeRate calculation:
     FSRotateAngle = EIRRotateAngle - (EIPDuration.inDays()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration

@@ -26,7 +26,6 @@
 #include "mon/AgeGroup.h"
 #include "mon/reporting.h"
 #include "interventions/InterventionManager.hpp"
-#include "util/BoincWrapper.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
 #include "util/timeConversions.h"
@@ -179,32 +178,33 @@ SimTime finalSurveyTime(){
     return impl::surveyTimes[impl::surveyTimes.size()-1].time;
 }
 
-void writeSurveyData ()
-{
-#ifdef WITHOUT_BOINC
-    ofstream outputFile;          // without boinc, use plain text (for easy reading)
-#else
-    ogzstream outputFile;         // with, use gzip
-#endif
-    
+void writeToStream(ostream& stream) {
     // This locale ensures uniform formatting of nans and infs on all platforms.
     std::locale old_locale;
     std::locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
-    outputFile.imbue( nfn_put_locale );
-
-    string output_filename = util::BoincWrapper::resolveFile(
-        util::CommandLine::getOutputName() );
+    stream.imbue( nfn_put_locale );
     
-    outputFile.open( output_filename.c_str(), std::ios::out | std::ios::binary );
-    
-    outputFile.width (0);
+    stream.width (0);
     // For additional control:
-    // outputFile.precision (6);
-    // outputFile << scientific;
+    // stream.precision (6);
+    // stream << scientific;
     
-    internal::write( outputFile );
+    internal::write( stream );
+}
+
+void writeSurveyData ()
+{
+    string filename = util::CommandLine::getOutputName();
+    auto mode = std::ios::out | std::ios::binary;
     
-    outputFile.close();
+    if (util::CommandLine::option( util::CommandLine::COMPRESS_OUTPUT )) {
+        filename.append(".gz");
+        ogzstream stream(filename.c_str(), mode);
+        writeToStream(stream);
+    } else {
+        ofstream stream(filename, mode);
+        writeToStream(stream);
+    }
 }
 
 

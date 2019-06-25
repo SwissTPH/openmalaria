@@ -77,7 +77,6 @@ set (Model_CPP
   mon/mon.cpp
   mon/misc.cpp
   
-  util/BoincWrapper.cpp
   util/timer.cpp
   util/vectors.cpp
   util/DecayFunction.cpp

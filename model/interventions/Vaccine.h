@@ -46,9 +46,7 @@ public:
     
     virtual Component::Type componentType() const;
     
-#ifdef WITHOUT_BOINC
     virtual void print_details( std::ostream& out )const;
-#endif
     
 private:
     /** Get the initial efficacy of the vaccine.
