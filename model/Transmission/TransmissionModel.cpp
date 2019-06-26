@@ -193,12 +193,6 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
     calculateEIR( human, ageYears, EIR );
     util::streamValidate( EIR );
     
-    for( size_t g = 0, nG = EIR.size(); g < nG; ++g ){
-        auto ag = human.monAgeGroup().i();
-        auto cs = human.cohortSet();
-        mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, g, EIR[g] );
-    }
-    
     double allEIR = vectors::sum( EIR );
     if( age >= adultAge ){
         tsAdultEntoInocs += allEIR;

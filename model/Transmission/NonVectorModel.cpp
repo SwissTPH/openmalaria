@@ -217,7 +217,7 @@ void NonVectorModel::update () {
 }
 
 
-double NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<double>& EIR){
+void NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<double>& EIR){
     EIR.resize( 1 );    // no support for per-genotype tracking in this model (possible, but we're lazy)
     // where the full model, with estimates of human mosquito transmission is in use, use this:
     switch (simulationMode) {
@@ -258,7 +258,10 @@ double NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<
     }
     #endif
     EIR[0] *= human.perHostTransmission.relativeAvailabilityHetAge (ageYears);
-    return EIR[0];
+    
+    auto ag = human.monAgeGroup().i();
+    auto cs = human.cohortSet();
+    mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, 0, EIR[0] );
 }
 
 

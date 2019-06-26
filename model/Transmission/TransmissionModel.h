@@ -215,7 +215,7 @@ protected:
    * @param EIR Out-vector. Set to the age- and heterogeneity-specific EIR an
    *    individual human is exposed to, per parasite genotype, in units of
    *    inoculations per day. Length set by callee. */
-  virtual double calculateEIR(Host::Human& human, double ageYears,
+  virtual void calculateEIR(Host::Human& human, double ageYears,
         vector<double>& EIR ) = 0; 
   
   /** Needs to be called each time-step after Human::update() to update summary

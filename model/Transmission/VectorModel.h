@@ -62,7 +62,7 @@ public:
   virtual void vectorUpdate ();
   virtual void update ();
 
-  virtual double calculateEIR( Host::Human& human, double ageYears,
+  virtual void calculateEIR( Host::Human& human, double ageYears,
         vector<double>& EIR );
   
   virtual const map<string,size_t>& getSpeciesIndexMap();

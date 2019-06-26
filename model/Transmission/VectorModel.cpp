@@ -414,7 +414,7 @@ SimTime VectorModel::initIterate () {
     }
 }
 
-double VectorModel::calculateEIR(Host::Human& human, double ageYears,
+void VectorModel::calculateEIR(Host::Human& human, double ageYears,
         vector<double>& EIR)
 {
     PerHost& host = human.perHostTransmission;
@@ -423,7 +423,6 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
         double eir = initialisationEIR[sim::ts0().moduloYearSteps()] *
                 host.relativeAvailabilityHetAge (ageYears);
         EIR.assign( 1, eir );
-        return eir;
     }else{
         assert( simulationMode == dynamicEIR );
         EIR.assign( WithinHost::Genotypes::N(), 0.0 );
@@ -444,7 +443,12 @@ double VectorModel::calculateEIR(Host::Human& human, double ageYears,
                 EIR[g] += partialEIR[g] * entoFactor;
             }
         }
-        return vectors::sum( EIR );
+    }
+    
+    for( size_t g = 0, nG = EIR.size(); g < nG; ++g ){
+        auto ag = human.monAgeGroup().i();
+        auto cs = human.cohortSet();
+        mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, g, EIR[g] );
     }
 }
 
