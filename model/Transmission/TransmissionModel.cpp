@@ -40,13 +40,6 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
-inline size_t survInocsSize(size_t nGenotypes){
-    return mon::AgeGroup::numGroups() * mon::numCohortSets() * nGenotypes; }
-inline size_t survInocsIndex(size_t ageGroup, size_t cohortSet, size_t genotype){
-    return ageGroup + mon::AgeGroup::numGroups() *
-        (cohortSet + mon::numCohortSets() * genotype);
-}
-
 TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Entomology& entoData, int populationSize) {
   // Entomology contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
@@ -125,7 +118,6 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
     tsNumAdults(0)
 {
     initialisationEIR.assign (SimTime::stepsPerYear(), 0.0);
-    surveyInoculations.assign(survInocsSize(nGenotypes), 0.0);
     
   using Monitoring::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
@@ -202,8 +194,9 @@ double TransmissionModel::getEIR( Host::Human& human, SimTime age,
     util::streamValidate( EIR );
     
     for( size_t g = 0, nG = EIR.size(); g < nG; ++g ){
-        size_t index = survInocsIndex(human.monAgeGroup().i(), human.cohortSet(), g);
-        surveyInoculations[index] += EIR[g];
+        auto ag = human.monAgeGroup().i();
+        auto cs = human.cohortSet();
+        mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, g, EIR[g] );
     }
     
     double allEIR = vectors::sum( EIR );
@@ -219,19 +212,6 @@ void TransmissionModel::summarize () {
     mon::reportStatMF( mon::MVF_ANN_AVG_K, _annualAverageKappa );
     
     if( !mon::isReported() ) return;    // cannot use counters below when not reporting
-    
-    for( size_t ag = 0, nAg = mon::AgeGroup::numGroups(), cs = 0,
-        nCS = mon::numCohortSets(), g = 0, nG = surveyInoculations.size() / (nAg * nCS);
-        ag < nAg; ++ag )
-    {
-        for( cs = 0; cs < nCS; ++cs ){
-            for( g = 0; g < nG; ++ g ){
-                size_t index = survInocsIndex(ag, cs, g);
-                mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, g, surveyInoculations[index] );
-            }
-        }
-    }
-    surveyInoculations.assign( surveyInoculations.size(), 0.0 );
     
     double duration = (sim::now() - lastSurveyTime).inSteps();
     if( duration == 0.0 ){
@@ -265,7 +245,6 @@ void TransmissionModel::checkpoint (istream& stream) {
     lastSurveyTime & stream;
     numTransmittingHumans & stream;
     tsNumAdults & stream;
-    surveyInoculations & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     simulationMode & stream;
@@ -283,7 +262,6 @@ void TransmissionModel::checkpoint (ostream& stream) {
     lastSurveyTime & stream;
     numTransmittingHumans & stream;
     tsNumAdults & stream;
-    surveyInoculations & stream;
 }
 
 } }

@@ -307,10 +307,6 @@ private:
 
   /// accumulator for time step adults requesting EIR
   int tsNumAdults;
-  
-    /// Total inoculations since last survey (multidimensional).
-    /// See survInocsSize, survInocsIndex in cpp file.
-    vector<double> surveyInoculations;
 };
 
 } }
