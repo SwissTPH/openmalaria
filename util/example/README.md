@@ -28,6 +28,10 @@ may be required, depending on your system libraries and resources needed by the
 simulation. Alternatively resource files may be retrieved from a different path
 via the --resource-path option.
 
+Linux builds are currently missing required libraries. If your system has
+different library versions, it is probably easiest to clone the repository and
+build from source.
+
 Windows builds currently include all schema versions in the `schema/` directory.
 Copy the correct version for this OpenMalaria build to the current directory.
 (This must correspond to the build version, not the scenario version.)

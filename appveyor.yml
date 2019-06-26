@@ -33,6 +33,7 @@ after_build:
   - cmd: ECHO "build-log:" https://ci.appveyor.com/project/%APPVEYOR_ACCOUNT_NAME%/openmalaria/builds/%APPVEYOR_BUILD_ID% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
   - cmd: ECHO "build-version:" %APPVEYOR_BUILD_VERSION% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
   - cmd: ECHO "worker-image:" %APPVEYOR_BUILD_WORKER_IMAGE% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
+  - cmd: copy %APPVEYOR_BUILD_FOLDER%\version.txt %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c*.dll %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: mkdir %APPVEYOR_BUILD_FOLDER%\OpenMalaria\schema
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\schema\scenario_*.xsd %APPVEYOR_BUILD_FOLDER%\OpenMalaria\schema

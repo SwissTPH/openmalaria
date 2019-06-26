@@ -42,7 +42,7 @@ before_install:
 
 install:
   - mkdir build && pushd build
-  - cmake -DCMAKE_BUILD_TYPE=Release -DOM_COPY_LIBS=1 ..
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
 
 script:
   - make -j4
@@ -60,7 +60,6 @@ script:
   - echo "Using schema ../schema/$SCHEMA"
   - cp ../schema/$SCHEMA example/
   - cp openMalaria example/
-  - cp *.so example/
   - pushd example && strip openMalaria && ./run-example-scenario.sh && popd
   - echo "Running test scenarios"
   - ctest -j4
