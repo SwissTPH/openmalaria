@@ -73,7 +73,7 @@ public:
   
   virtual void vectorUpdate () {}
   virtual void update ();
-  virtual double calculateEIR(OM::Host::Human& human, double ageYears, vector< double >& EIR);
+  virtual void calculateEIR(OM::Host::Human& human, double ageYears, vector< double >& EIR);
   
 private:
 

@@ -655,6 +655,12 @@ void reportStatMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
     const size_t survey = impl::survNumStat;
     storeF.report( val, measure, survey, ageIndex, cohortSet, 0, genotype, 0 );
 }
+void reportStatMACSGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
+                  size_t species, size_t genotype, double val )
+{
+    const size_t survey = impl::survNumStat;
+    storeF.report( val, measure, survey, ageIndex, cohortSet, species, genotype, 0 );
+}
 void reportStatMHPF( Measure measure, const Host::Human& human, size_t drug, double val ){
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monAgeGroup().i();

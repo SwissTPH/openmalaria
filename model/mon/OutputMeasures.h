@@ -236,8 +236,8 @@ void defineOutMeasures(){
     /// Kappa (human infectiousness) weighted by availability per day-of-year for the last year.
     /// (Reporting removed.)
     namedOutMeasures["kappaPerDayOfYear"] = OutMeasure::obsolete( 29 );
-    /** The total number of inoculations, by age group and cohort, summed over
-     * the reporting period. */
+    /** The total number of inoculations, by age group, cohort and parasite
+     * genotype, summed over the reporting period. */
     namedOutMeasures["innoculationsPerAgeGroup"] =
         OutMeasure::humanACG( 30, MVF_INOCS, true );
     /// N_v0: emergence of feeding vectors during the last time step. Units: mosquitoes/day
@@ -450,6 +450,10 @@ void defineOutMeasures(){
      */
     namedOutMeasures["expectedSevere"] =
         OutMeasure::humanAC( 78, MHF_EXPECTED_SEVERE, true );
+    /** The total number of inoculations, by mosquito species, summed over
+     * the reporting period. */
+    namedOutMeasures["innoculationsPerVector"] =
+        OutMeasure::species( 79, MVF_INOCS, false );
     
     // Now initialise valid condition measures:
     foreach( const NamedMeasureMapT::value_type& v, namedOutMeasures ){

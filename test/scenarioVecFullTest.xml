@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Full set of interventions" schemaVersion="38" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Full set of interventions" schemaVersion="40" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="150">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -61,6 +61,7 @@
       <option name="Vector_Sv" value="true"/>
       <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
+      <option name="innoculationsPerVector" value="true"/>
       <option name="allCauseIMR"/>
       <option name="nMDAs"/>
       <option name="nCtsMDA"/>
@@ -367,7 +368,6 @@
     <ModelOptions>
       <option name="LOGNORMAL_MASS_ACTION" value="true"/>
       <option name="NO_PRE_ERYTHROCYTIC" value="true"/>
-      <option name="PROPHYLACTIC_DRUG_ACTION_MODEL" value="true"/>
       <option name="INNATE_MAX_DENS" value="false"/>
       <option name="INDIRECT_MORTALITY_FIX" value="false"/>
       <option name="NON_MALARIA_FEVERS" value="true"/>

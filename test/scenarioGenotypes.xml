@@ -32,6 +32,7 @@
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="false"/>
       <option name="innoculationsPerAgeGroup" byGenotype="true"/>
+      <option name="innoculationsPerVector" value="true"/>
       <option name="Vector_Nv0" value="false"/>
       <option name="Vector_Nv" value="true"/>
       <option name="Vector_Ov" value="true"/>
