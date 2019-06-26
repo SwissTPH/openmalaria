@@ -417,11 +417,14 @@ SimTime VectorModel::initIterate () {
 void VectorModel::calculateEIR(Host::Human& human, double ageYears,
         vector<double>& EIR)
 {
+    auto ag = human.monAgeGroup().i();
+    auto cs = human.cohortSet();
     PerHost& host = human.perHostTransmission;
     host.update( human );
     if (simulationMode == forcedEIR){
         double eir = initialisationEIR[sim::ts0().moduloYearSteps()] *
                 host.relativeAvailabilityHetAge (ageYears);
+        mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, 0, eir );
         EIR.assign( 1, eir );
     }else{
         assert( simulationMode == dynamicEIR );
@@ -440,15 +443,11 @@ void VectorModel::calculateEIR(Host::Human& human, double ageYears,
              * See comment in AnophelesModel::advancePeriod for method. */
             double entoFactor = ageFactor * host.availBite(species[i].getHumanBaseParams(), i);
             for( size_t g = 0; g < EIR.size(); ++g ){
-                EIR[g] += partialEIR[g] * entoFactor;
+                auto eir = partialEIR[g] * entoFactor;
+                mon::reportStatMACSGF( mon::MVF_INOCS, ag, cs, i, g, eir );
+                EIR[g] += eir;
             }
         }
-    }
-    
-    for( size_t g = 0, nG = EIR.size(); g < nG; ++g ){
-        auto ag = human.monAgeGroup().i();
-        auto cs = human.cohortSet();
-        mon::reportStatMACGF( mon::MVF_INOCS, ag, cs, g, EIR[g] );
     }
 }
 

@@ -227,7 +227,7 @@ void reportStatMHF( Measure measure, const Host::Human& human, double val );
 /// Report some value (floating point) for the current survey and some age
 /// group and cohort set
 void reportStatMACGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
-                  size_t genotpye, double val );
+                  size_t genotype, double val );
 /// Report some value (floating point) for some human and genotype to the current survey.
 void reportStatMHGF( Measure measure, const Host::Human& human, size_t genotype,
                  double val );
@@ -237,6 +237,10 @@ void reportStatMHPF( Measure measure, const Host::Human& human, size_t drugIndex
 void reportStatMSF( Measure measure, size_t species, double val );
 /// Report some value (floating point) by genotype to the current survey.
 void reportStatMSGF( Measure measure, size_t species, size_t genotype, double val );
+/// Report some value (floating point) for the current survey and some age
+/// group, cohort set, genotype and vector species
+void reportStatMACSGF( Measure measure, size_t ageIndex, uint32_t cohortSet,
+                  size_t species, size_t genotype, double val );
 
 /// Query whether an output measure is used.
 /// This function is not fast, so it is recommended to cache the result.
