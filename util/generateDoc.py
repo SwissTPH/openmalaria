@@ -156,9 +156,8 @@ class DocWriter:
     
     """write header"""
     def header(self, schema_file, ver, filter, commit):
-        self.heading(1, 'Generated schema', ver, 'documentation', ('' if filter is None else '('+filter+')'))
-        self.p('This page is automatically generated from the following schema file: `'+schema_file+'`.')
-        self.p('I recommend against editing it because edits will likely be lost later.')
+        self.heading(1, 'Schema', ver, 'documentation', ('' if filter is None else '('+filter+')'))
+        self.p('Generated from: `'+schema_file+'`.')
         
         if commit:
             dt = date.today()
@@ -522,10 +521,7 @@ class Element(Node):
             self.elt_type.collect_elements(doc, stypes, self)
     
     def writedoc(self, w):
-        if self.name == "half_life":
-            print("half_life element has type", self.elt_type, ", appinfo: ", self.appinfo)
-        
-        w.heading(1, w.anchor(self.linkname), self.appinfo.get('name', self.name))
+        w.heading(2, w.anchor(self.linkname), self.appinfo.get('name', self.name))
         w.p(self.breadcrumb(w, None))
         
         #w.heading(5, 'specification')
@@ -710,6 +706,8 @@ def main():
             w.pn('')
             w.p('This documentation was automatically generated from OpenMalaria schema (XSD) files.')
             w.p('It is automatically kept up to date with schema files in the master branch of the repository.')
+            dt = date.today()
+            w.p('Contents were last updated on {0}-{1}-{2}.'.format(dt.year,dt.month,dt.day))
             w.finish()
         
         path=os.path.join(out_dir, 'SUMMARY.md')
