@@ -5,23 +5,10 @@ env:
     - SCHEMA="scenario_$SCHEMA_VERSION.xsd"
     - OMP_NUM_THREADS=4
 
-os:
-  - linux
-  - osx
-
-matrix:
-  exclude:
-    - os: osx
-      compiler: gcc
-
 sudo: required
 dist: xenial
 
 language: cpp
-
-compiler:
-  - gcc
-  - clang
 
 addons:
   apt:
@@ -83,11 +70,21 @@ deploy:
   file: openMalaria-$TRAVIS_OS_NAME.tar.gz
   on:
     tags: true
-    condition: $CC = clang
 
-jobs:
+matrix:
   include:
-    - stage: XSD documentation
+    - os: linux
+      compiler: gcc
+    
+    - os: linux
+      compiler: clang
+      deploy: skip
+      
+    - os: osx
+      compiler: clang
+    
+    - name: gh-pages build
+      os: linux
       script:
         - mkdir schema/generated
         - pushd schema/generated
