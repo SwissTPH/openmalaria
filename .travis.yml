@@ -85,6 +85,8 @@ matrix:
     
     - name: gh-pages build
       os: linux
+      before_install: skip
+      install: skip
       script:
         - mkdir schema/generated
         - pushd schema/generated
@@ -94,6 +96,8 @@ matrix:
         - ../../util/generateDoc.py --mdbook -O src ../scenario_*.xsd
         - ./mdbook build
         - popd
+      after_success: skip
+      before_deploy: skip
       deploy:
         provider: pages
         skip-cleanup: true
