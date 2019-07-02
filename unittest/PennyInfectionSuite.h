@@ -49,9 +49,12 @@ public:
     }
     
     void testThresholds(){
-        TS_ASSERT_APPROX( infection->threshold_N, 1162659.874442960284000 );
-        TS_ASSERT_APPROX( infection->threshold_C, 220.766169197537423 );
-        TS_ASSERT_APPROX( infection->threshold_V, 778.491750025389886 );
+//         cout << setprecision(8) << infection->threshold_N
+//             << '\t' << infection->threshold_C
+//             << '\t' << infection->threshold_V << endl;
+        TS_ASSERT_APPROX( infection->threshold_N, 1037.7696 );
+        TS_ASSERT_APPROX( infection->threshold_C, 351.63491 );
+        TS_ASSERT_APPROX( infection->threshold_V, 227.82697 );
     }
     
     static void readVector(std::vector<double>& vec, const char* file){
@@ -68,6 +71,10 @@ public:
         vector<double> cirDens, seqDens;
         readVector(cirDens,"PennyCirDens.txt");
         readVector(seqDens,"PennySeqDens.txt");
+//         ofstream outCir("PennyCirDens.txt");
+//         ofstream outSeq("PennySeqDens.txt");
+//         outCir << setprecision(8);
+//         outSeq << setprecision(8);
         TS_ASSERT_EQUALS( cirDens.size(), seqDens.size() );
         
         bool extinct = false;
@@ -80,6 +87,8 @@ public:
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
             TS_ASSERT_APPROX( infection->getDensity(), cirDens[iterations] );
             TS_ASSERT_APPROX( infection->seqDensity(ageDays), seqDens[iterations] );
+//             outCir << infection->getDensity() << endl;
+//             outSeq << infection->seqDensity(ageDays) << endl;
             now += SimTime::oneDay();
             iterations+=1;
         }while(!extinct);

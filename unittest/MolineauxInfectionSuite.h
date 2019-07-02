@@ -65,7 +65,7 @@ public:
         // only useful thing this test does is spot changes in output!
         vector<double> dens;
         readVector(dens,"MolineauxCirDens.txt");
-//         ofstream out("MolineauxCirDens2.txt");
+//         ofstream out("MolineauxCirDens.txt");
 //         out << setprecision(8);
         
         // pkpdID (value) isn't important since we're not using drug model here:
@@ -107,7 +107,7 @@ public:
         // from the pairwise model, when compared to those in the paper.
         stats.compare( "MolineauxStatsOrigRG" );
     }
-    
+    /*
     void dont_testMol1MG(){
         UnittestUtil::MolineauxWHM_setup( "1st_max_gamma", false );
         MolInfStats stats( 200 );
@@ -161,7 +161,7 @@ public:
         // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStats1MGMDGRG" );;
     }
-    
+    */
     void testMolPairwise(){
         UnittestUtil::MolineauxWHM_setup( "pairwise", false );
         MolInfStats stats( 200 );

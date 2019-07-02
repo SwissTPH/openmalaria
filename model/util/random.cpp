@@ -34,7 +34,7 @@
 
 // Define to use boost as the underlying generator:
 #define OM_RANDOM_USE_BOOST
-// #define OM_RANDOM_USE_PCG
+#define OM_RANDOM_USE_PCG
 // #define OM_RANDOM_USE_BOOST_DIST
 
 #include "util/random.h"
