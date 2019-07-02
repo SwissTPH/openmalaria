@@ -34,6 +34,7 @@
 
 // Define to use boost as the underlying generator:
 #define OM_RANDOM_USE_BOOST
+// #define OM_RANDOM_USE_PCG
 // #define OM_RANDOM_USE_BOOST_DIST
 
 #include "util/random.h"
@@ -42,10 +43,15 @@
 #include "Global.h"
 
 #ifdef OM_RANDOM_USE_BOOST
-#include <boost/random/mersenne_twister.hpp>
 #include <boost/random/uniform_01.hpp>
+#   ifdef OM_RANDOM_USE_PCG
+#include <pcg_random.hpp>
+#   else
+#include <boost/random/mersenne_twister.hpp>
+#   endif
+#endif
 
-#   ifdef OM_RANDOM_USE_BOOST_DIST
+#ifdef OM_RANDOM_USE_BOOST_DIST
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/lognormal_distribution.hpp>
 #include <boost/random/gamma_distribution.hpp>
@@ -53,7 +59,6 @@
 #include <boost/random/poisson_distribution.hpp>
 #include <boost/random/bernoulli_distribution.hpp>
 #include <boost/random/weibull_distribution.hpp>
-#   endif
 #endif
 
 #if !defined OM_RANDOM_USE_BOOST_DIST
@@ -72,13 +77,18 @@
 namespace OM { namespace util {
 
 # ifdef OM_RANDOM_USE_BOOST
-    static boost::random::mt19937 boost_generator;
-    static boost::random::uniform_01<boost::random::mt19937&> rng_uniform01 (boost_generator);
+#   ifdef OM_RANDOM_USE_PCG
+    static pcg64 generator;
+    static boost::random::uniform_01<pcg64&> rng_uniform01 (generator);
+#   else
+    static boost::random::mt19937 generator;
+    static boost::random::uniform_01<boost::random::mt19937&> rng_uniform01 (generator);
+#   endif
     
 #   if !defined OM_RANDOM_USE_BOOST_DIST
     long unsigned int boost_rng_get (void*) {
 	BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
-	long unsigned int val = static_cast<long unsigned int> (boost_generator ());
+	long unsigned int val = static_cast<long unsigned int> (generator ());
 	streamValidate( val );
 	return val;
     }
@@ -88,8 +98,8 @@ namespace OM { namespace util {
     
     static const gsl_rng_type boost_mt_type = {
 	"boost_mt19937",		// name
-	boost_generator.max(),	// max value
-	boost_generator.min(),	// min value
+	generator.max(),	// max value
+	generator.min(),	// min value
 	0,					// size of state; not used here
 	nullptr,				// re-seed function; don't use
 	&boost_rng_get,
@@ -131,8 +141,10 @@ struct generator_factory {
 void random::seed (uint32_t seed) {
 //     util::streamValidate(seed);
 # ifdef OM_RANDOM_USE_BOOST
+# if !defined OM_RANDOM_USE_PCG
     if (seed == 0) seed = 4357;	// gsl compatibility − ugh
-    boost_generator.seed (seed);
+# endif
+    generator.seed (seed);
 # else
     gsl_rng_set (rng.gsl_generator, seed);
 # endif
@@ -149,7 +161,7 @@ void random::checkpoint (istream& stream, int seedFileNumber) {
     if (!stream || stream.gcount() != streamsize(len))
 	throw checkpoint_error ("stream read error string");
     istringstream ss (str);
-    ss >> boost_generator;
+    ss >> generator;
 # else
     
     ostringstream seedN;
@@ -166,7 +178,7 @@ void random::checkpoint (istream& stream, int seedFileNumber) {
 void random::checkpoint (ostream& stream, int seedFileNumber) {
 # ifdef OM_RANDOM_USE_BOOST
     ostringstream ss;
-    ss << boost_generator;
+    ss << generator;
     ss.str() & stream;
 # else
     
@@ -197,7 +209,7 @@ double random::uniform_01 () {
 double random::gauss (double mean, double std){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::normal_distribution<> dist (mean, std);
-    double result = dist(boost_generator);
+    double result = dist(generator);
 # else
     double result = gsl_ran_gaussian(rng.gsl_generator,std)+mean;
 # endif
@@ -208,7 +220,7 @@ double random::gauss (double mean, double std){
 double random::gamma (double a, double b){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::gamma_distribution<> dist (a, b);
-    double result = dist(boost_generator);
+    double result = dist(generator);
 # else
     double result = gsl_ran_gamma(rng.gsl_generator, a, b);
 # endif
@@ -219,7 +231,7 @@ double random::gamma (double a, double b){
 double random::log_normal (double meanlog, double stdlog){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::lognormal_distribution<> dist (meanlog, stdlog);
-    double result = dist (boost_generator);
+    double result = dist (generator);
 # else
     double result = gsl_ran_lognormal (rng.gsl_generator, meanlog, stdlog);
 # endif
@@ -255,7 +267,7 @@ double random::max_multi_log_normal (double start, int n, double meanlog, double
 double random::beta (double a, double b){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::beta_distribution<> dist (a, b);
-    double result = dist(boost_generator);
+    double result = dist(generator);
 # else
     double result = gsl_ran_beta (rng.gsl_generator,a,b);
 # endif
@@ -276,7 +288,7 @@ int random::poisson(double lambda){
     }
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::poisson_distribution<> dist (lambda);
-    int result = dist(boost_generator);
+    int result = dist(generator);
 # else
     int result = gsl_ran_poisson (rng.gsl_generator, lambda);
 # endif
@@ -287,7 +299,7 @@ int random::poisson(double lambda){
 bool random::bernoulli(double prob){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::bernoulli_distribution<> dist (prob);
-    bool result = dist(boost_generator);
+    bool result = dist(generator);
 # else
     assert( (boost::math::isfinite)(prob) );
     // return true iff our variate is less than the probability
@@ -305,7 +317,7 @@ int random::uniform(int n){
 double random::weibull(double lambda, double k){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::weibull_distribution<> dist (k, lambda);
-    return dist(boost_generator);
+    return dist(generator);
 # else
     return gsl_ran_weibull( rng.gsl_generator, lambda, k );
 # endif
