@@ -78,8 +78,9 @@ namespace OM { namespace util {
 
 # ifdef OM_RANDOM_USE_BOOST
 #   ifdef OM_RANDOM_USE_PCG
-    static pcg64 generator;
-    static boost::random::uniform_01<pcg64&> rng_uniform01 (generator);
+    // I would prefer to use pcg64, but MSVC mysteriously fails
+    static pcg32 generator;
+    static boost::random::uniform_01<pcg32&> rng_uniform01 (generator);
 #   else
     static boost::random::mt19937 generator;
     static boost::random::uniform_01<boost::random::mt19937&> rng_uniform01 (generator);
