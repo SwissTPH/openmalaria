@@ -78,7 +78,9 @@ matrix:
     
     - os: linux
       compiler: clang
-      deploy: skip
+      deploy:
+        provider: script
+        script: echo "Skipping deployment!"
       
     - os: osx
       compiler: clang
