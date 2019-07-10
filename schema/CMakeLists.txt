@@ -2,8 +2,6 @@
 # Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-find_package (Python)
-
 set (SCHEMA_NAMES
   scenario
   demography

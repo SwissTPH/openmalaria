@@ -4,8 +4,17 @@
 #
 # Defines PYTHON_EXECUTABLE. Doesn't abort if not found.
 
-# We need python3 which is now often the default version
-find_program (PYTHON_EXECUTABLE python3 python
+# We need Python 3.x which is now often the default version.
+# On Windows, install paths may help
+find_program (PYTHON_EXECUTABLE
+  NAMES python3 python3.exe python python.exe
+  PATHS
+    "C:\\Python37-x64" "C:\\Python37"
+    "C:\\Python36-x64" "C:\\Python36"
+    "C:\\Python35-x64" "C:\\Python35"
+    "C:\\Python34-x64" "C:\\Python34"
+    "C:\\Python33-x64" "C:\\Python33"
   DOC "Path to python (required).")
+message (STATUS "Found Python interpreter: ${PYTHON_EXECUTABLE}")
 
 mark_as_advanced (PYTHON_EXECUTABLE)

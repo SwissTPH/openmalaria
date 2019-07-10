@@ -2,13 +2,7 @@
 # Copyright © 2005-2013 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-cmake_minimum_required (VERSION 2.4)
-# We still (try to) support cmake 2.4, but cmake 2.8 policies also work:
-if("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.6)
-    cmake_policy(VERSION 2.8)
-elseif("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.4)
-    cmake_policy(VERSION 2.6)
-endif("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" GREATER 2.6)
+cmake_minimum_required (VERSION 3.0)
 
 project (OpenMalaria CXX)
 
@@ -94,6 +88,11 @@ find_package (XSD)
 find_package (XERCESC)
 find_package (GSL)
 find_package (Z)
+find_package (Python)
+
+if (NOT PYTHON_EXECUTABLE)
+    message (SEND_ERROR "Unable to find a Python interpreter (required).")
+endif (NOT PYTHON_EXECUTABLE)
 
 
 # Find Boost:
