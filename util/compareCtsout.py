@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of OpenMalaria.
@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """
 
 import sys
-import string
 from optparse import OptionParser
 from approxEqual import ApproxSame
 
@@ -64,21 +63,21 @@ def sumsApproxEq (fn1,fn2):
     t2,vec2=readSums(fn2)
     approxSame = ApproxSame(REL_PRECISION,ABS_PRECISION)
     if t1 != t2:
-        print "\033[1;31mColumns not equal:"
-        print t1
-        print t2
-        print "\033[0;0m",
+        print("\033[1;31mColumns not equal:")
+        print(t1)
+        print(t2)
+        print("\033[0;0m", end=' ')
         return False
     allApEq=True
     assert len(vec1)==len(vec2)
     for i in range(len(vec1)):
         if not approxSame(vec1[i],vec2[i]):
-            print "\033[0;31mSignificantly different:",t1[i],"; sums:",vec1[i],",",vec2[i]
+            print("\033[0;31mSignificantly different:",t1[i],"; sums:",vec1[i],",",vec2[i])
             allApEq=False
     if allApEq:
-        print "No significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+"), ok."
+        print("No significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+"), ok.")
     else:
-        print "\033[1;31mSome significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+ ")!\033[0;0m"
+        print("\033[1;31mSome significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+ ")!\033[0;0m")
     return allApEq
 
 def main(fn1,fn2):
@@ -88,19 +87,19 @@ def main(fn1,fn2):
         opt+=" --rel-prescision="+str(REL_PRECISION)
     if ABS_PRECISION!=1e-6:
         opt+=" --abs-prescision="+str(ABS_PRECISION)
-    print "\033[1;36m  compareCtsout.py"+opt+" "+fn1+" "+fn2+"\033[0;0m"
+    print("\033[1;36m  compareCtsout.py"+opt+" "+fn1+" "+fn2+"\033[0;0m")
     
     # Read both files and combine into a map of key to pairs (v1, v2)
     try:
         if charEqual (fn1,fn2):
-            print "ctsout.txt files are identical"
+            print("ctsout.txt files are identical")
             return 0,True
         elif sumsApproxEq (fn1,fn2):
             return 0,False
         return 1,False
     # python 3000 syntax is "except IOError as e", backported to 2.6 but not always supported. Old syntax:
-    except IOError, e:
-        print str(e)
+    except IOError as e:
+        print(str(e))
         return 1,False
 
 # Test for options
@@ -131,6 +130,6 @@ if __name__ == '__main__':
     if (len(others) == 2):
         ret,ident = main (others[0],others[1])
     else:
-        print "Usage: "+sys.argv[0]+" logfile1 logfile2"
+        print("Usage: "+sys.argv[0]+" logfile1 logfile2")
         ret=-1
     sys.exit(ret)

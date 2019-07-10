@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of OpenMalaria.
@@ -53,29 +53,29 @@ ident is 1 if files are binary-equal."""
         opt+=" --rel-prescision="+str(REL_PRECISION)
     if ABS_PRECISION!=1e-6:
         opt+=" --abs-prescision="+str(ABS_PRECISION)
-    print "\033[1;34m  compareOutput.py"+opt+" "+fn1+" "+fn2+" "+str(maxDiffsToPrint)+"\033[0;0m"
+    print(("\033[1;34m  compareOutput.py"+opt+" "+fn1+" "+fn2+" "+str(maxDiffsToPrint)+"\033[0;0m"))
     
     # Read both files and combine into a map of key to pairs (v1, v2)
     try:
         if charEqual (fn1,fn2):
-            print "output.txt files are identical"
+            print("output.txt files are identical")
             return 0,True
-        print "output.txt files aren't binary-equal"
+        print("output.txt files aren't binary-equal")
         
         values1=readEntries(fn1)
         values2=readEntries(fn2)
     # python 3000 syntax is "except IOError as e", backported to 2.6 but not always supported. Old syntax:
-    except IOError, e:
-        print str(e)
+    except IOError as e:
+        print((str(e)))
         return 1,False
     values=dict()
-    for (k,v1) in values1.iteritems():
+    for (k,v1) in list(values1.items()):
         v2=None
         if (k in values2):
             v2=values2[k]
             del values2[k]
         values[k] = (v1,v2)
-    for (k,v2) in values2.iteritems():
+    for (k,v2) in list(values2.items()):
         values[k] = (None,v2)
     
     # Go through all values:
@@ -91,7 +91,7 @@ ident is 1 if files are binary-equal."""
     perMeasureDiffAbsSum = dict()
     approxSame = ApproxSame(REL_PRECISION, ABS_PRECISION)
     
-    for (k,(v1,v2)) in values.iteritems():
+    for (k,(v1,v2)) in list(values.items()):
         if v1==None:
             numMissing1 += 1
         elif v2==None:
@@ -113,17 +113,17 @@ ident is 1 if files are binary-equal."""
         numPrinted += 1
         perMeasureNumDiff[k.a] = perMeasureNumDiff.get(k.a,0) + 1;
         if (numPrinted <= maxDiffsToPrint):
-            print "survey "+str(k.b)+", group "+str(k.c)+", measure "+str(k.a)+": "+str(v1)+" -> "+str(v2)
+            print(("survey "+str(k.b)+", group "+str(k.c)+", measure "+str(k.a)+": "+str(v1)+" -> "+str(v2)))
             if (numPrinted == maxDiffsToPrint):
-                print "[won't print any more line-by-line diffs]"
+                print("[won't print any more line-by-line diffs]")
     
     if (numMissing1 > 0) or (numMissing2 > 0):
-        print str(numMissing1) + " entries missing from first file, " + str(numMissing2) +" from second"
+        print((str(numMissing1) + " entries missing from first file, " + str(numMissing2) +" from second"))
         ret = 3
     
     maxDiffSum=0.0
     maxAbsDiffSum=0.0
-    for (k.a,absDiff) in perMeasureDiffAbsSum.iteritems():
+    for (k.a,absDiff) in list(perMeasureDiffAbsSum.items()):
         if not (absDiff <= 1e-6):   # handle NANs
             # standard division throws on divide-by-zero, which I don't want
             def div(x,y):
@@ -139,15 +139,15 @@ ident is 1 if files are binary-equal."""
             maxDiffSum=max(maxDiffSum,math.fabs(diffSum))
             absDiffSum=div(absDiff,sum1)
             maxAbsDiffSum=max(maxAbsDiffSum,absDiffSum)
-            print "for measure "+str(k.a)+":\tsum(1st file):"+str(sum1)+"\tsum(2nd file):"+str(sum2)+"\tdiff/sum: "+str(diffSum)+"\t(abs diff)/sum: "+str(absDiffSum)
+            print(("for measure "+str(k.a)+":\tsum(1st file):"+str(sum1)+"\tsum(2nd file):"+str(sum2)+"\tdiff/sum: "+str(diffSum)+"\t(abs diff)/sum: "+str(absDiffSum)))
     if maxDiffSum>0 or maxAbsDiffSum>0:
-        print "Max diff/sum:",maxDiffSum,"max (abs diff)/sum:",maxAbsDiffSum
+        print(("Max diff/sum:",maxDiffSum,"max (abs diff)/sum:",maxAbsDiffSum))
     
     if numDiffs == 0:
-        print "No significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+"), ok."
+        print(("No significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+"), ok."))
         return ret,False
     else:
-        print "\033[1;31m"+str(numDiffs)+" significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+ ")!\033[0;0m"
+        print(("\033[1;31m"+str(numDiffs)+" significant differences (total relative diff: "+str(approxSame.getTotalRelDiff())+ ")!\033[0;0m"))
         return 1,False
 
 # Test for options
@@ -179,6 +179,6 @@ if __name__ == '__main__':
     elif (len(others) == 2):
         ret,ident = main (others[0],others[1])
     else:
-        print "Usage: "+sys.argv[0]+" logfile1 logfile2 [max different lines to print]"
+        print(("Usage: "+sys.argv[0]+" logfile1 logfile2 [max different lines to print]"))
         ret=-1
     sys.exit(ret)

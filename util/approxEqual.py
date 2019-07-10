@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of OpenMalaria.
@@ -86,39 +86,39 @@ class TestApproxEqual (unittest.TestCase):
     def testNaN (self):
         Inf = 1e10000
         NaN = Inf * 0.0
-        self.assert_ (not self.approxEqual6 (NaN, 1))
-        self.assert_ (not self.approxEqual6 (NaN, 0))
-        self.assert_ (not self.approxEqual6 (NaN, NaN))
-        self.assert_ (not self.approxEqual6 (NaN, Inf))
+        self.assertTrue (not self.approxEqual6 (NaN, 1))
+        self.assertTrue (not self.approxEqual6 (NaN, 0))
+        self.assertTrue (not self.approxEqual6 (NaN, NaN))
+        self.assertTrue (not self.approxEqual6 (NaN, Inf))
     
     def testInf (self):
         Inf = 1e10000
-        self.assert_ (not self.approxEqual6 (Inf, 1))
-        self.assert_ (not self.approxEqual6 (Inf, 0))
-        self.assert_ (not self.approxEqual6 (Inf, Inf))
-        self.assert_ (not self.approxEqual6 (Inf, -Inf))
+        self.assertTrue (not self.approxEqual6 (Inf, 1))
+        self.assertTrue (not self.approxEqual6 (Inf, 0))
+        self.assertTrue (not self.approxEqual6 (Inf, Inf))
+        self.assertTrue (not self.approxEqual6 (Inf, -Inf))
     
     def testZero (self):
-        self.assert_ (not self.approxEqual6 (0, 1e-6))
-        self.assert_ (    self.approxEqual6 (0, 1e-7))
+        self.assertTrue (not self.approxEqual6 (0, 1e-6))
+        self.assertTrue (    self.approxEqual6 (0, 1e-7))
     
     def testRegular (self):
-        self.assert_ (not self.approxEqual6 (1, 0))
-        self.assert_ (not self.approxEqual6 (1, 0.999999))
-        self.assert_ (    self.approxEqual6 (1, 0.9999995))
-        self.assert_ (not self.approxEqual6 (1000000, 999999))
-        self.assert_ (    self.approxEqual6 (1000000, 999999.5))
+        self.assertTrue (not self.approxEqual6 (1, 0))
+        self.assertTrue (not self.approxEqual6 (1, 0.999999))
+        self.assertTrue (    self.approxEqual6 (1, 0.9999995))
+        self.assertTrue (not self.approxEqual6 (1000000, 999999))
+        self.assertTrue (    self.approxEqual6 (1000000, 999999.5))
         # these are considered equal because of absolute precision limitation rather than relative:
-        self.assert_ (    self.approxEqual6 (0.000001, 0.0000005))
+        self.assertTrue (    self.approxEqual6 (0.000001, 0.0000005))
         # this is roughly on the verge of what isn't considered equal:
-        self.assert_ (not self.approxEqual6 (0.000001, 0.000002))
+        self.assertTrue (not self.approxEqual6 (0.000001, 0.000002))
         
         # if we only want to test relative precision:
         approxEqualRel = ApproxEqual(1e-6, 0)
-        self.assert_ (not approxEqualRel (0.000001, 0.000000999999))
-        self.assert_ (    approxEqualRel (0.000001, 0.0000009999995))
+        self.assertTrue (not approxEqualRel (0.000001, 0.000000999999))
+        self.assertTrue (    approxEqualRel (0.000001, 0.0000009999995))
         approxEqual = ApproxEqual(0, 1e-11)
-        self.assert_ (approxEqual (approxEqualRel.sumRelDiffs, 1.49999999994))
+        self.assertTrue (approxEqual (approxEqualRel.sumRelDiffs, 1.49999999994))
 
 
 if __name__ == '__main__':

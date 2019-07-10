@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of OpenMalaria.
@@ -83,8 +83,8 @@ def update_source(filename, copyright):
     elif header in nonheaders:
         pass
     else:
-        print header
-        r=raw_input("Remove above header? (y/N): ")
+        print(header)
+        r=eval(input("Remove above header? (y/N): "))
         if r[0]=='y' or r[0]=='Y':
             oldheaders.add(header)
             fdata = fdata[len(header):]
@@ -92,7 +92,7 @@ def update_source(filename, copyright):
             nonheaders.add(header)
     
     if not (fdata.startswith(copyright)):
-        print "updating "+filename
+        print(("updating "+filename))
         fdata = copyright + fdata
         if (isUTF):
             file(filename,"w").write(utfstr+fdata)

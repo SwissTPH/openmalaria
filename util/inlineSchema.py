@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of OpenMalaria.
@@ -35,7 +35,7 @@ def findIncludes(node,inlined,toInline):
         if node.nodeType==xd.Node.ELEMENT_NODE and node.tagName=="xs:include":
             incl=node.getAttribute("schemaLocation")
             if not os.path.isfile(incl):
-                raise Exception,"schema '{0}' not found".format(incl)
+                raise Exception("schema '{0}' not found".format(incl))
             if not incl in inlined:
                 if not incl in toInline:
                     #print "new include: {0}".format(incl)
@@ -49,7 +49,7 @@ def inlineSchema(sourcePath,destinationPath):
     doc=xd.parse(sourcePath)
     docElt=doc.documentElement
     if not (docElt.nodeType==xd.Node.ELEMENT_NODE and docElt.tagName=="xs:schema"):
-        raise Exception, "file {0} doesn't start with an elt of name xs:schema".format(sourcePath)
+        raise Exception("file {0} doesn't start with an elt of name xs:schema".format(sourcePath))
     
     inlined=set()
     toInline=set()
@@ -61,7 +61,7 @@ def inlineSchema(sourcePath,destinationPath):
         inclDoc=xd.parse(incl)
         iDElt=inclDoc.documentElement
         if not iDElt.nodeType==xd.Node.ELEMENT_NODE and iDElt.tagName=="xs:schema":
-            raise Exception, "file {0} doesn't start with an elt of name xs:schema".format(incl)
+            raise Exception("file {0} doesn't start with an elt of name xs:schema".format(incl))
         findIncludes(iDElt.firstChild,inlined,toInline)
         for child in iDElt.childNodes:
             docElt.appendChild(child.cloneNode(True))
@@ -82,7 +82,7 @@ def main(args):
         (options, others) = parser.parse_args(args=args[1:])
         if not len(others)==2:
             parser.print_usage()
-            raise Exception,"Expected 2 arguments"
+            raise Exception("Expected 2 arguments")
         
         inlineSchema(others[0],others[1])
     #except Exception,e:

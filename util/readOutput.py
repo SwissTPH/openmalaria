@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This file is part of OpenMalaria.
@@ -19,7 +19,6 @@
 # along with this program; if not, write to the Free Software
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 
-import string
 import unittest
 
 class Keys:
@@ -71,14 +70,14 @@ class TestMultiKeys (unittest.TestCase):
         self.b1 = Multi3Keys(0,"abc",5);
         self.b2 = Multi3Keys(0,"abc",5);
     def testEq (self):
-        self.assert_ (self.a1.a == self.a2.a)
-        self.assert_ (self.a1 == self.a2)
-        self.assert_ (self.b1 == self.b2)
-        self.assert_ (self.a1 != self.a3)
+        self.assertTrue (self.a1.a == self.a2.a)
+        self.assertTrue (self.a1 == self.a2)
+        self.assertTrue (self.b1 == self.b2)
+        self.assertTrue (self.a1 != self.a3)
     def testHash (self):
-        self.assert_ (self.a1.__hash__() == self.a2.__hash__())
-        self.assert_ (self.a1.__hash__() != self.a3.__hash__()) # actually, hash collisions are possible
-        self.assert_ (self.b1.__hash__() == self.b2.__hash__())
+        self.assertTrue (self.a1.__hash__() == self.a2.__hash__())
+        self.assertTrue (self.a1.__hash__() != self.a3.__hash__()) # actually, hash collisions are possible
+        self.assertTrue (self.b1.__hash__() == self.b2.__hash__())
 
 def isAgeGroup(measure):
     if measure in set([7,9,21,25,26,28,29,31,32,33,34,35,36,39,40,47,48,49,50,51,54]):
@@ -123,11 +122,11 @@ class MeasureDict(object):
         except LookupError:
             return 1e1000 - 1e0000 # NaN
     def getGroups(self):
-        return range(0,self.nGroups)
+        return list(range(0,self.nGroups))
     def getCohorts(self):
-        return range(0,self.nCohorts)
+        return list(range(0,self.nCohorts))
     def getGenotypes(self):
-        return range(0,self.nGenotypes)
+        return list(range(0,self.nGenotypes))
 
 def stringIndexAllMatch(strs,ind,char):
     for s in strs:
@@ -153,7 +152,7 @@ class ValDict (object):
         def filterFun(f,m,s,g,c,gt):
             r=eval(filterExpr)
             if exprDebug:
-                print "f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g),"c="+str(c),"g="+str(g)+":",r
+                print(("f="+str(f),"m="+str(m),"s="+str(s),"g="+str(g),"c="+str(c),"g="+str(g)+":",r))
             return r
         aKS = Keys.SURVEY in self.aggregateKeys
         aKG = Keys.GROUP in self.aggregateKeys
@@ -168,10 +167,10 @@ class ValDict (object):
         fileObj = open(fileName, 'r')
         nErrs=0
         for line in fileObj:
-            items=string.split(line)
+            items=line.split()
             if (len(items) != 4):
-                print "expected 4 items on line; found (following line):"
-                print line
+                print("expected 4 items on line; found (following line):")
+                print(line)
                 nErrs+=1
                 if nErrs>5:
                     raise Exception ("Too many errors reading "+fileName)
@@ -203,7 +202,7 @@ class ValDict (object):
             self.values[m].add(s,g,c,gt,fID,robustFloat(items[3]))
     
     def getFiles(self):
-        return range(len(self.files))
+        return list(range(len(self.files)))
     def getFileName(self,n):
         return self.files[n]
     def getFileNames(self,replaceFN):
@@ -234,7 +233,7 @@ class ValDict (object):
         if m==21:
             return [1]
         else:
-            return range(1,self.nSurveys+1)
+            return list(range(1,self.nSurveys+1))
     def getAllGroups(self):
         groups=set()
         for x in self.values:
@@ -282,10 +281,10 @@ def readEntries (fname):
     values=dict()
     fileObj = open(fname, 'r')
     for line in fileObj:
-        items=string.split(line)
+        items=line.split()
         if (len(items) != 4):
-            print "expected 4 items on line; found (following line):"
-            print line
+            print("expected 4 items on line; found (following line):")
+            print(line)
             continue
             
         key=Multi3Keys(int(items[2]),int(items[0]),int(items[1]))

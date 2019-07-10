@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This file is part of OpenMalaria.
@@ -28,7 +28,6 @@
 #  data from a particular arm may be picked (all others ignored)
 #  data may be agglomerated using some expression involving the arm
 
-import string
 import os.path
 import sys
 from optparse import OptionParser
