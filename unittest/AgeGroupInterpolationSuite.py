@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This file is part of OpenMalaria.
@@ -52,7 +52,7 @@ class LinearInterpolator(Interpolator):
         self.v=[values[0]]
         self.v.extend(values)
         self.v.append(values[len(values)-1])
-        print "Lengths:",len(self.a),len(self.v)
+        print("Lengths:",len(self.a),len(self.v))
     
     def interpolate(self,t):
         i=0
@@ -141,9 +141,9 @@ linear.plot(p)
 # Generate sample data for unittest:
 x=[15.2,18.09,7.0, 2.5, 0.0,20.0,900.0,62.0]
 
-print "Age points:",x
-print "Piecewise constant:",[const.interpolate(t) for t in x]
-print "Linear interpolation:",[linear.interpolate(t) for t in x]
+print("Age points:",x)
+print("Piecewise constant:",[const.interpolate(t) for t in x])
+print("Linear interpolation:",[linear.interpolate(t) for t in x])
 
 
 # Third plot: CMF data

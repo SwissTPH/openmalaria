@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of OpenMalaria.
@@ -20,7 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """
 
-import string
 import os.path
 import sys
 from optparse import OptionParser
@@ -52,16 +51,16 @@ def main(args):
         return 1
     
     sweeps,swArmIds = readSwArmIds(others[0])
-    sce_id_ind = next((i for i in xrange(len(sweeps)) if sweeps[i] == 'sce_id'), None)
+    sce_id_ind = next((i for i in range(len(sweeps)) if sweeps[i] == 'sce_id'), None)
     if sce_id_ind is None:
-        raise Exception, "unable to find column for sce_id!"
+        raise Exception("unable to find column for sce_id!")
     # sce_id_ind is zero-indexed and misses first column, so add 2:
-    print "Column for sce_id:",sce_id_ind+2
+    print(("Column for sce_id:",sce_id_ind+2))
     
     outFile=open(others[2],'w')
     resultDir=others[1]
     
-    for f,k in swArmIds.iteritems():
+    for f,k in list(swArmIds.items()):
         sce_id=k[sce_id_ind]
         lineStart=sce_id+'\t'
         resPath=os.path.join(resultDir,f+'.txt')

@@ -15,7 +15,7 @@ addons:
     packages:
     - build-essential
     - cmake
-    - python
+    - python3
     - libboost-all-dev
     - libgsl-dev
     - libxerces-c-dev

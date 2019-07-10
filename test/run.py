@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 # This file is part of OpenMalaria.
@@ -51,7 +51,7 @@ class RunError(Exception):
 testSrcDir="@CMAKE_CURRENT_SOURCE_DIR@"
 testBuildDir="@CMAKE_CURRENT_BINARY_DIR@"
 if not os.path.isdir(testSrcDir) or not os.path.isdir(testBuildDir):
-    print "Don't run this script directly; configure CMake then use the version in the CMake build dir."
+    print("Don't run this script directly; configure CMake then use the version in the CMake build dir.")
     sys.exit(-1)
 
 # executable
@@ -106,7 +106,7 @@ def linkOrCopy (src, dest):
             # This can still fail: a VirtualBox guest is not allowed to create
             # links on a drive shared by the host
             os.symlink(os.path.abspath(src), dest)
-        except OSError,e:
+        except OSError as e:
             shutil.copy2(src, dest)
     else:
         shutil.copy2(src, dest)
@@ -133,13 +133,13 @@ def runScenario(options,omOptions,name):
         cmd=["xmllint","--noout","--schema",scenarioSchema,scenarioSrc]
         # alternative: ["xmlstarlet","val","-s",SCHEMA,scenarioSrc]
         if options.logging:
-            print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
+            print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
         return subprocess.call (cmd,cwd=testBuildDir)
     
     cmd=options.wrapArgs+[openMalariaExec,"--deprecation-warnings","--resource-path",os.path.abspath(testSrcDir),"--scenario",scenarioSrc]+omOptions
     
     if not options.run:
-        print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
+        print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
         return 0
     
     # Run from a temporary directory, so checkpoint files won't conflict
@@ -156,16 +156,16 @@ def runScenario(options,omOptions,name):
     linkOrCopy (scenarioSchema, scenario_xsd)
     
     if options.logging:
-        print time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")+"\t\033[1;33m%s" % scenarioSrc
+        print(time.strftime("\033[0;33m%a, %d %b %Y %H:%M:%S")+"\t\033[1;33m%s" % scenarioSrc)
     
     startTime=lastTime=time.time()
     # While no output.txt file and cmd exits successfully:
     while (not os.path.isfile(outputFile)):
         if options.logging:
-            print "\033[0;32m  "+(" ".join(cmd))+"\033[0;00m"
+            print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
         ret=subprocess.call (cmd, shell=False, cwd=simDir)
         if ret != 0:
-            print "\033[1;31mNon-zero exit status: " + str(ret)
+            print("\033[1;31mNon-zero exit status: " + str(ret))
             break
         
         # check for output.txt.gz in place of output.txt and uncompress:
@@ -195,7 +195,7 @@ def runScenario(options,omOptions,name):
         lastTime=checkTime
     
     if ret == 0 and options.logging:
-        print "\033[0;33mDone in " + str(time.time()-startTime) + " seconds"
+        print("\033[0;33mDone in " + str(time.time()-startTime) + " seconds")
     
     if options.cleanup:
         os.remove(scenario_xsd)
@@ -218,7 +218,7 @@ def runScenario(options,omOptions,name):
                 ctsret,ctsident = compareCtsout.main (origCtsout, ctsoutFile)
             else:
                 ctsret,ctsident = 3,False
-                print "\033[1;31mNo original ctsout.txt to compare with."
+                print("\033[1;31mNo original ctsout.txt to compare with.")
             if ctsident and options.cleanup:
                 os.remove(ctsoutFile)
                 if os.path.isfile(newCtsout):
@@ -233,7 +233,7 @@ def runScenario(options,omOptions,name):
                 ret,ident = compareOutput.main (origOutput, outputFile, 0)
             else:
                 ret,ident = 3,False
-                print "\033[1;31mNo original output.txt to compare with."
+                print("\033[1;31mNo original output.txt to compare with.")
             if ident and options.cleanup:
                 os.remove(outputFile)
                 if os.path.isfile(newOutput):
@@ -243,12 +243,12 @@ def runScenario(options,omOptions,name):
             ret,ident = 1,False
             stderrFile=os.path.join(simDir,"stderr.txt")
             if os.path.isfile (stderrFile):
-                print "\033[1;31mNo output 'output.txt'; error messages:"
+                print("\033[1;31mNo output 'output.txt'; error messages:")
                 se = open(stderrFile)
                 se.read()
                 se.close()
             else:
-                print "\033[1;31mNo output 'output.txt'"
+                print("\033[1;31mNo output 'output.txt'")
         
         ret=max(ret,ctsret)
         ident=ident and ctsident
@@ -265,9 +265,9 @@ def runScenario(options,omOptions,name):
     try:
         os.rmdir(simDir)
     except OSError:
-        print "\033[0;31mDirectory %s not empty, so not deleted!" % simDir
+        print("\033[0;31mDirectory %s not empty, so not deleted!" % simDir)
     
-    print "\033[0;00m"
+    print("\033[0;00m")
     return ret
 
 def setWrapArgs(option, opt_str, value, parser, *args, **kwargs):
@@ -345,8 +345,8 @@ def main(args):
             retVal = r if retVal == 0 else retVal
         
         return retVal
-    except RunError,e:
-        print str(e)
+    except RunError as e:
+        print(str(e))
         return -1
 
 if __name__ == "__main__":

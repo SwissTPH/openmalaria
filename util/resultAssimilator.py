@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
 This file is part of OpenMalaria.
@@ -20,7 +20,6 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
 """
 
-import string
 import os.path
 import sys
 from optparse import OptionParser
@@ -61,7 +60,7 @@ def main(args):
         outFile.write('\t')
     outFile.write('survey\tgroup\tmeasure\tvalue\n')
     
-    for f,k in swArmIds.iteritems():
+    for f,k in list(swArmIds.items()):
         lineStart=''
         for x in k:
             lineStart+=x+'\t'

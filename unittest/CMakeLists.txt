@@ -2,8 +2,6 @@
 # Copyright © 2005-2009 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
-find_package (Python)
-
 set (OM_CXXTEST_INTERPRETER ${PYTHON_EXECUTABLE})
 set (OM_CXXTEST_SCRIPT ${CMAKE_SOURCE_DIR}/contrib/cxxtest/bin/cxxtestgen)
 
@@ -50,18 +48,13 @@ set (OM_CXXTEST_HEADERS
   PkPdComplianceSuite.h
 )
 
-#Appears to be problems with this on windows...
-if (OM_CXXTEST_INTERPRETER)
-  add_custom_command (OUTPUT tests.cpp
-    COMMAND ${OM_CXXTEST_INTERPRETER} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${OM_CXXTEST_HEADERS}
+add_custom_command (OUTPUT tests.cpp
+    COMMAND ${PYTHON_EXECUTABLE} ${OM_CXXTEST_SCRIPT} ${OM_CXXTEST_OPTIONS} --runner=ParenPrinter -o ${CMAKE_CURRENT_BINARY_DIR}/tests.cpp ${OM_CXXTEST_HEADERS}
     DEPENDS ${OM_CXXTEST_HEADERS}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     COMMENT "Generating unittest code with cxxtestgen"
     VERBATIM
-  )
-else (OM_CXXTEST_INTERPRETER)
-  message (SEND_ERROR "Unable to find python executable. Thus I can't build tests.cpp which is required to run the unittests.")
-endif (OM_CXXTEST_INTERPRETER)
+)
 
 # These files are needed to run various infection model tests:
 configure_file (${CMAKE_SOURCE_DIR}/test/autoRegressionParameters.csv ${CMAKE_CURRENT_BINARY_DIR} COPYONLY)
