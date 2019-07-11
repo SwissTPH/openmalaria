@@ -39,15 +39,55 @@ or, when it's preferable to have a separate namespace from the parent dir,
 OM is the namespace for the OpenMalaria model. SUBDIR and MODULE should correspond exactly to the
 sub-directory of include/model (assuming one sub-dir deep) and the file name excluding extension.
 
-(This is new and largely unimplemented.)
 
-
-Static members
+Data storage
 ------------------------
 
-Avoid making any data requiring checkpointing static, so it's clear all static data doesn't change
-after program initialization. One exception to this is a little of the data in Global, which is
-really only there to avoid passing the values constantly.
+### Compile-time constants
+
+Use `const static ty name = ...;` (at namespace level, `static` can be skipped).
+See: https://stackoverflow.com/a/178259/314345
+
+### Scenario constants
+
+I.e. data which must be read from input but is constant throughout the
+simulation. This data should be `static` and set by an `init` function.
+It may need to use `std::unique_ptr<T>`.
+
+The data "variable" should be private to its module.
+If the data is only used within a single `.cpp` file, it should not be declared
+in the header. If it is read from outside that file and is not performance
+sensitive, it should also not be declared in the header and only accessed
+indirectly through a function declared in the header. If reads are performance
+sensitive, it should be declared in the header either via `extern` or
+(preferably) as a private `static` struct/class member; either way reads should
+be via an inline function defined in the header.
+
+This type of data does not need checkpointing.
+
+### Mutable simulation data
+
+Most data falls into this category, and should be:
+
+-   allocated on the stack
+-   allocated within a struct/class which itself respects this policy
+-   explicitly allocated on the heap by a smart pointer (e.g. `std::unique_ptr`)
+    which is allocated according to this policy
+
+The `Simulation` class is the root simulation object.
+All data in this category likely needs checkpointing.
+
+### Special mutable data
+
+We make exceptions in a few cases:
+
+-   simulation times, which are accessed *very* frequently and only updated
+    at well defined times
+-   the random number generator, which currently shares a single state between
+    all users
+-   reporting data, which is accessed from many different places
+
+The last two will need attention for parallelisation of OM.
 
 
 Forward declarations
