@@ -26,7 +26,6 @@
 #include "WithinHost/WHInterface.h"
 
 #include "Transmission/TransmissionModel.h"
-#include "PopulationStats.h"
 #include "util/ModelOptions.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
@@ -89,10 +88,6 @@ Human::Human(SimTime dateOfBirth, int dummy) :
 vector<double> EIR_per_genotype;        // cache (not thread safe)
 
 bool Human::update(bool doUpdate) {
-    ++PopulationStats::humanUpdateCalls;
-    if( doUpdate )
-        ++PopulationStats::humanUpdates;
-    
     // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
     SimTime age0 = age(sim::ts0());
     if (clinicalModel->isDead(age0))

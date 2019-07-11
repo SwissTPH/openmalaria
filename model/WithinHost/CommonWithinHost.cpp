@@ -23,7 +23,6 @@
 #include "WithinHost/Genotypes.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/errors.h"
-#include "PopulationStats.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
@@ -125,9 +124,7 @@ void CommonWithinHost::clearImmunity() {
     m_cumulative_Y_lag = 0.0;
 }
 void CommonWithinHost::importInfection(){
-    PopulationStats::totalInfections += 1;
     if( numInfs < MAX_INFECTIONS ){
-        PopulationStats::allowedInfections += 1;
         m_cumulative_h += 1;
         numInfs += 1;
         // This is a hook, used by interventions. The newly imported infections
@@ -153,9 +150,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    PopulationStats::totalInfections += nNewInfs;
     nNewInfs=min(nNewInfs,MAX_INFECTIONS-numInfs);
-    PopulationStats::allowedInfections += nNewInfs;
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfs; ++i ) {

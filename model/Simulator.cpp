@@ -22,7 +22,6 @@
 
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
-#include "PopulationStats.h"
 #include "Parameters.h"
 #include "Clinical/ClinicalModel.h"
 #include "Monitoring/Continuous.h"
@@ -271,7 +270,6 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     }
     
     cerr << '\r' << flush;	// clean last line of progress-output
-    PopulationStats::print();
     
     sim::humanPop().flushReports();        // ensure all Human instances report past events
     mon::writeSurveyData();
@@ -396,7 +394,6 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         phase & stream;
         sim::transmission() & stream;
         sim::humanPop().checkpoint(stream);
-        PopulationStats::staticCheckpoint( stream );
         InterventionManager::checkpoint( stream );
         InterventionManager::loadFromCheckpoint( sim::interv_time );
         
@@ -443,7 +440,6 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     phase & stream;
     sim::transmission() & stream;
     sim::humanPop().checkpoint(stream);
-    PopulationStats::staticCheckpoint( stream );
     InterventionManager::checkpoint( stream );
     
     sim::time0 & stream;

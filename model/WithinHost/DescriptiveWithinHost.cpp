@@ -24,7 +24,6 @@
 #include "WithinHost/Genotypes.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/ModelOptions.h"
-#include "PopulationStats.h"
 #include "util/StreamValidator.h"
 #include "util/errors.h"
 #include <cassert>
@@ -82,9 +81,7 @@ void DescriptiveWithinHostModel::clearImmunity() {
     m_cumulative_Y_lag = 0.0;
 }
 void DescriptiveWithinHostModel::importInfection(){
-    PopulationStats::totalInfections += 1;
     if( numInfs < MAX_INFECTIONS ){
-        PopulationStats::allowedInfections += 1;
         m_cumulative_h += 1;
         numInfs += 1;
         infections.push_back(DescriptiveInfection());
@@ -104,9 +101,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    PopulationStats::totalInfections += nNewInfs;
     nNewInfs=min(nNewInfs,MAX_INFECTIONS-numInfs);
-    PopulationStats::allowedInfections += nNewInfs;
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfs; ++i ) {
