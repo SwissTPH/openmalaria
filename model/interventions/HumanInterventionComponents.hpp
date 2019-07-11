@@ -27,7 +27,6 @@
 #include "util/ModelOptions.h"
 #include "Clinical/ESCaseManagement.h"
 #include "Clinical/ImmediateOutcomes.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
 #include "WithinHost/Diagnostic.h"

@@ -19,7 +19,6 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"
 #include "util/errors.h"

@@ -119,7 +119,7 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     interventions::InterventionManager::init( scenario.getInterventions(), *transmission );
     
     // Depends on interventions, PK/PD (from humanPop):
-    Clinical::ClinicalModel::changeHS( scenario.getHealthSystem() );    // i.e. init health system
+    Clinical::ClinicalModel::setHS( scenario.getHealthSystem() );
     
     // Depends on interventions:
     mon::initCohorts( scenario.getMonitoring() );

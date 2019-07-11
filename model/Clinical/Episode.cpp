@@ -19,7 +19,7 @@
  */
 
 #include "Clinical/Episode.h"
-#include "Clinical/CaseManagementCommon.h"
+#include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
 
 namespace OM {
@@ -38,7 +38,7 @@ void Episode::flush() {
 
 void Episode::update (const Host::Human& human, Episode::State newState)
 {
-    if( time + healthSystemMemory < sim::ts0() ){
+    if( time + ClinicalModel::hsMemory() < sim::ts0() ){
         report ();
 
         time = sim::ts0();

@@ -27,7 +27,6 @@
 #include "WithinHost/Genotypes.h"
 #include "WithinHost/Diagnostic.h"
 #include "Clinical/ClinicalModel.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "Transmission/TransmissionModel.h"
 
 #include "util/errors.h"
@@ -60,14 +59,14 @@ void Population::staticCheckpoint (istream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::staticCheckpointCMCommon (stream);
+    Clinical::InfantMortality::staticCheckpoint(stream);
     WithinHost::Genotypes::staticCheckpoint(stream);
 }
 void Population::staticCheckpoint (ostream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::staticCheckpointCMCommon (stream);
+    Clinical::InfantMortality::staticCheckpoint(stream);
     WithinHost::Genotypes::staticCheckpoint(stream);
 }
 
@@ -139,9 +138,9 @@ void Population::checkpoint (ostream& stream)
 
 void Population::preMainSimInit ()
 {
-    Host::InfectionIncidenceModel::initMainSimulation();
-    Clinical::mainSimInitCMCommon();
-    WithinHost::Genotypes::startMainSim();
+    Host::InfectionIncidenceModel::preMainSimInit();
+    Clinical::InfantMortality::preMainSimInit();
+    WithinHost::Genotypes::preMainSimInit();
     recentBirths = 0;
 }
 

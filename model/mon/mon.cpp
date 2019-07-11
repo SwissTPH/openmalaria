@@ -25,7 +25,7 @@
 #include "mon/OutputMeasures.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
-#include "Clinical/CaseManagementCommon.h"
+#include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
 #include "util/errors.h"
 #include "schema/scenario.h"
@@ -589,7 +589,7 @@ void internal::write( ostream& stream ){
         // It is calculated across the entire intervention period and used in
         // model fitting.
         stream << 1 << "\t" << 1 << "\t" << reportIMR
-            << "\t" << Clinical::infantAllCauseMort() << lineEnd;
+            << "\t" << Clinical::InfantMortality::allCause() << lineEnd;
     }
 }
 

@@ -25,7 +25,6 @@ set (Model_CPP
   Host/ImportedInfections.cpp
   
   Clinical/ClinicalModel.cpp
-  Clinical/CaseManagementCommon.cpp
   Clinical/EventScheduler.cpp
   Clinical/ESCaseManagement.cpp
   Clinical/CMDecisionTree.cpp

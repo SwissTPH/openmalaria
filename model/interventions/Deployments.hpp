@@ -84,7 +84,7 @@ public:
         newHS( hs._clone() )
     {}
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
-        Clinical::ClinicalModel::changeHS( *newHS );
+        Clinical::ClinicalModel::setHS( *newHS );
         delete newHS;
         newHS = 0;
     }

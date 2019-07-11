@@ -23,7 +23,6 @@
 
 #include "WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "Host/Human.h"
 #include "WithinHost/WHInterface.h"
 #include "mon/reporting.h"

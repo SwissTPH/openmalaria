@@ -19,7 +19,6 @@
  */
 
 #include "Clinical/EventScheduler.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "util/random.h"
 #include "WithinHost/WHInterface.h"
 #include "mon/reporting.h"
