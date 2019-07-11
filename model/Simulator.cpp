@@ -53,8 +53,8 @@ bool Simulator::startedFromCheckpoint;  // static
 
 const char* CHECKPOINT = "checkpoint";
 
-std::unique_ptr<Population> sim::p_humanPop;
-std::unique_ptr<TransmissionModel> sim::p_transmission;
+std::unique_ptr<Population> population;
+std::unique_ptr<TransmissionModel> transmission;
 
 enum Phase {
     STARTING_PHASE = 0,
@@ -109,14 +109,14 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     // genotypes (both from Human, from Population::init()) and
     // Monitoring::AgeGroup (from Surveys.init()):
     // Note: PerHost dependency can be postponed; it is only used to set adultAge
-    sim::p_humanPop = unique_ptr<Population>(
+    population = unique_ptr<Population>(
             new Population( scenario.getDemography().getPopSize() ));
-    sim::p_transmission = unique_ptr<TransmissionModel>(
-            TransmissionModel::createTransmissionModel(scenario.getEntomology(), sim::humanPop().size()) );
+    transmission = unique_ptr<TransmissionModel>(
+            TransmissionModel::createTransmissionModel(scenario.getEntomology(), population->size()) );
     
     // Depends on transmission model (for species indexes):
     // MDA1D may depend on health system (too complex to verify)
-    interventions::InterventionManager::init( scenario.getInterventions() );
+    interventions::InterventionManager::init( scenario.getInterventions(), *transmission );
     
     // Depends on interventions, PK/PD (from humanPop):
     Clinical::ClinicalModel::changeHS( scenario.getHealthSystem() );    // i.e. init health system
@@ -141,19 +141,19 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
     SimTime humanWarmupLength = sim::maxHumanAge();
-    if( humanWarmupLength < sim::transmission().minPreinitDuration() ){
+    if( humanWarmupLength < transmission->minPreinitDuration() ){
         cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
         cerr << ") shorter than length of warm-up requested by" << endl;
         cerr << "transmission model ("
-            << sim::transmission().minPreinitDuration().inYears();
+            << transmission->minPreinitDuration().inYears();
         cerr << "). Transmission may be unstable; perhaps use forced" << endl;
         cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
-        humanWarmupLength = sim::transmission().minPreinitDuration();
+        humanWarmupLength = transmission->minPreinitDuration();
     }
     humanWarmupLength = SimTime::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
     
     totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
-        + sim::transmission().expectedInitDuration()
+        + transmission->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
         + mon::finalSurveyTime() + SimTime::oneTS();
     assert( totalSimDuration + SimTime::never() < SimTime::zero() );
@@ -163,8 +163,8 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         readCheckpoint();
     } else {
         Continuous.init( monitoring, false );
-        sim::humanPop().createInitialHumans();
-        sim::transmission().init2();
+        population->createInitialHumans();
+        transmission->init2(*population);
     }
     // Set to either a checkpointing time step or min int value. We only need to
     // set once, since we exit after a checkpoint triggered this way.
@@ -193,15 +193,15 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // Monitoring. sim::now() gives time of end of last step,
             // and is when reporting happens in our time-series.
-            Continuous.update( sim::humanPop() );
+            Continuous.update( *population );
             if( sim::intervNow() == mon::nextSurveyTime() ){
-                sim::humanPop().newSurvey();
-                sim::transmission().summarize();
+                population->newSurvey();
+                transmission->summarize();
                 mon::concludeSurvey();
             }
             
             // Deploy interventions, at time sim::now().
-            InterventionManager::deploy( sim::humanPop() );
+            InterventionManager::deploy( *population, *transmission );
             
             // Time step updates. Time steps are mid-day to mid-day.
             // sim::ts0() gives the date at the start of the step, sim::ts1() the date at the end.
@@ -209,13 +209,13 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
             // This should be called before humans contract new infections in the simulation step.
             // This needs the whole population (it is an approximation before all humans are updated).
-            sim::transmission().vectorUpdate ();
+            transmission->vectorUpdate (*population);
             
-            sim::humanPop().update1(humanWarmupLength);
+            population->update(*transmission, humanWarmupLength);
             
             // Doesn't matter whether non-updated humans are included (value isn't used
             // before all humans are updated).
-            sim::transmission().update();
+            transmission->update(*population);
             
             sim::end_update();
         }
@@ -227,7 +227,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
         } else if (phase == TRANSMISSION_INIT) {
             // Start or continuation of transmission init cycle (after one life span)
-            SimTime iterate = sim::transmission().initIterate();
+            SimTime iterate = transmission->initIterate();
             if( iterate > SimTime::zero() ){
                 simPeriodEnd += iterate;
                 --phase;        // repeat phase
@@ -241,8 +241,8 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             // Start MAIN_PHASE:
             simPeriodEnd = totalSimDuration;
             sim::interv_time = SimTime::zero();
-            sim::humanPop().preMainSimInit();
-            sim::transmission().summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
+            population->preMainSimInit();
+            transmission->summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
             mon::initMainSim();
             
         } else if (phase == END_SIM) {
@@ -271,7 +271,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     
     cerr << '\r' << flush;	// clean last line of progress-output
     
-    sim::humanPop().flushReports();        // ensure all Human instances report past events
+    population->flushReports();        // ensure all Human instances report past events
     mon::writeSurveyData();
     
 # ifdef OM_STREAM_VALIDATOR
@@ -392,10 +392,10 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         simPeriodEnd & stream;
         totalSimDuration & stream;
         phase & stream;
-        sim::transmission() & stream;
-        sim::humanPop().checkpoint(stream);
+        transmission & stream;
+        population->checkpoint(stream);
         InterventionManager::checkpoint( stream );
-        InterventionManager::loadFromCheckpoint( sim::interv_time );
+        InterventionManager::loadFromCheckpoint( *population, *transmission, sim::interv_time );
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
@@ -438,8 +438,8 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     simPeriodEnd & stream;
     totalSimDuration & stream;
     phase & stream;
-    sim::transmission() & stream;
-    sim::humanPop().checkpoint(stream);
+    transmission & stream;
+    population->checkpoint(stream);
     InterventionManager::checkpoint( stream );
     
     sim::time0 & stream;

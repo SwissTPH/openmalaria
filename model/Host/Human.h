@@ -39,7 +39,10 @@ namespace Clinical {
 namespace WithinHost {
     class WHInterface;
 }
-    class Population;
+namespace Transmission {
+    class TransmissionModel;
+}
+class Population;
 namespace Host {
 
 /** Interface to all sub-models storing data per-human individual.
@@ -83,10 +86,11 @@ public:
   
   /** Main human update.
    *
+   * @param transmission A reference to the transmission model
    * @param doUpdate If false, returns immediately after is-dead check.
    * @returns True if the individual is dead (too old or otherwise killed).
    */
-  bool update(bool doUpdate);
+  bool update(const Transmission::TransmissionModel& transmission, bool doUpdate);
   //@}
   
   ///@brief Deploy "intervention" functions

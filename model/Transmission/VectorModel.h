@@ -40,12 +40,16 @@ namespace Transmission {
  * code is in the Anopheles directory and namespace. */
 class VectorModel : public TransmissionModel {
 public:
+  /// Get the map of species names to indicies.
+  static const map<string,size_t>& getSpeciesIndexMap();
+  
+    
   VectorModel(const scnXml::Entomology& entoData, const scnXml::Vector vectorData, int populationSize);
   virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2 ();
+  virtual void init2 (const Population& population);
   
   virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list,
         size_t instance, const string& name );
@@ -59,13 +63,12 @@ public:
   virtual SimTime expectedInitDuration ();
   virtual SimTime initIterate ();
   
-  virtual void vectorUpdate ();
-  virtual void update ();
+  virtual void vectorUpdate (const Population& population);
+  virtual void update (const Population& population);
 
   virtual void calculateEIR( Host::Human& human, double ageYears,
-        vector<double>& EIR );
+        vector<double>& EIR ) const;
   
-  virtual const map<string,size_t>& getSpeciesIndexMap();
   virtual void deployVectorPopInterv (size_t instance);
   virtual void deployVectorTrap( size_t instance, double number, SimTime lifespan );
   virtual void uninfectVectors();
@@ -104,26 +107,11 @@ private:
    *
    * Set by constructor so don't checkpoint. */
   //@{
-  /** The number of discrete species of anopheles mosquitos to be modelled.
-   *
-   * Must be the same as species.size() and at least 1. */
-  size_t numSpecies;
-  
   /** Per anopheles species data.
    *
    * Array will be recreated by constructor, but some members of AnophelesModel
    * need to be checkpointed. */
   vector<AnophelesModel> species;
-  
-  /** A map of anopheles species/variant name to an index in species.
-   *
-   * When the main ento data is read from XML, each anopheles section is read
-   * into one index of the species array. The name and this index are added
-   * here.
-   * 
-   * Other data read from XML should look up the name here and use the index
-   * found. Doesn't need checkpointing. */
-  map<string,size_t> speciesIndex;
   //@}
   
   /// @brief Saved data for use in initialisation / fitting cycle

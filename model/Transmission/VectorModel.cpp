@@ -38,60 +38,68 @@ namespace Transmission {
 using namespace OM::util;
 using Anopheles::PerHostAnophParams;
 
+/** A map of anopheles species/variant name to an index in species.
+ *
+ * When the main ento data is read from XML, each anopheles section is read
+ * into one index of the species array. The name and this index are added
+ * here.
+ * 
+ * Other data read from XML should look up the name here and use the index
+ * found. Doesn't need checkpointing. */
+map<string,size_t> speciesIndex;
+
+
 void VectorModel::ctsCbN_v0 (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastN_v0();
 }
 void VectorModel::ctsCbP_A (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::PA);
 }
 void VectorModel::ctsCbP_df (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::PDF);
 }
 void VectorModel::ctsCbP_dif (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::PDIF);
 }
 void VectorModel::ctsCbN_v (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::NV);
 }
 void VectorModel::ctsCbO_v (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::OV);
 }
 void VectorModel::ctsCbS_v (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::SV);
 }
 void VectorModel::ctsCbAlpha (const Population& population, ostream& stream){
-    for( size_t i = 0; i < numSpecies; ++i){
-        const PerHostAnophParams& params = species[i].getHumanBaseParams();
+    for( size_t i = 0; i < speciesIndex.size(); ++i){
         double total = 0.0;
         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.entoAvailabilityFull( params, i, iter->age(sim::now()).inYears() );
+            total += iter->perHostTransmission.entoAvailabilityFull( i, iter->age(sim::now()).inYears() );
         }
         stream << '\t' << total / population.size();
     }
 }
 void VectorModel::ctsCbP_B (const Population& population, ostream& stream){
-    for( size_t i = 0; i < numSpecies; ++i){
-	const PerHostAnophParams& params = species[i].getHumanBaseParams();
+    for( size_t i = 0; i < speciesIndex.size(); ++i){
         double total = 0.0;
         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.probMosqBiting( params, i );
+            total += iter->perHostTransmission.probMosqBiting( i );
         }
         stream << '\t' << total / population.size();
     }
 }
 void VectorModel::ctsCbP_CD (const Population& population, ostream& stream){
-    for( size_t i = 0; i < numSpecies; ++i){
-	const PerHostAnophParams& params = species[i].getHumanBaseParams();
+    for( size_t i = 0; i < speciesIndex.size(); ++i){
         double total = 0.0;
         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-            total += iter->perHostTransmission.probMosqResting( params, i );
+            total += iter->perHostTransmission.probMosqResting( i );
         }
         stream << '\t' << total / population.size();
     }
@@ -117,7 +125,7 @@ void VectorModel::ctsIRSInsecticideContent (const Population& population, ostrea
 }
 void VectorModel::ctsIRSEffects (const Population& population, ostream& stream) {
     //TODO(monitoring): work out how this applies when multiple IRS effects are allowed
-//     for( size_t i = 0; i < numSpecies; ++i ){
+//     for( size_t i = 0; i < speciesIndex.size(); ++i ){
 //         const interventions::IRSAnophelesParams& params = species[i].getHumanBaseParams().irs;
 //         double totalRA = 0.0, totalPrePSF = 0.0, totalPostPSF = 0.0;
 //         for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
@@ -132,11 +140,11 @@ void VectorModel::ctsIRSEffects (const Population& population, ostream& stream) 
 }
 
 void VectorModel::ctsCbResAvailability (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getResAvailability();
 }
 void VectorModel::ctsCbResRequirements (ostream& stream) {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getResRequirements();
 }
 
@@ -151,7 +159,7 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
 VectorModel::VectorModel (const scnXml::Entomology& entoData,
                           const scnXml::Vector vectorData, int populationSize) :
     TransmissionModel( entoData, WithinHost::Genotypes::N() ),
-    initIterations(0), numSpecies(0)
+    initIterations(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.
     // TransmissionModel::createTransmissionModel checks length of list >= 1.
@@ -163,13 +171,16 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
 //         nonHumanHostPopulations[nonHumansList[i].getName()] = nonHumansList[i].getNumber();
 //     }
 
-    numSpecies = anophelesList.size();
+    size_t numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
+    PerHostAnophParams::initReserve (numSpecies);
     species.resize (numSpecies);
 
     for(size_t i = 0; i < numSpecies; ++i) {
-        string name = species[i].initialise (anophelesList[i],
+        auto elt = anophelesList[i];
+        PerHostAnophParams::init(elt.getMosq());
+        string name = species[i].initialise (i, elt,
                                              initialisationEIR,
 //                                              nonHumanHostPopulations,
                                              populationSize);
@@ -247,42 +258,41 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
 VectorModel::~VectorModel () {
 }
 
-void VectorModel::init2 () {
+void VectorModel::init2 (const Population& population) {
     SimTime data_save_len = SimTime::oneDay();  // we don't need to save anything at first
-    saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
-    saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
-    saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
+    saved_sum_avail.assign( data_save_len, speciesIndex.size(), 0.0 );
+    saved_sigma_df.assign( data_save_len, speciesIndex.size(), 0.0 );
+    saved_sigma_dif.assign( data_save_len, speciesIndex.size(), WithinHost::Genotypes::N(), 0.0 );
     
     double sumRelativeAvailability = 0.0;
-    foreach(const Host::Human& human, sim::humanPop().crange()) {
+    foreach(const Host::Human& human, population.crange()) {
         sumRelativeAvailability +=
                 human.perHostTransmission.relativeAvailabilityAge (human.age(sim::now()).inYears());
     }
-    int popSize = sim::humanPop().size();
+    int popSize = population.size();
     // value should be unimportant when no humans are available, though inf/nan is not acceptable
     double meanPopAvail = 1.0;
     if( popSize > 0 ){
         meanPopAvail = sumRelativeAvailability / popSize;    // mean-rel-avail
     }
     
-    for(size_t i = 0; i < numSpecies; ++i) {
+    for(size_t i = 0; i < speciesIndex.size(); ++i) {
         double sum_avail = 0.0;
         double sigma_f = 0.0;
         double sigma_df = 0.0;
         double sigma_dff = 0.0;
         
-        const PerHostAnophParams& humanBase = species[i].getHumanBaseParams();
-        foreach(const Host::Human& human, sim::humanPop().crange()) {
+        foreach(const Host::Human& human, population.crange()) {
             const OM::Transmission::PerHost& host = human.perHostTransmission;
-            double prod = host.entoAvailabilityFull (humanBase, i, human.age(sim::now()).inYears());
+            double prod = host.entoAvailabilityFull (i, human.age(sim::now()).inYears());
             sum_avail += prod;
-            prod *= host.probMosqBiting(humanBase, i);
+            prod *= host.probMosqBiting(i);
             sigma_f += prod;
-            sigma_df += prod * host.probMosqResting(humanBase, i);
-            sigma_dff += prod * host.probMosqResting(humanBase, i) * host.relMosqFecundity(i);
+            sigma_df += prod * host.probMosqResting(i);
+            sigma_dff += prod * host.probMosqResting(i) * host.relMosqFecundity(i);
         }
         
-        species[i].init2 (sim::humanPop().size(), meanPopAvail, sum_avail, sigma_f, sigma_df, sigma_dff);
+        species[i].init2 (population.size(), meanPopAvail, sum_avail, sigma_f, sigma_df, sigma_dff);
     }
     simulationMode = forcedEIR;   // now we should be ready to start
 }
@@ -314,7 +324,7 @@ void VectorModel::initVectorTrap( const scnXml::VectorTrap::DescriptionSequence 
 
 
 void VectorModel::scaleEIR (double factor) {
-    for( size_t i = 0; i < numSpecies; ++i )
+    for( size_t i = 0; i < speciesIndex.size(); ++i )
         species[i].scaleEIR( factor );
     vectors::scale( initialisationEIR, factor );
     annualEIR = vectors::sum( initialisationEIR );
@@ -379,9 +389,9 @@ SimTime VectorModel::initIterate () {
     if( initState == 1 || initState == 3 ){
         // When starting the iteration phase, we switch to five years worth of data; otherwise we only keep one day.
         SimTime data_save_len = /*initState == 1 ? SimTime::fromYearsI(5) :*/ SimTime::oneDay();
-        saved_sum_avail.assign( data_save_len, numSpecies, 0.0 );
-        saved_sigma_df.assign( data_save_len, numSpecies, 0.0 );
-        saved_sigma_dif.assign( data_save_len, numSpecies, WithinHost::Genotypes::N(), 0.0 );
+        saved_sum_avail.assign( data_save_len, speciesIndex.size(), 0.0 );
+        saved_sigma_df.assign( data_save_len, speciesIndex.size(), 0.0 );
+        saved_sigma_dif.assign( data_save_len, speciesIndex.size(), WithinHost::Genotypes::N(), 0.0 );
         
 //         if( initState == 1 ){
 //             return SimTime::fromYearsI(5);
@@ -399,7 +409,7 @@ SimTime VectorModel::initIterate () {
     }
     
     bool needIterate = false;
-    for(size_t i = 0; i < numSpecies; ++i) {
+    for(size_t i = 0; i < speciesIndex.size(); ++i) {
         //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
         needIterate = needIterate || species[i].initIterate ();
     }
@@ -415,7 +425,7 @@ SimTime VectorModel::initIterate () {
 }
 
 void VectorModel::calculateEIR(Host::Human& human, double ageYears,
-        vector<double>& EIR)
+        vector<double>& EIR) const
 {
     auto ag = human.monAgeGroup().i();
     auto cs = human.cohortSet();
@@ -430,8 +440,8 @@ void VectorModel::calculateEIR(Host::Human& human, double ageYears,
         assert( simulationMode == dynamicEIR );
         EIR.assign( WithinHost::Genotypes::N(), 0.0 );
         const double ageFactor = host.relativeAvailabilityAge (ageYears);
-        for(size_t i = 0; i < numSpecies; ++i) {
-            vector<double>& partialEIR = species[i].getPartialEIR();
+        for(size_t i = 0; i < speciesIndex.size(); ++i) {
+            const vector<double>& partialEIR = species[i].getPartialEIR();
             
             assert( EIR.size() == partialEIR.size() );
             if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
@@ -441,7 +451,7 @@ void VectorModel::calculateEIR(Host::Human& human, double ageYears,
             /* Calculates EIR per individual (hence N_i == 1).
              *
              * See comment in AnophelesModel::advancePeriod for method. */
-            double entoFactor = ageFactor * host.availBite(species[i].getHumanBaseParams(), i);
+            double entoFactor = ageFactor * host.availBite(i);
             for( size_t g = 0; g < EIR.size(); ++g ){
                 auto eir = partialEIR[g] * entoFactor;
                 mon::reportStatMACSGF( mon::MVF_INOCS, ag, cs, i, g, eir );
@@ -453,23 +463,17 @@ void VectorModel::calculateEIR(Host::Human& human, double ageYears,
 
 
 // Every Global::interval days:
-void VectorModel::vectorUpdate () {
+void VectorModel::vectorUpdate (const Population& population) {
     const size_t nGenotypes = WithinHost::Genotypes::N();
     SimTime popDataInd = mod_nn(sim::ts0(), saved_sum_avail.size1());
     vector<double> probTransmission;
     saved_sum_avail.assign_at1(popDataInd, 0.0);
     saved_sigma_df.assign_at1(popDataInd, 0.0);
     saved_sigma_dif.assign_at1(popDataInd, 0.0);
-    vector<double> sigma_dff(numSpecies, 0.0);
-    
-    vector<const PerHostAnophParams*> humanBases;
-    humanBases.reserve( numSpecies );
-    for(size_t s = 0; s < numSpecies; ++s){
-        humanBases.push_back( &species[s].getHumanBaseParams() );
-    }
+    vector<double> sigma_dff(speciesIndex.size(), 0.0);
     
     size_t h = 0;
-    foreach(const Host::Human& human, sim::humanPop().crange()) {
+    foreach(const Host::Human& human, population.crange()) {
         const OM::Transmission::PerHost& host = human.perHostTransmission;
         WithinHost::WHInterface& whm = *human.withinHostModel;
         const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );
@@ -484,16 +488,15 @@ void VectorModel::vectorUpdate () {
             probTransmission[g] = k;
         }
         
-        for(size_t s = 0; s < numSpecies; ++s){
+        for(size_t s = 0; s < speciesIndex.size(); ++s){
             //NOTE: calculate availability relative to age at end of time step;
             // not my preference but consistent with TransmissionModel::getEIR().
             //TODO: even stranger since probTransmission comes from the previous time step
-            const double avail = host.entoAvailabilityFull (*humanBases[s], s,
-                    human.age(sim::ts1()).inYears());
+            const double avail = host.entoAvailabilityFull (s, human.age(sim::ts1()).inYears());
             saved_sum_avail.at(popDataInd, s) += avail;
             const double df = avail
-                    * host.probMosqBiting(*humanBases[s], s)
-                    * host.probMosqResting(*humanBases[s], s);
+                    * host.probMosqBiting(s)
+                    * host.probMosqResting(s);
             saved_sigma_df.at(popDataInd, s) += df;
             for( size_t g = 0; g < nGenotypes; ++g ){
                 saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
@@ -505,7 +508,7 @@ void VectorModel::vectorUpdate () {
     }
     
     vector<double> sigma_dif_species;
-    for(size_t s = 0; s < numSpecies; ++s){
+    for(size_t s = 0; s < speciesIndex.size(); ++s){
         // Copy slice to new array:
         auto range = saved_sigma_dif.range_at12(popDataInd, s);
         sigma_dif_species.assign(range.first, range.second);
@@ -517,16 +520,13 @@ void VectorModel::vectorUpdate () {
                 simulationMode == dynamicEIR);
     }
 }
-void VectorModel::update() {
-    TransmissionModel::updateKappa();
+void VectorModel::update(const Population& population) {
+    TransmissionModel::updateKappa(population);
 }
 
 const string vec_mode_err = "vector interventions can only be used in "
             "dynamic transmission mode (mode=\"dynamic\")";
-const map<string,size_t>& VectorModel::getSpeciesIndexMap(){
-    if( interventionMode != dynamicEIR ){
-        throw xml_scenario_error(vec_mode_err);
-    }
+const map<string,size_t>& VectorModel::getSpeciesIndexMap() {
     return speciesIndex;
 }
 
@@ -542,19 +542,19 @@ void VectorModel::deployVectorTrap( size_t instance, double number, SimTime life
     if( interventionMode != dynamicEIR ){
         throw xml_scenario_error(vec_mode_err);
     }
-    for( auto it = species.begin(); it != species.end(); ++it ){
-        it->deployVectorTrap( instance, number, lifespan );
+    for(size_t i = 0; i < speciesIndex.size(); ++i) {
+        species[i].deployVectorTrap( i, instance, number, lifespan );
     }
 }
 void VectorModel::uninfectVectors() {
-    for(size_t i = 0; i < numSpecies; ++i)
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
         species[i].uninfectVectors();
 }
 
 void VectorModel::summarize () {
     TransmissionModel::summarize ();
     
-    for(size_t i = 0; i < numSpecies; ++i){
+    for(size_t i = 0; i < speciesIndex.size(); ++i){
         species[i].summarize( i );
     }
 }

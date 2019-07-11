@@ -52,7 +52,7 @@ public:
     }
     virtual ~TimedDeployment() {}
     
-    virtual void deploy (OM::Population&) =0;
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) =0;
     
     virtual void print_details( std::ostream& out )const =0;
     
@@ -71,7 +71,7 @@ public:
         // check has been done (hacky).
         time = SimTime::future();
     }
-    virtual void deploy (OM::Population&) {}
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {}
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tdummy (no interventions)";
     }
@@ -83,7 +83,7 @@ public:
         TimedDeployment( date ),
         newHS( hs._clone() )
     {}
-    virtual void deploy (OM::Population& population) {
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
         Clinical::ClinicalModel::changeHS( *newHS );
         delete newHS;
         newHS = 0;
@@ -102,8 +102,8 @@ public:
         TimedDeployment( date ),
         newEIR( nv._clone() )
     {}
-    virtual void deploy (OM::Population& population) {
-        sim::transmission().changeEIRIntervention( *newEIR );
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+        transmission.changeEIRIntervention( *newEIR );
         delete newEIR;
         newEIR = 0;
     }
@@ -120,8 +120,8 @@ public:
     TimedUninfectVectorsDeployment( SimTime deployTime ) :
         TimedDeployment( deployTime )
     {}
-    virtual void deploy (OM::Population& population) {
-        sim::transmission().uninfectVectors();
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+        transmission.uninfectVectors();
     }
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tuninfect vectors";
@@ -203,7 +203,7 @@ public:
         }
     }
     
-    virtual void deploy (OM::Population& population) {
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
         for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
@@ -251,7 +251,7 @@ public:
     {
     }
     
-    virtual void deploy (OM::Population& population) {
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
         // Cumulative case: bring target group's coverage up to target coverage
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally subPop
@@ -292,8 +292,8 @@ public:
         TimedDeployment( deployTime ),
         inst(instance)
     {}
-    virtual void deploy (OM::Population& population) {
-      sim::transmission().deployVectorPopInterv(inst);
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+      transmission.deployVectorPopInterv(inst);
     }
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tvector";
@@ -308,9 +308,9 @@ public:
     TimedTrapDeployment( SimTime deployTime, size_t instance, double ratio, SimTime lifespan ) :
         TimedDeployment(deployTime), inst(instance), ratio(ratio), lifespan(lifespan)
     {}
-    virtual void deploy (OM::Population& population) {
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
         double number = population.size() * ratio;
-        sim::transmission().deployVectorTrap(inst, number, lifespan);
+        transmission.deployVectorTrap(inst, number, lifespan);
     }
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tvector trap";

@@ -34,9 +34,23 @@ namespace Anopheles {
  * Parameters are read from XML, and the availability rate is adjusted. */
 class PerHostAnophParams {
 public:
-    /** Set parameters from an XML element. */
-    void operator= (const scnXml::Mosq& mosq);
-
+    static inline void initReserve (size_t numSpecies) {
+        params.reserve (numSpecies);
+    }
+    static inline void init (const scnXml::Mosq& mosq) {
+        params.push_back(PerHostAnophParams{ mosq });
+    }
+    
+    /// Get the number of vector species
+    static inline size_t numSpecies() {
+        return params.size();
+    }
+    
+    /// Get parameters for the given vector species
+    static inline const PerHostAnophParams& get(size_t species) {
+        return params[species];
+    }
+    
     /** entoAvailability is calculated externally, then set after other
      * parameters have been initialised.
      * 
@@ -44,8 +58,8 @@ public:
      * 
      * It should be called exactly once.
       */
-    inline void scaleEntoAvailability(double entoAvailability){
-        this->entoAvailability.scaleMean( entoAvailability );
+    inline static void scaleEntoAvailability(size_t species, double entoAvailability){
+        params[species].entoAvailability.scaleMean( entoAvailability );
     }
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
@@ -67,6 +81,11 @@ public:
      * (P_D_i). */
     util::BetaSampler probMosqSurvivalResting;
     //@}
+    
+private:
+    PerHostAnophParams (const scnXml::Mosq& mosq);
+
+    static vector<PerHostAnophParams> params;
 };
 
 /** Data needed for each human which is per-mosquito species. */
@@ -75,7 +94,7 @@ class PerHostAnoph
 public:
     /** In lieu of a constructor initialises elements, using the passed base to
      * get baseline parameters. */
-    void initialise (const PerHostAnophParams& base, double availabilityFactor);
+    void initialise (size_t species, double availabilityFactor);
     
     /// Checkpointing
     template<class S>

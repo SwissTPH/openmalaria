@@ -177,7 +177,7 @@ void Population::newHuman( SimTime dob ){
     ++recentBirths;
 }
 
-void Population::update1( SimTime firstVecInitTS ){
+void Population::update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
@@ -202,7 +202,7 @@ void Population::update1( SimTime firstVecInitTS ){
         // is the time step they die at (some code still runs on this step).
         SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
         bool updateHuman = lastPossibleTS >= firstVecInitTS;
-        bool isDead = iter->update(updateHuman);
+        bool isDead = iter->update(transmission, updateHuman);
         if( isDead ){
             iter = population.erase (iter);
             continue;

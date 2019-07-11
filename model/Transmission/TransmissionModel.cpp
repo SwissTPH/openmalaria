@@ -40,6 +40,11 @@
 namespace OM { namespace Transmission {
 namespace vectors = util::vectors;
 
+// Reporting data. Doesn't need checkpointing due to reset every time-step.
+static double tsAdultEntoInocs = 0.0;  // accumulator for time step EIR of adults
+static int tsNumAdults = 0; // accumulator for time step adults requesting EIR
+
+
 TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Entomology& entoData, int populationSize) {
   // Entomology contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
@@ -109,13 +114,11 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
     annualEIR(0.0),
     _annualAverageKappa(numeric_limits<double>::signaling_NaN()),
     _sumAnnualKappa(0.0),
-    tsAdultEntoInocs(0.0),
     tsAdultEIR(0.0),
     surveyInputEIR(0.0),
     surveySimulatedEIR(0.0),
     adultAge(PerHost::adultAge()),
-    numTransmittingHumans(0),
-    tsNumAdults(0)
+    numTransmittingHumans(0)
 {
     initialisationEIR.assign (SimTime::stepsPerYear(), 0.0);
     
@@ -130,13 +133,13 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-double TransmissionModel::updateKappa () {
+double TransmissionModel::updateKappa (const Population& population) {
     // We calculate kappa for output and the non-vector model.
     double sumWt_kappa= 0.0;
     double sumWeight  = 0.0;
     numTransmittingHumans = 0;
 
-    foreach(const Host::Human& human, sim::humanPop().crange()) {
+    foreach(const Host::Human& human, population.crange()) {
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
         const double avail = human.perHostTransmission.relativeAvailabilityHetAge(
@@ -152,13 +155,13 @@ double TransmissionModel::updateKappa () {
 
 
     size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
-    if( sim::humanPop().size() == 0 ){     // this is valid
+    if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {
         if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
             ostringstream msg;
             msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa
-                    <<", "<<sim::humanPop().size();
+                    <<", "<<population.size();
             throw TRACED_EXCEPTION(msg.str(),util::Error::SumWeight);
         }
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
@@ -184,7 +187,7 @@ double TransmissionModel::updateKappa () {
 }
 
 double TransmissionModel::getEIR( Host::Human& human, SimTime age,
-                    double ageYears, vector<double>& EIR )
+                    double ageYears, vector<double>& EIR ) const
 {
     /* For the NonVector model, the EIR should just be multiplied by the
      * availability. For the Vector model, the availability is also required
@@ -208,12 +211,10 @@ void TransmissionModel::summarize () {
     if( !mon::isReported() ) return;    // cannot use counters below when not reporting
     
     double duration = (sim::now() - lastSurveyTime).inSteps();
-    if( duration == 0.0 ){
-        assert( surveyInputEIR == 0.0 && surveySimulatedEIR == 0.0 );
-        duration = 1.0;   // avoid outputting NaNs. 0 isn't quite correct, but should do.
+    if( duration > 0.0 ){
+        mon::reportStatMF( mon::MVF_INPUT_EIR, surveyInputEIR / duration );
+        mon::reportStatMF( mon::MVF_SIM_EIR, surveySimulatedEIR / duration );
     }
-    mon::reportStatMF( mon::MVF_INPUT_EIR, surveyInputEIR / duration );
-    mon::reportStatMF( mon::MVF_SIM_EIR, surveySimulatedEIR / duration );
     
     surveyInputEIR = 0.0;
     surveySimulatedEIR = 0.0;
@@ -231,14 +232,12 @@ void TransmissionModel::checkpoint (istream& stream) {
     annualEIR & stream;
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
-    adultAge & stream;
-    tsAdultEntoInocs & stream;
     tsAdultEIR & stream;
     surveyInputEIR & stream;
     surveySimulatedEIR & stream;
     lastSurveyTime & stream;
+    adultAge & stream;
     numTransmittingHumans & stream;
-    tsNumAdults & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     simulationMode & stream;
@@ -248,14 +247,12 @@ void TransmissionModel::checkpoint (ostream& stream) {
     annualEIR & stream;
     _annualAverageKappa & stream;
     _sumAnnualKappa & stream;
-    adultAge & stream;
-    tsAdultEntoInocs & stream;
     tsAdultEIR & stream;
     surveyInputEIR & stream;
     surveySimulatedEIR & stream;
     lastSurveyTime & stream;
+    adultAge & stream;
     numTransmittingHumans & stream;
-    tsNumAdults & stream;
 }
 
 } }

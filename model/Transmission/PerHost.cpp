@@ -47,11 +47,9 @@ PerHost::PerHost () :
 }
 void PerHost::initialise (double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
-    VectorModel* vTM = dynamic_cast<VectorModel*> (&sim::transmission());
-    if (vTM != 0) {
-        species.resize (vTM->numSpecies);
-        for(size_t i = 0; i < vTM->numSpecies; ++i)
-            species[i].initialise (vTM->species[i].getHumanBaseParams(), availabilityFactor);
+    speciesData.resize (PerHostAnophParams::numSpecies());
+    for(size_t i = 0; i < speciesData.size(); ++i) {
+        speciesData[i].initialise (i, availabilityFactor);
     }
 }
 
@@ -81,33 +79,32 @@ void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.
-double PerHost::entoAvailabilityHetVecItv (const PerHostAnophParams& base,
-                                size_t speciesIndex) const {
-    double alpha_i = species[speciesIndex].getEntoAvailability();
+double PerHost::entoAvailabilityHetVecItv (size_t species) const {
+    double alpha_i = speciesData[species].getEntoAvailability();
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
-        alpha_i *= (*iter)->relativeAttractiveness( speciesIndex );
+        alpha_i *= (*iter)->relativeAttractiveness( species );
     }
     return alpha_i;
 }
-double PerHost::probMosqBiting (const PerHostAnophParams& base, size_t speciesIndex) const {
-    double P_B_i = species[speciesIndex].getProbMosqBiting();
+double PerHost::probMosqBiting (size_t species) const {
+    double P_B_i = speciesData[species].getProbMosqBiting();
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
-        P_B_i *= (*iter)->preprandialSurvivalFactor( speciesIndex );
+        P_B_i *= (*iter)->preprandialSurvivalFactor( species );
     }
     return P_B_i;
 }
-double PerHost::probMosqResting (const PerHostAnophParams& base, size_t speciesIndex) const {
-    double pRest = species[speciesIndex].getProbMosqRest();
+double PerHost::probMosqResting (size_t species) const {
+    double pRest = speciesData[species].getProbMosqRest();
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
-        pRest *= (*iter)->postprandialSurvivalFactor( speciesIndex );
+        pRest *= (*iter)->postprandialSurvivalFactor( species );
     }
     return pRest;
 }
 
-double PerHost::relMosqFecundity (size_t speciesIndex) const {
+double PerHost::relMosqFecundity (size_t species) const {
     double relFecundity = 1.0;
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
-        relFecundity *= (*iter)->relFecundity( speciesIndex );
+        relFecundity *= (*iter)->relFecundity( species );
     }
     return relFecundity;
 }

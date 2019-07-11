@@ -87,7 +87,7 @@ Human::Human(SimTime dateOfBirth, int dummy) :
 
 vector<double> EIR_per_genotype;        // cache (not thread safe)
 
-bool Human::update(bool doUpdate) {
+bool Human::update(const Transmission::TransmissionModel& transmission, bool doUpdate) {
     // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
     SimTime age0 = age(sim::ts0());
     if (clinicalModel->isDead(age0))
@@ -116,7 +116,7 @@ bool Human::update(bool doUpdate) {
             }
         }
         // ageYears1 used only in PerHost::relativeAvailabilityAge(); difference to age0 should be minor
-        double EIR = sim::transmission().getEIR( *this, age0, ageYears1,
+        double EIR = transmission.getEIR( *this, age0, ageYears1,
                 EIR_per_genotype );
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         

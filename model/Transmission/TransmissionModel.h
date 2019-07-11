@@ -29,10 +29,11 @@
 #include <string.h>
 
 namespace OM {
-    class Summary;
+class Summary;
+class Population;
 namespace Host{ class Human; }
 namespace Transmission {
-    class PerHost;
+class PerHost;
 
 /** Variable describing current simulation mode. */
 enum SimulationMode {
@@ -87,7 +88,7 @@ public:
   
   /** Extra initialisation when not loading from a checkpoint, requiring
    * information from the human population structure. */
-  virtual void init2() =0;
+  virtual void init2(const Population& population) =0;
   
   /** Set up vector population interventions. */
   virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list,
@@ -144,12 +145,12 @@ public:
   /** Needs to be called each step of the simulation before Human::update().
    *
    * when the vector model is used this updates mosquito populations. */
-  virtual void vectorUpdate () {};
+  virtual void vectorUpdate (const Population& population) {};
   /** Needs to be called each time-step after Human::update().
    * 
    * Updates summary statistics related to transmission as well as the
    * the non-vector model (when in use). */
-  virtual void update () =0;
+  virtual void update (const Population& population) =0;
   
   virtual void changeEIRIntervention (const scnXml::NonVector&) {
       throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
@@ -180,13 +181,7 @@ public:
    * @returns the sum of EIR across genotypes
    */
   double getEIR (Host::Human& human, SimTime age, double ageYears,
-                 vector<double>& EIR);
-  
-  /** Non-vector model: throw an exception. Vector model: check that the
-   * simulation mode allows interventions, and return a map of species names
-   * to indecies. Each index must be unique and in the range [0,n) where
-   * n is the number of species. */
-  virtual const map<string,size_t>& getSpeciesIndexMap() =0;
+                 vector<double>& EIR) const;
   
   /** Deploy a vector population intervention.
    *
@@ -216,12 +211,12 @@ protected:
    *    individual human is exposed to, per parasite genotype, in units of
    *    inoculations per day. Length set by callee. */
   virtual void calculateEIR(Host::Human& human, double ageYears,
-        vector<double>& EIR ) = 0; 
+        vector<double>& EIR ) const =0; 
   
   /** Needs to be called each time-step after Human::update() to update summary
    * statististics related to transmission. Also returns kappa (the average
    * human infectiousness weighted by availability to mosquitoes). */
-  double updateKappa ();
+  double updateKappa (const Population& population);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
@@ -284,9 +279,6 @@ private:
    * Checkpointed. */
   double _sumAnnualKappa;
 
-  /// accumulator for time step EIR of adults
-  double tsAdultEntoInocs;
-
   /// Adult-only EIR over the last update
   double tsAdultEIR;
 
@@ -304,9 +296,6 @@ private:
 
   /// For "num transmitting humans" cts output.
   int numTransmittingHumans;
-
-  /// accumulator for time step adults requesting EIR
-  int tsNumAdults;
 };
 
 } }

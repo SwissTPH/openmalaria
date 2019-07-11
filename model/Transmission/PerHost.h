@@ -65,15 +65,15 @@ public:
      * negative. 0 means mosquitoes are fully deterred, 1 that the intervention
      * has no effect, 2 that the intervention attracts twice as many mosquitoes
      * as would otherwise come. */
-    virtual double relativeAttractiveness(size_t speciesIndex) const =0;
+    virtual double relativeAttractiveness(size_t species) const =0;
     /** Get the killing effect on mosquitoes before they've eaten as a survival
      * multiplier. */
-    virtual double preprandialSurvivalFactor(size_t speciesIndex) const =0;
+    virtual double preprandialSurvivalFactor(size_t species) const =0;
     /** Get the killing effect on mosquitoes after they've eaten as a survival
      * multiplier. */
-    virtual double postprandialSurvivalFactor(size_t speciesIndex) const =0;
+    virtual double postprandialSurvivalFactor(size_t species) const =0;
     /// Get the mosquito fecundity multiplier (1 for no effect).
-    virtual double relFecundity(size_t speciesIndex) const =0;
+    virtual double relFecundity(size_t species) const =0;
     
     /// Index of effect describing the intervention
     inline interventions::ComponentId id() const { return m_id; }
@@ -201,7 +201,7 @@ public:
      * rate factors.)
      * 
      * Assume mean is human-to-vector availability rate factor. */
-    double entoAvailabilityHetVecItv( const PerHostAnophParams& base, size_t speciesIndex ) const;
+    double entoAvailabilityHetVecItv (size_t species) const;
     
     /** Availability rate of human to mosquitoes (α_i). Equals 
      * entoAvailabilityHetVecItv()*getRelativeAvailability().
@@ -210,12 +210,8 @@ public:
      * rate) as well as age (avail. relative to an adult). It does not divide
      * by the average availability of the population, which was incorrectly done
      * in the past. */
-    inline double entoAvailabilityFull (
-        const PerHostAnophParams& base,
-        size_t speciesIndex,
-        double ageYears
-    ) const {
-        return entoAvailabilityHetVecItv (base, speciesIndex)
+    inline double entoAvailabilityFull (size_t species, double ageYears) const {
+        return entoAvailabilityHetVecItv (species)
             * relativeAvailabilityAge (ageYears);
     }
     //@}
@@ -223,22 +219,21 @@ public:
     ///@brief Get effects of interventions pre/post biting
     //@{
     /** Probability of a mosquito succesfully biting a host (P_B_i). */
-    double probMosqBiting (const PerHostAnophParams& base, size_t speciesIndex) const;
+    double probMosqBiting (size_t species) const;
     /** Probability of a mosquito succesfully finding a resting
      * place after biting and then resting (P_C_i * P_D_i). */
-    double probMosqResting (const PerHostAnophParams& base, size_t speciesIndex) const;
+    double probMosqResting (size_t species) const;
     /** Multiplicative factor for the number of fertile eggs laid by mosquitoes
      * after feeding on this host. Should be 1 normally, less than 1 to reduce
      * fertility, greater than 1 to increase. */
-    double relMosqFecundity (size_t speciesIndex) const;
+    double relMosqFecundity (size_t species) const;
     //@}
     
     ///@brief Convenience wrappers around several functions
     //@{
     /// entoAvailabilityHetVecItv * probMosqBiting
-    inline double availBite (const PerHostAnophParams& base, size_t speciesIndex) const{
-        return entoAvailabilityHetVecItv(base, speciesIndex) *
-                probMosqBiting(base, speciesIndex);
+    inline double availBite (size_t species) const{
+        return entoAvailabilityHetVecItv(species) * probMosqBiting(species);
     }
     //@}
     
@@ -259,7 +254,7 @@ public:
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
-        species & stream;
+        speciesData & stream;
         _relativeAvailabilityHet & stream;
         outsideTransmission & stream;
         checkpointIntervs( stream );
@@ -270,7 +265,7 @@ private:
     void checkpointIntervs( ostream& stream );
     void checkpointIntervs( istream& stream );
     
-    vector<PerHostAnoph> species;
+    vector<PerHostAnoph> speciesData;
     
     // Determines whether human is outside transmission
     bool outsideTransmission;
