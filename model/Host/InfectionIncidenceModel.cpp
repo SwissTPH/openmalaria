@@ -23,7 +23,7 @@
 #include "Transmission/PerHost.h"
 #include "WithinHost/WHInterface.h"
 #include "Parameters.h"
-#include "Monitoring/Continuous.h"
+#include "mon/Continuous.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -119,7 +119,7 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
         }
     }
     
-    Monitoring::Continuous.registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
+    mon::Continuous.registerCallback( "new infections", "\tnew infections", &InfectionIncidenceModel::ctsReportNewInfections );
 }
 
 

@@ -23,7 +23,7 @@
 #include "Host/Human.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/Genotypes.h"
-#include "Monitoring/Continuous.h"
+#include "mon/Continuous.h"
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
 #include "util/SpeciesIndexChecker.h"
@@ -226,7 +226,7 @@ VectorModel::VectorModel (const scnXml::Entomology& entoData,
         ctsRA<<"\tres avail("<<name<<")";
         ctsRR<<"\tres req("<<name<<")";
     }
-    using Monitoring::Continuous;
+    using mon::Continuous;
     Continuous.registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
     Continuous.registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorModel::ctsCbP_A ) );
     Continuous.registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorModel::ctsCbP_df ) );

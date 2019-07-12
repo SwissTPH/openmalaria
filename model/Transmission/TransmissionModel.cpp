@@ -26,7 +26,7 @@
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/Genotypes.h"
-#include "Monitoring/Continuous.h"
+#include "mon/Continuous.h"
 #include "mon/info.h"
 #include "util/StreamValidator.h"
 #include "util/CommandLine.h"
@@ -122,7 +122,7 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
 {
     initialisationEIR.assign (SimTime::stepsPerYear(), 0.0);
     
-  using Monitoring::Continuous;
+  using mon::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
   Continuous.registerCallback( "simulated EIR", "\tsimulated EIR", MakeDelegate( this, &TransmissionModel::ctsCbSimulatedEIR ) );
   Continuous.registerCallback( "human infectiousness", "\thuman infectiousness", MakeDelegate( this, &TransmissionModel::ctsCbKappa ) );

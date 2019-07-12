@@ -24,7 +24,7 @@
 #include "Transmission/TransmissionModel.h"
 #include "Parameters.h"
 #include "Clinical/ClinicalModel.h"
-#include "Monitoring/Continuous.h"
+#include "mon/Continuous.h"
 #include "interventions/InterventionManager.hpp"
 #include "Population.h"
 #include "WithinHost/WHInterface.h"
@@ -45,7 +45,7 @@
 
 
 namespace OM {
-    using Monitoring::Continuous;
+    using mon::Continuous;
     using interventions::InterventionManager;
     using Transmission::TransmissionModel;
 
@@ -107,7 +107,7 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     
     // Transmission model initialisation depends on Transmission::PerHost and
     // genotypes (both from Human, from Population::init()) and
-    // Monitoring::AgeGroup (from Surveys.init()):
+    // mon::AgeGroup (from Surveys.init()):
     // Note: PerHost dependency can be postponed; it is only used to set adultAge
     population = unique_ptr<Population>(
             new Population( scenario.getDemography().getPopSize() ));

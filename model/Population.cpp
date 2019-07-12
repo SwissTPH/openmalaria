@@ -19,7 +19,7 @@
  */
 
 #include "Population.h"
-#include "Monitoring/Continuous.h"
+#include "mon/Continuous.h"
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
@@ -76,7 +76,7 @@ void Population::staticCheckpoint (ostream& stream)
 Population::Population(size_t populationSize)
     : populationSize (populationSize), recentBirths(0)
 {
-    using Monitoring::Continuous;
+    using mon::Continuous;
     Continuous.registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
     // Age groups are currently hard-coded.
     ctsDemogAgeGroups += 1.0, 5.0, 10.0, 15.0, 25.0;

@@ -30,7 +30,7 @@ using fastdelegate::MakeDelegate;
 namespace scnXml{ class Monitoring; }
 namespace OM {
     class Population;
-namespace Monitoring {
+namespace mon {
     
     /** Class to deal with continuous output data.
      *

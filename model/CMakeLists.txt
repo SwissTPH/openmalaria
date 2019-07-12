@@ -74,6 +74,7 @@ set (Model_CPP
   
   mon/mon.cpp
   mon/misc.cpp
+  mon/Continuous.cpp
   
   util/timer.cpp
   util/vectors.cpp
@@ -88,8 +89,6 @@ set (Model_CPP
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp
   util/misc.cpp
-  
-  Monitoring/Continuous.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp
