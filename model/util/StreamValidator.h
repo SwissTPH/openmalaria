@@ -30,14 +30,14 @@
 #endif
 
 namespace OM { namespace util {
-    typedef boost::uint32_t SVType;
+    typedef uint32_t SVType;
     
     // ———  Our cross-platform consistent-result hasing functions  ——
     namespace CPCH {
-        SVType toSVType(boost::uint32_t x);
-        SVType toSVType(boost::int32_t x);
-        SVType toSVType(boost::uint64_t x);
-        SVType toSVType(boost::int64_t x);
+        SVType toSVType(uint32_t x);
+        SVType toSVType(int32_t x);
+        SVType toSVType(uint64_t x);
+        SVType toSVType(int64_t x);
         SVType toSVType(float x);
         SVType toSVType(double x);
     }
