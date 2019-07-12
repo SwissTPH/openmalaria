@@ -127,10 +127,11 @@ namespace OM { namespace util {
     /// Use this function at validation points in code. If validator is not compile-
     /// time enabled, it will have no effect and should be optimised out.
     template<class T>
-    inline void streamValidate (T x){
+    inline T streamValidate (T x){
 # ifdef OM_STREAM_VALIDATOR
         StreamValidator( x );
 # endif
+        return std::move(x);
     }
     
 } }

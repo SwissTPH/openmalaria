@@ -30,15 +30,24 @@ namespace OM { namespace WithinHost {
     
 class Infection {
 public:
-    static void init( const OM::Parameters& parameters, SimTime latentP );
+    inline static void init( SimTime latentP ){
+        s_latentP = latentP;
+    }
     
     Infection () :
         m_startDate(sim::nowOrTs0()),
         m_density(0.0),
         m_cumulativeExposureJ(0.0)
     {}
-    Infection (istream& stream);
+    Infection (istream& stream) :
+        m_startDate(SimTime::never())
+    {
+        m_startDate & stream;
+        m_density & stream;
+        m_cumulativeExposureJ & stream;
+    }
     virtual ~Infection () {}
+    
     
     /** Return true if infection is blood stage.
      * 
@@ -66,14 +75,10 @@ public:
         return m_density;
     }
     
-    /** @returns A multiplier describing the proportion of parasites surviving
-     * immunity effects this time step.
-     * 
-     * Note that in the Descriptive model this multiplies log(density), but the
-     * new density has no effect on future densities, wheras the Empirical model
-     * multiplies the actual density (which then affects density on the following
-     * time step). */
-    double immunitySurvivalFactor (double ageInYears, double cumulativeh, double cumulativeY);
+    /// Get the cumulative parasite density
+    inline double cumulativeExposureJ() {
+        return m_cumulativeExposureJ;
+    }
     
     /// Resets immunity properties specific to the infection (should only be
     /// called along with clearImmunity() on within-host model).
@@ -88,7 +93,11 @@ public:
     }
     
 protected:
-    virtual void checkpoint (ostream& stream);
+    inline virtual void checkpoint (ostream& stream) {
+        m_startDate & stream;
+        m_density & stream;
+        m_cumulativeExposureJ & stream;
+    }
     
     /// Date of inoculation of infection (start of liver stage)
     /// This is the step of inoculation (ts0()).
@@ -100,24 +109,8 @@ protected:
     /// Cumulative parasite density, since start of this infection
     double m_cumulativeExposureJ;
         
-    /// @brief Static data set by init
-    //@{
-public:
-    /// pre-erythrocytic latent period
-    static SimTime latentP;
-    
-    static double invCumulativeYstar; //!< Critical value for immunity trigger (cumulative densities)
-    static double invCumulativeHstar; //!< Critical value for immunity trigger (cumulative inoculations)
-    
-private:
-    static double alpha_m; //!< Maternal protection at birth
-    
-    /*!
-    More or less (up to 0.693) inverse quantity of alphaMStar (AJTM p. 9 eq. 12),
-    decay rate of maternal protection in years^(-1).
-    */
-    static double decayM;
-    //@}
+    /// Pre-erythrocytic latent period (instantiated in WHFalciparum.cpp)
+    static SimTime s_latentP;
     
     friend class ::UnittestUtil;
 };

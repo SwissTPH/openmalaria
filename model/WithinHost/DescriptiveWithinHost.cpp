@@ -114,12 +114,6 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     totalDensity = 0.0;
     timeStepMaxDensity = 0.0;
 
-    // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
-    // this time-step and cumulative_Y only includes past densities.
-    double cumulative_h=m_cumulative_h;
-    double cumulative_Y=m_cumulative_Y;
-    m_cumulative_h += nNewInfs;
-    
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
     
@@ -142,7 +136,8 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
         // Should be: infStepMaxDens = 0.0, but has some history.
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
-        inf->determineDensities(ageInYears, cumulative_h, cumulative_Y, infStepMaxDens, _innateImmSurvFact, bsvFactor);
+        double immSurvFact = immunitySurvivalFactor(ageInYears, inf->cumulativeExposureJ());
+        inf->determineDensities(m_cumulative_h, infStepMaxDens, immSurvFact, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
@@ -150,10 +145,15 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 
         double density = inf->getDensity();
         totalDensity += density;
-        m_cumulative_Y += SimTime::oneTS().inDays() * density;
 
         ++inf;
     }
+    
+    // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
+    // this time-step and cumulative_Y only includes past densities.
+    m_cumulative_h += nNewInfs;
+    m_cumulative_Y += SimTime::oneTS().inDays() * totalDensity;
+    
     util::streamValidate( totalDensity );
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }

@@ -5,9 +5,14 @@ Coding practices
 Naming conventions
 -------------------------------
 
-* constants — USE_CAPS
-* variables & functions — useLowercase
-* types — UseCamelCase
+Guidelines. Note that sometimes capitalisation of symbols is important, hence
+the following is not always adhered to precisely.
+
+* compile-time constants — `USE_CAPS`
+* variables & functions — `useLowerCamelCase`
+* types — `UseCamelCase`
+* non-static struct/class fields — prefix 'm_': `m_dataName`
+* static struct/class fields — prefix 's_': `s_dataName`
 
 
 File naming
