@@ -166,10 +166,6 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         population->createInitialHumans();
         transmission->init2(*population);
     }
-    // Set to either a checkpointing time step or min int value. We only need to
-    // set once, since we exit after a checkpoint triggered this way.
-    SimTime testCheckpointTime = util::CommandLine::getNextCheckpointTime( sim::now() );
-    SimTime testCheckpointDieTime = testCheckpointTime;        // kill program at same time
     
     int lastPercent = -1;	// last _integer_ percentage value
     
@@ -182,13 +178,6 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
                 lastPercent = percent;
                 // \r cleans line. Then we print progress as a percentage.
                 cerr << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
-            }
-            
-            if( testCheckpointTime == sim::now() ){
-                writeCheckpoint();
-            }
-            if( testCheckpointDieTime == sim::now() ){
-                throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }
             
             // Monitoring. sim::now() gives time of end of last step,
@@ -250,21 +239,10 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             break;
         }
         
-        if (util::CommandLine::option (util::CommandLine::TEST_CHECKPOINTING)){
-            // First of middle of next phase, or current value (from command line) triggers a checkpoint.
-            SimTime phase_mid = sim::now() + (simPeriodEnd - sim::now()) * 0.5;
-            // Don't checkpoint 0-length phases or do mid-phase checkpointing
-            // when timed checkpoints were specified, and don't checkpoint
-            // ONE_LIFE_SPAN phase if already past time humanWarmupLength:
-            // these are extra transmission inits, and we don't want to
-            // checkpoint every one of them.
-            if( testCheckpointTime < SimTime::zero() && phase_mid > sim::now()
-                && (phase != ONE_LIFE_SPAN || sim::now() < humanWarmupLength)
-            ){
-                testCheckpointTime = phase_mid;
-                // Test checkpoint: die a bit later than checkpoint for better
-                // resume testing (specifically, ctsout.txt).
-                testCheckpointDieTime = testCheckpointTime + SimTime::oneTS() + SimTime::oneTS();
+        if (phase == MAIN_PHASE && util::CommandLine::option (util::CommandLine::CHECKPOINT)){
+            writeCheckpoint();
+            if( util::CommandLine::option (util::CommandLine::CHECKPOINT_STOP) ){
+                throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }
         }
     }
@@ -306,19 +284,11 @@ void Simulator::writeCheckpoint(){
     
     {   // Open the next checkpoint file for writing:
         ostringstream name;
-        name << CHECKPOINT << checkpointNum;
+        name << CHECKPOINT << checkpointNum << ".gz";
         //Writing checkpoint:
-//      cerr << sim::now() << " WC: " << name.str();
-        if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
-            name << ".gz";
-            ogzstream out(name.str().c_str(), ios::out | ios::binary);
-            checkpoint (out, checkpointNum);
-            out.close();
-        } else {
-            ofstream out(name.str().c_str(), ios::out | ios::binary);
-            checkpoint (out, checkpointNum);
-            out.close();
-        }
+        ogzstream out(name.str().c_str(), ios::out | ios::binary);
+        checkpoint (out, checkpointNum);
+        out.close();
     }
     
     {   // Indicate which is the latest checkpoint file.
@@ -330,16 +300,9 @@ void Simulator::writeCheckpoint(){
             throw util::checkpoint_error ("error writing to file \"checkpoint\"");
     }
     // Truncate the old checkpoint to save disk space, when it existed
-    if( oldCheckpointNum != checkpointNum
-        && !util::CommandLine::option (
-            util::CommandLine::TEST_DUPLICATE_CHECKPOINTS
-        )       /* need original in this case */
-    ) {
+    if( oldCheckpointNum != checkpointNum ){
         ostringstream name;
-        name << CHECKPOINT << oldCheckpointNum;
-        if (util::CommandLine::option (util::CommandLine::COMPRESS_CHECKPOINTS)) {
-            name << ".gz";
-        }
+        name << CHECKPOINT << oldCheckpointNum << ".gz";
         ofstream out(name.str().c_str(), ios::out | ios::binary);
         out.close();
     }
@@ -349,29 +312,17 @@ void Simulator::writeCheckpoint(){
 void Simulator::readCheckpoint() {
     int checkpointNum = readCheckpointNum();
     
-  // Open the latest file
-  ostringstream name;
-  name << CHECKPOINT << checkpointNum;  // try uncompressed
-  ifstream in(name.str().c_str(), ios::in | ios::binary);
-  if (in.good()) {
-    checkpoint (in, checkpointNum);
-    in.close();
-  } else {
-    name << ".gz";                              // then compressed
+    // Open the latest file
+    ostringstream name;
+    name << CHECKPOINT << checkpointNum << ".gz";
     igzstream in(name.str().c_str(), ios::in | ios::binary);
     //Note: gzstreams are considered "good" when file not open!
     if ( !( in.good() && in.rdbuf()->is_open() ) )
-      throw util::checkpoint_error ("Unable to read file");
+        throw util::checkpoint_error ("Unable to read file");
     checkpoint (in, checkpointNum);
     in.close();
-  }
   
-  // Keep size of stderr.txt minimal with a short message, since this is a common message:
-  cerr << sim::now().inSteps() << "t RC" << endl;
-  
-  // On resume, write a checkpoint so we can tell whether we have identical checkpointed state
-  if (util::CommandLine::option (util::CommandLine::TEST_DUPLICATE_CHECKPOINTS))
-    writeCheckpoint();
+    cerr << sim::now().inSteps() << "t loaded checkpoint" << endl;
 }
 
 

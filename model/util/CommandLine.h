@@ -36,17 +36,10 @@ namespace OM { namespace util {
 	enum Options {
 	    /** Outputs non-default "ModelOptions" values in a human-readable form. */
 	    PRINT_MODEL_OPTIONS = 0,
-	    /** Forces checkpoints in the middle of each simulation phase,
-	     * exiting immediately afterwards.
-	     * 
-	     * Also see checkpoint_times, which overrides this option. */
-	    TEST_CHECKPOINTING,
-	    /** Write a checkpoint immediately after loading one. Allows
-	     * confirmation that a duplicate is produced. */
-	    TEST_DUPLICATE_CHECKPOINTS,
-	    /** Compress checkpoint files with gzip before writing.
-	     * Even with binary checkpoints, this has a big effect. */
-	    COMPRESS_CHECKPOINTS,
+	    /// Forces checkpointing just before starting the main phase.
+	    CHECKPOINT,
+	    /// Exit after writing checkpoint
+            CHECKPOINT_STOP,
 	    /** Do initialisation and error checks, but don't run simulation. */
 	    SKIP_SIMULATION,
             /** Compress output.txt file. */
@@ -74,16 +67,6 @@ namespace OM { namespace util {
 	/** Return true if given option (from CommandLine::Options) is active. */
 	static inline bool option(size_t code) {
 	    return options.test(code);
-	}
-	
-	/** Return first checkpointing time step _greater than_ time step passed,
-	 * or min int value if no (more) checkpoint times. */
-	static SimTime getNextCheckpointTime( SimTime now ) {
-	    set<int>::iterator it = checkpoint_times.upper_bound( now.inSteps() );
-	    if( it == checkpoint_times.end() )
-		return SimTime::never();
-	    else
-		return SimTime::fromTS(*it);
 	}
 	
 	/** If path is relative, prepend it with clResourcePath. */
@@ -124,14 +107,6 @@ namespace OM { namespace util {
 	//Output filename (for main output file "output.txt")
 	static string outputName;
         static string ctsoutName;
-	
-	/** Set of simulation times at which a checkpoint should be written and
-	* program should exit (to allow resume).
-	* 
-	* Units: steps. (We don't use the SimTime type because these times are read
-	* before the step interval is set, and SimTime needs this to convert to days.)
-	*/
-	static set<int> checkpoint_times;
     };
 } }
 #endif
