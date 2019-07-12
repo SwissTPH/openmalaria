@@ -126,6 +126,10 @@ ostream& operator<<(ostream& stream, const traced_exception& e){
 unimplemented_exception::unimplemented_exception(const string& msg) :
         base_exception(msg, Error::NotImplemented)
 {}
+
+const string msg_pre = "Sorry, this feature hasn't been implemented by OpenMalaria yet: ";
+vector<char> msg_buf;
+
 const char *unimplemented_exception::message() const{
     const char *base_msg = base_exception::what();
     size_t base_len = strlen( base_msg );
@@ -139,8 +143,6 @@ const char *unimplemented_exception::message() const{
     memcpy( &msg_buf[msg_pre.size()], base_msg, base_len );
     return &msg_buf[0];
 }
-const string unimplemented_exception::msg_pre = "Sorry, this feature hasn't been implemented by OpenMalaria yet: ";
-vector<char> unimplemented_exception::msg_buf;
 
 xml_scenario_error::xml_scenario_error(const string& msg) :
     base_exception(msg, Error::XmlScenario)
