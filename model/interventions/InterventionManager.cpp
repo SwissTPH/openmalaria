@@ -164,7 +164,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
             
             // 2.b intervention deployments
             for( auto ctsIt = elt.getContinuous().begin(); ctsIt != elt.getContinuous().end(); ++ctsIt ) {
-                ComponentId subPop = ComponentId_pop;
+                ComponentId subPop = ComponentId::wholePop();
                 bool complement = false;
                 if( ctsIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = ctsIt->getRestrictToSubPop().get().getId();
@@ -193,7 +193,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
                 }
             }
             for( auto timedIt = elt.getTimed().begin(); timedIt != elt.getTimed().end(); ++timedIt ) {
-                ComponentId subPop = ComponentId_pop;
+                ComponentId subPop = ComponentId::wholePop();
                 bool complement = false;
                 if( timedIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = timedIt->getRestrictToSubPop().get().getId();

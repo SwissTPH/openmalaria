@@ -35,7 +35,7 @@ namespace interventions {
 using namespace OM::util;
 
 vector<VaccineComponent*> VaccineComponent::params;
-ComponentId VaccineComponent::reportComponent = ComponentId_pop;
+ComponentId VaccineComponent::reportComponent = ComponentId::wholePop();
 
 VaccineComponent::VaccineComponent( ComponentId component, const scnXml::VaccineDescription& vd, Vaccine::Types type ) :
         HumanInterventionComponent(component),
@@ -46,7 +46,7 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
     if( type == Vaccine::BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
         throw util::unimplemented_exception( "blood stage vaccines (BSV) cannot be used with vivax model" );
     
-    if( reportComponent == ComponentId_pop /* the initial value */ ){
+    if( reportComponent == ComponentId::wholePop() /* the initial value */ ){
         // set to the first type described
         reportComponent = component;
     }
@@ -125,7 +125,7 @@ void Vaccine::verifyEnabledForR_0 (){
 
 // this is only used for checkpointing; loaded values are unimportant
 PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
-    component(ComponentId_pop),
+    component(ComponentId::wholePop()),
     numDosesAdministered(0),
     initialEfficacy( std::numeric_limits<double>::signaling_NaN() )
 {

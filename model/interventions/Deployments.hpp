@@ -147,7 +147,7 @@ protected:
     /**
      * @param deploy XML element describing deployment
      * @param intervention The intervention to deploy (list of components)
-     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      * @param complement Whether to take the complement of the sub-population
      *  to which deployment will be restricted
      */
@@ -171,7 +171,7 @@ protected:
     
     double coverage;    // proportion coverage within group meeting above restrictions
     VaccineLimits vaccLimits;
-    ComponentId subPop;      // ComponentId_pop if deployment is not restricted to a sub-population
+    ComponentId subPop;      // ComponentId::wholePop() if deployment is not restricted to a sub-population
     bool complement;
     shared_ptr<const HumanIntervention> intervention;
 };
@@ -184,7 +184,7 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      */
     TimedHumanDeployment( SimTime date,
                            const scnXml::MassDeployment& mass,
@@ -207,7 +207,7 @@ public:
         for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
+                if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
                     if( util::random::bernoulli( coverage ) ){
                         deployToHuman( *iter, mon::Deploy::TIMED );
                     }
@@ -219,7 +219,7 @@ public:
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t"
             << minAge.inYears() << "y\t" << maxAge.inYears() << "t\t";
-        if( subPop == ComponentId_pop ) out << "(none)";
+        if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );
@@ -238,7 +238,7 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      * @param cumCuvId Id of component to test coverage for
      */
     TimedCumulativeHumanDeployment( SimTime date,
@@ -258,7 +258,7 @@ public:
         for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
+                if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
                     total+=1;
                     if( !iter->isInSubPop(cumCovInd) )
                         unprotected.push_back( &*iter );
@@ -366,7 +366,7 @@ public:
             return false;
         }else if( deployAge == age ){
             if( begin <= sim::intervNow() && sim::intervNow() < end &&
-                ( subPop == interventions::ComponentId_pop ||
+                ( subPop == ComponentId::wholePop() ||
                     (human.isInSubPop( subPop ) != complement)
                 ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
@@ -382,7 +382,7 @@ public:
         if( end == SimTime::future() ) out << "(none)";
         else out << end.inSteps() << 't';
         out << '\t' << deployAge.inYears() << "y\t";
-        if( subPop == ComponentId_pop ) out << "(none)";
+        if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );

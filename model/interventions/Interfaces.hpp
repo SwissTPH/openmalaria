@@ -70,10 +70,14 @@ struct ComponentId{
     inline void operator& (ostream& stream) const{ id & stream; }
     inline bool operator== (const ComponentId that) const{ return id == that.id; }
     inline bool operator< (const ComponentId that) const{ return id < that.id; }
+    
+    /// Special value indicating the whole population
+    static ComponentId wholePop() {
+        return ComponentId{ boost::integer_traits<size_t>::const_max };
+    }
+    
     size_t id;
 };
-// special value "whole population cohort" :
-static ComponentId ComponentId_pop = ComponentId( boost::integer_traits<size_t>::const_max );
 
 /** A description of one component of a human intervention.
  * 
