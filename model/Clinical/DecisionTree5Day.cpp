@@ -19,7 +19,6 @@
  */
 
 #include "Clinical/DecisionTree5Day.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "Clinical/CMDecisionTree.h"
 #include "WithinHost/WHInterface.h"
 #include "WithinHost/WHVivax.h"

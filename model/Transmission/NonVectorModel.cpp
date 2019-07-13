@@ -80,7 +80,7 @@ NonVectorModel::NonVectorModel(const scnXml::Entomology& entoData,
 
 NonVectorModel::~NonVectorModel () {}
 
-void NonVectorModel::init2 () {
+void NonVectorModel::init2 (const Population& population) {
     // no set-up needed; just indicate we're ready to roll:
     simulationMode = forcedEIR;
 }
@@ -190,10 +190,6 @@ void NonVectorModel::changeEIRIntervention (
   annualEIR = numeric_limits<double>::quiet_NaN();
 }
 
-const map<string,size_t>& NonVectorModel::getSpeciesIndexMap(){
-    throw util::xml_scenario_error( "attempt to use a vector-affecting intervention with the non-vector model" );
-}
-
 void NonVectorModel::uninfectVectors(){
     if( simulationMode != dynamicEIR )
 	cerr <<"Warning: uninfectVectors is not efficacious with forced EIR"<<endl;
@@ -208,8 +204,8 @@ void NonVectorModel::deployVectorTrap(size_t instance, double number, SimTime li
   throw util::xml_scenario_error (viError);
 }
 
-void NonVectorModel::update () {
-    double currentKappa = TransmissionModel::updateKappa();
+void NonVectorModel::update (const Population& population) {
+    double currentKappa = TransmissionModel::updateKappa(population);
     
     if( simulationMode == forcedEIR ){
         initialKappa[sim::ts1().moduloSteps(initialKappa.size())] = currentKappa;
@@ -217,7 +213,7 @@ void NonVectorModel::update () {
 }
 
 
-void NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<double>& EIR){
+void NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<double>& EIR) const{
     EIR.resize( 1 );    // no support for per-genotype tracking in this model (possible, but we're lazy)
     // where the full model, with estimates of human mosquito transmission is in use, use this:
     switch (simulationMode) {

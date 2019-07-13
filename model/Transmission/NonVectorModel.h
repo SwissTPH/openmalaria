@@ -36,7 +36,7 @@ public:
   NonVectorModel(const scnXml::Entomology& entoData, const scnXml::NonVector& nonVectorData);
   virtual ~NonVectorModel();
   
-  virtual void init2 ();
+  virtual void init2 (const Population& population);
   
   virtual void initVectorInterv( const scnXml::Description::AnophelesSequence& list,
         size_t instance, const string& name );
@@ -64,16 +64,14 @@ public:
    * Similar calculation to that used during initialization. */
   virtual void changeEIRIntervention (const scnXml::NonVector&);
   
-  virtual const map<string,size_t>& getSpeciesIndexMap();
-  
   virtual void deployVectorPopInterv (size_t instance);
   virtual void deployVectorTrap( size_t instance, double number, SimTime lifespan );
   
   virtual void uninfectVectors();
   
-  virtual void vectorUpdate () {}
-  virtual void update ();
-  virtual void calculateEIR(OM::Host::Human& human, double ageYears, vector< double >& EIR);
+  virtual void vectorUpdate (const Population& population) {}
+  virtual void update (const Population& population);
+  virtual void calculateEIR(OM::Host::Human& human, double ageYears, vector< double >& EIR) const;
   
 private:
 

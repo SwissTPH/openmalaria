@@ -37,11 +37,6 @@ namespace scnXml {
 }
 
 namespace OM {
-class Population;
-namespace Transmission {
-    class TransmissionModel;
-}
-using Transmission::TransmissionModel;
 
 struct TimeDisplayHelper;
 
@@ -266,7 +261,7 @@ ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay );
 
 
 
-/** Encapsulates static variables: sim time, population, transmission model. */
+/** Encapsulates static variables: sim time. */
 class sim {
 public:
     ///@brief SimTime accessors, all returning a copy to make read-only
@@ -317,20 +312,6 @@ public:
     static inline SimTime maxHumanAge(){ return max_human_age; }
     //@}
     
-    ///@brief Population variables (globals)
-    //@{
-    /// Human population
-    static Population& humanPop() {
-        assert(p_humanPop.get() != 0);
-        return *p_humanPop;
-    }
-    /// Transmission model (& vector population, if using)
-    static TransmissionModel& transmission() {
-        assert(p_transmission.get() != 0);
-        return *p_transmission;
-    }
-    //@}
-    
 private:
     static void init( const scnXml::Scenario& scenario );
     
@@ -358,9 +339,6 @@ private:
     static SimTime time0;
     static SimTime time1;
     static SimTime interv_time;
-    
-    static std::unique_ptr<Population> p_humanPop;
-    static std::unique_ptr<TransmissionModel> p_transmission;
     
     friend class Simulator;
     friend class ::UnittestUtil;

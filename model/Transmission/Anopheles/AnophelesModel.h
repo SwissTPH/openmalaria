@@ -82,7 +82,6 @@ public:
     {}
     
     AnophelesModel (AnophelesModel&& o):
-            humanBase(move(o.humanBase)),
             mosqSeekingDuration(move(o.mosqSeekingDuration)),
             mosqSeekingDeathRate(move(o.mosqSeekingDeathRate)),
             probMosqSurvivalOvipositing(move(o.probMosqSurvivalOvipositing)),
@@ -98,7 +97,6 @@ public:
     {}
     
     void operator= (AnophelesModel&& o) {
-        humanBase = move(o.humanBase);
         mosqSeekingDuration = move(o.mosqSeekingDuration);
         mosqSeekingDeathRate = move(o.mosqSeekingDeathRate);
         probMosqSurvivalOvipositing = move(o.probMosqSurvivalOvipositing);
@@ -123,7 +121,9 @@ public:
      * @param nonHumanHostPopulations Size of each non-human population
      * @param populationSize Size of human population (assumed constant)
      */
-    string initialise (const scnXml::AnophelesParams& anoph,
+    string initialise (
+                       size_t species,
+                       const scnXml::AnophelesParams& anoph,
                        vector<double>& initialisationEIR,
 //                        map<string, double>& nonHumanHostPopulations,
                        int populationSize);
@@ -156,11 +156,6 @@ public:
     /** Set up trap parameters. */
     void initVectorTrap( const scnXml::Description1& desc, size_t instance );
     
-    /** Return base-line human parameters for the mosquito. */
-    inline const PerHostAnophParams& getHumanBaseParams () {
-        return humanBase;
-    }
-    
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
@@ -184,7 +179,7 @@ public:
     void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic);
 
     /// Intermediatary from vector model equations used to calculate EIR
-    inline vector<double>& getPartialEIR() { return partialEIR; }
+    inline const vector<double>& getPartialEIR() const{ return partialEIR; }
     //@}
 
 
@@ -196,7 +191,7 @@ public:
     /// @param instance Index of this type of trap
     /// @param number The number of traps to deploy
     /// @param lifespan Time until these traps are removed/replaced/useless
-    void deployVectorTrap(size_t instance, double number, SimTime lifespan);
+    void deployVectorTrap(size_t species, size_t instance, double number, SimTime lifespan);
 
     inline void uninfectVectors() {
         transmission.uninfectVectors();
@@ -254,11 +249,13 @@ private:
      * Documentation: "Parameter Values for Transmission model"
      * (Chitnis, Smith and Schapira, 4.3.2010)
      * 
+     * @param species Species index
      * @param anoph Data from XML
      * @param nonHumanHostPopulations Size of each non-human population
      * @param populationSize Size of the human population (assumed constant)
      */
     void initAvailability(
+        size_t species,
         const scnXml::AnophelesParams& anoph,
 //         map<string, double>& nonHumanHostPopulations,
         int populationSize);
@@ -281,19 +278,6 @@ private:
     
     
     // -----  parameters (constant after initialisation)  -----
-    
-    /** Baseline parameters which may be varied per human host. The primary
-     * reason for wrapping these parameters in a struct is that these are the
-     * parameters which need to be passed to the PerHost code
-     * during calculations.
-     *
-     * Includes model parameters which may be varied per-individual to account
-     * for interventions and innate resistances, and intervention effect
-     * descriptions.
-     *
-     * Read from XML by initialise; no need to checkpoint. */
-    PerHostAnophParams humanBase;
-    
     
     /** Duration of host-seeking per day; the maximum fraction of a day that a
      * mosquito would spend seeking (θ_d). */

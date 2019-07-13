@@ -30,6 +30,7 @@
 #include "interventions/HumanInterventionComponents.hpp"
 #include "interventions/Deployments.hpp"
 #include "WithinHost/Diagnostic.h"
+#include "Transmission/VectorModel.h"
 
 namespace OM { namespace interventions {
 
@@ -49,7 +50,7 @@ vector<ComponentId> removeAtIds[SubPopRemove::NUM];
 
 // static functions:
 
-void InterventionManager::init (const scnXml::Interventions& intervElt){
+void InterventionManager::init (const scnXml::Interventions& intervElt, Transmission::TransmissionModel& transmission){
     nextTimed = 0;
     
     if( intervElt.getChangeHS().present() ){
@@ -132,15 +133,15 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                 hiComponent = new VaccineComponent( id, component.getTBV().get(), Vaccine::TBV );
             }else if( component.getITN().present() ){
                 if( species_index_map == 0 )
-                    species_index_map = &sim::transmission().getSpeciesIndexMap();
+                    species_index_map = &Transmission::VectorModel::getSpeciesIndexMap();
                 hiComponent = new ITNComponent( id, component.getITN().get(), *species_index_map );
             }else if( component.getIRS().present() ){
                 if( species_index_map == 0 )
-                    species_index_map = &sim::transmission().getSpeciesIndexMap();
+                    species_index_map = &Transmission::VectorModel::getSpeciesIndexMap();
                 hiComponent = new IRSComponent( id, component.getIRS().get(), *species_index_map );
             }else if( component.getGVI().present() ){
                 if( species_index_map == 0 )
-                    species_index_map = &sim::transmission().getSpeciesIndexMap();
+                    species_index_map = &Transmission::VectorModel::getSpeciesIndexMap();
                 hiComponent = new GVIComponent( id, component.getGVI().get(), *species_index_map );
             }else if( component.getRecruitmentOnly().present() ){
                 hiComponent = new RecruitmentOnlyComponent( id );
@@ -163,7 +164,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
             
             // 2.b intervention deployments
             for( auto ctsIt = elt.getContinuous().begin(); ctsIt != elt.getContinuous().end(); ++ctsIt ) {
-                ComponentId subPop = ComponentId_pop;
+                ComponentId subPop = ComponentId::wholePop();
                 bool complement = false;
                 if( ctsIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = ctsIt->getRestrictToSubPop().get().getId();
@@ -192,7 +193,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
                 }
             }
             for( auto timedIt = elt.getTimed().begin(); timedIt != elt.getTimed().end(); ++timedIt ) {
-                ComponentId subPop = ComponentId_pop;
+                ComponentId subPop = ComponentId::wholePop();
                 bool complement = false;
                 if( timedIt->getRestrictToSubPop().present() ){
                     const string& subPopStr = timedIt->getRestrictToSubPop().get().getId();
@@ -295,7 +296,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
         for( auto it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
-                sim::transmission().initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
+                transmission.initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
                 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 for( auto it = seq.begin(); it != seq.end(); ++it ) {
@@ -309,8 +310,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt){
     if( intervElt.getVectorTrap().present() ){
         size_t instance = 0;
         foreach( const scnXml::VectorTrap& trap, intervElt.getVectorTrap().get().getIntervention() ){
-            sim::transmission().initVectorTrap(
-                    trap.getDescription(), instance, trap.getName() );
+            transmission.initVectorTrap(trap.getDescription(), instance, trap.getName());
             if( trap.getTimed().present() ) {
                 foreach( const scnXml::Deploy1 deploy, trap.getTimed().get().getDeploy() ){
                     SimTime time = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
@@ -365,7 +365,11 @@ ComponentId InterventionManager::getComponentId( const string textId )
     return it->second;
 }
 
-void InterventionManager::loadFromCheckpoint( SimTime interventionTime ){
+void InterventionManager::loadFromCheckpoint(
+                Population& population,
+                Transmission::TransmissionModel& transmission,
+                SimTime interventionTime)
+{
     // We need to re-deploy changeHS and changeEIR interventions, but nothing
     // else. nextTimed should be zero so we can go through all past interventions.
     // Only redeploy those which happened before this time step.
@@ -377,14 +381,14 @@ void InterventionManager::loadFromCheckpoint( SimTime interventionTime ){
             //Note: neither changeHS nor changeEIR interventions care what the
             //current time step is when they are deployed, so we don't need to
             //tell them the deployment time.
-            deployment->deploy( sim::humanPop() );
+            deployment->deploy( population, transmission );
         }
         nextTimed += 1;
     }
 }
 
 
-void InterventionManager::deploy(OM::Population& population) {
+void InterventionManager::deploy(Population& population, Transmission::TransmissionModel& transmission) {
     if( sim::intervNow() < SimTime::zero() )
         return;
     
@@ -393,7 +397,7 @@ void InterventionManager::deploy(OM::Population& population) {
     
     // deploy timed interventions
     while( timed[nextTimed]->time <= sim::intervNow() ){
-        timed[nextTimed]->deploy( population );
+        timed[nextTimed]->deploy( population, transmission );
         nextTimed += 1;
     }
     

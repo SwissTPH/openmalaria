@@ -52,7 +52,7 @@ public:
     }
     virtual ~TimedDeployment() {}
     
-    virtual void deploy (OM::Population&) =0;
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) =0;
     
     virtual void print_details( std::ostream& out )const =0;
     
@@ -71,7 +71,7 @@ public:
         // check has been done (hacky).
         time = SimTime::future();
     }
-    virtual void deploy (OM::Population&) {}
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {}
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tdummy (no interventions)";
     }
@@ -83,8 +83,8 @@ public:
         TimedDeployment( date ),
         newHS( hs._clone() )
     {}
-    virtual void deploy (OM::Population& population) {
-        Clinical::ClinicalModel::changeHS( *newHS );
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+        Clinical::ClinicalModel::setHS( *newHS );
         delete newHS;
         newHS = 0;
     }
@@ -102,8 +102,8 @@ public:
         TimedDeployment( date ),
         newEIR( nv._clone() )
     {}
-    virtual void deploy (OM::Population& population) {
-        sim::transmission().changeEIRIntervention( *newEIR );
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+        transmission.changeEIRIntervention( *newEIR );
         delete newEIR;
         newEIR = 0;
     }
@@ -120,8 +120,8 @@ public:
     TimedUninfectVectorsDeployment( SimTime deployTime ) :
         TimedDeployment( deployTime )
     {}
-    virtual void deploy (OM::Population& population) {
-        sim::transmission().uninfectVectors();
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+        transmission.uninfectVectors();
     }
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tuninfect vectors";
@@ -147,7 +147,7 @@ protected:
     /**
      * @param deploy XML element describing deployment
      * @param intervention The intervention to deploy (list of components)
-     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      * @param complement Whether to take the complement of the sub-population
      *  to which deployment will be restricted
      */
@@ -171,7 +171,7 @@ protected:
     
     double coverage;    // proportion coverage within group meeting above restrictions
     VaccineLimits vaccLimits;
-    ComponentId subPop;      // ComponentId_pop if deployment is not restricted to a sub-population
+    ComponentId subPop;      // ComponentId::wholePop() if deployment is not restricted to a sub-population
     bool complement;
     shared_ptr<const HumanIntervention> intervention;
 };
@@ -184,7 +184,7 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      */
     TimedHumanDeployment( SimTime date,
                            const scnXml::MassDeployment& mass,
@@ -203,11 +203,11 @@ public:
         }
     }
     
-    virtual void deploy (OM::Population& population) {
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
         for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
+                if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
                     if( util::random::bernoulli( coverage ) ){
                         deployToHuman( *iter, mon::Deploy::TIMED );
                     }
@@ -219,7 +219,7 @@ public:
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t"
             << minAge.inYears() << "y\t" << maxAge.inYears() << "t\t";
-        if( subPop == ComponentId_pop ) out << "(none)";
+        if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );
@@ -238,7 +238,7 @@ public:
      * @param mass XML element specifying the age range and compliance
      * (proportion of eligible individuals who receive the intervention).
      * @param intervention The HumanIntervention to deploy.
-     * @param subPop Either ComponentId_pop or a sub-population to which deployment is restricted
+     * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      * @param cumCuvId Id of component to test coverage for
      */
     TimedCumulativeHumanDeployment( SimTime date,
@@ -251,14 +251,14 @@ public:
     {
     }
     
-    virtual void deploy (OM::Population& population) {
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
         // Cumulative case: bring target group's coverage up to target coverage
         vector<Host::Human*> unprotected;
         size_t total = 0;       // number of humans within age bound and optionally subPop
         for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == interventions::ComponentId_pop || (iter->isInSubPop( subPop ) != complement) ){
+                if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
                     total+=1;
                     if( !iter->isInSubPop(cumCovInd) )
                         unprotected.push_back( &*iter );
@@ -292,8 +292,8 @@ public:
         TimedDeployment( deployTime ),
         inst(instance)
     {}
-    virtual void deploy (OM::Population& population) {
-      sim::transmission().deployVectorPopInterv(inst);
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+      transmission.deployVectorPopInterv(inst);
     }
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tvector";
@@ -308,9 +308,9 @@ public:
     TimedTrapDeployment( SimTime deployTime, size_t instance, double ratio, SimTime lifespan ) :
         TimedDeployment(deployTime), inst(instance), ratio(ratio), lifespan(lifespan)
     {}
-    virtual void deploy (OM::Population& population) {
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
         double number = population.size() * ratio;
-        sim::transmission().deployVectorTrap(inst, number, lifespan);
+        transmission.deployVectorTrap(inst, number, lifespan);
     }
     virtual void print_details( std::ostream& out )const{
         out << time.inSteps() << "t\t\t\t\t\tvector trap";
@@ -366,7 +366,7 @@ public:
             return false;
         }else if( deployAge == age ){
             if( begin <= sim::intervNow() && sim::intervNow() < end &&
-                ( subPop == interventions::ComponentId_pop ||
+                ( subPop == ComponentId::wholePop() ||
                     (human.isInSubPop( subPop ) != complement)
                 ) &&
                 util::random::uniform_01() < coverage )     // RNG call should be last test
@@ -382,7 +382,7 @@ public:
         if( end == SimTime::future() ) out << "(none)";
         else out << end.inSteps() << 't';
         out << '\t' << deployAge.inYears() << "y\t";
-        if( subPop == ComponentId_pop ) out << "(none)";
+        if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
         intervention->print_details( out );

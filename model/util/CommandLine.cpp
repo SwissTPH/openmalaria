@@ -38,7 +38,6 @@ namespace OM { namespace util {
     string CommandLine::resourcePath;
     string CommandLine::outputName;
     string CommandLine::ctsoutName;
-    set<int> CommandLine::checkpoint_times;
     
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
@@ -48,8 +47,6 @@ namespace OM { namespace util {
     }
     
     string CommandLine::parse (int argc, char* argv[]) {
-	options[COMPRESS_CHECKPOINTS] = true;	// turn on by default
-	
 	bool cloHelp = false, cloVersion = false, cloError = false;
 	string scenarioFile = "";
         outputName = "";
@@ -119,31 +116,10 @@ namespace OM { namespace util {
 		    options.set (SAMPLE_INTERPOLATIONS);
 		    options.set (SKIP_SIMULATION);
 		} else if (clo == "checkpoint") {
-		    options.set (TEST_CHECKPOINTING);
-		} else if (clo.compare (0,11,"checkpoint=") == 0) {
-		    stringstream t;
-		    t << clo.substr (11);
-		    int time;
-		    t >> time;
-		    if (t.fail() || time <= 0) {
-			cerr << "Expected: --checkpoint=t  where t is a positive integer" << endl;
-			cloError = true;
-			break;
-		    }
-		    checkpoint_times.insert( time );
-		} else if (clo.compare (0,21,"compress-checkpoints=") == 0) {
-		    stringstream t;
-		    t << clo.substr (21);
-		    bool b;
-		    t >> b;
-		    if (t.fail()) {
-			cerr << "Expected: --compress-checkpoints=x  where x is 1 or 0" << endl;
-			cloError = true;
-			break;
-		    }
-		    options[COMPRESS_CHECKPOINTS] = b;
-		} else if (clo == "checkpoint-duplicates") {
-		    options.set (TEST_DUPLICATE_CHECKPOINTS);
+		    options.set (CHECKPOINT);
+                } else if (clo == "checkpoint-stop") {
+		    options.set (CHECKPOINT);
+                    options.set (CHECKPOINT_STOP);
                 } else if (clo == "debug-vector-fitting") {
                     options.set (DEBUG_VECTOR_FITTING);
 #	ifdef OM_STREAM_VALIDATOR
@@ -190,9 +166,7 @@ namespace OM { namespace util {
                         (outputName = "output").append(name).append(".txt");
                         (ctsoutName = "ctsout").append(name).append(".txt");
 		    } else if (clo[j] == 'c') {
-			options.set (TEST_CHECKPOINTING);
-		    } else if (clo[j] == 'd') {
-			options.set (TEST_DUPLICATE_CHECKPOINTS);
+			options.set (CHECKPOINT);
                     } else if (clo[j] == 'v') {
                         cloVersion = true;
                     } else if (clo[j] == 'z') {
@@ -251,16 +225,10 @@ namespace OM { namespace util {
 	    << "    --sample-interpolations" <<endl
 	    << "			Output samples of all used age-group data according to active"<<endl
 	    << "			interpolation method and exit."<<endl
-	    << "    --checkpoint=t	Forces a checkpoint a simulation time t (time steps). May"<<endl
-	    << "			be specified more than once. Overrides --checkpoint option."<<endl
-	    << " -c --checkpoint	Forces a checkpoint during each simulation"<<endl
-	    << "			period, exiting after completing each"<<endl
-	    << "			checkpoint." <<endl
-	    << " -d --checkpoint-duplicates"<<endl
-	    << "			Write a checkpoint immediately after reading, which should be" <<endl
-	    << "			identical to that read." <<endl
-	    << "    --compress-checkpoints=boolean" << endl
-	    << "			Set checkpoint compression on or off. Default is on." <<endl
+	    << " -c --checkpoint	Write a checkpoint just before starting the main phase."<<endl
+	    << "			This may be used to skip redundant computation when multiple"<<endl
+	    << "			simulations differ only during the intervention phase."<<endl
+	    << "    --checkpoint-stop	Checkpoint as above, then stop immediately afterwards."<<endl
 	    << "    --debug-vector-fitting"<<endl
 	    << "			Show details of vector-parameter fitting. The fitting methods used" <<endl
 	    << "			aren't guaranteed to work. If they don't, this output should help"<<endl
@@ -285,9 +253,6 @@ namespace OM { namespace util {
 	    StreamValidator.loadStream( sVFile );
 #	endif
 	
-	if (checkpoint_times.size())	// timed checkpointing overrides this
-	    options[TEST_CHECKPOINTING] = false;
-        
         if (scenarioFile == ""){
             scenarioFile = "scenario.xml";
         }

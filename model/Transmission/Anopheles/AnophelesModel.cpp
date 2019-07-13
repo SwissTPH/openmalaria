@@ -38,6 +38,7 @@ using namespace OM::util;
 // -----  Initialisation of model, done before human warmup  ------
 
 string AnophelesModel::initialise (
+    size_t species,
     const scnXml::AnophelesParams& anoph,
     vector<double>& initialisationEIR,
 //     map<string, double>& nonHumanHostPopulations,
@@ -50,12 +51,11 @@ string AnophelesModel::initialise (
 
     mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
-    humanBase = mosq;	// read human-specific parameters
 
     transmission.initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq() );
     
     // Uses anoph.getNonHumanHosts() and anoph.getMosq():
-    initAvailability( anoph, /*nonHumanHostPopulations,*/ populationSize );
+    initAvailability( species, anoph, /*nonHumanHostPopulations,*/ populationSize );
     
     // Uses anoph.getSeasonality() and three attributes:
     transmission.emergence->initEIR( anoph, initialisationEIR, transmission.getEIPDuration() );
@@ -65,6 +65,7 @@ string AnophelesModel::initialise (
 
 
 void AnophelesModel::initAvailability(
+    size_t species,
     const scnXml::AnophelesParams& anoph,
 //     map<string, double>& nonHumanHostPopulations,
     int populationSize)
@@ -152,7 +153,7 @@ void AnophelesModel::initAvailability(
     
     
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
-    humanBase.scaleEntoAvailability( (P_A1 / populationSize) * availFactor );
+    PerHostAnophParams::scaleEntoAvailability( species, (P_A1 / populationSize) * availFactor );
     
     nhh_avail = 0.0;
     nhh_sigma_df = 0.0;
@@ -259,11 +260,11 @@ void AnophelesModel::deployVectorPopInterv (size_t instance){
     seekingDeathRateIntervs[instance].deploy( sim::now() );
     probDeathOvipositingIntervs[instance].deploy( sim::now() );
 }
-void AnophelesModel::deployVectorTrap(size_t instance, double number, SimTime lifespan){
+void AnophelesModel::deployVectorTrap(size_t species, size_t instance, double number, SimTime lifespan){
     assert(instance < trapParams.size());
     TrapData data;
     data.instance = instance;
-    double adultAvail = humanBase.entoAvailability.mean();
+    double adultAvail = PerHostAnophParams::get(species).entoAvailability.mean();
     data.initialAvail = number * adultAvail * trapParams[instance].relAvail;
     data.availHet = trapParams[instance].availDecay->hetSample();
     data.deployTime = sim::now();

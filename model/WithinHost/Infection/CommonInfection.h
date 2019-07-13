@@ -56,7 +56,7 @@ public:
      * @param body_mass Body mass of host in kg
      * @returns True when the infection goes extinct. */
     inline bool update( double survivalFactor, SimTime now, double body_mass ){
-	SimTime bsAge = now - m_startDate - latentP;	// age of post-latent-period blood stage
+	SimTime bsAge = now - m_startDate - s_latentP;	// age of post-latent-period blood stage
 	if( bsAge < SimTime::zero() )
 	    return false;	// latent period (liver stage) — don't do anything
 	else

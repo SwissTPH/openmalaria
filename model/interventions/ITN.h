@@ -159,6 +159,7 @@ public:
     virtual unique_ptr<PerHostInterventionData> makeHumanPart() const;
     virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream, ComponentId id ) const;
     
+private:
     /** Per mosquito-species parameters for extended ITN model. */
     class ITNAnopheles {
     public:

@@ -63,7 +63,7 @@ public:
     /*!  Also updates the population-level measures such as infectiousness, and
          the age-distribution by c outmigrating or creating new births if
          necessary */
-    void update1( SimTime firstVecInitTS );
+    void update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
 
     //! Makes a survey
     void newSurvey();

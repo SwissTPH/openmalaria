@@ -84,9 +84,12 @@ public:
      * @param innateImmSurvFact Density multiplier for innate immunity.
      * @param bsvFactor Density multiplier for Blood-Stage Vaccine effect.
      */
-    void determineDensities(double ageInYears, double cumulativeh,
-                            double cumulativeY, double &timeStepMaxDensity,
-                            double innateImmSurvFact, double bsvFactor);
+    void determineDensities(
+            double cumulativeh,
+            double &timeStepMaxDensity,
+            double immSurvFact,
+            double innateImmSurvFact,
+            double bsvFactor);
     
     /** Decide on an infection duration and return it.
      * 

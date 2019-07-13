@@ -20,7 +20,6 @@
 
 #include "Clinical/ClinicalModel.h"
 
-#include "Clinical/CaseManagementCommon.h"
 #include "Clinical/EventScheduler.h"
 #include "Clinical/ImmediateOutcomes.h"
 #include "Clinical/DecisionTree5Day.h"
@@ -37,14 +36,25 @@ namespace OM { namespace Clinical {
 bool opt_event_scheduler = false;
 bool opt_imm_outcomes = false;
 
+bool ClinicalModel::indirectMortBugfix;
+SimTime ClinicalModel::healthSystemMemory{ SimTime::never() };
+
+//log odds ratio of case-fatality in community compared to hospital
+double oddsRatioThreshold;
+
+util::AgeGroupInterpolator ClinicalModel::caseFatalityRate;
+util::AgeGroupInterpolator ClinicalModel::pSequelaeInpatient;
+
 // -----  static methods  -----
 
 void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& scenario ) {
     const scnXml::Clinical& clinical = scenario.getModel().getClinical();
     try{
+        indirectMortBugfix = util::ModelOptions::option (util::INDIRECT_MORTALITY_FIX);
         //NOTE: if changing XSD, this should not have a default unit:
-        SimTime hsMemory = UnitParse::readShortDuration(clinical.getHealthSystemMemory(), UnitParse::STEPS);
-        initCMCommon( parameters, hsMemory );
+        healthSystemMemory = UnitParse::readShortDuration(clinical.getHealthSystemMemory(), UnitParse::STEPS);
+        oddsRatioThreshold = exp( parameters[Parameters::LOG_ODDS_RATIO_CF_COMMUNITY] );
+        InfantMortality::init( parameters );
     }catch( const util::format_error& e ){
         throw util::xml_scenario_error( string("model/clinical/healthSystemMemory: ").append(e.message()) );
     }
@@ -66,7 +76,7 @@ void ClinicalModel::init( const Parameters& parameters, const scnXml::Scenario& 
     }
 }
 
-void ClinicalModel::changeHS( const scnXml::HealthSystem& healthSystem ){
+void ClinicalModel::setHS( const scnXml::HealthSystem& healthSystem ){
     caseFatalityRate.set( healthSystem.getCFR(), "CFR" );
     pSequelaeInpatient.set( healthSystem.getPSequelaeInpatient(), "pSequelaeInpatient" );
     if( opt_event_scheduler ){
@@ -99,6 +109,12 @@ unique_ptr<ClinicalModel> ClinicalModel::createClinicalModel (double tSF) {
         return unique_ptr<ClinicalModel>(new DecisionTree5Day( tSF ));
     }
 }
+
+double ClinicalModel::getCommunityCFR (double caseFatalityRatio){
+    double x = caseFatalityRatio * oddsRatioThreshold;
+    return x / (1 - caseFatalityRatio + x);
+}
+
 
 
 // -----  non-static construction, destruction and checkpointing  -----
@@ -147,12 +163,13 @@ void ClinicalModel::updateInfantDeaths( SimTime age ){
     // update array for the infant death rates
     if (age < SimTime::oneYear()){
         size_t index = age / SimTime::oneTS();
-        infantIntervalsAtRisk[index] += 1;     // baseline
+        
         // Testing doomed == DOOMED_NEXT_TS gives very slightly different results than
         // testing doomed == DOOMED_INDIRECT (due to above if(..))
-        if( doomed == DOOMED_COMPLICATED || doomed == DOOMED_NEXT_TS || doomed == DOOMED_NEONATAL ){
-            infantDeaths[index] += 1;  // deaths
-        }
+        bool isDoomed = doomed == DOOMED_COMPLICATED
+                || doomed == DOOMED_NEXT_TS
+                || doomed == DOOMED_NEONATAL;
+        InfantMortality::reportRisk( index, isDoomed );
     }
 }
 
@@ -165,5 +182,55 @@ void ClinicalModel::checkpoint (ostream& stream) {
     latestReport & stream;
     doomed & stream;
 }
+
+
+
+// ——— infant mortality ———
+
+// Infant death summaries (checkpointed).
+vector<int> infantDeaths;
+vector<int> infantIntervalsAtRisk;
+
+/// Non-malaria mortality in under 1year olds.
+/// Set by init ()
+double nonMalariaMortality;
+
+void InfantMortality::init( const OM::Parameters& parameters ){
+    infantDeaths.resize(SimTime::stepsPerYear());
+    infantIntervalsAtRisk.resize(SimTime::stepsPerYear());
+    nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
+}
+
+void InfantMortality::preMainSimInit() {
+    std::fill(infantDeaths.begin(), infantDeaths.end(), 0);
+    std::fill(infantIntervalsAtRisk.begin(), infantIntervalsAtRisk.end(), 0);
+}
+
+void InfantMortality::staticCheckpoint(istream& stream) {
+    infantDeaths & stream;
+    infantIntervalsAtRisk & stream;
+}
+void InfantMortality::staticCheckpoint (ostream& stream) {
+    infantDeaths & stream;
+    infantIntervalsAtRisk & stream;
+}
+
+void InfantMortality::reportRisk(size_t index, bool isDoomed) {
+    infantIntervalsAtRisk[index] += 1;     // baseline
+    if (isDoomed)
+        infantDeaths[index] += 1;  // deaths
+}
+
+double InfantMortality::allCause(){
+    double infantPropSurviving=1.0;       // use to calculate proportion surviving
+    for( size_t i = 0; i < SimTime::stepsPerYear(); i += 1 ){
+        // multiply by proportion of infants surviving at each interval
+        infantPropSurviving *= double(infantIntervalsAtRisk[i] - infantDeaths[i])
+            / double(infantIntervalsAtRisk[i]);
+    }
+    // Child deaths due to malaria (per 1000), plus non-malaria child deaths. Deaths per 1000 births is the return unit.
+    return (1.0 - infantPropSurviving) * 1000.0 + nonMalariaMortality;
+}
+
 
 } }

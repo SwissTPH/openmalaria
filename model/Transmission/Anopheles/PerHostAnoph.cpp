@@ -25,21 +25,23 @@ namespace OM {
 namespace Transmission {
 namespace Anopheles {
 
+vector<PerHostAnophParams> PerHostAnophParams::params;
+
 // ----- Per host, per species, non-static -----
 
-void PerHostAnoph::initialise (const PerHostAnophParams& base, double availabilityFactor)
-{
-    entoAvailability = base.entoAvailability.sample() * availabilityFactor;
-    probMosqBiting = base.probMosqBiting.sample();
-    probMosqRest = base.probMosqFindRestSite.sample() * base.probMosqSurvivalResting.sample();
-}
-
-void PerHostAnophParams::operator =(const scnXml::Mosq& mosq)
-{
+PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
     entoAvailability.setParams( 1.0, mosq.getAvailability() );
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
     probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
+}
+
+void PerHostAnoph::initialise (size_t species, double availabilityFactor)
+{
+    const PerHostAnophParams& base = PerHostAnophParams::get(species);
+    entoAvailability = base.entoAvailability.sample() * availabilityFactor;
+    probMosqBiting = base.probMosqBiting.sample();
+    probMosqRest = base.probMosqFindRestSite.sample() * base.probMosqSurvivalResting.sample();
 }
 
 }

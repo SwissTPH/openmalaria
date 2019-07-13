@@ -261,7 +261,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
     }
 }
 
-void Genotypes::startMainSim(){
+void Genotypes::preMainSimInit(){
     GT::current_mode = GT::interv_mode;
 }
 

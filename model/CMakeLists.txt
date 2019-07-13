@@ -17,7 +17,6 @@ set (Model_CPP
   Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
-  PopulationStats.cpp
   Parameters.cpp
   
   Host/Human.cpp
@@ -26,7 +25,6 @@ set (Model_CPP
   Host/ImportedInfections.cpp
   
   Clinical/ClinicalModel.cpp
-  Clinical/CaseManagementCommon.cpp
   Clinical/EventScheduler.cpp
   Clinical/ESCaseManagement.cpp
   Clinical/CMDecisionTree.cpp
@@ -63,7 +61,6 @@ set (Model_CPP
   WithinHost/CommonWithinHost.cpp
   WithinHost/DescriptiveWithinHost.cpp
   WithinHost/Genotypes.cpp
-  WithinHost/Infection/Infection.cpp
   WithinHost/Infection/DescriptiveInfection.cpp
   WithinHost/Infection/DummyInfection.cpp
   WithinHost/Infection/EmpiricalInfection.cpp
@@ -76,6 +73,7 @@ set (Model_CPP
   
   mon/mon.cpp
   mon/misc.cpp
+  mon/Continuous.cpp
   
   util/timer.cpp
   util/vectors.cpp
@@ -90,8 +88,6 @@ set (Model_CPP
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp
   util/misc.cpp
-  
-  Monitoring/Continuous.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp

@@ -19,7 +19,7 @@
  */
 
 #include "Population.h"
-#include "Monitoring/Continuous.h"
+#include "mon/Continuous.h"
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
@@ -27,7 +27,6 @@
 #include "WithinHost/Genotypes.h"
 #include "WithinHost/Diagnostic.h"
 #include "Clinical/ClinicalModel.h"
-#include "Clinical/CaseManagementCommon.h"
 #include "Transmission/TransmissionModel.h"
 
 #include "util/errors.h"
@@ -60,14 +59,14 @@ void Population::staticCheckpoint (istream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::staticCheckpointCMCommon (stream);
+    Clinical::InfantMortality::staticCheckpoint(stream);
     WithinHost::Genotypes::staticCheckpoint(stream);
 }
 void Population::staticCheckpoint (ostream& stream)
 {
     Host::NeonatalMortality::staticCheckpoint (stream);
     Host::InfectionIncidenceModel::staticCheckpoint (stream);
-    Clinical::staticCheckpointCMCommon (stream);
+    Clinical::InfantMortality::staticCheckpoint(stream);
     WithinHost::Genotypes::staticCheckpoint(stream);
 }
 
@@ -77,7 +76,7 @@ void Population::staticCheckpoint (ostream& stream)
 Population::Population(size_t populationSize)
     : populationSize (populationSize), recentBirths(0)
 {
-    using Monitoring::Continuous;
+    using mon::Continuous;
     Continuous.registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
     // Age groups are currently hard-coded.
     ctsDemogAgeGroups += 1.0, 5.0, 10.0, 15.0, 25.0;
@@ -139,9 +138,9 @@ void Population::checkpoint (ostream& stream)
 
 void Population::preMainSimInit ()
 {
-    Host::InfectionIncidenceModel::initMainSimulation();
-    Clinical::mainSimInitCMCommon();
-    WithinHost::Genotypes::startMainSim();
+    Host::InfectionIncidenceModel::preMainSimInit();
+    Clinical::InfantMortality::preMainSimInit();
+    WithinHost::Genotypes::preMainSimInit();
     recentBirths = 0;
 }
 
@@ -177,7 +176,7 @@ void Population::newHuman( SimTime dob ){
     ++recentBirths;
 }
 
-void Population::update1( SimTime firstVecInitTS ){
+void Population::update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
@@ -202,7 +201,7 @@ void Population::update1( SimTime firstVecInitTS ){
         // is the time step they die at (some code still runs on this step).
         SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
         bool updateHuman = lastPossibleTS >= firstVecInitTS;
-        bool isDead = iter->update(updateHuman);
+        bool isDead = iter->update(transmission, updateHuman);
         if( isDead ){
             iter = population.erase (iter);
             continue;

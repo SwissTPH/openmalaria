@@ -140,16 +140,16 @@ SimTime DescriptiveInfection::infectionDuration() {
 
 // ———  time-step updates  ———
 
-void DescriptiveInfection::determineDensities(double ageInYears,
-                                              double cumulativeh,
-                                              double cumulativeY,
-                                              double &timeStepMaxDensity,
-                                              double innateImmSurvFact,
-                                              double bsvFactor)
+void DescriptiveInfection::determineDensities(
+        double cumulativeh,
+        double &timeStepMaxDensity,
+        double immSurvFact,
+        double innateImmSurvFact,
+        double bsvFactor)
 {
     // Age of patent blood stage infection. Note: liver stage is fixed at one
     // 5-day time step and prepatent blood stage is latentp - 1 time steps.
-    SimTime infage = sim::ts0() - m_startDate - latentP;
+    SimTime infage = sim::ts0() - m_startDate - s_latentP;
     if ( infage < SimTime::zero()) {
         m_density = 0.0;
         if (bugfix_max_dens) timeStepMaxDensity = 0.0;
@@ -162,7 +162,7 @@ void DescriptiveInfection::determineDensities(double ageInYears,
         
         // The expected parasite density in the non naive host (AJTM p.9 eq. 9)
         // Note that in published and current implementations Dx is zero.
-        m_density = pow(m_density, immunitySurvivalFactor(ageInYears, cumulativeh, cumulativeY));
+        m_density = pow(m_density, immSurvFact);
         
         //Perturb m_density using a lognormal
         double varlog = sigma0sq / (1.0 + (cumulativeh / xNuStar));

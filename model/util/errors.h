@@ -141,8 +141,6 @@ namespace OM { namespace util {
          * returned result should not survive beyond a second call to this
          * function (from any unimplemented_exception object). */
         virtual const char* message() const;
-        static vector<char> msg_buf;
-        static const string msg_pre;
     };
     
     /** Extension of base_exception which tries to get a stack trace. Also

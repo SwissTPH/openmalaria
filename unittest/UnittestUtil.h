@@ -413,19 +413,7 @@ public:
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     // But do set latentP.
     static void Infection_init_latentP_and_NaN () {
-	Infection::latentP = SimTime::fromDays(15);
-	Infection::invCumulativeYstar = numeric_limits<double>::quiet_NaN();
-	Infection::invCumulativeHstar = numeric_limits<double>::quiet_NaN();
-	Infection::alpha_m = numeric_limits<double>::quiet_NaN();
-	Infection::decayM = numeric_limits<double>::quiet_NaN();
-    }
-    static void Infection_init_5day () {
-	// Note: these values were pulled from one source and shouldn't be taken as authoritative
-	Infection::latentP = SimTime::fromDays(15);
-	Infection::invCumulativeYstar = 1.0 / 68564384.7102;
-	Infection::invCumulativeHstar = 1.0 / 71.676733;
-	Infection::alpha_m = 1.0 - exp(- 2.411434);
-	Infection::decayM = 2.717773;
+	Infection::s_latentP = SimTime::fromDays(15);
     }
     
     static void DescriptiveInfection_init () {

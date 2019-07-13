@@ -23,6 +23,7 @@
 #include "Global.h"
 #include "interventions/Interfaces.hpp"
 #include "Host/ImportedInfections.h"
+#include "Transmission/TransmissionModel.h"
 #include "schema/interventions.h"
 
 namespace OM {
@@ -40,7 +41,7 @@ class TimedDeployment;
 class InterventionManager {
 public:
     /** Read XML descriptions. */
-    static void init(const scnXml::Interventions& intervElt);
+    static void init (const scnXml::Interventions& intervElt, Transmission::TransmissionModel& transmission);
     
     /// Checkpointing
     template<class S>
@@ -55,7 +56,10 @@ public:
      * 
      * Serves to replace health-system and EIR where changeHS/changeEIR
      * interventions have been used. */
-    static void loadFromCheckpoint( SimTime interventionTime );
+    static void loadFromCheckpoint(
+                Population& population,
+                Transmission::TransmissionModel& transmission,
+                SimTime interventionTime);
     
     /** @brief Deploy interventions
      *
@@ -63,7 +67,7 @@ public:
      * 
      * Continuous interventions are deployed as humans reach the target ages.
      * Unlike with vaccines, missing one schedule doesn't preclude the next. */
-    static void deploy (OM::Population& population);
+    static void deploy(Population& population, Transmission::TransmissionModel& transmission);
     
     /** Get a constant reference to a component class with a certain index.
      * 

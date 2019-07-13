@@ -54,7 +54,7 @@ public:
     /** Second stage of initialisation, done after interventions are configured
      * 
      * Also done when a certain intervention is deployed. */
-    static void changeHS (const scnXml::HealthSystem& healthSystem);
+    static void setHS (const scnXml::HealthSystem& healthSystem);
     
     /** Return a new ClinicalModel.
      *
@@ -85,6 +85,10 @@ public:
     /** Special option to allow reports not to be delivered for existing cases
      * (within health-system-memory and not new cases). */
     virtual bool isExistingCase() =0;
+    
+    inline static SimTime hsMemory() {
+        return healthSystemMemory;
+    }
     
     /// Force all pending summaries to be reported. Should only be called when
     /// class is about to be destroyed anyway to avoid affecting output.
@@ -136,7 +140,57 @@ protected:
      * population at the beginning of the next time step. NOTE:
      * updateInfantDeaths() counts deaths after the fact, thus cannot remove immediately. */
     int doomed;
+    
+    
+    /// True if bug-fix is enabled
+    static bool indirectMortBugfix;
+    
+    /// The maximum age of a sickness bout, for another bout to be considered
+    /// part of the same episode.
+    /// 
+    /// Used by both the clinical models in roughly the same way, but will have
+    /// different values in each to match Global::interval.
+    static SimTime healthSystemMemory;
+    
+    ///@brief Case fatality and sequelae "rate" data
+    //@{
+    /// Calculate the case fatality "rate" in the community as a function of
+    /// that in hospitals.
+    static double getCommunityCFR(double caseFatalityRatio);
+    
+    /// Age-specific hospital case fatality "rates"
+    static util::AgeGroupInterpolator caseFatalityRate;
+    /// Age-specific in-hospital rates of sequelae given a severe malaria bout
+    /// Note: out-patients have currently have the same probabilities of sequelae
+    static util::AgeGroupInterpolator pSequelaeInpatient;
+    //@}
 };
+
+
+/// Infant mortality reporting
+class InfantMortality {
+public:
+    /** Initialise parameters. */
+    static void init( const Parameters& parameters );
+    static void preMainSimInit();
+
+    /// Static checkpointing
+    static void staticCheckpoint(istream& stream);
+    static void staticCheckpoint(ostream& stream);
+
+    static void reportRisk(size_t index, bool isDoomed);
+    
+    /// Calculate infant mortality as deaths/1000 livebirths for the whole main-
+    /// simulation period (not as deaths/1000 years-at-risk per survey).
+    /// 
+    /// This mimicks field data on all-cause mortality in infants.
+    /// Uses the kaplan-meier method because the demography was set up to provide
+    /// a stable age-distribution but unfortunately does not accurately describe
+    /// death rates. The kaplan-meier estimate is the product of the proportion of
+    /// infants survivng at each interval.
+    static double allCause();
+};
+
 
 } }
 #endif

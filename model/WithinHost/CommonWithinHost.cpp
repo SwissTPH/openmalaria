@@ -23,7 +23,6 @@
 #include "WithinHost/Genotypes.h"
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/errors.h"
-#include "PopulationStats.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
@@ -125,9 +124,7 @@ void CommonWithinHost::clearImmunity() {
     m_cumulative_Y_lag = 0.0;
 }
 void CommonWithinHost::importInfection(){
-    PopulationStats::totalInfections += 1;
     if( numInfs < MAX_INFECTIONS ){
-        PopulationStats::allowedInfections += 1;
         m_cumulative_h += 1;
         numInfs += 1;
         // This is a hook, used by interventions. The newly imported infections
@@ -153,9 +150,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    PopulationStats::totalInfections += nNewInfs;
     nNewInfs=min(nNewInfs,MAX_INFECTIONS-numInfs);
-    PopulationStats::allowedInfections += nNewInfs;
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfs; ++i ) {
@@ -167,12 +162,6 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
 
     totalDensity = 0.0;
     timeStepMaxDensity = 0.0;
-    
-    // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
-    // this time-step and cumulative_Y only includes past densities.
-    double cumulative_h=m_cumulative_h;
-    double cumulative_Y=m_cumulative_Y;
-    m_cumulative_h += nNewInfs;
     
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
@@ -192,7 +181,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 const double drugFactor = pkpdModel.getDrugFactor(*inf, body_mass);
-                const double immFactor = (*inf)->immunitySurvivalFactor(ageInYears, cumulative_h, cumulative_Y);
+                const double immFactor = immunitySurvivalFactor(ageInYears, (*inf)->cumulativeExposureJ());
                 const double survivalFactor = survivalFactor_part * immFactor * drugFactor;
                 // update, may result in termination of infection:
                 expires = (*inf)->update(survivalFactor, now, body_mass);
@@ -206,7 +195,6 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
                 double density = (*inf)->getDensity();
                 totalDensity += density;
                 timeStepMaxDensity = max(timeStepMaxDensity, density);
-                m_cumulative_Y += density;
                 if( density > 0 ){
                     // Base 10 logarithms are usually used; +1 because it avoids negatives in output while having very little affect on high densities
                     sumLogDens += log10(1.0 + density);
@@ -216,6 +204,12 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
         }
         pkpdModel.decayDrugs (body_mass);
     }
+    
+    // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
+    // this time-step and cumulative_Y only includes past densities, thus we
+    // increment these after the update.
+    m_cumulative_h += nNewInfs;
+    m_cumulative_Y += totalDensity;
     
     util::streamValidate(totalDensity);
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be

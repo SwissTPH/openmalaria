@@ -75,7 +75,7 @@ public:
         SimTime now = sim::ts0();
         do{
             extinct = infection->update(1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/);
-            SimTime age = now - infection->m_startDate - infection->latentP;
+            SimTime age = now - infection->m_startDate - infection->s_latentP;
             if( age >= SimTime::zero() ){
                 ETS_ASSERT_LESS_THAN( day, dens.size() );
                 TS_ASSERT_APPROX( infection->getDensity(), dens[day] );

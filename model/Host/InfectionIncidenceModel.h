@@ -51,7 +51,7 @@ public:
   static InfectionIncidenceModel* createModel ();
   
   /// Reset summary outputs at beginning of main simulation
-  static inline void initMainSimulation() {
+  static inline void preMainSimInit() {
       ctsNewInfections = 0;
   }
   //@}

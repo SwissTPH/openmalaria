@@ -31,7 +31,7 @@
 
 using namespace std;
 
-class UnittestUtil;
+class InfectionImmunitySuite;
 
 namespace OM {
 namespace WithinHost {
@@ -93,6 +93,15 @@ protected:
      * Applies decay of immunity against asexual blood stages, if present. */
     void updateImmuneStatus();
 
+    /** @returns A multiplier describing the proportion of parasites surviving
+     * immunity effects this time step.
+     * 
+     * Note that in the Descriptive model this multiplies log(density), but the
+     * new density has no effect on future densities, wheras the Empirical model
+     * multiplies the actual density (which then affects density on the following
+     * time step). */
+    double immunitySurvivalFactor (double ageInYears, double cumulativeExposureJ);
+    
     //!innate ability to control parasite densities
     double _innateImmSurvFact;
 
@@ -130,29 +139,12 @@ protected:
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);
 
-    ///@brief Static parameters, set by init()
-    //@{
-//Standard dev innate immunity for densities
-    static double sigma_i;
-// contribution of parasite densities to acquired immunity in the presence of fever
-    static double immPenalty_22;
-    /*
-      Remaining immunity against asexual parasites(after time step, each of 2 components y and h)
-      This variable decays the effectors m_cumulative_h and m_cumulative_Y in a way that their
-      effects on densities (1-Dh and 1-Dy) decay exponentially.
-    */
-    static double asexImmRemain;
-    /*
-      Remaining immunity against asexual parasites(after each time step, each of 2 components y and h)
-      This variable decays the effectors m_cumulative_h and m_cumulative_Y exponentially.
-    */
-    static double immEffectorRemain;
     /// Length of m_y_lag array. Wouldn't have to be dynamic if Global::interval was known at compile-time.
     /// set by initHumanParameters
     static int y_lag_len;
-    //@}
     
-    friend class ::UnittestUtil;
+    static void setParams(double cumYStar, double cumHStar, double aM, double dM);   // for unit test only
+    friend class ::InfectionImmunitySuite;
 };
 
 }

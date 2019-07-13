@@ -21,7 +21,7 @@
 // must be included first to avoid compiler error (incompatible with fpclassify which is included from Global.h?)
 #include <boost/math/special_functions/nonfinite_num_facets.hpp>
 
-#include "Monitoring/Continuous.h"
+#include "mon/Continuous.h"
 #include "mon/info.h"   // lineEnd
 #include "util/errors.h"
 #include "util/CommandLine.h"
@@ -34,7 +34,7 @@
 #include <boost/format.hpp>
 #include <gzstream/gzstream.h>
 
-namespace OM { namespace Monitoring {
+namespace OM { namespace mon {
     using namespace fastdelegate;
     using util::xml_scenario_error;
     
