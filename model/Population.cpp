@@ -171,7 +171,7 @@ void Population::createInitialHumans()
 // -----  non-static methods: simulation loop  -----
 
 void Population::newHuman( SimTime dob ){
-    util::streamValidate( dob.raw() );
+    util::streamValidate( dob.inDays() );
     population.push_back( Host::Human (dob) );
     ++recentBirths;
 }

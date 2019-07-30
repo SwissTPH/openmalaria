@@ -68,16 +68,12 @@ namespace UnitParse {
      * 
      * Supports dates (e.g. 2015-10-08) as well as times relative to the start
      * of the intervention period (as readDuration will parse). Returns a time
-     * to be compared against sim::intervNow(). Again, the result is rounded to
+     * to be compared against sim::intervDate(). Again, the result is rounded to
      * the nearest time step. */
-    SimTime readDate( const std::string& str, DefaultUnit defUnit );
-    
-    /** Return true if we have a starting date (and thus can convert to and
-     * from dates), false if not. */
-    bool haveDate();
+    SimDate readDate( const std::string& str, DefaultUnit defUnit );
     
     /// Write a time to a stream as a date. Throws if !haveDate().
-    void formatDate( ostream& stream, SimTime time );
+    void formatDate( ostream& stream, SimDate date );
 }
 
 }

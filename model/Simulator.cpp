@@ -78,8 +78,6 @@ enum Phase {
 // ———  Set-up & tear-down  ———
 
 Simulator::Simulator( const scnXml::Scenario& scenario ) :
-    simPeriodEnd(SimTime::zero()),
-    totalSimDuration(SimTime::zero()),
     phase(STARTING_PHASE)
 {
     // ———  Initialise static data  ———
@@ -87,7 +85,7 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     const scnXml::Model& model = scenario.getModel();
     
     // 1) elements with no dependencies on other elements initialised here:
-    sim::init( scenario );
+    sim::init( scenario );  // also reads survey dates
     Parameters parameters( model.getParameters() );     // depends on nothing
     WithinHost::Genotypes::init( scenario );
     
@@ -99,8 +97,8 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     // Depends on parameters:
     WithinHost::diagnostics::init( parameters, scenario );
     
-    // Survey init depends on diagnostics, monitoring:
-    mon::initSurveyTimes( parameters, scenario, scenario.getMonitoring() );
+    // Reporting init depends on diagnostics, monitoring:
+    mon::initReporting( scenario );
     Population::init( parameters, scenario );
     
     // 3) elements depending on other elements; dependencies on (1) are not mentioned:
@@ -135,8 +133,8 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
 // ———  run simulations  ———
 
 void Simulator::start(const scnXml::Monitoring& monitoring){
-    sim::time0 = SimTime::zero();
-    sim::time1 = SimTime::zero();
+    sim::s_t0 = SimTime::zero();
+    sim::s_t1 = SimTime::zero();
     
     // Make sure warmup period is at least as long as a human lifespan, as the
     // length required by vector warmup, and is a whole number of years.
@@ -152,11 +150,12 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     }
     humanWarmupLength = SimTime::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
     
-    totalSimDuration = humanWarmupLength  // ONE_LIFE_SPAN
+    m_estimatedEnd = humanWarmupLength  // ONE_LIFE_SPAN
         + transmission->expectedInitDuration()
         // plus MAIN_PHASE: survey period plus one TS for last survey
-        + mon::finalSurveyTime() + SimTime::oneTS();
-    assert( totalSimDuration + SimTime::never() < SimTime::zero() );
+        + (sim::endDate() - sim::startDate())
+        + SimTime::oneTS();
+    assert( m_estimatedEnd + SimTime::never() < SimTime::zero() );
     
     if (isCheckpoint()) {
         Continuous.init( monitoring, true );
@@ -172,8 +171,8 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
     // phase loop
     while (true){
         // loop for steps within a phase
-        while (sim::now() < simPeriodEnd){
-            int percent = (sim::now() * 100) / totalSimDuration;
+        while (sim::now() < m_phaseEnd){
+            int percent = (sim::now() * 100) / m_estimatedEnd;
             if( percent != lastPercent ){	// avoid huge amounts of output for performance/log-file size reasons
                 lastPercent = percent;
                 // \r cleans line. Then we print progress as a percentage.
@@ -183,7 +182,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             // Monitoring. sim::now() gives time of end of last step,
             // and is when reporting happens in our time-series.
             Continuous.update( *population );
-            if( sim::intervNow() == mon::nextSurveyTime() ){
+            if( sim::intervDate() == mon::nextSurveyDate() ){
                 population->newSurvey();
                 transmission->summarize();
                 mon::concludeSurvey();
@@ -212,24 +211,26 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
         ++phase;        // advance to next phase
         if (phase == ONE_LIFE_SPAN) {
             // Start human warm-up
-            simPeriodEnd = humanWarmupLength;
+            m_phaseEnd = humanWarmupLength;
             
         } else if (phase == TRANSMISSION_INIT) {
             // Start or continuation of transmission init cycle (after one life span)
             SimTime iterate = transmission->initIterate();
             if( iterate > SimTime::zero() ){
-                simPeriodEnd += iterate;
+                m_phaseEnd += iterate;
                 --phase;        // repeat phase
             } else {
                 // nothing to do: start main phase immediately
             }
             // adjust estimation of final time step: end of current period + length of main phase
-            totalSimDuration = simPeriodEnd + mon::finalSurveyTime() + SimTime::oneTS();
+            m_estimatedEnd = m_phaseEnd
+                + (sim::endDate() - sim::startDate())
+                + SimTime::oneTS();
             
         } else if (phase == MAIN_PHASE) {
             // Start MAIN_PHASE:
-            simPeriodEnd = totalSimDuration;
-            sim::interv_time = SimTime::zero();
+            m_phaseEnd = m_estimatedEnd;
+            sim::s_interv = SimTime::zero();
             population->preMainSimInit();
             transmission->summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
             mon::initMainSim();
@@ -339,19 +340,19 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         util::StreamValidator & stream;
 #       endif
         
-        sim::interv_time & stream;
-        simPeriodEnd & stream;
-        totalSimDuration & stream;
+        sim::s_interv & stream;
+        m_phaseEnd & stream;
+        m_estimatedEnd & stream;
         phase & stream;
         transmission & stream;
         population->checkpoint(stream);
         InterventionManager::checkpoint( stream );
-        InterventionManager::loadFromCheckpoint( *population, *transmission, sim::interv_time );
+        InterventionManager::loadFromCheckpoint( *population, *transmission );
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
-        sim::time0 & stream;
-        sim::time1 & stream;
+        sim::s_t0 & stream;
+        sim::s_t1 & stream;
         util::random::checkpoint (stream, checkpointNum);
     } catch (const util::checkpoint_error& e) { // append " (pos X of Y bytes)"
         ostringstream pos;
@@ -385,16 +386,16 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     util::StreamValidator & stream;
 # endif
     
-    sim::interv_time & stream;
-    simPeriodEnd & stream;
-    totalSimDuration & stream;
+    sim::s_interv & stream;
+    m_phaseEnd & stream;
+    m_estimatedEnd & stream;
     phase & stream;
     transmission & stream;
     population->checkpoint(stream);
     InterventionManager::checkpoint( stream );
     
-    sim::time0 & stream;
-    sim::time1 & stream;
+    sim::s_t0 & stream;
+    sim::s_t1 & stream;
     util::random::checkpoint (stream, checkpointNum);
     
     util::timer::stopCheckpoint ();

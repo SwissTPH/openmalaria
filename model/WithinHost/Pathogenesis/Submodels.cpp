@@ -37,7 +37,7 @@ double densityExponent_32;
 
 void MuellerPathogenesis::init( const Parameters& parameters ){
     rateMultiplier_31 = parameters[Parameters::MUELLER_RATE_MULTIPLIER]
-        * SimTime::yearsPerStep();
+        * sim::yearsPerStep();
     densityExponent_32 = parameters[Parameters::MUELLER_DENSITY_EXPONENT];
 }
 
@@ -67,7 +67,7 @@ void PyrogenPathogenesis::init( const Parameters& parameters ){
     
     double delt = 1.0 / n;
     double smuY = -log(0.5) /
-        (SimTime::stepsPerYear() * parameters[Parameters::Y_STAR_HALF_LIFE]);
+        (sim::stepsPerYear() * parameters[Parameters::Y_STAR_HALF_LIFE]);
     b = -smuY * delt;
     
     Ystar2_13 = parameters[Parameters::Y_STAR_SQ];

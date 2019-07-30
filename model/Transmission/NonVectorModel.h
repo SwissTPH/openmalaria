@@ -106,9 +106,7 @@ private:
   //@}
   
   /** EIR per time interval during the intervention period. Value at index
-   * sim::intervNow().inSteps() used each time-step: first value should
-   * be used for update in the first interval, which has
-   * sim::intervNow().inSteps() = 0.
+   * sim::intervTime().inSteps() used each time-step.
    * 
    * Units: inoculations per adult per time step */
   vector<double> interventionEIR;

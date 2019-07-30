@@ -24,6 +24,7 @@
 #include "util/CommandLine.h"
 #include "util/timeConversions.h"
 #include "schema/scenario.h"
+#include "mon/management.h"
 
 #include <cstdlib>
 #include <boost/xpressive/xpressive.hpp>
@@ -35,31 +36,27 @@ namespace OM {
 
 // ———  SimTime stuff  ———
 
-// global constants:
-int SimTime::interval;
-size_t SimTime::steps_per_year;
-double SimTime::years_per_step;
-SimTime sim::max_human_age;
-SimTime interv_start_date;
+// Scenario constants
+int SimData::interval;
+size_t SimData::steps_per_year;
+double SimData::years_per_step;
 
-// global variables:
+SimDate sim::s_start;
+SimDate sim::s_end;
+
+SimTime sim::s_max_human_age;
+
+// Global variables
 #ifndef NDEBUG
 bool sim::in_update = false;
 #endif
-SimTime sim::time0;
-SimTime sim::time1;
-SimTime sim::interv_time;
+SimTime sim::s_t0;
+SimTime sim::s_t1;
+
+SimTime sim::s_interv;
 
 using util::CommandLine;
 
-
-TimeDisplayHelper SimTime::date() const {
-    return TimeDisplayHelper(*this, TimeDisplayHelper::DATE);
-}
-/// Display as a duration with automatic units
-TimeDisplayHelper SimTime::duration() const {
-    return TimeDisplayHelper(*this, TimeDisplayHelper::DURATION);
-}
 
 // ———  Unit parsing stuff  ———
 namespace UnitParse {
@@ -79,10 +76,6 @@ int castToInt( T x ){
         throw util::format_error( "underflow/overflow" );
     }
     return y;
-}
-
-bool haveDate(){
-    return interv_start_date != SimTime::never();
 }
 
 SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
@@ -171,9 +164,9 @@ double durationToDays( const std::string& str, DefaultUnit unit ){
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-/** Returns SimTime::never() when it doesn't recognise a date. Throws when it does
+/** Returns SimDate::never() when it doesn't recognise a date. Throws when it does
  * but encounters definite format errors. */
-SimTime parseDate( const std::string& str ){
+SimDate parseDate( const std::string& str ){
     static sregex dateRx = sregex::compile ( "(\\d{4})-(\\d{1,2})-(\\d{1,2})" );
     smatch rx_what;
     if( regex_match(str, rx_what, dateRx) ){
@@ -189,70 +182,80 @@ SimTime parseDate( const std::string& str ){
         // Inconsistency: time "zero" is 0000-01-01, not 0001-01-01. Since
         // dates are always relative to another date, the extra year doesn't
         // actually affect anything.
-        return SimTime::fromYearsI(year) + SimTime::roundToTSFromDays(monthStart[month-1] + day - 1);
+        return SimDate::origin()
+            + SimTime::fromYearsI(year)
+            + SimTime::roundToTSFromDays(monthStart[month-1] + day - 1);
     }else{
-        return SimTime::never();
+        return SimDate::never();
     }
 }
 
-SimTime readDate( const std::string& str, DefaultUnit defUnit ){
-    SimTime date = parseDate( str );
-    if( date != SimTime::never() ){
-        if( interv_start_date == SimTime::never() ){
-            throw util::format_error( "must set monitoring/startDate when using dates" );
-        }else if( date < interv_start_date ){
+SimDate readDate( const std::string& str, DefaultUnit defUnit ){
+    SimDate date = parseDate( str );
+    if( date != SimDate::never() ){
+        if( date > sim::startDate() + SimTime::fromYearsI(500) ){
+            cerr << "Warning: date is a long time after start date. Did you forget to set monitoring/startDate?" << endl;
+        }else if( date < sim::startDate() ){
             throw util::format_error( "date of event is before the start of monitoring" );
-        }else {
-            return date - interv_start_date;  // externally, intervention dates are relative to the start
         }
+        return date;
     }else{
         if( CommandLine::option(CommandLine::DEPRECATION_WARNINGS) ){
             cerr << "Deprecation warning: time specified via duration \"" << str << "\" where a date could be used; recommended to use a date (e.g. 2011-12-20)" << endl;
         }
-        return readDuration( str, defUnit );
+        return sim::startDate() + readDuration( str, defUnit );
     }
 }
 
 }       // end of UnitParse namespace
 
 
-ostream& operator<<( ostream& stream, TimeDisplayHelper timeDisplay ){
-    if( timeDisplay.mode == TimeDisplayHelper::DATE && interv_start_date != SimTime::never() ){
-        // format as a date
-        SimTime date = interv_start_date + timeDisplay.time;
-        assert( date >= SimTime::zero() );
-        int year = date / SimTime::oneYear();
-        assert( year >= 0 );
-        int remainder = (date - SimTime::oneYear() * year).inDays();
+ostream& operator<<( ostream& stream, SimTime time ){
+    if( time.inDays() % sim::DAYS_IN_YEAR == 0 ){
+        stream << time.inYears() << 'y';
+    } else {
+        stream << time.inDays() << 'd';
+    }
+    return stream;
+}
+
+ostream& operator<<( ostream& stream, SimDate date ){
+    int days = date.d;
+    if (days < 0) {
+        // Shouldn't happen; best still to print something
+        stream << days << 'd';
+    } else {
+        int year = days / sim::DAYS_IN_YEAR;
+        days -= year * sim::DAYS_IN_YEAR;
+        
         int month = 0;
-        while( remainder >= UnitParse::monthStart[month+1] ) ++month;
-        remainder -= UnitParse::monthStart[month];
-        assert( month < 12 && remainder < UnitParse::monthLen[month] );
+        while( days >= UnitParse::monthStart[month+1] ) ++month;
+        days -= UnitParse::monthStart[month];
+        assert( month < 12 && days < UnitParse::monthLen[month] );
+        
         // Inconsistency in year vs month and day: see parseDate()
         stream << setfill('0') << setw(4) << year << '-'
-                << setw(2) << (month+1) << '-' << (remainder+1)
+                << setw(2) << (month+1) << '-' << (days+1)
                 << setw(0) << setfill(' ');
-    } else {
-        // format as a duration
-        if( timeDisplay.time.inDays() % SimTime::DAYS_IN_YEAR == 0 ){
-            stream << timeDisplay.time.inYears() << 'y';
-        } else {
-            stream << timeDisplay.time.inDays() << 'd';
-        }
     }
     return stream;
 }
 
 void sim::init( const scnXml::Scenario& scenario ){
-    SimTime::interval = scenario.getModel().getParameters().getInterval();
-    SimTime::steps_per_year = SimTime::oneYear().inSteps();
-    SimTime::years_per_step = 1.0 / SimTime::steps_per_year;
-    sim::max_human_age = SimTime::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
-    if( scenario.getMonitoring().getStartDate().present() ){
+    SimData::interval = scenario.getModel().getParameters().getInterval();
+    SimData::steps_per_year = SimTime::oneYear().inSteps();
+    SimData::years_per_step = 1.0 / SimData::steps_per_year;
+    
+    sim::s_max_human_age =
+        SimTime::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
+    
+    sim::s_start = SimDate::origin();
+    auto mon = scenario.getMonitoring();
+    if( mon.getStartDate().present() ){
         try{
-            // on failure, this throws or returns SimTime::never()
-            interv_start_date = UnitParse::parseDate( scenario.getMonitoring().getStartDate().get() );
-            if( interv_start_date == SimTime::never() ){
+            // on failure, this throws or returns SimDate::never()
+            sim::s_start = UnitParse::parseDate( mon.getStartDate().get() );
+            if( sim::s_start == SimDate::never() ){
                 throw util::format_error( "invalid format (expected YYYY-MM-DD)" );
             }
         }catch( const util::format_error& e ){
@@ -260,7 +263,9 @@ void sim::init( const scnXml::Scenario& scenario ){
         }
     }
     
-    sim::interv_time = SimTime::never();    // large negative number
+    sim::s_interv = SimTime::never();    // large negative number
+    
+    sim::s_end = mon::readSurveyDates( mon );
 }
 
 }

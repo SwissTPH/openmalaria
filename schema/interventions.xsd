@@ -161,10 +161,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   <xs:annotation>
                     <xs:documentation>
                       If period is 0 (or effectively infinite), the last specified
-                      value remains indefinitely in effect, otherwise the times of
-                      all values specified must be less than the period, and values
-                      are repeated modulo period (the step at time 'period+2t'
-                      has same value as the step at '2t', etc.).
+                      value remains indefinitely in effect.
+                      
+                      If period is less than the length of the simulation's intervention phase,
+                      then all "rate" deployments are repeated with this periodicity.
+                      In this case, the first "rate" deployment must coincide with the start of
+                      the intervention phase (monitoring/startDate).
                       
                       Can be specified in steps (e.g. 1t) or days (e.g. 365d).
                     </xs:documentation>

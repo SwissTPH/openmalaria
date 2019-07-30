@@ -258,19 +258,23 @@ public:
         dummyXML::modelParams.setInterval( daysPerStep );
         dummyXML::model.setParameters(dummyXML::modelParams);
         dummyXML::scenario.setModel(dummyXML::model);
+        dummyXML::surveys.setDetectionLimit( numeric_limits<double>::quiet_NaN() );
+        dummyXML::surveys.getSurveyTime().push_back( scnXml::SurveyTime ( "1t" ) );
+        dummyXML::monitoring.setSurveys( dummyXML::surveys );
+        dummyXML::scenario.setMonitoring( dummyXML::monitoring );
         sim::init( dummyXML::scenario );
         
         // we could just use zero, but we may spot more errors by using some weird number
-        sim::time0 = SimTime::fromYearsN(83.2591);
-        sim::time1 = sim::time0;
+        sim::s_t0 = SimTime::fromYearsN(83.2591);
+        sim::s_t1 = sim::s_t0;
 #ifndef NDEBUG
         sim::in_update = true;  // may not always be correct but we're more interested in getting around this check than using it in unit tests
 #endif
     }
     static void incrTime(SimTime incr){
-        //NOTE: for unit tests, we do not differentiate between time0 and time1
-        sim::time0 += incr;
-        sim::time1 = sim::time0;
+        //NOTE: for unit tests, we do not differentiate between s_t0 and s_t1
+        sim::s_t0 += incr;
+        sim::s_t1 = sim::s_t0;
     }
     
     static const scnXml::Parameters& prepareParameters(){
@@ -284,14 +288,6 @@ public:
         return dummyXML::modelParams;
     }
     
-    // Initialise surveys, to the minimum required not to crash
-    static void initSurveys(){
-        diagnostics::clear();
-        Parameters parameters( prepareParameters() );
-        dummyXML::surveys.setDetectionLimit( numeric_limits<double>::quiet_NaN() );
-        dummyXML::monitoring.setSurveys( dummyXML::surveys );
-        mon::initSurveyTimes( parameters, dummyXML::scenario, dummyXML::monitoring );
-    }
     // Parameterise standard diagnostics
     static void setDiagnostics(){
         // note that this is only ever called after initSurveys(), thus we

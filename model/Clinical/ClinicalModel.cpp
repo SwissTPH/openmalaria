@@ -196,8 +196,8 @@ vector<int> infantIntervalsAtRisk;
 double nonMalariaMortality;
 
 void InfantMortality::init( const OM::Parameters& parameters ){
-    infantDeaths.resize(SimTime::stepsPerYear());
-    infantIntervalsAtRisk.resize(SimTime::stepsPerYear());
+    infantDeaths.resize(sim::stepsPerYear());
+    infantIntervalsAtRisk.resize(sim::stepsPerYear());
     nonMalariaMortality=parameters[Parameters::NON_MALARIA_INFANT_MORTALITY];
 }
 
@@ -223,7 +223,7 @@ void InfantMortality::reportRisk(size_t index, bool isDoomed) {
 
 double InfantMortality::allCause(){
     double infantPropSurviving=1.0;       // use to calculate proportion surviving
-    for( size_t i = 0; i < SimTime::stepsPerYear(); i += 1 ){
+    for( size_t i = 0; i < sim::stepsPerYear(); i += 1 ){
         // multiply by proportion of infants surviving at each interval
         infantPropSurviving *= double(infantIntervalsAtRisk[i] - infantDeaths[i])
             / double(infantIntervalsAtRisk[i]);

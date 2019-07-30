@@ -160,7 +160,7 @@ double AgeStructure::setDemoParameters (double param1, double param2)
 {
     rho = initialRho;
 
-    rho = rho * (0.01 * SimTime::yearsPerStep());
+    rho = rho * (0.01 * sim::yearsPerStep());
     if (rho != 0.0)
 	// Issue: in this case the total population size differs from populationSize,
 	// however, some code currently uses this as the total population size.

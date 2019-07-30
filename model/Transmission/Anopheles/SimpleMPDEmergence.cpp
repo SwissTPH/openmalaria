@@ -168,7 +168,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     
     const double LIMIT = 0.1;
     return (fabs(factor - 1.0) > LIMIT) ||
-           (rAngle > LIMIT * 2*M_PI / SimTime::stepsPerYear());
+           (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
     //NOTE: in theory, mosqEmergeRate and annualEggsLaid aren't needed after convergence.
 }
 

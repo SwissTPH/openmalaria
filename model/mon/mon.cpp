@@ -53,7 +53,7 @@ namespace impl {
     bool isInit = false;
     size_t surveyIndex = 0;     // index in surveyTimes of next survey
     size_t survNumEvent = NOT_USED, survNumStat = NOT_USED;
-    SimTime nextSurveyTime = SimTime::future();
+    SimDate nextSurveyDate = SimDate::future();
     
     vector<Condition> conditions;
 }
@@ -417,7 +417,7 @@ struct MeasureByOutId{
     }
 } measureByOutId;
 
-void internal::initReporting( const scnXml::Scenario& scenario ){
+void initReporting( const scnXml::Scenario& scenario ){
     defineOutMeasures();        // set up namedOutMeasures
     assert(reportedMeasures.empty());
     
@@ -690,7 +690,7 @@ void checkpoint( ostream& stream ){
     impl::surveyIndex & stream;
     impl::survNumEvent & stream;
     impl::survNumStat & stream;
-    impl::nextSurveyTime & stream;
+    impl::nextSurveyDate & stream;
     
     storeI.checkpoint(stream);
     storeF.checkpoint(stream);
@@ -700,7 +700,7 @@ void checkpoint( istream& stream ){
     impl::surveyIndex & stream;
     impl::survNumEvent & stream;
     impl::survNumStat & stream;
-    impl::nextSurveyTime & stream;
+    impl::nextSurveyDate & stream;
     
     storeI.checkpoint(stream);
     storeF.checkpoint(stream);

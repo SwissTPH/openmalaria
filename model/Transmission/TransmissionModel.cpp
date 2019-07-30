@@ -82,7 +82,7 @@ TransmissionModel* TransmissionModel::createTransmissionModel (const scnXml::Ent
 void TransmissionModel::ctsCbInputEIR (ostream& stream){
     int prevStep = (sim::now() - SimTime::oneTS()) / SimTime::oneTS();
     //Note: prevStep may be negative, hence util::mod not mod_nn:
-    stream<<'\t'<<initialisationEIR[util::mod(prevStep, SimTime::stepsPerYear())];
+    stream<<'\t'<<initialisationEIR[util::mod(prevStep, sim::stepsPerYear())];
 }
 void TransmissionModel::ctsCbSimulatedEIR (ostream& stream){
     stream<<'\t'<<tsAdultEIR;
@@ -120,7 +120,7 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
     adultAge(PerHost::adultAge()),
     numTransmittingHumans(0)
 {
-    initialisationEIR.assign (SimTime::stepsPerYear(), 0.0);
+    initialisationEIR.assign (sim::stepsPerYear(), 0.0);
     
   using mon::Continuous;
   Continuous.registerCallback( "input EIR", "\tinput EIR", MakeDelegate( this, &TransmissionModel::ctsCbInputEIR ) );
@@ -171,7 +171,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     
     //Calculate time-weighted average of kappa
     _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
-    if (tmod == SimTime::stepsPerYear() - 1) {
+    if (tmod == sim::stepsPerYear() - 1) {
         _annualAverageKappa = _sumAnnualKappa / annualEIR;	// inf or NaN when annualEIR is 0
         _sumAnnualKappa = 0.0;
     }
