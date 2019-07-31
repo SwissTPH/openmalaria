@@ -283,7 +283,8 @@ namespace OM { namespace util { namespace checkpoint {
         x.size() & stream;
         for(auto pos = x.begin (); pos != x.end() ; ++pos) {
             pos->first & stream;
-            pos->second.raw() & stream;
+            SimTime t = pos->second;    // use a copy: avoid const restriction
+            t & stream;
         }
     }
     void operator& (map<interventions::ComponentId,SimTime>& x, istream& stream) {

@@ -47,7 +47,6 @@ public:
         // generator which is initialized after constructor runs.
         util::random::seed (83);	// seed is unimportant, but must be fixed
         UnittestUtil::initTime(5);
-        UnittestUtil::initSurveys();
         UnittestUtil::setDiagnostics();
 
         UnittestUtil::EmpiricalWHM_setup();

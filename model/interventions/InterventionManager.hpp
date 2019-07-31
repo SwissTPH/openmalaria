@@ -58,8 +58,7 @@ public:
      * interventions have been used. */
     static void loadFromCheckpoint(
                 Population& population,
-                Transmission::TransmissionModel& transmission,
-                SimTime interventionTime);
+                Transmission::TransmissionModel& transmission);
     
     /** @brief Deploy interventions
      *

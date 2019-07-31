@@ -94,7 +94,7 @@ bool Human::update(const Transmission::TransmissionModel& transmission, bool doU
         return true;
     
     if (doUpdate){
-        util::streamValidate( age0.raw() );
+        util::streamValidate( age0.inDays() );
         // Age at  the end of the update period. In most cases
         // the difference between this and age at the start is not especially
         // important in the model design, but since we parameterised with

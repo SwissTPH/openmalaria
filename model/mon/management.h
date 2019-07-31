@@ -35,10 +35,11 @@ namespace OM {
     class Parameters;
 namespace mon {
 
-/// Read survey times from XML.
-void initSurveyTimes( const Parameters& parameters,
-        const scnXml::Scenario& scenario,
-        const scnXml::Monitoring& monitoring );
+/// Read survey times from XML. Return the date of the final survey.
+SimDate readSurveyDates( const scnXml::Monitoring& monitoring );
+
+/// Call before start of simulation to set up outputs. Call readSurveyDates first.
+void initReporting( const scnXml::Scenario& scenario );
 
 /// Call after initialising interventions
 void initCohorts( const scnXml::Monitoring& monitoring );
@@ -58,9 +59,6 @@ void checkpoint( std::istream& stream );
 
 // Functions for internal use (within mon package)
 namespace internal{
-    /// Call before start of simulation to set up outputs. Call initSurveyTimes first.
-    void initReporting( const scnXml::Scenario& scenario );
-    
     // Write results to stream
     void write( std::ostream& stream );
     

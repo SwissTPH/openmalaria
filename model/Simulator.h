@@ -61,8 +61,8 @@ private:
     //@}
     
     // Data
-    SimTime simPeriodEnd;
-    SimTime totalSimDuration;
+    SimTime m_phaseEnd;
+    SimTime m_estimatedEnd;
     int phase;  // only need be a class member because value is checkpointed
     
     static bool startedFromCheckpoint;

@@ -37,7 +37,7 @@ namespace impl {
     // Variables (checkpointed):
     extern bool isInit; // set true after "initialisation" survey at intervention time 0
     extern size_t survNumEvent, survNumStat;
-    extern SimTime nextSurveyTime;
+    extern SimDate nextSurveyDate;
 }
 
 /// For surveys and measures to say something shouldn't be reported
@@ -56,17 +56,11 @@ inline size_t eventSurveyNumber(){ return impl::survNumEvent; }
 /// reported but acts like it is to set survey variables.
 inline bool isReported(){ return !impl::isInit || impl::survNumStat != NOT_USED; }
 
-/** Time the current (next) survey ends at, or SimTime::never() if no more
+/** Date the current (next) survey ends at, or SimTime::never() if no more
  * surveys take place. */
-SimTime nextSurveyTime();
-
-/** Return the time of the final survey.
- *
- * We use this to control when the simulation ends.
- * This isn't quite the same as before when the simulation end was
- * explicitly specified and has a small affect on
- * infantAllCauseMortality (survey 21) output. */
-SimTime finalSurveyTime();
+inline SimDate nextSurveyDate() {
+    return impl::nextSurveyDate;
+}
 
 /// The number of cohort sets
 inline size_t numCohortSets(){ return impl::nCohorts; }
@@ -79,7 +73,7 @@ inline size_t numCohortSets(){ return impl::nCohorts; }
 /// A key is returned; use this in future calls to checkCondition().
 /// 
 /// This should only be called before the simulation is started but after
-/// initSurveyTimes() is called.
+/// initReporting() is called.
 size_t setupCondition( const std::string& measureName, double minValue,
                      double maxValue, bool initialState );
 

@@ -131,7 +131,7 @@ void EmergenceModel::initEIR(
     // Note: sum stays the same, units changes to per-time-step.
     for( SimTime i = SimTime::zero(); i < SimTime::oneYear(); i += SimTime::oneDay() ){
         // index 0 of initialisationEIR corresponds to first period of year
-        initialisationEIR[mod_nn(i.inSteps(), SimTime::stepsPerYear())] += speciesEIR[i];
+        initialisationEIR[mod_nn(i.inSteps(), sim::stepsPerYear())] += speciesEIR[i];
     }
     
     if ( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ) {

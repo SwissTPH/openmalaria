@@ -122,6 +122,8 @@ void diagnostics::clear(){
 }
 
 void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& scenario ){
+    diagnostic_set.clear(); // compatibility with unit tests
+    
     if(scenario.getDiagnostics().present()){
         foreach( const scnXml::Diagnostic& diagnostic, scenario.getDiagnostics().get().getDiagnostic() ){
             string name = diagnostic.getName();     // conversion fails without this extra line
