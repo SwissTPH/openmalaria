@@ -38,8 +38,9 @@ public:
     /** Use the test.
      * 
      * @param dens Current parasite density in parasites per µL
+     * @param densHRP2 Equivalent density for diagnostics dependent on HRP2
      * @returns True if outcome is positive. */
-    bool isPositive( double dens ) const;
+    bool isPositive( double dens, double densHRP2 ) const;
     
     inline bool operator!=( const Diagnostic& that )const{
         return specificity != that.specificity ||
@@ -60,6 +61,9 @@ private:
     // depending on model, this is either the minimum detectible density
     // or the density at which test has half a chance of a positive outcome
     double dens_lim;
+    
+    // if true, the diagnostic is dependent on the HRP2 antigen
+    bool uses_hrp2;
     
     friend class diagnostics;
 };

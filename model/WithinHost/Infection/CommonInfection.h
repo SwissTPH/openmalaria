@@ -22,6 +22,7 @@
 #define Hmod_CommonInfection
 
 #include "WithinHost/Infection/Infection.h"
+#include "WithinHost/Genotypes.h"
 
 namespace OM { namespace WithinHost {
 
@@ -45,6 +46,11 @@ public:
     {}
     virtual ~CommonInfection() {}
     //@}
+    
+    
+    virtual bool isHrp2Deficient() const {
+        return Genotypes::getGenotypes()[m_genotype].hrp2_deficient;
+    }
     
     /** Get the infection's genotype. */
     uint32_t genotype()const{ return m_genotype; }

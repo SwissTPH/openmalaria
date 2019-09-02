@@ -117,6 +117,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     updateImmuneStatus ();
 
     totalDensity = 0.0;
+    hrp2Density = 0.0;
     timeStepMaxDensity = 0.0;
 
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
@@ -155,11 +156,15 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 
         double density = inf->getDensity();
         totalDensity += density;
+        if( !inf->isHrp2Deficient() ){
+            hrp2Density += density;
+        }
         m_cumulative_Y += SimTime::oneTS().inDays() * density;
 
         ++inf;
     }
     util::streamValidate( totalDensity );
+    util::streamValidate( hrp2Density );
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }
 
@@ -177,7 +182,7 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
         if( reportPatentInfected ){
             for(std::list<DescriptiveInfection>::const_iterator inf =
                 infections.begin(); inf != infections.end(); ++inf) {
-            if( diagnostics::monitoringDiagnostic().isPositive( inf->getDensity() ) ){
+            if( diagnostics::monitoringDiagnostic().isPositive( inf->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
                 }
             }
@@ -187,7 +192,7 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
     // Some treatments (simpleTreat with steps=-1) clear infections immediately
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
-    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity) ){
+    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
         mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
         mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent

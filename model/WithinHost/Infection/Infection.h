@@ -66,6 +66,9 @@ public:
         return m_density;
     }
     
+    /// Get whether the infection is HRP2-deficient
+    virtual bool isHrp2Deficient() const =0;
+    
     /** @returns A multiplier describing the proportion of parasites surviving
      * immunity effects this time step.
      * 

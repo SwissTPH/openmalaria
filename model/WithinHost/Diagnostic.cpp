@@ -88,14 +88,21 @@ Diagnostic::Diagnostic( const Parameters& parameters, const scnXml::Diagnostic& 
         assert( elt.getUnits().get() == "Malariatherapy" );
         // in this case we don't need to use a bias factor
     }
+    
+    uses_hrp2 = elt.getMechanism() == "HRP2";
 }
 
 Diagnostic::Diagnostic(double minDens){
     specificity = numeric_limits<double>::quiet_NaN();
     dens_lim = minDens;
+    uses_hrp2 = false;
 }
 
-bool Diagnostic::isPositive( double dens ) const {
+bool Diagnostic::isPositive( double dens, double densHRP2 ) const {
+    if( uses_hrp2 ){
+        assert( densHRP2 == densHRP2 ); // monitoring diagnostic passes NaN; use of HRP2 is not supported
+        dens = densHRP2;
+    }
     if( (boost::math::isnan)(specificity) ){
         // use deterministic test
         return dens >= dens_lim;
@@ -180,6 +187,11 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
                 "appropriate when monitoring/surveys/diagnostic is used." );
         }
         diagnostics::monitoring_diagnostic = &diagnostics::get( surveys.getDiagnostic().get() );
+    }
+    
+    if( diagnostics::monitoring_diagnostic->uses_hrp2 ){
+        throw util::xml_scenario_error( "the diagnostic used for "
+            "monitoring may not use HRP2 as its mechanism" );
     }
 }
 

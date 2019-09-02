@@ -166,6 +166,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     updateImmuneStatus ();
 
     totalDensity = 0.0;
+    hrp2Density = 0.0;
     timeStepMaxDensity = 0.0;
     
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
@@ -205,6 +206,9 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             } else {
                 double density = (*inf)->getDensity();
                 totalDensity += density;
+                if( !(*inf)->isHrp2Deficient() ){
+                    hrp2Density += density;
+                }
                 timeStepMaxDensity = max(timeStepMaxDensity, density);
                 m_cumulative_Y += density;
                 if( density > 0 ){
@@ -218,6 +222,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     }
     
     util::streamValidate(totalDensity);
+    util::streamValidate(hrp2Density);
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
 }
 
@@ -248,7 +253,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
                 infections.begin(); inf != infections.end(); ++inf) {
                 uint32_t genotype = (*inf)->genotype();
                 mon::reportStatMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
-                if( diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity() ) ){
+                if( diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
                 }
             }
@@ -271,7 +276,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
                 }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
                 // we had at least one infection of this genotype
                 mon::reportStatMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
-                if( diagnostics::monitoringDiagnostic().isPositive(dens) ){
+                if( diagnostics::monitoringDiagnostic().isPositive(dens, std::numeric_limits<double>::quiet_NaN()) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
                     mon::reportStatMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
                 }
@@ -282,7 +287,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
     // Some treatments (simpleTreat with steps=-1) clear infections immediately
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
-    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity) ){
+    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
         mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
         mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent

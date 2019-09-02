@@ -67,6 +67,10 @@ public:
     DescriptiveInfection (istream& stream);
     //@}
     
+    virtual bool isHrp2Deficient() const {
+        return false;   // not supported
+    }
+    
     /** Returns true when age reaches the pre-determined duration (i.e. when
     * this infection terminates). */
     bool expired () {

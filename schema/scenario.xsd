@@ -536,6 +536,20 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         <xs:appinfo>name:Fitness factor;</xs:appinfo>
       </xs:annotation>
     </xs:attribute>
+    <xs:attribute name="hrp2_deletion" type="xs:boolean" default="false">
+      <xs:annotation>
+        <xs:documentation>
+          If true, marks this allele as having deleted HRP2.
+          
+          The effect on the simulation is that any diagnostic dependent on HRP2
+          behaves as if infections with deleted HRP2 have density 0.
+          
+          A diagnostic MUST explicitly set mechanism="HRP2" for this to have any
+          effect.
+        </xs:documentation>
+        <xs:appinfo>name:HRP2 deletion;</xs:appinfo>
+      </xs:annotation>
+    </xs:attribute>
   </xs:complexType>
   
   <xs:complexType name="Diagnostics">
@@ -647,6 +661,27 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:enumeration value="Other"/>
           <xs:enumeration value="Garki"/>
           <xs:enumeration value="Malariatherapy"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="mechanism" default="Other">
+      <xs:annotation>
+        <xs:documentation>
+          Mechanism by which this diagnostic functions.
+          
+          Possible values are: HRP2, Other. In the case of HRP2, infections with
+          an hrp2_deletion will be invisible to this diagnostic. In the case of
+          Other, the diagnostic is unaffected by infection genome.
+          
+          The diagnostic used for monitoring cannot use HRP2. (This is a
+          restriction made to simplify implementation.)
+        </xs:documentation>
+        <xs:appinfo>name:Mechanism;</xs:appinfo>
+      </xs:annotation>
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="Other"/>
+          <xs:enumeration value="HRP2"/>
         </xs:restriction>
       </xs:simpleType>
     </xs:attribute>
