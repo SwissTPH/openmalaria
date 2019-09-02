@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/Infection/Infection.h"
+#include "WithinHost/Infection/CommonInfection.h"
 #include "util/ModelOptions.h"
 #include "util/StreamValidator.h"
 
@@ -69,11 +70,19 @@ Infection::Infection (istream& stream) : m_startDate(SimTime::never()) {
     m_startDate & stream;
     m_density & stream;
     m_cumulativeExposureJ & stream;
+    m_genotype & stream;
 }
 void Infection::checkpoint (ostream& stream) {
     m_startDate & stream;
     m_density & stream;
     m_cumulativeExposureJ & stream;
+    m_genotype & stream;
 }
+
+CommonInfection::~CommonInfection() {}
+void CommonInfection::checkpoint (ostream& stream) {
+    Infection::checkpoint (stream);
+}
+
 
 } }

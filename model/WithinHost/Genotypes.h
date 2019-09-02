@@ -21,7 +21,9 @@
 #ifndef Hmod_WH_Genotypes
 #define Hmod_WH_Genotypes
 
+#include "Global.h"
 #include <iostream>
+#include <set>
 
 namespace OM { namespace WithinHost {
 
@@ -36,7 +38,7 @@ public:
             alleles.insert(allele);
         }
         Genotype cross( const Genotype& that )const;
-        set<uint32_t> alleles;      // set of codes of all alleles
+        std::set<uint32_t> alleles;      // set of codes of all alleles
         double init_freq;
         double fitness;
         bool hrp2_deficient;

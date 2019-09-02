@@ -62,14 +62,10 @@ public:
     ///@name Constructors
     //@{
     /// Default constructor
-    DescriptiveInfection ();
+    DescriptiveInfection (uint32_t genotype);
     /// Checkpoint loading constructor
     DescriptiveInfection (istream& stream);
     //@}
-    
-    virtual bool isHrp2Deficient() const {
-        return false;   // not supported
-    }
     
     /** Returns true when age reaches the pre-determined duration (i.e. when
     * this infection terminates). */

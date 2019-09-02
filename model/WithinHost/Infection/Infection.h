@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Parameters.h"
+#include "WithinHost/Genotypes.h"
 
 class UnittestUtil;
 
@@ -32,10 +33,11 @@ class Infection {
 public:
     static void init( const OM::Parameters& parameters, SimTime latentP );
     
-    Infection () :
+    Infection (uint32_t genotype) :
         m_startDate(sim::nowOrTs0()),
         m_density(0.0),
-        m_cumulativeExposureJ(0.0)
+        m_cumulativeExposureJ(0.0),
+        m_genotype(genotype)
     {}
     Infection (istream& stream);
     virtual ~Infection () {}
@@ -67,7 +69,12 @@ public:
     }
     
     /// Get whether the infection is HRP2-deficient
-    virtual bool isHrp2Deficient() const =0;
+    bool isHrp2Deficient() const {
+        return Genotypes::getGenotypes()[m_genotype].hrp2_deficient;
+    }
+    
+    /** Get the infection's genotype. */
+    uint32_t genotype()const{ return m_genotype; }
     
     /** @returns A multiplier describing the proportion of parasites surviving
      * immunity effects this time step.
@@ -102,6 +109,10 @@ protected:
     
     /// Cumulative parasite density, since start of this infection
     double m_cumulativeExposureJ;
+    
+private:
+    /// Genotype of infection (a code; see Genotypes class).
+    uint32_t m_genotype;
         
     /// @brief Static data set by init
     //@{

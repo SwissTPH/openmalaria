@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "WithinHost/Infection/CommonInfection.h"
 #include "WithinHost/Genotypes.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -333,17 +332,6 @@ void Genotypes::staticCheckpoint( istream& stream ){
     assert( GT::current_mode == GT::SAMPLE_FIRST ||
         GT::current_mode == GT::SAMPLE_INITIAL ||
         GT::current_mode == GT::SAMPLE_TRACKING );
-}
-
-void CommonInfection::checkpoint(ostream& stream)
-{
-    OM::WithinHost::Infection::checkpoint(stream);
-    m_genotype & stream;
-}
-CommonInfection::CommonInfection(istream& stream):
-    Infection(stream)
-{
-    m_genotype & stream;
 }
 
 }

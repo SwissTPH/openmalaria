@@ -218,6 +218,9 @@ protected:
     friend class ::UnittestUtil;
 };
 
+/// True if any by-genotype reporting is enabled (read-only)
+extern bool reportInfectionsByGenotype;
+
 }
 }
 #endif

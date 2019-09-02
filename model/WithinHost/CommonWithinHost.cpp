@@ -44,7 +44,6 @@ double minHetMassMult = std::numeric_limits<double>::signaling_NaN();
 util::AgeGroupInterpolator massByAge;
 
 bool reportInfectedOrPatentInfected = false;
-bool reportInfectionsByGenotype = false;
 
 
 // -----  Initialization  -----
@@ -62,9 +61,6 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
     
     reportInfectedOrPatentInfected = mon::isUsedM(mon::MHR_INFECTIONS) ||
         mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
-    reportInfectionsByGenotype = mon::isUsedM(mon::MHR_INFECTED_GENOTYPE) ||
-        mon::isUsedM(mon::MHR_PATENT_GENOTYPE) ||
-        mon::isUsedM(mon::MHF_LOG_DENSITY_GENOTYPE);
     
     PkPd::LSTMModel::init( scenario );
 }

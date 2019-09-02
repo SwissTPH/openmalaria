@@ -115,7 +115,8 @@ void DescriptiveInfection::init (const Parameters& parameters) {
 
 // ———  non-static init/destruction  ———
 
-DescriptiveInfection::DescriptiveInfection () :
+DescriptiveInfection::DescriptiveInfection (uint32_t genotype) :
+	Infection(genotype),
         m_duration(infectionDuration()),
         notPrintedMDWarning(true)
 {
