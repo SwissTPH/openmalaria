@@ -209,7 +209,6 @@
   </entomology>
   <parasiteGenetics samplingMode="tracking">
     <locus name="mdr">
-      <!-- model three alleles, no real reason -->
       <allele name="sensitive" initialFrequency="0.5" fitness="1"/>
       <allele name="resistant" initialFrequency="0.5" fitness="1"/>
     </locus>

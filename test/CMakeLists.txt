@@ -30,6 +30,7 @@ set (OM_BOXTEST_NAMES
   Molineaux
   MolPairwise
   MSAT
+  MSAT_HRP2
   # disabled due to test failure (TODO: since when?)
   # MultiVecPopInterventions
   NamawalaArabiensis

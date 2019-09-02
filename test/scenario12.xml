@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_39" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="38" wuID="12345" xsi:schemaLocation="http://openmalaria.org/schema/scenario_39 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_39" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="30" name="Matsari Intervention" schemaVersion="39" wuID="12345" xsi:schemaLocation="http://openmalaria.org/schema/scenario_39 scenario_current.xsd">
   <demography maximumAgeYrs="80.389041096" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0.0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -27,6 +27,7 @@
     <SurveyOptions>
       <option name="nHost" value="true"/>
       <option name="nPatent" value="true"/>
+      <option name="nPatentByGenotype"/>
       <option name="sumlogDens" value="true"/>
       <option name="nUncomp"/>
       <option name="simulatedEIR" value="true"/>
@@ -633,7 +634,7 @@
         <treatSimple durationLiver="-1t" durationBlood="-1t"/>
       </component>
       <component id="MSAT">
-        <screen diagnostic="deterministic">
+        <screen diagnostic="RDT">
           <positive id="treat"/>
         </screen>
       </component>
@@ -1189,10 +1190,15 @@
       <EIRDaily origin="interpolate">0.00227</EIRDaily>
     </nonVector>
   </entomology>
+  <parasiteGenetics samplingMode="initial">
+    <locus name="hrp2">
+      <allele name="wildtype" initialFrequency="0.5" fitness="1"/>
+      <allele name="hrp2_deficient" initialFrequency="0.5" fitness="1" hrp2_deletion="true"/>
+    </locus>
+  </parasiteGenetics>
   <diagnostics>
-    <diagnostic name="deterministic" units="Malariatherapy">
-      <!-- this diagnostic has no basis in reality -->
-      <deterministic minDensity="20"/>
+    <diagnostic name="RDT" mechanism="HRP2">
+      <stochastic dens_50="50" specificity=".942"/>
     </diagnostic>
     <diagnostic name="garki" units="Garki">
       <deterministic minDensity="2"/>
