@@ -32,6 +32,8 @@ class InfectionImmunitySuite : public CxxTest::TestSuite
 {
 public:
     void setUp () {
+        UnittestUtil::initTime(5);
+        
 	// Note: these values were pulled from one source and shouldn't be taken as authoritative
 	double invCumulativeYstar = 1.0 / 68564384.7102;
 	double invCumulativeHstar = 1.0 / 71.676733;

@@ -18,7 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#include "WithinHost/Infection/CommonInfection.h"
 #include "WithinHost/Genotypes.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -51,7 +50,7 @@ struct LocusSet{
             uint32_t alleleCode = (nextAlleleCode++);
             alleleCodes[elt_l.getName()][elt_a.getName()] = alleleCode;
             cum_p += elt_a.getInitialFrequency();
-            alleles.push_back( Genotypes::Genotype( alleleCode, elt_a.getInitialFrequency(), elt_a.getFitness() ) );
+            alleles.push_back( Genotypes::Genotype( alleleCode, elt_a.getInitialFrequency(), elt_a.getFitness(), elt_a.getHrp2_deletion() ) );
         }
         if( cum_p < 0.999 || cum_p > 1.001 ){
             throw util::xml_scenario_error( (
@@ -90,7 +89,10 @@ SampleMode current_mode = SAMPLE_FIRST, interv_mode = SAMPLE_FIRST;
 size_t Genotypes::N_genotypes = 1;
 
 Genotypes::Genotype Genotypes::Genotype::cross( const Genotype& that )const{
-    Genotype result(*that.alleles.begin(), init_freq*that.init_freq, fitness*that.fitness);
+    Genotype result(*that.alleles.begin(),
+                    init_freq*that.init_freq,
+                    fitness*that.fitness,
+                    hrp2_deficient || that.hrp2_deficient);
     result.alleles.insert( alleles.begin(), alleles.end() );
     result.alleles.insert( that.alleles.begin(), that.alleles.end() );
     return result;
@@ -100,7 +102,7 @@ void Genotypes::initSingle()
 {
     // no specification implies there is a single genotype
     GT::genotypes.assign( 1, Genotypes::Genotype(
-        0 /*allele code*/, 1.0/*frequency*/, 1.0/*fitness*/) );
+        0 /*allele code*/, 1.0/*frequency*/, 1.0/*fitness*/, false /*hrp2 deficiency*/) );
     N_genotypes = 1;
 }
 
@@ -326,17 +328,6 @@ void Genotypes::staticCheckpoint( istream& stream ){
     assert( GT::current_mode == GT::SAMPLE_FIRST ||
         GT::current_mode == GT::SAMPLE_INITIAL ||
         GT::current_mode == GT::SAMPLE_TRACKING );
-}
-
-void CommonInfection::checkpoint(ostream& stream)
-{
-    OM::WithinHost::Infection::checkpoint(stream);
-    m_genotype & stream;
-}
-CommonInfection::CommonInfection(istream& stream):
-    Infection(stream)
-{
-    m_genotype & stream;
 }
 
 }

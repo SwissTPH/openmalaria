@@ -96,7 +96,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
     decayM = parameters[Parameters::DECAY_M];
     
-    y_lag_len = SimTime::fromDays(20).inSteps();
+    y_lag_len = SimTime::fromDays(20).inSteps() + 1;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
@@ -124,7 +124,7 @@ void WHFalciparum::setParams(double cumYStar, double cumHStar, double aM, double
 WHFalciparum::WHFalciparum( double comorbidityFactor ):
     WHInterface(),
     m_cumulative_h(0.0), m_cumulative_Y(0.0), m_cumulative_Y_lag(0.0),
-    totalDensity(0.0), timeStepMaxDensity(0.0),
+    totalDensity(0.0), hrp2Density(0.0), timeStepMaxDensity(0.0),
     pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
 {
     // NOTE: negating a Gaussian sample with mean 0 is pointless — except that
@@ -232,7 +232,7 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
 }
 
 bool WHFalciparum::diagnosticResult( const Diagnostic& diagnostic ) const{
-    return diagnostic.isPositive( totalDensity );
+    return diagnostic.isPositive( totalDensity, hrp2Density );
 }
 
 void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
@@ -307,6 +307,7 @@ void WHFalciparum::checkpoint (istream& stream) {
     m_cumulative_Y & stream;
     m_cumulative_Y_lag & stream;
     totalDensity & stream;
+    hrp2Density & stream;
     timeStepMaxDensity & stream;
     m_y_lag & stream;
     (*pathogenesisModel) & stream;
@@ -320,6 +321,7 @@ void WHFalciparum::checkpoint (ostream& stream) {
     m_cumulative_Y & stream;
     m_cumulative_Y_lag & stream;
     totalDensity & stream;
+    hrp2Density & stream;
     timeStepMaxDensity & stream;
     m_y_lag & stream;
     (*pathogenesisModel) & stream;

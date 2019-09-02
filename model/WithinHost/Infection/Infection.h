@@ -23,6 +23,7 @@
 
 #include "Global.h"
 #include "Parameters.h"
+#include "WithinHost/Genotypes.h"
 
 class UnittestUtil;
 
@@ -34,10 +35,11 @@ public:
         s_latentP = latentP;
     }
     
-    Infection () :
+    Infection (uint32_t genotype) :
         m_startDate(sim::nowOrTs0()),
         m_density(0.0),
-        m_cumulativeExposureJ(0.0)
+        m_cumulativeExposureJ(0.0),
+        m_genotype(genotype)
     {}
     Infection (istream& stream) :
         m_startDate(SimTime::never())
@@ -45,6 +47,7 @@ public:
         m_startDate & stream;
         m_density & stream;
         m_cumulativeExposureJ & stream;
+        m_genotype & stream;
     }
     virtual ~Infection () {}
     
@@ -80,6 +83,15 @@ public:
         return m_cumulativeExposureJ;
     }
     
+    /// Get whether the infection is HRP2-deficient
+    bool isHrp2Deficient() const {
+        return Genotypes::getGenotypes()[m_genotype].hrp2_deficient;
+    }
+    
+    /** Get the infection's genotype. */
+    uint32_t genotype()const{ return m_genotype; }
+    
+    
     /// Resets immunity properties specific to the infection (should only be
     /// called along with clearImmunity() on within-host model).
     inline void clearImmunity(){
@@ -97,6 +109,7 @@ protected:
         m_startDate & stream;
         m_density & stream;
         m_cumulativeExposureJ & stream;
+        m_genotype & stream;
     }
     
     /// Date of inoculation of infection (start of liver stage)
@@ -108,7 +121,12 @@ protected:
     
     /// Cumulative parasite density, since start of this infection
     double m_cumulativeExposureJ;
-        
+    
+private:
+    /// Genotype of infection (a code; see Genotypes class).
+    uint32_t m_genotype;
+    
+protected:
     /// Pre-erythrocytic latent period (instantiated in WHFalciparum.cpp)
     static SimTime s_latentP;
     

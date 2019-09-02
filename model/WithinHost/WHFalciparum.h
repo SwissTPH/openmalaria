@@ -115,6 +115,8 @@ protected:
     
     /// Total asexual blood stage density (sum of density of infections).
     double totalDensity;
+    /// Density from the point of view of diagnostics dependent on HRP2
+    double hrp2Density;
     
     /** Maximum parasite density of any infection during the previous interval.
      *

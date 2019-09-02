@@ -19,6 +19,8 @@ if (NOT MSVC)
   else (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
     set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -msse2 -mfpmath=sse")
   endif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
+  # We almost always want optimisations enabled:
+  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O2")
 endif (NOT MSVC)
 
 set (OM_STD_LIBS )
@@ -48,6 +50,8 @@ option (BUILD_SHARED_LIBS "Link xsdcxx, model, etc. libraries dynamically instea
 mark_as_advanced (BUILD_SHARED_LIBS)
 
 if (MSVC)
+  # We almost always want optimisations enabled:
+  set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /O2")
   # This is now the OM_STATICALLY_LINK for windows
   option (OM_USE_LIBCMT "Use LIBCMT.lib instead of MSVCRT[D].lib when linking, and link statically. This removes a dependency on a .net library, but usually requires manually building dependency libraries." OFF)
   # set a temporary variable, since cache variables don't get rewritten

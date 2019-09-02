@@ -38,16 +38,16 @@ public:
     /// @brief Construction and destruction
     //@{
     /// For checkpointing (don't use for anything else)
-    CommonInfection(istream& stream);
+    CommonInfection(istream& stream) :
+        Infection(stream)
+    {}
     /// Per instance initialisation; create new inf.
     CommonInfection(uint32_t genotype) :
-	m_genotype(genotype)
+	Infection(genotype)
     {}
-    virtual ~CommonInfection() {}
+    virtual ~CommonInfection();
     //@}
     
-    /** Get the infection's genotype. */
-    uint32_t genotype()const{ return m_genotype; }
     
     /** Update: calculate new density. Call this once per day.
      * 
@@ -75,13 +75,9 @@ protected:
      *  this, but this function is not called during those stages.
      * @param body_mass Body mass of host in kg
      * @returns True when the infection goes extinct. */
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double body_mass )=0;
+    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double body_mass ) =0;
     
     virtual void checkpoint (ostream& stream);
-    
-private:
-    /// Genotype of infection (a code; see Genotypes class).
-    uint32_t m_genotype;
 };
 
 } }

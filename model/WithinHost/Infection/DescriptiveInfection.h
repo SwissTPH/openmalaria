@@ -62,7 +62,7 @@ public:
     ///@name Constructors
     //@{
     /// Default constructor
-    DescriptiveInfection ();
+    DescriptiveInfection (uint32_t genotype);
     /// Checkpoint loading constructor
     DescriptiveInfection (istream& stream);
     //@}
