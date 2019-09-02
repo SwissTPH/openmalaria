@@ -29,14 +29,14 @@ build:
   verbosity: normal
 
 after_build:
+  - cmd: set /p Build=<version.txt
   - cmd: mkdir %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: ECHO "build-log:" https://ci.appveyor.com/project/%APPVEYOR_ACCOUNT_NAME%/openmalaria/builds/%APPVEYOR_BUILD_ID% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
   - cmd: ECHO "build-version:" %APPVEYOR_BUILD_VERSION% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
   - cmd: ECHO "worker-image:" %APPVEYOR_BUILD_WORKER_IMAGE% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\version.txt %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c*.dll %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - cmd: mkdir %APPVEYOR_BUILD_FOLDER%\OpenMalaria\schema
-  - cmd: copy %APPVEYOR_BUILD_FOLDER%\schema\scenario_*.xsd %APPVEYOR_BUILD_FOLDER%\OpenMalaria\schema
+  - cmd: copy %APPVEYOR_BUILD_FOLDER%\schema\scenario_%Build:~7,2%.xsd %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\test\*.csv %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - cmd: copy %APPVEYOR_BUILD_FOLDER%\util\example\* %APPVEYOR_BUILD_FOLDER%\OpenMalaria
   - ps: pushd "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"; .\dumpbin.exe /dependents $env:APPVEYOR_BUILD_FOLDER"\build\Release\openMalaria.exe" > $env:APPVEYOR_BUILD_FOLDER"\OpenMalaria\dependencies.txt"; popd
