@@ -62,7 +62,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     immEffectorRemain=exp(-parameters[Parameters::IMMUNE_EFFECTOR_DECAY]);
     asexImmRemain=exp(-parameters[Parameters::ASEXUAL_IMMUNITY_DECAY]);
     
-    y_lag_len = SimTime::daysToSteps(20);
+    y_lag_len = SimTime::daysToSteps(20) + 1;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );

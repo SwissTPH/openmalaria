@@ -101,13 +101,6 @@ void DescriptiveWithinHostModel::importInfection(){
 void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_weights,
         double ageInYears, double bsvFactor)
 {
-    // Cache total density for infectiousness calculations
-    int y_lag_i = sim::ts0().moduloSteps(y_lag_len);
-    for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag.at(y_lag_i, g) = 0.0;
-    for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
-        m_y_lag.at( y_lag_i, inf->genotype() ) += inf->getDensity();
-    }
-    
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
     PopulationStats::totalInfections += nNewInfs;
@@ -172,6 +165,13 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     util::streamValidate( totalDensity );
     util::streamValidate( hrp2Density );
     assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
+    
+    // Cache total density for infectiousness calculations
+    int y_lag_i = sim::ts1().moduloSteps(y_lag_len);
+    for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag.at(y_lag_i, g) = 0.0;
+    for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
+        m_y_lag.at( y_lag_i, inf->genotype() ) += inf->getDensity();
+    }
 }
 
 
