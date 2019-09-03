@@ -73,7 +73,7 @@ inline double WHMock::getTotalDensity() const{
 }
 
 bool WHMock::diagnosticResult( const Diagnostic& diagnostic ) const{
-    return diagnostic.isPositive( totalDensity );
+    return diagnostic.isPositive( totalDensity, numeric_limits<double>::quiet_NaN() );
 }
 
 void WHMock::treatment( Host::Human& human, TreatmentId treatId ){

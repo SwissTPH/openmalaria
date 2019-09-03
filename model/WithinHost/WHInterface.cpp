@@ -42,6 +42,8 @@ namespace WithinHost {
 
 using namespace OM::util;
 
+bool reportInfectionsByGenotype = false;
+
 bool opt_vivax_simple = false,
         opt_dummy_whm = false, opt_empirical_whm = false,
         opt_molineaux_whm = false, opt_penny_whm = false,
@@ -50,6 +52,10 @@ bool opt_vivax_simple = false,
 // -----  static functions  -----
 
 void WHInterface::init( const OM::Parameters& parameters, const scnXml::Scenario& scenario ) {
+    reportInfectionsByGenotype = mon::isUsedM(mon::MHR_INFECTED_GENOTYPE) ||
+        mon::isUsedM(mon::MHR_PATENT_GENOTYPE) ||
+        mon::isUsedM(mon::MHF_LOG_DENSITY_GENOTYPE);
+    
     if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
         opt_vivax_simple = true;
         WHVivax::init( parameters, scenario.getModel() );

@@ -21,7 +21,9 @@
 #ifndef Hmod_WH_Genotypes
 #define Hmod_WH_Genotypes
 
+#include "Global.h"
 #include <iostream>
+#include <set>
 
 namespace OM { namespace WithinHost {
 
@@ -30,15 +32,16 @@ class Genotypes {
 public:
     /// Represent a combination of alleles, each from a different locus
     struct Genotype{
-        Genotype( uint32_t allele, double iFreq, double fit ):
-            init_freq(iFreq), fitness(fit)
+        Genotype( uint32_t allele, double iFreq, double fit, bool hrp2_del ):
+            init_freq(iFreq), fitness(fit), hrp2_deficient(hrp2_del)
         {
             alleles.insert(allele);
         }
         Genotype cross( const Genotype& that )const;
-        set<uint32_t> alleles;      // set of codes of all alleles
+        std::set<uint32_t> alleles;      // set of codes of all alleles
         double init_freq;
         double fitness;
+        bool hrp2_deficient;
     };
     
     /** Initialise with a single genotype. */
