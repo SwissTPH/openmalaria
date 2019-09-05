@@ -632,11 +632,11 @@ def die(*args):
     print('Error: ', *args, file=sys.stderr)
     sys.exit(1)
 
-def maybe_to_int(x):
+def make_key_list(v):
     try:
-        return int(x)
+        return int(v[0])
     except:
-        return x
+        return 1000000
 
 def main():
     # parse command-line arguments
@@ -670,7 +670,8 @@ def main():
         
         print('Translating', in_path, file=sys.stderr)
         out_name = translate(in_path, out_dir, in_name, ver, args.split, commit=args.develop)
-        generated.append((out_name, in_name))
+        major = ver.split('-')[0]
+        generated.append((major, out_name, in_name))
     
     if args.index:
         path = os.path.join(out_dir, 'schema-index.md')
@@ -689,7 +690,7 @@ def main():
             w.code(' '.join(sys.argv))
             w.heading(2, 'Index')
             #TODO: instead of linking generated doc, we should search for everything matching schema-*.md
-            for link, schema in sorted(generated, key = (lambda v: list(map(maybe_to_int, v[0].split('-')))), reverse=True):
+            for major, link, schema in sorted(generated, key = make_key_list, reverse=True):
                 w.bulleted(w.link(link, None, 'Documentation for '+schema))
             w.finish()
     
@@ -716,8 +717,10 @@ def main():
             w = DocWriter(f_out)
             w.line(w.link('intro.md', None, 'Introduction'))
             w.pn('')
-            for link, schema in sorted(generated, key = (lambda v: list(map(maybe_to_int, v[0].split('-')))), reverse=True):
-                w.bulleted(w.link(link + '.md', None, schema))
+            w.bulleted(w.link('schema-latest.md', None, 'Latest version'))
+            for major, link, schema in sorted(generated, key = make_key_list, reverse=True):
+                w.bulleted(w.link(link+'.md', None,
+                                  'Development version' if major == 'current' else 'Schema {}'.format(major)))
             w.finish()
 
 if __name__ == "__main__":
