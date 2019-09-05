@@ -96,6 +96,7 @@ matrix:
         - tar xaf *.tar.gz
         - mkdir src
         - ../../util/generateDoc.py --mdbook -O src ../scenario_*.xsd
+        - ln -s $(ls src/ | egrep "schema-[0-9]" | sort -nr -t- -k2 | head -n1) src/schema-latest.md
         - ./mdbook build
         - popd
       after_success: true
