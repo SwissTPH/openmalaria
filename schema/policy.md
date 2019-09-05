@@ -10,6 +10,7 @@ Update policy:
 *   update the schema translator [translateXML.py](https://github.com/vecnet/openmalaria.tools/blob/master/openmalaria/tools/translateXML.py) with a function translating the last release version to the next (translate_X_to_Y where X is current version, Y=X+1), doing necessary translations and writing a comment explaining the change
 *   update test scenarios when necessary (at least those run by ctest)
 *   in DocumentLoader.h, update SCHEMA_VERSION to the next version number (otherwise it'll refuse to run updated scenarios)
+*   update `version.txt`
 
 Release policy (new schema versions):
 *   copy build/schema/scenario_current.xsd to scenario_VER.xsd

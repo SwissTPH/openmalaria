@@ -41,15 +41,15 @@ Copy the correct version for this OpenMalaria build to the current directory.
 Each scenario starts similar to the following:
 ```xml
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_40" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Example Scenario" schemaVersion="40" xsi:schemaLocation="http://openmalaria.org/schema/scenario_40 scenario_40.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_41" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Example Scenario" schemaVersion="41" xsi:schemaLocation="http://openmalaria.org/schema/scenario_41 scenario_41.xsd">
 ```
 
 In case the version number does not match the version of this OpenMalaria build,
 it must be updated to match (the major part of the version number only). Here:
 
--   `schemaVersion="40"` — the schema version is 40
--   `http://openmalaria.org/schema/scenario_40` — this is the XML namespace
--   `scenario_40.xsd` — the name of the schema file
+-   `schemaVersion="41"` — the schema version is 41
+-   `http://openmalaria.org/schema/scenario_41` — this is the XML namespace
+-   `scenario_41.xsd` — the name of the schema file
 
 For the most part, this is the only change needed when updating an XML to use a
 newer version of OpenMalaria, though this is not always the case.
