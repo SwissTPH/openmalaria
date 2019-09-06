@@ -32,9 +32,8 @@
  * the length of the program rather than be created on each use.
  */
 
-// Define to use boost as the underlying generator:
-#define OM_RANDOM_USE_BOOST
-#define OM_RANDOM_USE_PCG
+// Define to use boost distributions. Unfortunately these are not necessarily
+// value-stable or portable.
 // #define OM_RANDOM_USE_BOOST_DIST
 
 #include "util/random.h"
@@ -42,14 +41,8 @@
 #include "util/StreamValidator.h"
 #include "Global.h"
 
-#ifdef OM_RANDOM_USE_BOOST
 #include <boost/random/uniform_01.hpp>
-#   ifdef OM_RANDOM_USE_PCG
 #include <pcg_random.hpp>
-#   else
-#include <boost/random/mersenne_twister.hpp>
-#   endif
-#endif
 
 #ifdef OM_RANDOM_USE_BOOST_DIST
 #include <boost/random/normal_distribution.hpp>
@@ -76,15 +69,9 @@
 
 namespace OM { namespace util {
 
-# ifdef OM_RANDOM_USE_BOOST
-#   ifdef OM_RANDOM_USE_PCG
     // I would prefer to use pcg64, but MSVC mysteriously fails
     static pcg32 generator;
     static boost::random::uniform_01<pcg32&> rng_uniform01 (generator);
-#   else
-    static boost::random::mt19937 generator;
-    static boost::random::uniform_01<boost::random::mt19937&> rng_uniform01 (generator);
-#   endif
     
 #   if !defined OM_RANDOM_USE_BOOST_DIST
     long unsigned int boost_rng_get (void*) {
@@ -107,7 +94,6 @@ namespace OM { namespace util {
 	&boost_rng_get_double_01
     };
 #   endif
-# endif
 
 #if !defined OM_RANDOM_USE_BOOST_DIST
 // This should be created and deleted automatically, taking care of
@@ -116,23 +102,14 @@ struct generator_factory {
     gsl_rng * gsl_generator;
     
     generator_factory () {
-#	ifdef OM_RANDOM_USE_BOOST
 	// In this case, I construct a wrapper around boost's generator. The reason for this is
 	// that it allows use of distributions from both boost and GSL.
 	gsl_generator = new gsl_rng;
 	gsl_generator->type = &boost_mt_type;
 	gsl_generator->state = nullptr;	// state is stored as static variables
-#	else
-	//use the mersenne twister generator
-	gsl_generator = gsl_rng_alloc(gsl_rng_mt19937);
-#	endif
     }
     ~generator_factory () {
-#	ifdef OM_RANDOM_USE_BOOST
 	delete gsl_generator;
-#	else
-	gsl_rng_free (gsl_generator);
-#	endif
     }
 } rng;
 # endif
@@ -141,18 +118,10 @@ struct generator_factory {
 
 void random::seed (uint32_t seed) {
 //     util::streamValidate(seed);
-# ifdef OM_RANDOM_USE_BOOST
-# if !defined OM_RANDOM_USE_PCG
-    if (seed == 0) seed = 4357;	// gsl compatibility − ugh
-# endif
     generator.seed (seed);
-# else
-    gsl_rng_set (rng.gsl_generator, seed);
-# endif
 }
 
 void random::checkpoint (istream& stream, int seedFileNumber) {
-# ifdef OM_RANDOM_USE_BOOST
     // Don't use OM::util::checkpoint function for loading a stream; checkpoint::validateListSize uses too small a number.
     string str;
     size_t len;
@@ -163,33 +132,12 @@ void random::checkpoint (istream& stream, int seedFileNumber) {
 	throw checkpoint_error ("stream read error string");
     istringstream ss (str);
     ss >> generator;
-# else
-    
-    ostringstream seedN;
-    seedN << string("seed") << seedFileNumber;
-    FILE * f = fopen(seedN.str().c_str(), "rb");
-    if (f == nullptr)
-	throw checkpoint_error (string("load_rng_state: file not found: ").append(seedN.str()));
-    if (gsl_rng_fread(f, rng.gsl_generator) != 0)
-	throw checkpoint_error ("gsl_rng_fread failed");
-    fclose (f);
-# endif
 }
 
 void random::checkpoint (ostream& stream, int seedFileNumber) {
-# ifdef OM_RANDOM_USE_BOOST
     ostringstream ss;
     ss << generator;
     ss.str() & stream;
-# else
-    
-    ostringstream seedN;
-    seedN << string("seed") << seedFileNumber;
-    FILE * f = fopen(seedN.str().c_str(), "wb");
-    if (gsl_rng_fwrite(f, rng.gsl_generator) != 0)
-	throw checkpoint_error ("gsl_rng_fwrite failed");
-    fclose (f);
-# endif
 }
 
 
