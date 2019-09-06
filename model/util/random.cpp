@@ -71,7 +71,6 @@ namespace OM { namespace util {
 
     // I would prefer to use pcg64, but MSVC mysteriously fails
     static pcg32 generator;
-    static boost::random::uniform_01<pcg32&> rng_uniform01 (generator);
     
 #   if !defined OM_RANDOM_USE_BOOST_DIST
     long unsigned int boost_rng_get (void*) {
@@ -81,6 +80,7 @@ namespace OM { namespace util {
 	return val;
     }
     double boost_rng_get_double_01 (void*) {
+        boost::random::uniform_01<pcg32&> rng_uniform01 (generator);
 	return rng_uniform01 ();
     }
     
@@ -144,13 +144,8 @@ void random::checkpoint (ostream& stream, int seedFileNumber) {
 // -----  random number generation  -----
 
 double random::uniform_01 () {
-    double result =
-    // GSL and boost versions both do the same (when using boost as the underlying generator):
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        rng_uniform01 ();
-# else
-        gsl_rng_uniform (rng.gsl_generator);
-# endif
+    boost::random::uniform_01<pcg32&> rng_uniform01 (generator);
+    double result = rng_uniform01 ();
 //     util::streamValidate(result);
     return result;
 }
