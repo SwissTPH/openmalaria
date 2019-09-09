@@ -56,31 +56,31 @@ struct HumanHet {
         HumanHet het;
         if( opt_trans_het ){
             het.availabilityFactor = 0.2;
-            if( util::random::bernoulli(0.5) ){
+            if( util::global_RNG.bernoulli(0.5) ){
                 het.availabilityFactor = 1.8;
             }
         }
         if( opt_comorb_het ){
             het.comorbidityFactor = 0.2;
-            if( util::random::bernoulli(0.5) ){
+            if( util::global_RNG.bernoulli(0.5) ){
                 het.comorbidityFactor = 1.8;
             }
         }
         if( opt_treat_het ){
             het.treatmentSeekingFactor = 0.2;
-            if( util::random::bernoulli(0.5) ){            
+            if( util::global_RNG.bernoulli(0.5) ){            
                 het.treatmentSeekingFactor = 1.8;
             }
         }
         if( opt_trans_treat_het ){
             het.treatmentSeekingFactor = 0.2;
             het.availabilityFactor = 1.8;
-            if( util::random::bernoulli(0.5) ){
+            if( util::global_RNG.bernoulli(0.5) ){
                 het.treatmentSeekingFactor = 1.8;
                 het.availabilityFactor = 0.2;
             }
         }else if( opt_comorb_treat_het ){
-            if( util::random::bernoulli(0.5) ){
+            if( util::global_RNG.bernoulli(0.5) ){
                 het.comorbidityFactor = 1.8;
                 het.treatmentSeekingFactor = 0.2;
             }else{
@@ -90,7 +90,7 @@ struct HumanHet {
         }else if( opt_comorb_trans_het ){
             het.availabilityFactor = 1.8;
             het.comorbidityFactor = 1.8;
-            if( util::random::bernoulli(0.5) ){
+            if( util::global_RNG.bernoulli(0.5) ){
                 het.availabilityFactor = 0.2;
                 het.comorbidityFactor = 0.2;
             }
@@ -98,7 +98,7 @@ struct HumanHet {
             het.availabilityFactor = 1.8;
             het.comorbidityFactor = 1.8;
             het.treatmentSeekingFactor = 0.2;
-            if( util::random::bernoulli(0.5) ){
+            if( util::global_RNG.bernoulli(0.5) ){
                 het.availabilityFactor = 0.2;
                 het.comorbidityFactor = 0.2;
                 het.treatmentSeekingFactor = 1.8;

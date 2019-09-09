@@ -187,7 +187,7 @@ void TriggeredDeployments::SubList::deploy( Host::Human& human,
     //TODO: why does the above contradict what we do? Is this due to a date being shifted later?
     SimTime age = human.age(sim::nowOrTs1());
     if( age >= minAge && age < maxAge ){
-        if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
+        if( coverage >= 1.0 || util::global_RNG.bernoulli( coverage ) ){
             HumanIntervention::deploy( human, method, vaccLimits );
         }
     }

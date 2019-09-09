@@ -107,7 +107,7 @@ Pathogenesis::StatePair PathogenesisModel::determineState(Host::Human& human,
     StatePair result;
     //TODO(performance): would using a single RNG sample and manipulating probabilities be faster?
     //Decide whether a clinical episode occurs and if so, which type
-    if( random::bernoulli( pMalariaFever ) ){
+    if( global_RNG.bernoulli( pMalariaFever ) ){
         const double prSevereEpisode = timeStepMaxDensity / (timeStepMaxDensity + pg_severeMalThreshold);
         const double comorb_factor = _comorbidityFactor / (1.0 + ageYears * pg_inv_critAgeComorb);
         const double pCoinfection = pg_comorbIntercept * comorb_factor;
@@ -116,10 +116,10 @@ Pathogenesis::StatePair PathogenesisModel::determineState(Host::Human& human,
         const double exSevere = prSevereEpisode + (1.0 - prSevereEpisode) * pCoinfection;
         mon::reportStatMHF( mon::MHF_EXPECTED_SEVERE, human, exSevere );
         
-        if( random::bernoulli( prSevereEpisode ) )
+        if( global_RNG.bernoulli( prSevereEpisode ) )
             result.state = STATE_SEVERE;
         else {
-            if( random::bernoulli( pCoinfection ) )
+            if( global_RNG.bernoulli( pCoinfection ) )
                 result.state = STATE_COINFECTION;
             else
                 result.state = STATE_MALARIA;
@@ -136,7 +136,7 @@ Pathogenesis::StatePair PathogenesisModel::determineState(Host::Human& human,
         // except that (a) it affects random numbers, and (b) it affects
         // evaluation of uncomplicated cases with the 5-day HS when
         // indirectMortBugfix is not enabled.
-        if( random::bernoulli( indirectRisk ) )
+        if( global_RNG.bernoulli( indirectRisk ) )
             result.indirectMortality = true;        
     }else{
         result.state = sampleNMF( ageYears );
@@ -147,7 +147,7 @@ Pathogenesis::StatePair PathogenesisModel::determineState(Host::Human& human,
 Pathogenesis::State PathogenesisModel::sampleNMF( double ageYears ){
     if ( pg_NMF_incidence.isSet() ) {
         double pNMF = pg_NMF_incidence.eval( ageYears );
-        if( random::bernoulli( pNMF ) )
+        if( global_RNG.bernoulli( pNMF ) )
             return Pathogenesis::STATE_NMF;
     }
     return Pathogenesis::NONE;

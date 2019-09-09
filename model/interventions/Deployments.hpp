@@ -208,7 +208,7 @@ public:
             SimTime age = iter->age(sim::now());
             if( age >= minAge && age < maxAge ){
                 if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
-                    if( util::random::bernoulli( coverage ) ){
+                    if( util::global_RNG.bernoulli( coverage ) ){
                         deployToHuman( *iter, mon::Deploy::TIMED );
                     }
                 }
@@ -275,7 +275,7 @@ public:
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
             cerr << "cum deployment: prop protected " << propProtected << "; additionalCoverage " << additionalCoverage << "; total " << total << endl;
             for(auto iter = unprotected.begin(); iter != unprotected.end(); ++iter) {
-                if( util::random::uniform_01() < additionalCoverage ){
+                if( util::global_RNG.uniform_01() < additionalCoverage ){
                     deployToHuman( **iter, mon::Deploy::TIMED );
                 }
             }
@@ -370,7 +370,7 @@ public:
                 ( subPop == ComponentId::wholePop() ||
                     (human.isInSubPop( subPop ) != complement)
                 ) &&
-                util::random::uniform_01() < coverage )     // RNG call should be last test
+                util::global_RNG.uniform_01() < coverage )     // RNG call should be last test
             {
                 deployToHuman( human, mon::Deploy::CTS );
             }

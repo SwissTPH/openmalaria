@@ -39,13 +39,13 @@ class MolineauxInfectionSuite : public CxxTest::TestSuite
 {
 public:
     void setUp () {
-        util::random::seed( 1095 );     // make sure other tests don't influence our random numbers
+        util::global_RNG = util::RNG( 1095 );     // make sure other tests don't influence our random numbers
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();
         // test should call molInit( ... )
     }
     void tearDown () {
-        util::random::seed(0);  // make sure nothing else uses this seed/reports
+        util::global_RNG = util::RNG(0);  // make sure nothing else uses this seed/reports
     }
     
     static void readVector(std::vector<double>& vec, const char* file){

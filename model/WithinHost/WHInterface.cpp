@@ -27,7 +27,6 @@
 #include "WithinHost/Infection/MolineauxInfection.h"
 #include "WithinHost/Infection/PennyInfection.h"
 #include "WithinHost/Treatments.h"
-#include "util/random.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
 #include "schema/scenario.h"

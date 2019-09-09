@@ -197,7 +197,7 @@ namespace OM { namespace util {
         
         /** Sample a value. */
         inline double sample() const{
-            return random::weibull( scale, shape );
+            return global_RNG.weibull( scale, shape );
         }
         
     private:

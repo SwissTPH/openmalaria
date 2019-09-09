@@ -41,9 +41,6 @@
 #include "util/StreamValidator.h"
 #include "Global.h"
 
-#include <boost/random/uniform_01.hpp>
-#include <pcg_random.hpp>
-
 #ifdef OM_RANDOM_USE_BOOST_DIST
 #include <boost/random/normal_distribution.hpp>
 #include <boost/random/lognormal_distribution.hpp>
@@ -56,7 +53,6 @@
 
 #if !defined OM_RANDOM_USE_BOOST_DIST
 #include <gsl/gsl_cdf.h>
-#include <gsl/gsl_rng.h>
 #include <gsl/gsl_randist.h>
 #endif
 
@@ -69,59 +65,47 @@
 
 namespace OM { namespace util {
 
-    // I would prefer to use pcg64, but MSVC mysteriously fails
-    static pcg32 generator;
-    
-#   if !defined OM_RANDOM_USE_BOOST_DIST
-    long unsigned int boost_rng_get (void*) {
-	BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
-	long unsigned int val = static_cast<long unsigned int> (generator ());
-	streamValidate( val );
-	return val;
-    }
-    double boost_rng_get_double_01 (void*) {
-        boost::random::uniform_01<pcg32&> rng_uniform01 (generator);
-	return rng_uniform01 ();
-    }
-    
-    static const gsl_rng_type boost_mt_type = {
-	"boost_mt19937",		// name
-	generator.max(),	// max value
-	generator.min(),	// min value
-	0,					// size of state; not used here
-	nullptr,				// re-seed function; don't use
-	&boost_rng_get,
-	&boost_rng_get_double_01
-    };
-#   endif
+RNG global_RNG;
 
-#if !defined OM_RANDOM_USE_BOOST_DIST
-// This should be created and deleted automatically, taking care of
-// allocating and freeing the generator.
-struct generator_factory {
-    gsl_rng * gsl_generator;
-    
-    generator_factory () {
-	// In this case, I construct a wrapper around boost's generator. The reason for this is
-	// that it allows use of distributions from both boost and GSL.
-	gsl_generator = new gsl_rng;
-	gsl_generator->type = &boost_mt_type;
-	gsl_generator->state = nullptr;	// state is stored as static variables
-    }
-    ~generator_factory () {
-	delete gsl_generator;
-    }
-} rng;
-# endif
-
-// -----  set-up, tear-down and checkpointing  -----
-
-void random::seed (uint32_t seed) {
-//     util::streamValidate(seed);
-    generator.seed (seed);
+// Support functions
+long unsigned int sample_ulong (void *ptr) {
+    pcg32 *rng = reinterpret_cast<pcg32*>(ptr);
+    BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
+    return static_cast<long unsigned int> ((*rng)());
+}
+double sample_double01 (void *ptr) {
+    pcg32 *rng = reinterpret_cast<pcg32*>(ptr);
+    boost::random::uniform_01<pcg32&> dist (*rng);
+    return dist ();
 }
 
-void random::checkpoint (istream& stream, int seedFileNumber) {
+gsl_rng_type make_gsl_rng_type(pcg32& rng) {
+    return {
+        "PCG32",			// name
+        rng.max(),		// max value
+        rng.min(),		// min value
+        0,				// size of state; not used here
+        nullptr,			// re-seed function; don't use
+        &sample_ulong,
+        &sample_double01
+    };
+}
+
+
+RNG::RNG() {
+    m_gsl_type = make_gsl_rng_type(m_rng);
+    m_gsl_gen.type = &m_gsl_type;
+    m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
+}
+
+RNG::RNG(uint32_t seed) {
+    m_rng.seed(seed);
+    m_gsl_type = make_gsl_rng_type(m_rng);
+    m_gsl_gen.type = &m_gsl_type;
+    m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
+}
+
+RNG::RNG(istream& stream) {
     // Don't use OM::util::checkpoint function for loading a stream; checkpoint::validateListSize uses too small a number.
     string str;
     size_t len;
@@ -131,59 +115,71 @@ void random::checkpoint (istream& stream, int seedFileNumber) {
     if (!stream || stream.gcount() != streamsize(len))
 	throw checkpoint_error ("stream read error string");
     istringstream ss (str);
-    ss >> generator;
+    ss >> m_rng;
+    
+    m_gsl_type = make_gsl_rng_type(m_rng);
+    m_gsl_gen.type = &m_gsl_type;
+    m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
 }
 
-void random::checkpoint (ostream& stream, int seedFileNumber) {
+RNG::RNG(RNG&& other) {
+    m_rng = other.m_rng;
+    m_gsl_type = other.m_gsl_type;
+    // The following point into instance of this RNG:
+    m_gsl_gen.type = &m_gsl_type;
+    m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
+}
+void RNG::operator=(RNG&& other) {
+    m_rng = other.m_rng;
+    m_gsl_type = other.m_gsl_type;
+    // The following point into instance of this RNG:
+    m_gsl_gen.type = &m_gsl_type;
+    m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
+}
+
+void RNG::checkpoint (ostream& stream) {
     ostringstream ss;
-    ss << generator;
+    ss << m_rng;
     ss.str() & stream;
 }
 
 
 // -----  random number generation  -----
 
-double random::uniform_01 () {
-    boost::random::uniform_01<pcg32&> rng_uniform01 (generator);
-    double result = rng_uniform01 ();
-//     util::streamValidate(result);
-    return result;
-}
-
-double random::gauss (double mean, double std){
+double RNG::gauss (double mean, double std){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::normal_distribution<> dist (mean, std);
-    double result = dist(generator);
+    double result = dist(m_rng);
 # else
-    double result = gsl_ran_gaussian(rng.gsl_generator,std)+mean;
+    double result = gsl_ran_gaussian(&m_gsl_gen,std)+mean;
 # endif
 //     util::streamValidate(result);
     return result;
 }
 
-double random::gamma (double a, double b){
+double RNG::gamma (double a, double b){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::gamma_distribution<> dist (a, b);
-    double result = dist(generator);
+    double result = dist(m_rng);
 # else
-    double result = gsl_ran_gamma(rng.gsl_generator, a, b);
+    double result = gsl_ran_gamma(&m_gsl_gen, a, b);
 # endif
 //     util::streamValidate(result);
     return result;
 }
 
-double random::log_normal (double meanlog, double stdlog){
+double RNG::log_normal (double meanlog, double stdlog){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::lognormal_distribution<> dist (meanlog, stdlog);
-    double result = dist (generator);
+    double result = dist (m_rng);
 # else
-    double result = gsl_ran_lognormal (rng.gsl_generator, meanlog, stdlog);
+    double result = gsl_ran_lognormal (&m_gsl_gen, meanlog, stdlog);
 # endif
 //     util::streamValidate(result);
     return result;
 }
 
-double random::max_multi_log_normal (double start, int n, double meanlog, double stdlog){
+double RNG::max_multi_log_normal (double start, int n, double meanlog, double stdlog){
     double result = start;
 # ifdef OM_RANDOM_USE_BOOST_DIST
     // We don't have a CDF available, so take log-normal samples
@@ -199,7 +195,7 @@ double random::max_multi_log_normal (double start, int n, double meanlog, double
     //              = P(X1 ≤ x) P(X2 ≤ x) .. P(Xn ≤ x)
     //              = F_X(x) ^ n
     // Thus for u = F_Mn(x) = F_X(x) ^ n, u^(1/n) = F_X(x).
-    double normp = pow( random::uniform_01(), 1.0 / n );
+    double normp = pow( uniform_01(), 1.0 / n );
     double zval = gsl_cdf_ugaussian_Pinv (normp);
     double multi_sample = exp(meanlog + stdlog * zval);
     result = std::max(result, multi_sample);
@@ -208,62 +204,51 @@ double random::max_multi_log_normal (double start, int n, double meanlog, double
     return result;
 }
 
-double random::beta (double a, double b){
+double RNG::beta (double a, double b){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::beta_distribution<> dist (a, b);
-    double result = dist(generator);
+    double result = dist(m_rng);
 # else
-    double result = gsl_ran_beta (rng.gsl_generator,a,b);
+    double result = gsl_ran_beta (&m_gsl_gen,a,b);
 # endif
 //     util::streamValidate(result);
     return result;
 }
-double random::betaWithMean (double m, double b){
-    //TODO(performance): could do this calculation externally, and feed in a,b instead of mean,b
-    double a = m * b / (1.0 - m);
-//     util::streamValidate(a);
-    return beta(a,b);
-}
 
-int random::poisson(double lambda){
+int RNG::poisson(double lambda){
     if( !(boost::math::isfinite)(lambda) ){
 	//This would lead to an inifinite loop
 	throw TRACED_EXCEPTION( "lambda is inf", Error::InfLambda );
     }
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::poisson_distribution<> dist (lambda);
-    int result = dist(generator);
+    int result = dist(m_rng);
 # else
-    int result = gsl_ran_poisson (rng.gsl_generator, lambda);
+    int result = gsl_ran_poisson (&m_gsl_gen, lambda);
 # endif
 //     util::streamValidate(result);
     return result;
 }
 
-bool random::bernoulli(double prob){
+bool RNG::bernoulli(double prob){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::bernoulli_distribution<> dist (prob);
-    bool result = dist(generator);
+    bool result = dist(m_rng);
 # else
     assert( (boost::math::isfinite)(prob) );
     // return true iff our variate is less than the probability
-    bool result =random::uniform_01() < prob;
+    bool result = uniform_01() < prob;
 # endif
 //     util::streamValidate(result);
     return result;
 }
 
-int random::uniform(int n){
-    assert( (boost::math::isfinite)(n) );
-    return static_cast<int>( random::uniform_01() * n );
-}
-
-double random::weibull(double lambda, double k){
+double RNG::weibull(double lambda, double k){
 # ifdef OM_RANDOM_USE_BOOST_DIST
     boost::random::weibull_distribution<> dist (k, lambda);
-    return dist(generator);
+    return dist(m_rng);
 # else
-    return gsl_ran_weibull( rng.gsl_generator, lambda, k );
+    return gsl_ran_weibull( &m_gsl_gen, lambda, k );
 # endif
 }
 

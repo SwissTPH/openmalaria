@@ -74,7 +74,7 @@ DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep lastSPdose) :
 {
     // proteome_ID is initialized to 0xFFFFFFFF
     
-    double rndSample=(random::uniform_01());
+    double rndSample=(global_RNG.uniform_01());
     double lowerBound = 0.0;
     //This Loop assigns the infection a genotype according to its frequency
     for(size_t genotypeCounter=0; genotypeCounter < genotypes.size(); genotypeCounter++){
@@ -108,7 +108,7 @@ bool DescriptiveIPTInfection::eventSPClears (TimeStep _lastSPDose) {
     // random chance of clearance (in original models, the probability is one
     // for all genotypes with prophylactic period greater than a single
     // timestep)
-    return random::bernoulli( DescriptiveIPTInfection::genotypes[proteome_ID].ACR );
+    return global_RNG.bernoulli( DescriptiveIPTInfection::genotypes[proteome_ID].ACR );
 }
 
 double DescriptiveIPTInfection::asexualAttenuation () {

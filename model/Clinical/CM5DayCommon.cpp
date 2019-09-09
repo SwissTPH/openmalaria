@@ -146,7 +146,7 @@ void CM5DayCommon::severeMalaria (
     const double exSeq = (p2 * (p3 * (1 - p4) + (1 - p3) * (1 - p5b)) + (1 - p2) * (1 - p5a)) * p6;
     mon::reportStatMHF( mon::MHF_EXPECTED_SEQUELAE, human, exSeq );
 
-    double prandom = random::uniform_01();
+    double prandom = util::global_RNG.uniform_01();
     
     //NOTE: we do not model diagnostics in this case
     if( prandom >= q[2] ){      // treated in hospital

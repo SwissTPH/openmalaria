@@ -21,7 +21,6 @@
 #include "Global.h"
 #include "interventions/IRS.h"
 #include "Host/Human.h"
-#include "util/random.h"
 #include "util/errors.h"
 #include "util/SpeciesIndexChecker.h"
 
@@ -29,8 +28,6 @@
 #include <cmath>
 
 namespace OM { namespace interventions {
-    using util::random::poisson;
-
 vector<IRSComponent*> IRSComponent::componentsByIndex;
 
 IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,

@@ -22,7 +22,6 @@
 #include "WithinHost/Genotypes.h"
 #include "WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
-#include "util/random.h"
 #include "util/CommandLine.h"
 #include "PkPd/Drug/LSTMDrugOneComp.h"
 #include "PkPd/Drug/LSTMDrugThreeComp.h"

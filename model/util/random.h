@@ -18,28 +18,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#ifndef OM_util_random
+#define OM_util_random
+
 #include "Global.h"
 #include <set>
+#include <pcg_random.hpp>
+#include <boost/random/uniform_01.hpp>
+#include <gsl/gsl_rng.h>
 
 namespace OM { namespace util {
 
-/** Random number generator.
- *
- * This interface should be independant of implementation. */
-namespace random {
-    ///@brief Setup & cleanup; checkpointing
+/// Our random number generator.
+struct RNG {
+    ///@brief Construction and checkpointing
     //@{
-    /// Reseed the random-number-generator with seed (usually InputData.getISeed()).
-    void seed (uint32_t seed);
+    /// Default constructor
+    RNG();
+    /// Construction, given a seed
+    explicit RNG(uint32_t seed);
+    /// Construction from checkpoint
+    explicit RNG(istream& stream);
     
-    void checkpoint (istream& stream, int seedFileNumber);
-    void checkpoint (ostream& stream, int seedFileNumber);
+    // Disable copying
+    RNG(const RNG&) = delete;
+    RNG& operator=(const RNG&) = delete;
+  
+    /// Allow moving, with explicit functions
+    RNG(RNG&& other);
+    void operator=(RNG&& other);
+    
+    /// Checkpointing
+    void checkpoint (ostream& stream);
     //@}
     
     ///@brief Random number distributions
     //@{
     /** Generate a random number in the range [0,1). */
-    double uniform_01 ();
+    inline double uniform_01 () {
+        boost::random::uniform_01<pcg32&> rng_uniform01 (m_rng);
+        return rng_uniform01 ();
+    }
     
     /** This function returns a Gaussian random variate, with mean mean and
      * standard deviation std. The sampled value x ~ N(mean, std^2) . */
@@ -73,7 +92,11 @@ namespace random {
     
     /** This function wraps beta(), setting b=b and a such that m is the mean
      * of the distribution. */
-    double betaWithMean(double m, double b);
+    inline double betaWithMean(double m, double b) {
+        //TODO(performance): could do this calculation externally, and feed in a,b instead of mean,b
+        double a = m * b / (1.0 - m);
+        return beta(a,b);
+    }
     
     /** This function returns a random integer from the Poisson distribution with mean lambda. */
     int poisson(double lambda);
@@ -84,7 +107,10 @@ namespace random {
     
     /** This function returns an integer from 0 to 1-n, where every value has
      * equal probability of being sampled. */
-    int uniform (int n);
+    inline int uniform (int n) {
+        assert( (boost::math::isfinite)(n) );
+        return static_cast<int>( uniform_01() * n );
+    }
     
     /**
      * Return a variate sampled from the Weibull distribution.
@@ -96,5 +122,18 @@ namespace random {
      */
     double weibull( double lambda, double k );
     //@}
-}
+    
+private:
+    // I would prefer to use pcg64, but MSVC mysteriously fails
+    pcg32 m_rng;
+    
+    // Hooks for GSL distributions
+    gsl_rng_type m_gsl_type;
+    gsl_rng m_gsl_gen;
+};
+
+/// The global RNG
+extern RNG global_RNG;
+
 } }
+#endif

@@ -20,7 +20,6 @@
 
 #include "WithinHost/Infection/DummyInfection.h"
 #include "WithinHost/CommonWithinHost.h"
-#include "util/random.h"
 #include "util/ModelOptions.h"
 
 #include <algorithm>

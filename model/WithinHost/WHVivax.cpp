@@ -126,7 +126,7 @@ void initNHypnozoites(){
     }
 }
 int sampleNHypnozoites(){
-    double x = util::random::uniform_01();
+    double x = util::global_RNG.uniform_01();
     // upper_bound finds the first key (cumulative probability) greater than x:
     auto it = nHypnozoitesProbMap.upper_bound( x );
     assert( it != nHypnozoitesProbMap.end() );  // i.e. that we did find a real key
@@ -137,7 +137,7 @@ int sampleNHypnozoites(){
 SimTime sampleReleaseDelay(){
     bool isFirstRelease = true;
     if( pSecondRelease == 1.0 ||
-        (pSecondRelease > 0.0 && random::bernoulli(pSecondRelease)) ){
+        (pSecondRelease > 0.0 && global_RNG.bernoulli(pSecondRelease)) ){
         isFirstRelease = false;
     }
     
@@ -270,7 +270,7 @@ void VivaxBrood::treatmentLS(){
     vector<SimTime> survivingZoites;
     survivingZoites.reserve( releaseDates.size() );   // maximum size we need
     for( auto it = releaseDates.begin(); it != releaseDates.end(); ++it ){
-        if( !random::bernoulli( pClearEachHypnozoite ) ){
+        if( !global_RNG.bernoulli( pClearEachHypnozoite ) ){
             survivingZoites.push_back( *it );    // copy            
         }
     }
@@ -296,7 +296,7 @@ WHVivax::WHVivax( double comorbidityFactor ) :
         cout << "New host" << endl;
     }
 #endif
-    noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
+    noPQ = ( pHetNoPQ > 0.0 && global_RNG.bernoulli(pHetNoPQ) );
 }
 
 WHVivax::~WHVivax(){
@@ -379,19 +379,19 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             if( result.newPrimaryBS ){
                 // Blood stage is primary. oldCumInf wasn't updated yet.
                 double pPrimaryInfEvent = pPrimaryA * pPrimaryB / (pPrimaryB+oldCumInf);
-                clinicalEvent = random::bernoulli( pPrimaryInfEvent );
+                clinicalEvent = global_RNG.bernoulli( pPrimaryInfEvent );
                 inf->setHadEvent( clinicalEvent );
             } else if ( result.newRelapseBS ){
                 // Blood stage is a relapse. oldCumInf wasn't updated yet.
                 double pFirstRelapseEvent = oldpEvent * (pRelapseOneA * pRelapseOneB / (pRelapseOneB + (oldCumInf-1)));
-                clinicalEvent = random::bernoulli( pFirstRelapseEvent );
+                clinicalEvent = global_RNG.bernoulli( pFirstRelapseEvent );
                 inf->setHadRelapse( clinicalEvent );
             }else{
                 // Subtract 1 from oldCumInf to not count the current brood in
                 // the number of cumulative primary infections.
                 if( inf->hasHadRelapse() ){
                     double pSecondRelapseEvent = oldpRelapseEvent * (pRelapseTwoA * pRelapseTwoB / (pRelapseTwoB + (oldCumInf-1)));
-                    clinicalEvent = random::bernoulli( pSecondRelapseEvent );
+                    clinicalEvent = global_RNG.bernoulli( pSecondRelapseEvent );
                 }else{
                     // If the primary infection did not cause an event, there
                     // is 0 chance of a secondary causing an event in our model.
@@ -401,7 +401,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             
             if( clinicalEvent ){
                 pSevere = pSevere + (1.0 - pSevere) * pEventIsSevere;
-                if( random::bernoulli( pEventIsSevere ) )
+                if( global_RNG.bernoulli( pEventIsSevere ) )
                     morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_SEVERE );
                 else
                     morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_MALARIA );
@@ -454,8 +454,8 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
     // PQ clears liver stages. We don't worry about the effect of PQ on
     // gametocytes, because these are always cleared by blood-stage drugs with
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
-    if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && random::bernoulli(pReceivePQ)){
-        if( random::bernoulli(effectivenessPQ) ){
+    if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && global_RNG.bernoulli(pReceivePQ)){
+        if( global_RNG.bernoulli(effectivenessPQ) ){
             for( auto it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
@@ -475,7 +475,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
             "stages is incompatible with case-management pUseUncomplicated "
             "(liverStageDrug) option; it is suggested to use the former over the latter");
         }
-        if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || random::bernoulli(effectivenessPQ)) ){
+        if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || global_RNG.bernoulli(effectivenessPQ)) ){
             if( timeLiver >= SimTime::zero() ){
                 treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
             }else{

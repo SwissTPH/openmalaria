@@ -33,13 +33,13 @@ double NormalSample::asLognormal( double mu, double sigma )const{
 }
 
 NormalSample NormalSample::generate() {
-    return NormalSample( random::gauss(0.0, 1.0) );
+    return NormalSample( global_RNG.gauss(0.0, 1.0) );
 }
 
 NormalSample NormalSample::generate_correlated(NormalSample base, double correlation, double factor) {
     if( correlation == 1.0 ) { return base; }
     
-    double e = random::gauss(0.0, factor);
+    double e = global_RNG.gauss(0.0, factor);
     return NormalSample( base.x * correlation + e );
 }
 
@@ -69,7 +69,7 @@ double NormalSampler::sample() const{
     if( sigma == 0.0 ){
         return mu;
     }
-    return random::gauss( mu, sigma );
+    return global_RNG.gauss( mu, sigma );
 }
 
 void LognormalSampler::setParams( const scnXml::SampledValueLN& elt ){
@@ -133,7 +133,7 @@ double LognormalSampler::sample() const{
     if( sigma == 0.0 ){
         return exp( mu );
     } else {
-        return random::log_normal( mu, sigma );
+        return global_RNG.log_normal( mu, sigma );
     }
 }
 
@@ -157,7 +157,7 @@ double BetaSampler::sample() const{
         return a;
     }else{
         assert( a>0.0 && b>0.0 );
-        return random::beta( a, b );
+        return global_RNG.beta( a, b );
     }
 }
 

@@ -127,7 +127,7 @@ SimTime DescriptiveInfection::infectionDuration() {
     // Forgive the excess precision; it just avoids having to update all expected results
     double dur_mean = 5.1300001144409179688;
     double dur_sigma = 0.80000001192092895508;
-    double dur=random::log_normal(dur_mean, dur_sigma);
+    double dur=global_RNG.log_normal(dur_mean, dur_sigma);
     
     //TODO:
     // Model did say infection is cleared on day dur+1 converted to a time-step
@@ -177,10 +177,10 @@ void DescriptiveInfection::determineDensities(
         if (stdlog > 0.0000001) {
             // Calculate the expected density on the day of sampling:
             double meanlog = log(m_density) - stdlog*stdlog / 2.0;
-            m_density = random::log_normal(meanlog, stdlog);
+            m_density = global_RNG.log_normal(meanlog, stdlog);
             // Calculate additional samples for T-1 days (T=days per step):
             if( true /*SimTime::oneTS().inDays() > 1, always true for this model*/ ){
-                timeStepMaxDensity = random::max_multi_log_normal (m_density,
+                timeStepMaxDensity = global_RNG.max_multi_log_normal (m_density,
                         SimTime::oneTS().inDays() - 1, meanlog, stdlog);
             } else {
                 timeStepMaxDensity = m_density;

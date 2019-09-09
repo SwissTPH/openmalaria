@@ -124,7 +124,7 @@ public:
     
     SimTime sampleAgeOfDecay () const{
         // Note: rounds to nearest. Object may decay instantly or at time L.
-        return SimTime::roundToTSFromDays(random::uniform_01() / invL);
+        return SimTime::roundToTSFromDays(global_RNG.uniform_01() / invL);
     }
     
 private:
@@ -148,7 +148,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return SimTime::roundToTSFromDays( -log(random::uniform_01()) / invLambda );
+        return SimTime::roundToTSFromDays( -log(global_RNG.uniform_01()) / invLambda );
     }
     
 private:
@@ -171,7 +171,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return SimTime::roundToTSFromDays( pow( -log(random::uniform_01()), 1.0/k ) / constOverLambda );
+        return SimTime::roundToTSFromDays( pow( -log(global_RNG.uniform_01()), 1.0/k ) / constOverLambda );
     }
     
 private:
@@ -195,7 +195,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return SimTime::roundToTSFromDays( pow( 1.0 / random::uniform_01() - 1.0, 1.0/k ) / invL );
+        return SimTime::roundToTSFromDays( pow( 1.0 / global_RNG.uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
 private:
@@ -222,7 +222,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay () const{
-        return SimTime::roundToTSFromDays( sqrt( 1.0 - k / (k - log( random::uniform_01() )) ) / invL );
+        return SimTime::roundToTSFromDays( sqrt( 1.0 - k / (k - log( global_RNG.uniform_01() )) ) / invL );
     }
     
 private:

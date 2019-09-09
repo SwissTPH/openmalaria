@@ -86,7 +86,7 @@ void ImportedInfections::import( Population& population ){
     double rateNow = rate[lastIndex].value;
     if( rateNow > 0.0 ){
         for(Population::Iter it = population.begin(); it!=population.end(); ++it){
-            if(util::random::bernoulli( rateNow )){
+            if(util::global_RNG.bernoulli( rateNow )){
                 it->addInfection();
             }
         }

@@ -131,7 +131,7 @@ WHFalciparum::WHFalciparum( double comorbidityFactor ):
     // the individual samples change. In any case the overhead is negligible.
     //FIXME: Should this be allowed to be greater than 1?
     // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
-    _innateImmSurvFact = exp(-random::gauss(0.0, sigma_i));
+    _innateImmSurvFact = exp(-global_RNG.gauss(0.0, sigma_i));
     
     m_y_lag.assign(y_lag_len, Genotypes::N(), 0.0);
 }

@@ -20,7 +20,6 @@
 
 #include "WithinHost/Treatments.h"
 #include "util/errors.h"
-#include "util/random.h"
 #include "util/timeConversions.h"
 #include "schema/healthSystem.h"
 

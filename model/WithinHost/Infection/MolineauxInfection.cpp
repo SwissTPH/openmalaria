@@ -209,11 +209,11 @@ MolineauxInfection::MolineauxInfection(uint32_t genotype):
         // Molineaux paper, equation 11
         if( multi_factor_gamma ){
             do{
-                mi[i] = static_cast<float>(random::gamma(shape_m,scale_m));
+                mi[i] = static_cast<float>(global_RNG.gamma(shape_m,scale_m));
             }while( mi[i]<1.0 );
         }else{
             do{
-                mi[i] = static_cast<float>(random::gauss(mu_m, sigma_m));
+                mi[i] = static_cast<float>(global_RNG.gauss(mu_m, sigma_m));
             }while( mi[i]<1.0 );
         }
     }
@@ -225,25 +225,25 @@ MolineauxInfection::MolineauxInfection(uint32_t genotype):
     Sm_summation = 0.0;
     
     if( pairwise_P_star_sample ){
-        int patient = util::random::uniform( 35 );
+        int patient = util::global_RNG.uniform( 35 );
         Pc_star = static_cast<float>( k_c * case_specific_data[2 * patient + 1] );
         Pm_star = static_cast<float>( k_m * case_specific_data[2 * patient + 0] );
     }else{
         // Sampling of the first local maxima:
         if( first_local_maximum_gamma ){
-            Pc_star = static_cast<float>( k_c * pow(10.0, random::gamma(
+            Pc_star = static_cast<float>( k_c * pow(10.0, global_RNG.gamma(
                 mean_shape_first_local_max, sd_scale_first_local_max)) );
         } else {
-            Pc_star = static_cast<float>( k_c * pow(10.0, random::gauss(
+            Pc_star = static_cast<float>( k_c * pow(10.0, global_RNG.gauss(
                 mean_shape_first_local_max, sd_scale_first_local_max)) );
         }
         
         // Sampling of duration:
         if( mean_duration_gamma ) {
-            Pm_star = static_cast<float>( k_m * pow(10.0, random::gamma(
+            Pm_star = static_cast<float>( k_m * pow(10.0, global_RNG.gamma(
                 mean_shape_diff_pos_days,sd_scale_diff_pos_days)) );
         } else {
-            Pm_star = static_cast<float>( k_m * pow(10.0, random::gauss(
+            Pm_star = static_cast<float>( k_m * pow(10.0, global_RNG.gauss(
                 mean_shape_diff_pos_days,sd_scale_diff_pos_days)) );
         }
     }

@@ -89,7 +89,7 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     Parameters parameters( model.getParameters() );     // depends on nothing
     WithinHost::Genotypes::init( scenario );
     
-    util::random::seed( model.getParameters().getIseed() );
+    util::global_RNG = util::RNG( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
     
     // 2) elements depending on only elements initialised in (1):
@@ -288,7 +288,7 @@ void Simulator::writeCheckpoint(){
         name << CHECKPOINT << checkpointNum << ".gz";
         //Writing checkpoint:
         ogzstream out(name.str().c_str(), ios::out | ios::binary);
-        checkpoint (out, checkpointNum);
+        checkpoint (out);
         out.close();
     }
     
@@ -320,7 +320,7 @@ void Simulator::readCheckpoint() {
     //Note: gzstreams are considered "good" when file not open!
     if ( !( in.good() && in.rdbuf()->is_open() ) )
         throw util::checkpoint_error ("Unable to read file");
-    checkpoint (in, checkpointNum);
+    checkpoint (in);
     in.close();
   
     cerr << sim::now().inSteps() << "t loaded checkpoint" << endl;
@@ -329,7 +329,7 @@ void Simulator::readCheckpoint() {
 
 // ———  checkpointing: Simulation data  ———
 
-void Simulator::checkpoint (istream& stream, int checkpointNum) {
+void Simulator::checkpoint (istream& stream) {
     try {
         util::checkpoint::header (stream);
         util::CommandLine::staticCheckpoint (stream);
@@ -353,7 +353,7 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         // to be negative
         sim::s_t0 & stream;
         sim::s_t1 & stream;
-        util::random::checkpoint (stream, checkpointNum);
+        util::global_RNG = util::RNG(stream);
     } catch (const util::checkpoint_error& e) { // append " (pos X of Y bytes)"
         ostringstream pos;
         pos<<" (pos "<<stream.tellg()<<" of ";
@@ -372,7 +372,7 @@ void Simulator::checkpoint (istream& stream, int checkpointNum) {
         throw util::checkpoint_error ("stream read error");
 }
 
-void Simulator::checkpoint (ostream& stream, int checkpointNum) {
+void Simulator::checkpoint (ostream& stream) {
     util::checkpoint::header (stream);
     if (!stream.good())
         throw util::checkpoint_error ("Unable to write to file");
@@ -396,7 +396,7 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     
     sim::s_t0 & stream;
     sim::s_t1 & stream;
-    util::random::checkpoint (stream, checkpointNum);
+    util::global_RNG.checkpoint (stream);
     
     util::timer::stopCheckpoint ();
     if (stream.fail())
