@@ -117,7 +117,7 @@ void LognormalSampler::setMeanCV( double mean, double CV ){
     // X ~ lognormal(μ, σ)
     // E(X) = exp(μ + σ² / 2)
     // Var(X) = exp(σ² + 2μ)(exp(σ²) - 1)
-    // Var = CV * mean
+    // Var = (CV * mean)²
     
     const double a = 1 + CV * CV;
     mu = log( mean / sqrt(a) );
