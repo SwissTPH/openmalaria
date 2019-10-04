@@ -19,7 +19,7 @@
 # visit http://www.pcg-random.org/.
 #
 
-TARGETS           = pcg-demo codebook cppref-sample make-partytrick
+TARGETS           = pcg-demo codebook cppref-sample
 BINARYOUT_TARGETS = spew use-partytrick
 
 CPPFLAGS += -I../include 
@@ -36,8 +36,6 @@ clean:
 codebook.o: codebook.cpp ../include/pcg_random.hpp \
   ../include/pcg_extras.hpp ../include/pcg_uint128.hpp
 cppref-sample.o: cppref-sample.cpp ../include/pcg_random.hpp \
-  ../include/pcg_extras.hpp ../include/pcg_uint128.hpp
-make-partytrick.o: make-partytrick.cpp ../include/pcg_random.hpp \
   ../include/pcg_extras.hpp ../include/pcg_uint128.hpp
 pcg-demo.o: pcg-demo.cpp ../include/pcg_random.hpp \
   ../include/pcg_extras.hpp ../include/pcg_uint128.hpp
