@@ -1,5 +1,6 @@
 // Source: https://gist.github.com/orlp/32f5d1b631ab092608b1
 // Modified: keysetup length increased to 10 words.
+// Modified: seed function uses unique values for keysetup[8] and [9]
 /*
     Copyright (c) 2015 Orson Peters <orsonpeters@gmail.com>
     
@@ -78,7 +79,9 @@ inline void ChaCha<R>::seed(uint64_t seedval, uint64_t stream) {
     keysetup[4] = stream & 0xffffffffu;
     keysetup[5] = stream >> 32;
     keysetup[6] = keysetup[7] = 0xdeadbeef;      // Could use 128-bit stream.
-    keysetup[8] = keysetup[9] = 0xdeadbeef;      // Could use ...?
+    // Use an IV unique to this application
+    keysetup[8] = 0xac4fd2ff;
+    keysetup[9] = 0x1b48daba;
 }
 
 template<size_t R>

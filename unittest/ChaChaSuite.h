@@ -49,6 +49,30 @@ public:
     void tearDown () {
     }
     
+    void testChaCha8Unique () {
+        // We use an IV unique to this application:
+        // 0xac4fd2ff 0x1b48daba
+        
+        uint32_t vector[] = {
+            0x3cd0863f, 0x13603b22, 0x124e9e52, 0xd7d5ca9f,
+            0xea45cb0e, 0xa830d84f, 0xd015250, 0x5b09e105,
+            0x252863ed, 0xa0c42af4, 0x75cc18e3, 0x74e279c4,
+            0x36afc072, 0xf7436c17, 0x120694e2, 0x28ba3b58,
+            0x2acfb3bd, 0x4135de96, 0x50ce79c1, 0xaa90727d,
+            0x387cc61c, 0x43c4de0f, 0xc625a4e7, 0x358e10e6,
+            0xc5db18a5, 0xf4a70f66, 0xd5bb6965, 0x861a86b1,
+            0x3f874f08, 0x64f485c0, 0xc878622d, 0xa0247a5d
+        };
+        
+        // Seed and stream 0, custom IV:
+        ChaCha<8> rng(0, 0);
+        
+        for (uint32_t n = 0; n < 32; n += 1) {
+            uint32_t x = rng();
+            TS_ASSERT_EQUALS(x, vector[n]);
+        }
+    }
+    
     void testChaCha8 () {
         uint8_t vector[] = {
             0x3e, 0x00, 0xef, 0x2f, 0x89, 0x5f, 0x40, 0xd6,
