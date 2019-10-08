@@ -1,6 +1,13 @@
 // Source: https://gist.github.com/orlp/32f5d1b631ab092608b1
-// Modified: keysetup length increased to 10 words.
-// Modified: seed function uses unique values for keysetup[8] and [9]
+/*
+ * Modified:
+ *
+ * - keysetup length increased to 10 words
+ * - seed function uses unique values for keysetup[8] and [9]
+ * - added binary_checkpoint
+ * - added include guard
+ */
+
 /*
     Copyright (c) 2015 Orson Peters <orsonpeters@gmail.com>
     
@@ -19,6 +26,9 @@
     
     3. This notice may not be removed or altered from any source distribution.
 */
+
+#ifndef OPETERS_CHACHA
+#define OPETERS_CHACHA
 
 #include <cstdint>
 #include <limits>
@@ -45,6 +55,17 @@ public:
 
     template<typename CharT, typename Traits>
     friend std::basic_istream<CharT, Traits>& operator>>(std::basic_istream<CharT, Traits>& is, ChaCha<R>& rng);
+
+    // Incomplete checkpointing: assumes RNG was already seeded
+    void binary_checkpoint(ostream& stream) {
+        stream.write (reinterpret_cast<char*>(&ctr), sizeof(ctr));
+    }
+    void binary_checkpoint(istream& stream) {
+        stream.read (reinterpret_cast<char*>(&ctr), sizeof(ctr));
+        if (!stream || stream.gcount() != sizeof(ctr))
+            throw runtime_error ("pcg_random - binary_checkpoint: stream read error");
+        if ((ctr % 16) != 0) generate_block();
+    }
 
     static constexpr uint32_t min() { return std::numeric_limits<uint32_t>::min(); }
     static constexpr uint32_t max() { return std::numeric_limits<uint32_t>::max(); }
@@ -299,3 +320,5 @@ inline std::basic_istream<CharT, Traits>& operator>>(std::basic_istream<CharT, T
 
     return is;
 }
+
+#endif

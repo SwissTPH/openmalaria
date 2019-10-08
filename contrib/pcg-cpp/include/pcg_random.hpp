@@ -461,6 +461,7 @@ public:
                                      output_mixin1,output_previous1,
                                      stream_mixin_rhs, multiplier_mixin_rhs>&);
     
+    // Incomplete checkpointing: assumes RNG was already seeded
     void binary_checkpoint(ostream& stream) {
         stream.write (reinterpret_cast<char*>(&state_), sizeof(state_));
     }

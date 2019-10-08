@@ -45,5 +45,6 @@
 namespace OM { namespace util {
 
 RNG<pcg32> global_RNG;
+RNG<ChaCha<8>> master_RNG;
 
 } }

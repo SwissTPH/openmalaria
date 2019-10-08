@@ -41,11 +41,13 @@ public:
         UnittestUtil::Infection_init_latentP_and_NaN ();
         PennyInfection::init();
         util::global_RNG.seed( 1095 );
+        util::master_RNG.seed( 1095 );
         infection = new PennyInfection (0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
     void tearDown () {
         delete infection;
         util::global_RNG.seed(0);  // make sure nothing else uses this seed/reports
+        util::master_RNG.seed(0);  // make sure nothing else uses this seed/reports
     }
     
     void testThresholds(){

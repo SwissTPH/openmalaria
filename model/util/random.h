@@ -31,6 +31,7 @@
 #include <pcg_random.hpp>
 #include <boost/random/uniform_01.hpp>
 #include <gsl/gsl_rng.h>
+#include <chacha.h>
 
 #ifdef OM_RANDOM_USE_BOOST_DIST
 #include <boost/random/normal_distribution.hpp>
@@ -280,8 +281,11 @@ private:
 };
 
 /// The global RNG
+// TODO: replace with instances local to humans
 // I would prefer to use pcg64, but MSVC mysteriously fails
 extern RNG<pcg32> global_RNG;
+/// The master RNG, used only where no local RNG is available
+extern RNG<ChaCha<8>> master_RNG;
 
 } }
 #endif

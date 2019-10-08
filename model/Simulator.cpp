@@ -90,6 +90,7 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     WithinHost::Genotypes::init( scenario );
     
     util::global_RNG.seed( model.getParameters().getIseed() );
+    util::master_RNG.seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
     
     // 2) elements depending on only elements initialised in (1):
@@ -354,6 +355,7 @@ void Simulator::checkpoint (istream& stream) {
         sim::s_t0 & stream;
         sim::s_t1 & stream;
         util::global_RNG.checkpoint(stream);
+        util::master_RNG.checkpoint(stream);
     } catch (const util::checkpoint_error& e) { // append " (pos X of Y bytes)"
         ostringstream pos;
         pos<<" (pos "<<stream.tellg()<<" of ";
@@ -397,6 +399,7 @@ void Simulator::checkpoint (ostream& stream) {
     sim::s_t0 & stream;
     sim::s_t1 & stream;
     util::global_RNG.checkpoint (stream);
+    util::master_RNG.checkpoint(stream);
     
     util::timer::stopCheckpoint ();
     if (stream.fail())

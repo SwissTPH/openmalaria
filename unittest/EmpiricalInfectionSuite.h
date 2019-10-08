@@ -42,6 +42,7 @@ public:
         UnittestUtil::Infection_init_latentP_and_NaN ();
         EmpiricalInfection::init();
         util::global_RNG.seed(3978236241);	// seed is unimportant, but must be fixed
+        util::master_RNG.seed(3978236241);	// seed is unimportant, but must be fixed
         // pkpdID (1st value) isn't important since we're not using drug model here:
         infection = CommonWithinHost::createInfection( 0xFFFFFFFF );
         for( SimTime d = sim::ts1(), end = sim::ts1() + SimTime::fromDays(15); d < end; d += SimTime::oneDay() ){
@@ -53,6 +54,7 @@ public:
     void tearDown () {
         delete infection;
         util::global_RNG.seed(0);  // make sure nothing else uses this seed/reports
+        util::master_RNG.seed(0);  // make sure nothing else uses this seed/reports
     }
 
     void testNewInf () {
