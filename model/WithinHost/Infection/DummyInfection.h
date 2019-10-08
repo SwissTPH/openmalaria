@@ -26,7 +26,7 @@
 namespace OM { namespace WithinHost {
 
 //! Create a dummy infection (used directly by unit test).
-CommonInfection* createDummyInfection (uint32_t protID);
+CommonInfection* createDummyInfection (LocalRng& rng, uint32_t protID);
 
 //!  Models of infection.
 /*!
@@ -37,13 +37,13 @@ public:
     /// For checkpointing (don't use for anything else)
     DummyInfection (istream& stream);
     //! Constructor
-    DummyInfection (uint32_t protID);
+    DummyInfection (LocalRng& rng, uint32_t protID);
     
     virtual ~DummyInfection () {}
     
     static void init ();
     
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double );
+    virtual bool updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double );
 };
 
 } }

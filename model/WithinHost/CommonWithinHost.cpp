@@ -35,7 +35,7 @@ using namespace std;
 namespace OM {
 namespace WithinHost {
 
-CommonInfection* (* CommonWithinHost::createInfection) (uint32_t protID);
+CommonInfection* (* CommonWithinHost::createInfection) (LocalRng& rng, uint32_t protID);
 CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
 double hetMassMultStdDev = std::numeric_limits<double>::signaling_NaN();
@@ -64,8 +64,8 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
     PkPd::LSTMModel::init( scenario );
 }
 
-CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
-        WHFalciparum( comorbidityFactor )
+CommonWithinHost::CommonWithinHost( LocalRng& rng, double comorbidityFactor ) :
+        WHFalciparum( rng, comorbidityFactor )
 {
     assert( SimTime::oneTS() == SimTime::fromDays(1) || SimTime::oneTS() == SimTime::fromDays(5) );
     
@@ -119,14 +119,15 @@ void CommonWithinHost::clearImmunity() {
     m_cumulative_h = 0.0;
     m_cumulative_Y_lag = 0.0;
 }
-void CommonWithinHost::importInfection(){
+void CommonWithinHost::importInfection(LocalRng& rng){
     if( numInfs < MAX_INFECTIONS ){
         m_cumulative_h += 1;
         numInfs += 1;
         // This is a hook, used by interventions. The newly imported infections
         // should use initial frequencies to select genotypes.
         vector<double> weights( 0 );        // zero length: signal to use initial frequencies
-        infections.push_back(createInfection(Genotypes::sampleGenotype(weights)));
+        uint32_t genotype = Genotypes::sampleGenotype(rng, weights);
+        infections.push_back(createInfection(rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -134,7 +135,8 @@ void CommonWithinHost::importInfection(){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
+void CommonWithinHost::update(LocalRng& rng,
+        int nNewInfs, vector<double>& genotype_weights,
         double ageInYears, double bsvFactor)
 {
     // Note: adding infections at the beginning of the update instead of the end
@@ -143,7 +145,8 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(createInfection (Genotypes::sampleGenotype(genotype_weights)));
+        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
+        infections.push_back(createInfection (rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
     
@@ -174,7 +177,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
                 const double immFactor = immunitySurvivalFactor(ageInYears, (*inf)->cumulativeExposureJ());
                 const double survivalFactor = survivalFactor_part * immFactor * drugFactor;
                 // update, may result in termination of infection:
-                expires = (*inf)->update(survivalFactor, now, body_mass);
+                expires = (*inf)->update(rng, survivalFactor, now, body_mass);
             }
             
             if( expires ){

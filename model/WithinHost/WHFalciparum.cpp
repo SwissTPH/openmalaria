@@ -121,7 +121,7 @@ void WHFalciparum::setParams(double cumYStar, double cumHStar, double aM, double
 
 // -----  Non-static  -----
 
-WHFalciparum::WHFalciparum( double comorbidityFactor ):
+WHFalciparum::WHFalciparum( LocalRng& rng, double comorbidityFactor ):
     WHInterface(),
     m_cumulative_h(0.0), m_cumulative_Y(0.0), m_cumulative_Y_lag(0.0),
     totalDensity(0.0), hrp2Density(0.0), timeStepMaxDensity(0.0),
@@ -244,7 +244,7 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
                   mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
-bool WHFalciparum::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
+bool WHFalciparum::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     if( timeLiver != SimTime::zero() ){
         if( timeLiver < SimTime::zero() )
             clearInfections( Treatments::LIVER );

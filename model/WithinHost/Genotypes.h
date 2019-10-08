@@ -22,10 +22,13 @@
 #define Hmod_WH_Genotypes
 
 #include "Global.h"
+#include "util/random.h"
 #include <iostream>
 #include <set>
 
 namespace OM { namespace WithinHost {
+
+using util::LocalRng;
 
 /** Represents infection genotypes. */
 class Genotypes {
@@ -71,7 +74,7 @@ public:
      *  weights of each genotype for use in sampling. Total need not be one.
      *  Also, passing a zero-length vector is a signal to use initial
      *  frequencies in sampling. */
-    static uint32_t sampleGenotype( std::vector<double>& genotype_weights );
+    static uint32_t sampleGenotype( LocalRng& rng, std::vector<double>& genotype_weights );
     
     /** Get the number of genotypes. Functions like sampleGenotype use values
      * from 0 to one less than this. */

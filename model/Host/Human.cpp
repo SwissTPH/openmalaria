@@ -58,8 +58,9 @@ void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(SimTime dateOfBirth) :
+Human::Human(uint64_t seed, SimTime dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
+    m_rng(seed),
     m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
@@ -68,7 +69,7 @@ Human::Human(SimTime dateOfBirth) :
     assert( m_DOB == sim::nowOrTs1() || (sim::now() == SimTime::zero() && m_DOB < sim::now()) );
     
     HumanHet het = HumanHet::sample();
-    withinHostModel = WithinHost::WHInterface::createWithinHostModel( het.comorbidityFactor );
+    withinHostModel = WithinHost::WHInterface::createWithinHostModel( m_rng, het.comorbidityFactor );
     perHostTransmission.initialise (het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
     clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
 }
@@ -121,7 +122,7 @@ bool Human::update(const Transmission::TransmissionModel& transmission, bool doU
         int nNewInfs = infIncidence->numNewInfections( *this, EIR );
         
         // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-        withinHostModel->update(nNewInfs, EIR_per_genotype, ageYears1,
+        withinHostModel->update(m_rng, nNewInfs, EIR_per_genotype, ageYears1,
                 _vaccine.getFactor(interventions::Vaccine::BSV));
         
         // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
@@ -132,7 +133,7 @@ bool Human::update(const Transmission::TransmissionModel& transmission, bool doU
 }
 
 void Human::addInfection(){
-    withinHostModel->importInfection();
+    withinHostModel->importInfection(m_rng);
 }
 
 void Human::clearImmunity(){

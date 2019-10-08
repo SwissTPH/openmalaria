@@ -71,12 +71,12 @@ public:
 //         out << setprecision(8);
         
         // pkpdID (value) isn't important since we're not using drug model here:
-        MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
+        MolineauxInfection* infection = new MolineauxInfection (util::global_RNG, 0xFFFFFFFF);
         bool extinct = false;
         size_t day=0;
         SimTime now = sim::ts0();
         do{
-            extinct = infection->update(1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/);
+            extinct = infection->update(util::global_RNG, 1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/);
             SimTime age = now - infection->m_startDate - infection->s_latentP;
             if( age >= SimTime::zero() ){
                 ETS_ASSERT_LESS_THAN( day, dens.size() );
@@ -291,10 +291,10 @@ private:
             vector<double> dens;    // time series of density
             for( size_t run = 0; run < N; ++run ){
                 dens.resize( 0 );
-                MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
+                MolineauxInfection* infection = new MolineauxInfection (util::global_RNG, 0xFFFFFFFF);
                 SimTime now = sim::ts0();
                 
-                while( !infection->update(1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/) ){
+                while( !infection->update(util::global_RNG, 1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/) ){
                     dens.push_back( infection->getDensity() );
                     now += SimTime::oneDay();
                 }

@@ -139,8 +139,8 @@ const double Omega=0.00025;
 
 //@}
 
-CommonInfection* createPennyInfection (uint32_t protID) {
-    return new PennyInfection (protID);
+CommonInfection* createPennyInfection (LocalRng& rng, uint32_t protID) {
+    return new PennyInfection (rng, protID);
 }
 
 CommonInfection* checkpointedPennyInfection (istream& stream) {
@@ -164,7 +164,7 @@ void PennyInfection::init() {
     }
 }
 
-PennyInfection::PennyInfection(uint32_t protID):
+PennyInfection::PennyInfection(LocalRng& rng, uint32_t protID):
         CommonInfection(protID),
         variantSpecificSummation(0),
         clonalSummation(0)
@@ -193,7 +193,7 @@ PennyInfection::PennyInfection(uint32_t protID):
 }
 
 
-bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double ){
+bool PennyInfection::updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double ){
     int ageDays = bsAge.inDays();       // lazy
     if( bsAge == SimTime::zero() ){
         // assign initial densities (Y circulating, X sequestered)
@@ -239,7 +239,7 @@ bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double
         double R_Cy = (1.0-psi_C) / (1.0 + base_Cpow) + psi_C;
         
         // variant specific immunity
-        double base_V = getVariantSpecificSummation(ageDays)/threshold_V;
+        double base_V = getVariantSpecificSummation(rng, ageDays)/threshold_V;
         double R_Vx = (1.0-beta_V) / (1.0 + pow(base_V,kappa_V)) + beta_V;
         
         // cirDensity: circulating density of circulating at t
@@ -293,7 +293,7 @@ bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double
     return false;
 }
 
-double PennyInfection::getVariantSpecificSummation(int ageDays) {
+double PennyInfection::getVariantSpecificSummation(LocalRng& rng, int ageDays) {
     // check if new dominant variant has arrived
     bool newVarDominant = global_RNG.bernoulli(prob_lambda_V);
     //draw from bernouli distrb, prob 1/lambda_V

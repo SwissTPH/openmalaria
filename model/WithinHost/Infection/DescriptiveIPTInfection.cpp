@@ -69,7 +69,7 @@ DescriptiveIPTInfection::GenotypeData::GenotypeData (
 
 // -----  non-static init/destruction  -----
 
-DescriptiveIPTInfection::DescriptiveIPTInfection(TimeStep lastSPdose) :
+DescriptiveIPTInfection::DescriptiveIPTInfection(LocalRng& rng, TimeStep lastSPdose) :
   DescriptiveInfection(), _SPattenuate(false)
 {
     // proteome_ID is initialized to 0xFFFFFFFF

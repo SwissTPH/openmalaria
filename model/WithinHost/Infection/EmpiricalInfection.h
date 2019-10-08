@@ -41,7 +41,7 @@ public:
   /// For checkpointing (don't use for anything else)
   EmpiricalInfection(istream& stream);
   /// Per instance initialisation; create new inf.
-  EmpiricalInfection(uint32_t protID, double growthRateMultiplier);
+  EmpiricalInfection(LocalRng& rng, uint32_t protID, double growthRateMultiplier);
   /** Destructor
    * 
    * Note: this destructor does nothing in order to allow shallow copying to
@@ -53,16 +53,16 @@ public:
   /// This was used for independant parameterization.
   void setPatentGrowthRateMultiplier(double multiplier);
   
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double );
+    virtual bool updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double );
   
 protected:
     virtual void checkpoint (ostream& stream);
     
 private:
-  double getInflatedDensity(double nonInflatedDensity);
+  double getInflatedDensity(LocalRng& rng, double nonInflatedDensity);
   double sigma_noise(int ageDays);
-  double samplePatentValue(double mu, double sigma, double lowerBound);
-  double sampleSubPatentValue(double mu, double sigma, double upperBound);
+  double samplePatentValue(LocalRng& rng, double mu, double sigma, double lowerBound);
+  double sampleSubPatentValue(LocalRng& rng, double mu, double sigma, double upperBound);
   
   double _laggedLogDensities[3];
   double _patentGrowthRateMultiplier;

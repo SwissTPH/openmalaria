@@ -22,6 +22,7 @@
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Treatments.h"
 #include "WithinHost/Genotypes.h"
+#include "Host/Human.h"
 #include "mon/reporting.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -125,7 +126,7 @@ void initNHypnozoites(){
         nHypnozoitesProbMap[cumP] = n;
     }
 }
-int sampleNHypnozoites(){
+int sampleNHypnozoites(LocalRng& rng){
     double x = util::global_RNG.uniform_01();
     // upper_bound finds the first key (cumulative probability) greater than x:
     auto it = nHypnozoitesProbMap.upper_bound( x );
@@ -134,7 +135,7 @@ int sampleNHypnozoites(){
 }
 
 // time to hypnozoite release after initial release:
-SimTime sampleReleaseDelay(){
+SimTime sampleReleaseDelay(LocalRng& rng){
     bool isFirstRelease = true;
     if( pSecondRelease == 1.0 ||
         (pSecondRelease > 0.0 && global_RNG.bernoulli(pSecondRelease)) ){
@@ -151,7 +152,7 @@ SimTime sampleReleaseDelay(){
 
 // ———  per-brood code  ———
 
-VivaxBrood::VivaxBrood( WHVivax *host ) :
+VivaxBrood::VivaxBrood( LocalRng& rng, WHVivax *host ) :
         primaryHasStarted( false ),
         relapseHasStarted( false ),
         hadEvent( false ),
@@ -161,10 +162,10 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     
     // primary blood stage plus hypnozoites (relapses)
     releases.insert( sim::nowOrTs0() + latentP );
-    int numberHypnozoites = sampleNHypnozoites();
+    int numberHypnozoites = sampleNHypnozoites(rng);
     for( int i = 0; i < numberHypnozoites; ){
         //TODO: why do we have two latent periods (latentP + latentReleaseDays added in sampleReleaseDelay())?
-        SimTime randomReleaseDelay = sampleReleaseDelay();
+        SimTime randomReleaseDelay = sampleReleaseDelay(rng);
         SimTime timeToRelease = sim::nowOrTs0() + latentP + randomReleaseDelay;
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
@@ -281,7 +282,7 @@ void VivaxBrood::treatmentLS(){
 
 // ———  per-host code  ———
 
-WHVivax::WHVivax( double comorbidityFactor ) :
+WHVivax::WHVivax( LocalRng& rng, double comorbidityFactor ) :
     cumPrimInf(0),
     pEvent( numeric_limits<double>::quiet_NaN() ),
     pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() ),
@@ -341,19 +342,20 @@ bool WHVivax::summarize(const Host::Human& human) const{
     return patentHost;
 }
 
-void WHVivax::importInfection(){
+void WHVivax::importInfection(LocalRng& rng){
     // this means one new liver stage infection, which can result in multiple blood stages
-    infections.push_back( VivaxBrood( this ) );
+    infections.push_back( VivaxBrood( rng, this ) );
 }
 
-void WHVivax::update(int nNewInfs, vector<double>&,
+void WHVivax::update(LocalRng& rng,
+        int nNewInfs, vector<double>&,
         double ageInYears, double)
 {
     pSevere = 0.0;
     
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )
-        infections.push_back( VivaxBrood( this ) );
+        infections.push_back( VivaxBrood( rng, this ) );
     
     // update infections
     // NOTE: currently no BSV model
@@ -450,7 +452,7 @@ void WHVivax::treatment( Host::Human& human, TreatmentId treatId ){
                   mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
-void WHVivax::optionalPqTreatment( const Host::Human& human ){
+void WHVivax::optionalPqTreatment( Host::Human& human ){
     // PQ clears liver stages. We don't worry about the effect of PQ on
     // gametocytes, because these are always cleared by blood-stage drugs with
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
@@ -463,7 +465,7 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
         mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
 }
-bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
+bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     //TODO: this should be implemented properly (allowing effects on next
     // update instead of now)
     

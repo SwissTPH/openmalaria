@@ -51,12 +51,12 @@ public:
     //@}
     
     // Initialise. Samples several parameters.
-    MolineauxInfection(uint32_t protID);
+    MolineauxInfection(LocalRng& rng, uint32_t protID);
     // Load from a checkpoint:
     MolineauxInfection (istream& stream);
     virtual ~MolineauxInfection () {};
     
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double body_mass );
+    virtual bool updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double body_mass );
     
 protected:
     virtual void checkpoint (ostream& stream);

@@ -91,13 +91,13 @@ TreatmentId WHInterface::addTreatment(const scnXml::TreatmentOption& desc){
     return Treatments::addTreatment( desc );
 }
 
-unique_ptr<WHInterface> WHInterface::createWithinHostModel ( double comorbidityFactor ) {
+unique_ptr<WHInterface> WHInterface::createWithinHostModel(LocalRng& rng, double comorbidityFactor) {
     if( opt_vivax_simple ) {
-        return unique_ptr<WHInterface>(new WHVivax( comorbidityFactor ));
+        return unique_ptr<WHInterface>(new WHVivax( rng, comorbidityFactor ));
     } else if( opt_common_whm ) {
-        return unique_ptr<WHInterface>(new CommonWithinHost( comorbidityFactor ));
+        return unique_ptr<WHInterface>(new CommonWithinHost( rng, comorbidityFactor ));
     } else {
-        return unique_ptr<WHInterface>(new DescriptiveWithinHostModel( comorbidityFactor ));
+        return unique_ptr<WHInterface>(new DescriptiveWithinHostModel( rng, comorbidityFactor ));
     }
 }
 

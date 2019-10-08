@@ -45,18 +45,20 @@ namespace Transmission {
 class Population;
 namespace Host {
 
+using util::LocalRng;
+
 /** Interface to all sub-models storing data per-human individual.
  *
  * Still contains some data, but most is now contained in sub-models. */
 class Human {
 public:
-  
   /// @brief Construction and destruction, checkpointing
   //@{
   /** Initialise all variables of a human datatype.
    * 
-   * \param dateOfBirth date of birth (usually start of next time step) */
-  Human(SimTime dateOfBirth);
+   * @param seed Seed for local RNG
+   * @param dateOfBirth date of birth (usually start of next time step) */
+  Human(uint64_t seed, SimTime dateOfBirth);
   
   /// Allow move construction
   Human(Human&&) = default;
@@ -75,6 +77,7 @@ public:
       infIncidence & stream;
       withinHostModel & stream;
       clinicalModel & stream;
+      m_rng.checkpoint(stream);
       m_DOB & stream;
       _vaccine & stream;
       monitoringAgeGroup & stream;
@@ -112,6 +115,9 @@ public:
   
   /// @brief Small functions
   //@{
+    /// Get access to the RNG
+    inline LocalRng& rng() { return m_rng; }
+    
     /** Get human's age with respect to some time. */
     inline SimTime age( SimTime time )const{ return time - m_DOB; }
     /** Date of birth. */
@@ -196,6 +202,8 @@ private:
    * and clinical outcomes (morbidity, reporting). */
   unique_ptr<Clinical::ClinicalModel> clinicalModel;
   //@}
+  
+  LocalRng m_rng;
   
   SimTime m_DOB;        // date of birth; humans are always born at the end of a time step
   

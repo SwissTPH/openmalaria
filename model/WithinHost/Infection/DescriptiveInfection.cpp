@@ -115,15 +115,15 @@ void DescriptiveInfection::init (const Parameters& parameters) {
 
 // ———  non-static init/destruction  ———
 
-DescriptiveInfection::DescriptiveInfection (uint32_t genotype) :
+DescriptiveInfection::DescriptiveInfection (LocalRng& rng, uint32_t genotype) :
 	Infection(genotype),
-        m_duration(infectionDuration()),
+        m_duration(infectionDuration(rng)),
         notPrintedMDWarning(true)
 {
     assert( SimTime::oneTS().inDays() == 5 );
 }
 
-SimTime DescriptiveInfection::infectionDuration() {
+SimTime DescriptiveInfection::infectionDuration(LocalRng& rng) {
     // Forgive the excess precision; it just avoids having to update all expected results
     double dur_mean = 5.1300001144409179688;
     double dur_sigma = 0.80000001192092895508;
@@ -142,6 +142,7 @@ SimTime DescriptiveInfection::infectionDuration() {
 // ———  time-step updates  ———
 
 void DescriptiveInfection::determineDensities(
+        LocalRng& rng,
         double cumulativeh,
         double &timeStepMaxDensity,
         double immSurvFact,

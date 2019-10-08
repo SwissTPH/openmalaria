@@ -151,8 +151,8 @@ const double case_specific_data[] = {
 
 // ———  static (non-class-member) code  ———
 
-CommonInfection* createMolineauxInfection (uint32_t protID) {
-    return new MolineauxInfection (protID);
+CommonInfection* createMolineauxInfection (LocalRng& rng, uint32_t protID) {
+    return new MolineauxInfection (rng, protID);
 }
 
 CommonInfection* checkpointedMolineauxInfection (istream& stream) {
@@ -202,7 +202,7 @@ void MolineauxInfection::init( const Parameters& parameters ){
 
 // ———  MolineauxInfection: initialisation  ———
 
-MolineauxInfection::MolineauxInfection(uint32_t genotype):
+MolineauxInfection::MolineauxInfection(LocalRng& rng, uint32_t genotype):
         CommonInfection(genotype)
 {
     for( size_t i = 0; i < v; i++ ){
@@ -259,7 +259,7 @@ MolineauxInfection::Variant::Variant () :
 
 // ———  MolineauxInfection: density updates  ———
 
-bool MolineauxInfection::updateDensity( double survival_factor, SimTime age_BS, double body_mass ){
+bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTime age_BS, double body_mass ){
     // bsAge : age of blood stage; 0 implies initial density (0.1; time t=0 in
     // paper, t=1 in MP's Matlab code), age 2 days is after first update step
     // survivalFactor : probabilty of merozoites surviving drugs, inter-infection immunity and vaccines

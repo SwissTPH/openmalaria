@@ -22,8 +22,11 @@
 #define Hmod_CommonInfection
 
 #include "WithinHost/Infection/Infection.h"
+#include "util/random.h"
 
 namespace OM { namespace WithinHost {
+
+using util::LocalRng;
 
 /** Represent infections used by CommonWithinHost.
  * 
@@ -55,12 +58,12 @@ public:
      * @param now The simulation time. Use this instead of sim::ts1().
      * @param body_mass Body mass of host in kg
      * @returns True when the infection goes extinct. */
-    inline bool update( double survivalFactor, SimTime now, double body_mass ){
+    inline bool update( LocalRng& rng, double survivalFactor, SimTime now, double body_mass ){
 	SimTime bsAge = now - m_startDate - s_latentP;	// age of post-latent-period blood stage
 	if( bsAge < SimTime::zero() )
 	    return false;	// latent period (liver stage) — don't do anything
 	else
-	    return updateDensity( survivalFactor, bsAge, body_mass );
+	    return updateDensity( rng, survivalFactor, bsAge, body_mass );
     }
     
     map<size_t, double> Kn; // IC50^slope per drug type, if sampled
@@ -75,7 +78,7 @@ protected:
      *  this, but this function is not called during those stages.
      * @param body_mass Body mass of host in kg
      * @returns True when the infection goes extinct. */
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double body_mass ) =0;
+    virtual bool updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double body_mass ) =0;
     
     virtual void checkpoint (ostream& stream);
 };

@@ -57,7 +57,7 @@ public:
      * @param host      The host creating this. Not really needed, except to
      * prevent VivaxBrood being default-constructed by its container.
      */
-    VivaxBrood( WHVivax *host );
+    VivaxBrood( LocalRng& rng, WHVivax *host );
     ~VivaxBrood();
     /** Save a checkpoint. */
     void checkpoint( ostream& stream );
@@ -142,7 +142,7 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHVivax( double comorbidityFactor );
+    WHVivax( LocalRng& rng, double comorbidityFactor );
     virtual ~WHVivax();
     //@}
     
@@ -151,9 +151,9 @@ public:
     
     virtual bool summarize(const Host::Human& human) const;
     
-    virtual void importInfection();
+    virtual void importInfection(LocalRng& rng);
     
-    virtual void update(int nNewInfs, vector<double>& genotype_weights,
+    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
             double ageInYears, double bsvFactor);
     
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
@@ -164,8 +164,8 @@ public:
     
 protected:
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
-    virtual void optionalPqTreatment( const Host::Human& human );
+    virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );
+    virtual void optionalPqTreatment( Host::Human& human );
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

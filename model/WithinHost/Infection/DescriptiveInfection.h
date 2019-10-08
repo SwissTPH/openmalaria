@@ -20,9 +20,13 @@
 
 #ifndef Hmod_DescriptiveInfection
 #define Hmod_DescriptiveInfection
+
 #include "WithinHost/Infection/Infection.h"
+#include "util/random.h"
 
 namespace OM { namespace WithinHost {
+
+using util::LocalRng;
 
 // Max duration of sample data for an infection in intervals. Simulated
 // infections may last longer; in this case the last sample data is repeated
@@ -62,7 +66,7 @@ public:
     ///@name Constructors
     //@{
     /// Default constructor
-    DescriptiveInfection (uint32_t genotype);
+    DescriptiveInfection (LocalRng& rng, uint32_t genotype);
     /// Checkpoint loading constructor
     DescriptiveInfection (istream& stream);
     //@}
@@ -85,6 +89,7 @@ public:
      * @param bsvFactor Density multiplier for Blood-Stage Vaccine effect.
      */
     void determineDensities(
+            LocalRng& rng,
             double cumulativeh,
             double &timeStepMaxDensity,
             double immSurvFact,
@@ -99,7 +104,7 @@ public:
      * normal distribution using parameters for 53 patients from Georgia.
      * Mean log duration of an infection values from AJTM p.9 eq.5.
      */
-    static SimTime infectionDuration();
+    static SimTime infectionDuration(LocalRng& rng);
     
     /// Includes the effect of attenuated infections by SP concentrations, when using IPT
     virtual void IPTattenuateAsexualDensity () {}

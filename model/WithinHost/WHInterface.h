@@ -22,6 +22,7 @@
 #define Hmod_WithinHost_Interface
 
 #include "Global.h"
+#include "util/random.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Pathogenesis/State.h"
 #include "Parameters.h"
@@ -40,6 +41,8 @@ namespace Host {
     class Human;
 }
 namespace WithinHost {
+
+using util::LocalRng;
 
 /**
  * Type used to select a treatment option.
@@ -82,7 +85,7 @@ public:
     static TreatmentId addTreatment( const scnXml::TreatmentOption& desc );
 
     /// Create an instance using the appropriate model
-    static unique_ptr<WHInterface> createWithinHostModel( double comorbidityFactor );
+    static unique_ptr<WHInterface> createWithinHostModel( LocalRng& rng, double comorbidityFactor );
     //@}
 
     /// @brief Constructors, destructors and checkpointing functions
@@ -127,7 +130,7 @@ public:
     virtual bool summarize(const Host::Human& human) const =0;
 
     /// Create a new infection within this human
-    virtual void importInfection() =0;
+    virtual void importInfection(LocalRng& rng) =0;
 
     /**
      * Carry out the effects of some treatment option.
@@ -138,11 +141,11 @@ public:
     virtual void treatment( Host::Human& human, TreatmentId treatId ) =0;
     
     /// Conditionally gives Primaquine as a treatment. Reports as appropriate.
-    virtual void optionalPqTreatment( const Host::Human& human ) =0;
+    virtual void optionalPqTreatment( Host::Human& human ) =0;
     
     /** Treat a patient via the simple treatment model. Return true if any
      * blood-stage treatment is administered. Report any liver-stage treatments. */
-    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ) =0;
+    virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood ) =0;
     
     /** Give a patient a course of drugs, via the Pk/Pd model
      * 
@@ -164,7 +167,7 @@ public:
      * @param ageInYears Age of human
      * @param bsvFactor Parasite survival factor for blood-stage vaccines
      */
-    virtual void update(int nNewInfs, vector<double>& genotype_weights,
+    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
             double ageInYears, double bsvFactor) =0;
 
     /** TODO: this should not need to be exposed. It is currently used by a

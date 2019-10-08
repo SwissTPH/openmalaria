@@ -48,12 +48,12 @@ public:
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX ) const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     virtual bool summarize(const Host::Human& human)const;
-    virtual void importInfection();
+    virtual void importInfection(LocalRng& rng);
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual void optionalPqTreatment( const Host::Human& human );
-    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
+    virtual void optionalPqTreatment( Host::Human& human );
+    virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     virtual void treatPkPd(size_t schedule, size_t dosages, double age, double delay_d);
-    virtual void update(int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
+    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;
     virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );

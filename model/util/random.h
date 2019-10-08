@@ -90,6 +90,12 @@ struct RNG {
         m_gsl_gen.type = &m_gsl_type;
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
     }
+    /// Seeding constructor
+    RNG(uint64_t seed): m_rng(seed) {
+        m_gsl_type = make_gsl_rng_type(m_rng);
+        m_gsl_gen.type = &m_gsl_type;
+        m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
+    }
     
     // Disable copying
     RNG(const RNG&) = delete;
@@ -123,6 +129,12 @@ struct RNG {
         m_rng.binary_checkpoint(stream);
     }
     //@}
+    
+    uint64_t gen_seed() {
+        uint32_t low = m_rng();
+        uint32_t high = m_rng();
+        return ((uint64_t)high << 32) | (uint64_t)low;
+    }
     
     ///@brief Random number distributions
     //@{
@@ -280,12 +292,15 @@ private:
     gsl_rng m_gsl_gen;
 };
 
+typedef RNG<pcg32> LocalRng;
+typedef RNG<ChaCha<8>> MasterRng;
+
 /// The global RNG
 // TODO: replace with instances local to humans
 // I would prefer to use pcg64, but MSVC mysteriously fails
-extern RNG<pcg32> global_RNG;
+extern LocalRng global_RNG;
 /// The master RNG, used only where no local RNG is available
-extern RNG<ChaCha<8>> master_RNG;
+extern MasterRng master_RNG;
 
 } }
 #endif

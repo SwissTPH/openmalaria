@@ -279,7 +279,7 @@ const vector< Genotypes::Genotype >& Genotypes::getGenotypes(){
     return GT::genotypes;
 }
 
-uint32_t Genotypes::sampleGenotype( vector<double>& genotype_weights ){
+uint32_t Genotypes::sampleGenotype( LocalRng& rng, vector<double>& genotype_weights ){
     if( GT::current_mode == GT::SAMPLE_FIRST ){
         return 0;       // always the first genotype code
     }else if( GT::current_mode == GT::SAMPLE_INITIAL

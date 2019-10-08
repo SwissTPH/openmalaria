@@ -120,7 +120,7 @@ void Population::checkpoint (istream& stream)
     for(size_t i = 0; i < populationSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( Host::Human (SimTime::zero()) );
+        population.push_back( Host::Human (master_RNG.gen_seed(), SimTime::zero()) );
         population.back() & stream;
     }
     if (population.size() != populationSize)
@@ -172,7 +172,7 @@ void Population::createInitialHumans()
 
 void Population::newHuman( SimTime dob ){
     util::streamValidate( dob.inDays() );
-    population.push_back( Host::Human (dob) );
+    population.push_back( Host::Human (master_RNG.gen_seed(), dob) );
     ++recentBirths;
 }
 

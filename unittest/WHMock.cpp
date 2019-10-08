@@ -44,15 +44,15 @@ bool WHMock::summarize(const Host::Human& human)const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::importInfection(){
+void WHMock::importInfection(LocalRng& rng){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-void WHMock::optionalPqTreatment(const Host::Human& human){
+void WHMock::optionalPqTreatment(Host::Human& human){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-bool WHMock::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
+bool WHMock::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     nTreatments += 1;
     lastTimeLiver = timeLiver;
     lastTimeBlood = timeBlood;
@@ -64,7 +64,7 @@ void WHMock::treatPkPd(size_t schedule, size_t dosages, double age, double delay
     pkpd.prescribe( schedule, dosages, age, numeric_limits<double>::quiet_NaN(), delay_d );
 }
 
-void WHMock::update(int nNewInfs, vector<double>&, double ageInYears, double bsvFactor){
+void WHMock::update(LocalRng& rng, int nNewInfs, vector<double>&, double ageInYears, double bsvFactor){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
