@@ -98,30 +98,6 @@ RNG::RNG() {
     m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
 }
 
-RNG::RNG(uint32_t seed) {
-    m_rng.seed(seed);
-    m_gsl_type = make_gsl_rng_type(m_rng);
-    m_gsl_gen.type = &m_gsl_type;
-    m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
-}
-
-RNG::RNG(istream& stream) {
-    // Don't use OM::util::checkpoint function for loading a stream; checkpoint::validateListSize uses too small a number.
-    string str;
-    size_t len;
-    len & stream;
-    str.resize (len);
-    stream.read (&str[0], str.length());
-    if (!stream || stream.gcount() != streamsize(len))
-	throw checkpoint_error ("stream read error string");
-    istringstream ss (str);
-    ss >> m_rng;
-    
-    m_gsl_type = make_gsl_rng_type(m_rng);
-    m_gsl_gen.type = &m_gsl_type;
-    m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
-}
-
 RNG::RNG(RNG&& other) {
     m_rng = other.m_rng;
     m_gsl_type = other.m_gsl_type;
@@ -137,11 +113,18 @@ void RNG::operator=(RNG&& other) {
     m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
 }
 
-void RNG::checkpoint (ostream& stream) {
-    ostringstream ss;
-    ss << m_rng;
-    ss.str() & stream;
+void RNG::seed (uint64_t seed) {
+    m_rng.seed(seed);
 }
+
+// Incomplete checkpointing: assumes seed(..) has been called as before
+void RNG::checkpoint (ostream& stream) {
+    m_rng.binary_checkpoint(stream);
+}
+void RNG::checkpoint(istream& stream) {
+    m_rng.binary_checkpoint(stream);
+}
+
 
 
 // -----  random number generation  -----

@@ -35,10 +35,6 @@ struct RNG {
     //@{
     /// Default constructor
     RNG();
-    /// Construction, given a seed
-    explicit RNG(uint32_t seed);
-    /// Construction from checkpoint
-    explicit RNG(istream& stream);
     
     // Disable copying
     RNG(const RNG&) = delete;
@@ -48,8 +44,13 @@ struct RNG {
     RNG(RNG&& other);
     void operator=(RNG&& other);
     
-    /// Checkpointing
+    /// Seed
+    void seed(uint64_t seed);
+    
+    /// Write checkpoint
     void checkpoint (ostream& stream);
+    /// Read checkpoint (note: this relies on the RNG having been constructed with the same seed)
+    void checkpoint (istream& stream);
     //@}
     
     ///@brief Random number distributions

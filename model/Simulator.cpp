@@ -89,7 +89,7 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     Parameters parameters( model.getParameters() );     // depends on nothing
     WithinHost::Genotypes::init( scenario );
     
-    util::global_RNG = util::RNG( model.getParameters().getIseed() );
+    util::global_RNG.seed( model.getParameters().getIseed() );
     util::ModelOptions::init( model.getModelOptions() );
     
     // 2) elements depending on only elements initialised in (1):
@@ -353,7 +353,7 @@ void Simulator::checkpoint (istream& stream) {
         // to be negative
         sim::s_t0 & stream;
         sim::s_t1 & stream;
-        util::global_RNG = util::RNG(stream);
+        util::global_RNG.checkpoint(stream);
     } catch (const util::checkpoint_error& e) { // append " (pos X of Y bytes)"
         ostringstream pos;
         pos<<" (pos "<<stream.tellg()<<" of ";

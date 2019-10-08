@@ -460,93 +460,16 @@ public:
                             const engine<xtype1,itype1,
                                      output_mixin1,output_previous1,
                                      stream_mixin_rhs, multiplier_mixin_rhs>&);
-
-    template <typename CharT, typename Traits,
-              typename xtype1, typename itype1,
-              typename output_mixin1, bool output_previous1,
-              typename stream_mixin1, typename multiplier_mixin1>
-    friend std::basic_ostream<CharT,Traits>&
-    operator<<(std::basic_ostream<CharT,Traits>& out,
-               const engine<xtype1,itype1,
-                              output_mixin1,output_previous1,
-                              stream_mixin1, multiplier_mixin1>&);
-
-    template <typename CharT, typename Traits,
-              typename xtype1, typename itype1,
-              typename output_mixin1, bool output_previous1,
-              typename stream_mixin1, typename multiplier_mixin1>
-    friend std::basic_istream<CharT,Traits>&
-    operator>>(std::basic_istream<CharT,Traits>& in,
-               engine<xtype1, itype1,
-                        output_mixin1, output_previous1,
-                        stream_mixin1, multiplier_mixin1>& rng);
-};
-
-template <typename CharT, typename Traits,
-          typename xtype, typename itype,
-          typename output_mixin, bool output_previous,
-          typename stream_mixin, typename multiplier_mixin>
-std::basic_ostream<CharT,Traits>&
-operator<<(std::basic_ostream<CharT,Traits>& out,
-           const engine<xtype,itype,
-                          output_mixin,output_previous,
-                          stream_mixin, multiplier_mixin>& rng)
-{
-    using pcg_extras::operator<<;
-
-    auto orig_flags = out.flags(std::ios_base::dec | std::ios_base::left);
-    auto space = out.widen(' ');
-    auto orig_fill = out.fill();
-
-    pcg_extras::Output(out, rng.multiplier());
-    out << space;
-    pcg_extras::Output(out, rng.increment());
-    out << space;
-    pcg_extras::Output(out, rng.state_);
-    out << space;
-
-    out.flags(orig_flags);
-    out.fill(orig_fill);
-    return out;
-}
-
-template <typename CharT, typename Traits,
-          typename xtype, typename itype,
-          typename output_mixin, bool output_previous,
-          typename stream_mixin, typename multiplier_mixin>
-std::basic_istream<CharT,Traits>&
-operator>>(std::basic_istream<CharT,Traits>& in,
-           engine<xtype,itype,
-                    output_mixin,output_previous,
-                    stream_mixin, multiplier_mixin>& rng)
-{
-    using pcg_extras::operator>>;
-
-    auto orig_flags = in.flags(std::ios_base::dec | std::ios_base::skipws);
-
-    itype multiplier, increment, state;
-    pcg_extras::Input(in, multiplier);
-    pcg_extras::Input(in, increment);
-    pcg_extras::Input(in, state);
-    if (!in.fail()) {
-        bool good = true;
-        if (multiplier != rng.multiplier()) {
-           good = false;
-        } else if (rng.can_specify_stream) {
-           rng.set_stream(increment >> 1);
-        } else if (increment != rng.increment()) {
-           good = false;
-        }
-        if (good) {
-            rng.state_ = state;
-        } else {
-            in.clear(std::ios::failbit);
-        }
+    
+    void binary_checkpoint(ostream& stream) {
+        stream.write (reinterpret_cast<char*>(&state_), sizeof(state_));
     }
-
-    in.flags(orig_flags);
-    return in;
-}
+    void binary_checkpoint(istream& stream) {
+        stream.read (reinterpret_cast<char*>(&state_), sizeof(state_));
+        if (!stream || stream.gcount() != sizeof(state_))
+            throw runtime_error ("pcg_random - binary_checkpoint: stream read error");
+    }
+};
 
 
 template <typename xtype, typename itype,
