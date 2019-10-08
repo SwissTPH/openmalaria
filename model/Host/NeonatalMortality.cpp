@@ -86,7 +86,7 @@ void NeonatalMortality::staticCheckpoint (ostream& stream) {
 }
 
 bool NeonatalMortality::eventNeonatalMortality(LocalRng& rng) {
-  return global_RNG.uniform_01() <= riskFromMaternalInfection;
+  return rng.uniform_01() <= riskFromMaternalInfection;
 }
 
 void NeonatalMortality::update (Population& population) {

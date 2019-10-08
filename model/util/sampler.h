@@ -197,7 +197,7 @@ namespace OM { namespace util {
         
         /** Sample a value. */
         inline double sample(LocalRng& rng) const{
-            return global_RNG.weibull( scale, shape );
+            return rng.weibull( scale, shape );
         }
         
     private:

@@ -179,7 +179,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
     CaseType regimen = (m_tLastTreatment + healthSystemMemory > sim::ts0()) ?
         SecondLine : FirstLine;
     
-    double x = util::global_RNG.uniform_01();
+    double x = human.rng().uniform_01();
     if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
         // UC1: official care OR self treatment
         // UC2: official care only
@@ -196,7 +196,7 @@ void ImmediateOutcomes::uncomplicatedEvent (
         
         double p = ( x < accessUCSelfTreat[regimen] * m_treatmentSeekingFactor ) ?
             cureRateUCSelfTreat[regimen] : cureRateUCOfficial[regimen];
-        if( util::global_RNG.bernoulli(p) ){
+        if( human.rng().bernoulli(p) ){
             // Could report Episode::RECOVERY to latestReport,
             // but we don't report out-of-hospital recoveries anyway.
             human.withinHostModel->treatment( human, treatmentUC[regimen] );

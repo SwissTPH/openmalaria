@@ -152,7 +152,7 @@ double InfectionIncidenceModel::getAvailabilityFactor(LocalRng& rng, double base
 }
 double NegBinomMAII::getAvailabilityFactor(LocalRng& rng, double baseAvailability) {
     // Gamma sample with k=BaselineAvailabilityShapeParam; mean is baseAvailability
-  return global_RNG.gamma(baseline_avail_shape_param,
+  return rng.gamma(baseline_avail_shape_param,
 		 baseAvailability/baseline_avail_shape_param);
 }
 double LogNormalMAII::getAvailabilityFactor(LocalRng& rng, double baseAvailability) {
@@ -162,7 +162,7 @@ double LogNormalMAII::getAvailabilityFactor(LocalRng& rng, double baseAvailabili
         // NOTE: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
         throw TRACED_EXCEPTION_DEFAULT("LogNormalMAII::getAvailabilityFactor");
     }
-  return global_RNG.log_normal (log(baseAvailability) - baseline_avail_offset,
+  return rng.log_normal (log(baseAvailability) - baseline_avail_offset,
 		     baseline_avail_shape_param);
 }
 
@@ -185,13 +185,13 @@ double HeterogeneityWorkaroundII::getModelExpectedInfections (LocalRng& rng, dou
 }
 double NegBinomMAII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
-  return global_RNG.gamma(inf_rate_shape_param,
+  return rng.gamma(inf_rate_shape_param,
       effectiveEIR * susceptibility() / inf_rate_shape_param);
 }
 double LogNormalMAII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
     double meanlog = log(effectiveEIR * susceptibility()) - inf_rate_offset;
-    return global_RNG.log_normal(meanlog, inf_rate_shape_param);
+    return rng.log_normal(meanlog, inf_rate_shape_param);
 }
 
 double InfectionIncidenceModel::susceptibility () {
@@ -233,7 +233,7 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
     m_pInfected = 1.0;
   
   if (expectedNumInfections > 0.0000001){
-    int n = global_RNG.poisson(expectedNumInfections);
+    int n = human.rng().poisson(expectedNumInfections);
     if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }

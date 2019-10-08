@@ -174,15 +174,15 @@ bool EmpiricalInfection::updateDensity( LocalRng& rng, double survivalFactor, Si
   for(int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
     double logDensity;
     for(int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
-      double b_1=global_RNG.gauss(_mu_beta1[ageDays],_sigma_beta1[ageDays]);
-      double b_2=global_RNG.gauss(_mu_beta2[ageDays],_sigma_beta2[ageDays]);
-      double b_3=global_RNG.gauss(_mu_beta3[ageDays],_sigma_beta3[ageDays]);
+      double b_1=rng.gauss(_mu_beta1[ageDays],_sigma_beta1[ageDays]);
+      double b_2=rng.gauss(_mu_beta2[ageDays],_sigma_beta2[ageDays]);
+      double b_3=rng.gauss(_mu_beta3[ageDays],_sigma_beta3[ageDays]);
       double expectedlogDensity = b_1 * (L[0]+L[1]+L[2]) / 3
       + b_2 * (L[2]-L[0]) / 2
       + b_3 * (L[2]+L[0]-2*L[1]) / 4;
       
       //include sampling error
-      logDensity=global_RNG.gauss(expectedlogDensity,sigma_noise(ageDays));
+      logDensity=rng.gauss(expectedlogDensity,sigma_noise(ageDays));
       //include drug and immunity effects via growthRateMultiplier 
       logDensity += log(_patentGrowthRateMultiplier);
       
@@ -225,7 +225,7 @@ bool EmpiricalInfection::updateDensity( LocalRng& rng, double survivalFactor, Si
 
 double EmpiricalInfection::sampleSubPatentValue(LocalRng& rng, double alpha, double mu, double upperBound){
     double beta = alpha * (1.0-mu) / mu;
-    double nonInflatedValue = upperBound + log(global_RNG.beta(alpha, beta));
+    double nonInflatedValue = upperBound + log(rng.beta(alpha, beta));
     double inflatedValue;
     int tries=0;
     do {
@@ -241,7 +241,7 @@ double EmpiricalInfection::sampleSubPatentValue(LocalRng& rng, double alpha, dou
 double EmpiricalInfection::samplePatentValue(LocalRng& rng, double mu, double sigma, double lowerBound){
   double returnValue;
   do {
-    double nonInflatedValue=global_RNG.gauss(mu, sigma);
+    double nonInflatedValue=rng.gauss(mu, sigma);
     returnValue=getInflatedDensity(rng, nonInflatedValue);
   } while (returnValue<lowerBound);
   return returnValue;
@@ -252,7 +252,7 @@ double EmpiricalInfection::sigma_noise(int ageDays) {
 }
 
 double EmpiricalInfection::getInflatedDensity(LocalRng& rng, double nonInflatedDensity){
-  double inflatedLogDensity = log(_inflationMean) + global_RNG.gauss(nonInflatedDensity, sqrt(_inflationVariance));
+  double inflatedLogDensity = log(_inflationMean) + rng.gauss(nonInflatedDensity, sqrt(_inflationVariance));
   return exp(inflatedLogDensity);
 }
 

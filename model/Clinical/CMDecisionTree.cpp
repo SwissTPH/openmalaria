@@ -186,7 +186,7 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        auto it = branches.upper_bound( util::global_RNG.uniform_01() );
+        auto it = branches.upper_bound( hostData.human.rng().uniform_01() );
         assert( it != branches.end() );
         return it->second->exec( hostData );
     }

@@ -285,7 +285,7 @@ uint32_t Genotypes::sampleGenotype( LocalRng& rng, vector<double>& genotype_weig
     }else if( GT::current_mode == GT::SAMPLE_INITIAL
             || genotype_weights.size() == 0 )
     {
-        double sample = util::global_RNG.uniform_01();
+        double sample = rng.uniform_01();
         auto it = GT::cum_initial_freqs.upper_bound( sample );
         assert( it != GT::cum_initial_freqs.end() );
         return it->second;
@@ -294,7 +294,7 @@ uint32_t Genotypes::sampleGenotype( LocalRng& rng, vector<double>& genotype_weig
         assert( genotype_weights.size() == N_genotypes );
         double weight_sum = util::vectors::sum( genotype_weights );
         assert( weight_sum >= 0.0 && weight_sum < 1e5 );        // possible loss of precision or other error
-        double sample = util::global_RNG.uniform_01() * weight_sum;
+        double sample = rng.uniform_01() * weight_sum;
         double cum = 0.0;
         for( size_t g = 0; g < N_genotypes; ++g ){
             cum += genotype_weights[g];
