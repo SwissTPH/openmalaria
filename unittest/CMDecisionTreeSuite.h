@@ -45,8 +45,6 @@ public:
     void setUp () {
         // Note: cannot create whm in constructor, since it uses random number
         // generator which is initialized after constructor runs.
-        util::global_RNG.seed(83);	// seed is unimportant, but must be fixed
-        util::master_RNG.seed(83);	// seed is unimportant, but must be fixed
         UnittestUtil::initTime(5);
         UnittestUtil::setDiagnostics();
 
@@ -69,8 +67,6 @@ public:
         whm = nullptr;
         PkPd::LSTMDrugType::clear();
         PkPd::LSTMTreatments::clear();
-        util::global_RNG.seed(0);  // make sure nothing else uses this seed/reports
-        util::master_RNG.seed(0);  // make sure nothing else uses this seed/reports
     }
     
     /* Runs the decision tree N times

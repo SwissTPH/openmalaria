@@ -50,7 +50,8 @@ public:
         UnittestUtil::initTime(1);
 	UnittestUtil::PkPdSuiteSetup();
 	proxy = new LSTMModel ();
-        inf = createDummyInfection(util::global_RNG, 0);
+        LocalRng rng(0);
+        inf = createDummyInfection(rng, 0);
         MQ_index = LSTMDrugType::findDrug( "MQ" );
     }
     void tearDown () {

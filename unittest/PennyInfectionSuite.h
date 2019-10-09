@@ -37,12 +37,12 @@ class PennyInfectionSuite : public CxxTest::TestSuite
 {
 public:
     void setUp () {
+        m_rng.seed(1095);
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();
         PennyInfection::init();
         util::global_RNG.seed( 1095 );
-        util::master_RNG.seed( 1095 );
-        infection = new PennyInfection (util::global_RNG, 0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
+        infection = new PennyInfection (m_rng, 0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
     void tearDown () {
         delete infection;
@@ -81,7 +81,7 @@ public:
         int iterations=0;
         SimTime now = sim::ts0();
         do{
-            extinct = infection->update(util::global_RNG, 1.0, now, numeric_limits<double>::quiet_NaN());
+            extinct = infection->update(m_rng, 1.0, now, numeric_limits<double>::quiet_NaN());
             int ageDays = (now - infection->m_startDate - infection->s_latentP).inDays();
             while( ageDays < 0 ) ageDays += infection->delta_V; // special case encountered by unit test
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
@@ -97,6 +97,7 @@ public:
     
 private:
     PennyInfection* infection;
+    LocalRng m_rng;
 };
 
 #endif
