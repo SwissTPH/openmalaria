@@ -186,7 +186,8 @@ void ImmediateOutcomes::uncomplicatedEvent (
         
         if( useDiagnosticUC ){
             mon::reportEventMHI( mon::MHT_TREAT_DIAGNOSTICS, human, 1 );
-            if( !human.withinHostModel->diagnosticResult(WithinHost::diagnostics::monitoringDiagnostic()) )
+            auto diag = WithinHost::diagnostics::monitoringDiagnostic();
+            if( !human.withinHostModel->diagnosticResult(human.rng(), diag) )
                 return; // negative outcome: no treatment
         }
         

@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "Host/Human.h"
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
@@ -235,7 +236,7 @@ struct InfGenotypeSorter {
     }
 } infGenotypeSorter;
 
-bool CommonWithinHost::summarize( const Host::Human& human )const{
+bool CommonWithinHost::summarize( Host::Human& human )const{
     pathogenesisModel->summarize( human );
     pkpdModel.summarize( human );
     
@@ -245,7 +246,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
             for(auto inf = infections.begin(); inf != infections.end(); ++inf) {
                 uint32_t genotype = (*inf)->genotype();
                 mon::reportStatMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
-                if( diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
+                if( diagnostics::monitoringDiagnostic().isPositive( human.rng(), (*inf)->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
                 }
             }
@@ -268,7 +269,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
                 }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
                 // we had at least one infection of this genotype
                 mon::reportStatMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
-                if( diagnostics::monitoringDiagnostic().isPositive(dens, std::numeric_limits<double>::quiet_NaN()) ){
+                if( diagnostics::monitoringDiagnostic().isPositive(human.rng(), dens, std::numeric_limits<double>::quiet_NaN()) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
                     mon::reportStatMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
                 }
@@ -279,7 +280,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
     // Some treatments (simpleTreat with steps=-1) clear infections immediately
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
-    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
+    if( diagnostics::monitoringDiagnostic().isPositive(human.rng(), totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
         mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
         mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent

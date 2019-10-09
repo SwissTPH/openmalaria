@@ -325,7 +325,7 @@ double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
     throw util::unimplemented_exception("genotype tracking for vivax");
 }
 
-bool WHVivax::summarize(const Host::Human& human) const{
+bool WHVivax::summarize(Host::Human& human) const{
     if( infections.size() == 0 ) return false;  // no infections: not patent, nothing to report
     mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
     bool patentHost = false;
@@ -418,11 +418,11 @@ void WHVivax::update(LocalRng& rng,
     
     //NOTE: currently we don't model co-infection or indirect deaths
     if( morbidity == Pathogenesis::NONE ){
-        morbidity = Pathogenesis::PathogenesisModel::sampleNMF( ageInYears );
+        morbidity = Pathogenesis::PathogenesisModel::sampleNMF( rng, ageInYears );
     }
 }
 
-bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
+bool WHVivax::diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const{
     //TODO(monitoring): this shouldn't ignore the diagnostic (especially since
     // it should always return true if diagnostic.density=0)
     for(auto inf = infections.begin(); inf != infections.end(); ++inf) {

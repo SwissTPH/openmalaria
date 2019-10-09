@@ -40,7 +40,7 @@ double WHMock::pTransGenotype( double, double, size_t ){
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
-bool WHMock::summarize(const Host::Human& human)const{
+bool WHMock::summarize(Host::Human& human)const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 
@@ -72,8 +72,8 @@ inline double WHMock::getTotalDensity() const{
     return totalDensity;
 }
 
-bool WHMock::diagnosticResult( const Diagnostic& diagnostic ) const{
-    return diagnostic.isPositive( totalDensity, numeric_limits<double>::quiet_NaN() );
+bool WHMock::diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const{
+    return diagnostic.isPositive( rng, totalDensity, numeric_limits<double>::quiet_NaN() );
 }
 
 void WHMock::treatment( Host::Human& human, TreatmentId treatId ){

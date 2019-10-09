@@ -231,8 +231,8 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
     return pTrans * x * sumX;
 }
 
-bool WHFalciparum::diagnosticResult( const Diagnostic& diagnostic ) const{
-    return diagnostic.isPositive( totalDensity, hrp2Density );
+bool WHFalciparum::diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const{
+    return diagnostic.isPositive( rng, totalDensity, hrp2Density );
 }
 
 void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){

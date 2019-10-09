@@ -97,7 +97,7 @@ Diagnostic::Diagnostic(double minDens){
     uses_hrp2 = false;
 }
 
-bool Diagnostic::isPositive( double dens, double densHRP2 ) const {
+bool Diagnostic::isPositive( LocalRng& rng, double dens, double densHRP2 ) const {
     if( uses_hrp2 ){
         assert( densHRP2 == densHRP2 ); // monitoring diagnostic passes NaN; use of HRP2 is not supported
         dens = densHRP2;

@@ -43,7 +43,7 @@ public:
   static bool eventNeonatalMortality();
   
   /** Calculate risk of a neonatal mortality based on humans 20-25 years old. */
-  static void update (const Population& population);
+  static void update (Population& population);
 };
 
 } }

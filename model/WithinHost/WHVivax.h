@@ -149,14 +149,14 @@ public:
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX )const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
-    virtual bool summarize(const Host::Human& human) const;
+    virtual bool summarize(Host::Human& human) const;
     
     virtual void importInfection(LocalRng& rng);
     
     virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
             double ageInYears, double bsvFactor);
     
-    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
+    virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
 
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool );
     

@@ -138,7 +138,7 @@ protected:
     
     virtual CMDTOut exec( CMHostData hostData ) const{
         CMDTOut result;
-        if( hostData.withinHost().diagnosticResult( diagnostic ) ){
+        if( hostData.withinHost().diagnosticResult( hostData.human.rng(), diagnostic ) ){
             result = positive.exec( hostData );
         }else{
             result = negative.exec( hostData );

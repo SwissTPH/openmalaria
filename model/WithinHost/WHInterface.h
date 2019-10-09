@@ -127,7 +127,7 @@ public:
     }
     
     /// @returns true if host has patent parasites
-    virtual bool summarize(const Host::Human& human) const =0;
+    virtual bool summarize(Host::Human& human) const =0;
 
     /// Create a new infection within this human
     virtual void importInfection(LocalRng& rng) =0;
@@ -183,7 +183,7 @@ public:
      * 
      * @returns true when the diagnostic is positive
      */
-    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const =0;
+    virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const =0;
     
     /** Use the pathogenesis model to determine, based on infection status
      * and random draw, this person't morbidity.

@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "Parameters.h"
 #include "WithinHost/Pathogenesis/State.h"
+#include "util/random.h"
 
 namespace scnXml{
     class HSESNMF;
@@ -33,6 +34,8 @@ namespace scnXml{
 namespace OM {
     namespace Host { class Human; }
     namespace WithinHost { namespace Pathogenesis {
+
+using util::LocalRng;
 
 /*! PathogenesisModel abstract base class.
  *
@@ -59,7 +62,7 @@ public:
     
     /** For Vivax: determine the chance of a NMF and sample, returning either
      * NONE or STATE_NMF. */
-    static Pathogenesis::State sampleNMF( double ageYears );
+    static Pathogenesis::State sampleNMF( LocalRng& rng, double ageYears );
     
     /** Summarize PathogenesisModel details
      *

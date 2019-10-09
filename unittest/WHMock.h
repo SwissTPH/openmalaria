@@ -47,7 +47,7 @@ public:
     
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX ) const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
-    virtual bool summarize(const Host::Human& human)const;
+    virtual bool summarize(Host::Human& human)const;
     virtual void importInfection(LocalRng& rng);
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual void optionalPqTreatment( Host::Human& human );
@@ -55,7 +55,7 @@ public:
     virtual void treatPkPd(size_t schedule, size_t dosages, double age, double delay_d);
     virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
     virtual double getTotalDensity() const;
-    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
+    virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );
     virtual void clearImmunity();
     virtual double getCumulative_h() const;

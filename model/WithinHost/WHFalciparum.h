@@ -65,7 +65,7 @@ public:
     
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
-    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
+    virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
     virtual void treatment( Host::Human& human, TreatmentId treatId );
     virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     

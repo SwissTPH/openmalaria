@@ -228,7 +228,7 @@ public:
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits ) const{
         mon::reportEventMHD( mon::MHD_SCREEN, human, method );
-        if( human.withinHostModel->diagnosticResult(diagnostic) ){
+        if( human.withinHostModel->diagnosticResult(human.rng(), diagnostic) ){
             positive.deploy( human, method, vaccLimits );
         }else{
             negative.deploy( human, method, vaccLimits );

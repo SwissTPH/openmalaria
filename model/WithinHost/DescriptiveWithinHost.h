@@ -51,7 +51,7 @@ public:
     virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
             double ageInYears, double bsvFactor);
     
-    virtual bool summarize( const Host::Human& human )const;
+    virtual bool summarize( Host::Human& human )const;
     
 protected:
     virtual void clearInfections( Treatments::Stages stage );

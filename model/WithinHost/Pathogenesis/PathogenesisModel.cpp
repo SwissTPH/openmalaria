@@ -19,6 +19,7 @@
  */
 
 #include "WithinHost/Pathogenesis/Submodels.h"
+#include "Host/Human.h"
 #include "mon/reporting.h"
 #include "util/random.h"
 #include "util/ModelOptions.h"
@@ -139,12 +140,12 @@ Pathogenesis::StatePair PathogenesisModel::determineState(Host::Human& human,
         if( global_RNG.bernoulli( indirectRisk ) )
             result.indirectMortality = true;        
     }else{
-        result.state = sampleNMF( ageYears );
+        result.state = sampleNMF( human.rng(), ageYears );
     }
     return result;
 }
 
-Pathogenesis::State PathogenesisModel::sampleNMF( double ageYears ){
+Pathogenesis::State PathogenesisModel::sampleNMF( LocalRng& rng, double ageYears ){
     if ( pg_NMF_incidence.isSet() ) {
         double pNMF = pg_NMF_incidence.eval( ageYears );
         if( global_RNG.bernoulli( pNMF ) )
