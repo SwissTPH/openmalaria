@@ -88,13 +88,8 @@ public:
   }
   //@}
   
-  /** Main human update.
-   *
-   * @param transmission A reference to the transmission model
-   * @param doUpdate If false, returns immediately after is-dead check.
-   * @returns True if the individual is dead (too old or otherwise killed).
-   */
-  bool update(const Transmission::TransmissionModel& transmission, bool doUpdate);
+  /// Main human update method.
+  void update(const Transmission::TransmissionModel& transmission);
   //@}
   
   ///@brief Deploy "intervention" functions
@@ -116,6 +111,8 @@ public:
   
   /// @brief Small functions
   //@{
+    bool remove() { return m_remove; }
+    
     /// Get access to the RNG
     inline LocalRng& rng() { return m_rng; }
     
@@ -207,6 +204,7 @@ private:
   LocalRng m_rng;
   
   SimTime m_DOB;        // date of birth; humans are always born at the end of a time step
+  bool m_remove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
   
   /// Vaccines
   interventions::PerHumanVaccine _vaccine;

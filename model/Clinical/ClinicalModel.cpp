@@ -132,9 +132,7 @@ ClinicalModel::~ClinicalModel () {
 bool ClinicalModel::isDead( SimTime age ){
     if( age >= sim::maxHumanAge())       // too old (reached age limit)
         doomed = DOOMED_TOO_OLD;
-    if (doomed > NOT_DOOMED)	// killed by some means
-        return true;	// remove from population
-    return false;
+    return doomed > NOT_DOOMED;	// killed by some means
 }
 
 void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {

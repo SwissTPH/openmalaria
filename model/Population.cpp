@@ -157,7 +157,11 @@ void Population::createInitialHumans()
     {
         int targetPop = AgeStructure::targetCumPop( iage, populationSize );
         while (cumulativePop < targetPop) {
-            newHuman( SimTime::zero() - SimTime::fromTS(iage) );
+            SimTime dob = SimTime::zero() - SimTime::fromTS(iage);
+            util::streamValidate( dob.inDays() );
+            uint64_t seed1 = util::master_RNG.gen_seed();
+            uint64_t seed2 = util::master_RNG.gen_seed();
+            population.push_back( Host::Human (seed1, seed2, dob) );
             ++cumulativePop;
         }
     }
@@ -170,20 +174,23 @@ void Population::createInitialHumans()
 
 // -----  non-static methods: simulation loop  -----
 
-void Population::newHuman( SimTime dob ){
-    util::streamValidate( dob.inDays() );
-    uint64_t seed1 = util::master_RNG.gen_seed();
-    uint64_t seed2 = util::master_RNG.gen_seed();
-    population.push_back( Host::Human (seed1, seed2, dob) );
-    ++recentBirths;
-}
-
 void Population::update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
     // (until humans old enough to be pregnate get updated and can be infected).
     Host::NeonatalMortality::update (*this);
+    
+    // Update each human in turn
+    for (Host::Human& human : population) {
+        // Update human, and remove if too old.
+        // We only need to update humans who will survive past the end of the
+        // "one life span" init phase (this is an optimisation). lastPossibleTS
+        // is the time step they die at (some code still runs on this step).
+        SimTime lastPossibleTS = human.getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
+        if (lastPossibleTS >= firstVecInitTS)
+            human.update(transmission);
+    }
     
     //NOTE: other parts of code are not set up to handle changing population size. Also
     // populationSize is assumed to be the _actual and exact_ population size by other code.
@@ -192,44 +199,29 @@ void Population::update( const Transmission::TransmissionModel& transmission, Si
     int targetPop = populationSize;
     int cumPop = 0;
 
-    // Update each human in turn
-    //std::cout<<" time " <<t<<std::endl;
-    Iter last = population.end();
-    --last;
-    for(Iter iter = population.begin(); iter != population.end();) {
-        // Update human, and remove if too old.
-        // We only need to update humans who will survive past the end of the
-        // "one life span" init phase (this is an optimisation). lastPossibleTS
-        // is the time step they die at (some code still runs on this step).
-        SimTime lastPossibleTS = iter->getDateOfBirth() + sim::maxHumanAge();   // this is last time of possible update
-        bool updateHuman = lastPossibleTS >= firstVecInitTS;
-        bool isDead = iter->update(transmission, updateHuman);
-        if( isDead ){
-            iter = population.erase (iter);
-            continue;
-        }
-        
-        //BEGIN Population size & age structure
-        ++cumPop;
-
+    for (Iter iter = population.begin(); iter != population.end();) {
+        bool isDead = iter->remove();
         // if (Actual number of people so far > target population size for this age)
         // "outmigrate" some to maintain population shape
         //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
         // Also see targetPop = ... comment above
-        if( cumPop > AgeStructure::targetCumPop(iter->age(sim::ts1()).inSteps(), targetPop) ){
-            --cumPop;
+        bool outmigrate = cumPop >= AgeStructure::targetCumPop(iter->age(sim::ts1()).inSteps(), targetPop);
+        
+        if( isDead || outmigrate ){
             iter = population.erase (iter);
             continue;
         }
-        //END Population size & age structure
+        ++cumPop;
         ++iter;
     } // end of per-human updates
 
     // increase population size to targetPop
+    recentBirths += (targetPop - cumPop);
     while (cumPop < targetPop) {
         // humans born at end of this time step = beginning of next, hence ts1
-        newHuman( sim::ts1() );
-        //++nCounter;
+        uint64_t seed1 = util::master_RNG.gen_seed();
+        uint64_t seed2 = util::master_RNG.gen_seed();
+        population.push_back( Host::Human (seed1, seed2, sim::ts1()) );
         ++cumPop;
     }
 }
