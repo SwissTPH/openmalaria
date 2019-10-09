@@ -41,7 +41,6 @@ public:
     MolineauxInfectionSuite() : m_rng(0, 0) {}
     
     void setUp () {
-        util::global_RNG.seed( 1095, 721347520444481703 );     // make sure other tests don't influence our random numbers
         m_rng.seed( 1095, 721347520444481703 );
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();

@@ -83,7 +83,6 @@ set (Model_CPP
   util/checkpoint.cpp
   util/ModelOptions.cpp
   util/CommandLine.cpp
-  util/random.cpp
   util/AgeGroupInterpolation.cpp
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp

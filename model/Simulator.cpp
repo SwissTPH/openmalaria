@@ -49,6 +49,10 @@ namespace OM {
     using interventions::InterventionManager;
     using Transmission::TransmissionModel;
 
+namespace util {
+    MasterRng master_RNG(0, 0);
+}
+
 bool Simulator::startedFromCheckpoint;  // static
 
 const char* CHECKPOINT = "checkpoint";
@@ -89,7 +93,6 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     Parameters parameters( model.getParameters() );     // depends on nothing
     WithinHost::Genotypes::init( scenario );
     
-    util::global_RNG.seed( model.getParameters().getIseed(), 721347520444481703 );
     // The master RNG is cryptographic with a hard-coded IV. Use of low
     // Hamming weight inputs (numbers close to 0) should not reduce quality.
     util::master_RNG.seed( model.getParameters().getIseed(), 0 );
@@ -361,7 +364,6 @@ void Simulator::checkpoint (istream& stream) {
         // to be negative
         sim::s_t0 & stream;
         sim::s_t1 & stream;
-        util::global_RNG.checkpoint(stream);
         util::master_RNG.checkpoint(stream);
     } catch (const util::checkpoint_error& e) { // append " (pos X of Y bytes)"
         ostringstream pos;
@@ -405,7 +407,6 @@ void Simulator::checkpoint (ostream& stream) {
     
     sim::s_t0 & stream;
     sim::s_t1 & stream;
-    util::global_RNG.checkpoint (stream);
     util::master_RNG.checkpoint(stream);
     
     util::timer::stopCheckpoint ();

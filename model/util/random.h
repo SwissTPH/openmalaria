@@ -21,8 +21,22 @@
 #ifndef OM_util_random
 #define OM_util_random
 
-// Define to use boost distributions. Unfortunately these are not necessarily
-// value-stable or portable.
+/* This module contains the random-number generator and distributions wrapper.
+ *
+ * We use modern RNGs:
+ * 
+ * -    ChaCha<8> for our master RNG; this is a low-margin cryptographic-grade
+ *      generator yet still very fast
+ * -    PCG32 for our local RNGs; this is fast, passes stringent tests and has
+ *      a very small state size, allowing embedding within each human.
+ * 
+ * To sample from distributions, we fall back to the venerable GSL, which
+ * provides fast sampling from a wide variety of distributions and whose results
+ * are stable across platforms and releases, allowing reproducibility.
+ */
+
+// Experimental support for boost random number distributions.
+// Unfortunately the authors do not support reproducibility of results.
 // #define OM_RANDOM_USE_BOOST_DIST
 
 #include "Global.h"
@@ -291,14 +305,11 @@ private:
     gsl_rng m_gsl_gen;
 };
 
+// I would prefer to use pcg64, but MSVC mysteriously fails
 typedef RNG<pcg32> LocalRng;
 typedef RNG<ChaCha<8>> MasterRng;
 
-/// The global RNG
-// TODO: replace with instances local to humans
-// I would prefer to use pcg64, but MSVC mysteriously fails
-extern LocalRng global_RNG;
-/// The master RNG, used only where no local RNG is available
+/// The master RNG, used only for seeding local RNGs
 extern MasterRng master_RNG;
 
 } }
