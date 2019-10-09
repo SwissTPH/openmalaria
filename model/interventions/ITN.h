@@ -33,6 +33,7 @@ namespace interventions {
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
+    using util::LocalRng;
     using Transmission::PerHostInterventionData;
 
 
@@ -156,7 +157,7 @@ public:
     
     virtual void print_details( std::ostream& out )const;
     
-    virtual unique_ptr<PerHostInterventionData> makeHumanPart() const;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart(LocalRng& rng) const;
     virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream, ComponentId id ) const;
     
 private:
@@ -228,10 +229,10 @@ private:
  */
 class HumanITN : public PerHostInterventionData {
 public:
-    HumanITN( const ITNComponent& params );
+    HumanITN( LocalRng& rng, const ITNComponent& params );
     HumanITN( istream& stream, ComponentId id );
     
-    virtual void redeploy(const Transmission::HumanVectorInterventionComponent& params);
+    virtual void redeploy(LocalRng& rng, const Transmission::HumanVectorInterventionComponent& params);
     
     inline double getHoleIndex()const{
         return holeIndex;

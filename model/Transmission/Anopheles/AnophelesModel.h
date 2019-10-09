@@ -185,13 +185,13 @@ public:
 
     ///@brief Functions called to deploy interventions
     //@{
-    void deployVectorPopInterv (size_t instance);
+    void deployVectorPopInterv (LocalRng& rng, size_t instance);
     /// Deploy some traps
     /// 
     /// @param instance Index of this type of trap
     /// @param number The number of traps to deploy
     /// @param lifespan Time until these traps are removed/replaced/useless
-    void deployVectorTrap(size_t species, size_t instance, double number, SimTime lifespan);
+    void deployVectorTrap(LocalRng& rng, size_t species, size_t instance, double number, SimTime lifespan);
 
     inline void uninfectVectors() {
         transmission.uninfectVectors();

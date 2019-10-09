@@ -86,7 +86,7 @@ void VaccineComponent::print_details(ostream& out) const
         out << id().id << "\t" << (type == Vaccine::PEV ? "PEV" : (type == Vaccine::BSV ? "BSV" : "TBV"));
 }
 
-double VaccineComponent::getInitialEfficacy (size_t numPrevDoses) const
+double VaccineComponent::getInitialEfficacy (LocalRng& rng, size_t numPrevDoses) const
 {
     /* If initialMeanEfficacy.size or more doses have already been given, use
      * the last efficacy. */
@@ -131,10 +131,10 @@ PerEffectPerHumanVaccine::PerEffectPerHumanVaccine() :
 {
 }
 
-PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( ComponentId id, const VaccineComponent& params ) :
+PerEffectPerHumanVaccine::PerEffectPerHumanVaccine( LocalRng& rng, ComponentId id, const VaccineComponent& params ) :
     component( id ), numDosesAdministered(0), initialEfficacy(0.0)
 {
-    hetSample = params.decayFunc->hetSample();
+    hetSample = params.decayFunc->hetSample(rng);
 }
 
 double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
@@ -150,7 +150,7 @@ double PerHumanVaccine::getFactor( Vaccine::Types type ) const{
     return factor;
 }
 
-bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
+bool PerHumanVaccine::possiblyVaccinate( Host::Human& human,
         ComponentId componentId, interventions::VaccineLimits vaccLimits )
 {
     PerEffectPerHumanVaccine* effect = 0;
@@ -169,11 +169,11 @@ bool PerHumanVaccine::possiblyVaccinate( const Host::Human& human,
     const VaccineComponent& params = VaccineComponent::getParams( componentId );
     
     if( effect == 0 ){
-        effects.push_back( PerEffectPerHumanVaccine( componentId, params ) );
+        effects.push_back( PerEffectPerHumanVaccine( human.rng(), componentId, params ) );
         effect = &effects.back();
     }
     
-    effect->initialEfficacy = params.getInitialEfficacy(numDosesAdministered);
+    effect->initialEfficacy = params.getInitialEfficacy(human.rng(), numDosesAdministered);
     util::streamValidate(effect->initialEfficacy);
     
     effect->numDosesAdministered = numDosesAdministered + 1;

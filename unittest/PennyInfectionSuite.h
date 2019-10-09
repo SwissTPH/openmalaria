@@ -46,8 +46,6 @@ public:
     }
     void tearDown () {
         delete infection;
-        util::global_RNG.seed(0);  // make sure nothing else uses this seed/reports
-        util::master_RNG.seed(0);  // make sure nothing else uses this seed/reports
     }
     
     void testThresholds(){

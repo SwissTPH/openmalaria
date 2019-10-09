@@ -40,8 +40,8 @@ public:
     
     virtual double getBaseTMult() const =0;
     
-    DecayFuncHet hetSample () const{
-        return DecayFuncHet(het.sample() * getBaseTMult());
+    DecayFuncHet hetSample (LocalRng& rng) const{
+        return DecayFuncHet(het.sample(rng) * getBaseTMult());
     }
     DecayFuncHet hetSample (NormalSample sample) const{
         return DecayFuncHet(het.sample(sample) * getBaseTMult());
@@ -50,13 +50,15 @@ public:
 
 class ConstantDecayFunction : public DecayFunction {
 public:
-    DecayFuncHet hetSample () const{
+    DecayFuncHet hetSample (LocalRng& rng) const{
         DecayFuncHet ret;
         ret.tMult = 1.0;
         return ret;
     }
     DecayFuncHet hetSample (NormalSample sample) const{
-        return hetSample();
+        DecayFuncHet ret;
+        ret.tMult = 1.0;
+        return ret;
     }
     
     double eval(double effectiveAge) const{
@@ -66,7 +68,7 @@ public:
             return 0.0;
         return 1.0;
     }
-    SimTime sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return SimTime::future();        // decay occurs "in the future" (don't use SimTime::never() because that is interpreted as being in the past)
     }
 };
@@ -96,7 +98,7 @@ public:
         }
     }
     
-    SimTime sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return SimTime::roundToTSFromDays( 1.0 / invL );
     }
     
@@ -122,7 +124,7 @@ public:
         }
     }
     
-    SimTime sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
         // Note: rounds to nearest. Object may decay instantly or at time L.
         return SimTime::roundToTSFromDays(global_RNG.uniform_01() / invL);
     }
@@ -147,7 +149,7 @@ public:
         return exp( -effectiveAge );
     }
     
-    SimTime sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return SimTime::roundToTSFromDays( -log(global_RNG.uniform_01()) / invLambda );
     }
     
@@ -170,7 +172,7 @@ public:
         return exp( -pow(effectiveAge, k) );
     }
     
-    SimTime sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return SimTime::roundToTSFromDays( pow( -log(global_RNG.uniform_01()), 1.0/k ) / constOverLambda );
     }
     
@@ -194,7 +196,7 @@ public:
         return 1.0 / (1.0 + pow(effectiveAge, k));
     }
     
-    SimTime sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return SimTime::roundToTSFromDays( pow( 1.0 / global_RNG.uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
@@ -221,7 +223,7 @@ public:
         }
     }
     
-    SimTime sampleAgeOfDecay () const{
+    SimTime sampleAgeOfDecay (LocalRng& rng) const{
         return SimTime::roundToTSFromDays( sqrt( 1.0 - k / (k - log( global_RNG.uniform_01() )) ) / invL );
     }
     

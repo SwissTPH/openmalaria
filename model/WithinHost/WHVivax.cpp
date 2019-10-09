@@ -52,14 +52,14 @@ struct HypnozoiteReleaseDistribution: private LognormalSampler {
     };
     
     /// Sample the time until next release
-    SimTime sampleReleaseDelay() const {
+    SimTime sampleReleaseDelay(LocalRng& rng) const {
         double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
         double delay = numeric_limits<double>::quiet_NaN();       // in days
         int count = 0;
         int maxcount = 1e3;
         
         do{
-            delay = LognormalSampler::sample();
+            delay = LognormalSampler::sample(rng);
             count += 1;
             
             if( count >= maxcount ){
@@ -143,9 +143,9 @@ SimTime sampleReleaseDelay(LocalRng& rng){
     }
     
     if (isFirstRelease){
-        return latentRelapse1st.sampleReleaseDelay();
+        return latentRelapse1st.sampleReleaseDelay(rng);
     } else {
-        return latentRelapse2nd.sampleReleaseDelay();
+        return latentRelapse2nd.sampleReleaseDelay(rng);
     }
 }
 
@@ -212,7 +212,7 @@ VivaxBrood::VivaxBrood( istream& stream ){
 }
 
 
-VivaxBrood::UpdResult VivaxBrood::update(){
+VivaxBrood::UpdResult VivaxBrood::update(LocalRng& rng){
     if( bloodStageClearDate == sim::ts0() ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
@@ -247,7 +247,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         }
         result.newBS = true;
         
-        double lengthDays = bloodStageLength.sample();
+        double lengthDays = bloodStageLength.sample(rng);
         bloodStageClearDate = sim::ts0() + SimTime::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
@@ -370,7 +370,7 @@ void WHVivax::update(LocalRng& rng,
     while( inf != infections.end() ){
         if( treatmentLiver ) inf->treatmentLS();
         if( treatmentBlood ) inf->treatmentBS();        // clearnace due to treatment; no protection against reemergence
-        VivaxBrood::UpdResult result = inf->update();
+        VivaxBrood::UpdResult result = inf->update(rng);
         if( result.newPrimaryBS ) cumPrimInf += 1;
         
         if( result.newBS ){

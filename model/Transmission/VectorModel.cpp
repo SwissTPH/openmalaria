@@ -156,10 +156,10 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
-VectorModel::VectorModel (const scnXml::Entomology& entoData,
+VectorModel::VectorModel (uint64_t seed, const scnXml::Entomology& entoData,
                           const scnXml::Vector vectorData, int populationSize) :
     TransmissionModel( entoData, WithinHost::Genotypes::N() ),
-    initIterations(0)
+    m_rng(seed), initIterations(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.
     // TransmissionModel::createTransmissionModel checks length of list >= 1.
@@ -535,7 +535,7 @@ void VectorModel::deployVectorPopInterv (size_t instance) {
         throw xml_scenario_error(vec_mode_err);
     }
     for( auto it = species.begin(); it != species.end(); ++it ){
-        it->deployVectorPopInterv(instance);
+        it->deployVectorPopInterv(m_rng, instance);
     }
 }
 void VectorModel::deployVectorTrap( size_t instance, double number, SimTime lifespan ){
@@ -543,7 +543,7 @@ void VectorModel::deployVectorTrap( size_t instance, double number, SimTime life
         throw xml_scenario_error(vec_mode_err);
     }
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
-        species[i].deployVectorTrap( i, instance, number, lifespan );
+        species[i].deployVectorTrap( m_rng, i, instance, number, lifespan );
     }
 }
 void VectorModel::uninfectVectors() {
@@ -562,6 +562,7 @@ void VectorModel::summarize () {
 
 void VectorModel::checkpoint (istream& stream) {
     TransmissionModel::checkpoint (stream);
+    m_rng.checkpoint(stream);
     initIterations & stream;
     species & stream;
     saved_sum_avail & stream;
@@ -570,6 +571,7 @@ void VectorModel::checkpoint (istream& stream) {
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
+    m_rng.checkpoint(stream);
     initIterations & stream;
     species & stream;
     saved_sum_avail & stream;

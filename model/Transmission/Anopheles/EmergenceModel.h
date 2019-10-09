@@ -33,6 +33,7 @@ namespace Anopheles {
 
 using namespace std;
 using util::vecDay;
+using util::LocalRng;
 
 // forward declare to avoid circular dependency:
 class MosqTransmission;
@@ -116,7 +117,7 @@ public:
     ///@brief Interventions and reporting
     //@{
     /// Start an intervention affecting the vector population.
-    void deployVectorPopInterv (size_t instance);
+    void deployVectorPopInterv (LocalRng& rng, size_t instance);
     
     virtual double getResAvailability() const =0;
     virtual double getResRequirements() const =0;

@@ -175,9 +175,9 @@ void EmergenceModel::initVectorInterv( const scnXml::VectorSpeciesIntervention& 
     }
 }
 
-void EmergenceModel::deployVectorPopInterv (size_t instance) {
+void EmergenceModel::deployVectorPopInterv (LocalRng& rng, size_t instance) {
     assert( instance < emergenceReduction.size() );
-    emergenceReduction[instance].deploy( sim::now() );
+    emergenceReduction[instance].deploy( rng, sim::now() );
 }
 
 

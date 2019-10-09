@@ -85,7 +85,7 @@ void NeonatalMortality::staticCheckpoint (ostream& stream) {
     prevByGestationalAge & stream;
 }
 
-bool NeonatalMortality::eventNeonatalMortality() {
+bool NeonatalMortality::eventNeonatalMortality(LocalRng& rng) {
   return global_RNG.uniform_01() <= riskFromMaternalInfection;
 }
 

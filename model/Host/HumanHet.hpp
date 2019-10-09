@@ -52,7 +52,7 @@ struct HumanHet {
         opt_triple_het = util::ModelOptions::option (util::TRIPLE_HET);
     }
     
-    static HumanHet sample(){
+    static HumanHet sample(LocalRng& rng){
         HumanHet het;
         if( opt_trans_het ){
             het.availabilityFactor = 0.2;

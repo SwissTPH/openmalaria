@@ -45,10 +45,7 @@ public:
         UnittestUtil::Infection_init_latentP_and_NaN ();
         // test should call molInit( ... )
     }
-    void tearDown () {
-        util::global_RNG.seed(0);  // make sure nothing else uses this seed/reports
-        util::master_RNG.seed(0);  // make sure nothing else uses this seed/reports
-    }
+    void tearDown () {}
     
     static void readVector(std::vector<double>& vec, const char* file){
         ifstream istr(file);

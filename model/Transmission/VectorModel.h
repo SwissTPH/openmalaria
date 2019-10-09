@@ -44,7 +44,7 @@ public:
   static const map<string,size_t>& getSpeciesIndexMap();
   
     
-  VectorModel(const scnXml::Entomology& entoData, const scnXml::Vector vectorData, int populationSize);
+  VectorModel(uint64_t seed, const scnXml::Entomology& entoData, const scnXml::Vector vectorData, int populationSize);
   virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring
@@ -96,6 +96,8 @@ private:
   void ctsCbResAvailability (ostream& stream);
   void ctsCbResRequirements (ostream& stream);
   
+    /// RNG used by the transmission model
+    LocalRng m_rng;
   
     /// Number of iterations performed during initialization.
     /// 

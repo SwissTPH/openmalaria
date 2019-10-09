@@ -48,10 +48,10 @@ public:
     }
     
     /** Trigger a deployment, if decay function was set. */
-    inline void deploy (SimTime time){
+    inline void deploy (LocalRng& rng, SimTime time){
         if( decay.get() == 0 ) return;  // cannot deploy
         deploy_t = time;
-        het = decay->hetSample();
+        het = decay->hetSample(rng);
     }
     
     /** Get the value (0 if before any deployment or after complete decay,

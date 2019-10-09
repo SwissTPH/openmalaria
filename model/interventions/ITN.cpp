@@ -534,7 +534,7 @@ ITNComponent::ITNComponent( ComponentId id, const scnXml::ITNDescription& elt,
 }
 
 void ITNComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
-    human.perHostTransmission.deployComponent( *this );
+    human.perHostTransmission.deployComponent( human.rng(), *this );
     mon::reportEventMHD( mon::MHD_ITN, human, method );
 }
 
@@ -546,8 +546,8 @@ void ITNComponent::print_details( std::ostream& out )const{
     out << id().id << "\tITN";
 }
 
-unique_ptr<PerHostInterventionData> ITNComponent::makeHumanPart() const{
-    return unique_ptr<PerHostInterventionData>(new HumanITN( *this ));
+unique_ptr<PerHostInterventionData> ITNComponent::makeHumanPart(LocalRng& rng) const{
+    return unique_ptr<PerHostInterventionData>(new HumanITN( rng, *this ));
 }
 unique_ptr<PerHostInterventionData> ITNComponent::makeHumanPart( istream& stream, ComponentId id ) const{
     return unique_ptr<PerHostInterventionData>(new HumanITN( stream, id ));
@@ -621,7 +621,7 @@ void ITNComponent::ITNAnopheles::init(
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
-HumanITN::HumanITN( const ITNComponent& params ) :
+HumanITN::HumanITN( LocalRng& rng, const ITNComponent& params ) :
         PerHostInterventionData( params.id() ),
         nHoles( 0 ),
         holeIndex( 0.0 )
@@ -629,30 +629,30 @@ HumanITN::HumanITN( const ITNComponent& params ) :
     // Net rips and insecticide loss are assumed to co-vary dependent on
     // handling of net. They are sampled once per human: human handling is
     // presumed to be the largest cause of variance.
-    util::NormalSample x = util::NormalSample::generate();
+    util::NormalSample x = util::NormalSample::generate(rng);
     holeRate = params.holeRate.sample(x);
     ripRate = params.ripRate.sample(x);
     insecticideDecayHet = params.insecticideDecay->hetSample(x);
 
     // Sample per-deployment variables as in redeploy:
-    disposalTime = sim::now() + params.attritionOfNets->sampleAgeOfDecay();
+    disposalTime = sim::now() + params.attritionOfNets->sampleAgeOfDecay(rng);
     // this is sampled independently: initial insecticide content doesn't depend on handling
-    initialInsecticide = params.initialInsecticide.sample();
+    initialInsecticide = params.initialInsecticide.sample(rng);
     if( initialInsecticide < 0.0 )
         initialInsecticide = 0.0;       // avoid negative samples
     if( initialInsecticide > params.maxInsecticide )
         initialInsecticide = params.maxInsecticide;
 }
 
-void HumanITN::redeploy(const OM::Transmission::HumanVectorInterventionComponent& params0) {
+void HumanITN::redeploy(LocalRng& rng, const OM::Transmission::HumanVectorInterventionComponent& params0) {
     const ITNComponent& params = *dynamic_cast<const ITNComponent*>(&params0);
     
     deployTime = sim::nowOrTs1();
-    disposalTime = sim::nowOrTs1() + params.attritionOfNets->sampleAgeOfDecay();
+    disposalTime = sim::nowOrTs1() + params.attritionOfNets->sampleAgeOfDecay(rng);
     nHoles = 0;
     holeIndex = 0.0;
     // this is sampled independently: initial insecticide content doesn't depend on handling
-    initialInsecticide = params.initialInsecticide.sample();
+    initialInsecticide = params.initialInsecticide.sample(rng);
     if( initialInsecticide < 0.0 )
         initialInsecticide = 0.0;	// avoid negative samples
     if( initialInsecticide > params.maxInsecticide )

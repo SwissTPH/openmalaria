@@ -165,7 +165,7 @@ void CommonWithinHost::update(LocalRng& rng,
     
     for( SimTime now = sim::ts0(), end = sim::ts0() + SimTime::oneTS(); now < end; now += SimTime::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
-        pkpdModel.medicate();
+        pkpdModel.medicate(rng);
         
         double sumLogDens = 0.0;
         
@@ -174,7 +174,7 @@ void CommonWithinHost::update(LocalRng& rng,
             bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);
             
             if( !expires ){     /* no expiry due to simple treatment model; do update */
-                const double drugFactor = pkpdModel.getDrugFactor(*inf, body_mass);
+                const double drugFactor = pkpdModel.getDrugFactor(rng, *inf, body_mass);
                 const double immFactor = immunitySurvivalFactor(ageInYears, (*inf)->cumulativeExposureJ());
                 const double survivalFactor = survivalFactor_part * immFactor * drugFactor;
                 // update, may result in termination of infection:

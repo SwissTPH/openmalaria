@@ -23,12 +23,15 @@
 
 #include "Global.h"
 #include "Transmission/PerHost.h"
+#include "util/random.h"
 
 namespace OM {
     class Parameters;
 namespace Host {
     class Human;
-    
+
+using util::LocalRng;
+
 /** Models how a per-host EIR translates into new infections
  * (roughly when bites from infected mosquitos infect the host).
  *
@@ -82,7 +85,7 @@ public:
    * @param baseAvailability This was BaselineAvailabilityMean from Constant.h,
    *	and had the value 1.0. Whether it should be anything else I don't know.
    */
-  virtual double getAvailabilityFactor(double baseAvailability = 1.0);
+  virtual double getAvailabilityFactor(LocalRng& rng, double baseAvailability = 1.0);
   
   /// Output _pinfected to the summary
   void summarize (const Host::Human& human);
@@ -102,11 +105,11 @@ public:
    * @param effectiveEIR    EIR adjusted for availability (age, het,
    *        outside transmission due to hospitalisation)
    */
-  int numNewInfections(const OM::Host::Human& human, double effectiveEIR);
+  int numNewInfections(OM::Host::Human& human, double effectiveEIR);
   
 protected:
   /// Calculates the expected number of infections, excluding vaccine effects
-  virtual double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans);
+  virtual double getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost& phTrans);
   
   double susceptibility ();
   
@@ -138,23 +141,23 @@ public:
   HeterogeneityWorkaroundII () {}
   virtual ~HeterogeneityWorkaroundII() {}
 protected:
-  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans);
+  double getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost& phTrans);
 };
 class NegBinomMAII : public InfectionIncidenceModel {
 public:
   NegBinomMAII () {}
   virtual ~NegBinomMAII() {}
-  virtual double getAvailabilityFactor(double baseAvailability = 1.0);
+  virtual double getAvailabilityFactor(LocalRng& rng, double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&);
+  double getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&);
 };
 class LogNormalMAII : public InfectionIncidenceModel {
 public:
   LogNormalMAII () {}
   virtual ~LogNormalMAII() {}
-  virtual double getAvailabilityFactor(double baseAvailability = 1.0);
+  virtual double getAvailabilityFactor(LocalRng& rng, double baseAvailability = 1.0);
 protected:
-  double getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&);
+  double getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&);
 };
 
 } }

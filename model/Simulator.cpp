@@ -110,8 +110,9 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     // Note: PerHost dependency can be postponed; it is only used to set adultAge
     population = unique_ptr<Population>(
             new Population( scenario.getDemography().getPopSize() ));
+    uint64_t trans_seed = util::master_RNG.gen_seed();
     transmission = unique_ptr<TransmissionModel>(
-            TransmissionModel::createTransmissionModel(scenario.getEntomology(), population->size()) );
+            TransmissionModel::createTransmissionModel(trans_seed, scenario.getEntomology(), population->size()) );
     
     // Depends on transmission model (for species indexes):
     // MDA1D may depend on health system (too complex to verify)

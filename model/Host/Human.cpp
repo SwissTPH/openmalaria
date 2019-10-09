@@ -68,9 +68,10 @@ Human::Human(uint64_t seed, SimTime dateOfBirth) :
     // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
     assert( m_DOB == sim::nowOrTs1() || (sim::now() == SimTime::zero() && m_DOB < sim::now()) );
     
-    HumanHet het = HumanHet::sample();
+    HumanHet het = HumanHet::sample(m_rng);
     withinHostModel = WithinHost::WHInterface::createWithinHostModel( m_rng, het.comorbidityFactor );
-    perHostTransmission.initialise (het.availabilityFactor * infIncidence->getAvailabilityFactor(1.0));
+    auto iiFactor = infIncidence->getAvailabilityFactor(m_rng, 1.0);
+    perHostTransmission.initialise (m_rng, het.availabilityFactor * iiFactor);
     clinicalModel = Clinical::ClinicalModel::createClinicalModel (het.treatmentSeekingFactor);
 }
 

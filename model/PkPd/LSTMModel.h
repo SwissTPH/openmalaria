@@ -110,7 +110,7 @@ public:
      * Note: poor adherence on the part of the patient is not modeled here; to
      * model, prescribe with a "poor adherence" schedule.
      */
-    void medicate();
+    void medicate(LocalRng& rng);
     
     /** Get concentration of the drug at the beginning of the day.
      * 
@@ -122,7 +122,7 @@ public:
      * Each time step, on each infection, the parasite density is multiplied by
      * the return value of this infection. The WithinHostModels are responsible
      * for clearing infections once the parasite density is negligible. */
-    double getDrugFactor (WithinHost::CommonInfection *inf, double body_mass) const;
+    double getDrugFactor (LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const;
     
     /** After any resident infections have been reduced by getDrugFactor(),
      * this function is called to update drug levels to their effective level
@@ -148,7 +148,7 @@ private:
      * new infection densities) happens first; hence medicate() will always be
      * called after getDrugFactor in a time step, and a time of zero means the
      * dose has effect from the start of the following time step. */
-    void medicateDrug(size_t typeIndex, double qty, double time);
+    void medicateDrug(LocalRng& rng, size_t typeIndex, double qty, double time);
   
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);

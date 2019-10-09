@@ -46,6 +46,7 @@ namespace WithinHost {
 namespace PkPd {
 using util::LognormalSampler;
 using util::NormalSample;
+using util::LocalRng;
 
 class LSTMDrugType;
 class LSTMDrug;
@@ -77,7 +78,7 @@ public:
     double calcFactor( double Kn, double neg_elim_rate, double* C0, double duration ) const;
     
     inline double slope() const{ return n; }
-    double IC50_pow_slope(size_t index, WithinHost::CommonInfection *inf) const;
+    double IC50_pow_slope(LocalRng& rng, size_t index, WithinHost::CommonInfection *inf) const;
     inline double IC50_pow_slope(NormalSample normal) const {
         return pow(IC50.sample(normal), n);
     }
@@ -126,7 +127,7 @@ public:
     static const vector<size_t>& getDrugsInUse();
     
     /** Create a per-human drug module for a given drug index. */
-    static unique_ptr<LSTMDrug> createInstance( size_t index );
+    static unique_ptr<LSTMDrug> createInstance( LocalRng& rng, size_t index );
     //@}
     
     
@@ -153,24 +154,24 @@ public:
     inline double molecular_weight_ratio() const{ return mwr; }
     
     /// Generate IC50 sample of metabolite
-    inline NormalSample IC50_correlated_sample(NormalSample parent) const {
-        return NormalSample::generate_correlated(parent, ic50_log_corr, ic50_corr_factor);
+    inline NormalSample IC50_correlated_sample(NormalSample parent, LocalRng& rng) const {
+        return NormalSample::generate_correlated(parent, ic50_log_corr, ic50_corr_factor, rng);
     }
 
-    inline double sample_Vd() const{
-        return vol_dist.sample();
+    inline double sample_Vd(LocalRng& rng) const{
+        return vol_dist.sample(rng);
     }
-    inline double sample_elim_rate() const{
-        return elimination_rate.sample();
+    inline double sample_elim_rate(LocalRng& rng) const{
+        return elimination_rate.sample(rng);
     }
-    inline double sample_conv_rate() const{
-        return conversion_rate.sample();
+    inline double sample_conv_rate(LocalRng& rng) const{
+        return conversion_rate.sample(rng);
     }
-    inline double sample_k12() const{ return k12.sample(); }
-    inline double sample_k21() const{ return k21.sample(); }
-    inline double sample_k13() const{ return k13.sample(); }
-    inline double sample_k31() const{ return k31.sample(); }
-    inline double sample_ka() const{ return absorption_rate.sample(); }
+    inline double sample_k12(LocalRng& rng) const{ return k12.sample(rng); }
+    inline double sample_k21(LocalRng& rng) const{ return k21.sample(rng); }
+    inline double sample_k13(LocalRng& rng) const{ return k13.sample(rng); }
+    inline double sample_k31(LocalRng& rng) const{ return k31.sample(rng); }
+    inline double sample_ka(LocalRng& rng) const{ return absorption_rate.sample(rng); }
     
     /** Return reference to correct drug-phenotype data. */
     const LSTMDrugPD& getPD( uint32_t genotype ) const;

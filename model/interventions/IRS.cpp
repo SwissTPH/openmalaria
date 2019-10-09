@@ -65,7 +65,7 @@ IRSComponent::IRSComponent( ComponentId id, const scnXml::IRSDescription& elt,
 }
 
 void IRSComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
-    human.perHostTransmission.deployComponent(*this);
+    human.perHostTransmission.deployComponent(human.rng(), *this);
     mon::reportEventMHD( mon::MHD_IRS, human, method );
 }
 
@@ -75,8 +75,8 @@ void IRSComponent::print_details( std::ostream& out )const{
     out << id().id << "\tIRS";
 }
 
-unique_ptr<PerHostInterventionData> IRSComponent::makeHumanPart() const{
-    return unique_ptr<PerHostInterventionData>(new HumanIRS( *this ));
+unique_ptr<PerHostInterventionData> IRSComponent::makeHumanPart(LocalRng& rng) const{
+    return unique_ptr<PerHostInterventionData>(new HumanIRS( rng, *this ));
 }
 unique_ptr<PerHostInterventionData> IRSComponent::makeHumanPart( istream& stream, ComponentId id ) const{
     return unique_ptr<PerHostInterventionData>(new HumanIRS( stream, id ));
@@ -222,8 +222,8 @@ double IRSComponent::IRSAnopheles::SurvivalFactor::survivalFactor(
     return survivalFactor;
 }
 
-double IRSComponent::sampleInitialInsecticide() const{
-    double sample = initialInsecticide.sample();
+double IRSComponent::sampleInitialInsecticide(LocalRng& rng) const{
+    double sample = initialInsecticide.sample(rng);
     if( sample < 0.0 )
         sample = 0.0;       // avoid negative samples
     if( sample > maxInsecticide )
@@ -233,20 +233,20 @@ double IRSComponent::sampleInitialInsecticide() const{
 
 
 // ———  per-human data  ———
-HumanIRS::HumanIRS( const IRSComponent& params ) :
+HumanIRS::HumanIRS( LocalRng& rng, const IRSComponent& params ) :
     PerHostInterventionData( params.id() ),
-    initialInsecticide( params.sampleInitialInsecticide() )
+    initialInsecticide( params.sampleInitialInsecticide(rng) )
 {
     // Varience factor of decay is sampled once per human: human is assumed
     // to account for most variance.
-    insecticideDecayHet = params.insecticideDecay->hetSample();
+    insecticideDecayHet = params.insecticideDecay->hetSample(rng);
 }
 
-void HumanIRS::redeploy( const OM::Transmission::HumanVectorInterventionComponent& params ) {
+void HumanIRS::redeploy( LocalRng& rng, const OM::Transmission::HumanVectorInterventionComponent& params ) {
     deployTime = sim::nowOrTs1();
     const IRSComponent* irsParams = dynamic_cast<const IRSComponent*>(&params);
     assert( irsParams != 0 );   // code error if this fails
-    initialInsecticide = irsParams->sampleInitialInsecticide();
+    initialInsecticide = irsParams->sampleInitialInsecticide(rng);
 }
 
 void HumanIRS::update(Host::Human& human){

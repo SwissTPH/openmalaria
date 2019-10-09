@@ -204,12 +204,12 @@ public:
     }
     
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
-        for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            SimTime age = iter->age(sim::now());
+        for(Human& human : population) {
+            SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
+                if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
                     if( util::global_RNG.bernoulli( coverage ) ){
-                        deployToHuman( *iter, mon::Deploy::TIMED );
+                        deployToHuman( human, mon::Deploy::TIMED );
                     }
                 }
             }
@@ -274,9 +274,9 @@ public:
             // selected from the list unprotected.
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
             cerr << "cum deployment: prop protected " << propProtected << "; additionalCoverage " << additionalCoverage << "; total " << total << endl;
-            for(auto iter = unprotected.begin(); iter != unprotected.end(); ++iter) {
+            for(Human* human : unprotected) {
                 if( util::global_RNG.uniform_01() < additionalCoverage ){
-                    deployToHuman( **iter, mon::Deploy::TIMED );
+                    deployToHuman( *human, mon::Deploy::TIMED );
                 }
             }
         }

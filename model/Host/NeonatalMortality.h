@@ -22,6 +22,7 @@
 #define Hmod_NeonatalMortality
 
 #include "Global.h"
+#include "util/random.h"
 
 namespace scnXml {
     class Clinical;
@@ -29,6 +30,8 @@ namespace scnXml {
 namespace OM {
     class Population;
 namespace Host {
+
+using util::LocalRng;
 
 class NeonatalMortality {
 public:
@@ -40,7 +43,7 @@ public:
   
   /** Called for each birth; returns true if infant dies due to mother's
    * infection. */
-  static bool eventNeonatalMortality();
+  static bool eventNeonatalMortality(LocalRng& rng);
   
   /** Calculate risk of a neonatal mortality based on humans 20-25 years old. */
   static void update (Population& population);

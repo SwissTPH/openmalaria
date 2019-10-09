@@ -76,7 +76,7 @@ public:
      *  or liver stages) and whether a new primary blood-stage has started (to
      *  update cumPrimInf)
      */
-    UpdResult update();
+    UpdResult update(LocalRng& rng);
     
     inline void setHadEvent( bool hadEvent ){ this->hadEvent = hadEvent; }
     inline bool hasHadEvent()const{ return hadEvent; }

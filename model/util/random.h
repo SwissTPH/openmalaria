@@ -91,7 +91,7 @@ struct RNG {
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
     }
     /// Seeding constructor
-    RNG(uint64_t seed): m_rng(seed) {
+    explicit RNG(uint64_t seed): m_rng(seed) {
         m_gsl_type = make_gsl_rng_type(m_rng);
         m_gsl_gen.type = &m_gsl_type;
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);

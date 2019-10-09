@@ -36,6 +36,7 @@ using Anopheles::PerHostAnoph;
 using util::AgeGroupInterpolator;
 using util::DecayFunction;
 using util::DecayFuncHet;
+using util::LocalRng;
 
 class HumanVectorInterventionComponent;
 
@@ -54,7 +55,7 @@ public:
     virtual ~PerHostInterventionData() {}
     
     /** Deploy an intervention. */
-    virtual void redeploy( const HumanVectorInterventionComponent& params ) =0;
+    virtual void redeploy( LocalRng& rng, const HumanVectorInterventionComponent& params ) =0;
     
     /** Per time step update. Used by ITNs to update hole decay. */
     virtual void update(Host::Human& human) =0;
@@ -107,7 +108,7 @@ public:
     virtual ~HumanVectorInterventionComponent() {}
     
     /** Create a new object to store human-specific details of deployment. */
-    virtual unique_ptr<PerHostInterventionData> makeHumanPart() const =0;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart(LocalRng&) const =0;
     virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream,
             interventions::ComponentId id ) const =0;
 protected:
@@ -130,7 +131,7 @@ public:
     ///@brief Initialisation / checkpionting
     //@{
     PerHost ();
-    void initialise (double availabilityFactor);
+    void initialise (LocalRng& rng, double availabilityFactor);
     //@}
     
     /// Call once per time step. Updates net holes.
@@ -145,7 +146,7 @@ public:
     }
   
     /// Deploy some intervention component
-    void deployComponent( const HumanVectorInterventionComponent& params );
+    void deployComponent( LocalRng& rng, const HumanVectorInterventionComponent& params );
     //@}
     
     /** @brief Availability of host to mosquitoes */
