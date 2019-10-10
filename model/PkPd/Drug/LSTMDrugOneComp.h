@@ -43,12 +43,12 @@ namespace PkPd {
 class LSTMDrugOneComp : public LSTMDrug {
 public:
     /** Create a new instance. */
-    LSTMDrugOneComp (const LSTMDrugType&);
+    LSTMDrugOneComp (const LSTMDrugType&, LocalRng& rng);
     
     virtual size_t getIndex() const;
     virtual double getConcentration(size_t index) const;
     
-    virtual double calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const;
+    virtual double calculateDrugFactor(LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const;
     virtual void updateConcentration (double body_mass);
     
 protected:

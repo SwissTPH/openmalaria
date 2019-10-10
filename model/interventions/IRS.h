@@ -31,6 +31,7 @@ namespace interventions {
     using util::DecayFuncHet;
     using util::NormalSampler;
     using util::LognormalSampler;
+    using util::LocalRng;
     using Transmission::PerHostInterventionData;
 
 class IRSComponent : public Transmission::HumanVectorInterventionComponent {
@@ -44,7 +45,7 @@ public:
     
     virtual void print_details( std::ostream& out )const;
     
-    virtual unique_ptr<PerHostInterventionData> makeHumanPart() const;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart(LocalRng& rng) const;
     virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream, ComponentId ) const;
     
 private:
@@ -137,7 +138,7 @@ private:
         friend class HumanIRS;
     };
     
-    double sampleInitialInsecticide() const;
+    double sampleInitialInsecticide(LocalRng& rng) const;
     
     NormalSampler initialInsecticide;
     double maxInsecticide;              // maximum initial insecticide
@@ -157,10 +158,10 @@ private:
  */
 class HumanIRS : public PerHostInterventionData {
 public:
-    HumanIRS( const IRSComponent& params );
+    HumanIRS( LocalRng& rng, const IRSComponent& params );
     HumanIRS( istream& stream, ComponentId id );
     
-    virtual void redeploy(const Transmission::HumanVectorInterventionComponent& params);
+    virtual void redeploy(LocalRng& rng, const Transmission::HumanVectorInterventionComponent& params);
     
     /// Get remaining insecticide content based on initial amount and decay.
     inline double getInsecticideContent(const IRSComponent& params)const{

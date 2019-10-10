@@ -11,3 +11,4 @@ util/SchemaTranslator/*.class
 .sconsign.dblite
 build*/
 lib
+.clangd

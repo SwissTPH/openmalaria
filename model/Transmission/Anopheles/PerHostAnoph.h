@@ -27,6 +27,7 @@
 namespace OM {
 namespace Transmission {
 namespace Anopheles {
+using util::LocalRng;
 
 /** Stores vector model data applicable between a category of host and a
  * mosquito species: intervention descriptions and model parameters.
@@ -94,7 +95,7 @@ class PerHostAnoph
 public:
     /** In lieu of a constructor initialises elements, using the passed base to
      * get baseline parameters. */
-    void initialise (size_t species, double availabilityFactor);
+    void initialise (LocalRng& rng, size_t species, double availabilityFactor);
     
     /// Checkpointing
     template<class S>

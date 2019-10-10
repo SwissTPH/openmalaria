@@ -19,6 +19,7 @@
  */
 
 #include "Global.h"
+#include "Host/Human.h"
 #include "WithinHost/DescriptiveWithinHost.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
@@ -42,8 +43,8 @@ void DescriptiveWithinHostModel::initDescriptive(){
     reportPatentInfected = mon::isUsedM(mon::MHR_PATENT_INFECTIONS);
 }
 
-DescriptiveWithinHostModel::DescriptiveWithinHostModel( double comorbidityFactor ) :
-        WHFalciparum( comorbidityFactor )
+DescriptiveWithinHostModel::DescriptiveWithinHostModel( LocalRng& rng, double comorbidityFactor ) :
+        WHFalciparum( rng, comorbidityFactor )
 {
     assert( SimTime::oneTS() == SimTime::fromDays(5) );
 }
@@ -80,14 +81,15 @@ void DescriptiveWithinHostModel::clearImmunity() {
     m_cumulative_h = 0.0;
     m_cumulative_Y_lag = 0.0;
 }
-void DescriptiveWithinHostModel::importInfection(){
+void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
     if( numInfs < MAX_INFECTIONS ){
         m_cumulative_h += 1;
         numInfs += 1;
         // This is a hook, used by interventions. The newly imported infections
         // should use initial frequencies to select genotypes.
         vector<double> weights( 0 );        // zero length: signal to use initial frequencies
-        infections.push_back(DescriptiveInfection(Genotypes::sampleGenotype(weights)));
+        uint32_t genotype = Genotypes::sampleGenotype(rng, weights);
+        infections.push_back(DescriptiveInfection(rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -95,7 +97,8 @@ void DescriptiveWithinHostModel::importInfection(){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_weights,
+void DescriptiveWithinHostModel::update(LocalRng& rng,
+        int nNewInfs, vector<double>& genotype_weights,
         double ageInYears, double bsvFactor)
 {
     // Note: adding infections at the beginning of the update instead of the end
@@ -104,7 +107,8 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(DescriptiveInfection (Genotypes::sampleGenotype(genotype_weights)));
+        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
+        infections.push_back(DescriptiveInfection (rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 
@@ -137,7 +141,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
         double immSurvFact = immunitySurvivalFactor(ageInYears, inf->cumulativeExposureJ());
-        inf->determineDensities(m_cumulative_h, infStepMaxDens, immSurvFact, _innateImmSurvFact, bsvFactor);
+        inf->determineDensities(rng, m_cumulative_h, infStepMaxDens, immSurvFact, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)
             infStepMaxDens = std::max(infStepMaxDens, timeStepMaxDensity);
@@ -172,7 +176,7 @@ void DescriptiveWithinHostModel::update(int nNewInfs, vector<double>& genotype_w
 
 // -----  Summarize  -----
 
-bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
+bool DescriptiveWithinHostModel::summarize( Host::Human& human )const{
     pathogenesisModel->summarize( human );
     
     if( infections.size() > 0 ){
@@ -183,7 +187,7 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
         if( reportPatentInfected ){
             for(std::list<DescriptiveInfection>::const_iterator inf =
                 infections.begin(); inf != infections.end(); ++inf) {
-            if( diagnostics::monitoringDiagnostic().isPositive( inf->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
+            if( diagnostics::monitoringDiagnostic().isPositive( human.rng(), inf->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, 0, 1 );
                 }
             }
@@ -198,7 +202,7 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
             for( auto gtype: dens_by_gtype ){
                 // we had at least one infection of this genotype
                 mon::reportStatMHGI( mon::MHR_INFECTED_GENOTYPE, human, gtype.first, 1 );
-                if( diagnostics::monitoringDiagnostic().isPositive(gtype.second, std::numeric_limits<double>::quiet_NaN()) ){
+                if( diagnostics::monitoringDiagnostic().isPositive(human.rng(), gtype.second, std::numeric_limits<double>::quiet_NaN()) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_GENOTYPE, human, gtype.first, 1 );
                     mon::reportStatMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, gtype.first, log(gtype.second) );
                 }
@@ -209,7 +213,7 @@ bool DescriptiveWithinHostModel::summarize( const Host::Human& human )const{
     // Some treatments (simpleTreat with steps=-1) clear infections immediately
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
-    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
+    if( diagnostics::monitoringDiagnostic().isPositive(human.rng(), totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
         mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
         mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent

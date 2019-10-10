@@ -45,18 +45,21 @@ namespace Transmission {
 class Population;
 namespace Host {
 
+using util::LocalRng;
+
 /** Interface to all sub-models storing data per-human individual.
  *
  * Still contains some data, but most is now contained in sub-models. */
 class Human {
 public:
-  
   /// @brief Construction and destruction, checkpointing
   //@{
   /** Initialise all variables of a human datatype.
    * 
-   * \param dateOfBirth date of birth (usually start of next time step) */
-  Human(SimTime dateOfBirth);
+   * Parameters seed1 and seed2 together form a 128-bit RNG seed.
+   * 
+   * @param dateOfBirth date of birth (usually start of next time step) */
+  Human(uint64_t seed1, uint64_t seed2, SimTime dateOfBirth);
   
   /// Allow move construction
   Human(Human&&) = default;
@@ -75,6 +78,7 @@ public:
       infIncidence & stream;
       withinHostModel & stream;
       clinicalModel & stream;
+      m_rng.checkpoint(stream);
       m_DOB & stream;
       _vaccine & stream;
       monitoringAgeGroup & stream;
@@ -84,13 +88,8 @@ public:
   }
   //@}
   
-  /** Main human update.
-   *
-   * @param transmission A reference to the transmission model
-   * @param doUpdate If false, returns immediately after is-dead check.
-   * @returns True if the individual is dead (too old or otherwise killed).
-   */
-  bool update(const Transmission::TransmissionModel& transmission, bool doUpdate);
+  /// Main human update method.
+  void update(const Transmission::TransmissionModel& transmission);
   //@}
   
   ///@brief Deploy "intervention" functions
@@ -112,6 +111,11 @@ public:
   
   /// @brief Small functions
   //@{
+    bool remove() { return m_remove; }
+    
+    /// Get access to the RNG
+    inline LocalRng& rng() { return m_rng; }
+    
     /** Get human's age with respect to some time. */
     inline SimTime age( SimTime time )const{ return time - m_DOB; }
     /** Date of birth. */
@@ -197,7 +201,10 @@ private:
   unique_ptr<Clinical::ClinicalModel> clinicalModel;
   //@}
   
+  LocalRng m_rng;
+  
   SimTime m_DOB;        // date of birth; humans are always born at the end of a time step
+  bool m_remove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
   
   /// Vaccines
   interventions::PerHumanVaccine _vaccine;

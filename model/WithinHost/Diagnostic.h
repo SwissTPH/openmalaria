@@ -22,6 +22,7 @@
 #define HS_DIAGNOSTIC
 
 #include "Global.h"
+#include "util/random.h"
 
 class UnittestUtil;
 namespace scnXml {
@@ -33,6 +34,8 @@ namespace OM {
     class Parameters;
 namespace WithinHost {
 
+using util::LocalRng;
+
 class Diagnostic {
 public:
     /** Use the test.
@@ -40,7 +43,7 @@ public:
      * @param dens Current parasite density in parasites per µL
      * @param densHRP2 Equivalent density for diagnostics dependent on HRP2
      * @returns True if outcome is positive. */
-    bool isPositive( double dens, double densHRP2 ) const;
+    bool isPositive( LocalRng& rng, double dens, double densHRP2 ) const;
     
     inline bool operator!=( const Diagnostic& that )const{
         return specificity != that.specificity ||

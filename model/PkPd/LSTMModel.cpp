@@ -45,13 +45,17 @@ void LSTMModel::init( const scnXml::Scenario& scenario ){
 // ———  non-static set up / tear down functions  ———
 
 void LSTMModel::checkpoint (istream& stream) {
+    // We need an RNG to call createInstance, but override the values later
+    // anyway. Hacky solution: create a local RNG.
+    LocalRng rng(0, 0);
+    
     size_t numDrugs;	// type must be same as m_drugs.size()
     numDrugs & stream;
     util::checkpoint::validateListSize (numDrugs);
     for(size_t i=0; i<numDrugs; ++i) {
         size_t index;
         index & stream;
-        m_drugs.push_back( LSTMDrugType::createInstance(index) );
+        m_drugs.push_back( LSTMDrugType::createInstance(rng, index) );
         m_drugs.back() & stream;
     }
     medicateQueue & stream;
@@ -80,7 +84,7 @@ void LSTMModel::prescribe(size_t schedule, size_t dosage, double age, double bod
     }
 }
 
-void LSTMModel::medicate(){
+void LSTMModel::medicate(LocalRng& rng){
     if( medicateQueue.empty() ) return;
     
     // Process pending medications (in interal queue) and apply/update:
@@ -88,7 +92,7 @@ void LSTMModel::medicate(){
     while( iter != medicateQueue.end() ){
         if( iter->time < 1.0 ){   // Medicate medications to be prescribed starting at the next time-step
             // This function could be inlined, except for uses in testing:
-            medicateDrug (iter->drug, iter->qty, iter->time);
+            medicateDrug (rng, iter->drug, iter->qty, iter->time);
             iter = medicateQueue.erase (iter);
         }else{  // and decrement treatment seeking delay for the rest
             iter->time -= 1.0;
@@ -97,7 +101,7 @@ void LSTMModel::medicate(){
     }
 }
 
-void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time) {
+void LSTMModel::medicateDrug(LocalRng& rng, size_t typeIndex, double qty, double time) {
     //TODO: might be a little faster if m_drugs was pre-allocated with a slot for each drug type, using a null pointer
     foreach( auto& drug, m_drugs ){
         if (drug->getIndex() == typeIndex){
@@ -106,7 +110,7 @@ void LSTMModel::medicateDrug(size_t typeIndex, double qty, double time) {
         }
     }
     // No match, so insert one:
-    m_drugs.push_back( LSTMDrugType::createInstance(typeIndex) );
+    m_drugs.push_back( LSTMDrugType::createInstance(rng, typeIndex) );
     (*m_drugs.back()).medicate (time, qty);
 }
 
@@ -127,12 +131,12 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
     return c;
 }
 
-double LSTMModel::getDrugFactor (WithinHost::CommonInfection *inf, double body_mass) const{
+double LSTMModel::getDrugFactor (LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const{
     double factor = 1.0; //no effect
     
     for( auto drug = m_drugs.begin(), end = m_drugs.end();
             drug != end; ++drug ){
-        double drugFactor = (*drug)->calculateDrugFactor(inf, body_mass);
+        double drugFactor = (*drug)->calculateDrugFactor(rng, inf, body_mass);
         factor *= drugFactor;
     }
     return factor;

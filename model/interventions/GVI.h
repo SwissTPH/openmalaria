@@ -31,6 +31,7 @@ namespace OM { namespace interventions {
     using util::DecayFunction;
     using util::DecayFuncHet;
     using util::LognormalSampler;
+    using util::LocalRng;
     using Transmission::PerHostInterventionData;
 
 /** Constant parameters for generic vector intervention model. */
@@ -50,7 +51,7 @@ public:
     
     virtual void print_details( std::ostream& out )const;
     
-    virtual unique_ptr<PerHostInterventionData> makeHumanPart() const;
+    virtual unique_ptr<PerHostInterventionData> makeHumanPart(LocalRng& rng) const;
     virtual unique_ptr<PerHostInterventionData> makeHumanPart( istream& stream, ComponentId ) const;
     
 private:
@@ -99,10 +100,10 @@ private:
  */
 class HumanGVI : public PerHostInterventionData {
 public:
-    HumanGVI( const GVIComponent& params );
+    HumanGVI( LocalRng& rng, const GVIComponent& params );
     HumanGVI( istream& stream, ComponentId );
     
-    virtual void redeploy( const Transmission::HumanVectorInterventionComponent& );
+    virtual void redeploy( LocalRng& rng, const Transmission::HumanVectorInterventionComponent& );
     
     /** This is the survival factor of the effect. */
     inline double getEffectSurvival(const GVIComponent& params)const{

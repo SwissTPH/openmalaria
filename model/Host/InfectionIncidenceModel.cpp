@@ -147,22 +147,22 @@ InfectionIncidenceModel::InfectionIncidenceModel () :
 
 // -----  non-static methods  -----
 
-double InfectionIncidenceModel::getAvailabilityFactor(double baseAvailability) {
+double InfectionIncidenceModel::getAvailabilityFactor(LocalRng& rng, double baseAvailability) {
   return baseAvailability;
 }
-double NegBinomMAII::getAvailabilityFactor(double baseAvailability) {
+double NegBinomMAII::getAvailabilityFactor(LocalRng& rng, double baseAvailability) {
     // Gamma sample with k=BaselineAvailabilityShapeParam; mean is baseAvailability
-  return random::gamma(baseline_avail_shape_param,
+  return rng.gamma(baseline_avail_shape_param,
 		 baseAvailability/baseline_avail_shape_param);
 }
-double LogNormalMAII::getAvailabilityFactor(double baseAvailability) {
+double LogNormalMAII::getAvailabilityFactor(LocalRng& rng, double baseAvailability) {
     // given BaselineAvailabilityShapeParam = sqrt (log (1 + variance/mean²))
     // and baseAvailability = mean, this is a draw from the log-normal distribution.
     if( baseAvailability != 1.0 ){
         // NOTE: shouldn't the normal_mean parameter be adjusted when baseAvailability != 1.0?
         throw TRACED_EXCEPTION_DEFAULT("LogNormalMAII::getAvailabilityFactor");
     }
-  return random::log_normal (log(baseAvailability) - baseline_avail_offset,
+  return rng.log_normal (log(baseAvailability) - baseline_avail_offset,
 		     baseline_avail_shape_param);
 }
 
@@ -171,27 +171,27 @@ void InfectionIncidenceModel::summarize (const Host::Human& human) {
 }
 
 
-double InfectionIncidenceModel::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans) {
+double InfectionIncidenceModel::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost& phTrans) {
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
   // Note that NegBinomMAII and LogNormalMAII supercede this model; see below
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/SimTime::oneTS().inDays()*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double HeterogeneityWorkaroundII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost& phTrans) {
+double HeterogeneityWorkaroundII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost& phTrans) {
   return (Sinf+(1-Sinf) / 
     (1 + effectiveEIR/(SimTime::oneTS().inDays()*phTrans.relativeAvailabilityHet())*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
-double NegBinomMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
+double NegBinomMAII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
-  return random::gamma(inf_rate_shape_param,
+  return rng.gamma(inf_rate_shape_param,
       effectiveEIR * susceptibility() / inf_rate_shape_param);
 }
-double LogNormalMAII::getModelExpectedInfections (double effectiveEIR, const Transmission::PerHost&) {
+double LogNormalMAII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&) {
   // Documentation: http://www.plosmedicine.org/article/fetchSingleRepresentation.action?uri=info:doi/10.1371/journal.pmed.1001157.s009
     double meanlog = log(effectiveEIR * susceptibility()) - inf_rate_offset;
-    return random::log_normal(meanlog, inf_rate_shape_param);
+    return rng.log_normal(meanlog, inf_rate_shape_param);
 }
 
 double InfectionIncidenceModel::susceptibility () {
@@ -211,8 +211,8 @@ double InfectionIncidenceModel::susceptibility () {
   }
 }
 
-int InfectionIncidenceModel::numNewInfections (const Human& human, double effectiveEIR) {
-  double expectedNumInfections = getModelExpectedInfections (effectiveEIR, human.perHostTransmission);
+int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR) {
+  double expectedNumInfections = getModelExpectedInfections (human.rng(), effectiveEIR, human.perHostTransmission);
   // error check (should be OK if kappa is checked, for nonVector model):
   if( !(boost::math::isfinite)(effectiveEIR) ){
     ostringstream out;
@@ -233,7 +233,7 @@ int InfectionIncidenceModel::numNewInfections (const Human& human, double effect
     m_pInfected = 1.0;
   
   if (expectedNumInfections > 0.0000001){
-    int n = random::poisson(expectedNumInfections);
+    int n = human.rng().poisson(expectedNumInfections);
     if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }

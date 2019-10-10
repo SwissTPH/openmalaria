@@ -187,7 +187,7 @@ void TriggeredDeployments::SubList::deploy( Host::Human& human,
     //TODO: why does the above contradict what we do? Is this due to a date being shifted later?
     SimTime age = human.age(sim::nowOrTs1());
     if( age >= minAge && age < maxAge ){
-        if( coverage >= 1.0 || util::random::bernoulli( coverage ) ){
+        if( coverage >= 1.0 || human.rng().bernoulli( coverage ) ){
             HumanIntervention::deploy( human, method, vaccLimits );
         }
     }
@@ -228,7 +228,7 @@ public:
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits vaccLimits ) const{
         mon::reportEventMHD( mon::MHD_SCREEN, human, method );
-        if( human.withinHostModel->diagnosticResult(diagnostic) ){
+        if( human.withinHostModel->diagnosticResult(human.rng(), diagnostic) ){
             positive.deploy( human, method, vaccLimits );
         }else{
             negative.deploy( human, method, vaccLimits );

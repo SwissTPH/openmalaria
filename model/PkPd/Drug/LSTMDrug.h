@@ -23,12 +23,15 @@
 
 #include "Global.h"
 #include "util/checkpoint_containers.h"
+#include "util/random.h"
 
 namespace OM {
 namespace WithinHost {
     class CommonInfection;
 }
 namespace PkPd {
+
+using util::LocalRng;
 
 /** A class holding pkpd drug use info.
  *
@@ -72,7 +75,7 @@ public:
      * @param inf A pointer to the infection of interest
      * @param body_mass Weight of patient in kg
      */
-    virtual double calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const =0;
+    virtual double calculateDrugFactor(LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const =0;
     
     /** Updates concentration variable and clears day's doses.
      * 

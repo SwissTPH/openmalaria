@@ -45,11 +45,11 @@ PerHost::PerHost () :
         _relativeAvailabilityHet(numeric_limits<double>::signaling_NaN())
 {
 }
-void PerHost::initialise (double availabilityFactor) {
+void PerHost::initialise (LocalRng& rng, double availabilityFactor) {
     _relativeAvailabilityHet = availabilityFactor;
     speciesData.resize (PerHostAnophParams::numSpecies());
     for(size_t i = 0; i < speciesData.size(); ++i) {
-        speciesData[i].initialise (i, availabilityFactor);
+        speciesData[i].initialise (rng, i, availabilityFactor);
     }
 }
 
@@ -59,18 +59,18 @@ void PerHost::update(Host::Human& human){
     }
 }
 
-void PerHost::deployComponent( const HumanVectorInterventionComponent& params ){
+void PerHost::deployComponent( LocalRng& rng, const HumanVectorInterventionComponent& params ){
     // This adds per-host per-intervention details to the host's data set.
     // This data is never removed since it can contain per-host heterogeneity samples.
     for( auto iter = activeComponents.begin(); iter != activeComponents.end(); ++iter ){
         if( (*iter)->id() == params.id() ){
             // already have a deployment for that description; just update it
-            (*iter)->redeploy( params );
+            (*iter)->redeploy( rng, params );
             return;
         }
     }
     // no deployment for that description: must make a new one
-    activeComponents.push_back( params.makeHumanPart() );
+    activeComponents.push_back( params.makeHumanPart(rng) );
 }
 
 

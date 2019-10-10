@@ -25,7 +25,7 @@
 #include "PopulationAgeStructure.h"
 #include "Host/Human.h"
 
-#include <list>
+#include <vector>
 #include <fstream>
 #include <utility>  // pair
 
@@ -72,7 +72,7 @@ public:
     void flushReports();
     
     /// Type of population list. Store pointers to humans only to avoid copy operations.
-    typedef list<Host::Human> HumanPop;
+    typedef vector<Host::Human> HumanPop;
     /// Iterator type of population
     typedef HumanPop::iterator Iter;
     /// Const iterator type of population
@@ -104,11 +104,6 @@ public:
     //@}
 
 private:
-    /// Creates initializes and add to the population list a new uninfected human
-    /// 
-    /// @param dob date of birth (usually current time)
-    void newHuman( SimTime dob );
-    
     /// Delegate to print the number of hosts
     void ctsHosts (ostream& stream);
     /// Delegate to print cumulative numbers of hosts under various age limits

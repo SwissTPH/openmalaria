@@ -22,6 +22,7 @@
 #include "WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "WithinHost/Treatments.h"
 #include "WithinHost/Genotypes.h"
+#include "Host/Human.h"
 #include "mon/reporting.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -51,14 +52,14 @@ struct HypnozoiteReleaseDistribution: private LognormalSampler {
     };
     
     /// Sample the time until next release
-    SimTime sampleReleaseDelay() const {
+    SimTime sampleReleaseDelay(LocalRng& rng) const {
         double liverStageMaximumDays = 16.0*30.0; // maximum of about 16 months in liver stage
         double delay = numeric_limits<double>::quiet_NaN();       // in days
         int count = 0;
         int maxcount = 1e3;
         
         do{
-            delay = LognormalSampler::sample();
+            delay = LognormalSampler::sample(rng);
             count += 1;
             
             if( count >= maxcount ){
@@ -125,8 +126,8 @@ void initNHypnozoites(){
         nHypnozoitesProbMap[cumP] = n;
     }
 }
-int sampleNHypnozoites(){
-    double x = util::random::uniform_01();
+int sampleNHypnozoites(LocalRng& rng){
+    double x = rng.uniform_01();
     // upper_bound finds the first key (cumulative probability) greater than x:
     auto it = nHypnozoitesProbMap.upper_bound( x );
     assert( it != nHypnozoitesProbMap.end() );  // i.e. that we did find a real key
@@ -134,24 +135,24 @@ int sampleNHypnozoites(){
 }
 
 // time to hypnozoite release after initial release:
-SimTime sampleReleaseDelay(){
+SimTime sampleReleaseDelay(LocalRng& rng){
     bool isFirstRelease = true;
     if( pSecondRelease == 1.0 ||
-        (pSecondRelease > 0.0 && random::bernoulli(pSecondRelease)) ){
+        (pSecondRelease > 0.0 && rng.bernoulli(pSecondRelease)) ){
         isFirstRelease = false;
     }
     
     if (isFirstRelease){
-        return latentRelapse1st.sampleReleaseDelay();
+        return latentRelapse1st.sampleReleaseDelay(rng);
     } else {
-        return latentRelapse2nd.sampleReleaseDelay();
+        return latentRelapse2nd.sampleReleaseDelay(rng);
     }
 }
 
 
 // ———  per-brood code  ———
 
-VivaxBrood::VivaxBrood( WHVivax *host ) :
+VivaxBrood::VivaxBrood( LocalRng& rng, WHVivax *host ) :
         primaryHasStarted( false ),
         relapseHasStarted( false ),
         hadEvent( false ),
@@ -161,10 +162,10 @@ VivaxBrood::VivaxBrood( WHVivax *host ) :
     
     // primary blood stage plus hypnozoites (relapses)
     releases.insert( sim::nowOrTs0() + latentP );
-    int numberHypnozoites = sampleNHypnozoites();
+    int numberHypnozoites = sampleNHypnozoites(rng);
     for( int i = 0; i < numberHypnozoites; ){
         //TODO: why do we have two latent periods (latentP + latentReleaseDays added in sampleReleaseDelay())?
-        SimTime randomReleaseDelay = sampleReleaseDelay();
+        SimTime randomReleaseDelay = sampleReleaseDelay(rng);
         SimTime timeToRelease = sim::nowOrTs0() + latentP + randomReleaseDelay;
         bool inserted = releases.insert( timeToRelease ).second;
         if( inserted ) ++i;     // successful
@@ -211,7 +212,7 @@ VivaxBrood::VivaxBrood( istream& stream ){
 }
 
 
-VivaxBrood::UpdResult VivaxBrood::update(){
+VivaxBrood::UpdResult VivaxBrood::update(LocalRng& rng){
     if( bloodStageClearDate == sim::ts0() ){
         //NOTE: this effectively means that both asexual and sexual stage
         // parasites self-terminate. It also means the immune system can
@@ -246,7 +247,7 @@ VivaxBrood::UpdResult VivaxBrood::update(){
         }
         result.newBS = true;
         
-        double lengthDays = bloodStageLength.sample();
+        double lengthDays = bloodStageLength.sample(rng);
         bloodStageClearDate = sim::ts0() + SimTime::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
@@ -270,7 +271,7 @@ void VivaxBrood::treatmentLS(){
     vector<SimTime> survivingZoites;
     survivingZoites.reserve( releaseDates.size() );   // maximum size we need
     for( auto it = releaseDates.begin(); it != releaseDates.end(); ++it ){
-        if( !random::bernoulli( pClearEachHypnozoite ) ){
+        if( !rng.bernoulli( pClearEachHypnozoite ) ){
             survivingZoites.push_back( *it );    // copy            
         }
     }
@@ -281,7 +282,7 @@ void VivaxBrood::treatmentLS(){
 
 // ———  per-host code  ———
 
-WHVivax::WHVivax( double comorbidityFactor ) :
+WHVivax::WHVivax( LocalRng& rng, double comorbidityFactor ) :
     cumPrimInf(0),
     pEvent( numeric_limits<double>::quiet_NaN() ),
     pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() ),
@@ -296,7 +297,7 @@ WHVivax::WHVivax( double comorbidityFactor ) :
         cout << "New host" << endl;
     }
 #endif
-    noPQ = ( pHetNoPQ > 0.0 && random::bernoulli(pHetNoPQ) );
+    noPQ = ( pHetNoPQ > 0.0 && rng.bernoulli(pHetNoPQ) );
 }
 
 WHVivax::~WHVivax(){
@@ -324,7 +325,7 @@ double WHVivax::pTransGenotype(double pTrans, double sumX, size_t genotype){
     throw util::unimplemented_exception("genotype tracking for vivax");
 }
 
-bool WHVivax::summarize(const Host::Human& human) const{
+bool WHVivax::summarize(Host::Human& human) const{
     if( infections.size() == 0 ) return false;  // no infections: not patent, nothing to report
     mon::reportStatMHI( mon::MHR_INFECTED_HOSTS, human, 1 );
     bool patentHost = false;
@@ -341,19 +342,20 @@ bool WHVivax::summarize(const Host::Human& human) const{
     return patentHost;
 }
 
-void WHVivax::importInfection(){
+void WHVivax::importInfection(LocalRng& rng){
     // this means one new liver stage infection, which can result in multiple blood stages
-    infections.push_back( VivaxBrood( this ) );
+    infections.push_back( VivaxBrood( rng, this ) );
 }
 
-void WHVivax::update(int nNewInfs, vector<double>&,
+void WHVivax::update(LocalRng& rng,
+        int nNewInfs, vector<double>&,
         double ageInYears, double)
 {
     pSevere = 0.0;
     
     // create new infections, letting the constructor do the initialisation work:
     for( int i = 0; i < nNewInfs; ++i )
-        infections.push_back( VivaxBrood( this ) );
+        infections.push_back( VivaxBrood( rng, this ) );
     
     // update infections
     // NOTE: currently no BSV model
@@ -368,7 +370,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     while( inf != infections.end() ){
         if( treatmentLiver ) inf->treatmentLS();
         if( treatmentBlood ) inf->treatmentBS();        // clearnace due to treatment; no protection against reemergence
-        VivaxBrood::UpdResult result = inf->update();
+        VivaxBrood::UpdResult result = inf->update(rng);
         if( result.newPrimaryBS ) cumPrimInf += 1;
         
         if( result.newBS ){
@@ -379,19 +381,19 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             if( result.newPrimaryBS ){
                 // Blood stage is primary. oldCumInf wasn't updated yet.
                 double pPrimaryInfEvent = pPrimaryA * pPrimaryB / (pPrimaryB+oldCumInf);
-                clinicalEvent = random::bernoulli( pPrimaryInfEvent );
+                clinicalEvent = rng.bernoulli( pPrimaryInfEvent );
                 inf->setHadEvent( clinicalEvent );
             } else if ( result.newRelapseBS ){
                 // Blood stage is a relapse. oldCumInf wasn't updated yet.
                 double pFirstRelapseEvent = oldpEvent * (pRelapseOneA * pRelapseOneB / (pRelapseOneB + (oldCumInf-1)));
-                clinicalEvent = random::bernoulli( pFirstRelapseEvent );
+                clinicalEvent = rng.bernoulli( pFirstRelapseEvent );
                 inf->setHadRelapse( clinicalEvent );
             }else{
                 // Subtract 1 from oldCumInf to not count the current brood in
                 // the number of cumulative primary infections.
                 if( inf->hasHadRelapse() ){
                     double pSecondRelapseEvent = oldpRelapseEvent * (pRelapseTwoA * pRelapseTwoB / (pRelapseTwoB + (oldCumInf-1)));
-                    clinicalEvent = random::bernoulli( pSecondRelapseEvent );
+                    clinicalEvent = rng.bernoulli( pSecondRelapseEvent );
                 }else{
                     // If the primary infection did not cause an event, there
                     // is 0 chance of a secondary causing an event in our model.
@@ -401,7 +403,7 @@ void WHVivax::update(int nNewInfs, vector<double>&,
             
             if( clinicalEvent ){
                 pSevere = pSevere + (1.0 - pSevere) * pEventIsSevere;
-                if( random::bernoulli( pEventIsSevere ) )
+                if( rng.bernoulli( pEventIsSevere ) )
                     morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_SEVERE );
                 else
                     morbidity = static_cast<Pathogenesis::State>( morbidity | Pathogenesis::STATE_MALARIA );
@@ -416,11 +418,11 @@ void WHVivax::update(int nNewInfs, vector<double>&,
     
     //NOTE: currently we don't model co-infection or indirect deaths
     if( morbidity == Pathogenesis::NONE ){
-        morbidity = Pathogenesis::PathogenesisModel::sampleNMF( ageInYears );
+        morbidity = Pathogenesis::PathogenesisModel::sampleNMF( rng, ageInYears );
     }
 }
 
-bool WHVivax::diagnosticResult( const Diagnostic& diagnostic ) const{
+bool WHVivax::diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const{
     //TODO(monitoring): this shouldn't ignore the diagnostic (especially since
     // it should always return true if diagnostic.density=0)
     for(auto inf = infections.begin(); inf != infections.end(); ++inf) {
@@ -450,12 +452,12 @@ void WHVivax::treatment( Host::Human& human, TreatmentId treatId ){
                   mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
-void WHVivax::optionalPqTreatment( const Host::Human& human ){
+void WHVivax::optionalPqTreatment( Host::Human& human ){
     // PQ clears liver stages. We don't worry about the effect of PQ on
     // gametocytes, because these are always cleared by blood-stage drugs with
     // Vivax, and PQ is not given without BS drugs. NOTE: this ignores drug failure.
-    if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && random::bernoulli(pReceivePQ)){
-        if( random::bernoulli(effectivenessPQ) ){
+    if (pReceivePQ > 0.0 && (ignoreNoPQ || !noPQ) && human.rng().bernoulli(pReceivePQ)){
+        if( human.rng().bernoulli(effectivenessPQ) ){
             for( auto it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentLS();
             }
@@ -463,7 +465,7 @@ void WHVivax::optionalPqTreatment( const Host::Human& human ){
         mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
 }
-bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
+bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     //TODO: this should be implemented properly (allowing effects on next
     // update instead of now)
     
@@ -475,7 +477,7 @@ bool WHVivax::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime 
             "stages is incompatible with case-management pUseUncomplicated "
             "(liverStageDrug) option; it is suggested to use the former over the latter");
         }
-        if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || random::bernoulli(effectivenessPQ)) ){
+        if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || human.rng().bernoulli(effectivenessPQ)) ){
             if( timeLiver >= SimTime::zero() ){
                 treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
             }else{

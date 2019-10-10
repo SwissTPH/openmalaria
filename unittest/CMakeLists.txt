@@ -21,6 +21,7 @@ configure_file (${CMAKE_CURRENT_SOURCE_DIR}/TestPaths.h ${CMAKE_CURRENT_BINARY_D
 configure_file (${CMAKE_CURRENT_SOURCE_DIR}/scenario.xml ${CMAKE_CURRENT_BINARY_DIR}/configured/scenario.xml @ONLY)
 include_directories( SYSTEM
     ${CMAKE_SOURCE_DIR}/contrib/cxxtest
+    ${CMAKE_SOURCE_DIR}/contrib
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model
@@ -46,6 +47,7 @@ set (OM_CXXTEST_HEADERS
   #MosqLifeCycleSuite.h
   UtilVectorsSuite.h
   PkPdComplianceSuite.h
+  ChaChaSuite.h
 )
 
 add_custom_command (OUTPUT tests.cpp

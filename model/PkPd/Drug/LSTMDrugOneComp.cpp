@@ -28,11 +28,11 @@ using namespace std;
 
 namespace OM { namespace PkPd {
     
-LSTMDrugOneComp::LSTMDrugOneComp(const LSTMDrugType& type) :
-    LSTMDrug(type.sample_Vd()),
+LSTMDrugOneComp::LSTMDrugOneComp(const LSTMDrugType& type, LocalRng& rng) :
+    LSTMDrug(type.sample_Vd(rng)),
     typeData(type),
     concentration (0.0),
-    neg_elim_sample(-type.sample_elim_rate())
+    neg_elim_sample(-type.sample_elim_rate(rng))
 {}
 
 //LSTMDrugOneComp::~LSTMDrugOneComp(){}
@@ -47,7 +47,7 @@ double LSTMDrugOneComp::getConcentration(size_t index) const {
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugOneComp::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {
+double LSTMDrugOneComp::calculateDrugFactor(LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const {
     if( concentration == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
     
     /* Survival factor of the parasite (this multiplies the parasite density).
@@ -60,7 +60,7 @@ double LSTMDrugOneComp::calculateDrugFactor(WithinHost::CommonInfection *inf, do
     double neg_elim_rate = neg_elim_sample * pow(body_mass, typeData.neg_m_exponent());
     
     const LSTMDrugPD& drugPD = typeData.getPD(inf->genotype());
-    const double Kn = drugPD.IC50_pow_slope(typeData.getIndex(), inf);
+    const double Kn = drugPD.IC50_pow_slope(rng, typeData.getIndex(), inf);
     
     double time = 0.0;
     typedef pair<double,double> TimeConc;

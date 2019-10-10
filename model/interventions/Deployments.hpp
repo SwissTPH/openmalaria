@@ -204,12 +204,12 @@ public:
     }
     
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
-        for(Population::Iter iter = population.begin(); iter != population.end(); ++iter) {
-            SimTime age = iter->age(sim::now());
+        for(Human& human : population) {
+            SimTime age = human.age(sim::now());
             if( age >= minAge && age < maxAge ){
-                if( subPop == ComponentId::wholePop() || (iter->isInSubPop( subPop ) != complement) ){
-                    if( util::random::bernoulli( coverage ) ){
-                        deployToHuman( *iter, mon::Deploy::TIMED );
+                if( subPop == ComponentId::wholePop() || (human.isInSubPop( subPop ) != complement) ){
+                    if( human.rng().bernoulli( coverage ) ){
+                        deployToHuman( human, mon::Deploy::TIMED );
                     }
                 }
             }
@@ -274,9 +274,9 @@ public:
             // selected from the list unprotected.
             double additionalCoverage = (coverage - propProtected) / (1.0 - propProtected);
             cerr << "cum deployment: prop protected " << propProtected << "; additionalCoverage " << additionalCoverage << "; total " << total << endl;
-            for(auto iter = unprotected.begin(); iter != unprotected.end(); ++iter) {
-                if( util::random::uniform_01() < additionalCoverage ){
-                    deployToHuman( **iter, mon::Deploy::TIMED );
+            for(Human* human : unprotected) {
+                if( human->rng().uniform_01() < additionalCoverage ){
+                    deployToHuman( *human, mon::Deploy::TIMED );
                 }
             }
         }
@@ -370,7 +370,7 @@ public:
                 ( subPop == ComponentId::wholePop() ||
                     (human.isInSubPop( subPop ) != complement)
                 ) &&
-                util::random::uniform_01() < coverage )     // RNG call should be last test
+                human.rng().uniform_01() < coverage )     // RNG call should be last test
             {
                 deployToHuman( human, mon::Deploy::CTS );
             }

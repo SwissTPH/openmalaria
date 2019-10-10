@@ -31,16 +31,16 @@ using namespace std;
 
 namespace OM { namespace PkPd {
 
-LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type) :
-    LSTMDrug(type.sample_Vd()),
+LSTMDrugThreeComp::LSTMDrugThreeComp(const LSTMDrugType& type, LocalRng& rng) :
+    LSTMDrug(type.sample_Vd(rng)),
     typeData(type),
     concA(0.0), concB(0.0), concC(0.0), concABC(0.0),
-    elim_sample(type.sample_elim_rate()),
-    k12(type.sample_k12()),
-    k21(type.sample_k21()),
-    k13(type.sample_k13()),
-    k31(type.sample_k31()),
-    nka(-type.sample_ka()),
+    elim_sample(type.sample_elim_rate(rng)),
+    k12(type.sample_k12(rng)),
+    k21(type.sample_k21(rng)),
+    k13(type.sample_k13(rng)),
+    k31(type.sample_k31(rng)),
+    nka(-type.sample_ka(rng)),
     last_bm(numeric_limits<double>::quiet_NaN()),
     na(numeric_limits<double>::quiet_NaN()),
     nb(numeric_limits<double>::quiet_NaN()),
@@ -156,7 +156,7 @@ double LSTMDrugThreeComp::calculateFactor(const Params_fC& p, double duration) c
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugThreeComp::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {
+double LSTMDrugThreeComp::calculateDrugFactor(LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const {
     if( conc() == 0.0 && doses.size() == 0 ) return 1.0; // nothing to do
     updateCached(body_mass);
     
@@ -165,7 +165,7 @@ double LSTMDrugThreeComp::calculateDrugFactor(WithinHost::CommonInfection *inf, 
     p.na = na;  p.nb = nb;      p.ng = ng;      p.nka = nka;
     const LSTMDrugPD& pd = typeData.getPD(inf->genotype());
     p.n = pd.slope();   p.V = pd.max_killing_rate();
-    p.Kn = pd.IC50_pow_slope(typeData.getIndex(), inf);
+    p.Kn = pd.IC50_pow_slope(rng, typeData.getIndex(), inf);
     
     double time = 0.0;  // time since start of day
     double totalFactor = 1.0;   // survival factor for whole day

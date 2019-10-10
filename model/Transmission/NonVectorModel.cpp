@@ -23,7 +23,6 @@
 #include "Host/Human.h"
 #include "WithinHost/Genotypes.h"
 #include "mon/info.h"
-#include "util/random.h"
 #include "util/vectors.h"
 #include "util/StreamValidator.h"
 #include "util/checkpoint_containers.h"

@@ -22,7 +22,6 @@
 #include "WithinHost/Genotypes.h"
 #include "WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
-#include "util/random.h"
 #include "util/CommandLine.h"
 #include "PkPd/Drug/LSTMDrugOneComp.h"
 #include "PkPd/Drug/LSTMDrugThreeComp.h"
@@ -69,12 +68,12 @@ double LSTMDrugPD::calcFactor( double Kn, double neg_elim_rate, double* conc, do
     return pow( numerator / denominator, power );       // unitless
 }
 
-double LSTMDrugPD::IC50_pow_slope(size_t index, WithinHost::CommonInfection *inf) const{
+double LSTMDrugPD::IC50_pow_slope(LocalRng& rng, size_t index, WithinHost::CommonInfection *inf) const{
     double Kn;  // gets sampled once per infection
     if (inf->Kn.count(index) != 0) {
         Kn = inf->Kn.at(index);
     } else {
-        Kn = pow(IC50.sample(), n);
+        Kn = pow(IC50.sample(rng), n);
         inf->Kn[index] = Kn;
     }
     return Kn;
@@ -135,17 +134,17 @@ const vector< size_t >& LSTMDrugType::getDrugsInUse(){
     return drugsInUse;
 }
 
-unique_ptr<LSTMDrug> LSTMDrugType::createInstance(size_t index) {
+unique_ptr<LSTMDrug> LSTMDrugType::createInstance(LocalRng& rng, size_t index) {
     LSTMDrugType& typeData = drugTypes[index];
     if( typeData.conversion_rate.isSet() ){
         LSTMDrugType& metaboliteData = drugTypes[typeData.metabolite];
-        return unique_ptr<LSTMDrug>(new LSTMDrugConversion( typeData, metaboliteData ));
+        return unique_ptr<LSTMDrug>(new LSTMDrugConversion( typeData, metaboliteData, rng ));
     }else if( typeData.k12.isSet() ){
         // k21 is set when k12 is set; k13 and k31 may be set
-        return unique_ptr<LSTMDrug>(new LSTMDrugThreeComp( typeData ));
+        return unique_ptr<LSTMDrug>(new LSTMDrugThreeComp( typeData, rng ));
     }else{
         // none of k12/k21/k13/k31 should be set in this case
-        return unique_ptr<LSTMDrug>(new LSTMDrugOneComp( typeData ));
+        return unique_ptr<LSTMDrug>(new LSTMDrugOneComp( typeData, rng ));
     }
 }
 

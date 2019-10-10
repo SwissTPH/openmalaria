@@ -38,15 +38,15 @@ using namespace OM::WithinHost;
 class MolineauxInfectionSuite : public CxxTest::TestSuite
 {
 public:
+    MolineauxInfectionSuite() : m_rng(0, 0) {}
+    
     void setUp () {
-        util::random::seed( 1095 );     // make sure other tests don't influence our random numbers
+        m_rng.seed( 1095, 721347520444481703 );
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();
         // test should call molInit( ... )
     }
-    void tearDown () {
-        util::random::seed(0);  // make sure nothing else uses this seed/reports
-    }
+    void tearDown () {}
     
     static void readVector(std::vector<double>& vec, const char* file){
         ifstream istr(file);
@@ -69,12 +69,12 @@ public:
 //         out << setprecision(8);
         
         // pkpdID (value) isn't important since we're not using drug model here:
-        MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
+        MolineauxInfection* infection = new MolineauxInfection (m_rng, 0xFFFFFFFF);
         bool extinct = false;
         size_t day=0;
         SimTime now = sim::ts0();
         do{
-            extinct = infection->update(1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/);
+            extinct = infection->update(m_rng, 1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/);
             SimTime age = now - infection->m_startDate - infection->s_latentP;
             if( age >= SimTime::zero() ){
                 ETS_ASSERT_LESS_THAN( day, dens.size() );
@@ -91,7 +91,7 @@ public:
     void testMolOrig(){
         UnittestUtil::MolineauxWHM_setup( "original", false );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). These stats look similar to and possibly better than those
         // from the pairwise model, when compared to those in the paper.
@@ -101,7 +101,7 @@ public:
     void testMolOrigRG(){
         UnittestUtil::MolineauxWHM_setup( "original", true );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). These stats look similar to and possibly better than those
         // from the pairwise model, when compared to those in the paper.
@@ -111,7 +111,7 @@ public:
     void dont_testMol1MG(){
         UnittestUtil::MolineauxWHM_setup( "1st_max_gamma", false );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). Output is nowhere near what we want.
         stats.write( "MolineauxStats1MG" );
@@ -120,7 +120,7 @@ public:
     void dont_testMol1MGRG(){
         UnittestUtil::MolineauxWHM_setup( "1st_max_gamma", true );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). Output is nowhere near what we want.
         stats.write( "MolineauxStats1MGRG" );
@@ -129,7 +129,7 @@ public:
     void dont_testMolMDG(){
         UnittestUtil::MolineauxWHM_setup( "mean_dur_gamma", false );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStatsMDG" );
@@ -138,7 +138,7 @@ public:
     void dont_testMolMDGRG(){
         UnittestUtil::MolineauxWHM_setup( "mean_dur_gamma", true );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStatsMDGRG" );
@@ -147,7 +147,7 @@ public:
     void dont_testMol1MGMDG(){
         UnittestUtil::MolineauxWHM_setup( "1st_max_and_mean_dur_gamma", false );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStats1MGMDG" );
@@ -156,7 +156,7 @@ public:
     void dont_testMol1MGMDGRG(){
         UnittestUtil::MolineauxWHM_setup( "1st_max_and_mean_dur_gamma", true );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). Model output contains NaNs.
         stats.write( "MolineauxStats1MGMDGRG" );;
@@ -165,7 +165,7 @@ public:
     void testMolPairwise(){
         UnittestUtil::MolineauxWHM_setup( "pairwise", false );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). Compared to those in the paper, these stats match the
         // first peak and prop_pos_1st reasonably well, but the interval stats,
@@ -176,7 +176,7 @@ public:
     void testMolPairwiseRG(){
         UnittestUtil::MolineauxWHM_setup( "pairwise", true );
         MolInfStats stats( 200 );
-        stats.capture();
+        stats.capture(m_rng);
         // We compare against model outputs (checking for changes, rather than
         // accuracy). This one compares a little more favourably tho the stats
         // in the paper than without replication gamma, though only a little.
@@ -284,15 +284,15 @@ private:
         }
         
         /** This runs the infection model several times, capturing stats in the process */
-        void capture(){
+        void capture(LocalRng& rng){
             const size_t N = init_slope.size();
             vector<double> dens;    // time series of density
             for( size_t run = 0; run < N; ++run ){
                 dens.resize( 0 );
-                MolineauxInfection* infection = new MolineauxInfection (0xFFFFFFFF);
+                MolineauxInfection* infection = new MolineauxInfection (rng, 0xFFFFFFFF);
                 SimTime now = sim::ts0();
                 
-                while( !infection->update(1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/) ){
+                while( !infection->update(rng, 1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/) ){
                     dens.push_back( infection->getDensity() );
                     now += SimTime::oneDay();
                 }
@@ -399,6 +399,8 @@ private:
             MOL_CHECK_STAT( last_pos_day );
         }
     };
+    
+    LocalRng m_rng;
 };
 
 #endif

@@ -85,20 +85,20 @@ void NeonatalMortality::staticCheckpoint (ostream& stream) {
     prevByGestationalAge & stream;
 }
 
-bool NeonatalMortality::eventNeonatalMortality() {
-  return random::uniform_01() <= riskFromMaternalInfection;
+bool NeonatalMortality::eventNeonatalMortality(LocalRng& rng) {
+  return rng.uniform_01() <= riskFromMaternalInfection;
 }
 
-void NeonatalMortality::update (const Population& population) {
+void NeonatalMortality::update (Population& population) {
     // ———  find potential mothers and their prevalence  ———
     // For individuals in the age range 20-25, we sum:
     int nCounter=0;	// total number
     int pCounter=0;	// number with patent infections, needed for prev in 20-25y
     
-    for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter){
+    for (Human& human : population){
         // diagnosticDefault() gives patency after the last time step's
         // update, so it's appropriate to use age at the beginning of this step.
-        SimTime age = iter->age(sim::ts0());
+        SimTime age = human.age(sim::ts0());
         
         // Note: since we're using a linked list, we have to iterate until we reach
         // the individuals we're interested in. Due to population structure, it's
@@ -107,7 +107,7 @@ void NeonatalMortality::update (const Population& population) {
         if( age < ageLb ) break;	// Not interested in younger individuals.
         
         nCounter ++;
-        if( iter->withinHostModel->diagnosticResult(*neonatalDiagnostic) ){
+        if( human.withinHostModel->diagnosticResult(human.rng(), *neonatalDiagnostic) ){
             pCounter ++;
         }
     }

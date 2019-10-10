@@ -139,8 +139,8 @@ const double Omega=0.00025;
 
 //@}
 
-CommonInfection* createPennyInfection (uint32_t protID) {
-    return new PennyInfection (protID);
+CommonInfection* createPennyInfection (LocalRng& rng, uint32_t protID) {
+    return new PennyInfection (rng, protID);
 }
 
 CommonInfection* checkpointedPennyInfection (istream& stream) {
@@ -164,7 +164,7 @@ void PennyInfection::init() {
     }
 }
 
-PennyInfection::PennyInfection(uint32_t protID):
+PennyInfection::PennyInfection(LocalRng& rng, uint32_t protID):
         CommonInfection(protID),
         variantSpecificSummation(0),
         clonalSummation(0)
@@ -172,15 +172,15 @@ PennyInfection::PennyInfection(uint32_t protID):
     // assign infection dependent immune thresholds
     if( immune_threshold_gamma )/* using gamma distribution */{
         do {
-            threshold_N = exp(random::gamma(a_TN,b_TN));
-            threshold_C = exp(random::gamma(a_TC,b_TC));
-            threshold_V = exp(random::gamma(a_TV,b_TV));
+            threshold_N = exp(rng.gamma(a_TN,b_TN));
+            threshold_C = exp(rng.gamma(a_TC,b_TC));
+            threshold_V = exp(rng.gamma(a_TV,b_TV));
         } while(threshold_N <= threshold_C || threshold_N <= threshold_V);
     }else /* using lognormal distribution */{
         do {
-            threshold_N = exp(random::gauss(mu_TN,sigma_TN));
-            threshold_C = exp(random::gauss(mu_TC,sigma_TC));
-            threshold_V = exp(random::gauss(mu_TV,sigma_TV));
+            threshold_N = exp(rng.gauss(mu_TN,sigma_TN));
+            threshold_C = exp(rng.gauss(mu_TC,sigma_TC));
+            threshold_V = exp(rng.gauss(mu_TV,sigma_TV));
         } while(threshold_N <= threshold_C || threshold_N <= threshold_V);
     }
     
@@ -193,25 +193,25 @@ PennyInfection::PennyInfection(uint32_t protID):
 }
 
 
-bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double ){
+bool PennyInfection::updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double ){
     int ageDays = bsAge.inDays();       // lazy
     if( bsAge == SimTime::zero() ){
         // assign initial densities (Y circulating, X sequestered)
         size_t today = mod_nn(ageDays, delta_C);
         
         if(update_density_gamma) {
-            cirDensities[today] = exp(random::gamma(a_Y,b_Y));
+            cirDensities[today] = exp(rng.gamma(a_Y,b_Y));
         } else {
-            cirDensities[today] = exp(random::gauss(mu_Y,sigma_Y));
+            cirDensities[today] = exp(rng.gauss(mu_Y,sigma_Y));
         }
         
         m_density = cirDensities[today];
         today = mod_nn(ageDays, delta_V);
         
         if(update_density_gamma){
-            seqDensities[today] = exp(random::gamma(a_X,b_X));
+            seqDensities[today] = exp(rng.gamma(a_X,b_X));
         } else {
-            seqDensities[today] = exp(random::gauss(mu_X,sigma_X));
+            seqDensities[today] = exp(rng.gauss(mu_X,sigma_X));
         }
     }
     else /*not first day*/
@@ -239,7 +239,7 @@ bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double
         double R_Cy = (1.0-psi_C) / (1.0 + base_Cpow) + psi_C;
         
         // variant specific immunity
-        double base_V = getVariantSpecificSummation(ageDays)/threshold_V;
+        double base_V = getVariantSpecificSummation(rng, ageDays)/threshold_V;
         double R_Vx = (1.0-beta_V) / (1.0 + pow(base_V,kappa_V)) + beta_V;
         
         // cirDensity: circulating density of circulating at t
@@ -260,9 +260,9 @@ bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double
             if( update_density_gamma ) {
                 double a_cirDens = pow(log(cirDensity_new),2)/pow(sigma_epsilon,2);
                 double b_cirDens = pow(sigma_epsilon,2)/log(cirDensity_new);
-                cirDensity_new = exp(random::gamma(a_cirDens,b_cirDens) ) * survivalFactor;
+                cirDensity_new = exp(rng.gamma(a_cirDens,b_cirDens) ) * survivalFactor;
             } else {
-                cirDensity_new = exp(random::gauss(log(cirDensity_new),sigma_epsilon)) * survivalFactor;
+                cirDensity_new = exp(rng.gauss(log(cirDensity_new),sigma_epsilon)) * survivalFactor;
             }
             // please don't simplify this, we want more chance at ending infection
             if (cirDensity_new < Omega) {
@@ -293,9 +293,9 @@ bool PennyInfection::updateDensity( double survivalFactor, SimTime bsAge, double
     return false;
 }
 
-double PennyInfection::getVariantSpecificSummation(int ageDays) {
+double PennyInfection::getVariantSpecificSummation(LocalRng& rng, int ageDays) {
     // check if new dominant variant has arrived
-    bool newVarDominant = random::bernoulli(prob_lambda_V);
+    bool newVarDominant = rng.bernoulli(prob_lambda_V);
     //draw from bernouli distrb, prob 1/lambda_V
     if (newVarDominant) {
         variantSpecificSummation = 0;

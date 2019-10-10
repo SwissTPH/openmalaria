@@ -34,13 +34,14 @@ class DecayFunctionSuite : public CxxTest::TestSuite
 {
 public:
     DecayFunctionSuite () :
-        dfElt( "" )
+        m_rng(0, 0), dfElt( "" )
     {
         dfElt.setL( "10y" );
         dfElt.setK( 1.6 );
     }
     
     void setUp() {
+        m_rng.seed(0, 721347520444481703);
         UnittestUtil::initTime(5);
     }
     
@@ -58,11 +59,11 @@ public:
         DecayFuncHet dHet;
         TS_ASSERT_EQUALS( df->eval( SimTime::fromDays(5), dHet ), 0.0 );
         // Second test: with an appropriately sampled helper value, we should get the results we want
-        dHet = df->hetSample();
+        dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( df->eval( SimTime::zero(), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(10), dHet ), 1.0 );
         // Third test: time of decay (age plus now) should always be in the future
-        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), SimTime::future() );
+        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(m_rng), SimTime::future() );
     }
     
     void testStep () {
@@ -70,11 +71,11 @@ public:
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
         TS_ASSERT_EQUALS( df->eval( SimTime::fromDays(5), dHet ), 0.0 );
-        dHet = df->hetSample();
+        dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( df->eval( SimTime::zero(), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(6), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(20), dHet ), 0.0 );
-        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(), SimTime::fromYearsI(10) );
+        TS_ASSERT_EQUALS( df->sampleAgeOfDecay(m_rng), SimTime::fromYearsI(10) );
     }
     
     void testLinear () {
@@ -82,7 +83,7 @@ public:
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
         TS_ASSERT_EQUALS( df->eval( SimTime::fromDays(5), dHet ), 0.0 );
-        dHet = df->hetSample();
+        dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( df->eval( SimTime::zero(), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(6), dHet ), 0.4 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(20), dHet ), 0.0 );
@@ -93,7 +94,7 @@ public:
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
         TS_ASSERT_EQUALS( df->eval( SimTime::fromDays(5), dHet ), 0.0 );
-        dHet = df->hetSample();
+        dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( df->eval( SimTime::zero(), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(6), dHet ), 0.65975394736842108 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(20), dHet ), 0.25 );
@@ -102,7 +103,7 @@ public:
     void testWeibull () {
         dfElt.setFunction( "weibull" );
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
-        DecayFuncHet dHet = df->hetSample();
+        DecayFuncHet dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( df->eval( SimTime::zero(), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(6), dHet ), 0.73631084210526321 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(20), dHet ), 0.122306 );
@@ -113,7 +114,7 @@ public:
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
         TS_ASSERT_EQUALS( df->eval( SimTime::fromDays(5), dHet ), 0.0 );
-        dHet = df->hetSample();
+        dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( df->eval( SimTime::zero(), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(6), dHet ), 0.6936673684210527 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(20), dHet ), 0.24805074736842106 );
@@ -124,13 +125,14 @@ public:
         df = DecayFunction::makeObject( dfElt, "DecayFunctionSuite" );
         DecayFuncHet dHet;
         TS_ASSERT_EQUALS( df->eval( SimTime::fromDays(5), dHet ), 0.0 );
-        dHet = df->hetSample();
+        dHet = df->hetSample(m_rng);
         TS_ASSERT_APPROX( df->eval( SimTime::zero(), dHet ), 1.0 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(6), dHet ), 0.40656965789473687 );
         TS_ASSERT_APPROX( df->eval( SimTime::fromYearsI(20), dHet ), 0.0 );
     }
     
 private:
+    LocalRng m_rng;
     scnXml::DecayFunction dfElt;
     unique_ptr<DecayFunction> df;
 };

@@ -29,6 +29,7 @@ namespace Host {
     class Human;
 }
 namespace interventions {
+using util::LocalRng;
     
 /** Vaccine intervention parameters.
  *
@@ -52,7 +53,7 @@ private:
     /** Get the initial efficacy of the vaccine.
      *
      * @param numPrevDoses The number of prior vaccinations of the individual. */
-    double getInitialEfficacy (size_t numPrevDoses) const;
+    double getInitialEfficacy (LocalRng& rng, size_t numPrevDoses) const;
 
     inline static const VaccineComponent& getParams( ComponentId component ){
         assert( component.id < params.size() && params[component.id] != 0 );

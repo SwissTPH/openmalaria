@@ -40,18 +40,18 @@ public:
     static void initDescriptive();
     
     /// Create a new WHM
-    DescriptiveWithinHostModel( double comorbidityFactor );
+    DescriptiveWithinHostModel( LocalRng& rng, double comorbidityFactor );
     virtual ~DescriptiveWithinHostModel();
     
-    virtual void importInfection();
+    virtual void importInfection(LocalRng& rng);
     /// load an infection from a checkpoint
     virtual void loadInfection(istream& stream);
     virtual void clearImmunity();
     
-    virtual void update(int nNewInfs, vector<double>& genotype_weights,
+    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
             double ageInYears, double bsvFactor);
     
-    virtual bool summarize( const Host::Human& human )const;
+    virtual bool summarize( Host::Human& human )const;
     
 protected:
     virtual void clearInfections( Treatments::Stages stage );

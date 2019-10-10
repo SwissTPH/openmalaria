@@ -41,7 +41,7 @@ namespace OM { namespace util {
         /// convert sample to lnN(mu,sigma)
         double asLognormal( double mu, double sigma ) const;
         
-        static NormalSample generate();
+        static NormalSample generate(LocalRng& rng);
         
         /// Generate a sample correlated with base.
         /// 
@@ -50,7 +50,7 @@ namespace OM { namespace util {
         ///     (note: if this is used to sample a log-normal, then the
         ///     correlation is on the log-scale)
         /// @param factor should equal sqrt(1 - correlation^2); may be cached
-        static NormalSample generate_correlated(NormalSample base, double correlation, double factor);
+        static NormalSample generate_correlated(NormalSample base, double correlation, double factor, LocalRng& rng);
         
     private:
         NormalSample( double variate ) : x(variate) {}
@@ -77,7 +77,7 @@ namespace OM { namespace util {
         void setParams( const scnXml::SampledValueN& elt );
         
         /** Sample a value. */
-        double sample() const;
+        double sample(LocalRng& rng) const;
         
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
@@ -120,7 +120,7 @@ namespace OM { namespace util {
         /** Get the mean. */
         double mean() const;
         /** Sample a value. */
-        double sample() const;
+        double sample(LocalRng& rng) const;
         
         /** Create a log-normal sample from an existing normal sample. */
         inline double sample(NormalSample sample) const{
@@ -168,7 +168,7 @@ namespace OM { namespace util {
         }
         
         /** Sample a value. */
-        double sample() const;
+        double sample(LocalRng& rng) const;
         
     private:
         //Note: if b is 0, then alpha is mean. Otherwise a and b are
@@ -196,8 +196,8 @@ namespace OM { namespace util {
         }
         
         /** Sample a value. */
-        inline double sample() const{
-            return random::weibull( scale, shape );
+        inline double sample(LocalRng& rng) const{
+            return rng.weibull( scale, shape );
         }
         
     private:

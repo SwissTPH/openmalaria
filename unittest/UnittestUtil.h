@@ -463,9 +463,9 @@ public:
         return r;
     }
     
-    static void medicate(PkPd::LSTMModel& pkpd, size_t typeIndex, double qty,
+    static void medicate(LocalRng& rng, PkPd::LSTMModel& pkpd, size_t typeIndex, double qty,
                          double time){
-        pkpd.medicateDrug(typeIndex, qty, time);
+        pkpd.medicateDrug(rng, typeIndex, qty, time);
     }
     
     static void clearMedicateQueue( PkPd::LSTMModel& pkpd ){

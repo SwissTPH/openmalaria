@@ -57,7 +57,7 @@ public:
      * @param host      The host creating this. Not really needed, except to
      * prevent VivaxBrood being default-constructed by its container.
      */
-    VivaxBrood( WHVivax *host );
+    VivaxBrood( LocalRng& rng, WHVivax *host );
     ~VivaxBrood();
     /** Save a checkpoint. */
     void checkpoint( ostream& stream );
@@ -76,7 +76,7 @@ public:
      *  or liver stages) and whether a new primary blood-stage has started (to
      *  update cumPrimInf)
      */
-    UpdResult update();
+    UpdResult update(LocalRng& rng);
     
     inline void setHadEvent( bool hadEvent ){ this->hadEvent = hadEvent; }
     inline bool hasHadEvent()const{ return hadEvent; }
@@ -142,21 +142,21 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHVivax( double comorbidityFactor );
+    WHVivax( LocalRng& rng, double comorbidityFactor );
     virtual ~WHVivax();
     //@}
     
     virtual double probTransmissionToMosquito( double tbvFactor, double *sumX )const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
-    virtual bool summarize(const Host::Human& human) const;
+    virtual bool summarize(Host::Human& human) const;
     
-    virtual void importInfection();
+    virtual void importInfection(LocalRng& rng);
     
-    virtual void update(int nNewInfs, vector<double>& genotype_weights,
+    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
             double ageInYears, double bsvFactor);
     
-    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
+    virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
 
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool );
     
@@ -164,8 +164,8 @@ public:
     
 protected:
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
-    virtual void optionalPqTreatment( const Host::Human& human );
+    virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );
+    virtual void optionalPqTreatment( Host::Human& human );
     
     virtual void checkpoint (istream& stream);
     virtual void checkpoint (ostream& stream);

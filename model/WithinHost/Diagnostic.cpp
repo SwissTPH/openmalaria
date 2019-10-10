@@ -97,7 +97,7 @@ Diagnostic::Diagnostic(double minDens){
     uses_hrp2 = false;
 }
 
-bool Diagnostic::isPositive( double dens, double densHRP2 ) const {
+bool Diagnostic::isPositive( LocalRng& rng, double dens, double densHRP2 ) const {
     if( uses_hrp2 ){
         assert( densHRP2 == densHRP2 ); // monitoring diagnostic passes NaN; use of HRP2 is not supported
         dens = densHRP2;
@@ -109,7 +109,7 @@ bool Diagnostic::isPositive( double dens, double densHRP2 ) const {
         // dens_lim is dens_50 in this case
         double pPositive = 1.0 + specificity * (dens / (dens + dens_lim) - 1.0);
 //         double pPositive = (dens + dens_lim - dens_lim * specificity) / (dens + dens_lim);       // equivalent
-        return util::random::bernoulli( pPositive );
+        return rng.bernoulli( pPositive );
     }
 }
 

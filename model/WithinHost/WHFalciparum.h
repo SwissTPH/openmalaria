@@ -53,7 +53,7 @@ public:
 
     /// @brief Constructors, destructors and checkpointing functions
     //@{
-    WHFalciparum( double comorbidityFactor );
+    WHFalciparum( LocalRng& rng, double comorbidityFactor );
     virtual ~WHFalciparum();
     //@}
     
@@ -61,13 +61,13 @@ public:
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
     // No PQ treatment for falciparum in current models:
-    virtual void optionalPqTreatment( const Host::Human& human ){}
+    virtual void optionalPqTreatment( Host::Human& human ){}
     
     virtual inline double getTotalDensity() const{ return totalDensity; }
     
-    virtual bool diagnosticResult( const Diagnostic& diagnostic ) const;
+    virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
     virtual void treatment( Host::Human& human, TreatmentId treatId );
-    virtual bool treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood );
+    virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );
 

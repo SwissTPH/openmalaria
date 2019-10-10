@@ -18,6 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include "Host/Human.h"
 #include "WithinHost/CommonWithinHost.h"
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
@@ -35,7 +36,7 @@ using namespace std;
 namespace OM {
 namespace WithinHost {
 
-CommonInfection* (* CommonWithinHost::createInfection) (uint32_t protID);
+CommonInfection* (* CommonWithinHost::createInfection) (LocalRng& rng, uint32_t protID);
 CommonInfection* (* CommonWithinHost::checkpointedInfection) (istream& stream);
 
 double hetMassMultStdDev = std::numeric_limits<double>::signaling_NaN();
@@ -64,8 +65,8 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
     PkPd::LSTMModel::init( scenario );
 }
 
-CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
-        WHFalciparum( comorbidityFactor )
+CommonWithinHost::CommonWithinHost( LocalRng& rng, double comorbidityFactor ) :
+        WHFalciparum( rng, comorbidityFactor )
 {
     assert( SimTime::oneTS() == SimTime::fromDays(1) || SimTime::oneTS() == SimTime::fromDays(5) );
     
@@ -74,7 +75,7 @@ CommonWithinHost::CommonWithinHost( double comorbidityFactor ) :
     int counter = 0;
 #endif
     do {
-        hetMassMultiplier = util::random::gauss( 1.0, hetMassMultStdDev );
+        hetMassMultiplier = rng.gauss( 1.0, hetMassMultStdDev );
 #ifndef NDEBUG
         assert( counter < 100 );        // too many resamples: resamples should rarely be needed...
         ++counter;
@@ -119,14 +120,15 @@ void CommonWithinHost::clearImmunity() {
     m_cumulative_h = 0.0;
     m_cumulative_Y_lag = 0.0;
 }
-void CommonWithinHost::importInfection(){
+void CommonWithinHost::importInfection(LocalRng& rng){
     if( numInfs < MAX_INFECTIONS ){
         m_cumulative_h += 1;
         numInfs += 1;
         // This is a hook, used by interventions. The newly imported infections
         // should use initial frequencies to select genotypes.
         vector<double> weights( 0 );        // zero length: signal to use initial frequencies
-        infections.push_back(createInfection(Genotypes::sampleGenotype(weights)));
+        uint32_t genotype = Genotypes::sampleGenotype(rng, weights);
+        infections.push_back(createInfection(rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 }
@@ -134,7 +136,8 @@ void CommonWithinHost::importInfection(){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
+void CommonWithinHost::update(LocalRng& rng,
+        int nNewInfs, vector<double>& genotype_weights,
         double ageInYears, double bsvFactor)
 {
     // Note: adding infections at the beginning of the update instead of the end
@@ -143,7 +146,8 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfs; ++i ) {
-        infections.push_back(createInfection (Genotypes::sampleGenotype(genotype_weights)));
+        uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
+        infections.push_back(createInfection (rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
     
@@ -161,7 +165,7 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
     
     for( SimTime now = sim::ts0(), end = sim::ts0() + SimTime::oneTS(); now < end; now += SimTime::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
-        pkpdModel.medicate();
+        pkpdModel.medicate(rng);
         
         double sumLogDens = 0.0;
         
@@ -170,11 +174,11 @@ void CommonWithinHost::update(int nNewInfs, vector<double>& genotype_weights,
             bool expires = ((*inf)->bloodStage() ? treatmentBlood : treatmentLiver);
             
             if( !expires ){     /* no expiry due to simple treatment model; do update */
-                const double drugFactor = pkpdModel.getDrugFactor(*inf, body_mass);
+                const double drugFactor = pkpdModel.getDrugFactor(rng, *inf, body_mass);
                 const double immFactor = immunitySurvivalFactor(ageInYears, (*inf)->cumulativeExposureJ());
                 const double survivalFactor = survivalFactor_part * immFactor * drugFactor;
                 // update, may result in termination of infection:
-                expires = (*inf)->update(survivalFactor, now, body_mass);
+                expires = (*inf)->update(rng, survivalFactor, now, body_mass);
             }
             
             if( expires ){
@@ -232,7 +236,7 @@ struct InfGenotypeSorter {
     }
 } infGenotypeSorter;
 
-bool CommonWithinHost::summarize( const Host::Human& human )const{
+bool CommonWithinHost::summarize( Host::Human& human )const{
     pathogenesisModel->summarize( human );
     pkpdModel.summarize( human );
     
@@ -242,7 +246,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
             for(auto inf = infections.begin(); inf != infections.end(); ++inf) {
                 uint32_t genotype = (*inf)->genotype();
                 mon::reportStatMHGI( mon::MHR_INFECTIONS, human, genotype, 1 );
-                if( diagnostics::monitoringDiagnostic().isPositive( (*inf)->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
+                if( diagnostics::monitoringDiagnostic().isPositive( human.rng(), (*inf)->getDensity(), std::numeric_limits<double>::quiet_NaN() ) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_INFECTIONS, human, genotype, 1 );
                 }
             }
@@ -265,7 +269,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
                 }while( inf != sortedInfs.end() && (*inf)->genotype() == genotype );
                 // we had at least one infection of this genotype
                 mon::reportStatMHGI( mon::MHR_INFECTED_GENOTYPE, human, genotype, 1 );
-                if( diagnostics::monitoringDiagnostic().isPositive(dens, std::numeric_limits<double>::quiet_NaN()) ){
+                if( diagnostics::monitoringDiagnostic().isPositive(human.rng(), dens, std::numeric_limits<double>::quiet_NaN()) ){
                     mon::reportStatMHGI( mon::MHR_PATENT_GENOTYPE, human, genotype, 1 );
                     mon::reportStatMHGF( mon::MHF_LOG_DENSITY_GENOTYPE, human, genotype, log(dens) );
                 }
@@ -276,7 +280,7 @@ bool CommonWithinHost::summarize( const Host::Human& human )const{
     // Some treatments (simpleTreat with steps=-1) clear infections immediately
     // (and are applied after update()), thus infections.size() may be 0 while
     // totalDensity > 0. Here we report the last calculated density.
-    if( diagnostics::monitoringDiagnostic().isPositive(totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
+    if( diagnostics::monitoringDiagnostic().isPositive(human.rng(), totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
         mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
         mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent

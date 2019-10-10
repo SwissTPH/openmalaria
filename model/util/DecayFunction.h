@@ -104,7 +104,7 @@ public:
      * Note that a DecayFuncHet is needed to call eval() even if heterogeneity
      * is not wanted. If sigma = 0 then the random number stream will not be
      * touched. */
-    virtual DecayFuncHet hetSample () const =0;
+    virtual DecayFuncHet hetSample (LocalRng& rng) const =0;
     
     /** Generate a DecayFuncHet value from an existing sample. */
     virtual DecayFuncHet hetSample (NormalSample sample) const =0;
@@ -117,7 +117,7 @@ public:
      * This is only valid where mu and sigma parameters are zero.
      * 
      * @returns Age at which an object should decay. */
-    virtual SimTime sampleAgeOfDecay () const =0;
+    virtual SimTime sampleAgeOfDecay (LocalRng& rng) const =0;
     
 protected:
     DecayFunction() {}

@@ -253,20 +253,20 @@ void AnophelesModel::initVectorTrap(const scnXml::Description1& desc, size_t ins
     trapParams.push_back(move(params));
 }
 
-void AnophelesModel::deployVectorPopInterv (size_t instance){
-    transmission.emergence->deployVectorPopInterv(instance);
+void AnophelesModel::deployVectorPopInterv (LocalRng& rng, size_t instance){
+    transmission.emergence->deployVectorPopInterv(rng, instance);
     // do same as in above function (of EmergenceModel)
     assert( instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size() );
-    seekingDeathRateIntervs[instance].deploy( sim::now() );
-    probDeathOvipositingIntervs[instance].deploy( sim::now() );
+    seekingDeathRateIntervs[instance].deploy( rng, sim::now() );
+    probDeathOvipositingIntervs[instance].deploy( rng, sim::now() );
 }
-void AnophelesModel::deployVectorTrap(size_t species, size_t instance, double number, SimTime lifespan){
+void AnophelesModel::deployVectorTrap(LocalRng& rng, size_t species, size_t instance, double number, SimTime lifespan){
     assert(instance < trapParams.size());
     TrapData data;
     data.instance = instance;
     double adultAvail = PerHostAnophParams::get(species).entoAvailability.mean();
     data.initialAvail = number * adultAvail * trapParams[instance].relAvail;
-    data.availHet = trapParams[instance].availDecay->hetSample();
+    data.availHet = trapParams[instance].availDecay->hetSample(rng);
     data.deployTime = sim::now();
     data.expiry = sim::now() + lifespan;
     baitedTraps.push_back(data);

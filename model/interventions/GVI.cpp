@@ -60,7 +60,7 @@ GVIComponent::GVIComponent( ComponentId id, const scnXml::GVIDescription& elt,
 }
 
 void GVIComponent::deploy( Host::Human& human, mon::Deploy::Method method, VaccineLimits )const{
-    human.perHostTransmission.deployComponent(*this);
+    human.perHostTransmission.deployComponent(human.rng(), *this);
     mon::reportEventMHD( mon::MHD_GVI, human, method );
 }
 
@@ -70,8 +70,8 @@ void GVIComponent::print_details( std::ostream& out )const{
     out << id().id << "\tGVI";
 }
 
-unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart() const{
-    return unique_ptr<PerHostInterventionData>(new HumanGVI( *this ));
+unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart(LocalRng& rng) const{
+    return unique_ptr<PerHostInterventionData>(new HumanGVI( rng, *this ));
 }
 unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart( istream& stream, ComponentId id ) const{
     return unique_ptr<PerHostInterventionData>(new HumanGVI( stream, id ));
@@ -95,15 +95,15 @@ void GVIComponent::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesPar
 
 
 // ———  per-human data  ———
-HumanGVI::HumanGVI ( const GVIComponent& params ) :
+HumanGVI::HumanGVI ( LocalRng& rng, const GVIComponent& params ) :
     PerHostInterventionData( params.id() )
 {
     // Varience factor of decay is sampled once per human: human is assumed
     // to account for most variance.
-    decayHet = params.decay->hetSample();
+    decayHet = params.decay->hetSample(rng);
 }
 
-void HumanGVI::redeploy(const Transmission::HumanVectorInterventionComponent&) {
+void HumanGVI::redeploy(LocalRng& rng, const Transmission::HumanVectorInterventionComponent&) {
     deployTime = sim::nowOrTs1();
 }
 

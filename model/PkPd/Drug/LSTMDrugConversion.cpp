@@ -32,16 +32,17 @@ using namespace std;
 namespace OM { namespace PkPd {
     
 LSTMDrugConversion::LSTMDrugConversion(const LSTMDrugType& parent,
-                                       const LSTMDrugType& metabolite) :
-    LSTMDrug(parent.sample_Vd()),
+                                       const LSTMDrugType& metabolite,
+                                       LocalRng& rng) :
+    LSTMDrug(parent.sample_Vd(rng)),
     parentType(parent),
     metaboliteType(metabolite),
     qtyG(0.0), qtyP(0.0), qtyM(0.0),
-    nka(-parent.sample_ka()),
-    nkP_sample(-parent.sample_elim_rate()),
-    nconv_sample(-parent.sample_conv_rate()),
-    nkM_sample(-metabolite.sample_elim_rate()),
-    vol_dist_metabolite(metabolite.sample_Vd())
+    nka(-parent.sample_ka(rng)),
+    nkP_sample(-parent.sample_elim_rate(rng)),
+    nconv_sample(-parent.sample_conv_rate(rng)),
+    nkM_sample(-metabolite.sample_elim_rate(rng)),
+    vol_dist_metabolite(metabolite.sample_Vd(rng))
 {}
 
 //LSTMDrugConversion::~LSTMDrugConversion(){}
@@ -179,7 +180,7 @@ void LSTMDrugConversion::setConversionParameters(Params_convFactor& p,
     p.invVdP = 1.0 / (vol_dist * body_mass); p.invVdM = 1.0 / (vol_dist_metabolite * body_mass);
 }
 
-void LSTMDrugConversion::setKillingParameters(Params_convFactor& p,
+void LSTMDrugConversion::setKillingParameters(LocalRng& rng, Params_convFactor& p,
         WithinHost::CommonInfection *inf) const
 {
     uint32_t genotype = inf->genotype();
@@ -198,11 +199,11 @@ void LSTMDrugConversion::setKillingParameters(Params_convFactor& p,
         p.KnM = inf->Kn.at(metaboliteType.getIndex());
     } else {
         // First usage for this infection / treatment: sample, optionally with correlation.
-        auto zscore = NormalSample::generate();
+        auto zscore = NormalSample::generate(rng);
         p.KnP = pdP.IC50_pow_slope(zscore);
         inf->Kn[pIndex] = p.KnP;
         
-        auto metab_zscore = parentType.IC50_correlated_sample(zscore);
+        auto metab_zscore = parentType.IC50_correlated_sample(zscore, rng);
         p.KnM = pdM.IC50_pow_slope(metab_zscore);
         inf->Kn[metaboliteType.getIndex()] = p.KnM;
     }
@@ -210,14 +211,14 @@ void LSTMDrugConversion::setKillingParameters(Params_convFactor& p,
 
 // TODO: in high transmission, is this going to get called more often than updateConcentration?
 // When does it make sense to try to optimise (avoid doing decay calcuations here)?
-double LSTMDrugConversion::calculateDrugFactor(WithinHost::CommonInfection *inf, double body_mass) const {
+double LSTMDrugConversion::calculateDrugFactor(LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const {
     if( qtyG == 0.0 && qtyP == 0.0 && qtyM == 0.0 && doses.size() == 0 ){
         return 1.0; // nothing to do
     }
     
     Params_convFactor p;
     setConversionParameters(p, body_mass);
-    setKillingParameters(p, inf);
+    setKillingParameters(rng, p, inf);
     
     double time = 0.0;  // time since start of day
     double totalFactor = 1.0;   // survival factor for whole day

@@ -74,7 +74,11 @@ public:
   ///@brief Creation, destruction and checkpointing
   //@{
   /// Creates a derived class
-  static TransmissionModel* createTransmissionModel (const scnXml::Entomology& entoData, int populationSize);
+  /// 
+  /// Parameters seed1 and seed2 together form a 128-bit RNG seed.
+  static TransmissionModel* createTransmissionModel (
+      uint64_t seed1, uint64_t seed2,
+      const scnXml::Entomology& entoData, int populationSize);
   
 protected:
     /// Reads all entomological parameters from the input datafile.

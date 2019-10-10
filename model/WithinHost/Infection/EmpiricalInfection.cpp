@@ -58,8 +58,8 @@ double EmpiricalInfection::_extinctionLevel;
 double EmpiricalInfection::_overallMultiplier;
 
 
-CommonInfection* createEmpiricalInfection (uint32_t protID) {
-    return new EmpiricalInfection (protID, 1);
+CommonInfection* createEmpiricalInfection (LocalRng& rng, uint32_t protID) {
+    return new EmpiricalInfection (rng, protID, 1);
 }
 CommonInfection* checkpointedEmpiricalInfection (istream& stream) {
     return new EmpiricalInfection (stream);
@@ -136,14 +136,14 @@ void EmpiricalInfection::init(){
 
 /* Initialises a new infection by assigning the densities for the last 3 prepatent days
 */
-EmpiricalInfection::EmpiricalInfection(uint32_t protID, double growthRateMultiplier) :
+EmpiricalInfection::EmpiricalInfection(LocalRng& rng, uint32_t protID, double growthRateMultiplier) :
     CommonInfection(protID)
 {
   //sample the parasite densities for the last 3 prepatent days
   //note that the lag decreases with time
-  _laggedLogDensities[0]=sampleSubPatentValue(_alpha1,_mu1,log(_subPatentLimit));  
-  _laggedLogDensities[1]=sampleSubPatentValue(_alpha2,_mu2,log(_subPatentLimit)); 
-  _laggedLogDensities[2]=sampleSubPatentValue(_alpha3,_mu3,log(_subPatentLimit));  
+  _laggedLogDensities[0]=sampleSubPatentValue(rng, _alpha1,_mu1,log(_subPatentLimit));  
+  _laggedLogDensities[1]=sampleSubPatentValue(rng, _alpha2,_mu2,log(_subPatentLimit)); 
+  _laggedLogDensities[2]=sampleSubPatentValue(rng, _alpha3,_mu3,log(_subPatentLimit));  
   //only the immediately preceding value is modified by the growth rate multiplier
   _laggedLogDensities[0] += log(growthRateMultiplier); 
   _patentGrowthRateMultiplier = growthRateMultiplier;
@@ -159,7 +159,7 @@ void EmpiricalInfection::setPatentGrowthRateMultiplier(double multiplier) {
 
 // NOTE: TS never provided a lot of documentation for this code.
 const int EI_MAX_SAMPLES = 10;
-bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge, double ){
+bool EmpiricalInfection::updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double ){
   //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
   # define L _laggedLogDensities
   
@@ -174,15 +174,15 @@ bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge, do
   for(int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
     double logDensity;
     for(int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {
-      double b_1=random::gauss(_mu_beta1[ageDays],_sigma_beta1[ageDays]);
-      double b_2=random::gauss(_mu_beta2[ageDays],_sigma_beta2[ageDays]);
-      double b_3=random::gauss(_mu_beta3[ageDays],_sigma_beta3[ageDays]);
+      double b_1=rng.gauss(_mu_beta1[ageDays],_sigma_beta1[ageDays]);
+      double b_2=rng.gauss(_mu_beta2[ageDays],_sigma_beta2[ageDays]);
+      double b_3=rng.gauss(_mu_beta3[ageDays],_sigma_beta3[ageDays]);
       double expectedlogDensity = b_1 * (L[0]+L[1]+L[2]) / 3
       + b_2 * (L[2]-L[0]) / 2
       + b_3 * (L[2]+L[0]-2*L[1]) / 4;
       
       //include sampling error
-      logDensity=random::gauss(expectedlogDensity,sigma_noise(ageDays));
+      logDensity=rng.gauss(expectedlogDensity,sigma_noise(ageDays));
       //include drug and immunity effects via growthRateMultiplier 
       logDensity += log(_patentGrowthRateMultiplier);
       
@@ -192,7 +192,7 @@ bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge, do
     if (!(logDensity <= upperLimitoflogDensity))	// in case all the above attempts fail, cap logDensity
       logDensity=upperLimitoflogDensity;
     
-    localDensity= getInflatedDensity(logDensity);
+    localDensity= getInflatedDensity(rng, logDensity);
     
     localDensity *= survivalFactor;	// Apply drug and vaccine effects
     
@@ -223,13 +223,13 @@ bool EmpiricalInfection::updateDensity( double survivalFactor, SimTime bsAge, do
 # undef L
 }
 
-double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double upperBound){
+double EmpiricalInfection::sampleSubPatentValue(LocalRng& rng, double alpha, double mu, double upperBound){
     double beta = alpha * (1.0-mu) / mu;
-    double nonInflatedValue = upperBound + log(random::beta(alpha, beta));
+    double nonInflatedValue = upperBound + log(rng.beta(alpha, beta));
     double inflatedValue;
     int tries=0;
     do {
-	inflatedValue=getInflatedDensity(nonInflatedValue);
+	inflatedValue=getInflatedDensity(rng, nonInflatedValue);
 	tries++;
     } while ((inflatedValue>upperBound) && tries<10);
     if (inflatedValue>upperBound)
@@ -237,11 +237,12 @@ double EmpiricalInfection::sampleSubPatentValue(double alpha, double mu, double 
     return inflatedValue;
 }
 
-double EmpiricalInfection::samplePatentValue(double mu, double sigma, double lowerBound){
+// NOTE: method is unused — why?
+double EmpiricalInfection::samplePatentValue(LocalRng& rng, double mu, double sigma, double lowerBound){
   double returnValue;
   do {
-    double nonInflatedValue=random::gauss(mu, sigma);
-    returnValue=getInflatedDensity(nonInflatedValue);
+    double nonInflatedValue=rng.gauss(mu, sigma);
+    returnValue=getInflatedDensity(rng, nonInflatedValue);
   } while (returnValue<lowerBound);
   return returnValue;
 }
@@ -250,8 +251,8 @@ double EmpiricalInfection::sigma_noise(int ageDays) {
   return _sigma0_res+_sigmat_res*((double)ageDays);
 }
 
-double EmpiricalInfection::getInflatedDensity(double nonInflatedDensity){
-  double inflatedLogDensity = log(_inflationMean) + random::gauss(nonInflatedDensity, sqrt(_inflationVariance));
+double EmpiricalInfection::getInflatedDensity(LocalRng& rng, double nonInflatedDensity){
+  double inflatedLogDensity = log(_inflationMean) + rng.gauss(nonInflatedDensity, sqrt(_inflationVariance));
   return exp(inflatedLogDensity);
 }
 

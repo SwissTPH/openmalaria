@@ -36,16 +36,17 @@ using namespace OM::WithinHost;
 class PennyInfectionSuite : public CxxTest::TestSuite
 {
 public:
+    PennyInfectionSuite() : m_rng(0, 0) {}
+    
     void setUp () {
+        m_rng.seed(1095, 721347520444481703);
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();
         PennyInfection::init();
-        util::random::seed( 1095 );
-        infection = new PennyInfection (0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
+        infection = new PennyInfection (m_rng, 0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
     void tearDown () {
         delete infection;
-        util::random::seed(0);  // make sure nothing else uses this seed/reports
     }
     
     void testThresholds(){
@@ -81,7 +82,7 @@ public:
         int iterations=0;
         SimTime now = sim::ts0();
         do{
-            extinct = infection->update(1.0, now, numeric_limits<double>::quiet_NaN());
+            extinct = infection->update(m_rng, 1.0, now, numeric_limits<double>::quiet_NaN());
             int ageDays = (now - infection->m_startDate - infection->s_latentP).inDays();
             while( ageDays < 0 ) ageDays += infection->delta_V; // special case encountered by unit test
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
@@ -97,6 +98,7 @@ public:
     
 private:
     PennyInfection* infection;
+    LocalRng m_rng;
 };
 
 #endif

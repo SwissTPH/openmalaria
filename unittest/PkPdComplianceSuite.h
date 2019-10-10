@@ -57,7 +57,7 @@ class PkPdComplianceSuite : public CxxTest::TestSuite
 {
 public:
     PkPdComplianceSuite() :
-            proxy(0)
+            m_rng(0, 0), proxy(0)
     {
         bodymass = 50 /*kg*/;
        
@@ -66,10 +66,11 @@ public:
     }
     
     void setUp () {
+        m_rng.seed(0, 721347520444481703);
         UnittestUtil::initTime(1);
         UnittestUtil::PkPdSuiteSetup();
         proxy = new LSTMModel ();
-        inf = createDummyInfection(0);
+        inf = createDummyInfection(m_rng, 0);
         schedule.clear();
     }
     
@@ -175,7 +176,7 @@ public:
         double totalFac = 1;
         for( size_t i = 0; i < maxDays; i++){
             // before update (after last step):
-            double fac = proxy->getDrugFactor(inf, bodymass);
+            double fac = proxy->getDrugFactor(m_rng, inf, bodymass);
             totalFac *= fac;
             TS_ASSERT_APPROX_TOL (totalFac, drug_factors[i], PKPD_FACT_REL_TOL, PKPD_FACT_ABS_TOL);
             PCS_VERBOSE(res_Fac[i] = totalFac;)
@@ -233,7 +234,7 @@ public:
             pair<iter, iter> doses_tmp = schedule.equal_range(i);
             for( iter it = doses_tmp.first; it != doses_tmp.second; it++){
                 const double time = it->second.first, qty = it->second.second;
-                UnittestUtil::medicate( *proxy, drugIndex, qty, time );
+                UnittestUtil::medicate( m_rng, *proxy, drugIndex, qty, time );
             }
     }
     
@@ -332,6 +333,7 @@ public:
     }
     
 private:
+    LocalRng m_rng;
     LSTMModel *proxy;
     CommonInfection *inf;
     double bodymass;

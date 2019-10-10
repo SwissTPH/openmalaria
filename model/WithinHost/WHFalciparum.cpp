@@ -121,7 +121,7 @@ void WHFalciparum::setParams(double cumYStar, double cumHStar, double aM, double
 
 // -----  Non-static  -----
 
-WHFalciparum::WHFalciparum( double comorbidityFactor ):
+WHFalciparum::WHFalciparum( LocalRng& rng, double comorbidityFactor ):
     WHInterface(),
     m_cumulative_h(0.0), m_cumulative_Y(0.0), m_cumulative_Y_lag(0.0),
     totalDensity(0.0), hrp2Density(0.0), timeStepMaxDensity(0.0),
@@ -131,7 +131,7 @@ WHFalciparum::WHFalciparum( double comorbidityFactor ):
     // the individual samples change. In any case the overhead is negligible.
     //FIXME: Should this be allowed to be greater than 1?
     // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
-    _innateImmSurvFact = exp(-random::gauss(0.0, sigma_i));
+    _innateImmSurvFact = exp(-rng.gauss(0.0, sigma_i));
     
     m_y_lag.assign(y_lag_len, Genotypes::N(), 0.0);
 }
@@ -231,8 +231,8 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
     return pTrans * x * sumX;
 }
 
-bool WHFalciparum::diagnosticResult( const Diagnostic& diagnostic ) const{
-    return diagnostic.isPositive( totalDensity, hrp2Density );
+bool WHFalciparum::diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const{
+    return diagnostic.isPositive( rng, totalDensity, hrp2Density );
 }
 
 void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
@@ -244,7 +244,7 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
                   mon::Deploy::TREAT,
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
-bool WHFalciparum::treatSimple( const Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
+bool WHFalciparum::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
     if( timeLiver != SimTime::zero() ){
         if( timeLiver < SimTime::zero() )
             clearInfections( Treatments::LIVER );

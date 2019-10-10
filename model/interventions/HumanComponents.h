@@ -31,6 +31,7 @@ namespace Host {
 }
 namespace interventions {
     class VaccineComponent;
+    using util::LocalRng;
 
 // ———  sub-population removal  ———
 
@@ -81,7 +82,7 @@ public:
     }
     
 private:
-    PerEffectPerHumanVaccine( ComponentId id, const VaccineComponent& params );
+    PerEffectPerHumanVaccine( LocalRng& rng, ComponentId id, const VaccineComponent& params );
     
     ComponentId component;      // id of component (for finding parameters)
     // Type of vaccine
@@ -111,7 +112,7 @@ public:
     /** Vaccinate unless the passed VaccineLimits specify not to.
      * 
      * @returns true when the vaccine is administered */
-    bool possiblyVaccinate( const Host::Human& human, ComponentId componentId,
+    bool possiblyVaccinate( Host::Human& human, ComponentId componentId,
                            interventions::VaccineLimits vaccLimits );
 
 #if 0

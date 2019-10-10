@@ -36,13 +36,13 @@ public:
     static void init();
     
     /// Constructor
-    PennyInfection(uint32_t protID);
+    PennyInfection(LocalRng& rng, uint32_t protID);
     /// Resume from a checkpoint
     PennyInfection (istream& stream);
     /// Destructor
     virtual ~PennyInfection () {};
     
-    virtual bool updateDensity( double survivalFactor, SimTime bsAge, double );
+    virtual bool updateDensity( LocalRng& rng, double survivalFactor, SimTime bsAge, double );
     
     /** Get the density of sequestered parasites. */
     inline double seqDensity(int ageDays){
@@ -55,7 +55,7 @@ protected:
 
 private:
     // function to obtain the summation component of variant specific immunity
-    double getVariantSpecificSummation(int ageDays);
+    double getVariantSpecificSummation(LocalRng& rng, int ageDays);
     // function to obtain the summation component of clonal immunity
     double getClonalSummation(int ageDays);
     

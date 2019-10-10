@@ -31,9 +31,6 @@ namespace scnXml{
     class Scenario;
 }
 namespace OM {
-namespace interventions{
-    class InterventionManager;
-}
     
 //! Main simulation class
 class Simulator{
@@ -56,8 +53,8 @@ private:
     void writeCheckpoint();
     void readCheckpoint();
     
-    void checkpoint (istream& stream, int checkpointNum);
-    void checkpoint (ostream& stream, int checkpointNum);
+    void checkpoint (istream& stream);
+    void checkpoint (ostream& stream);
     //@}
     
     // Data

@@ -151,8 +151,8 @@ const double case_specific_data[] = {
 
 // ———  static (non-class-member) code  ———
 
-CommonInfection* createMolineauxInfection (uint32_t protID) {
-    return new MolineauxInfection (protID);
+CommonInfection* createMolineauxInfection (LocalRng& rng, uint32_t protID) {
+    return new MolineauxInfection (rng, protID);
 }
 
 CommonInfection* checkpointedMolineauxInfection (istream& stream) {
@@ -202,18 +202,18 @@ void MolineauxInfection::init( const Parameters& parameters ){
 
 // ———  MolineauxInfection: initialisation  ———
 
-MolineauxInfection::MolineauxInfection(uint32_t genotype):
+MolineauxInfection::MolineauxInfection(LocalRng& rng, uint32_t genotype):
         CommonInfection(genotype)
 {
     for( size_t i = 0; i < v; i++ ){
         // Molineaux paper, equation 11
         if( multi_factor_gamma ){
             do{
-                mi[i] = static_cast<float>(random::gamma(shape_m,scale_m));
+                mi[i] = static_cast<float>(rng.gamma(shape_m,scale_m));
             }while( mi[i]<1.0 );
         }else{
             do{
-                mi[i] = static_cast<float>(random::gauss(mu_m, sigma_m));
+                mi[i] = static_cast<float>(rng.gauss(mu_m, sigma_m));
             }while( mi[i]<1.0 );
         }
     }
@@ -225,25 +225,25 @@ MolineauxInfection::MolineauxInfection(uint32_t genotype):
     Sm_summation = 0.0;
     
     if( pairwise_P_star_sample ){
-        int patient = util::random::uniform( 35 );
+        int patient = rng.uniform( 35 );
         Pc_star = static_cast<float>( k_c * case_specific_data[2 * patient + 1] );
         Pm_star = static_cast<float>( k_m * case_specific_data[2 * patient + 0] );
     }else{
         // Sampling of the first local maxima:
         if( first_local_maximum_gamma ){
-            Pc_star = static_cast<float>( k_c * pow(10.0, random::gamma(
+            Pc_star = static_cast<float>( k_c * pow(10.0, rng.gamma(
                 mean_shape_first_local_max, sd_scale_first_local_max)) );
         } else {
-            Pc_star = static_cast<float>( k_c * pow(10.0, random::gauss(
+            Pc_star = static_cast<float>( k_c * pow(10.0, rng.gauss(
                 mean_shape_first_local_max, sd_scale_first_local_max)) );
         }
         
         // Sampling of duration:
         if( mean_duration_gamma ) {
-            Pm_star = static_cast<float>( k_m * pow(10.0, random::gamma(
+            Pm_star = static_cast<float>( k_m * pow(10.0, rng.gamma(
                 mean_shape_diff_pos_days,sd_scale_diff_pos_days)) );
         } else {
-            Pm_star = static_cast<float>( k_m * pow(10.0, random::gauss(
+            Pm_star = static_cast<float>( k_m * pow(10.0, rng.gauss(
                 mean_shape_diff_pos_days,sd_scale_diff_pos_days)) );
         }
     }
@@ -259,7 +259,7 @@ MolineauxInfection::Variant::Variant () :
 
 // ———  MolineauxInfection: density updates  ———
 
-bool MolineauxInfection::updateDensity( double survival_factor, SimTime age_BS, double body_mass ){
+bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTime age_BS, double body_mass ){
     // bsAge : age of blood stage; 0 implies initial density (0.1; time t=0 in
     // paper, t=1 in MP's Matlab code), age 2 days is after first update step
     // survivalFactor : probabilty of merozoites surviving drugs, inter-infection immunity and vaccines

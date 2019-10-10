@@ -132,9 +132,7 @@ ClinicalModel::~ClinicalModel () {
 bool ClinicalModel::isDead( SimTime age ){
     if( age >= sim::maxHumanAge())       // too old (reached age limit)
         doomed = DOOMED_TOO_OLD;
-    if (doomed > NOT_DOOMED)	// killed by some means
-        return true;	// remove from population
-    return false;
+    return doomed > NOT_DOOMED;	// killed by some means
 }
 
 void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
@@ -149,7 +147,7 @@ void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     }
     if(newBorn /* i.e. first update since birth */) {
         // Chance of neonatal mortality:
-        if (Host::NeonatalMortality::eventNeonatalMortality()) {
+        if (Host::NeonatalMortality::eventNeonatalMortality(human.rng())) {
             mon::reportEventMHI( mon::MHO_INDIRECT_DEATHS, human, 1 );
             doomed = DOOMED_NEONATAL;
             return;
