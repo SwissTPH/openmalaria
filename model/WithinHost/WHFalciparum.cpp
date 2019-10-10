@@ -181,15 +181,15 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX 
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to index to ensure positive.
-    const int i10 = (sim::ts0() - SimTime::fromDays(10) + SimTime::oneTS()).inSteps() + y_lag_len;
-    const int i5d = SimTime::fromDays(5).inSteps();
-    const int i10d = 2 * i5d;
+    size_t d10 = mod_nn(y_lag_len + (sim::ts1() - SimTime::fromDays(10)).inSteps(), y_lag_len);
+    size_t d15 = mod_nn(y_lag_len + (sim::ts1() - SimTime::fromDays(15)).inSteps(), y_lag_len);
+    size_t d20 = mod_nn(y_lag_len + (sim::ts1() - SimTime::fromDays(20)).inSteps(), y_lag_len);
     // Sum lagged densities across genotypes:
     double y10 = 0.0, y15 = 0.0, y20 = 0.0;
     for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
-        y10 += m_y_lag.at(mod_nn(i10, y_lag_len), genotype);
-        y15 += m_y_lag.at(mod_nn(i10 - i5d, y_lag_len), genotype);
-        y20 += m_y_lag.at(mod_nn(i10 - i10d, y_lag_len), genotype);
+        y10 += m_y_lag.at(d10, genotype);
+        y15 += m_y_lag.at(d15, genotype);
+        y20 += m_y_lag.at(d20, genotype);
     }
     // Weighted sum:
     const double x = PTM_beta1 * y10 + PTM_beta2 * y15 + PTM_beta3 * y20;
