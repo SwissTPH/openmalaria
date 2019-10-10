@@ -34,8 +34,10 @@ using namespace OM::WithinHost;
 class DummyInfectionSuite : public CxxTest::TestSuite
 {
 public:
+    DummyInfectionSuite() : m_rng(0, 0) {}
+    
     void setUp () {
-        m_rng.seed(0);
+        m_rng.seed(0, 721347520444481703);
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();
         DummyInfection::init();

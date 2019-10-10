@@ -84,14 +84,13 @@ template<class T>
 struct RNG {
     ///@brief Construction and checkpointing
     //@{
-    /// Default constructor
-    RNG(): m_rng(0) {
-        m_gsl_type = make_gsl_rng_type(m_rng);
-        m_gsl_gen.type = &m_gsl_type;
-        m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
-    }
-    /// Seeding constructor
-    explicit RNG(uint64_t seed): m_rng(seed) {
+    /// Seeding constructor: use given seed and stream
+    /// 
+    /// Note: we don't expose a seed-only constructor to prevent accidental
+    /// seeding with only a 64-bit seed. Since many instances of the LocalRng
+    /// are used, 128-bit seeds are recommended to reduce chance of overlapping
+    /// sections of RNG output.
+    explicit RNG(uint64_t seed, uint64_t stream): m_rng(seed, stream) {
         m_gsl_type = make_gsl_rng_type(m_rng);
         m_gsl_gen.type = &m_gsl_type;
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
@@ -116,9 +115,9 @@ struct RNG {
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
     }
     
-    /// Seed
-    void seed(uint64_t seed) {
-        m_rng.seed(seed);
+    /// Seed with given 128-bit input (see notes on constructor)
+    void seed(uint64_t seed, uint64_t stream) {
+        m_rng.seed(seed, stream);
     }
     
     /// Checkpointing

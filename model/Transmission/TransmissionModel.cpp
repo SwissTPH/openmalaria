@@ -45,14 +45,17 @@ static double tsAdultEntoInocs = 0.0;  // accumulator for time step EIR of adult
 static int tsNumAdults = 0; // accumulator for time step adults requesting EIR
 
 
-TransmissionModel* TransmissionModel::createTransmissionModel (uint64_t seed, const scnXml::Entomology& entoData, int populationSize) {
+TransmissionModel* TransmissionModel::createTransmissionModel (
+    uint64_t seed1, uint64_t seed2,
+    const scnXml::Entomology& entoData, int populationSize)
+{
   // Entomology contains either a list of at least one anopheles or a list of at
   // least one EIRDaily.
   const scnXml::Entomology::VectorOptional& vectorData = entoData.getVector();
 
   TransmissionModel *model;
   if (vectorData.present())
-    model = new VectorModel(seed, entoData, vectorData.get(), populationSize);
+    model = new VectorModel(seed1, seed2, entoData, vectorData.get(), populationSize);
   else {
       const scnXml::Entomology::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...

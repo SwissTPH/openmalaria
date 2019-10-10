@@ -57,7 +57,7 @@ class PkPdComplianceSuite : public CxxTest::TestSuite
 {
 public:
     PkPdComplianceSuite() :
-            proxy(0)
+            m_rng(0, 0), proxy(0)
     {
         bodymass = 50 /*kg*/;
        
@@ -66,12 +66,11 @@ public:
     }
     
     void setUp () {
-        m_rng.seed(0);
+        m_rng.seed(0, 721347520444481703);
         UnittestUtil::initTime(1);
         UnittestUtil::PkPdSuiteSetup();
         proxy = new LSTMModel ();
-        LocalRng rng(0);
-        inf = createDummyInfection(rng, 0);
+        inf = createDummyInfection(m_rng, 0);
         schedule.clear();
     }
     

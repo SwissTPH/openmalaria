@@ -47,7 +47,7 @@ void LSTMModel::init( const scnXml::Scenario& scenario ){
 void LSTMModel::checkpoint (istream& stream) {
     // We need an RNG to call createInstance, but override the values later
     // anyway. Hacky solution: create a local RNG.
-    LocalRng rng(0);
+    LocalRng rng(0, 0);
     
     size_t numDrugs;	// type must be same as m_drugs.size()
     numDrugs & stream;

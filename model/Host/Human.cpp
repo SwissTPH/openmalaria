@@ -58,9 +58,9 @@ void Human::init( const Parameters& parameters, const scnXml::Scenario& scenario
 // -----  Non-static functions: creation/destruction, checkpointing  -----
 
 // Create new human
-Human::Human(uint64_t seed, SimTime dateOfBirth) :
+Human::Human(uint64_t seed1, uint64_t seed2, SimTime dateOfBirth) :
     infIncidence(InfectionIncidenceModel::createModel()),
-    m_rng(seed),
+    m_rng(seed1, seed2),
     m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)
@@ -79,6 +79,7 @@ Human::Human(SimTime dateOfBirth, int dummy) :
     withinHostModel(nullptr),
     infIncidence(nullptr),
     clinicalModel(nullptr),
+    m_rng(0, 0),
     m_DOB(dateOfBirth),
     m_cohortSet(0),
     nextCtsDist(0)

@@ -38,7 +38,7 @@ class LSTMPkPdSuite : public CxxTest::TestSuite
 {
 public:
     LSTMPkPdSuite() :
-            proxy(0)
+            m_rng(0, 0), proxy(0)
     {
         // This is what a previously-used weight distribution gave us,
         // and is good enough for testing purposes:
@@ -46,12 +46,11 @@ public:
     }
     
     void setUp () {
-        m_rng.seed(0);
+        m_rng.seed(0, 721347520444481703);
         UnittestUtil::initTime(1);
 	UnittestUtil::PkPdSuiteSetup();
 	proxy = new LSTMModel ();
-        LocalRng rng(0);
-        inf = createDummyInfection(rng, 0);
+        inf = createDummyInfection(m_rng, 0);
         MQ_index = LSTMDrugType::findDrug( "MQ" );
     }
     void tearDown () {

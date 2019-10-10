@@ -36,12 +36,14 @@ using namespace OM::WithinHost;
 class PennyInfectionSuite : public CxxTest::TestSuite
 {
 public:
+    PennyInfectionSuite() : m_rng(0, 0) {}
+    
     void setUp () {
-        m_rng.seed(1095);
+        m_rng.seed(1095, 721347520444481703);
         UnittestUtil::initTime(1);
         UnittestUtil::Infection_init_latentP_and_NaN ();
         PennyInfection::init();
-        util::global_RNG.seed( 1095 );
+        util::global_RNG.seed( 1095, 721347520444481703 );
         infection = new PennyInfection (m_rng, 0xFFFFFFFF);    // pkpdID (value) isn't important since we're not using drug model here
     }
     void tearDown () {

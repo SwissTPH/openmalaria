@@ -89,8 +89,11 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     Parameters parameters( model.getParameters() );     // depends on nothing
     WithinHost::Genotypes::init( scenario );
     
-    util::global_RNG.seed( model.getParameters().getIseed() );
-    util::master_RNG.seed( model.getParameters().getIseed() );
+    util::global_RNG.seed( model.getParameters().getIseed(), 721347520444481703 );
+    // The master RNG is cryptographic with a hard-coded IV. Use of low
+    // Hamming weight inputs (numbers close to 0) should not reduce quality.
+    util::master_RNG.seed( model.getParameters().getIseed(), 0 );
+    
     util::ModelOptions::init( model.getModelOptions() );
     
     // 2) elements depending on only elements initialised in (1):
@@ -110,9 +113,12 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     // Note: PerHost dependency can be postponed; it is only used to set adultAge
     population = unique_ptr<Population>(
             new Population( scenario.getDemography().getPopSize() ));
-    uint64_t trans_seed = util::master_RNG.gen_seed();
+    uint64_t seed1 = util::master_RNG.gen_seed();
+    uint64_t seed2 = util::master_RNG.gen_seed();
     transmission = unique_ptr<TransmissionModel>(
-            TransmissionModel::createTransmissionModel(trans_seed, scenario.getEntomology(), population->size()) );
+        TransmissionModel::createTransmissionModel(
+            seed1, seed2,
+            scenario.getEntomology(), population->size()) );
     
     // Depends on transmission model (for species indexes):
     // MDA1D may depend on health system (too complex to verify)

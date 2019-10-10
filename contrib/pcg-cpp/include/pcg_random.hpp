@@ -213,6 +213,9 @@ public:
 
 protected:
     constexpr no_stream() = default;
+    
+    void stream_binary_checkpoint(ostream& bstream) {}
+    void stream_binary_checkpoint(istream& bstream) {}
 };
 
 
@@ -260,6 +263,13 @@ protected:
     {
         // Nothing (else) to do.
     }
+    
+    void stream_binary_checkpoint(ostream& bstream) {
+        bstream.write (reinterpret_cast<char*>(&inc_), sizeof(inc_));
+    }
+    void stream_binary_checkpoint(istream& bstream) {
+        bstream.read (reinterpret_cast<char*>(&inc_), sizeof(inc_));
+    }
 };
 
 
@@ -294,6 +304,7 @@ protected:
     struct no_specifiable_stream_tag {};
 
     using stream_mixin::increment;
+    using stream_mixin::stream_binary_checkpoint;
     using multiplier_mixin::multiplier;
 
 public:
@@ -462,12 +473,15 @@ public:
                                      stream_mixin_rhs, multiplier_mixin_rhs>&);
     
     // Incomplete checkpointing: assumes RNG was already seeded
-    void binary_checkpoint(ostream& stream) {
-        stream.write (reinterpret_cast<char*>(&state_), sizeof(state_));
+    void binary_checkpoint(ostream& bstream) {
+        stream_binary_checkpoint(bstream);
+        bstream.write (reinterpret_cast<char*>(&state_), sizeof(state_));
     }
-    void binary_checkpoint(istream& stream) {
-        stream.read (reinterpret_cast<char*>(&state_), sizeof(state_));
-        if (!stream || stream.gcount() != sizeof(state_))
+    void binary_checkpoint(istream& bstream) {
+        stream_binary_checkpoint(bstream);
+        bstream.read (reinterpret_cast<char*>(&state_), sizeof(state_));
+        
+        if (!bstream || bstream.gcount() != sizeof(state_))
             throw runtime_error ("pcg_random - binary_checkpoint: stream read error");
     }
 };

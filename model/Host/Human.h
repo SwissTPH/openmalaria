@@ -56,9 +56,10 @@ public:
   //@{
   /** Initialise all variables of a human datatype.
    * 
-   * @param seed Seed for local RNG
+   * Parameters seed1 and seed2 together form a 128-bit RNG seed.
+   * 
    * @param dateOfBirth date of birth (usually start of next time step) */
-  Human(uint64_t seed, SimTime dateOfBirth);
+  Human(uint64_t seed1, uint64_t seed2, SimTime dateOfBirth);
   
   /// Allow move construction
   Human(Human&&) = default;

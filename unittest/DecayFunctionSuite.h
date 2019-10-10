@@ -34,14 +34,14 @@ class DecayFunctionSuite : public CxxTest::TestSuite
 {
 public:
     DecayFunctionSuite () :
-        dfElt( "" )
+        m_rng(0, 0), dfElt( "" )
     {
         dfElt.setL( "10y" );
         dfElt.setK( 1.6 );
     }
     
     void setUp() {
-        m_rng.seed(0);
+        m_rng.seed(0, 721347520444481703);
         UnittestUtil::initTime(5);
     }
     

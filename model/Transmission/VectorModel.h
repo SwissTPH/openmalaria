@@ -44,7 +44,8 @@ public:
   static const map<string,size_t>& getSpeciesIndexMap();
   
     
-  VectorModel(uint64_t seed, const scnXml::Entomology& entoData, const scnXml::Vector vectorData, int populationSize);
+  /// Parameters seed1 and seed2 together form a 128-bit RNG seed.
+  VectorModel(uint64_t seed1, uint64_t seed2, const scnXml::Entomology& entoData, const scnXml::Vector vectorData, int populationSize);
   virtual ~VectorModel();
   
   /** Extra initialisation when not loading from a checkpoint, requiring

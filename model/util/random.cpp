@@ -44,7 +44,7 @@
 
 namespace OM { namespace util {
 
-LocalRng global_RNG;
-MasterRng master_RNG;
+LocalRng global_RNG(0, 0);
+MasterRng master_RNG(0, 0);
 
 } }
