@@ -466,8 +466,25 @@ void VectorModel::calculateEIR(Host::Human& human, double ageYears,
 
 // Every Global::interval days:
 void VectorModel::vectorUpdate (const Population& population) {
-    const size_t nGenotypes = WithinHost::Genotypes::N();
     SimTime popDataInd = mod_nn(sim::ts0(), saved_sum_avail.size1());
+    
+    for(size_t s = 0; s < speciesIndex.size(); ++s){
+        // Copy slice to new array:
+        auto range = saved_sigma_dif.range_at12(popDataInd, s);
+        sigma_dif_species.assign(range.first, range.second);
+        
+        species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
+                saved_sigma_df.at(popDataInd, s),
+                sigma_dif_species,
+                saved_sigma_dff[s],
+                simulationMode == dynamicEIR);
+    }
+}
+void VectorModel::update(const Population& population) {
+    TransmissionModel::updateKappa(population);
+    
+    const size_t nGenotypes = WithinHost::Genotypes::N();
+    SimTime popDataInd = mod_nn(sim::ts1(), saved_sum_avail.size1());
     vector<double> probTransmission;
     saved_sum_avail.assign_at1(popDataInd, 0.0);
     saved_sigma_df.assign_at1(popDataInd, 0.0);
@@ -505,21 +522,6 @@ void VectorModel::vectorUpdate (const Population& population) {
             saved_sigma_dff[s] += df * host.relMosqFecundity(s);
         }
     }
-    
-    for(size_t s = 0; s < speciesIndex.size(); ++s){
-        // Copy slice to new array:
-        auto range = saved_sigma_dif.range_at12(popDataInd, s);
-        sigma_dif_species.assign(range.first, range.second);
-        
-        species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
-                saved_sigma_df.at(popDataInd, s),
-                sigma_dif_species,
-                saved_sigma_dff[s],
-                simulationMode == dynamicEIR);
-    }
-}
-void VectorModel::update(const Population& population) {
-    TransmissionModel::updateKappa(population);
 }
 
 const string vec_mode_err = "vector interventions can only be used in "
