@@ -481,7 +481,23 @@ void VectorModel::vectorUpdate (const Population& population) {
     }
 }
 void VectorModel::update(const Population& population) {
-    TransmissionModel::updateKappa(population);
+    // We calculate kappa for output and the non-vector model.
+    double sumWt_kappa = 0.0;
+    double sumWeight  = 0.0;
+    int nTransmit = 0;
+
+    foreach(const Host::Human& human, population.crange()) {
+        // Calculate availability relative to age at end of time step
+        const double avail = human.perHostTransmission.relativeAvailabilityHetAge(
+            human.age(sim::ts1()).inYears());
+        sumWeight += avail;
+        const double tbvFactor = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        const double pTransmit = human.withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
+        const double riskTrans = avail * pTransmit;
+        sumWt_kappa += riskTrans;
+        if( riskTrans > 0.0 )
+            ++nTransmit;
+    }
     
     const size_t nGenotypes = WithinHost::Genotypes::N();
     SimTime popDataInd = mod_nn(sim::ts1(), saved_sum_avail.size1());
@@ -522,6 +538,16 @@ void VectorModel::update(const Population& population) {
             saved_sigma_dff[s] += df * host.relMosqFecundity(s);
         }
     }
+    
+    double kappa;
+    if (sumWeight > DBL_MIN * 10.0) {
+        kappa = sumWt_kappa / sumWeight;
+    } else {
+        // This is valid due to a population size of zero
+        kappa = 0.0;        // no humans: no infectiousness
+    }
+
+    TransmissionModel::updateKappa(kappa, nTransmit);
 }
 
 const string vec_mode_err = "vector interventions can only be used in "

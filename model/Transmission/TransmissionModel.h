@@ -217,10 +217,9 @@ protected:
   virtual void calculateEIR(Host::Human& human, double ageYears,
         vector<double>& EIR ) const =0; 
   
-  /** Needs to be called each time-step after Human::update() to update summary
-   * statististics related to transmission. Also returns kappa (the average
-   * human infectiousness weighted by availability to mosquitoes). */
-  double updateKappa (const Population& population);
+    /// Called each time-step after Human::update() to update summary
+    /// statististics related to transmission.
+    void updateKappa (double kappa, int nTransmit);
   
   virtual void checkpoint (istream& stream);
   virtual void checkpoint (ostream& stream);
@@ -299,7 +298,7 @@ private:
   SimTime adultAge;
 
   /// For "num transmitting humans" cts output.
-  int numTransmittingHumans;
+  int m_nTransmit;
 };
 
 } }

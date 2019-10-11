@@ -23,9 +23,6 @@
 #include "Transmission/VectorModel.h"
 #include "Transmission/PerHost.h"
 
-#include "Population.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Genotypes.h"
 #include "mon/Continuous.h"
 #include "mon/info.h"
 #include "util/StreamValidator.h"
@@ -95,7 +92,7 @@ void TransmissionModel::ctsCbKappa (ostream& stream){
     stream<<'\t'<<laggedKappa[sim::now().moduloSteps(laggedKappa.size())];
 }
 void TransmissionModel::ctsCbNumTransmittingHumans (ostream& stream){
-    stream<<'\t'<<numTransmittingHumans;
+    stream<<'\t'<<m_nTransmit;
 }
 
 
@@ -121,7 +118,7 @@ TransmissionModel::TransmissionModel(const scnXml::Entomology& entoData,
     surveyInputEIR(0.0),
     surveySimulatedEIR(0.0),
     adultAge(PerHost::adultAge()),
-    numTransmittingHumans(0)
+    m_nTransmit(0)
 {
     initialisationEIR.assign (sim::stepsPerYear(), 0.0);
     
@@ -136,34 +133,9 @@ TransmissionModel::~TransmissionModel () {
 }
 
 
-double TransmissionModel::updateKappa (const Population& population) {
-    // We calculate kappa for output and the non-vector model.
-    double sumWt_kappa= 0.0;
-    double sumWeight  = 0.0;
-    numTransmittingHumans = 0;
-
-    foreach(const Host::Human& human, population.crange()) {
-        //NOTE: calculate availability relative to age at end of time step;
-        // not my preference but consistent with TransmissionModel::getEIR().
-        const double avail = human.perHostTransmission.relativeAvailabilityHetAge(
-            human.age(sim::ts1()).inYears());
-        sumWeight += avail;
-        const double tbvFactor = human.getVaccine().getFactor( interventions::Vaccine::TBV );
-        const double pTransmit = human.withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
-        const double riskTrans = avail * pTransmit;
-        sumWt_kappa += riskTrans;
-        if( riskTrans > 0.0 )
-            ++numTransmittingHumans;
-    }
-
-
+void TransmissionModel::updateKappa (double kappa, int nTransmit) {
     size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
-    if (sumWeight > DBL_MIN * 10.0) {
-        laggedKappa[lKMod] = sumWt_kappa / sumWeight;
-    } else {
-        // This is valid due to a population size of zero
-        laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
-    }
+    laggedKappa[lKMod] = kappa;
     
     size_t tmod = sim::ts0().moduloYearSteps();
     
@@ -181,7 +153,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     surveyInputEIR += initialisationEIR[tmod];
     surveySimulatedEIR += tsAdultEIR;
     
-    return laggedKappa[lKMod];  // kappa now
+    m_nTransmit = nTransmit;
 }
 
 double TransmissionModel::getEIR( Host::Human& human, SimTime age,
@@ -235,7 +207,7 @@ void TransmissionModel::checkpoint (istream& stream) {
     surveySimulatedEIR & stream;
     lastSurveyTime & stream;
     adultAge & stream;
-    numTransmittingHumans & stream;
+    m_nTransmit & stream;
 }
 void TransmissionModel::checkpoint (ostream& stream) {
     simulationMode & stream;
@@ -250,7 +222,7 @@ void TransmissionModel::checkpoint (ostream& stream) {
     surveySimulatedEIR & stream;
     lastSurveyTime & stream;
     adultAge & stream;
-    numTransmittingHumans & stream;
+    m_nTransmit & stream;
 }
 
 } }

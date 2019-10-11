@@ -20,6 +20,9 @@
 
 #include "Transmission/NonVectorModel.h"
 #include "Transmission/PerHost.h"
+#include "Population.h"
+#include "WithinHost/WHInterface.h"
+#include "WithinHost/Genotypes.h"
 #include "Host/Human.h"
 #include "WithinHost/Genotypes.h"
 #include "mon/info.h"
@@ -204,10 +207,36 @@ void NonVectorModel::deployVectorTrap(size_t instance, double number, SimTime li
 }
 
 void NonVectorModel::update (const Population& population) {
-    double currentKappa = TransmissionModel::updateKappa(population);
+    // We calculate kappa for output and the non-vector model.
+    double sumWt_kappa = 0.0;
+    double sumWeight  = 0.0;
+    int nTransmit = 0;
+
+    foreach(const Host::Human& human, population.crange()) {
+        // Calculate availability relative to age at end of time step
+        const double avail = human.perHostTransmission.relativeAvailabilityHetAge(
+            human.age(sim::ts1()).inYears());
+        sumWeight += avail;
+        const double tbvFactor = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        const double pTransmit = human.withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
+        const double riskTrans = avail * pTransmit;
+        sumWt_kappa += riskTrans;
+        if( riskTrans > 0.0 )
+            ++nTransmit;
+    }
+    
+    double kappa;
+    if (sumWeight > DBL_MIN * 10.0) {
+        kappa = sumWt_kappa / sumWeight;
+    } else {
+        // This is valid due to a population size of zero
+        kappa = 0.0;        // no humans: no infectiousness
+    }
+
+    TransmissionModel::updateKappa(kappa, nTransmit);
     
     if( simulationMode == forcedEIR ){
-        initialKappa[sim::ts1().moduloSteps(initialKappa.size())] = currentKappa;
+        initialKappa[sim::ts1().moduloSteps(initialKappa.size())] = kappa;
     }
 }
 
