@@ -481,24 +481,10 @@ void VectorModel::vectorUpdate (const Population& population) {
     }
 }
 void VectorModel::update(const Population& population) {
-    // We calculate kappa for output and the non-vector model.
     double sumWt_kappa = 0.0;
     double sumWeight  = 0.0;
     int nTransmit = 0;
 
-    foreach(const Host::Human& human, population.crange()) {
-        // Calculate availability relative to age at end of time step
-        const double avail = human.perHostTransmission.relativeAvailabilityHetAge(
-            human.age(sim::ts1()).inYears());
-        sumWeight += avail;
-        const double tbvFactor = human.getVaccine().getFactor( interventions::Vaccine::TBV );
-        const double pTransmit = human.withinHostModel->probTransmissionToMosquito( tbvFactor, 0 );
-        const double riskTrans = avail * pTransmit;
-        sumWt_kappa += riskTrans;
-        if( riskTrans > 0.0 )
-            ++nTransmit;
-    }
-    
     const size_t nGenotypes = WithinHost::Genotypes::N();
     SimTime popDataInd = mod_nn(sim::ts1(), saved_sum_avail.size1());
     vector<double> probTransmission;
@@ -508,25 +494,31 @@ void VectorModel::update(const Population& population) {
     saved_sigma_dff.assign( saved_sigma_dff.size(), 0.0 );
     
     foreach(const Host::Human& human, population.crange()) {
+        // Calculate availability relative to age at end of time step
+        double ageYrs = human.age(sim::ts1()).inYears();
         const OM::Transmission::PerHost& host = human.perHostTransmission;
         WithinHost::WHInterface& whm = *human.withinHostModel;
-        const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );
+        const double tbvFactor = human.getVaccine().getFactor( interventions::Vaccine::TBV );
         
         probTransmission.assign( nGenotypes, 0.0 );
         double sumX = numeric_limits<double>::quiet_NaN();
-        const double pTrans = whm.probTransmissionToMosquito( tbvFac, &sumX );
-        if( nGenotypes == 1 ) probTransmission[0] = pTrans;
+        const double pTransmit = whm.probTransmissionToMosquito( tbvFactor, &sumX );
+        if( nGenotypes == 1 ) probTransmission[0] = pTransmit;
         else for( size_t g = 0; g < nGenotypes; ++g ){
-            const double k = whm.probTransGenotype( pTrans, sumX, g );
+            const double k = whm.probTransGenotype( pTransmit, sumX, g );
             assert( (boost::math::isfinite)(k) );
             probTransmission[g] = k;
         }
         
+        const double avail = host.relativeAvailabilityHetAge(ageYrs);
+        sumWeight += avail;
+        const double riskTrans = avail * pTransmit;
+        sumWt_kappa += riskTrans;
+        if( riskTrans > 0.0 )
+            ++nTransmit;
+        
         for(size_t s = 0; s < speciesIndex.size(); ++s){
-            //NOTE: calculate availability relative to age at end of time step;
-            // not my preference but consistent with TransmissionModel::getEIR().
-            //TODO: even stranger since probTransmission comes from the previous time step
-            const double avail = host.entoAvailabilityFull (s, human.age(sim::ts1()).inYears());
+            const double avail = host.entoAvailabilityFull (s, ageYrs);
             saved_sum_avail.at(popDataInd, s) += avail;
             const double df = avail
                     * host.probMosqBiting(s)
