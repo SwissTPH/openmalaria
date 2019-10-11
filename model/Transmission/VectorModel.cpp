@@ -264,6 +264,7 @@ void VectorModel::init2 (const Population& population) {
     saved_sum_avail.assign( data_save_len, speciesIndex.size(), 0.0 );
     saved_sigma_df.assign( data_save_len, speciesIndex.size(), 0.0 );
     saved_sigma_dif.assign( data_save_len, speciesIndex.size(), WithinHost::Genotypes::N(), 0.0 );
+    saved_sigma_dff.assign( speciesIndex.size(), 0.0 );
     
     double sumRelativeAvailability = 0.0;
     foreach(const Host::Human& human, population.crange()) {
@@ -471,9 +472,8 @@ void VectorModel::vectorUpdate (const Population& population) {
     saved_sum_avail.assign_at1(popDataInd, 0.0);
     saved_sigma_df.assign_at1(popDataInd, 0.0);
     saved_sigma_dif.assign_at1(popDataInd, 0.0);
-    vector<double> sigma_dff(speciesIndex.size(), 0.0);
+    saved_sigma_dff.assign( saved_sigma_dff.size(), 0.0 );
     
-    size_t h = 0;
     foreach(const Host::Human& human, population.crange()) {
         const OM::Transmission::PerHost& host = human.perHostTransmission;
         WithinHost::WHInterface& whm = *human.withinHostModel;
@@ -502,13 +502,10 @@ void VectorModel::vectorUpdate (const Population& population) {
             for( size_t g = 0; g < nGenotypes; ++g ){
                 saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
             }
-            sigma_dff[s] += df * host.relMosqFecundity(s);
+            saved_sigma_dff[s] += df * host.relMosqFecundity(s);
         }
-        
-        h += 1;
     }
     
-    vector<double> sigma_dif_species;
     for(size_t s = 0; s < speciesIndex.size(); ++s){
         // Copy slice to new array:
         auto range = saved_sigma_dif.range_at12(popDataInd, s);
@@ -517,7 +514,7 @@ void VectorModel::vectorUpdate (const Population& population) {
         species[s].advancePeriod (saved_sum_avail.at(popDataInd, s),
                 saved_sigma_df.at(popDataInd, s),
                 sigma_dif_species,
-                sigma_dff[s],
+                saved_sigma_dff[s],
                 simulationMode == dynamicEIR);
     }
 }
@@ -569,6 +566,7 @@ void VectorModel::checkpoint (istream& stream) {
     saved_sum_avail & stream;
     saved_sigma_df & stream;
     saved_sigma_dif & stream;
+    saved_sigma_dff & stream;
 }
 void VectorModel::checkpoint (ostream& stream) {
     TransmissionModel::checkpoint (stream);
@@ -578,6 +576,7 @@ void VectorModel::checkpoint (ostream& stream) {
     saved_sum_avail & stream;
     saved_sigma_df & stream;
     saved_sigma_dif & stream;
+    saved_sigma_dff & stream;
 }
 
 }
