@@ -158,16 +158,11 @@ double TransmissionModel::updateKappa (const Population& population) {
 
 
     size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
-    if( population.size() == 0 ){     // this is valid
-        laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
-    } else {
-        if ( !(sumWeight > DBL_MIN * 10.0) ){       // if approx. eq. 0, negative or an NaN
-            ostringstream msg;
-            msg<<"sumWeight is invalid: "<<sumWeight<<", "<<sumWt_kappa
-                    <<", "<<population.size();
-            throw TRACED_EXCEPTION(msg.str(),util::Error::SumWeight);
-        }
+    if (sumWeight > DBL_MIN * 10.0) {
         laggedKappa[lKMod] = sumWt_kappa / sumWeight;
+    } else {
+        // This is valid due to a population size of zero
+        laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     }
     
     size_t tmod = sim::ts0().moduloYearSteps();
