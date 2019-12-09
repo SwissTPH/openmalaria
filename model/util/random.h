@@ -115,14 +115,14 @@ struct RNG {
     RNG& operator=(const RNG&) = delete;
   
     /// Allow moving, with explicit functions
-    RNG(RNG&& other): m_rng(other.m_rng) {
+    RNG(RNG&& other): m_rng(std::move(other.m_rng)) {
         m_gsl_type = other.m_gsl_type;
         // The following point into instance of this RNG:
         m_gsl_gen.type = &m_gsl_type;
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
     }
     void operator=(RNG&& other) {
-        m_rng = other.m_rng;
+        m_rng = std::move(other.m_rng);
         m_gsl_type = other.m_gsl_type;
         // The following point into instance of this RNG:
         m_gsl_gen.type = &m_gsl_type;

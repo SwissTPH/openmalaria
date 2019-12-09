@@ -40,7 +40,22 @@ public:
 
     explicit ChaCha(uint64_t seedval, uint64_t stream = 0);
     template<class Sseq> explicit ChaCha(Sseq& seq);
+    
+    // Disable copying
+    ChaCha(const ChaCha&) = delete;
+    ChaCha& operator=(const ChaCha&) = delete;
 
+    /// Allow moving, with explicit functions
+    ChaCha(ChaCha&& other) : ctr(other.ctr) {
+        memcpy(block, other.block, sizeof block);
+        memcpy(keysetup, other.keysetup, sizeof keysetup);
+    }
+    void operator=(ChaCha&& other) {
+        memcpy(block, other.block, sizeof block);
+        memcpy(keysetup, other.keysetup, sizeof keysetup);
+        ctr = other.ctr;
+    }
+    
     void seed(uint64_t seedval, uint64_t stream = 0);
     template<class Sseq> void seed(Sseq& seq);
 
