@@ -78,7 +78,7 @@ public:
     void binary_checkpoint(istream& stream) {
         stream.read (reinterpret_cast<char*>(&ctr), sizeof(ctr));
         if (!stream || stream.gcount() != sizeof(ctr))
-            throw runtime_error ("pcg_random - binary_checkpoint: stream read error");
+            throw runtime_error ("ChaCha::binary_checkpoint: stream read error");
         if ((ctr % 16) != 0) generate_block();
     }
 
