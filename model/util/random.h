@@ -66,11 +66,12 @@
 namespace OM { namespace util {
 
 // Support functions
+// Note: GSL  doesn't really seem to be interested in RNGs producing more than
+// 32-bits of state. This implementation serves two underlying generators.
 template<class T>
 long unsigned int sample_ulong (void *ptr) {
     T *rng = reinterpret_cast<T*>(ptr);
-    BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
-    return static_cast<long unsigned int> ((*rng)());
+    return rng->gen_u32();
 }
 template<class T>
 double sample_double01 (void *ptr) {
@@ -82,8 +83,8 @@ template<class T>
 gsl_rng_type make_gsl_rng_type(T& rng) {
     return {
         "OM_RNG",		// name
-        rng.max(),		// max value
-        rng.min(),		// min value
+        std::numeric_limits<uint32_t>::max(),
+        std::numeric_limits<uint32_t>::min(),
         0,				// size of state; not used here
         nullptr,			// re-seed function; don't use
         &sample_ulong<T>,

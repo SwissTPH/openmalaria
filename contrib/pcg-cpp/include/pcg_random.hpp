@@ -361,6 +361,11 @@ public:
         return bounded_rand(*this, upper_bound);
     }
     
+    uint32_t gen_u32() {
+        // FIXME: not appropriate for sizes less than 32-bit
+        return this->operator()();
+    }
+    
     double gen_double()
     {
         // TODO: this is not the most appropriate conversion for 64-bit variants.

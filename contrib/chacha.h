@@ -60,6 +60,9 @@ public:
     template<class Sseq> void seed(Sseq& seq);
 
     uint32_t operator()();
+    uint32_t gen_u32() {
+        return this->operator()();
+    }
     uint64_t gen_u64() {
         uint64_t low = this->operator()();
         uint64_t high = this->operator()();
