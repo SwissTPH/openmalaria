@@ -120,7 +120,7 @@ void Population::checkpoint (istream& stream)
     for(size_t i = 0; i < populationSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( Host::Human (0, 0, SimTime::zero()) );
+        population.push_back( Host::Human (SimTime::zero()) );
         population.back() & stream;
     }
     if (population.size() != populationSize)
@@ -159,9 +159,7 @@ void Population::createInitialHumans()
         while (cumulativePop < targetPop) {
             SimTime dob = SimTime::zero() - SimTime::fromTS(iage);
             util::streamValidate( dob.inDays() );
-            uint64_t seed1 = util::master_RNG.gen_seed();
-            uint64_t seed2 = util::master_RNG.gen_seed();
-            population.push_back( Host::Human (seed1, seed2, dob) );
+            population.push_back( Host::Human (dob) );
             ++cumulativePop;
         }
     }
@@ -219,9 +217,7 @@ void Population::update( const Transmission::TransmissionModel& transmission, Si
     recentBirths += (targetPop - cumPop);
     while (cumPop < targetPop) {
         // humans born at end of this time step = beginning of next, hence ts1
-        uint64_t seed1 = util::master_RNG.gen_seed();
-        uint64_t seed2 = util::master_RNG.gen_seed();
-        population.push_back( Host::Human (seed1, seed2, sim::ts1()) );
+        population.push_back( Host::Human (sim::ts1()) );
         ++cumPop;
     }
 }
