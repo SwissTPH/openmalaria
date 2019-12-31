@@ -60,6 +60,11 @@ public:
     template<class Sseq> void seed(Sseq& seq);
 
     uint32_t operator()();
+    uint64_t gen_u64() {
+        uint64_t low = this->operator()();
+        uint64_t high = this->operator()();
+        return (high << 32) | low;
+    }
     double gen_double();
     void discard(unsigned long long n);
     

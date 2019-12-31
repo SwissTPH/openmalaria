@@ -108,6 +108,14 @@ struct RNG {
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
     }
     
+    /// Seed via another RNG
+    template<class S>
+    explicit RNG(RNG<S>& source): m_rng(source.m_rng) {
+        m_gsl_type = make_gsl_rng_type(m_rng);
+        m_gsl_gen.type = &m_gsl_type;
+        m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
+    }
+    
     // Disable copying
     RNG(const RNG&) = delete;
     RNG& operator=(const RNG&) = delete;
@@ -300,6 +308,8 @@ private:
     // Hooks for GSL distributions
     gsl_rng_type m_gsl_type;
     gsl_rng m_gsl_gen;
+    
+    template<class> friend class RNG;
 };
 
 // I would prefer to use pcg64, but MSVC mysteriously fails

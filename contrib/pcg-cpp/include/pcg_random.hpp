@@ -429,6 +429,12 @@ public:
     {
         // Nothing else to do.
     }
+    
+    // FIXME: using gen_u64 here does not make much sense; we do it to avoid changing results.
+    template<typename R>
+    engine(R& source): engine(source.gen_u64(), source.gen_u64()) {
+        // Nothing else to do.
+    }
 
     template<typename SeedSeq>
     engine(SeedSeq&& seedSeq, typename std::enable_if<
