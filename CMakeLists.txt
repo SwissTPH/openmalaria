@@ -148,7 +148,6 @@ include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/contrib
-  ${CMAKE_SOURCE_DIR}/contrib/pcg-cpp/include
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}

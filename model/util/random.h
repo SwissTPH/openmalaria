@@ -27,8 +27,8 @@
  * 
  * -    ChaCha<8> for our master RNG; this is a low-margin cryptographic-grade
  *      generator yet still very fast
- * -    PCG32 for our local RNGs; this is fast, passes stringent tests and has
- *      a very small state size, allowing embedding within each human.
+ * -    Xoshiro256+; this is very fast, decent quality and has small state
+ *      http://prng.di.unimi.it/
  * 
  * To sample from distributions, we fall back to the venerable GSL, which
  * provides fast sampling from a wide variety of distributions and whose results
