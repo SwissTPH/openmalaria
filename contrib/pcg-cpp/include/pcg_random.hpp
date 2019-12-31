@@ -360,6 +360,16 @@ public:
     {
         return bounded_rand(*this, upper_bound);
     }
+    
+    double gen_double()
+    {
+        // TODO: this is not the most appropriate conversion for 64-bit variants.
+        // We have a 32-bit integer result. Doubles support 53-bits of precision
+        // (1 bit implied). Use what we have in a single sample (32-bits precision,
+        // lower 21 bits are zero).
+        uint64_t x = this->operator()() & 0xFFFFFFFF;
+        return (x << 21) * 0x1.0p-53;
+    }
 
 protected:
     static itype advance(itype state, itype delta,

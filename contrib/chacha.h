@@ -60,6 +60,7 @@ public:
     template<class Sseq> void seed(Sseq& seq);
 
     uint32_t operator()();
+    double gen_double();
     void discard(unsigned long long n);
     
     template<size_t R_> friend bool operator==(const ChaCha<R_>& lhs, const ChaCha<R_>& rhs);
@@ -135,6 +136,15 @@ inline uint32_t ChaCha<R>::operator()() {
     ++ctr;
 
     return block[idx];
+}
+
+template<size_t R>
+inline double ChaCha<R>::gen_double() {
+    // We have a 32-bit integer result. Doubles support 53-bits of precision
+    // (1 bit implied). Use what we have in a single sample (32-bits precision,
+    // lower 21 bits are zero).
+    uint64_t x = this->operator()();
+    return (x << 21) * 0x1.0p-53;
 }
 
 template<size_t R>

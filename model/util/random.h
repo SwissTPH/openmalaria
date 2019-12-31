@@ -43,7 +43,6 @@
 #include "util/errors.h"
 #include <set>
 #include <pcg_random.hpp>
-#include <boost/random/uniform_01.hpp>
 #include <gsl/gsl_rng.h>
 #include <chacha.h>
 
@@ -76,8 +75,7 @@ long unsigned int sample_ulong (void *ptr) {
 template<class T>
 double sample_double01 (void *ptr) {
     T *rng = reinterpret_cast<T*>(ptr);
-    boost::random::uniform_01<T&> dist (*rng);
-    return dist ();
+    return rng->gen_double();
 }
 
 template<class T>
@@ -153,8 +151,7 @@ struct RNG {
     //@{
     /** Generate a random number in the range [0,1). */
     inline double uniform_01 () {
-        boost::random::uniform_01<T&> rng_uniform01 (m_rng);
-        return rng_uniform01 ();
+        return m_rng.gen_double();
     }
     
     /** This function returns a Gaussian random variate, with mean mean and
