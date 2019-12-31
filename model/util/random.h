@@ -42,9 +42,9 @@
 #include "Global.h"
 #include "util/errors.h"
 #include <set>
-#include <pcg_random.hpp>
 #include <gsl/gsl_rng.h>
 #include <chacha.h>
+#include "util/xoshiro.hpp"
 
 #ifdef OM_RANDOM_USE_BOOST_DIST
 #include <boost/random/normal_distribution.hpp>
@@ -313,8 +313,7 @@ private:
     template<class> friend class RNG;
 };
 
-// I would prefer to use pcg64, but MSVC mysteriously fails
-typedef RNG<pcg32> LocalRng;
+typedef RNG<Xoshiro256P> LocalRng;
 typedef RNG<ChaCha<8>> MasterRng;
 
 /// The master RNG, used only for seeding local RNGs

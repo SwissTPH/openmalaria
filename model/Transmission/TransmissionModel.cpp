@@ -56,10 +56,6 @@ TransmissionModel* TransmissionModel::createTransmissionModel (
   if (vectorData.present())
     model = new VectorModel(entoData, vectorData.get(), populationSize);
   else {
-      // FIXME: to preserve results, we fetch some random numbers we don't need here!
-      uint64_t seed1 = util::master_RNG.gen_seed();
-      uint64_t seed2 = util::master_RNG.gen_seed();
-      
       const scnXml::Entomology::NonVectorOptional& nonVectorData = entoData.getNonVector();
     if (!nonVectorData.present())       // should be a validation error, but anyway...
       throw util::xml_scenario_error ("Neither vector nor non-vector data present in the XML!");
