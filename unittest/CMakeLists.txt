@@ -48,6 +48,7 @@ set (OM_CXXTEST_HEADERS
   UtilVectorsSuite.h
   PkPdComplianceSuite.h
   ChaChaSuite.h
+  XoshiroSuite.h
 )
 
 add_custom_command (OUTPUT tests.cpp
