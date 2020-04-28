@@ -16,6 +16,7 @@ FIND_PATH(GSL_INCLUDE_DIR gsl/gsl_version.h
  PATHS
   ${CMAKE_SOURCE_DIR}/../gsl/include
   ${CMAKE_SOURCE_DIR}/../gsl
+  PATHS ENV CPATH
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/include"
   "C:/Program Files/GnuWin32/include"
   "C:/Program Files/GnuWin32/gsl-111/gsl/win32/include"
@@ -27,6 +28,7 @@ endif (NOT GSL_INCLUDE_DIR)
 
 FIND_PATH(GSL_INCLUDE_DIR2 gsl_sys.h
  PATHS
+ PATHS ENV CPATH
   ${GSL_INCLUDE_DIR}
   ${GSL_INCLUDE_DIR}/gsl
  NO_DEFAULT_PATH
@@ -43,6 +45,8 @@ message(STATUS "GSL include path(s): ${GSL_INCLUDE_DIRS}")
 # gsl puts libraries in various places, with various suffixes. Copy the ones you want to use to ../gsl/lib and remove suffixes.
 set (GSL_LIB_PATHS
   PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
+  PATHS ENV CPATH
+  ${GSL_INCLUDE_DIR}/../lib
   "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"

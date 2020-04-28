@@ -23,6 +23,7 @@ FIND_PATH(XSD_INCLUDE_DIRS xsd/cxx/parser/elements.hxx
   "/usr/local/Cellar/xsd/4.0.0/include"
   ${CMAKE_SOURCE_DIR}/../xsd/include
   ${CMAKE_SOURCE_DIR}/../xsd/libxsd
+  PATHS ENV CPATH
 )
 
 FIND_PROGRAM(XSD_EXECUTABLE 
