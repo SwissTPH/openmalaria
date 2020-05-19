@@ -47,8 +47,11 @@ elseif (XERCESC_LIB_DBG)
 else ()
   message (FATAL_ERROR "Unable to find xerces-c library")
 endif ()
+
 if (NOT XERCESC_INCLUDE_DIRS)
   message (FATAL_ERROR "Unable to find xerces include files (xercesc/dom/DOMNode.hpp)")
+else ()
+  message (STATUS "Found XercesC++: ${XERCESC_INCLUDE_DIRS}")
 endif (NOT XERCESC_INCLUDE_DIRS)
 
 SET (XERCESC_LIBRARIES ${XERCESC_LIB})
