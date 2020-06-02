@@ -18,7 +18,6 @@ FIND_PATH(XERCESC_INCLUDE_DIRS xercesc/dom/DOMNode.hpp
   "C:/Program Files (x86)/CodeSynthesis XSD 3.3/include"
   "C:/Program Files (x86)/CodeSynthesis XSD 4.0/include"
   ${CMAKE_SOURCE_DIR}/../xsd/libxsd
-  PATHS ENV CPATH
 )
 
 set (XERCESC_LIB_PATHS
