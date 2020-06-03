@@ -6,7 +6,8 @@
 # Ubuntu:
 # sudo apt-get install git libboost-dev libgsl-dev libxerces-c-dev xsdcxx
 
-brew install boost@1.60 coreutils cmake gcc gsl xerces-c xsd
+# Mac OS:
+# brew install boost@1.60 coreutils cmake gcc gsl xerces-c xsd
 
 echo "=========================================================================="
 echo "IMPORTANT: make sure dependencies are installed."
