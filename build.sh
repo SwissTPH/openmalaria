@@ -1,13 +1,16 @@
 #/bin/bash
 
 # Assuming you have installed:
-# gsl, git, xsd, xerces-c, boost
+# gsl, git, cmake, xsd, xerces-c, boost
 
 # Ubuntu:
-# sudo apt-get install git libboost-dev libgsl-dev libxerces-c-dev xsdcxx
+# sudo apt-get install git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx
 
 # Mac OS:
-# brew install boost@1.60 coreutils cmake gcc gsl xerces-c xsd
+# brew install git boost coreutils cmake gcc gsl xerces-c xsd
+
+# Windows - Cygwin (MobaXTerm)
+# apt-get install zlib-devel make python2 git cmake libboost-devel libgsl-devel xsd libxerces-c-devel
 
 echo "=========================================================================="
 echo "IMPORTANT: make sure dependencies are installed."
@@ -15,6 +18,8 @@ echo "Ubuntu/Debian:"
 echo "sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx"
 echo "Mac OS:"
 echo "brew install boost coreutils cmake gcc gsl xerces-c xsd"
+echo "Windows - Cygwin (MobaXTerm):"
+echo "apt-get install zlib-devel make python2 git cmake libboost-devel libgsl-devel xsd libxerces-c-devel"
 echo "=========================================================================="
 
 # stop on error
@@ -23,6 +28,9 @@ set -e
 OMGIT=openmalaria
 RELEASE=openMalaria
 BRANCH=master
+
+# For Windows - Cygwin
+export PATH=/usr/bin:$PATH
 
 # Clone git repo
 if [ ! -d "$OMGIT" ] ; then
