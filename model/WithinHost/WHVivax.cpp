@@ -363,9 +363,9 @@ void WHVivax::update(LocalRng& rng,
     uint32_t oldCumInf = cumPrimInf;
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
-    double oldpEvent = ( isnan(pEvent))? 1.0 : pEvent;
+    double oldpEvent = ( std::isnan(pEvent))? 1.0 : pEvent;
     // always use the first relapse probability for following relapses as a factor
-    double oldpRelapseEvent = ( isnan(pFirstRelapseEvent))? 1.0 : pFirstRelapseEvent;
+    double oldpRelapseEvent = ( std::isnan(pFirstRelapseEvent))? 1.0 : pFirstRelapseEvent;
     auto inf = infections.begin();
     while( inf != infections.end() ){
         if( treatmentLiver ) inf->treatmentLS();
@@ -603,7 +603,7 @@ void WHVivax::setHSParameters(const scnXml::LiverStageDrug* elt){
         effectivenessPQ = elt->getEffectivenessOnUse().getValue();
     }
     
-    if( !isnan(oldPHetNoPQ) && oldPHetNoPQ != pHetNoPQ ){
+    if( !std::isnan(oldPHetNoPQ) && oldPHetNoPQ != pHetNoPQ ){
         throw util::xml_scenario_error( "changeHS cannot change pHumanCannotReceive value" );
     }
 }
