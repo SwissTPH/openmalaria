@@ -29,8 +29,19 @@ OMGIT=openmalaria
 RELEASE=openMalaria
 BRANCH=master
 
-# For Windows - Cygwin
+# For Windows - Cygwin (MobaXTerm)
 export PATH=/usr/bin:$PATH
+
+unameOut="$(uname -s)"
+case "${unameOut}" in
+    Linux*)     MACHINE=Linux;;
+    Darwin*)    MACHINE=Mac;;
+    CYGWIN*)    MACHINE=Cygwin;;
+    MINGW*)     MACHINE=MinGw;;
+    *)          MACHINE="UNKNOWN:${unameOut}"
+esac
+
+echo "Running for ${MACHINE}"
 
 # Clone git repo
 if [ ! -d "$OMGIT" ] ; then
@@ -57,6 +68,14 @@ cp $OMGIT/test/autoRegressionParameters.csv $RELEASE-$VERSION/
 
 # Compress into a tarball
 tar -cavf $RELEASE-$VERSION.tar.gz $RELEASE-$VERSION/
+
+# if Cygwin, copy dll files
+if [ "${MACHINE}" = "Cygwin" ]; then
+	pushd $RELEASE-$VERSION/
+	mv $RELEASE-$VERSION/openMalaria $RELEASE-$VERSION/openMalaria.exe
+	rm -f dlls; for i in $(ldd openMalaria.exe); do echo $i | grep "/usr" >> dlls;  done; for i in $(cat dlls); do cp -f $i .; done; rm -f dlls;
+	popd
+fi
 
 echo "BUILD SUCCESS: $RELEASE-$VERSION.tar.gz"
 
