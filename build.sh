@@ -121,12 +121,13 @@ function package {
         #mv openMalaria openMalaria.exe
         rm -f dlls;
         ldd openMalaria
-        for i in $(ldd openMalaria); 
-            do echo $i | grep "/usr" >> dlls; 
+        for i in $(ldd openMalaria); do
+            echo $i
+            echo $i | grep "/usr" >> dlls; 
         done;
         cat dlls
-        for i in $(cat dlls);
-            do cp -f $i .;
+        for i in $(cat dlls); do
+            cp -f $i .;
         done;
         rm -f dlls;
         popd
