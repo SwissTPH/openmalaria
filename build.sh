@@ -32,7 +32,7 @@ function printHelp {
     echo "--------------"
     echo "Mac OS: brew install git boost coreutils cmake gcc gsl xerces-c xsd"
     echo "--------------"
-    echo "Windows - Cygwin (MobaXTerm): apt-get install gcc-g++ git cmake make python2 zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
+    echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make python2 zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
 }
 
 function parseArguments {
@@ -118,16 +118,13 @@ function package {
     # if Cygwin, copy dll files
     if [ $CYGWIN -eq 1 ]; then
         pushd $ARTIFACT/
-        #mv openMalaria openMalaria.exe
         rm -f dlls
-        ldd openMalaria
         for i in $(ldd openMalaria); do
-            echo $i
-            echo $i | grep "/usr" >> dlls
+            echo $i | grep "/usr" >> dlls || true
         done
-        cat dlls
         for i in $(cat dlls); do
             cp -f $i .
+            echo "cp $i ."
         done
         rm -f dlls
         popd
