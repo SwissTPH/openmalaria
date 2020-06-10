@@ -162,6 +162,5 @@ if [ $CREATERELEASE -eq 1 ]; then
     echo "RELEASE: $(ls $ARTIFACT.*)"
 fi
 
-
 # Don't delete the temp folders yet, let the user decide
 # rm -rf $OMGIT $ARTIFACT/
