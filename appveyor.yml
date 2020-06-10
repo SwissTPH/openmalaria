@@ -19,9 +19,9 @@ configuration: Release
 
 # Run install scripts
 install:
-  - C:\cygwin64\bin\bash -lc "echo $HOME"
-  - C:\cygwin64\bin\bash -lc "lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg"
-  - C:\cygwin64\bin\bash -lc "install apt-cyg /bin"
+  #- C:\cygwin64\bin\bash -lc "echo $HOME"
+  #- C:\cygwin64\bin\bash -lc "lynx -source rawgit.com/transcode-open/apt-cyg/master/apt-cyg > apt-cyg"
+  #- C:\cygwin64\bin\bash -lc "install apt-cyg /bin"
   - C:\cygwin64\bin\bash -lc "apt-cyg install wget"
   - C:\cygwin64\bin\bash -lc "apt-cyg install zlib-devel make python2 cmake libboost-devel libgsl-devel xsd libxerces-c-devel"
 
