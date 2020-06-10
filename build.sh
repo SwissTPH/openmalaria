@@ -13,11 +13,13 @@ OMGIT=openmalaria
 RELEASE=openMalaria
 BRANCH=master
 
-# option
-CLEAN=0
-TESTS=OFF
-JOBS=4
-ARTIFACT=
+# options
+CLEAN=0         # Clean build/
+TESTS=OFF       # Don't generate tests
+RUNTESTS=0      # Don't run tests
+JOBS=4          # 4 threads
+CREATERELEASE=0 # Create release ARTIFACT.zip:tar.gz
+ARTIFACT=       # default filename is RELEASE-VERSION
 
 # shell
 CYGWIN=0
@@ -33,6 +35,15 @@ function printHelp {
     echo "Mac OS: brew install git boost coreutils cmake gcc gsl xerces-c xsd"
     echo "--------------"
     echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make python2 zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
+
+    echo ""
+    echo "Options:"
+    echo "  -c, --clean"        "clean build folder (false)"
+    echo "  -t, --tests"        "run the tests (false)"
+    echo "  -r, --release"      "generate the release artifcat (false)"
+    echo "  -a, --artifact"     "specify the artifcat name (openMalaria-VERSION)"
+    echo "  -j, --jobs"         "specify the number of jobs (default: 4)"
+    echo "  -h, --help"         "print this message"
 }
 
 function parseArguments {
@@ -40,6 +51,7 @@ function parseArguments {
         case $i in
             -c|--clean)         CLEAN=1 && shift ;;
             -t|--tests)         TESTS=ON && shift ;;
+            -r|--release)       CREATERELEASE=1 && shift ;;
             -a=*|--artifact=*)  ARTIFACT=${i#*=} && shift ;;
             -j=*|--jobs=*)      JOBS="${i#*=}" && shift ;;
             -h|--help)          printHelp && shift && exit ;;
@@ -90,7 +102,7 @@ function build {
     popd
 }
 
-function test {
+function runtests {
     if [ $TESTS = "ON" ]; then
         pushd build && ctest -j$JOBS && popd
     fi
@@ -140,10 +152,16 @@ parseArguments $@ # CLEAN=0:1, JOBS=1:N, TESTS=ON:OFF, print help
 isWindows # set CYGWIN=0:1
 clone # clone the repo
 build # compile
-test # test
-package # create $ARTIFACT.zip or $ARTIFACT.tar.gz
 
-echo "BUILD SUCCESS: $(ls $ARTIFACT.*)"
+if [ $TESTS = "ON" ]; then
+    runtests # test
+fi
+
+if [ $CREATERELEASE -eq 1 ]; then
+    package # create $ARTIFACT.zip or $ARTIFACT.tar.gz
+    echo "RELEASE: $(ls $ARTIFACT.*)"
+fi
+
 
 # Don't delete the temp folders yet, let the user decide
 # rm -rf $OMGIT $ARTIFACT/
