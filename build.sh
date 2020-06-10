@@ -69,9 +69,9 @@ function clone {
         # Clone git repo
         if [ ! -d "$OMGIT" ] ; then
             git clone --branch $BRANCH https://github.com/SwissTPH/openmalaria.git $OMGIT
+            cd "$OMGIT" && git checkout $BRANCH && git pull
         else
             echo "Folder $OMGIT already exist, not cloning."
-            cd "$OMGIT" && git checkout $BRANCH && git pull
         fi
     fi
 }
