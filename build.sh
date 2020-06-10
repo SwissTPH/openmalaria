@@ -120,7 +120,7 @@ function package {
         pushd $ARTIFACT/
         #mv openMalaria openMalaria.exe
         rm -f dlls;
-        ldd --help
+        ldd openMalaria
         for i in $(ldd openMalaria); 
             do echo $i | grep "/usr" >> dlls; 
         done;
