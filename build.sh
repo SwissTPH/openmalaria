@@ -119,17 +119,17 @@ function package {
     if [ $CYGWIN -eq 1 ]; then
         pushd $ARTIFACT/
         #mv openMalaria openMalaria.exe
-        rm -f dlls;
+        rm -f dlls
         ldd openMalaria
         for i in $(ldd openMalaria); do
             echo $i
-            echo $i | grep "/usr" >> dlls; 
-        done;
+            echo $i | grep "/usr" >> dlls
+        done
         cat dlls
         for i in $(cat dlls); do
-            cp -f $i .;
-        done;
-        rm -f dlls;
+            cp -f $i .
+        done
+        rm -f dlls
         popd
     fi
 
