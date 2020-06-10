@@ -11,7 +11,8 @@ install:
   - C:\cygwin64\bin\bash -lc "apt-cyg install zlib-devel make python2 cmake libboost-devel libgsl-devel xsd libxerces-c-devel"
 
 build_script:
-  - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria
+  - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria"
+  - C:\cygwin64\bin\bash -lc "ls"
   - C:\cygwin64\bin\bash -lc "./build.sh --jobs=4 --artifact=openMalaria-windows"
 
 # Discover and run tests (or test_script)
