@@ -124,6 +124,7 @@ function package {
         for i in $(ldd openMalaria); 
             do echo $i | grep "/usr" >> dlls; 
         done;
+        cat dlls
         for i in $(cat dlls);
             do cp -f $i .;
         done;
