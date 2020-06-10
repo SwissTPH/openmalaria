@@ -1,21 +1,6 @@
-clone_depth: 30
-
-environment:
-  VisualStudioVersion: 14.0
-
 os: Visual Studio 2015
 
-# Run init scripts
-# init:
-# Clone repository into clone folder
-
-# Checkout build commit
 configuration: Release
-
-# cd to clone folder
-
-# Restore build cache
-# cache:
 
 # Run install scripts
 install:
@@ -26,11 +11,8 @@ install:
   - C:\cygwin64\bin\bash -lc "apt-cyg install zlib-devel make python2 cmake libboost-devel libgsl-devel xsd libxerces-c-devel"
 
 build_script:
-  - C:\cygwin64\bin\bash -lc "./build.sh"
-
-# Test
-# Run before_test scripts
-# before_test:
+  - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria
+  - C:\cygwin64\bin\bash -lc "./build.sh --jobs=4 --artifact=openMalaria-windows"
 
 # Discover and run tests (or test_script)
 test_script:
@@ -39,12 +21,9 @@ test_script:
   - C:\cygwin64\bin\bash -lc "ctest"
   - C:\cygwin64\bin\bash -lc "popd && popd"
 
-# Run after_test scripts
-# after_test:
-
 # Package artifacts
 artifacts:
-  - path: openMalaria-windows.zip
+  - path: C:\projects\openmalaria\openMalaria-windows.zip
 
 # Deployment
 deploy:

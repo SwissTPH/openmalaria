@@ -3,81 +3,144 @@
 # Assuming you have installed:
 # gsl, git, cmake, xsd, xerces-c, boost
 
-# Ubuntu:
-# sudo apt-get install git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx
-
-# Mac OS:
-# brew install git boost coreutils cmake gcc gsl xerces-c xsd
-
-# Windows - Cygwin (MobaXTerm)
-# apt-get install zlib-devel make python2 git cmake libboost-devel libgsl-devel xsd libxerces-c-devel
-
-echo "=========================================================================="
-echo "IMPORTANT: make sure dependencies are installed."
-echo "Ubuntu/Debian:"
-echo "sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx"
-echo "Mac OS:"
-echo "brew install boost coreutils cmake gcc gsl xerces-c xsd"
-echo "Windows - Cygwin (MobaXTerm):"
-echo "apt-get install zlib-devel make python2 git cmake libboost-devel libgsl-devel xsd libxerces-c-devel"
-echo "=========================================================================="
-
 # stop on error
 set -e
 
+# Clone to
 OMGIT=openmalaria
+
+# Clone from
 RELEASE=openMalaria
 BRANCH=master
+
+# option
+CLEAN=0
+TESTS=OFF
+JOBS=4
+ARTIFACT=
+
+# shell
+CYGWIN=0
 
 # For Windows - Cygwin (MobaXTerm)
 export PATH=/usr/bin:$PATH
 
-unameOut="$(uname -s)"
-case "${unameOut}" in
-    Linux*)     MACHINE=Linux;;
-    Darwin*)    MACHINE=Mac;;
-    CYGWIN*)    MACHINE=Cygwin;;
-    MINGW*)     MACHINE=MinGw;;
-    *)          MACHINE="UNKNOWN:${unameOut}"
-esac
+function printHelp {
+    echo "HELP: make sure dependencies are installed (adapt to your distribution)"
+    echo "======================================================================="
+    echo "Ubuntu/Debian: sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx"
+    echo "--------------"
+    echo "Mac OS: brew install git boost coreutils cmake gcc gsl xerces-c xsd"
+    echo "--------------"
+    echo "Windows - Cygwin (MobaXTerm): apt-get install gcc-g++ git cmake make python2 zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
+}
 
-echo "Running for ${MACHINE}"
+function parseArguments {
+    for i in "$@"; do
+        case $i in
+            -c|--clean)         CLEAN=1 && shift ;;
+            -t|--tests)         TESTS=ON && shift ;;
+            -a=*|--artifact=*)  ARTIFACT=${i#*=} && shift ;;
+            -j=*|--jobs=*)      JOBS="${i#*=}" && shift ;;
+            -h|--help)          printHelp && shift && exit ;;
+            *) ;;
+        esac
+    done
+}
 
-# Clone git repo
-if [ ! -d "$OMGIT" ] ; then
-    git clone --branch $BRANCH https://github.com/SwissTPH/openmalaria.git $OMGIT
-else
-    pushd "$OMGIT" && git checkout $BRANCH && git pull && popd
-fi
+function isWindows {
+    unameOut="$(uname -s)"
+    case "${unameOut}" in
+        CYGWIN*)    CYGWIN=1;;
+        MINGW*)     CYGWIN=1;;
+        *)          CYGWIN=0;;
+    esac
+}
 
-# Compile OpenMalaria
-pushd $OMGIT/
-mkdir -p build && pushd build && cmake -DCMAKE_BUILD_TYPE=Release -DOM_BOXTEST_ENABLE=OFF -DOM_CXXTEST_ENABLE=OFF .. && make -j4 && popd
-popd
+function clone {
+    # Already in openmalaria?
+    if [ -d .git ]; then
+        if [ $(basename -s .git `git remote get-url origin`) = "openmalaria" ]; then
+            echo "Already in openmalaria repo, not cloning."
+        else
+            echo "Error: this git repository is not openmalaria."
+        fi
+    else
+        # Clone git repo
+        if [ ! -d "$OMGIT" ] ; then
+            git clone --branch $BRANCH https://github.com/SwissTPH/openmalaria.git $OMGIT
+        else
+            echo "Folder $OMGIT already exist, not cloning."
+            cd "$OMGIT" && git checkout $BRANCH && git pull
+        fi
+    fi
+}
 
-# Get version number
-VERSION=$(cat $OMGIT/version.txt | cut -d'-' -f2)
+function build {
+    mkdir -p build
 
-# Prepare release folder by copying the necessary files
-mkdir -p $RELEASE-$VERSION
-cp $OMGIT/build/openMalaria $RELEASE-$VERSION/
-cp -r $OMGIT/util/example/* $RELEASE-$VERSION/
-cp $OMGIT/schema/scenario_41.xsd $RELEASE-$VERSION/
-cp $OMGIT/test/densities.csv $RELEASE-$VERSION/
-cp $OMGIT/test/autoRegressionParameters.csv $RELEASE-$VERSION/
+    if [ $CLEAN -eq 1 ]; then
+        pushd build && rm -rf * && popd
+    fi
 
-# Compress into a tarball
-tar -cavf $RELEASE-$VERSION.tar.gz $RELEASE-$VERSION/
+    # Compile OpenMalaria
+    pushd build
+    cmake -DCMAKE_BUILD_TYPE=Release -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
+    popd
+}
 
-# if Cygwin, copy dll files
-if [ "${MACHINE}" = "Cygwin" ]; then
-	pushd $RELEASE-$VERSION/
-	mv $RELEASE-$VERSION/openMalaria $RELEASE-$VERSION/openMalaria.exe
-	rm -f dlls; for i in $(ldd openMalaria.exe); do echo $i | grep "/usr" >> dlls;  done; for i in $(cat dlls); do cp -f $i .; done; rm -f dlls;
-	popd
-fi
+function test {
+    if [ $TESTS = "ON" ]; then
+        pushd build && ctest -j$JOBS && popd
+    fi
+}
 
-echo "BUILD SUCCESS: $RELEASE-$VERSION.tar.gz"
+function package {
+    # Get version number
+    VERSION=$(cat version.txt | cut -d'-' -f2)
+    
+
+    echo "ARTIFACT IS $ARTIFACT"
+
+    if [ -z "${ARTIFACT}" ]; then
+        ARTIFACT=$RELEASE-$VERSION
+        echo $ARTIFACT
+    else
+        echo "LOLLOLOLOOOLLOLOLOLO"
+    fi
+
+    # Prepare release folder by copying the necessary files
+    mkdir -p $ARTIFACT
+    cp build/openMalaria $ARTIFACT/
+    cp -r util/example/* $ARTIFACT/
+    cp schema/scenario_41.xsd $ARTIFACT/
+    cp test/densities.csv $ARTIFACT/
+    cp test/autoRegressionParameters.csv $ARTIFACT/
+
+    # if Cygwin, copy dll files
+    if [ $CYGWIN -eq 1 ]; then
+        pushd $ARTIFACT/
+        mv $ARTIFACT/openMalaria $ARTIFACT/openMalaria.exe
+        rm -f dlls; for i in $(ldd openMalaria.exe); do echo $i | grep "/usr" >> dlls;  done; for i in $(cat dlls); do cp -f $i .; done; rm -f dlls;
+        popd
+    fi
+
+    # Compress
+    if [ $CYGWIN -eq 1 ]; then
+        7z a $ARTIFACT.zip "$ARTIFACT/"
+    else
+        tar -cavf $ARTIFACT.tar.gz $ARTIFACT/
+    fi
+}
+
+parseArguments $@ # CLEAN=0:1, JOBS=1:N, TESTS=ON:OFF, print help
+isWindows # set CYGWIN=0:1
+clone # clone the repo
+build # compile
+test # test
+package # create $ARTIFACT.zip or $ARTIFACT.tar.gz
+
+echo "BUILD SUCCESS: $(ls $ARTIFACT.*)"
 
 # Don't delete the temp folders yet, let the user decide
-# rm -rf $OMGIT $RELEASE-$VERSION/
+# rm -rf $OMGIT $ARTIFACT/
