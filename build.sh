@@ -69,9 +69,10 @@ function clone {
         # Clone git repo
         if [ ! -d "$OMGIT" ] ; then
             git clone --branch $BRANCH https://github.com/SwissTPH/openmalaria.git $OMGIT
-            cd "$OMGIT" && git checkout $BRANCH && git pull
+            cd $OMGIT && git checkout $BRANCH && git pull
         else
             echo "Folder $OMGIT already exist, not cloning."
+            cd $OMGIT
         fi
     fi
 }
@@ -98,9 +99,6 @@ function test {
 function package {
     # Get version number
     VERSION=$(cat version.txt | cut -d'-' -f2)
-    
-
-    echo "ARTIFACT IS $ARTIFACT"
 
     if [ -z "${ARTIFACT}" ]; then
         ARTIFACT=$RELEASE-$VERSION
