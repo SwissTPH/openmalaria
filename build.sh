@@ -105,8 +105,6 @@ function package {
     if [ -z "${ARTIFACT}" ]; then
         ARTIFACT=$RELEASE-$VERSION
         echo $ARTIFACT
-    else
-        echo "LOLLOLOLOOOLLOLOLOLO"
     fi
 
     # Prepare release folder by copying the necessary files
@@ -120,7 +118,7 @@ function package {
     # if Cygwin, copy dll files
     if [ $CYGWIN -eq 1 ]; then
         pushd $ARTIFACT/
-        mv $ARTIFACT/openMalaria $ARTIFACT/openMalaria.exe
+        mv openMalaria openMalaria.exe
         rm -f dlls; for i in $(ldd openMalaria.exe); do echo $i | grep "/usr" >> dlls;  done; for i in $(cat dlls); do cp -f $i .; done; rm -f dlls;
         popd
     fi
