@@ -3,26 +3,26 @@ language: cpp
 cache: apt
 
 install:
-  - test "$TRAVIS_OS_NAME" == "linux" && apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx"
-  - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd"
+  - test "$TRAVIS_OS_NAME" == "linux" && apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx
+  - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd
 
 # Build openMalaria and create the release folder openMalaria-$TRAVIS_OS_NAME
 build_script:
-  - ./build.sh --jobs=4 -r --artifact=openMalaria-$TOXENV"
+  - ./build.sh --jobs=4 -r --artifact=openMalaria-$OSNAME
 
 # Discover and run tests (or test_script)
 test_script:
   - ./build.sh --jobs=4 --tests
 
 after_success:
-  - util/generate-checksums.sh openMalaria-$TOXENV/
-  - util/build-info.sh | tee openMalaria-$TOXENV/travis-build.json
+  - util/generate-checksums.sh openMalaria-$OSNAME/
+  - util/build-info.sh | tee openMalaria-$OSNAME/travis-build.json
 
 deploy:
   provider: releases
   skip_cleanup: true
   api_key: $GH_TOKEN
-  file: openMalaria-$TOXENV.tar.gz
+  file: openMalaria-$OSNAME.tar.gz
   on:
     tags: true
 
@@ -32,31 +32,31 @@ matrix:
     - os: linux
       dist: xenial
       compiler: gcc
-      env: TOXENV=Ubuntu-Xenial
+      env: OSNAME=Ubuntu-Xenial
 
     # Ubuntu Bionic release
     - os: linux
       dist: bionic
       compiler: gcc
-      env: TOXENV=Ubuntu-Bionic
+      env: OSNAME=Ubuntu-Bionic
 
     # Max OSX release
     - os: osx
       osx_image: xcode11.5
       compiler: gcc
-      env: TOXENV=macOS-10.15.4
+      env: OSNAME=macOS-10.15.4
 
     # Max OSX release
     - os: osx
       osx_image: xcode9.4
       compiler: gcc
-      env: TOXENV=macOS-10.13
+      env: OSNAME=macOS-10.13
 
     # Clang test, don't deploy
     - os: linux
       dist: bionic
       compiler: clang
-      env: TOXENV=Ubuntu-Bionic
+      env: OSNAME=Ubuntu-Bionic
       deploy:
         provider: script
         script: echo "Skipping deployment!"
