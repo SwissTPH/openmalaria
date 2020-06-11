@@ -3,8 +3,8 @@ language: cpp
 cache: apt
 
 install:
-  - test "$TRAVIS_OS_NAME" == "linux" && apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx
-  - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd
+  - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx || true
+  - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd || true
 
 # Build openMalaria and create the release folder openMalaria-$TRAVIS_OS_NAME
 build_script:
