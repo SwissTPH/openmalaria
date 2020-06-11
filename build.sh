@@ -34,7 +34,7 @@ function printHelp {
     echo "--------------"
     echo "Mac OS: brew install git boost coreutils cmake gcc gsl xerces-c xsd"
     echo "--------------"
-    echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make python2 zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
+    echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
 
     echo ""
     echo "Options:"
@@ -104,7 +104,7 @@ function build {
 
 function runtests {
     if [ $TESTS = "ON" ]; then
-        pushd build && ctest -j$JOBS && popd
+        pushd build && ctest --output-on-failure -j$JOBS && popd
     fi
 }
 
