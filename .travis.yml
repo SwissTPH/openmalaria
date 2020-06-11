@@ -7,14 +7,9 @@ install:
   - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd || true
 
 # Build openMalaria and create the release folder openMalaria-$TRAVIS_OS_NAME
-build_script:
+script:
   - ./build.sh --jobs=4 -r --artifact=openMalaria-$OSNAME
-
-# Discover and run tests (or test_script)
-test_script:
   - ./build.sh --jobs=4 --tests
-
-after_success:
   - util/generate-checksums.sh openMalaria-$OSNAME/
   - util/build-info.sh | tee openMalaria-$OSNAME/travis-build.json
 
