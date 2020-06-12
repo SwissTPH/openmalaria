@@ -22,11 +22,11 @@
 #include <ostream>
 #include <iostream>
 #include <gsl_errno.h>
+#include <cstring>
 
 #ifdef __GNU_LIBRARY__
 #include <execinfo.h>
 #include <stdlib.h>
-#include <cstring>
 #include <cxxabi.h>
 #endif
 

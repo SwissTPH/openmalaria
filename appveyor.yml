@@ -1,54 +1,27 @@
-clone_depth: 30
-
-environment:
-  VisualStudioVersion: 14.0
+os: Visual Studio 2015
 
 configuration: Release
 
-os: Visual Studio 2015
-
-cache:
-  - xsd-4.0.msi -> appveyor.yml
-  - boost_1_55_0.zip -> appveyor.yml
-  - gsl-libs.zip -> appveyor.yml
-  - gsl-headers.zip -> appveyor.yml
-  - zlib.lib.zip -> appveyor.yml
-
+# Run install scripts
 install:
-  - git submodule init && git submodule update
-  - pushd util\install-dep-windows\ && install-dependencies-win.bat & popd
-  - pushd gsl && cmake . & popd
-  - pushd zlib && cmake . & popd
-  - cmd: echo "Dependencies installed and configured"
-  - cmd: echo "Configure openMalaria build and generate solution file 'OpenMalaria.sln' with CMake"
-  - mkdir build && pushd build && cmake .. -DGSL_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gsl.lib" -DZ_LIBRARIES:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/zlib.lib" -DXERCESC_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/lib/vc-12.0/xerces-c_3.lib" -DZ_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/zlib" -DXERCESC_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include/xercesc" -DBoost_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/boost_1_55_0" -DGSL_INCLUDE_DIR:PATH="%APPVEYOR_BUILD_FOLDER%/gsl" -DGSL_INCLUDE_DIR2:PATH="%APPVEYOR_BUILD_FOLDER%/gsl/gsl" -DGSL_CBLAS_LIB_OPT:FILEPATH="%APPVEYOR_BUILD_FOLDER%/lib/gslcblas.lib" -DXSD_INCLUDE_DIRS:PATH="%APPVEYOR_BUILD_FOLDER%/xsd/include" -DXSD_EXECUTABLE:FILEPATH="%APPVEYOR_BUILD_FOLDER%/xsd/bin/xsd.exe" & popd
+  - C:\cygwin64\bin\bash -lc "echo $HOME"
+  - C:\cygwin64\bin\bash -lc "appveyor DownloadFile http://rawgit.com/transcode-open/apt-cyg/master/apt-cyg -FileName apt-cyg"
+  - C:\cygwin64\bin\bash -lc "install apt-cyg /bin"
+  - C:\cygwin64\bin\bash -lc "apt-cyg install wget grep"
+  - C:\cygwin64\bin\bash -lc "apt-cyg install zlib-devel make python3 cmake libboost-devel libgsl-devel xsd libxerces-c-devel"
 
-build:
-  project: build\OpenMalaria.sln
-  parallel: true
-  verbosity: normal
+build_script:
+  - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria && ./build.sh --jobs=4 -r --artifact=openMalaria-windows"
 
-after_build:
-  - cmd: set /p Build=<version.txt
-  - cmd: mkdir %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - cmd: ECHO "build-log:" https://ci.appveyor.com/project/%APPVEYOR_ACCOUNT_NAME%/openmalaria/builds/%APPVEYOR_BUILD_ID% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
-  - cmd: ECHO "build-version:" %APPVEYOR_BUILD_VERSION% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
-  - cmd: ECHO "worker-image:" %APPVEYOR_BUILD_WORKER_IMAGE% >> %APPVEYOR_BUILD_FOLDER%\OpenMalaria\appveyor.log
-  - cmd: copy %APPVEYOR_BUILD_FOLDER%\version.txt %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - cmd: copy %APPVEYOR_BUILD_FOLDER%\xsd\bin\xerces-c*.dll %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - cmd: copy %APPVEYOR_BUILD_FOLDER%\schema\scenario_%Build:~7,2%.xsd %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - cmd: copy %APPVEYOR_BUILD_FOLDER%\test\*.csv %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - cmd: copy %APPVEYOR_BUILD_FOLDER%\util\example\* %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - ps: pushd "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\bin"; .\dumpbin.exe /dependents $env:APPVEYOR_BUILD_FOLDER"\build\Release\openMalaria.exe" > $env:APPVEYOR_BUILD_FOLDER"\OpenMalaria\dependencies.txt"; popd
-  - cmd: mkdir "%APPVEYOR_BUILD_FOLDER%\OpenMalaria\x86"
-  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\vcruntime140.dll" "%APPVEYOR_BUILD_FOLDER%\OpenMalaria\x86\vcruntime140.dll"
-  - cmd: copy "C:\Program Files (x86)\Microsoft Visual Studio 14.0\VC\redist\x86\Microsoft.VC140.CRT\msvcp140.dll" "%APPVEYOR_BUILD_FOLDER%\OpenMalaria\x86\msvcp140.dll"
-  - cmd: mv %APPVEYOR_BUILD_FOLDER%\build\Release\openMalaria.exe %APPVEYOR_BUILD_FOLDER%\OpenMalaria
-  - 7z a OpenMalaria-windows.zip "%APPVEYOR_BUILD_FOLDER%\OpenMalaria"
+# Discover and run tests (or test_script)
+test_script:
+  - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria && ./build.sh --jobs=4 --tests
 
+# Package artifacts
 artifacts:
-  - path: OpenMalaria-windows.zip
+  - path: openMalaria-windows.zip
 
+# Deployment
 deploy:
   provider: GitHub
   description: "OpenMalaria build for Windows"
