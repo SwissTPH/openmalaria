@@ -39,7 +39,7 @@ matrix:
     - os: osx
       osx_image: xcode11.5
       compiler: gcc
-      env: OSNAME=macOS-10.15.4
+      env: OSNAME=macOS-10.15
 
     # Max OSX release
     - os: osx
