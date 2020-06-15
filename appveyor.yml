@@ -15,7 +15,7 @@ build_script:
 
 # Discover and run tests (or test_script)
 test_script:
-  - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria && ./build.sh --jobs=4 --tests
+  - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria && ./build.sh --jobs=1 --tests
 
 # Package artifacts
 artifacts:

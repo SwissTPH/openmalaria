@@ -4,12 +4,12 @@ cache: apt
 
 install:
   - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx || true
-  - test "$TRAVIS_OS_NAME" == "osx" && brew uninstall --ignore-dependencies boost && brew install git boost@1.60 coreutils cmake gcc gsl xerces-c xsd || true
+  - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd || true
 
 # Build openMalaria and create the release folder openMalaria-$TRAVIS_OS_NAME
 script:
   - ./build.sh --jobs=4 -r --artifact=openMalaria-$OSNAME
-  - ./build.sh --jobs=4 --tests
+  - ./build.sh --jobs=1 --tests
   - util/generate-checksums.sh openMalaria-$OSNAME/
   - util/build-info.sh | tee openMalaria-$OSNAME/travis-build.json
 
