@@ -53,7 +53,8 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
     // Log-values: adding log is same as exponentiating, multiplying and taking
     // the log again.
     FSCoeffic[0] += log( EIRtoS_v);
-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
+    vectors::expIDFT (forcedS_v, FSCoeffic, EIRRotateAngle);
+    //vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     
     transmission.initState ( tsP_A, tsP_df, tsP_dff, initNvFromSv, initOvFromSv, forcedS_v );
     
@@ -62,17 +63,81 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
     vectors::scale (mosqEmergeRate, initNv0FromSv);
     
     // All set up to drive simulation from forcedS_v
+
+    scaleFactor = 1.0;
+    shiftAngle = 0;
 }
 
 
 // -----  Initialisation of model which is done after running the human warmup  -----
+int argmax(const vecDay<double> &vec)
+{
+    int imax = 0;
+    double max = 0.0;
+    for(int i=0; i<vec.size().inDays(); i++)
+    {
+        double v = vec[SimTime::fromDays(i)];
+        if(v >= max)
+        {
+            max = v;
+            imax = i;
+        }
+    }
+    return imax;
+}
+
+double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic, vecDay<double> &sim)
+{
+    vecDay<double> temp(sim.size(), 0.0);
+
+    double delta = 2 * M_PI / 365.0;
+
+    double min = std::numeric_limits<double>::infinity();
+    double minAngle = 0.0;
+    for(double angle=-M_PI; angle<M_PI; angle+=delta)
+    {
+        vectors::expIDFT(temp, FSCoeffic, EIRRotageAngle + angle);
+
+        // Minimize l1-norm
+        double sum = 0.0;
+        for(SimTime i=SimTime::zero(); i<SimTime::oneYear(); i+=SimTime::oneDay())
+            sum += fabs(temp[i] - sim[i]);
+
+        if(sum < min)
+        {
+            min = sum;
+            minAngle = angle;
+        }
+
+        // // Or minimize peaks offset
+        // int m1 = argmax(temp);
+        // int m2 = argmax(sim);
+        // int offset = abs(m1-m2);
+
+        // if(offset < min)
+        // {
+        //     min = offset;
+        //     minAngle = angle;
+        // }
+
+    }
+    return minAngle;
+}
 
 bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     // Try to match S_v against its predicted value. Don't try with N_v or O_v
     // because the predictions will change - would be chasing a moving target!
     // EIR comes directly from S_v, so should fit after we're done.
 
-    double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
+    // Compute avgAnnualS_v from quinquennialS_v for fitting 
+    vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
+    for( SimTime i = SimTime::zero(); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
+        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] +=
+            quinquennialS_v[i] / 5.0;
+    }
+
+    double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);
+
     //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
     if (!(factor > 1e-6 && factor < 1e6)) {
         if( factor > 1e6 && vectors::sum(quinquennialS_v) < 1e-3 ){
@@ -88,36 +153,37 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
         throw TRACED_EXCEPTION ("factor out of bounds",util::Error::VectorFitting);
     }
 
-    //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
-    // Adjusting mosqEmergeRate is the important bit. The rest should just
-    // bring things to a stable state quicker.
-    initNv0FromSv *= factor;
-    initNvFromSv *= factor;     //(not currently used)
-    vectors::scale (mosqEmergeRate, factor);
-    transmission.initIterateScale (factor);
-    vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
+    //double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v.internal());
+    // forced_sv -> mosqEmergRate -> shift + scale
 
-    // average annual period of S_v over 5 years
-    vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
-    for( SimTime i = SimTime::zero(); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
-        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] =
-            quinquennialS_v[i] / 5.0;
-    }
+    // Increase the factor by 60% of the difference to slow down (and improve) convergence
+    double factorDiff = (scaleFactor * factor - scaleFactor) * .6;
 
-    // Once the amplitude is approximately correct, we try to find a
-    // rotation offset.
-    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v.internal());
-    //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
-    // annualS_v was already rotated by old value of FSRotateAngle, so increment:
-    FSRotateAngle -= rAngle;
-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
-    // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
-    mosqEmergeRate = forcedS_v;
-    vectors::scale (mosqEmergeRate, initNv0FromSv);
+    cout << scaleFactor << " + " << factorDiff << " => ";
+    
+    scaleFactor += factorDiff;
 
-    const double LIMIT = 0.1;
-    return (fabs(factor - 1.0) > LIMIT) ||
-           (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
+    shiftAngle += findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
+
+    vectors::expIDFT(mosqEmergeRate, FSCoeffic, -shiftAngle);
+
+    vectors::scale (mosqEmergeRate, scaleFactor * initNv0FromSv);
+
+    transmission.initIterateScale (scaleFactor);
+    //initNvFromSv *= scaleFactor;     //(not currently used)
+
+    //cout << scaleFactor << ", " << "Factor: " << factor << endl;
+    //cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
+
+    int m1 = argmax(forcedS_v);
+    int m2 = argmax(avgAnnualS_v);
+    int offset = m1-m2;
+
+    cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
+
+    // 5% fitting error allowed
+    const double LIMIT = 0.05;
+    return (fabs(factor - 1.0) > LIMIT);// || (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
 }
 
 
