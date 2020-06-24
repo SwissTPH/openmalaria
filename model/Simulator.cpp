@@ -55,7 +55,7 @@ namespace util {
 
 bool Simulator::startedFromCheckpoint;  // static
 
-const char* CHECKPOINT = "checkpoint";
+//const char* CHECKPOINT = "checkpoint";
 
 std::unique_ptr<Population> population;
 std::unique_ptr<TransmissionModel> transmission;
@@ -134,10 +134,23 @@ Simulator::Simulator( const scnXml::Scenario& scenario ) :
     mon::initCohorts( scenario.getMonitoring() );
     
     // ———  End of static data initialisation  ———
-    
-    ifstream checkpointFile(CHECKPOINT,ios::in);
-    // If not open, file doesn't exist (or is inaccessible)
-    startedFromCheckpoint = checkpointFile.is_open();
+    checkpointFileName = util::CommandLine::getCheckpointName();
+
+    if(checkpointFileName == "")
+        checkpointFileName = "checkpoint";
+
+    if(util::CommandLine::option(util::CommandLine::CHECKPOINT))
+    {
+        ifstream checkpointFile(checkpointFileName,ios::in);
+        // If not open, file doesn't exist (or is inaccessible)
+        startedFromCheckpoint = checkpointFile.is_open();
+
+        // Cleanup errno in file doesn't exist
+        if(startedFromCheckpoint == false)
+            errno = 0;
+    }
+    else
+        startedFromCheckpoint = false;
 }
 
 
@@ -272,9 +285,9 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
 
 // ———  checkpointing: set up read/write stream  ———
 
-int readCheckpointNum () {
+int Simulator::readCheckpointNum () {
     ifstream checkpointFile;
-    checkpointFile.open(CHECKPOINT, fstream::in);
+    checkpointFile.open(checkpointFileName, fstream::in);
     int checkpointNum=0;
     checkpointFile >> checkpointNum;
     checkpointFile.close();
@@ -296,7 +309,7 @@ void Simulator::writeCheckpoint(){
     
     {   // Open the next checkpoint file for writing:
         ostringstream name;
-        name << CHECKPOINT << checkpointNum << ".gz";
+        name << checkpointFileName << checkpointNum << ".gz";
         //Writing checkpoint:
         ogzstream out(name.str().c_str(), ios::out | ios::binary);
         checkpoint (out);
@@ -305,7 +318,7 @@ void Simulator::writeCheckpoint(){
     
     {   // Indicate which is the latest checkpoint file.
         ofstream checkpointFile;
-        checkpointFile.open(CHECKPOINT,ios::out);
+        checkpointFile.open(checkpointFileName,ios::out);
         checkpointFile << checkpointNum;
         checkpointFile.close();
         if (!checkpointFile)
@@ -314,7 +327,7 @@ void Simulator::writeCheckpoint(){
     // Truncate the old checkpoint to save disk space, when it existed
     if( oldCheckpointNum != checkpointNum ){
         ostringstream name;
-        name << CHECKPOINT << oldCheckpointNum << ".gz";
+        name << checkpointFileName << oldCheckpointNum << ".gz";
         ofstream out(name.str().c_str(), ios::out | ios::binary);
         out.close();
     }
@@ -326,7 +339,7 @@ void Simulator::readCheckpoint() {
     
     // Open the latest file
     ostringstream name;
-    name << CHECKPOINT << checkpointNum << ".gz";
+    name << checkpointFileName << checkpointNum << ".gz";
     igzstream in(name.str().c_str(), ios::in | ios::binary);
     //Note: gzstreams are considered "good" when file not open!
     if ( !( in.good() && in.rdbuf()->is_open() ) )
