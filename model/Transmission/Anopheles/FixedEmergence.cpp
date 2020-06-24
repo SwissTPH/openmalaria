@@ -70,21 +70,21 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
 
 
 // -----  Initialisation of model which is done after running the human warmup  -----
-int argmax(const vecDay<double> &vec)
-{
-    int imax = 0;
-    double max = 0.0;
-    for(int i=0; i<vec.size().inDays(); i++)
-    {
-        double v = vec[SimTime::fromDays(i)];
-        if(v >= max)
-        {
-            max = v;
-            imax = i;
-        }
-    }
-    return imax;
-}
+// int argmax(const vecDay<double> &vec)
+// {
+//     int imax = 0;
+//     double max = 0.0;
+//     for(int i=0; i<vec.size().inDays(); i++)
+//     {
+//         double v = vec[SimTime::fromDays(i)];
+//         if(v >= max)
+//         {
+//             max = v;
+//             imax = i;
+//         }
+//     }
+//     return imax;
+// }
 
 double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic, vecDay<double> &sim)
 {
@@ -98,7 +98,7 @@ double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic, vecDay
     {
         vectors::expIDFT(temp, FSCoeffic, EIRRotageAngle + angle);
 
-        // Minimize l1-norm
+        Minimize l1-norm
         double sum = 0.0;
         for(SimTime i=SimTime::zero(); i<SimTime::oneYear(); i+=SimTime::oneDay())
             sum += fabs(temp[i] - sim[i]);
@@ -179,7 +179,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     int m2 = argmax(avgAnnualS_v);
     int offset = m1-m2;
 
-    cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
+    //cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
 
     // 5% fitting error allowed
     const double LIMIT = 0.05;
