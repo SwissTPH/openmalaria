@@ -98,7 +98,7 @@ double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic, vecDay
     {
         vectors::expIDFT(temp, FSCoeffic, EIRRotageAngle + angle);
 
-        Minimize l1-norm
+        // Minimize l1-norm
         double sum = 0.0;
         for(SimTime i=SimTime::zero(); i<SimTime::oneYear(); i+=SimTime::oneDay())
             sum += fabs(temp[i] - sim[i]);
@@ -159,7 +159,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     // Increase the factor by 60% of the difference to slow down (and improve) convergence
     double factorDiff = (scaleFactor * factor - scaleFactor) * .6;
 
-    cout << scaleFactor << " + " << factorDiff << " => ";
+    //cout << scaleFactor << " + " << factorDiff << " => ";
     
     scaleFactor += factorDiff;
 
@@ -175,9 +175,9 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     //cout << scaleFactor << ", " << "Factor: " << factor << endl;
     //cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
 
-    int m1 = argmax(forcedS_v);
-    int m2 = argmax(avgAnnualS_v);
-    int offset = m1-m2;
+    // int m1 = argmax(forcedS_v);
+    // int m2 = argmax(avgAnnualS_v);
+    // int offset = m1-m2;
 
     //cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
 
