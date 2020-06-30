@@ -182,7 +182,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     //cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
 
     // 5% fitting error allowed
-    const double LIMIT = 0.05;
+    const double LIMIT = 0.1;
     return (fabs(factor - 1.0) > LIMIT);// || (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
 }
 
