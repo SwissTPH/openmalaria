@@ -199,6 +199,7 @@ protected:
     //@}
 
     double scaleFactor, shiftAngle;
+    bool rotated, scaled;
 };
 
 }

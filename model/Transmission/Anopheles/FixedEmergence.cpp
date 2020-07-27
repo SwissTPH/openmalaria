@@ -66,25 +66,27 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
 
     scaleFactor = 1.0;
     shiftAngle = 0;
+    scaled = false;
+    rotated = false;
 }
 
 
 // -----  Initialisation of model which is done after running the human warmup  -----
-// int argmax(const vecDay<double> &vec)
-// {
-//     int imax = 0;
-//     double max = 0.0;
-//     for(int i=0; i<vec.size().inDays(); i++)
-//     {
-//         double v = vec[SimTime::fromDays(i)];
-//         if(v >= max)
-//         {
-//             max = v;
-//             imax = i;
-//         }
-//     }
-//     return imax;
-// }
+int argmax(const vecDay<double> &vec)
+{
+    int imax = 0;
+    double max = 0.0;
+    for(int i=0; i<vec.size().inDays(); i++)
+    {
+        double v = vec[SimTime::fromDays(i)];
+        if(v >= max)
+        {
+            max = v;
+            imax = i;
+        }
+    }
+    return imax;
+}
 
 double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic, vecDay<double> &sim)
 {
@@ -109,7 +111,7 @@ double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic, vecDay
             minAngle = angle;
         }
 
-        // // Or minimize peaks offset
+        // Or minimize peaks offset
         // int m1 = argmax(temp);
         // int m2 = argmax(sim);
         // int offset = abs(m1-m2);
@@ -156,34 +158,40 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     //double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v.internal());
     // forced_sv -> mosqEmergRate -> shift + scale
 
-    // Increase the factor by 60% of the difference to slow down (and improve) convergence
-    double factorDiff = (scaleFactor * factor - scaleFactor) * .6;
+    const double LIMIT = 0.05;
 
-    //cout << scaleFactor << " + " << factorDiff << " => ";
-    
-    scaleFactor += factorDiff;
+    if(fabs(factor - 1.0) > LIMIT)
+    {
+        scaled = false;
+        // Increase the factor by 60% of the difference to slow down (and improve) convergence
+        double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
+        scaleFactor += factorDiff;
+    }
+    else
+        scaled = true;
 
-    shiftAngle += findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
+    if (scaled && !rotated)
+    {
+        double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
+        shiftAngle += rAngle;
+        rotated = true;
+    }
 
     vectors::expIDFT(mosqEmergeRate, FSCoeffic, -shiftAngle);
-
     vectors::scale (mosqEmergeRate, scaleFactor * initNv0FromSv);
 
     transmission.initIterateScale (scaleFactor);
     //initNvFromSv *= scaleFactor;     //(not currently used)
 
-    //cout << scaleFactor << ", " << "Factor: " << factor << endl;
-    //cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
+    int m1 = argmax(forcedS_v);
+    int m2 = argmax(avgAnnualS_v);
+    int offset = m1-m2;
 
-    // int m1 = argmax(forcedS_v);
-    // int m2 = argmax(avgAnnualS_v);
-    // int offset = m1-m2;
-
-    //cout << "scaleFactor " << scaleFactor << ", " << "Factor: " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
-
+    // cout << scaleFactor << ", " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
+    
     // 5% fitting error allowed
-    const double LIMIT = 0.1;
-    return (fabs(factor - 1.0) > LIMIT);// || (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
+    return !(scaled && rotated);
+    // return (fabs(factor - 1.0) > LIMIT);// || (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
 }
 
 
