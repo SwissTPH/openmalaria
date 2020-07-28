@@ -438,7 +438,7 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     util::checkpoint::header (stream);
     if (!stream.good())
         throw util::checkpoint_error ("Unable to write to file");
-    util::timer::startCheckpoint ();
+    //util::timer::startCheckpoint ();
     
     util::CommandLine::staticCheckpoint (stream);
     Population::staticCheckpoint (stream);
@@ -463,7 +463,7 @@ void Simulator::checkpoint (ostream& stream, int checkpointNum) {
     workUnitIdentifier & stream;
     cksum & stream;
     
-    util::timer::stopCheckpoint ();
+    //util::timer::stopCheckpoint ();
     if (stream.fail())
         throw util::checkpoint_error ("stream write error");
 }
