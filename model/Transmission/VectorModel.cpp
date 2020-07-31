@@ -406,8 +406,8 @@ SimTime VectorModel::initIterate () {
     }
     
     ++initIterations;
-    if( initIterations > 10 ){
-        throw TRACED_EXCEPTION("Transmission warmup exceeded 10 iterations!",util::Error::VectorWarmup);
+    if( initIterations > 15 ){
+        throw TRACED_EXCEPTION("Transmission warmup exceeded 15 iterations!",util::Error::VectorWarmup);
     }
     
     bool needIterate = false;
