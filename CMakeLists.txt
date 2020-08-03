@@ -94,7 +94,8 @@ find_package (XSD)
 find_package (XERCESC)
 find_package (GSL)
 find_package (Z)
-
+find_package(PythonInterp 2.7 REQUIRED)
+find_package(PythonLibs 2.7 REQUIRED)
 
 # Find Boost:
 
