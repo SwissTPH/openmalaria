@@ -38,6 +38,7 @@ namespace OM { namespace util {
     string CommandLine::resourcePath;
     string CommandLine::outputName;
     string CommandLine::ctsoutName;
+    string CommandLine::checkpointFileName;
     
     string parseNextArg (int argc, char* argv[], int& i) {
 	++i;
@@ -117,8 +118,14 @@ namespace OM { namespace util {
 		    options.set (SKIP_SIMULATION);
 		} else if (clo == "checkpoint") {
 		    options.set (CHECKPOINT);
+                } else if (clo == "checkpoint-file") {
+                    if (checkpointFileName != ""){
+                        throw cmd_exception ("--checkpoint-file argument may only be given once");
+                    }
+                    options.set (CHECKPOINT);
+                    checkpointFileName = parseNextArg (argc, argv, i);
                 } else if (clo == "checkpoint-stop") {
-		    options.set (CHECKPOINT);
+		    		options.set (CHECKPOINT);
                     options.set (CHECKPOINT_STOP);
                 } else if (clo == "debug-vector-fitting") {
                     options.set (DEBUG_VECTOR_FITTING);
@@ -228,7 +235,8 @@ namespace OM { namespace util {
 	    << " -c --checkpoint	Write a checkpoint just before starting the main phase."<<endl
 	    << "			This may be used to skip redundant computation when multiple"<<endl
 	    << "			simulations differ only during the intervention phase."<<endl
-	    << "    --checkpoint-stop	Checkpoint as above, then stop immediately afterwards."<<endl
+	    << "    --checkpoint-file file	Checkpoint as above. Uses file as checkpoint file name. If not given, checkpoint is used." << endl
+	    << "    --checkpoint-stop	Checkpoint as above, then stop immediately afterwards. Can be used with --checkpoint-file."<<endl
 	    << "    --debug-vector-fitting"<<endl
 	    << "			Show details of vector-parameter fitting. The fitting methods used" <<endl
 	    << "			aren't guaranteed to work. If they don't, this output should help"<<endl
