@@ -406,13 +406,14 @@ SimTime VectorModel::initIterate () {
     }
     
     ++initIterations;
-    if( initIterations > 10 ){
-        throw TRACED_EXCEPTION("Transmission warmup exceeded 10 iterations!",util::Error::VectorWarmup);
+    if( initIterations > 15 ){
+        throw TRACED_EXCEPTION("Transmission warmup exceeded 15 iterations!",util::Error::VectorWarmup);
     }
     
     bool needIterate = false;
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
         //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
+        //if(!needIterate) cout << "Fitting: " << i << endl;
         needIterate = needIterate || species[i].initIterate ();
     }
     

@@ -105,6 +105,8 @@ void EmergenceModel::initEIR(
         // effectively the first month starts at angle -2*pi/24 radians.
         // The value for the first day of the year should start 2*pi/(365*2)
         // radians later, so adjust EIRRotateAngle to compensate.
+
+        // Change this to 0 later?
         EIRRotateAngle = M_PI * ( 1.0/12.0 - 1.0/365.0 );
     } else {
         assert( seasonality.getDailyValues().present() );      // XML loading code should enforce this
@@ -140,7 +142,7 @@ void EmergenceModel::initEIR(
     }
 
     // Set other data used for mosqEmergeRate calculation:
-    FSRotateAngle = EIRRotateAngle - (EIPDuration.inDays()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
+    FSRotateAngle = 0.0;//EIRRotateAngle - (EIPDuration.inDays()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
     initOvFromSv = initNvFromSv * anoph.getPropInfected();
 }
