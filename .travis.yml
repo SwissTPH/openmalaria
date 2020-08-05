@@ -1,4 +1,3 @@
-sudo: required
 language: cpp
 cache: apt
 
@@ -74,7 +73,6 @@ matrix:
       before_deploy: skip
       deploy:
         provider: pages
-        skip-cleanup: true
         github-token: $GH_TOKEN
         local-dir: schema/generated/book
         keep-history: false
