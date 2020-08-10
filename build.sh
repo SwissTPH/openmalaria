@@ -144,6 +144,8 @@ function package {
     if [ $CYGWIN -eq 1 ]; then
         7z a $ARTIFACT.zip "$ARTIFACT/"
     else
+        ls
+        echo "tar -cavf $ARTIFACT.tar.gz $ARTIFACT/"
         tar -cavf $ARTIFACT.tar.gz $ARTIFACT/
     fi
 }

@@ -14,7 +14,7 @@ script:
 
 deploy:
   provider: releases
-  skip_cleanup: true
+  cleanup: false
   api_key: $GH_TOKEN
   file: openMalaria-$OSNAME.tar.gz
   on:
@@ -53,6 +53,7 @@ matrix:
       env: OSNAME=Ubuntu-Bionic
       deploy:
         provider: script
+        cleanup: false
         script: echo "Skipping deployment!"
     
     - name: gh-pages build
