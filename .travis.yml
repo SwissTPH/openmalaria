@@ -1,5 +1,8 @@
 language: cpp
-cache: apt
+cache: 
+    - apt
+  directories:
+    - $HOME/Library/Caches/Homebrew
 
 install:
   - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx || true
@@ -14,7 +17,6 @@ script:
 
 deploy:
   provider: releases
-  cleanup: false
   api_key: $GH_TOKEN
   file: openMalaria-$OSNAME.tar.gz
   on:
@@ -53,7 +55,6 @@ matrix:
       env: OSNAME=Ubuntu-Bionic
       deploy:
         provider: script
-        cleanup: false
         script: echo "Skipping deployment!"
     
     - name: gh-pages build
