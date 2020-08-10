@@ -1,6 +1,6 @@
 language: cpp
 cache: 
-    - apt
+  - apt
   directories:
     - $HOME/Library/Caches/Homebrew
 
