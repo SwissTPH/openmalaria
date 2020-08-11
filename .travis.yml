@@ -1,6 +1,8 @@
-sudo: required
 language: cpp
-cache: apt
+cache: 
+  apt: true
+  directories:
+    - $HOME/Library/Caches/Homebrew
 
 install:
   - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx || true
@@ -15,7 +17,6 @@ script:
 
 deploy:
   provider: releases
-  skip_cleanup: true
   api_key: $GH_TOKEN
   file: openMalaria-$OSNAME.tar.gz
   on:
@@ -42,10 +43,10 @@ matrix:
       env: OSNAME=macOS-10.15
 
     # Max OSX release
-    - os: osx
-      osx_image: xcode9.4
-      compiler: gcc
-      env: OSNAME=macOS-10.13
+    # - os: osx
+    #   osx_image: xcode9.4
+    #   compiler: gcc
+    #   env: OSNAME=macOS-10.13
 
     # Clang test, don't deploy
     - os: linux
@@ -74,7 +75,6 @@ matrix:
       before_deploy: skip
       deploy:
         provider: pages
-        skip-cleanup: true
         github-token: $GH_TOKEN
         local-dir: schema/generated/book
         keep-history: false

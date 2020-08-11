@@ -120,7 +120,7 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     }
 
     double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);
-
+    
     //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
     if (!(factor > 1e-6 && factor < 1e6)) {
         if ( vectors::sum(forcedS_v) == 0.0 ) {

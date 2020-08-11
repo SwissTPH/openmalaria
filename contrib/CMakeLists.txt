@@ -3,8 +3,8 @@
 # Licence: GNU General Public Licence version 2 or later (see COPYING)
 
 set (Contrib_CPP
-  gzstream/gzstream.C
   R_nmath/qnorm.cpp
+  gzstream/gzstream.C
 )
 
 include_directories (SYSTEM

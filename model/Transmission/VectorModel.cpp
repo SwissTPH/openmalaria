@@ -156,6 +156,11 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
+bool anophelesCompare(scnXml::AnophelesParams& a1, scnXml::AnophelesParams& a2)
+{
+    return (a1.getSeasonality().getAnnualEIR().get()>a2.getSeasonality().getAnnualEIR().get()); 
+}
+
 VectorModel::VectorModel (uint64_t seed1, uint64_t seed2,
                           const scnXml::Entomology& entoData,
                           const scnXml::Vector vectorData, int populationSize) :
@@ -164,7 +169,7 @@ VectorModel::VectorModel (uint64_t seed1, uint64_t seed2,
 {
     // Each item in the AnophelesSequence represents an anopheles species.
     // TransmissionModel::createTransmissionModel checks length of list >= 1.
-    const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
+    scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
     const scnXml::Vector::NonHumanHostsSequence nonHumansList = vectorData.getNonHumanHosts();
 
 //     map<string, double> nonHumanHostPopulations;
@@ -175,6 +180,15 @@ VectorModel::VectorModel (uint64_t seed1, uint64_t seed2,
     size_t numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
+    
+    sort(anophelesList.begin(), anophelesList.end(), anophelesCompare);
+
+    for(size_t i = 0; i < numSpecies; ++i)
+    {
+        auto elt = anophelesList[i];
+        cout << elt.getSeasonality().getAnnualEIR().get() << endl;
+    }
+
     PerHostAnophParams::initReserve (numSpecies);
     species.resize (numSpecies);
 
