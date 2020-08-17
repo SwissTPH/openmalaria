@@ -50,9 +50,6 @@ set (Model_CPP
   Transmission/Anopheles/MosqTransmission.cpp
   Transmission/Anopheles/FixedEmergence.cpp
   Transmission/Anopheles/SimpleMPDEmergence.cpp
-  #Transmission/Anopheles/LCEmergence.cpp
-  #Transmission/Anopheles/LifeCycle.cpp
-  #Transmission/Anopheles/ResourceFitter.cpp
   Transmission/Anopheles/PerHostAnoph.cpp
   
   WithinHost/WHInterface.cpp
