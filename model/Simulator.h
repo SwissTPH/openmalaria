@@ -38,6 +38,9 @@ public:
     //!  Inititalise all step specific constants and variables.
     Simulator( const scnXml::Scenario& scenario );
     
+    //! Execute the internal simulation loop for a given phase
+    void loop(const SimTime humanWarmupLength, int lastPercent);
+
     //! Entry point to simulation.
     void start(const scnXml::Monitoring& monitoring);
     
@@ -61,8 +64,7 @@ private:
     // Data
     SimTime m_phaseEnd;
     SimTime m_estimatedEnd;
-    int phase;  // only need be a class member because value is checkpointed
-    
+
     string checkpointFileName;
 
     static bool startedFromCheckpoint;
