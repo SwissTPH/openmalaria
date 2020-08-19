@@ -1,0 +1,119 @@
+env:
+  global:
+    - BASE_URL="https://github.com/SwissTPH/openmalaria"
+    - SCHEMA_VERSION=$(cat version.txt | cut -d- -f2 | cut -d. -f1)
+    - SCHEMA="scenario_$SCHEMA_VERSION.xsd"
+    - OMP_NUM_THREADS=4
+
+sudo: required
+dist: xenial
+
+language: cpp
+
+addons:
+  apt:
+    packages:
+    - build-essential
+    - cmake
+    - python3
+    - libboost-all-dev
+    - libgsl-dev
+    - libxerces-c-dev
+    - xsdcxx
+    - zlib1g-dev
+
+cache: apt
+
+before_install:
+  - test "$TRAVIS_OS_NAME" == "osx" && util/install-dep-osx.sh || echo "not installing osx dependencies"
+
+install:
+  - mkdir build
+  - pushd build
+  - cmake -DCMAKE_BUILD_TYPE=Release ..
+  - popd
+
+script:
+  - pushd build
+  - make -j4
+  - ./openMalaria --version
+  - test "$TRAVIS_OS_NAME" == "linux" && ldd openMalaria || otool -L openMalaria
+  - echo "Testing release example"
+  # We copy everything in this directory. The developer must update the XML to
+  # work with the current schema version (USUALLY just updating the numbers).
+  - cp -r ../util/example ./
+  - cp ../version.txt example/
+  - cp ../test/*.csv example/
+  # NOTE: we expect the developer to copy schema/scenario_current.xsd to ../schema/$SCHEMA
+  # when creating a new schema version. We DO NOT AUTOMATE this step because we do not want to
+  # proliferate multiple incompatible versions of $SCHEMA.
+  - echo "Using schema ../schema/$SCHEMA"
+  - cp ../schema/$SCHEMA example/
+  - cp openMalaria example/
+  - pushd example && strip openMalaria && ./run-example-scenario.sh && popd
+  - echo "Running test scenarios"
+  - ctest -j4
+  - popd
+
+after_success:
+  - util/generate-checksums.sh build/example
+  - util/build-info.sh | tee build/example/travis-build.json
+
+before_deploy:
+  - mv build/example openMalaria-$TRAVIS_OS_NAME
+  - tar cvzf openMalaria-$TRAVIS_OS_NAME.tar.gz openMalaria-$TRAVIS_OS_NAME
+
+deploy:
+  provider: releases
+  skip_cleanup: true
+  api_key: $GH_TOKEN
+  file: openMalaria-$TRAVIS_OS_NAME.tar.gz
+  on:
+    tags: true
+
+matrix:
+  include:
+    - os: linux
+      compiler: gcc
+    
+    - os: linux
+      compiler: clang
+      deploy:
+        provider: script
+        script: echo "Skipping deployment!"
+      
+    - os: osx
+      compiler: clang
+    
+    - name: gh-pages build
+      os: linux
+      before_install: skip
+      install: skip
+      script:
+        - mkdir -p build/generated/src
+        - pushd build
+        - cmake -DCMAKE_BUILD_TYPE=Release ..
+        - make inlined_xsd
+        - pushd generated
+        - wget https://github.com/rust-lang-nursery/mdBook/releases/download/v0.3.1/mdbook-v0.3.1-x86_64-unknown-linux-gnu.tar.gz
+        - tar xaf *.tar.gz
+        - ../../util/generateDoc.py --mdbook -O src ../schema/scenario_current.xsd ../../schema/scenario_*.xsd
+        - ln -s $(ls src/ | egrep "schema-[0-9]" | sort -nr -t- -k2 | head -n1) src/schema-latest.md
+        - ./mdbook build
+        - popd && popd
+      after_success: true
+      before_deploy: skip
+      deploy:
+        provider: pages
+        skip-cleanup: true
+        github-token: $GH_TOKEN
+        local-dir: schema/generated/book
+        keep-history: false
+        on:
+          branch: master
+
+# blacklist
+branches:
+  except:
+    - appveyor-build
+    - binary-archive

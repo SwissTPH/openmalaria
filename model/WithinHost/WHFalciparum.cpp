@@ -141,8 +141,8 @@ WHFalciparum::~WHFalciparum()
 }
 
 double WHFalciparum::immunitySurvivalFactor (double ageInYears, double cumulativeExposureJ) {
-    if (isnan(ageInYears) || isnan(cumulativeExposureJ) ||
-        isnan(m_cumulative_h) || isnan(m_cumulative_Y)) {
+    if (std::isnan(ageInYears) || std::isnan(cumulativeExposureJ) ||
+        std::isnan(m_cumulative_h) || std::isnan(m_cumulative_Y)) {
         throw base_exception("nan in immunitySurvivalFactor");
     }
     

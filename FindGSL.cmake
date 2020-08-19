@@ -43,6 +43,7 @@ message(STATUS "GSL include path(s): ${GSL_INCLUDE_DIRS}")
 # gsl puts libraries in various places, with various suffixes. Copy the ones you want to use to ../gsl/lib and remove suffixes.
 set (GSL_LIB_PATHS
   PATHS ${CMAKE_SOURCE_DIR}/lib ${CMAKE_SOURCE_DIR}/../gsl/lib
+  ${GSL_INCLUDE_DIR}/../lib
   "C:/Program Files/GnuWin32/gsl-111/gsl/win32/lib"
   "C:/Program Files/GnuWin32/gsl-111/Binaries/gsl/lib"
   "C:/Program Files/GnuWin32/lib"

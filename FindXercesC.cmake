@@ -22,6 +22,7 @@ FIND_PATH(XERCESC_INCLUDE_DIRS xercesc/dom/DOMNode.hpp
 
 set (XERCESC_LIB_PATHS
   PATHS ${CMAKE_SOURCE_DIR}/lib
+  ${XERCESC_INCLUDE_DIRS}/../lib
   "C:/Program Files/CodeSynthesis XSD 3.2/lib/vc-8.0"
   "D:/Program Files/CodeSynthesis XSD 3.2/lib/vc-8.0"
   "C:/Program Files/CodeSynthesis XSD 3.3/lib/vc-8.0"
@@ -45,8 +46,11 @@ elseif (XERCESC_LIB_DBG)
 else ()
   message (FATAL_ERROR "Unable to find xerces-c library")
 endif ()
+
 if (NOT XERCESC_INCLUDE_DIRS)
   message (FATAL_ERROR "Unable to find xerces include files (xercesc/dom/DOMNode.hpp)")
+else ()
+  message (STATUS "Found XercesC++: ${XERCESC_INCLUDE_DIRS}")
 endif (NOT XERCESC_INCLUDE_DIRS)
 
 SET (XERCESC_LIBRARIES ${XERCESC_LIB})
