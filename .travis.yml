@@ -16,6 +16,7 @@ script:
   - util/build-info.sh | tee openMalaria-$OSNAME/travis-build.json
 
 deploy:
+  deploy.skip_cleanup: true
   provider: releases
   api_key: $GH_TOKEN
   file: openMalaria-$OSNAME.tar.gz
@@ -74,6 +75,7 @@ matrix:
       after_success: true
       before_deploy: skip
       deploy:
+        deploy.skip_cleanup: true
         provider: pages
         github-token: $GH_TOKEN
         local-dir: schema/generated/book
