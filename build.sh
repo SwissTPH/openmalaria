@@ -12,6 +12,7 @@ OMGIT=openmalaria
 # Clone from
 RELEASE=openMalaria
 BRANCH=master
+SWITCHBRANCH=0
 
 # options
 CLEAN=0         # Clean build/
@@ -38,17 +39,19 @@ function printHelp {
 
     echo ""
     echo "Options:"
-    echo "  -c, --clean"        "clean build folder (false)"
-    echo "  -t, --tests"        "run the tests (false)"
-    echo "  -r, --release"      "generate the release artifcat (false)"
-    echo "  -a, --artifact"     "specify the artifcat name (openMalaria-VERSION)"
-    echo "  -j, --jobs"         "specify the number of jobs (default: 4)"
-    echo "  -h, --help"         "print this message"
+    echo "  -b, --branch=<name>"    "specify the branch (master)"
+    echo "  -c, --clean"            "clean build folder (false)"
+    echo "  -t, --tests"            "run the tests (false)"
+    echo "  -r, --release"          "generate the release artifcat (false)"
+    echo "  -a, --artifact=<name>"  "specify the artifcat name (openMalaria-VERSION)"
+    echo "  -j, --jobs=<X>"         "specify the number of jobs (4)"
+    echo "  -h, --help"             "print this message"
 }
 
 function parseArguments {
     for i in "$@"; do
         case $i in
+            -b=*|--branch=*)    BRANCH="${i#*=}"; SWITCHBRANCH=1 && shift ;;
             -c|--clean)         CLEAN=1 && shift ;;
             -t|--tests)         TESTS=ON && shift ;;
             -r|--release)       CREATERELEASE=1 && shift ;;
@@ -81,11 +84,14 @@ function clone {
         # Clone git repo
         if [ ! -d "$OMGIT" ] ; then
             git clone --branch $BRANCH https://github.com/SwissTPH/openmalaria.git $OMGIT
-            cd $OMGIT && git checkout $BRANCH && git pull
         else
             echo "Folder $OMGIT already exist, not cloning."
-            cd $OMGIT
         fi
+        cd $OMGIT
+    fi
+    if [ $SWITCHBRANCH -eq 1 ]; then
+        echo "Switching branch to $BRANCH"
+        git checkout $BRANCH && git pull
     fi
 }
 
