@@ -82,9 +82,8 @@ function clone {
         fi
         echo "Using branch $BRANCH"
         if [ $SWITCH_BRANCH -eq 1 ]; then
-            git checkout $BRANCH
+            git checkout $BRANCH && git pull
         fi
-        git pull
     else
         # Clone git repo
         if [ ! -d "$OMGIT" ] ; then
@@ -95,9 +94,8 @@ function clone {
         echo "Using branch $BRANCH"
         cd $OMGIT
         if [ $SWITCH_BRANCH -eq 1 ]; then
-            git checkout $BRANCH
+            git checkout $BRANCH && git pull
         fi
-        git pull
     fi
 }
 
