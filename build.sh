@@ -12,6 +12,7 @@ OMGIT=openmalaria
 # Clone from
 RELEASE=openMalaria
 BRANCH=master
+SWITCH_BRANCH=0
 
 # options
 CLEAN=0         # Clean build/
@@ -50,7 +51,7 @@ function printHelp {
 function parseArguments {
     for i in "$@"; do
         case $i in
-            -b|--branch)        BRANCH="${i#*=}" && shift ;;
+            -b=*|--branch=*)      BRANCH="${i#*=}" && SWITCH_BRANCH=1 && shift ;;
             -c|--clean)         CLEAN=1 && shift ;;
             -t|--tests)         TESTS=ON && shift ;;
             -r|--release)       CREATERELEASE=1 && shift ;;
@@ -80,7 +81,10 @@ function clone {
             echo "Error: this git repository is not openmalaria."
         fi
         echo "Using branch $BRANCH"
-        git checkout $BRANCH && git pull
+        if [ $SWITCH_BRANCH -eq 1 ]; then
+            git checkout $BRANCH
+        fi
+        git pull
     else
         # Clone git repo
         if [ ! -d "$OMGIT" ] ; then
@@ -89,7 +93,11 @@ function clone {
             echo "Folder $OMGIT already exist, not cloning."
         fi
         echo "Using branch $BRANCH"
-        cd $OMGIT && git checkout $BRANCH && git pull
+        cd $OMGIT
+        if [ $SWITCH_BRANCH -eq 1 ]; then
+            git checkout $BRANCH
+        fi
+        git pull
     fi
 }
 
