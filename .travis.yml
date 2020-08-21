@@ -78,7 +78,7 @@ matrix:
         skip_cleanup: true
         provider: pages
         github-token: $GH_TOKEN
-        local-dir: schema/generated/book
+        local-dir: generated/book
         keep-history: false
         on:
           branch: master
