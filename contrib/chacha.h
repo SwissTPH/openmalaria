@@ -152,7 +152,8 @@ inline double ChaCha<R>::gen_double() {
     // (1 bit implied). Use what we have in a single sample (32-bits precision,
     // lower 21 bits are zero).
     uint64_t x = this->operator()();
-    return (x << 21) * 0x1.0p-53;
+    const double v = 1.1102230246251565e-16; // = 0x1.0p-53
+    return (x << 21) * v;
 }
 
 template<size_t R>

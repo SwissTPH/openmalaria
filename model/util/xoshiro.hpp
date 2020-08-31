@@ -147,7 +147,8 @@ inline uint32_t Xoshiro256P::gen_u32() {
 inline double Xoshiro256P::gen_double() {
     // Doubles support 53-bits of precision (1 bit implied). Use our high bits.
     uint64_t x = this->operator()();
-    return (x >> 11) * 0x1.0p-53;
+    const double v = 1.1102230246251565e-16; // = 0x1.0p-53
+    return (x >> 11) * v;
 }
 
 
