@@ -65,7 +65,7 @@ public:
         UnittestUtil::incrTime( SimTime::oneTS() );
         infection->update (m_rng, 1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         if (dump_emprical) cout << setprecision(8) << infection->getDensity() << endl;
-        TS_ASSERT_APPROX (infection->getDensity(), 12.625755);
+        TS_ASSERT_APPROX (infection->getDensity(), 2.3427793);
     }
     void testUpdated2Inf () {
         UnittestUtil::incrTime( SimTime::oneTS() );
@@ -73,7 +73,7 @@ public:
         UnittestUtil::incrTime( SimTime::oneTS() );
         infection->update (m_rng, 1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         if (dump_emprical) cout << setprecision(8) << infection->getDensity() << endl;
-        TS_ASSERT_APPROX (infection->getDensity(), 0.69249219);
+        TS_ASSERT_APPROX (infection->getDensity(), 0.42220637);
     }
     void testUpdated3Inf () {
         UnittestUtil::incrTime( SimTime::oneTS() );
@@ -83,7 +83,7 @@ public:
         UnittestUtil::incrTime( SimTime::oneTS() );
         infection->update (m_rng, 1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         if (dump_emprical) cout << setprecision(8) << infection->getDensity() << endl;
-        TS_ASSERT_APPROX (infection->getDensity(), 18.839721);
+        TS_ASSERT_APPROX (infection->getDensity(), 1.2290052);
     }
     void testUpdated4Inf () {
         UnittestUtil::incrTime( SimTime::oneTS() );
@@ -95,13 +95,13 @@ public:
         UnittestUtil::incrTime( SimTime::oneTS() );
         infection->update (m_rng, 1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         if (dump_emprical) cout << setprecision(8) << infection->getDensity() << endl;
-        TS_ASSERT_APPROX (infection->getDensity(), 0.23933943);
+        TS_ASSERT_APPROX (infection->getDensity(), 0.4272347);
     }
     void testUpdatedInf1 () {
         UnittestUtil::incrTime( SimTime::oneTS() );
         infection->update (m_rng, 1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         if (dump_emprical) cout << setprecision(8) << infection->getDensity() << endl;
-        TS_ASSERT_APPROX (infection->getDensity(), 12.625755);
+        TS_ASSERT_APPROX (infection->getDensity(), 2.3427793);
     }
 
     void testUpdatedReducedInf () {
@@ -111,7 +111,7 @@ public:
         infection->update (m_rng, 0.1, sim::ts1(), numeric_limits<double>::quiet_NaN());
         // This is, as expected, 1/10th of that in testUpdated2Inf
         if (dump_emprical) cout << setprecision(8) << infection->getDensity() << endl;
-        TS_ASSERT_APPROX (infection->getDensity(), 0.069249219);
+        TS_ASSERT_APPROX (infection->getDensity(), 0.042220637);
     }
     void testUpdatedReducedInf2 () {
         UnittestUtil::incrTime( SimTime::oneTS() );
@@ -120,7 +120,7 @@ public:
         infection->update (m_rng, 1.0, sim::ts1(), numeric_limits<double>::quiet_NaN());
         // This is completely different due to stochasitic effects
         if (dump_emprical) cout << setprecision(8) << infection->getDensity() << endl;
-        TS_ASSERT_APPROX (infection->getDensity(), 0.28988037);
+        TS_ASSERT_APPROX (infection->getDensity(), 0.16787395);
     }
 
 private:

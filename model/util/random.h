@@ -27,8 +27,8 @@
  * 
  * -    ChaCha<8> for our master RNG; this is a low-margin cryptographic-grade
  *      generator yet still very fast
- * -    PCG32 for our local RNGs; this is fast, passes stringent tests and has
- *      a very small state size, allowing embedding within each human.
+ * -    Xoshiro256+; this is very fast, decent quality and has small state
+ *      http://prng.di.unimi.it/
  * 
  * To sample from distributions, we fall back to the venerable GSL, which
  * provides fast sampling from a wide variety of distributions and whose results
@@ -42,10 +42,9 @@
 #include "Global.h"
 #include "util/errors.h"
 #include <set>
-#include <pcg_random.hpp>
-#include <boost/random/uniform_01.hpp>
 #include <gsl/gsl_rng.h>
 #include <chacha.h>
+#include "util/xoshiro.hpp"
 
 #ifdef OM_RANDOM_USE_BOOST_DIST
 #include <boost/random/normal_distribution.hpp>
@@ -67,25 +66,25 @@
 namespace OM { namespace util {
 
 // Support functions
+// Note: GSL  doesn't really seem to be interested in RNGs producing more than
+// 32-bits of state. This implementation serves two underlying generators.
 template<class T>
 long unsigned int sample_ulong (void *ptr) {
     T *rng = reinterpret_cast<T*>(ptr);
-    BOOST_STATIC_ASSERT (sizeof(uint32_t) <= sizeof(long unsigned int));
-    return static_cast<long unsigned int> ((*rng)());
+    return rng->gen_u32();
 }
 template<class T>
 double sample_double01 (void *ptr) {
     T *rng = reinterpret_cast<T*>(ptr);
-    boost::random::uniform_01<T&> dist (*rng);
-    return dist ();
+    return rng->gen_double();
 }
 
 template<class T>
 gsl_rng_type make_gsl_rng_type(T& rng) {
     return {
         "OM_RNG",		// name
-        rng.max(),		// max value
-        rng.min(),		// min value
+        std::numeric_limits<uint32_t>::max(),
+        std::numeric_limits<uint32_t>::min(),
         0,				// size of state; not used here
         nullptr,			// re-seed function; don't use
         &sample_ulong<T>,
@@ -110,19 +109,27 @@ struct RNG {
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
     }
     
+    /// Seed via another RNG
+    template<class S>
+    explicit RNG(RNG<S>& source): m_rng(source.m_rng) {
+        m_gsl_type = make_gsl_rng_type(m_rng);
+        m_gsl_gen.type = &m_gsl_type;
+        m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
+    }
+    
     // Disable copying
     RNG(const RNG&) = delete;
     RNG& operator=(const RNG&) = delete;
   
     /// Allow moving, with explicit functions
-    RNG(RNG&& other): m_rng(other.m_rng) {
+    RNG(RNG&& other): m_rng(std::move(other.m_rng)) {
         m_gsl_type = other.m_gsl_type;
         // The following point into instance of this RNG:
         m_gsl_gen.type = &m_gsl_type;
         m_gsl_gen.state = reinterpret_cast<void*>(&m_rng);
     }
     void operator=(RNG&& other) {
-        m_rng = other.m_rng;
+        m_rng = std::move(other.m_rng);
         m_gsl_type = other.m_gsl_type;
         // The following point into instance of this RNG:
         m_gsl_gen.type = &m_gsl_type;
@@ -144,17 +151,16 @@ struct RNG {
     //@}
     
     uint64_t gen_seed() {
-        uint32_t low = m_rng();
-        uint32_t high = m_rng();
-        return ((uint64_t)high << 32) | (uint64_t)low;
+        uint64_t low = m_rng();
+        uint64_t high = m_rng();
+        return (high << 32) | low;
     }
     
     ///@brief Random number distributions
     //@{
     /** Generate a random number in the range [0,1). */
     inline double uniform_01 () {
-        boost::random::uniform_01<T&> rng_uniform01 (m_rng);
-        return rng_uniform01 ();
+        return m_rng.gen_double();
     }
     
     /** This function returns a Gaussian random variate, with mean mean and
@@ -303,10 +309,11 @@ private:
     // Hooks for GSL distributions
     gsl_rng_type m_gsl_type;
     gsl_rng m_gsl_gen;
+    
+    template<class> friend class RNG;
 };
 
-// I would prefer to use pcg64, but MSVC mysteriously fails
-typedef RNG<pcg32> LocalRng;
+typedef RNG<Xoshiro256P> LocalRng;
 typedef RNG<ChaCha<8>> MasterRng;
 
 /// The master RNG, used only for seeding local RNGs
