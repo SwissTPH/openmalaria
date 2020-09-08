@@ -49,12 +49,9 @@ using util::LocalRng;
  * 
  * Pass by value; it just hides an integer.
  * 
- * NOTE: this struct and the Treatments class are no longer strictly necessary.
- * Ideally, one would remove this, firstly by replacing usages of
- * om:TreatmentOption in healthSystem.xsd with om:DecisionTree (requires an
- * XML updator algorithm), then optionally removing ImmediateOutcomes.
+ * Note: this struct and the Treatments class offer a sub-set of the
+ * functionality offered by CMDecisionTree, and thus is technically redundant.
  */
-//TODO: can we construct a CMDecisionTree when loading the relevant bits from the XML instead of changing the XSD?
 struct TreatmentId{
     inline bool operator==( const TreatmentId that ){ return id == that.id; }
     inline bool operator!=( const TreatmentId that ){ return id != that.id; }
@@ -133,11 +130,12 @@ public:
     virtual void importInfection(LocalRng& rng) =0;
 
     /**
-     * Carry out the effects of some treatment option.
+     * Carry out the effects of some treatment option, optionally with intervention deployment.
+     * 
+     * This is equivalent to calling treatSimple, then deploying any included interventions.
      * 
      * This may be used by intervention deployment, thus should use time 
      * sim::nowOrTs1(). */
-    //TODO: remove this (use treatSimple instead)
     virtual void treatment( Host::Human& human, TreatmentId treatId ) =0;
     
     /// Conditionally gives Primaquine as a treatment. Reports as appropriate.
