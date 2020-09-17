@@ -144,7 +144,7 @@ public:
    * switch to dynamic transmission mode. If not, try to improve the situation
    * and return the length of sim-time before this should be called again.
    */
-  virtual SimTime initIterate ()=0;
+  virtual SimTime initIterate (const Population& population)=0;
   
   /** Needs to be called each step of the simulation before Human::update().
    *

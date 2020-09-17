@@ -367,7 +367,7 @@ SimTime VectorModel::expectedInitDuration (){
     return SimTime::oneYear();
 }
 
-SimTime VectorModel::initIterate () {
+SimTime VectorModel::initIterate (const Population& population) {
     if( interventionMode != dynamicEIR ) {
         // allow forcing equilibrium mode like with non-vector model
         return SimTime::zero(); // no initialization to do
@@ -414,7 +414,7 @@ SimTime VectorModel::initIterate () {
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
         //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
         //if(!needIterate) cout << "Fitting: " << i << endl;
-        needIterate = needIterate || species[i].initIterate ();
+        needIterate = needIterate || species[i].initIterate (i, population.size(), laggedKappa);
     }
     
     if( needIterate ){
@@ -474,7 +474,7 @@ void VectorModel::vectorUpdate (const Population& population) {
     saved_sigma_df.assign_at1(popDataInd, 0.0);
     saved_sigma_dif.assign_at1(popDataInd, 0.0);
     saved_sigma_dff.assign( saved_sigma_dff.size(), 0.0 );
-    
+
     foreach(const Host::Human& human, population.crange()) {
         const OM::Transmission::PerHost& host = human.perHostTransmission;
         WithinHost::WHInterface& whm = *human.withinHostModel;

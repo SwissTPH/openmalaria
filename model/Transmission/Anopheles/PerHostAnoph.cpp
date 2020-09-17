@@ -29,7 +29,7 @@ vector<PerHostAnophParams> PerHostAnophParams::params;
 
 // ----- Per host, per species, non-static -----
 
-PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) {
+PerHostAnophParams::PerHostAnophParams (const scnXml::Mosq& mosq) : mosq(mosq){
     entoAvailability.setParams( 1.0, mosq.getAvailability() );
     probMosqBiting.setParams( mosq.getMosqProbBiting() );
     probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );

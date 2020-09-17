@@ -62,7 +62,7 @@ public:
   
   virtual SimTime minPreinitDuration ();
   virtual SimTime expectedInitDuration ();
-  virtual SimTime initIterate ();
+  virtual SimTime initIterate (const Population& population);
   
   virtual void vectorUpdate (const Population& population);
   virtual void update (const Population& population);
@@ -127,6 +127,8 @@ private:
     
     // Cache; no need to checkpoint
     vector<double> sigma_dif_species;
+
+    vector<double> Kvi;
   
   friend class PerHost;
   friend class AnophelesModelSuite;

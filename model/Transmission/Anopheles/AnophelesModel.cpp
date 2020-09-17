@@ -51,6 +51,10 @@ string AnophelesModel::initialise (
 
     mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
+    mosqProbBiting = mosq.getMosqProbBiting().getMean(); //PerHostAnophParams::get(species).ProbMosqbBiting;
+    mosqProbFindRestSite = mosq.getMosqProbFindRestSite().getMean(); //PerHostAnophParams::get(species).ProbMosqbFindRestSite;
+    mosqProbResting = mosq.getMosqProbResting().getMean(); //PerHostAnophParams::get(species).ProbMosqbResting;
+    mosqProbOvipositing = mosq.getMosqProbOvipositing().getValue(); //PerHostAnophParams::get(species).ProbMosqbOvipositing;
 
     transmission.initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq() );
     
@@ -221,6 +225,7 @@ void AnophelesModel::init2 (int nHumans, double meanPopAvail,
     transmission.emergence->init2( initialP_A, initialP_df, initialP_dff,
             nHumans * meanPopAvail / sumPFindBite, transmission );
     
+    meanAvail = meanPopAvail;
     // All set up to drive simulation from forcedS_v
 }
 

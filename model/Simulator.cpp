@@ -239,7 +239,7 @@ void Simulator::start(const scnXml::Monitoring& monitoring){
             
         } else if (phase == TRANSMISSION_INIT) {
             // Start or continuation of transmission init cycle (after one life span)
-            SimTime iterate = transmission->initIterate();
+            SimTime iterate = transmission->initIterate(*population);
             if( iterate > SimTime::zero() ){
                 m_phaseEnd += iterate;
                 --phase;        // repeat phase

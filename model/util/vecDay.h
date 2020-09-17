@@ -73,6 +73,7 @@ struct vecDay {
     
     /// Access
     const vec_t& internal()const{ return v; }
+    vec_t& internal(){ return v; }
     
     /// Checkpointing
     template<class S>

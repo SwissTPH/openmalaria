@@ -249,6 +249,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     
     const double nOvipositing = P_dff[ttau] * N_v[ttau];       // number ovipositing on this step
     const double newAdults = emergence->update( d0, nOvipositing, total_S_v );
+    //cout << "newAdults: " << newAdults << endl;
     util::streamValidate( newAdults );
     
     // num seeking mosquitos is: new adults + those which didn't find a host

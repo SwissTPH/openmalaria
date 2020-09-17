@@ -48,7 +48,7 @@ public:
   
   virtual SimTime minPreinitDuration ();
   virtual SimTime expectedInitDuration ();
-  virtual SimTime initIterate ();
+  virtual SimTime initIterate (const Population& population);
   
   /** Change the scnXml::NonVector data (changeEIR intervention). */
   void setNonVectorData (const scnXml::NonVector& nonVectorData);

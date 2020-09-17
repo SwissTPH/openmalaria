@@ -29,6 +29,8 @@
 #include "util/SimpleDecayingValue.h"
 #include "util/vectors.h"
 
+#include "CalcNvO.h"
+
 #include <vector>
 #include <limits>
 
@@ -160,8 +162,58 @@ public:
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    inline bool initIterate (){
-        return transmission.emergence->initIterate(transmission);
+    inline bool initIterate (size_t species, int populationSize, vector<double> &laggedKappa){
+        //return transmission.emergence->initIterate(species, transmission);
+        double *mosqEmergerateVector = transmission.emergence->getEmergenceRate().internal().data();
+        int daysInYear = transmission.emergence->getEmergenceRate().internal().size(); // 365?
+        int mosqRestDuration = transmission.getMosqRestDuration().inDays();
+        int EIPDuration = transmission.getEIPDuration().inDays();
+        int nHostTypesInit = 1; // + types of non human hosts
+        int nMalHostTypesInit = 1; // ??
+        double popSizeInit = populationSize; // ??
+        double hostAvailabilityRateInit = meanAvail; // ?
+        //double mosqSeekingDuration = mosqSeekingDuration;
+        // double mosqProbBiting = mosq.getMosqProbBiting().getMean(); //PerHostAnophParams::get(species).ProbMosqbBiting;
+        // double mosqProbFindRestSite = mosq.getMosqProbFindRestSite().getMean(); //PerHostAnophParams::get(species).ProbMosqbFindRestSite;
+        // double mosqProbResting = mosq.getMosqProbResting().getMean(); //PerHostAnophParams::get(species).ProbMosqbResting;
+        // double mosqProbOvipositing = mosq.getMosqProbOvipositing().getValue(); //PerHostAnophParams::get(species).ProbMosqbOvipositing;
+
+        vector<double> Kvi(daysInYear, laggedKappa[0]);
+        double *FHumanInfectivityInitVector = Kvi.data();
+        double *FEIRInitVector = transmission.emergence->getEIR().internal().data();
+
+        // check nvo multiplication if all values are 0
+        std::vector<double> & Nv0guessRef = transmission.emergence->getEmergenceRate().internal();
+        std::vector<double> NvOguess(Nv0guessRef.begin(), Nv0guessRef.end());
+        double *FMosqEmergeRateInitEstimateVector = NvOguess.data();
+
+        cout << "daysInYear: " << daysInYear << endl;
+        cout << "mosqRestDuration: " << mosqRestDuration << endl;
+        cout << "EIPDuration: " << EIPDuration << endl;
+        cout << "nHostTypesInit: " << nHostTypesInit << endl;
+        cout << "nMalHostTypesInit: " << nMalHostTypesInit << endl;
+        cout << "popSizeInit: " << popSizeInit << endl;
+        cout << "hostAvailabilityRateInit: " << hostAvailabilityRateInit << endl;
+        cout << "mosqSeekingDuration: " << mosqSeekingDuration << endl;
+        cout << "mosqProbBiting: " << mosqProbBiting << endl;
+        cout << "mosqProbFindRestSite: " << mosqProbFindRestSite << endl;
+        cout << "mosqProbResting: " << mosqProbResting << endl;
+        cout << "mosqProbOvipositing: " << mosqProbOvipositing << endl;
+
+        cout << "FHumanInfectivityInitVector: " << Kvi.size() << endl;
+        cout << "FEIRInitVector: " << transmission.emergence->getEIR().internal().size() << endl;
+        cout << "FMosqEmergeRateInitEstimateVector: " << NvOguess.size() << endl;
+
+        CalcInitMosqEmergeRate(mosqEmergerateVector, &daysInYear,
+            &mosqRestDuration, &EIPDuration, &nHostTypesInit,
+            &nMalHostTypesInit, &popSizeInit, 
+            &hostAvailabilityRateInit, &mosqSeekingDeathRate,
+            &mosqSeekingDuration, &mosqProbBiting,
+            &mosqProbFindRestSite, &mosqProbResting,
+            &mosqProbOvipositing, FHumanInfectivityInitVector,
+            FEIRInitVector, FMosqEmergeRateInitEstimateVector);
+
+        return false;
     }
     //@}
 
@@ -380,6 +432,13 @@ private:
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
     vector<double> partialEIR;
+
+    double meanAvail;
+    double mosqProbBiting;
+    double mosqProbFindRestSite;
+    double mosqProbResting;
+    double mosqProbOvipositing;
+
 };
 
 }

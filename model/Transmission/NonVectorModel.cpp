@@ -124,7 +124,7 @@ SimTime NonVectorModel::minPreinitDuration (){
 SimTime NonVectorModel::expectedInitDuration (){
     return SimTime::zero();
 }
-SimTime NonVectorModel::initIterate (){
+SimTime NonVectorModel::initIterate (const Population& population){
     simulationMode = interventionMode;
     if( simulationMode != dynamicEIR ){
         return SimTime::zero();
