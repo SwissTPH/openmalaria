@@ -81,7 +81,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 
     // Compute avgAnnualS_v from quinquennialS_v for fitting 
     vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
-    for( SimTime i = SimTime::zero(); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
+    for( SimTime i = SimTime::fromYearsI(0); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
         avgAnnualS_v[mod_nn(i, SimTime::oneYear())] +=
             quinquennialS_v[i] / 5.0;
     }
@@ -104,24 +104,51 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
         throw TRACED_EXCEPTION ("factor out of bounds",util::Error::VectorFitting);
     }
 
-    const double LIMIT = 0.1;
-    
+    const double LIMIT = 0.03;
+
     if(fabs(factor - 1.0) > LIMIT)
     {
         scaled = false;
         double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
         scaleFactor += factorDiff;
-        //cout << "scalefactor: " << scaleFactor << " , factor: " << factor << endl;
     }
     else
         scaled = true;
 
-    if (scaled && !rotated)
+    if (!rotated || scaleFactor < 1.0)
     {
         double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
         shiftAngle += rAngle;
         rotated = true;
     }
+
+    cout << "angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
+
+    //const double SCALING_THRESHOLD = 0.03;
+
+    // if(fabs(factor - 1.0) > SCALING_THRESHOLD)
+    // {
+    //     scaled = false;
+    //     double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
+    //     scaleFactor += factorDiff;
+    // }
+    // else
+    //     scaled = true;
+
+    // rotated = true;
+    // if(scaled && !rotated)
+    // {
+    //     double rAngle = findAngle(0, FSCoeffic, avgAnnualS_v);
+
+    //    // const double ROTATION_THRESHOLD = 0.02;
+    //     //if (fabs(rAngle) > ROTATION_THRESHOLD)
+    //     //{
+    //         rotated = false;
+    //         shiftAngle += rAngle;
+    //     //}
+    //     //else
+    //         rotated = true;
+    // }
 
     // Compute forced_sv from the Fourrier Coeffs
     // shiftAngle rotate the vector to correct the offset between simulated and input EIR
