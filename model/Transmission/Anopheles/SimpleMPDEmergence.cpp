@@ -114,22 +114,12 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
 
     // Compute avgAnnualS_v from quinquennialS_v for fitting 
     vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
-    for( SimTime i = SimTime::zero(); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
-        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] +=
-            quinquennialS_v[i] / 5.0;
+    for( SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
+        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] =
+            quinquennialS_v[i];
     }
 
     double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);
-
-    //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
-    if (!(factor > 1e-6 && factor < 1e6)) {
-        if ( vectors::sum(forcedS_v) == 0.0 ) {
-            return false;   // no EIR desired: nothing to do
-        }
-        cerr << "Input S_v for this vector:\t"<<vectors::sum(forcedS_v)<<endl;
-        cerr << "Simulated S_v:\t\t\t"<<vectors::sum(quinquennialS_v)/5.0<<endl;
-        throw TRACED_EXCEPTION ("factor out of bounds",util::Error::VectorFitting);
-    }
 
     const double LIMIT = 0.1;
 
@@ -138,17 +128,18 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
         scaled = false;
         double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
         scaleFactor += factorDiff;
-        //cout << "scalefactor: " << scaleFactor << endl;
     }
     else
         scaled = true;
 
-    if (scaled && !rotated)
+    if (!rotated || scaleFactor < 1.0)
     {
         double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
         shiftAngle += rAngle;
         rotated = true;
     }
+
+    cout << "angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
 
     // Compute forced_sv from the Fourrier Coeffs
     // shiftAngle rotate the vector to correct the offset between simulated and input EIR

@@ -81,9 +81,9 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 
     // Compute avgAnnualS_v from quinquennialS_v for fitting 
     vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
-    for( SimTime i = SimTime::fromYearsI(0); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
-        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] +=
-            quinquennialS_v[i] / 5.0;
+    for( SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
+        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] =
+            quinquennialS_v[i];
     }
 
     double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);

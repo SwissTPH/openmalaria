@@ -413,7 +413,7 @@ SimTime VectorModel::initIterate () {
     bool needIterate = false;
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
         //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
-        //if(!needIterate) cout << "Fitting: " << i << endl;
+        if(!needIterate) cout << "Fitting: " << i << endl;
         needIterate = needIterate || species[i].initIterate ();
     }
     
