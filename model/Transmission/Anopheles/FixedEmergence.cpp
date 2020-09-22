@@ -104,7 +104,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
         throw TRACED_EXCEPTION ("factor out of bounds",util::Error::VectorFitting);
     }
 
-    const double LIMIT = 0.03;
+    const double LIMIT = 0.1;
 
     if(fabs(factor - 1.0) > LIMIT)
     {
