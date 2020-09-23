@@ -67,7 +67,7 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
     // All set up to drive simulation from forcedS_v
 
     scaleFactor = 1.0;
-    shiftAngle = 0;
+    shiftAngle = FSRotateAngle;
     scaled = false;
     rotated = false;
 }
@@ -115,7 +115,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     else
         scaled = true;
 
-    if (!rotated || scaleFactor < 1.0)
+    //if (!rotated || scaleFactor < 1.0)
     {
         double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
         shiftAngle += rAngle;

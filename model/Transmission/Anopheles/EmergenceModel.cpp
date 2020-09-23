@@ -142,7 +142,7 @@ void EmergenceModel::initEIR(
     }
 
     // Set other data used for mosqEmergeRate calculation:
-    FSRotateAngle = 0.0;//EIRRotateAngle - (EIPDuration.inDays()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
+    FSRotateAngle = EIRRotateAngle - (EIPDuration.inDays()+10)/365.*2.*M_PI;       // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
     initOvFromSv = initNvFromSv * anoph.getPropInfected();
 }
