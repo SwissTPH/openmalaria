@@ -156,7 +156,7 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
-bool anophelesCompare(scnXml::AnophelesParams& a1, scnXml::AnophelesParams& a2)
+bool anophelesCompare(const scnXml::AnophelesParams& a1, const scnXml::AnophelesParams& a2)
 {
     return (a1.getSeasonality().getAnnualEIR().get()>a2.getSeasonality().getAnnualEIR().get()); 
 }
