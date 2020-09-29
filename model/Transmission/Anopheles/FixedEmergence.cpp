@@ -122,7 +122,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
         rotated = true;
     }
 
-    cout << "angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
+    // cout << "angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
 
     //const double SCALING_THRESHOLD = 0.03;
 

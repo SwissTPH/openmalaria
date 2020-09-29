@@ -132,14 +132,14 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     else
         scaled = true;
 
-    if (!rotated || scaleFactor < 1.0)
+    //if (!rotated || scaleFactor < 1.0)
     {
         double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
         shiftAngle += rAngle;
         rotated = true;
     }
 
-    cout << "angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
+    // cout << "angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
 
     // Compute forced_sv from the Fourrier Coeffs
     // shiftAngle rotate the vector to correct the offset between simulated and input EIR
