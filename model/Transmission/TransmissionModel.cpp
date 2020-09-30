@@ -157,6 +157,7 @@ double TransmissionModel::updateKappa (const Population& population) {
 
 
     size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size());	// now
+
     if( population.size() == 0 ){     // this is valid
         laggedKappa[lKMod] = 0.0;        // no humans: no infectiousness
     } else {

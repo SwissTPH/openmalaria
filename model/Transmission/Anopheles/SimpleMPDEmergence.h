@@ -75,6 +75,8 @@ public:
     //@}
     
     virtual double update( SimTime d0, double nOvipositing, double S_v );
+
+    vecDay<double> &getEmergenceRate() { return mosqEmergeRate; }
     
     ///@brief Interventions and reporting
     //@{

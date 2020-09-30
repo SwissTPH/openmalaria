@@ -92,12 +92,16 @@ public:
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    virtual bool initIterate (MosqTransmission& transmission) =0;
+    //virtual bool initIterate (MosqTransmission& transmission, int populationSize, const vector<double> &laggedkappa) =0;
     //@}
     
     /// Update per time-step (for larviciding intervention). Call before
     /// getting emergence each time-step.
     void update ();
+    
+    vecDay<double> &getEIR() { return speciesEIR; };
+
+    vecDay<double> &getInputEIR() { return speciesEIR; };
     
     /** Model updates.
      * 
@@ -114,6 +118,8 @@ public:
      */
     virtual double update( SimTime d0, double nOvipositing, double S_v ) =0;
     
+    virtual vecDay<double> &getEmergenceRate() = 0;
+
     ///@brief Interventions and reporting
     //@{
     /// Start an intervention affecting the vector population.
@@ -122,6 +128,8 @@ public:
     virtual double getResAvailability() const =0;
     virtual double getResRequirements() const =0;
     //@}
+
+    const double getinitNvFromSv() const { return initNvFromSv; }
     
     /// Checkpointing
     template<class S>
@@ -197,6 +205,8 @@ protected:
     /// Cache parameter updated by update()
     double emergenceSurvival;   // survival with regards to intervention effects
     //@}
+
+    vecDay<double> speciesEIR;
 
     double scaleFactor, shiftAngle;
     bool rotated, scaled;

@@ -82,6 +82,8 @@ public:
      * (P_D_i). */
     util::BetaSampler probMosqSurvivalResting;
     //@}
+
+    const scnXml::Mosq& mosq;
     
 private:
     PerHostAnophParams (const scnXml::Mosq& mosq);

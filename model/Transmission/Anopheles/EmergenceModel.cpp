@@ -55,7 +55,7 @@ void EmergenceModel::initEIR(
         //TODO
     }
     // EIR for this species, with index 0 refering to value over first interval
-    vecDay<double> speciesEIR (SimTime::oneYear());
+    speciesEIR.resize(SimTime::oneYear());
 
     if ( seasonality.getFourierSeries().present() ) {
         const scnXml::FourierSeries& seasFC = seasonality.getFourierSeries().get();
