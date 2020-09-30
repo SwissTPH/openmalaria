@@ -23,6 +23,7 @@
 #include "Host/Human.h"
 #include "util/SpeciesIndexChecker.h"
 #include "util/errors.h"
+#include "util/CommandLine.h"
 #include <cmath>
 
 namespace OM { namespace interventions {
@@ -87,6 +88,11 @@ void GVIComponent::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesPar
     fecundityReduction = elt.getFecundityReduction().present() ? elt.getFecundityReduction().get().getValue() : 0.0;
     // Simpler version of ITN usage/action:
     double propActive = elt.getPropActive();
+    if(propActive != 1.0 && util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS))
+    {
+        propActive = 1.0;
+        cerr << "Deprecation warning: propActive forced to 1.0 for this intervention. You should set the efficacy by changing the other parameters instead." << endl;
+    }
     assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
     assert( propActive >= 0.0 && propActive <= 1.0 );
     proportionProtected = proportionUse * propActive;
