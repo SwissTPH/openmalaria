@@ -204,6 +204,9 @@ public:
         cout << "FEIRInitVector: " << transmission.emergence->getEIR().internal().size() << endl;
         cout << "FMosqEmergeRateInitEstimateVector: " << NvOguess.size() << endl;
 
+        cout << "initNvFromSv: " << transmission.emergence->getinitNvFromSv() << endl;
+        cout << "FEIRInitVector: " << transmission.emergence->getEIR().internal()[365/2.0] << endl;
+
         CalcInitMosqEmergeRate(mosqEmergerateVector, &daysInYear,
             &mosqRestDuration, &EIPDuration, &nHostTypesInit,
             &nMalHostTypesInit, &popSizeInit, 
@@ -211,7 +214,7 @@ public:
             &mosqSeekingDuration, &mosqProbBiting,
             &mosqProbFindRestSite, &mosqProbResting,
             &mosqProbOvipositing, FHumanInfectivityInitVector,
-            FEIRInitVector, FMosqEmergeRateInitEstimateVector);
+            FEIRInitVector, FMosqEmergeRateInitEstimateVector, transmission.emergence->getinitNvFromSv());
 
         return false;
     }

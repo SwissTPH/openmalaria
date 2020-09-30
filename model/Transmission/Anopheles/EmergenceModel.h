@@ -100,6 +100,8 @@ public:
     void update ();
     
     vecDay<double> &getEIR() { return speciesEIR; };
+
+    vecDay<double> &getInputEIR() { return speciesEIR; };
     
     /** Model updates.
      * 
@@ -126,6 +128,8 @@ public:
     virtual double getResAvailability() const =0;
     virtual double getResRequirements() const =0;
     //@}
+
+    const double getinitNvFromSv() const { return initNvFromSv; }
     
     /// Checkpointing
     template<class S>
