@@ -283,8 +283,8 @@
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="24.826144381650714" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="0.8968" b="2.678"/>
-            <coeffic a="-0.4551" b="2.599"/>
+            <coeffic a="-0.20728482802708945" b="0.8461751937866211"/>
+            <coeffic a="0.09062021970748901" b="-0.04256971677144369"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">
@@ -310,8 +310,8 @@
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="77.00628873180102" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="-4.546" b="2.252"/>
-            <coeffic a="-0.2198" b="-0.00743"/>
+            <coeffic a="0.4943895737330119" b="0.6127588748931885"/>
+            <coeffic a="-0.23865493138631186" b="-0.28519290685653687"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">
@@ -337,8 +337,8 @@
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="223.38512656454782" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="0.8968" b="2.678"/>
-            <coeffic a="-0.4551" b="2.599"/>
+            <coeffic a="-0.20728482802708945" b="0.8461751937866211"/>
+            <coeffic a="0.09062021970748901" b="-0.04256971677144369"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">
