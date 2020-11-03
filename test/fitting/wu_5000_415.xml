@@ -1,0 +1,656 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_35" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Do" schemaVersion="35" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_35 scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="5000">
+    <ageGroup lowerbound="0.0">
+      <group poppercent="3.474714994" upperbound="1" />
+      <group poppercent="12.76004028" upperbound="5" />
+      <group poppercent="14.52151394" upperbound="10" />
+      <group poppercent="12.75565434" upperbound="15" />
+      <group poppercent="10.83632374" upperbound="20" />
+      <group poppercent="8.393312454" upperbound="25" />
+      <group poppercent="7.001421452" upperbound="30" />
+      <group poppercent="5.800587654" upperbound="35" />
+      <group poppercent="5.102136612" upperbound="40" />
+      <group poppercent="4.182561874" upperbound="45" />
+      <group poppercent="3.339409351" upperbound="50" />
+      <group poppercent="2.986112356" upperbound="55" />
+      <group poppercent="2.555766582" upperbound="60" />
+      <group poppercent="2.332763433" upperbound="65" />
+      <group poppercent="1.77400255" upperbound="70" />
+      <group poppercent="1.008525491" upperbound="75" />
+      <group poppercent="0.74167341" upperbound="80" />
+      <group poppercent="0.271863401" upperbound="85" />
+      <group poppercent="0.161614642" upperbound="90" />
+    </ageGroup>
+  </demography>
+  <monitoring name="Monthly Parasitological Surveys">
+    <SurveyOptions>
+      <option name="allCauseIMR" value="true" />
+    </SurveyOptions>
+    <surveys diagnostic="standard">
+      <surveyTime>725d</surveyTime>
+    </surveys>
+    <ageGroup lowerbound="0.0">
+      <group upperbound="1" />
+      <group upperbound="20" />
+      <group upperbound="99" />
+    </ageGroup>
+  </monitoring>
+  <interventions name="No Intervention" />
+  <healthSystem>
+    <ImmediateOutcomes name="Mortality Fitting">
+      <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ" />
+      <initialACR>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </initialACR>
+      <compliance>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </compliance>
+      <nonCompliersEffective>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </nonCompliersEffective>
+      <treatmentActions>
+        <CQ name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1" />
+        </CQ>
+      </treatmentActions>
+      <pSeekOfficialCareUncomplicated1 value="0" />
+      <pSelfTreatUncomplicated value="0" />
+      <pSeekOfficialCareUncomplicated2 value="0" />
+      <pSeekOfficialCareSevere value="0.48" />
+    </ImmediateOutcomes>
+    <CFR>
+      <group lowerbound="0" value="0.09189" />
+      <group lowerbound="0.25" value="0.0810811" />
+      <group lowerbound="0.75" value="0.0648649" />
+      <group lowerbound="1.5" value="0.0689189" />
+      <group lowerbound="2.5" value="0.0675676" />
+      <group lowerbound="3.5" value="0.0297297" />
+      <group lowerbound="4.5" value="0.0459459" />
+      <group lowerbound="7.5" value="0.0945946" />
+      <group lowerbound="12.5" value="0.1243243" />
+      <group lowerbound="15" value="0.1378378" />
+    </CFR>
+    <pSequelaeInpatient>
+      <group lowerbound="0.0" value="0.0" />
+      <group lowerbound="5.0" value="0.0" />
+    </pSequelaeInpatient>
+  </healthSystem>
+  <entomology mode="dynamic" name="Namawala Preintervention">
+    <nonVector eipDuration="10">
+      <EIRDaily origin="model">0.17130737076773023</EIRDaily>
+      <EIRDaily origin="model">0.050241605127490596</EIRDaily>
+      <EIRDaily origin="model">0.13481802981747246</EIRDaily>
+      <EIRDaily origin="model">0.3949650271701268</EIRDaily>
+      <EIRDaily origin="interpolate">0.36168454786122334</EIRDaily>
+      <EIRDaily origin="interpolate">0.3283582276717292</EIRDaily>
+      <EIRDaily origin="interpolate">0.2950777483628257</EIRDaily>
+      <EIRDaily origin="model">0.26175142817333147</EIRDaily>
+      <EIRDaily origin="interpolate">0.24217737216107008</EIRDaily>
+      <EIRDaily origin="interpolate">0.22260331614880868</EIRDaily>
+      <EIRDaily origin="interpolate">0.20307510101713808</EIRDaily>
+      <EIRDaily origin="interpolate">0.18350104500487668</EIRDaily>
+      <EIRDaily origin="model">0.1639269889926153</EIRDaily>
+      <EIRDaily origin="model">0.39519423157308065</EIRDaily>
+      <EIRDaily origin="model">0.37199874599414795</EIRDaily>
+      <EIRDaily origin="model">0.2864596628117598</EIRDaily>
+      <EIRDaily origin="model">0.5014075519019089</EIRDaily>
+      <EIRDaily origin="model">0.5631093771770934</EIRDaily>
+      <EIRDaily origin="interpolate">0.8286197575588686</EIRDaily>
+      <EIRDaily origin="interpolate">1.0940842970600528</EIRDaily>
+      <EIRDaily origin="model">1.359594677441828</EIRDaily>
+      <EIRDaily origin="model">1.446371464400167</EIRDaily>
+      <EIRDaily origin="model">1.2500349728298732</EIRDaily>
+      <EIRDaily origin="model">1.1905793507036366</EIRDaily>
+      <EIRDaily origin="interpolate">1.0960096140448654</EIRDaily>
+      <EIRDaily origin="interpolate">1.0014857182666852</EIRDaily>
+      <EIRDaily origin="interpolate">0.9069159816079141</EIRDaily>
+      <EIRDaily origin="model">0.8123462449491431</EIRDaily>
+      <EIRDaily origin="model">0.4519910826250522</EIRDaily>
+      <EIRDaily origin="model">1.3730718963355162</EIRDaily>
+      <EIRDaily origin="model">0.810329246203149</EIRDaily>
+      <EIRDaily origin="model">0.8048283405322558</EIRDaily>
+      <EIRDaily origin="model">0.4744072732339417</EIRDaily>
+      <EIRDaily origin="model">0.8882129023268776</EIRDaily>
+      <EIRDaily origin="model">1.3019726905392224</EIRDaily>
+      <EIRDaily origin="model">0.8044157726069388</EIRDaily>
+      <EIRDaily origin="model">1.2374745715480004</EIRDaily>
+      <EIRDaily origin="model">1.274009753378849</EIRDaily>
+      <EIRDaily origin="model">1.3116451163438763</EIRDaily>
+      <EIRDaily origin="model">0.7354252473178209</EIRDaily>
+      <EIRDaily origin="model">0.9625668106451164</EIRDaily>
+      <EIRDaily origin="model">1.2363743904138218</EIRDaily>
+      <EIRDaily origin="model">2.107626166922112</EIRDaily>
+      <EIRDaily origin="model">1.0878040964191167</EIRDaily>
+      <EIRDaily origin="model">0.9256649017695415</EIRDaily>
+      <EIRDaily origin="model">1.2876244949143096</EIRDaily>
+      <EIRDaily origin="model">0.8849581998049325</EIRDaily>
+      <EIRDaily origin="model">2.6099963773164276</EIRDaily>
+      <EIRDaily origin="model">1.2140957224467046</EIRDaily>
+      <EIRDaily origin="model">1.501701407273234</EIRDaily>
+      <EIRDaily origin="model">0.9869541591194092</EIRDaily>
+      <EIRDaily origin="model">0.9952971993869304</EIRDaily>
+      <EIRDaily origin="model">1.6184122892573498</EIRDaily>
+      <EIRDaily origin="model">1.7138988435279363</EIRDaily>
+      <EIRDaily origin="model">1.4319315870140727</EIRDaily>
+      <EIRDaily origin="model">1.1674755468858855</EIRDaily>
+      <EIRDaily origin="model">0.49613585063396964</EIRDaily>
+      <EIRDaily origin="model">0.8815201337606242</EIRDaily>
+      <EIRDaily origin="model">1.805122195903581</EIRDaily>
+      <EIRDaily origin="model">1.769916399609865</EIRDaily>
+      <EIRDaily origin="model">2.6662431378013096</EIRDaily>
+      <EIRDaily origin="model">1.5295726626724258</EIRDaily>
+      <EIRDaily origin="interpolate">1.4554479587571407</EIRDaily>
+      <EIRDaily origin="interpolate">1.3812774139612651</EIRDaily>
+      <EIRDaily origin="interpolate">1.3071527100459803</EIRDaily>
+      <EIRDaily origin="interpolate">1.2329821652501045</EIRDaily>
+      <EIRDaily origin="model">1.1588574613348195</EIRDaily>
+      <EIRDaily origin="model">0.9439095722446704</EIRDaily>
+      <EIRDaily origin="model">1.3826526403789885</EIRDaily>
+      <EIRDaily origin="model">0.6547452974780549</EIRDaily>
+      <EIRDaily origin="model">1.0211056151595375</EIRDaily>
+      <EIRDaily origin="model">1.25397728856068</EIRDaily>
+      <EIRDaily origin="model">0.8366877525428451</EIRDaily>
+      <EIRDaily origin="model">0.4204525567785983</EIRDaily>
+      <EIRDaily origin="model">0.6097753936185035</EIRDaily>
+      <EIRDaily origin="model">0.5728734847429288</EIRDaily>
+      <EIRDaily origin="model">0.4987946217082347</EIRDaily>
+      <EIRDaily origin="model">1.1740766336909572</EIRDaily>
+      <EIRDaily origin="model">3.1951093771770935</EIRDaily>
+      <EIRDaily origin="model">1.4352779712971993</EIRDaily>
+      <EIRDaily origin="model">1.21441660861084</EIRDaily>
+      <EIRDaily origin="model">0.9963056987599276</EIRDaily>
+      <EIRDaily origin="model">0.4055084297060053</EIRDaily>
+      <EIRDaily origin="model">1.026698202591612</EIRDaily>
+      <EIRDaily origin="model">1.1145751706841298</EIRDaily>
+      <EIRDaily origin="model">0.5337253727184059</EIRDaily>
+      <EIRDaily origin="model">0.8069370210394315</EIRDaily>
+      <EIRDaily origin="model">0.9368959175142817</EIRDaily>
+      <EIRDaily origin="model">1.1588116204542287</EIRDaily>
+      <EIRDaily origin="model">0.6047787376341089</EIRDaily>
+      <EIRDaily origin="model">1.1109995819980494</EIRDaily>
+      <EIRDaily origin="model">1.0485184617528216</EIRDaily>
+      <EIRDaily origin="model">1.113337466908179</EIRDaily>
+      <EIRDaily origin="model">1.1797150620036227</EIRDaily>
+      <EIRDaily origin="model">0.822614602201477</EIRDaily>
+      <EIRDaily origin="model">1.099401839208583</EIRDaily>
+      <EIRDaily origin="model">0.889129719938693</EIRDaily>
+      <EIRDaily origin="interpolate">0.5416100041800195</EIRDaily>
+      <EIRDaily origin="model">0.1940444475407552</EIRDaily>
+      <EIRDaily origin="interpolate">0.22856263062560958</EIRDaily>
+      <EIRDaily origin="interpolate">0.2631266545910547</EIRDaily>
+      <EIRDaily origin="interpolate">0.29764483767590916</EIRDaily>
+      <EIRDaily origin="interpolate">0.33216302076076354</EIRDaily>
+      <EIRDaily origin="interpolate">0.36672704472620876</EIRDaily>
+      <EIRDaily origin="interpolate">0.4012452278110631</EIRDaily>
+      <EIRDaily origin="interpolate">0.4357634108959175</EIRDaily>
+      <EIRDaily origin="interpolate">0.4702815939807719</EIRDaily>
+      <EIRDaily origin="interpolate">0.5048456179462171</EIRDaily>
+      <EIRDaily origin="interpolate">0.5393638010310715</EIRDaily>
+      <EIRDaily origin="interpolate">0.5738819841159258</EIRDaily>
+      <EIRDaily origin="interpolate">0.608446008081371</EIRDaily>
+      <EIRDaily origin="model">0.6429641911662255</EIRDaily>
+      <EIRDaily origin="model">0.5305165110770517</EIRDaily>
+      <EIRDaily origin="model">0.5087879336770239</EIRDaily>
+      <EIRDaily origin="model">0.34435669499791</EIRDaily>
+      <EIRDaily origin="model">0.6156430263341228</EIRDaily>
+      <EIRDaily origin="model">0.37199874599414795</EIRDaily>
+      <EIRDaily origin="model">0.39317723282708655</EIRDaily>
+      <EIRDaily origin="model">0.40954242719799355</EIRDaily>
+      <EIRDaily origin="model">0.6307705169290789</EIRDaily>
+      <EIRDaily origin="model">0.4944397380521109</EIRDaily>
+      <EIRDaily origin="model">0.433608889508151</EIRDaily>
+      <EIRDaily origin="model">0.38533844224606384</EIRDaily>
+      <EIRDaily origin="model">0.508146161348753</EIRDaily>
+      <EIRDaily origin="model">0.47789118015884074</EIRDaily>
+      <EIRDaily origin="model">0.44108095304444755</EIRDaily>
+      <EIRDaily origin="model">0.3594383447122753</EIRDaily>
+      <EIRDaily origin="model">0.42361557753936185</EIRDaily>
+      <EIRDaily origin="model">0.6398011704054618</EIRDaily>
+      <EIRDaily origin="model">0.39331475546885886</EIRDaily>
+      <EIRDaily origin="model">0.3518287585342065</EIRDaily>
+      <EIRDaily origin="model">0.3349134735962101</EIRDaily>
+      <EIRDaily origin="model">0.3265245924480981</EIRDaily>
+      <EIRDaily origin="model">0.3550376201755608</EIRDaily>
+      <EIRDaily origin="model">0.20605475825553854</EIRDaily>
+      <EIRDaily origin="model">0.26413515396405185</EIRDaily>
+      <EIRDaily origin="model">0.17488295945381077</EIRDaily>
+      <EIRDaily origin="model">0.30094538107844504</EIRDaily>
+      <EIRDaily origin="model">0.35980507175700155</EIRDaily>
+      <EIRDaily origin="model">0.2133434582694719</EIRDaily>
+      <EIRDaily origin="model">0.13509307510101715</EIRDaily>
+      <EIRDaily origin="model">0.12629162602758814</EIRDaily>
+      <EIRDaily origin="model">0.09346955552459245</EIRDaily>
+      <EIRDaily origin="interpolate">0.10456304862756026</EIRDaily>
+      <EIRDaily origin="model">0.11565654173052808</EIRDaily>
+      <EIRDaily origin="model">0.14710338581580049</EIRDaily>
+      <EIRDaily origin="model">0.12092824299846731</EIRDaily>
+      <EIRDaily origin="model">0.1303256235195764</EIRDaily>
+      <EIRDaily origin="interpolate">0.14820356694997908</EIRDaily>
+      <EIRDaily origin="model">0.166035669499791</EIRDaily>
+      <EIRDaily origin="model">0.11015563605963495</EIRDaily>
+      <EIRDaily origin="model">0.08856458130137941</EIRDaily>
+      <EIRDaily origin="model">0.1865265431238679</EIRDaily>
+      <EIRDaily origin="model">0.056705169290790024</EIRDaily>
+      <EIRDaily origin="model">0.10722181970182527</EIRDaily>
+      <EIRDaily origin="model">0.2498786401003205</EIRDaily>
+      <EIRDaily origin="model">0.1802463424829316</EIRDaily>
+      <EIRDaily origin="model">0.2110514142399331</EIRDaily>
+      <EIRDaily origin="model">0.10630500209000975</EIRDaily>
+      <EIRDaily origin="model">0.0774710881984116</EIRDaily>
+      <EIRDaily origin="model">0.1324801449073429</EIRDaily>
+      <EIRDaily origin="model">0.08182597185453531</EIRDaily>
+      <EIRDaily origin="model">0.14329859272676604</EIRDaily>
+      <EIRDaily origin="model">0.15943458269471925</EIRDaily>
+      <EIRDaily origin="model">0.15517138079977708</EIRDaily>
+      <EIRDaily origin="model">0.17566225442385397</EIRDaily>
+      <EIRDaily origin="model">0.12523728577400028</EIRDaily>
+      <EIRDaily origin="model">0.1570050160234081</EIRDaily>
+      <EIRDaily origin="interpolate">0.11047652222377037</EIRDaily>
+      <EIRDaily origin="model">0.06394802842413265</EIRDaily>
+      <EIRDaily origin="interpolate">0.0847139473317542</EIRDaily>
+      <EIRDaily origin="interpolate">0.10547986623937579</EIRDaily>
+      <EIRDaily origin="interpolate">0.12624578514699733</EIRDaily>
+      <EIRDaily origin="interpolate">0.14696586317402816</EIRDaily>
+      <EIRDaily origin="interpolate">0.1677317820816497</EIRDaily>
+      <EIRDaily origin="model">0.1884977009892713</EIRDaily>
+      <EIRDaily origin="model">0.15361279085969068</EIRDaily>
+      <EIRDaily origin="model">0.38561348752960845</EIRDaily>
+      <EIRDaily origin="model">0.15503385815800474</EIRDaily>
+      <EIRDaily origin="model">0.29292322697505924</EIRDaily>
+      <EIRDaily origin="model">0.13142580465375506</EIRDaily>
+      <EIRDaily origin="model">0.10140002786679671</EIRDaily>
+      <EIRDaily origin="model">0.09246105615159537</EIRDaily>
+      <EIRDaily origin="interpolate">0.09420300961404486</EIRDaily>
+      <EIRDaily origin="interpolate">0.09594496307649436</EIRDaily>
+      <EIRDaily origin="model">0.09768691653894385</EIRDaily>
+      <EIRDaily origin="model">0.09475310018113417</EIRDaily>
+      <EIRDaily origin="model">0.260009474710882</EIRDaily>
+      <EIRDaily origin="model">0.14595736380103108</EIRDaily>
+      <EIRDaily origin="interpolate">0.17612066322976172</EIRDaily>
+      <EIRDaily origin="model">0.20628396265849241</EIRDaily>
+      <EIRDaily origin="model">0.20302926013654732</EIRDaily>
+      <EIRDaily origin="model">0.1144646788351679</EIRDaily>
+      <EIRDaily origin="model">0.10818447819423156</EIRDaily>
+      <EIRDaily origin="model">0.1560881984115926</EIRDaily>
+      <EIRDaily origin="model">0.36901908875574757</EIRDaily>
+      <EIRDaily origin="model">0.25061209418977287</EIRDaily>
+      <EIRDaily origin="model">0.11941549393897172</EIRDaily>
+      <EIRDaily origin="model">0.15255845060610282</EIRDaily>
+      <EIRDaily origin="model">0.10479225303051413</EIRDaily>
+      <EIRDaily origin="model">0.25212484324926854</EIRDaily>
+      <EIRDaily origin="model">0.12606242162463427</EIRDaily>
+      <EIRDaily origin="model">0.16841939529051136</EIRDaily>
+      <EIRDaily origin="model">0.17121568900654868</EIRDaily>
+      <EIRDaily origin="model">0.1351389159816079</EIRDaily>
+      <EIRDaily origin="model">0.019115647206353628</EIRDaily>
+      <EIRDaily origin="model">0.09062742092796432</EIRDaily>
+      <EIRDaily origin="interpolate">0.11070572662672425</EIRDaily>
+      <EIRDaily origin="model">0.1307840323254842</EIRDaily>
+      <EIRDaily origin="model">0.24479030235474433</EIRDaily>
+      <EIRDaily origin="model">0.13468050717570015</EIRDaily>
+      <EIRDaily origin="model">0.22283252055176256</EIRDaily>
+      <EIRDaily origin="model">0.1753872091403093</EIRDaily>
+      <EIRDaily origin="model">0.1344054618921555</EIRDaily>
+      <EIRDaily origin="model">0.02049087362407691</EIRDaily>
+      <EIRDaily origin="model">0.2066965305838094</EIRDaily>
+      <EIRDaily origin="model">0.13683502856346663</EIRDaily>
+      <EIRDaily origin="model">0.08430137940643723</EIRDaily>
+      <EIRDaily origin="model">0.14921206632297618</EIRDaily>
+      <EIRDaily origin="model">0.15613403929218336</EIRDaily>
+      <EIRDaily origin="model">0.13238846314616134</EIRDaily>
+      <EIRDaily origin="model">0.10878040964191167</EIRDaily>
+      <EIRDaily origin="model">0.1311507593702104</EIRDaily>
+      <EIRDaily origin="model">0.03497659189076216</EIRDaily>
+      <EIRDaily origin="interpolate">0.028375505085690398</EIRDaily>
+      <EIRDaily origin="model">0.021728577400027864</EIRDaily>
+      <EIRDaily origin="model">0.009718266685244531</EIRDaily>
+      <EIRDaily origin="model">0.02988825414518601</EIRDaily>
+      <EIRDaily origin="model">0.03804793089034415</EIRDaily>
+      <EIRDaily origin="model">0.05780535042496864</EIRDaily>
+      <EIRDaily origin="model">0.056246760484882266</EIRDaily>
+      <EIRDaily origin="model">0.05702605545492545</EIRDaily>
+      <EIRDaily origin="model">0.04822460638149645</EIRDaily>
+      <EIRDaily origin="model">0.023562212623658912</EIRDaily>
+      <EIRDaily origin="model">0</EIRDaily>
+      <EIRDaily origin="model">0.023562212623658912</EIRDaily>
+      <EIRDaily origin="model">0.00783879058102271</EIRDaily>
+      <EIRDaily origin="model">0</EIRDaily>
+      <EIRDaily origin="model">0.03791040824857182</EIRDaily>
+      <EIRDaily origin="model">0.02791709627978264</EIRDaily>
+      <EIRDaily origin="interpolate">0.038277135293298035</EIRDaily>
+      <EIRDaily origin="interpolate">0.048683015187404206</EIRDaily>
+      <EIRDaily origin="interpolate">0.059043054200919605</EIRDaily>
+      <EIRDaily origin="interpolate">0.069403093214435</EIRDaily>
+      <EIRDaily origin="interpolate">0.0797631322279504</EIRDaily>
+      <EIRDaily origin="interpolate">0.09016901212205658</EIRDaily>
+      <EIRDaily origin="model">0.10052905113557196</EIRDaily>
+      <EIRDaily origin="model">0.27055287724676047</EIRDaily>
+      <EIRDaily origin="model">0.09278194231573081</EIRDaily>
+      <EIRDaily origin="model">0.07274947749756165</EIRDaily>
+      <EIRDaily origin="model">0.03419729692071896</EIRDaily>
+      <EIRDaily origin="model">0.04221945102410478</EIRDaily>
+      <EIRDaily origin="model">0.021866100041800195</EIRDaily>
+      <EIRDaily origin="model">0.020353350982304584</EIRDaily>
+      <EIRDaily origin="model">0.01709864846035948</EIRDaily>
+      <EIRDaily origin="model">0.06674432214017</EIRDaily>
+      <EIRDaily origin="model">0.08631837815243137</EIRDaily>
+      <EIRDaily origin="model">0.07875463285495332</EIRDaily>
+      <EIRDaily origin="model">0.017694579908039573</EIRDaily>
+      <EIRDaily origin="model">0.038827225860387345</EIRDaily>
+      <EIRDaily origin="model">0.04240281454646788</EIRDaily>
+      <EIRDaily origin="model">0.18771840601922807</EIRDaily>
+      <EIRDaily origin="model">0.08526403789884353</EIRDaily>
+      <EIRDaily origin="model">0.2676190608889508</EIRDaily>
+      <EIRDaily origin="model">0.22672899540197852</EIRDaily>
+      <EIRDaily origin="model">0.6406263062560958</EIRDaily>
+      <EIRDaily origin="model">0.3204735962101157</EIRDaily>
+      <EIRDaily origin="model">0.3326672704472621</EIRDaily>
+      <EIRDaily origin="model">0.32817486414936603</EIRDaily>
+      <EIRDaily origin="model">0.3813502856346663</EIRDaily>
+      <EIRDaily origin="model">0.3201527100459802</EIRDaily>
+      <EIRDaily origin="model">0.3453193534903163</EIRDaily>
+      <EIRDaily origin="model">0.5655847847289954</EIRDaily>
+      <EIRDaily origin="model">0.02709196042914867</EIRDaily>
+      <EIRDaily origin="model">0.6571290232687752</EIRDaily>
+      <EIRDaily origin="model">1.4168499372997074</EIRDaily>
+      <EIRDaily origin="model">1.0737309460777482</EIRDaily>
+      <EIRDaily origin="model">1.7550181134178626</EIRDaily>
+      <EIRDaily origin="model">0.7989148669360456</EIRDaily>
+      <EIRDaily origin="model">1.0268357252333844</EIRDaily>
+      <EIRDaily origin="model">0.8440681343179601</EIRDaily>
+      <EIRDaily origin="model">1.1270897310854118</EIRDaily>
+      <EIRDaily origin="model">0.5827751149505365</EIRDaily>
+      <EIRDaily origin="model">0.4590505782360318</EIRDaily>
+      <EIRDaily origin="model">0.3098843527936464</EIRDaily>
+      <EIRDaily origin="model">0.730245227811063</EIRDaily>
+      <EIRDaily origin="model">0.4488739027448794</EIRDaily>
+      <EIRDaily origin="model">0.6230692489898286</EIRDaily>
+      <EIRDaily origin="model">0.415593423435976</EIRDaily>
+      <EIRDaily origin="model">0.2847177093493103</EIRDaily>
+      <EIRDaily origin="model">1.070522084436394</EIRDaily>
+      <EIRDaily origin="model">0.4739947053086248</EIRDaily>
+      <EIRDaily origin="model">0.52923296642051</EIRDaily>
+      <EIRDaily origin="model">0.31158046537550504</EIRDaily>
+      <EIRDaily origin="model">0.6398470112860526</EIRDaily>
+      <EIRDaily origin="model">0.3987698202591612</EIRDaily>
+      <EIRDaily origin="model">0.21939445450745437</EIRDaily>
+      <EIRDaily origin="model">0.0805424271979936</EIRDaily>
+      <EIRDaily origin="model">0.20770502995680645</EIRDaily>
+      <EIRDaily origin="model">0.251208025637453</EIRDaily>
+      <EIRDaily origin="model">0.06532325484185592</EIRDaily>
+      <EIRDaily origin="model">0.07384965863174028</EIRDaily>
+      <EIRDaily origin="model">0.02182025916120942</EIRDaily>
+      <EIRDaily origin="model">0.05198355858994009</EIRDaily>
+      <EIRDaily origin="model">0.10227100459802145</EIRDaily>
+      <EIRDaily origin="model">0.08553908318238818</EIRDaily>
+      <EIRDaily origin="model">0.06876132088616413</EIRDaily>
+      <EIRDaily origin="model">0.1863431796015048</EIRDaily>
+      <EIRDaily origin="model">0.19482374251079837</EIRDaily>
+      <EIRDaily origin="model">0.16149742232130415</EIRDaily>
+      <EIRDaily origin="model">0.19482374251079837</EIRDaily>
+      <EIRDaily origin="model">0.19839933119687891</EIRDaily>
+      <EIRDaily origin="model">0.06674432214017</EIRDaily>
+      <EIRDaily origin="model">0.521027448794761</EIRDaily>
+      <EIRDaily origin="model">0.3608594120105894</EIRDaily>
+      <EIRDaily origin="model">1.753322000836004</EIRDaily>
+      <EIRDaily origin="model">0.5886885885467465</EIRDaily>
+      <EIRDaily origin="model">0.30809655845060613</EIRDaily>
+      <EIRDaily origin="model">0.3494450327434861</EIRDaily>
+      <EIRDaily origin="model">1.9483291068691655</EIRDaily>
+      <EIRDaily origin="model">0.9973600390135153</EIRDaily>
+      <EIRDaily origin="model">1.3033020760763552</EIRDaily>
+      <EIRDaily origin="model">0.4246699177929497</EIRDaily>
+      <EIRDaily origin="model">2.9541697087919743</EIRDaily>
+      <EIRDaily origin="model">1.993390692489898</EIRDaily>
+      <EIRDaily origin="model">2.4735739166782778</EIRDaily>
+      <EIRDaily origin="model">1.4658079977706562</EIRDaily>
+      <EIRDaily origin="model">4.671414936603037</EIRDaily>
+      <EIRDaily origin="model">2.742293158701407</EIRDaily>
+      <EIRDaily origin="model">2.8540073847011285</EIRDaily>
+      <EIRDaily origin="model">2.7588417165946773</EIRDaily>
+      <EIRDaily origin="model">1.5648701407273233</EIRDaily>
+      <EIRDaily origin="model">2.4977779016302075</EIRDaily>
+      <EIRDaily origin="model">3.8541637174306813</EIRDaily>
+      <EIRDaily origin="model">2.095615856207329</EIRDaily>
+      <EIRDaily origin="model">3.9108230458408806</EIRDaily>
+      <EIRDaily origin="model">3.341250104500488</EIRDaily>
+      <EIRDaily origin="model">5.198905949561098</EIRDaily>
+      <EIRDaily origin="model">2.694664483767591</EIRDaily>
+      <EIRDaily origin="model">3.0697804096419117</EIRDaily>
+      <EIRDaily origin="model">3.4327026612790856</EIRDaily>
+      <EIRDaily origin="model">2.9664092239097113</EIRDaily>
+      <EIRDaily origin="model">4.245736519437091</EIRDaily>
+      <EIRDaily origin="model">3.1811737494774976</EIRDaily>
+      <EIRDaily origin="model">6.065894524174446</EIRDaily>
+      <EIRDaily origin="model">5.404777344294273</EIRDaily>
+      <EIRDaily origin="model">6.125716873345409</EIRDaily>
+      <EIRDaily origin="model">6.0710745436812035</EIRDaily>
+      <EIRDaily origin="model">5.811248432492684</EIRDaily>
+      <EIRDaily origin="model">5.585390413821932</EIRDaily>
+      <EIRDaily origin="model">9.103998885328132</EIRDaily>
+      <EIRDaily origin="model">4.070165946774418</EIRDaily>
+      <EIRDaily origin="model">5.028011146718685</EIRDaily>
+      <EIRDaily origin="model">7.058074543681204</EIRDaily>
+      <EIRDaily origin="model">5.2066988992615295</EIRDaily>
+      <EIRDaily origin="model">11.173439598718128</EIRDaily>
+      <EIRDaily origin="model">7.838790581022712</EIRDaily>
+      <EIRDaily origin="model">5.709298314058799</EIRDaily>
+      <EIRDaily origin="interpolate">4.994180576842692</EIRDaily>
+      <EIRDaily origin="model">4.279062839626585</EIRDaily>
+      <EIRDaily origin="model">5.002798662393757</EIRDaily>
+      <EIRDaily origin="model">3.443429427337328</EIRDaily>
+      <EIRDaily origin="model">5.868732896753518</EIRDaily>
+      <EIRDaily origin="model">6.7066125121917235</EIRDaily>
+      <EIRDaily origin="model">2.9025070363661696</EIRDaily>
+      <EIRDaily origin="model">8.62198202591612</EIRDaily>
+      <EIRDaily origin="interpolate">6.536955413125261</EIRDaily>
+      <EIRDaily origin="model">4.451882959453811</EIRDaily>
+      <EIRDaily origin="model">4.053204820955831</EIRDaily>
+      <EIRDaily origin="model">2.651665737773443</EIRDaily>
+      <EIRDaily origin="model">2.2296087501741675</EIRDaily>
+      <EIRDaily origin="model">0.9504648181691514</EIRDaily>
+      <EIRDaily origin="model">1.3786644837675908</EIRDaily>
+      <EIRDaily origin="model">1.0673590636756305</EIRDaily>
+      <EIRDaily origin="model">0.9721933955691793</EIRDaily>
+      <EIRDaily origin="model">0.9751730528075797</EIRDaily>
+      <EIRDaily origin="model">0.5245571966002508</EIRDaily>
+      <EIRDaily origin="model">0.6331084018392086</EIRDaily>
+      <EIRDaily origin="model">0.5598088337745576</EIRDaily>
+      <EIRDaily origin="interpolate">0.43159189076215687</EIRDaily>
+      <EIRDaily origin="model">0.3033749477497562</EIRDaily>
+      <EIRDaily origin="model">0.2413522363104361</EIRDaily>
+      <EIRDaily origin="model">0.22636226835725234</EIRDaily>
+      <EIRDaily origin="model">0.1290879197436255</EIRDaily>
+      <EIRDaily origin="model">0.16113069527657795</EIRDaily>
+      <EIRDaily origin="model">0.08049658631740282</EIRDaily>
+      <EIRDaily origin="model">0.14802020342761602</EIRDaily>
+      <EIRDaily origin="model">0.1008499372997074</EIRDaily>
+      <EIRDaily origin="model">0.13454298453392782</EIRDaily>
+      <EIRDaily origin="model">0.062114393200501605</EIRDaily>
+      <EIRDaily origin="model">0.05212108123171241</EIRDaily>
+      <EIRDaily origin="model">0.12780437508708373</EIRDaily>
+      <EIRDaily origin="model">0.020811759788212345</EIRDaily>
+      <EIRDaily origin="model">0.07132841019924759</EIRDaily>
+      <EIRDaily origin="model">0.031125957921136965</EIRDaily>
+      <EIRDaily origin="model">0.029246481816915144</EIRDaily>
+      <EIRDaily origin="model">0.06408555106590498</EIRDaily>
+      <EIRDaily origin="model">0.10552570711996655</EIRDaily>
+      <EIRDaily origin="model">0.1351389159816079</EIRDaily>
+      <EIRDaily origin="model">0.16997798523059776</EIRDaily>
+      <EIRDaily origin="model">0.2176066601644141</EIRDaily>
+      <EIRDaily origin="model">0.27921680367841717</EIRDaily>
+      <EIRDaily origin="model">0.1832718406019228</EIRDaily>
+      <EIRDaily origin="model">0.2770622822906507</EIRDaily>
+      <EIRDaily origin="model">0.24735739166782778</EIRDaily>
+      <EIRDaily origin="model">0.2387393061167619</EIRDaily>
+      <EIRDaily origin="model">0.1939986066601644</EIRDaily>
+      <EIRDaily origin="model">0.3603093214435001</EIRDaily>
+      <EIRDaily origin="model">0.23786832938553715</EIRDaily>
+      <EIRDaily origin="model">0.11322697505921694</EIRDaily>
+      <EIRDaily origin="model">0.1974825135850634</EIRDaily>
+      <EIRDaily origin="model">0.29452765779573636</EIRDaily>
+      <EIRDaily origin="model">0.2678941061724955</EIRDaily>
+      <EIRDaily origin="model">0.7737023826111188</EIRDaily>
+      <EIRDaily origin="model">0.36860652083043055</EIRDaily>
+      <EIRDaily origin="model">0.3815336491570294</EIRDaily>
+      <EIRDaily origin="model">0.7463812177790163</EIRDaily>
+      <EIRDaily origin="model">0.6658387905810227</EIRDaily>
+      <EIRDaily origin="model">0.85882889786819</EIRDaily>
+      <EIRDaily origin="model">0.46991486693604567</EIRDaily>
+      <EIRDaily origin="model">0.5997362407691236</EIRDaily>
+      <EIRDaily origin="model">0.5335420091960429</EIRDaily>
+      <EIRDaily origin="model">0.3229490037620176</EIRDaily>
+      <EIRDaily origin="model">0.43878890901490875</EIRDaily>
+      <EIRDaily origin="model">0.4631762574892016</EIRDaily>
+      <EIRDaily origin="model">0.7440891737494775</EIRDaily>
+      <EIRDaily origin="model">0.6233901351539641</EIRDaily>
+      <EIRDaily origin="model">0.6193102967813849</EIRDaily>
+      <EIRDaily origin="model">0.3907018252751846</EIRDaily>
+      <EIRDaily origin="model">0.22732492684965863</EIRDaily>
+      <EIRDaily origin="model">0.3484365333704891</EIRDaily>
+      <EIRDaily origin="model">0.28962268357252335</EIRDaily>
+      <EIRDaily origin="model">0.3667728856067995</EIRDaily>
+      <EIRDaily origin="model">0.44181440713389997</EIRDaily>
+      <EIRDaily origin="interpolate">0.4651932562351957</EIRDaily>
+      <EIRDaily origin="interpolate">0.4886179462170824</EIRDaily>
+      <EIRDaily origin="model">0.5119967953183782</EIRDaily>
+      <EIRDaily origin="interpolate">0.45116594677441824</EIRDaily>
+      <EIRDaily origin="interpolate">0.39028925734986764</EIRDaily>
+      <EIRDaily origin="interpolate">0.32945840880590777</EIRDaily>
+      <EIRDaily origin="interpolate">0.2686275602619479</EIRDaily>
+      <EIRDaily origin="interpolate">0.20775087083739724</EIRDaily>
+      <EIRDaily origin="model">0.14692002229343737</EIRDaily>
+      <EIRDaily origin="model">0.3333090427755329</EIRDaily>
+      <EIRDaily origin="model">0.5636594677441829</EIRDaily>
+      <EIRDaily origin="interpolate">0.6873840044586875</EIRDaily>
+      <EIRDaily origin="interpolate">0.8110627002926014</EIRDaily>
+      <EIRDaily origin="model">0.9347872370071061</EIRDaily>
+      <EIRDaily origin="model">1.4139161209418978</EIRDaily>
+      <EIRDaily origin="model">0.8863792671032464</EIRDaily>
+      <EIRDaily origin="model">0.9901630207607636</EIRDaily>
+      <EIRDaily origin="model">1.6382155496725652</EIRDaily>
+      <EIRDaily origin="interpolate">1.3197131113278529</EIRDaily>
+      <EIRDaily origin="model">1.0012106729831405</EIRDaily>
+      <EIRDaily origin="model">0.8943555803260416</EIRDaily>
+      <EIRDaily origin="model">0.9359790999024661</EIRDaily>
+      <EIRDaily origin="model">1.6986338302912078</EIRDaily>
+      <EIRDaily origin="model">1.1117330360875017</EIRDaily>
+      <EIRDaily origin="model">1.1281440713389994</EIRDaily>
+      <EIRDaily origin="model">0.824448237425108</EIRDaily>
+      <EIRDaily origin="model">0.17116984812595792</EIRDaily>
+      <EIRDaily origin="model">0.23071715201337606</EIRDaily>
+      <EIRDaily origin="model">0.30103706283962656</EIRDaily>
+      <EIRDaily origin="model">0.44791124425247314</EIRDaily>
+      <EIRDaily origin="model">0.5265283544656542</EIRDaily>
+      <EIRDaily origin="model">0.4474986763271562</EIRDaily>
+      <EIRDaily origin="model">0.1696570990664623</EIRDaily>
+      <EIRDaily origin="model">0.37121945102410475</EIRDaily>
+      <EIRDaily origin="model">0.3241867075379685</EIRDaily>
+      <EIRDaily origin="model">0.19968287585342065</EIRDaily>
+      <EIRDaily origin="model">0.48958060470948866</EIRDaily>
+      <EIRDaily origin="model">0.28664302633412286</EIRDaily>
+      <EIRDaily origin="model">0.4240739863452696</EIRDaily>
+      <EIRDaily origin="model">0.3053919464957503</EIRDaily>
+      <EIRDaily origin="model">0.21939445450745437</EIRDaily>
+      <EIRDaily origin="model">0.16365194370907063</EIRDaily>
+      <EIRDaily origin="model">0.1521917235613766</EIRDaily>
+      <EIRDaily origin="model">0.21673568343318936</EIRDaily>
+      <EIRDaily origin="model">0.1338095304444754</EIRDaily>
+      <EIRDaily origin="model">0.23553044447540755</EIRDaily>
+      <EIRDaily origin="model">0.2279666991779295</EIRDaily>
+      <EIRDaily origin="model">0.18753504249686498</EIRDaily>
+      <EIRDaily origin="model">0.2570756583530723</EIRDaily>
+      <EIRDaily origin="model">0.20298341925595653</EIRDaily>
+      <EIRDaily origin="model">0.32143625470252196</EIRDaily>
+      <EIRDaily origin="model">0.4473153128047931</EIRDaily>
+      <EIRDaily origin="model">0.1472409084575728</EIRDaily>
+      <EIRDaily origin="model">0.11840699456597463</EIRDaily>
+      <EIRDaily origin="interpolate">0.19583224188379547</EIRDaily>
+      <EIRDaily origin="model">0.27325748920161624</EIRDaily>
+      <EIRDaily origin="model">0.1673650550369235</EIRDaily>
+      <EIRDaily origin="model">0.20142482931587014</EIRDaily>
+      <EIRDaily origin="model">0.4424561794621708</EIRDaily>
+      <EIRDaily origin="model">0.17689995819980495</EIRDaily>
+      <EIRDaily origin="interpolate">0.20133314755468856</EIRDaily>
+      <EIRDaily origin="model">0.22576633690957223</EIRDaily>
+      <EIRDaily origin="model">0.22503288282011982</EIRDaily>
+      <EIRDaily origin="model">0.17451623240908457</EIRDaily>
+      <EIRDaily origin="model">0.14403204681621845</EIRDaily>
+      <EIRDaily origin="model">0.17873359342343598</EIRDaily>
+      <EIRDaily origin="model">0.1244121499233663</EIRDaily>
+      <EIRDaily origin="model">0.030163299428730667</EIRDaily>
+      <EIRDaily origin="model">0.1173526543123868</EIRDaily>
+      <EIRDaily origin="model">0.1173526543123868</EIRDaily>
+      <EIRDaily origin="model">0.0916359203009614</EIRDaily>
+      <EIRDaily origin="model">0.10318782220983698</EIRDaily>
+      <EIRDaily origin="model">0.5067250940504389</EIRDaily>
+      <EIRDaily origin="model">0.2066506897032186</EIRDaily>
+      <EIRDaily origin="interpolate">0.16241423993311968</EIRDaily>
+      <EIRDaily origin="model">0.11813194928242998</EIRDaily>
+      <EIRDaily origin="interpolate">0.08879378570433329</EIRDaily>
+      <EIRDaily origin="model">0.05945562212623659</EIRDaily>
+      <EIRDaily origin="model">0.01925316984812596</EIRDaily>
+      <EIRDaily origin="model">0.03341800195067577</EIRDaily>
+      <EIRDaily origin="model">0.33908499372997075</EIRDaily>
+      <EIRDaily origin="model">0.09291946495750313</EIRDaily>
+      <EIRDaily origin="interpolate">0.08113835864567367</EIRDaily>
+      <EIRDaily origin="interpolate">0.069403093214435</EIRDaily>
+      <EIRDaily origin="interpolate">0.057621986902605546</EIRDaily>
+      <EIRDaily origin="interpolate">0.045840880590776095</EIRDaily>
+      <EIRDaily origin="interpolate">0.03410561515953741</EIRDaily>
+    </nonVector>
+  </entomology>
+  <diagnostics>
+    <diagnostic name="standard" units="Other">
+      <deterministic minDensity="40" />
+    </diagnostic>
+    <diagnostic name="neonatal" units="Other">
+      <deterministic minDensity="40" />
+    </diagnostic>
+  </diagnostics>
+ <model>
+    <ModelOptions>
+      <option name="INNATE_MAX_DENS" value="false"/>
+      <option name="INDIRECT_MORTALITY_FIX" value="false"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="6"/>
+    <human>
+      <availabilityToMosquitoes>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <!-- repeated parameter *IS* required, otherwise interpolation will
+        make parameter continually increase and the "adult age" will be wrong. -->
+      </availabilityToMosquitoes>
+    </human>

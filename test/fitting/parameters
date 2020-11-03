@@ -1,0 +1,34 @@
+    <parameters interval="5" iseed="@SEED@" latentp="3">
+      <parameter include="false" name="'-ln(1-Sinf)'" number="1" value="PARAM01"/>
+      <parameter include="false" name="Estar" number="2" value="PARAM02"/>
+      <parameter include="true" name="Simm" number="3" value="PARAM03"/>
+      <parameter include="true" name="Xstar_p" number="4" value="PARAM04"/>
+      <parameter include="true" name="gamma_p" number="5" value="PARAM05"/>
+      <parameter include="true" name="sigma2i" number="6" value="PARAM06"/>
+      <parameter include="true" name="CumulativeYstar" number="7" value="PARAM07"/>
+      <parameter include="true" name="CumulativeHstar" number="8" value="PARAM08"/>
+      <parameter include="true" name="'-ln(1-alpha_m)'" number="9" value="PARAM09"/>
+      <parameter include="true" name="decay_m" number="10" value="PARAM10"/>
+      <parameter include="true" name="sigma2_0" number="11" value="PARAM11"/>
+      <parameter include="true" name="Xstar_v" number="12" value="PARAM12"/>
+      <parameter include="true" name="Ystar2" number="13" value="PARAM13"/>
+      <parameter include="true" name="alpha" number="14" value="PARAM14"/>
+      <parameter include="true" name="Density bias (non Garki)" number="15" value="PARAM15"/>
+      <parameter include="true" name="        sigma2        " number="16" value="PARAM16"/>
+      <parameter include="true" name="log oddsr CF community" number="17" value="PARAM17"/>
+      <parameter include="true" name="Indirect risk cofactor" number="18" value="PARAM18"/>
+      <parameter include="true" name="Non-malaria infant mortality" number="19" value="PARAM19"/>
+      <parameter include="true" name="Density bias (Garki)" number="20" value="PARAM20"/>
+      <parameter include="true" name="Severe Malaria Threshhold" number="21" value="PARAM21"/>
+      <parameter include="true" name="Immunity Penalty" number="22" value="PARAM22"/>
+      <parameter include="false" name="Immune effector decay" number="23" value="PARAM23"/>
+      <parameter include="true" name="comorbidity intercept" number="24" value="PARAM24"/>
+      <parameter include="true" name="Ystar half life" number="25" value="PARAM25"/>
+      <parameter include="true" name="Ystar1" number="26" value="PARAM26"/>
+      <parameter include="false" name="Asexual immunity decay" number="27" value="PARAM27"/>
+      <parameter include="true" name="Ystar0" number="28" value="PARAM28"/>
+      <parameter include="true" name="Idete multiplier" number="29" value="PARAM29"/>
+      <parameter include="true" name="critical age for comorbidity" number="30" value="PARAM30"/>
+    </parameters>
+  </model>
+</om:scenario>

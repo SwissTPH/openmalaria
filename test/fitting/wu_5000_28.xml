@@ -1,0 +1,662 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_35" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" analysisNo="233" name="Do" schemaVersion="35" wuID="536305339" xsi:schemaLocation="http://openmalaria.org/schema/scenario_35 scenario_current.xsd">
+  <demography maximumAgeYrs="90" name="Ifakara" popSize="5000">
+    <ageGroup lowerbound="0.0">
+      <group poppercent="3.474714994" upperbound="1" />
+      <group poppercent="12.76004028" upperbound="5" />
+      <group poppercent="14.52151394" upperbound="10" />
+      <group poppercent="12.75565434" upperbound="15" />
+      <group poppercent="10.83632374" upperbound="20" />
+      <group poppercent="8.393312454" upperbound="25" />
+      <group poppercent="7.001421452" upperbound="30" />
+      <group poppercent="5.800587654" upperbound="35" />
+      <group poppercent="5.102136612" upperbound="40" />
+      <group poppercent="4.182561874" upperbound="45" />
+      <group poppercent="3.339409351" upperbound="50" />
+      <group poppercent="2.986112356" upperbound="55" />
+      <group poppercent="2.555766582" upperbound="60" />
+      <group poppercent="2.332763433" upperbound="65" />
+      <group poppercent="1.77400255" upperbound="70" />
+      <group poppercent="1.008525491" upperbound="75" />
+      <group poppercent="0.74167341" upperbound="80" />
+      <group poppercent="0.271863401" upperbound="85" />
+      <group poppercent="0.161614642" upperbound="90" />
+    </ageGroup>
+  </demography>
+  <monitoring name="Rafin Marke Preintervention">
+    <SurveyOptions>
+      <option name="nHost" value="true" />
+      <option name="nPatent" value="true" />
+      <option name="sumlogDens" value="true" />
+    </SurveyOptions>
+    <surveys diagnostic="garki">
+      <surveyTime>785d</surveyTime>
+      <surveyTime>865d</surveyTime>
+      <surveyTime>920d</surveyTime>
+      <surveyTime>980d</surveyTime>
+      <surveyTime>1055d</surveyTime>
+      <surveyTime>1135d</surveyTime>
+      <surveyTime>1210d</surveyTime>
+      <surveyTime>1275d</surveyTime>
+    </surveys>
+    <ageGroup lowerbound="0.0">
+      <group upperbound="0.5" />
+      <group upperbound="1" />
+      <group upperbound="2" />
+      <group upperbound="4" />
+      <group upperbound="6" />
+      <group upperbound="10" />
+      <group upperbound="15" />
+      <group upperbound="20" />
+      <group upperbound="30" />
+      <group upperbound="40" />
+      <group upperbound="60" />
+      <group upperbound="99" />
+    </ageGroup>
+  </monitoring>
+  <interventions name="No Intervention" />
+  <healthSystem>
+    <ImmediateOutcomes name="no Treatment no Mortality">
+      <drugRegimen firstLine="CQ" inpatient="CQ" secondLine="CQ" />
+      <initialACR>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </initialACR>
+      <compliance>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </compliance>
+      <nonCompliersEffective>
+        <CQ value="0" />
+        <SP value="0" />
+        <AQ value="0" />
+        <ACT value="0" />
+        <QN value="0" />
+        <selfTreatment value="0" />
+      </nonCompliersEffective>
+      <treatmentActions>
+        <CQ name="clear blood-stage infections">
+          <clearInfections stage="blood" timesteps="1" />
+        </CQ>
+      </treatmentActions>
+      <pSeekOfficialCareUncomplicated1 value="0" />
+      <pSelfTreatUncomplicated value="0" />
+      <pSeekOfficialCareUncomplicated2 value="0" />
+      <pSeekOfficialCareSevere value="0" />
+    </ImmediateOutcomes>
+    <CFR>
+      <group lowerbound="0" value="0" />
+    </CFR>
+    <pSequelaeInpatient>
+      <group lowerbound="0.0" value="0.0132" />
+      <group lowerbound="5.0" value="0.005" />
+    </pSequelaeInpatient>
+  </healthSystem>
+  <entomology mode="dynamic" name="Rafin Marke Preintervention">
+    <nonVector eipDuration="10">
+      <EIRDaily origin="regression">0.00524</EIRDaily>
+      <EIRDaily origin="interpolate">0.00516</EIRDaily>
+      <EIRDaily origin="interpolate">0.00509</EIRDaily>
+      <EIRDaily origin="interpolate">0.00501</EIRDaily>
+      <EIRDaily origin="interpolate">0.00494</EIRDaily>
+      <EIRDaily origin="interpolate">0.00486</EIRDaily>
+      <EIRDaily origin="interpolate">0.00479</EIRDaily>
+      <EIRDaily origin="interpolate">0.00471</EIRDaily>
+      <EIRDaily origin="interpolate">0.00464</EIRDaily>
+      <EIRDaily origin="interpolate">0.00456</EIRDaily>
+      <EIRDaily origin="interpolate">0.00449</EIRDaily>
+      <EIRDaily origin="interpolate">0.00441</EIRDaily>
+      <EIRDaily origin="interpolate">0.00434</EIRDaily>
+      <EIRDaily origin="interpolate">0.00426</EIRDaily>
+      <EIRDaily origin="interpolate">0.00419</EIRDaily>
+      <EIRDaily origin="interpolate">0.00411</EIRDaily>
+      <EIRDaily origin="interpolate">0.00404</EIRDaily>
+      <EIRDaily origin="interpolate">0.00396</EIRDaily>
+      <EIRDaily origin="interpolate">0.00389</EIRDaily>
+      <EIRDaily origin="interpolate">0.00382</EIRDaily>
+      <EIRDaily origin="interpolate">0.00374</EIRDaily>
+      <EIRDaily origin="interpolate">0.00367</EIRDaily>
+      <EIRDaily origin="interpolate">0.00359</EIRDaily>
+      <EIRDaily origin="interpolate">0.00352</EIRDaily>
+      <EIRDaily origin="interpolate">0.00344</EIRDaily>
+      <EIRDaily origin="interpolate">0.00337</EIRDaily>
+      <EIRDaily origin="interpolate">0.00329</EIRDaily>
+      <EIRDaily origin="interpolate">0.00322</EIRDaily>
+      <EIRDaily origin="interpolate">0.00314</EIRDaily>
+      <EIRDaily origin="interpolate">0.00307</EIRDaily>
+      <EIRDaily origin="interpolate">0.00299</EIRDaily>
+      <EIRDaily origin="interpolate">0.00292</EIRDaily>
+      <EIRDaily origin="interpolate">0.00284</EIRDaily>
+      <EIRDaily origin="interpolate">0.00277</EIRDaily>
+      <EIRDaily origin="interpolate">0.00269</EIRDaily>
+      <EIRDaily origin="interpolate">0.00262</EIRDaily>
+      <EIRDaily origin="interpolate">0.00254</EIRDaily>
+      <EIRDaily origin="interpolate">0.00247</EIRDaily>
+      <EIRDaily origin="interpolate">0.00239</EIRDaily>
+      <EIRDaily origin="interpolate">0.00232</EIRDaily>
+      <EIRDaily origin="interpolate">0.00224</EIRDaily>
+      <EIRDaily origin="interpolate">0.00217</EIRDaily>
+      <EIRDaily origin="interpolate">0.00210</EIRDaily>
+      <EIRDaily origin="interpolate">0.00202</EIRDaily>
+      <EIRDaily origin="interpolate">0.00195</EIRDaily>
+      <EIRDaily origin="interpolate">0.00187</EIRDaily>
+      <EIRDaily origin="interpolate">0.00180</EIRDaily>
+      <EIRDaily origin="interpolate">0.00172</EIRDaily>
+      <EIRDaily origin="interpolate">0.00165</EIRDaily>
+      <EIRDaily origin="interpolate">0.00157</EIRDaily>
+      <EIRDaily origin="interpolate">0.00150</EIRDaily>
+      <EIRDaily origin="interpolate">0.00142</EIRDaily>
+      <EIRDaily origin="interpolate">0.00135</EIRDaily>
+      <EIRDaily origin="interpolate">0.00127</EIRDaily>
+      <EIRDaily origin="interpolate">0.00120</EIRDaily>
+      <EIRDaily origin="interpolate">0.00112</EIRDaily>
+      <EIRDaily origin="interpolate">0.00105</EIRDaily>
+      <EIRDaily origin="interpolate">0.00097</EIRDaily>
+      <EIRDaily origin="interpolate">0.00090</EIRDaily>
+      <EIRDaily origin="interpolate">0.00082</EIRDaily>
+      <EIRDaily origin="interpolate">0.00075</EIRDaily>
+      <EIRDaily origin="interpolate">0.00067</EIRDaily>
+      <EIRDaily origin="interpolate">0.00060</EIRDaily>
+      <EIRDaily origin="interpolate">0.00052</EIRDaily>
+      <EIRDaily origin="interpolate">0.00045</EIRDaily>
+      <EIRDaily origin="interpolate">0.00038</EIRDaily>
+      <EIRDaily origin="interpolate">0.00030</EIRDaily>
+      <EIRDaily origin="interpolate">0.00023</EIRDaily>
+      <EIRDaily origin="interpolate">0.00015</EIRDaily>
+      <EIRDaily origin="interpolate">0.00008</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00004</EIRDaily>
+      <EIRDaily origin="interpolate">0.00007</EIRDaily>
+      <EIRDaily origin="interpolate">0.00011</EIRDaily>
+      <EIRDaily origin="interpolate">0.00014</EIRDaily>
+      <EIRDaily origin="interpolate">0.00018</EIRDaily>
+      <EIRDaily origin="interpolate">0.00021</EIRDaily>
+      <EIRDaily origin="interpolate">0.00025</EIRDaily>
+      <EIRDaily origin="interpolate">0.00028</EIRDaily>
+      <EIRDaily origin="interpolate">0.00031</EIRDaily>
+      <EIRDaily origin="interpolate">0.00035</EIRDaily>
+      <EIRDaily origin="interpolate">0.00038</EIRDaily>
+      <EIRDaily origin="interpolate">0.00042</EIRDaily>
+      <EIRDaily origin="interpolate">0.00045</EIRDaily>
+      <EIRDaily origin="regression">0.00049</EIRDaily>
+      <EIRDaily origin="interpolate">0.00045</EIRDaily>
+      <EIRDaily origin="interpolate">0.00042</EIRDaily>
+      <EIRDaily origin="interpolate">0.00038</EIRDaily>
+      <EIRDaily origin="interpolate">0.00035</EIRDaily>
+      <EIRDaily origin="interpolate">0.00031</EIRDaily>
+      <EIRDaily origin="interpolate">0.00028</EIRDaily>
+      <EIRDaily origin="interpolate">0.00025</EIRDaily>
+      <EIRDaily origin="interpolate">0.00021</EIRDaily>
+      <EIRDaily origin="interpolate">0.00018</EIRDaily>
+      <EIRDaily origin="interpolate">0.00014</EIRDaily>
+      <EIRDaily origin="interpolate">0.00011</EIRDaily>
+      <EIRDaily origin="interpolate">0.00007</EIRDaily>
+      <EIRDaily origin="interpolate">0.00004</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00004</EIRDaily>
+      <EIRDaily origin="interpolate">0.00007</EIRDaily>
+      <EIRDaily origin="interpolate">0.00011</EIRDaily>
+      <EIRDaily origin="interpolate">0.00014</EIRDaily>
+      <EIRDaily origin="interpolate">0.00018</EIRDaily>
+      <EIRDaily origin="interpolate">0.00021</EIRDaily>
+      <EIRDaily origin="interpolate">0.00025</EIRDaily>
+      <EIRDaily origin="interpolate">0.00028</EIRDaily>
+      <EIRDaily origin="interpolate">0.00031</EIRDaily>
+      <EIRDaily origin="interpolate">0.00035</EIRDaily>
+      <EIRDaily origin="interpolate">0.00038</EIRDaily>
+      <EIRDaily origin="interpolate">0.00042</EIRDaily>
+      <EIRDaily origin="interpolate">0.00045</EIRDaily>
+      <EIRDaily origin="regression">0.00049</EIRDaily>
+      <EIRDaily origin="interpolate">0.00401</EIRDaily>
+      <EIRDaily origin="interpolate">0.00752</EIRDaily>
+      <EIRDaily origin="interpolate">0.01104</EIRDaily>
+      <EIRDaily origin="interpolate">0.01455</EIRDaily>
+      <EIRDaily origin="interpolate">0.01807</EIRDaily>
+      <EIRDaily origin="interpolate">0.02159</EIRDaily>
+      <EIRDaily origin="interpolate">0.02510</EIRDaily>
+      <EIRDaily origin="interpolate">0.02862</EIRDaily>
+      <EIRDaily origin="interpolate">0.03214</EIRDaily>
+      <EIRDaily origin="interpolate">0.03565</EIRDaily>
+      <EIRDaily origin="interpolate">0.03917</EIRDaily>
+      <EIRDaily origin="interpolate">0.04269</EIRDaily>
+      <EIRDaily origin="interpolate">0.04620</EIRDaily>
+      <EIRDaily origin="regression">0.04972</EIRDaily>
+      <EIRDaily origin="interpolate">0.04837</EIRDaily>
+      <EIRDaily origin="interpolate">0.04701</EIRDaily>
+      <EIRDaily origin="interpolate">0.04566</EIRDaily>
+      <EIRDaily origin="interpolate">0.04431</EIRDaily>
+      <EIRDaily origin="interpolate">0.04295</EIRDaily>
+      <EIRDaily origin="interpolate">0.04160</EIRDaily>
+      <EIRDaily origin="interpolate">0.04025</EIRDaily>
+      <EIRDaily origin="interpolate">0.03890</EIRDaily>
+      <EIRDaily origin="interpolate">0.03754</EIRDaily>
+      <EIRDaily origin="interpolate">0.03619</EIRDaily>
+      <EIRDaily origin="interpolate">0.03484</EIRDaily>
+      <EIRDaily origin="interpolate">0.03348</EIRDaily>
+      <EIRDaily origin="interpolate">0.03213</EIRDaily>
+      <EIRDaily origin="regression">0.03078</EIRDaily>
+      <EIRDaily origin="interpolate">0.03484</EIRDaily>
+      <EIRDaily origin="interpolate">0.03890</EIRDaily>
+      <EIRDaily origin="interpolate">0.04295</EIRDaily>
+      <EIRDaily origin="interpolate">0.04701</EIRDaily>
+      <EIRDaily origin="interpolate">0.05107</EIRDaily>
+      <EIRDaily origin="interpolate">0.05513</EIRDaily>
+      <EIRDaily origin="interpolate">0.05919</EIRDaily>
+      <EIRDaily origin="interpolate">0.06325</EIRDaily>
+      <EIRDaily origin="interpolate">0.06731</EIRDaily>
+      <EIRDaily origin="interpolate">0.07136</EIRDaily>
+      <EIRDaily origin="interpolate">0.07542</EIRDaily>
+      <EIRDaily origin="interpolate">0.07948</EIRDaily>
+      <EIRDaily origin="interpolate">0.08354</EIRDaily>
+      <EIRDaily origin="regression">0.08760</EIRDaily>
+      <EIRDaily origin="interpolate">0.08608</EIRDaily>
+      <EIRDaily origin="interpolate">0.08455</EIRDaily>
+      <EIRDaily origin="interpolate">0.08303</EIRDaily>
+      <EIRDaily origin="interpolate">0.08151</EIRDaily>
+      <EIRDaily origin="interpolate">0.07999</EIRDaily>
+      <EIRDaily origin="interpolate">0.07847</EIRDaily>
+      <EIRDaily origin="interpolate">0.07695</EIRDaily>
+      <EIRDaily origin="interpolate">0.07542</EIRDaily>
+      <EIRDaily origin="interpolate">0.07390</EIRDaily>
+      <EIRDaily origin="interpolate">0.07238</EIRDaily>
+      <EIRDaily origin="interpolate">0.07086</EIRDaily>
+      <EIRDaily origin="interpolate">0.06934</EIRDaily>
+      <EIRDaily origin="interpolate">0.06781</EIRDaily>
+      <EIRDaily origin="regression">0.06629</EIRDaily>
+      <EIRDaily origin="interpolate">0.06582</EIRDaily>
+      <EIRDaily origin="interpolate">0.06535</EIRDaily>
+      <EIRDaily origin="interpolate">0.06488</EIRDaily>
+      <EIRDaily origin="interpolate">0.06440</EIRDaily>
+      <EIRDaily origin="interpolate">0.06393</EIRDaily>
+      <EIRDaily origin="interpolate">0.06346</EIRDaily>
+      <EIRDaily origin="interpolate">0.06299</EIRDaily>
+      <EIRDaily origin="interpolate">0.06252</EIRDaily>
+      <EIRDaily origin="interpolate">0.06205</EIRDaily>
+      <EIRDaily origin="interpolate">0.06158</EIRDaily>
+      <EIRDaily origin="interpolate">0.06110</EIRDaily>
+      <EIRDaily origin="interpolate">0.06063</EIRDaily>
+      <EIRDaily origin="interpolate">0.06016</EIRDaily>
+      <EIRDaily origin="regression">0.05969</EIRDaily>
+      <EIRDaily origin="interpolate">0.07538</EIRDaily>
+      <EIRDaily origin="interpolate">0.09107</EIRDaily>
+      <EIRDaily origin="interpolate">0.10676</EIRDaily>
+      <EIRDaily origin="interpolate">0.12245</EIRDaily>
+      <EIRDaily origin="interpolate">0.13815</EIRDaily>
+      <EIRDaily origin="interpolate">0.15384</EIRDaily>
+      <EIRDaily origin="interpolate">0.16953</EIRDaily>
+      <EIRDaily origin="interpolate">0.18522</EIRDaily>
+      <EIRDaily origin="interpolate">0.20091</EIRDaily>
+      <EIRDaily origin="interpolate">0.21660</EIRDaily>
+      <EIRDaily origin="interpolate">0.23229</EIRDaily>
+      <EIRDaily origin="interpolate">0.24798</EIRDaily>
+      <EIRDaily origin="interpolate">0.26368</EIRDaily>
+      <EIRDaily origin="regression">0.27937</EIRDaily>
+      <EIRDaily origin="interpolate">0.28021</EIRDaily>
+      <EIRDaily origin="interpolate">0.28106</EIRDaily>
+      <EIRDaily origin="interpolate">0.28190</EIRDaily>
+      <EIRDaily origin="interpolate">0.28275</EIRDaily>
+      <EIRDaily origin="interpolate">0.28359</EIRDaily>
+      <EIRDaily origin="interpolate">0.28444</EIRDaily>
+      <EIRDaily origin="interpolate">0.28529</EIRDaily>
+      <EIRDaily origin="interpolate">0.28613</EIRDaily>
+      <EIRDaily origin="interpolate">0.28698</EIRDaily>
+      <EIRDaily origin="interpolate">0.28782</EIRDaily>
+      <EIRDaily origin="interpolate">0.28867</EIRDaily>
+      <EIRDaily origin="interpolate">0.28951</EIRDaily>
+      <EIRDaily origin="interpolate">0.29036</EIRDaily>
+      <EIRDaily origin="regression">0.29120</EIRDaily>
+      <EIRDaily origin="interpolate">0.28493</EIRDaily>
+      <EIRDaily origin="interpolate">0.27866</EIRDaily>
+      <EIRDaily origin="interpolate">0.27239</EIRDaily>
+      <EIRDaily origin="interpolate">0.26612</EIRDaily>
+      <EIRDaily origin="interpolate">0.25985</EIRDaily>
+      <EIRDaily origin="interpolate">0.25358</EIRDaily>
+      <EIRDaily origin="interpolate">0.24731</EIRDaily>
+      <EIRDaily origin="interpolate">0.24104</EIRDaily>
+      <EIRDaily origin="interpolate">0.23477</EIRDaily>
+      <EIRDaily origin="interpolate">0.22850</EIRDaily>
+      <EIRDaily origin="interpolate">0.22223</EIRDaily>
+      <EIRDaily origin="interpolate">0.21596</EIRDaily>
+      <EIRDaily origin="interpolate">0.20969</EIRDaily>
+      <EIRDaily origin="interpolate">0.20342</EIRDaily>
+      <EIRDaily origin="interpolate">0.19715</EIRDaily>
+      <EIRDaily origin="interpolate">0.19088</EIRDaily>
+      <EIRDaily origin="interpolate">0.18461</EIRDaily>
+      <EIRDaily origin="interpolate">0.17834</EIRDaily>
+      <EIRDaily origin="interpolate">0.17207</EIRDaily>
+      <EIRDaily origin="interpolate">0.16580</EIRDaily>
+      <EIRDaily origin="interpolate">0.15953</EIRDaily>
+      <EIRDaily origin="interpolate">0.15326</EIRDaily>
+      <EIRDaily origin="interpolate">0.14699</EIRDaily>
+      <EIRDaily origin="interpolate">0.14072</EIRDaily>
+      <EIRDaily origin="interpolate">0.13445</EIRDaily>
+      <EIRDaily origin="interpolate">0.12818</EIRDaily>
+      <EIRDaily origin="interpolate">0.12191</EIRDaily>
+      <EIRDaily origin="regression">0.11564</EIRDaily>
+      <EIRDaily origin="interpolate">0.11317</EIRDaily>
+      <EIRDaily origin="interpolate">0.11069</EIRDaily>
+      <EIRDaily origin="interpolate">0.10822</EIRDaily>
+      <EIRDaily origin="interpolate">0.10574</EIRDaily>
+      <EIRDaily origin="interpolate">0.10327</EIRDaily>
+      <EIRDaily origin="interpolate">0.10079</EIRDaily>
+      <EIRDaily origin="interpolate">0.09832</EIRDaily>
+      <EIRDaily origin="interpolate">0.09584</EIRDaily>
+      <EIRDaily origin="interpolate">0.09337</EIRDaily>
+      <EIRDaily origin="interpolate">0.09089</EIRDaily>
+      <EIRDaily origin="interpolate">0.08842</EIRDaily>
+      <EIRDaily origin="interpolate">0.08595</EIRDaily>
+      <EIRDaily origin="interpolate">0.08347</EIRDaily>
+      <EIRDaily origin="regression">0.08100</EIRDaily>
+      <EIRDaily origin="interpolate">0.07888</EIRDaily>
+      <EIRDaily origin="interpolate">0.07677</EIRDaily>
+      <EIRDaily origin="interpolate">0.07465</EIRDaily>
+      <EIRDaily origin="interpolate">0.07254</EIRDaily>
+      <EIRDaily origin="interpolate">0.07042</EIRDaily>
+      <EIRDaily origin="interpolate">0.06830</EIRDaily>
+      <EIRDaily origin="interpolate">0.06619</EIRDaily>
+      <EIRDaily origin="interpolate">0.06407</EIRDaily>
+      <EIRDaily origin="interpolate">0.06196</EIRDaily>
+      <EIRDaily origin="interpolate">0.05984</EIRDaily>
+      <EIRDaily origin="interpolate">0.05773</EIRDaily>
+      <EIRDaily origin="interpolate">0.05561</EIRDaily>
+      <EIRDaily origin="interpolate">0.05350</EIRDaily>
+      <EIRDaily origin="interpolate">0.05138</EIRDaily>
+      <EIRDaily origin="interpolate">0.04927</EIRDaily>
+      <EIRDaily origin="interpolate">0.04715</EIRDaily>
+      <EIRDaily origin="interpolate">0.04504</EIRDaily>
+      <EIRDaily origin="interpolate">0.04292</EIRDaily>
+      <EIRDaily origin="interpolate">0.04081</EIRDaily>
+      <EIRDaily origin="interpolate">0.03869</EIRDaily>
+      <EIRDaily origin="interpolate">0.03658</EIRDaily>
+      <EIRDaily origin="interpolate">0.03446</EIRDaily>
+      <EIRDaily origin="interpolate">0.03235</EIRDaily>
+      <EIRDaily origin="interpolate">0.03023</EIRDaily>
+      <EIRDaily origin="interpolate">0.02812</EIRDaily>
+      <EIRDaily origin="interpolate">0.02600</EIRDaily>
+      <EIRDaily origin="interpolate">0.02388</EIRDaily>
+      <EIRDaily origin="interpolate">0.02177</EIRDaily>
+      <EIRDaily origin="interpolate">0.01965</EIRDaily>
+      <EIRDaily origin="interpolate">0.01754</EIRDaily>
+      <EIRDaily origin="interpolate">0.01542</EIRDaily>
+      <EIRDaily origin="regression">0.01331</EIRDaily>
+      <EIRDaily origin="interpolate">0.01285</EIRDaily>
+      <EIRDaily origin="interpolate">0.01239</EIRDaily>
+      <EIRDaily origin="interpolate">0.01193</EIRDaily>
+      <EIRDaily origin="interpolate">0.01147</EIRDaily>
+      <EIRDaily origin="interpolate">0.01101</EIRDaily>
+      <EIRDaily origin="interpolate">0.01056</EIRDaily>
+      <EIRDaily origin="interpolate">0.01010</EIRDaily>
+      <EIRDaily origin="interpolate">0.00964</EIRDaily>
+      <EIRDaily origin="interpolate">0.00918</EIRDaily>
+      <EIRDaily origin="interpolate">0.00872</EIRDaily>
+      <EIRDaily origin="interpolate">0.00826</EIRDaily>
+      <EIRDaily origin="interpolate">0.00780</EIRDaily>
+      <EIRDaily origin="interpolate">0.00734</EIRDaily>
+      <EIRDaily origin="interpolate">0.00688</EIRDaily>
+      <EIRDaily origin="interpolate">0.00643</EIRDaily>
+      <EIRDaily origin="interpolate">0.00597</EIRDaily>
+      <EIRDaily origin="interpolate">0.00551</EIRDaily>
+      <EIRDaily origin="interpolate">0.00505</EIRDaily>
+      <EIRDaily origin="interpolate">0.00459</EIRDaily>
+      <EIRDaily origin="interpolate">0.00413</EIRDaily>
+      <EIRDaily origin="interpolate">0.00367</EIRDaily>
+      <EIRDaily origin="interpolate">0.00321</EIRDaily>
+      <EIRDaily origin="interpolate">0.00275</EIRDaily>
+      <EIRDaily origin="interpolate">0.00230</EIRDaily>
+      <EIRDaily origin="interpolate">0.00184</EIRDaily>
+      <EIRDaily origin="interpolate">0.00138</EIRDaily>
+      <EIRDaily origin="interpolate">0.00092</EIRDaily>
+      <EIRDaily origin="interpolate">0.00046</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00000</EIRDaily>
+      <EIRDaily origin="regression">0.00000</EIRDaily>
+      <EIRDaily origin="interpolate">0.00002</EIRDaily>
+      <EIRDaily origin="interpolate">0.00004</EIRDaily>
+      <EIRDaily origin="interpolate">0.00005</EIRDaily>
+      <EIRDaily origin="interpolate">0.00007</EIRDaily>
+      <EIRDaily origin="interpolate">0.00009</EIRDaily>
+      <EIRDaily origin="interpolate">0.00011</EIRDaily>
+      <EIRDaily origin="interpolate">0.00012</EIRDaily>
+      <EIRDaily origin="interpolate">0.00014</EIRDaily>
+      <EIRDaily origin="interpolate">0.00016</EIRDaily>
+      <EIRDaily origin="interpolate">0.00018</EIRDaily>
+      <EIRDaily origin="interpolate">0.00019</EIRDaily>
+      <EIRDaily origin="interpolate">0.00021</EIRDaily>
+      <EIRDaily origin="interpolate">0.00023</EIRDaily>
+      <EIRDaily origin="interpolate">0.00025</EIRDaily>
+      <EIRDaily origin="interpolate">0.00026</EIRDaily>
+      <EIRDaily origin="interpolate">0.00028</EIRDaily>
+      <EIRDaily origin="interpolate">0.00030</EIRDaily>
+      <EIRDaily origin="interpolate">0.00031</EIRDaily>
+      <EIRDaily origin="interpolate">0.00033</EIRDaily>
+      <EIRDaily origin="interpolate">0.00035</EIRDaily>
+      <EIRDaily origin="interpolate">0.00037</EIRDaily>
+      <EIRDaily origin="interpolate">0.00038</EIRDaily>
+      <EIRDaily origin="interpolate">0.00040</EIRDaily>
+      <EIRDaily origin="interpolate">0.00042</EIRDaily>
+      <EIRDaily origin="interpolate">0.00044</EIRDaily>
+      <EIRDaily origin="interpolate">0.00045</EIRDaily>
+      <EIRDaily origin="interpolate">0.00047</EIRDaily>
+      <EIRDaily origin="regression">0.00049</EIRDaily>
+      <EIRDaily origin="interpolate">0.00180</EIRDaily>
+      <EIRDaily origin="interpolate">0.00312</EIRDaily>
+      <EIRDaily origin="interpolate">0.00443</EIRDaily>
+      <EIRDaily origin="interpolate">0.00575</EIRDaily>
+      <EIRDaily origin="interpolate">0.00706</EIRDaily>
+      <EIRDaily origin="interpolate">0.00838</EIRDaily>
+      <EIRDaily origin="interpolate">0.00969</EIRDaily>
+      <EIRDaily origin="interpolate">0.01101</EIRDaily>
+      <EIRDaily origin="interpolate">0.01232</EIRDaily>
+      <EIRDaily origin="interpolate">0.01364</EIRDaily>
+      <EIRDaily origin="interpolate">0.01495</EIRDaily>
+      <EIRDaily origin="interpolate">0.01626</EIRDaily>
+      <EIRDaily origin="interpolate">0.01758</EIRDaily>
+      <EIRDaily origin="interpolate">0.01889</EIRDaily>
+      <EIRDaily origin="interpolate">0.02021</EIRDaily>
+      <EIRDaily origin="interpolate">0.02152</EIRDaily>
+      <EIRDaily origin="interpolate">0.02284</EIRDaily>
+      <EIRDaily origin="interpolate">0.02415</EIRDaily>
+      <EIRDaily origin="interpolate">0.02547</EIRDaily>
+      <EIRDaily origin="interpolate">0.02678</EIRDaily>
+      <EIRDaily origin="interpolate">0.02810</EIRDaily>
+      <EIRDaily origin="interpolate">0.02941</EIRDaily>
+      <EIRDaily origin="interpolate">0.03073</EIRDaily>
+      <EIRDaily origin="interpolate">0.03204</EIRDaily>
+      <EIRDaily origin="interpolate">0.03335</EIRDaily>
+      <EIRDaily origin="interpolate">0.03467</EIRDaily>
+      <EIRDaily origin="interpolate">0.03598</EIRDaily>
+      <EIRDaily origin="regression">0.03730</EIRDaily>
+    </nonVector>
+  </entomology>
+  <diagnostics>
+    <diagnostic name="garki" units="Garki">
+      <deterministic minDensity="2" />
+    </diagnostic>
+    <diagnostic name="neonatal" units="Other">
+      <deterministic minDensity="40" />
+    </diagnostic>
+  </diagnostics>
+ <model>
+    <ModelOptions>
+      <option name="INNATE_MAX_DENS" value="false"/>
+      <option name="INDIRECT_MORTALITY_FIX" value="false"/>
+    </ModelOptions>
+    <clinical healthSystemMemory="6"/>
+    <human>
+      <availabilityToMosquitoes>
+        <group lowerbound="0.0" value="0.225940909648"/>
+        <group lowerbound="1.0" value="0.286173633441"/>
+        <group lowerbound="2.0" value="0.336898395722"/>
+        <group lowerbound="3.0" value="0.370989854675"/>
+        <group lowerbound="4.0" value="0.403114915112"/>
+        <group lowerbound="5.0" value="0.442585112522"/>
+        <group lowerbound="6.0" value="0.473839351511"/>
+        <group lowerbound="7.0" value="0.512630464378"/>
+        <group lowerbound="8.0" value="0.54487872702"/>
+        <group lowerbound="9.0" value="0.581527755812"/>
+        <group lowerbound="10.0" value="0.630257580698"/>
+        <group lowerbound="11.0" value="0.663063362714"/>
+        <group lowerbound="12.0" value="0.702417432755"/>
+        <group lowerbound="13.0" value="0.734605377277"/>
+        <group lowerbound="14.0" value="0.788908765653"/>
+        <group lowerbound="15.0" value="0.839587932303"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <group lowerbound="20.0" value="1.0"/>
+        <!-- repeated parameter *IS* required, otherwise interpolation will
+        make parameter continually increase and the "adult age" will be wrong. -->
+      </availabilityToMosquitoes>
+    </human>
