@@ -616,10 +616,11 @@ void ITNComponent::ITNAnopheles::init(
     // Nets only affect people while they're using the net. NOTE: we may want
     // to revise this at some point (heterogeneity, seasonal usage patterns).
     double propActive = elt.getPropActive();
-    if(propActive != 1.0 && util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS))
+    if(propActive != 1.0)
     {
         propActive = 1.0;
-        cerr << "Deprecation warning: propActive forced to 1.0 for this intervention. You should set the efficacy by changing the other parameters instead." << endl;
+        if(util::CommandLine::option(util::CommandLine::DEPRECATION_WARNINGS))
+            cerr << "Deprecation warning: propActive forced to 1.0 for this intervention. You should set the efficacy by changing the other parameters instead." << endl;
     }
     assert( proportionUse >= 0.0 && proportionUse <= 1.0 );
     assert( propActive >= 0.0 && propActive <= 1.0 );
