@@ -26,11 +26,11 @@ inline int argmax(const vecDay<double> &vec)
     return imax;
 }
 
-inline double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic, vecDay<double> &sim)
+inline double findAngle(const double EIRRotageAngle, const vector<double> & FSCoeffic, const vecDay<double> &sim)
 {
     vecDay<double> temp(sim.size(), 0.0);
 
-    double delta = 2 * M_PI / 365.0;
+    double delta = 2.0 * M_PI / 365.0;
 
     double min = std::numeric_limits<double>::infinity();
     double minAngle = 0.0;
@@ -41,12 +41,17 @@ inline double findAngle(double EIRRotageAngle, const vector<double> & FSCoeffic,
         // Minimize l1-norm
         double sum = 0.0;
         for(SimTime i=SimTime::zero(); i<SimTime::oneYear(); i+=SimTime::oneDay())
-            sum += fabs(temp[i] - sim[i]);
+        {
+            double v = fabs(temp[i] - sim[i]);
+            sum += v*v;
+        }
 
+        sum = sqrtf(sum);
         if(sum < min)
         {
             min = sum;
             minAngle = angle;
+            // cout << angle << " " << min << " " << sum << endl;
         }
 
         // Or minimize peaks offset

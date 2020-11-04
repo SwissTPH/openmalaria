@@ -181,8 +181,8 @@ For simulating Rusinga
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="3.82" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="0.8968" b="2.678"/>
-            <coeffic a="-0.4551" b="2.599"/>
+            <coeffic a="-0.2072" b="0.8461"/>
+            <coeffic a="0.0906" b="-0.0425"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">
@@ -202,8 +202,8 @@ For simulating Rusinga
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="11.84" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="-4.546" b="2.252"/>
-            <coeffic a="-0.2198" b="-0.00743"/>
+            <coeffic a="0.4943" b="0.6127"/>
+            <coeffic a="-0.2386" b="-0.2851"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">
@@ -223,8 +223,8 @@ For simulating Rusinga
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="34.37" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="0.8968" b="2.678"/>
-            <coeffic a="-0.4551" b="2.599"/>
+            <coeffic a="-0.2072" b="0.8461"/>
+            <coeffic a="0.0906" b="-0.0425"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">

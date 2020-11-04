@@ -67,7 +67,7 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
     // All set up to drive simulation from forcedS_v
 
     scaleFactor = 1.0;
-    shiftAngle = 0;
+    shiftAngle = FSRotateAngle;
     scaled = false;
     rotated = false;
 }
@@ -81,13 +81,13 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
 
     // Compute avgAnnualS_v from quinquennialS_v for fitting 
     vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
-    for( SimTime i = SimTime::zero(); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
-        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] +=
-            quinquennialS_v[i] / 5.0;
+    for( SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
+        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] =
+            quinquennialS_v[i];
     }
 
     double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);
-
+    
     //cout << "check: " << vectors::sum(forcedS_v) << " " << vectors::sum(avgAnnualS_v) << endl;
     //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
     if (!(factor > 1e-6 && factor < 1e6)) {
@@ -105,23 +105,21 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     }
 
     const double LIMIT = 0.1;
-    
+
     if(fabs(factor - 1.0) > LIMIT)
     {
         scaled = false;
         double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
         scaleFactor += factorDiff;
-        //cout << "scalefactor: " << scaleFactor << " , factor: " << factor << endl;
     }
     else
         scaled = true;
 
-    if (scaled && !rotated)
-    {
-        double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
-        shiftAngle += rAngle;
-        rotated = true;
-    }
+    double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
+    shiftAngle += rAngle;
+    rotated = true;
+
+    // cout << "EIRRotateAngle: " << EIRRotateAngle << " rAngle = " << rAngle << ", angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
 
     // Compute forced_sv from the Fourrier Coeffs
     // shiftAngle rotate the vector to correct the offset between simulated and input EIR
@@ -134,14 +132,6 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     transmission.initIterateScale (scaleFactor);
     //initNvFromSv *= scaleFactor;     //(not currently used)
 
-    // Check peaks alignement of the Sv vector for debugging
-    // int m1 = argmax(forcedS_v);
-    // int m2 = argmax(avgAnnualS_v);
-    // int offset = m1-m2;
-
-    // cout << scaleFactor << ", " << factor << ", Angle: " << shiftAngle << ", Offset: " << offset << " | " << m1 << ", " << m2 << endl;
-    
-    // 5% fitting error allowed
     return !(scaled && rotated);
     // return (fabs(factor - 1.0) > LIMIT);// || (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
 }
