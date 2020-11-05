@@ -2,8 +2,8 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_41"
-           xmlns:om="http://openmalaria.org/schema/scenario_41"
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_42"
+           xmlns:om="http://openmalaria.org/schema/scenario_42"
            xmlns:xs="http://www.w3.org/2001/XMLSchema">
   <xs:include schemaLocation="healthSystem.xsd"/>
   <xs:include schemaLocation="entomology.xsd"/>
@@ -1546,6 +1546,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           <xs:attribute name="propActive" type="xs:double" default="1">
             <xs:annotation>
               <xs:documentation>
+              Deprecated: propActive is now always set to 1. This value will be ignored.
+
               The proportion of bites, when nets are in use, for which the net
               has any action whatsoever on the mosquito.
               
