@@ -40,11 +40,35 @@ public:
 
     explicit ChaCha(uint64_t seedval, uint64_t stream = 0);
     template<class Sseq> explicit ChaCha(Sseq& seq);
+    
+    // Disable copying
+    ChaCha(const ChaCha&) = delete;
+    ChaCha& operator=(const ChaCha&) = delete;
 
+    /// Allow moving, with explicit functions
+    ChaCha(ChaCha&& other) : ctr(other.ctr) {
+        memcpy(block, other.block, sizeof block);
+        memcpy(keysetup, other.keysetup, sizeof keysetup);
+    }
+    void operator=(ChaCha&& other) {
+        memcpy(block, other.block, sizeof block);
+        memcpy(keysetup, other.keysetup, sizeof keysetup);
+        ctr = other.ctr;
+    }
+    
     void seed(uint64_t seedval, uint64_t stream = 0);
     template<class Sseq> void seed(Sseq& seq);
 
     uint32_t operator()();
+    uint32_t gen_u32() {
+        return this->operator()();
+    }
+    uint64_t gen_u64() {
+        uint64_t low = this->operator()();
+        uint64_t high = this->operator()();
+        return (high << 32) | low;
+    }
+    double gen_double();
     void discard(unsigned long long n);
     
     template<size_t R_> friend bool operator==(const ChaCha<R_>& lhs, const ChaCha<R_>& rhs);
@@ -63,7 +87,7 @@ public:
     void binary_checkpoint(istream& stream) {
         stream.read (reinterpret_cast<char*>(&ctr), sizeof(ctr));
         if (!stream || stream.gcount() != sizeof(ctr))
-            throw runtime_error ("pcg_random - binary_checkpoint: stream read error");
+            throw runtime_error ("ChaCha::binary_checkpoint: stream read error");
         if ((ctr % 16) != 0) generate_block();
     }
 
@@ -120,6 +144,16 @@ inline uint32_t ChaCha<R>::operator()() {
     ++ctr;
 
     return block[idx];
+}
+
+template<size_t R>
+inline double ChaCha<R>::gen_double() {
+    // We have a 32-bit integer result. Doubles support 53-bits of precision
+    // (1 bit implied). Use what we have in a single sample (32-bits precision,
+    // lower 21 bits are zero).
+    uint64_t x = this->operator()();
+    const double v = 1.1102230246251565e-16; // = 0x1.0p-53
+    return (x << 21) * v;
 }
 
 template<size_t R>

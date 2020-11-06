@@ -27,6 +27,8 @@
 #include "util/errors.h"
 #include "schema/entomology.h"
 
+#include "rotate.h"
+
 namespace OM {
 namespace Transmission {
 namespace Anopheles {
@@ -95,6 +97,11 @@ void SimpleMPDEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, dou
     }
     
     // All set up to drive simulation from forcedS_v
+
+    scaleFactor = 1.0;
+    shiftAngle = FSRotateAngle;
+    scaled = false;
+    rotated = false;
 }
 
 
@@ -105,47 +112,42 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
     // because the predictions will change - would be chasing a moving target!
     // EIR comes directly from S_v, so should fit after we're done.
 
-    double factor = vectors::sum (forcedS_v)*5 / vectors::sum(quinquennialS_v);
-    //cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
-    if (!(factor > 1e-6 && factor < 1e6)) {
-        if ( vectors::sum(forcedS_v) == 0.0 ) {
-            return false;   // no EIR desired: nothing to do
-        }
-        cerr << "Input S_v for this vector:\t"<<vectors::sum(forcedS_v)<<endl;
-        cerr << "Simulated S_v:\t\t\t"<<vectors::sum(quinquennialS_v)/5.0<<endl;
-        throw TRACED_EXCEPTION ("factor out of bounds",util::Error::VectorFitting);
+    // Compute avgAnnualS_v from quinquennialS_v for fitting 
+    vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
+    for( SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
+        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] =
+            quinquennialS_v[i];
     }
 
-    //cout << "Vector iteration: adjusting with factor "<<factor<<endl;
-    // Adjusting mosqEmergeRate is the important bit. The rest should just
-    // bring things to a stable state quicker.
-    initNv0FromSv *= factor;
-    initNvFromSv *= factor;     //(not currently used)
-    vectors::scale (mosqEmergeRate, factor);
-    transmission.initIterateScale (factor);
-    vectors::scale (quinquennialS_v, factor); // scale so we can fit rotation offset
+    double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);
 
-    // average annual period of S_v over 5 years
-    vector<double> avgAnnualS_v( SimTime::oneYear().inDays(), 0.0 );
-    for( SimTime i = SimTime::zero(), end = SimTime::fromYearsI(5); i < end; i += SimTime::oneDay() ) {
-        avgAnnualS_v[mod_nn(i, SimTime::oneYear()).inDays()] =
-            quinquennialS_v[i] / 5.0;
+    const double LIMIT = 0.1;
+
+    if(fabs(factor - 1.0) > LIMIT)
+    {
+        scaled = false;
+        double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
+        scaleFactor += factorDiff;
     }
+    else
+        scaled = true;
 
-    // Once the amplitude is approximately correct, we try to find a
-    // rotation offset.
-    double rAngle = Nv0DelayFitting::fit<double> (EIRRotateAngle, FSCoeffic, avgAnnualS_v);
-    //cout << "Vector iteration: rotating with angle (in radians): " << rAngle << endl;
-    // annualS_v was already rotated by old value of FSRotateAngle, so increment:
-    FSRotateAngle -= rAngle;
-    vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
-    // We use the stored initXxFromYy calculated from the ideal population age-structure (at init).
-    mosqEmergeRate = move(forcedS_v);
-    vectors::scale (mosqEmergeRate, initNv0FromSv);
-    
+    double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
+    shiftAngle += rAngle;
+    rotated = true;
+
+    // cout << "EIRRotateAngle: " << EIRRotateAngle << " rAngle = " << rAngle << ", angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
+
+    // Compute forced_sv from the Fourrier Coeffs
+    // shiftAngle rotate the vector to correct the offset between simulated and input EIR
+    vectors::expIDFT(mosqEmergeRate, FSCoeffic, -shiftAngle);
+    // Scale the vector according to initNv0FromSv to get the mosqEmergerate
+    // scaleFactor scales the vector to correct the ratio between simulated and input EIR
+    vectors::scale (mosqEmergeRate, scaleFactor * initNv0FromSv);
     // Finally, update nOvipositingDelayed and invLarvalResources
-    vectors::scale (nOvipositingDelayed, factor);
-    
+    vectors::scale (nOvipositingDelayed, scaleFactor);
+    transmission.initIterateScale (scaleFactor);
+
     SimTime y1 = SimTime::oneYear(),
         y2 = SimTime::fromYearsI(2),
         y3 = SimTime::fromYearsI(3),
@@ -166,9 +168,11 @@ bool SimpleMPDEmergence::initIterate (MosqTransmission& transmission) {
             (mosqEmergeRate[t] * yt);
     }
     
-    const double LIMIT = 0.1;
-    return (fabs(factor - 1.0) > LIMIT) ||
-           (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
+    return !(scaled && rotated);
+
+    // const double LIMIT = 0.1;
+    // return (fabs(factor - 1.0) > LIMIT) ||
+    //        (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
     //NOTE: in theory, mosqEmergeRate and annualEggsLaid aren't needed after convergence.
 }
 

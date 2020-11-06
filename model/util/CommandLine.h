@@ -77,10 +77,15 @@ namespace OM { namespace util {
 	    return outputName;
 	}
 	
-        /** Get the name of the ctsout file. */
-        static inline string getCtsoutName (){
-            return ctsoutName;
-        }
+    /** Get the name of the ctsout file. */
+    static inline string getCtsoutName (){
+        return ctsoutName;
+    }
+
+     /** Get the name of the checkpoint file. */
+    static inline string getCheckpointName (){
+        return checkpointFileName;
+    }
         
 	/** Looks through all command line options.
 	*
@@ -106,7 +111,8 @@ namespace OM { namespace util {
 	
 	//Output filename (for main output file "output.txt")
 	static string outputName;
-        static string ctsoutName;
+    static string ctsoutName;
+    static string checkpointFileName;
     };
 } }
 #endif

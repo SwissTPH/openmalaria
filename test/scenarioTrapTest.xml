@@ -1,5 +1,5 @@
 <?xml version='1.0' encoding='UTF-8'?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_41" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vector traps test" schemaVersion="41" xsi:schemaLocation="http://openmalaria.org/schema/scenario_41 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_42" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Vector traps test" schemaVersion="42" xsi:schemaLocation="http://openmalaria.org/schema/scenario_42 scenario_current.xsd">
   <!--
 I would suggest that there are two steps here- getting something running in v35 for testing, and then adjusting it for simulating Rusinga.
 We need to include the full-life cycle model since there is clearly an effect on emergence rates at least for funestus, and this might be a good test of this as well as of the new v35 functionality.
@@ -181,8 +181,8 @@ For simulating Rusinga
       <anopheles mosquito="gambiae_ss" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="3.82" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="0.8968" b="2.678"/>
-            <coeffic a="-0.4551" b="2.599"/>
+            <coeffic a="-0.2072" b="0.8461"/>
+            <coeffic a="0.0906" b="-0.0425"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">
@@ -202,8 +202,8 @@ For simulating Rusinga
       <anopheles mosquito="funestus" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="11.84" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="-4.546" b="2.252"/>
-            <coeffic a="-0.2198" b="-0.00743"/>
+            <coeffic a="0.4943" b="0.6127"/>
+            <coeffic a="-0.2386" b="-0.2851"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">
@@ -223,8 +223,8 @@ For simulating Rusinga
       <anopheles mosquito="arabiensis" propInfected="0.078" propInfectious="0.021">
         <seasonality annualEIR="34.37" input="EIR">
           <fourierSeries EIRRotateAngle="0">
-            <coeffic a="0.8968" b="2.678"/>
-            <coeffic a="-0.4551" b="2.599"/>
+            <coeffic a="-0.2072" b="0.8461"/>
+            <coeffic a="0.0906" b="-0.0425"/>
           </fourierSeries>
         </seasonality>
         <mosq minInfectedThreshold="0.001">

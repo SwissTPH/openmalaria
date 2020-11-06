@@ -197,6 +197,9 @@ protected:
     /// Cache parameter updated by update()
     double emergenceSurvival;   // survival with regards to intervention effects
     //@}
+
+    double scaleFactor, shiftAngle;
+    bool rotated, scaled;
 };
 
 }

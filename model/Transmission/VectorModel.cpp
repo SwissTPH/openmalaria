@@ -156,15 +156,20 @@ const string& reverseLookup (const map<string,size_t>& m, size_t i) {
     throw TRACED_EXCEPTION_DEFAULT( "reverseLookup: key not found" );        // shouldn't ever happen
 }
 
-VectorModel::VectorModel (uint64_t seed1, uint64_t seed2,
+bool anophelesCompare(const scnXml::AnophelesParams& a1, const scnXml::AnophelesParams& a2)
+{
+    return (a1.getSeasonality().getAnnualEIR().get()>a2.getSeasonality().getAnnualEIR().get()); 
+}
+
+VectorModel::VectorModel (
                           const scnXml::Entomology& entoData,
                           const scnXml::Vector vectorData, int populationSize) :
     TransmissionModel( entoData, WithinHost::Genotypes::N() ),
-    m_rng(seed1, seed2), initIterations(0)
+    m_rng(util::master_RNG), initIterations(0)
 {
     // Each item in the AnophelesSequence represents an anopheles species.
     // TransmissionModel::createTransmissionModel checks length of list >= 1.
-    const scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
+    scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
     const scnXml::Vector::NonHumanHostsSequence nonHumansList = vectorData.getNonHumanHosts();
 
 //     map<string, double> nonHumanHostPopulations;
@@ -175,6 +180,15 @@ VectorModel::VectorModel (uint64_t seed1, uint64_t seed2,
     size_t numSpecies = anophelesList.size();
     if (numSpecies < 1)
         throw util::xml_scenario_error ("Can't use Vector model without data for at least one anopheles species!");
+    
+    sort(anophelesList.begin(), anophelesList.end(), anophelesCompare);
+
+    // for(size_t i = 0; i < numSpecies; ++i)
+    // {
+    //     auto elt = anophelesList[i];
+    //     cout << elt.getSeasonality().getAnnualEIR().get() << endl;
+    // }
+
     PerHostAnophParams::initReserve (numSpecies);
     species.resize (numSpecies);
 
@@ -406,13 +420,14 @@ SimTime VectorModel::initIterate () {
     }
     
     ++initIterations;
-    if( initIterations > 15 ){
-        throw TRACED_EXCEPTION("Transmission warmup exceeded 15 iterations!",util::Error::VectorWarmup);
+    if( initIterations > 30 ){
+        throw TRACED_EXCEPTION("Transmission warmup exceeded 30 iterations!",util::Error::VectorWarmup);
     }
     
     bool needIterate = false;
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
         //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
+        if(!needIterate) cout << "Fitting: " << i << endl;
         needIterate = needIterate || species[i].initIterate ();
     }
     

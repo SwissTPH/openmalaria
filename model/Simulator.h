@@ -52,6 +52,7 @@ private:
     //@{
     void writeCheckpoint();
     void readCheckpoint();
+    int readCheckpointNum();
     
     void checkpoint (istream& stream);
     void checkpoint (ostream& stream);
@@ -62,6 +63,8 @@ private:
     SimTime m_estimatedEnd;
     int phase;  // only need be a class member because value is checkpointed
     
+    string checkpointFileName;
+
     static bool startedFromCheckpoint;
     
     friend class AnophelesModelSuite;

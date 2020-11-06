@@ -93,6 +93,7 @@ function clone {
         echo "Switching branch to $BRANCH"
         git checkout $BRANCH && git pull
     fi
+    git branch
 }
 
 function build {
