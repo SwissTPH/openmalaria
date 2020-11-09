@@ -128,7 +128,7 @@ function package {
     mkdir -p $ARTIFACT
     cp build/openMalaria $ARTIFACT/
     cp -r util/example/* $ARTIFACT/
-    cp schema/scenario_41.xsd $ARTIFACT/
+    cp schema/scenario_42.xsd $ARTIFACT/
     cp test/densities.csv $ARTIFACT/
     cp test/autoRegressionParameters.csv $ARTIFACT/
 
