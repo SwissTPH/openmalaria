@@ -23,6 +23,7 @@ artifacts:
 
 # Deployment
 deploy:
+  force_update: true
   provider: GitHub
   description: "OpenMalaria build for Windows"
   auth_token:

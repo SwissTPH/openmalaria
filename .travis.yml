@@ -16,6 +16,7 @@ script:
   - util/build-info.sh | tee openMalaria-$OSNAME/travis-build.json
 
 deploy:
+  overwrite: true
   skip_cleanup: true
   provider: releases
   api_key: $GH_TOKEN
