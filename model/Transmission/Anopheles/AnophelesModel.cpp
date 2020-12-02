@@ -281,21 +281,21 @@ void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesI
     if( elt.getPreprandialKillingEffect().present() ){
         const scnXml::PreprandialKillingEffect& elt2 = elt.getPreprandialKillingEffect().get();
         if( elt2.getInitial() < -1.0 )
-            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+            throw util::xml_scenario_error( "PreprandialKillingEffect intervention: initial effect must be ≥ -1" );
         reduceP_B_I[name].resize(instance+1);
         reduceP_B_I[name][instance].set (elt2.getInitial(), decay, "reduceP_B_I");
     }
     if( elt.getPostprandialKillingEffect().present() ){
         const scnXml::PostprandialKillingEffect& elt2 = elt.getPostprandialKillingEffect().get();
         if( elt2.getInitial() < -1.0 )
-            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+            throw util::xml_scenario_error( "PostprandialKillingEffect intervention: initial effect must be ≥ -1" );
         reduceP_C_I[name].resize(instance+1);
         reduceP_C_I[name][instance].set (elt2.getInitial(), decay, "reduceP_C_I");
     }
     if( elt.getRestingKillingEffect().present() ){
         const scnXml::RestingKillingEffect& elt2 = elt.getRestingKillingEffect().get();
         if( elt2.getInitial() < -1.0 )
-            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+            throw util::xml_scenario_error( "RestingKillingEffect intervention: initial effect must be ≥ -1" );
         reduceP_D_I[name].resize(instance+1);
         reduceP_D_I[name][instance].set (elt2.getInitial(), decay, "reduceP_D_I");
     }
@@ -303,9 +303,8 @@ void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesI
 }
 void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVectorSpecies& elt, string name ){
     // Check that the nonHumanHostsType does not exist
-    if(addedNhh.count(name) != 0 || initNhh.count(name) != 0)
-        throw util::xml_scenario_error( "non human hosts type already exists" );
-
+    // if(addedNhh.count(name) != 0 || initNhh.count(name) != 0)
+    //     throw util::xml_scenario_error( "non human hosts type already exists" );
     NHHParams nhh;
     nhh.mosqRelativeAvailabilityHuman = elt.getMosqRelativeAvailabilityHuman().getValue();
     nhh.mosqProbBiting = elt.getMosqProbBiting().getValue();
