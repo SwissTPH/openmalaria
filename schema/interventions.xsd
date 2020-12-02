@@ -2,7 +2,7 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_43" xmlns:om="http://openmalaria.org/schema/scenario_43" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_42" xmlns:om="http://openmalaria.org/schema/scenario_42" xmlns:xs="http://www.w3.org/2001/XMLSchema">
  <xs:include schemaLocation="healthSystem.xsd"/>
  <xs:include schemaLocation="entomology.xsd"/>
  <xs:include schemaLocation="util.xsd"/>
@@ -320,7 +320,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    </xs:element>
    <xs:element minOccurs="0" name="nonHumanHostsModifications">
     <xs:annotation>
-     <xs:documentation>List of interventions that modify  parameters of non-human hosts described in the &lt;entomology&gt; &lt;vector&gt; &lt;anopheles&gt;.</xs:documentation>
+     <xs:documentation>TODO</xs:documentation>
+     <xs:appinfo>name:TODO;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:sequence>
@@ -330,8 +331,8 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    </xs:element>
    <xs:element minOccurs="0" name="addNonHumanHosts">
     <xs:annotation>
-     <xs:documentation>List of intervention that add new non-human hosts that have not been described in the &lt;entomology&gt; &lt;vector&gt;
-&lt;anopheles&gt; &lt;nonHumanHosts&gt;.</xs:documentation>
+     <xs:documentation>TODO</xs:documentation>
+     <xs:appinfo>TODO</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:sequence>
@@ -1559,15 +1560,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
        <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-              <xs:appinfo>name:Mosquito species;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="propActive" type="xs:double" default="1">
-            <xs:annotation>
-              <xs:documentation>
-              Deprecated: propActive can still be used but its value must be set to either 0 or 1.
-              Any other value will result in an error at initialization.
-              
+       <xs:appinfo>name:Mosquito species;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="propActive" type="xs:double" default="1">
+      <xs:annotation>
+       <xs:documentation>
+              Deprecated: propActive is now always set to 1. This value will be ignored.
+
               The proportion of bites, when nets are in use, for which the net
               has any action whatsoever on the mosquito.
               
@@ -2042,18 +2042,16 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
  </xs:complexType>
  <xs:complexType name="NonHumanHostsIntervention">
   <xs:annotation>
-   <xs:documentation>This intervention modifies parameters of non-human hosts described in the &lt;entomology&gt; &lt;vector&gt; &lt;anopheles&gt;
-&lt;nonHumanHosts&gt; section of the input scenario file.
-
-The intervention is described by 5 parameters that define the change in each of non-human host parameters: 
-
-reduceAvailability: Reduction in the availability rate, αi. For example a value of 0 will result in no change; a value of 0.2 will reduce the availability to 0.8 of its initial value; and a value of 1 will set the availability to 0;
-
-prePrandialKillingEffect: Reduction in the pre-prandial survival probability, PBi.  For example a value of 0 will result in no change; a value of 0.2 will reduce PBi to 0.8 of its initial value; and a value of 1 will set PBi to 0;
-
-postPrandialKillingEffect: Reduction in the post-prandial survival probability, PCi.  For example a value of 0 will result in no change; a value of 0.2 will reduce PCi to 0.8 of its initial value; and a value of 1 will set PCi to 0;
-
-restingKillingEffect: Reduction in the survival probability of the resting period, PDi.  For example a value of 0 will result in no change; a value of 0.2 will reduce PDi to 0.8 of its initial value; and a value of 1 will set PDi to 0;</xs:documentation>
+   <xs:documentation>
+        An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
+        
+        Multiple instances of this intervention class are allowed (multiple parameterisations, not just deployments).
+        
+        Each instance may have multiple deployments. In this case the effects of each instance
+        are independent (effects are combined) but the effects of multiple deployments of a single
+        instance are not independent (only the latest deployment has any effect).
+      </xs:documentation>
+   <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
   </xs:annotation>
   <xs:sequence>
    <xs:element name="decay" type="om:DecayFunction"/>
@@ -2093,13 +2091,22 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
  <xs:complexType name="NonHumanHostsSpeciesIntervention">
   <xs:annotation>
    <xs:documentation>
-        Descriptions of the effects of non human hosts interventions with per-species effects.
+        Descriptions of the effects of vector interventions with per-species effects.
       </xs:documentation>
+   <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
   </xs:annotation>
   <xs:all>
-   <xs:element name="availabilityReduction" minOccurs="0">
+   <xs:element name="reduceAvailability" minOccurs="0">
     <xs:annotation>
-     <xs:documentation>Reduction in the availability rate, αi. For example a value of 0 will result in no change; a value of 0.2 will reduce the availability to 0.8 of its initial value; and a value of 1 will set the availability to 0;</xs:documentation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:attribute name="initial" type="xs:double" use="required">
@@ -2111,7 +2118,15 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
    </xs:element>
    <xs:element name="preprandialKillingEffect" minOccurs="0">
     <xs:annotation>
-     <xs:documentation>Reduction in the pre-prandial survival probability, PBi. For example a value of 0 will result in no change; a value of 0.2 will reduce PBi to 0.8 of its initial value; and a value of 1 will set PBi to 0;</xs:documentation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:attribute name="initial" type="xs:double" use="required">
@@ -2123,7 +2138,15 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
    </xs:element>
    <xs:element name="postprandialKillingEffect" minOccurs="0">
     <xs:annotation>
-     <xs:documentation>Reduction in the post-prandial survival probability, PCi. For example a value of 0 will result in no change; a value of 0.2 will reduce PCi to 0.8 of its initial value; and a value of 1 will set PCi to 0;</xs:documentation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:attribute name="initial" type="xs:double" use="required">
@@ -2135,19 +2158,15 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
    </xs:element>
    <xs:element name="restingKillingEffect" minOccurs="0">
     <xs:annotation>
-     <xs:documentation>Reduction in the survival probability of the resting period, PDi. For example a value of 0 will result in no change; a value of 0.2 will reduce PDi to 0.8 of its initial value; and a value of 1 will set PDi to 0;</xs:documentation>
-    </xs:annotation>
-    <xs:complexType>
-     <xs:attribute name="initial" type="xs:double" use="required">
-      <xs:annotation>
-       <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-    </xs:complexType>
-   </xs:element>
-   <xs:element name="fecundityReduction" minOccurs="0">
-    <xs:annotation>
-     <xs:documentation>Reduction in the number of fertile eggs laid by a mosquito after biting this type of host, relative to an unprotected human. For example a value of 0 will result in no change; a value of 0.2 will reduce the fecundity factor to 0.8 of its initial value; and a value of 1 will set the fecundity factor to 0;</xs:documentation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:attribute name="initial" type="xs:double" use="required">
@@ -2169,7 +2188,16 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
  </xs:complexType>
  <xs:complexType name="NonHumanHosts">
   <xs:annotation>
-   <xs:documentation>Describes a new non-human hosts that have not been described in the &lt;entomology&gt; &lt;vector&gt; &lt;anopheles&gt; &lt;nonHumanHosts&gt;.</xs:documentation>
+   <xs:documentation>
+        An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
+        
+        Multiple instances of this intervention class are allowed (multiple parameterisations, not just deployments).
+        
+        Each instance may have multiple deployments. In this case the effects of each instance
+        are independent (effects are combined) but the effects of multiple deployments of a single
+        instance are not independent (only the latest deployment has any effect).
+      </xs:documentation>
+   <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
   </xs:annotation>
   <xs:sequence>
    <xs:element name="description">
@@ -2226,8 +2254,10 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
  </xs:complexType>
  <xs:complexType name="NonHumanHostsVectorSpecies">
   <xs:annotation>
-   <xs:documentation>Descriptions of the effects of new non human hosts with per-species effects.
+   <xs:documentation>
+        Descriptions of the effects of vector interventions with per-species effects.
       </xs:documentation>
+   <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
   </xs:annotation>
   <xs:all>
    <xs:element name="mosqRelativeAvailabilityHuman" type="om:DoubleValue">
@@ -2255,12 +2285,6 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
    <xs:element name="mosqProbResting" type="om:DoubleValue">
     <xs:annotation>
      <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
-     <xs:appinfo>units:Proportion;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
-    </xs:annotation>
-   </xs:element>
-   <xs:element name="hostFecundityFactor" type="om:DoubleValue">
-    <xs:annotation>
-     <xs:documentation>Multiplicative factor for the number of fertile eggs laid by a mosquito after biting this type of host, relative to an unprotected human.</xs:documentation>
      <xs:appinfo>units:Proportion;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
     </xs:annotation>
    </xs:element>

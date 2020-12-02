@@ -351,7 +351,6 @@ private:
         double mosqProbBiting;
         double mosqProbFindingRestSite;
         double mosqProbResting;
-        double hostFecundityFactor;
     };
     map<string,NHHParams> addedNhh;
 
@@ -402,7 +401,7 @@ private:
     list<TrapData> baitedTraps;
     //@}
 
-    map<string,vector<util::SimpleDecayingValue>> reduceNHHAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I, reduceFecundity;
+    map<string,vector<util::SimpleDecayingValue>> reduceNHHAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I;
     
     /** Per time-step partial calculation of EIR, per genotype.
     *
