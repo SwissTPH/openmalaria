@@ -95,7 +95,16 @@ void NonVectorModel::initVectorTrap( const scnXml::VectorTrap::DescriptionSequen
 {
     throw util::xml_scenario_error( viError );
 }
-
+void NonVectorModel::initNonHumanHostsInterv( const scnXml::Description2::AnophelesSequence list,
+        const scnXml::DecayFunction& decay, size_t instance, const string& name )
+{
+    throw util::xml_scenario_error( viError );
+}
+void NonVectorModel::initAddNonHumanHostsInterv( const scnXml::Description3::AnophelesSequence list,
+        const string& name )
+{
+    throw util::xml_scenario_error( viError );
+}
 
 void NonVectorModel::scaleEIR (double factor){
     vectors::scale( initialisationEIR, factor );
@@ -199,8 +208,15 @@ void NonVectorModel::uninfectVectors(){
 void NonVectorModel::deployVectorPopInterv (size_t instance) {
   throw util::xml_scenario_error (viError);
 }
-void NonVectorModel::deployVectorTrap(size_t instance, double number, SimTime lifespan){
+void NonVectorModel::deployVectorTrap(size_t instance, double popSize, SimTime lifespan){
   throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::deployNonHumanHostsInterv( size_t instance, string name ) {
+    throw util::xml_scenario_error (viError);
+}
+void NonVectorModel::deployAddNonHumanHosts( string name, double popSize, SimTime lifespan )
+{
+    throw util::xml_scenario_error( viError );
 }
 
 void NonVectorModel::update (const Population& population) {

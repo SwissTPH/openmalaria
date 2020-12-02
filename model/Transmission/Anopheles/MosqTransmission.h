@@ -35,7 +35,7 @@ namespace Anopheles {
 using util::vecDay2D;
 
 // enumeration of gettable stats for cts out
-enum VecStat { PA, PDF, PDIF, NV, OV, SV };
+enum VecStat { PA, PAmu, PA1, PAh, PDF, PDIF, NV, OV, SV };
 
 /** Encapsulates the central part of the Chitnis et al transmission model:
  * vector transmission of malaria.
@@ -96,9 +96,10 @@ public:
     
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */
-    void initState ( double tsP_A, double tsP_df, double tsP_dff,
+    void initState ( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah,
+                     double tsP_df, double tsP_dff,
                      double initNvFromSv, double initOvFromSv,
-                     const vecDay<double>& forcedS_v );
+                     const vecDay<double>& forcedS_v);
     
     /// Helper function for initialisation.
     void initIterateScale ( double factor );
@@ -119,10 +120,10 @@ public:
      *  S_v values are multiplied by EIR_factor and added to this.
      * @param EIR_factor see parameter partialEIR
      */
-    void update( SimTime d0, double tsP_A, double tsP_df,
+    void update( SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
                    const vector<double> tsP_dif, double tsP_dff,
                    bool isDynamic,
-                   vector<double>& partialEIR, double EIR_factor );
+                   vector<double>& partialEIR, double EIR_factor);
     
     ///@brief Interventions and reporting
     //@{
@@ -178,6 +179,9 @@ public:
         N_v & stream;
         O_v & stream;
         S_v & stream;
+        P_Amu & stream;
+        P_A1 & stream;
+        P_Ah & stream;
         //TODO: do we actually need to checkpoint these next three?
         fArray & stream;
         ftauArray & stream;
@@ -270,8 +274,17 @@ private:
      * O_v is the number of infected host-seeking mosquitoes, and S_v is the
      * number of infective (to humans) host-seeking mosquitoes. */
     vecDay2D<double> O_v, S_v;
-    //@}
 
+    /** Probability of a mosquito dying */
+    vecDay<double> P_Amu;
+
+    /** Probability of a mosquito finding a host */
+    vecDay<double> P_A1;
+
+    /** Probability of a mosquito finding a non-human host type*/
+    vecDay<double> P_Ah;
+    //@}
+    
     ///@brief Working memory
     /** Used for calculations within advancePeriod. Only saved for optimisation.
      *

@@ -176,12 +176,24 @@ void AnophelesModel::initAvailability(
         const double P_Ahi = P_Ah * xi_i;       // probability of encountering this type of NNH on a given night
         const double avail_i = P_Ahi * availFactor; // N_i * α_i
         
-        nhh_avail += avail_i;    // N * α
+        nhh_avail += avail_i;    // N * α (nhh_avail is not used anymore)
         const double df = avail_i * P_B_i * P_C_i * P_D_i;    // term in P_df series
         nhh_sigma_df += df;
         nhh_sigma_dff += df * rel_fecundity;
         // Note: we would do the same for P_dif except that it's multiplied by
         // infectiousness of host to mosquito which is zero.
+
+        string name = xmlNNH.getName();
+
+        NHH nhh;
+        nhh.avail_i = avail_i;
+        nhh.P_B_I = P_B_i;
+        nhh.P_C_I = P_C_i;
+        nhh.P_D_I = P_D_i;
+        nhh.rel_fecundity = rel_fecundity;
+        nhh.expiry = SimTime::future();
+
+        initNhh[name] = nhh;
     }
     
     // ———  set mosqSeekingDeathRate  ———
@@ -213,12 +225,19 @@ void AnophelesModel::init2 (int nHumans, double meanPopAvail,
     double initialP_df  = sigma_df * availDivisor * probMosqSurvivalOvipositing;
     double initialP_dff  = sigma_dff * availDivisor * probMosqSurvivalOvipositing;
     
+    double initialP_Amu = (1-initialP_A) * mosqSeekingDeathRate/(mosqSeekingDeathRate + sum_avail + nhh_avail);
+    double initialP_A1 = (1-initialP_A) * sum_avail/(mosqSeekingDeathRate + sum_avail + nhh_avail);
+    double initialP_Ah = 0.0;
+    for( auto it = initNhh.begin(); it != initNhh.end(); ++it){
+        initialP_Ah += (1-initialP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + nhh_avail);
+    }
+
     // -----  Calculate required S_v based on desired EIR  -----
     // Third parameter is a multiplication factor for S_v/EIR. First we multiply
     // input EIR by meanPopAvail to give us population average EIR instead of
     // adult average EIR, then we divide by (sumPFindBite/populationSize) to
     // get S_v.
-    transmission.emergence->init2( initialP_A, initialP_df, initialP_dff,
+    transmission.emergence->init2( initialP_A, initialP_Amu, initialP_A1, initialP_Ah, initialP_df, initialP_dff,
             nHumans * meanPopAvail / sumPFindBite, transmission );
     
     // All set up to drive simulation from forcedS_v
@@ -252,6 +271,51 @@ void AnophelesModel::initVectorTrap(const scnXml::Description1& desc, size_t ins
     params.availDecay= DecayFunction::makeObject(desc.getDecayOfAvailability(), "decayOfAvailability");
     trapParams.push_back(move(params));
 }
+void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesIntervention& elt, const scnXml::DecayFunction& decay, size_t instance, string name ){
+    if( elt.getReduceAvailability().present() ){
+        const scnXml::ReduceAvailability& elt2 = elt.getReduceAvailability().get();
+        if( elt2.getInitial() < -1.0 )
+            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+        reduceNHHAvailability[name].resize(instance+1);
+        reduceNHHAvailability[name][instance].set (elt2.getInitial(), decay, "reduceAvailability");
+    }
+    if( elt.getPreprandialKillingEffect().present() ){
+        const scnXml::PreprandialKillingEffect& elt2 = elt.getPreprandialKillingEffect().get();
+        if( elt2.getInitial() < -1.0 )
+            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+        reduceP_B_I[name].resize(instance+1);
+        reduceP_B_I[name][instance].set (elt2.getInitial(), decay, "reduceP_B_I");
+    }
+    if( elt.getPostprandialKillingEffect().present() ){
+        const scnXml::PostprandialKillingEffect& elt2 = elt.getPostprandialKillingEffect().get();
+        if( elt2.getInitial() < -1.0 )
+            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+        reduceP_C_I[name].resize(instance+1);
+        reduceP_C_I[name][instance].set (elt2.getInitial(), decay, "reduceP_C_I");
+    }
+    if( elt.getRestingKillingEffect().present() ){
+        const scnXml::RestingKillingEffect& elt2 = elt.getRestingKillingEffect().get();
+        if( elt2.getInitial() < -1.0 )
+            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+        reduceP_D_I[name].resize(instance+1);
+        reduceP_D_I[name][instance].set (elt2.getInitial(), decay, "reduceP_D_I");
+    }
+    cout << "AnophelesModel::init NHH interv on species " << " NHH " << name << endl;
+}
+void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVectorSpecies& elt, string name ){
+    // Check that the nonHumanHostsType does not exist
+    if(addedNhh.count(name) != 0 || initNhh.count(name) != 0)
+        throw util::xml_scenario_error( "non human hosts type already exists" );
+
+    NHHParams nhh;
+    nhh.mosqRelativeAvailabilityHuman = elt.getMosqRelativeAvailabilityHuman().getValue();
+    nhh.mosqProbBiting = elt.getMosqProbBiting().getValue();
+    nhh.mosqProbFindingRestSite = elt.getMosqProbFindRestSite().getValue();
+    nhh.mosqProbResting = elt.getMosqProbResting().getValue();
+    addedNhh[name] = nhh;
+
+    cout << "AnophelesModel::init NHH: " << name << endl;
+}
 
 void AnophelesModel::deployVectorPopInterv (LocalRng& rng, size_t instance){
     transmission.emergence->deployVectorPopInterv(rng, instance);
@@ -260,18 +324,51 @@ void AnophelesModel::deployVectorPopInterv (LocalRng& rng, size_t instance){
     seekingDeathRateIntervs[instance].deploy( rng, sim::now() );
     probDeathOvipositingIntervs[instance].deploy( rng, sim::now() );
 }
-void AnophelesModel::deployVectorTrap(LocalRng& rng, size_t species, size_t instance, double number, SimTime lifespan){
+void AnophelesModel::deployVectorTrap(LocalRng& rng, size_t species, size_t instance, double popSize, SimTime lifespan){
     assert(instance < trapParams.size());
     TrapData data;
     data.instance = instance;
     double adultAvail = PerHostAnophParams::get(species).entoAvailability.mean();
-    data.initialAvail = number * adultAvail * trapParams[instance].relAvail;
+    data.initialAvail = popSize * adultAvail * trapParams[instance].relAvail;
     data.availHet = trapParams[instance].availDecay->hetSample(rng);
     data.deployTime = sim::now();
     data.expiry = sim::now() + lifespan;
     baitedTraps.push_back(data);
 }
+void AnophelesModel::deployNonHumanHostsInterv(LocalRng& rng, size_t species, size_t instance, string name){
+    if(initNhh.count(name) == 0)
+        throw util::xml_scenario_error("non human hosts type "+name+" not deployed during non human hosts intervention deployment");
 
+    reduceNHHAvailability[name][instance].deploy( rng, sim::now() );
+    cout << "NHH intervention deployment on species " << species << " NHH " << name << endl;
+}
+void AnophelesModel::deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan){
+    if(initNhh.count(name) != 0)
+        throw util::xml_scenario_error("non human hosts type "+name+" already deployed during non human hosts deployment");
+
+    const NHHParams &nhhParams = addedNhh[name];
+
+    double adultAvail = PerHostAnophParams::get(species).entoAvailability.mean();
+    double avail_i = popSize * adultAvail * nhhParams.mosqRelativeAvailabilityHuman;
+
+    cout << "Add NHH intervention deployment on species " << species << endl;
+    cout << "\tHumanAvail: " << adultAvail << endl;
+    cout << "\tmosqRelativeAvailabilityHuman: " << nhhParams.mosqRelativeAvailabilityHuman << endl;
+    cout << "\tmosqProbBiting: " << nhhParams.mosqProbBiting << endl;
+    cout << "\tmosqProbFindingRestSite: " << nhhParams.mosqProbFindingRestSite << endl;
+    cout << "\tmosqProbResting: " << nhhParams.mosqProbResting << endl;
+
+    NHH nhh;
+    nhh.avail_i = avail_i;
+    nhh.P_B_I = nhhParams.mosqProbBiting;
+    nhh.P_C_I = nhhParams.mosqProbFindingRestSite;
+    nhh.P_D_I = nhhParams.mosqProbResting;
+    nhh.rel_fecundity = 0.0;
+    nhh.expiry = sim::now() + lifespan;
+    initNhh[name] = nhh;
+
+    cout << "Deployed NHH:" << name << endl;
+}
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod (
         double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic)
@@ -317,12 +414,69 @@ void AnophelesModel::advancePeriod (
         leaveRate *= 1.0 + increase.current_value( sim::ts0() );
     }
     leaveRate += sum_avail;
-    
-    leaveRate += nhh_avail;
-    sigma_df += nhh_sigma_df;
-    sigma_dff += nhh_sigma_dff;
-    
-    for( auto it = baitedTraps.begin(); it != baitedTraps.end(); ){
+
+    // NON-HUMAN HOSTS INTERVENTIONS
+    // Check if some nhh must be removed
+    for( auto it = initNhh.begin(); it != initNhh.end();){
+        if( sim::ts0() > it->second.expiry ){
+            cout << "AnophelesModel::removed NHH " << it->first << " on day " << sim::ts0() << endl;
+            it = initNhh.erase(it);
+            continue;
+        }
+        it++;
+    }
+
+    double modified_nhh_avail = 0.0;
+    double modified_nhh_sigma_df = 0.0;
+    double modified_nhh_sigma_dff = 0.0;
+
+    map<string,NHH> currentNhh = initNhh;
+
+    for( auto it = reduceNHHAvailability.begin(); it != reduceNHHAvailability.end(); ++it) {
+        for( const auto &decay : it->second )
+        {
+            if(currentNhh.count(it->first) != 0) // Check that the non-human hosts still exist
+                currentNhh[it->first].avail_i *= 1.0 - decay.current_value( sim::ts0() );
+        }
+    }
+
+    for( auto it = reduceP_B_I.begin(); it != reduceP_B_I.end(); ++it) {
+        for( const auto &decay : it->second )
+        {
+            if(currentNhh.count(it->first) != 0) // Check that the non-human hosts still exist
+                currentNhh[it->first].P_B_I *= 1.0 - decay.current_value( sim::ts0() );
+        }
+    }
+
+    for( auto it = reduceP_C_I.begin(); it != reduceP_C_I.end(); ++it) {
+        for( const auto &decay : it->second )
+        {
+            if(currentNhh.count(it->first) != 0) // Check that the non-human hosts still exist
+                currentNhh[it->first].P_C_I *= 1.0 - decay.current_value( sim::ts0() );
+        }
+    }
+
+    for( auto it = reduceP_D_I.begin(); it != reduceP_D_I.end(); ++it) {
+        for( const auto &decay : it->second )
+        {
+            if(currentNhh.count(it->first) != 0) // Check that the non-human hosts still exist
+                currentNhh[it->first].P_D_I *= 1.0 - decay.current_value( sim::ts0() );
+        }
+    }
+
+    for( auto it = currentNhh.begin(); it != currentNhh.end(); ++it){
+        modified_nhh_avail += it->second.avail_i;
+        const double df = it->second.avail_i * it->second.P_B_I * it->second.P_C_I * it->second.P_D_I;    // term in P_df series
+        modified_nhh_sigma_df += df;
+        modified_nhh_sigma_dff += df * it->second.rel_fecundity;
+    }
+
+    leaveRate += modified_nhh_avail;
+    sigma_df += modified_nhh_sigma_df;
+    sigma_dff += modified_nhh_sigma_dff;
+    // NON-HUMAN HOSTS INTERVENTIONS
+
+    for( auto it = baitedTraps.begin(); it != baitedTraps.end();){
         if( sim::ts0() > it->expiry ){
             it = baitedTraps.erase(it);
             continue;
@@ -348,17 +502,24 @@ void AnophelesModel::advancePeriod (
     // from now, sigma_dif becomes P_dif (but we can't simply rename):
     vectors::scale( sigma_dif, alphaE );
     
-    
     // Summed per day:
     partialEIR.assign( WithinHost::Genotypes::N(), 0.0 );
     
     transmission.resetTSStats();
     
+    // Computing for output only
+    double tsP_Amu = (1-tsP_A) * mosqSeekingDeathRate/(mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
+    double tsP_A1 = (1-tsP_A) * sum_avail/(mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
+    double tsP_Ah = 0.0;
+    for( auto it = currentNhh.begin(); it != currentNhh.end(); ++it){
+        tsP_Ah += (1-tsP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
+    }
+
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
     const SimTime nextTS = sim::ts0() + SimTime::oneTS();
     for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay() ){
-        transmission.update( d0, tsP_A, tsP_df, sigma_dif, tsP_dff, isDynamic, partialEIR, availDivisor );
+        transmission.update( d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif, tsP_dff, isDynamic, partialEIR, availDivisor);
     }
 }
 

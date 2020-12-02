@@ -322,6 +322,43 @@ private:
     SimTime lifespan;
 };
 
+class TimedNonHumanHostsDeployment : public TimedDeployment {
+public:
+    TimedNonHumanHostsDeployment( SimDate date, size_t instance, string name ) :
+        TimedDeployment( date ),
+        instance(instance),
+        name(name)
+    {}
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+      transmission.deployNonHumanHostsInterv(instance, name);
+    }
+    virtual void print_details( std::ostream& out )const{
+        out << date << "\t\t\t\t\tnhh";
+    }
+    
+private:
+    size_t instance;
+    string name;
+};
+
+class TimedAddNonHumanHostsDeployment : public TimedDeployment {
+public:
+    TimedAddNonHumanHostsDeployment( SimDate date, const string &name, SimTime lifespan) :
+        TimedDeployment( date ), name(name), lifespan(lifespan)
+    {}
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+        double popSize = population.size();
+        transmission.deployAddNonHumanHosts(name, popSize, lifespan);
+    }
+    virtual void print_details( std::ostream& out )const{
+        out << date << "\t\t\t\t\tnhh";
+    }
+    
+private:
+    string name;
+    SimTime lifespan;
+};
+
 // ———  ContinuousHumanDeployment  ———
 
 /** Interface for continuous deployment of an intervention. */

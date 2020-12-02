@@ -2,37 +2,35 @@
 <!-- Schema for OpenMalaria input documents
 Copyright © 2005-2012 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_42"
-           xmlns:om="http://openmalaria.org/schema/scenario_42"
-           xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:include schemaLocation="healthSystem.xsd"/>
-  <xs:include schemaLocation="entomology.xsd"/>
-  <xs:include schemaLocation="util.xsd"/>
-  <xs:complexType name="Interventions">
-    <xs:all>
-      <xs:element minOccurs="0" name="changeHS">
-        <xs:annotation>
-          <xs:documentation>
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_42" xmlns:om="http://openmalaria.org/schema/scenario_42" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+ <xs:include schemaLocation="healthSystem.xsd"/>
+ <xs:include schemaLocation="entomology.xsd"/>
+ <xs:include schemaLocation="util.xsd"/>
+ <xs:complexType name="Interventions">
+  <xs:all>
+   <xs:element minOccurs="0" name="changeHS">
+    <xs:annotation>
+     <xs:documentation>
             Changes to the health system
           </xs:documentation>
-          <xs:appinfo>name:Change health system;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:complexContent>
-                  <xs:extension base="om:HealthSystem">
-                    <xs:annotation>
-                      <xs:documentation>
+     <xs:appinfo>name:Change health system;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
+       <xs:complexType>
+        <xs:complexContent>
+         <xs:extension base="om:HealthSystem">
+          <xs:annotation>
+           <xs:documentation>
                         A complete replacement health system. Replaces all previous properties.
                         (Health system can be replaced multiple times if necessary.)
                       </xs:documentation>
-                      <xs:appinfo>name:Timed replacement;</xs:appinfo>
-                    </xs:annotation>
-                    <xs:attribute name="time" type="xs:string" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
+           <xs:appinfo>name:Timed replacement;</xs:appinfo>
+          </xs:annotation>
+          <xs:attribute name="time" type="xs:string" use="required">
+           <xs:annotation>
+            <xs:documentation>
                           Time at which this replacement occurs. See doc on
                           intervention period and on monitoring/startDate for
                           details of how times work.
@@ -40,52 +38,52 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                           Can be specified in steps, days, years, or as a date
                           (examples: 15t, 75d, 0.2y, 2000-03-16).
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
+            <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
+           </xs:annotation>
+          </xs:attribute>
+         </xs:extension>
+        </xs:complexContent>
+       </xs:complexType>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+       <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="changeEIR">
-        <xs:annotation>
-          <xs:documentation>
+       <xs:appinfo>name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="changeEIR">
+    <xs:annotation>
+     <xs:documentation>
             New description of transmission level for models not
             supporting vector control interventions. Use of this overrides
             previous transmission levels such that human infectiousness no
             longer has any feedback effect on transmission. Supplied EIR
             data must last until end of simulation.
           </xs:documentation>
-          <xs:appinfo>name:Change transmission levels;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:complexContent>
-                  <xs:extension base="om:NonVector">
-                    <xs:annotation>
-                      <xs:documentation>
+     <xs:appinfo>name:Change transmission levels;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
+       <xs:complexType>
+        <xs:complexContent>
+         <xs:extension base="om:NonVector">
+          <xs:annotation>
+           <xs:documentation>
                         Replacement transmission levels. Disables feedback of
                         human infectiousness to mosquitoes on further mosquito
                         to human transmission. Must last until end of simulation.
                       </xs:documentation>
-                      <xs:appinfo>name:Timed replacement;</xs:appinfo>
-                    </xs:annotation>
-                    <xs:attribute name="time" type="xs:string" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
+           <xs:appinfo>name:Timed replacement;</xs:appinfo>
+          </xs:annotation>
+          <xs:attribute name="time" type="xs:string" use="required">
+           <xs:annotation>
+            <xs:documentation>
                           Time at which this replacement occurs. See doc on
                           intervention period and on monitoring/startDate for
                           details of how times work.
@@ -93,102 +91,102 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                           Can be specified in steps, days, years, or as a date
                           (examples: 15t, 75d, 0.2y, 2000-03-16).
                         </xs:documentation>
-                        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
+            <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
+           </xs:annotation>
+          </xs:attribute>
+         </xs:extension>
+        </xs:complexContent>
+       </xs:complexType>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+       <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="importedInfections">
-        <xs:annotation>
-          <xs:documentation>
+       <xs:appinfo>name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="importedInfections">
+    <xs:annotation>
+     <xs:documentation>
             Models importation of P. falciparum infections directly into humans
             from an external source. This is infections, not inoculations or
             EIR being imported.
           </xs:documentation>
-          <xs:appinfo>name:Imported infections;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="timed">
-              <xs:annotation>
-                <xs:documentation>
+     <xs:appinfo>name:Imported infections;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="timed">
+       <xs:annotation>
+        <xs:documentation>
                   Rate of case importation, as a step function. Each value is
                   valid until replaced by the next value.
                 </xs:documentation>
-                <xs:appinfo>name:Rate of importation</xs:appinfo>
-              </xs:annotation>
-              <xs:complexType>
-                <xs:sequence>
-                  <xs:element name="rate" minOccurs="1" maxOccurs="unbounded">
-                    <xs:complexType>
-                      <xs:complexContent>
-                        <xs:extension base="om:DoubleValue">
-                          <xs:annotation>
-                            <xs:documentation>A time-rate pair.</xs:documentation>
-                            <xs:appinfo>name:Rate;units:Imported cases per thousand people per year;</xs:appinfo>
-                          </xs:annotation>
-                          <xs:attribute name="time" type="xs:string" use="required">
-                            <xs:annotation>
-                              <xs:documentation>
+        <xs:appinfo>name:Rate of importation</xs:appinfo>
+       </xs:annotation>
+       <xs:complexType>
+        <xs:sequence>
+         <xs:element name="rate" minOccurs="1" maxOccurs="unbounded">
+          <xs:complexType>
+           <xs:complexContent>
+            <xs:extension base="om:DoubleValue">
+             <xs:annotation>
+              <xs:documentation>A time-rate pair.</xs:documentation>
+              <xs:appinfo>name:Rate;units:Imported cases per thousand people per year;</xs:appinfo>
+             </xs:annotation>
+             <xs:attribute name="time" type="xs:string" use="required">
+              <xs:annotation>
+               <xs:documentation>
                                 Time at which this importation rate becomes active.
                                 
                                 See doc on intervention period and on monitoring/startDate for
                                 details of how times work. Can be specified in steps, days,
                                 years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
                               </xs:documentation>
-                              <xs:appinfo>name:Time of start;units:User defined (defauls to steps);min:0;</xs:appinfo>
-                            </xs:annotation>
-                          </xs:attribute>
-                        </xs:extension>
-                      </xs:complexContent>
-                    </xs:complexType>
-                  </xs:element>
-                </xs:sequence>
-                <xs:attribute name="period" type="xs:string" default="0">
-                  <xs:annotation>
-                    <xs:documentation>
+               <xs:appinfo>name:Time of start;units:User defined (defauls to steps);min:0;</xs:appinfo>
+              </xs:annotation>
+             </xs:attribute>
+            </xs:extension>
+           </xs:complexContent>
+          </xs:complexType>
+         </xs:element>
+        </xs:sequence>
+        <xs:attribute name="period" type="xs:string" default="0">
+         <xs:annotation>
+          <xs:documentation>
                       If period is 0 (or effectively infinite), the last specified
                       value remains indefinitely in effect.
                       
                       If period is less than the length of the simulation's intervention phase,
-                      then all "rate" deployments are repeated with this periodicity.
-                      In this case, the first "rate" deployment must coincide with the start of
+                      then all &quot;rate&quot; deployments are repeated with this periodicity.
+                      In this case, the first &quot;rate&quot; deployment must coincide with the start of
                       the intervention phase (monitoring/startDate).
                       
                       Can be specified in steps (e.g. 1t) or days (e.g. 365d).
                     </xs:documentation>
-                    <xs:appinfo>name:Period of repetition;units:User defined (default: steps);min:0</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
+          <xs:appinfo>name:Period of repetition;units:User defined (default: steps);min:0</xs:appinfo>
+         </xs:annotation>
+        </xs:attribute>
+       </xs:complexType>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+       <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="insertR_0Case">
-        <xs:annotation>
-          <xs:documentation>
+       <xs:appinfo>name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="insertR_0Case">
+    <xs:annotation>
+     <xs:documentation>
             Used to simulate R_0. First, infections should be eliminated,
             immunity removed, and the population given an effective transmission-
             blocking vaccine (not done by this intervention). Then this
@@ -198,43 +196,43 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             one human will be a source of infections in an unprotected population,
             and will not reinfected himself.
           </xs:documentation>
-          <xs:appinfo>name:Insert R_0 case;</xs:appinfo>
+     <xs:appinfo>name:Insert R_0 case;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
+       <xs:complexType>
+        <xs:annotation>
+         <xs:appinfo>name:Timed occurrence;</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:annotation>
-                  <xs:appinfo>name:Timed occurrence;</xs:appinfo>
-                </xs:annotation>
-                <xs:attribute name="time" type="xs:string" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
+        <xs:attribute name="time" type="xs:string" use="required">
+         <xs:annotation>
+          <xs:documentation>
                       Time at which this intervention occurs.
                       
                       See doc on intervention period and on monitoring/startDate for
                       details of how times work. Can be specified in steps, days,
                       years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
                     </xs:documentation>
-                    <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
+          <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
+         </xs:annotation>
+        </xs:attribute>
+       </xs:complexType>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+       <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="uninfectVectors">
-        <xs:annotation>
-          <xs:documentation>
+       <xs:appinfo>name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="uninfectVectors">
+    <xs:annotation>
+     <xs:documentation>
             Removes all infections from mosquitoes -- resulting in zero EIR to
             humans, until such time that mosquitoes are re-infected and become
             infectious. Only efficacious in dynamic EIR mode (when changeEIR was
@@ -244,65 +242,65 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             from no infections, but with enough mosquitoes to reach a set
             equilibrium of exposure.
           </xs:documentation>
-          <xs:appinfo>units:List of elements;name:Uninfect vectors;</xs:appinfo>
+     <xs:appinfo>units:List of elements;name:Uninfect vectors;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
+       <xs:complexType>
+        <xs:annotation>
+         <xs:appinfo>name:Timed occurrence;</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="timedDeployment" minOccurs="0" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:annotation>
-                  <xs:appinfo>name:Timed occurrence;</xs:appinfo>
-                </xs:annotation>
-                <xs:attribute name="time" type="xs:string" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
+        <xs:attribute name="time" type="xs:string" use="required">
+         <xs:annotation>
+          <xs:documentation>
                       Time at which this intervention occurs.
                       
                       See doc on intervention period and on monitoring/startDate for
                       details of how times work. Can be specified in steps, days,
                       years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
                     </xs:documentation>
-                    <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>
+          <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
+         </xs:annotation>
+        </xs:attribute>
+       </xs:complexType>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+       <xs:documentation>
                 Name of intervention
               </xs:documentation>
-              <xs:appinfo>name:Name of intervention;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="vectorPop">
-        <xs:annotation>
-          <xs:documentation>A list of parameterisations of generic vector host-inspecific interventions.</xs:documentation>
-          <xs:appinfo>name:Vector population intervention;units:List of elements;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <!-- Note: the ONLY reason for this list being wrapped with the
+       <xs:appinfo>name:Name of intervention;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="vectorPop">
+    <xs:annotation>
+     <xs:documentation>A list of parameterisations of generic vector host-inspecific interventions.</xs:documentation>
+     <xs:appinfo>name:Vector population intervention;units:List of elements;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <!-- Note: the ONLY reason for this list being wrapped with the
             extra "vectorPop" element is that XSD 1.0 only allows unrepeated
             elements in an "all" section or multiple in a "sequence" section.
             Using the latter would invalidate existing XMLs and cause excess.
             confusion. XSD 1.1 does not have this limitation but still has
             limited support. -->
-            <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="om:VectorIntervention"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="vectorTrap">
-        <xs:annotation>
-          <xs:documentation>
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="om:VectorIntervention"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="vectorTrap">
+    <xs:annotation>
+     <xs:documentation>
             Traps attract and kill mosquitoes. They are modelled as a
             non-human-host where the probability of mosquitoes surviving
             feeding is zero (since otherwise the simulator would assume
             surviving mosquitoes have had a blood meal), and where this
-            "host" is initially not present.
+            &quot;host&quot; is initially not present.
             
             Model: each type of trap has has an initial availability
             relative to a human and a decay in availability. Each
@@ -312,37 +310,59 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             or sooner, either coinciding with a redeployment or
             causing a reduction in overall effectiveness of traps).
           </xs:documentation>
-          <xs:appinfo>name:Baited trap</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="intervention" type="om:VectorTrap" minOccurs="1" maxOccurs="unbounded"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="human" type="om:HumanInterventions" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>name:Baited trap</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="intervention" type="om:VectorTrap" minOccurs="1" maxOccurs="unbounded"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="nonHumanHostsModifications">
+    <xs:annotation>
+     <xs:documentation>TODO</xs:documentation>
+     <xs:appinfo>name:TODO;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="intervention" type="om:NonHumanHostsIntervention"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="addNonHumanHosts">
+    <xs:annotation>
+     <xs:documentation>TODO</xs:documentation>
+     <xs:appinfo>TODO</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element minOccurs="1" maxOccurs="unbounded" name="nonHumanHosts" type="om:NonHumanHosts"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="human" type="om:HumanInterventions" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
             Encapsulates all interventions whose effects are specific to the
             human host: any interventions where target humans may be selected
             via population-coverage, age limits and sub-population membership.
           </xs:documentation>
-          <xs:appinfo>name:Human-specific interventions;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:all>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>Name of set of interventions</xs:documentation>
-        <xs:appinfo>name:Name of intervention set;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="HumanInterventions">
-    <xs:sequence>
-      <xs:element name="component" minOccurs="1" maxOccurs="unbounded" type="om:HumanInterventionComponent">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>name:Human-specific interventions;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+  </xs:all>
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>Name of set of interventions</xs:documentation>
+    <xs:appinfo>name:Name of intervention set;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="HumanInterventions">
+  <xs:sequence>
+   <xs:element name="component" minOccurs="1" maxOccurs="unbounded" type="om:HumanInterventionComponent">
+    <xs:annotation>
+     <xs:documentation>
             A parameterisation of an effect achieved by one component of an
             intervention. (An intervention is described as the effects of a set
             of components plus deployments of those components. This describes
@@ -368,12 +388,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             some novel vector intervention since the two nets may have separate
             parameters).
           </xs:documentation>
-          <xs:appinfo>name:Component;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="0" name="deployment">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>name:Component;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element maxOccurs="unbounded" minOccurs="0" name="deployment">
+    <xs:annotation>
+     <xs:documentation>
             This element describes deployment of an intervention: which
             components are deployed, how humans are selected for deployment
             (via timed or age-based deployment) as well as a few additional
@@ -383,14 +403,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             same people (each timed or continuous deployment selects recipients
             and then gives each recipient all components of the intervention).
           </xs:documentation>
-          <xs:appinfo>name:Deployment;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
-            <xs:element name="condition" minOccurs="0" maxOccurs="unbounded">
-              <xs:annotation>
-                <xs:documentation>
+     <xs:appinfo>name:Deployment;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="component" maxOccurs="unbounded" type="om:Component"/>
+      <xs:element name="condition" minOccurs="0" maxOccurs="unbounded">
+       <xs:annotation>
+        <xs:documentation>
                   If conditions are specified, deployment of this intervention will only go ahead
                   if all specified conditions are true. Condition statements are evaluated only
                   during surveys, so deployment is enabled or disabled depending on the results
@@ -402,59 +422,59 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   
                   This affects all types of deployment.
                 </xs:documentation>
-                <xs:appinfo>name:Condition;</xs:appinfo>
-              </xs:annotation>
-              <xs:complexType>
-                <xs:attribute name="measure" type="xs:string" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
+        <xs:appinfo>name:Condition;</xs:appinfo>
+       </xs:annotation>
+       <xs:complexType>
+        <xs:attribute name="measure" type="xs:string" use="required">
+         <xs:annotation>
+          <xs:documentation>
                       The monitoring measure to test. Not all measures are available for use.
                     </xs:documentation>
-                    <xs:appinfo>name:Measure;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="minValue" type="xs:double" use="optional">
-                  <xs:annotation>
-                    <xs:documentation>
+          <xs:appinfo>name:Measure;</xs:appinfo>
+         </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="minValue" type="xs:double" use="optional">
+         <xs:annotation>
+          <xs:documentation>
                       Minimum value. If specified, the measured variable must be greater than 
                       or equal to this value for the condition to be satisfied.
                     </xs:documentation>
-                    <xs:appinfo>name:Minimum value;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="maxValue" type="xs:double" use="optional">
-                  <xs:annotation>
-                    <xs:documentation>
+          <xs:appinfo>name:Minimum value;</xs:appinfo>
+         </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="maxValue" type="xs:double" use="optional">
+         <xs:annotation>
+          <xs:documentation>
                       Maximum value. If specified, the measured variable must be less than or
                       equal to this value for the condition to be satisfied.
                     </xs:documentation>
-                    <xs:appinfo>name:Maximum value;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-                <xs:attribute name="initialState" type="xs:boolean" use="required">
-                  <xs:annotation>
-                    <xs:documentation>
+          <xs:appinfo>name:Maximum value;</xs:appinfo>
+         </xs:annotation>
+        </xs:attribute>
+        <xs:attribute name="initialState" type="xs:boolean" use="required">
+         <xs:annotation>
+          <xs:documentation>
                       Whether this condition is considered true or false before updated by a survey.
                     </xs:documentation>
-                    <xs:appinfo>name:Initial state;</xs:appinfo>
-                  </xs:annotation>
-                </xs:attribute>
-              </xs:complexType>
-            </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="om:ContinuousList">
-              <xs:annotation>
-                <xs:documentation>List of ages at which deployment takes place
+          <xs:appinfo>name:Initial state;</xs:appinfo>
+         </xs:annotation>
+        </xs:attribute>
+       </xs:complexType>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="continuous" type="om:ContinuousList">
+       <xs:annotation>
+        <xs:documentation>List of ages at which deployment takes place
                 (through EPI, post-natal and school-based programmes, etc.).
                 
                 A sub-population restriction may be added as a property of the
                 list of continuous deployments.
                 </xs:documentation>
-                <xs:appinfo>name:Age-based (continuous) deployment;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="om:MassListWithCum">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>name:Age-based (continuous) deployment;</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element minOccurs="0" maxOccurs="unbounded" name="timed" type="om:MassListWithCum">
+       <xs:annotation>
+        <xs:documentation>
                   List of timed deployments of the intervention (that is, of
                   deployment campaigns).
                   
@@ -462,73 +482,73 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   To allow multiple cumulative deployment descriptions, the entire timed list
                   may be repeated.
                 </xs:documentation>
-                <xs:appinfo>name:Mass (timed) deployment;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="name" type="xs:string" use="optional">
-            <xs:annotation>
-              <xs:documentation>Name of intervention</xs:documentation>
-              <xs:appinfo>name:Intervention name;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
+        <xs:appinfo>name:Mass (timed) deployment;</xs:appinfo>
+       </xs:annotation>
       </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="HumanInterventionComponent">
-    <xs:sequence>
-      <xs:choice>
-        <xs:element name="screen" type="om:Screen"/>
-        <xs:element name="treatSimple" type="om:DTTreatSimple"/>
-        <xs:element name="treatPKPD" type="om:DTTreatPKPD"/>
-        <xs:element name="decisionTree" type="om:DecisionTree"/>
-        <xs:element name="PEV" type="om:VaccineDescription">
-          <xs:annotation>
-            <xs:documentation>
+     </xs:sequence>
+     <xs:attribute name="name" type="xs:string" use="optional">
+      <xs:annotation>
+       <xs:documentation>Name of intervention</xs:documentation>
+       <xs:appinfo>name:Intervention name;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="HumanInterventionComponent">
+  <xs:sequence>
+   <xs:choice>
+    <xs:element name="screen" type="om:Screen"/>
+    <xs:element name="treatSimple" type="om:DTTreatSimple"/>
+    <xs:element name="treatPKPD" type="om:DTTreatPKPD"/>
+    <xs:element name="decisionTree" type="om:DecisionTree"/>
+    <xs:element name="PEV" type="om:VaccineDescription">
+     <xs:annotation>
+      <xs:documentation>
               Pre-erythrocytic vaccine (PEV): prevents a proportion of infections
               from commencing.
             </xs:documentation>
-            <xs:appinfo>name:Vaccines;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="BSV" type="om:VaccineDescription">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Vaccines;</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="BSV" type="om:VaccineDescription">
+     <xs:annotation>
+      <xs:documentation>
               Blood-stage vaccine (BSV): acts as a killing factor on blood-stage
               parasites. Exact action depends on the within host model.
             </xs:documentation>
-            <xs:appinfo>name:Vaccines;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="TBV" type="om:VaccineDescription">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Vaccines;</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="TBV" type="om:VaccineDescription">
+     <xs:annotation>
+      <xs:documentation>
               Transmission-blocking vaccine (TBV): one minus this scales the
               probability of transmission to mosquitoes
             </xs:documentation>
-            <xs:appinfo>name:Vaccines;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="ITN" type="om:ITNDescription">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Vaccines;</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="ITN" type="om:ITNDescription">
+     <xs:annotation>
+      <xs:documentation>
               Description of bed-net interventions (ITNs, LLINs).
             </xs:documentation>
-            <xs:appinfo>name:Bed nets;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="IRS" type="om:IRSDescription">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Bed nets;</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="IRS" type="om:IRSDescription">
+     <xs:annotation>
+      <xs:documentation>
               Description of indoor residual spraying interventions.
             </xs:documentation>
-            <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="GVI" type="om:GVIDescription">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Indoor residual spraying;</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="GVI" type="om:GVIDescription">
+     <xs:annotation>
+      <xs:documentation>
               Low-level description of intervention effects on vectors (i.e.
               mosquitoes). Can be used to describe simple ITN or IRS
               interventions (though more complex models are available for these
@@ -539,12 +559,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               according to a single decay function. If independant decay is
               wanted, a separate component can be used for each action.
             </xs:documentation>
-            <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
-          </xs:annotation>
-        </xs:element>
-        <xs:element name="recruitmentOnly" minOccurs="0">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Generic vector intervention;</xs:appinfo>
+     </xs:annotation>
+    </xs:element>
+    <xs:element name="recruitmentOnly" minOccurs="0">
+     <xs:annotation>
+      <xs:documentation>
               Recruitment of a host into a sub-population.
               
               All human-targeting intervention deployments recruit simulated
@@ -553,13 +573,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               defining a cohort. This pseudo-intervention can be used to define
               a sub-population without also deploying some intervention.
             </xs:documentation>
-            <xs:appinfo>name:Recruitment only;</xs:appinfo>
-          </xs:annotation>
-          <xs:complexType/>
-        </xs:element>
-        <xs:element name="clearImmunity">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Recruitment only;</xs:appinfo>
+     </xs:annotation>
+     <xs:complexType/>
+    </xs:element>
+    <xs:element name="clearImmunity">
+     <xs:annotation>
+      <xs:documentation>
               Removes all exposure-related immunitsy gained over time by hosts
               without removing infections (or affecting the ability to gain
               immunity through exposure).
@@ -567,37 +587,37 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               Hypothetical, but potentially useful to simulate scenarios with
               unprotected humans.
             </xs:documentation>
-            <xs:appinfo>name:Clear Immunity;</xs:appinfo>
-          </xs:annotation>
-          <xs:complexType/>
-        </xs:element>
-      </xs:choice>
-      <xs:element name="subPopRemoval" minOccurs="0" type="om:SubPopRemoval"/>
-    </xs:sequence>
-    <xs:attribute name="id" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
+      <xs:appinfo>name:Clear Immunity;</xs:appinfo>
+     </xs:annotation>
+     <xs:complexType/>
+    </xs:element>
+   </xs:choice>
+   <xs:element name="subPopRemoval" minOccurs="0" type="om:SubPopRemoval"/>
+  </xs:sequence>
+  <xs:attribute name="id" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
           A short name or code identifying the intervention component
           (used to refer to this component when describing an intervention).
           Also the id of the sub-population defined as those hosts who have
           received this intervention and who haven't subsequently been removed
           from the sub-population.
         </xs:documentation>
-        <xs:appinfo>name:Component identifier;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="name" type="xs:string" use="optional">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Component identifier;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
           An informal name/description for the component
         </xs:documentation>
-        <xs:appinfo>name:Name of component;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="SubPopRemoval">
-    <xs:annotation>
-      <xs:documentation>
+    <xs:appinfo>name:Name of component;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="SubPopRemoval">
+  <xs:annotation>
+   <xs:documentation>
         Each human intervention component corresponds to a sub-population:
         those who have received or are considered to be protected by the
         intervention component. Humans automatically become members of this
@@ -617,11 +637,11 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         population may or may not correspond (roughly) to humans protected by
         some intervention.
       </xs:documentation>
-      <xs:appinfo>name:Remove from sub-population ...;</xs:appinfo>
-    </xs:annotation>
-    <xs:attribute name="onFirstBout" type="xs:boolean" default="false">
-      <xs:annotation>
-        <xs:documentation>
+   <xs:appinfo>name:Remove from sub-population ...;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="onFirstBout" type="xs:boolean" default="false">
+   <xs:annotation>
+    <xs:documentation>
           If true, remove individuals from the sub-population at the start of
           the first episode (start of a clinical bout) since they were
           recruited into the sub-population. This is intended for cohort
@@ -636,12 +656,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           This does not prevent re-recruitment in the case that recruitment
           settings could conceivably recruit the same individual twice.
         </xs:documentation>
-        <xs:appinfo>name:Time to first episode only;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="onFirstTreatment" type="xs:boolean" default="false">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Time to first episode only;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="onFirstTreatment" type="xs:boolean" default="false">
+   <xs:annotation>
+    <xs:documentation>
           If true, remove individuals from the sub-population when they first
           seektreatment since they were recruited into the sub-population. This
           is intended for cohort studies which measure the time to first
@@ -655,12 +675,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           This does not prevent re-recruitment in the case that recruitment
           settings could conceivably recruit the same individual twice.
         </xs:documentation>
-        <xs:appinfo>name:Time to first treatment only;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="onFirstInfection" type="xs:boolean" default="false">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Time to first treatment only;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="onFirstInfection" type="xs:boolean" default="false">
+   <xs:annotation>
+    <xs:documentation>
           If true, remove individuals from the sub-population at completion of
           the first survey in which they present with a patent infection since
           they were recruited into the sub-population. This intended for cohort
@@ -675,12 +695,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           This does not prevent re-recruitment in the case that recruitment settings could
           conceivably recruit the same individual twice.
         </xs:documentation>
-        <xs:appinfo>name:Time to first infection only;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="afterYears" type="xs:double" use="optional">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Time to first infection only;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="afterYears" type="xs:double" use="optional">
+   <xs:annotation>
+    <xs:documentation>
           If given, membership to the sub-population of humans who have
           received this intervention component expires after the given number of
           years. Note that future deployments renew membership (e.g. if this
@@ -689,7 +709,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           
           This provides a crude way of modelling a cohort protected by some
           intervention. A few interventions provide more detailed ways of
-          modelling expiry of protection. In any case, "expiry of protection"
+          modelling expiry of protection. In any case, &quot;expiry of protection&quot;
           is an abstract concept and does not imply that all protection has
           ceased, even in the simulator.
           
@@ -706,13 +726,13 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           
           Input is rounded to the nearest time step.
         </xs:documentation>
-        <xs:appinfo>name:Remove from sub-population after;units:Years;min:0;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="Screen">
-    <xs:annotation>
-      <xs:documentation>
+    <xs:appinfo>name:Remove from sub-population after;units:Years;min:0;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="Screen">
+  <xs:annotation>
+   <xs:documentation>
         This can be combined with MDA to achieve mass screen and treat (MSAT)
         or other types of mass screening intervention.
         
@@ -725,24 +745,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         outcome. Deployment of interventions triggered by the screening may
         be reported, however.
       </xs:documentation>
-      <xs:appinfo>name:(Mass) screening;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="positive" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
-      <xs:element name="negative" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
-    </xs:sequence>
-    <xs:attribute name="diagnostic" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
+   <xs:appinfo>name:(Mass) screening;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="positive" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
+   <xs:element name="negative" minOccurs="0" maxOccurs="unbounded" type="om:Component"/>
+  </xs:sequence>
+  <xs:attribute name="diagnostic" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Name of a parameterised diagnostic (see scenario/diagnostics).
         </xs:documentation>
-        <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="VectorIntervention">
-    <xs:annotation>
-      <xs:documentation>
+    <xs:appinfo>name:Name of diagnostic;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="VectorIntervention">
+  <xs:annotation>
+   <xs:documentation>
         An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
         
         Multiple instances of this intervention class are allowed (multiple parameterisations, not just deployments).
@@ -751,58 +771,58 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
         are independent (effects are combined) but the effects of multiple deployments of a single
         instance are not independent (only the latest deployment has any effect).
       </xs:documentation>
-      <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="description">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="anopheles" maxOccurs="unbounded" type="om:VectorSpeciesIntervention"/>
-          </xs:sequence>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="timed" type="om:TimedBaseList">
-        <xs:annotation>
-          <xs:documentation>
+   <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="description">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="anopheles" maxOccurs="unbounded" type="om:VectorSpeciesIntervention"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="timed" type="om:TimedBaseList">
+    <xs:annotation>
+     <xs:documentation>
             List of timed vector population intervention deployment
           </xs:documentation>
-          <xs:appinfo>name:Vector population intervention deployment;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
+     <xs:appinfo>name:Vector population intervention deployment;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Name of intervention (e.g. larviciding, sugar bait).
         </xs:documentation>
-        <xs:appinfo>name:Name of intervention;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="VectorTrap">
-    <xs:annotation>
-      <xs:documentation>
+    <xs:appinfo>name:Name of intervention;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="VectorTrap">
+  <xs:annotation>
+   <xs:documentation>
         Parameters and deployment of one type of trap. In case multiple types
         of trap are needed simultaneously, multiple elements can be used. Note
         that different types of trap do not interact except that all will
         attract mosquitoes.
       </xs:documentation>
-      <xs:appinfo>name:Vector trap intervetion;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="description" minOccurs="1" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:documentation>
+   <xs:appinfo>name:Vector trap intervetion;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="description" minOccurs="1" maxOccurs="unbounded">
+    <xs:annotation>
+     <xs:documentation>
             Parameters associated with a vector trap intervention, per
             mosquito species.
           </xs:documentation>
-          <xs:appinfo>name:Description;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="relativeAvailability" type="om:DoubleValue">
-              <xs:annotation>
-                <xs:documentation>
+     <xs:appinfo>name:Description;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="relativeAvailability" type="om:DoubleValue">
+       <xs:annotation>
+        <xs:documentation>
                   Describes the availiability of a trap to a
                   host-seeking mosquito relative to an average
                   unprotected adult.
@@ -815,12 +835,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   towards zero depending on the configured
                   decay function.
                 </xs:documentation>
-                <xs:appinfo>units:Proportion;name:Initial relative availability;min:0;max:inf;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="decayOfAvailability" type="om:DecayFunction">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>units:Proportion;name:Initial relative availability;min:0;max:inf;</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="decayOfAvailability" type="om:DecayFunction">
+       <xs:annotation>
+        <xs:documentation>
                   Describes how availability decays to zero.
                   
                   If decay heterogeneity/variance is used, there will be a
@@ -829,36 +849,36 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   support for variances between traps (except in this crude
                   way, between deployments).
                 </xs:documentation>
-                <xs:appinfo>name:Decay of availability;</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="mosquito" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
+        <xs:appinfo>name:Decay of availability;</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="mosquito" type="xs:string" use="required">
+      <xs:annotation>
+       <xs:documentation>
                 Name of the species/subspecies/variant.
               </xs:documentation>
-              <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element minOccurs="0" name="timed">
-        <xs:annotation>
-          <xs:documentation>
+       <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="timed">
+    <xs:annotation>
+     <xs:documentation>
             List of timed vector trap intervention deployment
           </xs:documentation>
-          <xs:appinfo>name:Vector trap intervention deployment;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
-              <xs:complexType>
-                <xs:complexContent>
-                  <xs:extension base="om:TimedBase">
-                    <xs:attribute name="ratioToHumans" type="xs:double" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
+     <xs:appinfo>name:Vector trap intervention deployment;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
+       <xs:complexType>
+        <xs:complexContent>
+         <xs:extension base="om:TimedBase">
+          <xs:attribute name="ratioToHumans" type="xs:double" use="required">
+           <xs:annotation>
+            <xs:documentation>
                           The number of traps deployed, by this
                           deployment, per adult human.
                           
@@ -866,14 +886,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                           humans, then a ratio of 0.1 will increase the
                           number of traps to 200.
                         </xs:documentation>
-                        <xs:appinfo>name:Ratio to humans;unit:dimensionless;min:0;max:inf;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                    <xs:attribute name="lifespan" type="xs:string" use="required">
-                      <xs:annotation>
-                        <xs:documentation>
+            <xs:appinfo>name:Ratio to humans;unit:dimensionless;min:0;max:inf;</xs:appinfo>
+           </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="lifespan" type="xs:string" use="required">
+           <xs:annotation>
+            <xs:documentation>
                       Life of the trap until replaced or removed, e.g.
-                      "73t" or "1y". After this time period, these traps
+                      &quot;73t&quot; or &quot;1y&quot;. After this time period, these traps
                       will be removed from the simulation.
                       
                       New deployments do not automatically remove old
@@ -881,53 +901,53 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                       model. It may make sense to make the end-of-life
                       coincide with a new deployment.
                         </xs:documentation>
-                        <xs:appinfo>name:Lifespan;units:Steps or Days or Years;</xs:appinfo>
-                      </xs:annotation>
-                    </xs:attribute>
-                  </xs:extension>
-                </xs:complexContent>
-              </xs:complexType>
-            </xs:element>
-          </xs:sequence>
-        </xs:complexType>
+            <xs:appinfo>name:Lifespan;units:Steps or Days or Years;</xs:appinfo>
+           </xs:annotation>
+          </xs:attribute>
+         </xs:extension>
+        </xs:complexContent>
+       </xs:complexType>
       </xs:element>
-    </xs:sequence>
-    <xs:attribute name="name" type="xs:string" use="optional">
-      <xs:annotation>
-        <xs:documentation>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string" use="optional">
+   <xs:annotation>
+    <xs:documentation>
           Optional name for this type of trap
         </xs:documentation>
-        <xs:appinfo>name:Descriptive name for type of trap;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="TimedBase">
-    <xs:attribute name="time" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Descriptive name for type of trap;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="TimedBase">
+  <xs:attribute name="time" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Time at which this deployment occurs.
           
           See doc on intervention period and on monitoring/startDate for
           details of how times work. Can be specified in steps, days,
           years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
         </xs:documentation>
-        <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="DeploymentBase">
-    <xs:attribute name="coverage" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="DeploymentBase">
+  <xs:attribute name="coverage" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Proportion of otherwise eligible individuals who will receive this
           deployment.
         </xs:documentation>
-        <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="vaccMinPrevDoses" type="xs:int" use="optional">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>units:dimensionless;min:0;max:1;name:Coverage;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="vaccMinPrevDoses" type="xs:int" use="optional">
+   <xs:annotation>
+    <xs:documentation>
           Applies to vaccines only: vaccine doses are only deployed by this
           deployment if the previous number of doses (for the component
           deployed) is at least this number.
@@ -936,64 +956,64 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           vaccine and this value is 1, then this deployment cannot deploy the
           vaccine to individuals who did not receive the first deployment.
         </xs:documentation>
-        <xs:appinfo>name:Vaccine min previous doses;units:inoculations;min:0;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="vaccMaxCumDoses" type="xs:int" use="optional">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Vaccine min previous doses;units:inoculations;min:0;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="vaccMaxCumDoses" type="xs:int" use="optional">
+   <xs:annotation>
+    <xs:documentation>
           Applies to vaccines only: vaccine doses are only deployed by this
           deployment if the previous number of doses (for the component
           deployed) is less than this number.
         </xs:documentation>
-        <xs:appinfo>name:Vaccine max cumulative doses;units:inoculations;min:0;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="MassDeployment">
-    <xs:complexContent>
-      <xs:extension base="om:DeploymentBase">
-        <xs:attribute name="time" type="xs:string" use="required">
-          <xs:annotation>
-            <xs:documentation>
+    <xs:appinfo>name:Vaccine max cumulative doses;units:inoculations;min:0;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="MassDeployment">
+  <xs:complexContent>
+   <xs:extension base="om:DeploymentBase">
+    <xs:attribute name="time" type="xs:string" use="required">
+     <xs:annotation>
+      <xs:documentation>
               Time at which this deployment occurs.
               
               See doc on intervention period and on monitoring/startDate for
               details of how times work. Can be specified in steps, days,
               years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="maxAge" type="xs:double" use="optional">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:Time;units:User defined (defauls to steps);min:0;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="maxAge" type="xs:double" use="optional">
+     <xs:annotation>
+      <xs:documentation>
               Maximum age of eligible individuals (defaults to no limit).
               
               Input is rounded to the nearest time step.
             </xs:documentation>
-            <xs:appinfo>units:Years;min:0;name:Maximum age of eligible individuals;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="minAge" type="xs:double" default="0">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>units:Years;min:0;name:Maximum age of eligible individuals;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="minAge" type="xs:double" default="0">
+     <xs:annotation>
+      <xs:documentation>
               Minimum age of eligible individuals (defaults to 0).
               
               Input is rounded to the nearest time step.
             </xs:documentation>
-            <xs:appinfo>units:Years;min:0;name:Minimum age of eligible individuals;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="repeatStep" type="xs:string" use="optional">
-          <xs:annotation>
-            <xs:documentation>See repeatEnd's documentation.</xs:documentation>
-            <xs:appinfo>name:Step of repetition;units:User defined;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="repeatEnd" type="xs:string" use="optional">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>units:Years;min:0;name:Minimum age of eligible individuals;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="repeatStep" type="xs:string" use="optional">
+     <xs:annotation>
+      <xs:documentation>See repeatEnd's documentation.</xs:documentation>
+      <xs:appinfo>name:Step of repetition;units:User defined;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="repeatEnd" type="xs:string" use="optional">
+     <xs:annotation>
+      <xs:documentation>
               Either both repeatStep and repeatEnd should be present
               or neither. If present, the deployment is repeated every
               repeatStep timesteps (i.e. if t0 is the initial time
@@ -1004,35 +1024,35 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               Note that repeatEnd may be specified as a date but
               repeatStep must be a duration (days, steps or years).
             </xs:documentation>
-            <xs:appinfo>name:End of repetition (exclusive);units:User defined;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="ContinuousList">
-    <xs:sequence>
-      <xs:element name="restrictToSubPop" type="om:RestrictToSubPop" minOccurs="0"/>
-      <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="om:ContinuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="ContinuousDeployment">
-    <xs:complexContent>
-      <xs:extension base="om:DeploymentBase">
-        <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:End of repetition (exclusive);units:User defined;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+ <xs:complexType name="ContinuousList">
+  <xs:sequence>
+   <xs:element name="restrictToSubPop" type="om:RestrictToSubPop" minOccurs="0"/>
+   <!-- Note: minimum is 1 to save an extra check in code. -->
+   <xs:element name="deploy" type="om:ContinuousDeployment" minOccurs="1" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="ContinuousDeployment">
+  <xs:complexContent>
+   <xs:extension base="om:DeploymentBase">
+    <xs:attribute name="targetAgeYrs" type="xs:double" use="required">
+     <xs:annotation>
+      <xs:documentation>
               Target age of intervention.
               
               Input is rounded to the nearest time step.
             </xs:documentation>
-            <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="begin" type="xs:string" use="optional">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>units:Years;min:0;max:100;name:Target age;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="begin" type="xs:string" use="optional">
+     <xs:annotation>
+      <xs:documentation>
               First time at which this deployment is active. If not specified,
               deployment starts at the beginning of the intervention period.
               
@@ -1040,12 +1060,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               details of how times work. Can be specified in steps, days,
               years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>name:First time active;units:User defined (defauls to steps);</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="end" type="xs:string" use="optional">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>name:First time active;units:User defined (defauls to steps);</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="end" type="xs:string" use="optional">
+     <xs:annotation>
+      <xs:documentation>
               End of the period during which the intervention is active (to be
               exact, the first step of the intervention period at which the
               item becomes inactive). If not specified, deployment never
@@ -1055,24 +1075,24 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               details of how times work. Can be specified in steps, days,
               years, or as a date (examples: 15t, 75d, 0.2y, 2000-03-16).
             </xs:documentation>
-            <xs:appinfo>units:User defined (defauls to steps);name:End step;</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="TimedBaseList">
-    <xs:sequence>
-      <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="om:TimedBase" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="MassListWithCum">
-    <xs:sequence>
-      <xs:element name="restrictToSubPop" minOccurs="0" type="om:RestrictToSubPop"/>
-      <xs:element name="cumulativeCoverage" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+      <xs:appinfo>units:User defined (defauls to steps);name:End step;</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+ <xs:complexType name="TimedBaseList">
+  <xs:sequence>
+   <!-- Note: minimum is 1 to save an extra check in code. -->
+   <xs:element name="deploy" type="om:TimedBase" minOccurs="1" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="MassListWithCum">
+  <xs:sequence>
+   <xs:element name="restrictToSubPop" minOccurs="0" type="om:RestrictToSubPop"/>
+   <xs:element name="cumulativeCoverage" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
           If this element is not specified, standard deployment occurs, where
           a portion of the population as given by the coverage property of this
           campaign is selected, and interventions are deployed to all of
@@ -1080,7 +1100,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           
           If this attribute is specified, instead, the population is divided
           into two sets: those who are a member of a certain sub-population and
-          those who are not (see "subPopRemoval" element).
+          those who are not (see &quot;subPopRemoval&quot; element).
           If the proportion of people in the
           first set is less than the desired coverage, then the proportion of
           people from the second set needed to increase total coverage to the
@@ -1093,118 +1113,118 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           selecting people need not actually be one of the components deployed
           by this intervention, although that is the intended use case.
           </xs:documentation>
-          <xs:appinfo>name:Cumulative coverage;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="component" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
+     <xs:appinfo>name:Cumulative coverage;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:attribute name="component" type="xs:string" use="required">
+      <xs:annotation>
+       <xs:documentation>
                 The identifier (short name) of the component used when
                 selecting people.
               </xs:documentation>
-              <xs:appinfo>name:Component identifier;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <!-- Note: minimum is 1 to save an extra check in code. -->
-      <xs:element name="deploy" type="om:MassDeployment" minOccurs="1" maxOccurs="unbounded"/>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="RestrictToSubPop">
-    <xs:annotation>
-      <xs:documentation>
+       <xs:appinfo>name:Component identifier;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <!-- Note: minimum is 1 to save an extra check in code. -->
+   <xs:element name="deploy" type="om:MassDeployment" minOccurs="1" maxOccurs="unbounded"/>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="RestrictToSubPop">
+  <xs:annotation>
+   <xs:documentation>
         If this element is specified, deployment is restricted to some
-        sub-population (specified via the "id" attribute); otherwise the
+        sub-population (specified via the &quot;id&quot; attribute); otherwise the
         target population is the entire simulated population. Either way, other
         deployment restrictions (age, time, number of vaccine doeses) still
         apply.
       </xs:documentation>
-      <xs:appinfo>name:Restrict to sub-population;</xs:appinfo>
-    </xs:annotation>
-    <xs:attribute name="id" type="xs:string" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          The identifier (short name) of the sub-population (i.e. the "id" of
-          some intervention component). Also see the "complement" attribute.
+   <xs:appinfo>name:Restrict to sub-population;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="id" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          The identifier (short name) of the sub-population (i.e. the &quot;id&quot; of
+          some intervention component). Also see the &quot;complement&quot; attribute.
         </xs:documentation>
-        <xs:appinfo>name:Sub-population identifier;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="complement" type="xs:boolean" default="false">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>name:Sub-population identifier;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="complement" type="xs:boolean" default="false">
+   <xs:annotation>
+    <xs:documentation>
           If this is not specified or is false, deployment is restricted to the
           sub-population of people protected by the intervention component
           who's id is given. If complement is set to true, deployment is
           instead restricted to the complement of that sub-population, i.e. to
           those <i>not</i> protected by the intervention component.
         </xs:documentation>
-        <xs:appinfo>name:Complement;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="VaccineDescription">
+    <xs:appinfo>name:Complement;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="VaccineDescription">
+  <xs:annotation>
+   <xs:documentation>Description of a vaccine's effect</xs:documentation>
+   <xs:appinfo>name:Vaccine descriptions;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="decay" type="om:DecayFunction">
     <xs:annotation>
-      <xs:documentation>Description of a vaccine's effect</xs:documentation>
-      <xs:appinfo>name:Vaccine descriptions;</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="decay" type="om:DecayFunction">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:documentation>
             Specification of decay of efficacy. Documentation: see DecayFunction type
             or https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
           </xs:documentation>
-          <xs:appinfo>name:Decay of effect;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="efficacyB" type="om:DoubleValue">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>name:Decay of effect;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="efficacyB" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>
             Measure of variation in vaccine efficacy: efficacy is sampled from
             a beta distribution with efficacyB its beta parameter and its alpha
             parameter fixed such that the mean is that given by initialEfficacy.
           </xs:documentation>
-          <xs:appinfo>units:Positive real;min:0.001;max:1.00E+06;name:Variance parameter for vaccine efficacy;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="om:DoubleValue">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:Positive real;min:0.001;max:1.00E+06;name:Variance parameter for vaccine efficacy;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>
             Mean efficacy values before decay (see efficacyB and decay parameter
             descriptions for sampling and decay). The i-th value in this list
             is used for the efficacy of the vaccine after the i-th dose. Where
             more doses are given than there are values in this list, the last
             value is repeated.
           </xs:documentation>
-          <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="ITNDescription">
-    <xs:annotation>
-      <xs:appinfo>name:Description</xs:appinfo>
+     <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
     </xs:annotation>
-    <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="ITNDescription">
+  <xs:annotation>
+   <xs:appinfo>name:Description</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
           Usage of nets by humans, from 0 to 1.
           
           At the moment this is constant across humans and deterministic:
           relative attractiveness and survival factors are
           base*(1-usage*propActing) + intervention_factor*usage*propActing.
           
-          See also "propActing" (proportion of bits for which net acts).
+          See also &quot;propActing&quot; (proportion of bits for which net acts).
         </xs:documentation>
-          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="holeRate" type="om:SampledValueLN">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of time nets are used by humans;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="holeRate" type="om:SampledValueLN">
+    <xs:annotation>
+     <xs:documentation>
           The rate at which new holes are made in nets.
           
           nHoles(t) = nHoles(t-1) + X where X~Pois(R/T) where T is the number
@@ -1213,12 +1233,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           with ripRate and insecticideDecay. (To be exact, a single Gaussian
           sample is taken, adjusted for each sigma then exponentiated.)
         </xs:documentation>
-          <xs:appinfo>units:Holes per annum;min:0;name:Rate at which holes are made;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="ripRate" type="om:SampledValueLN">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:Holes per annum;min:0;name:Rate at which holes are made;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="ripRate" type="om:SampledValueLN">
+    <xs:annotation>
+     <xs:documentation>
           Each existing hole has a probability of being ripped bigger according
           to a Poisson process with this rate as (only) parameter.
           
@@ -1229,34 +1249,34 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           single Gaussian sample is taken, adjusted for the each and sigma
           then exponentiated.)
         </xs:documentation>
-          <xs:appinfo>units:Rips per existing hole per annum;min:0;name:Rate at which holes are enlarged;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="ripFactor" type="om:DoubleValue">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:Rips per existing hole per annum;min:0;name:Rate at which holes are enlarged;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="ripFactor" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>
           This factor expresses how important rips are in increasing the hole.
           
           The hole index of a net is h + F×x where h and x are the total numbers
           of holes and rips respectively and F is the rip factor.
         </xs:documentation>
-          <xs:appinfo>units:none;min:0;name:Rip factor;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="initialInsecticide" type="om:SampledValueN">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:none;min:0;name:Rip factor;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="initialInsecticide" type="om:SampledValueN">
+    <xs:annotation>
+     <xs:documentation>
           The insecticide concentration of new nets is Gaussian distributed with
-          mean "mu" and a standard deviation "sigma". The standard deviation
+          mean &quot;mu&quot; and a standard deviation &quot;sigma&quot;. The standard deviation
           should be small relative to the mean to avoid negative initial
           concentration. Any negative values sampled are set to 0.
         </xs:documentation>
-          <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="insecticideDecay" type="om:DecayFunction">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:mg/m²;min:0;name:Initial insecticide;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="insecticideDecay" type="om:DecayFunction">
+    <xs:annotation>
+     <xs:documentation>
           Decay curve for insecticide content of nets. Documentation: see DecayFunction
           type or https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
           
@@ -1269,12 +1289,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           variable is then exponentiated and multiplied by the required mean
           rate for the respective variable.
         </xs:documentation>
-          <xs:appinfo>units:none;name:Decay of insecticide;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="attritionOfNets" type="om:DecayFunction">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:none;name:Decay of insecticide;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="attritionOfNets" type="om:DecayFunction">
+    <xs:annotation>
+     <xs:documentation>
           Specifies the rate at which nets are disposed of over time.
           Documentation: see DecayFunction type or
           https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
@@ -1290,25 +1310,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           on disposal (attrition) of their nets. Currently this event is not 
           reported.
         </xs:documentation>
-          <xs:appinfo>units:dimensionless;name:Attrition of nets;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="anophelesParams" maxOccurs="unbounded">
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="holeIndexMax" type="om:DoubleValue" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Attrition of nets;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="anophelesParams" maxOccurs="unbounded">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="holeIndexMax" type="om:DoubleValue" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
                   Used by logit attacking and killing models only, holeIndexMax
                   is a user defined maximum hole index (typically, the total surface area of a net).
                 </xs:documentation>
-                <xs:appinfo>units:in same unit as holeIndex;name:maximum of holed surface area that has an effect (comparable to no net)</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:choice>
-              <xs:element name="deterrency" type="om:ITNDeterrency">
-                <xs:annotation>
-                  <xs:documentation>
+        <xs:appinfo>units:in same unit as holeIndex;name:maximum of holed surface area that has an effect (comparable to no net)</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:choice>
+       <xs:element name="deterrency" type="om:ITNDeterrency">
+        <xs:annotation>
+         <xs:documentation>
                   Effect of net on attractiveness of humans to mosquitoes relative to
                   an unprotected adult human. Parameterisations should take into
                   account that mosquitoes do not always bite indoors.
@@ -1319,12 +1339,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   respectively, h=exp(-holeIndex×holeScalingFactor) and
                   p=1−exp(-insecticideContent×insecticideScalingFactor).
                   </xs:documentation>
-                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness;</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="twoStageDeterrency">
-                <xs:annotation>
-                  <xs:documentation>
+         <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness;</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+       <xs:element name="twoStageDeterrency">
+        <xs:annotation>
+         <xs:documentation>
                   Effect of net on attractiveness of humans to mosquitoes relative to
                   an unprotected adult human. Parameterisations should take into
                   account that mosquitoes do not always bite indoors.
@@ -1332,25 +1352,25 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   This deterrency model multiplies human attractiveness by
                   pEnt×pAtt.
                   </xs:documentation>
-                  <xs:appinfo>units:dimensionless;name:Relative attractiveness;</xs:appinfo>
-                </xs:annotation>
-                <xs:complexType>
-                  <xs:sequence>
-                    <xs:choice>
-                      <xs:element name="entering" type="om:IRSDeterrency">
-                        <xs:annotation>
-                          <xs:documentation>
+         <xs:appinfo>units:dimensionless;name:Relative attractiveness;</xs:appinfo>
+        </xs:annotation>
+        <xs:complexType>
+         <xs:sequence>
+          <xs:choice>
+           <xs:element name="entering" type="om:IRSDeterrency">
+            <xs:annotation>
+             <xs:documentation>
                             pEnt represents the relative probability of entering due to
                             ITNs: pEnt = exp(log(P)×p) where P is the insecticide
                             factor and 
                             p=1−exp(-insecticideContent×insecticideScalingFactor).
                           </xs:documentation>
-                          <xs:appinfo>units:dimensionless;name:Deterrency: entering;</xs:appinfo>
-                        </xs:annotation>
-                      </xs:element>
-                      <xs:element name="enteringLogit" type="om:ITNEnteringDeterrencyLogit">
-                        <xs:annotation>
-                          <xs:documentation>
+             <xs:appinfo>units:dimensionless;name:Deterrency: entering;</xs:appinfo>
+            </xs:annotation>
+           </xs:element>
+           <xs:element name="enteringLogit" type="om:ITNEnteringDeterrencyLogit">
+            <xs:annotation>
+             <xs:documentation>
                             pEnt represents the relative probability of entering due to insecticide
                             in the hut:
                                 pEnt = exp(logit.pEnt) / (exp(logit.pEnt) + 1)
@@ -1365,14 +1385,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                                 pEnt ≤ pEnt0
                             and thus P ≤ 0 and give a warning if this is not fulfilled.
                           </xs:documentation>
-                          <xs:appinfo>units:dimensionless;name:Deterrency: entering (logit model);</xs:appinfo>
-                        </xs:annotation>
-                      </xs:element>
-                    </xs:choice>
-                    <xs:choice>
-                      <xs:element name="attacking" type="om:ITNKillingEffect">
-                        <xs:annotation>
-                          <xs:documentation>
+             <xs:appinfo>units:dimensionless;name:Deterrency: entering (logit model);</xs:appinfo>
+            </xs:annotation>
+           </xs:element>
+          </xs:choice>
+          <xs:choice>
+           <xs:element name="attacking" type="om:ITNKillingEffect">
+            <xs:annotation>
+             <xs:documentation>
                             pAtt represents the relative probability of attacking a human after
                             entering a house due to ITNs (i.e. of feeding/dying vs. flying off):
                                 pAtt = B + H×h + P×p + I×h×p
@@ -1382,12 +1402,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                             and
                                 p=1 - exp(-insecticideContent × insecticideScalingFactor).
                           </xs:documentation>
-                          <xs:appinfo>units:dimensionless;name:Deterrency: attacking;</xs:appinfo>
-                        </xs:annotation>
-                      </xs:element>
-                      <xs:element name="attackingLogit" type="om:ITNEffectLogit">
-                        <xs:annotation>
-                          <xs:documentation>
+             <xs:appinfo>units:dimensionless;name:Deterrency: attacking;</xs:appinfo>
+            </xs:annotation>
+           </xs:element>
+           <xs:element name="attackingLogit" type="om:ITNEffectLogit">
+            <xs:annotation>
+             <xs:documentation>
                             pAtt represents the relative probability of attacking a human
                             after entering a house due to ITNs (i.e. of feeding/dying vs.
                             flying off):
@@ -1406,20 +1426,20 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                             maximum hole index (typically, the total surface area of a net).
                             Attacking of mosquitoes is adjusted via multiplication by pAtt / pAtt0.
                             This may be larger and smaller than 1 (but will not be negative).
-                            By definition (through the logit transformation) pAtt0 > 0.  
+                            By definition (through the logit transformation) pAtt0 &gt; 0.  
                           </xs:documentation>
-                          <xs:appinfo>units:dimensionless;name:Deterrency: attacking (logit model);</xs:appinfo>
-                        </xs:annotation>
-                      </xs:element>
-                    </xs:choice>
-                  </xs:sequence>
-                </xs:complexType>
-              </xs:element>
-            </xs:choice>
-            <xs:choice>
-              <xs:element name="preprandialKillingEffect" type="om:ITNKillingEffect">
-                <xs:annotation>
-                  <xs:documentation>
+             <xs:appinfo>units:dimensionless;name:Deterrency: attacking (logit model);</xs:appinfo>
+            </xs:annotation>
+           </xs:element>
+          </xs:choice>
+         </xs:sequence>
+        </xs:complexType>
+       </xs:element>
+      </xs:choice>
+      <xs:choice>
+       <xs:element name="preprandialKillingEffect" type="om:ITNKillingEffect">
+        <xs:annotation>
+         <xs:documentation>
                   Effect of net on survival mosquitoes as they seek to bite a human
                   after choosing that human, relative to the same person not
                   sleeping under a net. Parameterisations should take into
@@ -1435,12 +1455,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
                   B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
                   </xs:documentation>
-                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="preprandialKillingEffectLogit" type="om:ITNEffectLogit">
-                <xs:annotation>
-                  <xs:documentation>
+         <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect;</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+       <xs:element name="preprandialKillingEffectLogit" type="om:ITNEffectLogit">
+        <xs:annotation>
+         <xs:documentation>
                   Effect of net on survival mosquitoes as they seek to bite a human
                   after choosing that human, relative to the same person not
                   sleeping under a net.                 
@@ -1458,14 +1478,14 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
                   To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
                   </xs:documentation>
-                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect (logit);</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-            </xs:choice>
-            <xs:choice>
-              <xs:element name="postprandialKillingEffect" type="om:ITNKillingEffect">
-                <xs:annotation>
-                  <xs:documentation>
+         <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect (logit);</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+      </xs:choice>
+      <xs:choice>
+       <xs:element name="postprandialKillingEffect" type="om:ITNKillingEffect">
+        <xs:annotation>
+         <xs:documentation>
                   Effect of net on survival mosquitoes as they seek to escape from
                   a human host and rest after a blood meal, relative to the same
                   person not sleeping under a net. Parameterisations should take
@@ -1481,12 +1501,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   To keep this in the range [0,1], we require that B+H ≤ 1, B+P ≤ 1,
                   B+H+P+I ≤ 1, H ≥ 0, P ≥ 0 and H+P+I ≥ 0.
                   </xs:documentation>
-                  <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="postprandialKillingEffectLogit" type="om:ITNEffectLogit">
-                <xs:annotation>
-                  <xs:documentation>
+         <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect;</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+       <xs:element name="postprandialKillingEffectLogit" type="om:ITNEffectLogit">
+        <xs:annotation>
+         <xs:documentation>
                   Effect of net on survival mosquitoes as they seek to escape from
                   a human host and rest after a blood meal, relative to the same
                   person not sleeping under a net.
@@ -1504,48 +1524,48 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                   Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−K0).
                   To keep this in the range [0,1], we require that K ≥ K0. We enforce that P ≥ 0 (It would not make sense biologically if P were negative) and P+I*hMax ≥ 0 and H ≤ 0 and holeIndex ≤ holeIndexMax and give a warning if these conditions are not fulfilled.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect (logit);</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-            </xs:choice>
-            <xs:choice>
-              <xs:element name="fecundityReduction" type="om:ITNKillingEffect" minOccurs="0">
-                <xs:annotation>
-                  <xs:documentation>
+         <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect (logit);</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+      </xs:choice>
+      <xs:choice>
+       <xs:element name="fecundityReduction" type="om:ITNKillingEffect" minOccurs="0">
+        <xs:annotation>
+         <xs:documentation>
                     Effect of net on fertility of mosquitoes who survive feeding
                     on a protected human, relative to an unprotected human.
                     
                     Fertility (number of eggs laid) is multiplied by (1-K) / (1-B),
                     similar to killing effects. This is not allowed to be greater than 1.
                   </xs:documentation>
-                  <xs:appinfo>name:Fecundity reduction;</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-              <xs:element name="fecundityReductionLogit" type="om:ITNEffectLogit" minOccurs="0">
-                <xs:annotation>
-                  <xs:documentation>
+         <xs:appinfo>name:Fecundity reduction;</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+       <xs:element name="fecundityReductionLogit" type="om:ITNEffectLogit" minOccurs="0">
+        <xs:annotation>
+         <xs:documentation>
                     Effect of net on fertility of mosquitoes who survive feeding
                     on a protected human, relative to an unprotected human.
                     
                     Fertility (number of eggs laid) is multiplied by (1-K) / (1-K0),
                     similar to killing effects. This is not allowed to be greater than 1.
                   </xs:documentation>
-                  <xs:appinfo>name:Fecundity reduction (logit);</xs:appinfo>
-                </xs:annotation>
-              </xs:element>
-            </xs:choice>
-          </xs:sequence>
-          <xs:attribute name="mosquito" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
+         <xs:appinfo>name:Fecundity reduction (logit);</xs:appinfo>
+        </xs:annotation>
+       </xs:element>
+      </xs:choice>
+     </xs:sequence>
+     <xs:attribute name="mosquito" type="xs:string" use="required">
+      <xs:annotation>
+       <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-              <xs:appinfo>name:Mosquito species;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="propActive" type="xs:double" default="1">
-            <xs:annotation>
-              <xs:documentation>
+       <xs:appinfo>name:Mosquito species;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="propActive" type="xs:double" default="1">
+      <xs:annotation>
+       <xs:documentation>
               Deprecated: propActive is now always set to 1. This value will be ignored.
 
               The proportion of bites, when nets are in use, for which the net
@@ -1555,44 +1575,44 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               relative attractiveness and survival factors are
               base*(1-usage*propActing) + intervention_factor*usage*propActing.
               
-              See also "usage" (proportion of time nets are used by humans).
+              See also &quot;usage&quot; (proportion of time nets are used by humans).
             </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which net acts;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="GVIDescription">
-    <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+       <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which net acts;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="GVIDescription">
+  <xs:sequence>
+   <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
           Usage of Generic vector interventions, from 0 to 1.
         </xs:documentation>
-          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of generic vector interventions;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="decay" type="om:DecayFunction">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of generic vector interventions;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="decay" type="om:DecayFunction">
+    <xs:annotation>
+     <xs:documentation>
             Description of decay of all intervention effects.
             Documentation: see DecayFunction type or
             https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
           </xs:documentation>
-          <xs:appinfo>name:Decay;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="anophelesParams" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="deterrency" type="om:DoubleValue" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
+     <xs:appinfo>name:Decay;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="anophelesParams" maxOccurs="unbounded">
+    <xs:annotation>
+     <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="deterrency" type="om:DoubleValue" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of intervention on attractiveness of humans to mosquitoes relative to
                 an unprotected adult human. Parameterisations should take into
                 account that mosquitoes do not always bite indoors.
@@ -1600,12 +1620,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Attractiveness of the human is multiplied this factor times
                 survival of effect.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="preprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="preprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of intervention on survival of mosquitoes as they seek to bite a human
                 after choosing that human, relative to the same person not
                 protected by the intervention. Parameterisations should take into account
@@ -1615,12 +1635,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 
                 Killing proportion is this factor multiplied by survival of effect.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="postprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="postprandialKillingEffect" type="om:DoubleValue" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of intervention on survival of mosquitoes as they seek to escape from
                 a human host and rest after a blood meal, relative to the same
                 person not protected by the intervention. Parameterisations should take
@@ -1628,33 +1648,33 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 
                 Killing proportion is this factor multiplied by survival of effect.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="fecundityReduction" type="om:DoubleValue" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="fecundityReduction" type="om:DoubleValue" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of intervention on fertility mosquitoes after successfully feeding on
                 a human host, relative to an unproteced human. Parameterisations should take
                 into account that mosquitoes do not always bite indoors.
                 
                 Fertility is multiplied by 1 - (fecundityReduction * decay).
                 </xs:documentation>
-                <xs:appinfo>min:0;name:Fecundity reduction effect</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="mosquito" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
+        <xs:appinfo>min:0;name:Fecundity reduction effect</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="mosquito" type="xs:string" use="required">
+      <xs:annotation>
+       <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-              <xs:appinfo>name:Mosquito species</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="propActive" type="xs:double" default="1">
-            <xs:annotation>
-              <xs:documentation>
+       <xs:appinfo>name:Mosquito species</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="propActive" type="xs:double" default="1">
+      <xs:annotation>
+       <xs:documentation>
               The proportion of bites for which the IRS
               has any action whatsoever on the mosquito.
               
@@ -1662,61 +1682,61 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               relative attractiveness and survival factors are
               base*(1-propActing) + intervention_factor*propActing.
             </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="IRSDescription">
-    <xs:annotation>
-      <xs:documentation>
+       <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="IRSDescription">
+  <xs:annotation>
+   <xs:documentation>
         Description of effect for the more complex and probably more realistic
         Briet model: IRS has three effects, whos strength is calculated as a
         function of surviving insecticide content.
       </xs:documentation>
-      <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
-    </xs:annotation>
-    <xs:sequence>
-      <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+   <xs:appinfo>name:Description (based on decay of insecticide);</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="usage" type="om:DoubleValue" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
           Usage of Indoor residual spraying (IRS) interventions, from 0 to 1.
         </xs:documentation>
-          <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of Indoor residual spraying (IRS) interventions;</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="initialInsecticide" type="om:SampledValueN">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of Indoor residual spraying (IRS) interventions;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="initialInsecticide" type="om:SampledValueN">
+    <xs:annotation>
+     <xs:documentation>
           The insecticide concentration of IRS (at time of spraying) is
-          Gaussian distributed with mean "mu" and a standard deviation "sigma".
+          Gaussian distributed with mean &quot;mu&quot; and a standard deviation &quot;sigma&quot;.
           The standard deviation should be small relative to the mean to avoid
           negative initial concentration. Any negative values sampled are set
           to 0.
         </xs:documentation>
-          <xs:appinfo>units:μg/cm²;min:0;name:Initial insecticide</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="insecticideDecay" type="om:DecayFunction">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:μg/cm²;min:0;name:Initial insecticide</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="insecticideDecay" type="om:DecayFunction">
+    <xs:annotation>
+     <xs:documentation>
           Decay curve for insecticide content of IRS. Documentation: see DecayFunction
           type or https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions
         </xs:documentation>
-          <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
-        </xs:annotation>
-      </xs:element>
-      <xs:element name="anophelesParams" maxOccurs="unbounded">
-        <xs:annotation>
-          <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="deterrency" type="om:IRSDeterrency">
-              <xs:annotation>
-                <xs:documentation>
+     <xs:appinfo>units:none;name:Decay of insecticide</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="anophelesParams" maxOccurs="unbounded">
+    <xs:annotation>
+     <xs:appinfo>name:Per-mosquito species parameters;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="deterrency" type="om:IRSDeterrency">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of IRS on attractiveness of humans to mosquitoes relative to
                 an unprotected adult human. Parameterisations should take into
                 account that mosquitoes do not always bite indoors.
@@ -1725,12 +1745,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 where P is the insecticide factor,
                 p=1−exp(-insecticideContent×insecticideScalingFactor).
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="preprandialKillingEffect" type="om:IRSKillingEffect">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Relative attractiveness</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="preprandialKillingEffect" type="om:IRSKillingEffect">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to bite a human
                 after choosing that human, relative to the same person not
                 protected by IRS. Parameterisations should take into account
@@ -1746,12 +1766,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
                 To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="postprandialKillingEffect" type="om:IRSKillingEffect">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Pre-prandial killing effect</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="postprandialKillingEffect" type="om:IRSKillingEffect">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of IRS on survival mosquitoes as they seek to escape from
                 a human host and rest after a blood meal, relative to the same
                 person not protected by IRS. Parameterisations should take
@@ -1765,12 +1785,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Survival of mosquitoes is adjusted via multiplication by (1−K) / (1−B).
                 To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-            <xs:element name="fecundityReduction" type="om:IRSKillingEffect" minOccurs="0">
-              <xs:annotation>
-                <xs:documentation>
+        <xs:appinfo>units:dimensionless;min:0;max:1;name:Post-prandial killing effect</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+      <xs:element name="fecundityReduction" type="om:IRSKillingEffect" minOccurs="0">
+       <xs:annotation>
+        <xs:documentation>
                 Effect of IRS on fertility mosquitoes after successfully feeding on
                 a human host, relative to an unproteced human. Parameterisations should take
                 into account that mosquitoes do not always bite indoors.
@@ -1783,21 +1803,21 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
                 Fecundity is multiplied by (1−K) / (1−B). It is not allowed to be greater than 1.
                 To keep this in the range [0,1], we require that B+P ≤ 1 and P ≥ 0.
                 </xs:documentation>
-                <xs:appinfo>name:Fecundity reduction</xs:appinfo>
-              </xs:annotation>
-            </xs:element>
-          </xs:sequence>
-          <xs:attribute name="mosquito" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
+        <xs:appinfo>name:Fecundity reduction</xs:appinfo>
+       </xs:annotation>
+      </xs:element>
+     </xs:sequence>
+     <xs:attribute name="mosquito" type="xs:string" use="required">
+      <xs:annotation>
+       <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-              <xs:appinfo>name:Mosquito species</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="propActive" type="xs:double" default="1">
-            <xs:annotation>
-              <xs:documentation>
+       <xs:appinfo>name:Mosquito species</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="propActive" type="xs:double" default="1">
+      <xs:annotation>
+       <xs:documentation>
               The proportion of bites for which the IRS
               has any action whatsoever on the mosquito.
               
@@ -1805,147 +1825,147 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
               relative attractiveness and survival factors are
               base*(1-propActing) + intervention_factor*propActing.
             </xs:documentation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:sequence>
-  </xs:complexType>
-  <xs:complexType name="IRSDeterrency">
-    <xs:attribute name="insecticideFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
+       <xs:appinfo>units:dimensionless;min:0;max:1;name:Proportion of bites for which IRS acts;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+ </xs:complexType>
+ <xs:complexType name="IRSDeterrency">
+  <xs:attribute name="insecticideFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Value expected to be at least 0. Negative values are not
           necessarily invalid, but allow nets to increase transmission.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Insecticide factor;max:1</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:appinfo>units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="ITNEnteringDeterrencyLogit">
+    <xs:appinfo>units:none;name:Insecticide factor;max:1</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="insecticideScalingFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:appinfo>units:none;name:Insecticide scaling factor;min:0</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="ITNEnteringDeterrencyLogit">
+  <xs:attribute name="baseFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          See parent element documentation
+        </xs:documentation>
+    <xs:appinfo>units:none;name:Base factor;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="insecticideFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          See parent element documentation
+        </xs:documentation>
+    <xs:appinfo>units:none;name:Insecticide factor;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="IRSKillingEffect">
+  <xs:complexContent>
+   <xs:extension base="om:IRSDeterrency">
     <xs:attribute name="baseFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          See parent element documentation
-        </xs:documentation>
-        <xs:appinfo>units:none;name:Base factor;</xs:appinfo>
-      </xs:annotation>
+     <xs:annotation>
+      <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
+     </xs:annotation>
     </xs:attribute>
-    <xs:attribute name="insecticideFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
-          See parent element documentation
-        </xs:documentation>
-        <xs:appinfo>units:none;name:Insecticide factor;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="IRSKillingEffect">
-    <xs:complexContent>
-      <xs:extension base="om:IRSDeterrency">
-        <xs:attribute name="baseFactor" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="ITNDeterrency">
-    <xs:complexContent>
-      <xs:extension base="om:IRSDeterrency">
-        <xs:attribute name="holeFactor" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:documentation>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+ <xs:complexType name="ITNDeterrency">
+  <xs:complexContent>
+   <xs:extension base="om:IRSDeterrency">
+    <xs:attribute name="holeFactor" type="xs:double" use="required">
+     <xs:annotation>
+      <xs:documentation>
               Value expected to be at least 0. Negative values are not
               necessarily invalid, but allow nets to increase transmission.
             </xs:documentation>
-            <xs:appinfo>units:none;name:Hole factor;max:1</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="interactionFactor" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:documentation>
+      <xs:appinfo>units:none;name:Hole factor;max:1</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="interactionFactor" type="xs:double" use="required">
+     <xs:annotation>
+      <xs:documentation>
               holeFactor + insecticideFactor + interactionFactor must not be greater
               than 1, and is expected to be at least 0. A negative value is not
               necessarily invalid, but allows nets to increase transmission.
             </xs:documentation>
-            <xs:appinfo>units:none;name:Interaction factor;max:1</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-        <xs:attribute name="holeScalingFactor" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:appinfo>units:none;name:Hole scaling factor;min:0</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="ITNKillingEffect">
-    <xs:complexContent>
-      <xs:extension base="om:ITNDeterrency">
-        <xs:attribute name="baseFactor" type="xs:double" use="required">
-          <xs:annotation>
-            <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
-          </xs:annotation>
-        </xs:attribute>
-      </xs:extension>
-    </xs:complexContent>
-  </xs:complexType>
-  <xs:complexType name="ITNEffectLogit">
+      <xs:appinfo>units:none;name:Interaction factor;max:1</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+    <xs:attribute name="holeScalingFactor" type="xs:double" use="required">
+     <xs:annotation>
+      <xs:appinfo>units:none;name:Hole scaling factor;min:0</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+ <xs:complexType name="ITNKillingEffect">
+  <xs:complexContent>
+   <xs:extension base="om:ITNDeterrency">
     <xs:attribute name="baseFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
+     <xs:annotation>
+      <xs:appinfo>units:dimensionless;name:Probability of mosquito death without intervention</xs:appinfo>
+     </xs:annotation>
+    </xs:attribute>
+   </xs:extension>
+  </xs:complexContent>
+ </xs:complexType>
+ <xs:complexType name="ITNEffectLogit">
+  <xs:attribute name="baseFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Logit of the probability (e.g. of death, of entry, of attacking) without intervention.
         </xs:documentation>
-        <xs:appinfo>units:dimensionless;name:Base factor;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="insecticideFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>units:dimensionless;name:Base factor;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="insecticideFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Coefficient of log(insecticide content+1) in a generalized linear model with logit link
           function.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Insecticide factor;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="holeFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>units:none;name:Insecticide factor;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="holeFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Coefficient of log(total holed surface area (in cm2) +1) in a generalized linear model
           with logit link function.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Hole factor;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-    <xs:attribute name="interactionFactor" type="xs:double" use="required">
-      <xs:annotation>
-        <xs:documentation>
+    <xs:appinfo>units:none;name:Hole factor;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="interactionFactor" type="xs:double" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Coefficient of the interaction term of log(total holed surface area (in cm2) +1) with
           log(insecticide content+1) in a generalized linear model with logit link function.
         </xs:documentation>
-        <xs:appinfo>units:none;name:Interaction factor;</xs:appinfo>
-      </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
-  <xs:complexType name="VectorSpeciesIntervention">
-    <xs:annotation>
-      <xs:documentation>
+    <xs:appinfo>units:none;name:Interaction factor;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="VectorSpeciesIntervention">
+  <xs:annotation>
+   <xs:documentation>
         Descriptions of the effects of vector interventions with per-species effects.
       </xs:documentation>
-      <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
-    </xs:annotation>
-    <xs:all>
-      <xs:element name="seekingDeathRateIncrease" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+   <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="seekingDeathRateIncrease" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
             Describe an effect on the increase in the death rate while host
             seeking (mu_vA) due to this intervention.
             
@@ -1953,71 +1973,329 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             give 0.2). New death rate while seeking is old × (1 + increase)
             where increase is this factor given. Must have increas ≥ -1.
           </xs:documentation>
-          <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="decay" type="om:DecayFunction"/>
-          </xs:sequence>
-          <xs:attribute name="initial" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="probDeathOvipositing" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="decay" type="om:DecayFunction"/>
+     </xs:sequence>
+     <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+       <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="probDeathOvipositing" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
             Describe an effect of increased mortality while ovipositing
             due to this intervention. Enter the probability of dying due to
             this intervention.
           </xs:documentation>
-          <xs:appinfo>units:dimensionless;name:Proportion ovipositing mosquitoes killed;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="decay" type="om:DecayFunction"/>
-          </xs:sequence>
-          <xs:attribute name="initial" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial probability of killing</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-      <xs:element name="emergenceReduction" minOccurs="0">
-        <xs:annotation>
-          <xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportion ovipositing mosquitoes killed;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="decay" type="om:DecayFunction"/>
+     </xs:sequence>
+     <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+       <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial probability of killing</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="emergenceReduction" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
             Describe an effect on emergence of pupa into adults: this value is the
             proportion of emerging pupa which are killed by this intervention.
             
             This can be used as a crude way of modelling larviciding. It ca
             also be used to increase emergence by giving a negative value.
-            The emergence rate is "old rate" × (1 - factor) where factor is the
+            The emergence rate is &quot;old rate&quot; × (1 - factor) where factor is the
             value given here; thus, for example, using -1 will double emergence.
           </xs:documentation>
-          <xs:appinfo>units:dimensionless;name:Proportion of emerging pupa killed;</xs:appinfo>
-        </xs:annotation>
-        <xs:complexType>
-          <xs:sequence>
-            <xs:element name="decay" type="om:DecayFunction"/>
-          </xs:sequence>
-          <xs:attribute name="initial" type="xs:double" use="required">
-            <xs:annotation>
-              <xs:appinfo>units:dimensionless;min:-inf;max:1;name:Initial proportion reduction</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
-      </xs:element>
-    </xs:all>
-    <xs:attribute name="mosquito" type="xs:string" use="required">
+     <xs:appinfo>units:dimensionless;name:Proportion of emerging pupa killed;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="decay" type="om:DecayFunction"/>
+     </xs:sequence>
+     <xs:attribute name="initial" type="xs:double" use="required">
       <xs:annotation>
-        <xs:documentation>
+       <xs:appinfo>units:dimensionless;min:-inf;max:1;name:Initial proportion reduction</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:all>
+  <xs:attribute name="mosquito" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
           Name of the species/subspecies/variant.
         </xs:documentation>
-        <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
+    <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="NonHumanHostsIntervention">
+  <xs:annotation>
+   <xs:documentation>
+        An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
+        
+        Multiple instances of this intervention class are allowed (multiple parameterisations, not just deployments).
+        
+        Each instance may have multiple deployments. In this case the effects of each instance
+        are independent (effects are combined) but the effects of multiple deployments of a single
+        instance are not independent (only the latest deployment has any effect).
+      </xs:documentation>
+   <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="decay" type="om:DecayFunction"/>
+   <xs:element name="description">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="anopheles" maxOccurs="unbounded" type="om:NonHumanHostsSpeciesIntervention"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="timed" type="om:TimedBaseList">
+    <xs:annotation>
+     <xs:documentation>
+            List of timed vector population intervention deployment
+          </xs:documentation>
+     <xs:appinfo>name:Vector population intervention deployment;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name of intervention (e.g. larviciding, sugar bait).
+        </xs:documentation>
+    <xs:appinfo>name:Name of intervention;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="nonHumanHostsName" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name of intervention (e.g. larviciding, sugar bait).
+        </xs:documentation>
+    <xs:appinfo>name:Name of intervention;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="NonHumanHostsSpeciesIntervention">
+  <xs:annotation>
+   <xs:documentation>
+        Descriptions of the effects of vector interventions with per-species effects.
+      </xs:documentation>
+   <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="reduceAvailability" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+       <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
       </xs:annotation>
-    </xs:attribute>
-  </xs:complexType>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="preprandialKillingEffect" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+       <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="postprandialKillingEffect" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+       <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+   <xs:element name="restingKillingEffect" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+       <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
+  </xs:all>
+  <xs:attribute name="mosquito" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name of the species/subspecies/variant.
+        </xs:documentation>
+    <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="NonHumanHosts">
+  <xs:annotation>
+   <xs:documentation>
+        An intervention which may have various effects on the vector populations as a whole. (Not host specific.)
+        
+        Multiple instances of this intervention class are allowed (multiple parameterisations, not just deployments).
+        
+        Each instance may have multiple deployments. In this case the effects of each instance
+        are independent (effects are combined) but the effects of multiple deployments of a single
+        instance are not independent (only the latest deployment has any effect).
+      </xs:documentation>
+   <xs:appinfo>units:List of elements;name:Vector population intervention;</xs:appinfo>
+  </xs:annotation>
+  <xs:sequence>
+   <xs:element name="description">
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="anopheles" maxOccurs="unbounded" type="om:NonHumanHostsVectorSpecies"/>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+   <xs:element minOccurs="0" name="timed">
+    <xs:annotation>
+     <xs:documentation>
+            List of timed vector trap intervention deployment
+          </xs:documentation>
+     <xs:appinfo>name:Vector trap intervention deployment;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="deploy" minOccurs="0" maxOccurs="unbounded">
+       <xs:complexType>
+        <xs:complexContent>
+         <xs:extension base="om:TimedBase">
+          <xs:attribute name="lifespan" type="xs:string" use="required">
+           <xs:annotation>
+            <xs:documentation>
+                      Life of the trap until replaced or removed, e.g.
+                      &quot;73t&quot; or &quot;1y&quot;. After this time period, these traps
+                      will be removed from the simulation.
+                      
+                      New deployments do not automatically remove old
+                      traps. Existing traps cannot be refurbished in the
+                      model. It may make sense to make the end-of-life
+                      coincide with a new deployment.
+                        </xs:documentation>
+            <xs:appinfo>name:Lifespan;units:Steps or Days or Years;</xs:appinfo>
+           </xs:annotation>
+          </xs:attribute>
+         </xs:extension>
+        </xs:complexContent>
+       </xs:complexType>
+      </xs:element>
+     </xs:sequence>
+    </xs:complexType>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="name" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name of intervention (e.g. larviciding, sugar bait).
+        </xs:documentation>
+    <xs:appinfo>name:Name of intervention;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="NonHumanHostsVectorSpecies">
+  <xs:annotation>
+   <xs:documentation>
+        Descriptions of the effects of vector interventions with per-species effects.
+      </xs:documentation>
+   <xs:appinfo>units:dimensionless;min:0;max:1;name:Vector population intervention;</xs:appinfo>
+  </xs:annotation>
+  <xs:all>
+   <xs:element name="mosqRelativeAvailabilityHuman" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>
+                  Relative availability of the population of non-human hosts of
+                  type i to other non-human hosts; the sum of this across all
+                  non-human hosts must be 1.
+                </xs:documentation>
+     <xs:appinfo>units:Proportion; name:Relative availability of non-human host (ξ_i);</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="mosqProbBiting" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>Probability of mosquito successfully biting host</xs:documentation>
+     <xs:appinfo>units:Proportion;name:Probability of mosquito successfully biting host;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="mosqProbFindRestSite" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>Probability that the mosquito escapes host and finds a resting place after biting</xs:documentation>
+     <xs:appinfo>units:Proportion;name:Probability that the mosquito escapes host and finds a resting place after biting;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="mosqProbResting" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
+     <xs:appinfo>units:Proportion;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+  </xs:all>
+  <xs:attribute name="mosquito" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Name of the species/subspecies/variant.
+        </xs:documentation>
+    <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
 </xs:schema>

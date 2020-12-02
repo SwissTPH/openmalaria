@@ -57,6 +57,18 @@ void VectorModel::ctsCbP_A (ostream& stream) {
     for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::PA);
 }
+void VectorModel::ctsCbP_Amu (ostream& stream) {
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PAmu);
+}
+void VectorModel::ctsCbP_A1 (ostream& stream) {
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PA1);
+}
+void VectorModel::ctsCbP_Ah (ostream& stream) {
+    for(size_t i = 0; i < speciesIndex.size(); ++i)
+        stream << '\t' << species[i].getLastVecStat(Anopheles::PAh);
+}
 void VectorModel::ctsCbP_df (ostream& stream) {
     for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i].getLastVecStat(Anopheles::PDF);
@@ -215,7 +227,8 @@ VectorModel::VectorModel (
 
 
     // -----  Continuous reporting  -----
-    ostringstream ctsNv0, ctsPA, ctsPdf, ctsPdif,
+    ostringstream ctsNv0, ctsPA, ctsPAmu, ctsPA1, ctsPAh,
+        ctsPdf, ctsPdif,
         ctsNv, ctsOv, ctsSv,
         ctsAlpha, ctsPB, ctsPCD,
         ctsIRSEffects,
@@ -227,6 +240,9 @@ VectorModel::VectorModel (
         const string& name = reverseLookup( speciesIndex, i );
         ctsNv0<<"\tN_v0("<<name<<")";
         ctsPA<<"\tP_A("<<name<<")";
+        ctsPAmu<<"\tP_Amu("<<name<<")";
+        ctsPA1<<"\tP_A1("<<name<<")";
+        ctsPAh<<"\tP_Ah("<<name<<")";
         ctsPdf<<"\tP_df("<<name<<")";
         ctsPdif<<"\tP_dif("<<name<<")";
         ctsNv<<"\tN_v("<<name<<")";
@@ -244,6 +260,9 @@ VectorModel::VectorModel (
     using mon::Continuous;
     Continuous.registerCallback( "N_v0", ctsNv0.str(), MakeDelegate( this, &VectorModel::ctsCbN_v0 ) );
     Continuous.registerCallback( "P_A", ctsPA.str(), MakeDelegate( this, &VectorModel::ctsCbP_A ) );
+    Continuous.registerCallback( "P_Amu", ctsPAmu.str(), MakeDelegate( this, &VectorModel::ctsCbP_Amu ) );
+    Continuous.registerCallback( "P_A1", ctsPA1.str(), MakeDelegate( this, &VectorModel::ctsCbP_A1 ) );
+    Continuous.registerCallback( "P_Ah", ctsPAh.str(), MakeDelegate( this, &VectorModel::ctsCbP_Ah ) );
     Continuous.registerCallback( "P_df", ctsPdf.str(), MakeDelegate( this, &VectorModel::ctsCbP_df ) );
     Continuous.registerCallback( "P_dif", ctsPdif.str(), MakeDelegate( this, &VectorModel::ctsCbP_dif ) );
     Continuous.registerCallback( "N_v", ctsNv.str(), MakeDelegate( this, &VectorModel::ctsCbN_v ) );
@@ -337,7 +356,27 @@ void VectorModel::initVectorTrap( const scnXml::VectorTrap::DescriptionSequence 
     }
     checker.checkNoneMissed();
 }
-
+void VectorModel::initNonHumanHostsInterv( const scnXml::Description2::AnophelesSequence list,
+        const scnXml::DecayFunction& decay, size_t instance, const string& name )
+{
+    SpeciesIndexChecker checker( name, speciesIndex );
+    foreach( const scnXml::NonHumanHostsSpeciesIntervention& anoph, list ){
+        const string& mosq = anoph.getMosquito();
+        species[checker.getIndex(mosq)].initNonHumanHostsInterv( anoph, decay, instance, name );
+    }
+    checker.checkNoneMissed();
+    cout << "VectorModel::initNonHumanHostsInterv() "<< endl;
+}
+void VectorModel::initAddNonHumanHostsInterv( const scnXml::Description3::AnophelesSequence list, const string& name )
+{
+    SpeciesIndexChecker checker( name, speciesIndex );
+    foreach( const scnXml::NonHumanHostsVectorSpecies& anoph, list ){
+        const string& mosq = anoph.getMosquito();
+        species[checker.getIndex(mosq)].initAddNonHumanHostsInterv( anoph, name );
+    }
+    checker.checkNoneMissed();
+    cout << "VectorModel::initAddNonHumanHostsInterv(): "<< name << endl;
+}
 
 void VectorModel::scaleEIR (double factor) {
     for( size_t i = 0; i < speciesIndex.size(); ++i )
@@ -427,7 +466,7 @@ SimTime VectorModel::initIterate () {
     bool needIterate = false;
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
         //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
-        if(!needIterate) cout << "Fitting: " << i << endl;
+        // if(!needIterate) cout << "Fitting: " << i << endl;
         needIterate = needIterate || species[i].initIterate ();
     }
     
@@ -557,6 +596,23 @@ void VectorModel::deployVectorTrap( size_t instance, double number, SimTime life
     }
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
         species[i].deployVectorTrap( m_rng, i, instance, number, lifespan );
+    }
+}
+void VectorModel::deployNonHumanHostsInterv( size_t instance, string name ){
+    if( interventionMode != dynamicEIR ){
+        throw xml_scenario_error(vec_mode_err);
+    }
+    for(size_t i = 0; i < speciesIndex.size(); ++i) {
+        species[i].deployNonHumanHostsInterv( m_rng, i, instance, name);
+    }
+}
+void VectorModel::deployAddNonHumanHosts(string name, double popSize, SimTime lifespan)
+{
+    if( interventionMode != dynamicEIR ){
+        throw xml_scenario_error(vec_mode_err);
+    }
+    for(size_t i = 0; i < speciesIndex.size(); ++i) {
+        species[i].deployAddNonHumanHosts( m_rng, i, name, popSize, lifespan);
     }
 }
 void VectorModel::uninfectVectors() {

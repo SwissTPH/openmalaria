@@ -46,7 +46,7 @@ FixedEmergence::FixedEmergence() :
 
 // -----  Initialisation of model which is done after creating initial humans  -----
 
-void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission ){
+void FixedEmergence::init2( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission ){
     // -----  Calculate required S_v based on desired EIR  -----
     
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
@@ -58,7 +58,7 @@ void FixedEmergence::init2( double tsP_A, double tsP_df, double tsP_dff, double 
     vectors::expIDFT (forcedS_v, FSCoeffic, EIRRotateAngle);
     //vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
     
-    transmission.initState ( tsP_A, tsP_df, tsP_dff, initNvFromSv, initOvFromSv, forcedS_v );
+    transmission.initState ( tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, tsP_dff, initNvFromSv, initOvFromSv, forcedS_v );
     
     // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
     mosqEmergeRate = forcedS_v;
@@ -129,7 +129,7 @@ bool FixedEmergence::initIterate (MosqTransmission& transmission) {
     // scaleFactor scales the vector to correct the ratio between simulated and input EIR
     vectors::scale (mosqEmergeRate, scaleFactor * initNv0FromSv);
 
-    transmission.initIterateScale (scaleFactor);
+    transmission.initIterateScale (factor);//scaleFactor);
     //initNvFromSv *= scaleFactor;     //(not currently used)
 
     return !(scaled && rotated);
