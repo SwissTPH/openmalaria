@@ -227,10 +227,10 @@ void AnophelesModel::init2 (int nHumans, double meanPopAvail,
     
     double initialP_Amu = (1-initialP_A) * mosqSeekingDeathRate/(mosqSeekingDeathRate + sum_avail + nhh_avail);
     double initialP_A1 = (1-initialP_A) * sum_avail/(mosqSeekingDeathRate + sum_avail + nhh_avail);
-    double initialP_Ah = 0.0;
-    for( auto it = initNhh.begin(); it != initNhh.end(); ++it){
-        initialP_Ah += (1-initialP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + nhh_avail);
-    }
+    double initialP_Ah = (1-initialP_A) * nhh_avail/(mosqSeekingDeathRate + sum_avail + nhh_avail);
+    // for( auto it = initNhh.begin(); it != initNhh.end(); ++it){
+    //     initialP_Ah += (1-initialP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + nhh_avail);
+    // }
 
     // -----  Calculate required S_v based on desired EIR  -----
     // Third parameter is a multiplication factor for S_v/EIR. First we multiply
@@ -274,29 +274,29 @@ void AnophelesModel::initVectorTrap(const scnXml::Description1& desc, size_t ins
 void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesIntervention& elt, const scnXml::DecayFunction& decay, size_t instance, string name ){
     if( elt.getReduceAvailability().present() ){
         const scnXml::ReduceAvailability& elt2 = elt.getReduceAvailability().get();
-        if( elt2.getInitial() < -1.0 )
-            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be ≥ -1" );
+        if( elt2.getInitial() > 1.0 )
+            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be <= 1" );
         reduceNHHAvailability[name].resize(instance+1);
         reduceNHHAvailability[name][instance].set (elt2.getInitial(), decay, "reduceAvailability");
     }
     if( elt.getPreprandialKillingEffect().present() ){
         const scnXml::PreprandialKillingEffect& elt2 = elt.getPreprandialKillingEffect().get();
-        if( elt2.getInitial() < -1.0 )
-            throw util::xml_scenario_error( "PreprandialKillingEffect intervention: initial effect must be ≥ -1" );
+        if( elt2.getInitial() < 0 ||  elt2.getInitial() > 1)
+            throw util::xml_scenario_error( "PreprandialKillingEffect intervention: initial effect must be between 0 and 1" );
         reduceP_B_I[name].resize(instance+1);
         reduceP_B_I[name][instance].set (elt2.getInitial(), decay, "reduceP_B_I");
     }
     if( elt.getPostprandialKillingEffect().present() ){
         const scnXml::PostprandialKillingEffect& elt2 = elt.getPostprandialKillingEffect().get();
-        if( elt2.getInitial() < -1.0 )
-            throw util::xml_scenario_error( "PostprandialKillingEffect intervention: initial effect must be ≥ -1" );
+        if( elt2.getInitial() < 0 ||  elt2.getInitial() > 1)
+            throw util::xml_scenario_error( "PostprandialKillingEffect intervention: initial effect must be between 0 and 1" );
         reduceP_C_I[name].resize(instance+1);
         reduceP_C_I[name][instance].set (elt2.getInitial(), decay, "reduceP_C_I");
     }
     if( elt.getRestingKillingEffect().present() ){
         const scnXml::RestingKillingEffect& elt2 = elt.getRestingKillingEffect().get();
-        if( elt2.getInitial() < -1.0 )
-            throw util::xml_scenario_error( "RestingKillingEffect intervention: initial effect must be ≥ -1" );
+        if( elt2.getInitial() < 0 ||  elt2.getInitial() > 1)
+            throw util::xml_scenario_error( "RestingKillingEffect intervention: initial effect must be be between 0 and 1" );
         reduceP_D_I[name].resize(instance+1);
         reduceP_D_I[name][instance].set (elt2.getInitial(), decay, "reduceP_D_I");
     }
@@ -509,10 +509,10 @@ void AnophelesModel::advancePeriod (
     // Computing for output only
     double tsP_Amu = (1-tsP_A) * mosqSeekingDeathRate/(mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
     double tsP_A1 = (1-tsP_A) * sum_avail/(mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
-    double tsP_Ah = 0.0;
-    for( auto it = currentNhh.begin(); it != currentNhh.end(); ++it){
-        tsP_Ah += (1-tsP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
-    }
+    double tsP_Ah = (1-tsP_A) * modified_nhh_avail/(mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
+    // for( auto it = currentNhh.begin(); it != currentNhh.end(); ++it){
+    //     tsP_Ah += (1-tsP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
+    // }
 
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
