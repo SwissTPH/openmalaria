@@ -81,7 +81,7 @@
           <!-- Standard value is 1.5 year halflife, but 2 years may be reasonable-->
           <attritionOfNets L="18.176" function="smooth-compact" k="18"/>
           <!-- Standard value -->
-          <anophelesParams mosquito="flavirostris" propActive="0.4">
+          <anophelesParams mosquito="flavirostris" propActive="1.0">
             <twoStageDeterrency>
               <entering insecticideFactor="0.1553273" insecticideScalingFactor="0.2722518"/>
               <attacking baseFactor="0.9847168" holeFactor="-0.6102794" holeScalingFactor="0.01165491" insecticideFactor="-0.01033009" insecticideScalingFactor="0.2410076" interactionFactor="0.6358927"/>
