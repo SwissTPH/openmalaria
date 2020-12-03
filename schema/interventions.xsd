@@ -1560,14 +1560,15 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
        <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-       <xs:appinfo>name:Mosquito species;</xs:appinfo>
-      </xs:annotation>
-     </xs:attribute>
-     <xs:attribute name="propActive" type="xs:double" default="1">
-      <xs:annotation>
-       <xs:documentation>
-              Deprecated: propActive is now always set to 1. This value will be ignored.
-
+              <xs:appinfo>name:Mosquito species;</xs:appinfo>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="propActive" type="xs:double" default="1">
+            <xs:annotation>
+              <xs:documentation>
+              Deprecated: propActive can still be used but its value must be set to either 0 or 1.
+              Any other value will result in an error at initialization.
+              
               The proportion of bites, when nets are in use, for which the net
               has any action whatsoever on the mosquito.
               
