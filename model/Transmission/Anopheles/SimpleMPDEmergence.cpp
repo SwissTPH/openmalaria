@@ -20,7 +20,6 @@
 
 #include "Transmission/Anopheles/SimpleMPDEmergence.h"
 #include "Transmission/Anopheles/MosqTransmission.h"
-#include "Transmission/Anopheles/Nv0DelayFitting.h"
 
 #include "util/vectors.h"
 #include "util/CommandLine.h"
