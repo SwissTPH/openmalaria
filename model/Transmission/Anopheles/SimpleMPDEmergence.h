@@ -58,11 +58,9 @@ public:
     ///@brief Initialisation and destruction
     //@{
     /// Initialise and allocate memory
-    SimpleMPDEmergence(const scnXml::SimpleMPD& elt) : initNv0FromSv( numeric_limits<double>::quiet_NaN() )
+    SimpleMPDEmergence(const scnXml::SimpleMPD& elt)
     {
-        quinquennialS_v.assign (SimTime::fromYearsI(5), 0.0);
         quinquennialOvipositing.assign (SimTime::fromYearsI(5), 0.0);
-        mosqEmergeRate.assign (SimTime::oneYear(), 0.0);
         invLarvalResources.assign (SimTime::oneYear(), 0.0);
         
         developmentDuration = SimTime::fromDays(elt.getDevelopmentDuration().getValue());
@@ -88,31 +86,16 @@ public:
      * @param EIRtoS_v multiplication factor to convert input EIR into required
      * @param transmission reference to MosqTransmission object
      * S_v. */
-    void init2( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission )
+    void init2(double tsP_dff, double initNvFromSv, const vecDay<double>& forcedS_v, const vecDay<double>& mosqEmergeRate, const SimTime &mosqRestDuration)
     {
-        // -----  Calculate required S_v based on desired EIR  -----
-        
-        initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
-
-        // We scale FSCoeffic to give us S_v instead of EIR.
-        // Log-values: adding log is same as exponentiating, multiplying and taking
-        // the log again.
-        FSCoeffic[0] += log( EIRtoS_v);
-        vectors::expIDFT (forcedS_v, FSCoeffic, FSRotateAngle);
-        
-        transmission.initState ( tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, tsP_dff, initNvFromSv, initOvFromSv, forcedS_v );
-        
         // Initialise nOvipositingDelayed
         SimTime y1 = SimTime::oneYear();
-        SimTime tau = transmission.getMosqRestDuration();
+        SimTime tau = mosqRestDuration;
         for( SimTime t = SimTime::zero(); t < developmentDuration; t += SimTime::oneDay() ){
             nOvipositingDelayed[mod_nn(t+tau, developmentDuration)] =
                 tsP_dff * initNvFromSv * forcedS_v[t];
         }
-        
-        // Crude estimate of mosqEmergeRate: (1 - P_A(t) - P_df(t)) / (T * ρ_S) * S_T(t)
-        mosqEmergeRate = forcedS_v;
-        vectors::scale (mosqEmergeRate, initNv0FromSv);
+
         // Used when calculating invLarvalResources (but not a hard constraint):
         assert(tau+developmentDuration <= y1);
         for( SimTime t = SimTime::zero(); t < SimTime::oneYear(); t += SimTime::oneDay() ){
@@ -121,59 +104,14 @@ public:
             invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
                 (mosqEmergeRate[t] * yt);
         }
-        
-        // All set up to drive simulation from forcedS_v
-
-        scaleFactor = 1.0;
-        shiftAngle = FSRotateAngle;
-        scaled = false;
-        rotated = false;
     }
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    virtual bool initIterate (MosqTransmission& transmission)
+    virtual void initIterate (double factor, const vecDay<double>& mosqEmergeRate)
     {
-        // Try to match S_v against its predicted value. Don't try with N_v or O_v
-        // because the predictions will change - would be chasing a moving target!
-        // EIR comes directly from S_v, so should fit after we're done.
-
-        // Compute avgAnnualS_v from quinquennialS_v for fitting 
-        vecDay<double> avgAnnualS_v( SimTime::oneYear(), 0.0 );
-        for( SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay() ){
-            avgAnnualS_v[mod_nn(i, SimTime::oneYear())] =
-                quinquennialS_v[i];
-        }
-
-        double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);
-
-        const double LIMIT = 0.1;
-
-        if(fabs(factor - 1.0) > LIMIT)
-        {
-            scaled = false;
-            double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
-            scaleFactor += factorDiff;
-        }
-        else
-            scaled = true;
-
-        double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
-        shiftAngle += rAngle;
-        rotated = true;
-
-        // cout << "EIRRotateAngle: " << EIRRotateAngle << " rAngle = " << rAngle << ", angle = " << shiftAngle << " scalefactor: " << scaleFactor << " , factor: " << factor << endl;
-
-        // Compute forced_sv from the Fourrier Coeffs
-        // shiftAngle rotate the vector to correct the offset between simulated and input EIR
-        vectors::expIDFT(mosqEmergeRate, FSCoeffic, -shiftAngle);
-        // Scale the vector according to initNv0FromSv to get the mosqEmergerate
-        // scaleFactor scales the vector to correct the ratio between simulated and input EIR
-        vectors::scale (mosqEmergeRate, scaleFactor * initNv0FromSv);
-        // Finally, update nOvipositingDelayed and invLarvalResources
-        vectors::scale (nOvipositingDelayed, scaleFactor);
-        transmission.initIterateScale (scaleFactor);
+        vectors::scale (nOvipositingDelayed, factor);
 
         SimTime y1 = SimTime::oneYear(),
             y2 = SimTime::fromYearsI(2),
@@ -194,30 +132,19 @@ public:
             invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
                 (mosqEmergeRate[t] * yt);
         }
-        
-        return !(scaled && rotated);
-
-        // const double LIMIT = 0.1;
-        // return (fabs(factor - 1.0) > LIMIT) ||
-        //        (rAngle > LIMIT * 2*M_PI / sim::stepsPerYear());
-        //NOTE: in theory, mosqEmergeRate and annualEggsLaid aren't needed after convergence.
     }
     //@}
     
-    virtual double update( SimTime d0, double nOvipositing, double S_v )
+    virtual double update(const SimTime &d0, const vecDay<double>& mosqEmergeRate, double nOvipositing)
     {
-        SimTime d1 = d0 + SimTime::oneDay();
-        SimTime d5Year = mod_nn(d1, SimTime::fromYearsI(5));
-        quinquennialS_v[d5Year] = S_v;
-        
         // Simple Mosquito Population Dynamics model: emergence depends on the
         // adult population, resources available, and larviciding.
         // See: A Simple Periodically-Forced Difference Equation Model for
         // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
-        
+        SimTime d1 = d0 + SimTime::oneDay();
+
         double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d1, developmentDuration)];
-        double emergence = interventionSurvival() * probPreadultSurvival * yt /
-            (1.0 + invLarvalResources[mod_nn(d0, SimTime::oneYear())] * yt);
+        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, SimTime::oneYear())] * yt);
         nOvipositingDelayed[mod_nn(d1, developmentDuration)] = nOvipositing;
         quinquennialOvipositing[mod_nn(d1, SimTime::fromYearsI(5))] = nOvipositing;
         return emergence;
@@ -252,10 +179,7 @@ private:
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
-        mosqEmergeRate & stream;
-        quinquennialS_v & stream;
         quinquennialOvipositing & stream;
-        initNv0FromSv & stream;
         developmentDuration & stream;
         probPreadultSurvival & stream;
         fEggsLaidByOviposit & stream;
@@ -278,36 +202,9 @@ private:
     
     // -----  parameters (constant after initialisation)  -----
     
-    ///@brief Descriptions of transmission, used primarily during warmup
-    //@{
-    /** Summary of S_v over the last five years, used by vectorInitIterate to
-     * calculate scaling factor.
-     *
-     * Length is 365 * 5. Checkpoint.
-     *
-     * Units: inoculations. */
-    vecDay<double> quinquennialS_v;
-    
     /** As quinquennialS_v, but for N_v*P_df (units: animals). */
     vecDay<double> quinquennialOvipositing;
     
-    /** Conversion factor from forcedS_v to mosqEmergeRate.
-     *
-     * Should be checkpointed. */
-    double initNv0FromSv;       ///< ditto
-    //@}
-    
-    /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-     * 
-     * Has annual periodicity: length is 365. First value (index 0) corresponds
-     * to first day of year (1st Jan or something else if rebased). In 5-day
-     * time-step model values at indecies 0 through 4 are used to calculate the
-     * state at time-step 1.
-     * 
-     * Units: Animals per day.
-     *
-     * Should be checkpointed. */
-    vecDay<double> mosqEmergeRate;
     
     /** Resources for mosquito larvae (or rather 1 over resources); γ(t) in
      * model description.

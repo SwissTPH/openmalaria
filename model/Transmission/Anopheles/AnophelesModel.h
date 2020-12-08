@@ -38,6 +38,8 @@ namespace Anopheles {
     using std::numeric_limits;
     using util::vector2D;
 
+enum VecStat { PA, PAmu, PA1, PAh, PDF, PDIF, NV, OV, SV };
+
 /** Per-species part for vector transmission model.
  *
  * Data in this class is specific to a species of anopheles mosquito, where
@@ -78,39 +80,30 @@ public:
             probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
             nhh_avail(numeric_limits<double>::signaling_NaN()),
             nhh_sigma_df(numeric_limits<double>::signaling_NaN()),
-            nhh_sigma_dff(numeric_limits<double>::signaling_NaN())
-    {}
-    
-    AnophelesModel (AnophelesModel&& o):
-            mosqSeekingDuration(move(o.mosqSeekingDuration)),
-            mosqSeekingDeathRate(move(o.mosqSeekingDeathRate)),
-            probMosqSurvivalOvipositing(move(o.probMosqSurvivalOvipositing)),
-            nhh_avail(move(o.nhh_avail)),
-            nhh_sigma_df(move(o.nhh_sigma_df)),
-            nhh_sigma_dff(move(o.nhh_sigma_dff)),
-            trapParams(move(o.trapParams)),
-            transmission(move(o.transmission)),
-            seekingDeathRateIntervs(move(o.seekingDeathRateIntervs)),
-            probDeathOvipositingIntervs(move(o.probDeathOvipositingIntervs)),
-            baitedTraps(move(o.baitedTraps)),
-            partialEIR(move(o.partialEIR))
-    {}
-    
-    void operator= (AnophelesModel&& o) {
-        mosqSeekingDuration = move(o.mosqSeekingDuration);
-        mosqSeekingDeathRate = move(o.mosqSeekingDeathRate);
-        probMosqSurvivalOvipositing = move(o.probMosqSurvivalOvipositing);
-        nhh_avail = move(o.nhh_avail);
-        nhh_sigma_df = move(o.nhh_sigma_df);
-        nhh_sigma_dff = move(o.nhh_sigma_dff);
-        trapParams = move(o.trapParams);
-        transmission = move(o.transmission);
-        seekingDeathRateIntervs = move(o.seekingDeathRateIntervs);
-        probDeathOvipositingIntervs = move(o.probDeathOvipositingIntervs);
-        baitedTraps = move(o.baitedTraps);
-        partialEIR = move(o.partialEIR);
+            nhh_sigma_dff(numeric_limits<double>::signaling_NaN()),
+            // EmergenceModel
+            EIRRotateAngle(numeric_limits<double>::quiet_NaN()),
+            FSRotateAngle(numeric_limits<double>::quiet_NaN()),
+            initNvFromSv(numeric_limits<double>::quiet_NaN()),
+            initOvFromSv(numeric_limits<double>::quiet_NaN()),
+            initNv0FromSv(numeric_limits<double>::quiet_NaN()),
+            interventionSurvival(1.0),
+            // MosqTransmission
+            mosqRestDuration(SimTime::zero()),
+            EIPDuration(SimTime::zero()),
+            N_v_length(SimTime::zero()),
+            minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
+            timeStep_N_v0(0.0)
+    {
+        forcedS_v.resize (SimTime::oneYear());
+        quinquennialS_v.assign (SimTime::fromYearsI(5), 0.0);
+        mosqEmergeRate.assign (SimTime::oneYear(), 0.0);
     }
     
+    AnophelesModel(const AnophelesModel&) = delete;            //disable copy-constructor
+    AnophelesModel& operator=(const AnophelesModel&) = delete; //disable copy-assignment
+    AnophelesModel(AnophelesModel&&) = default;
+
     /** Called to initialise variables instead of a constructor. At this point,
      * the size of the human population is known but that population has not
      * yet been constructed. Called whether data is loaded from a check-point
@@ -131,7 +124,7 @@ public:
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
     inline void scaleEIR( double factor ){
-        transmission.emergence->scaleEIR( factor );
+        FSCoeffic[0] += log( factor );
     }
     
     /** Initialisation which must wait until a human population is available.
@@ -165,12 +158,8 @@ public:
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    inline bool initIterate (){
-        return transmission.emergence->initIterate(transmission);
-    }
-    //@}
+    bool initIterate();
 
-    
     ///@brief Functions called as part of usual per-time-step operations
     //@{
     /** Called per time-step. Does most of calculation of EIR.
@@ -201,38 +190,73 @@ public:
     void deployNonHumanHostsInterv(LocalRng& rng, size_t species, size_t instance, string name);
 
     void deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan);
-
-    inline void uninfectVectors() {
-        transmission.uninfectVectors();
-    }
+    
+    // MosqTransmission
+        /** Initialise parameters and variables.
+     * 
+     * This is only a fraction of parameter initialisation; see also
+     * AnophelesModel::initialise. */
+    void initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt, const scnXml::Mosq& mosq );
+    
+    /** (Re) allocate and initialise some state variables. Must be called
+     * before model is run. */
+    void initState ( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah,
+                     double tsP_df, double tsP_dff,
+                     double initNvFromSv, double initOvFromSv,
+                     const vecDay<double>& forcedS_v);
+    
+    /// Helper function for initialisation.
+    void initIterateScale ( double factor );
+    
+    /** Update by one day (may be called multiple times for 1 time-step update).
+     * 
+     * @param d0 Time of the start of the day-long update period
+     * @param tsP_A P_A for this time-step
+     * @param tsP_df P_df for this time-step
+     * @param tsP_dif P_dif for this time-step, per parasite genotype
+     * @param tsP_dff P_dff for this time step
+     * @param partialEIR Vector, per genotype; after calculation, the latest
+     *  S_v values are multiplied by EIR_factor and added to this.
+     * @param EIR_factor see parameter partialEIR
+     */
+    void update( SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
+                   const vector<double> tsP_dif, double tsP_dff,
+                   bool isDynamic,
+                   vector<double>& partialEIR, double EIR_factor);
+    
+    ///@brief Interventions and reporting
+    //@{
+    void uninfectVectors();
     //@}
-
+    
+    inline SimTime getEIPDuration() const {
+        return EIPDuration;
+    }
     
     ///@brief Functions used in reporting
     //@{
-    /// Get mean emergence during last time-step
+    /// Reset per-time-step statistics before running time-step updates
+    inline void resetTSStats() {
+        timeStep_N_v0 = 0.0;
+    }
+    /// Get mean emergence per day during last time-step
     inline double getLastN_v0 () const{
-        return transmission.getLastN_v0();
+        return timeStep_N_v0 / SimTime::oneTS().inDays();
     }
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
-    inline double getLastVecStat( VecStat vs )const{
-        return transmission.getLastVecStat( vs );
-    }
+    double getLastVecStat( VecStat vs )const;
     
     inline double getResAvailability() const{
-        return transmission.getResAvailability();
+        return emergence->getResAvailability();
     }
     inline double getResRequirements() const{
-        return transmission.getResRequirements();
+        return emergence->getResRequirements();
     }
-
-    /// Write some per-species summary information.
-    inline void summarize( size_t species )const{
-        transmission.summarize( species );
-    }
-    //@}
     
+    /// Write some per-species summary information.
+    void summarize( size_t species )const;
+    //@}
 
     /// Checkpointing
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
@@ -241,13 +265,43 @@ public:
         mosqSeekingDeathRate & stream;
         mosqSeekingDuration & stream;
         probMosqSurvivalOvipositing & stream;
-        transmission & stream;
+        // transmission & stream;
         seekingDeathRateIntervs & stream;
         probDeathOvipositingIntervs & stream;
-        baitedTraps & stream;
         partialEIR & stream;
+        EIRRotateAngle & stream;
+        FSRotateAngle & stream;
+        FSCoeffic & stream;
+        forcedS_v & stream;
+        initNvFromSv & stream;
+        initOvFromSv & stream;
+        emergenceReduction & stream;
+        interventionSurvival & stream;
+        // EmergenceModel
+        mosqEmergeRate & stream;
+        quinquennialS_v & stream;
+        initNv0FromSv & stream;
+        (*emergence) & stream;
+        // MosqTransmission
+        mosqRestDuration & stream;
+        EIPDuration & stream;
+        N_v_length & stream;
+        P_A & stream;
+        P_df & stream;
+        P_dif & stream;
+        P_dff & stream;
+        N_v & stream;
+        O_v & stream;
+        S_v & stream;
+        P_Amu & stream;
+        P_A1 & stream;
+        P_Ah & stream;
+        //TODO: do we actually need to checkpoint these next three?
+        fArray & stream;
+        ftauArray & stream;
+        uninfected_v & stream;
+        timeStep_N_v0 & stream;
     }
-
 
 private:
     ///@brief Initialisation helper functions
@@ -263,11 +317,9 @@ private:
      * @param nonHumanHostPopulations Size of each non-human population
      * @param populationSize Size of the human population (assumed constant)
      */
-    void initAvailability(
-        size_t species,
-        const scnXml::AnophelesParams& anoph,
-//         map<string, double>& nonHumanHostPopulations,
-        int populationSize);
+    void initAvailability(size_t species, const scnXml::AnophelesParams& anoph, int populationSize);
+
+    void initEIR(const scnXml::AnophelesParams& anoph, vector<double>& initialisationEIR, SimTime EIPDuration);
 
     /** Calculates the human ento availability
      * 
@@ -327,10 +379,8 @@ private:
         TrapParams(): relAvail(numeric_limits<double>::signaling_NaN()) {}
         TrapParams(TrapParams&& o): relAvail(o.relAvail), availDecay(move(o.availDecay)) {}
         
-        // Initial availability of a trap relative to an adult
-        double relAvail;
-        // Decay of availability
-        unique_ptr<util::DecayFunction> availDecay;
+        double relAvail; // Initial availability of a trap relative to an adult
+        unique_ptr<util::DecayFunction> availDecay; // Decay of availability
     };
     // Parameters for trap interventions. Doesn't need checkpointing.
     vector<TrapParams> trapParams;
@@ -356,12 +406,6 @@ private:
     map<string,NHHParams> addedNhh;
 
     // -----  model state (and some encapsulated parameters)  -----
-    
-    /** @brief transmission and life-cycle parts of model
-     * 
-     * Much of the core model is encapsulated here. */
-    MosqTransmission transmission;
-    
     /** @brief Intervention parameters */
     //@{
     /** Interventions affecting death rate while seeking (parameters + state)
@@ -373,26 +417,11 @@ private:
      * Value is probability of dying due to this intervention (so multiply survival by 1 - this). */
     vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
     struct TrapData {
-        // index in trapParams
-        size_t instance;
-        // initial availability (avail per trap * num traps)
-        double initialAvail;
-        // parameter for decay of availability
-        DecayFuncHet availHet;
-        // deploy time (for decay function)
-        SimTime deployTime;
-        // date at which this intervention should be deleted
-        SimTime expiry;
-        
-        /// Checkpointing
-        template<class S>
-        void operator& (S& stream) {
-            instance & stream;
-            initialAvail & stream;
-            availHet & stream;
-            deployTime & stream;
-            expiry & stream;
-        }
+        size_t instance; // index in trapParams
+        double initialAvail; // initial availability (avail per trap * num traps)
+        DecayFuncHet availHet; // parameter for decay of availability
+        SimTime deployTime; // deploy time (for decay function)
+        SimTime expiry; // date at which this intervention should be deleted
     };
     /** Baited trap interventions.
      * 
@@ -410,6 +439,212 @@ private:
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
     vector<double> partialEIR;
+
+
+    // Emergence Model
+    // -----  parameters (constant after initialisation)  -----
+    
+    ///@brief Descriptions of transmission, used primarily during warmup
+    //@{
+    /// Angle (in radians) to rotate series generated by FSCoeffic by, for EIR.
+    double EIRRotateAngle;
+
+    /// Rotation angle (in radians) for emergence rate. Both offset for EIR given in XML file and
+    /// offset needed to fit target EIR (delayed from emergence rate). Checkpoint.
+    double FSRotateAngle;
+
+    /** Fourier coefficients for EIR / forcedS_v series, input from XML file.
+     *
+     * Initially used to calculate initialisation EIR, then scaled to calc. S_v.
+     *
+     * When calcFourierEIR is used to produce an EIR from this over 365
+     * (365) elements, the resulting EIR has units of
+     * infectious bites per adult per day.
+     *
+     * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
+     * FSCoeffic[0] needs checkpointing, the rest doesn't. */
+    vector<double> FSCoeffic;
+
+    /** S_v used to force an EIR during vector init.
+     * 
+     * Has annual periodicity: length is 365. First value (index 0) corresponds
+     * to first day of year (1st Jan or something else if rebased). In 5-day
+     * time-step model values at indecies 0 through 4 are used to calculate the
+     * state at time-step 1.
+     *
+     * Should be checkpointed. */
+    vecDay<double> forcedS_v;
+    
+    /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
+     * Should be checkpointed. */
+    double initNvFromSv;
+    
+    /** Conversion factor from forcedS_v to (initial values of) O_v (ρ_O / ρ_S).
+     * Should be checkpointed. */
+    double initOvFromSv;
+    //@}
+
+    ///@brief Descriptions of transmission, used primarily during warmup
+    //@{
+    /** Summary of S_v over the last five years, used by vectorInitIterate to
+     * calculate scaling factor.
+     *
+     * Length is 365 * 5. Checkpoint.
+     *
+     * Units: inoculations. */
+    vecDay<double> quinquennialS_v;
+    
+    /** Conversion factor from forcedS_v to mosqEmergeRate.
+     *
+     * Should be checkpointed. */
+    double initNv0FromSv;       ///< ditto
+    //@}
+    
+    /** @brief Intervention parameters
+     *
+     * Checkpointed. */
+    //@{
+    /// Description of intervention killing effects on emerging pupae
+    vector<util::SimpleDecayingValue> emergenceReduction;
+    /// Cache parameter updated by update()
+    double interventionSurvival;   // survival with regards to intervention effects
+    //@}
+
+    double scaleFactor, shiftAngle;
+    bool rotated, scaled;
+    
+    /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
+     * 
+     * Has annual periodicity: length is 365. First value (index 0) corresponds
+     * to first day of year (1st Jan or something else if rebased). In 5-day
+     * time-step model values at indecies 0 through 4 are used to calculate the
+     * state at time-step 1.
+     * 
+     * Units: Animals per day.
+     *
+     * Should be checkpointed. */
+    vecDay<double> mosqEmergeRate;
+
+
+    // MosqTransmission
+        // -----  parameters (constant after initialisation)  -----
+    
+    /** @brief Duration parameters for mosquito/parasite life-cycle
+     * 
+     * Currently these are all constant. In theory they could be made to vary
+     * seasonally, based on a fixed periodic cycle, though some code and
+     * possibly model changes would be needed to accomodate this.
+     * 
+     * All have units of days.
+     *
+     * Set in initialise function from XML data; no need to checkpoint. */
+    //@{
+    /** Duration of feeding cycle (equals duration of resting period) for
+     * mosquito (τ).
+     * Units: days. */
+    SimTime mosqRestDuration;
+
+    /** Duration of the extrinsic incubation period (sporozoite development time)
+    * (θ_s).
+    * Units: Days.
+    *
+    * Doesn't need checkpointing. */
+    SimTime EIPDuration;
+    
+    /** N_v_length-1 is the number of previous days for which some parameters are
+     * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
+     * the arrays need to be, but simplifies code with no real impact.
+     *
+     * Should equal EIPDuration + mosqRestDuration to allow values up to
+     * θ_s + τ - 1 days back, plus current day.
+     *
+     * Set by initialise; no need to checkpoint. */
+    SimTime N_v_length;
+    //@}
+    
+    /// If less than this many mosquitoes remain infected, transmission is interrupted.
+    double minInfectedThreshold;
+    
+    
+    // -----  variable model state  -----
+    
+    /** @brief Variable arrays N_v_length long.
+     *
+     * P_A, P_df, P_dif, N_v, O_v and S_v are set in advancePeriod() and have
+     * values stored per day.
+     * 
+     * P_dif, O_v and S_v have a second index: the parasite genotype.
+     *
+     * Values at index ((d-1) mod N_v_length) are used to derive the state of
+     * the population on day d. The state during days (t×I+1) through to ((t+1)×I)
+     * where t is sim::ts0() and I is SimTime::oneTS().inDays() is what
+     * drives the transmission at time-step t.
+     * 
+     * These arrays should be checkpointed. */
+    //@{
+    /** Probability of a mosquito not finding a host one night. */
+    vecDay<double> P_A;
+    
+    /** P_df is the probability of a mosquito finding a host and completing a
+     * feeding cycle without being killed. */
+    vecDay<double> P_df;
+    
+    /** P_dif is the probability of a mosquito finding a host, getting
+     * infected, and successfully completing a feeding cycle. */
+    vecDay2D<double> P_dif;
+    
+    /** Like P_df but including fertility factors */
+    vecDay<double> P_dff;
+    
+    /** Numbers of host-seeking mosquitos each day
+     * 
+     * N_v is the total number of host-seeking mosquitoes. */
+    vecDay<double> N_v;
+    
+    /** Numbers of host-seeking mosquitos each day
+     * 
+     * O_v is the number of infected host-seeking mosquitoes, and S_v is the
+     * number of infective (to humans) host-seeking mosquitoes. */
+    vecDay2D<double> O_v, S_v;
+
+    /** Probability of a mosquito dying */
+    vecDay<double> P_Amu;
+
+    /** Probability of a mosquito finding a host */
+    vecDay<double> P_A1;
+
+    /** Probability of a mosquito finding a non-human host type*/
+    vecDay<double> P_Ah;
+    //@}
+    
+    ///@brief Working memory
+    /** Used for calculations within advancePeriod. Only saved for optimisation.
+     *
+     * Used to calculate recursive functions f and f_τ in NDEMD eq 1.6, 1.7.
+     * Values are recalculated each step; only fArray[0] and
+     * ftauArray[0..mosqRestDuration] are stored across steps for optimisation
+     * (reallocating each time they are needed would be slow).
+     * 
+     * uninfected_v[0] is not used.
+     *
+     * Length (fArray): EIPDuration - mosqRestDuration + 1 (θ_s - τ + 1)
+     * Length (ftauArray): EIPDuration (θ_s)
+     * Length (uninfected_v): N_v_length
+     *
+     * Don't need to be checkpointed, but some values need to be initialised. */
+    //@{
+    vecDay<double> fArray;
+    vecDay<double> ftauArray;
+    vecDay<double> uninfected_v;
+    //@}
+    
+    /** Variables tracking data to be reported. */
+    double timeStep_N_v0;
+
+    /** @brief Emergence model
+     * 
+     * Code to calculate emergence of mosquitoes from water bodies goes here. */
+    unique_ptr<EmergenceModel> emergence;
 };
 
 }
