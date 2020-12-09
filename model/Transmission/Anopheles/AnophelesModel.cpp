@@ -299,7 +299,6 @@ void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesI
         reduceP_D_I[name].resize(instance+1);
         reduceP_D_I[name][instance].set (elt2.getInitial(), decay, "reduceP_D_I");
     }
-    cout << "AnophelesModel::init NHH interv on species " << " NHH " << name << endl;
 }
 void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVectorSpecies& elt, string name ){
     // Check that the nonHumanHostsType does not exist
@@ -312,8 +311,6 @@ void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVecto
     nhh.mosqProbFindingRestSite = elt.getMosqProbFindRestSite().getValue();
     nhh.mosqProbResting = elt.getMosqProbResting().getValue();
     addedNhh[name] = nhh;
-
-    cout << "AnophelesModel::init NHH: " << name << endl;
 }
 
 void AnophelesModel::deployVectorPopInterv (LocalRng& rng, size_t instance){
@@ -339,8 +336,11 @@ void AnophelesModel::deployNonHumanHostsInterv(LocalRng& rng, size_t species, si
         throw util::xml_scenario_error("non human hosts type "+name+" not deployed during non human hosts intervention deployment");
 
     reduceNHHAvailability[name][instance].deploy( rng, sim::now() );
-    cout << "NHH intervention deployment on species " << species << " NHH " << name << endl;
+    reduceP_B_I[name][instance].deploy( rng, sim::now() );
+    reduceP_C_I[name][instance].deploy( rng, sim::now() );
+    reduceP_D_I[name][instance].deploy( rng, sim::now() );
 }
+
 void AnophelesModel::deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan){
     if(initNhh.count(name) != 0)
         throw util::xml_scenario_error("non human hosts type "+name+" already deployed during non human hosts deployment");
@@ -350,23 +350,14 @@ void AnophelesModel::deployAddNonHumanHosts(LocalRng& rng, size_t species, strin
     double adultAvail = PerHostAnophParams::get(species).entoAvailability.mean();
     double avail_i = popSize * adultAvail * nhhParams.mosqRelativeAvailabilityHuman;
 
-    cout << "Add NHH intervention deployment on species " << species << endl;
-    cout << "\tHumanAvail: " << adultAvail << endl;
-    cout << "\tmosqRelativeAvailabilityHuman: " << nhhParams.mosqRelativeAvailabilityHuman << endl;
-    cout << "\tmosqProbBiting: " << nhhParams.mosqProbBiting << endl;
-    cout << "\tmosqProbFindingRestSite: " << nhhParams.mosqProbFindingRestSite << endl;
-    cout << "\tmosqProbResting: " << nhhParams.mosqProbResting << endl;
-
     NHH nhh;
     nhh.avail_i = avail_i;
     nhh.P_B_I = nhhParams.mosqProbBiting;
     nhh.P_C_I = nhhParams.mosqProbFindingRestSite;
     nhh.P_D_I = nhhParams.mosqProbResting;
-    nhh.rel_fecundity = 0.0;
+    nhh.rel_fecundity = 1.0;
     nhh.expiry = sim::now() + lifespan;
     initNhh[name] = nhh;
-
-    cout << "Deployed NHH:" << name << endl;
 }
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod (
@@ -417,8 +408,7 @@ void AnophelesModel::advancePeriod (
     // NON-HUMAN HOSTS INTERVENTIONS
     // Check if some nhh must be removed
     for( auto it = initNhh.begin(); it != initNhh.end();){
-        if( sim::ts0() > it->second.expiry ){
-            cout << "AnophelesModel::removed NHH " << it->first << " on day " << sim::ts0() << endl;
+        if( sim::ts0() >= it->second.expiry ){
             it = initNhh.erase(it);
             continue;
         }

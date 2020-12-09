@@ -319,7 +319,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
                     SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
                     timed.push_back( unique_ptr<TimedDeployment>(new TimedAddNonHumanHostsDeployment( date, elt.getName(), lifespan )) );
-                    cout << "InterventionManager::Scheduled intervention on add NHH at time " << date << endl;
                 }
                 instance++;
             }
@@ -338,7 +337,6 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
                 for( auto it = seq.begin(); it != seq.end(); ++it ) {
                     SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     timed.push_back( unique_ptr<TimedDeployment>(new TimedNonHumanHostsDeployment( date, instance, elt.getNonHumanHostsName())) );
-                    cout << "InterventionManager::Scheduled intervention " << elt.getName() << " on NHH(" << elt.getNonHumanHostsName() << ") at time " << date << endl;
                 }
                 instance++;
             }
