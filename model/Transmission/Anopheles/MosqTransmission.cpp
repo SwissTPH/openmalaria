@@ -265,7 +265,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_Amu, double 
     N_v[t1] = newAdults
                 + P_A[t0]  * N_v[t0]
                 + nOvipositing;
-    
+
     timeStep_N_v0 += newAdults;
     
 //     if( printDebug ){

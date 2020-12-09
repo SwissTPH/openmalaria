@@ -365,7 +365,6 @@ void VectorModel::initNonHumanHostsInterv( const scnXml::Description2::Anopheles
         species[checker.getIndex(mosq)].initNonHumanHostsInterv( anoph, decay, instance, name );
     }
     checker.checkNoneMissed();
-    cout << "VectorModel::initNonHumanHostsInterv() "<< endl;
 }
 void VectorModel::initAddNonHumanHostsInterv( const scnXml::Description3::AnophelesSequence list, const string& name )
 {
@@ -375,7 +374,6 @@ void VectorModel::initAddNonHumanHostsInterv( const scnXml::Description3::Anophe
         species[checker.getIndex(mosq)].initAddNonHumanHostsInterv( anoph, name );
     }
     checker.checkNoneMissed();
-    cout << "VectorModel::initAddNonHumanHostsInterv(): "<< name << endl;
 }
 
 void VectorModel::scaleEIR (double factor) {
@@ -448,9 +446,6 @@ SimTime VectorModel::initIterate () {
         saved_sigma_df.assign( data_save_len, speciesIndex.size(), 0.0 );
         saved_sigma_dif.assign( data_save_len, speciesIndex.size(), WithinHost::Genotypes::N(), 0.0 );
         
-//         if( initState == 1 ){
-//             return SimTime::fromYearsI(5);
-//         }
         if( initState == 3 ){
             //TODO: we should perhaps check that EIR gets reproduced correctly?
             simulationMode = dynamicEIR;
@@ -465,8 +460,6 @@ SimTime VectorModel::initIterate () {
     
     bool needIterate = false;
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
-        //TODO: this short-circuits if needIterate is already true, thus only adjusting one species at once. Is this what we want?
-        // if(!needIterate) cout << "Fitting: " << i << endl;
         needIterate = needIterate || species[i].initIterate ();
     }
     
