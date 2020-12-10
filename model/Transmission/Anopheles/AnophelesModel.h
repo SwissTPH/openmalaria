@@ -351,6 +351,7 @@ private:
         double mosqProbBiting;
         double mosqProbFindingRestSite;
         double mosqProbResting;
+        double hostFecundityFactor;
     };
     map<string,NHHParams> addedNhh;
 

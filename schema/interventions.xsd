@@ -2225,7 +2225,7 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
  </xs:complexType>
  <xs:complexType name="NonHumanHostsVectorSpecies">
   <xs:annotation>
-   <xs:documentation>Descriptions of the effects of non human hosts interventions with per-species effects.
+   <xs:documentation>Descriptions of the effects of new non human hosts with per-species effects.
       </xs:documentation>
   </xs:annotation>
   <xs:all>
@@ -2254,6 +2254,12 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
    <xs:element name="mosqProbResting" type="om:DoubleValue">
     <xs:annotation>
      <xs:documentation>Probability of mosquito successfully resting after finding a resting site</xs:documentation>
+     <xs:appinfo>units:Proportion;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="hostFecundityFactor" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>Multiplicative factor for the number of fertile eggs laid by a mosquito after biting this type of host, relative to an unprotected human.</xs:documentation>
      <xs:appinfo>units:Proportion;name:Probability of mosquito successfully resting after finding a resting site;</xs:appinfo>
     </xs:annotation>
    </xs:element>
