@@ -401,7 +401,7 @@ private:
     list<TrapData> baitedTraps;
     //@}
 
-    map<string,vector<util::SimpleDecayingValue>> reduceNHHAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I;
+    map<string,vector<util::SimpleDecayingValue>> reduceNHHAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I, reduceFecundity;
     
     /** Per time-step partial calculation of EIR, per genotype.
     *

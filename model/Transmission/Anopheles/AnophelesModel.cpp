@@ -271,33 +271,46 @@ void AnophelesModel::initVectorTrap(const scnXml::Description1& desc, size_t ins
     trapParams.push_back(move(params));
 }
 void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesIntervention& elt, const scnXml::DecayFunction& decay, size_t instance, string name ){
-    if( elt.getReduceAvailability().present() ){
-        const scnXml::ReduceAvailability& elt2 = elt.getReduceAvailability().get();
-        if( elt2.getInitial() > 1.0 )
-            throw util::xml_scenario_error( "reduceAvailability intervention: initial effect must be <= 1" );
+    if( reduceNHHAvailability[name].size() <= instance )
         reduceNHHAvailability[name].resize(instance+1);
-        reduceNHHAvailability[name][instance].set (elt2.getInitial(), decay, "reduceAvailability");
+    if( reduceP_B_I[name].size() <= instance )
+        reduceP_B_I[name].resize(instance+1);
+    if( reduceP_C_I[name].size() <= instance )
+        reduceP_C_I[name].resize(instance+1);
+    if( reduceP_D_I[name].size() <= instance )
+        reduceP_D_I[name].resize(instance+1);
+    if( reduceFecundity[name].size() <= instance )
+        reduceFecundity[name].resize(instance+1);
+
+    if( elt.getAvailabilityReduction().present() ){
+        const scnXml::AvailabilityReduction& elt2 = elt.getAvailabilityReduction().get();
+        if( elt2.getInitial() > 1.0 )
+            throw util::xml_scenario_error( "availabilityReduction intervention: initial effect must be <= 1" );
+        reduceNHHAvailability[name][instance].set (elt2.getInitial(), decay, "availabilityReduction");
     }
     if( elt.getPreprandialKillingEffect().present() ){
         const scnXml::PreprandialKillingEffect& elt2 = elt.getPreprandialKillingEffect().get();
         if( elt2.getInitial() < 0 ||  elt2.getInitial() > 1)
             throw util::xml_scenario_error( "PreprandialKillingEffect intervention: initial effect must be between 0 and 1" );
-        reduceP_B_I[name].resize(instance+1);
         reduceP_B_I[name][instance].set (elt2.getInitial(), decay, "reduceP_B_I");
     }
     if( elt.getPostprandialKillingEffect().present() ){
         const scnXml::PostprandialKillingEffect& elt2 = elt.getPostprandialKillingEffect().get();
         if( elt2.getInitial() < 0 ||  elt2.getInitial() > 1)
             throw util::xml_scenario_error( "PostprandialKillingEffect intervention: initial effect must be between 0 and 1" );
-        reduceP_C_I[name].resize(instance+1);
         reduceP_C_I[name][instance].set (elt2.getInitial(), decay, "reduceP_C_I");
     }
     if( elt.getRestingKillingEffect().present() ){
         const scnXml::RestingKillingEffect& elt2 = elt.getRestingKillingEffect().get();
         if( elt2.getInitial() < 0 ||  elt2.getInitial() > 1)
             throw util::xml_scenario_error( "RestingKillingEffect intervention: initial effect must be be between 0 and 1" );
-        reduceP_D_I[name].resize(instance+1);
         reduceP_D_I[name][instance].set (elt2.getInitial(), decay, "reduceP_D_I");
+    }
+    if( elt.getFecundityReduction().present() ){
+        const scnXml::FecundityReduction& elt2 = elt.getFecundityReduction().get();
+        if( elt2.getInitial() < 0 ||  elt2.getInitial() > 1)
+            throw util::xml_scenario_error( "FecundityReduction intervention: initial effect must be be between 0 and 1" );
+        reduceFecundity[name][instance].set (elt2.getInitial(), decay, "reduceFecundity");
     }
 }
 void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVectorSpecies& elt, string name ){
@@ -339,6 +352,7 @@ void AnophelesModel::deployNonHumanHostsInterv(LocalRng& rng, size_t species, si
     reduceP_B_I[name][instance].deploy( rng, sim::now() );
     reduceP_C_I[name][instance].deploy( rng, sim::now() );
     reduceP_D_I[name][instance].deploy( rng, sim::now() );
+    reduceFecundity[name][instance].deploy( rng, sim::now() );
 }
 
 void AnophelesModel::deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan){
@@ -450,6 +464,14 @@ void AnophelesModel::advancePeriod (
         {
             if(currentNhh.count(it->first) != 0) // Check that the non-human hosts still exist
                 currentNhh[it->first].P_D_I *= 1.0 - decay.current_value( sim::ts0() );
+        }
+    }
+
+    for( auto it = reduceFecundity.begin(); it != reduceFecundity.end(); ++it) {
+        for( const auto &decay : it->second )
+        {
+            if(currentNhh.count(it->first) != 0) // Check that the non-human hosts still exist
+                currentNhh[it->first].rel_fecundity *= 1.0 - decay.current_value( sim::ts0() );
         }
     }
 
