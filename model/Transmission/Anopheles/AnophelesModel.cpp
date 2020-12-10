@@ -323,6 +323,7 @@ void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVecto
     nhh.mosqProbBiting = elt.getMosqProbBiting().getValue();
     nhh.mosqProbFindingRestSite = elt.getMosqProbFindRestSite().getValue();
     nhh.mosqProbResting = elt.getMosqProbResting().getValue();
+    nhh.hostFecundityFactor = elt.getHostFecundityFactor().getValue();
     addedNhh[name] = nhh;
 }
 
@@ -369,7 +370,7 @@ void AnophelesModel::deployAddNonHumanHosts(LocalRng& rng, size_t species, strin
     nhh.P_B_I = nhhParams.mosqProbBiting;
     nhh.P_C_I = nhhParams.mosqProbFindingRestSite;
     nhh.P_D_I = nhhParams.mosqProbResting;
-    nhh.rel_fecundity = 1.0;
+    nhh.rel_fecundity = nhhParams.hostFecundityFactor;
     nhh.expiry = sim::now() + lifespan;
     initNhh[name] = nhh;
 }

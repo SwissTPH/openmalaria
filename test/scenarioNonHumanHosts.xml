@@ -58,30 +58,62 @@
 
     <interventions name="No Interventions">
         <nonHumanHostsModifications>
-          <intervention name="reduceAvailability" nonHumanHostsName="unprotectedAnimals">
+          <intervention name="availabilityReduction" nonHumanHostsName="unprotectedAnimals">
             <decay function="step" L="3.0"/>
             <description >
               <anopheles mosquito="gambiae_ss">
-                <reduceAvailability initial="1.0"/>
+                <availabilityReduction initial="1.0"/>
                 <preprandialKillingEffect initial="1.0"/>
                 <postprandialKillingEffect initial="1.0"/>
                 <restingKillingEffect initial="1.0"/>
+                <fecundityReduction initial="1.0"/>
               </anopheles>
               <anopheles mosquito="arabiensis">
-                <reduceAvailability initial="1.0"/>
+                <availabilityReduction initial="1.0"/>
                 <preprandialKillingEffect initial="1.0"/>
                 <postprandialKillingEffect initial="1.0"/>
                 <restingKillingEffect initial="1.0"/>
+                <fecundityReduction initial="1.0"/>
               </anopheles>
               <anopheles mosquito="funestus">
-                <reduceAvailability initial="1.0"/>
+                <availabilityReduction initial="1.0"/>
                 <preprandialKillingEffect initial="1.0"/>
                 <postprandialKillingEffect initial="1.0"/>
                 <restingKillingEffect initial="1.0"/>
+                <fecundityReduction initial="1.0"/>
               </anopheles>
             </description>
             <timed>
-              <deploy time="146"/>
+              <deploy time="116"/>
+            </timed>
+          </intervention>
+          <intervention name="fecundityReduction" nonHumanHostsName="unprotectedAnimals">
+            <decay function="step" L="1.0"/>
+            <description >
+              <anopheles mosquito="gambiae_ss">
+                <availabilityReduction initial="0.0"/>
+                <preprandialKillingEffect initial="0.0"/>
+                <postprandialKillingEffect initial="0.0"/>
+                <restingKillingEffect initial="0.0"/>
+                <fecundityReduction initial="1.0"/>
+              </anopheles>
+              <anopheles mosquito="arabiensis">
+                <availabilityReduction initial="0.0"/>
+                <preprandialKillingEffect initial="0.0"/>
+                <postprandialKillingEffect initial="0.0"/>
+                <restingKillingEffect initial="0.0"/>
+                <fecundityReduction initial="1.0"/>
+              </anopheles>
+              <anopheles mosquito="funestus">
+                <availabilityReduction initial="0.0"/>
+                <preprandialKillingEffect initial="0.0"/>
+                <postprandialKillingEffect initial="0.0"/>
+                <restingKillingEffect initial="0.0"/>
+                <fecundityReduction initial="1.0"/>
+              </anopheles>
+            </description>
+            <timed>
+              <deploy time="554"/>
             </timed>
           </intervention>
         </nonHumanHostsModifications>
@@ -94,22 +126,25 @@
                     <mosqProbBiting value="0.95"/>
                     <mosqProbFindRestSite value="0.95"/>
                     <mosqProbResting value="0.99"/>
+                    <hostFecundityFactor value="1.0"/>
                 </anopheles>
                 <anopheles mosquito="arabiensis">
                     <mosqRelativeAvailabilityHuman value="1.0"/>
                     <mosqProbBiting value="0.95"/>
                     <mosqProbFindRestSite value="0.95"/>
                     <mosqProbResting value="0.99"/>
+                    <hostFecundityFactor value="1.0"/>
                 </anopheles>
                 <anopheles mosquito="funestus">
                     <mosqRelativeAvailabilityHuman value="1.0"/>
                     <mosqProbBiting value="0.95"/>
                     <mosqProbFindRestSite value="0.95"/>
                     <mosqProbResting value="0.99"/>
+                    <hostFecundityFactor value="1.0"/>
                 </anopheles>
             </description>
             <timed>
-              <deploy time="190" lifespan="3y"/>
+              <deploy time="189" lifespan="3y"/>
             </timed>
           </nonHumanHosts>
         </addNonHumanHosts>
