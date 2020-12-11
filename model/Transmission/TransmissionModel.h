@@ -99,6 +99,14 @@ public:
   virtual void initVectorTrap( const scnXml::VectorTrap::DescriptionSequence list,
         size_t instance, const scnXml::VectorTrap::NameOptional name ) =0;
   
+  // /** Set up non-human hosts interventions. */
+  virtual void initNonHumanHostsInterv( const scnXml::Description2::AnophelesSequence list,
+        const scnXml::DecayFunction& decay, size_t instance, const string& name ) =0;
+
+  // /** Set up non-human hosts interventions. */
+  virtual void initAddNonHumanHostsInterv( const scnXml::Description3::AnophelesSequence list,
+        const string& name ) =0;
+
   /// Checkpointing
   template<class S>
   void operator& (S& stream) {
@@ -195,7 +203,11 @@ public:
     /// @param instance Index of this type of trap
     /// @param number The number of traps to deploy
     /// @param lifespan Time until these traps are removed/replaced/useless
-    virtual void deployVectorTrap( size_t instance, double number, SimTime lifespan ) =0;
+  virtual void deployVectorTrap( size_t instance, double popSize, SimTime lifespan ) =0;
+  
+  virtual void deployNonHumanHostsInterv( size_t instance, string name ) =0;
+
+  virtual void deployAddNonHumanHosts( string name, double popSize, SimTime lifespan) =0;
   
   /** Remove all current infections to mosquitoes, such that without re-
    * infection, humans will then be exposed to zero EIR. */

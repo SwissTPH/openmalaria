@@ -156,6 +156,11 @@ public:
     /** Set up trap parameters. */
     void initVectorTrap( const scnXml::Description1& desc, size_t instance );
     
+    // /** Set up the non-human hosts interventions. */
+    void initNonHumanHostsInterv( const scnXml::NonHumanHostsSpeciesIntervention& elt, const scnXml::DecayFunction& decay, size_t instance, string name );
+    
+    void initAddNonHumanHostsInterv( const scnXml::NonHumanHostsVectorSpecies& elt, string name );
+    
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
@@ -191,7 +196,11 @@ public:
     /// @param instance Index of this type of trap
     /// @param number The number of traps to deploy
     /// @param lifespan Time until these traps are removed/replaced/useless
-    void deployVectorTrap(LocalRng& rng, size_t species, size_t instance, double number, SimTime lifespan);
+    void deployVectorTrap(LocalRng& rng, size_t species, size_t instance, double popSize, SimTime lifespan);
+
+    void deployNonHumanHostsInterv(LocalRng& rng, size_t species, size_t instance, string name);
+
+    void deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan);
 
     inline void uninfectVectors() {
         transmission.uninfectVectors();
@@ -326,7 +335,26 @@ private:
     // Parameters for trap interventions. Doesn't need checkpointing.
     vector<TrapParams> trapParams;
     
-    
+    // Added NonHumanHosts
+    struct NHH {
+        double avail_i;
+        double P_B_I;
+        double P_C_I;
+        double P_D_I;
+        double rel_fecundity;
+        SimTime expiry;
+    };
+    map<string,NHH> initNhh;
+
+    struct NHHParams {
+        double mosqRelativeAvailabilityHuman;
+        double mosqProbBiting;
+        double mosqProbFindingRestSite;
+        double mosqProbResting;
+        double hostFecundityFactor;
+    };
+    map<string,NHHParams> addedNhh;
+
     // -----  model state (and some encapsulated parameters)  -----
     
     /** @brief transmission and life-cycle parts of model
@@ -373,6 +401,8 @@ private:
      * date; total availability is the sum. */
     list<TrapData> baitedTraps;
     //@}
+
+    map<string,vector<util::SimpleDecayingValue>> reduceNHHAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I, reduceFecundity;
     
     /** Per time-step partial calculation of EIR, per genotype.
     *

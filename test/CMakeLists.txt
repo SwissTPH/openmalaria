@@ -48,6 +48,7 @@ set (OM_BOXTEST_NAMES
   VecMonthly
   VecTest
   Vivax
+  NonHumanHosts
 )
 # tests with broken checkpointing:
 set (OM_BOXTEST_NC_NAMES)

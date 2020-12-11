@@ -46,6 +46,11 @@ public:
         decay = DecayFunction::makeObject(elt, name);
         initial = initial_value;
     }
+
+    /** Configure from an XML element. */
+    inline void set (double initial_value){
+        initial = initial_value;
+    }
     
     /** Trigger a deployment, if decay function was set. */
     inline void deploy (LocalRng& rng, SimTime time){
