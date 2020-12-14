@@ -1,0 +1,1856 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Schema 5 - </title>
+        
+
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link href="https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800" rel="stylesheet" type="text/css">
+        <link href="https://fonts.googleapis.com/css?family=Source+Code+Pro:500" rel="stylesheet" type="text/css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+        
+
+        
+    </head>
+    <body class="light">
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            document.body.className = theme;
+            document.querySelector('html').className = theme + ' js';
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="affix"><a href="intro.html">Introduction</a></li><li><a href="schema-latest.html"><strong aria-hidden="true">1.</strong> Latest version</a></li><li><a href="schema-current.html"><strong aria-hidden="true">2.</strong> Development version</a></li><li><a href="schema-43.html"><strong aria-hidden="true">3.</strong> Schema 43</a></li><li><a href="schema-42.html"><strong aria-hidden="true">4.</strong> Schema 42</a></li><li><a href="schema-41.html"><strong aria-hidden="true">5.</strong> Schema 41</a></li><li><a href="schema-40.html"><strong aria-hidden="true">6.</strong> Schema 40</a></li><li><a href="schema-39.html"><strong aria-hidden="true">7.</strong> Schema 39</a></li><li><a href="schema-38.html"><strong aria-hidden="true">8.</strong> Schema 38</a></li><li><a href="schema-37.html"><strong aria-hidden="true">9.</strong> Schema 37</a></li><li><a href="schema-36.html"><strong aria-hidden="true">10.</strong> Schema 36</a></li><li><a href="schema-35.html"><strong aria-hidden="true">11.</strong> Schema 35</a></li><li><a href="schema-34.html"><strong aria-hidden="true">12.</strong> Schema 34</a></li><li><a href="schema-33.html"><strong aria-hidden="true">13.</strong> Schema 33</a></li><li><a href="schema-32.html"><strong aria-hidden="true">14.</strong> Schema 32</a></li><li><a href="schema-31.html"><strong aria-hidden="true">15.</strong> Schema 31</a></li><li><a href="schema-30-3.html"><strong aria-hidden="true">16.</strong> Schema 30</a></li><li><a href="schema-30.html"><strong aria-hidden="true">17.</strong> Schema 30</a></li><li><a href="schema-29.html"><strong aria-hidden="true">18.</strong> Schema 29</a></li><li><a href="schema-28.html"><strong aria-hidden="true">19.</strong> Schema 28</a></li><li><a href="schema-27.html"><strong aria-hidden="true">20.</strong> Schema 27</a></li><li><a href="schema-26.html"><strong aria-hidden="true">21.</strong> Schema 26</a></li><li><a href="schema-25.html"><strong aria-hidden="true">22.</strong> Schema 25</a></li><li><a href="schema-24.html"><strong aria-hidden="true">23.</strong> Schema 24</a></li><li><a href="schema-23.html"><strong aria-hidden="true">24.</strong> Schema 23</a></li><li><a href="schema-22.html"><strong aria-hidden="true">25.</strong> Schema 22</a></li><li><a href="schema-21.html"><strong aria-hidden="true">26.</strong> Schema 21</a></li><li><a href="schema-20.html"><strong aria-hidden="true">27.</strong> Schema 20</a></li><li><a href="schema-19.html"><strong aria-hidden="true">28.</strong> Schema 19</a></li><li><a href="schema-18.html"><strong aria-hidden="true">29.</strong> Schema 18</a></li><li><a href="schema-17.html"><strong aria-hidden="true">30.</strong> Schema 17</a></li><li><a href="schema-16.html"><strong aria-hidden="true">31.</strong> Schema 16</a></li><li><a href="schema-15.html"><strong aria-hidden="true">32.</strong> Schema 15</a></li><li><a href="schema-14.html"><strong aria-hidden="true">33.</strong> Schema 14</a></li><li><a href="schema-13.html"><strong aria-hidden="true">34.</strong> Schema 13</a></li><li><a href="schema-12.html"><strong aria-hidden="true">35.</strong> Schema 12</a></li><li><a href="schema-11.html"><strong aria-hidden="true">36.</strong> Schema 11</a></li><li><a href="schema-10.html"><strong aria-hidden="true">37.</strong> Schema 10</a></li><li><a href="schema-9.html"><strong aria-hidden="true">38.</strong> Schema 9</a></li><li><a href="schema-8.html"><strong aria-hidden="true">39.</strong> Schema 8</a></li><li><a href="schema-7.html"><strong aria-hidden="true">40.</strong> Schema 7</a></li><li><a href="schema-6.html"><strong aria-hidden="true">41.</strong> Schema 6</a></li><li><a href="schema-5.html" class="active"><strong aria-hidden="true">42.</strong> Schema 5</a></li><li><a href="schema-4.html"><strong aria-hidden="true">43.</strong> Schema 4</a></li><li><a href="schema-3.html"><strong aria-hidden="true">44.</strong> Schema 3</a></li><li><a href="schema-2.html"><strong aria-hidden="true">45.</strong> Schema 2</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                
+                <div id="menu-bar" class="menu-bar">
+                    <div id="menu-bar-sticky-container">
+                        <div class="left-buttons">
+                            <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                                <i class="fa fa-bars"></i>
+                            </button>
+                            <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                                <i class="fa fa-paint-brush"></i>
+                            </button>
+                            <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                                <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                                <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                            </ul>
+                            
+                            <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                                <i class="fa fa-search"></i>
+                            </button>
+                            
+                        </div>
+
+                        <h1 class="menu-title"></h1>
+
+                        <div class="right-buttons">
+                            <a href="print.html" title="Print this book" aria-label="Print this book">
+                                <i id="print-button" class="fa fa-print"></i>
+                            </a>
+                            
+                        </div>
+                    </div>
+                </div>
+
+                
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" name="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1><a class="header" href="#schema-5-documentation" id="schema-5-documentation">Schema 5 documentation</a></h1>
+<p>Generated from: <code>scenario_5.xsd</code>.</p>
+<p>Key:</p>
+<pre><code>  abc           required (one)
+[ def ]         optional (zero or one)
+( ghi )*        any number (zero or more)
+( jkl )+        at least one
+( mno ){2,inf}  two or more occurrences
+</code></pre>
+<h2><a class="header" href="#a-nameelt-scenarioa-scenario" id="a-nameelt-scenarioa-scenario"><a name="elt-scenario"></a> scenario</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a></p>
+<pre><code class="language-xml">&lt;scenario
+    schemaVersion=int
+    analysisNo=int
+    maximumAgeYrs=double
+    name=string
+    popSize=int
+    simulationDuration=int
+    modelVersion=int
+    wuID=int
+    assimMode=(&quot;0&quot; or &quot;1&quot;)
+    mode=(&quot;1&quot; or &quot;2&quot; or &quot;3&quot; or &quot;4&quot;)
+    xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+    xsi:noNamespaceSchemaLocation=&quot;scenario_5.xsd&quot;
+  &gt;
+IN THIS ORDER:
+|   &lt;demography ... /&gt; 
+|   &lt;monitoring ... /&gt; 
+|   &lt;interventions ... /&gt; 
+| [ &lt;caseManagements ... /&gt; ]
+|   &lt;healthSystem ... /&gt; 
+|   &lt;entoData ... /&gt; 
+|   &lt;parameters ... /&gt; 
+&lt;/scenario&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-demography">demography</a></li>
+<li><a href="#elt-monitoring">monitoring</a></li>
+<li><a href="#elt-interventions">interventions</a></li>
+<li><a href="#elt-caseManagements">caseManagements</a></li>
+<li><a href="#elt-healthSystem">healthSystem</a></li>
+<li><a href="#elt-entoData">entoData</a></li>
+<li><a href="#elt-parameters">parameters</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element" id="documentation-element">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of scenario</p>
+<h3><a class="header" href="#attributes" id="attributes">Attributes</a></h3>
+<h4><a class="header" href="#schemaversion" id="schemaversion">schemaVersion</a></h4>
+<pre><code class="language-xml">schemaVersion=int
+</code></pre>
+<p>Version of xml schema. If not equal to the current version
+an error is thrown. Use SchemaTranslator to update xml files.</p>
+<h4><a class="header" href="#analysisno" id="analysisno">analysisNo</a></h4>
+<pre><code class="language-xml">analysisNo=int
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 1
+<strong>Max:</strong> 100000000</p>
+<p>Unique identifier of scenario</p>
+<h4><a class="header" href="#maximumageyrs" id="maximumageyrs">maximumAgeYrs</a></h4>
+<pre><code class="language-xml">maximumAgeYrs=double
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Maximum age of simulated humans</p>
+<h4><a class="header" href="#name" id="name">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of intervention</p>
+<h4><a class="header" href="#popsize" id="popsize">popSize</a></h4>
+<pre><code class="language-xml">popSize=int
+</code></pre>
+<p><strong>Units:</strong> Count
+<strong>Min:</strong> 1
+<strong>Max:</strong> 100000</p>
+<p>Population size</p>
+<h4><a class="header" href="#simulationduration" id="simulationduration">simulationDuration</a></h4>
+<pre><code class="language-xml">simulationDuration=int
+</code></pre>
+<p><strong>Units:</strong> Time steps
+<strong>Min:</strong> 1
+<strong>Max:</strong> 36500</p>
+<p>Duration of main simulation</p>
+<h4><a class="header" href="#modelversion" id="modelversion">modelVersion</a></h4>
+<pre><code class="language-xml">modelVersion=int
+</code></pre>
+<p><strong>Units:</strong> Code
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100000000</p>
+<p>Model Version</p>
+<h4><a class="header" href="#wuid" id="wuid">wuID</a></h4>
+<pre><code class="language-xml">wuID=int
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 1
+<strong>Max:</strong> 100000000</p>
+<p>Work unit ID. Only used to validate
+checkpointing, to prevent checkpoint cheats.</p>
+<h4><a class="header" href="#assimmode" id="assimmode">assimMode</a></h4>
+<pre><code class="language-xml">assimMode=(&quot;0&quot; or &quot;1&quot;)
+</code></pre>
+<p><strong>Units:</strong> Code</p>
+<p>Assimilator mode. Defines output of simulator as
+either complete (columns:
+time,agegroup,measure,value) or minimal (single
+column: value)</p>
+<h4><a class="header" href="#mode" id="mode">mode</a></h4>
+<pre><code class="language-xml">mode=(&quot;1&quot; or &quot;2&quot; or &quot;3&quot; or &quot;4&quot;)
+</code></pre>
+<p><strong>Units:</strong> Code</p>
+<p>Simulation mode</p>
+<h2><a class="header" href="#a-nameelt-demographya-demography" id="a-nameelt-demographya-demography"><a name="elt-demography"></a> demography</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-demography">demography</a></p>
+<pre><code class="language-xml">&lt;demography
+    name=string
+  [ growthRate=double ]
+  &gt;
+IN THIS ORDER:
+|   &lt;ageGroup ... /&gt; 
+&lt;/demography&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-ageGroup">ageGroup</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-1" id="documentation-element-1">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of demography</p>
+<h4><a class="header" href="#documentation-type" id="documentation-type">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of demography</p>
+<h3><a class="header" href="#attributes-1" id="attributes-1">Attributes</a></h3>
+<h4><a class="header" href="#name-1" id="name-1">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of demography data</p>
+<h4><a class="header" href="#growthrate" id="growthrate">growthRate</a></h4>
+<pre><code class="language-xml">growthRate=double
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 0
+<strong>Max:</strong> 0</p>
+<p>Growth rate of human population.</p>
+<h2><a class="header" href="#a-nameelt-agegroupa-agegroup" id="a-nameelt-agegroupa-agegroup"><a name="elt-ageGroup"></a> ageGroup</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-demography">demography</a> → <a href="#elt-ageGroup">ageGroup</a></p>
+<pre><code class="language-xml">&lt;ageGroup
+    lowerbound=double
+  &gt;
+IN THIS ORDER:
+| ( &lt;group ... /&gt; )+
+&lt;/ageGroup&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-group">group</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-2" id="documentation-element-2">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age groups included in demography</p>
+<h4><a class="header" href="#documentation-type-1" id="documentation-type-1">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age groups included in demography or surveys</p>
+<h3><a class="header" href="#attributes-2" id="attributes-2">Attributes</a></h3>
+<h4><a class="header" href="#lowerbound" id="lowerbound">lowerbound</a></h4>
+<pre><code class="language-xml">lowerbound=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Lower bound of age group</p>
+<h2><a class="header" href="#a-nameelt-groupa-group" id="a-nameelt-groupa-group"><a name="elt-group"></a> group</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-demography">demography</a> → <a href="#elt-ageGroup">ageGroup</a> → <a href="#elt-group">group</a></p>
+<pre><code class="language-xml">&lt;group
+    poppercent=double
+    upperbound=double
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-3" id="attributes-3">Attributes</a></h3>
+<h4><a class="header" href="#poppercent" id="poppercent">poppercent</a></h4>
+<pre><code class="language-xml">poppercent=double
+</code></pre>
+<h4><a class="header" href="#upperbound" id="upperbound">upperbound</a></h4>
+<pre><code class="language-xml">upperbound=double
+</code></pre>
+<h2><a class="header" href="#a-nameelt-monitoringa-monitoring" id="a-nameelt-monitoringa-monitoring"><a name="elt-monitoring"></a> monitoring</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-monitoring">monitoring</a></p>
+<pre><code class="language-xml">&lt;monitoring
+    name=string
+  &gt;
+IN THIS ORDER:
+|   &lt;surveys ... /&gt; 
+|   &lt;ageGroup ... /&gt; 
+&lt;/monitoring&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-surveys">surveys</a></li>
+<li><a href="#elt-ageGroup-2">ageGroup</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-3" id="documentation-element-3">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of surveys</p>
+<h4><a class="header" href="#documentation-type-2" id="documentation-type-2">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of surveys</p>
+<h3><a class="header" href="#attributes-4" id="attributes-4">Attributes</a></h3>
+<h4><a class="header" href="#name-2" id="name-2">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of monitoring data</p>
+<h2><a class="header" href="#a-nameelt-surveysa-surveys" id="a-nameelt-surveysa-surveys"><a name="elt-surveys"></a> surveys</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-monitoring">monitoring</a> → <a href="#elt-surveys">surveys</a></p>
+<pre><code class="language-xml">&lt;surveys
+    detectionLimit=double
+    summaryOption=int
+  &gt;
+IN THIS ORDER:
+|   &lt;surveyTime ... /&gt; 
+&lt;/surveys&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-surveyTime">surveyTime</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-4" id="documentation-element-4">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of survey times</p>
+<h3><a class="header" href="#attributes-5" id="attributes-5">Attributes</a></h3>
+<h4><a class="header" href="#detectionlimit" id="detectionlimit">detectionLimit</a></h4>
+<pre><code class="language-xml">detectionLimit=double
+</code></pre>
+<p><strong>Units:</strong> parasites/micolitre
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1000</p>
+<p>Detection limit for parasitemia</p>
+<h4><a class="header" href="#summaryoption" id="summaryoption">summaryOption</a></h4>
+<pre><code class="language-xml">summaryOption=int
+</code></pre>
+<p><strong>Units:</strong> Code</p>
+<p>Requested output variables</p>
+<h2><a class="header" href="#a-nameelt-surveytimea-surveytime" id="a-nameelt-surveytimea-surveytime"><a name="elt-surveyTime"></a> surveyTime</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-monitoring">monitoring</a> → <a href="#elt-surveys">surveys</a> → <a href="#elt-surveyTime">surveyTime</a></p>
+<pre><code class="language-xml">&lt;surveyTime&gt;
+    int
+&lt;/surveyTime&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-5" id="documentation-element-5">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 0</p>
+<p>Survey time</p>
+<h2><a class="header" href="#a-nameelt-agegroup-2a-agegroup" id="a-nameelt-agegroup-2a-agegroup"><a name="elt-ageGroup-2"></a> ageGroup</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-monitoring">monitoring</a> → <a href="#elt-ageGroup-2">ageGroup</a></p>
+<pre><code class="language-xml">&lt;ageGroup
+    lowerbound=double
+  &gt;
+IN THIS ORDER:
+| ( &lt;group ... /&gt; )+
+&lt;/ageGroup&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-group-2">group</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-6" id="documentation-element-6">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age groups included in demography or
+surveys</p>
+<h4><a class="header" href="#documentation-type-3" id="documentation-type-3">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age groups included in surveys</p>
+<h3><a class="header" href="#attributes-6" id="attributes-6">Attributes</a></h3>
+<h4><a class="header" href="#lowerbound-1" id="lowerbound-1">lowerbound</a></h4>
+<pre><code class="language-xml">lowerbound=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Lower bound of age group</p>
+<h2><a class="header" href="#a-nameelt-group-2a-group" id="a-nameelt-group-2a-group"><a name="elt-group-2"></a> group</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-monitoring">monitoring</a> → <a href="#elt-ageGroup-2">ageGroup</a> → <a href="#elt-group-2">group</a></p>
+<pre><code class="language-xml">&lt;group
+    upperbound=double
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-7" id="attributes-7">Attributes</a></h3>
+<h4><a class="header" href="#upperbound-1" id="upperbound-1">upperbound</a></h4>
+<pre><code class="language-xml">upperbound=double
+</code></pre>
+<h2><a class="header" href="#a-nameelt-interventionsa-interventions" id="a-nameelt-interventionsa-interventions"><a name="elt-interventions"></a> interventions</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a></p>
+<pre><code class="language-xml">&lt;interventions
+    name=string
+  &gt;
+IN THIS ORDER:
+| ( &lt;vaccineDescription ... /&gt; ){0,3}
+| [ &lt;iptiDescription ... /&gt; ]
+| [ &lt;continuous ... /&gt; ]
+| [ &lt;timed ... /&gt; ]
+&lt;/interventions&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-vaccineDescription">vaccineDescription</a></li>
+<li><a href="#elt-iptiDescription">iptiDescription</a></li>
+<li><a href="#elt-continuous">continuous</a></li>
+<li><a href="#elt-timed">timed</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-7" id="documentation-element-7">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of interventions</p>
+<h4><a class="header" href="#documentation-type-4" id="documentation-type-4">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of interventions</p>
+<h3><a class="header" href="#attributes-8" id="attributes-8">Attributes</a></h3>
+<h4><a class="header" href="#name-3" id="name-3">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of age specific intervention</p>
+<h2><a class="header" href="#a-nameelt-vaccinedescriptiona-vaccinedescription" id="a-nameelt-vaccinedescriptiona-vaccinedescription"><a name="elt-vaccineDescription"></a> vaccineDescription</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vaccineDescription">vaccineDescription</a></p>
+<pre><code class="language-xml">&lt;vaccineDescription
+    vaccineType=int
+  &gt;
+IN THIS ORDER:
+|   &lt;halfLifeYrs ... /&gt; 
+|   &lt;efficacyB ... /&gt; 
+| ( &lt;initialEfficacy ... /&gt; )+
+&lt;/vaccineDescription&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-halfLifeYrs">halfLifeYrs</a></li>
+<li><a href="#elt-efficacyB">efficacyB</a></li>
+<li><a href="#elt-initialEfficacy">initialEfficacy</a></li>
+</ul>
+<h3><a class="header" href="#attributes-9" id="attributes-9">Attributes</a></h3>
+<h4><a class="header" href="#vaccinetype" id="vaccinetype">vaccineType</a></h4>
+<pre><code class="language-xml">vaccineType=int
+</code></pre>
+<p><strong>Units:</strong> Code</p>
+<p>Type of vaccine</p>
+<h2><a class="header" href="#a-nameelt-halflifeyrsa-halflifeyrs" id="a-nameelt-halflifeyrsa-halflifeyrs"><a name="elt-halfLifeYrs"></a> halfLifeYrs</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vaccineDescription">vaccineDescription</a> → <a href="#elt-halfLifeYrs">halfLifeYrs</a></p>
+<pre><code class="language-xml">&lt;halfLifeYrs
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-8" id="documentation-element-8">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Half life of drug effect</p>
+<h3><a class="header" href="#attributes-10" id="attributes-10">Attributes</a></h3>
+<h4><a class="header" href="#value" id="value">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-efficacyba-efficacyb" id="a-nameelt-efficacyba-efficacyb"><a name="elt-efficacyB"></a> efficacyB</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vaccineDescription">vaccineDescription</a> → <a href="#elt-efficacyB">efficacyB</a></p>
+<pre><code class="language-xml">&lt;efficacyB
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-9" id="documentation-element-9">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Positive real
+<strong>Min:</strong> 0.001
+<strong>Max:</strong> 1.00E+06</p>
+<p>Measure of variation in vaccine efficacy</p>
+<h3><a class="header" href="#attributes-11" id="attributes-11">Attributes</a></h3>
+<h4><a class="header" href="#value-1" id="value-1">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-initialefficacya-initialefficacy" id="a-nameelt-initialefficacya-initialefficacy"><a name="elt-initialEfficacy"></a> initialEfficacy</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vaccineDescription">vaccineDescription</a> → <a href="#elt-initialEfficacy">initialEfficacy</a></p>
+<pre><code class="language-xml">&lt;initialEfficacy
+    value=double
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-12" id="attributes-12">Attributes</a></h3>
+<h4><a class="header" href="#value-2" id="value-2">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-iptidescriptiona-iptidescription" id="a-nameelt-iptidescriptiona-iptidescription"><a name="elt-iptiDescription"></a> iptiDescription</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-iptiDescription">iptiDescription</a></p>
+<pre><code class="language-xml">&lt;iptiDescription
+    iptiEffect=int
+  &gt;
+IN THIS ORDER:
+| ( &lt;infGenotype ... /&gt; )+
+&lt;/iptiDescription&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-infGenotype">infGenotype</a></li>
+</ul>
+<h3><a class="header" href="#attributes-13" id="attributes-13">Attributes</a></h3>
+<h4><a class="header" href="#iptieffect" id="iptieffect">iptiEffect</a></h4>
+<pre><code class="language-xml">iptiEffect=int
+</code></pre>
+<h2><a class="header" href="#a-nameelt-infgenotypea-infgenotype" id="a-nameelt-infgenotypea-infgenotype"><a name="elt-infGenotype"></a> infGenotype</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-iptiDescription">iptiDescription</a> → <a href="#elt-infGenotype">infGenotype</a></p>
+<pre><code class="language-xml">&lt;infGenotype
+    name=string
+    freq=double
+    ACR=double
+    proph=int
+    tolPeriod=int
+    atten=int
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-14" id="attributes-14">Attributes</a></h3>
+<h4><a class="header" href="#name-4" id="name-4">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of age specific intervention</p>
+<h4><a class="header" href="#freq" id="freq">freq</a></h4>
+<pre><code class="language-xml">freq=double
+</code></pre>
+<h4><a class="header" href="#acr" id="acr">ACR</a></h4>
+<pre><code class="language-xml">ACR=double
+</code></pre>
+<h4><a class="header" href="#proph" id="proph">proph</a></h4>
+<pre><code class="language-xml">proph=int
+</code></pre>
+<h4><a class="header" href="#tolperiod" id="tolperiod">tolPeriod</a></h4>
+<pre><code class="language-xml">tolPeriod=int
+</code></pre>
+<h4><a class="header" href="#atten" id="atten">atten</a></h4>
+<pre><code class="language-xml">atten=int
+</code></pre>
+<h2><a class="header" href="#a-nameelt-continuousa-continuous" id="a-nameelt-continuousa-continuous"><a name="elt-continuous"></a> continuous</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-continuous">continuous</a></p>
+<pre><code class="language-xml">&lt;continuous&gt;
+IN THIS ORDER:
+| ( &lt;vaccine ... /&gt; )*
+| ( &lt;ITN ... /&gt; )*
+| ( &lt;ipti ... /&gt; )*
+&lt;/continuous&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-vaccine">vaccine</a></li>
+<li><a href="#elt-ITN">ITN</a></li>
+<li><a href="#elt-ipti">ipti</a></li>
+</ul>
+<h2><a class="header" href="#a-nameelt-vaccinea-vaccine" id="a-nameelt-vaccinea-vaccine"><a name="elt-vaccine"></a> vaccine</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-continuous">continuous</a> → <a href="#elt-vaccine">vaccine</a></p>
+<pre><code class="language-xml">&lt;vaccine
+    targetAgeYrs=double
+    coverage=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-10" id="documentation-element-10">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age groups for vaccination</p>
+<h3><a class="header" href="#attributes-15" id="attributes-15">Attributes</a></h3>
+<h4><a class="header" href="#targetageyrs" id="targetageyrs">targetAgeYrs</a></h4>
+<pre><code class="language-xml">targetAgeYrs=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Target age of intervention</p>
+<h4><a class="header" href="#coverage" id="coverage">coverage</a></h4>
+<pre><code class="language-xml">coverage=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Coverage of intervention</p>
+<h2><a class="header" href="#a-nameelt-itna-itn" id="a-nameelt-itna-itn"><a name="elt-ITN"></a> ITN</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-continuous">continuous</a> → <a href="#elt-ITN">ITN</a></p>
+<pre><code class="language-xml">&lt;ITN
+    targetAgeYrs=double
+    coverage=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-11" id="documentation-element-11">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of ITN deployment in the community</p>
+<h3><a class="header" href="#attributes-16" id="attributes-16">Attributes</a></h3>
+<h4><a class="header" href="#targetageyrs-1" id="targetageyrs-1">targetAgeYrs</a></h4>
+<pre><code class="language-xml">targetAgeYrs=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Target age of intervention</p>
+<h4><a class="header" href="#coverage-1" id="coverage-1">coverage</a></h4>
+<pre><code class="language-xml">coverage=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Coverage of intervention</p>
+<h2><a class="header" href="#a-nameelt-iptia-ipti" id="a-nameelt-iptia-ipti"><a name="elt-ipti"></a> ipti</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-continuous">continuous</a> → <a href="#elt-ipti">ipti</a></p>
+<pre><code class="language-xml">&lt;ipti
+    targetAgeYrs=double
+    coverage=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-12" id="documentation-element-12">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age groups for IPTi distribution</p>
+<h3><a class="header" href="#attributes-17" id="attributes-17">Attributes</a></h3>
+<h4><a class="header" href="#targetageyrs-2" id="targetageyrs-2">targetAgeYrs</a></h4>
+<pre><code class="language-xml">targetAgeYrs=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Target age of intervention</p>
+<h4><a class="header" href="#coverage-2" id="coverage-2">coverage</a></h4>
+<pre><code class="language-xml">coverage=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Coverage of intervention</p>
+<h2><a class="header" href="#a-nameelt-timeda-timed" id="a-nameelt-timeda-timed"><a name="elt-timed"></a> timed</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a></p>
+<pre><code class="language-xml">&lt;timed&gt;
+IN THIS ORDER:
+| ( &lt;intervention ... /&gt; )+
+&lt;/timed&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-intervention">intervention</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-13" id="documentation-element-13">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of timed interventions</p>
+<h4><a class="header" href="#documentation-type-5" id="documentation-type-5">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of timed interventions</p>
+<h2><a class="header" href="#a-nameelt-interventiona-intervention" id="a-nameelt-interventiona-intervention"><a name="elt-intervention"></a> intervention</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a></p>
+<pre><code class="language-xml">&lt;intervention
+    time=int
+  &gt;
+IN THIS ORDER:
+| [ &lt;changeHS ... /&gt; ]
+| [ &lt;changeEIR ... /&gt; ]
+| [ &lt;MDA ... /&gt; ]
+| [ &lt;IRS ... /&gt; ]
+| [ &lt;vaccinate ... /&gt; ]
+| [ &lt;ITN ... /&gt; ]
+| [ &lt;ipti ... /&gt; ]
+&lt;/intervention&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-changeHS">changeHS</a></li>
+<li><a href="#elt-changeEIR">changeEIR</a></li>
+<li><a href="#elt-MDA">MDA</a></li>
+<li><a href="#elt-IRS">IRS</a></li>
+<li><a href="#elt-vaccinate">vaccinate</a></li>
+<li><a href="#elt-ITN-2">ITN</a></li>
+<li><a href="#elt-ipti-2">ipti</a></li>
+</ul>
+<h3><a class="header" href="#attributes-18" id="attributes-18">Attributes</a></h3>
+<h4><a class="header" href="#time" id="time">time</a></h4>
+<pre><code class="language-xml">time=int
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 1
+<strong>Max:</strong> 10000</p>
+<p>Time step of intervention</p>
+<h2><a class="header" href="#a-nameelt-changehsa-changehs" id="a-nameelt-changehsa-changehs"><a name="elt-changeHS"></a> changeHS</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-changeHS">changeHS</a></p>
+<pre><code class="language-xml">&lt;changeHS
+    name=string
+    healthSystemMemory=int
+  &gt;
+IN THIS ORDER:
+|   &lt;drugRegimen ... /&gt; 
+|   &lt;initialACR ... /&gt; 
+|   &lt;compliance ... /&gt; 
+|   &lt;nonCompliersEffective ... /&gt; 
+|   &lt;pSeekOfficialCareUncomplicated1 ... /&gt; 
+|   &lt;pSelfTreatUncomplicated ... /&gt; 
+|   &lt;pSeekOfficialCareUncomplicated2 ... /&gt; 
+|   &lt;pSeekOfficialCareSevere ... /&gt; 
+|   &lt;pSequelaeInpatient ... /&gt; 
+|   &lt;CFR ... /&gt; 
+&lt;/changeHS&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-drugRegimen">drugRegimen</a></li>
+<li><a href="#elt-initialACR">initialACR</a></li>
+<li><a href="#elt-compliance">compliance</a></li>
+<li><a href="#elt-nonCompliersEffective">nonCompliersEffective</a></li>
+<li><a href="#elt-pSeekOfficialCareUncomplicated1">pSeekOfficialCareUncomplicated1</a></li>
+<li><a href="#elt-pSelfTreatUncomplicated">pSelfTreatUncomplicated</a></li>
+<li><a href="#elt-pSeekOfficialCareUncomplicated2">pSeekOfficialCareUncomplicated2</a></li>
+<li><a href="#elt-pSeekOfficialCareSevere">pSeekOfficialCareSevere</a></li>
+<li><a href="#elt-pSequelaeInpatient">pSequelaeInpatient</a></li>
+<li><a href="#elt-CFR">CFR</a></li>
+</ul>
+<h4><a class="header" href="#documentation-type-6" id="documentation-type-6">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of health system</p>
+<h3><a class="header" href="#attributes-19" id="attributes-19">Attributes</a></h3>
+<h4><a class="header" href="#name-5" id="name-5">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of health system</p>
+<h4><a class="header" href="#healthsystemmemory" id="healthsystemmemory">healthSystemMemory</a></h4>
+<pre><code class="language-xml">healthSystemMemory=int
+</code></pre>
+<p><strong>Units:</strong> Time steps
+<strong>Min:</strong> 1
+<strong>Max:</strong> 100</p>
+<p>Follow-up period during which a recurrence is
+considered to be a treatment failure</p>
+<h2><a class="header" href="#a-nameelt-drugregimena-drugregimen" id="a-nameelt-drugregimena-drugregimen"><a name="elt-drugRegimen"></a> drugRegimen</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-drugRegimen">drugRegimen</a></p>
+<pre><code class="language-xml">&lt;drugRegimen
+    firstLine=string
+    secondLine=string
+    inpatient=string
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-14" id="documentation-element-14">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of drug regimen</p>
+<h3><a class="header" href="#attributes-20" id="attributes-20">Attributes</a></h3>
+<h4><a class="header" href="#firstline" id="firstline">firstLine</a></h4>
+<pre><code class="language-xml">firstLine=string
+</code></pre>
+<p><strong>Units:</strong> Drug code</p>
+<p>Code for first line drug</p>
+<h4><a class="header" href="#secondline" id="secondline">secondLine</a></h4>
+<pre><code class="language-xml">secondLine=string
+</code></pre>
+<p><strong>Units:</strong> Drug code</p>
+<p>Code for second line drug</p>
+<h4><a class="header" href="#inpatient" id="inpatient">inpatient</a></h4>
+<pre><code class="language-xml">inpatient=string
+</code></pre>
+<p><strong>Units:</strong> Drug code</p>
+<p>Code for drug used for treating
+inpatients</p>
+<h2><a class="header" href="#a-nameelt-initialacra-initialacr" id="a-nameelt-initialacra-initialacr"><a name="elt-initialACR"></a> initialACR</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a></p>
+<pre><code class="language-xml">&lt;initialACR&gt;
+IN THIS ORDER:
+| [ &lt;CQ ... /&gt; ]
+| [ &lt;SP ... /&gt; ]
+| [ &lt;AQ ... /&gt; ]
+| [ &lt;SPAQ ... /&gt; ]
+| [ &lt;ACT ... /&gt; ]
+| [ &lt;QN ... /&gt; ]
+|   &lt;selfTreatment ... /&gt; 
+&lt;/initialACR&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-CQ">CQ</a></li>
+<li><a href="#elt-SP">SP</a></li>
+<li><a href="#elt-AQ">AQ</a></li>
+<li><a href="#elt-SPAQ">SPAQ</a></li>
+<li><a href="#elt-ACT">ACT</a></li>
+<li><a href="#elt-QN">QN</a></li>
+<li><a href="#elt-selfTreatment">selfTreatment</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-15" id="documentation-element-15">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Initial cure rate</p>
+<h2><a class="header" href="#a-nameelt-cqa-cq" id="a-nameelt-cqa-cq"><a name="elt-CQ"></a> CQ</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a> → <a href="#elt-CQ">CQ</a></p>
+<pre><code class="language-xml">&lt;CQ
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-16" id="documentation-element-16">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Chloroquine</p>
+<h3><a class="header" href="#attributes-21" id="attributes-21">Attributes</a></h3>
+<h4><a class="header" href="#value-3" id="value-3">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-spa-sp" id="a-nameelt-spa-sp"><a name="elt-SP"></a> SP</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a> → <a href="#elt-SP">SP</a></p>
+<pre><code class="language-xml">&lt;SP
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-17" id="documentation-element-17">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Sulphadoxine-pyrimethamine</p>
+<h3><a class="header" href="#attributes-22" id="attributes-22">Attributes</a></h3>
+<h4><a class="header" href="#value-4" id="value-4">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-aqa-aq" id="a-nameelt-aqa-aq"><a name="elt-AQ"></a> AQ</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a> → <a href="#elt-AQ">AQ</a></p>
+<pre><code class="language-xml">&lt;AQ
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-18" id="documentation-element-18">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Amodiaquine</p>
+<h3><a class="header" href="#attributes-23" id="attributes-23">Attributes</a></h3>
+<h4><a class="header" href="#value-5" id="value-5">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-spaqa-spaq" id="a-nameelt-spaqa-spaq"><a name="elt-SPAQ"></a> SPAQ</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a> → <a href="#elt-SPAQ">SPAQ</a></p>
+<pre><code class="language-xml">&lt;SPAQ
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-19" id="documentation-element-19">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Sulphadoxine-pyrimethamine/Amodiaquine</p>
+<h3><a class="header" href="#attributes-24" id="attributes-24">Attributes</a></h3>
+<h4><a class="header" href="#value-6" id="value-6">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-acta-act" id="a-nameelt-acta-act"><a name="elt-ACT"></a> ACT</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a> → <a href="#elt-ACT">ACT</a></p>
+<pre><code class="language-xml">&lt;ACT
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-20" id="documentation-element-20">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Artemisinine combination therapy</p>
+<h3><a class="header" href="#attributes-25" id="attributes-25">Attributes</a></h3>
+<h4><a class="header" href="#value-7" id="value-7">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-qna-qn" id="a-nameelt-qna-qn"><a name="elt-QN"></a> QN</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a> → <a href="#elt-QN">QN</a></p>
+<pre><code class="language-xml">&lt;QN
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-21" id="documentation-element-21">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Quinine</p>
+<h3><a class="header" href="#attributes-26" id="attributes-26">Attributes</a></h3>
+<h4><a class="header" href="#value-8" id="value-8">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-selftreatmenta-selftreatment" id="a-nameelt-selftreatmenta-selftreatment"><a name="elt-selfTreatment"></a> selfTreatment</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-initialACR">initialACR</a> → <a href="#elt-selfTreatment">selfTreatment</a></p>
+<pre><code class="language-xml">&lt;selfTreatment
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-22" id="documentation-element-22">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Probability of self-treatment</p>
+<h3><a class="header" href="#attributes-27" id="attributes-27">Attributes</a></h3>
+<h4><a class="header" href="#value-9" id="value-9">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-compliancea-compliance" id="a-nameelt-compliancea-compliance"><a name="elt-compliance"></a> compliance</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-compliance">compliance</a></p>
+<pre><code class="language-xml">&lt;compliance&gt;
+IN THIS ORDER:
+| [ &lt;CQ ... /&gt; ]
+| [ &lt;SP ... /&gt; ]
+| [ &lt;AQ ... /&gt; ]
+| [ &lt;SPAQ ... /&gt; ]
+| [ &lt;ACT ... /&gt; ]
+| [ &lt;QN ... /&gt; ]
+|   &lt;selfTreatment ... /&gt; 
+&lt;/compliance&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-CQ">CQ</a></li>
+<li><a href="#elt-SP">SP</a></li>
+<li><a href="#elt-AQ">AQ</a></li>
+<li><a href="#elt-SPAQ">SPAQ</a></li>
+<li><a href="#elt-ACT">ACT</a></li>
+<li><a href="#elt-QN">QN</a></li>
+<li><a href="#elt-selfTreatment">selfTreatment</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-23" id="documentation-element-23">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Adherence to treatment</p>
+<h2><a class="header" href="#a-nameelt-noncomplierseffectivea-noncomplierseffective" id="a-nameelt-noncomplierseffectivea-noncomplierseffective"><a name="elt-nonCompliersEffective"></a> nonCompliersEffective</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-nonCompliersEffective">nonCompliersEffective</a></p>
+<pre><code class="language-xml">&lt;nonCompliersEffective&gt;
+IN THIS ORDER:
+| [ &lt;CQ ... /&gt; ]
+| [ &lt;SP ... /&gt; ]
+| [ &lt;AQ ... /&gt; ]
+| [ &lt;SPAQ ... /&gt; ]
+| [ &lt;ACT ... /&gt; ]
+| [ &lt;QN ... /&gt; ]
+|   &lt;selfTreatment ... /&gt; 
+&lt;/nonCompliersEffective&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-CQ">CQ</a></li>
+<li><a href="#elt-SP">SP</a></li>
+<li><a href="#elt-AQ">AQ</a></li>
+<li><a href="#elt-SPAQ">SPAQ</a></li>
+<li><a href="#elt-ACT">ACT</a></li>
+<li><a href="#elt-QN">QN</a></li>
+<li><a href="#elt-selfTreatment">selfTreatment</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-24" id="documentation-element-24">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Effectiveness of treatment of non compliers</p>
+<h2><a class="header" href="#a-nameelt-pseekofficialcareuncomplicated1a-pseekofficialcareuncomplicated1" id="a-nameelt-pseekofficialcareuncomplicated1a-pseekofficialcareuncomplicated1"><a name="elt-pSeekOfficialCareUncomplicated1"></a> pSeekOfficialCareUncomplicated1</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-pSeekOfficialCareUncomplicated1">pSeekOfficialCareUncomplicated1</a></p>
+<pre><code class="language-xml">&lt;pSeekOfficialCareUncomplicated1
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-25" id="documentation-element-25">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Probability that a patient with newly incident
+uncomplicated disease seeks official care</p>
+<h3><a class="header" href="#attributes-28" id="attributes-28">Attributes</a></h3>
+<h4><a class="header" href="#value-10" id="value-10">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-pselftreatuncomplicateda-pselftreatuncomplicated" id="a-nameelt-pselftreatuncomplicateda-pselftreatuncomplicated"><a name="elt-pSelfTreatUncomplicated"></a> pSelfTreatUncomplicated</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-pSelfTreatUncomplicated">pSelfTreatUncomplicated</a></p>
+<pre><code class="language-xml">&lt;pSelfTreatUncomplicated
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-26" id="documentation-element-26">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Probability that a patient with uncomplicated
+disease self-treats</p>
+<h3><a class="header" href="#attributes-29" id="attributes-29">Attributes</a></h3>
+<h4><a class="header" href="#value-11" id="value-11">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-pseekofficialcareuncomplicated2a-pseekofficialcareuncomplicated2" id="a-nameelt-pseekofficialcareuncomplicated2a-pseekofficialcareuncomplicated2"><a name="elt-pSeekOfficialCareUncomplicated2"></a> pSeekOfficialCareUncomplicated2</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-pSeekOfficialCareUncomplicated2">pSeekOfficialCareUncomplicated2</a></p>
+<pre><code class="language-xml">&lt;pSeekOfficialCareUncomplicated2
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-27" id="documentation-element-27">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Probability that a patient with recurrence of
+uncomplicated disease seeks official care</p>
+<h3><a class="header" href="#attributes-30" id="attributes-30">Attributes</a></h3>
+<h4><a class="header" href="#value-12" id="value-12">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-pseekofficialcareseverea-pseekofficialcaresevere" id="a-nameelt-pseekofficialcareseverea-pseekofficialcaresevere"><a name="elt-pSeekOfficialCareSevere"></a> pSeekOfficialCareSevere</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-pSeekOfficialCareSevere">pSeekOfficialCareSevere</a></p>
+<pre><code class="language-xml">&lt;pSeekOfficialCareSevere
+    value=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-28" id="documentation-element-28">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Probability that a patient with severe disease
+seeks official care</p>
+<h3><a class="header" href="#attributes-31" id="attributes-31">Attributes</a></h3>
+<h4><a class="header" href="#value-13" id="value-13">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h2><a class="header" href="#a-nameelt-psequelaeinpatienta-psequelaeinpatient" id="a-nameelt-psequelaeinpatienta-psequelaeinpatient"><a name="elt-pSequelaeInpatient"></a> pSequelaeInpatient</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-pSequelaeInpatient">pSequelaeInpatient</a></p>
+<pre><code class="language-xml">&lt;pSequelaeInpatient&gt;
+IN THIS ORDER:
+| ( &lt;item ... /&gt; )+
+&lt;/pSequelaeInpatient&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-item">item</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-29" id="documentation-element-29">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age specific probabilities of sequelae
+in inpatients</p>
+<h2><a class="header" href="#a-nameelt-itema-item" id="a-nameelt-itema-item"><a name="elt-item"></a> item</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-pSequelaeInpatient">pSequelaeInpatient</a> → <a href="#elt-item">item</a></p>
+<pre><code class="language-xml">&lt;item
+    value=double
+    maxAgeYrs=double
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-32" id="attributes-32">Attributes</a></h3>
+<h4><a class="header" href="#value-14" id="value-14">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p>TODO</p>
+<h4><a class="header" href="#maxageyrs" id="maxageyrs">maxAgeYrs</a></h4>
+<pre><code class="language-xml">maxAgeYrs=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Upper bound of age group</p>
+<h2><a class="header" href="#a-nameelt-cfra-cfr" id="a-nameelt-cfra-cfr"><a name="elt-CFR"></a> CFR</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-CFR">CFR</a></p>
+<pre><code class="language-xml">&lt;CFR&gt;
+IN THIS ORDER:
+| ( &lt;group ... /&gt; )+
+&lt;/CFR&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-group-3">group</a></li>
+</ul>
+<h2><a class="header" href="#a-nameelt-group-3a-group" id="a-nameelt-group-3a-group"><a name="elt-group-3"></a> group</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a> → <a href="#elt-CFR">CFR</a> → <a href="#elt-group-3">group</a></p>
+<pre><code class="language-xml">&lt;group
+    cfr=double
+    lowerbound=double
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-33" id="attributes-33">Attributes</a></h3>
+<h4><a class="header" href="#cfr" id="cfr">cfr</a></h4>
+<pre><code class="language-xml">cfr=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Case fatality rate</p>
+<h4><a class="header" href="#lowerbound-2" id="lowerbound-2">lowerbound</a></h4>
+<pre><code class="language-xml">lowerbound=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Lower bound of age group</p>
+<h2><a class="header" href="#a-nameelt-changeeira-changeeir" id="a-nameelt-changeeira-changeeir"><a name="elt-changeEIR"></a> changeEIR</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-changeEIR">changeEIR</a></p>
+<pre><code class="language-xml">&lt;changeEIR
+    eipDuration=int
+  &gt;
+IN THIS ORDER:
+| ( &lt;EIRDaily ... /&gt; )+
+&lt;/changeEIR&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-EIRDaily">EIRDaily</a></li>
+</ul>
+<h4><a class="header" href="#documentation-type-7" id="documentation-type-7">Documentation (type)</a></h4>
+<p>Parameters for the non-vector transmission model.</p>
+<h3><a class="header" href="#attributes-34" id="attributes-34">Attributes</a></h3>
+<h4><a class="header" href="#eipduration" id="eipduration">eipDuration</a></h4>
+<pre><code class="language-xml">eipDuration=int
+</code></pre>
+<p>The duration of sporogony in days</p>
+<h2><a class="header" href="#a-nameelt-eirdailya-eirdaily" id="a-nameelt-eirdailya-eirdaily"><a name="elt-EIRDaily"></a> EIRDaily</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-nonVector">nonVector</a> → <a href="#elt-EIRDaily">EIRDaily</a></p>
+<pre><code class="language-xml">&lt;EIRDaily
+  [ origin=string ]
+  &gt;
+    double
+&lt;/EIRDaily&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-type-8" id="documentation-type-8">Documentation (type)</a></h4>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 1</p>
+<p>Value of daily EIR</p>
+<h3><a class="header" href="#attributes-35" id="attributes-35">Attributes</a></h3>
+<h4><a class="header" href="#origin" id="origin">origin</a></h4>
+<pre><code class="language-xml">origin=string
+</code></pre>
+<h2><a class="header" href="#a-nameelt-mdaa-mda" id="a-nameelt-mdaa-mda"><a name="elt-MDA"></a> MDA</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-MDA">MDA</a></p>
+<pre><code class="language-xml">&lt;MDA
+    maxAge=double
+    minAge=double
+    coverage=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-30" id="documentation-element-30">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of mass drug deployment in the
+community</p>
+<h3><a class="header" href="#attributes-36" id="attributes-36">Attributes</a></h3>
+<h4><a class="header" href="#maxage" id="maxage">maxAge</a></h4>
+<pre><code class="language-xml">maxAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Maximum age of eligible individuals</p>
+<h4><a class="header" href="#minage" id="minage">minAge</a></h4>
+<pre><code class="language-xml">minAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Minimum age of eligible individuals</p>
+<h4><a class="header" href="#coverage-3" id="coverage-3">coverage</a></h4>
+<pre><code class="language-xml">coverage=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Coverage of intervention</p>
+<h2><a class="header" href="#a-nameelt-irsa-irs" id="a-nameelt-irsa-irs"><a name="elt-IRS"></a> IRS</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-IRS">IRS</a></p>
+<pre><code class="language-xml">&lt;IRS/&gt;
+</code></pre>
+<h2><a class="header" href="#a-nameelt-vaccinatea-vaccinate" id="a-nameelt-vaccinatea-vaccinate"><a name="elt-vaccinate"></a> vaccinate</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-vaccinate">vaccinate</a></p>
+<pre><code class="language-xml">&lt;vaccinate
+    maxAge=double
+    minAge=double
+    coverage=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-31" id="documentation-element-31">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of vaccine deployment in the
+community</p>
+<h3><a class="header" href="#attributes-37" id="attributes-37">Attributes</a></h3>
+<h4><a class="header" href="#maxage-1" id="maxage-1">maxAge</a></h4>
+<pre><code class="language-xml">maxAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Maximum age of eligible individuals</p>
+<h4><a class="header" href="#minage-1" id="minage-1">minAge</a></h4>
+<pre><code class="language-xml">minAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Minimum age of eligible individuals</p>
+<h4><a class="header" href="#coverage-4" id="coverage-4">coverage</a></h4>
+<pre><code class="language-xml">coverage=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Coverage of intervention</p>
+<h2><a class="header" href="#a-nameelt-itn-2a-itn" id="a-nameelt-itn-2a-itn"><a name="elt-ITN-2"></a> ITN</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-ITN-2">ITN</a></p>
+<pre><code class="language-xml">&lt;ITN
+    maxAge=double
+    minAge=double
+    coverage=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-32" id="documentation-element-32">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of ITN deployment in the community</p>
+<h3><a class="header" href="#attributes-38" id="attributes-38">Attributes</a></h3>
+<h4><a class="header" href="#maxage-2" id="maxage-2">maxAge</a></h4>
+<pre><code class="language-xml">maxAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Maximum age of eligible individuals</p>
+<h4><a class="header" href="#minage-2" id="minage-2">minAge</a></h4>
+<pre><code class="language-xml">minAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Minimum age of eligible individuals</p>
+<h4><a class="header" href="#coverage-5" id="coverage-5">coverage</a></h4>
+<pre><code class="language-xml">coverage=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Coverage of intervention</p>
+<h2><a class="header" href="#a-nameelt-ipti-2a-ipti" id="a-nameelt-ipti-2a-ipti"><a name="elt-ipti-2"></a> ipti</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-timed">timed</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-ipti-2">ipti</a></p>
+<pre><code class="language-xml">&lt;ipti
+    maxAge=double
+    minAge=double
+    coverage=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-33" id="documentation-element-33">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age groups for IPTi distribution</p>
+<h3><a class="header" href="#attributes-39" id="attributes-39">Attributes</a></h3>
+<h4><a class="header" href="#maxage-3" id="maxage-3">maxAge</a></h4>
+<pre><code class="language-xml">maxAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Maximum age of eligible individuals</p>
+<h4><a class="header" href="#minage-3" id="minage-3">minAge</a></h4>
+<pre><code class="language-xml">minAge=double
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Minimum age of eligible individuals</p>
+<h4><a class="header" href="#coverage-6" id="coverage-6">coverage</a></h4>
+<pre><code class="language-xml">coverage=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Coverage of intervention</p>
+<h2><a class="header" href="#a-nameelt-casemanagementsa-casemanagements" id="a-nameelt-casemanagementsa-casemanagements"><a name="elt-caseManagements"></a> caseManagements</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a></p>
+<pre><code class="language-xml">&lt;caseManagements
+    name=string
+  &gt;
+IN THIS ORDER:
+| ( &lt;caseManagement ... /&gt; )+
+&lt;/caseManagements&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-caseManagement">caseManagement</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-34" id="documentation-element-34">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of case managment interventions</p>
+<h4><a class="header" href="#documentation-type-9" id="documentation-type-9">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>List of age-specific case managment descriptions</p>
+<h3><a class="header" href="#attributes-40" id="attributes-40">Attributes</a></h3>
+<h4><a class="header" href="#name-6" id="name-6">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of age specific intervention</p>
+<h2><a class="header" href="#a-nameelt-casemanagementa-casemanagement" id="a-nameelt-casemanagementa-casemanagement"><a name="elt-caseManagement"></a> caseManagement</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a></p>
+<pre><code class="language-xml">&lt;caseManagement
+  [ minAgeYrs=decimal ]
+    maxAgeYrs=decimal
+  &gt;
+IN THIS ORDER:
+|   &lt;uc1 ... /&gt; 
+|   &lt;uc2 ... /&gt; 
+|   &lt;sev ... /&gt; 
+|   &lt;nmf ... /&gt; 
+|   &lt;decisions ... /&gt; 
+&lt;/caseManagement&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-uc1">uc1</a></li>
+<li><a href="#elt-uc2">uc2</a></li>
+<li><a href="#elt-sev">sev</a></li>
+<li><a href="#elt-nmf">nmf</a></li>
+<li><a href="#elt-decisions">decisions</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-35" id="documentation-element-35">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Age-specific case management description,
+describes entry-points and decisions, with
+entry-point-specific decision probabilities</p>
+<h3><a class="header" href="#attributes-41" id="attributes-41">Attributes</a></h3>
+<h4><a class="header" href="#minageyrs" id="minageyrs">minAgeYrs</a></h4>
+<pre><code class="language-xml">minAgeYrs=decimal
+</code></pre>
+<h4><a class="header" href="#maxageyrs-1" id="maxageyrs-1">maxAgeYrs</a></h4>
+<pre><code class="language-xml">maxAgeYrs=decimal
+</code></pre>
+<p><strong>Units:</strong> Years
+<strong>Min:</strong> 0
+<strong>Max:</strong> 100</p>
+<p>Upper bound of age group</p>
+<h2><a class="header" href="#a-nameelt-uc1a-uc1" id="a-nameelt-uc1a-uc1"><a name="elt-uc1"></a> uc1</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-uc1">uc1</a></p>
+<pre><code class="language-xml">&lt;uc1&gt;
+IN THIS ORDER:
+| ( &lt;endPoint ... /&gt; )+
+&lt;/uc1&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-endPoint">endPoint</a></li>
+</ul>
+<h2><a class="header" href="#a-nameelt-endpointa-endpoint" id="a-nameelt-endpointa-endpoint"><a name="elt-endPoint"></a> endPoint</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-uc1">uc1</a> → <a href="#elt-endPoint">endPoint</a></p>
+<pre><code class="language-xml">&lt;endPoint
+    decision=int
+    p=double
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-42" id="attributes-42">Attributes</a></h3>
+<h4><a class="header" href="#decision" id="decision">decision</a></h4>
+<pre><code class="language-xml">decision=int
+</code></pre>
+<p>Foreign key reference to outcome node</p>
+<h4><a class="header" href="#p" id="p">p</a></h4>
+<pre><code class="language-xml">p=double
+</code></pre>
+<p><strong>Units:</strong> Proportion
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>Probability of outcome</p>
+<h2><a class="header" href="#a-nameelt-uc2a-uc2" id="a-nameelt-uc2a-uc2"><a name="elt-uc2"></a> uc2</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-uc2">uc2</a></p>
+<pre><code class="language-xml">&lt;uc2&gt;
+IN THIS ORDER:
+| ( &lt;endPoint ... /&gt; )+
+&lt;/uc2&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-endPoint">endPoint</a></li>
+</ul>
+<h2><a class="header" href="#a-nameelt-seva-sev" id="a-nameelt-seva-sev"><a name="elt-sev"></a> sev</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-sev">sev</a></p>
+<pre><code class="language-xml">&lt;sev&gt;
+IN THIS ORDER:
+| ( &lt;endPoint ... /&gt; )+
+&lt;/sev&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-endPoint">endPoint</a></li>
+</ul>
+<h2><a class="header" href="#a-nameelt-nmfa-nmf" id="a-nameelt-nmfa-nmf"><a name="elt-nmf"></a> nmf</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-nmf">nmf</a></p>
+<pre><code class="language-xml">&lt;nmf&gt;
+IN THIS ORDER:
+| ( &lt;endPoint ... /&gt; )+
+&lt;/nmf&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-endPoint">endPoint</a></li>
+</ul>
+<h2><a class="header" href="#a-nameelt-decisionsa-decisions" id="a-nameelt-decisionsa-decisions"><a name="elt-decisions"></a> decisions</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-decisions">decisions</a></p>
+<pre><code class="language-xml">&lt;decisions&gt;
+IN THIS ORDER:
+| ( &lt;decision ... /&gt; )+
+&lt;/decisions&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-decision">decision</a></li>
+</ul>
+<h2><a class="header" href="#a-nameelt-decisiona-decision" id="a-nameelt-decisiona-decision"><a name="elt-decision"></a> decision</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-decisions">decisions</a> → <a href="#elt-decision">decision</a></p>
+<pre><code class="language-xml">&lt;decision
+    id=int
+  &gt;
+IN THIS ORDER:
+| ( &lt;medicate ... /&gt; )+
+&lt;/decision&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-medicate">medicate</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-36" id="documentation-element-36">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>describes treatment
+decisions, a list of medicate descisions.</p>
+<h3><a class="header" href="#attributes-43" id="attributes-43">Attributes</a></h3>
+<h4><a class="header" href="#id" id="id">id</a></h4>
+<pre><code class="language-xml">id=int
+</code></pre>
+<p><strong>Units:</strong> Number</p>
+<p>Key of decision</p>
+<h2><a class="header" href="#a-nameelt-medicatea-medicate" id="a-nameelt-medicatea-medicate"><a name="elt-medicate"></a> medicate</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-caseManagements">caseManagements</a> → <a href="#elt-caseManagement">caseManagement</a> → <a href="#elt-decisions">decisions</a> → <a href="#elt-decision">decision</a> → <a href="#elt-medicate">medicate</a></p>
+<pre><code class="language-xml">&lt;medicate
+    name=string
+    qty=int
+    time=int
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-44" id="attributes-44">Attributes</a></h3>
+<h4><a class="header" href="#name-7" id="name-7">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name
+of
+drug
+compound</p>
+<h4><a class="header" href="#qty" id="qty">qty</a></h4>
+<pre><code class="language-xml">qty=int
+</code></pre>
+<p><strong>Units:</strong> Number</p>
+<p>Quantity of drug compound</p>
+<h4><a class="header" href="#time-1" id="time-1">time</a></h4>
+<pre><code class="language-xml">time=int
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 1
+<strong>Max:</strong> 10000</p>
+<p>Time
+step
+of
+intervention</p>
+<h2><a class="header" href="#a-nameelt-healthsystema-healthsystem" id="a-nameelt-healthsystema-healthsystem"><a name="elt-healthSystem"></a> healthSystem</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-healthSystem">healthSystem</a></p>
+<pre><code class="language-xml">&lt;healthSystem
+    name=string
+    healthSystemMemory=int
+  &gt;
+IN THIS ORDER:
+|   &lt;drugRegimen ... /&gt; 
+|   &lt;initialACR ... /&gt; 
+|   &lt;compliance ... /&gt; 
+|   &lt;nonCompliersEffective ... /&gt; 
+|   &lt;pSeekOfficialCareUncomplicated1 ... /&gt; 
+|   &lt;pSelfTreatUncomplicated ... /&gt; 
+|   &lt;pSeekOfficialCareUncomplicated2 ... /&gt; 
+|   &lt;pSeekOfficialCareSevere ... /&gt; 
+|   &lt;pSequelaeInpatient ... /&gt; 
+|   &lt;CFR ... /&gt; 
+&lt;/healthSystem&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-drugRegimen">drugRegimen</a></li>
+<li><a href="#elt-initialACR">initialACR</a></li>
+<li><a href="#elt-compliance">compliance</a></li>
+<li><a href="#elt-nonCompliersEffective">nonCompliersEffective</a></li>
+<li><a href="#elt-pSeekOfficialCareUncomplicated1">pSeekOfficialCareUncomplicated1</a></li>
+<li><a href="#elt-pSelfTreatUncomplicated">pSelfTreatUncomplicated</a></li>
+<li><a href="#elt-pSeekOfficialCareUncomplicated2">pSeekOfficialCareUncomplicated2</a></li>
+<li><a href="#elt-pSeekOfficialCareSevere">pSeekOfficialCareSevere</a></li>
+<li><a href="#elt-pSequelaeInpatient">pSequelaeInpatient</a></li>
+<li><a href="#elt-CFR">CFR</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-37" id="documentation-element-37">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of health system</p>
+<h4><a class="header" href="#documentation-type-10" id="documentation-type-10">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of health system</p>
+<h3><a class="header" href="#attributes-45" id="attributes-45">Attributes</a></h3>
+<h4><a class="header" href="#name-8" id="name-8">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of health system</p>
+<h4><a class="header" href="#healthsystemmemory-1" id="healthsystemmemory-1">healthSystemMemory</a></h4>
+<pre><code class="language-xml">healthSystemMemory=int
+</code></pre>
+<p><strong>Units:</strong> Time steps
+<strong>Min:</strong> 1
+<strong>Max:</strong> 100</p>
+<p>Follow-up period during which a recurrence is
+considered to be a treatment failure</p>
+<h2><a class="header" href="#a-nameelt-entodataa-entodata" id="a-nameelt-entodataa-entodata"><a name="elt-entoData"></a> entoData</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a></p>
+<pre><code class="language-xml">&lt;entoData
+    name=string
+  &gt;
+IN THIS ORDER:
+| EXACTLY ONE OF:
+| |   &lt;nonVector ... /&gt; 
+| |   &lt;vector ... /&gt; 
+&lt;/entoData&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-nonVector">nonVector</a></li>
+<li><a href="#elt-vector">vector</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-38" id="documentation-element-38">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Description of entomological data</p>
+<h4><a class="header" href="#documentation-type-11" id="documentation-type-11">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Data for entomodel</p>
+<h3><a class="header" href="#attributes-46" id="attributes-46">Attributes</a></h3>
+<h4><a class="header" href="#name-9" id="name-9">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of entomology data</p>
+<h2><a class="header" href="#a-nameelt-nonvectora-nonvector" id="a-nameelt-nonvectora-nonvector"><a name="elt-nonVector"></a> nonVector</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-nonVector">nonVector</a></p>
+<pre><code class="language-xml">&lt;nonVector
+    eipDuration=int
+  &gt;
+IN THIS ORDER:
+| ( &lt;EIRDaily ... /&gt; )+
+&lt;/nonVector&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-EIRDaily">EIRDaily</a></li>
+</ul>
+<h4><a class="header" href="#documentation-type-12" id="documentation-type-12">Documentation (type)</a></h4>
+<p>Parameters for the non-vector transmission model.</p>
+<h3><a class="header" href="#attributes-47" id="attributes-47">Attributes</a></h3>
+<h4><a class="header" href="#eipduration-1" id="eipduration-1">eipDuration</a></h4>
+<pre><code class="language-xml">eipDuration=int
+</code></pre>
+<p>The duration of sporogony in days</p>
+<h2><a class="header" href="#a-nameelt-vectora-vector" id="a-nameelt-vectora-vector"><a name="elt-vector"></a> vector</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-vector">vector</a></p>
+<pre><code class="language-xml">&lt;vector&gt;
+IN THIS ORDER:
+| ( &lt;anopheles ... /&gt; )+
+| ( &lt;nonHumanHosts ... /&gt; )*
+&lt;/vector&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-anopheles">anopheles</a></li>
+<li><a href="#elt-nonHumanHosts-2">nonHumanHosts</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-39" id="documentation-element-39">Documentation (element)</a></h4>
+<p>Parameters for the vector transmission model.</p>
+<h2><a class="header" href="#a-nameelt-anophelesa-anopheles" id="a-nameelt-anophelesa-anopheles"><a name="elt-anopheles"></a> anopheles</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles">anopheles</a></p>
+<pre><code class="language-xml">&lt;anopheles
+    mosquito=string
+  &gt;
+IN THIS ORDER:
+|   &lt;eir ... /&gt; 
+|   &lt;mosq ... /&gt; 
+| ( &lt;nonHumanHosts ... /&gt; )*
+&lt;/anopheles&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-eir">eir</a></li>
+<li><a href="#elt-mosq">mosq</a></li>
+<li><a href="#elt-nonHumanHosts">nonHumanHosts</a></li>
+</ul>
+<h3><a class="header" href="#attributes-48" id="attributes-48">Attributes</a></h3>
+<h4><a class="header" href="#mosquito" id="mosquito">mosquito</a></h4>
+<pre><code class="language-xml">mosquito=string
+</code></pre>
+<h2><a class="header" href="#a-nameelt-eira-eir" id="a-nameelt-eira-eir"><a name="elt-eir"></a> eir</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles">anopheles</a> → <a href="#elt-eir">eir</a></p>
+<pre><code class="language-xml">&lt;eir
+    a0=double
+    a1=double
+    a2=double
+    b1=double
+    b2=double
+    EIRRotateAngle=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-40" id="documentation-element-40">Documentation (element)</a></h4>
+<p><strong>Units:</strong> Element</p>
+<p>Description of entomological inoculation rate</p>
+<h3><a class="header" href="#attributes-49" id="attributes-49">Attributes</a></h3>
+<h4><a class="header" href="#a0" id="a0">a0</a></h4>
+<pre><code class="language-xml">a0=double
+</code></pre>
+<h4><a class="header" href="#a1" id="a1">a1</a></h4>
+<pre><code class="language-xml">a1=double
+</code></pre>
+<h4><a class="header" href="#a2" id="a2">a2</a></h4>
+<pre><code class="language-xml">a2=double
+</code></pre>
+<h4><a class="header" href="#b1" id="b1">b1</a></h4>
+<pre><code class="language-xml">b1=double
+</code></pre>
+<h4><a class="header" href="#b2" id="b2">b2</a></h4>
+<pre><code class="language-xml">b2=double
+</code></pre>
+<h4><a class="header" href="#eirrotateangle" id="eirrotateangle">EIRRotateAngle</a></h4>
+<pre><code class="language-xml">EIRRotateAngle=double
+</code></pre>
+<h2><a class="header" href="#a-nameelt-mosqa-mosq" id="a-nameelt-mosqa-mosq"><a name="elt-mosq"></a> mosq</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles">anopheles</a> → <a href="#elt-mosq">mosq</a></p>
+<pre><code class="language-xml">&lt;mosq
+    mosqRestDuration=int
+    extrinsicIncubationPeriod=int
+    mosqSeekingDeathRate=double
+    mosqSeekingDuration=double
+    mosqEntoAvailability=double
+    mosqProbBiting=double
+    mosqProbFindRestSite=double
+    mosqProbResting=double
+    mosqProbOvipositing=double
+    emergenceRateFilename=string
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-41" id="documentation-element-41">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Vector species</p>
+<h3><a class="header" href="#attributes-50" id="attributes-50">Attributes</a></h3>
+<h4><a class="header" href="#mosqrestduration" id="mosqrestduration">mosqRestDuration</a></h4>
+<pre><code class="language-xml">mosqRestDuration=int
+</code></pre>
+<h4><a class="header" href="#extrinsicincubationperiod" id="extrinsicincubationperiod">extrinsicIncubationPeriod</a></h4>
+<pre><code class="language-xml">extrinsicIncubationPeriod=int
+</code></pre>
+<h4><a class="header" href="#mosqseekingdeathrate" id="mosqseekingdeathrate">mosqSeekingDeathRate</a></h4>
+<pre><code class="language-xml">mosqSeekingDeathRate=double
+</code></pre>
+<h4><a class="header" href="#mosqseekingduration" id="mosqseekingduration">mosqSeekingDuration</a></h4>
+<pre><code class="language-xml">mosqSeekingDuration=double
+</code></pre>
+<h4><a class="header" href="#mosqentoavailability" id="mosqentoavailability">mosqEntoAvailability</a></h4>
+<pre><code class="language-xml">mosqEntoAvailability=double
+</code></pre>
+<h4><a class="header" href="#mosqprobbiting" id="mosqprobbiting">mosqProbBiting</a></h4>
+<pre><code class="language-xml">mosqProbBiting=double
+</code></pre>
+<h4><a class="header" href="#mosqprobfindrestsite" id="mosqprobfindrestsite">mosqProbFindRestSite</a></h4>
+<pre><code class="language-xml">mosqProbFindRestSite=double
+</code></pre>
+<h4><a class="header" href="#mosqprobresting" id="mosqprobresting">mosqProbResting</a></h4>
+<pre><code class="language-xml">mosqProbResting=double
+</code></pre>
+<h4><a class="header" href="#mosqprobovipositing" id="mosqprobovipositing">mosqProbOvipositing</a></h4>
+<pre><code class="language-xml">mosqProbOvipositing=double
+</code></pre>
+<h4><a class="header" href="#emergenceratefilename" id="emergenceratefilename">emergenceRateFilename</a></h4>
+<pre><code class="language-xml">emergenceRateFilename=string
+</code></pre>
+<h2><a class="header" href="#a-nameelt-nonhumanhostsa-nonhumanhosts" id="a-nameelt-nonhumanhostsa-nonhumanhosts"><a name="elt-nonHumanHosts"></a> nonHumanHosts</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-vector">vector</a> → <a href="#elt-anopheles">anopheles</a> → <a href="#elt-nonHumanHosts">nonHumanHosts</a></p>
+<pre><code class="language-xml">&lt;nonHumanHosts
+    mosqEntoAvailability=double
+    mosqProbBiting=double
+    mosqProbFindRestSite=double
+    mosqProbResting=double
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-42" id="documentation-element-42">Documentation (element)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Non human host parameters, per type of host (must match up with non-species-specific parameters).</p>
+<h3><a class="header" href="#attributes-51" id="attributes-51">Attributes</a></h3>
+<h4><a class="header" href="#mosqentoavailability-1" id="mosqentoavailability-1">mosqEntoAvailability</a></h4>
+<pre><code class="language-xml">mosqEntoAvailability=double
+</code></pre>
+<h4><a class="header" href="#mosqprobbiting-1" id="mosqprobbiting-1">mosqProbBiting</a></h4>
+<pre><code class="language-xml">mosqProbBiting=double
+</code></pre>
+<h4><a class="header" href="#mosqprobfindrestsite-1" id="mosqprobfindrestsite-1">mosqProbFindRestSite</a></h4>
+<pre><code class="language-xml">mosqProbFindRestSite=double
+</code></pre>
+<h4><a class="header" href="#mosqprobresting-1" id="mosqprobresting-1">mosqProbResting</a></h4>
+<pre><code class="language-xml">mosqProbResting=double
+</code></pre>
+<h2><a class="header" href="#a-nameelt-nonhumanhosts-2a-nonhumanhosts" id="a-nameelt-nonhumanhosts-2a-nonhumanhosts"><a name="elt-nonHumanHosts-2"></a> nonHumanHosts</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-entoData">entoData</a> → <a href="#elt-vector">vector</a> → <a href="#elt-nonHumanHosts-2">nonHumanHosts</a></p>
+<pre><code class="language-xml">&lt;nonHumanHosts
+  [ name=string ]
+    populationSize=int
+  /&gt;
+</code></pre>
+<h4><a class="header" href="#documentation-element-43" id="documentation-element-43">Documentation (element)</a></h4>
+<p>Populations of non-human hosts (must also have species-specific parameters).</p>
+<h3><a class="header" href="#attributes-52" id="attributes-52">Attributes</a></h3>
+<h4><a class="header" href="#name-10" id="name-10">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<h4><a class="header" href="#populationsize" id="populationsize">populationSize</a></h4>
+<pre><code class="language-xml">populationSize=int
+</code></pre>
+<h2><a class="header" href="#a-nameelt-parametersa-parameters" id="a-nameelt-parametersa-parameters"><a name="elt-parameters"></a> parameters</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-parameters">parameters</a></p>
+<pre><code class="language-xml">&lt;parameters
+    interval=int
+    iseed=int
+    delta=double
+    latentp=int
+  &gt;
+IN THIS ORDER:
+| ( &lt;parameter ... /&gt; )+
+&lt;/parameters&gt;
+</code></pre>
+<ul>
+<li><a href="#elt-parameter">parameter</a></li>
+</ul>
+<h4><a class="header" href="#documentation-element-44" id="documentation-element-44">Documentation (element)</a></h4>
+<p>Parameters for mathematical model</p>
+<h4><a class="header" href="#documentation-type-13" id="documentation-type-13">Documentation (type)</a></h4>
+<p><strong>Units:</strong> List of elements</p>
+<p>Parameter vector</p>
+<h3><a class="header" href="#attributes-53" id="attributes-53">Attributes</a></h3>
+<h4><a class="header" href="#interval" id="interval">interval</a></h4>
+<pre><code class="language-xml">interval=int
+</code></pre>
+<p><strong>Units:</strong> Days</p>
+<p>Simulation step</p>
+<h4><a class="header" href="#iseed" id="iseed">iseed</a></h4>
+<pre><code class="language-xml">iseed=int
+</code></pre>
+<p><strong>Units:</strong> Number</p>
+<p>Seed for RNG</p>
+<h4><a class="header" href="#delta" id="delta">delta</a></h4>
+<pre><code class="language-xml">delta=double
+</code></pre>
+<p><strong>Units:</strong> ? Redundant</p>
+<p>this no longer seems to be used</p>
+<h4><a class="header" href="#latentp" id="latentp">latentp</a></h4>
+<pre><code class="language-xml">latentp=int
+</code></pre>
+<p><strong>Units:</strong> Time steps
+<strong>Min:</strong> 0
+<strong>Max:</strong> 20</p>
+<p>pre-erythrocytic latent period, in time steps</p>
+<h2><a class="header" href="#a-nameelt-parametera-parameter" id="a-nameelt-parametera-parameter"><a name="elt-parameter"></a> parameter</a></h2>
+<p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-parameters">parameters</a> → <a href="#elt-parameter">parameter</a></p>
+<pre><code class="language-xml">&lt;parameter
+    name=string
+    number=int
+    value=double
+  [ include=boolean ]
+  /&gt;
+</code></pre>
+<h3><a class="header" href="#attributes-54" id="attributes-54">Attributes</a></h3>
+<h4><a class="header" href="#name-11" id="name-11">name</a></h4>
+<pre><code class="language-xml">name=string
+</code></pre>
+<p><strong>Units:</strong> string</p>
+<p>Name of parameter</p>
+<h4><a class="header" href="#number" id="number">number</a></h4>
+<pre><code class="language-xml">number=int
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 1
+<strong>Max:</strong> 100</p>
+<p>Reference number of input parameter</p>
+<h4><a class="header" href="#value-15" id="value-15">value</a></h4>
+<pre><code class="language-xml">value=double
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 0</p>
+<p>Parameter value</p>
+<h4><a class="header" href="#include" id="include">include</a></h4>
+<pre><code class="language-xml">include=boolean
+</code></pre>
+<p><strong>Units:</strong> Number
+<strong>Min:</strong> 0
+<strong>Max:</strong> 1</p>
+<p>True if parameter is to be sampled in optimization
+runs. Not used in simulator app.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                        
+                            <a rel="prev" href="schema-6.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
+
+                        
+                            <a rel="next" href="schema-4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a href="schema-6.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                
+
+                
+                    <a href="schema-4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+                
+            </nav>
+
+        </div>
+
+        
+
+        
+
+        
+
+        
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        
+
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+        
+
+        
+
+    </body>
+</html>
