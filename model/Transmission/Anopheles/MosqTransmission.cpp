@@ -113,9 +113,10 @@ void MosqTransmission::initIterateScale ( double factor ){
     vectors::scale (S_v, factor);
 }
 
-void MosqTransmission::initState ( double tsP_A, double tsP_df, double tsP_dff,
+void MosqTransmission::initState ( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, 
+                                       double tsP_df, double tsP_dff,
                                        double initNvFromSv, double initOvFromSv,
-                                       const vecDay<double>& forcedS_v ){
+                                       const vecDay<double>& forcedS_v){
     N_v  .assign (N_v_length, numeric_limits<double>::quiet_NaN());
     O_v  .assign (N_v_length, Genotypes::N(), numeric_limits<double>::quiet_NaN());
     S_v  .assign (N_v_length, Genotypes::N(), numeric_limits<double>::quiet_NaN());
@@ -123,11 +124,16 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df, double tsP_dff,
     P_df .assign (N_v_length, numeric_limits<double>::quiet_NaN());
     P_dif.assign (N_v_length, Genotypes::N(), 0.0);// humans start off with no infectiousness.. so just wait
     P_dff.assign (N_v_length, numeric_limits<double>::quiet_NaN());
-    
+    P_Amu  .assign (N_v_length, numeric_limits<double>::quiet_NaN());
+    P_A1  .assign (N_v_length, numeric_limits<double>::quiet_NaN());
+    P_Ah  .assign (N_v_length, numeric_limits<double>::quiet_NaN());
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
     assert( N_v_length <= forcedS_v.size() );
     for( SimTime t = SimTime::zero(); t < N_v_length; t += SimTime::oneDay() ){
         P_A[t] = tsP_A;
+        P_Amu[t] = tsP_Amu;
+        P_A1[t] = tsP_A1;
+        P_Ah[t] = tsP_Ah;
         P_df[t] = tsP_df;
         P_dff[t] = tsP_dff;
         N_v[t] = forcedS_v[t] * initNvFromSv;
@@ -139,10 +145,10 @@ void MosqTransmission::initState ( double tsP_A, double tsP_df, double tsP_dff,
 }
 
 
-void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
+void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
         const vector<double> tsP_dif, double tsP_dff,
         bool isDynamic,
-        vector<double>& partialEIR, double EIR_factor )
+        vector<double>& partialEIR, double EIR_factor)
 {
     SimTime d1 = d0 + SimTime::oneDay();    // end of step
     
@@ -157,6 +163,9 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     // These only need to be calculated once per time step, but should be
     // present in each of the previous N_v_length - 1 positions of arrays.
     P_A[t1] = tsP_A;
+    P_Amu[t1] = tsP_Amu;
+    P_A1[t1] = tsP_A1;
+    P_Ah[t1] = tsP_Ah;
     P_df[t1] = tsP_df;
     P_dff[t1] = tsP_dff;
     for( size_t i = 0; i < Genotypes::N(); ++i )
@@ -256,7 +265,7 @@ void MosqTransmission::update( SimTime d0, double tsP_A, double tsP_df,
     N_v[t1] = newAdults
                 + P_A[t0]  * N_v[t0]
                 + nOvipositing;
-    
+
     timeStep_N_v0 += newAdults;
     
 //     if( printDebug ){
@@ -321,6 +330,9 @@ double MosqTransmission::getLastVecStat( VecStat vs )const{
         case NV: return sum1(N_v, end, N_v_length);
         case OV: return sum2(O_v, end, N_v_length);
         case SV: return sum2(S_v, end, N_v_length);
+        case PAmu: return sum1(P_Amu, end, N_v_length);
+        case PA1: return sum1(P_A1, end, N_v_length);
+        case PAh: return sum1(P_Ah, end, N_v_length);
         default: throw SWITCH_DEFAULT_EXCEPTION;
     }
 }

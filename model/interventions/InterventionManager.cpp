@@ -307,6 +307,41 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
             }
         }
     }
+    if( intervElt.getAddNonHumanHosts().present() ){
+        typedef scnXml::AddNonHumanHosts::NonHumanHostsSequence SeqT;
+        const SeqT& seq = intervElt.getAddNonHumanHosts().get().getNonHumanHosts();
+        size_t instance = 0;
+        for( auto it = seq.begin(), end = seq.end(); it != end; ++it ){
+            const scnXml::NonHumanHosts2& elt = *it;
+            if (elt.getTimed().present() ) {
+                transmission.initAddNonHumanHostsInterv( elt.getDescription().getAnopheles(), elt.getName() );
+                foreach( const scnXml::Deploy2 deploy, elt.getTimed().get().getDeploy() ){
+                    SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                    SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
+                    timed.push_back( unique_ptr<TimedDeployment>(new TimedAddNonHumanHostsDeployment( date, elt.getName(), lifespan )) );
+                }
+                instance++;
+            }
+        }
+    }
+    if( intervElt.getNonHumanHostsModifications().present() ){
+        typedef scnXml::NonHumanHostsModifications::InterventionSequence SeqT;
+        const SeqT& seq = intervElt.getNonHumanHostsModifications().get().getIntervention();
+        size_t instance = 0;
+        for( auto it = seq.begin(), end = seq.end(); it != end; ++it ){
+            const scnXml::NonHumanHostsIntervention& elt = *it;
+            if (elt.getTimed().present() ) {
+                const scnXml::DecayFunction& decay = elt.getDecay();
+                transmission.initNonHumanHostsInterv( elt.getDescription().getAnopheles(), decay, instance, elt.getNonHumanHostsName() );
+                const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
+                for( auto it = seq.begin(); it != seq.end(); ++it ) {
+                    SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                    timed.push_back( unique_ptr<TimedDeployment>(new TimedNonHumanHostsDeployment( date, instance, elt.getNonHumanHostsName())) );
+                }
+                instance++;
+            }
+        }
+    }
     if( intervElt.getVectorTrap().present() ){
         size_t instance = 0;
         foreach( const scnXml::VectorTrap& trap, intervElt.getVectorTrap().get().getIntervention() ){

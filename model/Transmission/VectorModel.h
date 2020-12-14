@@ -54,7 +54,11 @@ public:
         size_t instance, const string& name );
   virtual void initVectorTrap( const scnXml::VectorTrap::DescriptionSequence list,
         size_t instance, const scnXml::VectorTrap::NameOptional name );
-  
+  virtual void initNonHumanHostsInterv( const scnXml::Description2::AnophelesSequence list,
+        const scnXml::DecayFunction& decay, size_t instance, const string& name );
+  virtual void initAddNonHumanHostsInterv( const scnXml::Description3::AnophelesSequence list,
+        const string& name );
+
   virtual void scaleEIR (double factor);
 //   virtual void scaleXML_EIR (scnXml::Entomology&, double factor) const;
   
@@ -69,7 +73,10 @@ public:
         vector<double>& EIR ) const;
   
   virtual void deployVectorPopInterv (size_t instance);
-  virtual void deployVectorTrap( size_t instance, double number, SimTime lifespan );
+  virtual void deployVectorTrap( size_t instance, double popSize, SimTime lifespan );
+  virtual void deployNonHumanHostsInterv( size_t instance, string name );
+  virtual void deployAddNonHumanHosts(string name, double popSize, SimTime lifespan);
+  
   virtual void uninfectVectors();
   
   virtual void summarize ();
@@ -81,6 +88,9 @@ protected:
 private:
   void ctsCbN_v0 (ostream& stream);
   void ctsCbP_A (ostream& stream);
+  void ctsCbP_Amu (ostream& stream);
+  void ctsCbP_A1 (ostream& stream);
+  void ctsCbP_Ah (ostream& stream);
   void ctsCbP_df (ostream& stream);
   void ctsCbP_dif (ostream& stream);
   void ctsCbN_v (ostream& stream);

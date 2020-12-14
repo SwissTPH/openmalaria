@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_42" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="wuITNIRS2_10.xml,cohort_coverage:cohort_coverage04,importedInfectionsrate:importedInfectionsrate11,LLINbrand:LLINbrandLifeNet,models:base,mosqHumanBloodIndex:mosqHumanBloodIndex0001,pSeekOfficialCareUncomplicated:pSeekOfficialCareUncomplicated44,scaledAnnualEIR:scaledAnnualEIR1.000,species:flavirostris,start:start04,seed:1" schemaVersion="42" xsi:schemaLocation="http://openmalaria.org/schema/scenario_42 scenario_current.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_43" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="wuITNIRS2_10.xml,cohort_coverage:cohort_coverage04,importedInfectionsrate:importedInfectionsrate11,LLINbrand:LLINbrandLifeNet,models:base,mosqHumanBloodIndex:mosqHumanBloodIndex0001,pSeekOfficialCareUncomplicated:pSeekOfficialCareUncomplicated44,scaledAnnualEIR:scaledAnnualEIR1.000,species:flavirostris,start:start04,seed:1" schemaVersion="43" xsi:schemaLocation="http://openmalaria.org/schema/scenario_43 scenario_current.xsd">
   <demography maximumAgeYrs="90" name="Ifakara" popSize="500">
     <ageGroup lowerbound="0">
       <group poppercent="3.474714994" upperbound="1"/>
@@ -81,7 +81,7 @@
           <!-- Standard value is 1.5 year halflife, but 2 years may be reasonable-->
           <attritionOfNets L="18.176" function="smooth-compact" k="18"/>
           <!-- Standard value -->
-          <anophelesParams mosquito="flavirostris" propActive="0.4">
+          <anophelesParams mosquito="flavirostris" propActive="1.0">
             <holeIndexMax value="145200"/>
             <twoStageDeterrency>
                 <enteringLogit baseFactor="4.0868" insecticideFactor="-2.8851"/>

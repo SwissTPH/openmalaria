@@ -1,3 +1,6 @@
+cache:
+    - 'C:\cygwin64'
+    
 os: Visual Studio 2015
 
 configuration: Release
