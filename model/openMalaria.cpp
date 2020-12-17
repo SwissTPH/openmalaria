@@ -231,6 +231,48 @@ void readCheckpoint() {
     cerr << sim::now().inSteps() << "t loaded checkpoint" << endl;
 }
 
+// Internal simulation loop
+void loop(const SimTime humanWarmupLength, int lastPercent)
+{
+    while (sim::now() < m_phaseEnd)
+    {        
+        // Monitoring. sim::now() gives time of end of last step,
+        // and is when reporting happens in our time-series.
+        Continuous.update( *population );
+        if( sim::intervDate() == mon::nextSurveyDate() ){
+            population->newSurvey();
+            transmission->summarize();
+            mon::concludeSurvey();
+        }
+        
+        // Deploy interventions, at time sim::now().
+        InterventionManager::deploy( *population, *transmission );
+        
+        // Time step updates. Time steps are mid-day to mid-day.
+        // sim::ts0() gives the date at the start of the step, sim::ts1() the date at the end.
+        sim::start_update();
+        
+        // This should be called before humans contract new infections in the simulation step.
+        // This needs the whole population (it is an approximation before all humans are updated).
+        transmission->vectorUpdate (*population);
+        
+        population->update(*transmission, humanWarmupLength);
+        
+        // Doesn't matter whether non-updated humans are included (value isn't used
+        // before all humans are updated).
+        transmission->update(*population);
+        
+        sim::end_update();
+
+        int percent = (sim::now() * 100) / m_estimatedEnd;
+        if( percent != lastPercent ){   // avoid huge amounts of output for performance/log-file size reasons
+            lastPercent = percent;
+            // \r cleans line. Then we print progress as a percentage.
+            cerr << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
+        }
+    }
+}
+
 /// main() — loads scenario XML and runs simulation
 int main(int argc, char* argv[]) {
     int exitStatus = EXIT_SUCCESS;
@@ -246,15 +288,6 @@ int main(int argc, char* argv[]) {
         util::DocumentLoader documentLoader;
         documentLoader.loadDocument(scenarioFile);
         
-        // // Set up the simulator
-        // Simulator simulator( documentLoader.document() );
-        
-        // // Save changes to the document if any occurred.
-        // documentLoader.saveDocument();
-        
-        // if ( !util::CommandLine::option(util::CommandLine::SKIP_SIMULATION) )
-        //     simulator.start(documentLoader.document().getMonitoring());
-
         const scnXml::Scenario &scenario = documentLoader.document();
         const scnXml::Model &model = scenario.getModel();
         const scnXml::Monitoring &monitoring = documentLoader.document().getMonitoring();
@@ -324,7 +357,7 @@ int main(int argc, char* argv[]) {
 
         sim::s_t0 = SimTime::zero();
         sim::s_t1 = SimTime::zero();
-
+        
         // Make sure warmup period is at least as long as a human lifespan, as the
         // length required by vector warmup, and is a whole number of years.
         SimTime humanWarmupLength = sim::maxHumanAge();
@@ -346,105 +379,76 @@ int main(int argc, char* argv[]) {
             + SimTime::oneTS();
         assert( m_estimatedEnd + SimTime::never() < SimTime::zero() );
         
-        if (isCheckpoint()) {
+        bool skipWarmup = false;
+        if (isCheckpoint())
+        {
             Continuous.init( monitoring, true );
             readCheckpoint();
-        } else {
+            skipWarmup = true;
+        }
+        else
+        {
             Continuous.init( monitoring, false );
             population->createInitialHumans();
             transmission->init2(*population);
         }
         
         int lastPercent = -1;   // last _integer_ percentage value
+        
+        if(!skipWarmup)
+        {
+            /** Warm-up phase: 
+             * Run the simulation using the equilibrium inoculation rates over one
+             * complete lifespan (sim::maxHumanAge()) to reach immunological
+             * equilibrium in all age classes. Don't report any events. */
+            m_phaseEnd = humanWarmupLength;
+            loop(humanWarmupLength, lastPercent);
 
-        // phase loop
-        while (true){
-            // loop for steps within a phase
-            while (sim::now() < m_phaseEnd){
-                int percent = (sim::now() * 100) / m_estimatedEnd;
-                if( percent != lastPercent ){   // avoid huge amounts of output for performance/log-file size reasons
-                    lastPercent = percent;
-                    // \r cleans line. Then we print progress as a percentage.
-                    cerr << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
-                }
-                
-                // Monitoring. sim::now() gives time of end of last step,
-                // and is when reporting happens in our time-series.
-                Continuous.update( *population );
-                if( sim::intervDate() == mon::nextSurveyDate() ){
-                    population->newSurvey();
-                    transmission->summarize();
-                    mon::concludeSurvey();
-                }
-                
-                // Deploy interventions, at time sim::now().
-                InterventionManager::deploy( *population, *transmission );
-                
-                // Time step updates. Time steps are mid-day to mid-day.
-                // sim::ts0() gives the date at the start of the step, sim::ts1() the date at the end.
-                sim::start_update();
-                
-                // This should be called before humans contract new infections in the simulation step.
-                // This needs the whole population (it is an approximation before all humans are updated).
-                transmission->vectorUpdate (*population);
-                
-                population->update(*transmission, humanWarmupLength);
-                
-                // Doesn't matter whether non-updated humans are included (value isn't used
-                // before all humans are updated).
-                transmission->update(*population);
-                
-                sim::end_update();
-            }
-            
-            ++phase;        // advance to next phase
-            if (phase == ONE_LIFE_SPAN) {
-                // Start human warm-up
-                m_phaseEnd = humanWarmupLength;
-                
-            } else if (phase == TRANSMISSION_INIT) {
-                // Start or continuation of transmission init cycle (after one life span)
-                SimTime iterate = transmission->initIterate();
-                if( iterate > SimTime::zero() ){
-                    m_phaseEnd += iterate;
-                    --phase;        // repeat phase
-                } else {
-                    // nothing to do: start main phase immediately
-                }
+            // Transmission init phase
+            SimTime iterate = transmission->initIterate();
+            while(iterate > SimTime::zero())
+            {
+                m_phaseEnd += iterate;
+
                 // adjust estimation of final time step: end of current period + length of main phase
-                m_estimatedEnd = m_phaseEnd
-                    + (sim::endDate() - sim::startDate())
-                    + SimTime::oneTS();
-                
-            } else if (phase == MAIN_PHASE) {
-                // Start MAIN_PHASE:
-                m_phaseEnd = m_estimatedEnd;
-                sim::s_interv = SimTime::zero();
-                population->preMainSimInit();
-                transmission->summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
-                mon::initMainSim();
-                
-            } else if (phase == END_SIM) {
-                cerr << "sim end" << endl;
-                break;
+                m_estimatedEnd = m_phaseEnd + (sim::endDate() - sim::startDate()) + SimTime::oneTS();
+
+                loop(humanWarmupLength, lastPercent);
+
+                iterate = transmission->initIterate();
             }
-            
-            if (phase == MAIN_PHASE && util::CommandLine::option (util::CommandLine::CHECKPOINT)){
+
+            // Main phase
+            //! This procedure starts with the current state of the simulation 
+            /*! It continues updating assuming:
+                (i)         the default (exponential) demographic model
+                (ii)        the entomological input defined by the EIRs in intEIR()
+                (iii)       the intervention packages defined in Intervention()
+                (iv)        the survey times defined in Survey() */
+            m_phaseEnd = m_estimatedEnd;
+            sim::s_interv = SimTime::zero();
+            population->preMainSimInit();
+            transmission->summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
+            mon::initMainSim();
+
+            if(util::CommandLine::option (util::CommandLine::CHECKPOINT))
+            {
                 writeCheckpoint();
-                if( util::CommandLine::option (util::CommandLine::CHECKPOINT_STOP) ){
+                if( util::CommandLine::option (util::CommandLine::CHECKPOINT_STOP) )
                     throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
-                }
             }
         }
-        
+
+        loop(humanWarmupLength, lastPercent);
+       
         cerr << '\r' << flush;  // clean last line of progress-output
         
         population->flushReports();        // ensure all Human instances report past events
         mon::writeSurveyData();
         
-        # ifdef OM_STREAM_VALIDATOR
-            util::StreamValidator.saveStream();
-        # endif
+    # ifdef OM_STREAM_VALIDATOR
+        util::StreamValidator.saveStream();
+    # endif
         
         // simulation's destructor runs
     } catch (const OM::util::cmd_exception& e) {
