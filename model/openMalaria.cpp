@@ -59,29 +59,10 @@ namespace OM{
     bool startedFromCheckpoint;  // static
     string checkpointFileName;
     SimTime m_estimatedEnd, m_phaseEnd;
-    int phase;
 
     std::unique_ptr<Population> population;
     std::unique_ptr<TransmissionModel> transmission;
 }
-
-enum Phase {
-    STARTING_PHASE = 0,
-    /** Run the simulation using the equilibrium inoculation rates over one
-     * complete lifespan (sim::maxHumanAge()) to reach immunological
-     * equilibrium in all age classes. Don't report any events. */
-    ONE_LIFE_SPAN,
-    /** Initialisation/fitting phase for transmission models. */
-    TRANSMISSION_INIT,
-    //!  This procedure starts with the current state of the simulation 
-    /*! It continues updating    assuming:
-        (i)         the default (exponential) demographic model
-        (ii)        the entomological input defined by the EIRs in intEIR()
-        (iii)       the intervention packages defined in Intervention()
-        (iv)        the survey times defined in Survey() */
-    MAIN_PHASE,
-    END_SIM         // should have largest value of all enumerations
-};
 
 using namespace OM;
 
@@ -117,7 +98,6 @@ void checkpoint (istream& stream) {
         sim::s_interv & stream;
         m_phaseEnd & stream;
         m_estimatedEnd & stream;
-        phase & stream;
         transmission & stream;
         population->checkpoint(stream);
         InterventionManager::checkpoint( stream );
@@ -163,7 +143,6 @@ void checkpoint (ostream& stream) {
     sim::s_interv & stream;
     m_phaseEnd & stream;
     m_estimatedEnd & stream;
-    phase & stream;
     transmission & stream;
     population->checkpoint(stream);
     InterventionManager::checkpoint( stream );
@@ -292,8 +271,6 @@ int main(int argc, char* argv[]) {
         const scnXml::Model &model = scenario.getModel();
         const scnXml::Monitoring &monitoring = documentLoader.document().getMonitoring();
         
-        phase = STARTING_PHASE;
-
         // 1) elements with no dependencies on other elements initialised here:
         sim::init( scenario );  // also reads survey dates
         Parameters parameters( model.getParameters() );     // depends on nothing
