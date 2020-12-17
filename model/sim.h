@@ -305,7 +305,7 @@ public:
         d & stream;
     }
     
-private:
+// private:
     int d;      // time in days
     
     friend ostream& operator<<( ostream& stream, SimDate date );
@@ -396,7 +396,7 @@ public:
     static inline SimDate intervDate(){ return s_start + s_interv; }
     //@}
     
-private:
+// private:
     // Initial set-up: called by Simulator
     static void init( const scnXml::Scenario& scenario );
     
