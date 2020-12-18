@@ -102,7 +102,7 @@ bool Diagnostic::isPositive( LocalRng& rng, double dens, double densHRP2 ) const
         assert( densHRP2 == densHRP2 ); // monitoring diagnostic passes NaN; use of HRP2 is not supported
         dens = densHRP2;
     }
-    if( (boost::math::isnan)(specificity) ){
+    if( (std::isnan)(specificity) ){
         // use deterministic test
         return dens >= dens_lim;
     }else{
@@ -114,7 +114,7 @@ bool Diagnostic::isPositive( LocalRng& rng, double dens, double densHRP2 ) const
 }
 
 bool Diagnostic::allowsFalsePositives() const{
-    if( (boost::math::isnan)(specificity) ) return dens_lim <= 0.0;
+    if( (std::isnan)(specificity) ) return dens_lim <= 0.0;
     return specificity < 1.0;
 }
 

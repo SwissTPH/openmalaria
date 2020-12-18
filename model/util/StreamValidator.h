@@ -21,8 +21,6 @@
 #ifndef Hmod_StreamValidator
 #define Hmod_StreamValidator
 
-#include <boost/cstdint.hpp>
-
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
 #include "Global.h"
