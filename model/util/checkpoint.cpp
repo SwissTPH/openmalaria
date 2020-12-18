@@ -64,11 +64,11 @@ namespace OM { namespace util { namespace checkpoint {
     //@}
     
     void staticChecks () {
-        BOOST_STATIC_ASSERT (sizeof(char) == 1);
-        BOOST_STATIC_ASSERT (sizeof(short int) == 2);
-        BOOST_STATIC_ASSERT (sizeof(int) == 4);
-        BOOST_STATIC_ASSERT (sizeof(float) == 4);
-        BOOST_STATIC_ASSERT (sizeof(double) == 8);
+        static_assert (sizeof(char) == 1);
+        static_assert (sizeof(short int) == 2);
+        static_assert (sizeof(int) == 4);
+        static_assert (sizeof(float) == 4);
+        static_assert (sizeof(double) == 8);
     }
     
     void header (ostream& stream) {

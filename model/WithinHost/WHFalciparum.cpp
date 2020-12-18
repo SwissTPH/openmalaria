@@ -212,7 +212,7 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX 
 double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
 {
     assert( pTrans > 0.0 );
-    assert( (boost::math::isfinite)(sumX) );
+    assert( (std::isfinite)(sumX) );
     
     // This is an extension of the original model.
     //NOTE: it is an approximation since it ignores the possibility of

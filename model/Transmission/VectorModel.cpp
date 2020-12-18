@@ -494,7 +494,7 @@ void VectorModel::calculateEIR(Host::Human& human, double ageYears,
             const vector<double>& partialEIR = species[i].getPartialEIR();
             
             assert( EIR.size() == partialEIR.size() );
-            if ( (boost::math::isnan)(vectors::sum(partialEIR)) ) {
+            if ( (std::isnan)(vectors::sum(partialEIR)) ) {
                 cerr<<"partialEIR is not a number; "<<i<<endl;
             }
             
@@ -533,7 +533,7 @@ void VectorModel::vectorUpdate (const Population& population) {
         if( nGenotypes == 1 ) probTransmission[0] = pTrans;
         else for( size_t g = 0; g < nGenotypes; ++g ){
             const double k = whm.probTransGenotype( pTrans, sumX, g );
-            assert( (boost::math::isfinite)(k) );
+            assert( (std::isfinite)(k) );
             probTransmission[g] = k;
         }
         

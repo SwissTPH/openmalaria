@@ -252,7 +252,7 @@ void NonVectorModel::calculateEIR(Host::Human& human, double ageYears, vector<do
         throw util::xml_scenario_error ("Invalid simulation mode");
     }
     #ifndef NDEBUG
-    if (!(boost::math::isfinite)(EIR[0])) {
+    if (!(std::isfinite)(EIR[0])) {
         size_t t = (sim::ts1()-nSpore).inSteps();
         ostringstream msg;
         msg << "Error: non-vect eir is: " << EIR[0]
