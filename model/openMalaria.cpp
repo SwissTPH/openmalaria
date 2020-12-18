@@ -55,22 +55,17 @@ namespace OM{
     using mon::Continuous;
     using interventions::InterventionManager;
     using Transmission::TransmissionModel;
-
-    bool startedFromCheckpoint;  // static
-    string checkpointFileName;
-    SimTime m_estimatedEnd, m_phaseEnd;
 }
 
 using namespace OM;
 
-inline static bool isCheckpoint(){ return startedFromCheckpoint; }
-    
 /** @brief checkpointing functions
 *
 * readCheckpoint/writeCheckpoint prepare to read/write the file,
 * and read/write read and write the actual data. */
 //@{
-int readCheckpointNum () {
+int readCheckpointNum (const string &checkpointFileName)
+{
     ifstream checkpointFile;
     checkpointFile.open(checkpointFileName, fstream::in);
     int checkpointNum=0;
@@ -81,8 +76,10 @@ int readCheckpointNum () {
     return checkpointNum;
 }
 
-void checkpoint (istream& stream, Population &population, TransmissionModel &transmission) {
-    try {
+void checkpoint (istream& stream, SimTime &endTime, SimTime &estEndTime, Population &population, TransmissionModel &transmission)
+{
+    try
+    {
         util::checkpoint::header (stream);
         util::CommandLine::staticCheckpoint (stream);
         Population::staticCheckpoint (stream);
@@ -93,8 +90,8 @@ void checkpoint (istream& stream, Population &population, TransmissionModel &tra
 #       endif
         
         sim::s_interv & stream;
-        m_phaseEnd & stream;
-        m_estimatedEnd & stream;
+        endTime & stream;
+        estEndTime & stream;
         transmission & stream;
         population.checkpoint(stream);
         InterventionManager::checkpoint(stream);
@@ -123,12 +120,11 @@ void checkpoint (istream& stream, Population &population, TransmissionModel &tra
         throw util::checkpoint_error ("stream read error");
 }
 
-void checkpoint (ostream& stream, Population &population, TransmissionModel &transmission) {
+void checkpoint (ostream& stream, SimTime &endTime, SimTime &estEndTime, Population &population, TransmissionModel &transmission) {
     util::checkpoint::header (stream);
     if (!stream.good())
         throw util::checkpoint_error ("Unable to write to file");
-    //util::timer::startCheckpoint ();
-    
+
     util::CommandLine::staticCheckpoint (stream);
     Population::staticCheckpoint (stream);
     Continuous & stream;
@@ -138,8 +134,8 @@ void checkpoint (ostream& stream, Population &population, TransmissionModel &tra
 # endif
     
     sim::s_interv & stream;
-    m_phaseEnd & stream;
-    m_estimatedEnd & stream;
+    endTime & stream;
+    estEndTime & stream;
     transmission & stream;
     population.checkpoint(stream);
     InterventionManager::checkpoint( stream );
@@ -148,29 +144,27 @@ void checkpoint (ostream& stream, Population &population, TransmissionModel &tra
     sim::s_t1 & stream;
     util::master_RNG.checkpoint(stream);
     
-    //util::timer::stopCheckpoint ();
     if (stream.fail())
         throw util::checkpoint_error ("stream write error");
 }
 
-void writeCheckpoint(Population &population, TransmissionModel &transmission)
+void writeCheckpoint(const bool startedFromCheckpoint, const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, TransmissionModel &transmission)
 {
     // We alternate between two checkpoints, in case program is closed while writing.
     const int NUM_CHECKPOINTS = 2;
     
     int oldCheckpointNum = 0, checkpointNum = 0;
-    if (isCheckpoint()) {
-        oldCheckpointNum = readCheckpointNum();
-        // Get next checkpoint number:
-        checkpointNum = mod_nn(oldCheckpointNum + 1, NUM_CHECKPOINTS);
+    if (startedFromCheckpoint)
+    {
+        oldCheckpointNum = readCheckpointNum(checkpointFileName);
+        checkpointNum = mod_nn(oldCheckpointNum + 1, NUM_CHECKPOINTS); // Get next checkpoint number:
     }
     
     {   // Open the next checkpoint file for writing:
         ostringstream name;
         name << checkpointFileName << checkpointNum << ".gz";
-        //Writing checkpoint:
         ogzstream out(name.str().c_str(), ios::out | ios::binary);
-        checkpoint (out, population, transmission);
+        checkpoint (out, endTime, estEndTime, population, transmission);
         out.close();
     }
     
@@ -182,6 +176,7 @@ void writeCheckpoint(Population &population, TransmissionModel &transmission)
         if (!checkpointFile)
             throw util::checkpoint_error ("error writing to file \"checkpoint\"");
     }
+
     // Truncate the old checkpoint to save disk space, when it existed
     if( oldCheckpointNum != checkpointNum ){
         ostringstream name;
@@ -189,12 +184,11 @@ void writeCheckpoint(Population &population, TransmissionModel &transmission)
         ofstream out(name.str().c_str(), ios::out | ios::binary);
         out.close();
     }
-//     cerr << " OK" << endl;
 }
 
-void readCheckpoint(Population &population, TransmissionModel &transmission)
+void readCheckpoint(const string &checkpointFileName, SimTime &endTime, SimTime &estEndTime, Population &population, TransmissionModel &transmission)
 {
-    int checkpointNum = readCheckpointNum();
+    int checkpointNum = readCheckpointNum(checkpointFileName);
     
     // Open the latest file
     ostringstream name;
@@ -203,16 +197,16 @@ void readCheckpoint(Population &population, TransmissionModel &transmission)
     //Note: gzstreams are considered "good" when file not open!
     if ( !( in.good() && in.rdbuf()->is_open() ) )
         throw util::checkpoint_error ("Unable to read file");
-    checkpoint (in, population, transmission);
+    checkpoint (in, endTime, estEndTime, population, transmission);
     in.close();
   
     cerr << sim::now().inSteps() << "t loaded checkpoint" << endl;
 }
 
 // Internal simulation loop
-void loop(const SimTime humanWarmupLength, Population &population, TransmissionModel &transmission, int lastPercent)
+void loop(const SimTime humanWarmupLength, Population &population, TransmissionModel &transmission, SimTime &endTime, SimTime &estEndTime, int lastPercent)
 {
-    while (sim::now() < m_phaseEnd)
+    while (sim::now() < endTime)
     {        
         // Monitoring. sim::now() gives time of end of last step,
         // and is when reporting happens in our time-series.
@@ -242,7 +236,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         
         sim::end_update();
 
-        int percent = (sim::now() * 100) / m_estimatedEnd;
+        int percent = (sim::now() * 100) / estEndTime;
         if( percent != lastPercent ){   // avoid huge amounts of output for performance/log-file size reasons
             lastPercent = percent;
             // \r cleans line. Then we print progress as a percentage.
@@ -256,6 +250,9 @@ int main(int argc, char* argv[])
 {
     int exitStatus = EXIT_SUCCESS;
     string scenarioFile;
+    bool startedFromCheckpoint;
+    string checkpointFileName;
+    SimTime estEndTime, endTime;
     
     try {
         util::set_gsl_handler();        // init
@@ -346,18 +343,18 @@ int main(int argc, char* argv[])
         }
         humanWarmupLength = SimTime::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
         
-        m_estimatedEnd = humanWarmupLength  // ONE_LIFE_SPAN
+        estEndTime = humanWarmupLength  // ONE_LIFE_SPAN
             + transmission->expectedInitDuration()
             // plus MAIN_PHASE: survey period plus one TS for last survey
             + (sim::endDate() - sim::startDate())
             + SimTime::oneTS();
-        assert( m_estimatedEnd + SimTime::never() < SimTime::zero() );
+        assert( estEndTime + SimTime::never() < SimTime::zero() );
         
         bool skipWarmup = false;
-        if (isCheckpoint())
+        if (startedFromCheckpoint)
         {
             Continuous.init( monitoring, true );
-            readCheckpoint(*population, *transmission);
+            readCheckpoint(checkpointFileName, endTime, estEndTime, *population, *transmission);
             skipWarmup = true;
         }
         else
@@ -375,17 +372,17 @@ int main(int argc, char* argv[])
              * Run the simulation using the equilibrium inoculation rates over one
              * complete lifespan (sim::maxHumanAge()) to reach immunological
              * equilibrium in all age classes. Don't report any events. */
-            m_phaseEnd = humanWarmupLength;
-            loop(humanWarmupLength, *population, *transmission, lastPercent);
+            endTime = humanWarmupLength;
+            loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
 
             // Transmission init phase
             SimTime iterate = transmission->initIterate();
             while(iterate > SimTime::zero())
             {
-                m_phaseEnd += iterate;
+                endTime += iterate;
                 // adjust estimation of final time step: end of current period + length of main phase
-                m_estimatedEnd = m_phaseEnd + (sim::endDate() - sim::startDate()) + SimTime::oneTS();
-                loop(humanWarmupLength, *population, *transmission, lastPercent);
+                estEndTime = endTime + (sim::endDate() - sim::startDate()) + SimTime::oneTS();
+                loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
                 iterate = transmission->initIterate();
             }
 
@@ -396,7 +393,7 @@ int main(int argc, char* argv[])
                 (ii)        the entomological input defined by the EIRs in intEIR()
                 (iii)       the intervention packages defined in Intervention()
                 (iv)        the survey times defined in Survey() */
-            m_phaseEnd = m_estimatedEnd;
+            endTime = estEndTime;
             sim::s_interv = SimTime::zero();
             population->preMainSimInit();
             transmission->summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
@@ -404,13 +401,13 @@ int main(int argc, char* argv[])
 
             if(util::CommandLine::option (util::CommandLine::CHECKPOINT))
             {
-                writeCheckpoint(*population, *transmission);
+                writeCheckpoint(startedFromCheckpoint, checkpointFileName, endTime, estEndTime, *population, *transmission);
                 if( util::CommandLine::option (util::CommandLine::CHECKPOINT_STOP) )
                     throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }
         }
 
-        loop(humanWarmupLength, *population, *transmission, lastPercent);
+        loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
        
         cerr << '\r' << flush;  // clean last line of progress-output
         
