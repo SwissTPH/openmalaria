@@ -76,7 +76,6 @@ set (Model_CPP
   mon/misc.cpp
   mon/Continuous.cpp
   
-  util/timer.cpp
   util/vectors.cpp
   util/DecayFunction.cpp
   util/errors.cpp
