@@ -41,23 +41,68 @@ using WithinHost::Genotypes;
 
 // -----  Initialisation of model, done before human warmup  ------
 
-string AnophelesModel::initialise (
-    size_t species,
-    const scnXml::AnophelesParams& anoph,
-    vector<double>& initialisationEIR,
-//     map<string, double>& nonHumanHostPopulations,
-    int populationSize
-)
+string AnophelesModel::initialise (size_t species, const scnXml::AnophelesParams& anoph, vector<double>& initialisationEIR, int populationSize)
 {
     // -----  Set model variables  -----
-
     const scnXml::Mosq& mosq = anoph.getMosq();
+    const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt = anoph.getSimpleMPD();
+    // const scnXml::AnophelesParams::LifeCycleOptional& lcOpt = anoph.getLifeCycle();
 
     mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
 
-    initialise( anoph.getLifeCycle(), anoph.getSimpleMPD(), anoph.getMosq() );
+    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
+        throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL not yet "
+            "implemented. Use VECTOR_SIMPLE_MPD_MODEL instead.");
+        /*TODO
+         * Note: this model is older than SimpleMPD and more complicated.
+         * Difficulties are in parameterisation and estimation of resources.
+        if (!lcOpt.present())
+            throw util::xml_scenario_error(
+                "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
+                "model parameters for each anopheles species");
+        emergence = unique_ptr<EmergenceModel>( new LCEmergence() );
+        emergence->initLifeCycle( lcOpt.get() );
+        */
+    }else if (util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL )){
+        if (!simpleMPDOpt.present())
+            throw util::xml_scenario_error(
+                "VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
+                "model parameters for each anopheles species");
+        emergence = unique_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get()) );
+    }else
+        emergence = unique_ptr<EmergenceModel>( new FixedEmergence() );
     
+    
+    // -----  Set model variables  -----
+
+    mosqRestDuration = SimTime::fromDays(mosq.getMosqRestDuration().getValue());
+    EIPDuration = SimTime::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
+    if (SimTime::oneDay() > mosqRestDuration || mosqRestDuration * 2 >= EIPDuration) {
+        //TODO: limit was EIPDuration >= mosqRestDuration >= 1
+        // but in usage of ftauArray this wasn't enough. Check why.
+        throw util::xml_scenario_error ("Code expects EIPDuration > 2*mosqRestDuration >= 2");
+    }
+
+    N_v_length = EIPDuration + mosqRestDuration;
+    
+    minInfectedThreshold = mosq.getMinInfectedThreshold();
+    
+    
+    // -----  allocate memory  -----
+    // Set up fArray and ftauArray. Each step, all elements not set here are
+    // calculated, even if they aren't directly used in the end;
+    // however all calculated values are used in calculating the next value.
+    fArray.resize(EIPDuration-mosqRestDuration+SimTime::oneDay());
+    fArray[SimTime::zero()] = 1.0;
+    ftauArray.resize(EIPDuration);
+    for( SimTime i = SimTime::zero(); i < mosqRestDuration; i += SimTime::oneDay() ){
+        ftauArray[i] = 0.0;
+    }
+    ftauArray[mosqRestDuration] = 1.0;
+    uninfected_v.resize(N_v_length);
+    uninfected_v[SimTime::zero()] = numeric_limits<double>::quiet_NaN();    // index not used
+
     // Uses anoph.getNonHumanHosts() and anoph.getMosq():
     initAvailability( species, anoph, /*nonHumanHostPopulations,*/ populationSize );
     
@@ -768,61 +813,6 @@ void AnophelesModel::advancePeriod (
     for( SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay() ){
         update( d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif, tsP_dff, isDynamic, partialEIR, availDivisor);
     }
-}
-
-void AnophelesModel::initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt,
-                                    const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt,
-                                    const scnXml::Mosq& mosq ) {
-    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
-        throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL not yet "
-            "implemented. Use VECTOR_SIMPLE_MPD_MODEL instead.");
-        /*TODO
-         * Note: this model is older than SimpleMPD and more complicated.
-         * Difficulties are in parameterisation and estimation of resources.
-        if (!lcOpt.present())
-            throw util::xml_scenario_error(
-                "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
-                "model parameters for each anopheles species");
-        emergence = unique_ptr<EmergenceModel>( new LCEmergence() );
-        emergence->initLifeCycle( lcOpt.get() );
-        */
-    }else if (util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL )){
-        if (!simpleMPDOpt.present())
-            throw util::xml_scenario_error(
-                "VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
-                "model parameters for each anopheles species");
-        emergence = unique_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get()) );
-    }else
-        emergence = unique_ptr<EmergenceModel>( new FixedEmergence() );
-    
-    
-    // -----  Set model variables  -----
-
-    mosqRestDuration = SimTime::fromDays(mosq.getMosqRestDuration().getValue());
-    EIPDuration = SimTime::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
-    if (SimTime::oneDay() > mosqRestDuration || mosqRestDuration * 2 >= EIPDuration) {
-        //TODO: limit was EIPDuration >= mosqRestDuration >= 1
-        // but in usage of ftauArray this wasn't enough. Check why.
-        throw util::xml_scenario_error ("Code expects EIPDuration > 2*mosqRestDuration >= 2");
-    }
-    N_v_length = EIPDuration + mosqRestDuration;
-    
-    minInfectedThreshold = mosq.getMinInfectedThreshold();
-    
-    
-    // -----  allocate memory  -----
-    // Set up fArray and ftauArray. Each step, all elements not set here are
-    // calculated, even if they aren't directly used in the end;
-    // however all calculated values are used in calculating the next value.
-    fArray.resize(EIPDuration-mosqRestDuration+SimTime::oneDay());
-    fArray[SimTime::zero()] = 1.0;
-    ftauArray.resize(EIPDuration);
-    for( SimTime i = SimTime::zero(); i < mosqRestDuration; i += SimTime::oneDay() ){
-        ftauArray[i] = 0.0;
-    }
-    ftauArray[mosqRestDuration] = 1.0;
-    uninfected_v.resize(N_v_length);
-    uninfected_v[SimTime::zero()] = numeric_limits<double>::quiet_NaN();    // index not used
 }
 
 void AnophelesModel::update( SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
