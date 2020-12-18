@@ -24,7 +24,6 @@
 #include "Global.h"
 #include "Transmission/Anopheles/PerHostAnoph.h"
 #include "Transmission/PerHost.h"
-#include "Transmission/Anopheles/MosqTransmission.h"
 #include "Transmission/Anopheles/FixedEmergence.h"
 #include "util/SimpleDecayingValue.h"
 #include "util/vectors.h"
@@ -114,12 +113,7 @@ public:
      * @param nonHumanHostPopulations Size of each non-human population
      * @param populationSize Size of human population (assumed constant)
      */
-    string initialise (
-                       size_t species,
-                       const scnXml::AnophelesParams& anoph,
-                       vector<double>& initialisationEIR,
-//                        map<string, double>& nonHumanHostPopulations,
-                       int populationSize);
+    string initialise ( size_t species, const scnXml::AnophelesParams& anoph, vector<double>& initialisationEIR, int populationSize);
     
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
@@ -190,13 +184,6 @@ public:
     void deployNonHumanHostsInterv(LocalRng& rng, size_t species, size_t instance, string name);
 
     void deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan);
-    
-    // MosqTransmission
-        /** Initialise parameters and variables.
-     * 
-     * This is only a fraction of parameter initialisation; see also
-     * AnophelesModel::initialise. */
-    void initialise ( const scnXml::AnophelesParams::LifeCycleOptional& lcOpt, const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt, const scnXml::Mosq& mosq );
     
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */
