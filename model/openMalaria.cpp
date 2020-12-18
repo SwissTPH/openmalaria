@@ -59,9 +59,6 @@ namespace OM{
     bool startedFromCheckpoint;  // static
     string checkpointFileName;
     SimTime m_estimatedEnd, m_phaseEnd;
-
-    std::unique_ptr<Population> population;
-    std::unique_ptr<TransmissionModel> transmission;
 }
 
 using namespace OM;
@@ -84,7 +81,7 @@ int readCheckpointNum () {
     return checkpointNum;
 }
 
-void checkpoint (istream& stream) {
+void checkpoint (istream& stream, Population &population, TransmissionModel &transmission) {
     try {
         util::checkpoint::header (stream);
         util::CommandLine::staticCheckpoint (stream);
@@ -99,9 +96,9 @@ void checkpoint (istream& stream) {
         m_phaseEnd & stream;
         m_estimatedEnd & stream;
         transmission & stream;
-        population->checkpoint(stream);
-        InterventionManager::checkpoint( stream );
-        InterventionManager::loadFromCheckpoint( *population, *transmission );
+        population.checkpoint(stream);
+        InterventionManager::checkpoint(stream);
+        InterventionManager::loadFromCheckpoint(population, transmission);
         
         // read last, because other loads may use random numbers or expect time
         // to be negative
@@ -126,7 +123,7 @@ void checkpoint (istream& stream) {
         throw util::checkpoint_error ("stream read error");
 }
 
-void checkpoint (ostream& stream) {
+void checkpoint (ostream& stream, Population &population, TransmissionModel &transmission) {
     util::checkpoint::header (stream);
     if (!stream.good())
         throw util::checkpoint_error ("Unable to write to file");
@@ -144,7 +141,7 @@ void checkpoint (ostream& stream) {
     m_phaseEnd & stream;
     m_estimatedEnd & stream;
     transmission & stream;
-    population->checkpoint(stream);
+    population.checkpoint(stream);
     InterventionManager::checkpoint( stream );
     
     sim::s_t0 & stream;
@@ -156,7 +153,8 @@ void checkpoint (ostream& stream) {
         throw util::checkpoint_error ("stream write error");
 }
 
-void writeCheckpoint(){
+void writeCheckpoint(Population &population, TransmissionModel &transmission)
+{
     // We alternate between two checkpoints, in case program is closed while writing.
     const int NUM_CHECKPOINTS = 2;
     
@@ -172,7 +170,7 @@ void writeCheckpoint(){
         name << checkpointFileName << checkpointNum << ".gz";
         //Writing checkpoint:
         ogzstream out(name.str().c_str(), ios::out | ios::binary);
-        checkpoint (out);
+        checkpoint (out, population, transmission);
         out.close();
     }
     
@@ -194,7 +192,8 @@ void writeCheckpoint(){
 //     cerr << " OK" << endl;
 }
 
-void readCheckpoint() {
+void readCheckpoint(Population &population, TransmissionModel &transmission)
+{
     int checkpointNum = readCheckpointNum();
     
     // Open the latest file
@@ -204,28 +203,28 @@ void readCheckpoint() {
     //Note: gzstreams are considered "good" when file not open!
     if ( !( in.good() && in.rdbuf()->is_open() ) )
         throw util::checkpoint_error ("Unable to read file");
-    checkpoint (in);
+    checkpoint (in, population, transmission);
     in.close();
   
     cerr << sim::now().inSteps() << "t loaded checkpoint" << endl;
 }
 
 // Internal simulation loop
-void loop(const SimTime humanWarmupLength, int lastPercent)
+void loop(const SimTime humanWarmupLength, Population &population, TransmissionModel &transmission, int lastPercent)
 {
     while (sim::now() < m_phaseEnd)
     {        
         // Monitoring. sim::now() gives time of end of last step,
         // and is when reporting happens in our time-series.
-        Continuous.update( *population );
+        Continuous.update( population );
         if( sim::intervDate() == mon::nextSurveyDate() ){
-            population->newSurvey();
-            transmission->summarize();
+            population.newSurvey();
+            transmission.summarize();
             mon::concludeSurvey();
         }
         
         // Deploy interventions, at time sim::now().
-        InterventionManager::deploy( *population, *transmission );
+        InterventionManager::deploy( population, transmission );
         
         // Time step updates. Time steps are mid-day to mid-day.
         // sim::ts0() gives the date at the start of the step, sim::ts1() the date at the end.
@@ -233,13 +232,13 @@ void loop(const SimTime humanWarmupLength, int lastPercent)
         
         // This should be called before humans contract new infections in the simulation step.
         // This needs the whole population (it is an approximation before all humans are updated).
-        transmission->vectorUpdate (*population);
+        transmission.vectorUpdate (population);
         
-        population->update(*transmission, humanWarmupLength);
+        population.update(transmission, humanWarmupLength);
         
         // Doesn't matter whether non-updated humans are included (value isn't used
         // before all humans are updated).
-        transmission->update(*population);
+        transmission.update(population);
         
         sim::end_update();
 
@@ -253,7 +252,8 @@ void loop(const SimTime humanWarmupLength, int lastPercent)
 }
 
 /// main() — loads scenario XML and runs simulation
-int main(int argc, char* argv[]) {
+int main(int argc, char* argv[])
+{
     int exitStatus = EXIT_SUCCESS;
     string scenarioFile;
     
@@ -297,11 +297,8 @@ int main(int argc, char* argv[]) {
         // genotypes (both from Human, from Population::init()) and
         // mon::AgeGroup (from Surveys.init()):
         // Note: PerHost dependency can be postponed; it is only used to set adultAge
-        population = unique_ptr<Population>(
-                new Population( scenario.getDemography().getPopSize() ));
-        transmission = unique_ptr<TransmissionModel>(
-            TransmissionModel::createTransmissionModel(
-                scenario.getEntomology(), population->size()) );
+        std::unique_ptr<Population> population = unique_ptr<Population>(new Population( scenario.getDemography().getPopSize() ));
+        std::unique_ptr<TransmissionModel> transmission = unique_ptr<TransmissionModel>(TransmissionModel::createTransmissionModel(scenario.getEntomology(), population->size()));
         
         // Depends on transmission model (for species indexes):
         // MDA1D may depend on health system (too complex to verify)
@@ -360,7 +357,7 @@ int main(int argc, char* argv[]) {
         if (isCheckpoint())
         {
             Continuous.init( monitoring, true );
-            readCheckpoint();
+            readCheckpoint(*population, *transmission);
             skipWarmup = true;
         }
         else
@@ -379,19 +376,16 @@ int main(int argc, char* argv[]) {
              * complete lifespan (sim::maxHumanAge()) to reach immunological
              * equilibrium in all age classes. Don't report any events. */
             m_phaseEnd = humanWarmupLength;
-            loop(humanWarmupLength, lastPercent);
+            loop(humanWarmupLength, *population, *transmission, lastPercent);
 
             // Transmission init phase
             SimTime iterate = transmission->initIterate();
             while(iterate > SimTime::zero())
             {
                 m_phaseEnd += iterate;
-
                 // adjust estimation of final time step: end of current period + length of main phase
                 m_estimatedEnd = m_phaseEnd + (sim::endDate() - sim::startDate()) + SimTime::oneTS();
-
-                loop(humanWarmupLength, lastPercent);
-
+                loop(humanWarmupLength, *population, *transmission, lastPercent);
                 iterate = transmission->initIterate();
             }
 
@@ -410,13 +404,13 @@ int main(int argc, char* argv[]) {
 
             if(util::CommandLine::option (util::CommandLine::CHECKPOINT))
             {
-                writeCheckpoint();
+                writeCheckpoint(*population, *transmission);
                 if( util::CommandLine::option (util::CommandLine::CHECKPOINT_STOP) )
                     throw util::cmd_exception ("Checkpoint test: checkpoint written", util::Error::None);
             }
         }
 
-        loop(humanWarmupLength, lastPercent);
+        loop(humanWarmupLength, *population, *transmission, lastPercent);
        
         cerr << '\r' << flush;  // clean last line of progress-output
         
