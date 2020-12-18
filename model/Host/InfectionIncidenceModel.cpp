@@ -105,7 +105,7 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
         inf_rate_shape_param = sqrt(r_square_LogNormal - 1.86 * pow(baseline_avail_shape_param, 2));
         inf_rate_shape_param=std::max(inf_rate_shape_param, 0.0);
         inf_rate_offset = 0.5 * pow(inf_rate_shape_param, 2);
-        if( (boost::math::isnan)(inf_rate_shape_param) ){
+        if( (std::isnan)(inf_rate_shape_param) ){
             throw util::xml_scenario_error( "bad parameter 16 (BASELINE_AVAILABILITY_SHAPE)" );
         }
     }else{
@@ -214,7 +214,7 @@ double InfectionIncidenceModel::susceptibility () {
 int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR) {
   double expectedNumInfections = getModelExpectedInfections (human.rng(), effectiveEIR, human.perHostTransmission);
   // error check (should be OK if kappa is checked, for nonVector model):
-  if( !(boost::math::isfinite)(effectiveEIR) ){
+  if( !(std::isfinite)(effectiveEIR) ){
     ostringstream out;
     out << "effectiveEIR is not finite: " << effectiveEIR << endl;
     throw TRACED_EXCEPTION (out.str(), util::Error::EffectiveEIR);
@@ -241,7 +241,7 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
     ctsNewInfections += n;
     return n;
   }
-  if ( (boost::math::isnan)(expectedNumInfections) ){	// check for not-a-number
+  if ( (std::isnan)(expectedNumInfections) ){	// check for not-a-number
       // bad Params::BASELINE_AVAILABILITY_SHAPE ?
       throw TRACED_EXCEPTION( "numNewInfections: NaN", util::Error::NumNewInfections );
   }

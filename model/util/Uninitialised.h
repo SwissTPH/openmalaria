@@ -41,12 +41,12 @@ public:
     Uninitialised () : initialised(false) {}
     Uninitialised (T var) : variable(var) {
         // don't consider setting to NaN initialisation
-        initialised = !(boost::math::isnan)(var);
+        initialised = !(std::isnan)(var);
     }
     
     inline void operator= (T var) {
         variable = var;
-        initialised = !(boost::math::isnan)(var);
+        initialised = !(std::isnan)(var);
     }
     
     // Implicit cast-to-T (should be invoked automatically on use): throw if uninitialised
