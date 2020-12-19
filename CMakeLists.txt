@@ -8,7 +8,7 @@ project (OpenMalaria CXX)
 
 # The FindXXX.cmake files included are not quite the same as standard ones.
 # They abort if not found, and look in a few extra places (e.g. ${CMAKE_SOURCE_DIR}/lib).
-set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
+set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # -----  Compile options  -----
 
@@ -93,7 +93,6 @@ endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
 set (CMAKE_LIBRARY_PATH /usr/lib64)
 
 find_package (XSD)
-#find_package (XERCESC)
 find_package (XercesC)
 find_package (GSL)
 find_package (Z)
