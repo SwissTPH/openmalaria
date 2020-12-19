@@ -109,13 +109,12 @@ include_directories (SYSTEM
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${SPIRIT_INCLUDE_DIRS}
+  # ${SPIRIT_INCLUDE_DIRS}
   
   ${CMAKE_BINARY_DIR}/model
   ${CMAKE_SOURCE_DIR}/contrib
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
-  ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
+  # ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}

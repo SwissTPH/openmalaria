@@ -28,10 +28,8 @@
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <list>
-#include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
-using namespace boost::assign;
 
 #if 0
 TODO: replace this test suite

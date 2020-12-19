@@ -30,8 +30,6 @@
 #include <sstream>
 #include <fstream>
 #include <cmath>
-#include <boost/static_assert.hpp>
-
 
 namespace OM {
 namespace WithinHost {

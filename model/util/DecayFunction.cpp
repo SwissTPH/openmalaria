@@ -26,7 +26,6 @@
 
 #include <cmath>
 #include <stdexcept>
-#include <boost/format.hpp>
 
 namespace OM {
 namespace util {
@@ -254,7 +253,7 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
     }else if( func == "smooth-compact" ){
         return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
     }else{
-        throw util::xml_scenario_error( (boost::format( "decay function type %1% of %2% unrecognized" ) %func %eltName).str() );
+        throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }
 }
 unique_ptr<DecayFunction> DecayFunction::makeConstantObject(){

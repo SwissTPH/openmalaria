@@ -40,7 +40,6 @@
 
 #include <fstream>
 #include <gzstream/gzstream.h>
-#include <boost/format.hpp>
 
 #include <cstdio>
 #include <cerrno>
@@ -239,7 +238,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         if( percent != lastPercent ){   // avoid huge amounts of output for performance/log-file size reasons
             lastPercent = percent;
             // \r cleans line. Then we print progress as a percentage.
-            cerr << (boost::format("\r[%|3i|%%]\t") %percent) << flush;
+            cerr << "\r" << percent << "%\t" << flush;
         }
     }
 }

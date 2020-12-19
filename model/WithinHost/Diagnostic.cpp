@@ -132,7 +132,7 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
     diagnostic_set.clear(); // compatibility with unit tests
     
     if(scenario.getDiagnostics().present()){
-        foreach( const scnXml::Diagnostic& diagnostic, scenario.getDiagnostics().get().getDiagnostic() ){
+        for( const scnXml::Diagnostic& diagnostic : scenario.getDiagnostics().get().getDiagnostic() ){
             string name = diagnostic.getName();     // conversion fails without this extra line
             bool inserted = diagnostic_set.insert( make_pair(move(name), Diagnostic(parameters, diagnostic)) ).second;
             if( !inserted ){

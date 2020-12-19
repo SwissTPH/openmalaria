@@ -31,7 +31,6 @@
 #include "util/StreamValidator.h"
 
 #include <cmath>
-#include <boost/format.hpp>
 
 namespace OM {
 namespace Transmission {
@@ -173,7 +172,7 @@ void AnophelesModel::initAvailability(
         double sum_u = 0.0;     // sum u across NNHs where u = xi * P_B * P_C
         double sum_uvw = 0.0;   // sum u*(v+w) across NNHs where w = (1-χ)*P_D*P_E
         
-        foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
+        for( const scnXml::NonHumanHosts& xmlNNH : xmlSeqNNHs ){
             // availability population of hosts of this type relative to other non-human hosts:
             const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
             // cycle probabilities, when biting this type of host:
@@ -207,16 +206,7 @@ void AnophelesModel::initAvailability(
     nhh_avail = 0.0;
     nhh_sigma_df = 0.0;
     nhh_sigma_dff = 0.0;
-    foreach( const scnXml::NonHumanHosts& xmlNNH, xmlSeqNNHs ){
-//         auto pop = nonHumanHostPopulations.find(xmlNNH.getName());
-//         if (pop == nonHumanHostPopulations.end()){
-//             throw xml_scenario_error ((boost::format("There is no population size defined for "
-//             "non-human host type \"%1%\"") %xmlNNH.getName()).str());
-//         }
-        
-        // population size for non-human host category:
-//         const double N_i = pop->second;
-        // per-NNH parameters, as above:
+    for( const scnXml::NonHumanHosts& xmlNNH : xmlSeqNNHs ){
         const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
         const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
         const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
@@ -689,7 +679,7 @@ void AnophelesModel::advancePeriod (
     
     // ν_A: rate at which mosquitoes find hosts or die (i.e. leave host-seeking state
     double leaveRate = mosqSeekingDeathRate;
-    foreach( const util::SimpleDecayingValue& increase, seekingDeathRateIntervs ){
+    for( const util::SimpleDecayingValue& increase : seekingDeathRateIntervs ){
         leaveRate *= 1.0 + increase.current_value( sim::ts0() );
     }
     leaveRate += sum_avail;
@@ -780,7 +770,7 @@ void AnophelesModel::advancePeriod (
     
     // alphaE (α_E) is α_d * P_E, where P_E may be adjusted by interventions
     double alphaE = availDivisor * probMosqSurvivalOvipositing;
-    foreach( const util::SimpleDecayingValue& pDeath, probDeathOvipositingIntervs ){
+    for( const util::SimpleDecayingValue& pDeath : probDeathOvipositingIntervs ){
         alphaE *= 1.0 - pDeath.current_value( sim::ts0() );
     }
     double tsP_df  = sigma_df * alphaE;

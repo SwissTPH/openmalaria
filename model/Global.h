@@ -38,9 +38,7 @@
 // Checkpointing and time-step operations are used _everywhere_:
 #include "sim.h"    // includes util/checkpoint.h and util/mod.h
 
-// foreach "keyword"
-#include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
+#define PI 3.14159265358979323846
 
 namespace OM {
 	

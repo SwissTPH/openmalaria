@@ -24,10 +24,10 @@
 #include "Global.h"
 #include <vector>
 
-#if __cplusplus >= 201402L
-// Update classes to mimic std::vector members
-#error "vecDay should be updated if switching to a later C++ version"
-#endif
+// #if __cplusplus >= 201402L
+// // Update classes to mimic std::vector members
+// #error "vecDay should be updated if switching to a later C++ version"
+// #endif
 
 namespace OM {
 namespace util {

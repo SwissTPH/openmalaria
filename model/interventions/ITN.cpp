@@ -384,7 +384,7 @@ void factors::RelativeAttractiveness::initSingleStage(
 
 void factors::RelativeAttractiveness::initTwoStage (
         const scnXml::TwoStageDeterrency& elt, double maxInsecticide,
-        boost::optional<double> holeIndexMax)
+        std::optional<double> holeIndexMax)
 {
     b.lPFEntering = numeric_limits<double>::quiet_NaN();
     if (elt.getEntering().present()) {
@@ -559,7 +559,7 @@ void ITNComponent::ITNAnopheles::init(
     double proportionUse,
     double maxInsecticide)
 {
-    boost::optional<double> holeIndexMax;
+    std::optional<double> holeIndexMax;
     if (elt.getHoleIndexMax().present()) {
         holeIndexMax = elt.getHoleIndexMax().get().getValue();
     }
