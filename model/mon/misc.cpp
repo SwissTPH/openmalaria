@@ -18,9 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// Must not be included _after_ boost/math/special_functions/fpclassify.hpp
-#include <boost/math/special_functions/nonfinite_num_facets.hpp>
-
 #include "mon/info.h"
 #include "mon/management.h"
 #include "mon/AgeGroup.h"
@@ -35,7 +32,6 @@
 
 #include <gzstream/gzstream.h>
 #include <fstream>
-#include <boost/algorithm/string.hpp>
 
 namespace OM {
 namespace mon {
@@ -62,6 +58,26 @@ namespace impl{
 
 void updateConditions();        // defined in mon.cpp
 
+// trim from start (in place)
+static inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
+}
+
 SimDate readSurveyDates( const scnXml::Monitoring& monitoring ){
     const scnXml::Surveys::SurveyTimeSequence& survs =
         monitoring.getSurveys().getSurveyTime();
@@ -72,7 +88,7 @@ SimDate readSurveyDates( const scnXml::Monitoring& monitoring ){
         const scnXml::SurveyTime& surv = survs[i];
         try{
             std::string s = surv;
-            boost::algorithm::trim(s);
+            trim(s);
             SimDate cur = UnitParse::readDate( s, UnitParse::STEPS );
             bool reporting = surv.getReported();
             if( surv.getRepeatStep().present() != surv.getRepeatEnd().present() ){
@@ -175,11 +191,6 @@ void concludeSurvey(){
 }
 
 void writeToStream(ostream& stream) {
-    // This locale ensures uniform formatting of nans and infs on all platforms.
-    std::locale old_locale;
-    std::locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
-    stream.imbue( nfn_put_locale );
-    
     stream.width (0);
     // For additional control:
     // stream.precision (6);

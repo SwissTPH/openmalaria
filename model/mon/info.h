@@ -24,7 +24,7 @@
 #include "Global.h"     // SimTime
 
 #include <string>
-#include <boost/integer_traits.hpp>
+#include <limits>
 
 /** This header provides information from the reporting system. */
 namespace OM {
@@ -41,7 +41,7 @@ namespace impl {
 }
 
 /// For surveys and measures to say something shouldn't be reported
-const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
+const size_t NOT_USED = std::numeric_limits<size_t>::max();
 
 /** Line end character. Use Unix line endings to save a little size. */
 const char lineEnd = '\n';

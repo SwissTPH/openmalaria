@@ -301,7 +301,7 @@ void VectorModel::init2 (const Population& population) {
     saved_sigma_dff.assign( speciesIndex.size(), 0.0 );
     
     double sumRelativeAvailability = 0.0;
-    foreach(const Host::Human& human, population.crange()) {
+    for(const Host::Human& human : population.getHumans()) {
         sumRelativeAvailability +=
                 human.perHostTransmission.relativeAvailabilityAge (human.age(sim::now()).inYears());
     }
@@ -318,7 +318,7 @@ void VectorModel::init2 (const Population& population) {
         double sigma_df = 0.0;
         double sigma_dff = 0.0;
         
-        foreach(const Host::Human& human, population.crange()) {
+        for(const Host::Human& human : population.getHumans()) {
             const OM::Transmission::PerHost& host = human.perHostTransmission;
             double prod = host.entoAvailabilityFull (i, human.age(sim::now()).inYears());
             sum_avail += prod;
@@ -337,7 +337,7 @@ void VectorModel::initVectorInterv( const scnXml::Description::AnophelesSequence
         size_t instance, const string& name )
 {
     SpeciesIndexChecker checker( name, speciesIndex );
-    foreach( const scnXml::VectorSpeciesIntervention& anoph, list ){
+    for( const scnXml::VectorSpeciesIntervention& anoph : list ){
         const string& mosq = anoph.getMosquito();
         species[checker.getIndex(mosq)].initVectorInterv( anoph, instance );
     }
@@ -351,7 +351,7 @@ void VectorModel::initVectorTrap( const scnXml::VectorTrap::DescriptionSequence 
     else name_ss << "vector trap intervention " << (instance+1);
     string name = name_ss.str();
     SpeciesIndexChecker checker( name, speciesIndex );
-    foreach( const scnXml::Description1& anoph, list ){
+    for( const scnXml::Description1& anoph : list ){
         const string& mosq = anoph.getMosquito();
         species[checker.getIndex(mosq)].initVectorTrap( anoph, instance );
     }
@@ -361,7 +361,7 @@ void VectorModel::initNonHumanHostsInterv( const scnXml::Description2::Anopheles
         const scnXml::DecayFunction& decay, size_t instance, const string& name )
 {
     SpeciesIndexChecker checker( name, speciesIndex );
-    foreach( const scnXml::NonHumanHostsSpeciesIntervention& anoph, list ){
+    for( const scnXml::NonHumanHostsSpeciesIntervention& anoph : list ){
         const string& mosq = anoph.getMosquito();
         species[checker.getIndex(mosq)].initNonHumanHostsInterv( anoph, decay, instance, name );
     }
@@ -370,7 +370,7 @@ void VectorModel::initNonHumanHostsInterv( const scnXml::Description2::Anopheles
 void VectorModel::initAddNonHumanHostsInterv( const scnXml::Description3::AnophelesSequence list, const string& name )
 {
     SpeciesIndexChecker checker( name, speciesIndex );
-    foreach( const scnXml::NonHumanHostsVectorSpecies& anoph, list ){
+    for( const scnXml::NonHumanHostsVectorSpecies& anoph : list ){
         const string& mosq = anoph.getMosquito();
         species[checker.getIndex(mosq)].initAddNonHumanHostsInterv( anoph, name );
     }
@@ -522,7 +522,7 @@ void VectorModel::vectorUpdate (const Population& population) {
     saved_sigma_dif.assign_at1(popDataInd, 0.0);
     saved_sigma_dff.assign( saved_sigma_dff.size(), 0.0 );
     
-    foreach(const Host::Human& human, population.crange()) {
+    for(const Host::Human& human : population.getHumans()) {
         const OM::Transmission::PerHost& host = human.perHostTransmission;
         WithinHost::WHInterface& whm = *human.withinHostModel;
         const double tbvFac = human.getVaccine().getFactor( interventions::Vaccine::TBV );

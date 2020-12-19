@@ -39,7 +39,6 @@
 #include "schema/scenario.h"
 
 #include <cmath>
-#include <boost/format.hpp>
 #include <gsl/gsl_cdf.h>
 
 

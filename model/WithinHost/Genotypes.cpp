@@ -25,8 +25,7 @@
 #include "util/CommandLine.h"
 #include "schema/scenario.h"
 
-
-#include <boost/format.hpp>
+#include <iomanip>
 
 namespace OM {
 namespace WithinHost {
@@ -46,19 +45,16 @@ struct LocusSet{
     LocusSet( const scnXml::ParasiteLocus& elt_l ){
         alleles.reserve( elt_l.getAllele().size() );
         double cum_p = 0.0;
-        foreach( const scnXml::ParasiteAllele& elt_a, elt_l.getAllele() ){
+        for( const scnXml::ParasiteAllele& elt_a : elt_l.getAllele() ){
             uint32_t alleleCode = (nextAlleleCode++);
             alleleCodes[elt_l.getName()][elt_a.getName()] = alleleCode;
             cum_p += elt_a.getInitialFrequency();
             alleles.push_back( Genotypes::Genotype( alleleCode, elt_a.getInitialFrequency(), elt_a.getFitness(), elt_a.getHrp2_deletion() ) );
         }
-        if( cum_p < 0.999 || cum_p > 1.001 ){
-            throw util::xml_scenario_error( (
-                boost::format("expected sum of initial probabilities of "
-                "alleles to be 1, but for the %1% alleles under locus %2% "
-                "this is %3%") %alleles.size() %elt_l.getName() %cum_p
-            ).str() );
-        }
+        if( cum_p < 0.999 || cum_p > 1.001 )
+            throw util::xml_scenario_error("expected sum of initial probabilities of alleles to be 1, but for the " 
+                + to_string(alleles.size()) + " alleles under locus " + string(elt_l.getName()) + " this is " + to_string(cum_p));
+
         alleles[0].init_freq += 1.0 - cum_p;     // account for any small errors by adjusting the first frequency
     }
     void include( LocusSet& that ){
@@ -157,16 +153,14 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         }
         
         // Test cum_p is approx. 1.0 in case the input tree is wrong.
-        if (cum_p < 0.999 || cum_p > 1.001){
-            throw util::xml_scenario_error ( (
-                boost::format("decision tree (random node): expected probability sum to be 1.0 but found %2%")
-                %cum_p
-            ).str() );
-        }
+        if (cum_p < 0.999 || cum_p > 1.001)
+            throw util::xml_scenario_error ("decision tree (random node): expected probability sum to be 1.0 but found " + to_string(cum_p));
+
         // last cum_p might be slightless less than 1 due to arithmetic errors; add a failsafe:
         GT::cum_initial_freqs[1.0] = GT::genotypes.size() - 1;
     }else{
         initSingle();
+        GT::cum_initial_freqs[1.0] = GT::genotypes.size() - 1;
     }
     
     if( util::CommandLine::option( util::CommandLine::PRINT_GENOTYPES ) ){
@@ -193,6 +187,7 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
                 for( auto j = i->alleles.begin();
                     j != i->alleles.end(); ++j ){
                     const string& locus = allele_codes[*j].first;
+
                     longest[locus] = locus.length();  // locus name is included in column
                 }
             }else assert( longest.size() == i->alleles.size() );
@@ -221,27 +216,28 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
         cout << endl;
         stringstream fmt;
         fmt << "|%8d|";
-        for( auto it = loci.begin(); it !=loci.end(); ++it ){
+        for( auto it = loci.begin(); it !=loci.end(); ++it )
             fmt << "%" << longest[*it] << "s|";
-        }
         fmt << "%9.3f|%7.3f|";
         
         // Table header:
-        boost::format fmtr(fmt.str());
-        fmtr % "Genotype";
-        for( auto it = loci.begin(); it !=loci.end(); ++it ){
-            fmtr % *it;
-        }
-        cout << (fmtr % "init freq" % "fitness") << endl;
+        cout << "|" << std::setw(8) << "Genotype"; 
+        for( auto it = loci.begin(); it !=loci.end(); ++it )
+            cout << "|" << std::setw(longest[*it]) << *it;
+        cout << "|" << std::setw(9) << "init freq" << "|" << std::setw(7) << "fitness" << "|" << endl;
         
-        // Bar under header:
-        fmtr.clear();
-        fmtr % "--------";
-        for( auto it = loci.begin(); it !=loci.end(); ++it ){
-            fmtr % string(longest[*it], '-');
+        cout << "|" << std::setw(8) << "--------"; 
+        for( auto it = loci.begin(); it !=loci.end(); ++it )
+        {
+            if(longest[*it] > 0)
+                cout << "|" << "---------";
+            else
+                cout << "|";
         }
-        cout << (fmtr % "---------" % "-------") << endl;
-        
+
+        cout << "|" << std::setw(9) << "---------" << "|" << std::setw(7) << "-------" << "|" << endl;
+
+        cout << std::fixed << setprecision(3);
         for( size_t i = 0; i < GT::genotypes.size(); ++i ){
             const Genotype& genotype = GT::genotypes[i];
             map<string,string> locus_allele;    // to find allele for each locus
@@ -249,16 +245,15 @@ void Genotypes::init( const scnXml::Scenario& scenario ){
                 assert( *a < allele_codes.size() );
                 locus_allele[allele_codes[*a].first] = allele_codes[*a].second;
             }
-            
-            fmtr.clear();
-            fmtr % (i*100000);
+
+            cout << "|" << std::setw(8) << (i*100000);
             for( auto it = loci.begin(); it !=loci.end(); ++it ){
                 auto la = locus_allele.find( *it );
                 assert( la != locus_allele.end() );
-                fmtr % la->second;
+                cout << "|" << std::setw(longest[*it]) << la->second << "|";
+
             }
-            fmtr % genotype.init_freq % genotype.fitness;
-            cout << fmtr << endl;
+            cout << std::setw(9) << genotype.init_freq << "|" << std::setw(7) << genotype.fitness << "|" << endl;
         }
     }
 }

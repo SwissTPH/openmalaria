@@ -233,7 +233,7 @@ void DescriptiveWithinHostModel::checkpoint (istream& stream) {
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
-    foreach (DescriptiveInfection& inf, infections) {
+    for(DescriptiveInfection& inf : infections) {
         inf & stream;
     }
 }

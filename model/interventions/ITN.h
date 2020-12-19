@@ -25,7 +25,7 @@
 #include "Transmission/PerHost.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
-#include <boost/optional.hpp>
+#include <optional>
 
 namespace OM {
 namespace interventions {
@@ -112,7 +112,7 @@ namespace factors {
          * the deterrent can never be perfect, but can have zero effect. */
         void initTwoStage(const scnXml::TwoStageDeterrency& elt,
                           double maxInsecticide,
-                          boost::optional<double> holeIndexMax);
+                          std::optional<double> holeIndexMax);
         
         /** Calculate effect. Range of output is any value ≥ 0.
          * 

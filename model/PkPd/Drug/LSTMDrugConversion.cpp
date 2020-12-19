@@ -224,7 +224,7 @@ double LSTMDrugConversion::calculateDrugFactor(LocalRng& rng, WithinHost::Common
     double totalFactor = 1.0;   // survival factor for whole day
     
     typedef pair<double,double> TimeConc;
-    foreach( const TimeConc& time_conc, doses ){
+    for( const TimeConc& time_conc : doses ){
         // we iterate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
@@ -261,7 +261,7 @@ void LSTMDrugConversion::updateConcentration( double body_mass ){
     double time = 0.0, duration;
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
-    foreach( TimeConc& time_conc, doses ){
+    for( TimeConc& time_conc : doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( (duration = time_conc.first - time) > 0.0 ){
