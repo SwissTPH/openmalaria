@@ -25,7 +25,6 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
-#include <boost/static_assert.hpp>
 
 using namespace std;
 

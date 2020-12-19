@@ -25,8 +25,6 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <boost/format.hpp>
-#include <boost/static_assert.hpp>
 
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
@@ -87,11 +85,11 @@ void StreamValidatorType::loadStream( const string& path ){
     storeMode = false;
     ifstream f_str( file.c_str(), ios::in | ios::binary );
     if( !f_str.is_open() )
-	throw util::base_exception( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
+	throw util::base_exception("unable to read " + string(file), Error::FileIO);
     char head[4];
     f_str.read( reinterpret_cast<char*>(&head), sizeof(char)*4 );
     if( memcmp( &OM_SV_HEAD, &head, sizeof(char)*4 ) != 0 )
-	throw util::base_exception( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
+	throw util::base_exception(string(file) + " is not a valid StreamValidator file", Error::FileIO);
     
     stream & f_str;
     

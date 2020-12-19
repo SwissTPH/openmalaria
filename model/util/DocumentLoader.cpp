@@ -25,7 +25,6 @@
 #include <sstream>
 #include <fstream>
 #include <map>
-#include <boost/format.hpp>
 
 namespace OM { namespace util {
 

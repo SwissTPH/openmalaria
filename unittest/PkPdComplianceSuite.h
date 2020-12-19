@@ -24,16 +24,15 @@
 #define Hmod_PkPdComplianceSuite
 
 #include <cxxtest/TestSuite.h>
-#include <boost/format.hpp>
 #include "PkPd/LSTMModel.h"
 #include "WithinHost/Infection/DummyInfection.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <limits>
+#include <cstdio>
 
 using std::pair;
 using std::multimap;
-using boost::format;
 using namespace OM;
 using namespace OM::PkPd;
 
@@ -130,10 +129,12 @@ public:
         fm += white + "\n";
         // head row
         const char * type = hasSecondDrug ? "type" : "";
-        cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err" % type;
+        printf(fm.c_str(), "day", "conc", yellow, "rel err %", yellow, "abs err", "factor", yellow, "rel err %", yellow, "abs err", type);
+        // cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err" % type;
         // head row separator
         string sfill = "------------";
-        cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill % "----";
+        printf(fm.c_str(), "---", "------------", white, "---------", white, sfill, sfill, white, "---------", white, sfill, "----");
+        // cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill % "----";
         return fm;
     }
     
@@ -149,8 +150,9 @@ public:
         const char* col_CA = abs(c_abs_error) > conc_abs_tol ? red : green;
         const char* col_FR = abs(f_rel_error) > PKPD_FACT_REL_TOL * 100 ? red : green;
         const char* col_FA = abs(f_abs_error) > PKPD_FACT_ABS_TOL ? red : green;
-        cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
-                % factor % col_FR % f_rel_error % col_FA % f_abs_error % type;
+        printf(fm.c_str(), day, concentration, col_CR, c_rel_error, col_CA, c_abs_error, factor, col_FR, f_rel_error, col_FA, f_abs_error, type);
+        // cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
+        //         % factor % col_FR % f_rel_error % col_FA % f_abs_error % type;
     }
     
     void runDrugSimulations (string drugName, string drug2Name,

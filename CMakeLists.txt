@@ -15,9 +15,9 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 if (NOT MSVC)
   # Enable builds on Raspberry pi (although without optimizations)
   if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
   else (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -msse2 -mfpmath=sse")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -msse2 -mfpmath=sse")
   endif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
   # We almost always want optimisations enabled:
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O2")
@@ -102,22 +102,6 @@ if (NOT PYTHON_EXECUTABLE)
     message (SEND_ERROR "Unable to find a Python interpreter (required).")
 endif (NOT PYTHON_EXECUTABLE)
 
-
-# Find Boost:
-
-# suggested on windows: install boost such that paths are:
-# C:\Program Files\boost\boost_VER\boost\config.hpp
-# VER looks like 1_38_0 NOT 1.38.0
-# Add additional versions here when needed:
-# set (Boost_ADDITIONAL_VERSIONS "1.54.0" "1.55.0" "1.56.0" "1.57.0" "1.58.0")
-#set (Boost_DEBUG)
-# We require 1.54: first version including nonfinite_num_facets.hpp
-find_package( Boost 1.54.0 )
-if(NOT Boost_FOUND)
-    message (FATAL_ERROR "Unable to find boost headers! Please install libboost-dev or boost from boost.org (preferably at least version 1.41)")
-endif(NOT Boost_FOUND)
-
-
 # -----  Compile-time optional features  -----
 # (must come before add_subdirectory (model))
 
@@ -132,7 +116,7 @@ endif (OM_STREAM_VALIDATOR)
 add_subdirectory (contrib)
 add_subdirectory (schema)
 add_subdirectory (model)
-add_subdirectory (util/SchemaTranslator)
+# add_subdirectory (util/SchemaTranslator)
 add_dependencies (model schema)
 
 # -----  generate openMalaria  -----
@@ -150,7 +134,6 @@ include_directories (SYSTEM
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/contrib
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
 )

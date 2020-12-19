@@ -53,7 +53,7 @@ namespace checkpoint {
     template<class T>
     void operator& (vector<T>& x, ostream& stream) {
         x.size() & stream;
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -63,7 +63,7 @@ namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.resize (l);
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -74,7 +74,7 @@ namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.resize (l, templateInstance);
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -82,7 +82,7 @@ namespace checkpoint {
     template<class T>
     void operator& (list<T> x, ostream& stream) {
         x.size() & stream;
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -92,7 +92,7 @@ namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.resize (l);
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
