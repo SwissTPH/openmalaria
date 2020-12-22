@@ -129,11 +129,11 @@ public:
         fm += white + "\n";
         // head row
         const char * type = hasSecondDrug ? "type" : "";
-        printf(fm.c_str(), "day", "conc", yellow, "rel err %", yellow, "abs err", "factor", yellow, "rel err %", yellow, "abs err", type);
+        printf(fm.c_str(), "day", "conc", yellow.c_str(), "rel err %", yellow.c_str(), "abs err", "factor", yellow.c_str(), "rel err %", yellow.c_str(), "abs err", type);
         // cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err" % type;
         // head row separator
         string sfill = "------------";
-        printf(fm.c_str(), "---", "------------", white, "---------", white, sfill, sfill, white, "---------", white, sfill, "----");
+        printf(fm.c_str(), "---", "------------", white.c_str(), "---------", white.c_str(), sfill.c_str(), sfill.c_str(), white.c_str(), "---------", white.c_str(), sfill.c_str(), "----");
         // cout << format(fm) % "---" % "------------" % white % "---------" % white % sfill % sfill % white % "---------" % white % sfill % "----";
         return fm;
     }
