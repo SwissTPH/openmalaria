@@ -62,3 +62,5 @@ add_library (schema
   ${SCHEMA_CPP}
   ${SCHEMA_H}
 )
+
+set_property(TARGET schema PROPERTY CXX_STANDARD 11)

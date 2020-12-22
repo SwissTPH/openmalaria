@@ -25,3 +25,5 @@ if (MSVC)
     COMPILE_FLAGS "${OM_COMPILE_FLAGS}"
   )
 endif (MSVC)
+
+set_property(TARGET contrib PROPERTY CXX_STANDARD 11)
