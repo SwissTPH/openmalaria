@@ -25,12 +25,12 @@ endif (NOT MSVC)
 
 set (OM_STD_LIBS )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fp-model source")
-endif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+endif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
   # This doesn't show up in the cache, but it is passed to gcc:
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-declarations")
 
@@ -48,7 +48,7 @@ if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     add_definitions(-static-libgcc -static-libstdc++)
     set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
   endif (OM_STATICALLY_LINK)
-endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
+endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 
 option (BUILD_SHARED_LIBS "Link xsdcxx, model, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
 mark_as_advanced (BUILD_SHARED_LIBS)
@@ -81,12 +81,12 @@ if (MSVC)
   set (OM_COMPILE_FLAGS "${OM_COMPILE_FLAGS} /D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS")
 endif (MSVC)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -Wno-deprecated-declarations")
   # These are actually only needed when using "clang" not "clang++" (same with
   # "gcc"), but adding here saves a user error:
   set (OM_STD_LIBS m stdc++)
-endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
 # -----  Find dependencies  -----
 
