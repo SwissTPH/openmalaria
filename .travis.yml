@@ -65,15 +65,9 @@ jobs:
 
     # Max OSX release
     - os: osx
-<<<<<<< HEAD
       osx_image: xcode11.5
       compiler: gcc
       env: OSNAME=macOS-10.15.4
-=======
-      osx_image: xcode9.4
-      compiler: gcc
-      env: OSNAME=macOS-10.13
->>>>>>> b6c5c9a1 (remove boost from install deps)
 
     # Max OSX release
     - os: osx
