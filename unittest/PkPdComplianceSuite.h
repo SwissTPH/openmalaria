@@ -150,7 +150,7 @@ public:
         const char* col_CA = abs(c_abs_error) > conc_abs_tol ? red : green;
         const char* col_FR = abs(f_rel_error) > PKPD_FACT_REL_TOL * 100 ? red : green;
         const char* col_FA = abs(f_abs_error) > PKPD_FACT_ABS_TOL ? red : green;
-        printf(fm.c_str(), day, concentration, col_CR, c_rel_error, col_CA, c_abs_error, factor, col_FR, f_rel_error, col_FA, f_abs_error, type);
+        printf(fm.c_str(), day, concentration, col_CR, c_rel_error, col_CA, c_abs_error, factor, col_FR, f_rel_error, col_FA, f_abs_error, type.c_str());
         // cout << format(fm) % day % concentration % col_CR % c_rel_error % col_CA % c_abs_error
         //         % factor % col_FR % f_rel_error % col_FA % f_abs_error % type;
     }
