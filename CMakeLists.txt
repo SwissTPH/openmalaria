@@ -12,6 +12,11 @@ set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # -----  Compile options  -----
 
+# -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
+# auto_ptr has been removed from c++17
+# This extension is needed because XSD still use auto_ptr in its headers
+# Note that is doe snot use auto_ptr in the generated code, only in the library headers
+
 if (NOT MSVC)
   # Enable builds on Raspberry pi (although without optimizations)
   if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
@@ -32,7 +37,7 @@ endif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
   # This doesn't show up in the cache, but it is passed to gcc:
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-declarations")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR")
 
   option (OM_COVERAGE "Produce coverage into binary.")
   if (OM_COVERAGE)
@@ -82,14 +87,14 @@ if (MSVC)
 endif (MSVC)
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -Wno-deprecated-declarations")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR")
   # These are actually only needed when using "clang" not "clang++" (same with
   # "gcc"), but adding here saves a user error:
   set (OM_STD_LIBS m stdc++)
 endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
 if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -Wno-deprecated-declarations")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR")
   # These are actually only needed when using "clang" not "clang++" (same with
   # "gcc"), but adding here saves a user error:
   set (OM_STD_LIBS m stdc++)
