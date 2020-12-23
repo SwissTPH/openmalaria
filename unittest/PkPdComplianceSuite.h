@@ -128,8 +128,8 @@ public:
             + white + "%12$=4s|";
         fm += white + "\n";
         // head row
-        const char * type = hasSecondDrug ? "type" : "";
-        printf(fm.c_str(), "day", "conc", yellow.c_str(), "rel err %", yellow.c_str(), "abs err", "factor", yellow.c_str(), "rel err %", yellow.c_str(), "abs err", type);
+        string type = hasSecondDrug ? "type" : "";
+        printf(fm.c_str(), "day", "conc", yellow.c_str(), "rel err %", yellow.c_str(), "abs err", "factor", yellow.c_str(), "rel err %", yellow.c_str(), "abs err", type.c_str());
         // cout << format(fm) % "day" % "conc" % yellow % "rel err %" % yellow % "abs err" % "factor" % yellow % "rel err %" % yellow % "abs err" % type;
         // head row separator
         string sfill = "------------";
