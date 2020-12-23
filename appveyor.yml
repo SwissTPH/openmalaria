@@ -11,7 +11,7 @@ install:
   - C:\cygwin64\bin\bash -lc "appveyor DownloadFile http://rawgit.com/transcode-open/apt-cyg/master/apt-cyg -FileName apt-cyg"
   - C:\cygwin64\bin\bash -lc "install apt-cyg /bin"
   - C:\cygwin64\bin\bash -lc "apt-cyg install wget grep"
-  - C:\cygwin64\bin\bash -lc "apt-cyg install zlib-devel make python3 cmake libboost-devel libgsl-devel xsd libxerces-c-devel"
+  - C:\cygwin64\bin\bash -lc "apt-cyg install zlib-devel make python3 cmake libgsl-devel xsd libxerces-c-devel"
 
 build_script:
   - C:\cygwin64\bin\bash -lc "cd /cygdrive/c/projects/openmalaria && ./build.sh --jobs=4 -r --artifact=openMalaria-windows"

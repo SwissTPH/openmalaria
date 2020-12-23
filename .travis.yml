@@ -5,8 +5,8 @@ cache:
     - $HOME/Library/Caches/Homebrew
 
 install:
-  - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx || true
-  - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd || true
+  - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libgsl-dev libxerces-c-dev xsdcxx || true
+  - test "$TRAVIS_OS_NAME" == "osx" && brew install git coreutils cmake gcc gsl xerces-c xsd || true
 
 # Build openMalaria and create the release folder openMalaria-$TRAVIS_OS_NAME
 script:
@@ -45,10 +45,10 @@ matrix:
       env: OSNAME=macOS-10.15
 
     # Max OSX release
-    # - os: osx
-    #   osx_image: xcode9.4
-    #   compiler: gcc
-    #   env: OSNAME=macOS-10.13
+    - os: osx
+      osx_image: xcode9.4
+      compiler: gcc
+      env: OSNAME=macOS-10.13
 
     # Clang test, don't deploy
     - os: linux
