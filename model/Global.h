@@ -32,7 +32,7 @@
 
 // unit32_t and similar, mostly for compatibility with MSVC:
 #include <cstdint>
-
+#include <algorithm>
 #include <cmath>
 
 // Checkpointing and time-step operations are used _everywhere_:

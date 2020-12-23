@@ -44,11 +44,11 @@ matrix:
       compiler: gcc
       env: OSNAME=macOS-10.15
 
-    # Max OSX release
-    - os: osx
-      osx_image: xcode9.4
-      compiler: gcc
-      env: OSNAME=macOS-10.13
+    # # Max OSX release
+    # - os: osx
+    #   osx_image: xcode9.4
+    #   compiler: gcc
+    #   env: OSNAME=macOS-10.13
 
     # Clang test, don't deploy
     - os: linux

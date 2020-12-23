@@ -99,7 +99,7 @@ namespace OM { namespace util {
     
     // As in the "Advanced Bash-Scripting Guide"; not directly relevant to C++
     // but gives some idea what codes make sense to use.
-    static_assert( Error::Max <= 113 );
+    static_assert( Error::Max <= 113, "Error::Max <= 113" );
     
     /** Base OpenMalaria exception class.
      * 
