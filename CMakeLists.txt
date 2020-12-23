@@ -88,6 +88,14 @@ if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
   set (OM_STD_LIBS m stdc++)
 endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
 
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -Wno-deprecated-declarations")
+  # These are actually only needed when using "clang" not "clang++" (same with
+  # "gcc"), but adding here saves a user error:
+  set (OM_STD_LIBS m stdc++)
+endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+
+
 # -----  Find dependencies  -----
 
 set (CMAKE_LIBRARY_PATH /usr/lib64)
