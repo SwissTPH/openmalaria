@@ -30,7 +30,7 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 endif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
-if( ${CMAKE_COMPILER_IS_GNUCXX} )
+if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
   # This doesn't show up in the cache, but it is passed to gcc:
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wno-deprecated-declarations")
 
@@ -48,7 +48,7 @@ if( ${CMAKE_COMPILER_IS_GNUCXX} )
     add_definitions(-static-libgcc -static-libstdc++)
     set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
   endif (OM_STATICALLY_LINK)
-endif( ${CMAKE_COMPILER_IS_GNUCXX} )
+endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
 
 option (BUILD_SHARED_LIBS "Link xsdcxx, model, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
 mark_as_advanced (BUILD_SHARED_LIBS)
