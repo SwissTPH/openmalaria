@@ -137,11 +137,11 @@ StreamValidatorType StreamValidator;
 // ———  Our cross-platform consistent-result hasing functions  ——
 namespace CPCH {
     SVType toSVType(uint32_t x){
-        static_assert( sizeof(x) == sizeof(SVType) );
+        static_assert( sizeof(x) == sizeof(SVType), "sizeof(x) == sizeof(SVType)" );
         return x;
     }
     SVType toSVType(int32_t x){
-        static_assert( sizeof(x) == sizeof(SVType) );
+        static_assert( sizeof(x) == sizeof(SVType), "sizeof(x) == sizeof(SVType)" );
         union {
             int32_t asS32;
             uint32_t asU32;
@@ -150,7 +150,7 @@ namespace CPCH {
         return asU32;
     }
     SVType toSVType(uint64_t x){
-        static_assert( sizeof(x) == 2*sizeof(SVType) );
+        static_assert( sizeof(x) == 2*sizeof(SVType), "sizeof(x) == 2*sizeof(SVType)" );
         union {
             uint64_t asU64;
             uint32_t asU32[2];
@@ -159,7 +159,7 @@ namespace CPCH {
         return asU32[0] ^ asU32[1];     // XOR two parts together
     }
     SVType toSVType(int64_t x){
-        static_assert( sizeof(x) == 2*sizeof(SVType) );
+        static_assert( sizeof(x) == 2*sizeof(SVType), "sizeof(x) == 2*sizeof(SVType)" );
         union {
             int64_t asS64;
             uint32_t asU32[2];
@@ -171,7 +171,7 @@ namespace CPCH {
     //Also not guaranteed to produce the same result on all platforms (but will
     //it?).
     SVType toSVType(float x){
-        static_assert( sizeof(x) == sizeof(SVType) );
+        static_assert( sizeof(x) == sizeof(SVType), "sizeof(x) == sizeof(SVType)" );
         union {
             float asFloat;
             uint32_t asU32;
@@ -180,7 +180,7 @@ namespace CPCH {
         return asU32;
     }
     SVType toSVType(double x){
-        static_assert( sizeof(x) == 2*sizeof(SVType) );
+        static_assert( sizeof(x) == 2*sizeof(SVType), "sizeof(x) == 2*sizeof(SVType)" );
         union {
             double asDouble;
             uint32_t asU32[2];
