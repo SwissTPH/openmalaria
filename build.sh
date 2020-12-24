@@ -1,4 +1,4 @@
-#/bin/bash
+#!/bin/bash
 
 # Assuming you have installed:
 # gsl, git, cmake, xsd, xerces-c, boost
@@ -28,7 +28,7 @@ CYGWIN=0
 # For Windows - Cygwin (MobaXTerm)
 export PATH=/usr/bin:$PATH
 
-function printHelp {
+printHelp () {
     echo "HELP: make sure dependencies are installed (adapt to your distribution)"
     echo "======================================================================="
     echo "Ubuntu/Debian: sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx"
@@ -48,7 +48,7 @@ function printHelp {
     echo "  -h, --help"             "print this message"
 }
 
-function parseArguments {
+parseArguments () {
     for i in "$@"; do
         case $i in
             -b=*|--branch=*)    BRANCH="${i#*=}"; SWITCHBRANCH=1 && shift ;;
@@ -63,7 +63,7 @@ function parseArguments {
     done
 }
 
-function isWindows {
+isWindows () {
     unameOut="$(uname -s)"
     case "${unameOut}" in
         CYGWIN*)    CYGWIN=1;;
@@ -72,7 +72,7 @@ function isWindows {
     esac
 }
 
-function clone {
+clone () {
     # Already in openmalaria?
     if [ -d .git ]; then
         if [ $(basename -s .git `git remote get-url origin`) = "openmalaria" ]; then
@@ -96,7 +96,7 @@ function clone {
     git branch
 }
 
-function build {
+build () {
     mkdir -p build
 
     if [ $CLEAN -eq 1 ]; then
@@ -109,13 +109,13 @@ function build {
     cd ..
 }
 
-function runtests {
+runtests () {
     if [ $TESTS = "ON" ]; then
         cd build && ctest --output-on-failure -j$JOBS && cd ..
     fi
 }
 
-function package {
+package () {
     # Get version number
     VERSION=$(cat version.txt | cut -d'-' -f2)
     MAJOR=$(cat version.txt | cut -d'-' -f2 | cut -d'.' -f1)
