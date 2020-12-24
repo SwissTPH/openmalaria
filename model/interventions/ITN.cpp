@@ -384,7 +384,7 @@ void factors::RelativeAttractiveness::initSingleStage(
 
 void factors::RelativeAttractiveness::initTwoStage (
         const scnXml::TwoStageDeterrency& elt, double maxInsecticide,
-        std::optional<double> holeIndexMax)
+        double holeIndexMax, bool holeIndexMaxPresent)
 {
     b.lPFEntering = numeric_limits<double>::quiet_NaN();
     if (elt.getEntering().present()) {
@@ -444,7 +444,7 @@ void factors::RelativeAttractiveness::initTwoStage (
         if (!holeIndexMax) {
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit attacking deterrency");
         }
-        b.pAttacking.initLogit(elt.getAttackingLogit().get(), *holeIndexMax, true);
+        b.pAttacking.initLogit(elt.getAttackingLogit().get(), holeIndexMax, true);
     }
 }
 
@@ -558,17 +558,19 @@ void ITNComponent::ITNAnopheles::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
     double proportionUse,
     double maxInsecticide)
-{
-    std::optional<double> holeIndexMax;
+{   bool holeIndexMaxPresent = false;
+
+    double holeIndexMax = 0.0;
     if (elt.getHoleIndexMax().present()) {
         holeIndexMax = elt.getHoleIndexMax().get().getValue();
+        holeIndexMaxPresent = true;
     }
     
     if (elt.getDeterrency().present()) {
         relAttractiveness.initSingleStage(elt.getDeterrency().get(), maxInsecticide);
     } else {
         assert (elt.getTwoStageDeterrency().present());
-        relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide, holeIndexMax);
+        relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide, holeIndexMax, holeIndexMaxPresent);
     }
     if (elt.getPreprandialKillingEffect().present()) {
         preprandialKillingEffect.init(elt.getPreprandialKillingEffect().get(),
@@ -581,7 +583,7 @@ void ITNComponent::ITNAnopheles::init(
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit killing effect");
         }
         preprandialKillingEffect.initLogit(elt.getPreprandialKillingEffectLogit().get(),
-                                           *holeIndexMax,
+                                           holeIndexMax,
                                            false);
     }
     if (elt.getPostprandialKillingEffect().present()) {
@@ -595,7 +597,7 @@ void ITNComponent::ITNAnopheles::init(
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit killing effect");
         }
         postprandialKillingEffect.initLogit(elt.getPostprandialKillingEffectLogit().get(),
-                                            *holeIndexMax,
+                                            holeIndexMax,
                                             false);
     }
     if (elt.getFecundityReduction().present()) {
@@ -608,7 +610,7 @@ void ITNComponent::ITNAnopheles::init(
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit fecundity effect");
         }
         relFecundityEffect.initLogit(elt.getFecundityReductionLogit().get(),
-                                     *holeIndexMax,
+                                     holeIndexMax,
                                      false);
     } else {
         relFecundityEffect.init1();
