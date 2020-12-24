@@ -100,18 +100,18 @@ function build {
     mkdir -p build
 
     if [ $CLEAN -eq 1 ]; then
-        pushd build && rm -rf * && popd
+        cd build && rm -rf * && cd ..
     fi
 
     # Compile OpenMalaria
-    pushd build
+    cd build
     cmake -DCMAKE_BUILD_TYPE=Release -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
-    popd
+    cd ..
 }
 
 function runtests {
     if [ $TESTS = "ON" ]; then
-        pushd build && ctest --output-on-failure -j$JOBS && popd
+        cd build && ctest --output-on-failure -j$JOBS && cd ..
     fi
 }
 
@@ -135,7 +135,7 @@ function package {
 
     # if Cygwin, copy dll files
     if [ $CYGWIN -eq 1 ]; then
-        pushd $ARTIFACT/
+        cd $ARTIFACT/
         rm -f dlls
         for i in $(ldd openMalaria); do
             echo $i | grep "/usr" >> dlls || true
@@ -145,7 +145,7 @@ function package {
             echo "cp $i ."
         done
         rm -f dlls
-        popd
+        cd ..
     fi
 
     # Compress
