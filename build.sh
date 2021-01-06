@@ -1,7 +1,7 @@
 #/bin/bash
 
 # Assuming you have installed:
-# gsl, git, cmake, xsd, xerces-c, boost
+# gsl, git, cmake, xsd, xerces-c
 
 # stop on error
 set -e
@@ -31,11 +31,11 @@ export PATH=/usr/bin:$PATH
 function printHelp {
     echo "HELP: make sure dependencies are installed (adapt to your distribution)"
     echo "======================================================================="
-    echo "Ubuntu/Debian: sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx"
+    echo "Ubuntu/Debian: sudo apt-get install build-essential git cmake libgsl-dev libxerces-c-dev xsdcxx"
     echo "--------------"
-    echo "Mac OS: brew install git boost coreutils cmake gcc gsl xerces-c xsd"
+    echo "Mac OS: brew install git coreutils cmake gcc gsl xerces-c xsd"
     echo "--------------"
-    echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
+    echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make zlib-devel libgsl-devel xsd libxerces-c-devel"
 
     echo ""
     echo "Options:"
