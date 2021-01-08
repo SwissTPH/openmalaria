@@ -26,6 +26,12 @@ deploy:
 
 matrix:
   include:
+    # Ubuntu Focal release
+    - os: linux
+      dist: focal
+      compiler: gcc
+      env: OSNAME=Ubuntu-Focal
+
     # Ubuntu Xenial release
     - os: linux
       dist: xenial
@@ -38,6 +44,12 @@ matrix:
       compiler: gcc
       env: OSNAME=Ubuntu-Bionic
 
+    # Clang test, don't deploy
+    - os: linux
+      dist: bionic
+      compiler: clang
+      env: OSNAME=Ubuntu-Bionic
+
     # Max OSX release
     - os: osx
       osx_image: xcode11.5
@@ -45,19 +57,10 @@ matrix:
       env: OSNAME=macOS-10.15
 
     # Max OSX release
-    # - os: osx
-    #   osx_image: xcode9.4
-    #   compiler: gcc
-    #   env: OSNAME=macOS-10.13
-
-    # Clang test, don't deploy
-    - os: linux
-      dist: bionic
-      compiler: clang
-      env: OSNAME=Ubuntu-Bionic
-      deploy:
-        provider: script
-        script: echo "Skipping deployment!"
+    - os: osx
+      osx_image: xcode9.4
+      compiler: gcc
+      env: OSNAME=macOS-10.13
     
     - name: gh-pages build
       os: linux
