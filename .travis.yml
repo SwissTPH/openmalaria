@@ -1,12 +1,18 @@
+os: linux     # set default
+dist: xenial  # set default
 language: cpp
+
 cache: 
   apt: true
   directories:
     - $HOME/Library/Caches/Homebrew
 
+before_cache:
+  - test "$TRAVIS_OS_NAME" == "osx" && brew cleanup
+
 install:
   - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx || true
-  - test "$TRAVIS_OS_NAME" == "osx" && brew install git boost coreutils cmake gcc gsl xerces-c xsd || true
+  - test "$TRAVIS_OS_NAME" == "osx" && brew install -v git boost coreutils cmake gcc gsl xerces-c xsd || true
 
 # Build openMalaria and create the release folder openMalaria-$TRAVIS_OS_NAME
 script:
@@ -17,14 +23,14 @@ script:
 
 deploy:
   overwrite: true
-  skip_cleanup: true
+  cleanup: false
   provider: releases
-  api_key: $GH_TOKEN
+  token: $GH_TOKEN
   file: openMalaria-$OSNAME.tar.gz
   on:
     tags: true
 
-matrix:
+jobs:
   include:
     # Ubuntu Focal release
     - os: linux
@@ -49,12 +55,19 @@ matrix:
       dist: bionic
       compiler: clang
       env: OSNAME=Ubuntu-Bionic
+      deploy: # skip
+
+    # Max OSX release
+    - os: osx
+      osx_image: xcode12.2
+      compiler: gcc
+      env: OSNAME=macOS-10.15.7
 
     # Max OSX release
     - os: osx
       osx_image: xcode11.5
       compiler: gcc
-      env: OSNAME=macOS-10.15
+      env: OSNAME=macOS-10.15.4
 
     # Max OSX release
     - os: osx
@@ -79,11 +92,11 @@ matrix:
       after_success: true
       before_deploy: skip
       deploy:
-        skip_cleanup: true
+        cleanup: false
         provider: pages
-        github-token: $GH_TOKEN
-        local-dir: build/generated/book
-        keep-history: false
+        token: $GH_TOKEN
+        local_dir: build/generated/book
+        keep_history: false
         on:
           branch: master
 
