@@ -113,6 +113,8 @@ def linkOrCopy (src, dest):
 
 # Run, with file "scenario"+name+".xml" (or just "name")
 def runScenario(options,omOptions,name):
+    print("Begin runScenario")
+    
     scenarioSrc=os.path.abspath(os.path.join(testSrcDir,"scenario%s.xml" % name))
     tmpprefix=name
     compare=options.compare
