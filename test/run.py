@@ -193,7 +193,6 @@ def runScenario(options,omOptions,name):
         if not os.path.isfile(checkFile):
             break
         checkTime=os.path.getmtime(checkFile)
-        print(checkTime, lastTime)
         if not checkTime > lastTime:
             break
         lastTime=checkTime

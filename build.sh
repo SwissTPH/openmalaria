@@ -111,8 +111,7 @@ function build {
 
 function runtests {
     if [ $TESTS = "ON" ]; then
-        #pushd build && ctest --output-on-failure -j$JOBS && popd
-        pushd build && ctest -VV -j$JOBS && popd
+        pushd build && ctest --output-on-failure -j$JOBS && popd
     fi
 }
 
