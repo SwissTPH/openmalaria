@@ -164,6 +164,9 @@ def runScenario(options,omOptions,name):
         if options.logging:
             print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
         ret=subprocess.call (cmd, shell=False, cwd=simDir)
+        
+        time.sleep(0.5)
+
         if ret != 0:
             print("\033[1;31mNon-zero exit status: " + str(ret))
             break

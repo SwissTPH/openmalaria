@@ -204,6 +204,12 @@ void writeSurveyData ()
         stream.flush();
         stream.close();
     }
+
+    ifstream stream(filename, mode);
+    if(stream.is_open() == false || !stream.good())
+    {
+        cerr << "STREAM BAD" << endl;
+    }
 }
 
 
