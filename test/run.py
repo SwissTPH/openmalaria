@@ -165,8 +165,6 @@ def runScenario(options,omOptions,name):
             print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
         ret=subprocess.call (cmd, shell=False, cwd=simDir)
         
-        time.sleep(0.5)
-
         if ret != 0:
             print("\033[1;31mNon-zero exit status: " + str(ret))
             break
@@ -189,11 +187,15 @@ def runScenario(options,omOptions,name):
             f_in.close()
             os.remove(ctsoutGzFile)
         
+        os.system('ls -l '+simDir)
+
         # if the checkpoint file hasn't been updated, stop
         if not os.path.isfile(checkFile):
+            print('break because isfile(checkFile) is false')
             break
         checkTime=os.path.getmtime(checkFile)
         if not checkTime > lastTime:
+            print('break because checkTime > lastTime is false')
             break
         lastTime=checkTime
     
@@ -205,7 +207,11 @@ def runScenario(options,omOptions,name):
         for f in (glob.glob(os.path.join(simDir,"checkpoint*")) + glob.glob(os.path.join(simDir,"seed?")) + [os.path.join(simDir,"init_data.xml"),os.path.join(simDir,"scenario.sum")]):
             if os.path.isfile(f):
                 os.remove(f)
-    
+
+    #debug
+    print('Printing output:')
+    os.system('ls -l '+outputFile)
+
     origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%tmpprefix)
     newCtsout = os.path.join(testBuildDir,"ctsout%s.txt"%tmpprefix)
     origOutput = os.path.join(testSrcDir,"expected/output%s.txt"%tmpprefix)
