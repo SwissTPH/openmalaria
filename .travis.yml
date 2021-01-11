@@ -69,8 +69,6 @@ jobs:
       compiler: gcc
       env: OSNAME=macOS-10.15.4
 
-    # See https://travis-ci.community/t/osx-homebrew-addons-module-not-as-reliable-as-claimed/4054/7
-    # Removed because most likely homebrew does not provide up-to-date
     # Max OSX release
     - os: osx
       osx_image: xcode9.4

@@ -200,6 +200,9 @@ void writeSurveyData ()
     } else {
         ofstream stream(filename, mode);
         writeToStream(stream);
+        // Otherwise file may be written after OpenMalaria has returned (Mac OS Xcode 9.4)
+        stream.flush();
+        stream.close();
     }
 }
 
