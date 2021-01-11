@@ -188,6 +188,7 @@ def runScenario(options,omOptions,name):
             f_in.close()
             os.remove(ctsoutGzFile)
         
+        print('Folder:')
         os.system('ls -l '+simDir)
 
         # if the checkpoint file hasn't been updated, stop
@@ -211,7 +212,7 @@ def runScenario(options,omOptions,name):
                 os.remove(f)
 
     #debug
-    print('Printing output:')
+    print('Loop over, is outputFile here?')
     os.system('ls -l '+outputFile)
 
     origCtsout = os.path.join(testSrcDir,"expected/ctsout%s.txt"%tmpprefix)
