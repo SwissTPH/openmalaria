@@ -161,6 +161,7 @@ def runScenario(options,omOptions,name):
     startTime=lastTime=time.time()
     # While no output.txt file and cmd exits successfully:
     while (not os.path.isfile(outputFile)):
+        print('Begin loop')
         if options.logging:
             print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
         ret=subprocess.call (cmd, shell=False, cwd=simDir)
@@ -198,6 +199,7 @@ def runScenario(options,omOptions,name):
             print('break because checkTime > lastTime is false')
             break
         lastTime=checkTime
+        print('End loop')
     
     if ret == 0 and options.logging:
         print("\033[0;33mDone in " + str(time.time()-startTime) + " seconds")
