@@ -163,7 +163,7 @@ void DescriptiveWithinHostModel::update(LocalRng& rng,
     
     util::streamValidate( totalDensity );
     util::streamValidate( hrp2Density );
-    assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
+    assert( (std::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
     
     // Cache total density for infectiousness calculations
     int y_lag_i = sim::ts1().moduloSteps(y_lag_len);
@@ -233,7 +233,7 @@ void DescriptiveWithinHostModel::checkpoint (istream& stream) {
 }
 void DescriptiveWithinHostModel::checkpoint (ostream& stream) {
     WHFalciparum::checkpoint (stream);
-    foreach (DescriptiveInfection& inf, infections) {
+    for(DescriptiveInfection& inf : infections) {
         inf & stream;
     }
 }

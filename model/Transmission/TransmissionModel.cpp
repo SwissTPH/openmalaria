@@ -141,7 +141,7 @@ double TransmissionModel::updateKappa (const Population& population) {
     double sumWeight  = 0.0;
     numTransmittingHumans = 0;
 
-    foreach(const Host::Human& human, population.crange()) {
+    for(const Host::Human& human : population.getHumans()) {
         //NOTE: calculate availability relative to age at end of time step;
         // not my preference but consistent with TransmissionModel::getEIR().
         const double avail = human.perHostTransmission.relativeAvailabilityHetAge(

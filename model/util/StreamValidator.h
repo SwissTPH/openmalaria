@@ -21,8 +21,6 @@
 #ifndef Hmod_StreamValidator
 #define Hmod_StreamValidator
 
-#include <boost/cstdint.hpp>
-
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
 #include "Global.h"
@@ -86,10 +84,7 @@ namespace OM { namespace util {
 	/// Load a reference stream from file and switch to validation mode.
 	void loadStream( const string& path );
 	
-	/** Templated function to take a value, hash it, and call handle.
-         * 
-         * We can't just use something like boost::hash because we want the
-         * result to be the same across platforms, builds, etc. */
+	/** Templated function to take a value, hash it, and call handle. */
 	template<class T>
 	void operator() (T value){
             handle( CPCH::toSVType( value ) );

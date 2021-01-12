@@ -102,7 +102,7 @@ bool Diagnostic::isPositive( LocalRng& rng, double dens, double densHRP2 ) const
         assert( densHRP2 == densHRP2 ); // monitoring diagnostic passes NaN; use of HRP2 is not supported
         dens = densHRP2;
     }
-    if( (boost::math::isnan)(specificity) ){
+    if( (std::isnan)(specificity) ){
         // use deterministic test
         return dens >= dens_lim;
     }else{
@@ -114,7 +114,7 @@ bool Diagnostic::isPositive( LocalRng& rng, double dens, double densHRP2 ) const
 }
 
 bool Diagnostic::allowsFalsePositives() const{
-    if( (boost::math::isnan)(specificity) ) return dens_lim <= 0.0;
+    if( (std::isnan)(specificity) ) return dens_lim <= 0.0;
     return specificity < 1.0;
 }
 
@@ -132,7 +132,7 @@ void diagnostics::init( const Parameters& parameters, const scnXml::Scenario& sc
     diagnostic_set.clear(); // compatibility with unit tests
     
     if(scenario.getDiagnostics().present()){
-        foreach( const scnXml::Diagnostic& diagnostic, scenario.getDiagnostics().get().getDiagnostic() ){
+        for( const scnXml::Diagnostic& diagnostic : scenario.getDiagnostics().get().getDiagnostic() ){
             string name = diagnostic.getName();     // conversion fails without this extra line
             bool inserted = diagnostic_set.insert( make_pair(move(name), Diagnostic(parameters, diagnostic)) ).second;
             if( !inserted ){

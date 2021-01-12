@@ -30,8 +30,6 @@
 #include <sstream>
 #include <fstream>
 #include <cmath>
-#include <boost/static_assert.hpp>
-
 
 namespace OM {
 namespace WithinHost {
@@ -308,7 +306,7 @@ bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTi
     // S[i] (                      "                      acquired and variant-specific immune response)
     
     // ———  2. innate immunity (equation 5)  ———
-    BOOST_STATIC_ASSERT( kappa_c == 3 );        // allows us to optimise pow(..., kappa_c) to multiplication
+    static_assert( kappa_c == 3, "kappa_c == 3" );        // allows us to optimise pow(..., kappa_c) to multiplication
     const double base = m_density/Pc_star;
     const double Sc = 1.0 / (1.0 + base*base*base);
     
@@ -324,7 +322,7 @@ bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTi
     lagged_Pc[tau] = static_cast<float>(m_density < C ? m_density : C);
     
     // 3.c) calculate S_m(t) (equation 7)
-    BOOST_STATIC_ASSERT( kappa_m == 1 );        // allows us to optimise out pow(..., kappa_m):
+    static_assert( kappa_m == 1, "kappa_m == 1" );        // allows us to optimise out pow(..., kappa_m):
     //double Sm = (1.0 - beta) / (1.0 + pow(Sm_summation / Pm_star, kappa_m)) + beta
     const double Sm = (1.0 - beta) / (1.0 + Sm_summation / Pm_star) + beta;
     
@@ -342,7 +340,7 @@ bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTi
             variants[i].lagged_Pi[tau] = static_cast<float>(Pi[i]);
             
             // 4.c) calculate S_i(t) (equation 6)
-            BOOST_STATIC_ASSERT( kappa_v == 3 );        // again, optimise pow to multiplication
+            static_assert( kappa_v == 3, "kappa_v == 3" );        // again, optimise pow to multiplication
             const double base = variants[i].Si_summation * inv_Pv_star;
             Si[i] = 1.0 / (1.0 + base*base*base);        // eqn 6, given κ_v = 3
         }else{

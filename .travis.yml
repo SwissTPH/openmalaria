@@ -11,8 +11,8 @@ before_cache:
   - test "$TRAVIS_OS_NAME" == "osx" && brew cleanup
 
 install:
-  - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx || true
-  - test "$TRAVIS_OS_NAME" == "osx" && HOMEBREW_NO_AUTO_UPDATE=1 brew install git boost coreutils cmake gcc gsl xerces-c xsd || true
+  - test "$TRAVIS_OS_NAME" == "linux" && sudo apt-get install build-essential git cmake libgsl-dev libxerces-c-dev xsdcxx || true
+  - test "$TRAVIS_OS_NAME" == "osx" && HOMEBREW_NO_AUTO_UPDATE=1 brew install git coreutils cmake gcc gsl xerces-c xsd || true
 
 # Build openMalaria and create the release folder openMalaria-$TRAVIS_OS_NAME
 script:
