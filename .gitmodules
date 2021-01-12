@@ -1,9 +1,0 @@
-[submodule "zlib"]
-	path = zlib
-	url = https://github.com/commontk/zlib.git
-[submodule "gsl"]
-	path = gsl
-	url = https://github.com/ampl/gsl
-[submodule "openmalaria.tools"]
-	path = tools
-	url = https://github.com/SwissTPH/openmalaria.tools
