@@ -153,6 +153,7 @@ include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
   ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/contrib
+  ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}

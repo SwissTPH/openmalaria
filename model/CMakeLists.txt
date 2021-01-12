@@ -14,7 +14,7 @@ configure_file(
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  Simulator.cpp
+  # Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
   # Parameters.cpp
@@ -88,6 +88,7 @@ set (Model_CPP
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp
   util/misc.cpp
+  util/random.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp
