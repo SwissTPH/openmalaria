@@ -27,11 +27,14 @@
 #include <vector>
 #include <limits>
 
+#include "rotate.h"
+
 namespace OM {
 namespace Transmission {
 namespace Anopheles {
 
 using namespace std;
+using namespace OM::util;
 
 // forward declare to avoid circular dependency:
 class MosqTransmission;
@@ -55,7 +58,25 @@ public:
     ///@brief Initialisation and destruction
     //@{
     /// Initialise and allocate memory
-    SimpleMPDEmergence(const scnXml::SimpleMPD& elt);
+    SimpleMPDEmergence(const scnXml::SimpleMPD& elt)
+    {
+        quinquennialOvipositing.assign (SimTime::fromYearsI(5), 0.0);
+        invLarvalResources.assign (SimTime::oneYear(), 0.0);
+        
+        developmentDuration = SimTime::fromDays(elt.getDevelopmentDuration().getValue());
+        if (!(developmentDuration > SimTime::zero()))
+            throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentDuration: "
+                "must be positive");
+        probPreadultSurvival = elt.getDevelopmentSurvival().getValue();
+        if (!(0.0 <= probPreadultSurvival && probPreadultSurvival <= 1.0))
+            throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentSurvival: "
+                "must be a probability (in range [0,1]");
+        fEggsLaidByOviposit = elt.getFemaleEggsLaidByOviposit().getValue();
+        if (!(fEggsLaidByOviposit > 0.0))
+            throw util::xml_scenario_error("entomology.vector.simpleMPD.femaleEggsLaidByOviposit: "
+                "must be positive");
+        nOvipositingDelayed.assign (developmentDuration, 0.0);
+    }
 
     /** Latter part of AnophelesModel::init2.
      *
@@ -65,28 +86,92 @@ public:
      * @param EIRtoS_v multiplication factor to convert input EIR into required
      * @param transmission reference to MosqTransmission object
      * S_v. */
-    void init2( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission );
-    
+    void init2(double tsP_dff, double initNvFromSv, const vecDay<double>& forcedS_v, const vecDay<double>& mosqEmergeRate, const SimTime &mosqRestDuration)
+    {
+        // Initialise nOvipositingDelayed
+        SimTime y1 = SimTime::oneYear();
+        SimTime tau = mosqRestDuration;
+        for( SimTime t = SimTime::zero(); t < developmentDuration; t += SimTime::oneDay() ){
+            nOvipositingDelayed[mod_nn(t+tau, developmentDuration)] =
+                tsP_dff * initNvFromSv * forcedS_v[t];
+        }
+
+        // Used when calculating invLarvalResources (but not a hard constraint):
+        assert(tau+developmentDuration <= y1);
+        for( SimTime t = SimTime::zero(); t < SimTime::oneYear(); t += SimTime::oneDay() ){
+            double yt = fEggsLaidByOviposit * tsP_dff * initNvFromSv *
+                forcedS_v[mod_nn(t + y1 - tau - developmentDuration, y1)];
+            invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
+                (mosqEmergeRate[t] * yt);
+        }
+    }
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    bool initIterate (MosqTransmission& transmission);
+    virtual void initIterate (double factor, const vecDay<double>& mosqEmergeRate)
+    {
+        vectors::scale (nOvipositingDelayed, factor);
+
+        SimTime y1 = SimTime::oneYear(),
+            y2 = SimTime::fromYearsI(2),
+            y3 = SimTime::fromYearsI(3),
+            y4 = SimTime::fromYearsI(4),
+            y5 = SimTime::fromYearsI(5);
+        assert(mosqEmergeRate.size() == y1);
+        
+        for( SimTime t = SimTime::zero(); t < y1; t += SimTime::oneDay() ){
+            SimTime ttj = t - developmentDuration;
+            // b · P_df · avg_N_v(t - θj - τ):
+            double yt = fEggsLaidByOviposit * 0.2 * (
+                quinquennialOvipositing[ttj + y1] +
+                quinquennialOvipositing[ttj + y2] +
+                quinquennialOvipositing[ttj + y3] +
+                quinquennialOvipositing[ttj + y4] +
+                quinquennialOvipositing[mod_nn(ttj + y5, y5)]);
+            invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
+                (mosqEmergeRate[t] * yt);
+        }
+    }
     //@}
     
-    virtual double update( SimTime d0, double nOvipositing, double S_v );
-    
+    virtual double update(const SimTime &d0, const vecDay<double>& mosqEmergeRate, double nOvipositing)
+    {
+        // Simple Mosquito Population Dynamics model: emergence depends on the
+        // adult population, resources available, and larviciding.
+        // See: A Simple Periodically-Forced Difference Equation Model for
+        // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
+        SimTime d1 = d0 + SimTime::oneDay();
+
+        double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d1, developmentDuration)];
+        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, SimTime::oneYear())] * yt);
+        nOvipositingDelayed[mod_nn(d1, developmentDuration)] = nOvipositing;
+        quinquennialOvipositing[mod_nn(d1, SimTime::fromYearsI(5))] = nOvipositing;
+        return emergence;
+    }
     ///@brief Interventions and reporting
     //@{
-    double getResAvailability() const;
+    double getResAvailability() const
+    {
+        //TODO: why offset by one time step? This is effectively getting the resources available on the last time step
+        //TODO: only have to add one year because of offset
+        SimTime start = sim::now() - SimTime::oneTS() + SimTime::oneYear();
+        double total = 0;
+        for( SimTime i = start, end = start + SimTime::oneTS(); i < end; i += SimTime::oneDay() ){
+            SimTime dYear1 = mod_nn(i, SimTime::oneYear());
+            total += 1.0 / invLarvalResources[dYear1];
+        }
+        return total / SimTime::oneTS().inDays();
+    }
+
     double getResRequirements() const {
         return numeric_limits<double>::quiet_NaN();
     }
     //@}
     
 protected:
-    virtual void checkpoint (istream& stream);
-    virtual void checkpoint (ostream& stream);
+    virtual void checkpoint (istream& stream){ (*this) & stream; }
+    virtual void checkpoint (ostream& stream){ (*this) & stream; }
     
 private:
     
@@ -94,10 +179,7 @@ private:
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
-        mosqEmergeRate & stream;
-        quinquennialS_v & stream;
         quinquennialOvipositing & stream;
-        initNv0FromSv & stream;
         developmentDuration & stream;
         probPreadultSurvival & stream;
         fEggsLaidByOviposit & stream;
@@ -120,36 +202,9 @@ private:
     
     // -----  parameters (constant after initialisation)  -----
     
-    ///@brief Descriptions of transmission, used primarily during warmup
-    //@{
-    /** Summary of S_v over the last five years, used by vectorInitIterate to
-     * calculate scaling factor.
-     *
-     * Length is 365 * 5. Checkpoint.
-     *
-     * Units: inoculations. */
-    vecDay<double> quinquennialS_v;
-    
     /** As quinquennialS_v, but for N_v*P_df (units: animals). */
     vecDay<double> quinquennialOvipositing;
     
-    /** Conversion factor from forcedS_v to mosqEmergeRate.
-     *
-     * Should be checkpointed. */
-    double initNv0FromSv;       ///< ditto
-    //@}
-    
-    /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-     * 
-     * Has annual periodicity: length is 365. First value (index 0) corresponds
-     * to first day of year (1st Jan or something else if rebased). In 5-day
-     * time-step model values at indecies 0 through 4 are used to calculate the
-     * state at time-step 1.
-     * 
-     * Units: Animals per day.
-     *
-     * Should be checkpointed. */
-    vecDay<double> mosqEmergeRate;
     
     /** Resources for mosquito larvae (or rather 1 over resources); γ(t) in
      * model description.

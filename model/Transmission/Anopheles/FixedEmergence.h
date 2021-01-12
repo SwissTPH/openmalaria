@@ -27,11 +27,14 @@
 #include <vector>
 #include <limits>
 
+#include "rotate.h"
+
 namespace OM {
 namespace Transmission {
 namespace Anopheles {
 
 using namespace std;
+using namespace OM::util;
 
 // forward declare to avoid circular dependency:
 class MosqTransmission;
@@ -47,11 +50,6 @@ class MosqTransmission;
 class FixedEmergence : public EmergenceModel
 {
 public:
-    ///@brief Initialisation and destruction
-    //@{
-    /// Initialise and allocate memory
-    FixedEmergence();
-
     /** Latter part of AnophelesModel::init2.
      *
      * @param tsP_A P_A for this time step.
@@ -60,16 +58,22 @@ public:
      * @param EIRtoS_v multiplication factor to convert input EIR into required
      * @param transmission reference to MosqTransmission object
      * S_v. */
-    virtual void init2( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df, double tsP_dff, double EIRtoS_v, MosqTransmission& transmission );
+    virtual void init2(double tsP_dff, double initNv0FromSv, const vecDay<double>& forcedS_v, const vecDay<double>& mosqEmergeRate, const SimTime &mosqRestDuration){ }
     
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    bool initIterate (MosqTransmission& transmission);
+    virtual void initIterate (double factor, const vecDay<double>& mosqEmergeRate) {}
     //@}
     
-    virtual double update( SimTime d0, double nOvipositing, double S_v );
+    virtual double update(const SimTime &d0, const vecDay<double>& mosqEmergeRate, double nOvipositing)
+    {   
+        // Get emergence at start of step:
+        SimTime dYear1 = mod_nn(d0, SimTime::oneYear());
+        // Simple model: fixed emergence scaled by larviciding
+        return mosqEmergeRate[dYear1];
+    }
     
     ///@brief Interventions and reporting
     //@{
@@ -82,49 +86,8 @@ public:
     //@}
     
 protected:
-    virtual void checkpoint (istream& stream);
-    virtual void checkpoint (ostream& stream);
-    
-private:
-    
-    /// Checkpointing
-    //Note: below comments about what does and doesn't need checkpointing are ignored here.
-    template<class S>
-    void operator& (S& stream) {
-        mosqEmergeRate & stream;
-        quinquennialS_v & stream;
-        initNv0FromSv & stream;
-    }
-    
-    // -----  parameters (constant after initialisation)  -----
-    
-    ///@brief Descriptions of transmission, used primarily during warmup
-    //@{
-    /** Summary of S_v over the last five years, used by vectorInitIterate to
-     * calculate scaling factor.
-     *
-     * Length is 365 * 5. Checkpoint.
-     *
-     * Units: inoculations. */
-    vecDay<double> quinquennialS_v;
-    
-    /** Conversion factor from forcedS_v to mosqEmergeRate.
-     *
-     * Should be checkpointed. */
-    double initNv0FromSv;       ///< ditto
-    //@}
-    
-    /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
-     * 
-     * Has annual periodicity: length is 365. First value (index 0) corresponds
-     * to first day of year (1st Jan or something else if rebased). In 5-day
-     * time-step model values at indecies 0 through 4 are used to calculate the
-     * state at time-step 1.
-     * 
-     * Units: Animals per day.
-     *
-     * Should be checkpointed. */
-    vecDay<double> mosqEmergeRate;
+    virtual void checkpoint (istream& stream) {}
+    virtual void checkpoint (ostream& stream) {}
 };
 
 }

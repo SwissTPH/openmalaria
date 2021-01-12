@@ -27,6 +27,7 @@
 #include "util/vectors.h"
 #include "util/ModelOptions.h"
 #include "util/SpeciesIndexChecker.h"
+#include "util/StreamValidator.h"
 
 #include <fstream>
 #include <map>
