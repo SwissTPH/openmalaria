@@ -17,7 +17,7 @@ set (Model_CPP
   Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
-  Parameters.cpp
+  # Parameters.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
