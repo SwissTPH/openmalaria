@@ -29,8 +29,6 @@
 #include "util/StreamValidator.h"
 #include "schema/scenario.h"
 
-#include <boost/algorithm/string.hpp>
-
 using namespace std;
 
 namespace OM {
@@ -210,7 +208,7 @@ void CommonWithinHost::update(LocalRng& rng,
     
     util::streamValidate(totalDensity);
     util::streamValidate(hrp2Density);
-    assert( (boost::math::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
+    assert( (std::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
     
     // Cache total density for infectiousness calculations
     int y_lag_i = sim::ts1().moduloSteps(y_lag_len);

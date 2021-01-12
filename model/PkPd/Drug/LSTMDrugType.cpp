@@ -29,7 +29,7 @@
 #include <schema/pharmacology.h>
 
 #include <cmath>
-#include <boost/format.hpp>
+#include <iomanip>
 
 using namespace std;
 
@@ -82,7 +82,7 @@ double LSTMDrugPD::IC50_pow_slope(LocalRng& rng, size_t index, WithinHost::Commo
 
 void LSTMDrugType::init (const scnXml::Pharmacology::DrugsType& drugData) {
     drugTypes.reserve(drugData.getDrug().size());
-    foreach( const scnXml::PKPDDrug& drug, drugData.getDrug() ){
+    for( const scnXml::PKPDDrug& drug : drugData.getDrug() ){
         const string& abbrev = drug.getAbbrev();
         // Check drug doesn't already exist
         if (drugTypeNames.find (abbrev) != drugTypeNames.end())
@@ -105,7 +105,7 @@ size_t LSTMDrugType::numDrugTypes(){
 
 // Add index to drugsInUse if not already present. Not fast but doesn't need to be.
 void drugIsUsed(size_t index){
-    foreach( size_t i, drugsInUse ){
+    for( size_t i : drugsInUse ){
         if( i == index ) return;        // already in list
     }
     drugsInUse.push_back(index);
@@ -243,25 +243,24 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
             if( phenotype.getName().present() )
                 first_phenotype_name = phenotype.getName().get();
             else
-                first_phenotype_name = (boost::format("(%1%)") %i).str();
-            foreach( const scnXml::Restriction& restriction, phenotype.getRestriction() ){
+                first_phenotype_name = to_string(i);
+            for( const scnXml::Restriction& restriction : phenotype.getRestriction() ){
                 loci_per_phenotype.insert( restriction.getOnLocus() );
             }
         }else{
             set<string> expected_loci = loci_per_phenotype;
-            foreach( const scnXml::Restriction& restriction, phenotype.getRestriction() ){
+            for( const scnXml::Restriction& restriction : phenotype.getRestriction() ){
                 size_t n = expected_loci.erase( restriction.getOnLocus() );
                 if( n == 0 ){
                     string this_phenotype_name;
                     if( phenotype.getName().present() )
                         this_phenotype_name = phenotype.getName().get();
                     else
-                        this_phenotype_name = (boost::format("(%1%)") %i).str();
-                    throw util::xml_scenario_error( (boost::format(
+                        this_phenotype_name = to_string(i);
+                    throw util::xml_scenario_error(
                         "pharmacology/drugs/drug/pd/phenotype/restriction/onLocus:"
-                        "locus %1% included in restriction of phenotype \"%2%\" but not %3%")
-                        %restriction.getOnLocus() %this_phenotype_name
-                        %first_phenotype_name).str() );
+                        "locus " + string(restriction.getOnLocus()) + " included in restriction of phenotype "
+                        + string(this_phenotype_name) + " but not " + string(first_phenotype_name));
                 }
             }
             if( !expected_loci.empty() ){
@@ -269,23 +268,22 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                 if( phenotype.getName().present() )
                     this_phenotype_name = phenotype.getName().get();
                 else
-                    this_phenotype_name = (boost::format("(%1%)") %i).str();
-                throw util::xml_scenario_error( (boost::format(
+                    this_phenotype_name = to_string(i);
+                throw util::xml_scenario_error(
                     "pharmacology/drugs/drug/pd/phenotype/restriction/onLocus:"
-                    "locus %1% included in restriction of phenotype \"%2%\" but not %3%")
-                    %(*expected_loci.begin()) %first_phenotype_name
-                    %this_phenotype_name).str() );
+                    "locus " + string(*expected_loci.begin()) + " included in restriction of phenotype "
+                    + string(first_phenotype_name) + " but not " + string(this_phenotype_name));
             }
         }
         map<string,size_t> loci;
         vector<vector<uint32_t> > loc_alleles;
-        foreach( const scnXml::Restriction& restriction, phenotype.getRestriction() ){
+        for( const scnXml::Restriction& restriction : phenotype.getRestriction() ){
             uint32_t allele = Genotypes::findAlleleCode( restriction.getOnLocus(), restriction.getToAllele() );
             if( allele == numeric_limits<uint32_t>::max() ){
-                throw util::xml_scenario_error( (boost::format("phenotype has "
-                    "restriction on locus %1%, allele %2% but this locus/allele "
-                    "has not been defined in parasiteGenetics section")
-                    %restriction.getOnLocus() %restriction.getToAllele()).str() );
+                throw util::xml_scenario_error("phenotype has "
+                    "restriction on locus " + string(restriction.getOnLocus())
+                    + " allele " + string(restriction.getToAllele()) + " but this locus/allele "
+                    "has not been defined in parasiteGenetics section");
             }
             auto iter = loci.find(restriction.getOnLocus());
             if( iter == loci.end() ){
@@ -317,9 +315,9 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                 // the phenotype restriction rules, one allele matches a
                 // genotype allele
                 bool match = true;
-                foreach( const vector<uint32_t>& loc_alleles, phenotype_restrictions[i] ){
+                for( const vector<uint32_t>& loc_alleles : phenotype_restrictions[i] ){
                     bool match_for_locus = false;
-                    foreach( uint32_t restrict_allele, loc_alleles ){
+                    for( uint32_t restrict_allele : loc_alleles ){
                         if( genotypes[j].alleles.count( restrict_allele ) > 0 ){
                             assert( !match_for_locus ); // shouldn't be two matches
                             match_for_locus = true;
@@ -352,12 +350,12 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
         }
         
         if( util::CommandLine::option( util::CommandLine::PRINT_GENOTYPES ) ){
-            cout << endl;
             // Debug output to see which genotypes correspond to phenotypes
+            cout << endl;
             cout << "Phenotype mapping: " << endl << "----------" << endl;
-            boost::format fmtr("|%8d|%14d|");
-            cout << (fmtr % "genotype" % "phenotype") << endl;
-            cout << (fmtr % "--------" % "-------------") << endl;
+            cout << "|" << setw(8) << "genotype" << "|" << setw(14) << "phenotype" << "|" << endl;
+            cout << "|" << setw(8) << "--------" << "|" << setw(14) << "-------------" << "|" << endl;
+            
             uint32_t genotype = 0;
             stringstream phenotypeName;
             for( auto phen = genotype_mapping.begin(); phen !=genotype_mapping.end(); ++phen ){
@@ -367,7 +365,7 @@ LSTMDrugType::LSTMDrugType (size_t index, const scnXml::PKPDDrug& drugData) :
                 } else {
                     phenotypeName << "no: " << *phen;
                 }
-                cout << (fmtr % (genotype*100000) % phenotypeName.str() ) << endl;
+                cout << "|" << setw(8) << (genotype*100000) << "|" << setw(14) << phenotypeName.str() << "|" << endl;
                 genotype += 1;
             }
         }

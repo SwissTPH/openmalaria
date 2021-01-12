@@ -457,7 +457,7 @@ public:
     
     static double getPrescribedMg( const PkPd::LSTMModel& pkpd ){
         double r = 0.0;
-        foreach( const PkPd::MedicateData& md, pkpd.medicateQueue ){
+        for( const PkPd::MedicateData& md : pkpd.medicateQueue ){
             r += md.qty;
         }
         return r;

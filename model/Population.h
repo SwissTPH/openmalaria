@@ -101,6 +101,12 @@ public:
     inline size_t size() const {
         return populationSize;
     }
+    inline HumanPop &getHumans() {
+        return population;
+    }
+    inline const HumanPop &getHumans() const {
+        return population;
+    }
     //@}
 
 private:
