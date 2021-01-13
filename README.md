@@ -43,7 +43,7 @@ however currently we keep both synchronised (in some ways this is simpler).
 
 Installation instructions:
 ==================
-See [INSTALLATION](https://github.com/SwissTPH/openmalaria/wiki/Installation).
+See [INSTALLATION](https://github.com/SwissTPH/openmalaria/wiki/UserGuide).
 
 Build instructions:
 ===================
