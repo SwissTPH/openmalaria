@@ -30,13 +30,6 @@
 #include <cmath>
 
 namespace OM { namespace Transmission {
-    namespace vectors = util::vectors;
-
-//static (class) variables
-const double NonVectorModel::totalInfectionrateVariance= 1.0;
-const double NonVectorModel::min_EIR_mult= 0.01;
-
-const int nYearsWarmupData = 5;
 
 NonVectorModel::NonVectorModel(const scnXml::Entomology& entoData,
         const scnXml::NonVector& nonVectorData) :
@@ -107,8 +100,8 @@ void NonVectorModel::initAddNonHumanHostsInterv( const scnXml::Description3::Ano
 }
 
 void NonVectorModel::scaleEIR (double factor){
-    vectors::scale( initialisationEIR, factor );
-    annualEIR = vectors::sum( initialisationEIR );
+    util::vectors::scale( initialisationEIR, factor );
+    annualEIR = util::vectors::sum( initialisationEIR );
 }
 #if 0
 void NonVectorModel::scaleXML_EIR (scnXml::Entomology& ed, double factor) const{
