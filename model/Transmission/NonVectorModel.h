@@ -96,7 +96,7 @@ private:
   to be measureable. The value of 0.01 was old pv(30) Now a constant. 
   0.01 was old pv(30) Now a constant. 
 */ 
-  static const double min_EIR_mult; 
+  const double min_EIR_mult = 0.01; 
 
   /** @brief Variables set by constructor.
    *
@@ -104,7 +104,9 @@ private:
    * interventions take effect. */
   //@{
   //! Variance of Infection Rate according to fielddata 
-  static const double totalInfectionrateVariance; 
+  const double totalInfectionrateVariance = 1.0; 
+
+  const int nYearsWarmupData = 5;
   
   //! The duration of sporogony in time steps
   // doesn't need checkpointing
