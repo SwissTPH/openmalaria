@@ -168,7 +168,7 @@ void Population::createInitialHumans()
 
 // -----  non-static methods: simulation loop  -----
 
-void Population::update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
+void Population::update(Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
