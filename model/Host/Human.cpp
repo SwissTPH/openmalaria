@@ -92,7 +92,7 @@ Human::Human(SimTime dateOfBirth, int dummy) :
 
 vector<double> EIR_per_genotype;        // cache (not thread safe)
 
-void Human::update(const Transmission::TransmissionModel& transmission) {
+void Human::update(Transmission::TransmissionModel& transmission) {
     // For integer age checks we use age0 to e.g. get 73 steps comparing less than 1 year old
     SimTime age0 = age(sim::ts0());
     if (clinicalModel->isDead(age0)) {

@@ -21,8 +21,6 @@
 #include "Global.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/PerHost.h"
-#include "Transmission/Anopheles/FixedEmergence.h"
-#include "Transmission/Anopheles/SimpleMPDEmergence.h"
 #include "Population.h"
 #include "WithinHost/Genotypes.h"
 #include "util/vectors.h"
@@ -44,34 +42,10 @@ string AnophelesModel::initialise (size_t species, const scnXml::AnophelesParams
 {
     // -----  Set model variables  -----
     const scnXml::Mosq& mosq = anoph.getMosq();
-    const scnXml::AnophelesParams::SimpleMPDOptional& simpleMPDOpt = anoph.getSimpleMPD();
     // const scnXml::AnophelesParams::LifeCycleOptional& lcOpt = anoph.getLifeCycle();
 
     mosqSeekingDuration = mosq.getMosqSeekingDuration().getValue();
     probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
-
-    if (util::ModelOptions::option( util::VECTOR_LIFE_CYCLE_MODEL )){
-        throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL not yet "
-            "implemented. Use VECTOR_SIMPLE_MPD_MODEL instead.");
-        /*TODO
-         * Note: this model is older than SimpleMPD and more complicated.
-         * Difficulties are in parameterisation and estimation of resources.
-        if (!lcOpt.present())
-            throw util::xml_scenario_error(
-                "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
-                "model parameters for each anopheles species");
-        emergence = unique_ptr<EmergenceModel>( new LCEmergence() );
-        emergence->initLifeCycle( lcOpt.get() );
-        */
-    }else if (util::ModelOptions::option( util::VECTOR_SIMPLE_MPD_MODEL )){
-        if (!simpleMPDOpt.present())
-            throw util::xml_scenario_error(
-                "VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
-                "model parameters for each anopheles species");
-        emergence = unique_ptr<EmergenceModel>(new SimpleMPDEmergence(simpleMPDOpt.get()) );
-    }else
-        emergence = unique_ptr<EmergenceModel>( new FixedEmergence() );
-    
     
     // -----  Set model variables  -----
 
@@ -425,9 +399,6 @@ void AnophelesModel::init2 (int nHumans, double meanPopAvail,
     shiftAngle = FSRotateAngle;
     scaled = false;
     rotated = false;
-
-    emergence->init2(tsP_dff, initNvFromSv, forcedS_v, mosqEmergeRate, mosqRestDuration);
-    // All set up to drive simulation from forcedS_v
 }
 
 bool AnophelesModel::initIterate ()
@@ -485,11 +456,7 @@ bool AnophelesModel::initIterate ()
 
     // What factor exactly these should be scaled by isn't obvious; in any case
     // they should reach stable values quickly.
-    vectors::scale (N_v, factor);
-    vectors::scale (O_v, factor);
-    vectors::scale (S_v, factor);
-
-    emergence->initIterate(factor, mosqEmergeRate);
+    scale(factor);
 
     return !(scaled && rotated);
 }
@@ -913,7 +880,7 @@ void AnophelesModel::update( SimTime d0, double tsP_A, double tsP_Amu, double ts
     quinquennialS_v[d5Year] = total_S_v;
 
     const double nOvipositing = P_dff[ttau] * N_v[ttau];       // number ovipositing on this step
-    const double newAdults = emergence->update(d0, mosqEmergeRate, nOvipositing) * interventionSurvival;
+    const double newAdults = getEmergenceRate(d0, mosqEmergeRate, nOvipositing) * interventionSurvival;
     util::streamValidate( newAdults );
 
     // num seeking mosquitos is: new adults + those which didn't find a host
