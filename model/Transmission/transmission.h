@@ -53,7 +53,7 @@ static TransmissionModel *createTransmissionModel(const scnXml::Entomology &ento
 
   if( entoData.getScaledAnnualEIR().present() ){
       model->scaleEIR( entoData.getScaledAnnualEIR().get() / model->annualEIR );
-      assert( vectors::approxEqual( model->annualEIR, entoData.getScaledAnnualEIR().get() ) );
+      assert( util::vectors::approxEqual( model->annualEIR, entoData.getScaledAnnualEIR().get() ) );
   }
 
   if( util::CommandLine::option( util::CommandLine::PRINT_ANNUAL_EIR ) ){
