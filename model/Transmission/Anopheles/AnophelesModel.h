@@ -75,6 +75,16 @@ enum VecStat { PA, PAmu, PA1, PAh, PDF, PDIF, NV, OV, SV };
  * P_df = σ_df α_d P_E
  * P_dif = σ_dif α_d P_E
  */
+
+struct NhhParams {
+    double mosqRelativeEntoAvailability;
+    double mosqProbBiting;
+    double mosqProbFindRestSite;
+    double mosqProbResting;
+    double hostFecundityFactor;
+    string name;
+};
+
 class AnophelesModel
 {
 public:
@@ -398,7 +408,7 @@ protected:
     vector<TrapParams> trapParams;
     
     // Added NonHumanHosts
-    struct NHH {
+    struct Nhh {
         double avail_i;
         double P_B_I;
         double P_C_I;
@@ -406,16 +416,16 @@ protected:
         double rel_fecundity;
         SimTime expiry;
     };
-    map<string,NHH> initNhh;
+    map<string,Nhh> nhhInstances;
 
-    struct NHHParams {
+    struct NhhParamsInterv {
         double mosqRelativeAvailabilityHuman;
         double mosqProbBiting;
         double mosqProbFindingRestSite;
         double mosqProbResting;
         double hostFecundityFactor;
     };
-    map<string,NHHParams> addedNhh;
+    map<string,NhhParamsInterv> nhhDefinitionsInterv;
 
     // -----  model state (and some encapsulated parameters)  -----
     /** @brief Intervention parameters */
@@ -443,7 +453,7 @@ protected:
     list<TrapData> baitedTraps;
     //@}
 
-    map<string,vector<util::SimpleDecayingValue>> reduceNHHAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I, reduceFecundity;
+    map<string,vector<util::SimpleDecayingValue>> reduceNhhAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I, reduceFecundity;
     
     /** Per time-step partial calculation of EIR, per genotype.
     *
