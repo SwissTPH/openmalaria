@@ -131,7 +131,22 @@ void AnophelesModel::initAvailability(
     double P_Ah = numeric_limits<double>::quiet_NaN();
 
     const scnXml::AnophelesParams::NonHumanHostsSequence& xmlSeqNNHs = anoph.getNonHumanHosts();
-    if( xmlSeqNNHs.empty() ){
+
+    // Init non human hosts from xml
+    vector<NhhParams> nhhs;
+    for( const scnXml::NonHumanHosts& xmlNNH : xmlSeqNNHs )
+    {
+        NhhParams nhh;
+        nhh.mosqRelativeEntoAvailability = xmlNNH.getMosqRelativeEntoAvailability().getValue();
+        nhh.mosqProbBiting = xmlNNH.getMosqProbBiting().getValue();
+        nhh.mosqProbFindRestSite = xmlNNH.getMosqProbFindRestSite().getValue();
+        nhh.mosqProbResting = xmlNNH.getMosqProbResting().getValue();
+        nhh.hostFecundityFactor = xmlNNH.getHostFecundityFactor().present() ? xmlNNH.getHostFecundityFactor().get().getValue() : 1.0;
+        nhh.name = xmlNNH.getName();
+        nhhs.push_back(nhh);
+    }
+
+    if( nhhs.empty() ){
         // Number of non-human hosts: χ=1
         P_A1 = A0 * Pf / (P_B1 * P_C1 * P_D1 * P_E1);
         P_Ah = 0.0;
@@ -146,13 +161,13 @@ void AnophelesModel::initAvailability(
         double sum_u = 0.0;     // sum u across NNHs where u = xi * P_B * P_C
         double sum_uvw = 0.0;   // sum u*(v+w) across NNHs where w = (1-χ)*P_D*P_E
         
-        for( const scnXml::NonHumanHosts& xmlNNH : xmlSeqNNHs ){
+        for( auto &nhh : nhhs ){
             // availability population of hosts of this type relative to other non-human hosts:
-            const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
+            const double xi_i = nhh.mosqRelativeEntoAvailability;
             // cycle probabilities, when biting this type of host:
-            const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
-            const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
-            const double P_D_i = xmlNNH.getMosqProbResting().getValue();
+            const double P_B_i = nhh.mosqProbBiting;
+            const double P_C_i = nhh.mosqProbFindRestSite;
+            const double P_D_i = nhh.mosqProbResting;
             sum_xi += xi_i;
             const double u_i = xi_i * P_B_i * P_C_i;
             sum_u += u_i;
@@ -180,12 +195,14 @@ void AnophelesModel::initAvailability(
     nhh_avail = 0.0;
     nhh_sigma_df = 0.0;
     nhh_sigma_dff = 0.0;
-    for( const scnXml::NonHumanHosts& xmlNNH : xmlSeqNNHs ){
-        const double xi_i = xmlNNH.getMosqRelativeEntoAvailability().getValue();
-        const double P_B_i = xmlNNH.getMosqProbBiting().getValue();
-        const double P_C_i = xmlNNH.getMosqProbFindRestSite().getValue();
-        const double P_D_i = xmlNNH.getMosqProbResting().getValue();
-        const double rel_fecundity = (xmlNNH.getHostFecundityFactor().present() ? xmlNNH.getHostFecundityFactor().get().getValue() : 1.0);
+    for( auto &nhh : nhhs ){
+        // availability population of hosts of this type relative to other non-human hosts:
+        const double xi_i = nhh.mosqRelativeEntoAvailability;
+        // cycle probabilities, when biting this type of host:
+        const double P_B_i = nhh.mosqProbBiting;
+        const double P_C_i = nhh.mosqProbFindRestSite;
+        const double P_D_i = nhh.mosqProbResting;
+        const double rel_fecundity = nhh.hostFecundityFactor;
         const double P_Ahi = P_Ah * xi_i;       // probability of encountering this type of NNH on a given night
         const double avail_i = P_Ahi * availFactor; // N_i * α_i
         
@@ -196,17 +213,17 @@ void AnophelesModel::initAvailability(
         // Note: we would do the same for P_dif except that it's multiplied by
         // infectiousness of host to mosquito which is zero.
 
-        string name = xmlNNH.getName();
+        string name = nhh.name;
 
-        NHH nhh;
-        nhh.avail_i = avail_i;
-        nhh.P_B_I = P_B_i;
-        nhh.P_C_I = P_C_i;
-        nhh.P_D_I = P_D_i;
-        nhh.rel_fecundity = rel_fecundity;
-        nhh.expiry = SimTime::future();
+        Nhh nhhi;
+        nhhi.avail_i = avail_i;
+        nhhi.P_B_I = P_B_i;
+        nhhi.P_C_I = P_C_i;
+        nhhi.P_D_I = P_D_i;
+        nhhi.rel_fecundity = rel_fecundity;
+        nhhi.expiry = SimTime::future();
 
-        initNhh[name] = nhh;
+        nhhInstances[name] = nhhi;
     }
     
     // ———  set mosqSeekingDeathRate  ———
@@ -346,7 +363,7 @@ void AnophelesModel::init2 (int nHumans, double meanPopAvail,
     double tsP_Amu = (1-tsP_A) * mosqSeekingDeathRate/(mosqSeekingDeathRate + sum_avail + nhh_avail);
     double tsP_A1 = (1-tsP_A) * sum_avail/(mosqSeekingDeathRate + sum_avail + nhh_avail);
     double tsP_Ah = (1-tsP_A) * nhh_avail/(mosqSeekingDeathRate + sum_avail + nhh_avail);
-    // for( auto it = initNhh.begin(); it != initNhh.end(); ++it){
+    // for( auto it = nhhInstances.begin(); it != nhhInstances.end(); ++it){
     //     initialP_Ah += (1-initialP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + nhh_avail);
     // }
 
@@ -498,8 +515,8 @@ void AnophelesModel::initVectorTrap(const scnXml::Description1& desc, size_t ins
     trapParams.push_back(move(params));
 }
 void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesIntervention& elt, const scnXml::DecayFunction& decay, size_t instance, string name ){
-    if( reduceNHHAvailability[name].size() <= instance )
-        reduceNHHAvailability[name].resize(instance+1);
+    if( reduceNhhAvailability[name].size() <= instance )
+        reduceNhhAvailability[name].resize(instance+1);
     if( reduceP_B_I[name].size() <= instance )
         reduceP_B_I[name].resize(instance+1);
     if( reduceP_C_I[name].size() <= instance )
@@ -513,7 +530,7 @@ void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesI
         const scnXml::AvailabilityReduction& elt2 = elt.getAvailabilityReduction().get();
         if( elt2.getInitial() > 1.0 )
             throw util::xml_scenario_error( "availabilityReduction intervention: initial effect must be <= 1" );
-        reduceNHHAvailability[name][instance].set (elt2.getInitial(), decay, "availabilityReduction");
+        reduceNhhAvailability[name][instance].set (elt2.getInitial(), decay, "availabilityReduction");
     }
     if( elt.getPreprandialKillingEffect().present() ){
         const scnXml::PreprandialKillingEffect& elt2 = elt.getPreprandialKillingEffect().get();
@@ -542,16 +559,16 @@ void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesI
 }
 void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVectorSpecies& elt, string name ){
     // Check that the nonHumanHostsType does not exist
-    if(addedNhh.count(name) != 0 || initNhh.count(name) != 0)
+    if(nhhDefinitionsInterv.count(name) != 0 || nhhInstances.count(name) != 0)
         throw util::xml_scenario_error( "non human hosts type with same name already exists in interventions" );
 
-    NHHParams nhh;
+    NhhParamsInterv nhh;
     nhh.mosqRelativeAvailabilityHuman = elt.getMosqRelativeAvailabilityHuman().getValue();
     nhh.mosqProbBiting = elt.getMosqProbBiting().getValue();
     nhh.mosqProbFindingRestSite = elt.getMosqProbFindRestSite().getValue();
     nhh.mosqProbResting = elt.getMosqProbResting().getValue();
     nhh.hostFecundityFactor = elt.getHostFecundityFactor().getValue();
-    addedNhh[name] = nhh;
+    nhhDefinitionsInterv[name] = nhh;
 }
 
 void AnophelesModel::deployVectorPopInterv (LocalRng& rng, size_t instance){
@@ -574,10 +591,10 @@ void AnophelesModel::deployVectorTrap(LocalRng& rng, size_t species, size_t inst
     baitedTraps.push_back(data);
 }
 void AnophelesModel::deployNonHumanHostsInterv(LocalRng& rng, size_t species, size_t instance, string name){
-    if(initNhh.count(name) == 0)
+    if(nhhInstances.count(name) == 0)
         throw util::xml_scenario_error("non human hosts type "+name+" not deployed during non human hosts intervention deployment");
 
-    reduceNHHAvailability[name][instance].deploy( rng, sim::now() );
+    reduceNhhAvailability[name][instance].deploy( rng, sim::now() );
     reduceP_B_I[name][instance].deploy( rng, sim::now() );
     reduceP_C_I[name][instance].deploy( rng, sim::now() );
     reduceP_D_I[name][instance].deploy( rng, sim::now() );
@@ -585,22 +602,22 @@ void AnophelesModel::deployNonHumanHostsInterv(LocalRng& rng, size_t species, si
 }
 
 void AnophelesModel::deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan){
-    if(initNhh.count(name) != 0)
+    if(nhhInstances.count(name) != 0)
         throw util::xml_scenario_error("non human hosts type "+name+" already deployed during non human hosts deployment");
 
-    const NHHParams &nhhParams = addedNhh[name];
+    const NhhParamsInterv &nhhParams = nhhDefinitionsInterv[name];
 
     double adultAvail = PerHostAnophParams::get(species).entoAvailability.mean();
     double avail_i = popSize * adultAvail * nhhParams.mosqRelativeAvailabilityHuman;
 
-    NHH nhh;
+    Nhh nhh;
     nhh.avail_i = avail_i;
     nhh.P_B_I = nhhParams.mosqProbBiting;
     nhh.P_C_I = nhhParams.mosqProbFindingRestSite;
     nhh.P_D_I = nhhParams.mosqProbResting;
     nhh.rel_fecundity = nhhParams.hostFecundityFactor;
     nhh.expiry = sim::now() + lifespan;
-    initNhh[name] = nhh;
+    nhhInstances[name] = nhh;
 }
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod (
@@ -653,9 +670,9 @@ void AnophelesModel::advancePeriod (
 
     // NON-HUMAN HOSTS INTERVENTIONS
     // Check if some nhh must be removed
-    for( auto it = initNhh.begin(); it != initNhh.end();){
+    for( auto it = nhhInstances.begin(); it != nhhInstances.end();){
         if( sim::ts0() >= it->second.expiry ){
-            it = initNhh.erase(it);
+            it = nhhInstances.erase(it);
             continue;
         }
         it++;
@@ -665,9 +682,9 @@ void AnophelesModel::advancePeriod (
     double modified_nhh_sigma_df = 0.0;
     double modified_nhh_sigma_dff = 0.0;
 
-    map<string,NHH> currentNhh = initNhh;
+    map<string,Nhh> currentNhh = nhhInstances;
 
-    for( auto it = reduceNHHAvailability.begin(); it != reduceNHHAvailability.end(); ++it) {
+    for( auto it = reduceNhhAvailability.begin(); it != reduceNhhAvailability.end(); ++it) {
         for( const auto &decay : it->second )
         {
             if(currentNhh.count(it->first) != 0) // Check that the non-human hosts still exist
