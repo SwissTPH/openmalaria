@@ -76,6 +76,25 @@ enum VecStat { PA, PAmu, PA1, PAh, PDF, PDIF, NV, OV, SV };
  * P_dif = σ_dif α_d P_E
  */
 
+struct MosqProb
+{
+    // Proportion of host-seeking parous mosquitoes (those who have laid eggs) which laid eggs that day:
+    double mosqLaidEggsSameDayProportion;
+    // Probability that the mosquito survives the feeding cycle.
+    // Note: Pf = M, the parous rate (prop mosqs which have laid eggs):
+    double mosqSurvivalFeedingCycleProbability;
+    double mosqHumanBloodIndex;    // χ (chi)
+    // Cycle probabilities, when biting a human:
+    // B: Host encountered
+    double mosqProbBiting;
+    // C: Fed
+    double mosqProbFindRestSite;
+    // D: Resting
+    double mosqProbResting;
+    // E: Laying eggs (ovipositing)
+    double mosqProbOvipositing;
+};
+
 struct NhhParams {
     double mosqRelativeEntoAvailability;
     double mosqProbBiting;
@@ -339,7 +358,7 @@ protected:
      * @param nonHumanHostPopulations Size of each non-human population
      * @param populationSize Size of the human population (assumed constant)
      */
-    void initAvailability(size_t species, const scnXml::AnophelesParams& anoph, int populationSize);
+    void initAvailability(size_t species, const MosqProb &probas, const vector<NhhParams> &nhhs, int populationSize);
 
     void initEIR(const scnXml::AnophelesParams& anoph, vector<double>& initialisationEIR, SimTime EIPDuration);
 
