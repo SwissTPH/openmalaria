@@ -40,9 +40,9 @@ namespace Transmission
 class NonVectorModel : public TransmissionModel
 {
 public:
-    NonVectorModel(const scnXml::Entomology &entoData, const scnXml::NonVector &nonVectorData)
-        : TransmissionModel(entoData, 1 /*this model doesn't support multiple genotypes*/)
-        , nSpore(SimTime::fromDays(nonVectorData.getEipDuration()))
+    NonVectorModel(vector<double> initEIR, int interventionMode, const scnXml::Entomology &entoData, const scnXml::NonVector &nonVectorData, int eipDuration)
+        : TransmissionModel(std::move(initEIR), interventionMode, 1 /*this model doesn't support multiple genotypes*/)
+        , nSpore(SimTime::fromDays(eipDuration))
     {
         laggedKappa.resize(nSpore.inSteps() + 1, 0.0);
 
