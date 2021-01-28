@@ -62,6 +62,173 @@ static bool anophelesCompare(const scnXml::AnophelesParams &a1, const scnXml::An
     return (a1.getSeasonality().getAnnualEIR().get() > a2.getSeasonality().getAnnualEIR().get());
 }
 
+static Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::AnophelesParams &anoph, vector<double>& initialisationEIR, int populationSize)
+{
+    Anopheles::AnophelesModel *anophModel;
+
+    if (util::ModelOptions::option(util::VECTOR_LIFE_CYCLE_MODEL))
+    {
+        throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL not yet "
+                                       "implemented. Use VECTOR_SIMPLE_MPD_MODEL instead.");
+        // TODO
+        //  * Note: this model is older than SimpleMPD and more complicated.
+        //  * Difficulties are in parameterisation and estimation of resources.
+        // if (!lcOpt.present())
+        //     throw util::xml_scenario_error(
+        //         "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
+        //         "model parameters for each anopheles species");
+        // emergence = unique_ptr<EmergenceModel>( new LCEmergence() );
+        // emergence->initLifeCycle( lcOpt.get() );
+    }
+    else if (util::ModelOptions::option(util::VECTOR_SIMPLE_MPD_MODEL))
+    {
+        if (!anoph.getSimpleMPD().present())
+            throw util::xml_scenario_error("VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
+                                           "model parameters for each anopheles species");
+
+        const scnXml::SimpleMPD& smpd = anoph.getSimpleMPD().get();
+
+        SimTime developmentDuration = SimTime::fromDays(smpd.getDevelopmentDuration().getValue());
+        if (!(developmentDuration > SimTime::zero()))
+            throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentDuration: "
+                "must be positive");
+        double probPreadultSurvival = smpd.getDevelopmentSurvival().getValue();
+        if (!(0.0 <= probPreadultSurvival && probPreadultSurvival <= 1.0))
+            throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentSurvival: "
+                "must be a probability (in range [0,1]");
+        double fEggsLaidByOviposit = smpd.getFemaleEggsLaidByOviposit().getValue();
+        if (!(fEggsLaidByOviposit > 0.0))
+            throw util::xml_scenario_error("entomology.vector.simpleMPD.femaleEggsLaidByOviposit: "
+                "must be positive");
+
+        anophModel = new Anopheles::SimpleMPDAnophelesModel(developmentDuration, probPreadultSurvival, fEggsLaidByOviposit);
+    }
+    else
+        anophModel = new Anopheles::AnophelesModel();
+
+    const scnXml::Seasonality &seasonality = anoph.getSeasonality();
+
+    if (seasonality.getInput() != "EIR")
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.input: must be EIR (for now)");
+
+    vector<double> FSCoeffic;
+    double EIRRotateAngle;
+    double targetEIR = seasonality.getAnnualEIR().get();
+    if (seasonality.getFourierSeries().present())
+    {
+        const scnXml::FourierSeries &seasFC = seasonality.getFourierSeries().get();
+        const scnXml::FourierSeries::CoefficSequence &fsCoeffic = seasFC.getCoeffic();
+
+        FSCoeffic.reserve(2 * fsCoeffic.size() + 1);
+
+        FSCoeffic.push_back(0.0); // value doesn't matter; EIR will be scaled
+        for (auto it = fsCoeffic.begin(); it != fsCoeffic.end(); ++it)
+        {
+            FSCoeffic.push_back(it->getA());
+            FSCoeffic.push_back(it->getB());
+        }
+        // According to spec, EIR for first day of year (rather than EIR at the
+        // exact start of the year) is generated with t=0 in Fourier series.
+        EIRRotateAngle = seasFC.getEIRRotateAngle();
+    }
+    else if (seasonality.getMonthlyValues().present())
+    {
+        const scnXml::MonthlyValues &seasM = seasonality.getMonthlyValues().get();
+        if (seasM.getSmoothing() != "fourier")
+            throw util::xml_scenario_error(
+                "entomology.anopheles.seasonality.monthlyValues.smoothing: only fourier supported at the moment");
+
+        const size_t N_m = 12;
+        const scnXml::MonthlyValues::ValueSequence seq = seasM.getValue();
+        assert(seq.size() == N_m); // enforced by schema
+        vector<double> months(N_m);
+        double sum = 0.0;
+        for (size_t i = 0; i < N_m; ++i)
+        {
+            months[i] = seq[i];
+            sum += months[i];
+        }
+        // arbitrary minimum we allow (cannot have zeros since we take the logarithm)
+        double min = sum / 1000.0;
+        for (size_t i = 0; i < N_m; ++i)
+        {
+            if (months[i] < min) months[i] = min;
+        }
+
+        FSCoeffic.assign(5, 0.0);
+        // TODO: determine whether to use Fourier Series Coefficient method or
+        // Discrete Fourier Transform. Former is designed for integrals (which
+        // roughly what we have?), the latter for discrete values. DFT doesn't
+        // work well when number of intervals changes?
+        util::vectors::logFourierCoefficients(months, FSCoeffic);
+
+        // The above places the value for the first month at angle 0, so
+        // effectively the first month starts at angle -2*pi/24 radians.
+        // The value for the first day of the year should start 2*pi/(365*2)
+        // radians later, so adjust EIRRotateAngle to compensate.
+
+        // Change this to 0 later?
+        EIRRotateAngle = M_PI * (1.0 / 12.0 - 1.0 / 365.0);
+    }
+    else
+    {
+        assert(seasonality.getDailyValues().present()); // XML loading code should enforce this
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues: not supported yet");
+    }
+
+    if (!seasonality.getAnnualEIR().present())
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.annualEIR is required at the moment");
+
+    // -----  Set model variables  -----
+    const scnXml::Mosq &mosq = anoph.getMosq();
+
+    Anopheles::MosquitoParams mosqParams;
+    mosqParams.name = anoph.getMosquito();
+    mosqParams.laidEggsSameDayProportion = mosq.getMosqLaidEggsSameDayProportion().getValue();
+    mosqParams.survivalFeedingCycleProbability = mosq.getMosqSurvivalFeedingCycleProbability().getValue();
+    mosqParams.humanBloodIndex = mosq.getMosqHumanBloodIndex().getValue();
+    mosqParams.probBiting = mosq.getMosqProbBiting().getMean();
+    mosqParams.probFindRestSite = mosq.getMosqProbFindRestSite().getMean();
+    mosqParams.probResting = mosq.getMosqProbResting().getMean();
+    mosqParams.probOvipositing = mosq.getMosqProbOvipositing().getValue();
+    mosqParams.seekingDuration = mosq.getMosqSeekingDuration().getValue();
+    mosqParams.probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
+    mosqParams.restDuration = SimTime::fromDays(mosq.getMosqRestDuration().getValue());
+    mosqParams.EIPDuration = SimTime::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
+    mosqParams.minInfectedThreshold = mosq.getMinInfectedThreshold();
+
+    if (SimTime::oneDay() > mosqParams.restDuration || mosqParams.restDuration * 2 >= mosqParams.EIPDuration)
+    {
+        // TODO: limit was EIPDuration >= mosqRestDuration >= 1
+        // but in usage of ftauArray this wasn't enough. Check why.
+        throw util::xml_scenario_error("Code expects EIPDuration > 2*mosqRestDuration >= 2");
+    }
+
+    const scnXml::AnophelesParams::NonHumanHostsSequence &xmlSeqNNHs = anoph.getNonHumanHosts();
+
+    vector<Anopheles::NhhParams> nhhs;
+    for (const scnXml::NonHumanHosts &xmlNNH : xmlSeqNNHs)
+    {
+        Anopheles::NhhParams nhh;
+        nhh.mosqRelativeEntoAvailability = xmlNNH.getMosqRelativeEntoAvailability().getValue();
+        nhh.mosqProbBiting = xmlNNH.getMosqProbBiting().getValue();
+        nhh.mosqProbFindRestSite = xmlNNH.getMosqProbFindRestSite().getValue();
+        nhh.mosqProbResting = xmlNNH.getMosqProbResting().getValue();
+        nhh.hostFecundityFactor = xmlNNH.getHostFecundityFactor().present() ? xmlNNH.getHostFecundityFactor().get().getValue() : 1.0;
+        nhh.name = xmlNNH.getName();
+        nhhs.push_back(nhh);
+    }
+
+    double propInfectious = anoph.getPropInfectious();
+    double propInfected = anoph.getPropInfected();
+
+    anophModel->initialise(i, mosqParams);
+    anophModel->initAvailability(i, nhhs, populationSize);
+    anophModel->initEIR(initialisationEIR, FSCoeffic, EIRRotateAngle, targetEIR, propInfectious, propInfected);
+
+    return anophModel;
+}
+
 static VectorModel *createVectorModel(const scnXml::Entomology &entoData, const scnXml::Interventions &intervElt, int populationSize)
 {
     const scnXml::Vector &vectorData = entoData.getVector().get();
@@ -87,58 +254,16 @@ static VectorModel *createVectorModel(const scnXml::Entomology &entoData, const 
 
     for (size_t i = 0; i < numSpecies; ++i)
     {
-        auto elt = anophelesList[i];
+        auto anoph = anophelesList[i];
 
-        PerHostAnophParams::init(elt.getMosq());
+        PerHostAnophParams::init(anoph.getMosq());
 
-        Anopheles::AnophelesModel *anophModel;
-
-        if (util::ModelOptions::option(util::VECTOR_LIFE_CYCLE_MODEL))
-        {
-            throw util::xml_scenario_error("VECTOR_LIFE_CYCLE_MODEL not yet "
-                                           "implemented. Use VECTOR_SIMPLE_MPD_MODEL instead.");
-            // TODO
-            //  * Note: this model is older than SimpleMPD and more complicated.
-            //  * Difficulties are in parameterisation and estimation of resources.
-            // if (!lcOpt.present())
-            //     throw util::xml_scenario_error(
-            //         "VECTOR_LIFE_CYCLE_MODEL: requires <lifeCycle> element with "
-            //         "model parameters for each anopheles species");
-            // emergence = unique_ptr<EmergenceModel>( new LCEmergence() );
-            // emergence->initLifeCycle( lcOpt.get() );
-        }
-        else if (util::ModelOptions::option(util::VECTOR_SIMPLE_MPD_MODEL))
-        {
-            if (!elt.getSimpleMPD().present())
-                throw util::xml_scenario_error("VECTOR_SIMPLE_MPD_MODEL: requires <simpleMPD> element with "
-                                               "model parameters for each anopheles species");
-
-            const scnXml::SimpleMPD& smpd = elt.getSimpleMPD().get();
-
-            SimTime developmentDuration = SimTime::fromDays(smpd.getDevelopmentDuration().getValue());
-            if (!(developmentDuration > SimTime::zero()))
-                throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentDuration: "
-                    "must be positive");
-            double probPreadultSurvival = smpd.getDevelopmentSurvival().getValue();
-            if (!(0.0 <= probPreadultSurvival && probPreadultSurvival <= 1.0))
-                throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentSurvival: "
-                    "must be a probability (in range [0,1]");
-            double fEggsLaidByOviposit = smpd.getFemaleEggsLaidByOviposit().getValue();
-            if (!(fEggsLaidByOviposit > 0.0))
-                throw util::xml_scenario_error("entomology.vector.simpleMPD.femaleEggsLaidByOviposit: "
-                    "must be positive");
-
-            anophModel = new Anopheles::SimpleMPDAnophelesModel(developmentDuration, probPreadultSurvival, fEggsLaidByOviposit);
-        }
-        else
-            anophModel = new Anopheles::AnophelesModel();
-
-        anophModel->initialise(i, elt, initialisationEIR, populationSize);
+        Anopheles::AnophelesModel *anophModel = createAnophelesModel(i, anoph, initialisationEIR, populationSize);
         Anopheles::AnophelesModelFitter *fitter = new Anopheles::AnophelesModelFitter(*anophModel);
 
         species.push_back(std::unique_ptr<Anopheles::AnophelesModel>(anophModel));
         speciesFitters.push_back(std::unique_ptr<Anopheles::AnophelesModelFitter>(fitter));
-        speciesIndex[elt.getMosquito()] = i;
+        speciesIndex[anophModel->mosq.name] = i;
     }
 
     if (interventionMode == forcedEIR)

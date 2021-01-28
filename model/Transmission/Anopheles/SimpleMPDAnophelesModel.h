@@ -63,17 +63,17 @@ public:
         AnophelesModel::init2(nHumans, meanPopAvail, sum_avail, sigma_f, sigma_df, sigma_dff);
 
         // Recompute tsp_dff locally
-        double leaveRate = sum_avail + nhh_avail + mosqSeekingDeathRate;
+        double leaveRate = sum_avail + nhh_avail + mosq.seekingDeathRate;
         sigma_df += nhh_sigma_df;
         sigma_dff += nhh_sigma_dff;
 
-        double tsP_A = exp(-leaveRate * mosqSeekingDuration);
+        double tsP_A = exp(-leaveRate * mosq.seekingDuration);
         double availDivisor = (1.0 - tsP_A) / leaveRate; // α_d
-        double tsP_dff = sigma_dff * availDivisor * probMosqSurvivalOvipositing;
+        double tsP_dff = sigma_dff * availDivisor * mosq.probMosqSurvivalOvipositing;
 
         // Initialise nOvipositingDelayed
         SimTime y1 = SimTime::oneYear();
-        SimTime tau = mosqRestDuration;
+        SimTime tau = mosq.restDuration;
         for (SimTime t = SimTime::zero(); t < developmentDuration; t += SimTime::oneDay())
         {
             nOvipositingDelayed[mod_nn(t + tau, developmentDuration)] = tsP_dff * initNvFromSv * forcedS_v[t];
