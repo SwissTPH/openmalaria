@@ -26,101 +26,12 @@
 #include "Transmission/VectorModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/Anopheles/SimpleMPDAnophelesModel.h"
+#include "Transmission/Anopheles/AnophelesModelFitter.h"
 
 namespace OM
 {
 namespace Transmission
 {
-
-// static void loadVectorInterventions(const scnXml::Interventions& intervElt, VectorModel &model)
-// {
-//     if (intervElt.getVectorPop().present())
-//     {
-//         typedef scnXml::VectorPop::InterventionSequence SeqT;
-//         const SeqT &seq = intervElt.getVectorPop().get().getIntervention();
-//         size_t instance = 0;
-//         for (auto it = seq.begin(), end = seq.end(); it != end; ++it)
-//         {
-//             const scnXml::VectorIntervention &elt = *it;
-//             if (elt.getTimed().present())
-//             {
-//                 transmission.initVectorInterv(elt.getDescription().getAnopheles(), instance, elt.getName());
-
-//                 const scnXml::TimedBaseList::DeploySequence &seq = elt.getTimed().get().getDeploy();
-//                 for (auto it = seq.begin(); it != seq.end(); ++it)
-//                 {
-//                     SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-//                     timed.push_back(unique_ptr<TimedDeployment>(new TimedVectorDeployment(date, instance)));
-//                 }
-//                 instance++;
-//             }
-//         }
-//     }
-//     if (intervElt.getAddNonHumanHosts().present())
-//     {
-//         typedef scnXml::AddNonHumanHosts::NonHumanHostsSequence SeqT;
-//         const SeqT &seq = intervElt.getAddNonHumanHosts().get().getNonHumanHosts();
-//         size_t instance = 0;
-//         for (auto it = seq.begin(), end = seq.end(); it != end; ++it)
-//         {
-//             const scnXml::NonHumanHosts2 &elt = *it;
-//             if (elt.getTimed().present())
-//             {
-//                 transmission.initAddNonHumanHostsInterv(elt.getDescription().getAnopheles(), elt.getName());
-//                 for (const scnXml::Deploy2 deploy : elt.getTimed().get().getDeploy())
-//                 {
-//                     SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-//                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
-//                     timed.push_back(unique_ptr<TimedDeployment>(new TimedAddNonHumanHostsDeployment(date, elt.getName(), lifespan)));
-//                 }
-//                 instance++;
-//             }
-//         }
-//     }
-//     if (intervElt.getNonHumanHostsModifications().present())
-//     {
-//         typedef scnXml::NonHumanHostsModifications::InterventionSequence SeqT;
-//         const SeqT &seq = intervElt.getNonHumanHostsModifications().get().getIntervention();
-//         size_t instance = 0;
-//         for (auto it = seq.begin(), end = seq.end(); it != end; ++it)
-//         {
-//             const scnXml::NonHumanHostsIntervention &elt = *it;
-//             if (elt.getTimed().present())
-//             {
-//                 const scnXml::DecayFunction &decay = elt.getDecay();
-//                 transmission.initNonHumanHostsInterv(elt.getDescription().getAnopheles(), decay, instance, elt.getNonHumanHostsName());
-//                 const scnXml::TimedBaseList::DeploySequence &seq = elt.getTimed().get().getDeploy();
-//                 for (auto it = seq.begin(); it != seq.end(); ++it)
-//                 {
-//                     SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
-//                     timed.push_back(
-//                         unique_ptr<TimedDeployment>(new TimedNonHumanHostsDeployment(date, instance, elt.getNonHumanHostsName())));
-//                 }
-//                 instance++;
-//             }
-//         }
-//     }
-//     if (intervElt.getVectorTrap().present())
-//     {
-//         size_t instance = 0;
-//         for (const scnXml::VectorTrap &trap : intervElt.getVectorTrap().get().getIntervention())
-//         {
-//             transmission.initVectorTrap(trap.getDescription(), instance, trap.getName());
-//             if (trap.getTimed().present())
-//             {
-//                 for (const scnXml::Deploy1 deploy : trap.getTimed().get().getDeploy())
-//                 {
-//                     SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
-//                     double ratio = deploy.getRatioToHumans();
-//                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
-//                     timed.push_back(unique_ptr<TimedDeployment>(new TimedTrapDeployment(date, instance, ratio, lifespan)));
-//                 }
-//             }
-//             instance += 1;
-//         }
-//     }
-// }
-
 static SimulationMode readMode(const string &str)
 {
     if (str == "forced")
@@ -161,22 +72,24 @@ static VectorModel *createVectorModel(const scnXml::Entomology &entoData, const 
     vector<double> initialisationEIR;
     initialisationEIR.assign(sim::stepsPerYear(), 0.0);
 
-    vector<Anopheles::AnophelesModel *> species;
+    vector<std::unique_ptr<Anopheles::AnophelesModel>> species;
+    vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFitters;
     map<string, size_t> speciesIndex;
 
     size_t numSpecies = anophelesList.size();
-    cout << "numSpecies " << numSpecies << endl;
+
     if (numSpecies < 1) throw util::xml_scenario_error("Can't use Vector model without data for at least one anopheles species!");
 
     // Sort Anopheles by Decreasing EIR
     sort(anophelesList.begin(), anophelesList.end(), anophelesCompare);
 
     PerHostAnophParams::initReserve(numSpecies);
-    species.resize(numSpecies);
 
     for (size_t i = 0; i < numSpecies; ++i)
     {
         auto elt = anophelesList[i];
+
+        PerHostAnophParams::init(elt.getMosq());
 
         Anopheles::AnophelesModel *anophModel;
 
@@ -220,13 +133,12 @@ static VectorModel *createVectorModel(const scnXml::Entomology &entoData, const 
         else
             anophModel = new Anopheles::AnophelesModel();
 
-        PerHostAnophParams::init(elt.getMosq());
+        anophModel->initialise(i, elt, initialisationEIR, populationSize);
+        Anopheles::AnophelesModelFitter *fitter = new Anopheles::AnophelesModelFitter(*anophModel);
 
-        species[i] = anophModel;
-        species[i]->initialise(i, elt, initialisationEIR, populationSize);
-
-        string name = elt.getMosquito();
-        speciesIndex[name] = i;
+        species.push_back(std::unique_ptr<Anopheles::AnophelesModel>(anophModel));
+        speciesFitters.push_back(std::unique_ptr<Anopheles::AnophelesModelFitter>(fitter));
+        speciesIndex[elt.getMosquito()] = i;
     }
 
     if (interventionMode == forcedEIR)
@@ -237,7 +149,7 @@ static VectorModel *createVectorModel(const scnXml::Entomology &entoData, const 
         speciesIndex.clear();
     }
 
-    return new VectorModel(initialisationEIR, interventionMode, species, speciesIndex, populationSize);
+    return new VectorModel(initialisationEIR, interventionMode, std::move(species), std::move(speciesFitters), speciesIndex, populationSize);
 }
 
 ///@brief Creation, destruction and checkpointing

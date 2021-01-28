@@ -188,12 +188,13 @@ const string &reverseLookup(const map<string, size_t> &m, size_t i)
     throw TRACED_EXCEPTION_DEFAULT("reverseLookup: key not found"); // shouldn't ever happen
 }
 
-VectorModel::VectorModel(vector<double> initEIR, int interventionMode, vector<Anopheles::AnophelesModel *> speciesList,
-                         map<string, size_t> speciesIndexList, int populationSize)
+VectorModel::VectorModel(vector<double> initEIR, int interventionMode, vector<std::unique_ptr<Anopheles::AnophelesModel>> speciesList,
+                         vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFittersList, map<string, size_t> speciesIndexList, int populationSize)
     : TransmissionModel(std::move(initEIR), interventionMode, WithinHost::Genotypes::N())
     , m_rng(util::master_RNG)
     , initIterations(0)
     , species(std::move(speciesList))
+    , speciesFitters(std::move(speciesFittersList))
     , speciesIndex(std::move(speciesIndexList))
 {
     // Calculate total annual EIR
@@ -434,7 +435,7 @@ SimTime VectorModel::initIterate()
     bool needIterate = false;
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
-        needIterate = needIterate || species[i]->initIterate();
+        needIterate = needIterate || speciesFitters[i]->fit(*species[i]);
     }
 
     if (needIterate)

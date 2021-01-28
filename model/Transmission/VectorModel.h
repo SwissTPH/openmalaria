@@ -24,6 +24,7 @@
 #include "Global.h"
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
+#include "Transmission/Anopheles/AnophelesModelFitter.h"
 
 namespace scnXml
 {
@@ -46,8 +47,8 @@ public:
     /// Get the map of species names to indicies.
     const map<string, size_t> &getSpeciesIndexMap() { return speciesIndex; }
 
-    VectorModel(vector<double> initEIR, int interventionMode, vector<Anopheles::AnophelesModel *> speciesList,
-                map<string, size_t> speciesIndexList, int populationSize);
+    VectorModel(vector<double> initEIR, int interventionMode, vector<std::unique_ptr<Anopheles::AnophelesModel>> speciesList,
+                vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFittersList, map<string, size_t> speciesIndexList, int populationSize);
     
     virtual ~VectorModel();
 
@@ -120,7 +121,8 @@ private:
      *
      * Array will be recreated by constructor, but some members of AnophelesModel
      * need to be checkpointed. */
-    vector<Anopheles::AnophelesModel *> species;
+    vector<std::unique_ptr<Anopheles::AnophelesModel>> species;
+    vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFitters;
 
     /** A map of anopheles species/variant name to an index in species.
      *
