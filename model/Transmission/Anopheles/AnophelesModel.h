@@ -76,23 +76,72 @@ enum VecStat { PA, PAmu, PA1, PAh, PDF, PDIF, NV, OV, SV };
  * P_dif = σ_dif α_d P_E
  */
 
-struct MosqProb
+struct MosquitoParams
 {
     // Proportion of host-seeking parous mosquitoes (those who have laid eggs) which laid eggs that day:
-    double mosqLaidEggsSameDayProportion;
+    double laidEggsSameDayProportion;
     // Probability that the mosquito survives the feeding cycle.
     // Note: Pf = M, the parous rate (prop mosqs which have laid eggs):
-    double mosqSurvivalFeedingCycleProbability;
-    double mosqHumanBloodIndex;    // χ (chi)
+    double survivalFeedingCycleProbability;
+    double humanBloodIndex;    // χ (chi)
     // Cycle probabilities, when biting a human:
     // B: Host encountered
-    double mosqProbBiting;
+    double probBiting;
     // C: Fed
-    double mosqProbFindRestSite;
+    double probFindRestSite;
     // D: Resting
-    double mosqProbResting;
+    double probResting;
     // E: Laying eggs (ovipositing)
-    double mosqProbOvipositing;
+    double probOvipositing;
+
+    /** Duration of host-seeking per day; the maximum fraction of a day that a
+     * mosquito would spend seeking (θ_d). */
+    double seekingDuration;
+
+    /** Probability of a mosquito successfully laying eggs given that it has
+     * rested (P_E).
+     *
+     * Currently assumed constant, although NC's non-autonomous model provides
+     * an alternative. */
+    double probMosqSurvivalOvipositing;
+
+    /** If less than this many mosquitoes remain infected, transmission is interrupted. */
+    double minInfectedThreshold;
+
+    /** @brief Probabilities and rates associated with life-cycle model
+     * 
+     * These are calculated during initialisation and thereafter constant.
+     * 
+     * Probabilities have no units; others have units specified.
+     *
+     * All parameters are calculated during initialisation and in theory don't
+     * need checkpointing. 
+     * Death rate of mosquitoes while host-seeking (μ_vA).
+     *
+     * Unit: animals/day. */
+    double seekingDeathRate;
+
+    /** Duration parameters for mosquito/parasite life-cycle
+     * 
+     * Currently these are all constant. In theory they could be made to vary
+     * seasonally, based on a fixed periodic cycle, though some code and
+     * possibly model changes would be needed to accomodate this.
+     * 
+     * All have units of days.
+     *
+     * Set in initialise function from XML data; no need to checkpoint.
+     * Duration of feeding cycle (equals duration of resting period) for mosquito (τ).
+     * Units: days. */
+    SimTime restDuration;
+
+    /** Duration of the extrinsic incubation period (sporozoite development time)
+    * (θ_s).
+    * Units: Days.
+    *
+    * Doesn't need checkpointing. */
+    SimTime EIPDuration;
+
+    string name;
 };
 
 struct NhhParams {
@@ -104,15 +153,45 @@ struct NhhParams {
     string name;
 };
 
+struct NhhParamsInterv {
+    double mosqRelativeAvailabilityHuman;
+    double mosqProbBiting;
+    double mosqProbFindingRestSite;
+    double mosqProbResting;
+    double hostFecundityFactor;
+};
+
+struct Nhh {
+    double avail_i;
+    double P_B_I;
+    double P_C_I;
+    double P_D_I;
+    double rel_fecundity;
+    SimTime expiry;
+};
+
+struct TrapParams {
+    TrapParams(): relAvail(numeric_limits<double>::signaling_NaN()) {}
+    TrapParams(TrapParams&& o): relAvail(o.relAvail), availDecay(move(o.availDecay)) {}
+    
+    double relAvail; // Initial availability of a trap relative to an adult
+    unique_ptr<util::DecayFunction> availDecay; // Decay of availability
+};
+
+struct TrapData {
+    size_t instance; // index in trapParams
+    double initialAvail; // initial availability (avail per trap * num traps)
+    DecayFuncHet availHet; // parameter for decay of availability
+    SimTime deployTime; // deploy time (for decay function)
+    SimTime expiry; // date at which this intervention should be deleted
+};
+
 class AnophelesModel
 {
 public:
     ///@brief Initialisation and destruction
     //@{
     AnophelesModel () :
-            mosqSeekingDuration(numeric_limits<double>::signaling_NaN()),
-            mosqSeekingDeathRate(numeric_limits<double>::signaling_NaN()),
-            probMosqSurvivalOvipositing(numeric_limits<double>::signaling_NaN()),
             nhh_avail(numeric_limits<double>::signaling_NaN()),
             nhh_sigma_df(numeric_limits<double>::signaling_NaN()),
             nhh_sigma_dff(numeric_limits<double>::signaling_NaN()),
@@ -123,10 +202,7 @@ public:
             initNv0FromSv(numeric_limits<double>::quiet_NaN()),
             interventionSurvival(1.0),
             // MosqTransmission
-            mosqRestDuration(SimTime::zero()),
-            EIPDuration(SimTime::zero()),
             N_v_length(SimTime::zero()),
-            minInfectedThreshold( std::numeric_limits< double >::quiet_NaN() ),     // requires config
             timeStep_N_v0(0.0)
     {
         forcedS_v.resize (SimTime::oneYear());
@@ -148,8 +224,25 @@ public:
      * @param nonHumanHostPopulations Size of each non-human population
      * @param populationSize Size of human population (assumed constant)
      */
-    string initialise ( size_t species, const scnXml::AnophelesParams& anoph, vector<double>& initialisationEIR, int populationSize);
+    void initialise ( size_t species, MosquitoParams mosqParams);
     
+    ///@brief Initialisation helper functions
+    //@{
+    /** Calculate availability rate of hosts (α_i) and death rate while seeking
+     * (µ_vA)
+     *
+     * Documentation: "Parameter Values for Transmission model"
+     * (Chitnis, Smith and Schapira, 4.3.2010)
+     * 
+     * @param species Species index
+     * @param anoph Data from XML
+     * @param nonHumanHostPopulations Size of each non-human population
+     * @param populationSize Size of the human population (assumed constant)
+     */
+    void initAvailability(size_t species, const vector<NhhParams> &nhhs, int populationSize);
+
+    void initEIR(vector<double>& initialisationEIR, vector<double> FSCoefficInit, double EIRRotateAngleInit, double targetEIR, double propInfectious, double propInfected);
+
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */
     inline void scaleEIR( double factor ){
@@ -267,7 +360,7 @@ public:
     //@}
     
     inline SimTime getEIPDuration() const {
-        return EIPDuration;
+        return mosq.EIPDuration;
     }
     
     ///@brief Functions used in reporting
@@ -295,16 +388,33 @@ public:
     void summarize( size_t species )const;
     //@}
 
+
+    /** Calculates the human ento availability
+     * 
+     * Reference: Parameter Values for Transmission Model, Chitnis et al,
+     * September 2010 eqn (26).
+     * 
+     * @param N_i Human/non-human population size
+     * @param P_A Probability of mosquito not dying or finding a host while
+     *  seeking on a given night
+     * @param P_Ai Probability of mosquito finding a human/non-human host of
+     *  type i while seeking on a given night
+     * @return α_i, the rate at which mosquitoes encounter hosts of type i
+     *  while seeking
+     */
+    double calcEntoAvailability(double N_i, double P_A, double P_Ai);
+    //@}
+    
     virtual void checkpoint (istream& stream){ (*this) & stream; }
     virtual void checkpoint (ostream& stream){ (*this) & stream; }
 
-        /// Checkpointing
+    /// Checkpointing
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
-        mosqSeekingDeathRate & stream;
-        mosqSeekingDuration & stream;
-        probMosqSurvivalOvipositing & stream;
+        mosq.seekingDeathRate & stream;
+        mosq.seekingDuration & stream;
+        mosq.probMosqSurvivalOvipositing & stream;
         // transmission & stream;
         seekingDeathRateIntervs & stream;
         probDeathOvipositingIntervs & stream;
@@ -322,8 +432,8 @@ public:
         initNv0FromSv & stream;
         // (*emergence) & stream;
         // MosqTransmission
-        mosqRestDuration & stream;
-        EIPDuration & stream;
+        mosq.restDuration & stream;
+        mosq.EIPDuration & stream;
         N_v_length & stream;
         P_A & stream;
         P_df & stream;
@@ -342,67 +452,7 @@ public:
         timeStep_N_v0 & stream;
     }
 
-    ///@brief Initialisation helper functions
-    //@{
-    /** Calculate availability rate of hosts (α_i) and death rate while seeking
-     * (µ_vA)
-     *
-     * Documentation: "Parameter Values for Transmission model"
-     * (Chitnis, Smith and Schapira, 4.3.2010)
-     * 
-     * @param species Species index
-     * @param anoph Data from XML
-     * @param nonHumanHostPopulations Size of each non-human population
-     * @param populationSize Size of the human population (assumed constant)
-     */
-    void initAvailability(size_t species, const MosqProb &probas, const vector<NhhParams> &nhhs, int populationSize);
-
-    void initEIR(const scnXml::AnophelesParams& anoph, vector<double>& initialisationEIR, SimTime EIPDuration);
-
-    /** Calculates the human ento availability
-     * 
-     * Reference: Parameter Values for Transmission Model, Chitnis et al,
-     * September 2010 eqn (26).
-     * 
-     * @param N_i Human/non-human population size
-     * @param P_A Probability of mosquito not dying or finding a host while
-     *  seeking on a given night
-     * @param P_Ai Probability of mosquito finding a human/non-human host of
-     *  type i while seeking on a given night
-     * @return α_i, the rate at which mosquitoes encounter hosts of type i
-     *  while seeking
-     */
-    double calcEntoAvailability(double N_i, double P_A, double P_Ai);
-    //@}
-    
-    
-    // -----  parameters (constant after initialisation)  -----
-    
-    /** Duration of host-seeking per day; the maximum fraction of a day that a
-     * mosquito would spend seeking (θ_d). */
-    double mosqSeekingDuration;
-    
-    
-    /** @brief Probabilities and rates associated with life-cycle model
-     * 
-     * These are calculated during initialisation and thereafter constant.
-     * 
-     * Probabilities have no units; others have units specified.
-     *
-     * All parameters are calculated during initialisation and in theory don't
-     * need checkpointing. */
-    //@{
-    /** Death rate of mosquitoes while host-seeking (μ_vA).
-     *
-     * Unit: animals/day. */
-    double mosqSeekingDeathRate;
-
-    /** Probability of a mosquito successfully laying eggs given that it has
-     * rested (P_E).
-     *
-     * Currently assumed constant, although NC's non-autonomous model provides
-     * an alternative. */
-    double probMosqSurvivalOvipositing;
+    MosquitoParams mosq;
 
     // sum_i N_i * α_i for i in NHH types: total availability of non-human hosts
     double nhh_avail;
@@ -413,34 +463,13 @@ public:
     double nhh_sigma_dff;
     //@}
     
-    struct TrapParams {
-        TrapParams(): relAvail(numeric_limits<double>::signaling_NaN()) {}
-        TrapParams(TrapParams&& o): relAvail(o.relAvail), availDecay(move(o.availDecay)) {}
-        
-        double relAvail; // Initial availability of a trap relative to an adult
-        unique_ptr<util::DecayFunction> availDecay; // Decay of availability
-    };
+    
     // Parameters for trap interventions. Doesn't need checkpointing.
     vector<TrapParams> trapParams;
     
     // Added NonHumanHosts
-    struct Nhh {
-        double avail_i;
-        double P_B_I;
-        double P_C_I;
-        double P_D_I;
-        double rel_fecundity;
-        SimTime expiry;
-    };
     map<string,Nhh> nhhInstances;
 
-    struct NhhParamsInterv {
-        double mosqRelativeAvailabilityHuman;
-        double mosqProbBiting;
-        double mosqProbFindingRestSite;
-        double mosqProbResting;
-        double hostFecundityFactor;
-    };
     map<string,NhhParamsInterv> nhhDefinitionsInterv;
 
     // -----  model state (and some encapsulated parameters)  -----
@@ -454,13 +483,7 @@ public:
      * 
      * Value is probability of dying due to this intervention (so multiply survival by 1 - this). */
     vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
-    struct TrapData {
-        size_t instance; // index in trapParams
-        double initialAvail; // initial availability (avail per trap * num traps)
-        DecayFuncHet availHet; // parameter for decay of availability
-        SimTime deployTime; // deploy time (for decay function)
-        SimTime expiry; // date at which this intervention should be deleted
-    };
+
     /** Baited trap interventions.
      * 
      * This is the "full" availability: availability per trap times the number
@@ -555,32 +578,6 @@ public:
      *
      * Should be checkpointed. */
     vecDay<double> mosqEmergeRate;
-
-
-    // MosqTransmission
-        // -----  parameters (constant after initialisation)  -----
-    
-    /** @brief Duration parameters for mosquito/parasite life-cycle
-     * 
-     * Currently these are all constant. In theory they could be made to vary
-     * seasonally, based on a fixed periodic cycle, though some code and
-     * possibly model changes would be needed to accomodate this.
-     * 
-     * All have units of days.
-     *
-     * Set in initialise function from XML data; no need to checkpoint. */
-    //@{
-    /** Duration of feeding cycle (equals duration of resting period) for
-     * mosquito (τ).
-     * Units: days. */
-    SimTime mosqRestDuration;
-
-    /** Duration of the extrinsic incubation period (sporozoite development time)
-    * (θ_s).
-    * Units: Days.
-    *
-    * Doesn't need checkpointing. */
-    SimTime EIPDuration;
     
     /** N_v_length-1 is the number of previous days for which some parameters are
      * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
@@ -592,10 +589,6 @@ public:
      * Set by initialise; no need to checkpoint. */
     SimTime N_v_length;
     //@}
-    
-    /// If less than this many mosquitoes remain infected, transmission is interrupted.
-    double minInfectedThreshold;
-    
     
     // -----  variable model state  -----
     
