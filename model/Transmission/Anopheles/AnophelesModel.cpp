@@ -352,9 +352,6 @@ void AnophelesModel::initEIR(const scnXml::AnophelesParams &anoph, vector<double
     }
 
     // Set other data used for mosqEmergeRate calculation:
-    FSRotateAngle =
-        EIRRotateAngle - (EIPDuration.inDays() + 10) / 365. * 2. *
-                             M_PI; // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
     initNvFromSv = 1.0 / anoph.getPropInfectious();
     initOvFromSv = initNvFromSv * anoph.getPropInfected();
 }
@@ -432,76 +429,11 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
     vectors::scale(mosqEmergeRate, initNv0FromSv);
 
     // All set up to drive simulation from forcedS_v
-
-    scaleFactor = 1.0;
-    shiftAngle = FSRotateAngle;
-    scaled = false;
-    rotated = false;
 }
 
 bool AnophelesModel::initIterate()
 {
-    vecDay<double> avgAnnualS_v(SimTime::oneYear(), 0.0);
-    for (SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay())
-    {
-        avgAnnualS_v[mod_nn(i, SimTime::oneYear())] = quinquennialS_v[i];
-    }
-
-    double factor = vectors::sum(forcedS_v) / vectors::sum(avgAnnualS_v);
-
-    // cout << "check: " << vectors::sum(forcedS_v) << " " << vectors::sum(avgAnnualS_v) << endl;
-    // cout << "Pre-calced Sv, dynamic Sv:\t"<<sumAnnualForcedS_v<<'\t'<<vectors::sum(annualS_v)<<endl;
-    if (!(factor > 1e-6 && factor < 1e6))
-    {
-        if (factor > 1e6 && vectors::sum(quinquennialS_v) < 1e-3)
-        {
-            throw util::base_exception("Simulated S_v is approx 0 (i.e.\
- mosquitoes are not infectious, before interventions). Simulator cannot handle this; perhaps\
- increase EIR or change the entomology model.",
-                                       util::Error::VectorFitting);
-        }
-        if (vectors::sum(forcedS_v) == 0.0)
-        {
-            return false; // no EIR desired: nothing to do
-        }
-        cerr << "Input S_v for this vector:\t" << vectors::sum(forcedS_v) << endl;
-        cerr << "Simulated S_v:\t\t\t" << vectors::sum(quinquennialS_v) / 5.0 << endl;
-        throw TRACED_EXCEPTION("factor out of bounds", util::Error::VectorFitting);
-    }
-
-    const double LIMIT = 0.1;
-
-    if (fabs(factor - 1.0) > LIMIT)
-    {
-        scaled = false;
-        double factorDiff = (scaleFactor * factor - scaleFactor) * 1.0;
-        scaleFactor += factorDiff;
-    }
-    else
-        scaled = true;
-
-    double rAngle = findAngle(EIRRotateAngle, FSCoeffic, avgAnnualS_v);
-    shiftAngle += rAngle;
-    rotated = true;
-
-    // cout << "EIRRotateAngle: " << EIRRotateAngle << " rAngle = " << rAngle << ", angle = " << shiftAngle << " scalefactor: " <<
-    // scaleFactor << " , factor: " << factor << endl;
-
-    // Compute forced_sv from the Fourrier Coeffs
-    // shiftAngle rotate the vector to correct the offset between simulated and input EIR
-    // shiftAngle is the offset between the
-    vectors::expIDFT(mosqEmergeRate, FSCoeffic, -shiftAngle);
-    // Scale the vector according to initNv0FromSv to get the mosqEmergerate
-    // scaleFactor scales the vector to correct the ratio between simulated and input EIR
-    vectors::scale(mosqEmergeRate, scaleFactor * initNv0FromSv);
-
-    // initNvFromSv *= scaleFactor;     //(not currently used)
-
-    // What factor exactly these should be scaled by isn't obvious; in any case
-    // they should reach stable values quickly.
-    scale(factor);
-
-    return !(scaled && rotated);
+    return true;
 }
 //@}
 
