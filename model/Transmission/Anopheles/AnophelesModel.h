@@ -200,7 +200,6 @@ public:
             initNvFromSv(numeric_limits<double>::quiet_NaN()),
             initOvFromSv(numeric_limits<double>::quiet_NaN()),
             initNv0FromSv(numeric_limits<double>::quiet_NaN()),
-            interventionSurvival(1.0),
             // MosqTransmission
             N_v_length(SimTime::zero()),
             timeStep_N_v0(0.0)
@@ -369,10 +368,12 @@ public:
     inline void resetTSStats() {
         timeStep_N_v0 = 0.0;
     }
+
     /// Get mean emergence per day during last time-step
     inline double getLastN_v0 () const{
         return timeStep_N_v0 / SimTime::oneTS().inDays();
     }
+    
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat( VecStat vs )const;
@@ -386,23 +387,6 @@ public:
     
     /// Write some per-species summary information.
     void summarize( size_t species )const;
-    //@}
-
-
-    /** Calculates the human ento availability
-     * 
-     * Reference: Parameter Values for Transmission Model, Chitnis et al,
-     * September 2010 eqn (26).
-     * 
-     * @param N_i Human/non-human population size
-     * @param P_A Probability of mosquito not dying or finding a host while
-     *  seeking on a given night
-     * @param P_Ai Probability of mosquito finding a human/non-human host of
-     *  type i while seeking on a given night
-     * @return α_i, the rate at which mosquitoes encounter hosts of type i
-     *  while seeking
-     */
-    double calcEntoAvailability(double N_i, double P_A, double P_Ai);
     //@}
     
     virtual void checkpoint (istream& stream){ (*this) & stream; }
@@ -425,7 +409,7 @@ public:
         initNvFromSv & stream;
         initOvFromSv & stream;
         emergenceReduction & stream;
-        interventionSurvival & stream;
+        // interventionSurvival & stream;
         // EmergenceModel
         mosqEmergeRate & stream;
         quinquennialS_v & stream;
@@ -463,44 +447,12 @@ public:
     double nhh_sigma_dff;
     //@}
     
-    
-    // Parameters for trap interventions. Doesn't need checkpointing.
-    vector<TrapParams> trapParams;
-    
-    // Added NonHumanHosts
-    map<string,Nhh> nhhInstances;
-
-    map<string,NhhParamsInterv> nhhDefinitionsInterv;
-
-    // -----  model state (and some encapsulated parameters)  -----
-    /** @brief Intervention parameters */
-    //@{
-    /** Interventions affecting death rate while seeking (parameters + state)
-     * 
-     * Value is increase in death rate (so multiply rate by 1 + this). */
-    vector<util::SimpleDecayingValue> seekingDeathRateIntervs;
-    /** Interventions affecting probability of dying while ovipositing (pre laying of eggs) (parameters + state)
-     * 
-     * Value is probability of dying due to this intervention (so multiply survival by 1 - this). */
-    vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
-
-    /** Baited trap interventions.
-     * 
-     * This is the "full" availability: availability per trap times the number
-     * of traps. Each deployment has its own availiability along with expiry
-     * date; total availability is the sum. */
-    list<TrapData> baitedTraps;
-    //@}
-
-    map<string,vector<util::SimpleDecayingValue>> reduceNhhAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I, reduceFecundity;
-    
     /** Per time-step partial calculation of EIR, per genotype.
     *
     * See comment in advancePeriod() for details of how the EIR is calculated.
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
     vector<double> partialEIR;
-
 
     // Emergence Model
     // -----  parameters (constant after initialisation)  -----
@@ -554,17 +506,7 @@ public:
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
      * Should be checkpointed. */
-    double initNv0FromSv;       ///< ditto
-    //@}
-    
-    /** @brief Intervention parameters
-     *
-     * Checkpointed. */
-    //@{
-    /// Description of intervention killing effects on emerging pupae
-    vector<util::SimpleDecayingValue> emergenceReduction;
-    /// Cache parameter updated by update()
-    double interventionSurvival;   // survival with regards to intervention effects
+    double initNv0FromSv;
     //@}
     
     /** Emergence rate of new mosquitoes, for every day of the year (N_v0).
@@ -588,7 +530,6 @@ public:
      *
      * Set by initialise; no need to checkpoint. */
     SimTime N_v_length;
-    //@}
     
     // -----  variable model state  -----
     
@@ -620,16 +561,14 @@ public:
     /** Like P_df but including fertility factors */
     vecDay<double> P_dff;
     
-    /** Numbers of host-seeking mosquitos each day
-     * 
-     * N_v is the total number of host-seeking mosquitoes. */
+    /** Numbers of host-seeking mosquitos each day */
     vecDay<double> N_v;
     
-    /** Numbers of host-seeking mosquitos each day
-     * 
-     * O_v is the number of infected host-seeking mosquitoes, and S_v is the
-     * number of infective (to humans) host-seeking mosquitoes. */
-    vecDay2D<double> O_v, S_v;
+    /** Numbers of infected host-seeking mosquitoes */
+    vecDay2D<double> O_v;
+
+    /** Nnumbers of infective (to humans) host-seeking mosquitoes */
+    vecDay2D<double> S_v;
 
     /** Probability of a mosquito dying */
     vecDay<double> P_Amu;
@@ -664,6 +603,33 @@ public:
     
     /** Variables tracking data to be reported. */
     double timeStep_N_v0;
+
+    /** Active Non-Human hosts instances in the simulation. */
+    map<string,Nhh> nhhInstances;
+
+    /** Non-Human hosts interventions description */
+    map<string,NhhParamsInterv> nhhDefinitionsInterv;
+
+    /** Parameters for trap interventions. Doesn't need checkpointing. */
+    vector<TrapParams> trapParams;
+
+    /** Interventions affecting death rate while seeking (parameters + state) */
+    vector<util::SimpleDecayingValue> seekingDeathRateIntervs;
+
+    /** Interventions affecting probability of dying while ovipositing (pre laying of eggs) (parameters + state) */
+    vector<util::SimpleDecayingValue> probDeathOvipositingIntervs;
+
+    /** Baited trap interventions.
+     * 
+     * This is the "full" availability: availability per trap times the number
+     * of traps. Each deployment has its own availiability along with expiry
+     * date; total availability is the sum. */
+    list<TrapData> baitedTraps;
+
+    map<string,vector<util::SimpleDecayingValue>> reduceNhhAvailability, reduceP_B_I, reduceP_C_I, reduceP_D_I, reduceFecundity;
+
+    /** Description of intervention killing effects on emerging pupae */
+    vector<util::SimpleDecayingValue> emergenceReduction;
 };
 
 }

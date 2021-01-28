@@ -452,12 +452,6 @@ void AnophelesModel::deployAddNonHumanHosts(LocalRng &rng, size_t species, strin
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<double> &sigma_dif, double sigma_dff, bool isDynamic)
 {
-    interventionSurvival = 1.0;
-    for (size_t i = 0; i < emergenceReduction.size(); ++i)
-    {
-        interventionSurvival *= 1.0 - emergenceReduction[i].current_value(sim::ts0());
-    }
-
     /* Largely equations correspond to Nakul Chitnis's model in
       "A mathematic model for the dynamics of malaria in
       mosquitoes feeding on a heterogeneous host population" [MMDM]
@@ -629,6 +623,10 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
 void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah, double tsP_df,
                             const vector<double> tsP_dif, double tsP_dff, bool isDynamic, vector<double> &partialEIR, double EIR_factor)
 {
+    double interventionSurvival = 1.0;
+    for (size_t i = 0; i < emergenceReduction.size(); ++i)
+        interventionSurvival *= 1.0 - emergenceReduction[i].current_value(sim::ts0());
+
     SimTime d1 = d0 + SimTime::oneDay(); // end of step
 
     // We add N_v_length so that we can use mod_nn() instead of mod().
@@ -769,6 +767,7 @@ double sum1(const vecDay<double> &arr, SimTime end, SimTime N_v_length)
     }
     return val / SimTime::oneTS().inDays();
 }
+
 double sum2(const vecDay2D<double> &arr, SimTime end, SimTime N_v_length)
 {
     double val = 0.0;
@@ -784,6 +783,7 @@ double sum2(const vecDay2D<double> &arr, SimTime end, SimTime N_v_length)
     }
     return val / SimTime::oneTS().inDays();
 }
+
 double sum3(const vecDay2D<double> &arr, size_t g, SimTime end, SimTime N_v_length)
 {
     double val = 0.0;
@@ -795,6 +795,7 @@ double sum3(const vecDay2D<double> &arr, size_t g, SimTime end, SimTime N_v_leng
     }
     return val / SimTime::oneTS().inDays();
 }
+
 double AnophelesModel::getLastVecStat(VecStat vs) const
 {
     // Last time step ended at sim::now(). Values are stored per day, and for
@@ -815,6 +816,7 @@ double AnophelesModel::getLastVecStat(VecStat vs) const
         default: throw SWITCH_DEFAULT_EXCEPTION;
     }
 }
+
 void AnophelesModel::summarize(size_t species) const
 {
     // Last time step ended at sim::now(). Values are stored per day, and for
