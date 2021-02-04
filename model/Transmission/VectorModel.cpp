@@ -255,12 +255,6 @@ VectorModel::~VectorModel() {}
 
 void VectorModel::init2(const Population &population)
 {
-    SimTime data_save_len = SimTime::oneDay(); // we don't need to save anything at first
-    saved_sum_avail.assign(data_save_len, speciesIndex.size(), 0.0);
-    saved_sigma_df.assign(data_save_len, speciesIndex.size(), 0.0);
-    saved_sigma_dif.assign(data_save_len, speciesIndex.size(), WithinHost::Genotypes::N(), 0.0);
-    saved_sigma_dff.assign(speciesIndex.size(), 0.0);
-
     double sumRelativeAvailability = 0.0;
     for (const Host::Human &human : population.getHumans())
     {
@@ -393,49 +387,26 @@ SimTime VectorModel::initIterate()
         return SimTime::zero(); // no initialization to do
     }
 
-    // This function is called repeatedly until vector initialisation is
-    // complete (signalled by returning 0).
-    int initState = 0;
-    if (initIterations == 0 && saved_sum_avail.size1() == SimTime::oneDay())
+    // Fitting is doness
+    if (initIterations < 0)
     {
-        // First time called: we need to do some data collection
-        initState = 1;
-    }
-    else if (initIterations >= 0)
-    {
-        // Next, while generated EIR is not close to that required,
-        // try adjusting emergence parameters, do a stabilisation phase then data collection phase, then repeat.
-        initState = 2;
-    }
-    else if (initIterations < 0)
-    {
-        // Finally, we're done.
-        initState = 3;
+        simulationMode = dynamicEIR;
+        return SimTime::zero();
     }
 
-    if (initState == 1 || initState == 3)
-    {
-        // When starting the iteration phase, we switch to five years worth of data; otherwise we only keep one day.
-        SimTime data_save_len = /*initState == 1 ? SimTime::fromYearsI(5) :*/ SimTime::oneDay();
-        saved_sum_avail.assign(data_save_len, speciesIndex.size(), 0.0);
-        saved_sigma_df.assign(data_save_len, speciesIndex.size(), 0.0);
-        saved_sigma_dif.assign(data_save_len, speciesIndex.size(), WithinHost::Genotypes::N(), 0.0);
-
-        if (initState == 3)
-        {
-            // TODO: we should perhaps check that EIR gets reproduced correctly?
-            simulationMode = dynamicEIR;
-            return SimTime::zero();
-        }
-    }
-
-    ++initIterations;
-    if (initIterations > 30) { throw TRACED_EXCEPTION("Transmission warmup exceeded 30 iterations!", util::Error::VectorWarmup); }
+    if (++initIterations > 30) { throw TRACED_EXCEPTION("Transmission warmup exceeded 30 iterations!", util::Error::VectorWarmup); }
 
     bool needIterate = false;
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
-        needIterate = needIterate || speciesFitters[i]->fit(*species[i]);
+        bool needFitting = speciesFitters[i]->fit(*species[i]);
+        species[i]->initIterate();
+
+        if(needFitting)
+        {
+            needIterate = true;
+            break;
+        }
     }
 
     if (needIterate)
@@ -493,13 +464,11 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
 void VectorModel::vectorUpdate(const Population &population)
 {
     const size_t nGenotypes = WithinHost::Genotypes::N();
-    SimTime popDataInd = mod_nn(sim::ts0(), saved_sum_avail.size1());
-    vector<double> probTransmission;
-    saved_sum_avail.assign_at1(popDataInd, 0.0);
-    saved_sigma_df.assign_at1(popDataInd, 0.0);
-    saved_sigma_dif.assign_at1(popDataInd, 0.0);
-    saved_sigma_dff.assign(saved_sigma_dff.size(), 0.0);
-
+    std::vector<double> probTransmission;
+    std::vector<double> sum_avail(speciesIndex.size());
+    std::vector<double> sigma_df(speciesIndex.size());
+    std::vector<double> sigma_dff(speciesIndex.size());
+    std::vector<std::vector<double>> sigma_dif(speciesIndex.size(), std::vector<double>(nGenotypes));
     for (const Host::Human &human : population.getHumans())
     {
         const OM::Transmission::PerHost &host = human.perHostTransmission;
@@ -525,25 +494,21 @@ void VectorModel::vectorUpdate(const Population &population)
             // not my preference but consistent with TransmissionModel::getEIR().
             // TODO: even stranger since probTransmission comes from the previous time step
             const double avail = host.entoAvailabilityFull(s, human.age(sim::ts1()).inYears());
-            saved_sum_avail.at(popDataInd, s) += avail;
+            sum_avail[s] += avail;
             const double df = avail * host.probMosqBiting(s) * host.probMosqResting(s);
-            saved_sigma_df.at(popDataInd, s) += df;
+            sigma_df[s] += df;
             for (size_t g = 0; g < nGenotypes; ++g)
             {
-                saved_sigma_dif.at(popDataInd, s, g) += df * probTransmission[g];
+                sigma_dif[s][g] += df * probTransmission[g];
             }
-            saved_sigma_dff[s] += df * host.relMosqFecundity(s);
+            sigma_dff[s] += df * host.relMosqFecundity(s);
         }
     }
 
     for (size_t s = 0; s < speciesIndex.size(); ++s)
     {
-        // Copy slice to new array:
-        auto range = saved_sigma_dif.range_at12(popDataInd, s);
-        sigma_dif_species.assign(range.first, range.second);
-
-        species[s]->advancePeriod(saved_sum_avail.at(popDataInd, s), saved_sigma_df.at(popDataInd, s), sigma_dif_species,
-                                  saved_sigma_dff[s], simulationMode == dynamicEIR);
+        species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif[s],
+                                  sigma_dff[s], simulationMode == dynamicEIR);
     }
 }
 void VectorModel::update(const Population &population) { TransmissionModel::updateKappa(population); }
@@ -607,10 +572,6 @@ void VectorModel::checkpoint(istream &stream)
     // species & stream;
     for (auto &s : species)
         s->checkpoint(stream);
-    saved_sum_avail &stream;
-    saved_sigma_df &stream;
-    saved_sigma_dif &stream;
-    saved_sigma_dff &stream;
 }
 void VectorModel::checkpoint(ostream &stream)
 {
@@ -619,11 +580,6 @@ void VectorModel::checkpoint(ostream &stream)
     initIterations &stream;
     for (auto &s : species)
         s->checkpoint(stream);
-    // species & stream;
-    saved_sum_avail &stream;
-    saved_sigma_df &stream;
-    saved_sigma_dif &stream;
-    saved_sigma_dff &stream;
 }
 
 } // namespace Transmission
