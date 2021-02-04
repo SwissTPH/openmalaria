@@ -115,8 +115,6 @@ public:
         // they should reach stable values quickly.
         m.scale(factor);
 
-        m.initIterate();
-
         return !(scaled && rotated);
     }
 

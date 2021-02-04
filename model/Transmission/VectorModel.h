@@ -134,17 +134,6 @@ private:
      * found. Doesn't need checkpointing. */
     map<string, size_t> speciesIndex;
 
-    /// @brief Saved data for use in initialisation / fitting cycle
-    //@{
-    util::vecDay2D<double> saved_sum_avail;
-    util::vecDay2D<double> saved_sigma_df;
-    util::vecDay3D<double> saved_sigma_dif;
-    vector<double> saved_sigma_dff;
-    //@}
-
-    // Cache; no need to checkpoint
-    vector<double> sigma_dif_species;
-
     friend class PerHost;
     friend class AnophelesModelSuite;
 };
