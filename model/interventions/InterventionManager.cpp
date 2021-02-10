@@ -52,7 +52,7 @@ vector<ComponentId> removeAtIds[SubPopRemove::NUM];
 
 // static functions:
 
-void InterventionManager::init(const scnXml::Interventions &intervElt, Transmission::TransmissionModel &transmission)
+void InterventionManager::init(const scnXml::Interventions &intervElt, const Population &population, Transmission::TransmissionModel &transmission)
 {
     nextTimed = 0;
 
@@ -103,10 +103,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, Transmiss
     {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel*>(&transmission);
         if (vectorModel != nullptr)
-        {
-            cout << "CAST" << endl;
             species_index_map = vectorModel->getSpeciesIndexMap();
-        }
     }
 
     if (intervElt.getHuman().present())
@@ -359,13 +356,16 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, Transmiss
         }
     }
     if( intervElt.getVectorPop().present() ){
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel*>(&transmission);
+        if(vectorModel == nullptr)
+            throw util::xml_scenario_error("vector model interventions can not be used with the non-vector model");
         typedef scnXml::VectorPop::InterventionSequence SeqT;
         const SeqT& seq = intervElt.getVectorPop().get().getIntervention();
         size_t instance = 0;
         for( auto it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::VectorIntervention& elt = *it;
             if (elt.getTimed().present() ) {
-                transmission.initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
+                vectorModel->initVectorInterv( elt.getDescription().getAnopheles(), instance, elt.getName() );
 
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 for( auto it = seq.begin(); it != seq.end(); ++it ) {
@@ -377,13 +377,16 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, Transmiss
         }
     }
     if( intervElt.getAddNonHumanHosts().present() ){
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel*>(&transmission);
+        if(vectorModel == nullptr)
+            throw util::xml_scenario_error("vector model interventions can not be used with the non-vector model");
         typedef scnXml::AddNonHumanHosts::NonHumanHostsSequence SeqT;
         const SeqT& seq = intervElt.getAddNonHumanHosts().get().getNonHumanHosts();
         size_t instance = 0;
         for( auto it = seq.begin(), end = seq.end(); it != end; ++it ){
             const scnXml::NonHumanHosts2& elt = *it;
             if (elt.getTimed().present() ) {
-                transmission.initAddNonHumanHostsInterv( elt.getDescription().getAnopheles(), elt.getName() );
+                vectorModel->initAddNonHumanHostsInterv( elt.getDescription().getAnopheles(), elt.getName() );
                 for( const scnXml::Deploy2 deploy : elt.getTimed().get().getDeploy() ){
                     SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
@@ -394,6 +397,9 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, Transmiss
         }
     }
     if( intervElt.getNonHumanHostsModifications().present() ){
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel*>(&transmission);
+        if(vectorModel == nullptr)
+            throw util::xml_scenario_error("vector model interventions can not be used with the non-vector model");
         typedef scnXml::NonHumanHostsModifications::InterventionSequence SeqT;
         const SeqT& seq = intervElt.getNonHumanHostsModifications().get().getIntervention();
         size_t instance = 0;
@@ -401,7 +407,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, Transmiss
             const scnXml::NonHumanHostsIntervention& elt = *it;
             if (elt.getTimed().present() ) {
                 const scnXml::DecayFunction& decay = elt.getDecay();
-                transmission.initNonHumanHostsInterv( elt.getDescription().getAnopheles(), decay, instance, elt.getNonHumanHostsName() );
+                vectorModel->initNonHumanHostsInterv( elt.getDescription().getAnopheles(), decay, instance, elt.getNonHumanHostsName() );
                 const scnXml::TimedBaseList::DeploySequence& seq = elt.getTimed().get().getDeploy();
                 for( auto it = seq.begin(); it != seq.end(); ++it ) {
                     SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
@@ -413,9 +419,12 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, Transmiss
         }
     }
     if( intervElt.getVectorTrap().present() ){
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel*>(&transmission);
+        if(vectorModel == nullptr)
+            throw util::xml_scenario_error("vector model interventions can not be used with the non-vector model");
         size_t instance = 0;
         for( const scnXml::VectorTrap& trap : intervElt.getVectorTrap().get().getIntervention() ){
-            transmission.initVectorTrap(trap.getDescription(), instance, trap.getName());
+            vectorModel->initVectorTrap(trap.getDescription(), instance, trap.getName());
             if( trap.getTimed().present() ) {
                 for( const scnXml::Deploy1 deploy : trap.getTimed().get().getDeploy() ){
                     SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
