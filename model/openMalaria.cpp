@@ -293,12 +293,13 @@ int main(int argc, char* argv[])
         // genotypes (both from Human, from Population::init()) and
         // mon::AgeGroup (from Surveys.init()):
         // Note: PerHost dependency can be postponed; it is only used to set adultAge
-        std::unique_ptr<Population> population = unique_ptr<Population>(new Population( scenario.getDemography().getPopSize() ));
-        std::unique_ptr<TransmissionModel> transmission = unique_ptr<TransmissionModel>(Transmission::createTransmissionModel(scenario.getEntomology(), scenario.getInterventions(), population->size()));
+        size_t popSize = scenario.getDemography().getPopSize();
+        std::unique_ptr<Population> population = unique_ptr<Population>(new Population( popSize ));
+        std::unique_ptr<TransmissionModel> transmission = unique_ptr<TransmissionModel>(Transmission::createTransmissionModel(scenario.getEntomology(), popSize));
         
         // Depends on transmission model (for species indexes):
         // MDA1D may depend on health system (too complex to verify)
-        interventions::InterventionManager::init( scenario.getInterventions(), *transmission );
+        interventions::InterventionManager::init(scenario.getInterventions(), *population, *transmission );
         
         // Depends on interventions, PK/PD (from humanPop):
         Clinical::ClinicalModel::setHS( scenario.getHealthSystem() );

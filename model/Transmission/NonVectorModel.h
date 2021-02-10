@@ -85,7 +85,7 @@ public:
     const char *viError = "vector model interventions can not be used with the non-vector model";
     virtual void initVectorInterv(const scnXml::Description::AnophelesSequence &list, size_t instance, const string &name)
     {
-        throw util::xml_scenario_error(viError);
+        throw util::xml_scenario_error("vector model interventions can not be used with the non-vector model");
     }
 
     virtual void initVectorTrap(const scnXml::VectorTrap::DescriptionSequence list, size_t instance, const scnXml::VectorTrap::NameOptional name)

@@ -189,7 +189,8 @@ const string &reverseLookup(const map<string, size_t> &m, size_t i)
 }
 
 VectorModel::VectorModel(vector<double> initEIR, int interventionMode, vector<std::unique_ptr<Anopheles::AnophelesModel>> speciesList,
-                         vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFittersList, map<string, size_t> speciesIndexList, int populationSize)
+                         vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFittersList, map<string, size_t> speciesIndexList,
+                         int populationSize)
     : TransmissionModel(std::move(initEIR), interventionMode, WithinHost::Genotypes::N())
     , m_rng(util::master_RNG)
     , initIterations(0)
@@ -387,7 +388,7 @@ SimTime VectorModel::initIterate()
         return SimTime::zero(); // no initialization to do
     }
 
-    // Fitting is doness
+    // Fitting is done
     if (initIterations < 0)
     {
         simulationMode = dynamicEIR;
@@ -399,14 +400,9 @@ SimTime VectorModel::initIterate()
     bool needIterate = false;
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
-        bool needFitting = speciesFitters[i]->fit(*species[i]);
+        needIterate = speciesFitters[i]->fit(*species[i]);
         species[i]->initIterate();
-
-        if(needFitting)
-        {
-            needIterate = true;
-            break;
-        }
+        if (needIterate) break;
     }
 
     if (needIterate)
@@ -507,8 +503,7 @@ void VectorModel::vectorUpdate(const Population &population)
 
     for (size_t s = 0; s < speciesIndex.size(); ++s)
     {
-        species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif[s],
-                                  sigma_dff[s], simulationMode == dynamicEIR);
+        species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif[s], sigma_dff[s], simulationMode == dynamicEIR);
     }
 }
 void VectorModel::update(const Population &population) { TransmissionModel::updateKappa(population); }

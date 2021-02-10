@@ -48,8 +48,9 @@ public:
     const map<string, size_t> &getSpeciesIndexMap() { return speciesIndex; }
 
     VectorModel(vector<double> initEIR, int interventionMode, vector<std::unique_ptr<Anopheles::AnophelesModel>> speciesList,
-                vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFittersList, map<string, size_t> speciesIndexList, int populationSize);
-    
+                vector<std::unique_ptr<Anopheles::AnophelesModelFitter>> speciesFittersList, map<string, size_t> speciesIndexList,
+                int populationSize);
+
     virtual ~VectorModel();
 
     /** Extra initialisation when not loading from a checkpoint, requiring
@@ -108,6 +109,7 @@ private:
     void ctsCbResAvailability(ostream &stream);
     void ctsCbResRequirements(ostream &stream);
 
+public:
     /// RNG used by the transmission model
     LocalRng m_rng;
 
