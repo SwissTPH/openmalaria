@@ -31,7 +31,6 @@
 #include "WithinHost/Diagnostic.h"
 #include "WithinHost/Genotypes.h"
 #include "mon/management.h"
-#include "util/timer.h"
 #include "util/CommandLine.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"
