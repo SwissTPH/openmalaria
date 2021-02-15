@@ -27,6 +27,7 @@
 #include "Clinical/ClinicalModel.h"
 #include "Population.h"
 #include "Transmission/TransmissionModel.h"
+#include "Transmission/VectorModel.h"
 #include "util/random.h"
 #include <schema/interventions.h>
 
@@ -293,7 +294,9 @@ public:
         inst(instance)
     {}
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
-      transmission.deployVectorPopInterv(inst);
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
+        if(vectorModel)
+            vectorModel->deployVectorPopInterv(inst);
     }
     virtual void print_details( std::ostream& out )const{
         out << date << "\t\t\t\t\tvector";
@@ -309,8 +312,12 @@ public:
         TimedDeployment(date), inst(instance), ratio(ratio), lifespan(lifespan)
     {}
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
-        double number = population.size() * ratio;
-        transmission.deployVectorTrap(inst, number, lifespan);
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
+        if(vectorModel)
+        {
+            double number = population.size() * ratio;
+            vectorModel->deployVectorTrap(inst, number, lifespan);
+        }
     }
     virtual void print_details( std::ostream& out )const{
         out << date << "\t\t\t\t\tvector trap";
@@ -330,7 +337,9 @@ public:
         name(name)
     {}
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
-      transmission.deployNonHumanHostsInterv(instance, name);
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
+        if(vectorModel)
+            vectorModel->deployNonHumanHostsInterv(instance, name);
     }
     virtual void print_details( std::ostream& out )const{
         out << date << "\t\t\t\t\tnhh";
@@ -347,8 +356,12 @@ public:
         TimedDeployment( date ), name(name), lifespan(lifespan)
     {}
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
-        double popSize = population.size();
-        transmission.deployAddNonHumanHosts(name, popSize, lifespan);
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
+        if(vectorModel)
+        {
+            double popSize = population.size();
+            vectorModel->deployAddNonHumanHosts(name, popSize, lifespan);
+        }
     }
     virtual void print_details( std::ostream& out )const{
         out << date << "\t\t\t\t\tnhh";

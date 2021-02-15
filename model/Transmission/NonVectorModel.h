@@ -82,28 +82,6 @@ public:
 
     virtual void init2(const Population &population) { simulationMode = forcedEIR; } // no set-up needed; just indicate we're ready to roll
 
-    const char *viError = "vector model interventions can not be used with the non-vector model";
-    virtual void initVectorInterv(const scnXml::Description::AnophelesSequence &list, size_t instance, const string &name)
-    {
-        throw util::xml_scenario_error("vector model interventions can not be used with the non-vector model");
-    }
-
-    virtual void initVectorTrap(const scnXml::VectorTrap::DescriptionSequence list, size_t instance, const scnXml::VectorTrap::NameOptional name)
-    {
-        throw util::xml_scenario_error(viError);
-    }
-
-    virtual void initNonHumanHostsInterv(const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay, size_t instance,
-                                 const string &name)
-    {
-        throw util::xml_scenario_error(viError);
-    }
-
-    virtual void initAddNonHumanHostsInterv(const scnXml::Description3::AnophelesSequence list, const string &name)
-    {
-        throw util::xml_scenario_error(viError);
-    }
-
     virtual void scaleEIR(double factor)
     {
         util::vectors::scale(initialisationEIR, factor);
@@ -190,11 +168,6 @@ public:
         // reset history of human infectivity, which scales dynamic EIR:
         laggedKappa.assign(laggedKappa.size(), 0.0);
     }
-
-    virtual void deployVectorPopInterv(size_t instance) { throw util::xml_scenario_error(viError); }
-    virtual void deployVectorTrap(size_t instance, double popSize, SimTime lifespan) { throw util::xml_scenario_error(viError); }
-    virtual void deployNonHumanHostsInterv(size_t instance, string name) { throw util::xml_scenario_error(viError); }
-    virtual void deployAddNonHumanHosts(string name, double popSize, SimTime lifespan) { throw util::xml_scenario_error(viError); }
 
     virtual void update(const Population &population)
     {
