@@ -348,28 +348,6 @@ void VectorModel::scaleEIR(double factor)
     vectors::scale(initialisationEIR, factor);
     annualEIR = vectors::sum(initialisationEIR);
 }
-#if 0
-void VectorModel::scaleXML_EIR (scnXml::EntoData& ed, double factor) const {
-    // XML values are exponentiated; so we add some factor to existing a0 values:
-    double add_to_a0 = std::log( factor );
-
-    assert( ed.getVector().present() );
-    scnXml::Vector::AnophelesSequence& anophelesList = ed.getVector().get().getAnopheles();
-
-    for( auto it = anophelesList.begin();
-            it != anophelesList.end(); ++it ) {
-        if( it->getEIR().present() ){
-            double old_a0 = it->getEIR().get().getA0();
-            it->getEIR().get().setA0( old_a0 + add_to_a0 );
-        }else{
-            // schema should enforce that one of the two is here
-            assert( it->getMonthlyEIR().present() );
-            double oldAnnual = it->getMonthlyEIR().get().getAnnualEIR();
-            it->getMonthlyEIR().get().setAnnualEIR( oldAnnual * factor );
-        }
-    }
-}
-#endif
 
 SimTime VectorModel::minPreinitDuration()
 {

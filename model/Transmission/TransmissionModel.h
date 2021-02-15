@@ -128,20 +128,6 @@ public:
      * information from the human population structure. */
     virtual void init2(const Population &population) = 0;
 
-    /** Set up vector population interventions. */
-    virtual void initVectorInterv(const scnXml::Description::AnophelesSequence &list, size_t instance, const string &name) = 0;
-
-    /** Set up vector trap interventions. */
-    virtual void initVectorTrap(const scnXml::VectorTrap::DescriptionSequence list, size_t instance,
-                                const scnXml::VectorTrap::NameOptional name) = 0;
-
-    // /** Set up non-human hosts interventions. */
-    virtual void initNonHumanHostsInterv(const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay,
-                                         size_t instance, const string &name) = 0;
-
-    // /** Set up non-human hosts interventions. */
-    virtual void initAddNonHumanHostsInterv(const scnXml::Description3::AnophelesSequence list, const string &name) = 0;
-
     /// Checkpointing
     template <class S>
     void operator&(S &stream)
@@ -177,17 +163,6 @@ public:
      * EIR is scaled in memory (so will affect this simulation).
      * XML data is not touched. */
     virtual void scaleEIR(double factor) = 0;
-
-#if 0
-  /** Scale the EIR descriptions in the XML element.
-   * This updates the XML, and not the EIR descriptions used for simulations.
-   * In order for changes to be written back to the XML file,
-   * InputData.documentChanged needs to be set.
-   * 
-   * @param ed	Access to XML element to update.
-   * @param factor	Multiplicative factor by which to scale EIR. */
-  virtual void scaleXML_EIR (scnXml::EntoData& ed, double factor) const =0;
-#endif
 
     /** How many intervals are needed for transmission initialization during the
      * "human" phase (before vector init)?
@@ -260,23 +235,6 @@ public:
         }
         return allEIR;
     }
-
-    /** Deploy a vector population intervention.
-     *
-     * Instance: the index of this instance of the intervention. Each instance
-     * has it's own parameterisation. 0 <= instance < N where N is the number of
-     * instances. */
-    virtual void deployVectorPopInterv(size_t instance) = 0;
-    /// Deploy some vector traps.
-    ///
-    /// @param instance Index of this type of trap
-    /// @param number The number of traps to deploy
-    /// @param lifespan Time until these traps are removed/replaced/useless
-    virtual void deployVectorTrap(size_t instance, double popSize, SimTime lifespan) = 0;
-
-    virtual void deployNonHumanHostsInterv(size_t instance, string name) = 0;
-
-    virtual void deployAddNonHumanHosts(string name, double popSize, SimTime lifespan) = 0;
 
     /** Remove all current infections to mosquitoes, such that without re-
      * infection, humans will then be exposed to zero EIR. */
