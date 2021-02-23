@@ -20,7 +20,6 @@
 
 #include "util/vectors.h"
 #include "util/errors.h"
-#include "util/vecDay.h"
 #include <cstring>
 #include <cmath>
 #include <cassert>
