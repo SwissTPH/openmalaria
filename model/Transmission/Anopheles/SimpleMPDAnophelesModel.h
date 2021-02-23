@@ -40,9 +40,9 @@ public:
         , probPreadultSurvival(probPreadultSurvival)
         , fEggsLaidByOviposit(fEggsLaidByOviposit)
     {
-        quinquennialOvipositing.assign(SimTime::fromYearsI(5), 0.0);
-        invLarvalResources.assign(SimTime::oneYear(), 0.0);
-        nOvipositingDelayed.assign(developmentDuration, 0.0);
+        quinquennialOvipositing.resize(SimTime::fromYearsI(5).inDays(), 0.0);
+        invLarvalResources.resize(SimTime::oneYear().inDays(), 0.0);
+        nOvipositingDelayed.resize(developmentDuration.inDays(), 0.0);
     }
 
     /** Initialisation which must wait until a human population is available.
@@ -72,18 +72,18 @@ public:
         double tsP_dff = sigma_dff * availDivisor * mosq.probMosqSurvivalOvipositing;
 
         // Initialise nOvipositingDelayed
-        SimTime y1 = SimTime::oneYear();
-        SimTime tau = mosq.restDuration;
-        for (SimTime t = SimTime::zero(); t < developmentDuration; t += SimTime::oneDay())
+        int y1 = SimTime::oneYear().inDays();
+        int tau = mosq.restDuration.inDays();
+        for (int t = 0; t < developmentDuration.inDays(); t++)
         {
-            nOvipositingDelayed[mod_nn(t + tau, developmentDuration)] = tsP_dff * initNvFromSv * forcedS_v[t];
+            nOvipositingDelayed[util::mod_nn(t + tau, developmentDuration.inDays())] = tsP_dff * initNvFromSv * forcedS_v[t];
         }
 
         // Used when calculating invLarvalResources (but not a hard constraint):
         assert(tau + developmentDuration <= y1);
-        for (SimTime t = SimTime::zero(); t < SimTime::oneYear(); t += SimTime::oneDay())
+        for (int t = 0; t < SimTime::oneYear().inDays(); t++)
         {
-            double yt = fEggsLaidByOviposit * tsP_dff * initNvFromSv * forcedS_v[mod_nn(t + y1 - tau - developmentDuration, y1)];
+            double yt = fEggsLaidByOviposit * tsP_dff * initNvFromSv * forcedS_v[util::mod_nn(t + y1 - tau - developmentDuration.inDays(), y1)];
             invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) / (mosqEmergeRate[t] * yt);
         }
     }
@@ -102,17 +102,17 @@ public:
     {
         bool fitted = AnophelesModel::initIterate();
 
-        SimTime y1 = SimTime::oneYear(), y2 = SimTime::fromYearsI(2), y3 = SimTime::fromYearsI(3), y4 = SimTime::fromYearsI(4),
-                y5 = SimTime::fromYearsI(5);
+        int y1 = SimTime::oneYear().inDays(), y2 = SimTime::fromYearsI(2).inDays(), y3 = SimTime::fromYearsI(3).inDays(), y4 = SimTime::fromYearsI(4).inDays(),
+                y5 = SimTime::fromYearsI(5).inDays();
         assert(mosqEmergeRate.size() == y1);
 
-        for (SimTime t = SimTime::zero(); t < y1; t += SimTime::oneDay())
+        for (int t = 0; t < y1; t++)
         {
-            SimTime ttj = t - developmentDuration;
+            int ttj = t - developmentDuration.inDays();
             // b · P_df · avg_N_v(t - θj - τ):
             double yt = fEggsLaidByOviposit * 0.2 *
                         (quinquennialOvipositing[ttj + y1] + quinquennialOvipositing[ttj + y2] + quinquennialOvipositing[ttj + y3] +
-                         quinquennialOvipositing[ttj + y4] + quinquennialOvipositing[mod_nn(ttj + y5, y5)]);
+                         quinquennialOvipositing[ttj + y4] + quinquennialOvipositing[util::mod_nn(ttj + y5, y5)]);
             invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) / (mosqEmergeRate[t] * yt);
         }
 
@@ -120,18 +120,18 @@ public:
     }
     //@}
 
-    virtual double getEmergenceRate(const SimTime &d0, const vecDay<double> &mosqEmergeRate, double nOvipositing)
+    virtual double getEmergenceRate(const SimTime &d0, const std::vector<double> &mosqEmergeRate, double nOvipositing)
     {
         // Simple Mosquito Population Dynamics model: emergence depends on the
         // adult population, resources available, and larviciding.
         // See: A Simple Periodically-Forced Difference Equation Model for
         // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
-        SimTime d1 = d0 + SimTime::oneDay();
+        int d1 = d0.inDays() + 1;
 
-        double yt = fEggsLaidByOviposit * nOvipositingDelayed[mod_nn(d1, developmentDuration)];
-        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, SimTime::oneYear())] * yt);
-        nOvipositingDelayed[mod_nn(d1, developmentDuration)] = nOvipositing;
-        quinquennialOvipositing[mod_nn(d1, SimTime::fromYearsI(5))] = nOvipositing;
+        double yt = fEggsLaidByOviposit * nOvipositingDelayed[util::mod_nn(d1, developmentDuration.inDays())];
+        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, SimTime::oneYear()).inDays()] * yt);
+        nOvipositingDelayed[util::mod_nn(d1, developmentDuration.inDays())] = nOvipositing;
+        quinquennialOvipositing[util::mod_nn(d1, SimTime::fromYearsI(5).inDays())] = nOvipositing;
         return emergence;
     }
 
@@ -146,7 +146,7 @@ public:
         for (SimTime i = start, end = start + SimTime::oneTS(); i < end; i += SimTime::oneDay())
         {
             SimTime dYear1 = mod_nn(i, SimTime::oneYear());
-            total += 1.0 / invLarvalResources[dYear1];
+            total += 1.0 / invLarvalResources[dYear1.inDays()];
         }
         return total / SimTime::oneTS().inDays();
     }
@@ -185,7 +185,7 @@ private:
     // -----  parameters (constant after initialisation)  -----
 
     /** As quinquennialS_v, but for N_v*P_df (units: animals). */
-    vecDay<double> quinquennialOvipositing;
+    std::vector<double> quinquennialOvipositing;
 
     /** Resources for mosquito larvae (or rather 1 over resources); γ(t) in
      * model description.
@@ -204,13 +204,13 @@ private:
      * Units: 1 / animals per day.
      *
      * vecDay be checkpointed. */
-    vecDay<double> invLarvalResources;
+    std::vector<double> invLarvalResources;
 
     /** Vector for storing values of nOvipositing for the last
      * developmentDuration time steps. Index 0 should correspond to
      * nOvipositing developmentDuration days before
      * get(0, dYear1, nOvipositing) is called. */
-    vecDay<double> nOvipositingDelayed;
+    std::vector<double> nOvipositingDelayed;
 };
 
 } // namespace Anopheles

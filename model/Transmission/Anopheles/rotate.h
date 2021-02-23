@@ -10,13 +10,13 @@ namespace Transmission {
 namespace Anopheles {
 using namespace OM::util;
 
-inline int argmax(const vecDay<double> &vec)
+inline int argmax(const std::vector<double> &vec)
 {
     int imax = 0;
     double max = 0.0;
-    for(int i=0; i<vec.size().inDays(); i++)
+    for(size_t i=0; i<vec.size(); i++)
     {
-        double v = vec[SimTime::fromDays(i)];
+        double v = vec[i];
         if(v >= max)
         {
             max = v;
@@ -26,9 +26,9 @@ inline int argmax(const vecDay<double> &vec)
     return imax;
 }
 
-inline double findAngle(const double EIRRotageAngle, const vector<double> & FSCoeffic, const vecDay<double> &sim)
+inline double findAngle(const double EIRRotageAngle, const vector<double> & FSCoeffic, const std::vector<double> &sim)
 {
-    vecDay<double> temp(sim.size(), 0.0);
+    std::vector<double> temp(sim.size(), 0.0);
 
     double delta = 2.0 * M_PI / 365.0;
 
@@ -40,7 +40,7 @@ inline double findAngle(const double EIRRotageAngle, const vector<double> & FSCo
 
         // Minimize l1-norm
         double sum = 0.0;
-        for(SimTime i=SimTime::zero(); i<SimTime::oneYear(); i+=SimTime::oneDay())
+        for(int i=0; i<SimTime::oneYear().inDays(); i++)
         {
             double v = fabs(temp[i] - sim[i]);
             sum += v*v;
