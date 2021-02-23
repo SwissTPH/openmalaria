@@ -26,9 +26,6 @@
 #include "Transmission/PerHost.h"
 #include "util/SimpleDecayingValue.h"
 #include "util/vectors.h"
-#include "util/vecDay.h"
-
-#include "util/vectors.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
 
@@ -41,7 +38,6 @@ namespace OM {
 namespace Transmission {
 namespace Anopheles {
     using std::numeric_limits;
-    using util::vector2D;
     using namespace OM::util;
 
 enum VecStat { PA, PAmu, PA1, PAh, PDF, PDIF, NV, OV, SV };
@@ -201,12 +197,12 @@ public:
             initOvFromSv(numeric_limits<double>::quiet_NaN()),
             initNv0FromSv(numeric_limits<double>::quiet_NaN()),
             // MosqTransmission
-            N_v_length(SimTime::zero()),
+            N_v_length(0),
             timeStep_N_v0(0.0)
     {
-        forcedS_v.resize (SimTime::oneYear());
-        quinquennialS_v.assign (SimTime::fromYearsI(5), 0.0);
-        mosqEmergeRate.assign (SimTime::oneYear(), 0.0);
+        forcedS_v.resize (SimTime::oneYear().inDays());
+        quinquennialS_v.resize (SimTime::fromYearsI(5).inDays(), 0.0);
+        mosqEmergeRate.resize (SimTime::oneYear().inDays(), 0.0);
     }
     
     AnophelesModel(const AnophelesModel&) = delete;            //disable copy-constructor
@@ -324,17 +320,17 @@ public:
     void initState ( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah,
                      double tsP_df, double tsP_dff,
                      double initNvFromSv, double initOvFromSv,
-                     const vecDay<double>& forcedS_v);
+                     const std::vector<double>& forcedS_v);
     
     /// Helper function for initialisation.
     void initIterateScale ( double factor );
     
-    virtual double getEmergenceRate(const SimTime &d0, const vecDay<double>& mosqEmergeRate, double nOvipositing)
+    virtual double getEmergenceRate(const SimTime &d0, const std::vector<double>& mosqEmergeRate, double nOvipositing)
     {   
         // Get emergence at start of step:
         SimTime dYear1 = mod_nn(d0, SimTime::oneYear());
         // Simple model: fixed emergence scaled by larviciding
-        return mosqEmergeRate[dYear1];
+        return mosqEmergeRate[dYear1.inDays()];
     }
 
     /** Update by one day (may be called multiple times for 1 time-step update).
@@ -482,7 +478,7 @@ public:
      * state at time-step 1.
      *
      * Should be checkpointed. */
-    vecDay<double> forcedS_v;
+    std::vector<double> forcedS_v;
     
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
@@ -501,7 +497,7 @@ public:
      * Length is 365 * 5. Checkpoint.
      *
      * Units: inoculations. */
-    vecDay<double> quinquennialS_v;
+    std::vector<double> quinquennialS_v;
     
     /** Conversion factor from forcedS_v to mosqEmergeRate.
      *
@@ -519,7 +515,7 @@ public:
      * Units: Animals per day.
      *
      * Should be checkpointed. */
-    vecDay<double> mosqEmergeRate;
+    std::vector<double> mosqEmergeRate;
     
     /** N_v_length-1 is the number of previous days for which some parameters are
      * stored: P_A, P_df, P_dif, N_v, O_v and S_v. This is longer than some of
@@ -529,7 +525,7 @@ public:
      * θ_s + τ - 1 days back, plus current day.
      *
      * Set by initialise; no need to checkpoint. */
-    SimTime N_v_length;
+    int N_v_length;
     
     // -----  variable model state  -----
     
@@ -548,36 +544,36 @@ public:
      * These arrays should be checkpointed. */
     //@{
     /** Probability of a mosquito not finding a host one night. */
-    vecDay<double> P_A;
+    std::vector<double> P_A;
     
     /** P_df is the probability of a mosquito finding a host and completing a
      * feeding cycle without being killed. */
-    vecDay<double> P_df;
+    std::vector<double> P_df;
     
     /** P_dif is the probability of a mosquito finding a host, getting
      * infected, and successfully completing a feeding cycle. */
-    vecDay2D<double> P_dif;
+    std::vector<double> P_dif;
     
     /** Like P_df but including fertility factors */
-    vecDay<double> P_dff;
+    std::vector<double> P_dff;
     
     /** Numbers of host-seeking mosquitos each day */
-    vecDay<double> N_v;
+    std::vector<double> N_v;
     
     /** Numbers of infected host-seeking mosquitoes */
-    vecDay2D<double> O_v;
+    std::vector<double> O_v;
 
     /** Nnumbers of infective (to humans) host-seeking mosquitoes */
-    vecDay2D<double> S_v;
+    std::vector<double> S_v;
 
     /** Probability of a mosquito dying */
-    vecDay<double> P_Amu;
+    std::vector<double> P_Amu;
 
     /** Probability of a mosquito finding a host */
-    vecDay<double> P_A1;
+    std::vector<double> P_A1;
 
     /** Probability of a mosquito finding a non-human host type*/
-    vecDay<double> P_Ah;
+    std::vector<double> P_Ah;
     //@}
     
     ///@brief Working memory
@@ -596,9 +592,9 @@ public:
      *
      * Don't need to be checkpointed, but some values need to be initialised. */
     //@{
-    vecDay<double> fArray;
-    vecDay<double> ftauArray;
-    vecDay<double> uninfected_v;
+    std::vector<double> fArray;
+    std::vector<double> ftauArray;
+    std::vector<double> uninfected_v;
     //@}
     
     /** Variables tracking data to be reported. */
