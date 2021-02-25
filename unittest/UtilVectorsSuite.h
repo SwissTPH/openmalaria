@@ -26,7 +26,6 @@
 #include "ExtraAsserts.h"
 
 #include "util/vectors.h"
-#include "util/vecDay.h"
 
 using namespace OM::util;
 using OM::sim;
