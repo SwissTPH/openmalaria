@@ -106,9 +106,6 @@ void IRSComponent::IRSAnopheles::init(
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
-inline bool inRange01( double x ){
-    return x>=0.0 && x<= 1.0;
-}
 IRSComponent::IRSAnopheles::RelativeAttractiveness::RelativeAttractiveness() :
     lPF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
