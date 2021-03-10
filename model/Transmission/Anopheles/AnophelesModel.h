@@ -269,9 +269,6 @@ public:
     /** Set up trap parameters. */
     void initVectorTrap( const scnXml::Description1& desc, size_t instance );
     
-    // /** Set up the non-human hosts interventions. */
-    void initNonHumanHostsInterv( const scnXml::NonHumanHostsSpeciesIntervention& elt, const scnXml::DecayFunction& decay, size_t instance, string name );
-    
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
@@ -304,8 +301,6 @@ public:
     /// @param number The number of traps to deploy
     /// @param lifespan Time until these traps are removed/replaced/useless
     void deployVectorTrap(LocalRng& rng, size_t species, size_t instance, double popSize, SimTime lifespan);
-
-    void deployNonHumanHostsInterv(LocalRng& rng, size_t species, size_t instance, string name);
 
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */

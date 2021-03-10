@@ -334,15 +334,85 @@ private:
 
 class TimedNonHumanHostsDeployment : public TimedDeployment {
 public:
-    TimedNonHumanHostsDeployment( SimDate date, size_t instance, string name ) :
+    TimedNonHumanHostsDeployment( SimDate date, size_t instance, string intervName, const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay, Transmission::TransmissionModel& transmission) :
         TimedDeployment( date ),
         instance(instance),
-        name(name)
-    {}
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+        intervName(intervName)
+    {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
         if(vectorModel)
-            vectorModel->deployNonHumanHostsInterv(instance, name);
+        {
+            util::SpeciesIndexChecker checker(intervName, vectorModel->speciesIndex);
+            for (const scnXml::NonHumanHostsSpeciesIntervention &anoph : list)
+            {
+                const string &mosqName = anoph.getMosquito();
+                size_t i = checker.getIndex(mosqName);
+
+                Transmission::Anopheles::AnophelesModel *anophModel = vectorModel->species[i].get();
+
+                if (anophModel->reduceNhhAvailability[intervName].size() <= instance) anophModel->reduceNhhAvailability[intervName].resize(instance + 1);
+                if (anophModel->reduceP_B_I[intervName].size() <= instance) anophModel->reduceP_B_I[intervName].resize(instance + 1);
+                if (anophModel->reduceP_C_I[intervName].size() <= instance) anophModel->reduceP_C_I[intervName].resize(instance + 1);
+                if (anophModel->reduceP_D_I[intervName].size() <= instance) anophModel->reduceP_D_I[intervName].resize(instance + 1);
+                if (anophModel->reduceFecundity[intervName].size() <= instance) anophModel->reduceFecundity[intervName].resize(instance + 1);
+
+                if (anoph.getAvailabilityReduction().present())
+                {
+                    const scnXml::AvailabilityReduction &decayFunc = anoph.getAvailabilityReduction().get();
+                    if (decayFunc.getInitial() > 1.0) throw util::xml_scenario_error("availabilityReduction intervention: initial effect must be <= 1");
+                    anophModel->reduceNhhAvailability[intervName][instance].set(decayFunc.getInitial(), decay, "availabilityReduction");
+                }
+                if (anoph.getPreprandialKillingEffect().present())
+                {
+                    const scnXml::PreprandialKillingEffect &decayFunc = anoph.getPreprandialKillingEffect().get();
+                    if (decayFunc.getInitial() < 0 || decayFunc.getInitial() > 1)
+                        throw util::xml_scenario_error("PreprandialKillingEffect intervention: initial effect must be between 0 and 1");
+                    anophModel->reduceP_B_I[intervName][instance].set(decayFunc.getInitial(), decay, "reduceP_B_I");
+                }
+                if (anoph.getPostprandialKillingEffect().present())
+                {
+                    const scnXml::PostprandialKillingEffect &decayFunc = anoph.getPostprandialKillingEffect().get();
+                    if (decayFunc.getInitial() < 0 || decayFunc.getInitial() > 1)
+                        throw util::xml_scenario_error("PostprandialKillingEffect intervention: initial effect must be between 0 and 1");
+                    anophModel->reduceP_C_I[intervName][instance].set(decayFunc.getInitial(), decay, "reduceP_C_I");
+                }
+                if (anoph.getRestingKillingEffect().present())
+                {
+                    const scnXml::RestingKillingEffect &decayFunc = anoph.getRestingKillingEffect().get();
+                    if (decayFunc.getInitial() < 0 || decayFunc.getInitial() > 1)
+                        throw util::xml_scenario_error("RestingKillingEffect intervention: initial effect must be be between 0 and 1");
+                    anophModel->reduceP_D_I[intervName][instance].set(decayFunc.getInitial(), decay, "reduceP_D_I");
+                }
+                if (anoph.getFecundityReduction().present())
+                {
+                    const scnXml::FecundityReduction &decayFunc = anoph.getFecundityReduction().get();
+                    if (decayFunc.getInitial() < 0 || decayFunc.getInitial() > 1)
+                        throw util::xml_scenario_error("FecundityReduction intervention: initial effect must be be between 0 and 1");
+                    anophModel->reduceFecundity[intervName][instance].set(decayFunc.getInitial(), decay, "reduceFecundity");
+                }
+            }
+            checker.checkNoneMissed();
+        }
+    }
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission)
+    {
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
+        if(vectorModel)
+        {
+            for (size_t i = 0; i < vectorModel->speciesIndex.size(); ++i)
+            {
+                Transmission::Anopheles::AnophelesModel *anophModel = vectorModel->species[i].get();
+
+                if (anophModel->nhhInstances.count(intervName) == 0)
+                    throw util::xml_scenario_error("non human hosts type " + intervName + " not deployed during non human hosts intervention deployment");
+
+                anophModel->reduceNhhAvailability[intervName][instance].deploy(vectorModel->m_rng, sim::now());
+                anophModel->reduceP_B_I[intervName][instance].deploy(vectorModel->m_rng, sim::now());
+                anophModel->reduceP_C_I[intervName][instance].deploy(vectorModel->m_rng, sim::now());
+                anophModel->reduceP_D_I[intervName][instance].deploy(vectorModel->m_rng, sim::now());
+                anophModel->reduceFecundity[intervName][instance].deploy(vectorModel->m_rng, sim::now());
+            }
+        }
     }
     virtual void print_details( std::ostream& out )const{
         out << date << "\t\t\t\t\tnhh";
@@ -350,7 +420,7 @@ public:
     
 private:
     size_t instance;
-    string name;
+    string intervName;
 };
 
 const string vec_mode_err = "vector interventions can only be used in dynamic transmission mode (mode=\"dynamic\")";
