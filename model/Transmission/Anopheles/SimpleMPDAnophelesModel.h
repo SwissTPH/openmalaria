@@ -18,47 +18,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-#ifndef Hmod_Anopheles_SimpleMPDEmergence
-#define Hmod_Anopheles_SimpleMPDEmergence
+#ifndef Hmod_SimpleMPDAnophelesModel
+#define Hmod_SimpleMPDAnophelesModel
 
-#include "Global.h"
-#include "Transmission/Anopheles/EmergenceModel.h"
-#include "schema/interventions.h"
-#include <vector>
-#include <limits>
-
-#include "rotate.h"
+#include "Transmission/Anopheles/AnophelesModel.h"
 
 namespace OM {
 namespace Transmission {
 namespace Anopheles {
 
-using namespace std;
-using namespace OM::util;
-
-// forward declare to avoid circular dependency:
-class MosqTransmission;
-
-/** Part of vector anopheles model, giving emergence of adult mosquitoes from
- * water bodies. This model fits annual (periodic) sequence to produce the
- * desired EIR during warmup, then calculates larval resources (space) needed
- * to reproduce this emergence according to a simple model.
- * 
- * Larviciding intervention directly scales the number of mosquitoes emerging
- * by a number, usually in the range [0,1] (but larger than 1 is also valid).
- * Simple mosquito population dynamics model ensures reduction in adult
- * mosquito numbers affects emergence.
- * 
- * TODO(vec lifecycle): most of this code is identical to that from the FixedEmergence model.
- * Use common base or even make this extend FixedEmergence?
- */
-class SimpleMPDEmergence : public EmergenceModel
+class SimpleMPDAnophelesModel : public AnophelesModel
 {
 public:
     ///@brief Initialisation and destruction
     //@{
-    /// Initialise and allocate memory
-    SimpleMPDEmergence(const scnXml::SimpleMPD& elt)
+    SimpleMPDAnophelesModel (const scnXml::SimpleMPD& elt)
     {
         quinquennialOvipositing.assign (SimTime::fromYearsI(5), 0.0);
         invLarvalResources.assign (SimTime::oneYear(), 0.0);
@@ -78,16 +52,32 @@ public:
         nOvipositingDelayed.assign (developmentDuration, 0.0);
     }
 
-    /** Latter part of AnophelesModel::init2.
+    /** Initialisation which must wait until a human population is available.
+     * This is only called when a checkpoint is not loaded.
      *
-     * @param tsP_A P_A for this time step.
-     * @param tsP_df P_df for this time step.
-     * @param tsP_dff P_dff for this time step.
-     * @param EIRtoS_v multiplication factor to convert input EIR into required
-     * @param transmission reference to MosqTransmission object
-     * S_v. */
-    void init2(double tsP_dff, double initNvFromSv, const vecDay<double>& forcedS_v, const vecDay<double>& mosqEmergeRate, const SimTime &mosqRestDuration)
+     * @param nHumans Human population size
+     * @param meanPopAvail The mean availability of age-based relative
+     * availability of humans to mosquitoes across populations.
+     * @param sum_avail sum_i α_i * N_i for human hosts i
+     * @param sigma_f sum_i α_i * N_i * P_Bi for human hosts i
+     * @param sigma_df sum_i α_i * N_i * P_Bi * P_Ci * P_Di for human hosts i
+     * @param sigma_dff sum_i α_i * N_i * P_Bi * P_Ci * P_Di * rel_mosq_fecundity for human hosts i
+     *
+     * Can only usefully run its calculations when not checkpointing, due to
+     * population not being the same when loaded from a checkpoint. */
+    virtual void init2 (int nHumans, double meanPopAvail, double sum_avail, double sigma_f, double sigma_df, double sigma_dff)
     {
+        AnophelesModel::init2(nHumans, meanPopAvail, sum_avail, sigma_f, sigma_df, sigma_dff);
+
+        // Recompute tsp_dff locally
+        double leaveRate = sum_avail + nhh_avail + mosqSeekingDeathRate;
+        sigma_df += nhh_sigma_df;
+        sigma_dff += nhh_sigma_dff;
+        
+        double tsP_A = exp(-leaveRate * mosqSeekingDuration);
+        double availDivisor = (1.0 - tsP_A) / leaveRate;   // α_d
+        double tsP_dff  = sigma_dff * availDivisor * probMosqSurvivalOvipositing;
+
         // Initialise nOvipositingDelayed
         SimTime y1 = SimTime::oneYear();
         SimTime tau = mosqRestDuration;
@@ -105,13 +95,20 @@ public:
                 (mosqEmergeRate[t] * yt);
         }
     }
+    
+    virtual void scale(double factor)
+    {
+        AnophelesModel::scale(factor);
+        vectors::scale (nOvipositingDelayed, factor);
+    }
+
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    virtual void initIterate (double factor, const vecDay<double>& mosqEmergeRate)
+    virtual bool initIterate ()
     {
-        vectors::scale (nOvipositingDelayed, factor);
+        bool fitted = AnophelesModel::initIterate();
 
         SimTime y1 = SimTime::oneYear(),
             y2 = SimTime::fromYearsI(2),
@@ -132,10 +129,12 @@ public:
             invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) /
                 (mosqEmergeRate[t] * yt);
         }
+
+        return fitted;
     }
     //@}
     
-    virtual double update(const SimTime &d0, const vecDay<double>& mosqEmergeRate, double nOvipositing)
+    virtual double getEmergenceRate(const SimTime &d0, const vecDay<double>& mosqEmergeRate, double nOvipositing)
     {
         // Simple Mosquito Population Dynamics model: emergence depends on the
         // adult population, resources available, and larviciding.
@@ -149,9 +148,10 @@ public:
         quinquennialOvipositing[mod_nn(d1, SimTime::fromYearsI(5))] = nOvipositing;
         return emergence;
     }
+
     ///@brief Interventions and reporting
     //@{
-    double getResAvailability() const
+    virtual double getResAvailability() const
     {
         //TODO: why offset by one time step? This is effectively getting the resources available on the last time step
         //TODO: only have to add one year because of offset
@@ -164,21 +164,18 @@ public:
         return total / SimTime::oneTS().inDays();
     }
 
-    double getResRequirements() const {
+    virtual double getResRequirements() const {
         return numeric_limits<double>::quiet_NaN();
     }
-    //@}
-    
-protected:
+
     virtual void checkpoint (istream& stream){ (*this) & stream; }
     virtual void checkpoint (ostream& stream){ (*this) & stream; }
-    
+
 private:
-    
-    /// Checkpointing
-    //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
+        AnophelesModel::checkpoint(stream);
+
         quinquennialOvipositing & stream;
         developmentDuration & stream;
         probPreadultSurvival & stream;
@@ -186,7 +183,7 @@ private:
         invLarvalResources & stream;
         nOvipositingDelayed & stream;
     }
-    
+
     // -----  model parameters (loaded from XML)  -----
     
     /** Duration of development (time from egg laying to emergence) in days. */

@@ -24,9 +24,15 @@
 #include "Global.h"
 #include "Transmission/Anopheles/PerHostAnoph.h"
 #include "Transmission/PerHost.h"
-#include "Transmission/Anopheles/FixedEmergence.h"
 #include "util/SimpleDecayingValue.h"
 #include "util/vectors.h"
+#include "util/vecDay.h"
+
+#include "util/vectors.h"
+#include "util/CommandLine.h"
+#include "util/errors.h"
+
+#include "rotate.h"
 
 #include <vector>
 #include <limits>
@@ -36,6 +42,7 @@ namespace Transmission {
 namespace Anopheles {
     using std::numeric_limits;
     using util::vector2D;
+    using namespace OM::util;
 
 enum VecStat { PA, PAmu, PA1, PAh, PDF, PDIF, NV, OV, SV };
 
@@ -120,6 +127,13 @@ public:
     inline void scaleEIR( double factor ){
         FSCoeffic[0] += log( factor );
     }
+
+    virtual void scale(double factor)
+    {
+        vectors::scale (N_v, factor);
+        vectors::scale (O_v, factor);
+        vectors::scale (S_v, factor);
+    }
     
     /** Initialisation which must wait until a human population is available.
      * This is only called when a checkpoint is not loaded.
@@ -134,7 +148,7 @@ public:
      *
      * Can only usefully run its calculations when not checkpointing, due to
      * population not being the same when loaded from a checkpoint. */
-    void init2 (int nHumans, double meanPopAvail,
+    virtual void init2 (int nHumans, double meanPopAvail,
         double sum_avail, double sigma_f, double sigma_df, double sigma_dff);
     
     /** Set up the non-host-specific interventions. */
@@ -152,7 +166,7 @@ public:
      * so, make necessary changes.
      *
      * @returns true if another iteration is needed. */
-    bool initIterate();
+    virtual bool initIterate();
 
     ///@brief Functions called as part of usual per-time-step operations
     //@{
@@ -195,6 +209,14 @@ public:
     /// Helper function for initialisation.
     void initIterateScale ( double factor );
     
+    virtual double getEmergenceRate(const SimTime &d0, const vecDay<double>& mosqEmergeRate, double nOvipositing)
+    {   
+        // Get emergence at start of step:
+        SimTime dYear1 = mod_nn(d0, SimTime::oneYear());
+        // Simple model: fixed emergence scaled by larviciding
+        return mosqEmergeRate[dYear1];
+    }
+
     /** Update by one day (may be called multiple times for 1 time-step update).
      * 
      * @param d0 Time of the start of the day-long update period
@@ -234,18 +256,22 @@ public:
     /// @param vs PA, PDF, PDIF, NV, OV or SV
     double getLastVecStat( VecStat vs )const;
     
-    inline double getResAvailability() const{
-        return emergence->getResAvailability();
+    virtual double getResAvailability() const {
+        return numeric_limits<double>::quiet_NaN();
     }
-    inline double getResRequirements() const{
-        return emergence->getResRequirements();
+    virtual double getResRequirements() const {
+        return numeric_limits<double>::quiet_NaN();
     }
     
     /// Write some per-species summary information.
     void summarize( size_t species )const;
     //@}
 
-    /// Checkpointing
+    virtual void checkpoint (istream& stream){ (*this) & stream; }
+    virtual void checkpoint (ostream& stream){ (*this) & stream; }
+
+protected:
+        /// Checkpointing
     //Note: below comments about what does and doesn't need checkpointing are ignored here.
     template<class S>
     void operator& (S& stream) {
@@ -268,7 +294,7 @@ public:
         mosqEmergeRate & stream;
         quinquennialS_v & stream;
         initNv0FromSv & stream;
-        (*emergence) & stream;
+        // (*emergence) & stream;
         // MosqTransmission
         mosqRestDuration & stream;
         EIPDuration & stream;
@@ -290,7 +316,6 @@ public:
         timeStep_N_v0 & stream;
     }
 
-private:
     ///@brief Initialisation helper functions
     //@{
     /** Calculate availability rate of hosts (α_i) and death rate while seeking
@@ -627,11 +652,6 @@ private:
     
     /** Variables tracking data to be reported. */
     double timeStep_N_v0;
-
-    /** @brief Emergence model
-     * 
-     * Code to calculate emergence of mosquitoes from water bodies goes here. */
-    unique_ptr<EmergenceModel> emergence;
 };
 
 }

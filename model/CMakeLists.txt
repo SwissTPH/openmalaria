@@ -41,11 +41,12 @@ set (Model_CPP
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/LSTMTreatments.cpp
   
-  Transmission/TransmissionModel.cpp
-  Transmission/NonVectorModel.cpp
+  #Transmission/TransmissionModel.cpp
+  #Transmission/NonVectorModel.cpp
   Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
   Transmission/Anopheles/AnophelesModel.cpp
+  Transmission/Anopheles/PerHostAnoph.cpp
   #Transmission/Anopheles/EmergenceModel.cpp
   #Transmission/Anopheles/MosqTransmission.cpp
   #Transmission/Anopheles/FixedEmergence.cpp
@@ -53,7 +54,6 @@ set (Model_CPP
   #Transmission/Anopheles/LCEmergence.cpp
   #Transmission/Anopheles/LifeCycle.cpp
   #Transmission/Anopheles/ResourceFitter.cpp
-  Transmission/Anopheles/PerHostAnoph.cpp
   
   WithinHost/WHInterface.cpp
   WithinHost/WHFalciparum.cpp

@@ -21,7 +21,7 @@
 #include "util/DocumentLoader.h"
 
 #include "Global.h"
-#include "Transmission/TransmissionModel.h"
+#include "Transmission/transmission.h"
 #include "Parameters.h"
 #include "Clinical/ClinicalModel.h"
 #include "mon/Continuous.h"
@@ -294,7 +294,7 @@ int main(int argc, char* argv[])
         // mon::AgeGroup (from Surveys.init()):
         // Note: PerHost dependency can be postponed; it is only used to set adultAge
         std::unique_ptr<Population> population = unique_ptr<Population>(new Population( scenario.getDemography().getPopSize() ));
-        std::unique_ptr<TransmissionModel> transmission = unique_ptr<TransmissionModel>(TransmissionModel::createTransmissionModel(scenario.getEntomology(), population->size()));
+        std::unique_ptr<TransmissionModel> transmission = unique_ptr<TransmissionModel>(Transmission::createTransmissionModel(scenario.getEntomology(), population->size()));
         
         // Depends on transmission model (for species indexes):
         // MDA1D may depend on health system (too complex to verify)
