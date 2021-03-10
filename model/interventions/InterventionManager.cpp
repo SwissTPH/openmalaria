@@ -396,13 +396,14 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                 const scnXml::NonHumanHosts2 &elt = *it;
                 if (elt.getTimed().present())
                 {
-                    vectorModel->initAddNonHumanHostsInterv(elt.getDescription().getAnopheles(), elt.getName());
+                    // vectorModel->initAddNonHumanHostsInterv(elt.getDescription().getAnopheles(), elt.getName());
+
                     for (const scnXml::Deploy2 deploy : elt.getTimed().get().getDeploy())
                     {
                         SimDate date =
                             UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
-                        timed.push_back(unique_ptr<TimedDeployment>(new TimedAddNonHumanHostsDeployment(date, elt.getName(), lifespan)));
+                        timed.push_back(unique_ptr<TimedDeployment>(new TimedAddNonHumanHostsDeployment(date, elt.getName(), lifespan, elt.getDescription().getAnopheles(), transmission)));
                     }
                     instance++;
                 }

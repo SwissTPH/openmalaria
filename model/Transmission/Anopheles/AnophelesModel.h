@@ -153,14 +153,6 @@ struct NhhParams {
     string name;
 };
 
-struct NhhParamsInterv {
-    double mosqRelativeAvailabilityHuman;
-    double mosqProbBiting;
-    double mosqProbFindingRestSite;
-    double mosqProbResting;
-    double hostFecundityFactor;
-};
-
 struct Nhh {
     double avail_i;
     double P_B_I;
@@ -280,8 +272,6 @@ public:
     // /** Set up the non-human hosts interventions. */
     void initNonHumanHostsInterv( const scnXml::NonHumanHostsSpeciesIntervention& elt, const scnXml::DecayFunction& decay, size_t instance, string name );
     
-    void initAddNonHumanHostsInterv( const scnXml::NonHumanHostsVectorSpecies& elt, string name );
-    
     /** Work out whether another interation is needed for initialisation and if
      * so, make necessary changes.
      *
@@ -317,8 +307,6 @@ public:
 
     void deployNonHumanHostsInterv(LocalRng& rng, size_t species, size_t instance, string name);
 
-    void deployAddNonHumanHosts(LocalRng& rng, size_t species, string name, double popSize, SimTime lifespan);
-    
     /** (Re) allocate and initialise some state variables. Must be called
      * before model is run. */
     void initState ( double tsP_A, double tsP_Amu, double tsP_A1, double tsP_Ah,
@@ -606,9 +594,6 @@ public:
 
     /** Active Non-Human hosts instances in the simulation. */
     map<string,Nhh> nhhInstances;
-
-    /** Non-Human hosts interventions description */
-    map<string,NhhParamsInterv> nhhDefinitionsInterv;
 
     /** Parameters for trap interventions. Doesn't need checkpointing. */
     vector<TrapParams> trapParams;

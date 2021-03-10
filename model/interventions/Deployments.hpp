@@ -29,7 +29,10 @@
 #include "Transmission/TransmissionModel.h"
 #include "Transmission/VectorModel.h"
 #include "util/random.h"
+#include "util/errors.h"
 #include <schema/interventions.h>
+
+#include "util/SpeciesIndexChecker.h"
 
 namespace OM { namespace interventions {
 
@@ -350,17 +353,64 @@ private:
     string name;
 };
 
+const string vec_mode_err = "vector interventions can only be used in dynamic transmission mode (mode=\"dynamic\")";
+
 class TimedAddNonHumanHostsDeployment : public TimedDeployment {
 public:
-    TimedAddNonHumanHostsDeployment( SimDate date, const string &name, SimTime lifespan) :
-        TimedDeployment( date ), name(name), lifespan(lifespan)
-    {}
-    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
+    TimedAddNonHumanHostsDeployment( SimDate date, const string &intervName, SimTime lifespan, const scnXml::Description3::AnophelesSequence list, Transmission::TransmissionModel& transmission) :
+        TimedDeployment( date ), intervName(intervName), lifespan(lifespan)
+    {
+        Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
+        if(vectorModel)
+        {
+            util::SpeciesIndexChecker checker(intervName, vectorModel->speciesIndex);
+            for (const scnXml::NonHumanHostsVectorSpecies &anoph : list)
+            {
+                const string &mosqName = anoph.getMosquito();
+                checker.getIndex(mosqName);
+
+                NhhParamsInterv nhh;
+                nhh.mosqRelativeAvailabilityHuman = anoph.getMosqRelativeAvailabilityHuman().getValue();
+                nhh.mosqProbBiting = anoph.getMosqProbBiting().getValue();
+                nhh.mosqProbFindingRestSite = anoph.getMosqProbFindRestSite().getValue();
+                nhh.mosqProbResting = anoph.getMosqProbResting().getValue();
+                nhh.hostFecundityFactor = anoph.getHostFecundityFactor().getValue();
+                nhhParams[mosqName] = nhh;
+            }
+            checker.checkNoneMissed();
+        }
+    }
+
+    virtual void deploy (Population& population, Transmission::TransmissionModel& transmission)
+    {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
         if(vectorModel)
         {
             double popSize = population.size();
-            vectorModel->deployAddNonHumanHosts(name, popSize, lifespan);
+            if (vectorModel->interventionMode != Transmission::SimulationMode::dynamicEIR) { throw util::xml_scenario_error(vec_mode_err); }
+            for (size_t i = 0; i < vectorModel->speciesIndex.size(); ++i)
+            {
+                Transmission::Anopheles::AnophelesModel *anophModel = vectorModel->species[i].get();
+        
+                if (anophModel->nhhInstances.count(intervName) != 0)
+                    throw util::xml_scenario_error("non human hosts type " + intervName + " already deployed during non human hosts deployment");
+
+                NhhParamsInterv &p = nhhParams[anophModel->mosq.name];
+                Transmission::Anopheles::Nhh nhh;
+
+                double adultAvail = Transmission::PerHostAnophParams::get(i).entoAvailability.mean();
+                double avail_i = popSize * adultAvail * p.mosqRelativeAvailabilityHuman;
+
+                nhh.avail_i = avail_i;
+                nhh.P_B_I = p.mosqProbBiting;
+                nhh.P_C_I = p.mosqProbFindingRestSite;
+                nhh.P_D_I = p.mosqProbResting;
+                nhh.rel_fecundity = p.hostFecundityFactor;
+                nhh.expiry = sim::now() + lifespan;
+
+                // add the nhh to the active nhh instances
+                anophModel->nhhInstances[intervName] = nhh;
+            }
         }
     }
     virtual void print_details( std::ostream& out )const{
@@ -368,8 +418,16 @@ public:
     }
     
 private:
-    string name;
+    struct NhhParamsInterv {
+        double mosqRelativeAvailabilityHuman;
+        double mosqProbBiting;
+        double mosqProbFindingRestSite;
+        double mosqProbResting;
+        double hostFecundityFactor;
+    };
+    string intervName;
     SimTime lifespan;
+    std::map<string, NhhParamsInterv> nhhParams; 
 };
 
 // ———  ContinuousHumanDeployment  ———
