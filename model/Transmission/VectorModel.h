@@ -62,7 +62,6 @@ public:
                                 const scnXml::VectorTrap::NameOptional name);
     virtual void initNonHumanHostsInterv(const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay,
                                          size_t instance, const string &name);
-    virtual void initAddNonHumanHostsInterv(const scnXml::Description3::AnophelesSequence list, const string &name);
 
     virtual void scaleEIR(double factor);
     //   virtual void scaleXML_EIR (scnXml::Entomology&, double factor) const;
@@ -79,7 +78,7 @@ public:
     virtual void deployVectorPopInterv(size_t instance);
     virtual void deployVectorTrap(size_t instance, double popSize, SimTime lifespan);
     virtual void deployNonHumanHostsInterv(size_t instance, string name);
-    virtual void deployAddNonHumanHosts(string name, double popSize, SimTime lifespan);
+    // virtual void deployAddNonHumanHosts(string name, double popSize, SimTime lifespan);
 
     virtual void uninfectVectors();
 

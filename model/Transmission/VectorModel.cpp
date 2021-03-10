@@ -330,16 +330,6 @@ void VectorModel::initNonHumanHostsInterv(const scnXml::Description2::AnophelesS
     }
     checker.checkNoneMissed();
 }
-void VectorModel::initAddNonHumanHostsInterv(const scnXml::Description3::AnophelesSequence list, const string &name)
-{
-    SpeciesIndexChecker checker(name, speciesIndex);
-    for (const scnXml::NonHumanHostsVectorSpecies &anoph : list)
-    {
-        const string &mosq = anoph.getMosquito();
-        species[checker.getIndex(mosq)]->initAddNonHumanHostsInterv(anoph, name);
-    }
-    checker.checkNoneMissed();
-}
 
 void VectorModel::scaleEIR(double factor)
 {
@@ -511,14 +501,6 @@ void VectorModel::deployNonHumanHostsInterv(size_t instance, string name)
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
         species[i]->deployNonHumanHostsInterv(m_rng, i, instance, name);
-    }
-}
-void VectorModel::deployAddNonHumanHosts(string name, double popSize, SimTime lifespan)
-{
-    if (interventionMode != dynamicEIR) { throw xml_scenario_error(vec_mode_err); }
-    for (size_t i = 0; i < speciesIndex.size(); ++i)
-    {
-        species[i]->deployAddNonHumanHosts(m_rng, i, name, popSize, lifespan);
     }
 }
 void VectorModel::uninfectVectors()

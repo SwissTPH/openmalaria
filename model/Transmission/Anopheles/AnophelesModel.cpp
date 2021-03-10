@@ -383,20 +383,6 @@ void AnophelesModel::initNonHumanHostsInterv(const scnXml::NonHumanHostsSpeciesI
         reduceFecundity[name][instance].set(elt2.getInitial(), decay, "reduceFecundity");
     }
 }
-void AnophelesModel::initAddNonHumanHostsInterv(const scnXml::NonHumanHostsVectorSpecies &elt, string name)
-{
-    // Check that the nonHumanHostsType does not exist
-    if (nhhDefinitionsInterv.count(name) != 0 || nhhInstances.count(name) != 0)
-        throw util::xml_scenario_error("non human hosts type with same name already exists in interventions");
-
-    NhhParamsInterv nhh;
-    nhh.mosqRelativeAvailabilityHuman = elt.getMosqRelativeAvailabilityHuman().getValue();
-    nhh.mosqProbBiting = elt.getMosqProbBiting().getValue();
-    nhh.mosqProbFindingRestSite = elt.getMosqProbFindRestSite().getValue();
-    nhh.mosqProbResting = elt.getMosqProbResting().getValue();
-    nhh.hostFecundityFactor = elt.getHostFecundityFactor().getValue();
-    nhhDefinitionsInterv[name] = nhh;
-}
 
 void AnophelesModel::deployVectorPopInterv(LocalRng &rng, size_t instance)
 {
@@ -431,25 +417,6 @@ void AnophelesModel::deployNonHumanHostsInterv(LocalRng &rng, size_t species, si
     reduceFecundity[name][instance].deploy(rng, sim::now());
 }
 
-void AnophelesModel::deployAddNonHumanHosts(LocalRng &rng, size_t species, string name, double popSize, SimTime lifespan)
-{
-    if (nhhInstances.count(name) != 0)
-        throw util::xml_scenario_error("non human hosts type " + name + " already deployed during non human hosts deployment");
-
-    const NhhParamsInterv &nhhParams = nhhDefinitionsInterv[name];
-
-    double adultAvail = PerHostAnophParams::get(species).entoAvailability.mean();
-    double avail_i = popSize * adultAvail * nhhParams.mosqRelativeAvailabilityHuman;
-
-    Nhh nhh;
-    nhh.avail_i = avail_i;
-    nhh.P_B_I = nhhParams.mosqProbBiting;
-    nhh.P_C_I = nhhParams.mosqProbFindingRestSite;
-    nhh.P_D_I = nhhParams.mosqProbResting;
-    nhh.rel_fecundity = nhhParams.hostFecundityFactor;
-    nhh.expiry = sim::now() + lifespan;
-    nhhInstances[name] = nhh;
-}
 // Every SimTime::oneTS() days:
 void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<double> &sigma_dif, double sigma_dff, bool isDynamic)
 {
