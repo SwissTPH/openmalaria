@@ -431,7 +431,7 @@ public:
     * See comment in advancePeriod() for details of how the EIR is calculated.
     *
     * Doesn't need to be checkpointed (is recalculated each step). */
-    vector<double> partialEIR;
+    std::vector<double> partialEIR;
 
     // Emergence Model
     // -----  parameters (constant after initialisation)  -----
@@ -451,7 +451,7 @@ public:
      *
      * fcEir must have odd length and is ordered: [a0, a1, b1, ..., an, bn].
      * FSCoeffic[0] needs checkpointing, the rest doesn't. */
-    vector<double> FSCoeffic;
+    std::vector<double> FSCoeffic;
 
     /** S_v used to force an EIR during vector init.
      * 

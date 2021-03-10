@@ -38,7 +38,6 @@ namespace WithinHost {
 namespace Pathogenesis {
     class PathogenesisModel;
 }
-using util::vector2D;
 
 /**
  * Immunity code and base class for all current P. falciparum models.
@@ -130,7 +129,7 @@ protected:
     *
     * m_y_lag[sim::ts0().moduloSteps(y_lag_len)] corresponds to the density
     * from the previous time step (once updateInfection has been called). */
-    vector2D<double> m_y_lag;
+    std::vector<double> m_y_lag;
     
     /// The PathogenesisModel introduces illness dependant on parasite density
     unique_ptr<Pathogenesis::PathogenesisModel> pathogenesisModel;

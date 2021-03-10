@@ -167,9 +167,9 @@ void DescriptiveWithinHostModel::update(LocalRng& rng,
     
     // Cache total density for infectiousness calculations
     int y_lag_i = sim::ts1().moduloSteps(y_lag_len);
-    for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag.at(y_lag_i, g) = 0.0;
+    for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag[y_lag_i * Genotypes::N() + g] = 0.0;
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
-        m_y_lag.at( y_lag_i, inf->genotype() ) += inf->getDensity();
+        m_y_lag[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
     }
 }
 
