@@ -1,11 +1,11 @@
-FROM ubuntu:trusty as builder
+FROM ubuntu:xenial as builder
 WORKDIR /
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  build-essential ca-certificates git zlib1g-dev cmake libgsl0-dev libboost-dev libxerces-c-dev xsdcxx python wget \
+  build-essential ca-certificates git zlib1g-dev cmake libgsl-dev libxerces-c-dev xsdcxx libboost-dev python \
   && rm -rf /var/lib/apt/lists/* \
-  && git clone --depth 1 --branch schema-30.3 https://github.com/SwissTPH/openmalaria.git \
+  && git clone --depth 1 --branch schema-34.0 https://github.com/SwissTPH/openmalaria.git \
   && cd openmalaria \
-  && echo "schema-30.3" > version.txt \
+  # && echo "schema-30.3" > version.txt \
   && mkdir build \
   && cd build \
   && cmake -DCMAKE_BUILD_TYPE=Release .. \
@@ -13,16 +13,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
   && cd .. \
   && mkdir openmalariaRelease \
   && cp build/openMalaria openmalariaRelease/ \
-  && cp build/schema/scenario_current.xsd openmalariaRelease/scenario_30.3.xsd
+  && cp build/schema/scenario_current.xsd openmalariaRelease/scenario_34.xsd \
   && cp build/schema/scenario_current.xsd openmalariaRelease/ \
   && cp test/*.csv openmalariaRelease/
 
-FROM ubuntu:trusty as openmalaria
+FROM ubuntu:xenial as openmalaria
 WORKDIR /om/
 RUN apt-get update && apt-get install -y --no-install-recommends \
-  libgsl0ldbl libxerces-c3.1 \
+  libgsl2 libxerces-c3.1 \
   && rm -rf /var/lib/apt/lists/*
-COPY --from=builder /openmalaria/openmalariaRelease/* /om/
+COPY --from=builder /openmalaria/openmalariaRelease/* ./
 ENTRYPOINT ["/om/openMalaria"]  
 
 # docker build -t openmalaria .
