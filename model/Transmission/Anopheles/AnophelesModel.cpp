@@ -288,7 +288,6 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
         N_v[t] = forcedS_v[t] * initNvFromSv;
         for (size_t genotype = 0; genotype < Genotypes::N(); ++genotype)
         {
-            cout << "loom:" << t * Genotypes::N() + genotype << endl;
             S_v[t * Genotypes::N() + genotype] = forcedS_v[t] * Genotypes::initialFreq(genotype);
             O_v[t * Genotypes::N() + genotype] = S_v[t * Genotypes::N() + genotype] * initOvFromSv;
         }
