@@ -240,6 +240,14 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
             // \r cleans line. Then we print progress as a percentage.
             cerr << "\r" << percent << "%\t" << flush;
         }
+
+        if( errno != 0 )
+        {
+            char err[256];
+            sprintf(err, "t = %d Please report! Error: ", sim::now().inDays());
+            std::perror(err);
+            errno = 0;
+        }
     }
 }
 
