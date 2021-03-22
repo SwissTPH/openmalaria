@@ -168,7 +168,11 @@ public:
         return constOverLambda;
     }
     double eval(double effectiveAge) const{
-        return exp( -pow(effectiveAge, k) );
+        double p = -pow(effectiveAge, k);
+        if(p < -700.0)
+            return 0.0;
+        else
+            return exp(p);
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
