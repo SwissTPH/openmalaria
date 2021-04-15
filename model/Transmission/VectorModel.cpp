@@ -73,18 +73,6 @@ void VectorModel::ctsCbP_Ah (ostream& stream) {
     for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i]->getLastVecStat(Anopheles::PAh);
 }
-void VectorModel::ctsCbP_Amu (ostream& stream) {
-    for(size_t i = 0; i < speciesIndex.size(); ++i)
-        stream << '\t' << species[i].getLastVecStat(Anopheles::PAmu);
-}
-void VectorModel::ctsCbP_A1 (ostream& stream) {
-    for(size_t i = 0; i < speciesIndex.size(); ++i)
-        stream << '\t' << species[i].getLastVecStat(Anopheles::PA1);
-}
-void VectorModel::ctsCbP_Ah (ostream& stream) {
-    for(size_t i = 0; i < speciesIndex.size(); ++i)
-        stream << '\t' << species[i].getLastVecStat(Anopheles::PAh);
-}
 void VectorModel::ctsCbP_df (ostream& stream) {
     for(size_t i = 0; i < speciesIndex.size(); ++i)
         stream << '\t' << species[i]->getLastVecStat(Anopheles::PDF);
@@ -659,23 +647,6 @@ void VectorModel::deployAddNonHumanHosts(string name, double popSize, SimTime li
     }
     for(size_t i = 0; i < speciesIndex.size(); ++i) {
         species[i]->deployAddNonHumanHosts( m_rng, i, name, popSize, lifespan);
-    }
-}
-void VectorModel::deployNonHumanHostsInterv( size_t instance, string name ){
-    if( interventionMode != dynamicEIR ){
-        throw xml_scenario_error(vec_mode_err);
-    }
-    for(size_t i = 0; i < speciesIndex.size(); ++i) {
-        species[i].deployNonHumanHostsInterv( m_rng, i, instance, name);
-    }
-}
-void VectorModel::deployAddNonHumanHosts(string name, double popSize, SimTime lifespan)
-{
-    if( interventionMode != dynamicEIR ){
-        throw xml_scenario_error(vec_mode_err);
-    }
-    for(size_t i = 0; i < speciesIndex.size(); ++i) {
-        species[i].deployAddNonHumanHosts( m_rng, i, name, popSize, lifespan);
     }
 }
 void VectorModel::uninfectVectors() {
