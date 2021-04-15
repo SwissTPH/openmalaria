@@ -5237,27 +5237,6 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
           </xs:documentation>
           <xs:appinfo>name:Effect of need;</xs:appinfo>
         </xs:annotation>
-        <xs:complexType>
-          <xs:attribute name="onLocus" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                A locus under which only a restricted set of alleles map to
-                this phenotype.
-              </xs:documentation>
-              <xs:appinfo>name:Locus relevant to the mapping of alleles to this phenotype;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="toAllele" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>
-                One allele of a locus upon which phenotype choice depends.
-                If multiple alleles under this locus should map to the same
-                phenotype, repeat the whole &quot;restriction onLocus...&quot; element.
-              </xs:documentation>
-              <xs:appinfo>name:Alleles mapping to this phenotype;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:complexType>
       </xs:element>
       <xs:element name="effectInformal" type="xs:double">
         <xs:annotation>
