@@ -64,7 +64,7 @@ double LSTMDrugOneComp::calculateDrugFactor(LocalRng& rng, WithinHost::CommonInf
     
     double time = 0.0;
     typedef pair<double,double> TimeConc;
-    foreach( TimeConc time_conc, doses ){
+    for( TimeConc time_conc : doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
@@ -94,7 +94,7 @@ void LSTMDrugOneComp::updateConcentration( double body_mass ){
     concentration *= exp(neg_elim_rate);
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
-    foreach( TimeConc& time_conc, doses ){
+    for( TimeConc& time_conc : doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             // calculate decayed dose and add:

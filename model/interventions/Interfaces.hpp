@@ -23,7 +23,7 @@
 #include "Global.h"
 #include "mon/reporting.h"
 #include <schema/interventions.h>
-#include <boost/integer_traits.hpp>
+#include <limits>
 
 namespace scnXml{ class DeploymentBase; }
 
@@ -54,7 +54,7 @@ namespace Component { enum Type {
 /** Specifies limits on the number of existing doses when deciding whether to
  * vaccinate a human. */
 struct VaccineLimits{
-    VaccineLimits() : minPrevDoses( 0 ), maxCumDoses( boost::integer_traits<uint32_t>::const_max ) {}
+    VaccineLimits() : minPrevDoses( 0 ), maxCumDoses( numeric_limits<uint32_t>::max() ) {}
     void set( const scnXml::DeploymentBase& );
     uint32_t minPrevDoses, maxCumDoses;
 };
@@ -73,7 +73,7 @@ struct ComponentId{
     
     /// Special value indicating the whole population
     static ComponentId wholePop() {
-        return ComponentId{ boost::integer_traits<size_t>::const_max };
+        return ComponentId{ numeric_limits<uint32_t>::max() };
     }
     
     size_t id;

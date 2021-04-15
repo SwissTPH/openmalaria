@@ -138,7 +138,7 @@ void IRSComponent::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSD
         // Potentially warn about this... but not necessary since making humans
         // more attractive isn't really an issue.
 //     }
-    assert( (boost::math::isnan)(lPF) ); // double init
+    assert( (std::isnan)(lPF) ); // double init
     lPF = log( PF );
 }
 IRSComponent::IRSAnopheles::SurvivalFactor::SurvivalFactor() :

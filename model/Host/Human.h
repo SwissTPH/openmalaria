@@ -87,7 +87,7 @@ public:
   //@}
   
   /// Main human update method.
-  void update(const Transmission::TransmissionModel& transmission);
+  void update(Transmission::TransmissionModel& transmission);
   //@}
   
   ///@brief Deploy "intervention" functions

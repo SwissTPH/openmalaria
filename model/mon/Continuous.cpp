@@ -18,9 +18,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// must be included first to avoid compiler error (incompatible with fpclassify which is included from Global.h?)
-#include <boost/math/special_functions/nonfinite_num_facets.hpp>
-
 #include "mon/Continuous.h"
 #include "mon/info.h"   // lineEnd
 #include "util/errors.h"
@@ -31,7 +28,6 @@
 #include <vector>
 #include <map>
 #include <fstream>
-#include <boost/format.hpp>
 #include <gzstream/gzstream.h>
 
 namespace OM { namespace mon {
@@ -117,10 +113,6 @@ namespace OM { namespace mon {
         
         cts_filename = util::CommandLine::getCtsoutName();
         
-	// This locale ensures uniform formatting of nans and infs on all platforms.
-	locale old_locale;
-	locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
-	ctsOStream.imbue( nfn_put_locale );
 	ctsOStream.width (0);
 	
 	if( isCheckpoint ){
@@ -128,7 +120,7 @@ namespace OM { namespace mon {
 	    for(scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 		auto reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
-		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
+		    throw xml_scenario_error("monitoring.continuous: no output " + string(it->getName()));
 		if( it->getValue() ){
 		    toReport.push_back( reg_it->second );
 		}
@@ -154,7 +146,7 @@ namespace OM { namespace mon {
 	    for(scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 		auto reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
-		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
+		    throw xml_scenario_error("monitoring.continuous: no output " + string(it->getName()));
 		if( it->getValue() ){
 		    ctsOStream << reg_it->second->titles;
 		    toReport.push_back( reg_it->second );

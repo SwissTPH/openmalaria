@@ -36,13 +36,10 @@
 #include <schema/scenario.h>
 
 #include <cmath>
-#include <boost/format.hpp>
-#include <boost/assign.hpp>
 
 namespace OM
 {
     using namespace OM::util;
-    using namespace boost::assign;
     using Transmission::TransmissionModel;
 
 // -----  Population: static data / methods  -----
@@ -79,9 +76,9 @@ Population::Population(size_t populationSize)
     using mon::Continuous;
     Continuous.registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
     // Age groups are currently hard-coded.
-    ctsDemogAgeGroups += 1.0, 5.0, 10.0, 15.0, 25.0;
+    ctsDemogAgeGroups.insert(ctsDemogAgeGroups.end(), { 1.0, 5.0, 10.0, 15.0, 25.0 });
     ostringstream ctsDemogTitle;
-    foreach( double ubound, ctsDemogAgeGroups ){
+    for( double ubound : ctsDemogAgeGroups ){
         ctsDemogTitle << "\thost % ≤ " << ubound;
     }
     Continuous.registerCallback( "host demography", ctsDemogTitle.str(),
@@ -124,8 +121,7 @@ void Population::checkpoint (istream& stream)
         population.back() & stream;
     }
     if (population.size() != populationSize)
-        throw util::checkpoint_error(
-            (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
+        throw util::checkpoint_error("Population: out of data (read " + to_string(population.size()) + " humans)");
 }
 void Population::checkpoint (ostream& stream)
 {
@@ -172,7 +168,7 @@ void Population::createInitialHumans()
 
 // -----  non-static methods: simulation loop  -----
 
-void Population::update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
+void Population::update(Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
@@ -232,7 +228,7 @@ void Population::ctsHosts (ostream& stream){
 void Population::ctsHostDemography (ostream& stream){
     auto iter = population.crbegin();
     int cumCount = 0;
-    foreach( double ubound, ctsDemogAgeGroups ){
+    for( double ubound : ctsDemogAgeGroups ){
         while( iter != population.crend() && iter->age(sim::now()).inYears() < ubound ){
             ++cumCount;
             ++iter;

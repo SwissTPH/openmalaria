@@ -456,7 +456,7 @@ void defineOutMeasures(){
         OutMeasure::species( 79, MVF_INOCS, false );
     
     // Now initialise valid condition measures:
-    foreach( const NamedMeasureMapT::value_type& v, namedOutMeasures ){
+    for( const NamedMeasureMapT::value_type& v : namedOutMeasures ){
         Measure m = v.second.m;
         // Not the following:
         if( m == mon::MHE_SEVERE_EPISODES ||

@@ -14,10 +14,10 @@ configure_file(
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  Simulator.cpp
+  # Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
-  Parameters.cpp
+  # Parameters.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
@@ -41,19 +41,19 @@ set (Model_CPP
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/LSTMTreatments.cpp
   
-  Transmission/TransmissionModel.cpp
-  Transmission/NonVectorModel.cpp
+  #Transmission/TransmissionModel.cpp
+  #Transmission/NonVectorModel.cpp
   Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
   Transmission/Anopheles/AnophelesModel.cpp
-  Transmission/Anopheles/EmergenceModel.cpp
-  Transmission/Anopheles/MosqTransmission.cpp
-  Transmission/Anopheles/FixedEmergence.cpp
-  Transmission/Anopheles/SimpleMPDEmergence.cpp
+  Transmission/Anopheles/PerHostAnoph.cpp
+  #Transmission/Anopheles/EmergenceModel.cpp
+  #Transmission/Anopheles/MosqTransmission.cpp
+  #Transmission/Anopheles/FixedEmergence.cpp
+  #Transmission/Anopheles/SimpleMPDEmergence.cpp
   #Transmission/Anopheles/LCEmergence.cpp
   #Transmission/Anopheles/LifeCycle.cpp
   #Transmission/Anopheles/ResourceFitter.cpp
-  Transmission/Anopheles/PerHostAnoph.cpp
   
   WithinHost/WHInterface.cpp
   WithinHost/WHFalciparum.cpp
@@ -88,6 +88,7 @@ set (Model_CPP
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp
   util/misc.cpp
+  util/random.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp
@@ -109,13 +110,12 @@ include_directories (SYSTEM
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${SPIRIT_INCLUDE_DIRS}
+  # ${SPIRIT_INCLUDE_DIRS}
   
   ${CMAKE_BINARY_DIR}/model
   ${CMAKE_SOURCE_DIR}/contrib
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
-  ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
+  # ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}

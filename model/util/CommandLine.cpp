@@ -29,11 +29,8 @@
 #include <sstream>
 #include <iostream>
 #include <cassert>
-#include <boost/lexical_cast.hpp>
 
 namespace OM { namespace util {
-    using boost::lexical_cast;
-    
     bitset<CommandLine::NUM_OPTIONS> CommandLine::options;
     string CommandLine::resourcePath;
     string CommandLine::outputName;

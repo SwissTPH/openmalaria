@@ -9,7 +9,6 @@ set (Contrib_CPP
 
 include_directories (SYSTEM
   ${Z_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/contrib/gzstream

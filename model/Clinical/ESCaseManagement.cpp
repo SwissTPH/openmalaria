@@ -26,14 +26,9 @@
 
 #include <set>
 #include <sstream>
-#include <boost/format.hpp>
-#include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 namespace OM { namespace Clinical {
     using namespace OM::util;
-    using namespace boost::assign;
-    using boost::format;
-
 
 // -----  ESCaseManagement  -----
 

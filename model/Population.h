@@ -63,7 +63,7 @@ public:
     /*!  Also updates the population-level measures such as infectiousness, and
          the age-distribution by c outmigrating or creating new births if
          necessary */
-    void update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
+    void update( Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
 
     //! Makes a survey
     void newSurvey();
@@ -100,6 +100,12 @@ public:
     /** Return the number of humans. */
     inline size_t size() const {
         return populationSize;
+    }
+    inline HumanPop &getHumans() {
+        return population;
+    }
+    inline const HumanPop &getHumans() const {
+        return population;
     }
     //@}
 

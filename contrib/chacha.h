@@ -32,6 +32,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <cstring>
 
 template<size_t R>
 class ChaCha {

@@ -33,8 +33,6 @@
 //using namespace std;
 
 #include <cmath>
-#include <boost/format.hpp>
-
 
 namespace OM {
 namespace WithinHost {
@@ -109,7 +107,7 @@ void WHInterface::checkpoint (istream& stream) {
     numInfs & stream;
 
     if (numInfs > MAX_INFECTIONS)
-        throw util::checkpoint_error( (boost::format("numInfs: %1%") %numInfs).str() );
+        throw util::checkpoint_error("numInfs: " + to_string(numInfs));
 }
 void WHInterface::checkpoint (ostream& stream) {
     numInfs & stream;

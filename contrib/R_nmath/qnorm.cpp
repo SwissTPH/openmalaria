@@ -47,13 +47,11 @@
  */
 
 
-#include <math.h>
+#include <cmath>
 
 #include <limits>
-#include <boost/math/special_functions/expm1.hpp>
 
-#include <boost/math/special_functions/fpclassify.hpp>
-#define ISNAN(x) (boost::math::isnan)(x)
+#define ISNAN(x) (std::isnan)(x)
 
 #define ML_NAN          std::numeric_limits<double>::quiet_NaN()
 #define ML_POSINF       std::numeric_limits<double>::infinity()
@@ -77,14 +75,14 @@ namespace R {
     template<typename T>
     inline T R_DT_qIv(T p, bool log_p, bool lower_tail) {
         if (log_p)
-            return lower_tail ? exp(p) : - boost::math::expm1(p);
+            return lower_tail ? exp(p) : - std::expm1(p);
         return R_D_Lval(p, lower_tail);
     }
     /*#define R_DT_CIv(p)   R_D_Cval(R_D_qIv(p))             *  1 - p in qF */
     template<typename T>
     inline T R_DT_CIv(T p, bool log_p, bool lower_tail) {
         if (log_p)
-            return lower_tail ? -boost::math::expm1(p) : exp(p);
+            return lower_tail ? -std::expm1(p) : exp(p);
         return R_D_Cval(p, lower_tail);
     }
 

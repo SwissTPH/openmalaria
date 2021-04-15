@@ -25,8 +25,6 @@
 #include <fstream>
 #include <sstream>
 #include <stdexcept>
-#include <boost/format.hpp>
-#include <boost/static_assert.hpp>
 
 // Compile-time optional
 #ifdef OM_STREAM_VALIDATOR
@@ -87,11 +85,11 @@ void StreamValidatorType::loadStream( const string& path ){
     storeMode = false;
     ifstream f_str( file.c_str(), ios::in | ios::binary );
     if( !f_str.is_open() )
-	throw util::base_exception( (boost::format("unable to read %1%") %file).str(), Error::FileIO );
+	throw util::base_exception("unable to read " + string(file), Error::FileIO);
     char head[4];
     f_str.read( reinterpret_cast<char*>(&head), sizeof(char)*4 );
     if( memcmp( &OM_SV_HEAD, &head, sizeof(char)*4 ) != 0 )
-	throw util::base_exception( (boost::format("%1% is not a valid StreamValidator file") %file).str(), Error::FileIO );
+	throw util::base_exception(string(file) + " is not a valid StreamValidator file", Error::FileIO);
     
     stream & f_str;
     
@@ -139,11 +137,11 @@ StreamValidatorType StreamValidator;
 // ———  Our cross-platform consistent-result hasing functions  ——
 namespace CPCH {
     SVType toSVType(uint32_t x){
-        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        static_assert( sizeof(x) == sizeof(SVType), "sizeof(x) == sizeof(SVType)" );
         return x;
     }
     SVType toSVType(int32_t x){
-        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        static_assert( sizeof(x) == sizeof(SVType), "sizeof(x) == sizeof(SVType)" );
         union {
             int32_t asS32;
             uint32_t asU32;
@@ -152,7 +150,7 @@ namespace CPCH {
         return asU32;
     }
     SVType toSVType(uint64_t x){
-        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        static_assert( sizeof(x) == 2*sizeof(SVType), "sizeof(x) == 2*sizeof(SVType)" );
         union {
             uint64_t asU64;
             uint32_t asU32[2];
@@ -161,7 +159,7 @@ namespace CPCH {
         return asU32[0] ^ asU32[1];     // XOR two parts together
     }
     SVType toSVType(int64_t x){
-        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        static_assert( sizeof(x) == 2*sizeof(SVType), "sizeof(x) == 2*sizeof(SVType)" );
         union {
             int64_t asS64;
             uint32_t asU32[2];
@@ -173,7 +171,7 @@ namespace CPCH {
     //Also not guaranteed to produce the same result on all platforms (but will
     //it?).
     SVType toSVType(float x){
-        BOOST_STATIC_ASSERT( sizeof(x) == sizeof(SVType) );
+        static_assert( sizeof(x) == sizeof(SVType), "sizeof(x) == sizeof(SVType)" );
         union {
             float asFloat;
             uint32_t asU32;
@@ -182,7 +180,7 @@ namespace CPCH {
         return asU32;
     }
     SVType toSVType(double x){
-        BOOST_STATIC_ASSERT( sizeof(x) == 2*sizeof(SVType) );
+        static_assert( sizeof(x) == 2*sizeof(SVType), "sizeof(x) == 2*sizeof(SVType)" );
         union {
             double asDouble;
             uint32_t asU32[2];

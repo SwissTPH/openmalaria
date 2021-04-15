@@ -31,7 +31,6 @@
 #include <list>
 #include <vector>
 #include <map>
-#include <boost/format.hpp>
 
 namespace OM { namespace Clinical {
 
@@ -275,7 +274,7 @@ class CMDTTreatPKPD : public CMDecisionTree {
 public:
     CMDTTreatPKPD( const scnXml::DecisionTree::TreatPKPDSequence& seq ){
         treatments.reserve( seq.size() );
-        foreach( const scnXml::DTTreatPKPD& treatElt, seq ){
+        for( const scnXml::DTTreatPKPD& treatElt : seq ){
             treatments.push_back( TreatInfo(
                 treatElt.getSchedule(),
                 treatElt.getDosage(),
@@ -300,7 +299,7 @@ protected:
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        foreach( const TreatInfo& treatment, treatments ){
+        for( const TreatInfo& treatment : treatments ){
             hostData.withinHost().treatPkPd( treatment.schedule, treatment.dosage, hostData.ageYears, 0.0 );
         }
         return CMDTOut(true);
@@ -416,7 +415,7 @@ const CMDecisionTree& save_decision( CMDecisionTree* decision ){
     // We search the library for a duplicate, and delete this one if there is
     // a duplicate. Note that this is not implemented efficiently, but a little
     // wasted time at start up is hardly a concern.
-    foreach( auto& d, decision_library ){
+    for( auto& d : decision_library ){
         if( *d == *decision ){
             return *d;
         }
@@ -448,16 +447,16 @@ const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, 
 
 const CMDecisionTree& CMDTMultiple::create( const scnXml::DTMultiple& node, bool isUC ){
     CMDTMultiple* self = new CMDTMultiple();
-    foreach( const scnXml::DTCaseType& sn, node.getCaseType() ){
+    for( const scnXml::DTCaseType& sn : node.getCaseType() ){
         self->children.push_back( &CMDTCaseType::create(sn, isUC) );
     }
-    foreach( const scnXml::DTDiagnostic& sn, node.getDiagnostic() ){
+    for( const scnXml::DTDiagnostic& sn : node.getDiagnostic() ){
         self->children.push_back( &CMDTDiagnostic::create(sn, isUC) );
     }
-    foreach( const scnXml::DTRandom& sn, node.getRandom() ){
+    for( const scnXml::DTRandom& sn : node.getRandom() ){
         self->children.push_back( &CMDTRandom::create(sn, isUC) );
     }
-    foreach( const scnXml::DTAge& sn, node.getAge() ){
+    for( const scnXml::DTAge& sn : node.getAge() ){
         self->children.push_back( &CMDTAge::create(sn, isUC) );
     }
     if( node.getTreatPKPD().size() ){
@@ -496,7 +495,7 @@ const CMDecisionTree& CMDTRandom::create(
     CMDTRandom* result = new CMDTRandom();
     
     double cum_p = 0.0;
-    foreach( const scnXml::Outcome& outcome, node.getOutcome() ){
+    for( const scnXml::Outcome& outcome : node.getOutcome() ){
         cum_p += outcome.getP();
         result->branches.insert( make_pair(cum_p, &CMDecisionTree::create( outcome, isUC )) );
     }
@@ -505,10 +504,8 @@ const CMDecisionTree& CMDTRandom::create(
     // less than one to make sure generated random numbers are not greater than
     // the last option.
     if (cum_p < 1.0 || cum_p > 1.001){
-        throw util::xml_scenario_error ( (
-            boost::format("decision tree (random node): expected probability sum to be 1.0 but found %2%")
-            %cum_p
-        ).str() );
+        throw util::xml_scenario_error (
+            "decision tree (random node): expected probability sum to be 1.0 but found " + to_string(cum_p));
     }
     
     return save_decision( result );
@@ -519,7 +516,7 @@ const CMDecisionTree& CMDTAge::create(const scnXml::DTAge& node, bool isUC){
     
     double lastAge = numeric_limits<double>::quiet_NaN();
     const CMDecisionTree* lastNode = nullptr;
-    foreach( const scnXml::Age& age, node.getAge() ){
+    for( const scnXml::Age& age : node.getAge() ){
         if( lastAge != lastAge ){
             if( age.getLb() != 0.0 )
                 throw util::xml_scenario_error( "decision tree age switch must have first lower bound equal 0" );

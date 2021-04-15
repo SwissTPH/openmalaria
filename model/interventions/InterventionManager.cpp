@@ -315,7 +315,7 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
             const scnXml::NonHumanHosts2& elt = *it;
             if (elt.getTimed().present() ) {
                 transmission.initAddNonHumanHostsInterv( elt.getDescription().getAnopheles(), elt.getName() );
-                foreach( const scnXml::Deploy2 deploy, elt.getTimed().get().getDeploy() ){
+                for( const scnXml::Deploy2 deploy : elt.getTimed().get().getDeploy() ){
                     SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
                     timed.push_back( unique_ptr<TimedDeployment>(new TimedAddNonHumanHostsDeployment( date, elt.getName(), lifespan )) );
@@ -344,10 +344,10 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
     }
     if( intervElt.getVectorTrap().present() ){
         size_t instance = 0;
-        foreach( const scnXml::VectorTrap& trap, intervElt.getVectorTrap().get().getIntervention() ){
+        for( const scnXml::VectorTrap& trap : intervElt.getVectorTrap().get().getIntervention() ){
             transmission.initVectorTrap(trap.getDescription(), instance, trap.getName());
             if( trap.getTimed().present() ) {
-                foreach( const scnXml::Deploy1 deploy, trap.getTimed().get().getDeploy() ){
+                for( const scnXml::Deploy1 deploy : trap.getTimed().get().getDeploy() ){
                     SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
                     double ratio = deploy.getRatioToHumans();
                     SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
@@ -376,12 +376,12 @@ void InterventionManager::init (const scnXml::Interventions& intervElt, Transmis
         }
         cout << "Timed deployments:" << endl
             << "time\tmin age\tmax age\tsub pop\tcompl\tcoverag\tcomponents" << endl;
-        foreach( auto& deploy, timed ){
+        for( auto& deploy : timed ){
             deploy->print_details( std::cout );
             cout << endl;
         }
         cout << "Human components:" << endl;
-        foreach( auto& component, humanComponents ){
+        for( auto& component : humanComponents ){
             component->print_details( cout );
             cout << endl;
         }

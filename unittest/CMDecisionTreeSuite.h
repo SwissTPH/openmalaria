@@ -29,11 +29,9 @@
 #include "UnittestUtil.h"
 #include "WHMock.h"
 #include <limits>
-#include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
 using namespace OM::WithinHost;
-using namespace boost::assign; // bring 'operator+=()' into scope
 using UnitTest::WHMock;
 
 class CMDecisionTreeSuite : public CxxTest::TestSuite

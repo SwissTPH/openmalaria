@@ -27,10 +27,8 @@
 #include "mon/management.h"
 
 #include <cstdlib>
-#include <boost/xpressive/xpressive.hpp>
 #include <iomanip>
-
-using namespace boost::xpressive;
+#include <regex>
 
 namespace OM {
 
@@ -167,8 +165,9 @@ double durationToDays( const std::string& str, DefaultUnit unit ){
 /** Returns SimDate::never() when it doesn't recognise a date. Throws when it does
  * but encounters definite format errors. */
 SimDate parseDate( const std::string& str ){
-    static sregex dateRx = sregex::compile ( "(\\d{4})-(\\d{1,2})-(\\d{1,2})" );
-    smatch rx_what;
+    std::regex dateRx("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
+    std::smatch rx_what;
+
     if( regex_match(str, rx_what, dateRx) ){
         int year = std::atoi(rx_what[1].str().c_str()),
             month = std::atoi(rx_what[2].str().c_str()),

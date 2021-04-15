@@ -32,7 +32,6 @@ namespace scnXml {
 namespace OM {
     class Population;
 namespace Transmission {
-    using Anopheles::AnophelesModel;
     
 /** Transmission models, Chitnis et al.
  * 
@@ -122,7 +121,7 @@ private:
    *
    * Array will be recreated by constructor, but some members of AnophelesModel
    * need to be checkpointed. */
-  vector<AnophelesModel> species;
+  vector<std::unique_ptr<Anopheles::AnophelesModel>> species;
   //@}
   
   /// @brief Saved data for use in initialisation / fitting cycle

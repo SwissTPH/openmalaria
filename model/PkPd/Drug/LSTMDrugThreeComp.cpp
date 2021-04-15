@@ -23,7 +23,6 @@
 #include "util/errors.h"
 #include "util/StreamValidator.h"
 
-#include <boost/math/constants/constants.hpp>
 #include <gsl/gsl_integration.h>
 #include <limits>
 
@@ -78,7 +77,7 @@ void LSTMDrugThreeComp::updateCached(double body_mass) const{
     const double r2 = 2.0 * sqrt(rt);
     
     const double phi = acos(-q / (rt * r2)) * third;
-    const double pi23 = (2.0 / 3.0) * boost::math::constants::pi<double>();
+    const double pi23 = (2.0 / 3.0) * PI;
     
     // negative alpha, beta, gamma:
     na = r2 * cos(phi) - at;
@@ -171,7 +170,7 @@ double LSTMDrugThreeComp::calculateDrugFactor(LocalRng& rng, WithinHost::CommonI
     double totalFactor = 1.0;   // survival factor for whole day
     
     typedef pair<double,double> TimeConc;
-    foreach( const TimeConc& time_conc, doses ){
+    for( const TimeConc& time_conc : doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
@@ -213,7 +212,7 @@ void LSTMDrugThreeComp::updateConcentration (double body_mass) {
     
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
-    foreach( TimeConc& time_conc, doses ){
+    for( TimeConc& time_conc : doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             // add dose:

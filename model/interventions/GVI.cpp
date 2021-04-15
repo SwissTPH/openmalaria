@@ -81,7 +81,7 @@ unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart( istream& stream
 void GVIComponent::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt,
                                           double proportionUse)
 {
-    assert( (boost::math::isnan)(deterrency) ); // double init
+    assert( (std::isnan)(deterrency) ); // double init
     deterrency = elt.getDeterrency().present() ? elt.getDeterrency().get().getValue() : 0.0;
     preprandialKilling = elt.getPreprandialKillingEffect().present() ? elt.getPreprandialKillingEffect().get().getValue() : 0.0;
     postprandialKilling = elt.getPostprandialKillingEffect().present() ? elt.getPostprandialKillingEffect().get().getValue() : 0.0;
