@@ -84,7 +84,7 @@ def update_source(filename, copyright):
         pass
     else:
         print(header)
-        r=eval(input("Remove above header? (y/N): "))
+        r=raw_input("Remove above header? (y/N): ")
         if r[0]=='y' or r[0]=='Y':
             oldheaders.add(header)
             fdata = fdata[len(header):]
