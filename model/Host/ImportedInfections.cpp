@@ -21,7 +21,7 @@
 #include "Host/ImportedInfections.h"
 #include "Host/Human.h"
 #include "util/random.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 #include "Population.h"
 
 namespace OM { namespace Host {

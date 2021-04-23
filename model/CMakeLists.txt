@@ -89,6 +89,7 @@ set (Model_CPP
   util/DocumentLoader.cpp
   util/misc.cpp
   util/random.cpp
+  util/UnitParse.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp
