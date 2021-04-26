@@ -83,23 +83,6 @@ class SimTime {
     /** Default construction; same as sim::never(). */
     SimTime() : d(0) {}
     
-    /** Return this time in time steps modulo some positive integer. */
-    inline int moduloSteps(int denominator){
-        return util::mod_nn(d / SimData::interval, denominator);
-    }
-    
-    /** Return this time in time steps modulo some positive integer. */
-    inline int moduloYearSteps(){
-        return util::mod_nn(d / SimData::interval, SimData::steps_per_year);
-    }
-
-    ///@brief Conversions to other types/units
-    //NOTE: these methods provide good documentation of the types of things
-    //one does with SimTimes (besides comparing with other SimTimes).
-    //@{
-    /// Get length of time in days. Currently this is simple no-op get.
-    inline int inDays() const{ return d; }
-    
     /// Convert to years
     inline double inYears() const{ return d * (1.0 / SimData::DAYS_IN_YEAR); }
     
@@ -107,6 +90,7 @@ class SimTime {
     inline int inSteps() const{ return d / SimData::interval; }
     //@}
     
+
     ///@brief Simple arithmatic modifiers (all return a copy)
     //@{
     inline SimTime operator-()const {
@@ -186,6 +170,15 @@ public:
     //@{
     /// Number of days in a year; defined as 365 (leap years are not simulated).
     enum { DAYS_IN_YEAR = 365 };
+    
+    ///@brief Conversions to other types/units
+    //@{
+    /// Convert to years
+    static inline double inYears(SimTime d) { return d * (1.0 / SimData::DAYS_IN_YEAR); }
+    
+    /// Convert to time steps (rounding down)
+    static inline int inSteps(SimTime d) { return d / SimData::interval; }
+    //@}
     
     /** Return this time in time steps modulo some positive integer. */
     static inline int moduloSteps(SimTime d, int denominator){

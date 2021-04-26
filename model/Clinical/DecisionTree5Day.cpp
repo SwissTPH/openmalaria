@@ -88,7 +88,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
     
     double x = human.rng().uniform_01();
     if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
-        CMHostData hostData( human, human.age(sim::ts0()).inYears(), pgState );
+        CMHostData hostData( human, sim::inYears(human.age(sim::ts0())), pgState );
         
         // Run tree (which may deploy treatment)
         CMDTOut output = ( x < accessUCSelfTreat[regimen] * m_treatmentSeekingFactor ) ?

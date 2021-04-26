@@ -215,7 +215,7 @@ void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> F
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
     for (SimTime i = sim::zero(); i < sim::oneYear(); i += sim::oneDay())
-        initialisationEIR[mod_nn(i.inSteps(), sim::stepsPerYear())] += speciesEIR[i];
+        initialisationEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += speciesEIR[i];
 
     if (util::CommandLine::option(util::CommandLine::PRINT_ANNUAL_EIR))
         cout << "Annual EIR for " << mosq.name << ": " << vectors::sum(speciesEIR) << endl;

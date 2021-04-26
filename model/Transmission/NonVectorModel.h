@@ -172,14 +172,14 @@ public:
     virtual void update(const Population &population)
     {
         double currentKappa = TransmissionModel::updateKappa(population);
-        if (simulationMode == forcedEIR) { initialKappa[sim::ts1().moduloSteps(initialKappa.size())] = currentKappa; }
+        if (simulationMode == forcedEIR) { initialKappa[sim::moduloSteps(sim::ts1(), initialKappa.size())] = currentKappa; }
     }
 
     virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const
     {
         EIR.resize(1); // no support for per-genotype tracking in this model (possible, but we're lazy)
         // where the full model, with estimates of human mosquito transmission is in use, use this:
-        if (simulationMode == forcedEIR) { EIR[0] = initialisationEIR[sim::ts0().moduloYearSteps()]; }
+        if (simulationMode == forcedEIR) { EIR[0] = initialisationEIR[sim::moduloYearSteps(sim::ts0())]; }
         else if (simulationMode == transientEIRknown)
         {
             // where the EIR for the intervention phase is known, obtain this from
@@ -188,7 +188,7 @@ public:
         }
         else if (simulationMode == dynamicEIR)
         {
-            EIR[0] = initialisationEIR[sim::ts0().moduloYearSteps()];
+            EIR[0] = initialisationEIR[sim::moduloYearSteps(sim::ts0())];
             if (sim::intervTime() >= sim::zero())
             {
                 // we modulate the initialization based on the human infectiousness time steps ago in the

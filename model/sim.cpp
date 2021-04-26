@@ -88,7 +88,7 @@ using util::CommandLine;
 
 void sim::init( const scnXml::Scenario& scenario ){
     SimData::interval = scenario.getModel().getParameters().getInterval();
-    SimData::steps_per_year = sim::oneYear().inSteps();
+    SimData::steps_per_year = sim::inSteps(sim::oneYear());
     SimData::years_per_step = 1.0 / SimData::steps_per_year;
     
     sim::s_max_human_age =

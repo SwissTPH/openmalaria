@@ -166,7 +166,7 @@ void DescriptiveWithinHostModel::update(LocalRng& rng,
     assert( (std::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
     
     // Cache total density for infectiousness calculations
-    int y_lag_i = sim::ts1().moduloSteps(y_lag_len);
+    int y_lag_i = sim::moduloSteps(sim::ts1(), y_lag_len);
     for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag[y_lag_i * Genotypes::N() + g] = 0.0;
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
         m_y_lag[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();

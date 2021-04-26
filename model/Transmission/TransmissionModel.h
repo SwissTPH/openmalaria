@@ -146,7 +146,7 @@ public:
 
         if (!mon::isReported()) return; // cannot use counters below when not reporting
 
-        double duration = (sim::now() - lastSurveyTime).inSteps();
+        double duration = sim::inSteps(sim::now() - lastSurveyTime);
         if (duration > 0.0)
         {
             mon::reportStatMF(mon::MVF_INPUT_EIR, surveyInputEIR / duration);
@@ -266,7 +266,7 @@ protected:
         {
             // NOTE: calculate availability relative to age at end of time step;
             // not my preference but consistent with TransmissionModel::getEIR().
-            const double avail = human.perHostTransmission.relativeAvailabilityHetAge(human.age(sim::ts1()).inYears());
+            const double avail = human.perHostTransmission.relativeAvailabilityHetAge(sim::inYears(human.age(sim::ts1())));
             sumWeight += avail;
             const double tbvFactor = human.getVaccine().getFactor(interventions::Vaccine::TBV);
             const double pTransmit = human.withinHostModel->probTransmissionToMosquito(tbvFactor, 0);

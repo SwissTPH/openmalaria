@@ -60,7 +60,7 @@ const WithinHost::Diagnostic* neonatalDiagnostic = 0;
 
 void NeonatalMortality::init( const scnXml::Clinical& clinical ){
     SimTime fiveMonths = sim::fromDays( 5 * 30 );
-    prevByGestationalAge.assign( fiveMonths.inSteps(), 0.0 );
+    prevByGestationalAge.assign( sim::inSteps(fiveMonths), 0.0 );
     
     if( clinical.getNeonatalMortality().present() ){
         neonatalDiagnostic = &WithinHost::diagnostics::get(
@@ -120,7 +120,7 @@ void NeonatalMortality::update (Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = sim::ts0().moduloSteps(prevByGestationalAge.size());
+    size_t index = sim::moduloSteps(sim::ts0(), prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for(size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {

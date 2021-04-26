@@ -105,7 +105,7 @@ void Human::update(Transmission::TransmissionModel& transmission) {
     // the difference between this and age at the start is not especially
     // important in the model design, but since we parameterised with
     // ageYears1 we should stick with it.
-    double ageYears1 = age(sim::ts1()).inYears();
+    double ageYears1 = sim::inYears(age(sim::ts1()));
     // monitoringAgeGroup is the group for the start of the time step.
     monitoringAgeGroup.update( age0 );
     // check sub-pop expiry
@@ -152,7 +152,7 @@ void Human::summarize() {
     }
     
     mon::reportStatMHI( mon::MHR_HOSTS, *this, 1 );
-    mon::reportStatMHF( mon::MHF_AGE, *this, age(sim::now()).inYears() );
+    mon::reportStatMHF( mon::MHF_AGE, *this, sim::inYears(age(sim::now())) );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     

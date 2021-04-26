@@ -199,7 +199,7 @@ void Population::update(Transmission::TransmissionModel& transmission, SimTime f
         // "outmigrate" some to maintain population shape
         //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
         // Also see targetPop = ... comment above
-        bool outmigrate = cumPop >= AgeStructure::targetCumPop(iter->age(sim::ts1()).inSteps(), targetPop);
+        bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(iter->age(sim::ts1())), targetPop);
         
         if( isDead || outmigrate ){
             iter = population.erase (iter);
@@ -229,7 +229,7 @@ void Population::ctsHostDemography (ostream& stream){
     auto iter = population.crbegin();
     int cumCount = 0;
     for( double ubound : ctsDemogAgeGroups ){
-        while( iter != population.crend() && iter->age(sim::now()).inYears() < ubound ){
+        while( iter != population.crend() && sim::inYears(iter->age(sim::now())) < ubound ){
             ++cumCount;
             ++iter;
         }
@@ -287,7 +287,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->age(sim::now()).inYears());
+            avail += iter->perHostTransmission.relativeAvailabilityAge(sim::inYears(iter->age(sim::now())));
         }
     }
     stream << '\t' << avail/nHumans;

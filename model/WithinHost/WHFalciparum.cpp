@@ -95,7 +95,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
     decayM = parameters[Parameters::DECAY_M];
     
-    y_lag_len = sim::fromDays(20).inSteps() + 1;
+    y_lag_len = sim::inSteps(sim::fromDays(20)) + 1;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
