@@ -32,7 +32,7 @@ namespace OM
 {
 namespace Transmission
 {
-static SimulationMode readMode(const string &str)
+inline SimulationMode readMode(const string &str)
 {
     if (str == "forced")
         return forcedEIR;
@@ -44,7 +44,7 @@ static SimulationMode readMode(const string &str)
         throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
 }
 
-static NonVectorModel *createNonVectorModel(const scnXml::Entomology &entoData)
+inline NonVectorModel *createNonVectorModel(const scnXml::Entomology &entoData)
 {
     const scnXml::NonVector &nonVectorData = entoData.getNonVector().get();
 
@@ -57,12 +57,12 @@ static NonVectorModel *createNonVectorModel(const scnXml::Entomology &entoData)
     return new NonVectorModel(initialisationEIR, interventionMode, entoData, nonVectorData, eipDuration);
 }
 
-static bool anophelesCompare(const scnXml::AnophelesParams &a1, const scnXml::AnophelesParams &a2)
+inline bool anophelesCompare(const scnXml::AnophelesParams &a1, const scnXml::AnophelesParams &a2)
 {
     return (a1.getSeasonality().getAnnualEIR().get() > a2.getSeasonality().getAnnualEIR().get());
 }
 
-static Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::AnophelesParams &anoph, vector<double>& initialisationEIR, int populationSize)
+inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::AnophelesParams &anoph, vector<double>& initialisationEIR, int populationSize)
 {
     Anopheles::AnophelesModel *anophModel;
 
@@ -229,7 +229,7 @@ static Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
     return anophModel;
 }
 
-static VectorModel *createVectorModel(const scnXml::Entomology &entoData, int populationSize)
+inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int populationSize)
 {
     const scnXml::Vector &vectorData = entoData.getVector().get();
     scnXml::Vector::AnophelesSequence anophelesList = vectorData.getAnopheles();
@@ -280,7 +280,7 @@ static VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
 ///@brief Creation, destruction and checkpointing
 //@{
 /// Creates a derived class
-static TransmissionModel *createTransmissionModel(const scnXml::Entomology &entoData, int populationSize)
+inline TransmissionModel *createTransmissionModel(const scnXml::Entomology &entoData, int populationSize)
 {
     // Entomology contains either a list of at least one anopheles or a list of at
     // least one EIRDaily.

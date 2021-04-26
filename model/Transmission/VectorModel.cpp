@@ -462,7 +462,6 @@ void VectorModel::vectorUpdate(const Population &population)
         species[s]->advancePeriod(sum_avail[s], sigma_df[s], sigma_dif[s], sigma_dff[s], simulationMode == dynamicEIR);
     }
 }
-void VectorModel::update(const Population &population) { TransmissionModel::updateKappa(population); }
 
 const string vec_mode_err = "vector interventions can only be used in "
                             "dynamic transmission mode (mode=\"dynamic\")";
