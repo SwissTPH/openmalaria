@@ -212,16 +212,16 @@ public:
         dt1.setTreatSimple( treat1 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt1 ), 1 );
-        TS_ASSERT_EQUALS( whm->lastTimeLiver.inDays(), 0 );
-        TS_ASSERT_EQUALS( whm->lastTimeBlood.inDays(), 1*5 );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver, 0 );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood, 1*5 );
         
         scnXml::DTTreatSimple treat2( "15d", "-1t" );
         scnXml::DecisionTree dt2;
         dt2.setTreatSimple( treat2 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt2 ), 1 );
-        TS_ASSERT_EQUALS( whm->lastTimeLiver.inDays(), 3*5 );
-        TS_ASSERT_EQUALS( whm->lastTimeBlood.inDays(), -1*5 );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver, 3*5 );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood, -1*5 );
     }
     
     double runAndGetMgPrescribed( scnXml::DecisionTree& dt, double age ){

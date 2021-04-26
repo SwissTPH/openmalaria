@@ -76,7 +76,7 @@ class SimTime {
     /** Construct, from a time in days. */
     explicit SimTime( int days ) : d(days) {}
     
-    operator int() { return d; }
+    operator int() const { return d; }
 
     ///@brief Unparameterised constructors
     //@{
