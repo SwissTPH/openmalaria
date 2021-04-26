@@ -76,11 +76,23 @@ class SimTime {
     /** Construct, from a time in days. */
     explicit SimTime( int days ) : d(days) {}
     
+    operator int() { return d; }
+
     ///@brief Unparameterised constructors
     //@{
     /** Default construction; same as sim::never(). */
     SimTime() : d(-0x3FFFFFFF) {}
     
+    /** Return this time in time steps modulo some positive integer. */
+    inline int moduloSteps(int denominator){
+        return util::mod_nn(d / SimData::interval, denominator);
+    }
+    
+    /** Return this time in time steps modulo some positive integer. */
+    inline int moduloYearSteps(){
+        return util::mod_nn(d / SimData::interval, SimData::steps_per_year);
+    }
+
     ///@brief Conversions to other types/units
     //NOTE: these methods provide good documentation of the types of things
     //one does with SimTimes (besides comparing with other SimTimes).
@@ -149,16 +161,6 @@ class SimTime {
     }
     //@}
     
-    /** Return this time in time steps modulo some positive integer. */
-    inline int moduloSteps(int denominator){
-        return util::mod_nn(d / SimData::interval, denominator);
-    }
-    
-    /** Return this time in time steps modulo some positive integer. */
-    inline int moduloYearSteps(){
-        return util::mod_nn(d / SimData::interval, SimData::steps_per_year);
-    }
-    
     /// Checkpointing
     template<class S>
     void operator& (S& stream) {
@@ -185,6 +187,16 @@ public:
     /// Number of days in a year; defined as 365 (leap years are not simulated).
     enum { DAYS_IN_YEAR = 365 };
     
+    /** Return this time in time steps modulo some positive integer. */
+    static inline int moduloSteps(SimTime d, int denominator){
+        return util::mod_nn(d / SimData::interval, denominator);
+    }
+    
+    /** Return this time in time steps modulo some positive integer. */
+    static inline int moduloYearSteps(SimTime d){
+        return util::mod_nn(d / SimData::interval, SimData::steps_per_year);
+    }
+
     /** Duration zero and the time at the start of the simulation. */
     static inline SimTime zero(){ return SimTime(0); }
 
