@@ -192,9 +192,9 @@ public:
             N_v_length(0),
             timeStep_N_v0(0.0)
     {
-        forcedS_v.resize (sim::oneYear().inDays());
-        quinquennialS_v.resize (sim::fromYearsI(5).inDays(), 0.0);
-        mosqEmergeRate.resize (sim::oneYear().inDays(), 0.0);
+        forcedS_v.resize (sim::oneYear());
+        quinquennialS_v.resize (sim::fromYearsI(5), 0.0);
+        mosqEmergeRate.resize (sim::oneYear(), 0.0);
     }
     
     AnophelesModel(const AnophelesModel&) = delete;            //disable copy-constructor
@@ -313,7 +313,7 @@ public:
         // Get emergence at start of step:
         SimTime dYear1 = mod_nn(d0, sim::oneYear());
         // Simple model: fixed emergence scaled by larviciding
-        return mosqEmergeRate[dYear1.inDays()];
+        return mosqEmergeRate[dYear1];
     }
 
     /** Update by one day (may be called multiple times for 1 time-step update).
@@ -350,7 +350,7 @@ public:
 
     /// Get mean emergence per day during last time-step
     inline double getLastN_v0 () const{
-        return timeStep_N_v0 / sim::oneTS().inDays();
+        return timeStep_N_v0 / sim::oneTS();
     }
     
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
@@ -521,7 +521,7 @@ public:
      *
      * Values at index ((d-1) mod N_v_length) are used to derive the state of
      * the population on day d. The state during days (t×I+1) through to ((t+1)×I)
-     * where t is sim::ts0() and I is sim::oneTS().inDays() is what
+     * where t is sim::ts0() and I is sim::oneTS() is what
      * drives the transmission at time-step t.
      * 
      * These arrays should be checkpointed. */

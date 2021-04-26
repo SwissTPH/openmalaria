@@ -51,12 +51,12 @@ public:
         double minEIR = min_EIR_mult * averageEIR(nonVectorData);
 
         const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily();
-        if (daily.size() < static_cast<size_t>(sim::oneYear().inDays()))
+        if (daily.size() < static_cast<size_t>(sim::oneYear()))
             throw util::xml_scenario_error("insufficient EIRDaily data for a year");
 
         for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday += sim::oneDay())
         {
-            double EIRdaily = std::max(static_cast<double>(daily[mpcday.inDays()]), minEIR);
+            double EIRdaily = std::max(static_cast<double>(daily[mpcday]), minEIR);
 
             // Index 0 of initialisationEIR refers to the EIR affecting the
             // first day(s) of the year. Correspondingly, the first 1 or 5 values
@@ -71,7 +71,7 @@ public:
         // divide by number of records assigned to each interval (usually one per day)
         for (size_t indTS = 0; indTS < sim::stepsPerYear(); indTS += 1)
         {
-            initialisationEIR[indTS] *= sim::oneTS().inDays() / static_cast<double>(nDays[indTS]);
+            initialisationEIR[indTS] *= sim::oneTS() / static_cast<double>(nDays[indTS]);
             annualEIR += initialisationEIR[indTS];
         }
 
@@ -134,7 +134,7 @@ public:
         const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily();
         vector<int> nDays(sim::fromDays(daily.size() - 1).inSteps() + 1, 0);
         interventionEIR.assign(nDays.size(), 0.0);
-        size_t required_days = static_cast<size_t>((sim::endDate() - sim::startDate()).inDays() + 1);
+        size_t required_days = static_cast<size_t>((sim::endDate() - sim::startDate()) + 1);
         if (daily.size() < required_days)
         {
             cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << required_days << endl;
@@ -144,7 +144,7 @@ public:
         double minEIR = min_EIR_mult * averageEIR(nonVectorData);
         for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday += sim::oneDay())
         {
-            double EIRdaily = std::max(static_cast<double>(daily[mpcday.inDays()]), minEIR);
+            double EIRdaily = std::max(static_cast<double>(daily[mpcday]), minEIR);
 
             // istep is the time period to which the day is assigned.
             size_t istep = mpcday.inSteps();
@@ -154,7 +154,7 @@ public:
         // divide by number of records assigned to each interval (usually one per day)
         for (size_t i = 0; i < interventionEIR.size(); ++i)
         {
-            interventionEIR[i] *= sim::oneTS().inDays() / static_cast<double>(nDays[i]);
+            interventionEIR[i] *= sim::oneTS() / static_cast<double>(nDays[i]);
         }
 
         // I've no idea what this should be, so until someone asks it can be NaN.

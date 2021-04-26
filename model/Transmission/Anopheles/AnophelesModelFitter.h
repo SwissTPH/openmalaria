@@ -46,15 +46,15 @@ public:
     AnophelesModelFitter(AnophelesModel &m) : scaleFactor(1.0), rotated(false), scaled(false)
     {
         // usually around 20 days; no real analysis for effect of changing EIPDuration or mosqRestDuration
-        shiftAngle = m.EIRRotateAngle - (m.mosq.EIPDuration.inDays() + 10) / 365. * 2. *M_PI; 
+        shiftAngle = m.EIRRotateAngle - (m.mosq.EIPDuration + 10) / 365. * 2. *M_PI; 
     }
 
     bool fit(AnophelesModel &m)
     {
-        std::vector<double> avgAnnualS_v(sim::oneYear().inDays(), 0.0);
+        std::vector<double> avgAnnualS_v(sim::oneYear(), 0.0);
         for (SimTime i = sim::fromYearsI(4); i < sim::fromYearsI(5); i += sim::oneDay())
         {
-            avgAnnualS_v[mod_nn(i, sim::oneYear()).inDays()] = m.quinquennialS_v[i.inDays()];
+            avgAnnualS_v[mod_nn(i, sim::oneYear())] = m.quinquennialS_v[i];
         }
 
         double factor = vectors::sum(m.forcedS_v) / vectors::sum(avgAnnualS_v);

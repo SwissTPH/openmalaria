@@ -40,9 +40,9 @@ public:
         , probPreadultSurvival(probPreadultSurvival)
         , fEggsLaidByOviposit(fEggsLaidByOviposit)
     {
-        quinquennialOvipositing.resize(sim::fromYearsI(5).inDays(), 0.0);
-        invLarvalResources.resize(sim::oneYear().inDays(), 0.0);
-        nOvipositingDelayed.resize(developmentDuration.inDays(), 0.0);
+        quinquennialOvipositing.resize(sim::fromYearsI(5), 0.0);
+        invLarvalResources.resize(sim::oneYear(), 0.0);
+        nOvipositingDelayed.resize(developmentDuration, 0.0);
     }
 
     /** Initialisation which must wait until a human population is available.
@@ -72,18 +72,18 @@ public:
         double tsP_dff = sigma_dff * availDivisor * mosq.probMosqSurvivalOvipositing;
 
         // Initialise nOvipositingDelayed
-        int y1 = sim::oneYear().inDays();
-        int tau = mosq.restDuration.inDays();
-        for (int t = 0; t < developmentDuration.inDays(); t++)
+        int y1 = sim::oneYear();
+        int tau = mosq.restDuration;
+        for (int t = 0; t < developmentDuration; t++)
         {
-            nOvipositingDelayed[util::mod_nn(t + tau, developmentDuration.inDays())] = tsP_dff * initNvFromSv * forcedS_v[t];
+            nOvipositingDelayed[util::mod_nn(t + tau, developmentDuration)] = tsP_dff * initNvFromSv * forcedS_v[t];
         }
 
         // Used when calculating invLarvalResources (but not a hard constraint):
         assert(tau + developmentDuration <= y1);
-        for (int t = 0; t < sim::oneYear().inDays(); t++)
+        for (int t = 0; t < sim::oneYear(); t++)
         {
-            double yt = fEggsLaidByOviposit * tsP_dff * initNvFromSv * forcedS_v[util::mod_nn(t + y1 - tau - developmentDuration.inDays(), y1)];
+            double yt = fEggsLaidByOviposit * tsP_dff * initNvFromSv * forcedS_v[util::mod_nn(t + y1 - tau - developmentDuration, y1)];
             invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) / (mosqEmergeRate[t] * yt);
         }
     }
@@ -102,13 +102,13 @@ public:
     {
         bool fitted = AnophelesModel::initIterate();
 
-        int y1 = sim::oneYear().inDays(), y2 = sim::fromYearsI(2).inDays(), y3 = sim::fromYearsI(3).inDays(), y4 = sim::fromYearsI(4).inDays(),
-                y5 = sim::fromYearsI(5).inDays();
+        int y1 = sim::oneYear(), y2 = sim::fromYearsI(2), y3 = sim::fromYearsI(3), y4 = sim::fromYearsI(4),
+                y5 = sim::fromYearsI(5);
         assert(mosqEmergeRate.size() == y1);
 
         for (int t = 0; t < y1; t++)
         {
-            int ttj = t - developmentDuration.inDays();
+            int ttj = t - developmentDuration;
             // b · P_df · avg_N_v(t - θj - τ):
             double yt = fEggsLaidByOviposit * 0.2 *
                         (quinquennialOvipositing[ttj + y1] + quinquennialOvipositing[ttj + y2] + quinquennialOvipositing[ttj + y3] +
@@ -126,12 +126,12 @@ public:
         // adult population, resources available, and larviciding.
         // See: A Simple Periodically-Forced Difference Equation Model for
         // Mosquito Population Dynamics, N. Chitnis, 2012. TODO: publish & link.
-        int d1 = d0.inDays() + 1;
+        int d1 = d0 + 1;
 
-        double yt = fEggsLaidByOviposit * nOvipositingDelayed[util::mod_nn(d1, developmentDuration.inDays())];
-        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, sim::oneYear()).inDays()] * yt);
-        nOvipositingDelayed[util::mod_nn(d1, developmentDuration.inDays())] = nOvipositing;
-        quinquennialOvipositing[util::mod_nn(d1, sim::fromYearsI(5).inDays())] = nOvipositing;
+        double yt = fEggsLaidByOviposit * nOvipositingDelayed[util::mod_nn(d1, developmentDuration)];
+        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, sim::oneYear())] * yt);
+        nOvipositingDelayed[util::mod_nn(d1, developmentDuration)] = nOvipositing;
+        quinquennialOvipositing[util::mod_nn(d1, sim::fromYearsI(5))] = nOvipositing;
         return emergence;
     }
 
@@ -146,9 +146,9 @@ public:
         for (SimTime i = start, end = start + sim::oneTS(); i < end; i += sim::oneDay())
         {
             SimTime dYear1 = mod_nn(i, sim::oneYear());
-            total += 1.0 / invLarvalResources[dYear1.inDays()];
+            total += 1.0 / invLarvalResources[dYear1];
         }
-        return total / sim::oneTS().inDays();
+        return total / sim::oneTS();
     }
 
     virtual double getResRequirements() const { return numeric_limits<double>::quiet_NaN(); }

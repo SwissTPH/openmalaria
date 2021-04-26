@@ -40,7 +40,7 @@ inline double findAngle(const double EIRRotageAngle, const vector<double> & FSCo
 
         // Minimize l1-norm
         double sum = 0.0;
-        for(int i=0; i<sim::oneYear().inDays(); i++)
+        for(int i=0; i<sim::oneYear(); i++)
         {
             double v = fabs(temp[i] - sim[i]);
             sum += v*v;
