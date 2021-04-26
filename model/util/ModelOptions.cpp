@@ -263,7 +263,7 @@ namespace OM { namespace util {
             // 1 day TS is also okay
         }else{
             ostringstream msg;
-            msg << "Time step set to " << sim::oneTS().inDays() << " days but only 1 and 5 days are supported.";
+            msg << "Time step set to " << sim::oneTS() << " days but only 1 and 5 days are supported.";
             throw xml_scenario_error (msg.str());
         }
     }

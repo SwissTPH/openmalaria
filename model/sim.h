@@ -119,13 +119,13 @@ class SimTime {
         return SimTime( d + rhs.d );
     }
     // scale by an integer
-    inline SimTime operator*( int scalar )const {
-        return SimTime( d * scalar );
-    }
-    // scale by a double, rounding to nearest
-    inline SimTime operator*( double scalar )const {
-        return SimTime( static_cast<int>(d * scalar + 0.5) );
-    }
+    // inline SimTime operator*( int scalar )const {
+    //     return SimTime( d * scalar );
+    // }
+    // // scale by a double, rounding to nearest
+    // inline SimTime operator*( double scalar )const {
+    //     return SimTime( static_cast<int>(d * scalar + 0.5) );
+    // }
     // Divide by another SimTime; result is unitless. Note integer division.
     inline int operator/( const SimTime rhs )const{
         return d / rhs.d;
@@ -225,7 +225,7 @@ public:
     ///@brief Parameterised constructors
     //@{
     /** Convert. */
-    static inline SimTime fromTS(int ts){ return oneTS() * ts; }
+    static inline SimTime fromTS(int ts){ return SimTime(int(oneTS()) * ts); }
     
     /** Duration in days. Should be fast (currently no conversion required). */
     static inline SimTime fromDays(int days){ return SimTime(days); }

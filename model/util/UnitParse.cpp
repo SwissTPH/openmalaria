@@ -124,9 +124,9 @@ SimTime readDuration( const std::string& str, DefaultUnit unit ){
 double durationToDays( const std::string& str, DefaultUnit unit ){
     double v = parseDurationAndUnit( str, unit );
     
-    if( unit == YEARS ) return v * sim::oneYear().inDays();
+    if( unit == YEARS ) return v * sim::oneYear();
     else if( unit == DAYS ) return v;
-    else if( unit == STEPS ) return v * sim::oneTS().inDays();
+    else if( unit == STEPS ) return v * sim::oneTS();
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
