@@ -38,8 +38,6 @@ namespace scnXml {
 
 namespace OM {
 
-class SimTime;
-
 inline int floorToInt( double x ){
 	return static_cast<int>(std::floor(x));
 }
@@ -52,9 +50,6 @@ class SimData {
     static int interval;        // days per time step
     static size_t steps_per_year;
     static double years_per_step;
-    
-    friend class SimTime;
-    friend class SimTime;
     friend class sim;
 };
 
@@ -81,16 +76,9 @@ class SimTime {
     ///@brief Unparameterised constructors
     //@{
     /** Default construction; same as sim::never(). */
-    SimTime() : d(0) {}
+    SimTime() = default;
     
     // ///@brief Self-modifying arithmatic
-    // //@{
-    // inline void operator+=( const SimTime rhs ) {
-    //     d += rhs.d;
-    // }
-    // //@}
-    
-    /// Checkpointing
     template<class S>
     void operator& (S& stream) {
         using namespace OM::util::checkpoint;

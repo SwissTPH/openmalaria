@@ -284,6 +284,7 @@ void VivaxBrood::treatmentLS(){
 
 WHVivax::WHVivax( LocalRng& rng, double comorbidityFactor ) :
     cumPrimInf(0),
+    treatExpiryLiver(0), treatExpiryBlood(0),
     pEvent( numeric_limits<double>::quiet_NaN() ),
     pFirstRelapseEvent( numeric_limits<double>::quiet_NaN() ),
     pSevere( 0.0 )

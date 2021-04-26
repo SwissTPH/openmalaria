@@ -124,7 +124,8 @@ WHFalciparum::WHFalciparum( LocalRng& rng, double comorbidityFactor ):
     WHInterface(),
     m_cumulative_h(0.0), m_cumulative_Y(0.0), m_cumulative_Y_lag(0.0),
     totalDensity(0.0), hrp2Density(0.0), timeStepMaxDensity(0.0),
-    pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
+    pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) ),
+    treatExpiryLiver(0), treatExpiryBlood(0)
 {
     // NOTE: negating a Gaussian sample with mean 0 is pointless — except that
     // the individual samples change. In any case the overhead is negligible.
