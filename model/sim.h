@@ -81,7 +81,7 @@ class SimTime {
     ///@brief Unparameterised constructors
     //@{
     /** Default construction; same as sim::never(). */
-    SimTime() : d(-0x3FFFFFFF) {}
+    SimTime() : d(0) {}
     
     /** Return this time in time steps modulo some positive integer. */
     inline int moduloSteps(int denominator){
@@ -206,7 +206,7 @@ public:
      * never() + x < zero() and x - never() will not to overflow for all valid
      * simulation times x (including any value now() may take as well as
      * never() and future()). */
-    static inline SimTime never(){ return SimTime(); }
+    static inline SimTime never(){ return SimTime(-0x3FFFFFFF); }
     
     /** Special value representing a time point always in the future, such that
      * now() < future() and now() + future() does not overflow. */

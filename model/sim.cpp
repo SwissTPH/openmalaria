@@ -48,8 +48,8 @@ SimTime sim::s_max_human_age = sim::never();
 #ifndef NDEBUG
 bool sim::in_update = false;
 #endif
-SimTime sim::s_t0;
-SimTime sim::s_t1;
+SimTime sim::s_t0 = sim::never();
+SimTime sim::s_t1 = sim::never();
 
 SimTime sim::s_interv = sim::never();
 

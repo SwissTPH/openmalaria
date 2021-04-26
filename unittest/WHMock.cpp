@@ -29,7 +29,8 @@ namespace UnitTest {
 
 WHMock::WHMock() :
     totalDensity(numeric_limits<double>::quiet_NaN()),
-    nTreatments(0)
+    nTreatments(0),
+    lastTimeLiver(sim::never()), lastTimeBlood(sim::never())
 {}
 WHMock::~WHMock() {}
 
