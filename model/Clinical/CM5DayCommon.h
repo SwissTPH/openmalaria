@@ -67,7 +67,7 @@ protected:
     /** Called when a non-severe/complicated malaria sickness occurs. */
     virtual void uncomplicatedEvent(Human& human, Episode::State pgState) =0;
     
-    /** Time of the last treatment (SimTime::never() if never treated). */
+    /** Time of the last treatment (sim::never() if never treated). */
     SimTime m_tLastTreatment;
 
     //! treatment seeking for heterogeneity

@@ -265,7 +265,7 @@ public:
         sim::init( dummyXML::scenario );
         
         // we could just use zero, but we may spot more errors by using some weird number
-        sim::s_t0 = SimTime::fromYearsN(83.2591);
+        sim::s_t0 = sim::fromYearsN(83.2591);
         sim::s_t1 = sim::s_t0;
 #ifndef NDEBUG
         sim::in_update = true;  // may not always be correct but we're more interested in getting around this check than using it in unit tests
@@ -409,7 +409,7 @@ public:
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     // But do set latentP.
     static void Infection_init_latentP_and_NaN () {
-	Infection::s_latentP = SimTime::fromDays(15);
+	Infection::s_latentP = sim::fromDays(15);
     }
     
     static void DescriptiveInfection_init () {

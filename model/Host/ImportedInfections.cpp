@@ -31,7 +31,7 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     try{
         //NOTE: if changing XSD, this should not have a default unit:
         period = UnitParse::readDuration( tElt.getPeriod(), UnitParse::STEPS );
-        if( period < SimTime::zero() ){
+        if( period < sim::zero() ){
             throw util::format_error( "cannot be negative" );
         }
     }catch( const util::format_error& e ){
@@ -40,14 +40,14 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     rate.reserve( tElt.getRate().size() );
     try{
         for( auto it = tElt.getRate().begin(); it != tElt.getRate().end(); ++it ){
-            SimDate date = UnitParse::readDate( it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/ );
+            SimTime date = UnitParse::readDate( it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/ );
             // convert to per-time-step, per-person
             double rateVal = it->getValue() * sim::yearsPerStep() * (1.0 / 1000.0);
             rate.push_back( Rate( date - sim::startDate(), rateVal ) );
         }
         sort( rate.begin(), rate.end() );
         if( rate.size() > 0 ){
-            if( period != SimTime::zero() && rate[0].time != SimTime::zero() ){
+            if( period != sim::zero() && rate[0].time != sim::zero() ){
                 throw util::xml_scenario_error( "must specify rate at time zero when period is not zero" );
             }
             // remove useless repeated entries from list
@@ -69,8 +69,8 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
 void ImportedInfections::import( Population& population ){
     if( rate.size() == 0 ) return;      // no imported infections
     SimTime now = sim::intervTime();
-    assert( now >= SimTime::zero() );
-    if( period > SimTime::zero() ){
+    assert( now >= sim::zero() );
+    if( period > sim::zero() ){
         now = mod_nn(now, period);
     }
     if( rate[lastIndex].time > now ){

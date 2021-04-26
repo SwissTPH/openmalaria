@@ -76,13 +76,13 @@ public:
         do{
             extinct = infection->update(m_rng, 1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/);
             SimTime age = now - infection->m_startDate - infection->s_latentP;
-            if( age >= SimTime::zero() ){
+            if( age >= sim::zero() ){
                 ETS_ASSERT_LESS_THAN( day, dens.size() );
                 TS_ASSERT_APPROX( infection->getDensity(), dens[day] );
 //                 out << infection->getDensity() << endl;
                 day += 1;
             }
-            now += SimTime::oneDay();
+            now += sim::oneDay();
         }while(!extinct);
         TS_ASSERT_EQUALS( day, dens.size() );
         delete infection;
@@ -294,7 +294,7 @@ private:
                 
                 while( !infection->update(rng, 1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/) ){
                     dens.push_back( infection->getDensity() );
-                    now += SimTime::oneDay();
+                    now += sim::oneDay();
                 }
                 delete infection;
                 calc( run, dens );

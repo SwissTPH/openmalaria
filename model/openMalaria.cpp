@@ -333,8 +333,8 @@ int main(int argc, char* argv[])
         else
             startedFromCheckpoint = false;
 
-        sim::s_t0 = SimTime::zero();
-        sim::s_t1 = SimTime::zero();
+        sim::s_t0 = sim::zero();
+        sim::s_t1 = sim::zero();
         
         // Make sure warmup period is at least as long as a human lifespan, as the
         // length required by vector warmup, and is a whole number of years.
@@ -348,14 +348,14 @@ int main(int argc, char* argv[])
             cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
             humanWarmupLength = transmission->minPreinitDuration();
         }
-        humanWarmupLength = SimTime::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
+        humanWarmupLength = sim::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
         
         estEndTime = humanWarmupLength  // ONE_LIFE_SPAN
             + transmission->expectedInitDuration()
             // plus MAIN_PHASE: survey period plus one TS for last survey
             + (sim::endDate() - sim::startDate())
-            + SimTime::oneTS();
-        assert( estEndTime + SimTime::never() < SimTime::zero() );
+            + sim::oneTS();
+        assert( estEndTime + sim::never() < sim::zero() );
         
         bool skipWarmup = false;
         if (startedFromCheckpoint)
@@ -384,11 +384,11 @@ int main(int argc, char* argv[])
 
             // Transmission init phase
             SimTime iterate = transmission->initIterate();
-            while(iterate > SimTime::zero())
+            while(iterate > sim::zero())
             {
                 endTime += iterate;
                 // adjust estimation of final time step: end of current period + length of main phase
-                estEndTime = endTime + (sim::endDate() - sim::startDate()) + SimTime::oneTS();
+                estEndTime = endTime + (sim::endDate() - sim::startDate()) + sim::oneTS();
                 loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
                 iterate = transmission->initIterate();
             }
@@ -401,7 +401,7 @@ int main(int argc, char* argv[])
                 (iii)       the intervention packages defined in Intervention()
                 (iv)        the survey times defined in Survey() */
             endTime = estEndTime;
-            sim::s_interv = SimTime::zero();
+            sim::s_interv = sim::zero();
             population->preMainSimInit();
             transmission->summarize();    // Only to reset TransmissionModel::inoculationsPerAgeGroup
             mon::initMainSim();

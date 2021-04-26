@@ -53,7 +53,7 @@ void CM5DayCommon::init(){
 // ———  per-human, construction and destruction  ———
 
 CM5DayCommon::CM5DayCommon (double tSF) :
-        m_tLastTreatment (SimTime::never()),
+        m_tLastTreatment (sim::never()),
         m_treatmentSeekingFactor (tSF)
 {}
 
@@ -79,7 +79,7 @@ void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
     }
     
     if (pg.indirectMortality && doomed == NOT_DOOMED)
-        doomed = -SimTime::oneTS().inDays();
+        doomed = -sim::oneTS().inDays();
     
     if( m_tLastTreatment == sim::ts0() ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );

@@ -349,7 +349,7 @@ private:
     // The times here should be for the last updated index of arrays:
     void ctsCbInputEIR(ostream &stream)
     {
-        int prevStep = (sim::now() - SimTime::oneTS()) / SimTime::oneTS();
+        int prevStep = (sim::now() - sim::oneTS()) / sim::oneTS();
         // Note: prevStep may be negative, hence util::mod not mod_nn:
         stream << '\t' << initialisationEIR[util::mod(prevStep, sim::stepsPerYear())];
     }

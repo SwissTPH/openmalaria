@@ -211,7 +211,7 @@ void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
     for(size_t j=1;j < cumAgeProp.size(); ++j) {
-	SimTime age = SimTime::fromTS( cumAgeProp.size() - j - 1 );
+	SimTime age = sim::fromTS( cumAgeProp.size() - j - 1 );
 	double ageYears = age.inYears();
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
 	double M2s = (mu1 * (exp (alpha1 * ageYears) - 1.0) / alpha1);

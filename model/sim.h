@@ -54,7 +54,7 @@ class SimData {
     static double years_per_step;
     
     friend class SimTime;
-    friend class SimDate;
+    friend class SimTime;
     friend class sim;
 };
 
@@ -67,71 +67,19 @@ class SimData {
  * class should not need to know).
  * 
  * The simulation always starts at time zero. "Intervention time" is a separate
- * concept (see SimDate).
+ * concept (see SimTime).
  * 
  * Granularity: 1 day.
  *****************************************************************************/
 class SimTime {
+    public:
     /** Construct, from a time in days. */
     explicit SimTime( int days ) : d(days) {}
     
-public:
     ///@brief Unparameterised constructors
     //@{
-    /** Default construction; same as SimTime::never(). */
+    /** Default construction; same as sim::never(). */
     SimTime() : d(-0x3FFFFFFF) {}
-    
-    /** Duration zero and the time at the start of the simulation. */
-    static inline SimTime zero(){ return SimTime(0); }
-    
-    /** Special value representing a time point always in the past, such that
-     * never() + x < zero() and x - never() will not to overflow for all valid
-     * simulation times x (including any value now() may take as well as
-     * never() and future()). */
-    static inline SimTime never(){ return SimTime(); }
-    
-    /** Special value representing a time point always in the future, such that
-     * now() < future() and now() + future() does not overflow. */
-    static inline SimTime future(){ return SimTime(0x3FFFFFFF); }
-    
-    /** One day. */
-    static inline SimTime oneDay(){ return SimTime(1); }
-    
-    /** One year. See SimData::DAYS_IN_YEAR. */
-    static inline SimTime oneYear(){ return SimTime(SimData::DAYS_IN_YEAR); }
-    
-    /** One time step (currently either one or five days). */
-    static inline SimTime oneTS(){ return SimTime(SimData::interval); }
-    //@}
-    
-    ///@brief Parameterised constructors
-    //@{
-    /** Convert. */
-    static inline SimTime fromTS(int ts){ return oneTS() * ts; }
-    
-    /** Duration in days. Should be fast (currently no conversion required). */
-    static inline SimTime fromDays(int days){ return SimTime(days); }
-    
-    /** Convert from a whole number of years. */
-    static inline SimTime fromYearsI(int years){
-        return SimTime(SimData::DAYS_IN_YEAR * years);
-    }
-    
-    /** Convert from years to nearest time step. */
-    static inline SimTime fromYearsN(double years){
-        return roundToTSFromDays(SimData::DAYS_IN_YEAR * years);
-    }
-    
-    /** Convert from years, rounding down to the next time step. */
-    static inline SimTime fromYearsD(double years){
-        return fromTS( floorToInt(SimData::steps_per_year * years) );
-    }
-    
-    /** Round to the nearest time-step, where input is in days. */
-    static inline SimTime roundToTSFromDays(double days){
-        return fromTS( floorToInt( days / SimData::interval + 0.5 ));
-    }
-    //@}
     
     ///@brief Conversions to other types/units
     //NOTE: these methods provide good documentation of the types of things
@@ -221,94 +169,8 @@ public:
 private:
     int d;      // time in days
     
-    friend class SimDate;
     friend SimTime mod_nn( const SimTime lhs, const SimTime rhs );
     friend ostream& operator<<( ostream& stream, SimTime date );
-};
-
-/******************************************************************************
- * Class encapsulating simulation time, from the point-of-view of interventions.
- * 
- * Intervention times may be specified as dates or as a delay since the start
- * of the intervention period.
- *****************************************************************************/
-class SimDate {
-    /** Construct, from a time in days. */
-    explicit SimDate( int days ) : d(days) {}
-    
-public:
-    ///@brief Constructors
-    //@{
-    /** Point zero of our date system: 0000-01-01. */
-    static inline SimDate origin(){ return SimDate(0); }
-    
-    /** Default construction; same as SimDate::never(). */
-    SimDate() : d(-0x3FFFFFFF) {}
-    
-    /** Special value representing a time point always in the past, such that
-     * never() + x < zero() and x - never() will not to overflow for all valid
-     * simulation times x (including any value now() may take as well as
-     * never() and future()). */
-    static inline SimDate never(){ return SimDate(); }
-    
-    /** Special value representing a time point always in the future, such that
-     * now() < future() and now() + future() does not overflow. */
-    static inline SimDate future(){ return SimDate(0x3FFFFFFF); }
-    //@}
-    
-    ///@brief Simple arithmatic modifiers (all return a copy)
-    //@{
-    inline SimDate operator-( const SimTime rhs )const {
-        return SimDate( d - rhs.d );
-    }
-    inline SimTime operator-( const SimDate rhs )const {
-        return SimTime( d - rhs.d );
-    }
-    inline SimDate operator+( const SimTime rhs )const {
-        return SimDate( d + rhs.d );
-    }
-    //@}
-    
-    ///@brief Self-modifying arithmatic
-    //@{
-    inline void operator+=( const SimTime rhs ) {
-        d += rhs.d;
-    }
-    //@}
-    
-    ///@brief Comparators between two SimDates (all return a boolean)
-    //@{
-    inline bool operator==( const SimDate rhs )const {
-        return  d == rhs.d;
-    }
-    inline bool operator!=( const SimDate rhs )const {
-        return  d != rhs.d;
-    }
-    inline bool operator>( const SimDate rhs )const {
-        return  d > rhs.d;
-    }
-    inline bool operator>=( const SimDate rhs )const {
-        return  d >= rhs.d;
-    }
-    inline bool operator<( const SimDate rhs )const {
-        return  d < rhs.d;
-    }
-    inline bool operator<=( const SimDate rhs )const {
-        return  d <= rhs.d;
-    }
-    //@}
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        using namespace OM::util::checkpoint;
-        d & stream;
-    }
-    
-// private:
-    int d;      // time in days
-    
-    friend ostream& operator<<( ostream& stream, SimDate date );
 };
 
 inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
@@ -323,6 +185,60 @@ public:
     /// Number of days in a year; defined as 365 (leap years are not simulated).
     enum { DAYS_IN_YEAR = 365 };
     
+    /** Duration zero and the time at the start of the simulation. */
+    static inline SimTime zero(){ return SimTime(0); }
+
+    static inline SimTime origin(){ return SimTime(0); }
+
+        /** Special value representing a time point always in the past, such that
+     * never() + x < zero() and x - never() will not to overflow for all valid
+     * simulation times x (including any value now() may take as well as
+     * never() and future()). */
+    static inline SimTime never(){ return SimTime(); }
+    
+    /** Special value representing a time point always in the future, such that
+     * now() < future() and now() + future() does not overflow. */
+    static inline SimTime future(){ return SimTime(0x3FFFFFFF); }
+    
+    /** One day. */
+    static inline SimTime oneDay(){ return SimTime(1); }
+    
+    /** One year. See SimData::DAYS_IN_YEAR. */
+    static inline SimTime oneYear(){ return SimTime(SimData::DAYS_IN_YEAR); }
+    
+    /** One time step (currently either one or five days). */
+    static inline SimTime oneTS(){ return SimTime(SimData::interval); }
+    //@}
+    
+    ///@brief Parameterised constructors
+    //@{
+    /** Convert. */
+    static inline SimTime fromTS(int ts){ return oneTS() * ts; }
+    
+    /** Duration in days. Should be fast (currently no conversion required). */
+    static inline SimTime fromDays(int days){ return SimTime(days); }
+    
+    /** Convert from a whole number of years. */
+    static inline SimTime fromYearsI(int years){
+        return SimTime(SimData::DAYS_IN_YEAR * years);
+    }
+    
+    /** Convert from years to nearest time step. */
+    static inline SimTime fromYearsN(double years){
+        return roundToTSFromDays(SimData::DAYS_IN_YEAR * years);
+    }
+    
+    /** Convert from years, rounding down to the next time step. */
+    static inline SimTime fromYearsD(double years){
+        return fromTS( floorToInt(SimData::steps_per_year * years) );
+    }
+    
+    /** Round to the nearest time-step, where input is in days. */
+    static inline SimTime roundToTSFromDays(double days){
+        return fromTS( floorToInt( days / SimData::interval + 0.5 ));
+    }
+    //@}
+
     /** The number of time steps in one year. */
     static inline size_t stepsPerYear(){ return SimData::steps_per_year; }
     
@@ -333,10 +249,10 @@ public:
     static inline SimTime maxHumanAge(){ return s_max_human_age; }
     
     /// The starting date of the simulation
-    static inline SimDate startDate() { return s_start; }
+    static inline SimTime startDate() { return s_start; }
     
     /// The ending date of the simulation
-    static inline SimDate endDate() { return s_end; }
+    static inline SimTime endDate() { return s_end; }
     //@}
     
     ///@brief Access simulation time variables
@@ -373,7 +289,7 @@ public:
     /** During updates, this is ts1; between, this is now. */
     static inline SimTime nowOrTs1(){ return s_t1; }
     /** During updates, this is ts0; between, it is now - 1. */
-    static inline SimTime latestTs0(){ return s_t1 - SimTime::oneTS(); }
+    static inline SimTime latestTs0(){ return s_t1 - sim::oneTS(); }
     //@}
     
     ///@brief Access intervention-time variables
@@ -393,7 +309,7 @@ public:
     /// returns a large negative value.)
     /// 
     /// Intervention deployment times are relative to this date.
-    static inline SimDate intervDate(){ return s_start + s_interv; }
+    static inline SimTime intervDate(){ return s_start + s_interv; }
     //@}
     
 // private:
@@ -402,7 +318,7 @@ public:
     
     // Start of update: called by Simulator
     static inline void start_update(){
-        s_t1 += SimTime::oneTS();
+        s_t1 += sim::oneTS();
 #ifndef NDEBUG
         in_update = true;
 #endif
@@ -413,12 +329,12 @@ public:
         in_update = false;
 #endif
         s_t0 = s_t1;
-        s_interv += SimTime::oneTS();
+        s_interv += sim::oneTS();
     }
     
     // Scenario constants
-    static SimDate s_start;
-    static SimDate s_end;
+    static SimTime s_start;
+    static SimTime s_end;
     
     static SimTime s_max_human_age;
     

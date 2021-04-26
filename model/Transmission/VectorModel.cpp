@@ -135,7 +135,7 @@ void VectorModel::ctsNetInsecticideContent(const Population &population, ostream
     //     double meanVar = 0.0;
     //     int n = 0;
     //     for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-    //         if( iter->perHostTransmission.getITN().timeOfDeployment() >= SimTime::zero() ){
+    //         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
     //             ++n;
     //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
     //         }
@@ -329,26 +329,26 @@ void VectorModel::scaleEIR(double factor)
 
 SimTime VectorModel::minPreinitDuration()
 {
-    if (interventionMode == forcedEIR) { return SimTime::zero(); }
+    if (interventionMode == forcedEIR) { return sim::zero(); }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return SimTime::fromYearsI(55);
+    return sim::fromYearsI(55);
 }
-SimTime VectorModel::expectedInitDuration() { return SimTime::oneYear(); }
+SimTime VectorModel::expectedInitDuration() { return sim::oneYear(); }
 
 SimTime VectorModel::initIterate()
 {
     if (interventionMode != dynamicEIR)
     {
         // allow forcing equilibrium mode like with non-vector model
-        return SimTime::zero(); // no initialization to do
+        return sim::zero(); // no initialization to do
     }
 
     // Fitting is done
     if (initIterations < 0)
     {
         simulationMode = dynamicEIR;
-        return SimTime::zero();
+        return sim::zero();
     }
 
     if (++initIterations > 30) { throw TRACED_EXCEPTION("Transmission warmup exceeded 30 iterations!", util::Error::VectorWarmup); }
@@ -364,13 +364,13 @@ SimTime VectorModel::initIterate()
     if (needIterate)
     {
         // stabilization + 5 years data-collection time:
-        return SimTime::oneYear() + SimTime::fromYearsI(5);
+        return sim::oneYear() + sim::fromYearsI(5);
     }
     else
     {
         // One year stabilisation, then we're finished:
         initIterations = -1;
-        return SimTime::oneYear();
+        return sim::oneYear();
     }
 }
 

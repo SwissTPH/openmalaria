@@ -32,10 +32,10 @@
 namespace OM { namespace Clinical {
     using namespace OM::util;
 
-SimTime ClinicalEventScheduler::maxUCSeekingMemory(SimTime::never());
-SimTime ClinicalEventScheduler::uncomplicatedCaseDuration(SimTime::never());
-SimTime ClinicalEventScheduler::complicatedCaseDuration(SimTime::never());
-SimTime ClinicalEventScheduler::extraDaysAtRisk(SimTime::never());
+SimTime ClinicalEventScheduler::maxUCSeekingMemory(sim::never());
+SimTime ClinicalEventScheduler::uncomplicatedCaseDuration(sim::never());
+SimTime ClinicalEventScheduler::complicatedCaseDuration(sim::never());
+SimTime ClinicalEventScheduler::extraDaysAtRisk(sim::never());
 vector<double> ClinicalEventScheduler::cumDailyPrImmUCTS;
 double ClinicalEventScheduler::neg_v;
 double ClinicalEventScheduler::alpha;
@@ -57,7 +57,7 @@ AgeGroupInterpolator ClinicalEventScheduler::MF_need_antibiotic;
 
 void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::Clinical& clinical )
 {
-    if( SimTime::oneTS() != SimTime::oneDay() )
+    if( sim::oneTS() != sim::oneDay() )
         throw util::xml_scenario_error ("ClinicalEventScheduler is only designed for a 1-day time step.");
     
     opt_non_malaria_fevers = util::ModelOptions::option( util::NON_MALARIA_FEVERS );
@@ -89,15 +89,15 @@ void ClinicalEventScheduler::init( const Parameters& parameters, const scnXml::C
 void ClinicalEventScheduler::setParameters(const scnXml::HSEventScheduler& esData) {
     const scnXml::ClinicalOutcomes& coData = esData.getClinicalOutcomes();
     
-    maxUCSeekingMemory = SimTime::fromDays(coData.getMaxUCSeekingMemory());
-    uncomplicatedCaseDuration = SimTime::fromDays(coData.getUncomplicatedCaseDuration());
-    complicatedCaseDuration = SimTime::fromDays(coData.getComplicatedCaseDuration());
-    extraDaysAtRisk = SimTime::fromDays(coData.getComplicatedRiskDuration()) - complicatedCaseDuration;
-    if( uncomplicatedCaseDuration < SimTime::fromDays(1)
-	|| complicatedCaseDuration < SimTime::fromDays(1)
-	|| maxUCSeekingMemory < SimTime::zero()
-	|| extraDaysAtRisk + complicatedCaseDuration < SimTime::fromDays(1) // at risk at least 1 day
-	|| extraDaysAtRisk > SimTime::zero()        // at risk longer than case duration
+    maxUCSeekingMemory = sim::fromDays(coData.getMaxUCSeekingMemory());
+    uncomplicatedCaseDuration = sim::fromDays(coData.getUncomplicatedCaseDuration());
+    complicatedCaseDuration = sim::fromDays(coData.getComplicatedCaseDuration());
+    extraDaysAtRisk = sim::fromDays(coData.getComplicatedRiskDuration()) - complicatedCaseDuration;
+    if( uncomplicatedCaseDuration < sim::fromDays(1)
+	|| complicatedCaseDuration < sim::fromDays(1)
+	|| maxUCSeekingMemory < sim::zero()
+	|| extraDaysAtRisk + complicatedCaseDuration < sim::fromDays(1) // at risk at least 1 day
+	|| extraDaysAtRisk > sim::zero()        // at risk longer than case duration
     ){
 	throw util::xml_scenario_error(
             "Clinical outcomes: constraints on case/risk/memory duration not met (see documentation)");
@@ -138,9 +138,9 @@ void ClinicalEventScheduler::setParameters(const scnXml::HSEventScheduler& esDat
 
 ClinicalEventScheduler::ClinicalEventScheduler (double tSF) :
         pgState (Episode::NONE),
-        caseStartTime (SimTime::never()),
-        timeOfRecovery (SimTime::never()),
-        timeLastTreatment (SimTime::never()),
+        caseStartTime (sim::never()),
+        timeOfRecovery (sim::never()),
+        timeLastTreatment (sim::never()),
         previousDensity (numeric_limits<double>::quiet_NaN())
 {
     if( tSF != 1.0 ){
@@ -231,13 +231,13 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
                     assert(false);      // should have uVariate < 1 = cumDailyPrImmUCTS[len-1]
                     gotDelay:
                     // set start time: current time plus length of delay (days)
-                    caseStartTime = sim::ts0() + SimTime::fromDays(i);
+                    caseStartTime = sim::ts0() + sim::fromDays(i);
                 }
             }
         }
         
         if (indirectMortality && doomed == NOT_DOOMED)
-            doomed = -SimTime::oneTS().inDays(); // start indirect mortality countdown
+            doomed = -sim::oneTS().inDays(); // start indirect mortality countdown
     }
     
     if( caseStartTime == sim::ts0() && (pgState & Episode::RUN_CM_TREE) ){

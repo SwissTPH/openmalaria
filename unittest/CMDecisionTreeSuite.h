@@ -48,7 +48,7 @@ public:
 
         UnittestUtil::EmpiricalWHM_setup();
 
-        human.reset( UnittestUtil::createHuman(SimTime::zero()).release() );
+        human.reset( UnittestUtil::createHuman(sim::zero()).release() );
         ETS_ASSERT( human.get() != 0 );
         whm = dynamic_cast<WHMock*>(UnittestUtil::setHumanWH( *human,
                 unique_ptr<WithinHost::WHInterface>(new WHMock()) ));
@@ -204,8 +204,8 @@ public:
     }
     
     void testSimpleTreat(){
-        TS_ASSERT_EQUALS( whm->lastTimeLiver, SimTime::never() );
-        TS_ASSERT_EQUALS( whm->lastTimeBlood, SimTime::never() );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver, sim::never() );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood, sim::never() );
         
         scnXml::DTTreatSimple treat1( "0t", "1t" );   // 0 time steps liver, 1 blood (using 1 day TS)
         scnXml::DecisionTree dt1;

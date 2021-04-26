@@ -66,7 +66,7 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
 CommonWithinHost::CommonWithinHost( LocalRng& rng, double comorbidityFactor ) :
         WHFalciparum( rng, comorbidityFactor )
 {
-    assert( SimTime::oneTS() == SimTime::fromDays(1) || SimTime::oneTS() == SimTime::fromDays(5) );
+    assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
     
     // Sample a weight heterogeneity factor
 #ifndef NDEBUG
@@ -161,7 +161,7 @@ void CommonWithinHost::update(LocalRng& rng,
     
     double body_mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
     
-    for( SimTime now = sim::ts0(), end = sim::ts0() + SimTime::oneTS(); now < end; now += SimTime::oneDay() ){
+    for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now += sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel.medicate(rng);
         

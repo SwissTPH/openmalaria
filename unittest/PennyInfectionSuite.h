@@ -90,7 +90,7 @@ public:
             TS_ASSERT_APPROX( infection->seqDensity(ageDays), seqDens[iterations] );
 //             outCir << infection->getDensity() << endl;
 //             outSeq << infection->seqDensity(ageDays) << endl;
-            now += SimTime::oneDay();
+            now += sim::oneDay();
             iterations+=1;
         }while(!extinct);
         TS_ASSERT_EQUALS( iterations, cirDens.size() );

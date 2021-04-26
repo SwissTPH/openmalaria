@@ -70,9 +70,9 @@ namespace UnitParse {
      * Call sim::init() first. */
     double durationToDays( const std::string& str, DefaultUnit defUnit );
     
-    /** Returns SimDate::never() when it doesn't recognise a date. Throws when it does
+    /** Returns sim::never() when it doesn't recognise a date. Throws when it does
      * but encounters definite format errors. */
-    SimDate parseDate( const std::string& str );
+    SimTime parseDate( const std::string& str );
 
     /** Read a date or relative time specifier found in the XML; dates are
      * rebased relative to a starting date so that they work the same as other
@@ -83,7 +83,7 @@ namespace UnitParse {
      * of the intervention period (as readDuration will parse). Returns a time
      * to be compared against sim::intervDate(). Again, the result is rounded to
      * the nearest time step. */
-    SimDate readDate( const std::string& str, DefaultUnit defUnit );
+    SimTime readDate( const std::string& str, DefaultUnit defUnit );
 }
 
 }

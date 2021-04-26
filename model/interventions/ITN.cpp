@@ -666,10 +666,10 @@ void HumanITN::redeploy(LocalRng& rng, const OM::Transmission::HumanVectorInterv
 
 void HumanITN::update(Host::Human& human){
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
-    if( deployTime != SimTime::never() ){
+    if( deployTime != sim::never() ){
         // First use is at age 0 relative to ts0()
         if( sim::ts0() >= disposalTime ){
-            deployTime = SimTime::never();
+            deployTime = sim::never();
             human.removeFromSubPop(id());
             return;
         }
@@ -681,27 +681,27 @@ void HumanITN::update(Host::Human& human){
 }
 
 double HumanITN::relativeAttractiveness(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::preprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 double HumanITN::relFecundity(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relFecundity( holeIndex, getInsecticideContent(params) );

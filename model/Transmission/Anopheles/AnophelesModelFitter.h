@@ -51,10 +51,10 @@ public:
 
     bool fit(AnophelesModel &m)
     {
-        std::vector<double> avgAnnualS_v(SimTime::oneYear().inDays(), 0.0);
-        for (SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay())
+        std::vector<double> avgAnnualS_v(sim::oneYear().inDays(), 0.0);
+        for (SimTime i = sim::fromYearsI(4); i < sim::fromYearsI(5); i += sim::oneDay())
         {
-            avgAnnualS_v[mod_nn(i, SimTime::oneYear()).inDays()] = m.quinquennialS_v[i.inDays()];
+            avgAnnualS_v[mod_nn(i, sim::oneYear()).inDays()] = m.quinquennialS_v[i.inDays()];
         }
 
         double factor = vectors::sum(m.forcedS_v) / vectors::sum(avgAnnualS_v);

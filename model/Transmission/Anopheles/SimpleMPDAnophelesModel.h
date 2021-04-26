@@ -40,8 +40,8 @@ public:
         , probPreadultSurvival(probPreadultSurvival)
         , fEggsLaidByOviposit(fEggsLaidByOviposit)
     {
-        quinquennialOvipositing.resize(SimTime::fromYearsI(5).inDays(), 0.0);
-        invLarvalResources.resize(SimTime::oneYear().inDays(), 0.0);
+        quinquennialOvipositing.resize(sim::fromYearsI(5).inDays(), 0.0);
+        invLarvalResources.resize(sim::oneYear().inDays(), 0.0);
         nOvipositingDelayed.resize(developmentDuration.inDays(), 0.0);
     }
 
@@ -72,7 +72,7 @@ public:
         double tsP_dff = sigma_dff * availDivisor * mosq.probMosqSurvivalOvipositing;
 
         // Initialise nOvipositingDelayed
-        int y1 = SimTime::oneYear().inDays();
+        int y1 = sim::oneYear().inDays();
         int tau = mosq.restDuration.inDays();
         for (int t = 0; t < developmentDuration.inDays(); t++)
         {
@@ -81,7 +81,7 @@ public:
 
         // Used when calculating invLarvalResources (but not a hard constraint):
         assert(tau + developmentDuration <= y1);
-        for (int t = 0; t < SimTime::oneYear().inDays(); t++)
+        for (int t = 0; t < sim::oneYear().inDays(); t++)
         {
             double yt = fEggsLaidByOviposit * tsP_dff * initNvFromSv * forcedS_v[util::mod_nn(t + y1 - tau - developmentDuration.inDays(), y1)];
             invLarvalResources[t] = (probPreadultSurvival * yt - mosqEmergeRate[t]) / (mosqEmergeRate[t] * yt);
@@ -102,8 +102,8 @@ public:
     {
         bool fitted = AnophelesModel::initIterate();
 
-        int y1 = SimTime::oneYear().inDays(), y2 = SimTime::fromYearsI(2).inDays(), y3 = SimTime::fromYearsI(3).inDays(), y4 = SimTime::fromYearsI(4).inDays(),
-                y5 = SimTime::fromYearsI(5).inDays();
+        int y1 = sim::oneYear().inDays(), y2 = sim::fromYearsI(2).inDays(), y3 = sim::fromYearsI(3).inDays(), y4 = sim::fromYearsI(4).inDays(),
+                y5 = sim::fromYearsI(5).inDays();
         assert(mosqEmergeRate.size() == y1);
 
         for (int t = 0; t < y1; t++)
@@ -129,9 +129,9 @@ public:
         int d1 = d0.inDays() + 1;
 
         double yt = fEggsLaidByOviposit * nOvipositingDelayed[util::mod_nn(d1, developmentDuration.inDays())];
-        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, SimTime::oneYear()).inDays()] * yt);
+        double emergence = probPreadultSurvival * yt / (1.0 + invLarvalResources[mod_nn(d0, sim::oneYear()).inDays()] * yt);
         nOvipositingDelayed[util::mod_nn(d1, developmentDuration.inDays())] = nOvipositing;
-        quinquennialOvipositing[util::mod_nn(d1, SimTime::fromYearsI(5).inDays())] = nOvipositing;
+        quinquennialOvipositing[util::mod_nn(d1, sim::fromYearsI(5).inDays())] = nOvipositing;
         return emergence;
     }
 
@@ -141,14 +141,14 @@ public:
     {
         // TODO: why offset by one time step? This is effectively getting the resources available on the last time step
         // TODO: only have to add one year because of offset
-        SimTime start = sim::now() - SimTime::oneTS() + SimTime::oneYear();
+        SimTime start = sim::now() - sim::oneTS() + sim::oneYear();
         double total = 0;
-        for (SimTime i = start, end = start + SimTime::oneTS(); i < end; i += SimTime::oneDay())
+        for (SimTime i = start, end = start + sim::oneTS(); i < end; i += sim::oneDay())
         {
-            SimTime dYear1 = mod_nn(i, SimTime::oneYear());
+            SimTime dYear1 = mod_nn(i, sim::oneYear());
             total += 1.0 / invLarvalResources[dYear1.inDays()];
         }
-        return total / SimTime::oneTS().inDays();
+        return total / sim::oneTS().inDays();
     }
 
     virtual double getResRequirements() const { return numeric_limits<double>::quiet_NaN(); }

@@ -51,8 +51,8 @@ void AnophelesModel::initialise(size_t species, MosquitoParams mosqParams)
     // Set up fArray and ftauArray. Each step, all elements not set here are
     // calculated, even if they aren't directly used in the end;
     // however all calculated values are used in calculating the next value.
-    fArray.resize((mosq.EIPDuration - mosq.restDuration + SimTime::oneDay()).inDays());
-    fArray[SimTime::zero().inDays()] = 1.0;
+    fArray.resize((mosq.EIPDuration - mosq.restDuration + sim::oneDay()).inDays());
+    fArray[sim::zero().inDays()] = 1.0;
     ftauArray.resize(mosq.EIPDuration.inDays());
     for (int i = 0; i < mosq.restDuration.inDays(); i += 1)
     {
@@ -60,7 +60,7 @@ void AnophelesModel::initialise(size_t species, MosquitoParams mosqParams)
     }
     ftauArray[mosq.restDuration.inDays()] = 1.0;
     uninfected_v.resize(N_v_length);
-    uninfected_v[SimTime::zero().inDays()] = numeric_limits<double>::quiet_NaN(); // index not used
+    uninfected_v[sim::zero().inDays()] = numeric_limits<double>::quiet_NaN(); // index not used
 }
 
 void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &nhhs, int populationSize)
@@ -175,7 +175,7 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
         nhhi.P_C_I = P_C_i;
         nhhi.P_D_I = P_D_i;
         nhhi.rel_fecundity = rel_fecundity;
-        nhhi.expiry = SimTime::future();
+        nhhi.expiry = sim::future();
 
         nhhInstances[name] = nhhi;
     }
@@ -201,7 +201,7 @@ void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> F
     double targetEIR = targetEIRInit;
 
     // EIR for this species, with index 0 refering to value over first interval
-    std::vector<double> speciesEIR(SimTime::oneYear().inDays());
+    std::vector<double> speciesEIR(sim::oneYear().inDays());
 
     // Now we rescale to get an EIR of targetEIR.
     // Calculate current sum as is usually done.
@@ -214,7 +214,7 @@ void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> F
 
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
-    for (SimTime i = SimTime::zero(); i < SimTime::oneYear(); i += SimTime::oneDay())
+    for (SimTime i = sim::zero(); i < sim::oneYear(); i += sim::oneDay())
         initialisationEIR[mod_nn(i.inSteps(), sim::stepsPerYear())] += speciesEIR[i.inDays()];
 
     if (util::CommandLine::option(util::CommandLine::PRINT_ANNUAL_EIR))
@@ -361,7 +361,7 @@ void AnophelesModel::deployVectorTrap(LocalRng &rng, size_t species, size_t inst
     baitedTraps.push_back(data);
 }
 
-// Every SimTime::oneTS() days:
+// Every sim::oneTS() days:
 void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<double> &sigma_dif, double sigma_dff, bool isDynamic)
 {
     /* Largely equations correspond to Nakul Chitnis's model in
@@ -525,8 +525,8 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
 
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
-    const SimTime nextTS = sim::ts0() + SimTime::oneTS();
-    for (SimTime d0 = sim::ts0(); d0 < nextTS; d0 += SimTime::oneDay())
+    const SimTime nextTS = sim::ts0() + sim::oneTS();
+    for (SimTime d0 = sim::ts0(); d0 < nextTS; d0 += sim::oneDay())
     {
         update(d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif, tsP_dff, isDynamic, partialEIR, availDivisor);
     }
@@ -539,7 +539,7 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
     for (size_t i = 0; i < emergenceReduction.size(); ++i)
         interventionSurvival *= 1.0 - emergenceReduction[i].current_value(sim::ts0());
 
-    int d1 = d0.inDays() + 1; //SimTime::oneDay(); // end of step
+    int d1 = d0.inDays() + 1; //sim::oneDay(); // end of step
 
     // We add N_v_length so that we can use mod_nn() instead of mod().
     int d1Mod = d1 + N_v_length;
@@ -647,7 +647,7 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
     }
 
     // We use time at end of step (i.e. start + 1) in index:
-    int d5Year = util::mod_nn(d1, SimTime::fromYearsI(5).inDays());
+    int d5Year = util::mod_nn(d1, sim::fromYearsI(5).inDays());
     quinquennialS_v[d5Year] = total_S_v;
 
     const double nOvipositing = P_dff[ttau] * N_v[ttau]; // number ovipositing on this step
@@ -678,11 +678,11 @@ double sum1(const std::vector<double> &arr, int end, int N_v_length)
     double val = 0.0;
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
-    for (int d1 = end - SimTime::oneTS().inDays(); d1 < end; d1++)
+    for (int d1 = end - sim::oneTS().inDays(); d1 < end; d1++)
     {
         val += arr[util::mod_nn(d1, N_v_length)];
     }
-    return val / SimTime::oneTS().inDays();
+    return val / sim::oneTS().inDays();
 }
 
 double sum2(const std::vector<double> &arr, int end, int N_v_length)
@@ -690,7 +690,7 @@ double sum2(const std::vector<double> &arr, int end, int N_v_length)
     double val = 0.0;
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
-    for (int d1 = end - SimTime::oneTS().inDays(); d1 < end; d1++)
+    for (int d1 = end - sim::oneTS().inDays(); d1 < end; d1++)
     {
         int i1 = util::mod_nn(d1, N_v_length);
         for (size_t g = 0; g < Genotypes::N(); ++g)
@@ -698,7 +698,7 @@ double sum2(const std::vector<double> &arr, int end, int N_v_length)
             val += arr[i1 * Genotypes::N() + g]; //.at(i1, g);
         }
     }
-    return val / SimTime::oneTS().inDays();
+    return val / sim::oneTS().inDays();
 }
 
 double sum3(const std::vector<double> &arr, size_t g, int end, int N_v_length)
@@ -706,11 +706,11 @@ double sum3(const std::vector<double> &arr, size_t g, int end, int N_v_length)
     double val = 0.0;
     // Last time step ended at sim::now(). Values are stored per day, and for
     // the last time step values at sim::now() and four previos were set.
-    for (int d1 = end - SimTime::oneTS().inDays(); d1 < end; d1++)
+    for (int d1 = end - sim::oneTS().inDays(); d1 < end; d1++)
     {
         val += arr[util::mod_nn(d1, N_v_length) * Genotypes::N() + g];// .at(mod_nn(d1, N_v_length), g);
     }
-    return val / SimTime::oneTS().inDays();
+    return val / sim::oneTS().inDays();
 }
 
 double AnophelesModel::getLastVecStat(VecStat vs) const

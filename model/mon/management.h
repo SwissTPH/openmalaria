@@ -36,7 +36,7 @@ namespace OM {
 namespace mon {
 
 /// Read survey times from XML. Return the date of the final survey.
-SimDate readSurveyDates( const scnXml::Monitoring& monitoring );
+SimTime readSurveyDates( const scnXml::Monitoring& monitoring );
 
 /// Call before start of simulation to set up outputs. Call readSurveyDates first.
 void initReporting( const scnXml::Scenario& scenario );

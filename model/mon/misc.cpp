@@ -39,11 +39,11 @@ namespace mon {
 // ———  surveys  ———
 
 struct SurveyDate {
-    SimDate date;       // date of survey
+    SimTime date;       // date of survey
     size_t num; // if NOT_USED, the survey is not reported; if greater, this is the survey number
     
     /// Construct
-    SurveyDate(SimDate date, size_t num) : date(date), num(num) {}
+    SurveyDate(SimTime date, size_t num) : date(date), num(num) {}
     
     inline bool isReported() const { return num != NOT_USED; }
 };
@@ -78,28 +78,28 @@ static inline void trim(std::string &s) {
     rtrim(s);
 }
 
-SimDate readSurveyDates( const scnXml::Monitoring& monitoring ){
+SimTime readSurveyDates( const scnXml::Monitoring& monitoring ){
     const scnXml::Surveys::SurveyTimeSequence& survs =
         monitoring.getSurveys().getSurveyTime();
     
-    map<SimDate, bool> surveys;        // dates of all surveys (from XML) and whether these are reporting
+    map<SimTime, bool> surveys;        // dates of all surveys (from XML) and whether these are reporting
     
     for(size_t i = 0; i < survs.size(); ++i) {
         const scnXml::SurveyTime& surv = survs[i];
         try{
             std::string s = surv;
             trim(s);
-            SimDate cur = UnitParse::readDate( s, UnitParse::STEPS );
+            SimTime cur = UnitParse::readDate( s, UnitParse::STEPS );
             bool reporting = surv.getReported();
             if( surv.getRepeatStep().present() != surv.getRepeatEnd().present() ){
                 throw util::xml_scenario_error( "surveyTime: use of repeatStep or repeatEnd without other" );
             }
             if( surv.getRepeatStep().present() ){
                 SimTime step = UnitParse::readDuration( surv.getRepeatStep().get(), UnitParse::NONE );
-                if( step < SimTime::oneTS() ){
+                if( step < sim::oneTS() ){
                     throw util::xml_scenario_error( "surveyTime: repeatStep must be >= 1" );
                 }
-                SimDate end = UnitParse::readDate( surv.getRepeatEnd().get(), UnitParse::NONE );
+                SimTime end = UnitParse::readDate( surv.getRepeatEnd().get(), UnitParse::NONE );
                 while(cur < end){
                     if( reporting ){
                         surveys[cur] = true;
@@ -168,7 +168,7 @@ void updateSurveyNumbers() {
     if( impl::surveyIndex >= impl::surveyDates.size() ){
         impl::survNumEvent = NOT_USED;
         impl::survNumStat = NOT_USED;
-        impl::nextSurveyDate = SimDate::future();
+        impl::nextSurveyDate = sim::future();
     }else{
         for( size_t i = impl::surveyIndex; i < impl::surveyDates.size(); ++i ){
             impl::survNumEvent = impl::surveyDates[i].num;  // set to survey number or NOT_USED; this happens at least once!
@@ -238,9 +238,9 @@ void AgeGroup::init (const scnXml::Monitoring& monitoring) {
     upperBound.resize( groups.size() + 1 );
     for(size_t i = 0;i < groups.size(); ++i) {
         // convert to SimTime, rounding down to the next time step
-        upperBound[i] = SimTime::fromYearsD( groups[i].getUpperbound() );
+        upperBound[i] = sim::fromYearsD( groups[i].getUpperbound() );
     }
-    upperBound[groups.size()] = SimTime::future();
+    upperBound[groups.size()] = sim::future();
 }
 
 void AgeGroup::update (SimTime age) {

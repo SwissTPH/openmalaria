@@ -68,7 +68,7 @@ struct HypnozoiteReleaseDistribution: private LognormalSampler {
         } while( delay > liverStageMaximumDays || delay < 0.0  );
         
         assert( delay >= 0 && delay < liverStageMaximumDays );
-        return SimTime::roundToTSFromDays( delay + latentRelapse );
+        return sim::roundToTSFromDays( delay + latentRelapse );
     }
     
 private:
@@ -248,7 +248,7 @@ VivaxBrood::UpdResult VivaxBrood::update(LocalRng& rng){
         result.newBS = true;
         
         double lengthDays = bloodStageLength.sample(rng);
-        bloodStageClearDate = sim::ts0() + SimTime::roundToTSFromDays( lengthDays );
+        bloodStageClearDate = sim::ts0() + sim::roundToTSFromDays( lengthDays );
         // Assume gametocytes emerge at the same time (they mature quickly and
         // we have little data, thus assume coincedence of start)
     }
@@ -261,7 +261,7 @@ void VivaxBrood::treatmentBS(){
     // Blood stage treatment: clear both asexual and sexual parasites from the
     // blood. NOTE: we assume infections removed via treatment do not leave
     // protective immunity since the patient was unable to self-clear.
-    bloodStageClearDate = SimTime::never();
+    bloodStageClearDate = sim::never();
 }
 
 void VivaxBrood::treatmentLS(){
@@ -470,7 +470,7 @@ bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBl
     // update instead of now)
     
     // liver-stage treatment is only via "LiverStageDrug" option, if at all
-    if( timeLiver != SimTime::zero() ){
+    if( timeLiver != sim::zero() ){
         if( pReceivePQ > 0.0 ){
             // This is only really disallowed to prevent simultaneous treatment through both methods
             throw util::xml_scenario_error("simple treatment for vivax liver "
@@ -478,7 +478,7 @@ bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBl
             "(liverStageDrug) option; it is suggested to use the former over the latter");
         }
         if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || human.rng().bernoulli(effectivenessPQ)) ){
-            if( timeLiver >= SimTime::zero() ){
+            if( timeLiver >= sim::zero() ){
                 treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
             }else{
                 for( auto it = infections.begin(); it != infections.end(); ++it ){
@@ -490,8 +490,8 @@ bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBl
     }
     
     // there probably will be blood-stage treatment
-    if( timeBlood != SimTime::zero() ){
-        if( timeBlood < SimTime::zero() ){
+    if( timeBlood != sim::zero() ){
+        if( timeBlood < sim::zero() ){
             // legacy mode: retroactive clearance
             for( auto it = infections.begin(); it != infections.end(); ++it ){
                 it->treatmentBS();
@@ -566,7 +566,7 @@ void WHVivax::init( const OM::Parameters& parameters, const scnXml::Model& model
         pSecondRelease = hr.getPSecondRelease();
         assert( pSecondRelease >= 0 && pSecondRelease <= 1 );
     } // else pSecondRelease is NaN and other values don't get used
-    bloodStageProtectionLatency = SimTime::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
+    bloodStageProtectionLatency = sim::roundToTSFromDays( elt.getBloodStageProtectionLatency().getValue() );
     bloodStageLength.setParams(elt.getBloodStageLengthDays());
     
     const scnXml::ClinicalEvents& ce = elt.getClinicalEvents();

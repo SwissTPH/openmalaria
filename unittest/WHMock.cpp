@@ -56,7 +56,7 @@ bool WHMock::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlo
     nTreatments += 1;
     lastTimeLiver = timeLiver;
     lastTimeBlood = timeBlood;
-    return timeBlood != SimTime::zero();
+    return timeBlood != sim::zero();
 }
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages, double age, double delay_d){

@@ -37,7 +37,7 @@ namespace impl {
     // Variables (checkpointed):
     extern bool isInit; // set true after "initialisation" survey at intervention time 0
     extern size_t survNumEvent, survNumStat;
-    extern SimDate nextSurveyDate;
+    extern SimTime nextSurveyDate;
 }
 
 /// For surveys and measures to say something shouldn't be reported
@@ -56,9 +56,9 @@ inline size_t eventSurveyNumber(){ return impl::survNumEvent; }
 /// reported but acts like it is to set survey variables.
 inline bool isReported(){ return !impl::isInit || impl::survNumStat != NOT_USED; }
 
-/** Date the current (next) survey ends at, or SimTime::never() if no more
+/** Date the current (next) survey ends at, or sim::never() if no more
  * surveys take place. */
-inline SimDate nextSurveyDate() {
+inline SimTime nextSurveyDate() {
     return impl::nextSurveyDate;
 }
 

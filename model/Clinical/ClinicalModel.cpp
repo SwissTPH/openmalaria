@@ -37,7 +37,7 @@ bool opt_event_scheduler = false;
 bool opt_imm_outcomes = false;
 
 bool ClinicalModel::indirectMortBugfix;
-SimTime ClinicalModel::healthSystemMemory{ SimTime::never() };
+SimTime ClinicalModel::healthSystemMemory{ sim::never() };
 
 //log odds ratio of case-fatality in community compared to hospital
 double oddsRatioThreshold;
@@ -137,7 +137,7 @@ bool ClinicalModel::isDead( SimTime age ){
 
 void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     if (doomed < NOT_DOOMED)	// Countdown to indirect mortality
-        doomed -= SimTime::oneTS().inDays();
+        doomed -= sim::oneTS().inDays();
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (doomed <= DOOMED_EXPIRED) {	//clinical bout 6 intervals before
@@ -159,8 +159,8 @@ void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
 
 void ClinicalModel::updateInfantDeaths( SimTime age ){
     // update array for the infant death rates
-    if (age < SimTime::oneYear()){
-        size_t index = age / SimTime::oneTS();
+    if (age < sim::oneYear()){
+        size_t index = age / sim::oneTS();
         
         // Testing doomed == DOOMED_NEXT_TS gives very slightly different results than
         // testing doomed == DOOMED_INDIRECT (due to above if(..))

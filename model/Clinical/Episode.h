@@ -76,7 +76,7 @@ public:
     };
     
     Episode() :
-            time(SimTime::never()),
+            time(sim::never()),
             surveyPeriod(mon::NOT_USED),
             ageGroup(),
             cohortSet(0),

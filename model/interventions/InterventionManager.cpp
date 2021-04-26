@@ -67,7 +67,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
             {
                 try
                 {
-                    SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                    SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     timed.push_back(unique_ptr<TimedDeployment>(new TimedChangeHSDeployment(date, *it)));
                 }
                 catch (const util::format_error &e)
@@ -87,7 +87,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
             {
                 try
                 {
-                    SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                    SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                     timed.push_back(unique_ptr<TimedDeployment>(new TimedChangeEIRDeployment(date, *it)));
                 }
                 catch (const util::format_error &e)
@@ -124,14 +124,14 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
             ComponentId id(humanComponents.size()); // i.e. index of next item
             identifierMap.insert(make_pair(component.getId(), id));
 
-            SimTime expireAfter = SimTime::future();
+            SimTime expireAfter = sim::future();
             if (component.getSubPopRemoval().present())
             {
                 const scnXml::SubPopRemoval &removeOpts = component.getSubPopRemoval().get();
                 if (removeOpts.getOnFirstBout()) { removeAtIds[SubPopRemove::ON_FIRST_BOUT].push_back(id); }
                 if (removeOpts.getOnFirstInfection()) { removeAtIds[SubPopRemove::ON_FIRST_INFECTION].push_back(id); }
                 if (removeOpts.getOnFirstTreatment()) { removeAtIds[SubPopRemove::ON_FIRST_TREATMENT].push_back(id); }
-                if (removeOpts.getAfterYears().present()) { expireAfter = SimTime::fromYearsN(removeOpts.getAfterYears().get()); }
+                if (removeOpts.getAfterYears().present()) { expireAfter = sim::fromYearsN(removeOpts.getAfterYears().get()); }
             }
 
             HumanInterventionComponent *hiComponent;
@@ -212,13 +212,13 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                 {
                     try
                     {
-                        SimDate begin = sim::startDate();
+                        SimTime begin = sim::startDate();
                         if (it2->getBegin().present())
                         {
                             begin =
                                 UnitParse::readDate(it2->getBegin().get(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         }
-                        SimDate end = SimDate::future();
+                        SimTime end = sim::future();
                         if (it2->getEnd().present())
                         {
                             end = UnitParse::readDate(it2->getEnd().get(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
@@ -243,10 +243,10 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                 }
                 try
                 {
-                    multimap<SimDate, const scnXml::MassDeployment *> deployTimes;
+                    multimap<SimTime, const scnXml::MassDeployment *> deployTimes;
                     for (auto it2 = timedIt->getDeploy().begin(), end2 = timedIt->getDeploy().end(); it2 != end2; ++it2)
                     {
-                        SimDate date = UnitParse::readDate(it2->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                        SimTime date = UnitParse::readDate(it2->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
 
                         if (it2->getRepeatStep().present() != it2->getRepeatEnd().present())
                         {
@@ -255,8 +255,8 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                         if (it2->getRepeatStep().present())
                         {
                             SimTime step = UnitParse::readDuration(it2->getRepeatStep().get(), UnitParse::NONE);
-                            if (step < SimTime::oneTS()) { throw util::xml_scenario_error("deploy: repeatStep must be >= 1"); }
-                            SimDate end = UnitParse::readDate(it2->getRepeatEnd().get(), UnitParse::NONE);
+                            if (step < sim::oneTS()) { throw util::xml_scenario_error("deploy: repeatStep must be >= 1"); }
+                            SimTime end = UnitParse::readDate(it2->getRepeatEnd().get(), UnitParse::NONE);
                             while (date < end)
                             {
                                 deployTimes.insert(make_pair(date, &*it2));
@@ -268,7 +268,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                             deployTimes.insert(make_pair(date, &*it2));
                         }
                     }
-                    SimDate lastDate = SimDate::never();
+                    SimTime lastDate = sim::never();
                     for (auto deploy = deployTimes.begin(), dpEnd = deployTimes.end(); deploy != dpEnd; ++deploy)
                     {
                         if (deploy->first == lastDate)
@@ -336,7 +336,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
             Vaccine::verifyEnabledForR_0();
             // timed deployments:
             for( auto it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it ){
-                SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                 timed.push_back( new TimedR_0Deployment( date ) );
             }
         }
@@ -350,7 +350,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
             // timed deployments:
             for (auto it = elt.getTimedDeployment().begin(); it != elt.getTimedDeployment().end(); ++it)
             {
-                SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                 timed.push_back(unique_ptr<TimedDeployment>(new TimedUninfectVectorsDeployment(date)));
             }
         }
@@ -373,7 +373,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                     const scnXml::TimedBaseList::DeploySequence &seq = elt.getTimed().get().getDeploy();
                     for (auto it = seq.begin(); it != seq.end(); ++it)
                     {
-                        SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                        SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         timed.push_back(unique_ptr<TimedDeployment>(new TimedVectorDeployment(date, instance)));
                     }
                     instance++;
@@ -398,7 +398,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                 {
                     for (const scnXml::Deploy2 &deploy : elt.getTimed().get().getDeploy())
                     {
-                        SimDate date =
+                        SimTime date =
                             UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
                         timed.push_back(unique_ptr<TimedDeployment>(new TimedAddNonHumanHostsDeployment(date, elt.getName(), lifespan, elt.getDescription().getAnopheles(), transmission)));
@@ -427,7 +427,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                     const scnXml::TimedBaseList::DeploySequence &seq = elt.getTimed().get().getDeploy();
                     for (auto it = seq.begin(); it != seq.end(); ++it)
                     {
-                        SimDate date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
+                        SimTime date = UnitParse::readDate(it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
                         timed.push_back(
                             unique_ptr<TimedDeployment>(new TimedNonHumanHostsDeployment(date, instance, elt.getNonHumanHostsName(), elt.getDescription().getAnopheles(), decay, transmission)));
                     }
@@ -451,7 +451,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                 {
                     for (const scnXml::Deploy1 &deploy : trap.getTimed().get().getDeploy())
                     {
-                        SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
+                        SimTime date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
                         double ratio = deploy.getRatioToHumans();
                         SimTime lifespan = UnitParse::readDuration(deploy.getLifespan(), UnitParse::NONE);
                         timed.push_back(unique_ptr<TimedDeployment>(new TimedTrapDeployment(date, instance, ratio, lifespan)));
@@ -511,7 +511,7 @@ ComponentId InterventionManager::getComponentId(const string textId)
 
 void InterventionManager::loadFromCheckpoint(Population &population, Transmission::TransmissionModel &transmission)
 {
-    SimDate date = sim::intervDate();
+    SimTime date = sim::intervDate();
     // We need to re-deploy changeHS and changeEIR interventions, but nothing
     // else. nextTimed should be zero so we can go through all past interventions.
     // Only redeploy those which happened before this time step.
@@ -532,13 +532,13 @@ void InterventionManager::loadFromCheckpoint(Population &population, Transmissio
 
 void InterventionManager::deploy(Population &population, Transmission::TransmissionModel &transmission)
 {
-    if (sim::intervTime() < SimTime::zero()) return;
+    if (sim::intervTime() < sim::zero()) return;
 
     // deploy imported infections (not strictly speaking an intervention)
     importedInfections.import(population);
 
     // deploy timed interventions
-    SimDate now = sim::intervDate();
+    SimTime now = sim::intervDate();
     while (timed[nextTimed]->date <= now)
     {
         timed[nextTimed]->deploy(population, transmission);

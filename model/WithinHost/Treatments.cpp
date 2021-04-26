@@ -47,7 +47,7 @@ Treatments::Stages stageFromString( const std::string& str ){
     throw util::format_error( std::string("stage must be liver, blood or both, not ").append(str) );
 }
 Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
-    TriggeredDeployments(elt), timeLiver(SimTime::zero()), timeBlood(SimTime::zero())
+    TriggeredDeployments(elt), timeLiver(sim::zero()), timeBlood(sim::zero())
 {
     for( auto it = elt.getClearInfections().begin(), end = elt.getClearInfections().end();
         it != end; ++it )
@@ -55,17 +55,17 @@ Treatments::Treatments( const scnXml::TreatmentOption& elt ) :
         try{
             //NOTE: if changing XSD, this should not be called "timesteps" or have a default unit
             SimTime len = UnitParse::readShortDuration( it->getTimesteps(), UnitParse::STEPS );
-            if( len < -SimTime::oneTS() || len == SimTime::zero() ){ 
+            if( len < -sim::oneTS() || len == sim::zero() ){ 
                 throw util::format_error( "timesteps must be ≥ 1 or have special value -1" );
             }
             Stages stage = stageFromString( it->getStage() );
             if( stage & LIVER ){
-                if( timeLiver != SimTime::zero() )   // existing treatment configuration
+                if( timeLiver != sim::zero() )   // existing treatment configuration
                     throw util::format_error( "multiple specification of liver stage effect" );
                 timeLiver = len;
             }
             if( stage & BLOOD ){
-                if( timeBlood != SimTime::zero() )   // existing treatment configuration
+                if( timeBlood != sim::zero() )   // existing treatment configuration
                     throw util::format_error( "multiple specification of blood stage effect" );
                 timeBlood = len;
             }

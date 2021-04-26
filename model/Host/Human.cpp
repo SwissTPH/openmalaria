@@ -67,7 +67,7 @@ Human::Human(SimTime dateOfBirth) :
     nextCtsDist(0)
 {
     // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
-    assert( m_DOB == sim::nowOrTs1() || (sim::now() == SimTime::zero() && m_DOB < sim::now()) );
+    assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
     
     HumanHet het = HumanHet::sample(m_rng);
     withinHostModel = WithinHost::WHInterface::createWithinHostModel( m_rng, het.comorbidityFactor );
@@ -131,7 +131,7 @@ void Human::update(Transmission::TransmissionModel& transmission) {
             _vaccine.getFactor(interventions::Vaccine::BSV));
     
     // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
-    clinicalModel->update( *this, ageYears1, age0 == SimTime::zero() );
+    clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
     clinicalModel->updateInfantDeaths( age0 );
 }
 
@@ -163,7 +163,7 @@ void Human::summarize() {
 }
 
 void Human::reportDeployment( ComponentId id, SimTime duration ){
-    if( duration <= SimTime::zero() ) return; // nothing to do
+    if( duration <= sim::zero() ) return; // nothing to do
     m_subPopExp[id] = sim::nowOrTs1() + duration;
     m_cohortSet = mon::updateCohortSet( m_cohortSet, id, true );
 }

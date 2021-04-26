@@ -74,7 +74,7 @@ void PyrogenPathogenesis::init( const Parameters& parameters ){
     
     //alpha: factor determining increase in pyrogenic threshold
     double alpha14 = parameters[Parameters::ALPHA];
-    a = alpha14 * SimTime::oneTS().inDays() * delt;  
+    a = alpha14 * sim::oneTS().inDays() * delt;  
     
     //Ystar1: critical value of parasite density in determing increase in pyrog t
     Ystar1_26 = parameters[Parameters::Y_STAR_1];
