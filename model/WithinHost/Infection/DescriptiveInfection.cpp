@@ -46,7 +46,7 @@ bool bugfix_max_dens = true, bugfix_innate_max_dens = true;
 
 void DescriptiveInfection::init (const Parameters& parameters) {
     // Error checks
-    if( sim::oneTS().inDays() != 5 ){
+    if( sim::oneTS() != 5 ){
         // To support non-5-day time-step models, either different data would
         // be needed or times need to be adjusted when accessing
         // meanLogParasiteCount. Probably the rest would be fine.
@@ -120,7 +120,7 @@ DescriptiveInfection::DescriptiveInfection (LocalRng& rng, uint32_t genotype) :
         m_duration(infectionDuration(rng)),
         notPrintedMDWarning(true)
 {
-    assert( sim::oneTS().inDays() == 5 );
+    assert( sim::oneTS() == 5 );
 }
 
 SimTime DescriptiveInfection::infectionDuration(LocalRng& rng) {
@@ -131,7 +131,7 @@ SimTime DescriptiveInfection::infectionDuration(LocalRng& rng) {
     
     //TODO:
     // Model did say infection is cleared on day dur+1 converted to a time-step
-    // let interval = sim::oneTS().inDays() in:
+    // let interval = sim::oneTS() in:
     // ((1+floor(dur))/interval); now it says the last interval is:
     // floor((1+dur)/interval)-1 = floor((dur+1-interval)/interval)
     // Is this reasonable, or should we change?
@@ -180,9 +180,9 @@ void DescriptiveInfection::determineDensities(
             double meanlog = log(m_density) - stdlog*stdlog / 2.0;
             m_density = rng.log_normal(meanlog, stdlog);
             // Calculate additional samples for T-1 days (T=days per step):
-            if( true /*sim::oneTS().inDays() > 1, always true for this model*/ ){
+            if( true /*sim::oneTS() > 1, always true for this model*/ ){
                 timeStepMaxDensity = rng.max_multi_log_normal (m_density,
-                        sim::oneTS().inDays() - 1, meanlog, stdlog);
+                        sim::oneTS() - 1, meanlog, stdlog);
             } else {
                 timeStepMaxDensity = m_density;
             }
@@ -200,7 +200,7 @@ void DescriptiveInfection::determineDensities(
         //Include here the effect of blood stage vaccination
         m_density *= bsvFactor;
         
-        m_cumulativeExposureJ += sim::oneTS().inDays() * m_density;
+        m_cumulativeExposureJ += sim::oneTS() * m_density;
     }
     
     if (bugfix_innate_max_dens) timeStepMaxDensity *= innateImmSurvFact;

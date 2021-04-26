@@ -159,7 +159,7 @@ void DescriptiveWithinHostModel::update(LocalRng& rng,
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
     // this time-step and cumulative_Y only includes past densities.
     m_cumulative_h += nNewInfs;
-    m_cumulative_Y += sim::oneTS().inDays() * totalDensity;
+    m_cumulative_Y += sim::oneTS() * totalDensity;
     
     util::streamValidate( totalDensity );
     util::streamValidate( hrp2Density );
