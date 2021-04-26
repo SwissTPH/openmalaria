@@ -198,7 +198,7 @@ void readCheckpoint(const string &checkpointFileName, SimTime &endTime, SimTime 
     checkpoint (in, endTime, estEndTime, population, transmission);
     in.close();
   
-    cerr << sim::now().inSteps() << "t loaded checkpoint" << endl;
+    cerr << sim::inSteps(sim::now()) << "t loaded checkpoint" << endl;
 }
 
 // Internal simulation loop
@@ -340,15 +340,15 @@ int main(int argc, char* argv[])
         // length required by vector warmup, and is a whole number of years.
         SimTime humanWarmupLength = sim::maxHumanAge();
         if( humanWarmupLength < transmission->minPreinitDuration() ){
-            cerr << "Warning: human life-span (" << humanWarmupLength.inYears();
+            cerr << "Warning: human life-span (" << sim::inYears(humanWarmupLength);
             cerr << ") shorter than length of warm-up requested by" << endl;
             cerr << "transmission model ("
-                << transmission->minPreinitDuration().inYears();
+                << sim::inYears(transmission->minPreinitDuration());
             cerr << "). Transmission may be unstable; perhaps use forced" << endl;
             cerr << "transmission (mode=\"forced\") or a longer life-span." << endl;
             humanWarmupLength = transmission->minPreinitDuration();
         }
-        humanWarmupLength = sim::fromYearsI( static_cast<int>(ceil(humanWarmupLength.inYears())) );
+        humanWarmupLength = sim::fromYearsI( static_cast<int>(ceil(sim::inYears(humanWarmupLength))) );
         
         estEndTime = humanWarmupLength  // ONE_LIFE_SPAN
             + transmission->expectedInitDuration()

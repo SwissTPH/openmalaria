@@ -202,7 +202,7 @@ namespace OM { namespace mon {
         } else {
             if( mod_nn(sim::now(), ctsPeriod) != sim::zero() )
                 return;
-            ctsOStream << sim::now().inSteps() << '\t';
+            ctsOStream << sim::inSteps(sim::now()) << '\t';
         }
 	
         if( duringInit && sim::intervTime() < sim::zero() ){
@@ -210,7 +210,7 @@ namespace OM { namespace mon {
         }else{
             // NOTE: we could switch this to output dates, but (1) it would be
             // breaking change and (2) it may be harder to use.
-            ctsOStream << sim::intervTime().inSteps();
+            ctsOStream << sim::inSteps(sim::intervTime());
         }
 	for( size_t i = 0; i < toReport.size(); ++i )
 	    toReport[i]->call( population, ctsOStream );

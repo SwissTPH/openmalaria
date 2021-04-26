@@ -83,12 +83,12 @@ class SimTime {
     /** Default construction; same as sim::never(). */
     SimTime() : d(0) {}
     
-    /// Convert to years
-    inline double inYears() const{ return d * (1.0 / SimData::DAYS_IN_YEAR); }
+    // /// Convert to years
+    // inline double inYears() const{ return d * (1.0 / SimData::DAYS_IN_YEAR); }
     
-    /// Convert to time steps (rounding down)
-    inline int inSteps() const{ return d / SimData::interval; }
-    //@}
+    // /// Convert to time steps (rounding down)
+    // inline int inSteps() const{ return d / SimData::interval; }
+    // //@}
     
 
     ///@brief Simple arithmatic modifiers (all return a copy)

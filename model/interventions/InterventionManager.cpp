@@ -285,7 +285,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                                 }
                                 msg << cp->getId();
                             }
-                            msg << " has multiple deplyoments at date " << lastDate << " (step " << (lastDate - sim::startDate()).inSteps()
+                            msg << " has multiple deplyoments at date " << lastDate << " (step " << sim::inSteps(lastDate - sim::startDate())
                                 << ')';
                             throw util::xml_scenario_error(msg.str());
                         }

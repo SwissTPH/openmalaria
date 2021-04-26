@@ -148,7 +148,7 @@ SimTime readSurveyDates( const scnXml::Monitoring& monitoring ){
             if( !surveyDate.isReported() ) continue;
             std::cout
                 << (surveyDate.num+1) << '\t'
-                << (surveyDate.date - sim::startDate()).inSteps() << '\t'
+                << sim::inSteps(surveyDate.date - sim::startDate()) << '\t'
                 << surveyDate.date << std::endl;
         }
     }

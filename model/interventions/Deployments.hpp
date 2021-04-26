@@ -222,7 +222,7 @@ public:
     
     virtual void print_details( std::ostream& out )const{
         out << date << "\t"
-            << minAge.inYears() << "y\t" << maxAge.inYears() << "t\t";
+            << sim::inYears(minAge) << "y\t" << sim::inYears(maxAge) << "t\t";
         if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
@@ -520,14 +520,14 @@ public:
         if( deployAge <= sim::zero() ){
             ostringstream msg;
             msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
-            msg << " years corresponds to time step " << deployAge.inSteps();
+            msg << " years corresponds to time step " << sim::inSteps(deployAge);
             msg << "; must be at least 1.";
             throw util::xml_scenario_error( msg.str() );
         }
         if( deployAge > sim::maxHumanAge() ){
             ostringstream msg;
             msg << "continuous intervention must have target age no greater than ";
-            msg << sim::maxHumanAge().inYears();
+            msg << sim::inYears(sim::maxHumanAge());
             throw util::xml_scenario_error( msg.str() );
         }
     }
@@ -560,7 +560,7 @@ public:
         out << begin << "\t";
         if( end == sim::future() ) out << "(none)";
         else out << end << 't';
-        out << '\t' << deployAge.inYears() << "y\t";
+        out << '\t' << sim::inYears(deployAge) << "y\t";
         if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';

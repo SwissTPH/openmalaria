@@ -158,8 +158,8 @@ void DescriptiveInfection::determineDensities(
     }else{
         timeStepMaxDensity = 0.0;
         
-        int32_t infAge = min( infage.inSteps(), maxDurationTS );
-        int32_t infDur = min( m_duration.inSteps(), maxDurationTS );
+        int32_t infAge = min( sim::inSteps(infage), maxDurationTS );
+        int32_t infDur = min( sim::inSteps(m_duration), maxDurationTS );
         m_density=max (exp(meanLogParasiteCount[infAge][infDur]), 1.0);
         
         // The expected parasite density in the non naive host (AJTM p.9 eq. 9)
