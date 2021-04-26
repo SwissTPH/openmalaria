@@ -237,7 +237,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
         }
         
         if (indirectMortality && doomed == NOT_DOOMED)
-            doomed = -sim::oneTS().inDays(); // start indirect mortality countdown
+            doomed = -sim::oneTS(); // start indirect mortality countdown
     }
     
     if( caseStartTime == sim::ts0() && (pgState & Episode::RUN_CM_TREE) ){

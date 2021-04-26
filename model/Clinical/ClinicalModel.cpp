@@ -137,7 +137,7 @@ bool ClinicalModel::isDead( SimTime age ){
 
 void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     if (doomed < NOT_DOOMED)	// Countdown to indirect mortality
-        doomed -= sim::oneTS().inDays();
+        doomed -= sim::oneTS();
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (doomed <= DOOMED_EXPIRED) {	//clinical bout 6 intervals before
