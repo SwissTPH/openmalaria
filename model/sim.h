@@ -83,12 +83,12 @@ class SimTime {
     /** Default construction; same as sim::never(). */
     SimTime() : d(0) {}
     
-    ///@brief Self-modifying arithmatic
-    //@{
-    inline void operator+=( const SimTime rhs ) {
-        d += rhs.d;
-    }
-    //@}
+    // ///@brief Self-modifying arithmatic
+    // //@{
+    // inline void operator+=( const SimTime rhs ) {
+    //     d += rhs.d;
+    // }
+    // //@}
     
     /// Checkpointing
     template<class S>
@@ -261,7 +261,7 @@ public:
     
     // Start of update: called by Simulator
     static inline void start_update(){
-        s_t1 += sim::oneTS();
+        s_t1 = s_t1 + sim::oneTS();
 #ifndef NDEBUG
         in_update = true;
 #endif
@@ -272,7 +272,7 @@ public:
         in_update = false;
 #endif
         s_t0 = s_t1;
-        s_interv += sim::oneTS();
+        s_interv = s_interv + sim::oneTS();
     }
     
     // Scenario constants

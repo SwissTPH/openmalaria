@@ -214,7 +214,7 @@ void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> F
 
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
-    for (SimTime i = sim::zero(); i < sim::oneYear(); i += sim::oneDay())
+    for (SimTime i = sim::zero(); i < sim::oneYear(); i = i + sim::oneDay())
         initialisationEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += speciesEIR[i];
 
     if (util::CommandLine::option(util::CommandLine::PRINT_ANNUAL_EIR))
@@ -526,7 +526,7 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
     const SimTime nextTS = sim::ts0() + sim::oneTS();
-    for (SimTime d0 = sim::ts0(); d0 < nextTS; d0 += sim::oneDay())
+    for (SimTime d0 = sim::ts0(); d0 < nextTS; d0 = d0 + sim::oneDay())
     {
         update(d0, tsP_A, tsP_Amu, tsP_A1, tsP_Ah, tsP_df, sigma_dif, tsP_dff, isDynamic, partialEIR, availDivisor);
     }

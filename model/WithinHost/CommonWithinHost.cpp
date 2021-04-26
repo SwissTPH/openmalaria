@@ -161,7 +161,7 @@ void CommonWithinHost::update(LocalRng& rng,
     
     double body_mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
     
-    for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now += sim::oneDay() ){
+    for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now = now + sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel.medicate(rng);
         

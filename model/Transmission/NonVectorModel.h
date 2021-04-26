@@ -54,7 +54,7 @@ public:
         if (daily.size() < static_cast<size_t>(sim::oneYear()))
             throw util::xml_scenario_error("insufficient EIRDaily data for a year");
 
-        for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday += sim::oneDay())
+        for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday = mpcday + sim::oneDay())
         {
             double EIRdaily = std::max(static_cast<double>(daily[mpcday]), minEIR);
 
@@ -142,7 +142,7 @@ public:
         }
         // The minimum EIR allowed in the array. The product of the average EIR and a constant.
         double minEIR = min_EIR_mult * averageEIR(nonVectorData);
-        for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday += sim::oneDay())
+        for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday = mpcday + sim::oneDay())
         {
             double EIRdaily = std::max(static_cast<double>(daily[mpcday]), minEIR);
 

@@ -43,7 +43,7 @@ public:
         DummyInfection::init();
         // pkpdID (1st value) isn't important since we're not using drug model here:
         infection = CommonWithinHost::createInfection( m_rng, 0xFFFFFFFF );
-        for( SimTime d = sim::ts1(), end = sim::ts1() + sim::fromDays(15); d < end; d += sim::oneDay() ){
+        for( SimTime d = sim::ts1(), end = sim::ts1() + sim::fromDays(15); d < end; d = d + sim::oneDay() ){
             // blood stage starts 15 days after creation
             UnittestUtil::incrTime( sim::oneDay() );
             infection->update( m_rng, 1.0, d, numeric_limits<double>::quiet_NaN() );

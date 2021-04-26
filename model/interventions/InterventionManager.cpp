@@ -260,7 +260,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                             while (date < end)
                             {
                                 deployTimes.insert(make_pair(date, &*it2));
-                                date += step;
+                                date = date + step;
                             }
                         }
                         else

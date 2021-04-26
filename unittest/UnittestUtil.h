@@ -273,7 +273,7 @@ public:
     }
     static void incrTime(SimTime incr){
         //NOTE: for unit tests, we do not differentiate between s_t0 and s_t1
-        sim::s_t0 += incr;
+        sim::s_t0 = sim::s_t0 + incr;
         sim::s_t1 = sim::s_t0;
     }
     

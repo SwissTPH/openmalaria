@@ -378,7 +378,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 		if (human.rng().uniform_01() < pDeath) {
 		    pgState = Episode::State (pgState | Episode::DIRECT_DEATH);
 		    // Human is killed at end of time at risk
-		    timeOfRecovery += extraDaysAtRisk;	// may be re-set later (see ATORWD)
+		    timeOfRecovery = timeOfRecovery + extraDaysAtRisk;	// may be re-set later (see ATORWD)
 		}
 	    }
 	    previousDensity = withinHostModel.getTotalDensity();
@@ -403,7 +403,7 @@ void ClinicalEventScheduler::doClinicalUpdate (Human& human, double ageYears){
 	    timeOfRecovery = sim::ts0() + complicatedCaseDuration;
 	    // Time should be adjusted to end of at-risk period when patient dies:
 	    if( pgState & Episode::DIRECT_DEATH )	// death may already have been determined
-		timeOfRecovery += extraDaysAtRisk;	// ATORWD (search keyword)
+		timeOfRecovery = timeOfRecovery + extraDaysAtRisk;	// ATORWD (search keyword)
 	} else {
 	    timeOfRecovery = sim::ts0() + uncomplicatedCaseDuration;
 	}

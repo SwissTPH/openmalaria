@@ -143,7 +143,7 @@ public:
         // TODO: only have to add one year because of offset
         SimTime start = sim::now() - sim::oneTS() + sim::oneYear();
         double total = 0;
-        for (SimTime i = start, end = start + sim::oneTS(); i < end; i += sim::oneDay())
+        for (SimTime i = start, end = start + sim::oneTS(); i < end; i = i + sim::oneDay())
         {
             SimTime dYear1 = mod_nn(i, sim::oneYear());
             total += 1.0 / invLarvalResources[dYear1];

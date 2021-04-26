@@ -244,7 +244,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         if( errno != 0 )
         {
            char err[256];
-           sprintf(err, "t = %d Please report! Error: ", sim::now());
+           sprintf(err, "t = %d Please report! Error: ", int(sim::now()));
            std::perror(err);
            errno = 0;
         }
@@ -386,7 +386,7 @@ int main(int argc, char* argv[])
             SimTime iterate = transmission->initIterate();
             while(iterate > sim::zero())
             {
-                endTime += iterate;
+                endTime = endTime + iterate;
                 // adjust estimation of final time step: end of current period + length of main phase
                 estEndTime = endTime + (sim::endDate() - sim::startDate()) + sim::oneTS();
                 loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);

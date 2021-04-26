@@ -106,7 +106,7 @@ SimTime readSurveyDates( const scnXml::Monitoring& monitoring ){
                     }else{
                         surveys.insert(make_pair(cur, false));        // does not override existing pair with key 'cur'
                     }
-                    cur += step;
+                    cur = cur + step;
                 }
             }else{
                 if( reporting ){

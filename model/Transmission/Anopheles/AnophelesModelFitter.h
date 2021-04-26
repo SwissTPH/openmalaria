@@ -52,7 +52,7 @@ public:
     bool fit(AnophelesModel &m)
     {
         std::vector<double> avgAnnualS_v(sim::oneYear(), 0.0);
-        for (SimTime i = sim::fromYearsI(4); i < sim::fromYearsI(5); i += sim::oneDay())
+        for (SimTime i = sim::fromYearsI(4); i < sim::fromYearsI(5); i = i + sim::oneDay())
         {
             avgAnnualS_v[mod_nn(i, sim::oneYear())] = m.quinquennialS_v[i];
         }

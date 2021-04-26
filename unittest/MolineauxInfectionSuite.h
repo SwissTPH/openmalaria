@@ -82,7 +82,7 @@ public:
 //                 out << infection->getDensity() << endl;
                 day += 1;
             }
-            now += sim::oneDay();
+            now = now + sim::oneDay();
         }while(!extinct);
         TS_ASSERT_EQUALS( day, dens.size() );
         delete infection;
@@ -294,7 +294,7 @@ private:
                 
                 while( !infection->update(rng, 1.0 /*no external immunity*/, now, 71.43 /*adult body mass in kg to get 5l blood volume*/) ){
                     dens.push_back( infection->getDensity() );
-                    now += sim::oneDay();
+                    now = now + sim::oneDay();
                 }
                 delete infection;
                 calc( run, dens );
