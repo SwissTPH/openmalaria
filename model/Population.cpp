@@ -23,9 +23,9 @@
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Genotypes.h"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Genotypes.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "Clinical/ClinicalModel.h"
 #include "Transmission/TransmissionModel.h"
 

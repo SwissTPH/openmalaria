@@ -56,22 +56,22 @@ set (Model_CPP
   #Transmission/Anopheles/LifeCycle.cpp
   #Transmission/Anopheles/ResourceFitter.cpp
   
-  WithinHost/WHInterface.cpp
-  WithinHost/WHFalciparum.cpp
-  WithinHost/WHVivax.cpp
-  WithinHost/CommonWithinHost.cpp
-  WithinHost/DescriptiveWithinHost.cpp
-  WithinHost/Genotypes.cpp
-  WithinHost/Infection/CommonInfection.cpp
-  WithinHost/Infection/DescriptiveInfection.cpp
-  WithinHost/Infection/DummyInfection.cpp
-  WithinHost/Infection/EmpiricalInfection.cpp
-  WithinHost/Infection/MolineauxInfection.cpp
-  WithinHost/Infection/PennyInfection.cpp
-  WithinHost/Pathogenesis/PathogenesisModel.cpp
-  WithinHost/Pathogenesis/Submodels.cpp
-  WithinHost/Diagnostic.cpp
-  WithinHost/Treatments.cpp
+  Host/WithinHost/WHInterface.cpp
+  Host/WithinHost/WHFalciparum.cpp
+  Host/WithinHost/WHVivax.cpp
+  Host/WithinHost/CommonWithinHost.cpp
+  Host/WithinHost/DescriptiveWithinHost.cpp
+  Host/WithinHost/Genotypes.cpp
+  Host/WithinHost/Infection/CommonInfection.cpp
+  Host/WithinHost/Infection/DescriptiveInfection.cpp
+  Host/WithinHost/Infection/DummyInfection.cpp
+  Host/WithinHost/Infection/EmpiricalInfection.cpp
+  Host/WithinHost/Infection/MolineauxInfection.cpp
+  Host/WithinHost/Infection/PennyInfection.cpp
+  Host/WithinHost/Pathogenesis/PathogenesisModel.cpp
+  Host/WithinHost/Pathogenesis/Submodels.cpp
+  Host/WithinHost/Diagnostic.cpp
+  Host/WithinHost/Treatments.cpp
   
   mon/mon.cpp
   mon/misc.cpp

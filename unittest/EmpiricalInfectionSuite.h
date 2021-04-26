@@ -25,8 +25,8 @@
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
-#include "WithinHost/Infection/EmpiricalInfection.h"
-#include "WithinHost/CommonWithinHost.h"
+#include "Host/WithinHost/Infection/EmpiricalInfection.h"
+#include "Host/WithinHost/CommonWithinHost.h"
 #include "util/random.h"
 #include <limits>
 

@@ -28,7 +28,7 @@
 #include "interventions/Vaccine.h"
 #include "interventions/HumanInterventionComponents.hpp"
 #include "interventions/Deployments.hpp"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "Transmission/VectorModel.h"
 
 namespace OM

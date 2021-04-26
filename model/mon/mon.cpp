@@ -23,8 +23,8 @@
 #include "mon/management.h"
 #define H_OM_mon_cpp
 #include "mon/OutputMeasures.h"
-#include "WithinHost/Diagnostic.h"
-#include "WithinHost/Genotypes.h"
+#include "Host/WithinHost/Diagnostic.h"
+#include "Host/WithinHost/Genotypes.h"
 #include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
 #include "util/errors.h"

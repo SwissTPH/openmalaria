@@ -22,7 +22,7 @@
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/PerHost.h"
 #include "Population.h"
-#include "WithinHost/Genotypes.h"
+#include "Host/WithinHost/Genotypes.h"
 #include "util/vectors.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"

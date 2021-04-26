@@ -250,14 +250,13 @@ public:
     static SimTime s_start;
     static SimTime s_end;
     static SimTime s_max_human_age;
-    
-    // Global variables
-#ifndef NDEBUG
-    static bool in_update;       // only true during human/population/transmission update
-#endif
     static SimTime s_t0;
     static SimTime s_t1;
     static SimTime s_interv;
+
+#ifndef NDEBUG
+    static bool in_update;       // only true during human/population/transmission update
+#endif
 };
 
 }

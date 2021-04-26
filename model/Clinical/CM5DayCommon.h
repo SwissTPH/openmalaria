@@ -21,10 +21,10 @@
 #ifndef Hmod_CM5DayCommon
 #define Hmod_CM5DayCommon
 
-#include "WithinHost/Pathogenesis/State.h"
+#include "Host/WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 #include "mon/reporting.h"
 
 namespace OM {

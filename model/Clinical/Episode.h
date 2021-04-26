@@ -22,7 +22,7 @@
 #define Hmod_Episode
 
 #include "Global.h"
-#include "WithinHost/Pathogenesis/State.h"
+#include "Host/WithinHost/Pathogenesis/State.h"
 #include "mon/AgeGroup.h"
 #include "mon/info.h"
 #include <ostream>

@@ -25,8 +25,8 @@
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
-#include "WithinHost/Infection/DummyInfection.h"
-#include "WithinHost/CommonWithinHost.h"
+#include "Host/WithinHost/Infection/DummyInfection.h"
+#include "Host/WithinHost/CommonWithinHost.h"
 #include <limits>
 
 using namespace OM::WithinHost;

@@ -22,7 +22,7 @@
 #define Hmod_ESDecisionTree
 
 #include "Host/Human.h"
-#include "WithinHost/Pathogenesis/State.h"
+#include "Host/WithinHost/Pathogenesis/State.h"
 #include "Clinical/Episode.h"
 #include <schema/healthSystem.h>
 

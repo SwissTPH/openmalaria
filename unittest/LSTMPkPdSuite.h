@@ -25,7 +25,7 @@
 
 #include <cxxtest/TestSuite.h>
 #include "PkPd/LSTMModel.h"
-#include "WithinHost/Infection/DummyInfection.h"
+#include "Host/WithinHost/Infection/DummyInfection.h"
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
 #include <limits>

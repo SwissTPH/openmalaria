@@ -23,7 +23,7 @@
 #define Hmod_DescriptiveInfectionSuite
 
 #include <cxxtest/TestSuite.h>
-#include "WithinHost/Infection/DescriptiveInfection.h"
+#include "Host/WithinHost/Infection/DescriptiveInfection.h"
 #include "util/random.h"
 #include "UnittestUtil.h"
 #include <limits>

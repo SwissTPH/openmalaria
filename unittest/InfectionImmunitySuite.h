@@ -23,7 +23,7 @@
 #define Hmod_InfectionImmunitySuite
 
 #include <cxxtest/TestSuite.h>
-#include "WithinHost/DescriptiveWithinHost.h"
+#include "Host/WithinHost/DescriptiveWithinHost.h"
 #include <limits>
 
 using namespace OM::WithinHost;

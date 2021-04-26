@@ -20,7 +20,7 @@
 
 #include "Clinical/EventScheduler.h"
 #include "util/random.h"
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 #include "mon/reporting.h"
 #include "util/ModelOptions.h"
 #include "util/errors.h"

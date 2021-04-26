@@ -23,7 +23,7 @@
 
 #include "Global.h"
 #include "Clinical/CMDecisionTree.h"    // needed for ESDecisionMap
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 #include "schema/pharmacology.h"
 
 namespace OM { namespace Clinical {

@@ -20,8 +20,8 @@
 
 #include "Host/NeonatalMortality.h"
 #include "Population.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "util/random.h"
 #include "util/CommandLine.h"
 #include "schema/healthSystem.h"
