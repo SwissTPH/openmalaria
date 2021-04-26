@@ -268,7 +268,7 @@ private:
 
     //! The duration of sporogony in time steps
     // doesn't need checkpointing
-    SimTime nSpore;
+    SimTime nSpore = sim::never();
     //@}
 
     /** EIR per time interval during the intervention period. Value at index

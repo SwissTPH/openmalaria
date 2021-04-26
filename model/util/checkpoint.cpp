@@ -295,7 +295,7 @@ namespace OM { namespace util { namespace checkpoint {
         auto pos = x.begin ();
         for(size_t i = 0; i < l; ++i) {
             interventions::ComponentId s( stream );
-            SimTime t;
+            SimTime t = sim::never();
             t & stream;
             pos = x.insert (pos, make_pair (s,t));
         }

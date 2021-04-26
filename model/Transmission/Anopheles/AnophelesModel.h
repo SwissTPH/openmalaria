@@ -128,14 +128,14 @@ struct MosquitoParams
      * Set in initialise function from XML data; no need to checkpoint.
      * Duration of feeding cycle (equals duration of resting period) for mosquito (τ).
      * Units: days. */
-    SimTime restDuration;
+    SimTime restDuration = sim::never();
 
     /** Duration of the extrinsic incubation period (sporozoite development time)
     * (θ_s).
     * Units: Days.
     *
     * Doesn't need checkpointing. */
-    SimTime EIPDuration;
+    SimTime EIPDuration = sim::never();
 
     string name;
 };
@@ -155,7 +155,7 @@ struct Nhh {
     double P_C_I;
     double P_D_I;
     double rel_fecundity;
-    SimTime expiry;
+    SimTime expiry = sim::never();
 };
 
 struct TrapParams {
@@ -170,8 +170,8 @@ struct TrapData {
     size_t instance; // index in trapParams
     double initialAvail; // initial availability (avail per trap * num traps)
     DecayFuncHet availHet; // parameter for decay of availability
-    SimTime deployTime; // deploy time (for decay function)
-    SimTime expiry; // date at which this intervention should be deleted
+    SimTime deployTime = sim::never(); // deploy time (for decay function)
+    SimTime expiry = sim::never(); // date at which this intervention should be deleted
 };
 
 class AnophelesModel

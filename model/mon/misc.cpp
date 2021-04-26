@@ -39,7 +39,7 @@ namespace mon {
 // ———  surveys  ———
 
 struct SurveyDate {
-    SimTime date;       // date of survey
+    SimTime date = sim::never();       // date of survey
     size_t num; // if NOT_USED, the survey is not reported; if greater, this is the survey number
     
     /// Construct

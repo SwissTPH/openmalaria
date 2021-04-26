@@ -105,7 +105,7 @@ private:
     
     // Either sim::never() (no blood stage) or the start of the time step on
     // which the blood stage will clear.
-    SimTime bloodStageClearDate;
+    SimTime bloodStageClearDate = sim::never();
     
     // Whether the primary blood stage infection has started
     bool primaryHasStarted;

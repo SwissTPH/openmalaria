@@ -114,7 +114,7 @@ protected:
     
     /// Date of inoculation of infection (start of liver stage)
     /// This is the step of inoculation (ts0()).
-    SimTime m_startDate;
+    SimTime m_startDate = sim::never();
     
     /// Current density of the infection
     double m_density;

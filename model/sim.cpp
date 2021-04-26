@@ -39,10 +39,10 @@ int SimData::interval;
 size_t SimData::steps_per_year;
 double SimData::years_per_step;
 
-SimTime sim::s_start;
-SimTime sim::s_end;
+SimTime sim::s_start = sim::never();
+SimTime sim::s_end = sim::never();
 
-SimTime sim::s_max_human_age;
+SimTime sim::s_max_human_age = sim::never();
 
 // Global variables
 #ifndef NDEBUG
@@ -51,7 +51,7 @@ bool sim::in_update = false;
 SimTime sim::s_t0;
 SimTime sim::s_t1;
 
-SimTime sim::s_interv;
+SimTime sim::s_interv = sim::never();
 
 using util::CommandLine;
 

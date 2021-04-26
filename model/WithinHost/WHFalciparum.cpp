@@ -76,7 +76,7 @@ static double alpha_m;
 /// decay rate of maternal protection in years^(-1).
 static double decayM;
 
-SimTime Infection::s_latentP;
+SimTime Infection::s_latentP = sim::never();
 int WHFalciparum::y_lag_len = 0;
 
 

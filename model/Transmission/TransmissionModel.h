@@ -141,7 +141,7 @@ public:
      * Overriding functions should call this base version too. */
     virtual void summarize()
     {
-        mon::reportStatMF(mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())]);
+        mon::reportStatMF(mon::MVF_NUM_TRANSMIT, laggedKappa[sim::moduloSteps(sim::now(), laggedKappa.size())]);
         mon::reportStatMF(mon::MVF_ANN_AVG_K, _annualAverageKappa);
 
         if (!mon::isReported()) return; // cannot use counters below when not reporting
@@ -275,7 +275,7 @@ protected:
             if (riskTrans > 0.0) ++numTransmittingHumans;
         }
 
-        size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size()); // now
+        size_t lKMod = sim::moduloSteps(sim::ts1(), laggedKappa.size()); // now
         if (population.size() == 0)
         {                             // this is valid
             laggedKappa[lKMod] = 0.0; // no humans: no infectiousness
@@ -291,7 +291,7 @@ protected:
             laggedKappa[lKMod] = sumWt_kappa / sumWeight;
         }
 
-        size_t tmod = sim::ts0().moduloYearSteps();
+        size_t tmod = sim::moduloYearSteps(sim::ts0());
 
         // Calculate time-weighted average of kappa
         _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
@@ -357,7 +357,7 @@ private:
     void ctsCbKappa(ostream &stream)
     {
         // The latest time-step's kappa:
-        stream << '\t' << laggedKappa[sim::now().moduloSteps(laggedKappa.size())];
+        stream << '\t' << laggedKappa[sim::moduloSteps(sim::now(), laggedKappa.size())];
     }
     void ctsCbNumTransmittingHumans(ostream &stream) { stream << '\t' << numTransmittingHumans; }
 
@@ -423,10 +423,10 @@ private:
      * Units: infectious bites/adult/inter-survey period. */
     double surveySimulatedEIR;
     /** Time of last survey. */
-    SimTime lastSurveyTime;
+    SimTime lastSurveyTime = sim::never();
 
     /// age at which an individual is considered an adult
-    SimTime adultAge;
+    SimTime adultAge = sim::never();
 
     /// For "num transmitting humans" cts output.
     int numTransmittingHumans;

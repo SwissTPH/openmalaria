@@ -68,7 +68,7 @@ protected:
     virtual void uncomplicatedEvent(Human& human, Episode::State pgState) =0;
     
     /** Time of the last treatment (sim::never() if never treated). */
-    SimTime m_tLastTreatment;
+    SimTime m_tLastTreatment = sim::never();
 
     //! treatment seeking for heterogeneity
     double m_treatmentSeekingFactor;

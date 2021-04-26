@@ -201,7 +201,7 @@ private:
   
   LocalRng m_rng;
   
-  SimTime m_DOB;        // date of birth; humans are always born at the end of a time step
+  SimTime m_DOB = sim::never();        // date of birth; humans are always born at the end of a time step
   bool m_remove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
   
   /// Vaccines

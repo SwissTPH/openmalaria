@@ -98,7 +98,7 @@ protected:
     /// Checkpointing: write
     virtual void checkpoint( ostream& stream ) =0;
     
-    SimTime deployTime;        // time of deployment or sim::never()
+    SimTime deployTime = sim::never();        // time of deployment or sim::never()
     interventions::ComponentId m_id;       // component id; don't change
 };
 

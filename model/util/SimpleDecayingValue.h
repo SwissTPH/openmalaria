@@ -87,7 +87,7 @@ private:
     util::DecayFuncHet het;
     
     /** Time of larviciding deployment. */
-    SimTime deploy_t;
+    SimTime deploy_t = sim::never();
 };
 
 } }

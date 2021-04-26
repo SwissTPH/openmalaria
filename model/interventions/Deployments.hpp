@@ -61,7 +61,7 @@ public:
     virtual void print_details( std::ostream& out )const =0;
     
     // Read access required in this file; don't really need protection:
-    SimTime date;
+    SimTime date = sim::never();
 };
 
 class DummyTimedDeployment : public TimedDeployment {
@@ -329,7 +329,7 @@ public:
 private:
     size_t inst;
     double ratio;
-    SimTime lifespan;
+    SimTime lifespan = sim::never();
 };
 
 class TimedNonHumanHostsDeployment : public TimedDeployment {
@@ -496,7 +496,7 @@ private:
         double hostFecundityFactor;
     };
     string intervName;
-    SimTime lifespan;
+    SimTime lifespan = sim::never();
     std::map<string, NhhParamsInterv> nhhParams; 
 };
 
@@ -569,7 +569,7 @@ public:
     
 protected:
     SimTime begin, end;    // first time step active and first time step no-longer active
-    SimTime deployAge;
+    SimTime deployAge = sim::never();
     
     friend ByDeployTime;
 };

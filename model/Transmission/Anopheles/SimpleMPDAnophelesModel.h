@@ -173,7 +173,7 @@ private:
     // -----  model parameters (loaded from XML)  -----
 
     /** Duration of development (time from egg laying to emergence) in days. */
-    SimTime developmentDuration;
+    SimTime developmentDuration = sim::never();
 
     /** Survival probability of a mosquito from egg to emergence in the absence
      * of density dependent mortality. */

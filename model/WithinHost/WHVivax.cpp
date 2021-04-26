@@ -79,7 +79,7 @@ private:
 // ———  parameters  ———
 
 // Set from the parameters block:
-SimTime latentP;       // attribute on parameters block
+SimTime latentP = sim::never();       // attribute on parameters block
 
 // Set from <vivax .../> element:
 double probBloodStageInfectiousToMosq = numeric_limits<double>::signaling_NaN();
@@ -87,7 +87,7 @@ int maxNumberHypnozoites = -1;
 double baseNumberHypnozoites = numeric_limits<double>::signaling_NaN();
 HypnozoiteReleaseDistribution latentRelapse1st, latentRelapse2nd;
 double pSecondRelease = numeric_limits<double>::signaling_NaN();
-SimTime bloodStageProtectionLatency;
+SimTime bloodStageProtectionLatency = sim::never();
 WeibullSampler bloodStageLength;    // units: days
 double pPrimaryA = numeric_limits<double>::signaling_NaN(),
     pPrimaryB = numeric_limits<double>::signaling_NaN();
