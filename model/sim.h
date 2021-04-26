@@ -172,7 +172,7 @@ private:
     int d;      // time in days
     
     friend SimTime mod_nn( const SimTime lhs, const SimTime rhs );
-    friend ostream& operator<<( ostream& stream, SimTime date );
+    // friend ostream& operator<<( ostream& stream, SimTime date );
 };
 
 inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){

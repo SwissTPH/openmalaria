@@ -154,7 +154,7 @@ void Population::createInitialHumans()
         int targetPop = AgeStructure::targetCumPop( iage, populationSize );
         while (cumulativePop < targetPop) {
             SimTime dob = sim::zero() - sim::fromTS(iage);
-            util::streamValidate( dob.inDays() );
+            util::streamValidate( dob );
             population.push_back( Host::Human (dob) );
             ++cumulativePop;
         }

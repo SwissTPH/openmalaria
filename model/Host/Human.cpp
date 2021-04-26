@@ -100,7 +100,7 @@ void Human::update(Transmission::TransmissionModel& transmission) {
         return;
     }
     
-    util::streamValidate( age0.inDays() );
+    util::streamValidate( age0 );
     // Age at  the end of the update period. In most cases
     // the difference between this and age at the start is not especially
     // important in the model design, but since we parameterised with

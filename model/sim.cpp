@@ -55,14 +55,14 @@ SimTime sim::s_interv = sim::never();
 
 using util::CommandLine;
 
-ostream& operator<<( ostream& stream, SimTime time ){
-    if( time.inDays() % sim::DAYS_IN_YEAR == 0 ){
-        stream << time.inYears() << 'y';
-    } else {
-        stream << time.inDays() << 'd';
-    }
-    return stream;
-}
+// ostream& operator<<( ostream& stream, SimTime time ){
+//     if( time % sim::DAYS_IN_YEAR == 0 ){
+//         stream << time.inYears() << 'y';
+//     } else {
+//         stream << time << 'd';
+//     }
+//     return stream;
+// }
 
 // ostream& operator<<( ostream& stream, SimTime date ){
 //     int days = date.d;

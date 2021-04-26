@@ -244,7 +244,7 @@ void loop(const SimTime humanWarmupLength, Population &population, TransmissionM
         if( errno != 0 )
         {
            char err[256];
-           sprintf(err, "t = %d Please report! Error: ", sim::now().inDays());
+           sprintf(err, "t = %d Please report! Error: ", sim::now());
            std::perror(err);
            errno = 0;
         }
