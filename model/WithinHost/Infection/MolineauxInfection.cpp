@@ -295,7 +295,7 @@ bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTi
     // Every other step (if bsAge is even) we calculate new densities (the
     // Molineaux model uses a 2-day step; we have simply added interpolation
     // for the interleaving densities). In other cases we are finished now.
-    if( mod_nn(age_BS, 2) != 0 ){
+    if( mod_nn(int(age_BS), 2) != 0 ){
         return false;   // end of update, not extinct
     }
     

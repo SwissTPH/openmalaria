@@ -74,7 +74,7 @@ class SimData {
 class SimTime {
     public:
     /** Construct, from a time in days. */
-    explicit SimTime( int days ) : d(days) {}
+    SimTime( int days ) : d(days) {}
     
     operator int() const { return d; }
 
@@ -83,65 +83,10 @@ class SimTime {
     /** Default construction; same as sim::never(). */
     SimTime() : d(0) {}
     
-    // /// Convert to years
-    // inline double inYears() const{ return d * (1.0 / SimData::DAYS_IN_YEAR); }
-    
-    // /// Convert to time steps (rounding down)
-    // inline int inSteps() const{ return d / SimData::interval; }
-    // //@}
-    
-
-    ///@brief Simple arithmatic modifiers (all return a copy)
-    //@{
-    inline SimTime operator-()const {
-        return SimTime( -d );
-    }
-    inline SimTime operator-( const SimTime rhs )const {
-        return SimTime( d - rhs.d );
-    }
-    inline SimTime operator+( const SimTime rhs )const {
-        return SimTime( d + rhs.d );
-    }
-    // scale by an integer
-    // inline SimTime operator*( int scalar )const {
-    //     return SimTime( d * scalar );
-    // }
-    // // scale by a double, rounding to nearest
-    // inline SimTime operator*( double scalar )const {
-    //     return SimTime( static_cast<int>(d * scalar + 0.5) );
-    // }
-    // Divide by another SimTime; result is unitless. Note integer division.
-    inline int operator/( const SimTime rhs )const{
-        return d / rhs.d;
-    }
-    //@}
-    
     ///@brief Self-modifying arithmatic
     //@{
     inline void operator+=( const SimTime rhs ) {
         d += rhs.d;
-    }
-    //@}
-    
-    ///@brief Comparators between two SimTimes (all return a boolean)
-    //@{
-    inline bool operator==( const SimTime rhs )const {
-        return  d == rhs.d;
-    }
-    inline bool operator!=( const SimTime rhs )const {
-        return  d != rhs.d;
-    }
-    inline bool operator>( const SimTime rhs )const {
-        return  d > rhs.d;
-    }
-    inline bool operator>=( const SimTime rhs )const {
-        return  d >= rhs.d;
-    }
-    inline bool operator<( const SimTime rhs )const {
-        return  d < rhs.d;
-    }
-    inline bool operator<=( const SimTime rhs )const {
-        return  d <= rhs.d;
     }
     //@}
     
@@ -154,14 +99,7 @@ class SimTime {
     
 private:
     int d;      // time in days
-    
-    friend SimTime mod_nn( const SimTime lhs, const SimTime rhs );
-    // friend ostream& operator<<( ostream& stream, SimTime date );
 };
-
-inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
-    return SimTime(util::mod_nn(lhs.d, rhs.d));
-}
 
 /** Encapsulates static variables: sim time. */
 class sim {

@@ -479,7 +479,7 @@ bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBl
         }
         if( (ignoreNoPQ || !noPQ) && (effectivenessPQ == 1.0 || human.rng().bernoulli(effectivenessPQ)) ){
             if( timeLiver >= sim::zero() ){
-                treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
+                treatExpiryLiver = max( int(treatExpiryLiver), sim::nowOrTs1() + timeLiver );
             }else{
                 for( auto it = infections.begin(); it != infections.end(); ++it ){
                     it->treatmentLS();
@@ -497,7 +497,7 @@ bool WHVivax::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBl
                 it->treatmentBS();
             }
         }else{
-            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
+            treatExpiryBlood = max( int(treatExpiryBlood), sim::nowOrTs1() + timeBlood );
         }
         return true;    // blood stage treatment
     }

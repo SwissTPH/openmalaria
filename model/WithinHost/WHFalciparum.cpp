@@ -248,14 +248,14 @@ bool WHFalciparum::treatSimple( Host::Human& human, SimTime timeLiver, SimTime t
         if( timeLiver < sim::zero() )
             clearInfections( Treatments::LIVER );
         else
-            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
+            treatExpiryLiver = max( int(treatExpiryLiver), int(sim::nowOrTs1()) + timeLiver );
         mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
     if( timeBlood != sim::zero() ){
         if( timeBlood < sim::zero() )
             clearInfections( Treatments::BLOOD );
         else
-            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
+            treatExpiryBlood = max( int(treatExpiryBlood), int(sim::nowOrTs1()) + timeBlood );
         return true;    // blood stage treatment
     }
     return false;    // no blood stage treatment
