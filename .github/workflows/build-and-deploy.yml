@@ -1,0 +1,56 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches: [ $default-branch ]
+  pull_request:
+    branches: [ $default-branch ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: []
+        include:
+          - os: ubuntu-20.04
+            compiler: g++
+            target: Linux
+          
+          - os: ubuntu-18.04
+            compiler: g++
+            target: Linux
+          
+          - os: macos-11
+            compiler: clang
+          
+          - os: macos-10.15
+            compiler: clang
+    steps:
+      - uses: actions/checkout@v2
+      
+      - if: startsWith(matrix.os,'ubuntu')
+        run: |
+          apt update
+          sudo apt install -y build-essential git cmake libgsl-dev libxerces-c-dev xsdcxx || true
+      
+      - if: startsWith(matrix.os,'macos')
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 sudo brew install git coreutils cmake gcc gsl xerces-c xsd || true
+      
+      - name: Compile
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Runner: ${{ runner.os }} ${{ matrix.os }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Path: ${{ github.workspace }}"
+          cd ${{ github.workspace }}
+          uname -a
+          ./build.sh --jobs=4 -r --artifact=openMalaria-$OSNAME
+          ./build.sh --jobs=1 --tests
+          util/generate-checksums.sh openMalaria-$OSNAME/
+      
+      - name: "Finalize"
+        run: echo ${{ job.status }}
+     
