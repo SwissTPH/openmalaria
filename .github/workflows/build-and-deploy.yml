@@ -1,0 +1,111 @@
+name: C/C++ CI
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+  workflow_dispatch:
+
+jobs:
+  create_release:
+    runs-on: ubuntu-latest
+    outputs:
+      upload_url: ${{ steps.create_release.outputs.upload_url }}
+    steps:
+      - name: Create Release
+        id: create_release
+        if: startsWith(github.ref, 'refs/tags/schema-')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release ${{ github.ref }}
+          body: |
+            Release of OpenMalaria.
+
+            Updates: https://github.com/SwissTPH/openmalaria/wiki/SchemaUpdateGuide
+            Changelog: https://github.com/SwissTPH/openmalaria/wiki/Changelog
+          draft: false
+          prerelease: false
+
+  build:
+    needs: create_release
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        # os: [] #for testing with act
+        include:
+          - os: ubuntu-20.04
+            compiler: g++
+            target: Linux
+          
+          - os: ubuntu-18.04
+            compiler: g++
+            target: Linux
+          
+          - os: macos-11
+            compiler: clang
+          
+          - os: macos-10.15
+            compiler: clang
+    steps:
+      - uses: actions/checkout@v2
+      
+      - name: Install - Ubuntu
+        if: startsWith(matrix.os,'ubuntu')
+        run: |
+          sudo apt update
+          sudo apt install -y build-essential git cmake libgsl-dev libxerces-c-dev xsdcxx || true
+      
+      - name: Install - MacOS
+        if: startsWith(matrix.os,'macos')
+        run: |
+          HOMEBREW_NO_AUTO_UPDATE=1 brew install git coreutils cmake gcc gsl xerces-c xsd || true
+          HOMEBREW_NO_AUTO_UPDATE=1 brew link --overwrite xsd
+      
+      - name: Infos
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Runner: ${{ runner.os }} ${{ matrix.os }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Path: ${{ github.workspace }}"
+          uname -a
+
+      - name: Build
+        run: |
+          echo "Event: ${{ github.event_name }}"
+          echo "Runner: ${{ runner.os }} ${{ matrix.os }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
+          echo "Path: ${{ github.workspace }}"
+          cd ${{ github.workspace }}
+          uname -a
+          ./build.sh --jobs=4 -r --artifact=openMalaria-${{matrix.os}}
+
+      - name: Test
+        run: ./build.sh --jobs=1 --tests
+
+      - name: Checksum
+        run: util/generate-checksums.sh openMalaria-${{matrix.os}}/
+
+      - name: Upload Release Asset
+        id: upload-release-asset
+        if: startsWith(github.ref, 'refs/tags/schema-')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ needs.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          asset_path: ./openMalaria-${{matrix.os}}.tar.gz
+          asset_name: openMalaria-${{matrix.os}}.tar.gz
+          asset_content_type: application/zip
+     
