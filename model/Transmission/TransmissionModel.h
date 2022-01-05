@@ -90,18 +90,6 @@ enum SimulationMode
     dynamicEIR,
 };
 
-static SimulationMode readMode(const string &str)
-{
-    if (str == "forced")
-        return forcedEIR;
-    else if (str == "dynamic")
-        return dynamicEIR;
-    else
-        // Note: originally 3 (transientEIRknown) could be specified; now it's
-        // set automatically.
-        throw util::xml_scenario_error(string("mode attribute invalid: ").append(str));
-}
-
 /// Abstract base class, defines behaviour of transmission models
 class TransmissionModel
 {
@@ -109,9 +97,10 @@ protected:
     /// Reads all entomological parameters from the input datafile.
     /// @param entoData input configuration for model
     /// @param nGenotypes number of genotypes transmission model is using
-    TransmissionModel(const scnXml::Entomology &entoData, size_t nGenotypes)
-        : simulationMode(forcedEIR)
-        , interventionMode(readMode(entoData.getMode()))
+    TransmissionModel(vector<double> initialisationEIR, int interventionMode, size_t nGenotypes)
+        : initialisationEIR(std::move(initialisationEIR))
+        , simulationMode(forcedEIR)
+        , interventionMode(interventionMode)
         , laggedKappa(1, 0.0)
         , // if using non-vector model, it will resize this
         annualEIR(0.0)
@@ -123,8 +112,6 @@ protected:
         , adultAge(PerHost::adultAge())
         , numTransmittingHumans(0)
     {
-        initialisationEIR.assign(sim::stepsPerYear(), 0.0);
-
         using mon::Continuous;
         Continuous.registerCallback("input EIR", "\tinput EIR", MakeDelegate(this, &TransmissionModel::ctsCbInputEIR));
         Continuous.registerCallback("simulated EIR", "\tsimulated EIR", MakeDelegate(this, &TransmissionModel::ctsCbSimulatedEIR));
@@ -140,20 +127,6 @@ public:
     /** Extra initialisation when not loading from a checkpoint, requiring
      * information from the human population structure. */
     virtual void init2(const Population &population) = 0;
-
-    /** Set up vector population interventions. */
-    virtual void initVectorInterv(const scnXml::Description::AnophelesSequence &list, size_t instance, const string &name) = 0;
-
-    /** Set up vector trap interventions. */
-    virtual void initVectorTrap(const scnXml::VectorTrap::DescriptionSequence list, size_t instance,
-                                const scnXml::VectorTrap::NameOptional name) = 0;
-
-    // /** Set up non-human hosts interventions. */
-    virtual void initNonHumanHostsInterv(const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay,
-                                         size_t instance, const string &name) = 0;
-
-    // /** Set up non-human hosts interventions. */
-    virtual void initAddNonHumanHostsInterv(const scnXml::Description3::AnophelesSequence list, const string &name) = 0;
 
     /// Checkpointing
     template <class S>
@@ -190,17 +163,6 @@ public:
      * EIR is scaled in memory (so will affect this simulation).
      * XML data is not touched. */
     virtual void scaleEIR(double factor) = 0;
-
-#if 0
-  /** Scale the EIR descriptions in the XML element.
-   * This updates the XML, and not the EIR descriptions used for simulations.
-   * In order for changes to be written back to the XML file,
-   * InputData.documentChanged needs to be set.
-   * 
-   * @param ed	Access to XML element to update.
-   * @param factor	Multiplicative factor by which to scale EIR. */
-  virtual void scaleXML_EIR (scnXml::EntoData& ed, double factor) const =0;
-#endif
 
     /** How many intervals are needed for transmission initialization during the
      * "human" phase (before vector init)?
@@ -273,23 +235,6 @@ public:
         }
         return allEIR;
     }
-
-    /** Deploy a vector population intervention.
-     *
-     * Instance: the index of this instance of the intervention. Each instance
-     * has it's own parameterisation. 0 <= instance < N where N is the number of
-     * instances. */
-    virtual void deployVectorPopInterv(size_t instance) = 0;
-    /// Deploy some vector traps.
-    ///
-    /// @param instance Index of this type of trap
-    /// @param number The number of traps to deploy
-    /// @param lifespan Time until these traps are removed/replaced/useless
-    virtual void deployVectorTrap(size_t instance, double popSize, SimTime lifespan) = 0;
-
-    virtual void deployNonHumanHostsInterv(size_t instance, string name) = 0;
-
-    virtual void deployAddNonHumanHosts(string name, double popSize, SimTime lifespan) = 0;
 
     /** Remove all current infections to mosquitoes, such that without re-
      * infection, humans will then be exposed to zero EIR. */
@@ -417,11 +362,6 @@ private:
     void ctsCbNumTransmittingHumans(ostream &stream) { stream << '\t' << numTransmittingHumans; }
 
 public:
-    /** The type of EIR calculation. Checkpointed. */
-    int simulationMode;
-    /** New simulation mode during intervention period. Not checkpointed. */
-    int interventionMode;
-
     /** Entomological inoculation rate for adults during the
      * pre-intervention phase.
      *
@@ -438,6 +378,11 @@ public:
      * Not checkpointed; doesn't need to be except when a changeEIR intervention
      * occurs. */
     vector<double> initialisationEIR;
+
+    /** The type of EIR calculation. Checkpointed. */
+    int simulationMode;
+    /** New simulation mode during intervention period. Not checkpointed. */
+    int interventionMode;
 
     /** The probability of infection of a mosquito at each bite.
      * It is calculated as the average infectiousness per human.

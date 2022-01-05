@@ -41,7 +41,7 @@ class TimedDeployment;
 class InterventionManager {
 public:
     /** Read XML descriptions. */
-    static void init (const scnXml::Interventions& intervElt, Transmission::TransmissionModel& transmission);
+    static void init (const scnXml::Interventions& intervElt, const Population &population, Transmission::TransmissionModel& transmission);
     
     /// Checkpointing
     template<class S>
