@@ -132,7 +132,7 @@ WHFalciparum::WHFalciparum( LocalRng& rng, double comorbidityFactor ):
     // Oldest code on GoogleCode: _innateImmunity=(double)(W_GAUSS((0), (sigma_i)));
     _innateImmSurvFact = exp(-rng.gauss(0.0, sigma_i));
     
-    m_y_lag.assign(y_lag_len, Genotypes::N(), 0.0);
+    m_y_lag.resize(y_lag_len * Genotypes::N());
 }
 
 WHFalciparum::~WHFalciparum()
@@ -186,9 +186,9 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX 
     // Sum lagged densities across genotypes:
     double y10 = 0.0, y15 = 0.0, y20 = 0.0;
     for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
-        y10 += m_y_lag.at(d10, genotype);
-        y15 += m_y_lag.at(d15, genotype);
-        y20 += m_y_lag.at(d20, genotype);
+        y10 += m_y_lag[d10 * Genotypes::N() + genotype];
+        y15 += m_y_lag[d15 * Genotypes::N() + genotype];
+        y20 += m_y_lag[d20 * Genotypes::N() + genotype];
     }
     // Weighted sum:
     const double x = PTM_beta1 * y10 + PTM_beta2 * y15 + PTM_beta3 * y20;
@@ -223,9 +223,9 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
     const int i5d = SimTime::fromDays(5).inSteps();
     const int i10d = 2 * i5d;
     const double x =
-        PTM_beta1 * m_y_lag.at(mod_nn(i10, y_lag_len), genotype) +
-        PTM_beta2 * m_y_lag.at(mod_nn(i10 - i5d, y_lag_len), genotype) +
-        PTM_beta3 * m_y_lag.at(mod_nn(i10 - i10d, y_lag_len), genotype);
+        PTM_beta1 * m_y_lag[mod_nn(i10, y_lag_len) * Genotypes::N() + genotype] +
+        PTM_beta2 * m_y_lag[mod_nn(i10 - i5d, y_lag_len) * Genotypes::N() + genotype] +
+        PTM_beta3 * m_y_lag[mod_nn(i10 - i10d, y_lag_len) * Genotypes::N() + genotype];
     
     return pTrans * x * sumX;
 }
