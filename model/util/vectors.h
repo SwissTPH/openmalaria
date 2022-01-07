@@ -22,8 +22,7 @@
 #define Hmod_UtilVectors
 
 #include "Global.h"
-#include "util/checkpoint_containers.h"
-#include <gsl/gsl_vector.h>
+#include "util/errors.h"
 #include "util/checkpoint_containers.h"
 
 #ifndef M_PI
@@ -39,25 +38,34 @@ namespace vectors {
   ///@brief Basic operations on std::vector
   //@{
   /// Scale all elements of a vector by a in-situ
-  void scale (vector<double>& vec, double a);
+  inline void scale (vector<double>& vec, double a) {
+    for(size_t i = 0; i < vec.size(); ++i)
+      vec[i] *= a;
+  }
   
   /// Return sum of all elements
-  double sum (const vector<double>& vec);
+  inline double sum (const vector<double>& vec) {
+    double r = 0.0;
+    for(size_t i = 0; i < vec.size(); ++i)
+      r += vec[i];
+    return r;
+  }
   
   /// Return sum of all elements
-  double sum (const gsl_vector *vec);
+ //double sum (const gsl_vector *vec);
   
   /// Return arithmetric mean
   inline double mean (const vector<double>& vec){
     return sum(vec) / vec.size();
   }
-  /// Return arithmetric mean
-  inline double mean (const gsl_vector *vec){
-    return sum(vec) / vec->size;
-  }
   
   /// Add one vector into another (x += y)
-  void addTo (vector<double>& x, vector<double>& y);
+  inline void addTo (vector<double>& x, vector<double>& y){
+    assert( x.size() == y.size() );
+    for( size_t i=0; i<x.size(); ++i ){
+      x[i] += y[i];
+    }
+  }
   //@}
   
   
@@ -66,38 +74,28 @@ namespace vectors {
   /** Return true if, approximately, a == b
    *
    * In detail: true when (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact). */
-  bool approxEqual (const double a, const double b, const double lim_fact = 1e-6);
+  inline bool approxEqual (const double a, const double b, const double lim_fact) {
+    bool aE = (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact);
+#ifndef NDEBUG
+    if (!aE){
+        cerr<<"not approx equal: "<<a<<", "<<b<<endl;
+    }
+#endif
+    return aE;
+}
   
   /// Returns true if vec1 and vec2 have equal length and all elements are
   /// approximately equal (see approxEqual for double parameters).
-  bool approxEqual (const vector<double>& vec1, const vector<double>& vec2, const double lim_fact = 1e-6);
+  inline bool approxEqual (const vector<double>& vec1, const vector<double>& vec2, const double lim_fact) {
+    if (vec1.size() != vec2.size())
+      return false;
+    for(size_t i = 0; i < vec1.size(); ++i) {
+      if (!approxEqual (vec1[i], vec2[i], lim_fact))
+        return false;
+    }
+    return true;
+  }
   //@}
-  
-  
-  ///@brief Convertions between gsl_vector and std::vector<double>
-  //@{
-  /** Convert a gsl_vector to a std::vector<double>. */
-  vector<double> gsl2std (const gsl_vector* vec);
-  /** Convert a gsl_vector to a possibly already allocated std::vector<double>. */
-  void gsl2std( const gsl_vector *vec, vector<double>& target );
-  
-  /** Convert a std::vector<double> to a gsl_vector (newly allocated).
-   *
-   * @param vec Input vector
-   * @param length Allows length to be validated. If
-   *	(vec.size() != length) an exception is thrown. */
-  gsl_vector* std2gsl (const vector<double>& vec, size_t length);
-  /// Ditto, but taking values from a double[].
-  gsl_vector* std2gsl (const double* vec, size_t length);
-  //@}
-  
-  /** Calculate Fourier Series coefficients for log values; slightly different
-   * method to (log) DFT.
-   * 
-   * @param iArray Integrals of inputs on curve.
-   * @param FC Fourier Series coefficients.
-   */
-  void logFourierCoefficients(const vector<double>& iArray, vector<double>& FC);
   
   /** Calculate what is essentially a discrete Fourier transform of log values.
    * 
@@ -110,7 +108,38 @@ namespace vectors {
    * @param iArray Input values; a vector of size T.
    * @param FC Output values. Should already be allocated, with length
    *    2*N-1 for 1 ≤ N ≤ T. */
-  void logDFT(const vector<double>& iArray, vector<double>& FC);
+  inline void logDFT(const vector<double>& iArray, vector<double>& FC) {
+    if (FC.size() > 2*iArray.size() || mod_nn(FC.size(), 2) == 0)
+        throw TRACED_EXCEPTION_DEFAULT("Require DFT FC.size() to be 2*n-1 for n<=iArray.size()");
+    
+    size_t T = iArray.size();
+    size_t N = (FC.size() + 1) / 2;
+    
+    double w = 2.0 * M_PI / T;
+    FC.assign(FC.size(), 0.0);
+    
+    for(size_t t = 0; t < T; ++t) {
+        double val = log( iArray[t] );
+        FC[0] += val;
+        for(size_t n = 1; n < N; ++n ){
+            FC[2*n-1] += val * cos(w*n*t);
+            FC[2*n  ] += val * sin(w*n*t);
+        }
+    }
+    scale(FC, 1.0 / T);
+  }
+
+  /** Calculate Fourier Series coefficients for log values; slightly different
+   * method to (log) DFT.
+   * 
+   * @param iArray Integrals of inputs on curve.
+   * @param FC Fourier Series coefficients.
+   */
+  inline void logFourierCoefficients(const vector<double>& iArray, vector<double>& FC) {
+    logDFT(iArray, FC);
+    for(size_t i=1; i<FC.size(); ++i)
+        FC[i] *= 2;
+  }
 
   /** The inverse of logDFT (or an approximation, when N&lt;T or
    * tArray.size() ≠ T). Result may also be rotated.
@@ -124,7 +153,27 @@ namespace vectors {
    * @param FC Fourier coefficients (a0, a1,b1, a2,b2, ...); can be any length
    * so long as it is odd.
    * @param rAngle Angle to rotate generated series by in radians: [0,2π] */
-  void expIDFT (std::vector<double>& tArray, const vector<double>& FC, double rAngle);
+  inline void expIDFT(std::vector< double >& tArray, const std::vector< double >& FC, double rAngle ){
+    if (mod_nn(FC.size(), 2) == 0)
+        throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
+    
+    size_t T2 = tArray.size();
+    size_t N = (FC.size() + 1) / 2;
+    
+    double w = 2.0 * M_PI / T2;
+    
+    // Calculate inverse discrete Fourier transform
+    // TODO: This may not interpolate sensibly. See for example
+    // https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Trigonometric_interpolation_polynomial
+    for( size_t t = 0; t < T2; t++ ){
+        double temp = FC[0];
+        double wt = w*t - rAngle;
+        for(size_t n = 1; n < N; ++n) {
+            temp += FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
+        }
+        tArray[t] = exp(temp);
+    }
+  }
 }
 
 /// Utility to print a vector (operator must be in namespace)
