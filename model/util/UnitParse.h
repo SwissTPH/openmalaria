@@ -41,6 +41,15 @@ namespace UnitParse {
         STEPS,  // assume steps
     };
     
+    static const int monthLen[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
+    
+    static const int monthStart[] = { // offsets of start of month from start of year
+        0 /*Jan*/, 31, 59, 90,
+        120 /*May*/, 151, 181, 212,
+        243 /*Sept*/, 273, 304, 334,
+        365 /*next year: stop condition in formatDate*/
+    };
+
     /** Parse a short duration from a string found in the input document.
      * 
      * Supports units of days (5d), and steps (2t) with integer values,
@@ -61,6 +70,10 @@ namespace UnitParse {
      * Call sim::init() first. */
     double durationToDays( const std::string& str, DefaultUnit defUnit );
     
+    /** Returns SimDate::never() when it doesn't recognise a date. Throws when it does
+     * but encounters definite format errors. */
+    SimDate parseDate( const std::string& str );
+
     /** Read a date or relative time specifier found in the XML; dates are
      * rebased relative to a starting date so that they work the same as other
      * ways of specifying intervention-period time from the point of view of
@@ -71,9 +84,6 @@ namespace UnitParse {
      * to be compared against sim::intervDate(). Again, the result is rounded to
      * the nearest time step. */
     SimDate readDate( const std::string& str, DefaultUnit defUnit );
-    
-    /// Write a time to a stream as a date. Throws if !haveDate().
-    void formatDate( ostream& stream, SimDate date );
 }
 
 }

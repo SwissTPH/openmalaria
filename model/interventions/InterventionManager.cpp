@@ -21,7 +21,7 @@
 #include "interventions/InterventionManager.hpp"
 #include "Population.h"
 #include "util/CommandLine.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 #include "interventions/GVI.h"
 #include "interventions/IRS.h"
 #include "interventions/ITN.h"

@@ -20,7 +20,7 @@
 
 #include "WithinHost/Treatments.h"
 #include "util/errors.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 #include "schema/healthSystem.h"
 
 namespace OM {
