@@ -26,9 +26,6 @@
 #include "Transmission/PerHost.h"
 #include "util/SimpleDecayingValue.h"
 #include "util/vectors.h"
-#include "util/vecDay.h"
-
-#include "util/vectors.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
 
@@ -41,7 +38,6 @@ namespace OM {
 namespace Transmission {
 namespace Anopheles {
     using std::numeric_limits;
-    using util::vector2D;
     using namespace OM::util;
 
 class AnophelesModelFitter
@@ -55,10 +51,10 @@ public:
 
     bool fit(AnophelesModel &m)
     {
-        vecDay<double> avgAnnualS_v(SimTime::oneYear(), 0.0);
+        std::vector<double> avgAnnualS_v(SimTime::oneYear().inDays(), 0.0);
         for (SimTime i = SimTime::fromYearsI(4); i < SimTime::fromYearsI(5); i += SimTime::oneDay())
         {
-            avgAnnualS_v[mod_nn(i, SimTime::oneYear())] = m.quinquennialS_v[i];
+            avgAnnualS_v[mod_nn(i, SimTime::oneYear()).inDays()] = m.quinquennialS_v[i.inDays()];
         }
 
         double factor = vectors::sum(m.forcedS_v) / vectors::sum(avgAnnualS_v);

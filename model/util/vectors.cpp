@@ -20,7 +20,6 @@
 
 #include "util/vectors.h"
 #include "util/errors.h"
-#include "util/vecDay.h"
 #include <cstring>
 #include <cmath>
 #include <cassert>
@@ -31,23 +30,10 @@ void vectors::scale (vector<double>& vec, double a) {
   for(size_t i = 0; i < vec.size(); ++i)
     vec[i] *= a;
 }
-void vectors::scale (vecDay<double>& vec, double a) {
-  for( SimTime i = SimTime::zero(); i < vec.size(); i += SimTime::oneDay() )
-    vec[i] *= a;
-}
-void vectors::scale (vecDay2D<double>& vec, double a) {
-  scale(vec.internal_vec(), a);
-}
 
 double vectors::sum (const vector<double>& vec) {
   double r = 0.0;
   for(size_t i = 0; i < vec.size(); ++i)
-    r += vec[i];
-  return r;
-}
-double vectors::sum (const vecDay<double>& vec) {
-  double r = 0.0;
-  for( SimTime i = SimTime::zero(); i < vec.size(); i += SimTime::oneDay() )
     r += vec[i];
   return r;
 }
@@ -142,21 +128,21 @@ void vectors::logDFT(const vector<double>& iArray, vector<double>& FC) {
     scale(FC, 1.0 / T);
 }
 
-void vectors::expIDFT( vecDay< double >& tArray, const std::vector< double >& FC, double rAngle ){
+void vectors::expIDFT(std::vector< double >& tArray, const std::vector< double >& FC, double rAngle ){
     if (mod_nn(FC.size(), 2) == 0)
         throw TRACED_EXCEPTION_DEFAULT("The number of Fourier coefficents should be odd.");
     
-    SimTime T2 = tArray.size();
+    size_t T2 = tArray.size();
     size_t N = (FC.size() + 1) / 2;
     
-    double w = 2.0 * M_PI / T2.inDays();
+    double w = 2.0 * M_PI / T2;
     
     // Calculate inverse discrete Fourier transform
     // TODO: This may not interpolate sensibly. See for example
     // https://en.wikipedia.org/wiki/Discrete_Fourier_transform#Trigonometric_interpolation_polynomial
-    for( SimTime t = SimTime::zero(); t < T2; t += SimTime::oneDay() ){
+    for( size_t t = 0; t < T2; t++ ){
         double temp = FC[0];
-        double wt = w*t.inDays() - rAngle;
+        double wt = w*t - rAngle;
         for(size_t n = 1; n < N; ++n) {
             temp += FC[2*n-1]*cos(n*wt) + FC[2*n]*sin(n*wt);
         }
