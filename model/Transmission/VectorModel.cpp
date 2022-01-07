@@ -319,28 +319,6 @@ void VectorModel::initVectorTrap(const scnXml::VectorTrap::DescriptionSequence l
     }
     checker.checkNoneMissed();
 }
-void VectorModel::initNonHumanHostsInterv(const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay,
-                                          size_t instance, const string &name)
-{
-    SpeciesIndexChecker checker(name, speciesIndex);
-    for (const scnXml::NonHumanHostsSpeciesIntervention &anoph : list)
-    {
-        const string &mosq = anoph.getMosquito();
-        species[checker.getIndex(mosq)]->initNonHumanHostsInterv(anoph, decay, instance, name);
-    }
-    checker.checkNoneMissed();
-}
-void VectorModel::initAddNonHumanHostsInterv(const scnXml::Description3::AnophelesSequence list, const string &name)
-{
-    SpeciesIndexChecker checker(name, speciesIndex);
-    for (const scnXml::NonHumanHostsVectorSpecies &anoph : list)
-    {
-        const string &mosq = anoph.getMosquito();
-        species[checker.getIndex(mosq)]->initAddNonHumanHostsInterv(anoph, name);
-    }
-    checker.checkNoneMissed();
-}
-
 void VectorModel::scaleEIR(double factor)
 {
     for (size_t i = 0; i < speciesIndex.size(); ++i)
@@ -503,22 +481,6 @@ void VectorModel::deployVectorTrap(size_t instance, double number, SimTime lifes
     for (size_t i = 0; i < speciesIndex.size(); ++i)
     {
         species[i]->deployVectorTrap(m_rng, i, instance, number, lifespan);
-    }
-}
-void VectorModel::deployNonHumanHostsInterv(size_t instance, string name)
-{
-    if (interventionMode != dynamicEIR) { throw xml_scenario_error(vec_mode_err); }
-    for (size_t i = 0; i < speciesIndex.size(); ++i)
-    {
-        species[i]->deployNonHumanHostsInterv(m_rng, i, instance, name);
-    }
-}
-void VectorModel::deployAddNonHumanHosts(string name, double popSize, SimTime lifespan)
-{
-    if (interventionMode != dynamicEIR) { throw xml_scenario_error(vec_mode_err); }
-    for (size_t i = 0; i < speciesIndex.size(); ++i)
-    {
-        species[i]->deployAddNonHumanHosts(m_rng, i, name, popSize, lifespan);
     }
 }
 void VectorModel::uninfectVectors()
