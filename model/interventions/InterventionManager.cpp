@@ -396,7 +396,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                 const scnXml::NonHumanHosts2 &elt = *it;
                 if (elt.getTimed().present())
                 {
-                    for (const scnXml::Deploy2 deploy : elt.getTimed().get().getDeploy())
+                    for (const scnXml::Deploy2 &deploy : elt.getTimed().get().getDeploy())
                     {
                         SimDate date =
                             UnitParse::readDate(deploy.getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/);
@@ -449,7 +449,7 @@ void InterventionManager::init(const scnXml::Interventions &intervElt, const Pop
                 vectorModel->initVectorTrap(trap.getDescription(), instance, trap.getName());
                 if (trap.getTimed().present())
                 {
-                    for (const scnXml::Deploy1 deploy : trap.getTimed().get().getDeploy())
+                    for (const scnXml::Deploy1 &deploy : trap.getTimed().get().getDeploy())
                     {
                         SimDate date = UnitParse::readDate(deploy.getTime(), UnitParse::STEPS);
                         double ratio = deploy.getRatioToHumans();
