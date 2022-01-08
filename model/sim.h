@@ -245,7 +245,6 @@ public:
     // Scenario constants
     static SimTime s_start;
     static SimTime s_end;
-    
     static SimTime s_max_human_age;
     
     // Global variables
@@ -254,11 +253,7 @@ public:
 #endif
     static SimTime s_t0;
     static SimTime s_t1;
-    
     static SimTime s_interv;
-    
-    friend class Simulator;
-    friend class ::UnittestUtil;
 };
 
 }
