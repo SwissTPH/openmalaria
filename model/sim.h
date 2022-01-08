@@ -66,28 +66,7 @@ class SimData {
  * 
  * Granularity: 1 day.
  *****************************************************************************/
-class SimTime {
-    public:
-    /** Construct, from a time in days. */
-    SimTime( int days ) : d(days) {}
-    
-    operator int() const { return d; }
-
-    ///@brief Unparameterised constructors
-    //@{
-    /** Default construction; same as sim::never(). */
-    SimTime() = default;
-    
-    // ///@brief Self-modifying arithmatic
-    template<class S>
-    void operator& (S& stream) {
-        using namespace OM::util::checkpoint;
-        d & stream;
-    }
-    
-private:
-    int d;      // time in days
-};
+typedef int SimTime;
 
 /** Encapsulates static variables: sim time. */
 class sim {
