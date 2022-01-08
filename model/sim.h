@@ -55,14 +55,18 @@ class SimData {
 
 
 /******************************************************************************
- * Class encapsulating simulation durations and times relative to the start.
+ * Since version 43.1, SimTime is an integer instead of a class. Note: a 
+ * class can be used again simply by replacing the following typedef 
+ * definition by the old SimTime class.
+ * 
+ * SimTime is now always a number of days.
  * 
  * Time steps, days and dates are derived from this. The values and units of
- * internal variables are an implementation detail (i.e. code outside this
- * class should not need to know).
+ * internal variables are an implementation detail (i.e. code outside of
+ * sim should not need to know).
  * 
- * The simulation always starts at time zero. "Intervention time" is a separate
- * concept (see SimTime).
+ * The simulation always starts at time zero. "Intervention time" is the 
+ * beginning of the scenario and monitoring period.
  * 
  * Granularity: 1 day.
  *****************************************************************************/
