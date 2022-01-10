@@ -163,14 +163,14 @@ bool EmpiricalInfection::updateDensity( LocalRng& rng, double survivalFactor, Si
   //to avoid the formula for the linear predictor being excessively long we introduce L for the lagged densities
   # define L _laggedLogDensities
   
-  if (bsAge.inDays() >= _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
+  if (bsAge >= _maximumDurationInDays || !(L[0] > -999999.9))	// Note: second test is extremely unlikely to fail
     return true;	// cut-off point
   
   // constraints to ensure the density is defined and not exploding
   double upperLimitoflogDensity=log(_maximumPermittedAmplificationPerCycle*exp(L[1])/_inflationMean);
   double amplificationPerCycle;
   double localDensity;	// density before scaling by _overallMultiplier
-  size_t ageDays = bsAge.inDays();
+  size_t ageDays = bsAge;
   for(int tries0 = 0; tries0 < EI_MAX_SAMPLES; ++tries0) {
     double logDensity;
     for(int tries1 = 0; tries1 < EI_MAX_SAMPLES; ++tries1) {

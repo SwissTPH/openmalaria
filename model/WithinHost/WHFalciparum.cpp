@@ -76,7 +76,7 @@ static double alpha_m;
 /// decay rate of maternal protection in years^(-1).
 static double decayM;
 
-SimTime Infection::s_latentP;
+SimTime Infection::s_latentP = sim::never();
 int WHFalciparum::y_lag_len = 0;
 
 
@@ -95,7 +95,7 @@ void WHFalciparum::init( const OM::Parameters& parameters, const scnXml::Model& 
     alpha_m = 1.0 - exp(-parameters[Parameters::NEG_LOG_ONE_MINUS_ALPHA_M]);
     decayM = parameters[Parameters::DECAY_M];
     
-    y_lag_len = SimTime::fromDays(20).inSteps() + 1;
+    y_lag_len = sim::inSteps(sim::fromDays(20)) + 1;
     
     //NOTE: should also call cleanup() on the PathogenesisModel, but it only frees memory which the OS does anyway
     Pathogenesis::PathogenesisModel::init( parameters, model.getClinical(), false );
@@ -124,7 +124,8 @@ WHFalciparum::WHFalciparum( LocalRng& rng, double comorbidityFactor ):
     WHInterface(),
     m_cumulative_h(0.0), m_cumulative_Y(0.0), m_cumulative_Y_lag(0.0),
     totalDensity(0.0), hrp2Density(0.0), timeStepMaxDensity(0.0),
-    pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) )
+    pathogenesisModel( Pathogenesis::PathogenesisModel::createPathogenesisModel( comorbidityFactor ) ),
+    treatExpiryLiver(0), treatExpiryBlood(0)
 {
     // NOTE: negating a Gaussian sample with mean 0 is pointless — except that
     // the individual samples change. In any case the overhead is negligible.
@@ -180,9 +181,9 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX 
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to index to ensure positive.
-    size_t d10 = mod_nn(y_lag_len + (sim::ts1() - SimTime::fromDays(10)).inSteps(), y_lag_len);
-    size_t d15 = mod_nn(y_lag_len + (sim::ts1() - SimTime::fromDays(15)).inSteps(), y_lag_len);
-    size_t d20 = mod_nn(y_lag_len + (sim::ts1() - SimTime::fromDays(20)).inSteps(), y_lag_len);
+    size_t d10 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(10)), y_lag_len);
+    size_t d15 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(15)), y_lag_len);
+    size_t d20 = mod_nn(y_lag_len + sim::inSteps(sim::ts1() - sim::fromDays(20)), y_lag_len);
     // Sum lagged densities across genotypes:
     double y10 = 0.0, y15 = 0.0, y20 = 0.0;
     for( size_t genotype = 0; genotype < Genotypes::N(); ++genotype ){
@@ -219,8 +220,8 @@ double WHFalciparum::pTransGenotype(double pTrans, double sumX, size_t genotype)
     
     // Take weighted sum of total asexual blood stage density 10, 15 and 20 days
     // before. Add y_lag_len to index to ensure positive.
-    const int i10 = (sim::ts0() - SimTime::fromDays(10) + SimTime::oneTS()).inSteps() + y_lag_len;
-    const int i5d = SimTime::fromDays(5).inSteps();
+    const int i10 = sim::inSteps(sim::ts0() - sim::fromDays(10) + sim::oneTS()) + y_lag_len;
+    const int i5d = sim::inSteps(sim::fromDays(5));
     const int i10d = 2 * i5d;
     const double x =
         PTM_beta1 * m_y_lag[mod_nn(i10, y_lag_len) * Genotypes::N() + genotype] +
@@ -244,18 +245,18 @@ void WHFalciparum::treatment( Host::Human& human, TreatmentId treatId ){
                   interventions::VaccineLimits(/*default initialise: no limits*/) );
 }
 bool WHFalciparum::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood ){
-    if( timeLiver != SimTime::zero() ){
-        if( timeLiver < SimTime::zero() )
+    if( timeLiver != sim::zero() ){
+        if( timeLiver < sim::zero() )
             clearInfections( Treatments::LIVER );
         else
-            treatExpiryLiver = max( treatExpiryLiver, sim::nowOrTs1() + timeLiver );
+            treatExpiryLiver = max( int(treatExpiryLiver), int(sim::nowOrTs1()) + timeLiver );
         mon::reportEventMHI( mon::MHT_LS_TREATMENTS, human, 1 );
     }
-    if( timeBlood != SimTime::zero() ){
-        if( timeBlood < SimTime::zero() )
+    if( timeBlood != sim::zero() ){
+        if( timeBlood < sim::zero() )
             clearInfections( Treatments::BLOOD );
         else
-            treatExpiryBlood = max( treatExpiryBlood, sim::nowOrTs1() + timeBlood );
+            treatExpiryBlood = max( int(treatExpiryBlood), int(sim::nowOrTs1()) + timeBlood );
         return true;    // blood stage treatment
     }
     return false;    // no blood stage treatment

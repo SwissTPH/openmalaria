@@ -141,12 +141,12 @@ public:
      * Overriding functions should call this base version too. */
     virtual void summarize()
     {
-        mon::reportStatMF(mon::MVF_NUM_TRANSMIT, laggedKappa[sim::now().moduloSteps(laggedKappa.size())]);
+        mon::reportStatMF(mon::MVF_NUM_TRANSMIT, laggedKappa[sim::moduloSteps(sim::now(), laggedKappa.size())]);
         mon::reportStatMF(mon::MVF_ANN_AVG_K, _annualAverageKappa);
 
         if (!mon::isReported()) return; // cannot use counters below when not reporting
 
-        double duration = (sim::now() - lastSurveyTime).inSteps();
+        double duration = sim::inSteps(sim::now() - lastSurveyTime);
         if (duration > 0.0)
         {
             mon::reportStatMF(mon::MVF_INPUT_EIR, surveyInputEIR / duration);
@@ -266,7 +266,7 @@ protected:
         {
             // NOTE: calculate availability relative to age at end of time step;
             // not my preference but consistent with TransmissionModel::getEIR().
-            const double avail = human.perHostTransmission.relativeAvailabilityHetAge(human.age(sim::ts1()).inYears());
+            const double avail = human.perHostTransmission.relativeAvailabilityHetAge(sim::inYears(human.age(sim::ts1())));
             sumWeight += avail;
             const double tbvFactor = human.getVaccine().getFactor(interventions::Vaccine::TBV);
             const double pTransmit = human.withinHostModel->probTransmissionToMosquito(tbvFactor, 0);
@@ -275,7 +275,7 @@ protected:
             if (riskTrans > 0.0) ++numTransmittingHumans;
         }
 
-        size_t lKMod = sim::ts1().moduloSteps(laggedKappa.size()); // now
+        size_t lKMod = sim::moduloSteps(sim::ts1(), laggedKappa.size()); // now
         if (population.size() == 0)
         {                             // this is valid
             laggedKappa[lKMod] = 0.0; // no humans: no infectiousness
@@ -291,7 +291,7 @@ protected:
             laggedKappa[lKMod] = sumWt_kappa / sumWeight;
         }
 
-        size_t tmod = sim::ts0().moduloYearSteps();
+        size_t tmod = sim::moduloYearSteps(sim::ts0());
 
         // Calculate time-weighted average of kappa
         _sumAnnualKappa += laggedKappa[lKMod] * initialisationEIR[tmod];
@@ -349,7 +349,7 @@ private:
     // The times here should be for the last updated index of arrays:
     void ctsCbInputEIR(ostream &stream)
     {
-        int prevStep = (sim::now() - SimTime::oneTS()) / SimTime::oneTS();
+        int prevStep = (sim::now() - sim::oneTS()) / sim::oneTS();
         // Note: prevStep may be negative, hence util::mod not mod_nn:
         stream << '\t' << initialisationEIR[util::mod(prevStep, sim::stepsPerYear())];
     }
@@ -357,7 +357,7 @@ private:
     void ctsCbKappa(ostream &stream)
     {
         // The latest time-step's kappa:
-        stream << '\t' << laggedKappa[sim::now().moduloSteps(laggedKappa.size())];
+        stream << '\t' << laggedKappa[sim::moduloSteps(sim::now(), laggedKappa.size())];
     }
     void ctsCbNumTransmittingHumans(ostream &stream) { stream << '\t' << numTransmittingHumans; }
 
@@ -423,10 +423,10 @@ private:
      * Units: infectious bites/adult/inter-survey period. */
     double surveySimulatedEIR;
     /** Time of last survey. */
-    SimTime lastSurveyTime;
+    SimTime lastSurveyTime = sim::never();
 
     /// age at which an individual is considered an adult
-    SimTime adultAge;
+    SimTime adultAge = sim::never();
 
     /// For "num transmitting humans" cts output.
     int numTransmittingHumans;

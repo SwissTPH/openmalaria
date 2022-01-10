@@ -51,7 +51,7 @@ double riskFromMaternalInfection = 0.0;
 std::vector<double> prevByGestationalAge;
 
 /// Lower and upper bounds for potential mothers (as in model description)
-SimTime ageLb = SimTime::fromYearsI(20), ageUb = SimTime::fromYearsI(25);
+SimTime ageLb = sim::fromYearsI(20), ageUb = sim::fromYearsI(25);
 
 // The model is parameterised based on patency levels; the diagnostic
 // used for this may be important.
@@ -59,8 +59,8 @@ const WithinHost::Diagnostic* neonatalDiagnostic = 0;
 
 
 void NeonatalMortality::init( const scnXml::Clinical& clinical ){
-    SimTime fiveMonths = SimTime::fromDays( 5 * 30 );
-    prevByGestationalAge.assign( fiveMonths.inSteps(), 0.0 );
+    SimTime fiveMonths = sim::fromDays( 5 * 30 );
+    prevByGestationalAge.assign( sim::inSteps(fiveMonths), 0.0 );
     
     if( clinical.getNeonatalMortality().present() ){
         neonatalDiagnostic = &WithinHost::diagnostics::get(
@@ -120,7 +120,7 @@ void NeonatalMortality::update (Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = sim::ts0().moduloSteps(prevByGestationalAge.size());
+    size_t index = sim::moduloSteps(sim::ts0(), prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for(size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {

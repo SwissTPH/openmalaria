@@ -38,8 +38,6 @@ namespace scnXml {
 
 namespace OM {
 
-class SimTime;
-
 inline int floorToInt( double x ){
 	return static_cast<int>(std::floor(x));
 }
@@ -52,43 +50,65 @@ class SimData {
     static int interval;        // days per time step
     static size_t steps_per_year;
     static double years_per_step;
-    
-    friend class SimTime;
-    friend class SimDate;
     friend class sim;
 };
 
 
 /******************************************************************************
- * Class encapsulating simulation durations and times relative to the start.
+ * Since version 43.1, SimTime is an integer instead of a class. Note: a 
+ * class can be used again simply by replacing the following typedef 
+ * definition by the old SimTime class.
+ * 
+ * SimTime is now always a number of days.
  * 
  * Time steps, days and dates are derived from this. The values and units of
- * internal variables are an implementation detail (i.e. code outside this
- * class should not need to know).
+ * internal variables are an implementation detail (i.e. code outside of
+ * sim should not need to know).
  * 
- * The simulation always starts at time zero. "Intervention time" is a separate
- * concept (see SimDate).
+ * The simulation always starts at time zero. "Intervention time" is the 
+ * beginning of the scenario and monitoring period.
  * 
  * Granularity: 1 day.
  *****************************************************************************/
-class SimTime {
-    /** Construct, from a time in days. */
-    explicit SimTime( int days ) : d(days) {}
-    
+typedef int SimTime;
+
+/** Encapsulates static variables: sim time. */
+class sim {
 public:
-    ///@brief Unparameterised constructors
+    ///@brief Simulation constants
     //@{
-    /** Default construction; same as SimTime::never(). */
-    SimTime() : d(-0x3FFFFFFF) {}
+    /// Number of days in a year; defined as 365 (leap years are not simulated).
+    enum { DAYS_IN_YEAR = 365 };
     
+    ///@brief Conversions to other types/units
+    //@{
+    /// Convert to years
+    static inline double inYears(SimTime d) { return d * (1.0 / SimData::DAYS_IN_YEAR); }
+    
+    /// Convert to time steps (rounding down)
+    static inline int inSteps(SimTime d) { return d / SimData::interval; }
+    //@}
+    
+    /** Return this time in time steps modulo some positive integer. */
+    static inline int moduloSteps(SimTime d, int denominator){
+        return util::mod_nn(d / SimData::interval, denominator);
+    }
+    
+    /** Return this time in time steps modulo some positive integer. */
+    static inline int moduloYearSteps(SimTime d){
+        return util::mod_nn(d / SimData::interval, SimData::steps_per_year);
+    }
+
     /** Duration zero and the time at the start of the simulation. */
     static inline SimTime zero(){ return SimTime(0); }
-    
-    /** Special value representing a time point always in the past, such that
+
+    static inline SimTime origin(){ return SimTime(0); }
+
+        /** Special value representing a time point always in the past, such that
      * never() + x < zero() and x - never() will not to overflow for all valid
      * simulation times x (including any value now() may take as well as
      * never() and future()). */
-    static inline SimTime never(){ return SimTime(); }
+    static inline SimTime never(){ return SimTime(-0x3FFFFFFF); }
     
     /** Special value representing a time point always in the future, such that
      * now() < future() and now() + future() does not overflow. */
@@ -107,7 +127,7 @@ public:
     ///@brief Parameterised constructors
     //@{
     /** Convert. */
-    static inline SimTime fromTS(int ts){ return oneTS() * ts; }
+    static inline SimTime fromTS(int ts){ return SimTime(int(oneTS()) * ts); }
     
     /** Duration in days. Should be fast (currently no conversion required). */
     static inline SimTime fromDays(int days){ return SimTime(days); }
@@ -132,197 +152,7 @@ public:
         return fromTS( floorToInt( days / SimData::interval + 0.5 ));
     }
     //@}
-    
-    ///@brief Conversions to other types/units
-    //NOTE: these methods provide good documentation of the types of things
-    //one does with SimTimes (besides comparing with other SimTimes).
-    //@{
-    /// Get length of time in days. Currently this is simple no-op get.
-    inline int inDays() const{ return d; }
-    
-    /// Convert to years
-    inline double inYears() const{ return d * (1.0 / SimData::DAYS_IN_YEAR); }
-    
-    /// Convert to time steps (rounding down)
-    inline int inSteps() const{ return d / SimData::interval; }
-    //@}
-    
-    ///@brief Simple arithmatic modifiers (all return a copy)
-    //@{
-    inline SimTime operator-()const {
-        return SimTime( -d );
-    }
-    inline SimTime operator-( const SimTime rhs )const {
-        return SimTime( d - rhs.d );
-    }
-    inline SimTime operator+( const SimTime rhs )const {
-        return SimTime( d + rhs.d );
-    }
-    // scale by an integer
-    inline SimTime operator*( int scalar )const {
-        return SimTime( d * scalar );
-    }
-    // scale by a double, rounding to nearest
-    inline SimTime operator*( double scalar )const {
-        return SimTime( static_cast<int>(d * scalar + 0.5) );
-    }
-    // Divide by another SimTime; result is unitless. Note integer division.
-    inline int operator/( const SimTime rhs )const{
-        return d / rhs.d;
-    }
-    //@}
-    
-    ///@brief Self-modifying arithmatic
-    //@{
-    inline void operator+=( const SimTime rhs ) {
-        d += rhs.d;
-    }
-    //@}
-    
-    ///@brief Comparators between two SimTimes (all return a boolean)
-    //@{
-    inline bool operator==( const SimTime rhs )const {
-        return  d == rhs.d;
-    }
-    inline bool operator!=( const SimTime rhs )const {
-        return  d != rhs.d;
-    }
-    inline bool operator>( const SimTime rhs )const {
-        return  d > rhs.d;
-    }
-    inline bool operator>=( const SimTime rhs )const {
-        return  d >= rhs.d;
-    }
-    inline bool operator<( const SimTime rhs )const {
-        return  d < rhs.d;
-    }
-    inline bool operator<=( const SimTime rhs )const {
-        return  d <= rhs.d;
-    }
-    //@}
-    
-    /** Return this time in time steps modulo some positive integer. */
-    inline int moduloSteps(int denominator){
-        return util::mod_nn(d / SimData::interval, denominator);
-    }
-    
-    /** Return this time in time steps modulo some positive integer. */
-    inline int moduloYearSteps(){
-        return util::mod_nn(d / SimData::interval, SimData::steps_per_year);
-    }
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        using namespace OM::util::checkpoint;
-        d & stream;
-    }
-    
-private:
-    int d;      // time in days
-    
-    friend class SimDate;
-    friend SimTime mod_nn( const SimTime lhs, const SimTime rhs );
-    friend ostream& operator<<( ostream& stream, SimTime date );
-};
 
-/******************************************************************************
- * Class encapsulating simulation time, from the point-of-view of interventions.
- * 
- * Intervention times may be specified as dates or as a delay since the start
- * of the intervention period.
- *****************************************************************************/
-class SimDate {
-    /** Construct, from a time in days. */
-    explicit SimDate( int days ) : d(days) {}
-    
-public:
-    ///@brief Constructors
-    //@{
-    /** Point zero of our date system: 0000-01-01. */
-    static inline SimDate origin(){ return SimDate(0); }
-    
-    /** Default construction; same as SimDate::never(). */
-    SimDate() : d(-0x3FFFFFFF) {}
-    
-    /** Special value representing a time point always in the past, such that
-     * never() + x < zero() and x - never() will not to overflow for all valid
-     * simulation times x (including any value now() may take as well as
-     * never() and future()). */
-    static inline SimDate never(){ return SimDate(); }
-    
-    /** Special value representing a time point always in the future, such that
-     * now() < future() and now() + future() does not overflow. */
-    static inline SimDate future(){ return SimDate(0x3FFFFFFF); }
-    //@}
-    
-    ///@brief Simple arithmatic modifiers (all return a copy)
-    //@{
-    inline SimDate operator-( const SimTime rhs )const {
-        return SimDate( d - rhs.d );
-    }
-    inline SimTime operator-( const SimDate rhs )const {
-        return SimTime( d - rhs.d );
-    }
-    inline SimDate operator+( const SimTime rhs )const {
-        return SimDate( d + rhs.d );
-    }
-    //@}
-    
-    ///@brief Self-modifying arithmatic
-    //@{
-    inline void operator+=( const SimTime rhs ) {
-        d += rhs.d;
-    }
-    //@}
-    
-    ///@brief Comparators between two SimDates (all return a boolean)
-    //@{
-    inline bool operator==( const SimDate rhs )const {
-        return  d == rhs.d;
-    }
-    inline bool operator!=( const SimDate rhs )const {
-        return  d != rhs.d;
-    }
-    inline bool operator>( const SimDate rhs )const {
-        return  d > rhs.d;
-    }
-    inline bool operator>=( const SimDate rhs )const {
-        return  d >= rhs.d;
-    }
-    inline bool operator<( const SimDate rhs )const {
-        return  d < rhs.d;
-    }
-    inline bool operator<=( const SimDate rhs )const {
-        return  d <= rhs.d;
-    }
-    //@}
-    
-    /// Checkpointing
-    template<class S>
-    void operator& (S& stream) {
-        using namespace OM::util::checkpoint;
-        d & stream;
-    }
-    
-// private:
-    int d;      // time in days
-    
-    friend ostream& operator<<( ostream& stream, SimDate date );
-};
-
-inline SimTime mod_nn( const SimTime lhs, const SimTime rhs ){
-    return SimTime(util::mod_nn(lhs.d, rhs.d));
-}
-
-/** Encapsulates static variables: sim time. */
-class sim {
-public:
-    ///@brief Simulation constants
-    //@{
-    /// Number of days in a year; defined as 365 (leap years are not simulated).
-    enum { DAYS_IN_YEAR = 365 };
-    
     /** The number of time steps in one year. */
     static inline size_t stepsPerYear(){ return SimData::steps_per_year; }
     
@@ -333,10 +163,10 @@ public:
     static inline SimTime maxHumanAge(){ return s_max_human_age; }
     
     /// The starting date of the simulation
-    static inline SimDate startDate() { return s_start; }
+    static inline SimTime startDate() { return s_start; }
     
     /// The ending date of the simulation
-    static inline SimDate endDate() { return s_end; }
+    static inline SimTime endDate() { return s_end; }
     //@}
     
     ///@brief Access simulation time variables
@@ -373,7 +203,7 @@ public:
     /** During updates, this is ts1; between, this is now. */
     static inline SimTime nowOrTs1(){ return s_t1; }
     /** During updates, this is ts0; between, it is now - 1. */
-    static inline SimTime latestTs0(){ return s_t1 - SimTime::oneTS(); }
+    static inline SimTime latestTs0(){ return s_t1 - sim::oneTS(); }
     //@}
     
     ///@brief Access intervention-time variables
@@ -393,7 +223,7 @@ public:
     /// returns a large negative value.)
     /// 
     /// Intervention deployment times are relative to this date.
-    static inline SimDate intervDate(){ return s_start + s_interv; }
+    static inline SimTime intervDate(){ return s_start + s_interv; }
     //@}
     
 // private:
@@ -402,7 +232,7 @@ public:
     
     // Start of update: called by Simulator
     static inline void start_update(){
-        s_t1 += SimTime::oneTS();
+        s_t1 = s_t1 + sim::oneTS();
 #ifndef NDEBUG
         in_update = true;
 #endif
@@ -413,13 +243,12 @@ public:
         in_update = false;
 #endif
         s_t0 = s_t1;
-        s_interv += SimTime::oneTS();
+        s_interv = s_interv + sim::oneTS();
     }
     
     // Scenario constants
-    static SimDate s_start;
-    static SimDate s_end;
-    
+    static SimTime s_start;
+    static SimTime s_end;
     static SimTime s_max_human_age;
     
     // Global variables
@@ -428,11 +257,7 @@ public:
 #endif
     static SimTime s_t0;
     static SimTime s_t1;
-    
     static SimTime s_interv;
-    
-    friend class Simulator;
-    friend class ::UnittestUtil;
 };
 
 }

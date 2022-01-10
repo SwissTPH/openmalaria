@@ -66,7 +66,7 @@ void CommonWithinHost::init( const scnXml::Scenario& scenario ){
 CommonWithinHost::CommonWithinHost( LocalRng& rng, double comorbidityFactor ) :
         WHFalciparum( rng, comorbidityFactor )
 {
-    assert( SimTime::oneTS() == SimTime::fromDays(1) || SimTime::oneTS() == SimTime::fromDays(5) );
+    assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
     
     // Sample a weight heterogeneity factor
 #ifndef NDEBUG
@@ -161,7 +161,7 @@ void CommonWithinHost::update(LocalRng& rng,
     
     double body_mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
     
-    for( SimTime now = sim::ts0(), end = sim::ts0() + SimTime::oneTS(); now < end; now += SimTime::oneDay() ){
+    for( SimTime now = sim::ts0(), end = sim::ts0() + sim::oneTS(); now < end; now = now + sim::oneDay() ){
         // every day, medicate drugs, update each infection, then decay drugs
         pkpdModel.medicate(rng);
         
@@ -211,7 +211,7 @@ void CommonWithinHost::update(LocalRng& rng,
     assert( (std::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
     
     // Cache total density for infectiousness calculations
-    int y_lag_i = sim::ts1().moduloSteps(y_lag_len);
+    int y_lag_i = sim::moduloSteps(sim::ts1(), y_lag_len);
     for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag[y_lag_i * Genotypes::N() + g] = 0.0;
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
         m_y_lag[y_lag_i * Genotypes::N() + (*inf)->genotype()] += (*inf)->getDensity();

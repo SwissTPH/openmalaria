@@ -88,8 +88,8 @@ static Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
 
         const scnXml::SimpleMPD& smpd = anoph.getSimpleMPD().get();
 
-        SimTime developmentDuration = SimTime::fromDays(smpd.getDevelopmentDuration().getValue());
-        if (!(developmentDuration > SimTime::zero()))
+        SimTime developmentDuration = sim::fromDays(smpd.getDevelopmentDuration().getValue());
+        if (!(developmentDuration > sim::zero()))
             throw util::xml_scenario_error("entomology.vector.simpleMPD.developmentDuration: "
                 "must be positive");
         double probPreadultSurvival = smpd.getDevelopmentSurvival().getValue();
@@ -193,11 +193,11 @@ static Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
     mosqParams.probOvipositing = mosq.getMosqProbOvipositing().getValue();
     mosqParams.seekingDuration = mosq.getMosqSeekingDuration().getValue();
     mosqParams.probMosqSurvivalOvipositing = mosq.getMosqProbOvipositing().getValue();
-    mosqParams.restDuration = SimTime::fromDays(mosq.getMosqRestDuration().getValue());
-    mosqParams.EIPDuration = SimTime::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
+    mosqParams.restDuration = sim::fromDays(mosq.getMosqRestDuration().getValue());
+    mosqParams.EIPDuration = sim::fromDays(mosq.getExtrinsicIncubationPeriod().getValue());
     mosqParams.minInfectedThreshold = mosq.getMinInfectedThreshold();
 
-    if (SimTime::oneDay() > mosqParams.restDuration || mosqParams.restDuration * 2 >= mosqParams.EIPDuration)
+    if (sim::oneDay() > mosqParams.restDuration || mosqParams.restDuration * 2 >= mosqParams.EIPDuration)
     {
         // TODO: limit was EIPDuration >= mosqRestDuration >= 1
         // but in usage of ftauArray this wasn't enough. Check why.

@@ -29,7 +29,8 @@ namespace UnitTest {
 
 WHMock::WHMock() :
     totalDensity(numeric_limits<double>::quiet_NaN()),
-    nTreatments(0)
+    nTreatments(0),
+    lastTimeLiver(sim::never()), lastTimeBlood(sim::never())
 {}
 WHMock::~WHMock() {}
 
@@ -56,7 +57,7 @@ bool WHMock::treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlo
     nTreatments += 1;
     lastTimeLiver = timeLiver;
     lastTimeBlood = timeBlood;
-    return timeBlood != SimTime::zero();
+    return timeBlood != sim::zero();
 }
 
 void WHMock::treatPkPd(size_t schedule, size_t dosages, double age, double delay_d){

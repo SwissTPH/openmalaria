@@ -46,7 +46,7 @@ void DescriptiveWithinHostModel::initDescriptive(){
 DescriptiveWithinHostModel::DescriptiveWithinHostModel( LocalRng& rng, double comorbidityFactor ) :
         WHFalciparum( rng, comorbidityFactor )
 {
-    assert( SimTime::oneTS() == SimTime::fromDays(5) );
+    assert( sim::oneTS() == sim::fromDays(5) );
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
@@ -159,14 +159,14 @@ void DescriptiveWithinHostModel::update(LocalRng& rng,
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
     // this time-step and cumulative_Y only includes past densities.
     m_cumulative_h += nNewInfs;
-    m_cumulative_Y += SimTime::oneTS().inDays() * totalDensity;
+    m_cumulative_Y += sim::oneTS() * totalDensity;
     
     util::streamValidate( totalDensity );
     util::streamValidate( hrp2Density );
     assert( (std::isfinite)(totalDensity) );        // inf probably wouldn't be a problem but NaN would be
     
     // Cache total density for infectiousness calculations
-    int y_lag_i = sim::ts1().moduloSteps(y_lag_len);
+    int y_lag_i = sim::moduloSteps(sim::ts1(), y_lag_len);
     for( size_t g = 0; g < Genotypes::N(); ++g ) m_y_lag[y_lag_i * Genotypes::N() + g] = 0.0;
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
         m_y_lag[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();

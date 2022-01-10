@@ -71,7 +71,7 @@ private:
     
     float mi[v];        // base multiplication factor per two-day cycle of variant i
     float Sm_summation; // sum in eqn 7
-    // index: we use ((bsAge.inDays()/2) mod 4) for τ = t - δ_v respectively τ = t
+    // index: we use ((bsAge/2) mod 4) for τ = t - δ_v respectively τ = t
     float lagged_Pc[taus];       // Pc(τ) for τ ∈ {t - δ_v, ..., t - 2}
     /* Pc_star, Pm_star: two host-specific critical densities.
      * These two values depend on the first local maximum or the difference
@@ -88,7 +88,7 @@ private:
         
         float Pi1, Pi2;   // Pi(t+1), Pi(t+2): variant's i density (PRBC/μl blood)
         float Si_summation;     // sum in eqn 6
-        // index: we use ((bsAge.inDays()/2) mod 4) for τ = t - δ_v respectively τ = t
+        // index: we use ((bsAge/2) mod 4) for τ = t - δ_v respectively τ = t
         float lagged_Pi[taus];   // Pi(τ) for τ ∈ {t - δ_v, ..., t - 2}
     };
     // variant-specific data; variants[i-1] corresponds to variant i in the paper

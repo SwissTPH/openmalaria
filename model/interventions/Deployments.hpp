@@ -44,7 +44,7 @@ struct ByDeployTime;    // forward decl for friend
 class TimedDeployment {
 public:
     /// Create, passing time of deployment
-    explicit TimedDeployment(SimDate deployDate) :
+    explicit TimedDeployment(SimTime deployDate) :
             date( deployDate )
     {
         if( deployDate < sim::startDate() ){
@@ -61,7 +61,7 @@ public:
     virtual void print_details( std::ostream& out )const =0;
     
     // Read access required in this file; don't really need protection:
-    SimDate date;
+    SimTime date = sim::never();
 };
 
 class DummyTimedDeployment : public TimedDeployment {
@@ -73,7 +73,7 @@ public:
         // within the intervention period. We want this time to be after the
         // last time-step, so set the time here after TimedDeployment's ctor
         // check has been done (hacky).
-        date = SimDate::future();
+        date = sim::future();
     }
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {}
     virtual void print_details( std::ostream& out )const{
@@ -83,7 +83,7 @@ public:
 
 class TimedChangeHSDeployment : public TimedDeployment {
 public:
-    TimedChangeHSDeployment( SimDate date, const scnXml::ChangeHS::TimedDeploymentType& hs ) :
+    TimedChangeHSDeployment( SimTime date, const scnXml::ChangeHS::TimedDeploymentType& hs ) :
         TimedDeployment( date ),
         newHS( hs._clone() )
     {}
@@ -102,7 +102,7 @@ private:
 
 class TimedChangeEIRDeployment : public TimedDeployment {
 public:
-    TimedChangeEIRDeployment( SimDate date, const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
+    TimedChangeEIRDeployment( SimTime date, const scnXml::ChangeEIR::TimedDeploymentType& nv ) :
         TimedDeployment( date ),
         newEIR( nv._clone() )
     {}
@@ -121,7 +121,7 @@ private:
 
 class TimedUninfectVectorsDeployment : public TimedDeployment {
 public:
-    TimedUninfectVectorsDeployment( SimDate date ) :
+    TimedUninfectVectorsDeployment( SimTime date ) :
         TimedDeployment( date )
     {}
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
@@ -190,19 +190,19 @@ public:
      * @param intervention The HumanIntervention to deploy.
      * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      */
-    TimedHumanDeployment( SimDate date,
+    TimedHumanDeployment( SimTime date,
                            const scnXml::MassDeployment& mass,
                            shared_ptr<const HumanIntervention> intervention,
                            ComponentId subPop, bool complement ) :
         TimedDeployment( date ),
         HumanDeploymentBase( mass, intervention, subPop, complement ),
-        minAge( SimTime::fromYearsN( mass.getMinAge() ) ),
-        maxAge( SimTime::future() )
+        minAge( sim::fromYearsN( mass.getMinAge() ) ),
+        maxAge( sim::future() )
     {
         if( mass.getMaxAge().present() )
-            maxAge = SimTime::fromYearsN( mass.getMaxAge().get() );
+            maxAge = sim::fromYearsN( mass.getMaxAge().get() );
             
-        if( minAge < SimTime::zero() || maxAge < minAge ){
+        if( minAge < sim::zero() || maxAge < minAge ){
             throw util::xml_scenario_error("timed intervention must have 0 <= minAge <= maxAge");
         }
     }
@@ -222,7 +222,7 @@ public:
     
     virtual void print_details( std::ostream& out )const{
         out << date << "\t"
-            << minAge.inYears() << "y\t" << maxAge.inYears() << "t\t";
+            << sim::inYears(minAge) << "y\t" << sim::inYears(maxAge) << "t\t";
         if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
@@ -245,7 +245,7 @@ public:
      * @param subPop Either ComponentId::wholePop() or a sub-population to which deployment is restricted
      * @param cumCuvId Id of component to test coverage for
      */
-    TimedCumulativeHumanDeployment( SimDate date,
+    TimedCumulativeHumanDeployment( SimTime date,
                            const scnXml::MassDeployment& mass,
                            shared_ptr<const HumanIntervention> intervention,
                            ComponentId subPop, bool complement,
@@ -292,7 +292,7 @@ protected:
 
 class TimedVectorDeployment : public TimedDeployment {
 public:
-    TimedVectorDeployment( SimDate date, size_t instance ) :
+    TimedVectorDeployment( SimTime date, size_t instance ) :
         TimedDeployment( date ),
         inst(instance)
     {}
@@ -311,7 +311,7 @@ private:
 
 class TimedTrapDeployment : public TimedDeployment {
 public:
-    TimedTrapDeployment( SimDate date, size_t instance, double ratio, SimTime lifespan ) :
+    TimedTrapDeployment( SimTime date, size_t instance, double ratio, SimTime lifespan ) :
         TimedDeployment(date), inst(instance), ratio(ratio), lifespan(lifespan)
     {}
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {
@@ -329,12 +329,12 @@ public:
 private:
     size_t inst;
     double ratio;
-    SimTime lifespan;
+    SimTime lifespan = sim::never();
 };
 
 class TimedNonHumanHostsDeployment : public TimedDeployment {
 public:
-    TimedNonHumanHostsDeployment( SimDate date, size_t instance, string intervName, const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay, Transmission::TransmissionModel& transmission) :
+    TimedNonHumanHostsDeployment( SimTime date, size_t instance, string intervName, const scnXml::Description2::AnophelesSequence list, const scnXml::DecayFunction &decay, Transmission::TransmissionModel& transmission) :
         TimedDeployment( date ),
         instance(instance),
         intervName(intervName)
@@ -427,7 +427,7 @@ const string vec_mode_err = "vector interventions can only be used in dynamic tr
 
 class TimedAddNonHumanHostsDeployment : public TimedDeployment {
 public:
-    TimedAddNonHumanHostsDeployment( SimDate date, const string &intervName, SimTime lifespan, const scnXml::Description3::AnophelesSequence list, Transmission::TransmissionModel& transmission) :
+    TimedAddNonHumanHostsDeployment( SimTime date, const string &intervName, SimTime lifespan, const scnXml::Description3::AnophelesSequence list, Transmission::TransmissionModel& transmission) :
         TimedDeployment( date ), intervName(intervName), lifespan(lifespan)
     {
         Transmission::VectorModel *vectorModel = dynamic_cast<Transmission::VectorModel *>(&transmission);
@@ -496,7 +496,7 @@ private:
         double hostFecundityFactor;
     };
     string intervName;
-    SimTime lifespan;
+    SimTime lifespan = sim::never();
     std::map<string, NhhParamsInterv> nhhParams; 
 };
 
@@ -506,28 +506,28 @@ private:
 class ContinuousHumanDeployment : protected HumanDeploymentBase {
 public:
     /// Create, passing deployment age
-    ContinuousHumanDeployment( SimDate begin, SimDate end,
+    ContinuousHumanDeployment( SimTime begin, SimTime end,
                                  const ::scnXml::ContinuousDeployment& elt,
                                  shared_ptr<const HumanIntervention> intervention,
                                  ComponentId subPop, bool complement ) :
             HumanDeploymentBase( elt, intervention, subPop, complement ),
             begin( begin ), end( end ),
-            deployAge( SimTime::fromYearsN( elt.getTargetAgeYrs() ) )
+            deployAge( sim::fromYearsN( elt.getTargetAgeYrs() ) )
     {
         if( begin < sim::startDate() || end < begin ){
             throw util::xml_scenario_error("continuous intervention must have startDate <= begin <= end");
         }
-        if( deployAge <= SimTime::zero() ){
+        if( deployAge <= sim::zero() ){
             ostringstream msg;
             msg << "continuous intervention with target age "<<elt.getTargetAgeYrs();
-            msg << " years corresponds to time step " << deployAge.inSteps();
+            msg << " years corresponds to time step " << sim::inSteps(deployAge);
             msg << "; must be at least 1.";
             throw util::xml_scenario_error( msg.str() );
         }
         if( deployAge > sim::maxHumanAge() ){
             ostringstream msg;
             msg << "continuous intervention must have target age no greater than ";
-            msg << sim::maxHumanAge().inYears();
+            msg << sim::inYears(sim::maxHumanAge());
             throw util::xml_scenario_error( msg.str() );
         }
     }
@@ -558,9 +558,9 @@ public:
     
     inline void print_details( std::ostream& out )const{
         out << begin << "\t";
-        if( end == SimDate::future() ) out << "(none)";
+        if( end == sim::future() ) out << "(none)";
         else out << end << 't';
-        out << '\t' << deployAge.inYears() << "y\t";
+        out << '\t' << sim::inYears(deployAge) << "y\t";
         if( subPop == ComponentId::wholePop() ) out << "(none)";
         else out << subPop.id;
         out << '\t' << complement << '\t' << coverage << '\t';
@@ -568,8 +568,8 @@ public:
     }
     
 protected:
-    SimDate begin, end;    // first time step active and first time step no-longer active
-    SimTime deployAge;
+    SimTime begin, end;    // first time step active and first time step no-longer active
+    SimTime deployAge = sim::never();
     
     friend ByDeployTime;
 };

@@ -52,7 +52,7 @@ namespace impl {
     bool isInit = false;
     size_t surveyIndex = 0;     // index in surveyTimes of next survey
     size_t survNumEvent = NOT_USED, survNumStat = NOT_USED;
-    SimDate nextSurveyDate = SimDate::future();
+    SimTime nextSurveyDate = sim::future();
     
     vector<Condition> conditions;
 }

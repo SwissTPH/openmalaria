@@ -76,7 +76,7 @@ public:
     };
     
     Episode() :
-            time(SimTime::never()),
+            time(sim::never()),
             surveyPeriod(mon::NOT_USED),
             ageGroup(),
             cohortSet(0),
@@ -109,7 +109,7 @@ private:
     void report();
     
     /// Time of event, potentially never
-    SimTime time;
+    SimTime time = sim::never();
     /// Survey during which the event occured
     size_t surveyPeriod;
     /// Age group of the individual when the episode's first bout occurred

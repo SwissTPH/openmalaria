@@ -96,7 +96,7 @@ public:
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
     inline double eval( SimTime age, DecayFuncHet sample )const{
-        return eval( age.inDays() * sample.getTMult() );
+        return eval( age * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).

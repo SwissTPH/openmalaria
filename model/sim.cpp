@@ -39,68 +39,68 @@ int SimData::interval;
 size_t SimData::steps_per_year;
 double SimData::years_per_step;
 
-SimDate sim::s_start;
-SimDate sim::s_end;
+SimTime sim::s_start = sim::never();
+SimTime sim::s_end = sim::never();
 
-SimTime sim::s_max_human_age;
+SimTime sim::s_max_human_age = sim::never();
 
 // Global variables
 #ifndef NDEBUG
 bool sim::in_update = false;
 #endif
-SimTime sim::s_t0;
-SimTime sim::s_t1;
+SimTime sim::s_t0 = sim::never();
+SimTime sim::s_t1 = sim::never();
 
-SimTime sim::s_interv;
+SimTime sim::s_interv = sim::never();
 
 using util::CommandLine;
 
-ostream& operator<<( ostream& stream, SimTime time ){
-    if( time.inDays() % sim::DAYS_IN_YEAR == 0 ){
-        stream << time.inYears() << 'y';
-    } else {
-        stream << time.inDays() << 'd';
-    }
-    return stream;
-}
+// ostream& operator<<( ostream& stream, SimTime time ){
+//     if( time % sim::DAYS_IN_YEAR == 0 ){
+//         stream << time.inYears() << 'y';
+//     } else {
+//         stream << time << 'd';
+//     }
+//     return stream;
+// }
 
-ostream& operator<<( ostream& stream, SimDate date ){
-    int days = date.d;
-    if (days < 0) {
-        // Shouldn't happen; best still to print something
-        stream << days << 'd';
-    } else {
-        int year = days / sim::DAYS_IN_YEAR;
-        days -= year * sim::DAYS_IN_YEAR;
+// ostream& operator<<( ostream& stream, SimTime date ){
+//     int days = date.d;
+//     if (days < 0) {
+//         // Shouldn't happen; best still to print something
+//         stream << days << 'd';
+//     } else {
+//         int year = days / sim::DAYS_IN_YEAR;
+//         days -= year * sim::DAYS_IN_YEAR;
         
-        int month = 0;
-        while( days >= UnitParse::monthStart[month+1] ) ++month;
-        days -= UnitParse::monthStart[month];
-        assert( month < 12 && days < UnitParse::monthLen[month] );
+//         int month = 0;
+//         while( days >= UnitParse::monthStart[month+1] ) ++month;
+//         days -= UnitParse::monthStart[month];
+//         assert( month < 12 && days < UnitParse::monthLen[month] );
         
-        // Inconsistency in year vs month and day: see parseDate()
-        stream << setfill('0') << setw(4) << year << '-'
-                << setw(2) << (month+1) << '-' << (days+1)
-                << setw(0) << setfill(' ');
-    }
-    return stream;
-}
+//         // Inconsistency in year vs month and day: see parseDate()
+//         stream << setfill('0') << setw(4) << year << '-'
+//                 << setw(2) << (month+1) << '-' << (days+1)
+//                 << setw(0) << setfill(' ');
+//     }
+//     return stream;
+// }
 
 void sim::init( const scnXml::Scenario& scenario ){
     SimData::interval = scenario.getModel().getParameters().getInterval();
-    SimData::steps_per_year = SimTime::oneYear().inSteps();
+    SimData::steps_per_year = sim::inSteps(sim::oneYear());
     SimData::years_per_step = 1.0 / SimData::steps_per_year;
     
     sim::s_max_human_age =
-        SimTime::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
+        sim::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
     
-    sim::s_start = SimDate::origin();
+    sim::s_start = sim::origin();
     auto mon = scenario.getMonitoring();
     if( mon.getStartDate().present() ){
         try{
-            // on failure, this throws or returns SimDate::never()
+            // on failure, this throws or returns sim::never()
             sim::s_start = UnitParse::parseDate( mon.getStartDate().get() );
-            if( sim::s_start == SimDate::never() ){
+            if( sim::s_start == sim::never() ){
                 throw util::format_error( "invalid format (expected YYYY-MM-DD)" );
             }
         }catch( const util::format_error& e ){
@@ -108,7 +108,7 @@ void sim::init( const scnXml::Scenario& scenario ){
         }
     }
     
-    sim::s_interv = SimTime::never();    // large negative number
+    sim::s_interv = sim::never();    // large negative number
     
     sim::s_end = mon::readSurveyDates( mon );
 }

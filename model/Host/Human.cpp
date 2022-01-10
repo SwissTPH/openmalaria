@@ -67,7 +67,7 @@ Human::Human(SimTime dateOfBirth) :
     nextCtsDist(0)
 {
     // Initial humans are created at time 0 and may have DOB in past. Otherwise DOB must be now.
-    assert( m_DOB == sim::nowOrTs1() || (sim::now() == SimTime::zero() && m_DOB < sim::now()) );
+    assert( m_DOB == sim::nowOrTs1() || (sim::now() == sim::zero() && m_DOB < sim::now()) );
     
     HumanHet het = HumanHet::sample(m_rng);
     withinHostModel = WithinHost::WHInterface::createWithinHostModel( m_rng, het.comorbidityFactor );
@@ -100,12 +100,12 @@ void Human::update(Transmission::TransmissionModel& transmission) {
         return;
     }
     
-    util::streamValidate( age0.inDays() );
+    util::streamValidate( age0 );
     // Age at  the end of the update period. In most cases
     // the difference between this and age at the start is not especially
     // important in the model design, but since we parameterised with
     // ageYears1 we should stick with it.
-    double ageYears1 = age(sim::ts1()).inYears();
+    double ageYears1 = sim::inYears(age(sim::ts1()));
     // monitoringAgeGroup is the group for the start of the time step.
     monitoringAgeGroup.update( age0 );
     // check sub-pop expiry
@@ -131,7 +131,7 @@ void Human::update(Transmission::TransmissionModel& transmission) {
             _vaccine.getFactor(interventions::Vaccine::BSV));
     
     // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
-    clinicalModel->update( *this, ageYears1, age0 == SimTime::zero() );
+    clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
     clinicalModel->updateInfantDeaths( age0 );
 }
 
@@ -152,7 +152,7 @@ void Human::summarize() {
     }
     
     mon::reportStatMHI( mon::MHR_HOSTS, *this, 1 );
-    mon::reportStatMHF( mon::MHF_AGE, *this, age(sim::now()).inYears() );
+    mon::reportStatMHF( mon::MHF_AGE, *this, sim::inYears(age(sim::now())) );
     bool patent = withinHostModel->summarize (*this);
     infIncidence->summarize (*this);
     
@@ -163,7 +163,7 @@ void Human::summarize() {
 }
 
 void Human::reportDeployment( ComponentId id, SimTime duration ){
-    if( duration <= SimTime::zero() ) return; // nothing to do
+    if( duration <= sim::zero() ) return; // nothing to do
     m_subPopExp[id] = sim::nowOrTs1() + duration;
     m_cohortSet = mon::updateCohortSet( m_cohortSet, id, true );
 }

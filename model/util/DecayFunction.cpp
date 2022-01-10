@@ -68,7 +68,7 @@ public:
         return 1.0;
     }
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::future();        // decay occurs "in the future" (don't use SimTime::never() because that is interpreted as being in the past)
+        return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
     }
 };
 
@@ -98,7 +98,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( 1.0 / invL );
+        return sim::roundToTSFromDays( 1.0 / invL );
     }
     
 private:
@@ -125,7 +125,7 @@ public:
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
         // Note: rounds to nearest. Object may decay instantly or at time L.
-        return SimTime::roundToTSFromDays(rng.uniform_01() / invL);
+        return sim::roundToTSFromDays(rng.uniform_01() / invL);
     }
     
 private:
@@ -149,7 +149,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( -log(rng.uniform_01()) / invLambda );
+        return sim::roundToTSFromDays( -log(rng.uniform_01()) / invLambda );
     }
     
 private:
@@ -176,7 +176,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( pow( -log(rng.uniform_01()), 1.0/k ) / constOverLambda );
+        return sim::roundToTSFromDays( pow( -log(rng.uniform_01()), 1.0/k ) / constOverLambda );
     }
     
 private:
@@ -200,7 +200,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( pow( 1.0 / rng.uniform_01() - 1.0, 1.0/k ) / invL );
+        return sim::roundToTSFromDays( pow( 1.0 / rng.uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
 private:
@@ -227,7 +227,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( sqrt( 1.0 - k / (k - log( rng.uniform_01() )) ) / invL );
+        return sim::roundToTSFromDays( sqrt( 1.0 - k / (k - log( rng.uniform_01() )) ) / invL );
     }
     
 private:

@@ -113,7 +113,7 @@ protected:
     virtual void checkpoint (ostream& stream);
     
     // Arbitrary predetermined maximum duration of the infection
-    SimTime m_duration; 
+    SimTime m_duration = sim::never(); 
     
     bool notPrintedMDWarning;
     

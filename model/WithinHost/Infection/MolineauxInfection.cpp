@@ -268,7 +268,7 @@ bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTi
     // ———  1. Update m_density (Pc), Pi and related  ———
     double Pi[v] = { 0.0f };
     
-    if (age_BS == SimTime::zero()){
+    if (age_BS == sim::zero()){
         // The first variant starts with a pre-set density (regardless of blood
         // volume; this is an assumption by DH; paper assumes fixed volume)
         variants.resize(1);
@@ -295,7 +295,7 @@ bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTi
     // Every other step (if bsAge is even) we calculate new densities (the
     // Molineaux model uses a 2-day step; we have simply added interpolation
     // for the interleaving densities). In other cases we are finished now.
-    if( mod_nn(age_BS.inDays(), 2) != 0 ){
+    if( mod_nn(int(age_BS), 2) != 0 ){
         return false;   // end of update, not extinct
     }
     
@@ -312,7 +312,7 @@ bool MolineauxInfection::updateDensity( LocalRng&, double survival_factor, SimTi
     
     // ———  3. variant-transcending immune response (equations 7, 8)  ———
     // 3.a) Update the sum in (7), based on previous result
-    const size_t tau = mod_nn(age_BS.inDays() / 2, taus);    // 8 days ago has same index as today
+    const size_t tau = mod_nn(age_BS / 2, taus);    // 8 days ago has same index as today
     // NOTE: rho == 0 so we can optimise this code:
     //Sm_summation = Sm_summation * exp(-2.0*rho) + laggedPc[index];
     Sm_summation = Sm_summation + lagged_Pc[tau];

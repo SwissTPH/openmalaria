@@ -53,7 +53,7 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
     if( len == str.size() ){
         // no unit given; examine our policy:
         if( v == 0 ){   // don't need a unit in this case
-            return SimTime::zero();
+            return sim::zero();
         }else if( defUnit == NONE ){
             throw util::format_error( "unit required but not given (try e.g. 5d or 12t)" );
         }else{
@@ -61,9 +61,9 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
                 cerr << "Deprecation warning: duration \"" << str << "\" specified without unit; it is recommended to do so (e.g. 5d or 1t)" << endl;
             }
             if( defUnit == DAYS ){
-                return SimTime::roundToTSFromDays( v );
+                return sim::roundToTSFromDays( v );
             }else if( defUnit == STEPS ){
-                return SimTime::fromTS( castToInt(v) );
+                return sim::fromTS( castToInt(v) );
             }else{
                 throw SWITCH_DEFAULT_EXCEPTION;
             }
@@ -72,9 +72,9 @@ SimTime readShortDuration( const std::string& str, DefaultUnit defUnit ){
         // one extra character found; is this a unit?
         char u = str[len];
         if( u == 'd' || u == 'D' ){
-            return SimTime::roundToTSFromDays( v );
+            return sim::roundToTSFromDays( v );
         }else if( u == 't' || u == 'T' ){
-            return SimTime::fromTS( castToInt(v) );
+            return sim::fromTS( castToInt(v) );
         }
         // otherwise, fall through to below
     }
@@ -113,26 +113,26 @@ double parseDurationAndUnit( const std::string& str, DefaultUnit& unit ){
 SimTime readDuration( const std::string& str, DefaultUnit unit ){
     double v = parseDurationAndUnit( str, unit );
     
-    if( unit == YEARS ) return SimTime::fromYearsN( v );
+    if( unit == YEARS ) return sim::fromYearsN( v );
     else if( v != std::floor(v) ){
         throw util::format_error( "fractional values are only allowed when the unit is years (e.g. 0.25y)" );
-    }else if( unit == DAYS ) return SimTime::roundToTSFromDays( v );
-	else if( unit == STEPS ) return SimTime::fromTS( castToInt(v) );
+    }else if( unit == DAYS ) return sim::roundToTSFromDays( v );
+	else if( unit == STEPS ) return sim::fromTS( castToInt(v) );
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
 double durationToDays( const std::string& str, DefaultUnit unit ){
     double v = parseDurationAndUnit( str, unit );
     
-    if( unit == YEARS ) return v * SimTime::oneYear().inDays();
+    if( unit == YEARS ) return v * sim::oneYear();
     else if( unit == DAYS ) return v;
-    else if( unit == STEPS ) return v * SimTime::oneTS().inDays();
+    else if( unit == STEPS ) return v * sim::oneTS();
     else throw SWITCH_DEFAULT_EXCEPTION;
 }
 
-/** Returns SimDate::never() when it doesn't recognise a date. Throws when it does
+/** Returns sim::never() when it doesn't recognise a date. Throws when it does
  * but encounters definite format errors. */
-SimDate parseDate( const std::string& str ){
+SimTime parseDate( const std::string& str ){
     std::regex dateRx("(\\d{4})-(\\d{1,2})-(\\d{1,2})");
     std::smatch rx_what;
 
@@ -149,18 +149,18 @@ SimDate parseDate( const std::string& str ){
         // Inconsistency: time "zero" is 0000-01-01, not 0001-01-01. Since
         // dates are always relative to another date, the extra year doesn't
         // actually affect anything.
-        return SimDate::origin()
-            + SimTime::fromYearsI(year)
-            + SimTime::roundToTSFromDays(monthStart[month-1] + day - 1);
+        return sim::origin()
+            + sim::fromYearsI(year)
+            + sim::roundToTSFromDays(monthStart[month-1] + day - 1);
     }else{
-        return SimDate::never();
+        return sim::never();
     }
 }
 
-SimDate readDate( const std::string& str, DefaultUnit defUnit ){
-    SimDate date = parseDate( str );
-    if( date != SimDate::never() ){
-        if( date > sim::startDate() + SimTime::fromYearsI(500) ){
+SimTime readDate( const std::string& str, DefaultUnit defUnit ){
+    SimTime date = parseDate( str );
+    if( date != sim::never() ){
+        if( date > sim::startDate() + sim::fromYearsI(500) ){
             cerr << "Warning: date is a long time after start date. Did you forget to set monitoring/startDate?" << endl;
         }else if( date < sim::startDate() ){
             throw util::format_error( "date of event is before the start of monitoring" );

@@ -160,14 +160,14 @@ void TriggeredDeployments::deploy(Human& human,
 
 TriggeredDeployments::SubList::SubList( const scnXml::TriggeredDeployments::DeployType& elt ) :
         HumanIntervention( elt.getComponent() ),
-        minAge( SimTime::fromYearsN( elt.getMinAge() ) ),
-        maxAge( SimTime::future() ),
+        minAge( sim::fromYearsN( elt.getMinAge() ) ),
+        maxAge( sim::future() ),
         coverage( elt.getP() )
 {
     if( elt.getMaxAge().present() )
-        maxAge = SimTime::fromYearsN( elt.getMaxAge().get() );
+        maxAge = sim::fromYearsN( elt.getMaxAge().get() );
     
-    if( minAge < SimTime::zero() || maxAge < minAge ){
+    if( minAge < sim::zero() || maxAge < minAge ){
         throw util::xml_scenario_error("triggered intervention must have 0 <= minAge <= maxAge");
     }
     
@@ -256,12 +256,12 @@ public:
         try{
             SimTime durL = UnitParse::readShortDuration( elt.getDurationLiver(), UnitParse::NONE ),
                 durB = UnitParse::readShortDuration( elt.getDurationBlood(), UnitParse::NONE );
-            SimTime neg1 = -SimTime::oneTS();
+            SimTime neg1 = -sim::oneTS();
             if( durL < neg1 || durB < neg1 ){
                 throw util::xml_scenario_error( "treatSimple: cannot have durationBlood or durationLiver less than -1" );
             }
             if( util::ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) ){
-                if( durL != SimTime::zero() || durB != neg1 )
+                if( durL != sim::zero() || durB != neg1 )
                     throw util::unimplemented_exception( "vivax model only supports timestepsLiver=0, timestepsBlood=-1" );
                 // Actually, the model ignores these parameters; we just don't want somebody thinking it doesn't.
             }
@@ -300,7 +300,7 @@ public:
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits ) const{
         mon::reportEventMHD( mon::MHD_TREAT, human, method );
-        double age = human.age(sim::nowOrTs1()).inYears();
+        double age = sim::inYears(human.age(sim::nowOrTs1()));
         human.withinHostModel->treatPkPd( schedule, dosage, age, delay_d );
     }
     
@@ -325,7 +325,7 @@ public:
     
     void deploy( Human& human, mon::Deploy::Method method, VaccineLimits )const{
         Clinical::CMDTOut out = tree.exec( Clinical::CMHostData(human,
-                human.age(sim::nowOrTs1()).inYears(),
+                sim::inYears(human.age(sim::nowOrTs1())),
                 Clinical::Episode::NONE /*parameter not needed*/) );
         if( out.treated ){
             mon::reportEventMHD( mon::MHD_TREAT, human, method );

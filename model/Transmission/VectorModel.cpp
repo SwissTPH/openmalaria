@@ -101,7 +101,7 @@ void VectorModel::ctsCbAlpha(const Population &population, ostream &stream)
         double total = 0.0;
         for (Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter)
         {
-            total += iter->perHostTransmission.entoAvailabilityFull(i, iter->age(sim::now()).inYears());
+            total += iter->perHostTransmission.entoAvailabilityFull(i, sim::inYears(iter->age(sim::now())));
         }
         stream << '\t' << total / population.size();
     }
@@ -135,7 +135,7 @@ void VectorModel::ctsNetInsecticideContent(const Population &population, ostream
     //     double meanVar = 0.0;
     //     int n = 0;
     //     for(Population::ConstIter iter = population.cbegin(); iter != population.cend(); ++iter) {
-    //         if( iter->perHostTransmission.getITN().timeOfDeployment() >= SimTime::zero() ){
+    //         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
     //             ++n;
     //             meanVar += iter->perHostTransmission.getITN().getInsecticideContent(_ITNParams);
     //         }
@@ -259,7 +259,7 @@ void VectorModel::init2(const Population &population)
     double sumRelativeAvailability = 0.0;
     for (const Host::Human &human : population.getHumans())
     {
-        sumRelativeAvailability += human.perHostTransmission.relativeAvailabilityAge(human.age(sim::now()).inYears());
+        sumRelativeAvailability += human.perHostTransmission.relativeAvailabilityAge(sim::inYears(human.age(sim::now())));
     }
     int popSize = population.size();
     // value should be unimportant when no humans are available, though inf/nan is not acceptable
@@ -279,7 +279,7 @@ void VectorModel::init2(const Population &population)
         for (const Host::Human &human : population.getHumans())
         {
             const OM::Transmission::PerHost &host = human.perHostTransmission;
-            double prod = host.entoAvailabilityFull(i, human.age(sim::now()).inYears());
+            double prod = host.entoAvailabilityFull(i, sim::inYears(human.age(sim::now())));
             sum_avail += prod;
             prod *= host.probMosqBiting(i);
             sigma_f += prod;
@@ -329,26 +329,26 @@ void VectorModel::scaleEIR(double factor)
 
 SimTime VectorModel::minPreinitDuration()
 {
-    if (interventionMode == forcedEIR) { return SimTime::zero(); }
+    if (interventionMode == forcedEIR) { return sim::zero(); }
     // Data is summed over 5 years; add an extra 50 for stabilization.
     // 50 years seems a reasonable figure from a few tests
-    return SimTime::fromYearsI(55);
+    return sim::fromYearsI(55);
 }
-SimTime VectorModel::expectedInitDuration() { return SimTime::oneYear(); }
+SimTime VectorModel::expectedInitDuration() { return sim::oneYear(); }
 
 SimTime VectorModel::initIterate()
 {
     if (interventionMode != dynamicEIR)
     {
         // allow forcing equilibrium mode like with non-vector model
-        return SimTime::zero(); // no initialization to do
+        return sim::zero(); // no initialization to do
     }
 
     // Fitting is done
     if (initIterations < 0)
     {
         simulationMode = dynamicEIR;
-        return SimTime::zero();
+        return sim::zero();
     }
 
     if (++initIterations > 30) { throw TRACED_EXCEPTION("Transmission warmup exceeded 30 iterations!", util::Error::VectorWarmup); }
@@ -364,13 +364,13 @@ SimTime VectorModel::initIterate()
     if (needIterate)
     {
         // stabilization + 5 years data-collection time:
-        return SimTime::oneYear() + SimTime::fromYearsI(5);
+        return sim::oneYear() + sim::fromYearsI(5);
     }
     else
     {
         // One year stabilisation, then we're finished:
         initIterations = -1;
-        return SimTime::oneYear();
+        return sim::oneYear();
     }
 }
 
@@ -382,7 +382,7 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
     host.update(human);
     if (simulationMode == forcedEIR)
     {
-        double eir = initialisationEIR[sim::ts0().moduloYearSteps()] * host.relativeAvailabilityHetAge(ageYears);
+        double eir = initialisationEIR[sim::moduloYearSteps(sim::ts0())] * host.relativeAvailabilityHetAge(ageYears);
         mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, eir);
         EIR.assign(1, eir);
     }
@@ -445,7 +445,7 @@ void VectorModel::vectorUpdate(const Population &population)
             // NOTE: calculate availability relative to age at end of time step;
             // not my preference but consistent with TransmissionModel::getEIR().
             // TODO: even stranger since probTransmission comes from the previous time step
-            const double avail = host.entoAvailabilityFull(s, human.age(sim::ts1()).inYears());
+            const double avail = host.entoAvailabilityFull(s, sim::inYears(human.age(sim::ts1())));
             sum_avail[s] += avail;
             const double df = avail * host.probMosqBiting(s) * host.probMosqResting(s);
             sigma_df[s] += df;

@@ -120,14 +120,14 @@ private:
      * is started (UC & severe behaviour different).
      *
      * Note: medications are not delayed by this. */
-    SimTime caseStartTime;
+    SimTime caseStartTime = sim::never();
 
     /** The individual recovers when sim::ts0() >= timeOfRecovery,
      * assuming they didn't die. */
-    SimTime timeOfRecovery;
+    SimTime timeOfRecovery = sim::never();
 
     /// Time at which last treatment was recieved (for second-case considerations).
-    SimTime timeLastTreatment;
+    SimTime timeLastTreatment = sim::never();
 
     /// Total parasite density at last time step (used during a bout).
     double previousDensity;

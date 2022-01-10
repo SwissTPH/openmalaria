@@ -262,7 +262,7 @@ protected:
     
 private:
     // these parameters express the current state of the net:
-    SimTime disposalTime;	// time at which net will be disposed of (if it's not already been replaced)
+    SimTime disposalTime = sim::never();	// time at which net will be disposed of (if it's not already been replaced)
     int nHoles;				// total number of holes
     double holeIndex;		// a measure of both the number and size of holes
     double initialInsecticide;	// units: mg/m²

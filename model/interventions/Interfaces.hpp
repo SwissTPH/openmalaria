@@ -134,7 +134,7 @@ private:
     HumanInterventionComponent& operator= ( const HumanInterventionComponent& ) = delete;
     
     ComponentId m_id;
-    SimTime m_duration;
+    SimTime m_duration = sim::never();
 };
 
 /** A description of a human intervention (as a list of components). */

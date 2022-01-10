@@ -128,14 +128,14 @@ struct MosquitoParams
      * Set in initialise function from XML data; no need to checkpoint.
      * Duration of feeding cycle (equals duration of resting period) for mosquito (τ).
      * Units: days. */
-    SimTime restDuration;
+    SimTime restDuration = sim::never();
 
     /** Duration of the extrinsic incubation period (sporozoite development time)
     * (θ_s).
     * Units: Days.
     *
     * Doesn't need checkpointing. */
-    SimTime EIPDuration;
+    SimTime EIPDuration = sim::never();
 
     string name;
 };
@@ -155,7 +155,7 @@ struct Nhh {
     double P_C_I;
     double P_D_I;
     double rel_fecundity;
-    SimTime expiry;
+    SimTime expiry = sim::never();
 };
 
 struct TrapParams {
@@ -170,8 +170,8 @@ struct TrapData {
     size_t instance; // index in trapParams
     double initialAvail; // initial availability (avail per trap * num traps)
     DecayFuncHet availHet; // parameter for decay of availability
-    SimTime deployTime; // deploy time (for decay function)
-    SimTime expiry; // date at which this intervention should be deleted
+    SimTime deployTime = sim::never(); // deploy time (for decay function)
+    SimTime expiry = sim::never(); // date at which this intervention should be deleted
 };
 
 class AnophelesModel
@@ -192,9 +192,9 @@ public:
             N_v_length(0),
             timeStep_N_v0(0.0)
     {
-        forcedS_v.resize (SimTime::oneYear().inDays());
-        quinquennialS_v.resize (SimTime::fromYearsI(5).inDays(), 0.0);
-        mosqEmergeRate.resize (SimTime::oneYear().inDays(), 0.0);
+        forcedS_v.resize (sim::oneYear());
+        quinquennialS_v.resize (sim::fromYearsI(5), 0.0);
+        mosqEmergeRate.resize (sim::oneYear(), 0.0);
     }
     
     AnophelesModel(const AnophelesModel&) = delete;            //disable copy-constructor
@@ -311,9 +311,9 @@ public:
     virtual double getEmergenceRate(const SimTime &d0, const std::vector<double>& mosqEmergeRate, double nOvipositing)
     {   
         // Get emergence at start of step:
-        SimTime dYear1 = mod_nn(d0, SimTime::oneYear());
+        SimTime dYear1 = mod_nn(d0, sim::oneYear());
         // Simple model: fixed emergence scaled by larviciding
-        return mosqEmergeRate[dYear1.inDays()];
+        return mosqEmergeRate[dYear1];
     }
 
     /** Update by one day (may be called multiple times for 1 time-step update).
@@ -350,7 +350,7 @@ public:
 
     /// Get mean emergence per day during last time-step
     inline double getLastN_v0 () const{
-        return timeStep_N_v0 / SimTime::oneTS().inDays();
+        return timeStep_N_v0 / sim::oneTS();
     }
     
     /// Get mean P_A/P_df/P_dif/N_v/O_v/S_v during last time-step
@@ -521,7 +521,7 @@ public:
      *
      * Values at index ((d-1) mod N_v_length) are used to derive the state of
      * the population on day d. The state during days (t×I+1) through to ((t+1)×I)
-     * where t is sim::ts0() and I is SimTime::oneTS().inDays() is what
+     * where t is sim::ts0() and I is sim::oneTS() is what
      * drives the transmission at time-step t.
      * 
      * These arrays should be checkpointed. */
