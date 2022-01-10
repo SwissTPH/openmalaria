@@ -19,7 +19,7 @@
  */
 
 #include "WHMock.h"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "util/errors.h"
 
 using namespace std;

@@ -23,7 +23,7 @@
 #include "Host/HumanHet.hpp"
 #include "Host/InfectionIncidenceModel.h"
 #include "Clinical/ClinicalModel.h"
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 
 #include "Transmission/TransmissionModel.h"
 #include "util/ModelOptions.h"

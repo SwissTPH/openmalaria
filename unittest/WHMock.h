@@ -22,7 +22,7 @@
 #define Hmod_WithinHost_Mock
 
 #include "Global.h"
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 #include "PkPd/LSTMModel.h"
 
 using namespace std;

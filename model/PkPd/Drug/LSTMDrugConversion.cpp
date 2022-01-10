@@ -19,7 +19,7 @@
  */
 
 #include "PkPd/Drug/LSTMDrugConversion.h"
-#include "WithinHost/Infection/CommonInfection.h"
+#include "Host/WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
 #include "util/vectors.h"

@@ -19,8 +19,8 @@
  */
 
 #include "Clinical/CMDecisionTree.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "PkPd/LSTMTreatments.h"
 #include "util/random.h"
 #include "util/errors.h"

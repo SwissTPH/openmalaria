@@ -20,8 +20,8 @@
 
 #include "Clinical/DecisionTree5Day.h"
 #include "Clinical/CMDecisionTree.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/WHVivax.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHVivax.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/errors.h"

@@ -21,7 +21,7 @@
 #include "Host/InfectionIncidenceModel.h"
 #include "Host/Human.h"
 #include "Transmission/PerHost.h"
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 #include "Parameters.h"
 #include "mon/Continuous.h"
 #include "util/ModelOptions.h"

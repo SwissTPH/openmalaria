@@ -32,8 +32,8 @@
 
 #include "Transmission/PerHost.h"
 #include "Population.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Genotypes.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Genotypes.h"
 #include "mon/Continuous.h"
 #include "mon/info.h"
 #include "util/StreamValidator.h"

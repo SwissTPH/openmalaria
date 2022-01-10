@@ -19,8 +19,8 @@
  */
 
 #include "PkPd/Drug/LSTMDrugType.h"
-#include "WithinHost/Genotypes.h"
-#include "WithinHost/Infection/CommonInfection.h"
+#include "Host/WithinHost/Genotypes.h"
+#include "Host/WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
 #include "util/CommandLine.h"
 #include "PkPd/Drug/LSTMDrugOneComp.h"

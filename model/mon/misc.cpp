@@ -28,7 +28,7 @@
 #include "util/UnitParse.h"
 #include "schema/monitoring.h"
 
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/Diagnostic.h"
 
 #include <gzstream/gzstream.h>
 #include <fstream>

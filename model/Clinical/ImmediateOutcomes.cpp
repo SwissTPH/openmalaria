@@ -19,8 +19,8 @@
  */
 
 #include "Clinical/ImmediateOutcomes.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/WHVivax.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHVivax.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"

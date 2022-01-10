@@ -29,7 +29,7 @@
 #include "Clinical/ImmediateOutcomes.h"
 #include "Host/Human.h"
 #include "Transmission/TransmissionModel.h"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "PkPd/LSTMTreatments.h"
 #include "mon/info.h"
 #include "util/random.h"

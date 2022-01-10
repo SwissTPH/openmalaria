@@ -25,7 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
-#include "WithinHost/Infection/PennyInfection.h"
+#include "Host/WithinHost/Infection/PennyInfection.h"
 #include "util/random.h"
 #include <limits>
 #include <fstream>

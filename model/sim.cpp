@@ -21,18 +21,11 @@
 #include "Global.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
-#include "util/CommandLine.h"
 #include "util/UnitParse.h"
 #include "schema/scenario.h"
 #include "mon/management.h"
 
-#include <cstdlib>
-#include <iomanip>
-#include <regex>
-
 namespace OM {
-
-// ———  SimTime stuff  ———
 
 // Scenario constants
 int SimData::interval;
@@ -41,58 +34,20 @@ double SimData::years_per_step;
 
 SimTime sim::s_start = sim::never();
 SimTime sim::s_end = sim::never();
-
 SimTime sim::s_max_human_age = sim::never();
 
-// Global variables
 #ifndef NDEBUG
 bool sim::in_update = false;
 #endif
 SimTime sim::s_t0 = sim::never();
 SimTime sim::s_t1 = sim::never();
-
 SimTime sim::s_interv = sim::never();
-
-using util::CommandLine;
-
-// ostream& operator<<( ostream& stream, SimTime time ){
-//     if( time % sim::DAYS_IN_YEAR == 0 ){
-//         stream << time.inYears() << 'y';
-//     } else {
-//         stream << time << 'd';
-//     }
-//     return stream;
-// }
-
-// ostream& operator<<( ostream& stream, SimTime date ){
-//     int days = date.d;
-//     if (days < 0) {
-//         // Shouldn't happen; best still to print something
-//         stream << days << 'd';
-//     } else {
-//         int year = days / sim::DAYS_IN_YEAR;
-//         days -= year * sim::DAYS_IN_YEAR;
-        
-//         int month = 0;
-//         while( days >= UnitParse::monthStart[month+1] ) ++month;
-//         days -= UnitParse::monthStart[month];
-//         assert( month < 12 && days < UnitParse::monthLen[month] );
-        
-//         // Inconsistency in year vs month and day: see parseDate()
-//         stream << setfill('0') << setw(4) << year << '-'
-//                 << setw(2) << (month+1) << '-' << (days+1)
-//                 << setw(0) << setfill(' ');
-//     }
-//     return stream;
-// }
 
 void sim::init( const scnXml::Scenario& scenario ){
     SimData::interval = scenario.getModel().getParameters().getInterval();
     SimData::steps_per_year = sim::inSteps(sim::oneYear());
     SimData::years_per_step = 1.0 / SimData::steps_per_year;
-    
-    sim::s_max_human_age =
-        sim::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
+    sim::s_max_human_age = sim::fromYearsD( scenario.getDemography().getMaximumAgeYrs() );
     
     sim::s_start = sim::origin();
     auto mon = scenario.getMonitoring();
@@ -108,8 +63,7 @@ void sim::init( const scnXml::Scenario& scenario ){
         }
     }
     
-    sim::s_interv = sim::never();    // large negative number
-    
+    sim::s_interv = sim::never(); // large negative number
     sim::s_end = mon::readSurveyDates( mon );
 }
 
