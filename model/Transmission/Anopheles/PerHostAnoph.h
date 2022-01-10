@@ -29,38 +29,13 @@ namespace Transmission {
 namespace Anopheles {
 using util::LocalRng;
 
-/** Stores vector model data applicable between a category of host and a
- * mosquito species: intervention descriptions and model parameters.
- *
- * Parameters are read from XML, and the availability rate is adjusted. */
-class PerHostAnophParams {
-public:
-    static inline void initReserve (size_t numSpecies) {
-        params.reserve (numSpecies);
-    }
-    static inline void init (const scnXml::Mosq& mosq) {
-        params.push_back(PerHostAnophParams{ mosq });
-    }
-    
-    /// Get the number of vector species
-    static inline size_t numSpecies() {
-        return params.size();
-    }
-    
-    /// Get parameters for the given vector species
-    static inline const PerHostAnophParams& get(size_t species) {
-        return params[species];
-    }
-    
-    /** entoAvailability is calculated externally, then set after other
-     * parameters have been initialised.
-     * 
-     * This function doesn't need to exist, but helps make this fact obvious.
-     * 
-     * It should be called exactly once.
-      */
-    inline static void scaleEntoAvailability(size_t species, double entoAvailability){
-        params[species].entoAvailability.scaleMean( entoAvailability );
+struct PerHostAnophParamsData
+{
+    PerHostAnophParamsData (const scnXml::Mosq& mosq) {
+        entoAvailability.setParams( 1.0, mosq.getAvailability() );
+        probMosqBiting.setParams( mosq.getMosqProbBiting() );
+        probMosqFindRestSite.setParams( mosq.getMosqProbFindRestSite() );
+        probMosqSurvivalResting.setParams( mosq.getMosqProbResting() );
     }
 
     /** @brief Probabilities of finding a host and surviving a feeding cycle
@@ -82,11 +57,44 @@ public:
      * (P_D_i). */
     util::BetaSampler probMosqSurvivalResting;
     //@}
-    
-private:
-    PerHostAnophParams (const scnXml::Mosq& mosq);
+};
 
-    static vector<PerHostAnophParams> params;
+/** Stores vector model data applicable between a category of host and a
+ * mosquito species: intervention descriptions and model parameters.
+ *
+ * Parameters are read from XML, and the availability rate is adjusted. */
+class PerHostAnophParams {
+public:
+    static inline void initReserve (size_t numSpecies) {
+        params.reserve (numSpecies);
+    }
+
+    static inline void init (const scnXml::Mosq& mosq) {
+        params.push_back(PerHostAnophParamsData(mosq));
+    }
+    
+    /// Get the number of vector species
+    static inline size_t numSpecies() {
+        return params.size();
+    }
+    
+    /// Get parameters for the given vector species
+    static inline const PerHostAnophParamsData& get(size_t species) {
+        return params[species];
+    }
+    
+    /** entoAvailability is calculated externally, then set after other
+     * parameters have been initialised.
+     * 
+     * This function doesn't need to exist, but helps make this fact obvious.
+     * 
+     * It should be called exactly once.
+      */
+    inline static void scaleEntoAvailability(size_t species, double entoAvailability){
+        params[species].entoAvailability.scaleMean( entoAvailability );
+    }
+
+    static inline vector<PerHostAnophParamsData> params;
 };
 
 /** Data needed for each human which is per-mosquito species. */
@@ -95,7 +103,15 @@ class PerHostAnoph
 public:
     /** In lieu of a constructor initialises elements, using the passed base to
      * get baseline parameters. */
-    void initialise (LocalRng& rng, size_t species, double availabilityFactor);
+    void initialise (LocalRng& rng, size_t species, double availabilityFactor)
+    {
+        const PerHostAnophParamsData& base = PerHostAnophParams::get(species);
+        entoAvailability = base.entoAvailability.sample(rng) * availabilityFactor;
+        probMosqBiting = base.probMosqBiting.sample(rng);
+        auto pRest1 = base.probMosqFindRestSite.sample(rng);
+        auto pRest2 = base.probMosqSurvivalResting.sample(rng);
+        probMosqRest = pRest1 * pRest2;
+    }
     
     /// Checkpointing
     template<class S>
