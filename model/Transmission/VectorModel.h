@@ -68,7 +68,6 @@ public:
     virtual SimTime initIterate();
 
     virtual void vectorUpdate(const Population &population);
-    virtual void update(const Population &population);
 
     virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const;
 

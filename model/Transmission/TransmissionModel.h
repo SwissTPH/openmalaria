@@ -183,11 +183,6 @@ public:
      *
      * when the vector model is used this updates mosquito populations. */
     virtual void vectorUpdate(const Population &population){};
-    /** Needs to be called each time-step after Human::update().
-     *
-     * Updates summary statistics related to transmission as well as the
-     * the non-vector model (when in use). */
-    virtual void update(const Population &population) = 0;
 
     virtual void changeEIRIntervention(const scnXml::NonVector &)
     {
@@ -240,22 +235,10 @@ public:
      * infection, humans will then be exposed to zero EIR. */
     virtual void uninfectVectors() = 0;
 
-protected:
-    /** Calculates the EIR individuals are exposed to.
-     *
-     * Call once per time-step: updates ITNs in vector model.
-     *
-     * @param host Transmission data for the human to calculate EIR for.
-     * @param ageGroupData Age group of this host for availablility data.
-     * @param EIR Out-vector. Set to the age- and heterogeneity-specific EIR an
-     *    individual human is exposed to, per parasite genotype, in units of
-     *    inoculations per day. Length set by callee. */
-    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const = 0;
-
     /** Needs to be called each time-step after Human::update() to update summary
      * statististics related to transmission. Also returns kappa (the average
      * human infectiousness weighted by availability to mosquitoes). */
-    double updateKappa(const Population &population)
+    virtual double updateKappa(const Population &population)
     {
         // We calculate kappa for output and the non-vector model.
         double sumWt_kappa = 0.0;
@@ -310,6 +293,18 @@ protected:
 
         return laggedKappa[lKMod]; // kappa now
     }
+
+protected:
+    /** Calculates the EIR individuals are exposed to.
+     *
+     * Call once per time-step: updates ITNs in vector model.
+     *
+     * @param host Transmission data for the human to calculate EIR for.
+     * @param ageGroupData Age group of this host for availablility data.
+     * @param EIR Out-vector. Set to the age- and heterogeneity-specific EIR an
+     *    individual human is exposed to, per parasite genotype, in units of
+     *    inoculations per day. Length set by callee. */
+    virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const = 0;
 
     virtual void checkpoint(istream &stream)
     {

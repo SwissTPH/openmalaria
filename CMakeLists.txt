@@ -154,7 +154,7 @@ include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
 
-add_executable (openMalaria model/openMalaria.cpp)
+add_executable (openMalaria model/main.cpp)
 
 target_link_libraries (openMalaria
   model

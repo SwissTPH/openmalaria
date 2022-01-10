@@ -169,10 +169,11 @@ public:
         laggedKappa.assign(laggedKappa.size(), 0.0);
     }
 
-    virtual void update(const Population &population)
+    virtual double updateKappa(const Population &population)
     {
         double currentKappa = TransmissionModel::updateKappa(population);
         if (simulationMode == forcedEIR) { initialKappa[sim::moduloSteps(sim::ts1(), initialKappa.size())] = currentKappa; }
+        return currentKappa;
     }
 
     virtual void calculateEIR(Host::Human &human, double ageYears, vector<double> &EIR) const
