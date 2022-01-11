@@ -96,6 +96,7 @@ public:
         // accuracy). These stats look similar to and possibly better than those
         // from the pairwise model, when compared to those in the paper.
         stats.compare( "MolineauxStatsOrig" );
+        stats.print();
     }
     
     void testMolOrigRG(){
@@ -106,6 +107,7 @@ public:
         // accuracy). These stats look similar to and possibly better than those
         // from the pairwise model, when compared to those in the paper.
         stats.compare( "MolineauxStatsOrigRG" );
+        stats.print();
     }
     /*
     void dont_testMol1MG(){
@@ -171,6 +173,7 @@ public:
         // first peak and prop_pos_1st reasonably well, but the interval stats,
         // prop_pos_2nd and last_pos_day don't match well.
         stats.compare( "MolineauxStatsPairwise" );
+        stats.print();
     }
     
     void testMolPairwiseRG(){
@@ -181,6 +184,7 @@ public:
         // accuracy). This one compares a little more favourably tho the stats
         // in the paper than without replication gamma, though only a little.
         stats.compare( "MolineauxStatsPairwiseRG" );
+        stats.print();
     }
 
 private:
