@@ -277,7 +277,7 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
     P_Ah.resize(N_v_length, numeric_limits<double>::quiet_NaN());
 
     // Initialize per-day variables; S_v, N_v and O_v are only estimated
-    assert(N_v_length <= forcedS_v.size());
+    assert(N_v_length <= (int)forcedS_v.size());
     for (int t = 0; t < N_v_length; t++)
     {
         P_A[t] = tsP_A;

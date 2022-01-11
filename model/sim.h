@@ -256,7 +256,7 @@ public:
     static inline SimTime s_interv = sim::never();
 
 #ifndef NDEBUG
-    static bool in_update = false;       // only true during human/population/transmission update
+    static inline bool in_update = false;       // only true during human/population/transmission update
 #endif
 };
 
