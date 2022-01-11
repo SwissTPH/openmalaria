@@ -105,7 +105,7 @@ public:
 
         int y1 = sim::oneYear(), y2 = sim::fromYearsI(2), y3 = sim::fromYearsI(3), y4 = sim::fromYearsI(4),
                 y5 = sim::fromYearsI(5);
-        assert(mosqEmergeRate.size() == y1);
+        assert((int)mosqEmergeRate.size() == y1);
 
         for (int t = 0; t < y1; t++)
         {

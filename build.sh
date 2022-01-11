@@ -16,6 +16,7 @@ SWITCHBRANCH=0
 
 # options
 CLEAN=0         # Clean build/
+DEBUG=0
 TESTS=OFF       # Don't generate tests
 RUNTESTS=0      # Don't run tests
 JOBS=4          # 4 threads
@@ -41,6 +42,7 @@ printHelp () {
     echo "Options:"
     echo "  -b, --branch=<name>"    "specify the branch (master)"
     echo "  -c, --clean"            "clean build folder (false)"
+    echo "  -d, --debug"            "build in debug mode (false)"
     echo "  -t, --tests"            "run the tests (false)"
     echo "  -r, --release"          "generate the release artifcat (false)"
     echo "  -a, --artifact=<name>"  "specify the artifcat name (openMalaria-VERSION)"
@@ -53,6 +55,7 @@ parseArguments () {
         case $i in
             -b=*|--branch=*)    BRANCH="${i#*=}"; SWITCHBRANCH=1 && shift ;;
             -c|--clean)         CLEAN=1 && shift ;;
+            -d|--debug)         DEBUG=1 && shift ;;
             -t|--tests)         TESTS=ON && shift ;;
             -r|--release)       CREATERELEASE=1 && shift ;;
             -a=*|--artifact=*)  ARTIFACT=${i#*=} && shift ;;
@@ -108,7 +111,11 @@ build () {
     # Compile OpenMalaria
     cd build
     which cmake
-    cmake -DCMAKE_BUILD_TYPE=Release -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
+    if [ $DEBUG -eq 1 ]; then
+        cmake -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
+    else
+        cmake -DCMAKE_BUILD_TYPE=Release -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
+    fi
     cd ..
 }
 

@@ -75,7 +75,7 @@ namespace vectors {
   /** Return true if, approximately, a == b
    *
    * In detail: true when (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact). */
-  inline bool approxEqual (const double a, const double b, const double lim_fact) {
+  inline bool approxEqual (const double a, const double b, const double lim_fact = 1e-6) {
     bool aE = (fabs(a-b) <= max(fabs(a),fabs(b)) * lim_fact);
 #ifndef NDEBUG
     if (!aE){

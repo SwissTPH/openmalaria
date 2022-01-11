@@ -207,7 +207,7 @@ public:
 #ifndef NDEBUG
         if (!(std::isfinite)(EIR[0]))
         {
-            size_t t = (sim::ts1() - nSpore).inSteps();
+            size_t t = sim::inSteps(sim::ts1() - nSpore);
             ostringstream msg;
             msg << "Error: non-vect eir is: " << EIR[0] << "\nlaggedKappa:\t" << laggedKappa[mod_nn(t, laggedKappa.size())]
                 << "\ninitialKappa:\t" << initialKappa[mod_nn(t, sim::stepsPerYear())] << endl;
