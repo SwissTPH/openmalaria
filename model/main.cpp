@@ -74,7 +74,10 @@ void print_errno()
 void loop(const SimTime humanWarmupLength, Population &population, TransmissionModel &transmission, SimTime &endTime, SimTime &estEndTime, int lastPercent)
 {
     while (sim::now() < endTime)
-    {        
+    {
+        if (util::CommandLine::option(util::CommandLine::VERBOSE) && sim::intervDate() > 0)
+            cout << "Time step: " << sim::now() / sim::oneTS() << ", internal days: " << sim::now() << " | " << estEndTime << ", Intervention Date: " << sim::intervDate() << endl;
+
         // Monitoring. sim::now() gives time of end of last step,
         // and is when reporting happens in our time-series.
         Continuous.update( population );
@@ -214,6 +217,8 @@ int main(int argc, char* argv[])
         if(!startedFromCheckpoint)
         {
             endTime = humanWarmupLength;
+            if (util::CommandLine::option(util::CommandLine::VERBOSE))
+                cout << "Warmup..." << endl;
             loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
         }
 
@@ -227,6 +232,8 @@ int main(int argc, char* argv[])
                 endTime = endTime + iterate;
                 // adjust estimation of final time step: end of current period + length of main phase
                 estEndTime = endTime + (sim::endDate() - sim::startDate()) + sim::oneTS();
+                if (util::CommandLine::option(util::CommandLine::VERBOSE))
+                    cout << "EIR Calibration..." << endl;
                 loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
                 iterate = transmission->initIterate();
             }
@@ -256,6 +263,8 @@ int main(int argc, char* argv[])
         }
 
         // Main phase loop
+        if (util::CommandLine::option(util::CommandLine::VERBOSE))
+            cout << "Intervention phase..." << endl;
         loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
        
         cerr << '\r' << flush;  // clean last line of progress-output
