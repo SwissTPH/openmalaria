@@ -48,9 +48,9 @@ inline int floorToInt( double x ){
 class SimData {
     enum { DAYS_IN_YEAR = 365 };
     
-    static int interval;        // days per time step
-    static size_t steps_per_year;
-    static double years_per_step;
+    static inline int interval;        // days per time step
+    static inline size_t steps_per_year;
+    static inline double years_per_step;
     friend class sim;
 };
 
@@ -248,15 +248,15 @@ public:
     }
     
     // Scenario constants
-    static SimTime s_start;
-    static SimTime s_end;
-    static SimTime s_max_human_age;
-    static SimTime s_t0;
-    static SimTime s_t1;
-    static SimTime s_interv;
+    static inline SimTime s_start = sim::never();
+    static inline SimTime s_end = sim::never();
+    static inline SimTime s_max_human_age = sim::never();
+    static inline SimTime s_t0 = sim::never();
+    static inline SimTime s_t1 = sim::never();
+    static inline SimTime s_interv = sim::never();
 
 #ifndef NDEBUG
-    static bool in_update;       // only true during human/population/transmission update
+    static bool in_update = false;       // only true during human/population/transmission update
 #endif
 };
 

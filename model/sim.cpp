@@ -28,22 +28,6 @@
 
 namespace OM {
 
-// Scenario constants
-int SimData::interval;
-size_t SimData::steps_per_year;
-double SimData::years_per_step;
-
-SimTime sim::s_start = sim::never();
-SimTime sim::s_end = sim::never();
-SimTime sim::s_max_human_age = sim::never();
-
-#ifndef NDEBUG
-bool sim::in_update = false;
-#endif
-SimTime sim::s_t0 = sim::never();
-SimTime sim::s_t1 = sim::never();
-SimTime sim::s_interv = sim::never();
-
 void sim::init( const scnXml::Scenario& scenario ){
     SimData::interval = scenario.getModel().getParameters().getInterval();
     SimData::steps_per_year = sim::inSteps(sim::oneYear());
