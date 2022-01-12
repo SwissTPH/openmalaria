@@ -217,9 +217,9 @@ int main(int argc, char* argv[])
         if(!startedFromCheckpoint)
         {
             endTime = humanWarmupLength;
-            if (util::CommandLine::option(util::CommandLine::VERBOSE))
-                cout << "Warmup..." << endl;
+            if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Starting Warmup..." << endl;
             loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
+            if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Finishing Warmup..." << endl;
         }
 
         /** Transmission init phase:
@@ -232,9 +232,9 @@ int main(int argc, char* argv[])
                 endTime = endTime + iterate;
                 // adjust estimation of final time step: end of current period + length of main phase
                 estEndTime = endTime + (sim::endDate() - sim::startDate()) + sim::oneTS();
-                if (util::CommandLine::option(util::CommandLine::VERBOSE))
-                    cout << "EIR Calibration..." << endl;
+                if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Starting EIR Calibration..." << endl;
                 loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
+                if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Finishing EIR Calibration..." << endl;
                 iterate = transmission->initIterate();
             }
         }
@@ -263,9 +263,9 @@ int main(int argc, char* argv[])
         }
 
         // Main phase loop
-        if (util::CommandLine::option(util::CommandLine::VERBOSE))
-            cout << "Intervention phase..." << endl;
+        if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Starting Intervention period..." << endl;
         loop(humanWarmupLength, *population, *transmission, endTime, estEndTime, lastPercent);
+        if (util::CommandLine::option(util::CommandLine::VERBOSE)) cout << "Finishing Intervention period..." << endl;
        
         cerr << '\r' << flush;  // clean last line of progress-output
         

@@ -77,7 +77,7 @@ public:
     }
     virtual void deploy (Population& population, Transmission::TransmissionModel& transmission) {}
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tdummy (no interventions)";
+        out << "Dummy";
     }
 };
 
@@ -93,7 +93,7 @@ public:
         newHS = 0;
     }
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tchange HS";
+        out << "ChangeHS";
     }
     
 private:
@@ -112,7 +112,7 @@ public:
         newEIR = 0;
     }
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tchange EIR";
+        out << "ChangeEIR";
     }
     
 private:
@@ -128,7 +128,7 @@ public:
         transmission.uninfectVectors();
     }
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tuninfect vectors";
+        out << "UninfectVectors";
     }
 };
 
@@ -221,11 +221,11 @@ public:
     }
     
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t"
-            << sim::inYears(minAge) << "y\t" << sim::inYears(maxAge) << "t\t";
-        if( subPop == ComponentId::wholePop() ) out << "(none)";
+        out << "Human:" << endl;
+        out << "\tage: " << sim::inYears(minAge) << "y\tmax age: " << sim::inYears(maxAge) << "y\tsubpop: ";
+        if( subPop == ComponentId::wholePop() ) out << "whole";
         else out << subPop.id;
-        out << '\t' << complement << '\t' << coverage << '\t';
+        out << "\tcomplement: " << complement << "\tcoverage: " << coverage << "\t";
         intervention->print_details( out );
     }
     
@@ -302,7 +302,7 @@ public:
             vectorModel->deployVectorPopInterv(inst);
     }
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tvector";
+        out << "Vector";
     }
     
 private:
@@ -323,7 +323,8 @@ public:
         }
     }
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tvector trap";
+        out << "VectorTrap:" << endl;
+        out << "\tratio: " << ratio << "\tlifespan: " << lifespan; 
     }
     
 private:
@@ -415,7 +416,7 @@ public:
         }
     }
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tnhh";
+        out << "NonHumanHosts(" << intervName << ")";
     }
     
 private:
@@ -484,7 +485,8 @@ public:
         }
     }
     virtual void print_details( std::ostream& out )const{
-        out << date << "\t\t\t\t\tnhh";
+        out << "AddNonHumanHosts(" << intervName << "):" << endl;
+        out << "\tlifespan: " << lifespan;
     }
     
 private:
@@ -557,13 +559,14 @@ public:
     }
     
     inline void print_details( std::ostream& out )const{
-        out << begin << "\t";
+        out << "Human:" << endl;
+        out << "\tbegin: " << begin << "\tend: ";
         if( end == sim::future() ) out << "(none)";
-        else out << end << 't';
-        out << '\t' << sim::inYears(deployAge) << "y\t";
-        if( subPop == ComponentId::wholePop() ) out << "(none)";
+        else out << end;
+        out << "\tdeployAge: " << sim::inYears(deployAge) << "y\tsubpop: ";
+        if( subPop == ComponentId::wholePop() ) out << "whole";
         else out << subPop.id;
-        out << '\t' << complement << '\t' << coverage << '\t';
+        out << "\tcomplement: " << complement << "\tcoverage: " << coverage << "\t";
         intervention->print_details( out );
     }
     

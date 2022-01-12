@@ -544,7 +544,7 @@ void InterventionManager::deploy(Population &population, Transmission::Transmiss
     {
         if (util::CommandLine::option(util::CommandLine::VERBOSE))
         {
-            cout << "deploy::Timed" << endl;
+            cout << "deploy::" << now << "::Timed";
             timed[nextTimed]->print_details(cout);
             cout << endl;
         }
@@ -562,7 +562,7 @@ void InterventionManager::deploy(Population &population, Transmission::Transmiss
         {
             if (util::CommandLine::option(util::CommandLine::VERBOSE))
             {
-                cout << "deploy::Continuous" << endl;
+                cout << "deploy::" << now << "::Continuous";
                 continuous[nextCtsDist].print_details(cout);
                 cout << endl;
             }
