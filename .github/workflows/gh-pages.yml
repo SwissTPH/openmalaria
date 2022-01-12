@@ -34,8 +34,8 @@ jobs:
           ../../util/generateDoc.py --mdbook -O src ../schema/scenario_current.xsd ../../schema/scenario_*.xsd
           ln -s $(ls src/ | egrep "schema-[0-9]" | sort -nr -t- -k2 | head -n1) src/schema-latest.md
           ./mdbook build
-          cp ../../util/fourier.html .
           popd && popd
+          cp ../../util/fourier.html build/generated/book/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
