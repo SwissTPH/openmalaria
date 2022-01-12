@@ -542,6 +542,13 @@ void InterventionManager::deploy(Population &population, Transmission::Transmiss
     SimTime now = sim::intervDate();
     while (timed[nextTimed]->date <= now)
     {
+        if (util::CommandLine::option(util::CommandLine::VERBOSE))
+        {
+            cout << "deploy::" << now << "::Timed";
+            timed[nextTimed]->print_details(cout);
+            cout << endl;
+        }
+
         timed[nextTimed]->deploy(population, transmission);
         nextTimed += 1;
     }
@@ -553,6 +560,12 @@ void InterventionManager::deploy(Population &population, Transmission::Transmiss
         // deploy continuous interventions
         while (nextCtsDist < continuous.size())
         {
+            if (util::CommandLine::option(util::CommandLine::VERBOSE))
+            {
+                cout << "deploy::" << now << "::Continuous";
+                continuous[nextCtsDist].print_details(cout);
+                cout << endl;
+            }
             if (!continuous[nextCtsDist].filterAndDeploy(*it, population)) break; // deployment (and all remaining) happens in the future
             nextCtsDist = it->incrNextCtsDist();
         }

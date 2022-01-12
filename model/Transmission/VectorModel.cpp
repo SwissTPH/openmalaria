@@ -207,7 +207,7 @@ VectorModel::VectorModel(vector<double> initEIR, int interventionMode, vector<st
         ctsRA, ctsRR;
 
     size_t numSpecies = species.size();
-    cout << "numSpecies " << numSpecies << endl;
+
     // Output in order of species so that (1) we can just iterate through this
     // list when outputting and (2) output is in order specified in XML.
     for (size_t i = 0; i < numSpecies; ++i)
