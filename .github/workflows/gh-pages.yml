@@ -2,13 +2,8 @@ name: GitHub Pages
 
 on:
   push:
-    branches:
-      - '*'
     tags:
-      - '*'
-  pull_request:
-    branches:
-      - '*'
+      - 'schema-*'
 
   workflow_dispatch:
 
@@ -41,7 +36,7 @@ jobs:
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
-        if: startsWith(github.ref, 'refs/tags/schema-')
+        if: github.ref == 'refs/heads/master'
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/generated/book
