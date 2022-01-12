@@ -35,7 +35,7 @@ jobs:
           ln -s $(ls src/ | egrep "schema-[0-9]" | sort -nr -t- -k2 | head -n1) src/schema-latest.md
           ./mdbook build
           popd && popd
-          cp ../../util/fourier.html build/generated/book/
+          cp util/fourier.html build/generated/book/
 
       - name: Deploy
         uses: peaceiris/actions-gh-pages@v3
