@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script>
+  	class baseComplexArray {
+  constructor(other, arrayType = Float32Array) {
+    if (other instanceof ComplexArray) {
+      // Copy constuctor.
+      this.ArrayType = other.ArrayType;
+      this.real = new this.ArrayType(other.real);
+      this.imag = new this.ArrayType(other.imag);
+    } else {
+      this.ArrayType = arrayType;
+      // other can be either an array or a number.
+      this.real = new this.ArrayType(other);
+      this.imag = new this.ArrayType(this.real.length);
+    }
+
+    this.length = this.real.length;
+  }
+
+  toString() {
+    const components = [];
+
+    this.forEach((value, i) => {
+      components.push(
+        `(${value.real.toFixed(2)}, ${value.imag.toFixed(2)})`
+      );
+    });
+
+    return `[${components.join(', ')}]`;
+  }
+
+  forEach(iterator) {
+    const n = this.length;
+    // For gc efficiency, re-use a single object in the iterator.
+    const value = Object.seal(Object.defineProperties({}, {
+      real: {writable: true}, imag: {writable: true},
+    }));
+
+    for (let i = 0; i < n; i++) {
+      value.real = this.real[i];
+      value.imag = this.imag[i];
+      iterator(value, i, n);
+    }
+  }
+
+  // In-place mapper.
+  map(mapper) {
+    this.forEach((value, i, n) => {
+      mapper(value, i, n);
+      this.real[i] = value.real;
+      this.imag[i] = value.imag;
+    });
+
+    return this;
+  }
+
+  conjugate() {
+    return new ComplexArray(this).map((value) => {
+      value.imag *= -1;
+    });
+  }
+
+  magnitude() {
+    const mags = new this.ArrayType(this.length);
+
+    this.forEach((value, i) => {
+      mags[i] = Math.sqrt(value.real*value.real + value.imag*value.imag);
+    })
+
+    return mags;
+  }
+}
+
+// Math constants and functions we need.
+const PI = Math.PI;
+const SQRT1_2 = Math.SQRT1_2;
+
+function FFT(input) {
+  return ensureComplexArray(input).FFT();
+};
+
+function InvFFT(input) {
+  return ensureComplexArray(input).InvFFT();
+};
+
+function frequencyMap(input, filterer) {
+  return ensureComplexArray(input).frequencyMap(filterer);
+};
+
+class ComplexArray extends baseComplexArray {
+  FFT() {
+    return fft(this, false);
+  }
+
+  InvFFT() {
+    return fft(this, true);
+  }
+
+  // Applies a frequency-space filter to input, and returns the real-space
+  // filtered input.
+  // filterer accepts freq, i, n and modifies freq.real and freq.imag.
+  frequencyMap(filterer) {
+    return this.FFT().map(filterer).InvFFT();
+  }
+}
+
+function ensureComplexArray(input) {
+  return input instanceof ComplexArray && input || new ComplexArray(input);
+}
+
+function fft(input, inverse) {
+  const n = input.length;
+  return FFT_Recursive(input, inverse);
+}
+
+function FFT_Recursive(input, inverse) {
+  const n = input.length;
+
+  if (n === 1) {
+    return input;
+  }
+
+  const output = new ComplexArray(n, input.ArrayType);
+
+  // Use the lowest odd factor, so we are able to use FFT_2_Iterative in the
+  // recursive transforms optimally.
+  const p = LowestOddFactor(n);
+  const m = n / p;
+  const normalisation = 1 / Math.sqrt(p);
+  let recursive_result = new ComplexArray(m, input.ArrayType);
+
+  // Loops go like O(n Σ p_i), where p_i are the prime factors of n.
+  // for a power of a prime, p, this reduces to O(n p log_p n)
+  for(let j = 0; j < p; j++) {
+    for(let i = 0; i < m; i++) {
+      recursive_result.real[i] = input.real[i * p + j];
+      recursive_result.imag[i] = input.imag[i * p + j];
+    }
+    // Don't go deeper unless necessary to save allocs.
+    if (m > 1) {
+      recursive_result = fft(recursive_result, inverse);
+    }
+
+    const del_f_r = Math.cos(2*PI*j/n);
+    const del_f_i = (inverse ? -1 : 1) * Math.sin(2*PI*j/n);
+    let f_r = 1;
+    let f_i = 0;
+
+    for(let i = 0; i < n; i++) {
+      const _real = recursive_result.real[i % m];
+      const _imag = recursive_result.imag[i % m];
+
+      output.real[i] += f_r * _real - f_i * _imag;
+      output.imag[i] += f_r * _imag + f_i * _real;
+
+      [f_r, f_i] = [
+        f_r * del_f_r - f_i * del_f_i,
+        f_i = f_r * del_f_i + f_i * del_f_r,
+      ];
+    }
+  }
+
+  // Copy back to input to match FFT_2_Iterative in-placeness
+  // TODO: faster way of making this in-place?
+  for(let i = 0; i < n; i++) {
+    input.real[i] = output.real[i];
+    input.imag[i] = output.imag[i];
+  }
+
+  return input;
+}
+
+function LowestOddFactor(n) {
+  const sqrt_n = Math.sqrt(n);
+  let factor = 3;
+
+  while(factor <= sqrt_n) {
+    if (n % factor === 0) return factor;
+    factor += 2;
+  }
+  return n;
+}
+
+function cleanCanvas(element_id) {
+  const c = document.getElementById(element_id);
+  var ctx = c.getContext("2d");
+  ctx.clearRect(0, 0, c.width, c.height);
+}
+
+function drawArrayToCanvas(element_id, data, color, MINY, MAXY) {
+  const c = document.getElementById(element_id);
+  var ctx = c.getContext("2d");
+
+  ctx.strokeStyle = color;
+
+  var rangeX = data.length;
+  var rangeY = MAXY-MINY;
+
+  var offset = 0;
+  //if(MINY < 0) {
+  	offset = -MINY;
+  //}
+
+  var scaleX = Math.min(c.width / rangeX);
+  var scaleY = Math.min(c.height * 0.9 / rangeY);
+
+  // console.log(c.height, rangeY, scaleY);
+
+  ctx.save();
+  ctx.beginPath();
+  data.forEach((v, i) => {
+    var x = i;
+    var y = v;
+    x = x * scaleX;
+    y = c.height - (y+offset) * scaleY;
+    ctx.lineTo(x,y);
+  });
+  ctx.stroke();
+  ctx.restore();
+}
+
+function ifft(a, b, N, P) {
+  var signal = new Array(P)
+  for(var x=0; x<P; x++) {
+    var temp = a[0] / 2.0
+    for(var n=1; n<N; n++) {
+      var wt = (2.0 * Math.PI * n * x)/P
+      temp += a[n] * Math.cos(wt) + b[n] * Math.sin(wt)
+    }
+    signal[x] = temp
+  }
+  return signal
+}
+
+/* function */
+function plot(){
+  var textarea = document.getElementById('timeseries');
+  var timeseries = textarea.value.split("\n");
+  var size = timeseries.length;
+
+  for(var i=0; i<size; i++) {
+    var v = parseFloat(timeseries[i]);
+    if(v != 0)
+      v = Math.log(v);
+
+     timeseries[i] = v;
+  }
+
+  const data = new ComplexArray(size).map((value, i, n) => {
+    value.real = timeseries[i];
+  });
+
+  data.FFT();
+  
+  var miny = Infinity;
+  var maxy = -Infinity;
+  for(var i=0; i<size; i++) {
+    miny = Math.min(miny,timeseries[i]);
+    maxy = Math.max(maxy,timeseries[i]);
+  }
+
+  var P = size;
+  var N = document.getElementById('N').value;
+
+  var a = new Array(size);
+  var b = new Array(size);
+  for(var i=0; i<size; i++) {
+    a[i] = data.real[i] * 2.0 / size;
+    b[i] = data.imag[i] * 2.0 / size;
+  }
+
+  var size = 12;
+  var P = 365;
+  var N = document.getElementById('N').value;
+
+  a[0] = 0; // Will be scaled later
+  var signal = ifft(a, b, N, P);
+
+  var sumEIR = 0;
+  for(var i=0; i<size; i++) {
+    timeseries[i] = Math.exp(timeseries[i]);
+    sumEIR += timeseries[i];
+  }
+
+  var iSumEIR = 0;
+  for(var i=0; i<P; i++) {
+    signal[i] = Math.exp(signal[i]);
+    iSumEIR += signal[i];
+  }
+
+  // console.log(a[0], iSumEIR, sumEIR, iSumEIR / sumEIR);
+
+  // Scale to original annual EIR (sumEIR)
+  a[0] = Math.log( sumEIR / iSumEIR) * 2.0;
+
+  var signal = ifft(a, b, N, P);
+
+  var iSumEIR = 0;
+  for(var i=0; i<P; i++) {
+    signal[i] = Math.exp(signal[i]);
+    iSumEIR += signal[i];
+  }
+
+  // console.log(a[0], iSumEIR, sumEIR, iSumEIR / sumEIR);
+
+  var minyT, maxyT, minyS, maxyS;
+  minyT = minyS = Infinity; 
+  maxyT = maxyS = -Infinity; 
+
+  for(var i=0; i<size; i++) {
+    minyT = Math.min(minyT,timeseries[i]);
+    maxyT = Math.max(maxyT,timeseries[i]);
+  }
+
+  for(var i=0; i<P; i++) {
+    minyS = Math.min(minyS,signal[i]);
+    maxyS = Math.max(maxyS,signal[i]);
+  }
+
+  cleanCanvas('fft');
+  drawArrayToCanvas('fft', timeseries, 'blue', minyT, maxyT);
+  drawArrayToCanvas('fft', signal, 'orange', minyS, maxyS);
+
+  var xml = '<fourierSeries EIRRotateAngle="0">\n'
+  for(var i=1; i<N; i++) {
+    xml += '<coeffic a="' + a[i] + '" b="' + b[i] + '"/>\n';
+  }
+  xml += "</fourierSeries>";
+  var output = document.getElementById("coefficients");
+  output.value = xml;
+
+  var annualEIR = document.getElementById("annualEIR");
+  annualEIR.value = sumEIR;
+
+  var daily = document.getElementById("daily");
+  daily.value = signal.toString().replaceAll(",", "\n");
+}
+
+/* function */
+function plotReverse(){
+  var textarea = document.getElementById('icoeffs');
+  var coeffs = textarea.value.split("\n");
+
+  var annualEIR = parseFloat(document.getElementById('iannualEIR').value);
+
+  // Set a0 to 0, will be scaled later
+  var ca = ["0"];
+  var cb = ["0"];
+
+  ca = ca.concat(coeffs[0].split(" "));
+  cb = cb.concat(coeffs[1].split(" "));
+
+  var a = new Array(coeffs[0].length);
+  var b = new Array(coeffs[1].length);
+
+  for(var i=0; i<ca.length; i++) {
+    a[i] = parseFloat(ca[i]);
+  }
+
+  for(var i=0; i<cb.length; i++) {
+    b[i] = parseFloat(cb[i]);
+  }
+
+  var size = 365;
+  var P = size;
+  var N = document.getElementById('N').value;
+
+  var timeseries = ifft(a, b, N, P);
+
+  var sumEIR = 0;
+  for(var i=0; i<size; i++) {
+      timeseries[i] = Math.exp(timeseries[i]);
+      sumEIR += timeseries[i];
+  }
+
+  console.log(a[0], sumEIR, annualEIR, annualEIR / sumEIR);
+
+  // Scale to specified annual EIR
+  a[0] = Math.log(annualEIR / sumEIR) * 2.0;
+
+  var timeseries = ifft(a, b, N, P);
+  sumEIR = 0;
+  for(var i=0; i<size; i++) {
+      timeseries[i] = Math.exp(timeseries[i]);
+      sumEIR += timeseries[i];
+  }
+
+  console.log(a[0], sumEIR, annualEIR, annualEIR / sumEIR);
+
+  var miny, maxy;
+  miny = Infinity;
+  maxy = -Infinity;
+  for(var i=0; i<size; i++) {
+    miny = Math.min(miny,timeseries[i]);
+    maxy = Math.max(maxy,timeseries[i]);
+  }
+
+  cleanCanvas('ifft');
+  drawArrayToCanvas('ifft', timeseries, 'blue', miny, maxy);
+  
+  var output = document.getElementById("result");
+  output.value = timeseries.toString().replaceAll(",", "\n");
+}
+
+window.onload = function() {
+  /* event listener */
+  document.getElementsByName("compute")[0].addEventListener('click', plot);
+  document.getElementsByName("reverse")[0].addEventListener('click', plotReverse);
+}
+
+  </script>
+<style>
+ body {
+  font-family: sans-serif;
+  padding: 20px;
+}
+
+#left {
+  width: 520px;
+  float: left;
+}
+
+#right {
+  margin-left: 520px;
+  /* Change this to whatever the width of your left column is*/
+}
+.clear {
+  clear: both;
+}
+
+.panel {
+	margin-top: 10px;
+  width: 400px;
+}
+
+.right {
+  margin-left: auto;
+}
+
+button {
+	margin: 0px 0px 5px 0px;
+}
+</style>
+  <title>EIR Series to Fourier Coefficient Calculator</title>
+</head>
+<body>
+<h1>Fourier Coefficients Calculator</h1>
+<div id="container">
+<div id="left">
+<form>
+<b>1. From monthly EIR values.</br>(one value per row, no enmpty rows):</b>
+<textarea rows="13" cols="50" id="timeseries">
+25.0
+49.5
+50.2
+59.5
+47.2
+30.8
+13.5
+7.3
+12.2
+19.3
+25.3
+43.4</textarea>
+<br>
+<b>Number of Fourier Coefficients: <b><input type="text" id="N" value="3"></input>
+<br>
+<button padding=5px type="button" name="compute">Compute</button>
+</form>
+<div class="panel">
+    Annual EIR:</br>
+    <input type="text" id="annualEIR" readonly></textarea></br>
+    </br>
+    Fourier Coefficients (output):</br>
+    <textarea id="coefficients" rows=6 cols=50 wrap=off readonly></textarea>
+    <br>
+    <canvas id="fft" width="500" height="200" style="border:1px solid #000000;"></canvas>
+    Daily values (output):</br>
+    <textarea id="daily" rows=10 cols=50 wrap=off readonly></textarea>
+</div>
+</div>
+<div id="right">
+<form>
+<b>2. From Fourier coefficients.</br>(a = firt row, b = second row):</b><br>
+<textarea rows="13" cols="50" id="icoeffs">
+0.4943895737330119 -0.23865493138631186
+0.6127588748931885 -0.28519290685653687
+</textarea></br>
+<b>Annual EIR: </b><input type="text" id="iannualEIR" value="383.2"></textarea>
+<br>
+<button padding=5px type="button" name="reverse">Compute</button>
+</form>
+   <div class="panel">
+    Daily values (output):<br>
+    <textarea id="result" rows=10 cols=50 wrap=off readonly></textarea>
+    <br>
+    <canvas id="ifft" width="500" height="200" style="border:1px solid #000000;"></canvas>
+  </div>
+</div>
+<div class="clear"></div>
+</div>
+</body>
+</html>

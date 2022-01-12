@@ -1,0 +1,40 @@
+name: GitHub Pages
+
+on:
+  push:
+    branches:
+      - '*'
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build
+        run: |
+          mkdir -p build/generated/src
+          pushd build
+          cmake -DCMAKE_BUILD_TYPE=Release ..
+          make inlined_xsd
+          pushd generated
+          wget https://github.com/rust-lang-nursery/mdBook/releases/download/v0.3.1/mdbook-v0.3.1-x86_64-unknown-linux-gnu.tar.gz
+          tar xaf *.tar.gz
+          ../../util/generateDoc.py --mdbook -O src ../schema/scenario_current.xsd ../../schema/scenario_*.xsd
+          ln -s $(ls src/ | egrep "schema-[0-9]" | sort -nr -t- -k2 | head -n1) src/schema-latest.md
+          ./mdbook build
+          cp ../../util/fourier.html .
+          popd && popd
+
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v3
+        if: startsWith(github.ref, 'refs/tags/schema-')
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build/generated/book
