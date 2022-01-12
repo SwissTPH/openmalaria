@@ -2,8 +2,11 @@ name: GitHub Pages
 
 on:
   push:
-    tags:
-      - 'schema-*'
+    branches:
+      - '*'
+  pull_request:
+    branches:
+      - '*'
 
   workflow_dispatch:
 
