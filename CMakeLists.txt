@@ -8,16 +8,21 @@ project (OpenMalaria CXX)
 
 # The FindXXX.cmake files included are not quite the same as standard ones.
 # They abort if not found, and look in a few extra places (e.g. ${CMAKE_SOURCE_DIR}/lib).
-set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR})
+set (CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake)
 
 # -----  Compile options  -----
+
+# -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR
+# auto_ptr has been removed from c++17
+# This extension is needed because XSD still use auto_ptr in its headers
+# Note that is doe snot use auto_ptr in the generated code, only in the library headers
 
 if (NOT MSVC)
   # Enable builds on Raspberry pi (although without optimizations)
   if (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17")
   else (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
-    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -msse2 -mfpmath=sse")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++17 -msse2 -mfpmath=sse")
   endif (${CMAKE_SYSTEM_PROCESSOR} MATCHES "^arm")
   # We almost always want optimisations enabled:
   set (CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -O2")
@@ -25,14 +30,14 @@ endif (NOT MSVC)
 
 set (OM_STD_LIBS )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+if (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
   set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fp-model source")
-endif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+endif (CMAKE_CXX_COMPILER_ID MATCHES "Intel")
 
 # Statically link libgcc; isn't going to work when other C++ libraries are dynamically linked
-if( ${CMAKE_COMPILER_IS_GNUCXX} )
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
   # This doesn't show up in the cache, but it is passed to gcc:
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR")
 
   option (OM_COVERAGE "Produce coverage into binary.")
   if (OM_COVERAGE)
@@ -48,7 +53,7 @@ if( ${CMAKE_COMPILER_IS_GNUCXX} )
     add_definitions(-static-libgcc -static-libstdc++)
     set(CMAKE_CXX_LINK_EXECUTABLE "${CMAKE_CXX_LINK_EXECUTABLE} -static-libgcc -static-libstdc++")
   endif (OM_STATICALLY_LINK)
-endif( ${CMAKE_COMPILER_IS_GNUCXX} )
+endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "GNU")
 
 option (BUILD_SHARED_LIBS "Link xsdcxx, model, etc. libraries dynamically instead of statically (almost certainly not wanted)." OFF)
 mark_as_advanced (BUILD_SHARED_LIBS)
@@ -81,19 +86,26 @@ if (MSVC)
   set (OM_COMPILE_FLAGS "${OM_COMPILE_FLAGS} /D_CRT_SECURE_NO_DEPRECATE -D_SCL_SECURE_NO_WARNINGS")
 endif (MSVC)
 
-if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
-  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments")
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR")
   # These are actually only needed when using "clang" not "clang++" (same with
   # "gcc"), but adding here saves a user error:
   set (OM_STD_LIBS m stdc++)
-endif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang")
+endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "Clang")
+
+if ("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Qunused-arguments -D_LIBCPP_ENABLE_CXX17_REMOVED_AUTO_PTR")
+  # These are actually only needed when using "clang" not "clang++" (same with
+  # "gcc"), but adding here saves a user error:
+  set (OM_STD_LIBS m stdc++)
+endif("${CMAKE_CXX_COMPILER_ID}" MATCHES "AppleClang")
+
 
 # -----  Find dependencies  -----
 
 set (CMAKE_LIBRARY_PATH /usr/lib64)
 
 find_package (XSD)
-#find_package (XERCESC)
 find_package (XercesC)
 find_package (GSL)
 find_package (Z)
@@ -102,22 +114,6 @@ find_package (Python)
 if (NOT PYTHON_EXECUTABLE)
     message (SEND_ERROR "Unable to find a Python interpreter (required).")
 endif (NOT PYTHON_EXECUTABLE)
-
-
-# Find Boost:
-
-# suggested on windows: install boost such that paths are:
-# C:\Program Files\boost\boost_VER\boost\config.hpp
-# VER looks like 1_38_0 NOT 1.38.0
-# Add additional versions here when needed:
-# set (Boost_ADDITIONAL_VERSIONS "1.54.0" "1.55.0" "1.56.0" "1.57.0" "1.58.0")
-#set (Boost_DEBUG)
-# We require 1.54: first version including nonfinite_num_facets.hpp
-find_package( Boost 1.54.0 )
-if(NOT Boost_FOUND)
-    message (FATAL_ERROR "Unable to find boost headers! Please install libboost-dev or boost from boost.org (preferably at least version 1.41)")
-endif(NOT Boost_FOUND)
-
 
 # -----  Compile-time optional features  -----
 # (must come before add_subdirectory (model))
@@ -133,7 +129,7 @@ endif (OM_STREAM_VALIDATOR)
 add_subdirectory (contrib)
 add_subdirectory (schema)
 add_subdirectory (model)
-add_subdirectory (util/SchemaTranslator)
+# add_subdirectory (util/SchemaTranslator)
 add_dependencies (model schema)
 
 # -----  generate openMalaria  -----
@@ -151,14 +147,14 @@ include_directories (SYSTEM
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
   ${CMAKE_SOURCE_DIR}/contrib
+  ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}
 )
 
-add_executable (openMalaria model/openMalaria.cpp)
+add_executable (openMalaria model/main.cpp)
 
 target_link_libraries (openMalaria
   model

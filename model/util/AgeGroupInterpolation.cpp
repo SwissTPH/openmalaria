@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -18,13 +19,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
+#include <fstream>
+
 #include "util/AgeGroupInterpolation.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
 #include "schema/healthSystem.h"
-
-#include <fstream>
-#include <boost/format.hpp>
 
 /* Required by AgeGroupSplineInterpolation
 #include <gsl_interp.h>
@@ -41,7 +41,7 @@ namespace OM { namespace util {
         }
         ofstream fstream( (name+".csv").c_str() );
         
-        double max = sim::maxHumanAge().inYears();
+        double max = sim::inYears(sim::maxHumanAge());
         for( double age = 0.0; age < max; age += 0.1 ){
             fstream << age << "," << this->eval( age ) << endl;
         }
@@ -77,35 +77,25 @@ namespace OM { namespace util {
                                     const char* eltName )
         {
             if( ageGroups.getGroup().size() == 0 ){
-                throw util::xml_scenario_error( (
-                    boost::format( "%1%: at least one age group required" ) %eltName
-                ).str() );
+                throw util::xml_scenario_error(string(eltName) + ": at least one age group required" );
             }
 
             auto pos = dataGroups.begin();
             assert(pos == dataGroups.end());
 
             double greatestLbound = -1.0;
-            foreach( const scnXml::Group& group, ageGroups.getGroup() ){
+            for( const scnXml::Group& group : ageGroups.getGroup() ){
                 double lbound = group.getLowerbound();
                 if( lbound >= greatestLbound ){
                     greatestLbound = lbound;
                     pos = dataGroups.insert( pos, make_pair( lbound, group.getValue() ) );
-                } else {
-                    throw util::xml_scenario_error( (
-                        boost::format("%3%: lower bound %1% not greater than previous %2%")
-                        %lbound %greatestLbound %eltName
-                    ).str() );
-                }
+                } else
+                    throw util::xml_scenario_error(string(eltName) + ": lower bound " + to_string(lbound) + " not greater than previous " + to_string(greatestLbound));
             }
 
             // first lower-bound must be 0
-            if( dataGroups.begin()->first != 0.0 ){
-                throw util::xml_scenario_error( (
-                    boost::format("%1%: first lower-bound must be 0")
-                    %eltName
-                ).str() );
-            }
+            if( dataGroups.begin()->first != 0.0 )
+                throw util::xml_scenario_error(string(eltName) + ": first lower-bound must be 0");
 
             outputSamples( eltName );
         }
@@ -152,18 +142,12 @@ namespace OM { namespace util {
             // Our read iterator
             auto it = ageGroups.getGroup().begin();
 
-            if( it == ageGroups.getGroup().end() ){
-                throw util::xml_scenario_error( (
-                    boost::format( "%1%: at least one age group required" ) %eltName
-                ).str() );
-            }
+            if( it == ageGroups.getGroup().end() )
+                throw util::xml_scenario_error(string(eltName) + ": at least one age group required");
+
             // first lower-bound must be 0
-            if( it->getLowerbound() != 0.0 ){
-                throw util::xml_scenario_error( (
-                    boost::format("%1%: first lower-bound must be 0")
-                    %eltName
-                ).str() );
-            }
+            if( it->getLowerbound() != 0.0 )
+                throw util::xml_scenario_error(string(eltName) + ": first lower-bound must be 0");
 
             // Our insert iterator (used for performance)
             auto pos = dataPoints.begin();
@@ -178,16 +162,12 @@ namespace OM { namespace util {
                     pos = dataPoints.insert( pos, make_pair( insBound, lastValue ) );
                     greatestLbound = lbound;
                     lastValue = it->getValue();     // always insert previous value
-                } else {
-                    throw util::xml_scenario_error( (
-                        boost::format("%3%: lower bound %1% less than previous %2%")
-                        %lbound %greatestLbound %eltName
-                    ).str() );
-                }
+                } else
+                    throw util::xml_scenario_error(string(eltName) + ": lower bound " + to_string(lbound) + " less than previous " + to_string(greatestLbound));
             }
 
             // add a point in middle of last age group (taking upper bound as max-age-years:
-            dataPoints[ 0.5*(greatestLbound + sim::maxHumanAge().inYears()) ] = lastValue;
+            dataPoints[ 0.5*(greatestLbound + sim::inYears(sim::maxHumanAge())) ] = lastValue;
         }
 
         virtual void scale( double factor ){
@@ -307,9 +287,8 @@ namespace OM { namespace util {
             obj = new AgeGroupPiecewiseLinear( ageGroups, eltName );
         }else if( interp.get() == "none" ){
             obj = new AgeGroupPiecewiseConstant( ageGroups, eltName );
-        }else{
-            throw util::xml_scenario_error( (boost::format( "age group interpolation %1% not implemented" ) %interp).str() );
-        }
+        }else
+            throw util::xml_scenario_error(string("age group interpolation ") + interp.get() + " not implemented" );
     }
     void AgeGroupInterpolator::reset(){
         assert( obj != nullptr );  // should not do that

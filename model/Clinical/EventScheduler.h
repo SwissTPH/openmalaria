@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -120,14 +121,14 @@ private:
      * is started (UC & severe behaviour different).
      *
      * Note: medications are not delayed by this. */
-    SimTime caseStartTime;
+    SimTime caseStartTime = sim::never();
 
     /** The individual recovers when sim::ts0() >= timeOfRecovery,
      * assuming they didn't die. */
-    SimTime timeOfRecovery;
+    SimTime timeOfRecovery = sim::never();
 
     /// Time at which last treatment was recieved (for second-case considerations).
-    SimTime timeLastTreatment;
+    SimTime timeLastTreatment = sim::never();
 
     /// Total parasite density at last time step (used during a bout).
     double previousDensity;

@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -80,7 +81,7 @@ public:
     inline interventions::ComponentId id() const { return m_id; }
     
     /// Return true if this component is deployed (i.e. currently active)
-    inline bool isDeployed() const{ return deployTime != SimTime::never(); }
+    inline bool isDeployed() const{ return deployTime != sim::never(); }
     
     /// Checkpointing (write only)
     void operator& (ostream& stream) {
@@ -98,7 +99,7 @@ protected:
     /// Checkpointing: write
     virtual void checkpoint( ostream& stream ) =0;
     
-    SimTime deployTime;        // time of deployment or SimTime::never()
+    SimTime deployTime = sim::never();        // time of deployment or sim::never()
     interventions::ComponentId m_id;       // component id; don't change
 };
 
@@ -243,7 +244,7 @@ public:
     /** Get the age at which individuals are considered adults (i.e. where
      * availability to mosquitoes reaches its maximum). */
     static inline SimTime adultAge() {
-        return SimTime::fromYearsD( relAvailAge.firstGlobalMaximum() );
+        return sim::fromYearsD( relAvailAge.firstGlobalMaximum() );
     }
     
     /** Get whether the user has any active deployments of interventions of

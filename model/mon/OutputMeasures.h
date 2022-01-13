@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2014 Swiss Tropical and Public Health Institute
- * Copyright (C) 2005-2014 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -456,7 +457,7 @@ void defineOutMeasures(){
         OutMeasure::species( 79, MVF_INOCS, false );
     
     // Now initialise valid condition measures:
-    foreach( const NamedMeasureMapT::value_type& v, namedOutMeasures ){
+    for( const NamedMeasureMapT::value_type& v : namedOutMeasures ){
         Measure m = v.second.m;
         // Not the following:
         if( m == mon::MHE_SEVERE_EPISODES ||

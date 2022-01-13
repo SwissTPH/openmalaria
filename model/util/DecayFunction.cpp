@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -22,11 +23,10 @@
 #include "util/errors.h"
 #include "util/StreamValidator.h"
 #include "util/random.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 
 #include <cmath>
 #include <stdexcept>
-#include <boost/format.hpp>
 
 namespace OM {
 namespace util {
@@ -69,7 +69,7 @@ public:
         return 1.0;
     }
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::future();        // decay occurs "in the future" (don't use SimTime::never() because that is interpreted as being in the past)
+        return sim::future();        // decay occurs "in the future" (don't use sim::never() because that is interpreted as being in the past)
     }
 };
 
@@ -99,7 +99,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( 1.0 / invL );
+        return sim::roundToTSFromDays( 1.0 / invL );
     }
     
 private:
@@ -126,7 +126,7 @@ public:
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
         // Note: rounds to nearest. Object may decay instantly or at time L.
-        return SimTime::roundToTSFromDays(rng.uniform_01() / invL);
+        return sim::roundToTSFromDays(rng.uniform_01() / invL);
     }
     
 private:
@@ -150,7 +150,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( -log(rng.uniform_01()) / invLambda );
+        return sim::roundToTSFromDays( -log(rng.uniform_01()) / invLambda );
     }
     
 private:
@@ -169,11 +169,15 @@ public:
         return constOverLambda;
     }
     double eval(double effectiveAge) const{
-        return exp( -pow(effectiveAge, k) );
+        double p = -pow(effectiveAge, k);
+        if(p < -700.0)
+            return 0.0;
+        else
+            return exp(p);
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( pow( -log(rng.uniform_01()), 1.0/k ) / constOverLambda );
+        return sim::roundToTSFromDays( pow( -log(rng.uniform_01()), 1.0/k ) / constOverLambda );
     }
     
 private:
@@ -197,7 +201,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( pow( 1.0 / rng.uniform_01() - 1.0, 1.0/k ) / invL );
+        return sim::roundToTSFromDays( pow( 1.0 / rng.uniform_01() - 1.0, 1.0/k ) / invL );
     }
     
 private:
@@ -224,7 +228,7 @@ public:
     }
     
     SimTime sampleAgeOfDecay (LocalRng& rng) const{
-        return SimTime::roundToTSFromDays( sqrt( 1.0 - k / (k - log( rng.uniform_01() )) ) / invL );
+        return sim::roundToTSFromDays( sqrt( 1.0 - k / (k - log( rng.uniform_01() )) ) / invL );
     }
     
 private:
@@ -254,7 +258,7 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
     }else if( func == "smooth-compact" ){
         return unique_ptr<DecayFunction>(new SmoothCompactDecayFunction( elt ));
     }else{
-        throw util::xml_scenario_error( (boost::format( "decay function type %1% of %2% unrecognized" ) %func %eltName).str() );
+        throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }
 }
 unique_ptr<DecayFunction> DecayFunction::makeConstantObject(){

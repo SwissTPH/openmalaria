@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -96,7 +97,7 @@ public:
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
     inline double eval( SimTime age, DecayFuncHet sample )const{
-        return eval( age.inDays() * sample.getTMult() );
+        return eval( age * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).

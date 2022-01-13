@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -20,8 +21,8 @@
 
 #include "Clinical/DecisionTree5Day.h"
 #include "Clinical/CMDecisionTree.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/WHVivax.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHVivax.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
 #include "util/errors.h"
@@ -88,7 +89,7 @@ void DecisionTree5Day::uncomplicatedEvent ( Human& human, Episode::State pgState
     
     double x = human.rng().uniform_01();
     if( x < accessUCAny[regimen] * m_treatmentSeekingFactor ){
-        CMHostData hostData( human, human.age(sim::ts0()).inYears(), pgState );
+        CMHostData hostData( human, sim::inYears(human.age(sim::ts0())), pgState );
         
         // Run tree (which may deploy treatment)
         CMDTOut output = ( x < accessUCSelfTreat[regimen] * m_treatmentSeekingFactor ) ?

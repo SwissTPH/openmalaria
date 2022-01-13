@@ -25,7 +25,7 @@
 #include <cxxtest/TestSuite.h>
 #include "UnittestUtil.h"
 #include "ExtraAsserts.h"
-#include "WithinHost/Infection/PennyInfection.h"
+#include "Host/WithinHost/Infection/PennyInfection.h"
 #include "util/random.h"
 #include <limits>
 #include <fstream>
@@ -83,14 +83,14 @@ public:
         SimTime now = sim::ts0();
         do{
             extinct = infection->update(m_rng, 1.0, now, numeric_limits<double>::quiet_NaN());
-            int ageDays = (now - infection->m_startDate - infection->s_latentP).inDays();
+            int ageDays = (now - infection->m_startDate - infection->s_latentP);
             while( ageDays < 0 ) ageDays += infection->delta_V; // special case encountered by unit test
             ETS_ASSERT_LESS_THAN( iterations, cirDens.size() );
             TS_ASSERT_APPROX( infection->getDensity(), cirDens[iterations] );
             TS_ASSERT_APPROX( infection->seqDensity(ageDays), seqDens[iterations] );
 //             outCir << infection->getDensity() << endl;
 //             outSeq << infection->seqDensity(ageDays) << endl;
-            now += SimTime::oneDay();
+            now = now + sim::oneDay();
             iterations+=1;
         }while(!extinct);
         TS_ASSERT_EQUALS( iterations, cirDens.size() );

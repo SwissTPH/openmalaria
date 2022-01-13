@@ -29,11 +29,9 @@
 #include "UnittestUtil.h"
 #include "WHMock.h"
 #include <limits>
-#include <boost/assign/std/vector.hpp> // for 'operator+=()'
 
 using namespace OM::Clinical;
 using namespace OM::WithinHost;
-using namespace boost::assign; // bring 'operator+=()' into scope
 using UnitTest::WHMock;
 
 class CMDecisionTreeSuite : public CxxTest::TestSuite
@@ -50,7 +48,7 @@ public:
 
         UnittestUtil::EmpiricalWHM_setup();
 
-        human.reset( UnittestUtil::createHuman(SimTime::zero()).release() );
+        human.reset( UnittestUtil::createHuman(sim::zero()).release() );
         ETS_ASSERT( human.get() != 0 );
         whm = dynamic_cast<WHMock*>(UnittestUtil::setHumanWH( *human,
                 unique_ptr<WithinHost::WHInterface>(new WHMock()) ));
@@ -206,24 +204,24 @@ public:
     }
     
     void testSimpleTreat(){
-        TS_ASSERT_EQUALS( whm->lastTimeLiver, SimTime::never() );
-        TS_ASSERT_EQUALS( whm->lastTimeBlood, SimTime::never() );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver, sim::never() );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood, sim::never() );
         
         scnXml::DTTreatSimple treat1( "0t", "1t" );   // 0 time steps liver, 1 blood (using 1 day TS)
         scnXml::DecisionTree dt1;
         dt1.setTreatSimple( treat1 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt1 ), 1 );
-        TS_ASSERT_EQUALS( whm->lastTimeLiver.inDays(), 0 );
-        TS_ASSERT_EQUALS( whm->lastTimeBlood.inDays(), 1*5 );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver, 0 );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood, 1*5 );
         
         scnXml::DTTreatSimple treat2( "15d", "-1t" );
         scnXml::DecisionTree dt2;
         dt2.setTreatSimple( treat2 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt2 ), 1 );
-        TS_ASSERT_EQUALS( whm->lastTimeLiver.inDays(), 3*5 );
-        TS_ASSERT_EQUALS( whm->lastTimeBlood.inDays(), -1*5 );
+        TS_ASSERT_EQUALS( whm->lastTimeLiver, 3*5 );
+        TS_ASSERT_EQUALS( whm->lastTimeBlood, -1*5 );
     }
     
     double runAndGetMgPrescribed( scnXml::DecisionTree& dt, double age ){

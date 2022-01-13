@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -384,7 +385,7 @@ void factors::RelativeAttractiveness::initSingleStage(
 
 void factors::RelativeAttractiveness::initTwoStage (
         const scnXml::TwoStageDeterrency& elt, double maxInsecticide,
-        boost::optional<double> holeIndexMax)
+        double holeIndexMax, bool holeIndexMaxPresent)
 {
     b.lPFEntering = numeric_limits<double>::quiet_NaN();
     if (elt.getEntering().present()) {
@@ -444,7 +445,7 @@ void factors::RelativeAttractiveness::initTwoStage (
         if (!holeIndexMax) {
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit attacking deterrency");
         }
-        b.pAttacking.initLogit(elt.getAttackingLogit().get(), *holeIndexMax, true);
+        b.pAttacking.initLogit(elt.getAttackingLogit().get(), holeIndexMax, true);
     }
 }
 
@@ -558,17 +559,19 @@ void ITNComponent::ITNAnopheles::init(
     const scnXml::ITNDescription::AnophelesParamsType& elt,
     double proportionUse,
     double maxInsecticide)
-{
-    boost::optional<double> holeIndexMax;
+{   bool holeIndexMaxPresent = false;
+
+    double holeIndexMax = 0.0;
     if (elt.getHoleIndexMax().present()) {
         holeIndexMax = elt.getHoleIndexMax().get().getValue();
+        holeIndexMaxPresent = true;
     }
     
     if (elt.getDeterrency().present()) {
         relAttractiveness.initSingleStage(elt.getDeterrency().get(), maxInsecticide);
     } else {
         assert (elt.getTwoStageDeterrency().present());
-        relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide, holeIndexMax);
+        relAttractiveness.initTwoStage(elt.getTwoStageDeterrency().get(), maxInsecticide, holeIndexMax, holeIndexMaxPresent);
     }
     if (elt.getPreprandialKillingEffect().present()) {
         preprandialKillingEffect.init(elt.getPreprandialKillingEffect().get(),
@@ -581,7 +584,7 @@ void ITNComponent::ITNAnopheles::init(
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit killing effect");
         }
         preprandialKillingEffect.initLogit(elt.getPreprandialKillingEffectLogit().get(),
-                                           *holeIndexMax,
+                                           holeIndexMax,
                                            false);
     }
     if (elt.getPostprandialKillingEffect().present()) {
@@ -595,7 +598,7 @@ void ITNComponent::ITNAnopheles::init(
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit killing effect");
         }
         postprandialKillingEffect.initLogit(elt.getPostprandialKillingEffectLogit().get(),
-                                            *holeIndexMax,
+                                            holeIndexMax,
                                             false);
     }
     if (elt.getFecundityReduction().present()) {
@@ -608,7 +611,7 @@ void ITNComponent::ITNAnopheles::init(
             throw util::xml_scenario_error("ITN.description.anophelesParams: holeIndexMax required when using logit fecundity effect");
         }
         relFecundityEffect.initLogit(elt.getFecundityReductionLogit().get(),
-                                     *holeIndexMax,
+                                     holeIndexMax,
                                      false);
     } else {
         relFecundityEffect.init1();
@@ -664,10 +667,10 @@ void HumanITN::redeploy(LocalRng& rng, const OM::Transmission::HumanVectorInterv
 
 void HumanITN::update(Host::Human& human){
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
-    if( deployTime != SimTime::never() ){
+    if( deployTime != sim::never() ){
         // First use is at age 0 relative to ts0()
         if( sim::ts0() >= disposalTime ){
-            deployTime = SimTime::never();
+            deployTime = sim::never();
             human.removeFromSubPop(id());
             return;
         }
@@ -679,27 +682,27 @@ void HumanITN::update(Host::Human& human){
 }
 
 double HumanITN::relativeAttractiveness(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relativeAttractiveness( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::preprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.preprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 
 double HumanITN::postprandialSurvivalFactor(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.postprandialSurvivalFactor( holeIndex, getInsecticideContent(params) );
 }
 double HumanITN::relFecundity(size_t speciesIndex) const{
-    if( deployTime == SimTime::never() ) return 1.0;
+    if( deployTime == sim::never() ) return 1.0;
     const ITNComponent& params = *ITNComponent::componentsByIndex[m_id.id];
     const ITNComponent::ITNAnopheles& anoph = params.species[speciesIndex];
     return anoph.relFecundity( holeIndex, getInsecticideContent(params) );

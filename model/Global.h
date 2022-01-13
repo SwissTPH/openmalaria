@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -31,32 +32,17 @@
 #endif
 
 // unit32_t and similar, mostly for compatibility with MSVC:
-#include <boost/cstdint.hpp>
-
-#include <boost/math/special_functions/fpclassify.hpp>
-// this provides: isfinite, isinf, isnan, isnormal
-// use these functions like this: (boost::math::isnan)(x)
-// extra brackets are necessary since isnan etc. may be defined as macros!
-// explicit namespace usage avoids confusion with std versions available sometimes
+#include <cstdint>
+#include <algorithm>
+#include <cmath>
 
 // Checkpointing and time-step operations are used _everywhere_:
 #include "sim.h"    // includes util/checkpoint.h and util/mod.h
 
-// foreach "keyword"
-#include <boost/foreach.hpp>
-#define foreach BOOST_FOREACH
+#define PI 3.14159265358979323846
 
 namespace OM {
-
-using boost::uint8_t;
-using boost::uint16_t;
-using boost::uint32_t;
-using boost::uint64_t;
-using boost::int8_t;
-using boost::int16_t;
-using boost::int32_t;
-using boost::int64_t;
-
+	
 using namespace util::checkpoint;
 using util::mod;
 using util::mod_nn;

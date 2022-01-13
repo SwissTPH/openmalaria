@@ -32,11 +32,11 @@
 #include "PkPd/LSTMModel.h"
 #include "PkPd/Drug/LSTMDrugType.h"
 #include "PkPd/LSTMTreatments.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Infection/Infection.h"
-#include "WithinHost/WHFalciparum.h"
-#include "WithinHost/Infection/MolineauxInfection.h"
-#include "WithinHost/Genotypes.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Infection/Infection.h"
+#include "Host/WithinHost/WHFalciparum.h"
+#include "Host/WithinHost/Infection/MolineauxInfection.h"
+#include "Host/WithinHost/Genotypes.h"
 #include "mon/management.h"
 
 #include "schema/scenario.h"
@@ -265,7 +265,7 @@ public:
         sim::init( dummyXML::scenario );
         
         // we could just use zero, but we may spot more errors by using some weird number
-        sim::s_t0 = SimTime::fromYearsN(83.2591);
+        sim::s_t0 = sim::fromYearsN(83.2591);
         sim::s_t1 = sim::s_t0;
 #ifndef NDEBUG
         sim::in_update = true;  // may not always be correct but we're more interested in getting around this check than using it in unit tests
@@ -273,7 +273,7 @@ public:
     }
     static void incrTime(SimTime incr){
         //NOTE: for unit tests, we do not differentiate between s_t0 and s_t1
-        sim::s_t0 += incr;
+        sim::s_t0 = sim::s_t0 + incr;
         sim::s_t1 = sim::s_t0;
     }
     
@@ -409,7 +409,7 @@ public:
     // For when infection parameters shouldn't be used; enforce by setting to NaNs.
     // But do set latentP.
     static void Infection_init_latentP_and_NaN () {
-	Infection::s_latentP = SimTime::fromDays(15);
+	Infection::s_latentP = sim::fromDays(15);
     }
     
     static void DescriptiveInfection_init () {
@@ -457,7 +457,7 @@ public:
     
     static double getPrescribedMg( const PkPd::LSTMModel& pkpd ){
         double r = 0.0;
-        foreach( const PkPd::MedicateData& md, pkpd.medicateQueue ){
+        for( const PkPd::MedicateData& md : pkpd.medicateQueue ){
             r += md.qty;
         }
         return r;

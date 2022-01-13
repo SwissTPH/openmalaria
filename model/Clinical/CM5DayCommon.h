@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -21,10 +22,10 @@
 #ifndef Hmod_CM5DayCommon
 #define Hmod_CM5DayCommon
 
-#include "WithinHost/Pathogenesis/State.h"
+#include "Host/WithinHost/Pathogenesis/State.h"
 #include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 #include "mon/reporting.h"
 
 namespace OM {
@@ -67,8 +68,8 @@ protected:
     /** Called when a non-severe/complicated malaria sickness occurs. */
     virtual void uncomplicatedEvent(Human& human, Episode::State pgState) =0;
     
-    /** Time of the last treatment (SimTime::never() if never treated). */
-    SimTime m_tLastTreatment;
+    /** Time of the last treatment (sim::never() if never treated). */
+    SimTime m_tLastTreatment = sim::never();
 
     //! treatment seeking for heterogeneity
     double m_treatmentSeekingFactor;

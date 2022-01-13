@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -23,9 +24,9 @@
 
 #include "Host/Human.h"
 #include "Host/NeonatalMortality.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Genotypes.h"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Genotypes.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "Clinical/ClinicalModel.h"
 #include "Transmission/TransmissionModel.h"
 
@@ -36,13 +37,10 @@
 #include <schema/scenario.h>
 
 #include <cmath>
-#include <boost/format.hpp>
-#include <boost/assign.hpp>
 
 namespace OM
 {
     using namespace OM::util;
-    using namespace boost::assign;
     using Transmission::TransmissionModel;
 
 // -----  Population: static data / methods  -----
@@ -79,9 +77,9 @@ Population::Population(size_t populationSize)
     using mon::Continuous;
     Continuous.registerCallback( "hosts", "\thosts", MakeDelegate( this, &Population::ctsHosts ) );
     // Age groups are currently hard-coded.
-    ctsDemogAgeGroups += 1.0, 5.0, 10.0, 15.0, 25.0;
+    ctsDemogAgeGroups.insert(ctsDemogAgeGroups.end(), { 1.0, 5.0, 10.0, 15.0, 25.0 });
     ostringstream ctsDemogTitle;
-    foreach( double ubound, ctsDemogAgeGroups ){
+    for( double ubound : ctsDemogAgeGroups ){
         ctsDemogTitle << "\thost % ≤ " << ubound;
     }
     Continuous.registerCallback( "host demography", ctsDemogTitle.str(),
@@ -120,12 +118,11 @@ void Population::checkpoint (istream& stream)
     for(size_t i = 0; i < populationSize && !stream.eof(); ++i) {
         // Note: calling this constructor of Host::Human is slightly wasteful, but avoids the need for another
         // ctor and leaves less opportunity for uninitialized memory.
-        population.push_back( Host::Human (SimTime::zero()) );
+        population.push_back( Host::Human (sim::zero()) );
         population.back() & stream;
     }
     if (population.size() != populationSize)
-        throw util::checkpoint_error(
-            (boost::format("Population: out of data (read %1% humans)") %population.size() ).str() );
+        throw util::checkpoint_error("Population: out of data (read " + to_string(population.size()) + " humans)");
 }
 void Population::checkpoint (ostream& stream)
 {
@@ -157,8 +154,8 @@ void Population::createInitialHumans()
     {
         int targetPop = AgeStructure::targetCumPop( iage, populationSize );
         while (cumulativePop < targetPop) {
-            SimTime dob = SimTime::zero() - SimTime::fromTS(iage);
-            util::streamValidate( dob.inDays() );
+            SimTime dob = sim::zero() - sim::fromTS(iage);
+            util::streamValidate( dob );
             population.push_back( Host::Human (dob) );
             ++cumulativePop;
         }
@@ -166,13 +163,13 @@ void Population::createInitialHumans()
     
     // Vector setup dependant on human population structure (we *want* to
     // include all humans, whether they'll survive to vector init phase or not).
-    assert( sim::now() == SimTime::zero() );      // assumed below
+    assert( sim::now() == sim::zero() );      // assumed below
 }
 
 
 // -----  non-static methods: simulation loop  -----
 
-void Population::update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
+void Population::update(Transmission::TransmissionModel& transmission, SimTime firstVecInitTS ){
     // This should only use humans being updated: otherwise too small a proportion
     // will be infected. However, we don't have another number to use instead.
     // NOTE: no neonatal mortalities will occur in the first 20 years of warmup
@@ -203,7 +200,7 @@ void Population::update( const Transmission::TransmissionModel& transmission, Si
         // "outmigrate" some to maintain population shape
         //NOTE: better to use age(sim::ts0())? Possibly, but the difference will not be very significant.
         // Also see targetPop = ... comment above
-        bool outmigrate = cumPop >= AgeStructure::targetCumPop(iter->age(sim::ts1()).inSteps(), targetPop);
+        bool outmigrate = cumPop >= AgeStructure::targetCumPop(sim::inSteps(iter->age(sim::ts1())), targetPop);
         
         if( isDead || outmigrate ){
             iter = population.erase (iter);
@@ -232,8 +229,8 @@ void Population::ctsHosts (ostream& stream){
 void Population::ctsHostDemography (ostream& stream){
     auto iter = population.crbegin();
     int cumCount = 0;
-    foreach( double ubound, ctsDemogAgeGroups ){
-        while( iter != population.crend() && iter->age(sim::now()).inYears() < ubound ){
+    for( double ubound : ctsDemogAgeGroups ){
+        while( iter != population.crend() && sim::inYears(iter->age(sim::now())) < ubound ){
             ++cumCount;
             ++iter;
         }
@@ -291,7 +288,7 @@ void Population::ctsMeanAgeAvailEffect (ostream& stream){
     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
         if( !iter->perHostTransmission.isOutsideTransmission() ){
             ++nHumans;
-            avail += iter->perHostTransmission.relativeAvailabilityAge(iter->age(sim::now()).inYears());
+            avail += iter->perHostTransmission.relativeAvailabilityAge(sim::inYears(iter->age(sim::now())));
         }
     }
     stream << '\t' << avail/nHumans;
@@ -324,7 +321,7 @@ void Population::ctsGVICoverage (ostream& stream){
 //     double meanVar = 0.0;
 //     int nNets = 0;
 //     for(Iter iter = population.begin(); iter != population.end(); ++iter) {
-//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= SimTime::zero() ){
+//         if( iter->perHostTransmission.getITN().timeOfDeployment() >= sim::zero() ){
 //             ++nNets;
 //             meanVar += iter->perHostTransmission.getITN().getHoleIndex();
 //         }

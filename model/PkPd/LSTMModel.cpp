@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -63,7 +64,7 @@ void LSTMModel::checkpoint (istream& stream) {
 
 void LSTMModel::checkpoint (ostream& stream) {
     m_drugs.size() & stream;
-    foreach( auto& drug, m_drugs ){
+    for( auto& drug : m_drugs ){
         drug->getIndex() & stream;
         drug & stream;
     }
@@ -77,7 +78,7 @@ void LSTMModel::prescribe(size_t schedule, size_t dosage, double age, double bod
     DosageTable& table = dosages[dosage];
     double key = table.useMass ? body_mass : age;
     double doseMult = table.getMultiplier( key );
-    foreach( MedicateData& medicateData, schedules[schedule].medications ){
+    for( MedicateData& medicateData : schedules[schedule].medications ){
         MedicateData data = medicateData.multiplied(doseMult);
         data.time += delay_d;
         medicateQueue.push_back( std::move(data) );
@@ -103,7 +104,7 @@ void LSTMModel::medicate(LocalRng& rng){
 
 void LSTMModel::medicateDrug(LocalRng& rng, size_t typeIndex, double qty, double time) {
     //TODO: might be a little faster if m_drugs was pre-allocated with a slot for each drug type, using a null pointer
-    foreach( auto& drug, m_drugs ){
+    for( auto& drug : m_drugs ){
         if (drug->getIndex() == typeIndex){
             drug->medicate (time, qty);
             return;
@@ -117,7 +118,7 @@ void LSTMModel::medicateDrug(LocalRng& rng, size_t typeIndex, double qty, double
 double LSTMModel::getDrugConc (size_t drug_index) const{
     double c = 0.0;
     double d = 0.0;
-    foreach( auto& drug, m_drugs ){
+    for( auto& drug : m_drugs ){
         d = drug->getConcentration(drug_index);
         if(d < 0.0){
             // FIXME: @tph-thuering, 2015-08-11:
@@ -134,8 +135,7 @@ double LSTMModel::getDrugConc (size_t drug_index) const{
 double LSTMModel::getDrugFactor (LocalRng& rng, WithinHost::CommonInfection *inf, double body_mass) const{
     double factor = 1.0; //no effect
     
-    for( auto drug = m_drugs.begin(), end = m_drugs.end();
-            drug != end; ++drug ){
+    for( auto drug = m_drugs.begin(), end = m_drugs.end(); drug != end; ++drug ){
         double drugFactor = (*drug)->calculateDrugFactor(rng, inf, body_mass);
         factor *= drugFactor;
     }
@@ -145,15 +145,15 @@ double LSTMModel::getDrugFactor (LocalRng& rng, WithinHost::CommonInfection *inf
 void LSTMModel::decayDrugs (double body_mass) {
     // Update concentrations for each drug.
     // TODO: previously we removed drugs with negligible concentration here. What now, just set concentration to 0?
-    foreach( auto& drug, m_drugs ){
+    for( auto& drug : m_drugs ){
         drug->updateConcentration(body_mass);
     }
 }
 
 void LSTMModel::summarize(const Host::Human& human) const{
     const vector<size_t> &drugsInUse( LSTMDrugType::getDrugsInUse() );
-    foreach( size_t index, drugsInUse ){
-        foreach( auto& drug, m_drugs ){
+    for( size_t index : drugsInUse ){
+        for( auto& drug : m_drugs ){
             double conc = drug->getConcentration(index);
             if( conc > 0.0 ){
                 mon::reportStatMHPI( mon::MHR_HOSTS_POS_DRUG_CONC, human, index, 1 );

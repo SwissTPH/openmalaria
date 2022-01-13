@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -25,7 +26,6 @@
 #include <vector>
 #include <iostream>
 #include <sstream>
-#include <boost/static_assert.hpp>
 
 using namespace std;
 
@@ -100,7 +100,7 @@ namespace OM { namespace util {
     
     // As in the "Advanced Bash-Scripting Guide"; not directly relevant to C++
     // but gives some idea what codes make sense to use.
-    BOOST_STATIC_ASSERT( Error::Max <= 113 );
+    static_assert( Error::Max <= 113, "Error::Max <= 113" );
     
     /** Base OpenMalaria exception class.
      * 

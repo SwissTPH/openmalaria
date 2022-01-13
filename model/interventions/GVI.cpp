@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -81,7 +82,7 @@ unique_ptr<PerHostInterventionData> GVIComponent::makeHumanPart( istream& stream
 void GVIComponent::GVIAnopheles::init(const scnXml::GVIDescription::AnophelesParamsType& elt,
                                           double proportionUse)
 {
-    assert( (boost::math::isnan)(deterrency) ); // double init
+    assert( (std::isnan)(deterrency) ); // double init
     deterrency = elt.getDeterrency().present() ? elt.getDeterrency().get().getValue() : 0.0;
     preprandialKilling = elt.getPreprandialKillingEffect().present() ? elt.getPreprandialKillingEffect().get().getValue() : 0.0;
     postprandialKilling = elt.getPostprandialKillingEffect().present() ? elt.getPostprandialKillingEffect().get().getValue() : 0.0;

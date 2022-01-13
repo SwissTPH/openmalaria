@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -46,7 +47,7 @@ vector<double> AgeStructure::cumAgeProp;
 
 void AgeStructure::init( const scnXml::Demography& demography ){
     // this number of cells are needed:
-    cumAgeProp.resize( sim::maxHumanAge().inSteps() + 1 );
+    cumAgeProp.resize( sim::inSteps(sim::maxHumanAge()) + 1 );
     
     estimateRemovalRates( demography );
     calcCumAgeProp();
@@ -211,8 +212,8 @@ void AgeStructure::calcCumAgeProp ()
 {
     cumAgeProp[0] = 0.0;
     for(size_t j=1;j < cumAgeProp.size(); ++j) {
-	SimTime age = SimTime::fromTS( cumAgeProp.size() - j - 1 );
-	double ageYears = age.inYears();
+	SimTime age = sim::fromTS( cumAgeProp.size() - j - 1 );
+	double ageYears = sim::inYears(age);
 	double M1s = (mu0 * (1.0 - exp (-alpha0 * ageYears)) / alpha0);
 	double M2s = (mu1 * (exp (alpha1 * ageYears) - 1.0) / alpha1);
 	double Ms = M1s + M2s;

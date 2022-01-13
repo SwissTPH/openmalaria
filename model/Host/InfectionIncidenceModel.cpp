@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -21,7 +22,7 @@
 #include "Host/InfectionIncidenceModel.h"
 #include "Host/Human.h"
 #include "Transmission/PerHost.h"
-#include "WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHInterface.h"
 #include "Parameters.h"
 #include "mon/Continuous.h"
 #include "util/ModelOptions.h"
@@ -105,7 +106,7 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
         inf_rate_shape_param = sqrt(r_square_LogNormal - 1.86 * pow(baseline_avail_shape_param, 2));
         inf_rate_shape_param=std::max(inf_rate_shape_param, 0.0);
         inf_rate_offset = 0.5 * pow(inf_rate_shape_param, 2);
-        if( (boost::math::isnan)(inf_rate_shape_param) ){
+        if( (std::isnan)(inf_rate_shape_param) ){
             throw util::xml_scenario_error( "bad parameter 16 (BASELINE_AVAILABILITY_SHAPE)" );
         }
     }else{
@@ -175,12 +176,12 @@ double InfectionIncidenceModel::getModelExpectedInfections (LocalRng& rng, doubl
   // First two lines are availability adjustment: S_1(i,t) from AJTMH 75 (suppl 2) p12 eqn. (5)
   // Note that NegBinomMAII and LogNormalMAII supercede this model; see below
   return (Sinf+(1-Sinf) / 
-    (1 + effectiveEIR/SimTime::oneTS().inDays()*EstarInv)) *
+    (1 + effectiveEIR/sim::oneTS()*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
 double HeterogeneityWorkaroundII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost& phTrans) {
   return (Sinf+(1-Sinf) / 
-    (1 + effectiveEIR/(SimTime::oneTS().inDays()*phTrans.relativeAvailabilityHet())*EstarInv)) *
+    (1 + effectiveEIR/(sim::oneTS()*phTrans.relativeAvailabilityHet())*EstarInv)) *
     susceptibility() * effectiveEIR;
 }
 double NegBinomMAII::getModelExpectedInfections (LocalRng& rng, double effectiveEIR, const Transmission::PerHost&) {
@@ -214,7 +215,7 @@ double InfectionIncidenceModel::susceptibility () {
 int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR) {
   double expectedNumInfections = getModelExpectedInfections (human.rng(), effectiveEIR, human.perHostTransmission);
   // error check (should be OK if kappa is checked, for nonVector model):
-  if( !(boost::math::isfinite)(effectiveEIR) ){
+  if( !(std::isfinite)(effectiveEIR) ){
     ostringstream out;
     out << "effectiveEIR is not finite: " << effectiveEIR << endl;
     throw TRACED_EXCEPTION (out.str(), util::Error::EffectiveEIR);
@@ -241,7 +242,7 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
     ctsNewInfections += n;
     return n;
   }
-  if ( (boost::math::isnan)(expectedNumInfections) ){	// check for not-a-number
+  if ( (std::isnan)(expectedNumInfections) ){	// check for not-a-number
       // bad Params::BASELINE_AVAILABILITY_SHAPE ?
       throw TRACED_EXCEPTION( "numNewInfections: NaN", util::Error::NumNewInfections );
   }

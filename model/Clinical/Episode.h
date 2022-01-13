@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -22,7 +23,7 @@
 #define Hmod_Episode
 
 #include "Global.h"
-#include "WithinHost/Pathogenesis/State.h"
+#include "Host/WithinHost/Pathogenesis/State.h"
 #include "mon/AgeGroup.h"
 #include "mon/info.h"
 #include <ostream>
@@ -76,7 +77,7 @@ public:
     };
     
     Episode() :
-            time(SimTime::never()),
+            time(sim::never()),
             surveyPeriod(mon::NOT_USED),
             ageGroup(),
             cohortSet(0),
@@ -109,7 +110,7 @@ private:
     void report();
     
     /// Time of event, potentially never
-    SimTime time;
+    SimTime time = sim::never();
     /// Survey during which the event occured
     size_t surveyPeriod;
     /// Age group of the individual when the episode's first bout occurred

@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -19,7 +20,7 @@
  */
 
 #include "PkPd/Drug/LSTMDrugOneComp.h"
-#include "WithinHost/Infection/CommonInfection.h"
+#include "Host/WithinHost/Infection/CommonInfection.h"
 #include "util/errors.h"
 #include "util/StreamValidator.h"
 #include "util/vectors.h"
@@ -64,7 +65,7 @@ double LSTMDrugOneComp::calculateDrugFactor(LocalRng& rng, WithinHost::CommonInf
     
     double time = 0.0;
     typedef pair<double,double> TimeConc;
-    foreach( TimeConc time_conc, doses ){
+    for( TimeConc time_conc : doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             if( time < time_conc.first ){
@@ -94,7 +95,7 @@ void LSTMDrugOneComp::updateConcentration( double body_mass ){
     concentration *= exp(neg_elim_rate);
     size_t doses_taken = 0;
     typedef pair<double,double> TimeConc;
-    foreach( TimeConc& time_conc, doses ){
+    for( TimeConc& time_conc : doses ){
         // we iteratate through doses in time order (since doses are sorted)
         if( time_conc.first < 1.0 /*i.e. today*/ ){
             // calculate decayed dose and add:

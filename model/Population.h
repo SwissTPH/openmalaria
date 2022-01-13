@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -63,7 +64,7 @@ public:
     /*!  Also updates the population-level measures such as infectiousness, and
          the age-distribution by c outmigrating or creating new births if
          necessary */
-    void update( const Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
+    void update( Transmission::TransmissionModel& transmission, SimTime firstVecInitTS );
 
     //! Makes a survey
     void newSurvey();
@@ -100,6 +101,12 @@ public:
     /** Return the number of humans. */
     inline size_t size() const {
         return populationSize;
+    }
+    inline HumanPop &getHumans() {
+        return population;
+    }
+    inline const HumanPop &getHumans() const {
+        return population;
     }
     //@}
 

@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -32,7 +33,7 @@ Episode::~Episode ()
 
 void Episode::flush() {
     report();
-    time = SimTime::never();
+    time = sim::never();
 }
 
 
@@ -52,7 +53,7 @@ void Episode::update (const Host::Human& human, Episode::State newState)
 }
 
 void Episode::report () {
-    if (time < SimTime::zero())        // Nothing to report
+    if (time < sim::zero())        // Nothing to report
         return;
     
     // Reports malarial/non-malarial UC fever dependent on cause, not diagnosis.
@@ -105,7 +106,7 @@ void Episode::report () {
 
 void Episode::operator& (istream& stream) {
     time & stream;
-    if (time > SimTime::zero()) {
+    if (time > sim::zero()) {
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;
@@ -116,7 +117,7 @@ void Episode::operator& (istream& stream) {
 }
 void Episode::operator& (ostream& stream) {
     time & stream;
-    if (time >= SimTime::zero()) {
+    if (time >= sim::zero()) {
         surveyPeriod & stream;
         ageGroup & stream;
         cohortSet & stream;

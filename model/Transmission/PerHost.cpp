@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -75,7 +76,7 @@ void PerHost::deployComponent( LocalRng& rng, const HumanVectorInterventionCompo
 
 
 // Note: in the case an intervention is not present, we can use the approximation
-// of Weibull decay over the time span now - SimTime::never()
+// of Weibull decay over the time span now - sim::never()
 // (easily large enough for conceivable Weibull params that the value is 0.0 when
 // rounded to a double. Performance-wise it's perhaps slightly slower than using
 // an if() when interventions aren't present.

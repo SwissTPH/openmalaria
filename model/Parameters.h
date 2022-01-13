@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -22,6 +23,8 @@
 #define Hmod_InputParameters
 
 #include <map>
+#include <schema/scenario.h>
+#include "util/errors.h"
 
 namespace scnXml { class Parameters; }
 namespace OM {
@@ -93,12 +96,29 @@ public:
         MAX
     };
 
-    Parameters( const scnXml::Parameters& parameters );
-    
+    Parameters( const scnXml::Parameters& parameters )
+    {
+        // set parameters
+        const scnXml::Parameters::ParameterSequence& paramSeq = parameters.getParameter();
+        for(auto iter = paramSeq.begin(); iter != paramSeq.end(); ++iter) {
+            int i = iter->getNumber();
+            if (i < 0 || i >= MAX)
+                continue;   // ignore the parameter; no real point in making this an error
+            Parameter parameter = static_cast<Parameter>(i);
+            if( !parameterValues.insert( make_pair( parameter, iter->getValue() ) ).second )
+                throw util::xml_scenario_error("parameter with index " + to_string(parameter) + " described twice");
+        }
+    }
+
     /**
      * Get a parameter, using one of the Parameter codes.
      */
-    double operator[]( Parameter parameter ) const;
+    double operator[]( Parameter parameter )const{
+        auto iter = parameterValues.find( parameter );
+        if( iter == parameterValues.end() )
+            throw util::xml_scenario_error("parameter " + to_string(parameter) + " required but not described");
+        return iter->second;
+    }
     
 private:
     // Initialized (derived) values:

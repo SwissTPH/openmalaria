@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -32,7 +33,7 @@ namespace Host {
 
     class ImportedInfections {
     public:
-        ImportedInfections() : period(SimTime::zero()), lastIndex(0) {}
+        ImportedInfections() : period(sim::zero()), lastIndex(0) {}
         
         /** Initialise, passing intervention description
          * 
@@ -61,11 +62,11 @@ namespace Host {
         }
         
     private:
-        SimTime period;
+        SimTime period = sim::never();
         uint32_t lastIndex;
         struct Rate {
             Rate( SimTime t, double v ): time(t), value(v) {}
-            SimTime time;
+            SimTime time = sim::never();
             double value;
             inline bool operator< (const Rate& that) const{
                 return time < that.time;

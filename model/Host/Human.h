@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -87,7 +88,7 @@ public:
   //@}
   
   /// Main human update method.
-  void update(const Transmission::TransmissionModel& transmission);
+  void update(Transmission::TransmissionModel& transmission);
   //@}
   
   ///@brief Deploy "intervention" functions
@@ -201,7 +202,7 @@ private:
   
   LocalRng m_rng;
   
-  SimTime m_DOB;        // date of birth; humans are always born at the end of a time step
+  SimTime m_DOB = sim::never();        // date of birth; humans are always born at the end of a time step
   bool m_remove;    // TODO: we only need this because dead-person replacement can be delayed by 2 steps
   
   /// Vaccines

@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -20,8 +21,8 @@
 
 #include "Host/NeonatalMortality.h"
 #include "Population.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/Diagnostic.h"
 #include "util/random.h"
 #include "util/CommandLine.h"
 #include "schema/healthSystem.h"
@@ -51,7 +52,7 @@ double riskFromMaternalInfection = 0.0;
 std::vector<double> prevByGestationalAge;
 
 /// Lower and upper bounds for potential mothers (as in model description)
-SimTime ageLb = SimTime::fromYearsI(20), ageUb = SimTime::fromYearsI(25);
+SimTime ageLb = sim::fromYearsI(20), ageUb = sim::fromYearsI(25);
 
 // The model is parameterised based on patency levels; the diagnostic
 // used for this may be important.
@@ -59,8 +60,8 @@ const WithinHost::Diagnostic* neonatalDiagnostic = 0;
 
 
 void NeonatalMortality::init( const scnXml::Clinical& clinical ){
-    SimTime fiveMonths = SimTime::fromDays( 5 * 30 );
-    prevByGestationalAge.assign( fiveMonths.inSteps(), 0.0 );
+    SimTime fiveMonths = sim::fromDays( 5 * 30 );
+    prevByGestationalAge.assign( sim::inSteps(fiveMonths), 0.0 );
     
     if( clinical.getNeonatalMortality().present() ){
         neonatalDiagnostic = &WithinHost::diagnostics::get(
@@ -120,7 +121,7 @@ void NeonatalMortality::update (Population& population) {
     
     double maxPrev = prev2025;
     //update the vector containing the prevalence by gestational age
-    size_t index = sim::ts0().moduloSteps(prevByGestationalAge.size());
+    size_t index = sim::moduloSteps(sim::ts0(), prevByGestationalAge.size());
     prevByGestationalAge[index] = prev2025;
     for(size_t i = 0; i < prevByGestationalAge.size(); ++i) {
         if (prevByGestationalAge[i] > maxPrev) {

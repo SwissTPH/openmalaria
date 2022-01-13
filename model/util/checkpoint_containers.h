@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -53,7 +54,7 @@ namespace checkpoint {
     template<class T>
     void operator& (vector<T>& x, ostream& stream) {
         x.size() & stream;
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -63,7 +64,7 @@ namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.resize (l);
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -74,7 +75,7 @@ namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.resize (l, templateInstance);
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -82,7 +83,7 @@ namespace checkpoint {
     template<class T>
     void operator& (list<T> x, ostream& stream) {
         x.size() & stream;
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }
@@ -92,7 +93,7 @@ namespace checkpoint {
         l & stream;
         validateListSize (l);
         x.resize (l);
-        foreach (T& y, x) {
+        for (T& y : x) {
             y & stream;
         }
     }

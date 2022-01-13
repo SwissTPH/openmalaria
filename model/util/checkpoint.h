@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -27,48 +28,12 @@
 #endif
 
 #include <iostream>
-#include <boost/foreach.hpp>
 #include <vector>
 #include <list>
 #include <map>
 #include <set>
 using namespace std;
 
-/** @brief Checkpointing utility functions
- *
- * These functions are intended to facilitate checkpointing. They were inspired
- * by the boost::serialization library (which proved to be easier not to use,
- * due to the additional library dependency).
- * 
- * My current rule-of-thumb is to checkpoint all non-static data but not static data in general.
- * 
- * Data should be checkpointed with the & operator. Non-derived classes should implement a
- * checkpointing function like the following:
- * 
- * \code
-/// Checkpointing
-template<class S>
-void operator& (S& stream) {
-    var1 & stream;
-    var2 & stream;
-}
- * \endcode
- * 
- * (This template will be implemented for istream and ostream types.)
- * Derived classes should implement the same templated function, but calling a virtual checkpoint
- * function defined as the following:
- * 
- * \code
-virtual checkpoint (istream& stream);
-virtual checkpoint (ostream& stream);
- * \endcode
- *
- * Although this needs to be implemented twice, in most cases one implementation will just be a copy
- * of the other with istream replaced with ostream as the argument type.
- * 
- * Checkpointing should be set up by including Global.h. Some more
- * checkpointing functions (for handling containers) are available by including
- * checkpoint_containers.h. */
 namespace OM {
 namespace interventions{
     struct ComponentId;

@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -246,7 +247,7 @@ namespace OM { namespace util {
             options[UPDATE_DENSITY_GAMMA] ) )
             throw xml_scenario_error( "Penny model option used without PENNY_WITHIN_HOST_MODEL option" );
         
-        if( SimTime::oneTS() == SimTime::fromDays(5) ){
+        if( sim::oneTS() == sim::fromDays(5) ){
             // 5 day TS is okay; some tests specific to this TS:
             bitset<NUM_OPTIONS> require1DayTS;
             require1DayTS
@@ -259,11 +260,11 @@ namespace OM { namespace util {
                     throw xml_scenario_error (msg.str());
                 }
             }
-        }else if( SimTime::oneTS() == SimTime::fromDays(1) ){
+        }else if( sim::oneTS() == sim::fromDays(1) ){
             // 1 day TS is also okay
         }else{
             ostringstream msg;
-            msg << "Time step set to " << SimTime::oneTS().inDays() << " days but only 1 and 5 days are supported.";
+            msg << "Time step set to " << sim::oneTS() << " days but only 1 and 5 days are supported.";
             throw xml_scenario_error (msg.str());
         }
     }

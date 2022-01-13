@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -25,7 +26,6 @@
 #include "Transmission/PerHost.h"
 #include "util/sampler.h"
 #include "schema/interventions.h"
-#include <boost/optional.hpp>
 
 namespace OM {
 namespace interventions {
@@ -112,7 +112,7 @@ namespace factors {
          * the deterrent can never be perfect, but can have zero effect. */
         void initTwoStage(const scnXml::TwoStageDeterrency& elt,
                           double maxInsecticide,
-                          boost::optional<double> holeIndexMax);
+                          double holeIndexMax, bool holeIndexMaxPresent = false);
         
         /** Calculate effect. Range of output is any value ≥ 0.
          * 
@@ -263,7 +263,7 @@ protected:
     
 private:
     // these parameters express the current state of the net:
-    SimTime disposalTime;	// time at which net will be disposed of (if it's not already been replaced)
+    SimTime disposalTime = sim::never();	// time at which net will be disposed of (if it's not already been replaced)
     int nHoles;				// total number of holes
     double holeIndex;		// a measure of both the number and size of holes
     double initialInsecticide;	// units: mg/m²

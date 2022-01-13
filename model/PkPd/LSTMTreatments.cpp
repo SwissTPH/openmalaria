@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -23,8 +24,6 @@
 #include "PkPd/Drug/LSTMDrugType.h"
 #include "PkPd/LSTMModel.h"
 
-#include <boost/foreach.hpp>
-
 namespace OM {
 namespace PkPd {
 
@@ -37,7 +36,7 @@ void MedicateData::load( const scnXml::PKPDMedication& med ){
 void Schedule::load( const scnXml::PKPDSchedule::MedicateSequence& seq ){
     medications.resize( seq.size() );
     size_t i = 0;
-    foreach( const scnXml::PKPDMedication& med, seq ){
+    for( const scnXml::PKPDMedication& med : seq ){
         medications[i].load( med );
         i += 1;
     }
@@ -50,7 +49,7 @@ void DosageTable::load( const xsd::cxx::tree::sequence<scnXml::PKPDDosageRange>&
     useMass = isBodyMass;
     multMassKg = false;
     double lastMult = 0.0, lastAge = numeric_limits<double>::quiet_NaN();
-    foreach( const scnXml::PKPDDosageRange& age, seq ){
+    for( const scnXml::PKPDDosageRange& age : seq ){
         if( lastAge != lastAge ){
             if( age.getLowerbound() != 0.0 )
                 throw util::xml_scenario_error( "dosage table must have first lower bound equal 0" );
@@ -72,7 +71,7 @@ map<string,size_t> dosagesNames;
 void LSTMTreatments::init(const scnXml::Treatments& data){
     schedules.resize( data.getSchedule().size() );
     size_t i = 0;
-    foreach( const scnXml::PKPDSchedule& schedule, data.getSchedule() ){
+    for( const scnXml::PKPDSchedule& schedule : data.getSchedule() ){
         schedules[i].load( schedule.getMedicate() );
         scheduleNames[schedule.getName()] = i;
         i += 1;
@@ -80,7 +79,7 @@ void LSTMTreatments::init(const scnXml::Treatments& data){
     
     dosages.resize( data.getDosages().size() );
     i = 0;
-    foreach( const scnXml::PKPDDosages& elt, data.getDosages() ){
+    for( const scnXml::PKPDDosages& elt : data.getDosages() ){
         if( elt.getAge().size() ) dosages[i].load( elt.getAge(), false );
         else if( elt.getBodymass().size() ) dosages[i].load( elt.getBodymass(), true );
         else{

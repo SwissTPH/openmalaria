@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -28,7 +29,7 @@
 #include "util/ModelOptions.h"
 #include "util/CommandLine.h"
 #include "util/errors.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 #include "schema/scenario.h"
 
 namespace OM { namespace Clinical {
@@ -37,7 +38,7 @@ bool opt_event_scheduler = false;
 bool opt_imm_outcomes = false;
 
 bool ClinicalModel::indirectMortBugfix;
-SimTime ClinicalModel::healthSystemMemory{ SimTime::never() };
+SimTime ClinicalModel::healthSystemMemory{ sim::never() };
 
 //log odds ratio of case-fatality in community compared to hospital
 double oddsRatioThreshold;
@@ -137,7 +138,7 @@ bool ClinicalModel::isDead( SimTime age ){
 
 void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
     if (doomed < NOT_DOOMED)	// Countdown to indirect mortality
-        doomed -= SimTime::oneTS().inDays();
+        doomed -= sim::oneTS();
     
     //indirect death: if this human's about to die, don't worry about further episodes:
     if (doomed <= DOOMED_EXPIRED) {	//clinical bout 6 intervals before
@@ -159,8 +160,8 @@ void ClinicalModel::update (Human& human, double ageYears, bool newBorn) {
 
 void ClinicalModel::updateInfantDeaths( SimTime age ){
     // update array for the infant death rates
-    if (age < SimTime::oneYear()){
-        size_t index = age / SimTime::oneTS();
+    if (age < sim::oneYear()){
+        size_t index = age / sim::oneTS();
         
         // Testing doomed == DOOMED_NEXT_TS gives very slightly different results than
         // testing doomed == DOOMED_INDIRECT (due to above if(..))

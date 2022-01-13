@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -18,9 +19,6 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// Must not be included _after_ boost/math/special_functions/fpclassify.hpp
-#include <boost/math/special_functions/nonfinite_num_facets.hpp>
-
 #include "mon/info.h"
 #include "mon/management.h"
 #include "mon/AgeGroup.h"
@@ -28,14 +26,13 @@
 #include "interventions/InterventionManager.hpp"
 #include "util/CommandLine.h"
 #include "util/errors.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 #include "schema/monitoring.h"
 
-#include "WithinHost/Diagnostic.h"
+#include "Host/WithinHost/Diagnostic.h"
 
 #include <gzstream/gzstream.h>
 #include <fstream>
-#include <boost/algorithm/string.hpp>
 
 namespace OM {
 namespace mon {
@@ -43,11 +40,11 @@ namespace mon {
 // ———  surveys  ———
 
 struct SurveyDate {
-    SimDate date;       // date of survey
+    SimTime date = sim::never();       // date of survey
     size_t num; // if NOT_USED, the survey is not reported; if greater, this is the survey number
     
     /// Construct
-    SurveyDate(SimDate date, size_t num) : date(date), num(num) {}
+    SurveyDate(SimTime date, size_t num) : date(date), num(num) {}
     
     inline bool isReported() const { return num != NOT_USED; }
 };
@@ -62,35 +59,55 @@ namespace impl{
 
 void updateConditions();        // defined in mon.cpp
 
-SimDate readSurveyDates( const scnXml::Monitoring& monitoring ){
+// trim from start (in place)
+static inline void ltrim(std::string &s) {
+    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }));
+}
+
+// trim from end (in place)
+static inline void rtrim(std::string &s) {
+    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {
+        return !std::isspace(ch);
+    }).base(), s.end());
+}
+
+// trim from both ends (in place)
+static inline void trim(std::string &s) {
+    ltrim(s);
+    rtrim(s);
+}
+
+SimTime readSurveyDates( const scnXml::Monitoring& monitoring ){
     const scnXml::Surveys::SurveyTimeSequence& survs =
         monitoring.getSurveys().getSurveyTime();
     
-    map<SimDate, bool> surveys;        // dates of all surveys (from XML) and whether these are reporting
+    map<SimTime, bool> surveys;        // dates of all surveys (from XML) and whether these are reporting
     
     for(size_t i = 0; i < survs.size(); ++i) {
         const scnXml::SurveyTime& surv = survs[i];
         try{
             std::string s = surv;
-            boost::algorithm::trim(s);
-            SimDate cur = UnitParse::readDate( s, UnitParse::STEPS );
+            trim(s);
+            SimTime cur = UnitParse::readDate( s, UnitParse::STEPS );
             bool reporting = surv.getReported();
             if( surv.getRepeatStep().present() != surv.getRepeatEnd().present() ){
                 throw util::xml_scenario_error( "surveyTime: use of repeatStep or repeatEnd without other" );
             }
             if( surv.getRepeatStep().present() ){
                 SimTime step = UnitParse::readDuration( surv.getRepeatStep().get(), UnitParse::NONE );
-                if( step < SimTime::oneTS() ){
+                if( step < sim::oneTS() ){
                     throw util::xml_scenario_error( "surveyTime: repeatStep must be >= 1" );
                 }
-                SimDate end = UnitParse::readDate( surv.getRepeatEnd().get(), UnitParse::NONE );
+                SimTime end = UnitParse::readDate( surv.getRepeatEnd().get(), UnitParse::NONE );
                 while(cur < end){
                     if( reporting ){
                         surveys[cur] = true;
                     }else{
                         surveys.insert(make_pair(cur, false));        // does not override existing pair with key 'cur'
                     }
-                    cur += step;
+                    cur = cur + step;
                 }
             }else{
                 if( reporting ){
@@ -132,7 +149,7 @@ SimDate readSurveyDates( const scnXml::Monitoring& monitoring ){
             if( !surveyDate.isReported() ) continue;
             std::cout
                 << (surveyDate.num+1) << '\t'
-                << (surveyDate.date - sim::startDate()).inSteps() << '\t'
+                << sim::inSteps(surveyDate.date - sim::startDate()) << '\t'
                 << surveyDate.date << std::endl;
         }
     }
@@ -152,7 +169,7 @@ void updateSurveyNumbers() {
     if( impl::surveyIndex >= impl::surveyDates.size() ){
         impl::survNumEvent = NOT_USED;
         impl::survNumStat = NOT_USED;
-        impl::nextSurveyDate = SimDate::future();
+        impl::nextSurveyDate = sim::future();
     }else{
         for( size_t i = impl::surveyIndex; i < impl::surveyDates.size(); ++i ){
             impl::survNumEvent = impl::surveyDates[i].num;  // set to survey number or NOT_USED; this happens at least once!
@@ -175,11 +192,6 @@ void concludeSurvey(){
 }
 
 void writeToStream(ostream& stream) {
-    // This locale ensures uniform formatting of nans and infs on all platforms.
-    std::locale old_locale;
-    std::locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
-    stream.imbue( nfn_put_locale );
-    
     stream.width (0);
     // For additional control:
     // stream.precision (6);
@@ -200,6 +212,15 @@ void writeSurveyData ()
     } else {
         ofstream stream(filename, mode);
         writeToStream(stream);
+        // Otherwise file may be written after OpenMalaria has returned (Mac OS Xcode 9.4)
+        stream.flush();
+        stream.close();
+    }
+
+    ifstream stream(filename, mode);
+    if(stream.is_open() == false || !stream.good())
+    {
+        cerr << "STREAM BAD" << endl;
     }
 }
 
@@ -218,9 +239,9 @@ void AgeGroup::init (const scnXml::Monitoring& monitoring) {
     upperBound.resize( groups.size() + 1 );
     for(size_t i = 0;i < groups.size(); ++i) {
         // convert to SimTime, rounding down to the next time step
-        upperBound[i] = SimTime::fromYearsD( groups[i].getUpperbound() );
+        upperBound[i] = sim::fromYearsD( groups[i].getUpperbound() );
     }
-    upperBound[groups.size()] = SimTime::future();
+    upperBound[groups.size()] = sim::future();
 }
 
 void AgeGroup::update (SimTime age) {

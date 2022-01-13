@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -35,10 +36,6 @@
  * are stable across platforms and releases, allowing reproducibility.
  */
 
-// Experimental support for boost random number distributions.
-// Unfortunately the authors do not support reproducibility of results.
-// #define OM_RANDOM_USE_BOOST_DIST
-
 #include "Global.h"
 #include "util/errors.h"
 #include <set>
@@ -46,20 +43,8 @@
 #include <chacha.h>
 #include "util/xoshiro.hpp"
 
-#ifdef OM_RANDOM_USE_BOOST_DIST
-#include <boost/random/normal_distribution.hpp>
-#include <boost/random/lognormal_distribution.hpp>
-#include <boost/random/gamma_distribution.hpp>
-#include <boost/random/beta_distribution.hpp>
-#include <boost/random/poisson_distribution.hpp>
-#include <boost/random/bernoulli_distribution.hpp>
-#include <boost/random/weibull_distribution.hpp>
-#endif
-
-#if !defined OM_RANDOM_USE_BOOST_DIST
 #include <gsl/gsl_cdf.h>
 #include <gsl/gsl_randist.h>
-#endif
 
 #include <cmath>
 
@@ -166,22 +151,12 @@ struct RNG {
     /** This function returns a Gaussian random variate, with mean mean and
      * standard deviation std. The sampled value x ~ N(mean, std^2) . */
     double gauss (double mean, double std){
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        boost::random::normal_distribution<> dist (mean, std);
-        return dist(m_rng);
-# else
         return gsl_ran_gaussian(&m_gsl_gen,std)+mean;
-# endif
     }
     
     /** This function returns a random variate from the gamma distribution. */
     double gamma (double a, double b){
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        boost::random::gamma_distribution<> dist (a, b);
-        return dist(m_rng);
-# else
         return gsl_ran_gamma(&m_gsl_gen, a, b);
-# endif
     }
     
     /** This function returns a random variate from the lognormal distribution.
@@ -193,12 +168,7 @@ struct RNG {
      * @param sigma sigma-log
      */
     double log_normal (double meanlog, double stdlog){
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        boost::random::lognormal_distribution<> dist (meanlog, stdlog);
-        return dist (m_rng);
-# else
         return gsl_ran_lognormal (&m_gsl_gen, meanlog, stdlog);
-# endif
     }
     
     /** Return the maximum over multiple log-normal samples.
@@ -210,15 +180,6 @@ struct RNG {
      * @param stdlog standard deviation of underlying Gaussian
      */
     double max_multi_log_normal (double start, int n, double meanlog, double stdlog){
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        // We don't have a CDF available, so take log-normal samples
-        double result = start;
-        for (int i = 0; i < n; ++i) {
-            double sample = log_normal(meanlog, stdlog);
-            if (sample > result) result = sample;
-        }
-        return result;
-# else
         // Used for performance reasons. Calling GSL's log_normal 5 times is 50% slower.
         // For random variables X1, .., Xn with identical distribution X and
         // Mn = max(X1, .., Xn), the CDF:
@@ -230,17 +191,11 @@ struct RNG {
         double zval = gsl_cdf_ugaussian_Pinv (normp);
         double multi_sample = exp(meanlog + stdlog * zval);
         return std::max(start, multi_sample);
-# endif
     }
     
     /** This function returns a random variate from the beta distribution. */
     double beta(double a, double b){
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        boost::random::beta_distribution<> dist (a, b);
-        return dist(m_rng);
-# else
         return gsl_ran_beta (&m_gsl_gen,a,b);
-# endif
     }
     
     /** This function wraps beta(), setting b=b and a such that m is the mean
@@ -253,35 +208,25 @@ struct RNG {
     
     /** This function returns a random integer from the Poisson distribution with mean lambda. */
     int poisson(double lambda){
-        if( !(boost::math::isfinite)(lambda) ){
+        if( !(std::isfinite)(lambda) ){
             //This would lead to an inifinite loop
             throw TRACED_EXCEPTION( "lambda is inf", Error::InfLambda );
         }
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        boost::random::poisson_distribution<> dist (lambda);
-        return dist(m_rng);
-# else
         return gsl_ran_poisson (&m_gsl_gen, lambda);
-# endif
     }
 
     /** This function returns true with probability prob or 0 with probability
      * 1-prob (Bernoulli distribution). */
     bool bernoulli(double prob){
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        boost::random::bernoulli_distribution<> dist (prob);
-        return dist(m_rng);
-# else
-        assert( (boost::math::isfinite)(prob) );
+        assert( (std::isfinite)(prob) );
         // return true iff our variate is less than the probability
         return uniform_01() < prob;
-# endif
     }
     
     /** This function returns an integer from 0 to 1-n, where every value has
      * equal probability of being sampled. */
     inline int uniform (int n) {
-        assert( (boost::math::isfinite)(n) );
+        assert( (std::isfinite)(n) );
         return static_cast<int>( uniform_01() * n );
     }
     
@@ -294,12 +239,7 @@ struct RNG {
      * @param k is the shape parameter
      */
     double weibull( double lambda, double k ){
-# ifdef OM_RANDOM_USE_BOOST_DIST
-        boost::random::weibull_distribution<> dist (k, lambda);
-        return dist(m_rng);
-# else
         return gsl_ran_weibull( &m_gsl_gen, lambda, k );
-# endif
     }
     //@}
     

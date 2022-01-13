@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -24,7 +25,7 @@
 #include "Global.h"     // SimTime
 
 #include <string>
-#include <boost/integer_traits.hpp>
+#include <limits>
 
 /** This header provides information from the reporting system. */
 namespace OM {
@@ -37,11 +38,11 @@ namespace impl {
     // Variables (checkpointed):
     extern bool isInit; // set true after "initialisation" survey at intervention time 0
     extern size_t survNumEvent, survNumStat;
-    extern SimDate nextSurveyDate;
+    extern SimTime nextSurveyDate;
 }
 
 /// For surveys and measures to say something shouldn't be reported
-const size_t NOT_USED = boost::integer_traits<size_t>::const_max;
+const size_t NOT_USED = std::numeric_limits<size_t>::max();
 
 /** Line end character. Use Unix line endings to save a little size. */
 const char lineEnd = '\n';
@@ -56,9 +57,9 @@ inline size_t eventSurveyNumber(){ return impl::survNumEvent; }
 /// reported but acts like it is to set survey variables.
 inline bool isReported(){ return !impl::isInit || impl::survNumStat != NOT_USED; }
 
-/** Date the current (next) survey ends at, or SimTime::never() if no more
+/** Date the current (next) survey ends at, or sim::never() if no more
  * surveys take place. */
-inline SimDate nextSurveyDate() {
+inline SimTime nextSurveyDate() {
     return impl::nextSurveyDate;
 }
 

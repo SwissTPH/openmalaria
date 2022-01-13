@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -21,7 +22,7 @@
 #include "Host/ImportedInfections.h"
 #include "Host/Human.h"
 #include "util/random.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 #include "Population.h"
 
 namespace OM { namespace Host {
@@ -31,7 +32,7 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     try{
         //NOTE: if changing XSD, this should not have a default unit:
         period = UnitParse::readDuration( tElt.getPeriod(), UnitParse::STEPS );
-        if( period < SimTime::zero() ){
+        if( period < sim::zero() ){
             throw util::format_error( "cannot be negative" );
         }
     }catch( const util::format_error& e ){
@@ -40,14 +41,14 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
     rate.reserve( tElt.getRate().size() );
     try{
         for( auto it = tElt.getRate().begin(); it != tElt.getRate().end(); ++it ){
-            SimDate date = UnitParse::readDate( it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/ );
+            SimTime date = UnitParse::readDate( it->getTime(), UnitParse::STEPS /*STEPS is only for backwards compatibility*/ );
             // convert to per-time-step, per-person
             double rateVal = it->getValue() * sim::yearsPerStep() * (1.0 / 1000.0);
             rate.push_back( Rate( date - sim::startDate(), rateVal ) );
         }
         sort( rate.begin(), rate.end() );
         if( rate.size() > 0 ){
-            if( period != SimTime::zero() && rate[0].time != SimTime::zero() ){
+            if( period != sim::zero() && rate[0].time != sim::zero() ){
                 throw util::xml_scenario_error( "must specify rate at time zero when period is not zero" );
             }
             // remove useless repeated entries from list
@@ -69,8 +70,8 @@ void ImportedInfections::init( const scnXml::ImportedInfections& iiElt ){
 void ImportedInfections::import( Population& population ){
     if( rate.size() == 0 ) return;      // no imported infections
     SimTime now = sim::intervTime();
-    assert( now >= SimTime::zero() );
-    if( period > SimTime::zero() ){
+    assert( now >= sim::zero() );
+    if( period > sim::zero() ){
         now = mod_nn(now, period);
     }
     if( rate[lastIndex].time > now ){

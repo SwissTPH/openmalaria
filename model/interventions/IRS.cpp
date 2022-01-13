@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -106,9 +107,6 @@ void IRSComponent::IRSAnopheles::init(
     proportionUnprotected = 1.0 - proportionProtected;
 }
 
-inline bool inRange01( double x ){
-    return x>=0.0 && x<= 1.0;
-}
 IRSComponent::IRSAnopheles::RelativeAttractiveness::RelativeAttractiveness() :
     lPF( numeric_limits< double >::signaling_NaN() ),
     insecticideScaling( numeric_limits< double >::signaling_NaN() )
@@ -138,7 +136,7 @@ void IRSComponent::IRSAnopheles::RelativeAttractiveness::init(const scnXml::IRSD
         // Potentially warn about this... but not necessary since making humans
         // more attractive isn't really an issue.
 //     }
-    assert( (boost::math::isnan)(lPF) ); // double init
+    assert( (std::isnan)(lPF) ); // double init
     lPF = log( PF );
 }
 IRSComponent::IRSAnopheles::SurvivalFactor::SurvivalFactor() :

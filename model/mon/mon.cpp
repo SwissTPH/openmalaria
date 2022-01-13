@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -23,8 +24,8 @@
 #include "mon/management.h"
 #define H_OM_mon_cpp
 #include "mon/OutputMeasures.h"
-#include "WithinHost/Diagnostic.h"
-#include "WithinHost/Genotypes.h"
+#include "Host/WithinHost/Diagnostic.h"
+#include "Host/WithinHost/Genotypes.h"
 #include "Clinical/ClinicalModel.h"
 #include "Host/Human.h"
 #include "util/errors.h"
@@ -32,7 +33,6 @@
 
 #include <typeinfo>
 #include <iostream>
-#include <boost/format.hpp>
 
 namespace OM {
 namespace mon {
@@ -53,7 +53,7 @@ namespace impl {
     bool isInit = false;
     size_t surveyIndex = 0;     // index in surveyTimes of next survey
     size_t survNumEvent = NOT_USED, survNumStat = NOT_USED;
-    SimDate nextSurveyDate = SimDate::future();
+    SimTime nextSurveyDate = sim::future();
     
     vector<Condition> conditions;
 }
@@ -204,7 +204,7 @@ public:
     // Set up ready to accept reports. The passed list includes all measures
     // used; we ignore those of the wrong type.
     void init( const vector<OutMeasure>& enabledMeasures, size_t nSp, size_t nD ){
-        foreach( const OutMeasure& om, enabledMeasures ){
+        for( const OutMeasure& om : enabledMeasures ){
             // Two types: double and int. Skip if type is wrong.
             if( om.isDouble != (typeid(T) == typeid(double)) ) continue;
             // We don't track weird measures like IMR here:
@@ -385,7 +385,7 @@ public:
     // Checkpointing
     void checkpoint( ostream& stream ){
         reports.size() & stream;
-        foreach (T& y, reports) {
+        for (T& y : reports) {
             y & stream;
         }
         // reports is the only field which changes after initialisation
@@ -397,7 +397,7 @@ public:
             throw util::checkpoint_error( "mon::reports: invalid list size" );
         }
         reports.resize (l);
-        foreach (T& y, reports) {
+        for (T& y : reports) {
             y & stream;
         }
         // reports is the only field which changes after initialisation
@@ -427,13 +427,12 @@ void initReporting( const scnXml::Scenario& scenario ){
     reportedMeasures.reserve(optsElt.getOption().size() + namedOutMeasures.size());
     
     set<int> outIds;    // all measure numbers used in output
-    foreach( const scnXml::MonitoringOption& optElt, optsElt.getOption() ){
+    for( const scnXml::MonitoringOption& optElt : optsElt.getOption() ){
         if( optElt.getValue() == false ) continue;      // option is disabled
         
         auto it = namedOutMeasures.find( optElt.getName() );
         if( it == namedOutMeasures.end() ){
-            throw util::xml_scenario_error( (boost::format("unrecognised "
-                "survey option: %1%") %optElt.getName()).str() );
+            throw util::xml_scenario_error("unrecognised survey option: " + string(optElt.getName()));
         }
         OutMeasure om = it->second;     // copy; we may modify below
         
@@ -442,20 +441,16 @@ void initReporting( const scnXml::Scenario& scenario ){
                 if( om.isDouble && !om.byAge && !om.byCohort && !om.bySpecies ){
                     reportIMR = om.outId;
                 }else{
-                    throw util::xml_scenario_error( "measure allCauseIMR does not "
-                        "support any categorisation" );
+                    throw util::xml_scenario_error( "measure allCauseIMR does not support any categorisation" );
                 }
             } else if( om.m == M_OBSOLETE ){
-                throw util::xml_scenario_error( (boost::format("obsolete "
-                    "survey option: %1%") %optElt.getName()).str() );
+                throw util::xml_scenario_error("obsolete survey option: " + string(optElt.getName()));
             } else TRACED_EXCEPTION_DEFAULT("invalid measure code");
         }
         
         if( om.m == MHF_LOG_DENSITY || om.m == MHF_LOG_DENSITY_GENOTYPE){
             if( WithinHost::diagnostics::monitoringDiagnostic().allowsFalsePositives() ){
-                throw util::xml_scenario_error( (boost::format("measure %1% "
-                    "may not be used when monitoring diagnostic sensitivity "
-                    "< 1") %optElt.getName()).str() );
+                throw util::xml_scenario_error("measure " + string(optElt.getName()) + " may not be used when monitoring diagnostic sensitivity < 1");
             }
         }
         
@@ -464,53 +459,42 @@ void initReporting( const scnXml::Scenario& scenario ){
             if( om.byAge ){
                 om.byAge = optElt.getByAge().get();     // disable or keep
             }else if( optElt.getByAge().get() ){
-                throw util::xml_scenario_error( (boost::format("measure %1% "
-                    "does not support categorisation by age group")
-                    %optElt.getName()).str() );
+                throw util::xml_scenario_error("measure " + string(optElt.getName()) + " does not support categorisation by age group");
             }
         }
         if( optElt.getByCohort().present() ){
             if( om.byCohort ){
                 om.byCohort = optElt.getByCohort().get();   // disable or keep
             }else if( optElt.getByCohort().get() ){
-                throw util::xml_scenario_error( (boost::format("measure %1% "
-                    "does not support categorisation by cohort")
-                    %optElt.getName()).str() );
+                throw util::xml_scenario_error("measure " + string(optElt.getName()) + " does not support categorisation by cohort");
             }
         }
         if( optElt.getBySpecies().present() ){
             if( om.bySpecies ){
                 om.bySpecies = optElt.getBySpecies().get(); // disable or keep
             }else if( optElt.getBySpecies().get() ){
-                throw util::xml_scenario_error( (boost::format("measure %1% "
-                    "does not support categorisation by species")
-                    %optElt.getName()).str() );
+                throw util::xml_scenario_error("measure " + string(optElt.getName()) + " does not support categorisation by species");
             }
         }
         if( optElt.getByGenotype().present() ){
             if( om.byGenotype ){
                 om.byGenotype = optElt.getByGenotype().get();   // disable or keep
             }else if( optElt.getByGenotype().get() ){
-                throw util::xml_scenario_error( (boost::format("measure %1% "
-                    "does not support categorisation by genotype")
-                    %optElt.getName()).str() );
+                throw util::xml_scenario_error("measure " + string(optElt.getName()) + " does not support categorisation by genotype");
             }
         }
         if( optElt.getByDrugType().present() ){
             if( om.byDrug ){
                 om.byDrug = optElt.getByDrugType().get();   // disable or keep
             }else if( optElt.getByDrugType().get() ){
-                throw util::xml_scenario_error( (boost::format("measure %1% "
-                    "does not support categorisation by drug type")
-                    %optElt.getName()).str() );
+                throw util::xml_scenario_error("measure " + string(optElt.getName()) + " does not support categorisation by drug type");
             }
         }
         
         // Output number may be changed:
         if( optElt.getOutputNumber().present() ) om.outId = optElt.getOutputNumber().get();
         if( outIds.count(om.outId) ){
-            throw util::xml_scenario_error( (boost::format("monitoring output "
-                "number %1% used more than once") %om.outId).str() );
+            throw util::xml_scenario_error("monitoring output number " + to_string(om.outId) + " used more than once");
         }
         outIds.insert( om.outId );
         
@@ -532,16 +516,14 @@ size_t setupCondition( const string& measureName, double minValue,
                        double maxValue, bool initialState )
 {
     auto it = namedOutMeasures.find( measureName );
-    if( it == namedOutMeasures.end() ){
-        throw util::xml_scenario_error( (boost::format("unrecognised measure: "
-            "%1%") %measureName).str() );
-    }
+    if( it == namedOutMeasures.end() )
+        throw util::xml_scenario_error("unrecognised measure: " + string(measureName));
+
     OutMeasure om = it->second;         // copy so that we can modify
     // Refuse to use some measures, since these are not reported reliably in
     // "non-reporting" surveys or are reported after the survey is taken:
     if( validCondMeasures.count(om.m) == 0 ){
-        throw util::xml_scenario_error( (boost::format("cannot use measure %1%"
-            " as condition of deployment") %measureName).str() );
+        throw util::xml_scenario_error("cannot use measure " + string(measureName) + " as condition of deployment");
     }
     if( om.isDouble ) storeF.enableCondition(om);
     else storeI.enableCondition(om);
@@ -558,7 +540,7 @@ size_t setupCondition( const string& measureName, double minValue,
 }
 
 void updateConditions() {
-    foreach( Condition& cond, impl::conditions ){
+    for( Condition& cond : impl::conditions ){
         double val = cond.isDouble ?
             storeF.get_sum( cond.measure, cond.method, impl::survNumStat ) :
             storeI.get_sum( cond.measure, cond.method, impl::survNumStat );
@@ -572,7 +554,7 @@ bool checkCondition( size_t conditionKey ){
 
 void internal::write( ostream& stream ){
     for( size_t survey = 0; survey < impl::nSurveys; ++survey ){
-        foreach( const OutMeasure& om, reportedMeasures ){
+        for( const OutMeasure& om : reportedMeasures ){
             if( om.m >= M_NUM ){
                 // "Special" measures are not reported this way. The only such measure is IMR.
                 assert( om.m == M_ALL_CAUSE_IMR && reportIMR >= 0 );

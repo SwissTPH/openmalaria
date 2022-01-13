@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -18,20 +19,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301, USA.
  */
 
-// must be included first to avoid compiler error (incompatible with fpclassify which is included from Global.h?)
-#include <boost/math/special_functions/nonfinite_num_facets.hpp>
-
 #include "mon/Continuous.h"
 #include "mon/info.h"   // lineEnd
 #include "util/errors.h"
 #include "util/CommandLine.h"
-#include "util/timeConversions.h"
+#include "util/UnitParse.h"
 #include "schema/monitoring.h"
 
 #include <vector>
 #include <map>
 #include <fstream>
-#include <boost/format.hpp>
 #include <gzstream/gzstream.h>
 
 namespace OM { namespace mon {
@@ -82,7 +79,7 @@ namespace OM { namespace mon {
     
     // List that we report.
     vector< Callback* > toReport;
-    SimTime ctsPeriod = SimTime::zero();
+    SimTime ctsPeriod = sim::zero();
     bool duringInit = false;
     
     
@@ -100,13 +97,13 @@ namespace OM { namespace mon {
     void ContinuousType::init (const scnXml::Monitoring& monitoring, bool isCheckpoint) {
 	const scnXml::Monitoring::ContinuousOptional& ctsOpt = monitoring.getContinuous();
 	if( ctsOpt.present() == false ) {
-	    ctsPeriod = SimTime::zero();
+	    ctsPeriod = sim::zero();
 	    return;
 	}
 	try{
             //NOTE: if changing XSD, this should not have a default unit:
             ctsPeriod = UnitParse::readShortDuration( ctsOpt.get().getPeriod(), UnitParse::STEPS );
-            if( ctsPeriod < SimTime::oneTS() )
+            if( ctsPeriod < sim::oneTS() )
                 throw util::format_error("must be >= 1 time step");
         }catch( const util::format_error& e ){
             throw xml_scenario_error( string("monitoring/continuous/period: ").append(e.message()) );
@@ -117,10 +114,6 @@ namespace OM { namespace mon {
         
         cts_filename = util::CommandLine::getCtsoutName();
         
-	// This locale ensures uniform formatting of nans and infs on all platforms.
-	locale old_locale;
-	locale nfn_put_locale(old_locale, new boost::math::nonfinite_num_put<char>);
-	ctsOStream.imbue( nfn_put_locale );
 	ctsOStream.width (0);
 	
 	if( isCheckpoint ){
@@ -128,7 +121,7 @@ namespace OM { namespace mon {
 	    for(scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 		auto reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
-		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
+		    throw xml_scenario_error("monitoring.continuous: no output " + string(it->getName()));
 		if( it->getValue() ){
 		    toReport.push_back( reg_it->second );
 		}
@@ -154,7 +147,7 @@ namespace OM { namespace mon {
 	    for(scnXml::OptionSet::OptionConstIterator it = sOSeq.begin(); it != sOSeq.end(); ++it) {
 		auto reg_it = registered.find( it->getName() );
 		if( reg_it == registered.end() )
-		    throw xml_scenario_error( (boost::format("monitoring.continuous: no output \"%1%\"") %it->getName() ).str() );
+		    throw xml_scenario_error("monitoring.continuous: no output " + string(it->getName()));
 		if( it->getValue() ){
 		    ctsOStream << reg_it->second->titles;
 		    toReport.push_back( reg_it->second );
@@ -166,13 +159,13 @@ namespace OM { namespace mon {
     }
 
     void ContinuousType::checkpoint (ostream& stream){
-        if( ctsPeriod == SimTime::zero() )
+        if( ctsPeriod == sim::zero() )
             return;	// output disabled
 	
 	streamOff & stream;
     }
     void ContinuousType::checkpoint (istream& stream){
-        if( ctsPeriod == SimTime::zero() )
+        if( ctsPeriod == sim::zero() )
             return;	// output disabled
 	
 	/* We attempt to resume output correctly after a reload by recording
@@ -201,24 +194,24 @@ namespace OM { namespace mon {
     }
     
     void ContinuousType::update (const Population& population){
-        if( ctsPeriod == SimTime::zero() )
+        if( ctsPeriod == sim::zero() )
             return;	// output disabled
         if( !duringInit ){
-            if( sim::intervTime() < SimTime::zero()
-                || mod_nn(sim::intervTime(), ctsPeriod) != SimTime::zero() )
+            if( sim::intervTime() < sim::zero()
+                || mod_nn(sim::intervTime(), ctsPeriod) != sim::zero() )
                 return;
         } else {
-            if( mod_nn(sim::now(), ctsPeriod) != SimTime::zero() )
+            if( mod_nn(sim::now(), ctsPeriod) != sim::zero() )
                 return;
-            ctsOStream << sim::now().inSteps() << '\t';
+            ctsOStream << sim::inSteps(sim::now()) << '\t';
         }
 	
-        if( duringInit && sim::intervTime() < SimTime::zero() ){
+        if( duringInit && sim::intervTime() < sim::zero() ){
             ctsOStream << "nan";
         }else{
             // NOTE: we could switch this to output dates, but (1) it would be
             // breaking change and (2) it may be harder to use.
-            ctsOStream << sim::intervTime().inSteps();
+            ctsOStream << sim::inSteps(sim::intervTime());
         }
 	for( size_t i = 0; i < toReport.size(); ++i )
 	    toReport[i]->call( population, ctsOStream );

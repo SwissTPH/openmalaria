@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -64,11 +65,11 @@ namespace OM { namespace util { namespace checkpoint {
     //@}
     
     void staticChecks () {
-        BOOST_STATIC_ASSERT (sizeof(char) == 1);
-        BOOST_STATIC_ASSERT (sizeof(short int) == 2);
-        BOOST_STATIC_ASSERT (sizeof(int) == 4);
-        BOOST_STATIC_ASSERT (sizeof(float) == 4);
-        BOOST_STATIC_ASSERT (sizeof(double) == 8);
+        static_assert (sizeof(char) == 1, "sizeof(char) == 1");
+        static_assert (sizeof(short int) == 2, "sizeof(short int) == 2");
+        static_assert (sizeof(int) == 4, "sizeof(int) == 4");
+        static_assert (sizeof(float) == 4, "sizeof(float) == 4");
+        static_assert (sizeof(double) == 8, "sizeof(double) == 8");
     }
     
     void header (ostream& stream) {
@@ -295,7 +296,7 @@ namespace OM { namespace util { namespace checkpoint {
         auto pos = x.begin ();
         for(size_t i = 0; i < l; ++i) {
             interventions::ComponentId s( stream );
-            SimTime t;
+            SimTime t = sim::never();
             t & stream;
             pos = x.insert (pos, make_pair (s,t));
         }

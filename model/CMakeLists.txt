@@ -14,10 +14,12 @@ configure_file(
 
 # Don't use aux_source_directory on . because we don't want to compile openMalaria.cpp in to the lib.
 set (Model_CPP
-  Simulator.cpp
+  sim.cpp
+  # Simulator.cpp
   Population.cpp
   PopulationAgeStructure.cpp
-  Parameters.cpp
+  # Parameters.cpp
+  checkpoint.cpp
   
   Host/Human.cpp
   Host/InfectionIncidenceModel.cpp
@@ -41,43 +43,43 @@ set (Model_CPP
   PkPd/Drug/LSTMDrugType.cpp
   PkPd/LSTMTreatments.cpp
   
-  Transmission/TransmissionModel.cpp
-  Transmission/NonVectorModel.cpp
+  #Transmission/TransmissionModel.cpp
+  #Transmission/NonVectorModel.cpp
   Transmission/VectorModel.cpp
   Transmission/PerHost.cpp
   Transmission/Anopheles/AnophelesModel.cpp
-  Transmission/Anopheles/EmergenceModel.cpp
-  Transmission/Anopheles/MosqTransmission.cpp
-  Transmission/Anopheles/FixedEmergence.cpp
-  Transmission/Anopheles/SimpleMPDEmergence.cpp
+  Transmission/Anopheles/PerHostAnoph.cpp
+  #Transmission/Anopheles/EmergenceModel.cpp
+  #Transmission/Anopheles/MosqTransmission.cpp
+  #Transmission/Anopheles/FixedEmergence.cpp
+  #Transmission/Anopheles/SimpleMPDEmergence.cpp
   #Transmission/Anopheles/LCEmergence.cpp
   #Transmission/Anopheles/LifeCycle.cpp
   #Transmission/Anopheles/ResourceFitter.cpp
-  Transmission/Anopheles/PerHostAnoph.cpp
   
-  WithinHost/WHInterface.cpp
-  WithinHost/WHFalciparum.cpp
-  WithinHost/WHVivax.cpp
-  WithinHost/CommonWithinHost.cpp
-  WithinHost/DescriptiveWithinHost.cpp
-  WithinHost/Genotypes.cpp
-  WithinHost/Infection/CommonInfection.cpp
-  WithinHost/Infection/DescriptiveInfection.cpp
-  WithinHost/Infection/DummyInfection.cpp
-  WithinHost/Infection/EmpiricalInfection.cpp
-  WithinHost/Infection/MolineauxInfection.cpp
-  WithinHost/Infection/PennyInfection.cpp
-  WithinHost/Pathogenesis/PathogenesisModel.cpp
-  WithinHost/Pathogenesis/Submodels.cpp
-  WithinHost/Diagnostic.cpp
-  WithinHost/Treatments.cpp
+  Host/WithinHost/WHInterface.cpp
+  Host/WithinHost/WHFalciparum.cpp
+  Host/WithinHost/WHVivax.cpp
+  Host/WithinHost/CommonWithinHost.cpp
+  Host/WithinHost/DescriptiveWithinHost.cpp
+  Host/WithinHost/Genotypes.cpp
+  Host/WithinHost/Infection/CommonInfection.cpp
+  Host/WithinHost/Infection/DescriptiveInfection.cpp
+  Host/WithinHost/Infection/DummyInfection.cpp
+  Host/WithinHost/Infection/EmpiricalInfection.cpp
+  Host/WithinHost/Infection/MolineauxInfection.cpp
+  Host/WithinHost/Infection/PennyInfection.cpp
+  Host/WithinHost/Pathogenesis/PathogenesisModel.cpp
+  Host/WithinHost/Pathogenesis/Submodels.cpp
+  Host/WithinHost/Diagnostic.cpp
+  Host/WithinHost/Treatments.cpp
   
   mon/mon.cpp
   mon/misc.cpp
   mon/Continuous.cpp
   
-  util/timer.cpp
-  util/vectors.cpp
+  # util/timer.cpp
+  # util/vectors.cpp
   util/DecayFunction.cpp
   util/errors.cpp
   util/checkpoint.cpp
@@ -87,7 +89,8 @@ set (Model_CPP
   util/sampler.cpp
   util/SpeciesIndexChecker.cpp
   util/DocumentLoader.cpp
-  util/misc.cpp
+  util/random.cpp
+  util/UnitParse.cpp
   
   interventions/InterventionManager.cpp
   interventions/ITN.cpp
@@ -109,13 +112,12 @@ include_directories (SYSTEM
   ${XERCESC_INCLUDE_DIRS}
   ${GSL_INCLUDE_DIRS}
   ${Z_INCLUDE_DIRS}
-  ${Boost_INCLUDE_DIRS}
-  ${SPIRIT_INCLUDE_DIRS}
+  # ${SPIRIT_INCLUDE_DIRS}
   
   ${CMAKE_BINARY_DIR}/model
   ${CMAKE_SOURCE_DIR}/contrib
   ${CMAKE_SOURCE_DIR}/contrib/FastDelegate_src
-  ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
+  # ${CMAKE_SOURCE_DIR}/contrib/floating_point_utilities_v3
 )
 include_directories (
   ${CMAKE_SOURCE_DIR}/model ${CMAKE_BINARY_DIR}

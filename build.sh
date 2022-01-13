@@ -1,7 +1,7 @@
 #/bin/bash
 
 # Assuming you have installed:
-# gsl, git, cmake, xsd, xerces-c, boost
+# gsl, git, cmake, xsd, xerces-c
 
 # stop on error
 set -e
@@ -16,6 +16,7 @@ SWITCHBRANCH=0
 
 # options
 CLEAN=0         # Clean build/
+DEBUG=0
 TESTS=OFF       # Don't generate tests
 RUNTESTS=0      # Don't run tests
 JOBS=4          # 4 threads
@@ -28,19 +29,20 @@ CYGWIN=0
 # For Windows - Cygwin (MobaXTerm)
 export PATH=/usr/bin:$PATH
 
-function printHelp {
+printHelp () {
     echo "HELP: make sure dependencies are installed (adapt to your distribution)"
     echo "======================================================================="
-    echo "Ubuntu/Debian: sudo apt-get install build-essential git cmake libboost-dev libgsl-dev libxerces-c-dev xsdcxx"
+    echo "Ubuntu/Debian: sudo apt-get install build-essential git cmake libgsl-dev libxerces-c-dev xsdcxx"
     echo "--------------"
-    echo "Mac OS: brew install git boost coreutils cmake gcc gsl xerces-c xsd"
+    echo "Mac OS: brew install git coreutils cmake gcc gsl xerces-c xsd"
     echo "--------------"
-    echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make zlib-devel libboost-devel libgsl-devel xsd libxerces-c-devel"
+    echo "Windows - Cygwin (MobaXTerm): apt-get install p7zip gcc-g++ git cmake make zlib-devel libgsl-devel xsd libxerces-c-devel"
 
     echo ""
     echo "Options:"
     echo "  -b, --branch=<name>"    "specify the branch (master)"
     echo "  -c, --clean"            "clean build folder (false)"
+    echo "  -d, --debug"            "build in debug mode (false)"
     echo "  -t, --tests"            "run the tests (false)"
     echo "  -r, --release"          "generate the release artifcat (false)"
     echo "  -a, --artifact=<name>"  "specify the artifcat name (openMalaria-VERSION)"
@@ -48,11 +50,12 @@ function printHelp {
     echo "  -h, --help"             "print this message"
 }
 
-function parseArguments {
+parseArguments () {
     for i in "$@"; do
         case $i in
             -b=*|--branch=*)    BRANCH="${i#*=}"; SWITCHBRANCH=1 && shift ;;
             -c|--clean)         CLEAN=1 && shift ;;
+            -d|--debug)         DEBUG=1 && shift ;;
             -t|--tests)         TESTS=ON && shift ;;
             -r|--release)       CREATERELEASE=1 && shift ;;
             -a=*|--artifact=*)  ARTIFACT=${i#*=} && shift ;;
@@ -63,7 +66,7 @@ function parseArguments {
     done
 }
 
-function isWindows {
+isWindows () {
     unameOut="$(uname -s)"
     case "${unameOut}" in
         CYGWIN*)    CYGWIN=1;;
@@ -72,9 +75,10 @@ function isWindows {
     esac
 }
 
-function clone {
+clone () {
+    echo "Cloning..."
     # Already in openmalaria?
-    if [ -d .git ]; then
+    if [ -d .git ] || [ git rev-parse --is-inside-work-tree ]; then
         if [ $(basename -s .git `git remote get-url origin`) = "openmalaria" ]; then
             echo "Already in openmalaria repo, not cloning."
         else
@@ -96,26 +100,34 @@ function clone {
     git branch
 }
 
-function build {
+build () {
+    echo "Building..."
     mkdir -p build
 
     if [ $CLEAN -eq 1 ]; then
-        pushd build && rm -rf * && popd
+        cd build && rm -rf * && cd ..
     fi
 
     # Compile OpenMalaria
-    pushd build
-    cmake -DCMAKE_BUILD_TYPE=Release -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
-    popd
+    cd build
+    which cmake
+    if [ $DEBUG -eq 1 ]; then
+        cmake -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
+    else
+        cmake -DCMAKE_BUILD_TYPE=Release -DOM_BOXTEST_ENABLE=$TESTS -DOM_CXXTEST_ENABLE=$TESTS .. && make -j$JOBS
+    fi
+    cd ..
 }
 
-function runtests {
+runtests () {
+    echo "Testing..."
     if [ $TESTS = "ON" ]; then
-        pushd build && ctest --output-on-failure -j$JOBS && popd
+        cd build && ctest --output-on-failure -j$JOBS && cd ..
     fi
 }
 
-function package {
+package () {
+    echo "Packaging..."
     # Get version number
     VERSION=$(cat version.txt | cut -d'-' -f2)
     MAJOR=$(cat version.txt | cut -d'-' -f2 | cut -d'.' -f1)
@@ -135,7 +147,7 @@ function package {
 
     # if Cygwin, copy dll files
     if [ $CYGWIN -eq 1 ]; then
-        pushd $ARTIFACT/
+        cd $ARTIFACT/
         rm -f dlls
         for i in $(ldd openMalaria); do
             echo $i | grep "/usr" >> dlls || true
@@ -145,7 +157,7 @@ function package {
             echo "cp $i ."
         done
         rm -f dlls
-        popd
+        cd ..
     fi
 
     # Compress

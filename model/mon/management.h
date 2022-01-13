@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -36,7 +37,7 @@ namespace OM {
 namespace mon {
 
 /// Read survey times from XML. Return the date of the final survey.
-SimDate readSurveyDates( const scnXml::Monitoring& monitoring );
+SimTime readSurveyDates( const scnXml::Monitoring& monitoring );
 
 /// Call before start of simulation to set up outputs. Call readSurveyDates first.
 void initReporting( const scnXml::Scenario& scenario );

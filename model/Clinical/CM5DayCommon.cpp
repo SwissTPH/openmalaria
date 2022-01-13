@@ -1,8 +1,9 @@
 /* This file is part of OpenMalaria.
  * 
- * Copyright (C) 2005-2015 Swiss Tropical and Public Health Institute
+ * Copyright (C) 2005-2021 Swiss Tropical and Public Health Institute
  * Copyright (C) 2005-2015 Liverpool School Of Tropical Medicine
- * 
+ * Copyright (C) 2020-2022 University of Basel
+ *
  * OpenMalaria is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or (at
@@ -20,8 +21,8 @@
 
 #include "Clinical/DecisionTree5Day.h"
 #include "Clinical/CMDecisionTree.h"
-#include "WithinHost/WHInterface.h"
-#include "WithinHost/WHVivax.h"
+#include "Host/WithinHost/WHInterface.h"
+#include "Host/WithinHost/WHVivax.h"
 #include "util/errors.h"
 #include "util/ModelOptions.h"
 #include "util/random.h"
@@ -53,7 +54,7 @@ void CM5DayCommon::init(){
 // ———  per-human, construction and destruction  ———
 
 CM5DayCommon::CM5DayCommon (double tSF) :
-        m_tLastTreatment (SimTime::never()),
+        m_tLastTreatment (sim::never()),
         m_treatmentSeekingFactor (tSF)
 {}
 
@@ -79,7 +80,7 @@ void CM5DayCommon::doClinicalUpdate (Human& human, double ageYears) {
     }
     
     if (pg.indirectMortality && doomed == NOT_DOOMED)
-        doomed = -SimTime::oneTS().inDays();
+        doomed = -sim::oneTS();
     
     if( m_tLastTreatment == sim::ts0() ){
         human.removeFirstEvent( interventions::SubPopRemove::ON_FIRST_TREATMENT );
