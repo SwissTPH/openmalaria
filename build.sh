@@ -11,7 +11,7 @@ OMGIT=openmalaria
 
 # Clone from
 RELEASE=openMalaria
-BRANCH=master
+BRANCH=main
 SWITCHBRANCH=0
 
 # options
