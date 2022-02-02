@@ -88,6 +88,8 @@ private:
      * the idea is that each WithinHostModel has its own list of infections. */
     //TODO: better to template class over infection type than use dynamic type?
     std::list<CommonInfection*> infections;
+
+    bool opt_pev_genotype = false;
 };
 
 } }

@@ -25,6 +25,7 @@
 #include "Host/WithinHost/Genotypes.h"
 #include "Host/WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
@@ -43,7 +44,6 @@ double minHetMassMult = std::numeric_limits<double>::signaling_NaN();
 util::AgeGroupInterpolator massByAge;
 
 bool reportInfectedOrPatentInfected = false;
-
 
 // -----  Initialization  -----
 
@@ -69,6 +69,8 @@ CommonWithinHost::CommonWithinHost( LocalRng& rng, double comorbidityFactor ) :
 {
     assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
     
+    opt_pev_genotype = util::ModelOptions::option (util::PEV_GENOTYPE);
+
     // Sample a weight heterogeneity factor
 #ifndef NDEBUG
     int counter = 0;
@@ -147,7 +149,12 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfsLocal; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
-        infections.push_back(createInfection (rng, genotype));
+
+        // If opt_pev_genotype is true the infection is discarded with probability 1-vaccineFactor
+        if( opt_pev_genotype && human.rng().bernoulli(human.getVaccine().getFactor( interventions::Vaccine::PEV )) )
+            infections.push_back(createInfection (rng, genotype));
+        else if (opt_pev_genotype == false)
+            infections.push_back(createInfection (rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
     

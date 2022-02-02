@@ -77,6 +77,7 @@ namespace OM { namespace util {
             ignoreOptions.insert("PROPHYLACTIC_DRUG_ACTION_MODEL");
             codeMap["VIVAX_SIMPLE_MODEL"] = VIVAX_SIMPLE_MODEL;
             codeMap["INDIRECT_MORTALITY_FIX"] = INDIRECT_MORTALITY_FIX;
+            codeMap["PEV_GENOTYPE"] = PEV_GENOTYPE;
 	}
 	
 	OptionCodes operator[] (const string s) {

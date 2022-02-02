@@ -241,6 +241,21 @@ namespace OM { namespace util {
          * with this disabled. New models could be fit with the option enabled.
          */
         CFR_PF_USE_HOSPITAL,
+
+     	/** By default 'nExpected' and 'nNewInfections' outputs are affected
+     	 * by the PEV vaccine factor (the vaccine reduces the 
+     	 * 'expectedNumInfections'). Enabling this option causes the vaccine 
+     	 * to be applied AFTER infections have been created. Some infections 
+     	 * will be immediately discarded with some probability based on the 
+     	 * vaccine factor. With this option, 'nExpected' will be unaffected 
+     	 * by the vaccine and will be higher while 'nNewInfections' will be 
+     	 * similar on average.
+     	 * 
+     	 * This option is required when genotypes are used in combination 
+     	 * with the vaccine.
+     	 */
+        PEV_GENOTYPE,
+
         
 	// Used by tests; should be 1 more than largest option
 	NUM_OPTIONS,

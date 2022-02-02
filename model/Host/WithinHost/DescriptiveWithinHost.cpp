@@ -37,7 +37,6 @@ namespace WithinHost {
 
 extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
 bool reportPatentInfected = false;
-
 // -----  Initialization  -----
 
 void DescriptiveWithinHostModel::initDescriptive(){
@@ -48,6 +47,7 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel( LocalRng& rng, double co
         WHFalciparum( rng, comorbidityFactor )
 {
     assert( sim::oneTS() == sim::fromDays(5) );
+    opt_pev_genotype = util::ModelOptions::option (util::PEV_GENOTYPE);
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
@@ -110,7 +110,12 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfsLocal; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
-        infections.push_back(DescriptiveInfection (rng, genotype));
+
+        // If opt_pev_genotype is true the infection is discarded with probability 1-vaccineFactor
+        if( opt_pev_genotype && human.rng().bernoulli(human.getVaccine().getFactor( interventions::Vaccine::PEV )) )
+            infections.push_back(DescriptiveInfection (rng, genotype));
+        else if (opt_pev_genotype == false)
+            infections.push_back(DescriptiveInfection (rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 
