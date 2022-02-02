@@ -99,15 +99,16 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
-        int nNewInfs, vector<double>& genotype_weights,
+        int &nNewInfs, vector<double>& genotype_weights,
         double ageInYears, double bsvFactor)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    nNewInfs=min(nNewInfs,MAX_INFECTIONS-numInfs);
-    numInfs += nNewInfs;
+    int nNewInfsLocal = min(nNewInfs,MAX_INFECTIONS-numInfs);
+    
+    numInfs += nNewInfsLocal;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
-    for( int i=0; i<nNewInfs; ++i ) {
+    for( int i=0; i<nNewInfsLocal; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
         infections.push_back(DescriptiveInfection (rng, genotype));
     }
@@ -159,7 +160,7 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
     
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
     // this time-step and cumulative_Y only includes past densities.
-    m_cumulative_h += nNewInfs;
+    m_cumulative_h += nNewInfsLocal;
     m_cumulative_Y += sim::oneTS() * totalDensity;
     
     util::streamValidate( totalDensity );

@@ -350,7 +350,7 @@ void WHVivax::importInfection(LocalRng& rng){
 }
 
 void WHVivax::update(Host::Human &human, LocalRng& rng,
-        int nNewInfs, vector<double>&,
+        int &nNewInfs, vector<double>&,
         double ageInYears, double)
 {
     pSevere = 0.0;

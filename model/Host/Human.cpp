@@ -131,6 +131,8 @@ void Human::update(Transmission::TransmissionModel& transmission) {
     withinHostModel->update(*this, m_rng, nNewInfs, EIR_per_genotype, ageYears1,
             _vaccine.getFactor(interventions::Vaccine::BSV));
     
+    infIncidence->reportNumNewInfections(*this, nNewInfs);
+    
     // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis
     clinicalModel->update( *this, ageYears1, age0 == sim::zero() );
     clinicalModel->updateInfantDeaths( age0 );

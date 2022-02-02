@@ -222,7 +222,7 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
   }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-    expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
+  expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
   
   //Update pre-erythrocytic immunity
   m_cumulativeEIRa+=effectiveEIR;
@@ -238,8 +238,6 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
     if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
-    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, n );
-    ctsNewInfections += n;
     return n;
   }
   if ( (std::isnan)(expectedNumInfections) ){	// check for not-a-number
@@ -247,6 +245,12 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
       throw TRACED_EXCEPTION( "numNewInfections: NaN", util::Error::NumNewInfections );
   }
   return 0;
+}
+
+void InfectionIncidenceModel::reportNumNewInfections(Human& human, int newNumInfections)
+{
+    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, newNumInfections);
+    ctsNewInfections += newNumInfections;
 }
 
 } }
