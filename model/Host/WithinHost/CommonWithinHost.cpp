@@ -151,8 +151,12 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
 
         // If opt_pev_genotype is true the infection is discarded with probability 1-vaccineFactor
-        if( opt_pev_genotype && human.rng().bernoulli(human.getVaccine().getFactor( interventions::Vaccine::PEV )) )
-            infections.push_back(createInfection (rng, genotype));
+        if( opt_pev_genotype )
+        {
+            double vaccineFactor = human.getVaccine().getFactor( interventions::Vaccine::PEV);
+            if(vaccineFactor == 1.0 || human.rng().bernoulli(vaccineFactor))
+                infections.push_back(createInfection (rng, genotype));
+        }
         else if (opt_pev_genotype == false)
             infections.push_back(createInfection (rng, genotype));
     }
