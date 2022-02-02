@@ -135,7 +135,7 @@ void CommonWithinHost::importInfection(LocalRng& rng){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(LocalRng& rng,
+void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
         int nNewInfs, vector<double>& genotype_weights,
         double ageInYears, double bsvFactor)
 {

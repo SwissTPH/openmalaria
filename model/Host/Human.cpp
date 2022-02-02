@@ -128,7 +128,7 @@ void Human::update(Transmission::TransmissionModel& transmission) {
     int nNewInfs = infIncidence->numNewInfections( *this, EIR );
     
     // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-    withinHostModel->update(m_rng, nNewInfs, EIR_per_genotype, ageYears1,
+    withinHostModel->update(*this, m_rng, nNewInfs, EIR_per_genotype, ageYears1,
             _vaccine.getFactor(interventions::Vaccine::BSV));
     
     // ageYears1 used to get case fatality and sequelae probabilities, determine pathogenesis

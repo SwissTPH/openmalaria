@@ -349,7 +349,7 @@ void WHVivax::importInfection(LocalRng& rng){
     infections.push_back( VivaxBrood( rng, this ) );
 }
 
-void WHVivax::update(LocalRng& rng,
+void WHVivax::update(Host::Human &human, LocalRng& rng,
         int nNewInfs, vector<double>&,
         double ageInYears, double)
 {

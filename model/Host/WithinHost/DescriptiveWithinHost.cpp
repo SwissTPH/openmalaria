@@ -98,7 +98,7 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::update(LocalRng& rng,
+void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
         int nNewInfs, vector<double>& genotype_weights,
         double ageInYears, double bsvFactor)
 {
