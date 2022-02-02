@@ -1188,7 +1188,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
      <xs:appinfo>units:Positive real;min:0.001;max:1.00E+06;name:Variance parameter for vaccine efficacy;</xs:appinfo>
     </xs:annotation>
    </xs:element>
-   <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="om:DoubleValue">
+   <xs:element maxOccurs="unbounded" minOccurs="0" name="initialEfficacy" type="om:DoubleValue">
     <xs:annotation>
      <xs:documentation>
             Mean efficacy values before decay (see efficacyB and decay parameter
@@ -1198,6 +1198,22 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             value is repeated.
           </xs:documentation>
      <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+   <xs:element name="phenotype" type="om:VaccinePhenotype" minOccurs="0" maxOccurs="unbounded">
+    <xs:annotation>
+     <xs:documentation>
+                  Pharmaco-Dynamic parameters for some resistance phenotype.
+                  
+                  To model resistance to this drug, describe multiple infection
+                  phenotypes (with respect to these PD parameters) and list one
+                  or more &quot;restrict&quot; elements for each phenotype.
+                  
+                  Loci are specified elsewhere. Multiple loci may influence the
+                  action of a single drug and each locus may influence multiple
+                  drugs.
+                </xs:documentation>
+     <xs:appinfo>name:PD parameters for some allele / resistance phenotype;</xs:appinfo>
     </xs:annotation>
    </xs:element>
   </xs:sequence>
@@ -1559,12 +1575,12 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
        <xs:documentation>
                 Name of the affected anopheles-mosquito species.
               </xs:documentation>
-              <xs:appinfo>name:Mosquito species;</xs:appinfo>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="propActive" type="xs:double" default="1">
-            <xs:annotation>
-              <xs:documentation>
+       <xs:appinfo>name:Mosquito species;</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+     <xs:attribute name="propActive" type="xs:double" default="1">
+      <xs:annotation>
+       <xs:documentation>
               Deprecated: propActive can still be used but its value must be set to either 0 or 1.
               Any other value will result in an error at initialization.
               
@@ -2271,6 +2287,64 @@ restingKillingEffect: Reduction in the survival probability of the resting perio
           Name of the species/subspecies/variant.
         </xs:documentation>
     <xs:appinfo>name:Species/subspecies/variant name</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="PhenotypeRestriction">
+  <xs:annotation>
+   <xs:documentation>
+            Specifies the mapping from genotype to phenotype. For each drug
+            type, if only one phenotype is present, restrictions need not be
+            specified, but otherwise restrictions must be specified.
+            
+            The set of loci affecting phenotypes of this drug's action must be
+            fixed for any drug type. Each phenotype must list, for each of
+            these loci, a restriction to one or more alleles under the locus.
+          </xs:documentation>
+   <xs:appinfo>name:Restrict phenotype applicability to certain alleles;</xs:appinfo>
+  </xs:annotation>
+  <xs:attribute name="onLocus" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+                A locus under which only a restricted set of alleles map to
+                this phenotype.
+              </xs:documentation>
+    <xs:appinfo>name:Locus relevant to the mapping of alleles to this phenotype;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="toAllele" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+                One allele of a locus upon which phenotype choice depends.
+                If multiple alleles under this locus should map to the same
+                phenotype, repeat the whole &quot;restriction onLocus...&quot; element.
+              </xs:documentation>
+    <xs:appinfo>name:Alleles mapping to this phenotype;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+ </xs:complexType>
+ <xs:complexType name="VaccinePhenotype">
+  <xs:sequence>
+   <xs:element name="restriction" minOccurs="0" maxOccurs="unbounded" type="om:PhenotypeRestriction"/>
+   <xs:element maxOccurs="unbounded" minOccurs="1" name="initialEfficacy" type="om:DoubleValue">
+    <xs:annotation>
+     <xs:documentation>
+            Mean efficacy values before decay (see efficacyB and decay parameter
+            descriptions for sampling and decay). The i-th value in this list
+            is used for the efficacy of the vaccine after the i-th dose. Where
+            more doses are given than there are values in this list, the last
+            value is repeated.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;min:0;max:1;name:Initial mean efficacy;</xs:appinfo>
+    </xs:annotation>
+   </xs:element>
+  </xs:sequence>
+  <xs:attribute name="name" use="optional" type="xs:string">
+   <xs:annotation>
+    <xs:documentation>
+          Name of the phenotype; for documentation use only.
+        </xs:documentation>
+    <xs:appinfo>name:Name of phenotype;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>

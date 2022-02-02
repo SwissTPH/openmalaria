@@ -114,7 +114,7 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
         // If opt_pev_genotype is true the infection is discarded with probability 1-vaccineFactor
         if( opt_pev_genotype )
         {
-            double vaccineFactor = human.getVaccine().getFactor( interventions::Vaccine::PEV);
+            double vaccineFactor = human.getVaccine().getFactor( interventions::Vaccine::PEV, genotype );
             if(vaccineFactor == 1.0 || human.rng().bernoulli(vaccineFactor))
                 infections.push_back(DescriptiveInfection (rng, genotype));
         }

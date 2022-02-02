@@ -54,7 +54,7 @@ private:
     /** Get the initial efficacy of the vaccine.
      *
      * @param numPrevDoses The number of prior vaccinations of the individual. */
-    double getInitialEfficacy (LocalRng& rng, size_t numPrevDoses) const;
+    double getInitialEfficacy (LocalRng& rng, size_t numPrevDoses, uint32_t genotype ) const;
 
     inline static const VaccineComponent& getParams( ComponentId component ){
         assert( component.id < params.size() && params[component.id] != 0 );
@@ -69,7 +69,8 @@ private:
 
     /* Vaccine type specific parameters
      * Initial mean efficacy, definition depends on vaccine type */
-    vector<double> initialMeanEfficacy;
+    vector<vector<double>> perGenotypeInitialMeanEfficacy;
+
     // Distribution of efficacies among individuals, parameter to sample from beta dist.
     double efficacyB;
 
