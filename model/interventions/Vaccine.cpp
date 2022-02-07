@@ -48,6 +48,8 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
     if( type == Vaccine::BSV && ModelOptions::option( util::VIVAX_SIMPLE_MODEL ) )
         throw util::unimplemented_exception( "blood stage vaccines (BSV) cannot be used with vivax model" );
     
+    opt_pev_genotype = util::ModelOptions::option (util::PEV_GENOTYPE);
+
     if( reportComponent == ComponentId::wholePop() /* the initial value */ ){
         // set to the first type described
         reportComponent = component;
@@ -58,13 +60,17 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
 
     cout << ies.size() << " " << ps.size() << " " << WithinHost::Genotypes::N() << endl;
 
-/* if genotype opt, then genotypes must be there 
-if not, they must not be there */
-    if(ies.size() == 0)
+    if(opt_pev_genotype == false && ies.size() == 0)
+        throw util::xml_scenario_error( "Vaccine: initialEfficacy is required but is missing" );
+    
+    if(opt_pev_genotype == true && ies.size() != 0)
+        throw util::xml_scenario_error( "Vaccine: initialEfficacy outside of phenotype definition with VACCINE_GENOTYPE option enabled is not allowed" );
+    
+    if(opt_pev_genotype == true && ies.size() && ps.size() != WithinHost::Genotypes::N())
+        throw util::xml_scenario_error( "Vaccine: Phenotype sequence must reference all genotypes" );
+    
+    if(opt_pev_genotype == true)
     {
-        if(ps.size() != WithinHost::Genotypes::N())
-            throw util::xml_scenario_error( "Vaccine: Genotypes sequence must reference all genotypes" );
-
         perGenotypeInitialMeanEfficacy.resize(WithinHost::Genotypes::N());
 
         for(size_t i = 0; i < ps.size(); ++i)

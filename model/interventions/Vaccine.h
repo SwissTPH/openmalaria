@@ -74,6 +74,9 @@ private:
     // Distribution of efficacies among individuals, parameter to sample from beta dist.
     double efficacyB;
 
+    // VACCINE_GENOTYPE option
+    bool opt_pev_genotype = false;
+    
     /** @brief Vaccine static parameters
      * 
      * Each instance is either null or points to data for the vaccine component

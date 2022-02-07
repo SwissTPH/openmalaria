@@ -143,11 +143,14 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    int nNewInfsLocal = min(nNewInfs,MAX_INFECTIONS-numInfs);
+    nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
 
-    numInfs += nNewInfsLocal;
+    int nNewInfsDiscarded = 0;
+
+    //numInfs += nNewInfsLocal;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
-    for( int i=0; i<nNewInfsLocal; ++i ) {
+
+    for( int i=0; i<nNewInfs; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
 
         // If opt_pev_genotype is true the infection is discarded with probability 1-vaccineFactor
@@ -156,10 +159,20 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
             double vaccineFactor = human.getVaccine().getFactor( interventions::Vaccine::PEV, genotype );
             if(vaccineFactor == 1.0 || human.rng().bernoulli(vaccineFactor))
                 infections.push_back(createInfection (rng, genotype));
+            else
+                nNewInfsDiscarded++;
         }
         else if (opt_pev_genotype == false)
             infections.push_back(createInfection (rng, genotype));
     }
+
+    // Update nNewInfs, this is the number that will be reported in Human
+    nNewInfs -= nNewInfsDiscarded;
+    numInfs += nNewInfs;
+
+    if(numInfs != infections.size())
+        cout << "big pb" << endl;
+
     assert( numInfs == static_cast<int>(infections.size()) );
     
     updateImmuneStatus ();
@@ -216,7 +229,7 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
     // this time-step and cumulative_Y only includes past densities, thus we
     // increment these after the update.
-    m_cumulative_h += nNewInfsLocal;
+    m_cumulative_h += nNewInfs;
     m_cumulative_Y += totalDensity;
     
     util::streamValidate(totalDensity);
