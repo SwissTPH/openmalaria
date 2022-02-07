@@ -147,7 +147,6 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
 
     int nNewInfsDiscarded = 0;
 
-    //numInfs += nNewInfsLocal;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
 
     for( int i=0; i<nNewInfs; ++i ) {
@@ -169,9 +168,6 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
     // Update nNewInfs, this is the number that will be reported in Human
     nNewInfs -= nNewInfsDiscarded;
     numInfs += nNewInfs;
-
-    if(numInfs != infections.size())
-        cout << "big pb" << endl;
 
     assert( numInfs == static_cast<int>(infections.size()) );
     

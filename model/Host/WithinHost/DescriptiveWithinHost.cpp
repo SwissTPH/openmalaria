@@ -104,11 +104,11 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    int nNewInfsLocal = min(nNewInfs,MAX_INFECTIONS-numInfs);
+    nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
     
-    numInfs += nNewInfsLocal;
+    numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
-    for( int i=0; i<nNewInfsLocal; ++i ) {
+    for( int i=0; i<nNewInfs; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
 
         // If opt_pev_genotype is true the infection is discarded with probability 1-vaccineFactor
@@ -169,7 +169,7 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
     
     // As in AJTMH p22, cumulative_h (X_h + 1) doesn't include infections added
     // this time-step and cumulative_Y only includes past densities.
-    m_cumulative_h += nNewInfsLocal;
+    m_cumulative_h += nNewInfs;
     m_cumulative_Y += sim::oneTS() * totalDensity;
     
     util::streamValidate( totalDensity );
