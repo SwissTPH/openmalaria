@@ -64,8 +64,7 @@ namespace OM { namespace util {
 				clo.assign (clo, 2, clo.size()-2);
 				if (clo == "verbose") {
 					options.set (VERBOSE);
-				}
-				if (clo == "resource-path") {
+				} else if (clo == "resource-path") {
 					if (resourcePath.size())
 						throw cmd_exception ("--resource-path (or -p) may only be given once");
 					resourcePath = parseNextArg (argc, argv, i).append ("/");
