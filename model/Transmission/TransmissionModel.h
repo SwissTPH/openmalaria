@@ -112,6 +112,9 @@ protected:
         , adultAge(PerHost::adultAge())
         , numTransmittingHumans(0)
     {
+        // Set VACCINE_GENOTYPE option
+        opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
+
         using mon::Continuous;
         Continuous.registerCallback("input EIR", "\tinput EIR", MakeDelegate(this, &TransmissionModel::ctsCbInputEIR));
         Continuous.registerCallback("simulated EIR", "\tsimulated EIR", MakeDelegate(this, &TransmissionModel::ctsCbSimulatedEIR));
@@ -251,11 +254,18 @@ public:
             // not my preference but consistent with TransmissionModel::getEIR().
             const double avail = human.perHostTransmission.relativeAvailabilityHetAge(sim::inYears(human.age(sim::ts1())));
             sumWeight += avail;
-            const double tbvFactor = human.getVaccine().getFactor(interventions::Vaccine::TBV);
+            
             const double pTransmit = human.withinHostModel->probTransmissionToMosquito(0);
-            const double riskTrans = avail * pTransmit * tbvFactor;
-            sumWt_kappa += riskTrans;
+            double riskTrans = avail * pTransmit;
+
+            // Only to be consistent with old simulation runs when set to false
+            // Setting this option to true will only affect reporting
+            if (opt_vaccine_genotype == false)
+                riskTrans *= human.getVaccine().getFactor(interventions::Vaccine::TBV);
+
             if (riskTrans > 0.0) ++numTransmittingHumans;
+
+            sumWt_kappa += riskTrans;
         }
 
         size_t lKMod = sim::moduloSteps(sim::ts1(), laggedKappa.size()); // now
@@ -429,6 +439,8 @@ private:
     // Reporting data. Doesn't need checkpointing due to reset every time-step.
     double tsAdultEntoInocs = 0.0;  // accumulator for time step EIR of adults
     int tsNumAdults = 0; // accumulator for time step adults requesting EIR
+
+    bool opt_vaccine_genotype = false;
 };
 
 } // namespace Transmission

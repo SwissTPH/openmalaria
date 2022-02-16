@@ -130,6 +130,8 @@ public:
      * found. Doesn't need checkpointing. */
     map<string, size_t> speciesIndex;
 
+    bool opt_vaccine_genotype = false;
+    
     friend class PerHost;
     friend class AnophelesModelSuite;
 };
