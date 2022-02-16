@@ -254,7 +254,7 @@ namespace OM { namespace util {
      	 * This option is required when genotypes are used in combination 
      	 * with the vaccine.
      	 */
-        PEV_GENOTYPE,
+        VACCINE_GENOTYPE,
 
         
 	// Used by tests; should be 1 more than largest option

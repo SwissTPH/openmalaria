@@ -75,7 +75,7 @@ private:
     double efficacyB;
 
     // VACCINE_GENOTYPE option
-    bool opt_pev_genotype = false;
+    bool opt_vaccine_genotype = false;
     
     /** @brief Vaccine static parameters
      * 

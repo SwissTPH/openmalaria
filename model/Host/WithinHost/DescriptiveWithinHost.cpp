@@ -47,7 +47,7 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel( LocalRng& rng, double co
         WHFalciparum( rng, comorbidityFactor )
 {
     assert( sim::oneTS() == sim::fromDays(5) );
-    opt_pev_genotype = util::ModelOptions::option (util::PEV_GENOTYPE);
+    opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
@@ -111,14 +111,14 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
     for( int i=0; i<nNewInfs; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
 
-        // If opt_pev_genotype is true the infection is discarded with probability 1-vaccineFactor
-        if( opt_pev_genotype )
+        // If opt_vaccine_genotype is true the infection is discarded with probability 1-vaccineFactor
+        if( opt_vaccine_genotype )
         {
             double vaccineFactor = human.getVaccine().getFactor( interventions::Vaccine::PEV, genotype );
             if(vaccineFactor == 1.0 || human.rng().bernoulli(vaccineFactor))
                 infections.push_back(DescriptiveInfection (rng, genotype));
         }
-        else if (opt_pev_genotype == false)
+        else if (opt_vaccine_genotype == false)
             infections.push_back(DescriptiveInfection (rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
@@ -152,7 +152,7 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
         double immSurvFact = immunitySurvivalFactor(ageInYears, inf->cumulativeExposureJ());
-        double bsvFactor = human.getVaccine().getFactor(interventions::Vaccine::BSV, opt_pev_genotype? inf->genotype() : 0);
+        double bsvFactor = human.getVaccine().getFactor(interventions::Vaccine::BSV, opt_vaccine_genotype? inf->genotype() : 0);
 
         inf->determineDensities(rng, m_cumulative_h, infStepMaxDens, immSurvFact, _innateImmSurvFact, bsvFactor);
 

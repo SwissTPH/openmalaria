@@ -89,7 +89,7 @@ private:
     //TODO: better to template class over infection type than use dynamic type?
     std::list<CommonInfection*> infections;
 
-    bool opt_pev_genotype = false;
+    bool opt_vaccine_genotype = false;
 };
 
 } }

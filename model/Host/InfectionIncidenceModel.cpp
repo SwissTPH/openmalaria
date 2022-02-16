@@ -61,7 +61,7 @@ double EstarInv;
 
 // model options:
 bool opt_neg_bin_mass_action = false, opt_lognormal_mass_action = false,
-        opt_no_pre_erythrocytic = false, opt_any_het = false, opt_pev_genotype = false;
+        opt_no_pre_erythrocytic = false, opt_any_het = false, opt_vaccine_genotype = false;
 
 // ———  variables  ———
 int InfectionIncidenceModel::ctsNewInfections = 0;
@@ -93,7 +93,7 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
     
     opt_no_pre_erythrocytic = util::ModelOptions::option (util::NO_PRE_ERYTHROCYTIC);
     opt_neg_bin_mass_action = util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION);
-    opt_pev_genotype = util::ModelOptions::option (util::PEV_GENOTYPE);
+    opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
 
     if (opt_neg_bin_mass_action) {
         inf_rate_shape_param = (baseline_avail_shape_param+1.0) / (r_square_Gamma*baseline_avail_shape_param - 1.0);
@@ -224,7 +224,7 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
   }
   
   //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-  if(opt_pev_genotype == false)
+  if(opt_vaccine_genotype == false)
       expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
   
   //Update pre-erythrocytic immunity
