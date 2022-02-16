@@ -128,8 +128,7 @@ void Human::update(Transmission::TransmissionModel& transmission) {
     int nNewInfs = infIncidence->numNewInfections( *this, EIR );
     
     // ageYears1 used when medicating drugs (small effect) and in immunity model (which was parameterised for it)
-    withinHostModel->update(*this, m_rng, nNewInfs, EIR_per_genotype, ageYears1,
-            _vaccine.getFactor(interventions::Vaccine::BSV));
+    withinHostModel->update(*this, m_rng, nNewInfs, EIR_per_genotype, ageYears1);
     
     infIncidence->reportNumNewInfections(*this, nNewInfs);
     

@@ -139,7 +139,7 @@ void CommonWithinHost::importInfection(LocalRng& rng){
 
 void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
         int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor)
+        double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -179,7 +179,6 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
     
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
-    double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
     double body_mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
     
@@ -196,7 +195,8 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 const double drugFactor = pkpdModel.getDrugFactor(rng, *inf, body_mass);
                 const double immFactor = immunitySurvivalFactor(ageInYears, (*inf)->cumulativeExposureJ());
-                const double survivalFactor = survivalFactor_part * immFactor * drugFactor;
+                const double bsvFactor = human.getVaccine().getFactor(interventions::Vaccine::BSV, opt_pev_genotype? (*inf)->genotype() : 0);
+                const double survivalFactor = bsvFactor * _innateImmSurvFact * immFactor * drugFactor;
                 // update, may result in termination of infection:
                 expires = (*inf)->update(rng, survivalFactor, now, body_mass);
             }

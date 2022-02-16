@@ -100,7 +100,7 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
 
 void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
         int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor)
+        double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
@@ -152,6 +152,8 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
         double immSurvFact = immunitySurvivalFactor(ageInYears, inf->cumulativeExposureJ());
+        double bsvFactor = human.getVaccine().getFactor(interventions::Vaccine::BSV, opt_pev_genotype? inf->genotype() : 0);
+
         inf->determineDensities(rng, m_cumulative_h, infStepMaxDens, immSurvFact, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)

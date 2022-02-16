@@ -155,7 +155,7 @@ public:
     virtual void importInfection(LocalRng& rng);
     
     virtual void update(Host::Human &human, LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor);
+            double ageInYears);
     
     virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
 

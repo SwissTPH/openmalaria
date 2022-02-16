@@ -52,7 +52,7 @@ public:
     virtual void clearImmunity();
     
     virtual void update (Host::Human &human, LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor);
+            double ageInYears);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     
