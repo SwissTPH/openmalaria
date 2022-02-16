@@ -34,7 +34,7 @@ WHMock::WHMock() :
 {}
 WHMock::~WHMock() {}
 
-double WHMock::probTransmissionToMosquito( double, double* ) const{
+double WHMock::probTransmissionToMosquito( double* ) const{
     throw util::unimplemented_exception( "not needed in unit test" );
 }
 double WHMock::pTransGenotype( double, double, size_t ){

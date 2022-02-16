@@ -57,7 +57,7 @@ public:
     virtual ~WHFalciparum();
     //@}
     
-    virtual double probTransmissionToMosquito( double tbvFactor, double *sumX )const;
+    virtual double probTransmissionToMosquito( double *sumX )const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
     // No PQ treatment for falciparum in current models:

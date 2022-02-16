@@ -172,7 +172,7 @@ const double PTM_tau= 0.066;
 const double PTM_tau_prime = 1.0 / sqrt(1.0 / PTM_tau);
 const double PTM_mu= -8.1;
 
-double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX ) const{
+double WHFalciparum::probTransmissionToMosquito( double *sumX ) const{
     // This model (often referred to as the gametocyte model) was designed for
     // 5-day time steps. We use the same model (sampling 10, 15 and 20 days
     // ago) for 1-day time steps to avoid having to design and analyse a new
@@ -206,7 +206,6 @@ double WHFalciparum::probTransmissionToMosquito( double tbvFactor, double *sumX 
     pTransmit=std::min(pTransmit, 1.0);
     
     // Include here the effect of transmission-blocking vaccination:
-    pTransmit *= tbvFactor;
     util::streamValidate( pTransmit );
     return pTransmit;
 }

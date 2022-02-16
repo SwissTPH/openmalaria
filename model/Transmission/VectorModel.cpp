@@ -430,7 +430,7 @@ void VectorModel::vectorUpdate(const Population &population)
 
         probTransmission.assign(nGenotypes, 0.0);
         double sumX = numeric_limits<double>::quiet_NaN();
-        const double pTrans = whm.probTransmissionToMosquito(tbvFac, &sumX);
+        const double pTrans = whm.probTransmissionToMosquito(&sumX);
         if (nGenotypes == 1)
             probTransmission[0] = pTrans;
         else
@@ -452,7 +452,7 @@ void VectorModel::vectorUpdate(const Population &population)
             sigma_df[s] += df;
             for (size_t g = 0; g < nGenotypes; ++g)
             {
-                sigma_dif[s][g] += df * probTransmission[g];
+                sigma_dif[s][g] += df * probTransmission[g] * tbvFac;
             }
             sigma_dff[s] += df * host.relMosqFecundity(s);
         }

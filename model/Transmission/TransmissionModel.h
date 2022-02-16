@@ -252,8 +252,8 @@ public:
             const double avail = human.perHostTransmission.relativeAvailabilityHetAge(sim::inYears(human.age(sim::ts1())));
             sumWeight += avail;
             const double tbvFactor = human.getVaccine().getFactor(interventions::Vaccine::TBV);
-            const double pTransmit = human.withinHostModel->probTransmissionToMosquito(tbvFactor, 0);
-            const double riskTrans = avail * pTransmit;
+            const double pTransmit = human.withinHostModel->probTransmissionToMosquito(0);
+            const double riskTrans = avail * pTransmit * tbvFactor;
             sumWt_kappa += riskTrans;
             if (riskTrans > 0.0) ++numTransmittingHumans;
         }
