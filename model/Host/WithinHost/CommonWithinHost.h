@@ -51,7 +51,7 @@ public:
     virtual void treatPkPd(size_t schedule, size_t dosage, double age, double delay_d);
     virtual void clearImmunity();
     
-    virtual void update (Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
+    virtual void update (Host::Human &human, LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
             double ageInYears, double bsvFactor);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
