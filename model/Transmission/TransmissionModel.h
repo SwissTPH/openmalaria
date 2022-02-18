@@ -255,13 +255,23 @@ public:
             const double avail = human.perHostTransmission.relativeAvailabilityHetAge(sim::inYears(human.age(sim::ts1())));
             sumWeight += avail;
             
-            const double pTransmit = human.withinHostModel->probTransmissionToMosquito(0);
-            double riskTrans = avail * pTransmit;
+            double sumX = numeric_limits<double>::quiet_NaN();
+            const double pTransmit = human.withinHostModel->probTransmissionToMosquito(&sumX);
+
+            double riskTrans = 0.0;
 
             // Only to be consistent with old simulation runs when set to false
             // Setting this option to true will only affect reporting
             if (opt_vaccine_genotype == false)
-                riskTrans *= human.getVaccine().getFactor(interventions::Vaccine::TBV);
+                riskTrans = avail * pTransmit * human.getVaccine().getFactor(interventions::Vaccine::TBV);
+            else
+            {
+                for (size_t g = 0; g < WithinHost::Genotypes::N(); ++g)
+                    riskTrans += human.withinHostModel->probTransGenotype(pTransmit, sumX, g) * human.getVaccine().getFactor(interventions::Vaccine::TBV, g);
+                //cout << riskTrans << " ";
+                riskTrans *= avail;
+                //cout << riskTrans << endl;
+            }
 
             if (riskTrans > 0.0) ++numTransmittingHumans;
 

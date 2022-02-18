@@ -138,12 +138,14 @@ void CommonWithinHost::importInfection(LocalRng& rng){
 // -----  Density calculations  -----
 
 void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
-        int nNewInfs, vector<double>& genotype_weights,
+        int &nNewInfs, vector<double>& genotype_weights,
         double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
     nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
+
+    int nNewInfsIgnored = nNewInfs - (MAX_INFECTIONS-numInfs);
 
     int nNewInfsDiscarded = 0;
 
@@ -238,6 +240,10 @@ void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
         m_y_lag[y_lag_i * Genotypes::N() + (*inf)->genotype()] += (*inf)->getDensity();
     }
+
+    // This is a bug, we keep it this way to be consistent with old simulations
+    if(nNewInfsIgnored > 0)
+        nNewInfs += nNewInfsIgnored;
 }
 
 void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {

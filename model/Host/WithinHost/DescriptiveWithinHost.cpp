@@ -99,11 +99,13 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
 // -----  Density calculations  -----
 
 void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
-        int nNewInfs, vector<double>& genotype_weights,
+        int &nNewInfs, vector<double>& genotype_weights,
         double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
+    int nNewInfsToBeCreated = nNewInfs;
+
     nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
     
     numInfs += nNewInfs;
@@ -184,6 +186,10 @@ void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
         m_y_lag[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
     }
+
+    // This is a bug, we keep it this way to be consistent with old simulations
+    if(opt_vaccine_genotype == false)
+        nNewInfs = nNewInfsToBeCreated;
 }
 
 
