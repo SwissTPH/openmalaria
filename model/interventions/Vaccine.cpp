@@ -58,7 +58,7 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
     const scnXml::VaccineDescription::InitialEfficacySequence ies = vd.getInitialEfficacy();
     const scnXml::VaccineDescription::PhenotypeSequence ps = vd.getPhenotype();
 
-    cout << ies.size() << " " << ps.size() << " " << WithinHost::Genotypes::N() << endl;
+    //cout << ies.size() << " " << ps.size() << " " << WithinHost::Genotypes::N() << endl;
 
     if(opt_vaccine_genotype == false && ies.size() == 0)
         throw util::xml_scenario_error( "Vaccine: initialEfficacy is required but is missing" );
@@ -75,15 +75,15 @@ VaccineComponent::VaccineComponent( ComponentId component, const scnXml::Vaccine
 
         for(size_t i = 0; i < ps.size(); ++i)
         {
-            cout << "Phenotype: " << ps[i].getName() << endl;
+            //cout << "Phenotype: " << ps[i].getName() << endl;
             
             const scnXml::VaccinePhenotype::RestrictionSequence restrictions = ps[i].getRestriction();
             const scnXml::VaccinePhenotype::InitialEfficacySequence vpies = ps[i].getInitialEfficacy();
 
             for(size_t j = 0; j < restrictions.size(); ++j)
             {
-                cout << "\tonLocus: " << restrictions[j].getOnLocus() << ", " << "toAllelle: " << restrictions[j].getToAllele() << endl;
-                cout << "\tmatching allelle code: " << WithinHost::Genotypes::findAlleleCode(restrictions[j].getOnLocus(), restrictions[j].getToAllele()) << endl;
+                //cout << "\tonLocus: " << restrictions[j].getOnLocus() << ", " << "toAllelle: " << restrictions[j].getToAllele() << endl;
+                //cout << "\tmatching allelle code: " << WithinHost::Genotypes::findAlleleCode(restrictions[j].getOnLocus(), restrictions[j].getToAllele()) << endl;
 
                 uint32_t allele_code = WithinHost::Genotypes::findAlleleCode(restrictions[j].getOnLocus(), restrictions[j].getToAllele());
 
