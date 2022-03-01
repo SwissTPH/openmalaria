@@ -37,7 +37,6 @@ namespace WithinHost {
 
 extern bool bugfix_max_dens;    // DescriptiveInfection.cpp
 bool reportPatentInfected = false;
-
 // -----  Initialization  -----
 
 void DescriptiveWithinHostModel::initDescriptive(){
@@ -48,6 +47,7 @@ DescriptiveWithinHostModel::DescriptiveWithinHostModel( LocalRng& rng, double co
         WHFalciparum( rng, comorbidityFactor )
 {
     assert( sim::oneTS() == sim::fromDays(5) );
+    opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
 }
 
 DescriptiveWithinHostModel::~DescriptiveWithinHostModel() {}
@@ -98,18 +98,30 @@ void DescriptiveWithinHostModel::importInfection(LocalRng& rng){
 
 // -----  Density calculations  -----
 
-void DescriptiveWithinHostModel::update(LocalRng& rng,
-        int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor)
+void DescriptiveWithinHostModel::update(Host::Human &human, LocalRng& rng,
+        int &nNewInfs, vector<double>& genotype_weights,
+        double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    nNewInfs=min(nNewInfs,MAX_INFECTIONS-numInfs);
+    int nNewInfsToBeCreated = nNewInfs;
+
+    nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
+    
     numInfs += nNewInfs;
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
     for( int i=0; i<nNewInfs; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
-        infections.push_back(DescriptiveInfection (rng, genotype));
+
+        // If opt_vaccine_genotype is true the infection is discarded with probability 1-vaccineFactor
+        if( opt_vaccine_genotype )
+        {
+            double vaccineFactor = human.getVaccine().getFactor( interventions::Vaccine::PEV, genotype );
+            if(vaccineFactor == 1.0 || human.rng().bernoulli(vaccineFactor))
+                infections.push_back(DescriptiveInfection (rng, genotype));
+        }
+        else if (opt_vaccine_genotype == false)
+            infections.push_back(DescriptiveInfection (rng, genotype));
     }
     assert( numInfs == static_cast<int>(infections.size()) );
 
@@ -142,6 +154,8 @@ void DescriptiveWithinHostModel::update(LocalRng& rng,
         // See MAX_DENS_CORRECTION in DescriptiveInfection.cpp.
         double infStepMaxDens = timeStepMaxDensity;
         double immSurvFact = immunitySurvivalFactor(ageInYears, inf->cumulativeExposureJ());
+        double bsvFactor = human.getVaccine().getFactor(interventions::Vaccine::BSV, opt_vaccine_genotype? inf->genotype() : 0);
+
         inf->determineDensities(rng, m_cumulative_h, infStepMaxDens, immSurvFact, _innateImmSurvFact, bsvFactor);
 
         if (bugfix_max_dens)
@@ -172,6 +186,10 @@ void DescriptiveWithinHostModel::update(LocalRng& rng,
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
         m_y_lag[y_lag_i * Genotypes::N() + inf->genotype()] += inf->getDensity();
     }
+
+    // This is a bug, we keep it this way to be consistent with old simulations
+    if(opt_vaccine_genotype == false)
+        nNewInfs = nNewInfsToBeCreated;
 }
 
 

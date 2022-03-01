@@ -311,14 +311,14 @@ WHVivax::~WHVivax(){
 #endif
 }
 
-double WHVivax::probTransmissionToMosquito( double tbvFactor, double *sumX )const{
+double WHVivax::probTransmissionToMosquito( double *sumX )const{
     assert( WithinHost::Genotypes::N() == 1 );
     for(auto inf = infections.begin();
          inf != infections.end(); ++inf)
     {
         if( inf->isPatent() ){
             // we have gametocytes from at least one brood
-            return probBloodStageInfectiousToMosq * tbvFactor;
+            return probBloodStageInfectiousToMosq;
         }
     }
     return 0;   // no gametocytes
@@ -349,9 +349,9 @@ void WHVivax::importInfection(LocalRng& rng){
     infections.push_back( VivaxBrood( rng, this ) );
 }
 
-void WHVivax::update(LocalRng& rng,
-        int nNewInfs, vector<double>&,
-        double ageInYears, double)
+void WHVivax::update(Host::Human &human, LocalRng& rng,
+        int &nNewInfs, vector<double>&,
+        double ageInYears)
 {
     pSevere = 0.0;
     

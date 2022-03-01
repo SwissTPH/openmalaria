@@ -45,7 +45,7 @@ public:
     WHMock();
     virtual ~WHMock();
     
-    virtual double probTransmissionToMosquito( double tbvFactor, double *sumX ) const;
+    virtual double probTransmissionToMosquito( double *sumX ) const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     virtual bool summarize(Host::Human& human)const;
     virtual void importInfection(LocalRng& rng);
@@ -53,7 +53,7 @@ public:
     virtual void optionalPqTreatment( Host::Human& human );
     virtual bool treatSimple( Host::Human& human, SimTime timeLiver, SimTime timeBlood );
     virtual void treatPkPd(size_t schedule, size_t dosages, double age, double delay_d);
-    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,double ageInYears, double bsvFactor);
+    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,double ageInYears);
     virtual double getTotalDensity() const;
     virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
     virtual Pathogenesis::StatePair determineMorbidity( Host::Human& human, double ageYears, bool isDoomed );

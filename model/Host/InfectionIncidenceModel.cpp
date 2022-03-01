@@ -61,7 +61,7 @@ double EstarInv;
 
 // model options:
 bool opt_neg_bin_mass_action = false, opt_lognormal_mass_action = false,
-        opt_no_pre_erythrocytic = false, opt_any_het = false;
+        opt_no_pre_erythrocytic = false, opt_any_het = false, opt_vaccine_genotype = false;
 
 // ———  variables  ———
 int InfectionIncidenceModel::ctsNewInfections = 0;
@@ -93,6 +93,8 @@ void InfectionIncidenceModel::init ( const Parameters& parameters ) {
     
     opt_no_pre_erythrocytic = util::ModelOptions::option (util::NO_PRE_ERYTHROCYTIC);
     opt_neg_bin_mass_action = util::ModelOptions::option (util::NEGATIVE_BINOMIAL_MASS_ACTION);
+    opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
+
     if (opt_neg_bin_mass_action) {
         inf_rate_shape_param = (baseline_avail_shape_param+1.0) / (r_square_Gamma*baseline_avail_shape_param - 1.0);
         inf_rate_shape_param=std::max(inf_rate_shape_param, 0.0);
@@ -221,8 +223,11 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
     throw TRACED_EXCEPTION (out.str(), util::Error::EffectiveEIR);
   }
   
-  //Introduce the effect of vaccination. Note that this does not affect cumEIR.
-    expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
+  // Only to be consistent with old simulation runs when set to false
+  // Setting this option to true will only affect reporting
+  if(opt_vaccine_genotype == false)
+      //Introduce the effect of vaccination. Note that this does not affect cumEIR.
+      expectedNumInfections *= human.getVaccine().getFactor( interventions::Vaccine::PEV );
   
   //Update pre-erythrocytic immunity
   m_cumulativeEIRa+=effectiveEIR;
@@ -238,8 +243,6 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
     if( n > WithinHost::WHInterface::MAX_INFECTIONS ){
         n = WithinHost::WHInterface::MAX_INFECTIONS;
     }
-    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, n );
-    ctsNewInfections += n;
     return n;
   }
   if ( (std::isnan)(expectedNumInfections) ){	// check for not-a-number
@@ -247,6 +250,12 @@ int InfectionIncidenceModel::numNewInfections (Human& human, double effectiveEIR
       throw TRACED_EXCEPTION( "numNewInfections: NaN", util::Error::NumNewInfections );
   }
   return 0;
+}
+
+void InfectionIncidenceModel::reportNumNewInfections(Human& human, int newNumInfections)
+{
+    mon::reportEventMHI( mon::MHR_NEW_INFECTIONS, human, newNumInfections);
+    ctsNewInfections += newNumInfections;
 }
 
 } }

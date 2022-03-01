@@ -78,7 +78,7 @@ public:
         component & stream;
         numDosesAdministered & stream;
         timeLastDeployment & stream;
-        initialEfficacy & stream;
+        perGenotypeInitialEfficacy & stream;
         hetSample & stream;
     }
     
@@ -96,7 +96,7 @@ private:
     /// Time of last vaccination with this vaccine type
     SimTime timeLastDeployment = sim::never();
     /// Efficacy at last deployment (undecayed)
-    double initialEfficacy;
+    vector<double> perGenotypeInitialEfficacy;
     util::DecayFuncHet hetSample;
     
     friend class PerHumanVaccine;
@@ -108,7 +108,7 @@ public:
     PerHumanVaccine() {}
     
     /** Get one minus the efficacy of the vaccine (1 for no effect, 0 for full effect). */
-    double getFactor( Vaccine::Types type )const;
+    double getFactor( Vaccine::Types type, uint32_t genotype = 0) const;
     
     /** Vaccinate unless the passed VaccineLimits specify not to.
      * 

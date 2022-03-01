@@ -25,6 +25,7 @@
 #include "Host/WithinHost/Genotypes.h"
 #include "Host/WithinHost/Pathogenesis/PathogenesisModel.h"
 #include "util/errors.h"
+#include "util/ModelOptions.h"
 #include "util/AgeGroupInterpolation.h"
 #include "util/random.h"
 #include "util/StreamValidator.h"
@@ -43,7 +44,6 @@ double minHetMassMult = std::numeric_limits<double>::signaling_NaN();
 util::AgeGroupInterpolator massByAge;
 
 bool reportInfectedOrPatentInfected = false;
-
 
 // -----  Initialization  -----
 
@@ -69,6 +69,8 @@ CommonWithinHost::CommonWithinHost( LocalRng& rng, double comorbidityFactor ) :
 {
     assert( sim::oneTS() == sim::fromDays(1) || sim::oneTS() == sim::fromDays(5) );
     
+    opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
+
     // Sample a weight heterogeneity factor
 #ifndef NDEBUG
     int counter = 0;
@@ -135,19 +137,40 @@ void CommonWithinHost::importInfection(LocalRng& rng){
 
 // -----  Density calculations  -----
 
-void CommonWithinHost::update(LocalRng& rng,
-        int nNewInfs, vector<double>& genotype_weights,
-        double ageInYears, double bsvFactor)
+void CommonWithinHost::update(Host::Human &human, LocalRng& rng,
+        int &nNewInfs, vector<double>& genotype_weights,
+        double ageInYears)
 {
     // Note: adding infections at the beginning of the update instead of the end
     // shouldn't be significant since before latentp delay nothing is updated.
-    nNewInfs=min(nNewInfs,MAX_INFECTIONS-numInfs);
-    numInfs += nNewInfs;
+    nNewInfs = min(nNewInfs,MAX_INFECTIONS-numInfs);
+
+    int nNewInfsIgnored = nNewInfs - (MAX_INFECTIONS-numInfs);
+
+    int nNewInfsDiscarded = 0;
+
     assert( numInfs>=0 && numInfs<=MAX_INFECTIONS );
+
     for( int i=0; i<nNewInfs; ++i ) {
         uint32_t genotype = Genotypes::sampleGenotype(rng, genotype_weights);
-        infections.push_back(createInfection (rng, genotype));
+
+        // If opt_vaccine_genotype is true the infection is discarded with probability 1-vaccineFactor
+        if( opt_vaccine_genotype )
+        {
+            double vaccineFactor = human.getVaccine().getFactor( interventions::Vaccine::PEV, genotype );
+            if(vaccineFactor == 1.0 || human.rng().bernoulli(vaccineFactor))
+                infections.push_back(createInfection (rng, genotype));
+            else
+                nNewInfsDiscarded++;
+        }
+        else if (opt_vaccine_genotype == false)
+            infections.push_back(createInfection (rng, genotype));
     }
+
+    // Update nNewInfs, this is the number that will be reported in Human
+    nNewInfs -= nNewInfsDiscarded;
+    numInfs += nNewInfs;
+
     assert( numInfs == static_cast<int>(infections.size()) );
     
     updateImmuneStatus ();
@@ -158,7 +181,6 @@ void CommonWithinHost::update(LocalRng& rng,
     
     bool treatmentLiver = treatExpiryLiver > sim::ts0();
     bool treatmentBlood = treatExpiryBlood > sim::ts0();
-    double survivalFactor_part = bsvFactor * _innateImmSurvFact;
     
     double body_mass = massByAge.eval( ageInYears ) * hetMassMultiplier;
     
@@ -175,7 +197,8 @@ void CommonWithinHost::update(LocalRng& rng,
             if( !expires ){     /* no expiry due to simple treatment model; do update */
                 const double drugFactor = pkpdModel.getDrugFactor(rng, *inf, body_mass);
                 const double immFactor = immunitySurvivalFactor(ageInYears, (*inf)->cumulativeExposureJ());
-                const double survivalFactor = survivalFactor_part * immFactor * drugFactor;
+                const double bsvFactor = human.getVaccine().getFactor(interventions::Vaccine::BSV, opt_vaccine_genotype? (*inf)->genotype() : 0);
+                const double survivalFactor = bsvFactor * _innateImmSurvFact * immFactor * drugFactor;
                 // update, may result in termination of infection:
                 expires = (*inf)->update(rng, survivalFactor, now, body_mass);
             }
@@ -217,6 +240,10 @@ void CommonWithinHost::update(LocalRng& rng,
     for( auto inf = infections.begin(); inf != infections.end(); ++inf ){
         m_y_lag[y_lag_i * Genotypes::N() + (*inf)->genotype()] += (*inf)->getDensity();
     }
+
+    // This is a bug, we keep it this way to be consistent with old simulations
+    if(nNewInfsIgnored > 0)
+        nNewInfs += nNewInfsIgnored;
 }
 
 void CommonWithinHost::addProphylacticEffects(const vector<double>& pClearanceByTime) {

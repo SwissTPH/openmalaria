@@ -49,8 +49,8 @@ public:
     virtual void loadInfection(istream& stream);
     virtual void clearImmunity();
     
-    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor);
+    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
+            double ageInYears);
     
     virtual bool summarize( Host::Human& human )const;
     
@@ -68,6 +68,8 @@ protected:
      * Since infection models and within host models are very much intertwined,
      * the idea is that each WithinHostModel has its own list of infections. */
      std::list<DescriptiveInfection> infections;
+
+     bool opt_vaccine_genotype = false;
 };
 
 } }

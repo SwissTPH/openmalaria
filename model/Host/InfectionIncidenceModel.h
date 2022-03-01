@@ -107,6 +107,15 @@ public:
    *        outside transmission due to hospitalisation)
    */
   int numNewInfections(OM::Host::Human& human, double effectiveEIR);
+
+  /** Report the number of new infections
+   * 
+   * This number might be lower than the numNewInfections from this model
+   * due to vaccine factors being applied in the WithinHost model
+   * 
+   * @param int newNumInfections  Number of infections to be reported
+   */
+  void reportNumNewInfections(Human& human, int newNumInfections);
   
 protected:
   /// Calculates the expected number of infections, excluding vaccine effects

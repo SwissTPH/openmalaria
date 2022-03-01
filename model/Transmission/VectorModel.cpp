@@ -199,6 +199,9 @@ VectorModel::VectorModel(vector<double> initEIR, int interventionMode, vector<st
     , speciesFitters(std::move(speciesFittersList))
     , speciesIndex(std::move(speciesIndexList))
 {
+    // set VACCINE_GENOTYPE option
+    opt_vaccine_genotype = util::ModelOptions::option (util::VACCINE_GENOTYPE);
+
     // Calculate total annual EIR
     annualEIR = vectors::sum(initialisationEIR);
 
@@ -426,11 +429,10 @@ void VectorModel::vectorUpdate(const Population &population)
     {
         const OM::Transmission::PerHost &host = human.perHostTransmission;
         WithinHost::WHInterface &whm = *human.withinHostModel;
-        const double tbvFac = human.getVaccine().getFactor(interventions::Vaccine::TBV);
 
         probTransmission.assign(nGenotypes, 0.0);
         double sumX = numeric_limits<double>::quiet_NaN();
-        const double pTrans = whm.probTransmissionToMosquito(tbvFac, &sumX);
+        const double pTrans = whm.probTransmissionToMosquito(&sumX);
         if (nGenotypes == 1)
             probTransmission[0] = pTrans;
         else
@@ -452,7 +454,8 @@ void VectorModel::vectorUpdate(const Population &population)
             sigma_df[s] += df;
             for (size_t g = 0; g < nGenotypes; ++g)
             {
-                sigma_dif[s][g] += df * probTransmission[g];
+                const double tbvFac = human.getVaccine().getFactor(interventions::Vaccine::TBV, opt_vaccine_genotype? g : 0);
+                sigma_dif[s][g] += df * probTransmission[g] * tbvFac;
             }
             sigma_dff[s] += df * host.relMosqFecundity(s);
         }

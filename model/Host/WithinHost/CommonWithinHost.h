@@ -51,8 +51,8 @@ public:
     virtual void treatPkPd(size_t schedule, size_t dosage, double age, double delay_d);
     virtual void clearImmunity();
     
-    virtual void update (LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor);
+    virtual void update (Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
+            double ageInYears);
     
     virtual void addProphylacticEffects(const vector<double>& pClearanceByTime);
     
@@ -88,6 +88,8 @@ private:
      * the idea is that each WithinHostModel has its own list of infections. */
     //TODO: better to template class over infection type than use dynamic type?
     std::list<CommonInfection*> infections;
+
+    bool opt_vaccine_genotype = false;
 };
 
 } }

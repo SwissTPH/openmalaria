@@ -147,15 +147,15 @@ public:
     virtual ~WHVivax();
     //@}
     
-    virtual double probTransmissionToMosquito( double tbvFactor, double *sumX )const;
+    virtual double probTransmissionToMosquito( double *sumX )const;
     virtual double pTransGenotype( double pTrans, double sumX, size_t genotype );
     
     virtual bool summarize(Host::Human& human) const;
     
     virtual void importInfection(LocalRng& rng);
     
-    virtual void update(LocalRng& rng, int nNewInfs, vector<double>& genotype_weights,
-            double ageInYears, double bsvFactor);
+    virtual void update(Host::Human &human, LocalRng& rng, int &nNewInfs, vector<double>& genotype_weights,
+            double ageInYears);
     
     virtual bool diagnosticResult( LocalRng& rng, const Diagnostic& diagnostic ) const;
 
