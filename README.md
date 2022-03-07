@@ -1,6 +1,3 @@
-[![Linux Build Status](https://travis-ci.org/SwissTPH/openmalaria.svg?branch=master)](https://travis-ci.org/SwissTPH/openmalaria)
-[![Windows Build Status](https://ci.appveyor.com/api/projects/status/dhardy/openmalaria)](https://ci.appveyor.com/project/dhardy/openmalaria)
-
 Open Malaria
 ============
 
