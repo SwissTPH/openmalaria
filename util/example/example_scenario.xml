@@ -47,6 +47,7 @@
       <option name="nUncomp" value="true"/>
       <option name="nSevere" value="true"/>
       <option name="nDirDeaths" value="false"/>
+      <option name="inputEIR" value="true"/>
       <option name="simulatedEIR" value="true"/>
     </SurveyOptions>
     <surveys detectionLimit="40">
