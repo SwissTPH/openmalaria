@@ -83,7 +83,11 @@ void LognormalSampler::setParams( double mean, const scnXml::SampledValueCV& elt
         if( elt.getCV().present() && elt.getCV().get() != 0.0 ){
             throw util::xml_scenario_error( "attribute CV must be zero or omitted when distr=\"const\" or is omitted" );
         }
-        mu = log(mean);
+        if( mean == 0.0 ){
+            mu = -numeric_limits<double>::infinity();
+        } else {
+            mu = log(mean);
+        }
         sigma = 0.0;
         return;
     }
