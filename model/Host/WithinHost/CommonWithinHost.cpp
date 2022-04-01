@@ -308,7 +308,10 @@ bool CommonWithinHost::summarize( Host::Human& human )const{
     // totalDensity > 0. Here we report the last calculated density.
     if( diagnostics::monitoringDiagnostic().isPositive(human.rng(), totalDensity, std::numeric_limits<double>::quiet_NaN()) ){
         mon::reportStatMHI( mon::MHR_PATENT_HOSTS, human, 1 );
-        mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
+        if(totalDensity == 0.0)
+            mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, 0.0);
+        else
+            mon::reportStatMHF( mon::MHF_LOG_DENSITY, human, log(totalDensity) );
         return true;    // patent
     }
     return false;       // not patent
