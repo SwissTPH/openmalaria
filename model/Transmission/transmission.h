@@ -149,7 +149,7 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
             sum += months[i];
         }
         // arbitrary minimum we allow (cannot have zeros since we take the logarithm)
-        double min = sum / 1000.0;
+        double min = sum / 100.0;
         for (size_t i = 0; i < N_m; ++i)
         {
             if (months[i] < min) months[i] = min;
