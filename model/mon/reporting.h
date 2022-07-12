@@ -212,6 +212,8 @@ namespace Deploy {
 void reportStatMF( Measure measure, double val );
 /// Report some tally (additive integer) for some human to the current survey.
 void reportEventMHI( Measure measure, const Host::Human& human, int val );
+/// Report some tally (additive integer) for some human to the current survey via the CMDecisionTree Report node
+void reportEventMHI_CMDT( Measure measure, const Host::Human& human, int val, int outId );
 /// Report some value (integer) for some human to the current survey.
 void reportStatMHI( Measure measure, const Host::Human& human, int val );
 /// Report some value (integer) for some survey, age group and cohort set

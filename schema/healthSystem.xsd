@@ -678,7 +678,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="age" type="om:DTAge"/>
    <!-- actions -->
    <xs:element name="noTreatment" type="om:DTNoTreatment"/>
-   <xs:element name="report" type="om:DTReport"/>
+   <xs:element name="report" type="om:DTReport" maxOccurs="unbounded"/>
    <xs:element name="treatFailure" type="om:DTTreatFailure"/>
    <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
    <xs:element name="treatSimple" type="om:DTTreatSimple"/>
@@ -914,6 +914,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
           An optional piece of documentation attached to this node.
         </xs:documentation>
     <xs:appinfo>name:Name;</xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
+  <xs:attribute name="outputNumber" type="xs:int" default="0">
+   <xs:annotation>
+    <xs:documentation>
+          Optionally, this can be given to delay the start of treatment by a
+          given number of hours. If not specified, treatment is not delayed. If
+          a delay is given, all medications within the treatment schedule used
+          are delayed by this number of hours.
+        </xs:documentation>
+    <xs:appinfo>name:Delay (hours);</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
  </xs:complexType>

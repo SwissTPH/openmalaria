@@ -276,6 +276,7 @@ public:
             surveySize += measures[i].size();
             
             Measure m = measures[i].measure;
+
             assert(m < measure_map.size());
             // Indices are initialised to zero, but zero may also be correct; measures[0] will be valid:
             if( measures.at(measure_map[m].first).measure != m )
@@ -287,7 +288,7 @@ public:
     // Take a reported value and either store it or forget it.
     // If some of ageIndex, cohortSet, species are not applicable, use 0.
     void report( T val, Measure measure, size_t survey, size_t ageIndex,
-                 uint32_t cohortSet, size_t species, size_t genotype, size_t drug )
+                 uint32_t cohortSet, size_t species, size_t genotype, size_t drug, int outId = 0)
     {
         if( survey == NOT_USED ) return; // pre-main-sim & unit tests we ignore all reports
         assert(measure < measure_map.size());
@@ -298,7 +299,7 @@ public:
             const MonIndex& ind = measures[i];
             assert(ind.measure == measure);
             if( ind.deployMask != Deploy::NA ) continue;        // skip measures tracking deployments
-            
+            if( outId != 0 && ind.outMeasure != outId) continue;     // skip if supplied outID is different
             size_t index = survey * surveySize +
                     ind.index(ageIndex, cohortSet, species, genotype, drug);
             assert( index < reports.size() );
@@ -589,6 +590,11 @@ void reportStatMHI( Measure measure, const Host::Human& human, int val ){
     const size_t survey = impl::survNumStat;
     const size_t ageIndex = human.monAgeGroup().i();
     storeI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0 );
+}
+void reportEventMHI_CMDT( Measure measure, const Host::Human& human, int val, int outId ){
+    const size_t survey = impl::survNumStat;
+    const size_t ageIndex = human.monAgeGroup().i();
+    storeI.report( val, measure, survey, ageIndex, human.cohortSet(), 0, 0, 0, outId );
 }
 void reportMSACI( Measure measure, size_t survey,
                   AgeGroup ageGroup, uint32_t cohortSet, int val )

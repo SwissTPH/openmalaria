@@ -183,7 +183,7 @@ protected:
         const Clinical::Episode &latest = clinicalModel.getLatestReport();
 
         // Rely on the health system memory to not count the same episode twice
-        if( latest.time + Clinical::ClinicalModel::hsMemory() > sim::ts0() - sim::oneTS() && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
+        if( latest.time == sim::ts0() - sim::oneTS() && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
         {
             result = positive.exec( hostData );
         }
@@ -300,17 +300,36 @@ protected:
 };
 
 class CMDTReport : public CMDecisionTree {
+public:
+    CMDTReport( const scnXml::DecisionTree::ReportSequence& seq ){
+        outIds.reserve( seq.size() );
+        for( const scnXml::DTReport& reportElt : seq ){
+            outIds.push_back( reportElt.getOutputNumber() );
+        }
+        assert( outIds.size() > 0 );        // CMDTTreatPKPD should not be used in this case
+    }
 protected:
     virtual bool operator==( const CMDecisionTree& that ) const{
-        if( this == &that ) return true; // short cut: same object thus equivalent
+     if( this == &that ) return true; // short cut: same object thus equivalent
         const CMDTReport* p = dynamic_cast<const CMDTReport*>( &that );
-        return p != 0;  // same type: is equivalent
+        if( p == 0 ) return false;      // different type of node
+        if( outIds.size() != p->outIds.size() ) return false;
+        for( auto it1 = outIds.begin(), it2 = p->outIds.begin();
+            it1 != outIds.end(); ++it1, ++it2 )
+        {
+            if( *it1 != *it2 ) return false;
+        }
+        return true;    // no tests failed; must be the same
     }
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        mon::reportEventMHI( mon::MCD_CMDT_REPORT, hostData.human, 1);
+        for( const size_t outId : outIds ){
+            mon::reportEventMHI_CMDT( mon::MCD_CMDT_REPORT, hostData.human, 1, outId);
+        }
         return CMDTOut(true);
     }
+private:
+    vector<int> outIds;
 };
 
 /** Report treament without affecting parasites. **/
@@ -496,7 +515,7 @@ const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, 
     if( node.getAge().present() ) return CMDTAge::create( node.getAge().get(), isUC );
     // action nodes
     if( node.getNoTreatment().present() ) return save_decision( new CMDTNoTreatment() );
-    if( node.getReport().present() ) return save_decision( new CMDTReport() );
+    if( node.getReport().size() ) return save_decision( new CMDTReport(node.getReport()) );
     if( node.getTreatFailure().present() ) return save_decision( new CMDTTreatFailure() );
     if( node.getTreatPKPD().size() ) return save_decision(
         new CMDTTreatPKPD( node.getTreatPKPD() ) );
@@ -531,7 +550,7 @@ const CMDecisionTree& CMDTMultiple::create( const scnXml::DTMultiple& node, bool
         self->children.push_back( &save_decision(new CMDTTreatSimple(node.getTreatSimple().get())) );
     }
     if( node.getReport().size() ){
-        self->children.push_back( &save_decision(new CMDTReport()) );
+        self->children.push_back( &save_decision(new CMDTReport(node.getReport())) );
     }
     if( node.getDeploy().size() ){
         self->children.push_back( &save_decision(new CMDTDeploy(node.getDeploy())) );
