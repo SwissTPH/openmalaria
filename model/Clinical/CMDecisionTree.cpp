@@ -183,7 +183,7 @@ protected:
         const Clinical::Episode &latest = clinicalModel.getLatestReport();
 
         // Rely on the health system memory to not count the same episode twice
-        if( latest.time == sim::ts0() - sim::oneTS() && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
+        if( (latest.time + lookBack > sim::ts0() - sim::oneTS()) && ((latest.state & Episode::MALARIA ) || (latest.state & Episode::SICK)) )
         {
             result = positive.exec( hostData );
         }
@@ -196,11 +196,17 @@ protected:
     }
     
 private:
-    CMDTFever( const CMDecisionTree& positive,
+    CMDTFever(
+        const SimTime lookBack,
+        const CMDecisionTree& positive,
         const CMDecisionTree& negative ) :
-        positive(positive), negative(negative)
-    {}
+        lookBack(lookBack), positive(positive), negative(negative)
+    {
+        if(lookBack > ClinicalModel::hsMemory())
+            throw util::xml_scenario_error( "<fever> lookBack parameter must be less than or equal to the healthsystem memory (hsmemory parameter)" );
+    }
     
+    const SimTime lookBack;
     const CMDecisionTree& positive;
     const CMDecisionTree& negative;
 };
@@ -578,6 +584,7 @@ const CMDecisionTree& CMDTDiagnostic::create( const scnXml::DTDiagnostic& node, 
 
 const CMDecisionTree& CMDTFever::create( const scnXml::DTFever& node, bool isUC ){
     return save_decision( new CMDTFever(
+        UnitParse::readShortDuration(node.getLookBack(), UnitParse::STEPS),
         CMDecisionTree::create( node.getPositive(), isUC ),
         CMDecisionTree::create( node.getNegative(), isUC )
     ) );

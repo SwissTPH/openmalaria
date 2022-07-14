@@ -802,6 +802,19 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
     <xs:appinfo>name:Name;</xs:appinfo>
    </xs:annotation>
   </xs:attribute>
+  <xs:attribute name="lookBack" type="xs:string" use="required">
+   <xs:annotation>
+    <xs:documentation>
+          Follow-up period during which a recurrence is
+          considered to be a treatment failure
+          
+          Can be specified in steps (e.g. 6t) or days (e.g. 28d).
+        </xs:documentation>
+    <xs:appinfo>units:User-defined (defaults to steps);
+          name:Number of days to look back for fevers. This must be less than or equal to the healthsystem memory parameter. In general, this should be less than or equal to the repeatStep in MSAT with contiuous deployment;
+        </xs:appinfo>
+   </xs:annotation>
+  </xs:attribute>
  </xs:complexType>
  <xs:complexType name="DTRandom">
   <xs:annotation>
