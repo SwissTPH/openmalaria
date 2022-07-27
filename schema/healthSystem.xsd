@@ -681,7 +681,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="report" type="om:DTReport" maxOccurs="unbounded"/>
    <xs:element name="treatFailure" type="om:DTTreatFailure"/>
    <xs:element name="treatPKPD" type="om:DTTreatPKPD" maxOccurs="unbounded"/>
-   <xs:element name="treatSimple" type="om:DTTreatSimple"/>
+   <xs:element name="treatSimple" type="om:DTTreatSimple" maxOccurs="unbounded"/>
    <xs:element name="deploy" type="om:DTDeploy" maxOccurs="unbounded"/>
   </xs:choice>
   <xs:attribute name="name" type="xs:string" use="optional">
@@ -707,7 +707,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
       </xs:documentation>
    <xs:appinfo>name:Decision tree;</xs:appinfo>
   </xs:annotation>
-  <xs:sequence>
+  <xs:choice minOccurs="0" maxOccurs="unbounded">
    <!-- branching points -->
    <xs:element name="caseType" type="om:DTCaseType" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="diagnostic" type="om:DTDiagnostic" minOccurs="0" maxOccurs="unbounded"/>
@@ -719,7 +719,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
    <xs:element name="treatSimple" type="om:DTTreatSimple" minOccurs="0"/>
    <xs:element name="deploy" type="om:DTDeploy" minOccurs="0" maxOccurs="unbounded"/>
    <xs:element name="report" type="om:DTReport" maxOccurs="unbounded" minOccurs="0"/>
-  </xs:sequence>
+  </xs:choice>
   <xs:attribute name="name" type="xs:string" use="optional">
    <xs:annotation>
     <xs:documentation>

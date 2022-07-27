@@ -413,41 +413,53 @@ private:
  */
 class CMDTTreatSimple : public CMDecisionTree {
 public:
-    CMDTTreatSimple( const scnXml::DTTreatSimple& elt ) :
+    CMDTTreatSimple( const scnXml::DecisionTree::TreatSimpleSequence& elt ) :
         timeLiver(sim::zero()), timeBlood(sim::zero())
     {
-        //NOTE: this code is currently identical to that in SimpleTreatComponent
-        try{
-            SimTime durL = UnitParse::readShortDuration( elt.getDurationLiver(), UnitParse::NONE ),
-                durB = UnitParse::readShortDuration( elt.getDurationBlood(), UnitParse::NONE );
-            SimTime neg1 = -sim::oneTS();
-            if( durL < neg1 || durB < neg1 ){
-                throw util::xml_scenario_error( "treatSimple: cannot have durationBlood or durationLiver less than -1" );
+        for (const auto &treatElt : elt) {
+            //NOTE: this code is currently identical to that in SimpleTreatComponent
+            try{
+                SimTime durL = UnitParse::readShortDuration( treatElt.getDurationLiver(), UnitParse::NONE ),
+                    durB = UnitParse::readShortDuration( treatElt.getDurationBlood(), UnitParse::NONE );
+                SimTime neg1 = -sim::oneTS();
+                if( durL < neg1 || durB < neg1 ){
+                    throw util::xml_scenario_error( "treatSimple: cannot have durationBlood or durationLiver less than -1" );
+                }
+                timeLiver.push_back(durL);
+                timeBlood.push_back(durB);
+            }catch( const util::format_error& e ){
+                throw util::xml_scenario_error( string("treatSimple: ").append(e.message()) );
             }
-            timeLiver = durL;
-            timeBlood = durB;
-        }catch( const util::format_error& e ){
-            throw util::xml_scenario_error( string("treatSimple: ").append(e.message()) );
         }
     }
     
 protected:
     virtual bool operator==( const CMDecisionTree& that ) const{
-        if( this == &that ) return true; // short cut: same object thus equivalent
+     if( this == &that ) return true; // short cut: same object thus equivalent
         const CMDTTreatSimple* p = dynamic_cast<const CMDTTreatSimple*>( &that );
         if( p == 0 ) return false;      // different type of node
-        if( timeLiver != p->timeLiver ) return false;
-        if( timeBlood != p->timeBlood ) return false;
+        if( timeLiver.size() != p->timeLiver.size() ) return false;
+        if( timeBlood.size() != p->timeBlood.size() ) return false;
+        for( auto it1 = timeLiver.begin(), it2 = p->timeLiver.begin();
+            it1 != timeLiver.end(); ++it1, ++it2 )
+        {
+            if( *it1 != *it2 ) return false;
+        }
         return true;    // no tests failed; must be the same
     }
+
     
     virtual CMDTOut exec( CMHostData hostData ) const{
-        bool bsTreatment = hostData.withinHost().treatSimple( hostData.human, timeLiver, timeBlood );
+        bool bsTreatment = false;
+        for(size_t i=0; i<timeLiver.size(); i++)
+        {
+            bsTreatment = hostData.withinHost().treatSimple( hostData.human, timeLiver[i], timeBlood[i] );
+        }
         return CMDTOut(bsTreatment);
     }
     
 private:
-    SimTime timeLiver, timeBlood;
+    vector<SimTime> timeLiver, timeBlood;
 };
 
 /**
@@ -525,8 +537,8 @@ const CMDecisionTree& CMDecisionTree::create( const scnXml::DecisionTree& node, 
     if( node.getTreatFailure().present() ) return save_decision( new CMDTTreatFailure() );
     if( node.getTreatPKPD().size() ) return save_decision(
         new CMDTTreatPKPD( node.getTreatPKPD() ) );
-    if( node.getTreatSimple().present() ) return save_decision(
-        new CMDTTreatSimple( node.getTreatSimple().get() ) );
+    if( node.getTreatSimple().size() ) return save_decision(
+        new CMDTTreatSimple( node.getTreatSimple() ) );
     if( node.getDeploy().size() ) return save_decision(
         new CMDTDeploy( node.getDeploy() ) );
     throw xml_scenario_error( "unterminated decision tree" );
@@ -552,8 +564,8 @@ const CMDecisionTree& CMDTMultiple::create( const scnXml::DTMultiple& node, bool
     if( node.getTreatPKPD().size() ){
         self->children.push_back( &save_decision(new CMDTTreatPKPD(node.getTreatPKPD())) );
     }
-    if( node.getTreatSimple().present() ){
-        self->children.push_back( &save_decision(new CMDTTreatSimple(node.getTreatSimple().get())) );
+    if( node.getTreatSimple().size() ){
+        self->children.push_back( &save_decision(new CMDTTreatSimple(node.getTreatSimple())) );
     }
     if( node.getReport().size() ){
         self->children.push_back( &save_decision(new CMDTReport(node.getReport())) );
