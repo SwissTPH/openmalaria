@@ -209,7 +209,7 @@ public:
         
         scnXml::DTTreatSimple treat1( "0t", "1t" );   // 0 time steps liver, 1 blood (using 1 day TS)
         scnXml::DecisionTree dt1;
-        dt1.setTreatSimple( treat1 );
+        dt1.getTreatSimple().push_back( treat1 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt1 ), 1 );
         TS_ASSERT_EQUALS( whm->lastTimeLiver, 0 );
@@ -217,7 +217,7 @@ public:
         
         scnXml::DTTreatSimple treat2( "15d", "-1t" );
         scnXml::DecisionTree dt2;
-        dt2.setTreatSimple( treat2 );
+        dt2.getTreatSimple().push_back( treat2 );
         
         TS_ASSERT_EQUALS( propTreatmentsNReps( 1, dt2 ), 1 );
         TS_ASSERT_EQUALS( whm->lastTimeLiver, 3*5 );
