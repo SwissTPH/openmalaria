@@ -1,7 +1,7 @@
 cache:
     - 'C:\cygwin64\var\cache\setup'
 
-os: Visual Studio 2019
+os: Visual Studio 2022
 
 configuration: Release
 
