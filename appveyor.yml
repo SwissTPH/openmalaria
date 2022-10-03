@@ -12,7 +12,7 @@ install:
   - C:\cygwin64\bin\bash -lc "echo $HOME"
   - C:\cygwin64\bin\bash -lc "appveyor DownloadFile http://rawgit.com/transcode-open/apt-cyg/master/apt-cyg -FileName apt-cyg"
   - C:\cygwin64\bin\bash -lc "install apt-cyg /bin"
-  - C:\cygwin64\bin\bash -lc "apt-cyg update"
+  # - C:\cygwin64\bin\bash -lc "apt-cyg update"
   - C:\cygwin64\bin\bash -lc "apt-cyg install wget grep"
   - C:\cygwin64\bin\bash -lc "apt-cyg install zlib-devel make python3 cmake libgsl-devel xsd libxerces-c-devel"
 
