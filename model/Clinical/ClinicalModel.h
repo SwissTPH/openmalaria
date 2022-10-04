@@ -101,6 +101,11 @@ public:
     inline void flushReports (){
         latestReport.flush();
     }
+
+    inline const Episode &getLatestReport () const{
+        return latestReport;
+    }
+    
     
     /// Checkpointing
     template<class S>

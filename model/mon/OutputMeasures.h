@@ -455,7 +455,10 @@ void defineOutMeasures(){
      * the reporting period. */
     namedOutMeasures["innoculationsPerVector"] =
         OutMeasure::species( 79, MVF_INOCS, false );
-    
+    /** Number of custom intervention reports done */
+    namedOutMeasures["nCMDTReport"] =
+        OutMeasure::humanAC( 80, MCD_CMDT_REPORT, false );
+
     // Now initialise valid condition measures:
     for( const NamedMeasureMapT::value_type& v : namedOutMeasures ){
         Measure m = v.second.m;

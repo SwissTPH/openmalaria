@@ -136,6 +136,10 @@ enum Measure{
     // Number of deployments (all interventions)
     MHD_ALL_DEPLOYS,
     
+    // ———  MCD: custom intervention deployments  ———
+    /** Added in v45, to be used mostly with the DecisonTree **/
+    MCD_CMDT_REPORT,
+
     // ———  MHF: measures for human reports (double)  ———
     // Expected number of new infections per human. Units: infections
     MHF_EXPECTED_INFECTED,
@@ -182,7 +186,7 @@ enum Measure{
     MVF_LAST_OV,
     // S_v: infectious vectors seeking to feed during the last time step. Units: mosquitoes/day
     MVF_LAST_SV,
-    
+
     M_NUM,
     M_OBSOLETE,
     M_ALL_CAUSE_IMR
@@ -208,6 +212,8 @@ namespace Deploy {
 void reportStatMF( Measure measure, double val );
 /// Report some tally (additive integer) for some human to the current survey.
 void reportEventMHI( Measure measure, const Host::Human& human, int val );
+/// Report some tally (additive integer) for some human to the current survey via the CMDecisionTree Report node
+void reportEventMHI_CMDT( Measure measure, const Host::Human& human, int val, int outId );
 /// Report some value (integer) for some human to the current survey.
 void reportStatMHI( Measure measure, const Host::Human& human, int val );
 /// Report some value (integer) for some survey, age group and cohort set
