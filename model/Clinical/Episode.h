@@ -61,6 +61,8 @@ public:
         MALARIA             = WithinHost::Pathogenesis::MALARIA,          ///< Malaria sickness
         /// Used by ClinicalEventScheduler to indicate a second bout of malarial sickness within the same episode (roughly)
         SECOND_CASE         = 0x10,
+        SEVERE              = 0x8,      ///< Severe malaria case
+        COINFECTION         = 0x4,      ///< Malaria with a coinfection
         COMPLICATED         = WithinHost::Pathogenesis::COMPLICATED,         ///< Flag used to indicate SEVERE and/or COINFECTION
         
         //NEED_ANTIBIOTIC     = 0x40,         ///< Flag indicates a non-malaria fever requires (antibiotic) treatment

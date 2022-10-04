@@ -455,12 +455,20 @@ void defineOutMeasures(){
      * the reporting period. */
     namedOutMeasures["innoculationsPerVector"] =
         OutMeasure::species( 79, MVF_INOCS, false );
-    
+    /// Similar to nSevere. Number of severe episodes WITHOUT coinfection
+    namedOutMeasures["nSevereWithoutComorbidities"] =
+        OutMeasure::humanAC( 80, MHE_SEVERE_EPISODES_WITHOUT_COMORBIDITIES, false );
+    /** Similar to 'expectedSevere'.
+     * Expected number of severe bouts of malaria WITHOUT "complications due 
+     * to coinfection" (the same as the `nSevereWithoutComorbidities` output). */
+    namedOutMeasures["expectedSevereWithoutComorbidities"] =
+        OutMeasure::humanAC( 81, MHF_EXPECTED_SEVERE_WITHOUT_COMORBIDITIES, true );
     // Now initialise valid condition measures:
     for( const NamedMeasureMapT::value_type& v : namedOutMeasures ){
         Measure m = v.second.m;
         // Not the following:
         if( m == mon::MHE_SEVERE_EPISODES ||
+            m == mon::MHE_SEVERE_EPISODES_WITHOUT_COMORBIDITIES ||
             m == mon::MHE_UNCOMPLICATED_EPISODES ||
             m == mon::MHO_DIRECT_DEATHS ||
             m == mon::MHO_HOSPITAL_DEATHS ||

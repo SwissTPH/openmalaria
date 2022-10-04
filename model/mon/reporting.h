@@ -84,6 +84,8 @@ enum Measure{
     MHE_UNCOMPLICATED_EPISODES,
     // Number of severe fever episodes in humans. Units: cases
     MHE_SEVERE_EPISODES,
+    // Number of severe fever episodes without counting episodes due to comorbidities in humans. Units: cases
+    MHE_SEVERE_EPISODES_WITHOUT_COMORBIDITIES,
     // Number of fever episodes in humans not due to malaria. Units: cases
     MHE_NON_MALARIA_FEVERS,
     
@@ -162,6 +164,8 @@ enum Measure{
     MHF_EXPECTED_SEQUELAE,
     // Expected severe bouts
     MHF_EXPECTED_SEVERE,
+    // Expected severe bouts without counting expected episodes due to comorbidites
+    MHF_EXPECTED_SEVERE_WITHOUT_COMORBIDITIES,
     
     // ———  MVF: vector (transmission) measures (doubles)  ———
     // Infectiousness of human population to mosquitoes

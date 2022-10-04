@@ -117,6 +117,7 @@ Pathogenesis::StatePair PathogenesisModel::determineState(Host::Human& human,
         // Expectation of a severe bout:
         const double exSevere = prSevereEpisode + (1.0 - prSevereEpisode) * pCoinfection;
         mon::reportStatMHF( mon::MHF_EXPECTED_SEVERE, human, exSevere );
+        mon::reportStatMHF( mon::MHF_EXPECTED_SEVERE_WITHOUT_COMORBIDITIES, human, prSevereEpisode );
         
         if( human.rng().bernoulli( prSevereEpisode ) )
             result.state = STATE_SEVERE;
