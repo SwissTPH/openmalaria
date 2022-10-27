@@ -2046,6 +2046,29 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
      </xs:attribute>
     </xs:complexType>
    </xs:element>
+   <xs:element name="probDeathSeeking" minOccurs="0">
+    <xs:annotation>
+     <xs:documentation>
+            Describe an effect on the increase in the death rate while host
+            seeking (mu_vA) due to this intervention.
+            
+            Enter the rate increase (i.e. if rate increases to 120% of normal,
+            give 0.2). New death rate while seeking is old × (1 + increase)
+            where increase is this factor given. Must have increas ≥ -1.
+          </xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+     <xs:sequence>
+      <xs:element name="decay" type="om:DecayFunction"/>
+     </xs:sequence>
+     <xs:attribute name="initial" type="xs:double" use="required">
+      <xs:annotation>
+       <xs:appinfo>units:dimensionless;min:-1;max:inf;name:Initial proportion increase</xs:appinfo>
+      </xs:annotation>
+     </xs:attribute>
+    </xs:complexType>
+   </xs:element>
   </xs:all>
   <xs:attribute name="mosquito" type="xs:string" use="required">
    <xs:annotation>
