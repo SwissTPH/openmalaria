@@ -590,6 +590,9 @@ public:
     /** Parameters for trap interventions. Doesn't need checkpointing. */
     vector<TrapParams> trapParams;
 
+    /** Interventions affecting death rate while seeking (parameters + state) based on a given probability */
+    vector<util::SimpleDecayingValue> probDeathSeekingIntervs;
+
     /** Interventions affecting death rate while seeking (parameters + state) */
     vector<util::SimpleDecayingValue> seekingDeathRateIntervs;
 

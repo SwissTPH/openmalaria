@@ -417,9 +417,16 @@ void AnophelesModel::initVectorInterv(const scnXml::VectorSpeciesIntervention &e
         if (elt2.getInitial() > 1.0) throw util::xml_scenario_error("emergenceReduction intervention: initial effect must be ≤ 1");
         emergenceReduction[instance].set(elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
     }
+    if (probDeathSeekingIntervs.size() <= instance) probDeathSeekingIntervs.resize(instance + 1);
     if (seekingDeathRateIntervs.size() <= instance) seekingDeathRateIntervs.resize(instance + 1);
     if (probDeathOvipositingIntervs.size() <= instance) probDeathOvipositingIntervs.resize(instance + 1);
 
+    if (elt.getProbDeathSeeking().present())
+    {
+        const scnXml::ProbDeathSeeking &elt2 = elt.getProbDeathSeeking().get();
+        if (elt2.getInitial() < -1.0) throw util::xml_scenario_error("probDeathSeeking intervention: initial effect must be ≥ -1");
+        probDeathSeekingIntervs[instance].set(elt2.getInitial(), elt2.getDecay(), "seekingDeathRateIncrease");
+    }
     if (elt.getSeekingDeathRateIncrease().present())
     {
         const scnXml::SeekingDeathRateIncrease &elt2 = elt.getSeekingDeathRateIncrease().get();
@@ -449,6 +456,7 @@ void AnophelesModel::deployVectorPopInterv(LocalRng &rng, size_t instance)
     emergenceReduction[instance].deploy(rng, sim::now());
     // do same as in above function (of EmergenceModel)
     assert(instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size());
+    probDeathSeekingIntervs[instance].deploy(rng, sim::now());
     seekingDeathRateIntervs[instance].deploy(rng, sim::now());
     probDeathOvipositingIntervs[instance].deploy(rng, sim::now());
 }
@@ -507,7 +515,7 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
         leaveRate *= 1.0 + increase.current_value(sim::ts0());
     }
     double mu_v_interv = leaveRate;
-    printf("don't forget to remove\n");
+    // printf("don't forget to remove\n");
     leaveRate += sum_avail;
 
     // NON-HUMAN HOSTS INTERVENTIONS
@@ -600,103 +608,115 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
         it++;
     }
 
-    printf("sum_avail: %f\n", sum_avail);
-    printf("modified_nhh_avail: %f\n", modified_nhh_avail);
-
     // Calculate alpha_t for ATSB interventions with fixed target PA
     // =============================================================
-    printf("check if multiple fixed PA ATSB interventions at the same time\n");
-    printf("%d %d\n", sim::intervDate()-sim::startDate(), sim::ts0());
+    double pDeathSeeking = 0.0;
+    for (const util::SimpleDecayingValue &pDeath : probDeathSeekingIntervs)
+    {
+        pDeathSeeking += pDeath.current_value(sim::ts0());
+    }
+
+    if(pDeathSeeking > 1.0)
+         throw xml_scenario_error("VectorPop: the cumulative probability of death wile seeking is greater than 1 during the simulation");
+
+    // pDeathSeeking = 0.1;
     // if ((sim::intervDate()-sim::startDate() > 22*365) && (sim::intervDate()-sim::startDate() < 25*365))
-    // {
-    //     int status;
-    //     int iter = 0, max_iter = 20;
+    
+    if(pDeathSeeking > 0.0)
+    {
+        printf("sum_avail: %f\n", sum_avail);
+        printf("modified_nhh_avail: %f\n", modified_nhh_avail);
+        int status;
+        int iter = 0, max_iter = 20;
 
-    //     double x0, x = 0.5;
+        double x0, x = 0.5;
 
-    //     double ah = sum_avail;//0.0001; // The availability rate of host h. Time-1
-    //     double an = modified_nhh_avail;//0.0072; // The availability rate of host n. Time-1
-    //     double Nh = 1.0;//10000; // Population size of hosts of type h. Animals.
-    //     double Nn = 1.0; // Population size of hosts of type n. Humans.
-    //     // double mu_v_interv = mu_v_interv; // Mosquito mortality rate while host-seeking. Time-1
-    //     double theta_d = mosq.seekingDuration; // Proportion of the night that the mosquito spends host-seeking. Time.
-    //     double PAt_wanted = 0.015; // PAt is the daily probability of a mosquito feeding on an ATSB
+        double ah = sum_avail;//0.0001; // The availability rate of host h. Time-1
+        double an = modified_nhh_avail;//0.0072; // The availability rate of host n. Time-1
+        double Nh = 1.0;//10000; // Population size of hosts of type h. Animals.
+        double Nn = 1.0; // Population size of hosts of type n. Humans.
+        // double mu_v_interv = mu_v_interv; // Mosquito mortality rate while host-seeking. Time-1
+        double theta_d = mosq.seekingDuration; // Proportion of the night that the mosquito spends host-seeking. Time.
+        double PAt_wanted = pDeathSeeking; // PAt is the daily probability of a mosquito feeding on an ATSB
 
-    //     struct quadratic_params params = { ah, an, Nh, Nn, mu_v_interv, theta_d, PAt_wanted};
+        printf("PAt: %f\n", PAt_wanted);
 
-    //     const gsl_root_solver_type *T = gsl_root_solver_method;
-    //     gsl_root_solver *s = gsl_root_solver_alloc(T);
+        struct quadratic_params params = { ah, an, Nh, Nn, mu_v_interv, theta_d, PAt_wanted};
 
-    //     #ifdef USE_DERIVATIVE
-    //         gsl_function_fdf FDF;
-    //         FDF.f = &quadratic_f;
-    //         FDF.df = &quadratic_df;
-    //         FDF.fdf = &quadratic_fdf;
-    //         FDF.params = &params;
+        const gsl_root_solver_type *T = gsl_root_solver_method;
+        gsl_root_solver *s = gsl_root_solver_alloc(T);
 
-    //         gsl_root_fdfsolver_set (s, &FDF, x);
-    //     #else
-    //         gsl_function F;
-    //         F.function = &quadratic_f;
-    //         F.params = &params;
+        #ifdef USE_DERIVATIVE
+            gsl_function_fdf FDF;
+            FDF.f = &quadratic_f;
+            FDF.df = &quadratic_df;
+            FDF.fdf = &quadratic_fdf;
+            FDF.params = &params;
 
-    //         gsl_root_fsolver_set (s, &F, 0.0, 1.0);
-    //     #endif
+            gsl_root_fdfsolver_set (s, &FDF, x);
+        #else
+            gsl_function F;
+            F.function = &quadratic_f;
+            F.params = &params;
 
-    //     printf("Checks:\n");
-    //     printf("f(0) = %f\n", quadratic_f(0, &params));
-    //     printf("df(0) = %f\n", quadratic_df(0, &params));
+            gsl_root_fsolver_set (s, &F, 0.0, 1.0);
+        #endif
 
-    //     printf ("using %s method\n", gsl_root_solver_name (s));
-    //     printf ("%-5s %10s %10s\n", "iter", "root", "err(est)");
+        printf("Checks:\n");
+        printf("f(0) = %f\n", quadratic_f(0, &params));
+        printf("df(0) = %f\n", quadratic_df(0, &params));
 
-    //     do
-    //     {
-    //         iter++;
-    //         status = gsl_root_solver_iterate (s);
-    //         x0 = x;
-    //         x = gsl_root_solver_root (s);
+        printf ("using %s method\n", gsl_root_solver_name (s));
+        printf ("%-5s %10s %10s\n", "iter", "root", "err(est)");
 
-    //         status = gsl_root_test_delta (x, x0, 0, 1e-4);
+        do
+        {
+            iter++;
+            status = gsl_root_solver_iterate (s);
+            x0 = x;
+            x = gsl_root_solver_root (s);
 
-    //         if (status == GSL_SUCCESS)
-    //             printf ("Converged:\n");
+            status = gsl_root_test_delta (x, x0, 0, 1e-4);
+
+            if (status == GSL_SUCCESS)
+                printf ("Converged:\n");
 
 
-    //         printf ("%5d %10.7f %10.7f\n", iter, x, x - x0);
-    //     }
-    //     while (status == GSL_CONTINUE && iter < max_iter);
+            printf ("%5d %10.7f %10.7f\n", iter, x, x - x0);
+        }
+        while (status == GSL_CONTINUE && iter < max_iter);
 
-    //     gsl_root_solver_free (s);
+        gsl_root_solver_free (s);
 
-    //     double a_t = x;
-    //     printf("a_t: %f\n", a_t);
-    //     printf("a_h * N_h: %f\n", sum_avail);
-    //     printf("a_n * N_n: %f\n", modified_nhh_avail);
-    //     printf("leaveRate (a_h * N_h + a_n * N_n + mu_v_interv): %f\n", leaveRate);
-    //     printf("seekingDuration: %f\n", mosq.seekingDuration);
-    //     printf("seekingDeathRate: %f\n", mu_v_interv);
-    //     printf("seekingDeathRateIncrease: %f\n", a_t / mu_v_interv);
-    //     printf("newSeekingDeathRate: %f\n", mu_v_interv * (1.0 + (a_t / mu_v_interv)));
-    //     // printf("newSeekingDeathRate: %f\n", mosq.seekingDeathRate + (a_t / mosq.seekingDeathRate));
+        double a_t = x;
+        printf("a_t: %f\n", a_t);
+        printf("a_h * N_h: %f\n", sum_avail);
+        printf("a_n * N_n: %f\n", modified_nhh_avail);
+        printf("leaveRate (a_h * N_h + a_n * N_n + mu_v_interv): %f\n", leaveRate);
+        printf("seekingDuration: %f\n", mosq.seekingDuration);
+        printf("seekingDeathRate: %f\n", mu_v_interv);
+        printf("seekingDeathRateIncrease: %f\n", a_t / mu_v_interv);
+        printf("newSeekingDeathRate: %f\n", mu_v_interv * (1.0 + (a_t / mu_v_interv)));
+        // printf("newSeekingDeathRate: %f\n", mosq.seekingDeathRate + (a_t / mosq.seekingDeathRate));
         
-    //     double tmp = (Nh*ah + Nn*an + mu_v_interv);
-    //     double PAmu = (1.0 - exp(-theta_d * tmp)) * mu_v_interv / tmp;
-    //     printf("PAmu_Before: %f\n", PAmu);
+        double tmp = (Nh*ah + Nn*an + mu_v_interv);
+        double PAmu = (1.0 - exp(-theta_d * tmp)) * mu_v_interv / tmp;
+        printf("PAmu_Before: %f\n", PAmu);
 
-    //     mu_v_interv = mu_v_interv * (1.0 + (a_t / mu_v_interv));
-    //     // double mu = mosq.seekingDeathRate + (a_t / mosq.seekingDeathRate);
+        mu_v_interv = mu_v_interv * (1.0 + (a_t / mu_v_interv));
+        // double mu = mosq.seekingDeathRate + (a_t / mosq.seekingDeathRate);
         
-    //     tmp = (a_t + Nh*ah + Nn*an + mu_v_interv);
-    //     PAmu = (1.0 - exp(-theta_d * tmp)) * mu_v_interv / tmp;
-    //     printf("PAmu_After: %f\n", PAmu);
-    //     printf("PA_t(a_t): %f\n", (1.0 - exp(-theta_d * tmp)) * a_t / tmp);
+        tmp = (a_t + Nh*ah + Nn*an + mu_v_interv);
+        PAmu = (1.0 - exp(-theta_d * tmp)) * mu_v_interv / tmp;
+        printf("PAmu_After: %f\n", PAmu);
+        printf("PA_t(a_t): %f\n", (1.0 - exp(-theta_d * tmp)) * a_t / tmp);
 
-    //     // Forward
-    //     leaveRate += a_t;
-    //     // mosq.seekingDeathRate = mu_v_interv * (1.0 + (a_t / mu_v_interv));
-    // }
+        // Forward
+        leaveRate += a_t;
+        // mosq.seekingDeathRate = mu_v_interv * (1.0 + (a_t / mu_v_interv));
+    }
     // =============================================================
+
     // Probability of a mosquito not finding a host this day:
     double tsP_A = exp(-leaveRate * mosq.seekingDuration);
     double availDivisor = (1.0 - tsP_A) / leaveRate; // α_d
