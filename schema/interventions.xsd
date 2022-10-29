@@ -2052,11 +2052,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             Describe an effect on the increase in the death rate while host
             seeking (mu_vA) due to this intervention.
             
-            Enter the rate increase (i.e. if rate increases to 120% of normal,
-            give 0.2). New death rate while seeking is old × (1 + increase)
-            where increase is this factor given. Must have increas ≥ -1.
-          </xs:documentation>
-     <xs:appinfo>units:dimensionless;name:Proportional increase in deaths while host searching;</xs:appinfo>
+            Enter the probability of dying while host seeking due to this 
+            intervention. If multiple interventions overlap, the cumulative 
+            probability will be used. Note that it cannot exceed 1, and 
+            OpenMalaria will return an error during the simulation if this
+            ever happens.
+
+            OpenMalaria will dynamically compute the necessary increase 
+            in mu_vA based on the given probability. Note that this is done 
+            by solving an equation numerically every timestep, which can 
+            cause a small drop in performance.</xs:documentation>
+     <xs:appinfo>units:dimensionless;name:Probability of death while host searching (used to dynamically adjust mu_vA);</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:sequence>
