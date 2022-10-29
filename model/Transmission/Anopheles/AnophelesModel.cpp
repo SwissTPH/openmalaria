@@ -38,10 +38,8 @@
 
 struct quadratic_params
 {
-    double ah; // The availability rate of host h. Time-1
-    double an; // The availability rate of host n. Time-1
-    double Nh; // Population size of hosts of type h. Animals.
-    double Nn; // Population size of hosts of type n. Humans.
+    double ah; // The availability rate of hosts h. Time-1
+    double an; // The availability rate of hosts n. Time-1
     double mu_v_interv; // Mosquito mortality rate while host-seeking. Time-1
     double theta_d; // Proportion of the night that the mosquito spends host-seeking. Time.
     double PAt_wanted; // PAt is the daily probability of a mosquito feeding on an ATSB
@@ -53,13 +51,11 @@ double quadratic_f (double x, void *params)
 
     double ah = p->ah;
     double an = p->an;
-    double Nh = p->Nh;
-    double Nn = p->Nn;
     double mu_v_interv = p->mu_v_interv;
     double theta_d = p->theta_d;
     double PAt_wanted = p->PAt_wanted;
     
-    double tmp = (x + Nh*ah + Nn*an + mu_v_interv);
+    double tmp = (x + ah + an + mu_v_interv);
 
     return (1.0 - exp(-tmp * theta_d)) * x / tmp - PAt_wanted;
 }
@@ -70,13 +66,10 @@ double quadratic_df (double x, void *params)
 
     double ah = p->ah;
     double an = p->an;
-    double Nh = p->Nh;
-    double Nn = p->Nn;
     double mu_v_interv = p->mu_v_interv;
     double theta_d = p->theta_d;
-    // double PAt_wanted = p->PAt_wanted;
 
-    double tmp = (x + Nh*ah + Nn*an + mu_v_interv);
+    double tmp = (x + ah + an + mu_v_interv);
 
     double a = (1.0 - exp(-tmp * theta_d)) * x / (tmp * tmp);
     double b = (1.0 - exp(-tmp * theta_d)) / tmp;
@@ -91,13 +84,11 @@ void quadratic_fdf (double x, void *params, double *y, double *dy)
 
     double ah = p->ah;
     double an = p->an;
-    double Nh = p->Nh;
-    double Nn = p->Nn;
     double mu_v_interv = p->mu_v_interv;
     double theta_d = p->theta_d;
     double PAt_wanted = p->PAt_wanted;
 
-    double tmp = (x + Nh*ah + Nn*an + mu_v_interv);
+    double tmp = (x + ah + an + mu_v_interv);
 
     double a = (1.0 - exp(-tmp)) * x / (tmp * tmp);
     double b = (1.0 - exp(-tmp)) / tmp;
@@ -515,7 +506,6 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
         leaveRate *= 1.0 + increase.current_value(sim::ts0());
     }
     double mu_v_interv = leaveRate;
-    // printf("don't forget to remove\n");
     leaveRate += sum_avail;
 
     // NON-HUMAN HOSTS INTERVENTIONS
@@ -612,36 +602,19 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     // =============================================================
     double pDeathSeeking = 0.0;
     for (const util::SimpleDecayingValue &pDeath : probDeathSeekingIntervs)
-    {
         pDeathSeeking += pDeath.current_value(sim::ts0());
-    }
 
     if(pDeathSeeking > 1.0)
          throw xml_scenario_error("VectorPop: the cumulative probability of death wile seeking is greater than 1 during the simulation");
 
-    // pDeathSeeking = 0.1;
-    // if ((sim::intervDate()-sim::startDate() > 22*365) && (sim::intervDate()-sim::startDate() < 25*365))
-    
     if(pDeathSeeking > 0.0)
     {
-        printf("sum_avail: %f\n", sum_avail);
-        printf("modified_nhh_avail: %f\n", modified_nhh_avail);
         int status;
         int iter = 0, max_iter = 20;
 
-        double x0, x = 0.5;
+        double x0, a_t = 0.5; // guess
 
-        double ah = sum_avail;//0.0001; // The availability rate of host h. Time-1
-        double an = modified_nhh_avail;//0.0072; // The availability rate of host n. Time-1
-        double Nh = 1.0;//10000; // Population size of hosts of type h. Animals.
-        double Nn = 1.0; // Population size of hosts of type n. Humans.
-        // double mu_v_interv = mu_v_interv; // Mosquito mortality rate while host-seeking. Time-1
-        double theta_d = mosq.seekingDuration; // Proportion of the night that the mosquito spends host-seeking. Time.
-        double PAt_wanted = pDeathSeeking; // PAt is the daily probability of a mosquito feeding on an ATSB
-
-        printf("PAt: %f\n", PAt_wanted);
-
-        struct quadratic_params params = { ah, an, Nh, Nn, mu_v_interv, theta_d, PAt_wanted};
+        struct quadratic_params params = { sum_avail, modified_nhh_avail, mu_v_interv, mosq.seekingDuration, pDeathSeeking};
 
         const gsl_root_solver_type *T = gsl_root_solver_method;
         gsl_root_solver *s = gsl_root_solver_alloc(T);
@@ -653,7 +626,7 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
             FDF.fdf = &quadratic_fdf;
             FDF.params = &params;
 
-            gsl_root_fdfsolver_set (s, &FDF, x);
+            gsl_root_fdfsolver_set (s, &FDF, a_t);
         #else
             gsl_function F;
             F.function = &quadratic_f;
@@ -662,58 +635,20 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
             gsl_root_fsolver_set (s, &F, 0.0, 1.0);
         #endif
 
-        printf("Checks:\n");
-        printf("f(0) = %f\n", quadratic_f(0, &params));
-        printf("df(0) = %f\n", quadratic_df(0, &params));
-
-        printf ("using %s method\n", gsl_root_solver_name (s));
-        printf ("%-5s %10s %10s\n", "iter", "root", "err(est)");
-
         do
         {
             iter++;
             status = gsl_root_solver_iterate (s);
-            x0 = x;
-            x = gsl_root_solver_root (s);
+            x0 = a_t;
+            a_t = gsl_root_solver_root (s);
 
-            status = gsl_root_test_delta (x, x0, 0, 1e-4);
-
-            if (status == GSL_SUCCESS)
-                printf ("Converged:\n");
-
-
-            printf ("%5d %10.7f %10.7f\n", iter, x, x - x0);
+            status = gsl_root_test_delta (a_t, x0, 0, 1e-4);
         }
         while (status == GSL_CONTINUE && iter < max_iter);
 
         gsl_root_solver_free (s);
 
-        double a_t = x;
-        printf("a_t: %f\n", a_t);
-        printf("a_h * N_h: %f\n", sum_avail);
-        printf("a_n * N_n: %f\n", modified_nhh_avail);
-        printf("leaveRate (a_h * N_h + a_n * N_n + mu_v_interv): %f\n", leaveRate);
-        printf("seekingDuration: %f\n", mosq.seekingDuration);
-        printf("seekingDeathRate: %f\n", mu_v_interv);
-        printf("seekingDeathRateIncrease: %f\n", a_t / mu_v_interv);
-        printf("newSeekingDeathRate: %f\n", mu_v_interv * (1.0 + (a_t / mu_v_interv)));
-        // printf("newSeekingDeathRate: %f\n", mosq.seekingDeathRate + (a_t / mosq.seekingDeathRate));
-        
-        double tmp = (Nh*ah + Nn*an + mu_v_interv);
-        double PAmu = (1.0 - exp(-theta_d * tmp)) * mu_v_interv / tmp;
-        printf("PAmu_Before: %f\n", PAmu);
-
-        mu_v_interv = mu_v_interv * (1.0 + (a_t / mu_v_interv));
-        // double mu = mosq.seekingDeathRate + (a_t / mosq.seekingDeathRate);
-        
-        tmp = (a_t + Nh*ah + Nn*an + mu_v_interv);
-        PAmu = (1.0 - exp(-theta_d * tmp)) * mu_v_interv / tmp;
-        printf("PAmu_After: %f\n", PAmu);
-        printf("PA_t(a_t): %f\n", (1.0 - exp(-theta_d * tmp)) * a_t / tmp);
-
-        // Forward
         leaveRate += a_t;
-        // mosq.seekingDeathRate = mu_v_interv * (1.0 + (a_t / mu_v_interv));
     }
     // =============================================================
 
@@ -742,9 +677,6 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     double tsP_Amu = (1 - tsP_A) * mosq.seekingDeathRate / (mosq.seekingDeathRate + sum_avail + modified_nhh_avail);
     double tsP_A1 = (1 - tsP_A) * sum_avail / (mosq.seekingDeathRate + sum_avail + modified_nhh_avail);
     double tsP_Ah = (1 - tsP_A) * modified_nhh_avail / (mosq.seekingDeathRate + sum_avail + modified_nhh_avail);
-    // for( auto it = currentNhh.begin(); it != currentNhh.end(); ++it){
-    //     tsP_Ah += (1-tsP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
-    // }
 
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
