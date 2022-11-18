@@ -286,7 +286,7 @@ public:
     void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic);
 
     /// Intermediatary from vector model equations used to calculate EIR
-    inline const double getInitPartialEIR() const{ return partialInitEIR[sim::moduloYearSteps(sim::ts0())] / initAvail; }
+    inline double getInitPartialEIR() const{ return partialInitEIR[sim::moduloYearSteps(sim::ts0())] / initAvail; }
     //@}
 
     /// Intermediatary from vector model equations used to calculate EIR
