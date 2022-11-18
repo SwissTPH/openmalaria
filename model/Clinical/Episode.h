@@ -101,16 +101,6 @@ public:
     void operator& (istream& stream);
     void operator& (ostream& stream);	///< ditto
     
-    
-private:
-    /** Report a clinical episode.
-     *
-     * From _state, an episode is reported based on severity (SICK,
-     * MALARIA or COMPLICATED), and any outcomes are reported: RECOVERY (in
-     * hospital, i.e. with EVENT_IN_HOSPITAL, only), SEQUELAE and DIRECT_DEATH
-     * (both in and out of hospital). */
-    void report();
-    
     /// Time of event, potentially never
     SimTime time = sim::never();
     /// Survey during which the event occured
@@ -122,6 +112,15 @@ private:
     /// Descriptor of state, containing reporting info. Not all information will
     /// be reported (e.g. indirect deaths are reported independantly).
     Episode::State state;
+    
+private:
+    /** Report a clinical episode.
+     *
+     * From _state, an episode is reported based on severity (SICK,
+     * MALARIA or COMPLICATED), and any outcomes are reported: RECOVERY (in
+     * hospital, i.e. with EVENT_IN_HOSPITAL, only), SEQUELAE and DIRECT_DEATH
+     * (both in and out of hospital). */
+    void report();
 };
 
 } }
