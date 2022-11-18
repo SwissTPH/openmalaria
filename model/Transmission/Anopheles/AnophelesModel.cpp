@@ -239,6 +239,7 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
 
     // -----  Calculate availability rate of hosts (α_i) and non-human population data  -----
     PerHostAnophParams::scaleEntoAvailability(species, (P_A1 / populationSize) * availFactor);
+    initAvail = (P_A1 / populationSize) * availFactor;
 
     nhh_avail = 0.0;
     nhh_sigma_df = 0.0;
@@ -307,10 +308,14 @@ void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> F
     // Calculate forced EIR for pre-intervention phase from FSCoeffic:
     vectors::expIDFT(speciesEIR, FSCoeffic, EIRRotateAngle);
 
+    partialInitEIR.resize(sim::stepsPerYear(), 0.0);
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
     for (SimTime i = sim::zero(); i < sim::oneYear(); i = i + sim::oneDay())
+    {
         initialisationEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += speciesEIR[i];
+        partialInitEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += speciesEIR[i];
+    }
 
     if (util::CommandLine::option(util::CommandLine::PRINT_ANNUAL_EIR))
         cout << "Annual EIR for " << mosq.name << ": " << vectors::sum(speciesEIR) << endl;
@@ -334,6 +339,7 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
     // Probability of a mosquito not finding a host this day:
     double tsP_A = exp(-leaveRate * mosq.seekingDuration);
     double availDivisor = (1.0 - tsP_A) / leaveRate; // α_d
+
     // Input per-species EIR is the mean EIR experienced by a human adult.
     // We use sumPFindBite below to get required S_v.
     double sumPFindBite = sigma_f * availDivisor;

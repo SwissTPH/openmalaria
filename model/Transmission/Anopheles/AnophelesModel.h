@@ -235,6 +235,7 @@ public:
      * initialisation. */
     inline void scaleEIR( double factor ){
         FSCoeffic[0] += log( factor );
+        vectors::scale(partialInitEIR, factor);
     }
 
     virtual void scale(double factor)
@@ -283,6 +284,10 @@ public:
      * @param isDynamic True to use full model; false to drive model from current contents of S_v.
      */
     void advancePeriod (double sum_avail, double sigma_df, vector<double>& sigma_dif, double sigma_dff, bool isDynamic);
+
+    /// Intermediatary from vector model equations used to calculate EIR
+    inline const double getInitPartialEIR() const{ return partialInitEIR[sim::moduloYearSteps(sim::ts0())] / initAvail; }
+    //@}
 
     /// Intermediatary from vector model equations used to calculate EIR
     inline const vector<double>& getPartialEIR() const{ return partialEIR; }
@@ -426,7 +431,13 @@ public:
     // as above, but modified by fertility factors
     double nhh_sigma_dff;
     //@}
-    
+
+    /** The initialisationEIR for this species */
+    std::vector<double> partialInitEIR;
+
+    /** The initialisation availDivisor: (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA */
+    double initAvail;
+
     /** Per time-step partial calculation of EIR, per genotype.
     *
     * See comment in advancePeriod() for details of how the EIR is calculated.

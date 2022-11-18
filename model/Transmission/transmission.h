@@ -269,9 +269,9 @@ inline VectorModel *createVectorModel(const scnXml::Entomology &entoData, int po
     if (interventionMode == forcedEIR)
     {
         // We don't need these anymore (now we have initialisationEIR); free memory
-        numSpecies = 0;
-        species.clear();
-        speciesIndex.clear();
+        // numSpecies = 0;
+        // species.clear();
+        // speciesIndex.clear();
     }
 
     return new VectorModel(initialisationEIR, interventionMode, std::move(species), std::move(speciesFitters), speciesIndex, populationSize);
