@@ -591,7 +591,7 @@ public:
     vector<TrapParams> trapParams;
 
     /** Interventions affecting death rate while seeking (parameters + state) based on a given probability */
-    vector<util::SimpleDecayingValue> probDeathSeekingIntervs;
+    vector<util::SimpleDecayingValue> probAdditionalDeathSugarFeedingIntervs;
 
     /** Interventions affecting death rate while seeking (parameters + state) */
     vector<util::SimpleDecayingValue> seekingDeathRateIntervs;

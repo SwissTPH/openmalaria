@@ -2046,11 +2046,17 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
      </xs:attribute>
     </xs:complexType>
    </xs:element>
-   <xs:element name="probDeathSeeking" minOccurs="0">
+   <xs:element name="probAdditionalDeathSugarFeeding" minOccurs="0">
     <xs:annotation>
      <xs:documentation>
             Describe an effect on the increase in the death rate while host
-            seeking (mu_vA) due to this intervention.
+            seeking (mu_vA) due to this intervention. This works like 
+            adding an non-human host with its own availability. The
+            difference is that biting this sugar bait is associated with a 
+            probability of dying of 1: all mosquitoes biting the sugar bait
+            will die. OpenMalaria will automatically compute the 
+            availability for this host so that the probability of biting this
+            'host' (and thus dying) is equal to the input parameter.
             
             Enter the probability of dying while host seeking due to this 
             intervention. If multiple interventions overlap, the cumulative 
@@ -2062,7 +2068,7 @@ Licence: GNU General Public Licence version 2 or later (see COPYING) -->
             in mu_vA based on the given probability. Note that this is done 
             by solving an equation numerically every timestep, which can 
             cause a small drop in performance.</xs:documentation>
-     <xs:appinfo>units:dimensionless;name:Probability of death while host searching (used to dynamically adjust mu_vA);</xs:appinfo>
+     <xs:appinfo>units:dimensionless;name:Probability of death while host searching as a result of feeding on a sugar bait (used to dynamically adjust mu_vA);</xs:appinfo>
     </xs:annotation>
     <xs:complexType>
      <xs:sequence>

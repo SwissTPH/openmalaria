@@ -408,15 +408,15 @@ void AnophelesModel::initVectorInterv(const scnXml::VectorSpeciesIntervention &e
         if (elt2.getInitial() > 1.0) throw util::xml_scenario_error("emergenceReduction intervention: initial effect must be ≤ 1");
         emergenceReduction[instance].set(elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
     }
-    if (probDeathSeekingIntervs.size() <= instance) probDeathSeekingIntervs.resize(instance + 1);
+    if (probAdditionalDeathSugarFeedingIntervs.size() <= instance) probAdditionalDeathSugarFeedingIntervs.resize(instance + 1);
     if (seekingDeathRateIntervs.size() <= instance) seekingDeathRateIntervs.resize(instance + 1);
     if (probDeathOvipositingIntervs.size() <= instance) probDeathOvipositingIntervs.resize(instance + 1);
 
-    if (elt.getProbDeathSeeking().present())
+    if (elt.getProbAdditionalDeathSugarFeeding().present())
     {
-        const scnXml::ProbDeathSeeking &elt2 = elt.getProbDeathSeeking().get();
-        if (elt2.getInitial() < -1.0) throw util::xml_scenario_error("probDeathSeeking intervention: initial effect must be ≥ -1");
-        probDeathSeekingIntervs[instance].set(elt2.getInitial(), elt2.getDecay(), "seekingDeathRateIncrease");
+        const scnXml::ProbAdditionalDeathSugarFeeding &elt2 = elt.getProbAdditionalDeathSugarFeeding().get();
+        if (elt2.getInitial() < -1.0) throw util::xml_scenario_error("probAdditionalDeathSugarFeeding intervention: initial effect must be ≥ -1");
+        probAdditionalDeathSugarFeedingIntervs[instance].set(elt2.getInitial(), elt2.getDecay(), "seekingDeathRateIncrease");
     }
     if (elt.getSeekingDeathRateIncrease().present())
     {
@@ -447,7 +447,7 @@ void AnophelesModel::deployVectorPopInterv(LocalRng &rng, size_t instance)
     emergenceReduction[instance].deploy(rng, sim::now());
     // do same as in above function (of EmergenceModel)
     assert(instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size());
-    probDeathSeekingIntervs[instance].deploy(rng, sim::now());
+    probAdditionalDeathSugarFeedingIntervs[instance].deploy(rng, sim::now());
     seekingDeathRateIntervs[instance].deploy(rng, sim::now());
     probDeathOvipositingIntervs[instance].deploy(rng, sim::now());
 }
@@ -601,7 +601,7 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     // Calculate alpha_t for ATSB interventions with fixed target PA
     // =============================================================
     double pDeathSeeking = 0.0;
-    for (const util::SimpleDecayingValue &pDeath : probDeathSeekingIntervs)
+    for (const util::SimpleDecayingValue &pDeath : probAdditionalDeathSugarFeedingIntervs)
         pDeathSeeking += pDeath.current_value(sim::ts0());
 
     if(pDeathSeeking > 1.0)
