@@ -393,6 +393,8 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
         // mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, eir);
         // EIR.assign(1, eir);
 
+        EIR.assign(1, 0.0);
+
         assert(simulationMode == forcedEIR);
         for (size_t i = 0; i < speciesIndex.size(); ++i)
         {
@@ -400,10 +402,10 @@ void VectorModel::calculateEIR(Host::Human &human, double ageYears, vector<doubl
              *
              * See comment in AnophelesModel::advancePeriod for method. */
             double eir = species[i]->getInitPartialEIR() * host.relativeAvailabilityAge(ageYears) * host.entoAvailabilityHetVecItv(i);
-            mon::reportStatMACGF(mon::MVF_INOCS, ag, cs, 0, eir);
+            mon::reportStatMACSGF(mon::MVF_INOCS, ag, cs, i, 0, eir);
             // cout << host.availBite(i) << endl;
             // cout << "species: " << eir << " " << host.entoAvailabilityHetVecItv(i) << " " << host.entoAvailabilityHetVecItv(i) * (1000*0.00112608) << endl;
-            EIR.assign(1, eir);
+            EIR[0] += eir;
         }
     }
     else
