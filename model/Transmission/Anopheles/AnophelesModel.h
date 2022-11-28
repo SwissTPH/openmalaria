@@ -30,8 +30,6 @@
 #include "util/CommandLine.h"
 #include "util/errors.h"
 
-#include "rotate.h"
-
 #include <vector>
 #include <limits>
 
