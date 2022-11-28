@@ -137,7 +137,7 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
         EIRRotateAngle = seasFC.getEIRRotateAngle();
 
         // EIR for this species, with index 0 refering to value over first interval
-        initEIR365.resize(sim::oneYear());
+        initEIR365.resize(sim::oneYear(), 0.0);
 
         // Now we rescale to get an EIR of targetEIR.
         // Calculate current sum as is usually done.
@@ -227,7 +227,6 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
         const scnXml::DailyValues &seasM = seasonality.getDailyValues().get();
         const scnXml::DailyValues::ValueSequence &daily = seasM.getValue();
 
-        vector<int> nDays(sim::stepsPerYear(), 0);
         // The minimum EIR allowed in the array. The product of the average EIR and a constant.
         double minEIR = 0.01;//min_EIR_mult * averageEIR(nonVectorData);
 
@@ -235,24 +234,30 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
             throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues insufficient daily data for a year");
 
         // EIR for this species, with index 0 refering to value over first interval
-        initEIR365.resize(sim::oneYear());
-        for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday = mpcday + sim::oneDay())
+        initEIR365.resize(sim::oneYear(), 0.0);
+        vector<int> nDays(sim::oneYear(), 0.0);
+        
+        cout << initEIR365.size() << endl;
+        for (SimTime d = sim::zero(), endDay = daily.size(); d < endDay; d = d + sim::oneDay())
         {
-            double EIRdaily = std::max(static_cast<double>(daily[mpcday]), minEIR);
+            double EIRdaily = std::max(static_cast<double>(daily[d]), minEIR);
 
             // Index 0 of initialisationEIR refers to the EIR affecting the
             // first day(s) of the year. Correspondingly, the first 1 or 5 values
             // of EIRDaily affect this (1- or 5-day) time-step.
-            size_t i = mod_nn(sim::inSteps(mpcday), sim::stepsPerYear());
+            size_t i = mod_nn(d, sim::oneYear());
+            cout << d << " " << i << endl;
 
             nDays[i] += 1;
             initEIR365[i] += EIRdaily;
         }
 
+        cout << "done" << endl;
+
         // Calculate total annual EIR
         // divide by number of records assigned to each interval (usually one per day)
-        for (size_t indTS = 0; indTS < sim::stepsPerYear(); indTS += 1)
-            initEIR365[indTS] *= sim::oneTS() / static_cast<double>(nDays[indTS]);
+        for (SimTime d = sim::zero(); d < sim::oneYear(); d = d + sim::oneDay())
+            initEIR365[d] *= 1.0 / static_cast<double>(nDays[d]);
     }
 
     if (!seasonality.getAnnualEIR().present())
