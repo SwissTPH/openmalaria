@@ -297,7 +297,7 @@ void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> F
     double targetEIR = targetEIRInit;
 
     // EIR for this species, with index 0 refering to value over first interval
-    std::vector<double> speciesEIR(sim::oneYear());
+    speciesEIR.resize(sim::oneYear());
 
     // Now we rescale to get an EIR of targetEIR.
     // Calculate current sum as is usually done.
@@ -355,15 +355,11 @@ void AnophelesModel::init2(int nHumans, double meanPopAvail, double sum_avail, d
 
     // -----  Calculate required S_v based on desired EIR  -----
     initNv0FromSv = initNvFromSv * (1.0 - tsP_A - tsP_df);
+    initSvFromEIR = nHumans * meanPopAvail / sumPFindBite;
 
-    // We scale FSCoeffic to give us S_v instead of EIR.
-    // Log-values: adding log is same as exponentiating, multiplying and taking
-    // the log again.
-
-    double EIRtoS_v = nHumans * meanPopAvail / sumPFindBite;
-
-    FSCoeffic[0] += log(EIRtoS_v);
-    vectors::expIDFT(forcedS_v, FSCoeffic, EIRRotateAngle);
+    // We estimate forcedS_v from EIR
+    forcedS_v = speciesEIR;
+    vectors::scale(forcedS_v, initSvFromEIR);
 
     N_v.resize(N_v_length, numeric_limits<double>::quiet_NaN());
     O_v.resize(N_v_length * Genotypes::N(), numeric_limits<double>::quiet_NaN());

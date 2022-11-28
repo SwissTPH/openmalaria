@@ -234,6 +234,7 @@ public:
     inline void scaleEIR( double factor ){
         FSCoeffic[0] += log( factor );
         vectors::scale(partialInitEIR, factor);
+        vectors::scale(speciesEIR, factor);
     }
 
     virtual void scale(double factor)
@@ -397,6 +398,7 @@ public:
         mosqEmergeRate & stream;
         quinquennialS_v & stream;
         initNv0FromSv & stream;
+        initSvFromEIR & stream;
         // (*emergence) & stream;
         // MosqTransmission
         mosq.restDuration & stream;
@@ -436,11 +438,14 @@ public:
     /** The initialisation availDivisor: (1 - P_A[t]) / (sum_{h in hosts} α_h[t] + μ_vA */
     double initAvail;
 
-    /** Per time-step partial calculation of EIR, per genotype.
+    /** init EIR.
     *
-    * See comment in advancePeriod() for details of how the EIR is calculated.
+    * Doesn't need to be checkpointed (is calculated during initialization). */
+    std::vector<double> speciesEIR;
+
+    /** Per time-step init EIR.
     *
-    * Doesn't need to be checkpointed (is recalculated each step). */
+    * Doesn't need to be checkpointed (is calculated during initialization). */
     std::vector<double> partialEIR;
 
     // Emergence Model
@@ -476,6 +481,10 @@ public:
     /** Conversion factor from forcedS_v to (initial values of) N_v (1 / ρ_S).
      * Should be checkpointed. */
     double initNvFromSv;
+
+    /** Used to estimate S_v from EIR during initialization 
+     * Should be checkpointed. */
+    double initSvFromEIR;
     
     /** Conversion factor from forcedS_v to (initial values of) O_v (ρ_O / ρ_S).
      * Should be checkpointed. */

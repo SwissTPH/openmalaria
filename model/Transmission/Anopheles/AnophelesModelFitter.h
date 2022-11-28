@@ -152,16 +152,12 @@ public:
         shiftAngle += rAngle;
         rotated = true;
 
-        // cout << "EIRRotateAngle: " << EIRRotateAngle << " rAngle = " << rAngle << ", angle = " << shiftAngle << " scalefactor: " <<
-        // scaleFactor << " , factor: " << factor << endl;
-
-        // Compute forced_sv from the Fourrier Coeffs
-        // shiftAngle rotate the vector to correct the offset between simulated and input EIR
-        // shiftAngle is the offset between the
+        // Compute forced_sv from the Fourrier Coeffs EIR
         vectors::expIDFT(m.mosqEmergeRate, m.FSCoeffic, -shiftAngle);
-        // Scale the vector according to initNv0FromSv to get the mosqEmergerate
+
+        // Scale the vector according to initSvFromEIR and initNv0FromSv to get the mosqEmergerate
         // scaleFactor scales the vector to correct the ratio between simulated and input EIR
-        vectors::scale(m.mosqEmergeRate, scaleFactor * m.initNv0FromSv);
+        vectors::scale(m.mosqEmergeRate, scaleFactor * m.initSvFromEIR * m.initNv0FromSv);
 
         // initNvFromSv *= scaleFactor;     //(not currently used)
 
