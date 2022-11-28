@@ -227,7 +227,7 @@ public:
      */
     void initAvailability(size_t species, const vector<NhhParams> &nhhs, int populationSize);
 
-    void initEIR(vector<double>& initialisationEIR, vector<double> FSCoefficInit, double EIRRotateAngleInit, double targetEIR, double propInfectious, double propInfected);
+    void initEIR(const vector<double>& initEIR365, vector<double> FSCoefficInit, double EIRRotateAngleInit, double propInfectious, double propInfected);
 
     /** Scale the internal EIR representation by factor; used as part of
      * initialisation. */

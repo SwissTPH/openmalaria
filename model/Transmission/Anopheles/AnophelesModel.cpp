@@ -289,32 +289,19 @@ void AnophelesModel::initAvailability(size_t species, const vector<NhhParams> &n
  * @param initialisationEIR In/out parameter: TransmissionModel::initialisationEIR
  * @param EIPDuration parameter from MosqTransmission (used for an estimation)
  */
-void AnophelesModel::initEIR(vector<double> &initialisationEIR, vector<double> FSCoefficInit, double EIRRotateAngleInit, double targetEIRInit, double propInfectious, double propInfected)
+void AnophelesModel::initEIR(const vector<double> &initEIR365, vector<double> FSCoefficInit, double EIRRotateAngleInit, double propInfectious, double propInfected)
 {
     FSCoeffic = FSCoefficInit;
     EIRRotateAngle = EIRRotateAngleInit;
-
-    double targetEIR = targetEIRInit;
-
-    // EIR for this species, with index 0 refering to value over first interval
-    speciesEIR.resize(sim::oneYear());
-
-    // Now we rescale to get an EIR of targetEIR.
-    // Calculate current sum as is usually done.
-    vectors::expIDFT(speciesEIR, FSCoeffic, EIRRotateAngle);
-    // And scale (also acts as a unit conversion):
-    FSCoeffic[0] += log(targetEIR / vectors::sum(speciesEIR));
-
-    // Calculate forced EIR for pre-intervention phase from FSCoeffic:
-    vectors::expIDFT(speciesEIR, FSCoeffic, EIRRotateAngle);
+    speciesEIR = initEIR365;
 
     partialInitEIR.resize(sim::stepsPerYear(), 0.0);
+
     // Add to the TransmissionModel's EIR, used for the initalization phase.
     // Note: sum stays the same, units changes to per-time-step.
     for (SimTime i = sim::zero(); i < sim::oneYear(); i = i + sim::oneDay())
     {
-        initialisationEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += speciesEIR[i];
-        partialInitEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += speciesEIR[i];
+        partialInitEIR[mod_nn(sim::inSteps(i), sim::stepsPerYear())] += initEIR365[i];
     }
 
     if (util::CommandLine::option(util::CommandLine::PRINT_ANNUAL_EIR))
