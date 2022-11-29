@@ -806,6 +806,49 @@ void AnophelesModel::update(SimTime d0, double tsP_A, double tsP_Amu, double tsP
 }
 
 // -----  Summary and intervention functions  -----
+void AnophelesModel::changeEIRIntervention(const scnXml::NonVector &nonVectorData)
+{
+    assert(nonVectorData.getEIRDaily().present()); // XML loading code should enforce this
+    const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily();
+
+    // const scnXml::DailyValues &seasM = seasonality.getDailyValues().get();
+    // const scnXml::DailyValues::ValueSequence &daily = seasM.getValue();
+
+    // The minimum EIR allowed in the array. The product of the average EIR and a constant.
+    double minEIR = 0.01 * averageEIR(nonVectorData);
+
+    if (daily.size() < static_cast<size_t>(sim::oneYear()))
+        throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues insufficient daily data for a year");
+
+    vector<int> nDays(sim::inSteps(sim::fromDays(daily.size() - 1)) + 1, 0);
+
+    interventionEIR.assign(nDays.size(), 0.0);
+
+    size_t required_days = static_cast<size_t>((sim::endDate() - sim::startDate()) + 1);
+
+    cout << "required " << required_days << " " << daily.size() <<  " " << interventionEIR.size() * 5 << ", nDays=" << nDays.size() << endl;
+
+    if (daily.size() < required_days)
+    {
+        cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << required_days << endl;
+        throw util::xml_scenario_error("Insufficient intervention phase EIR values provided");
+    }
+
+    for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday = mpcday + sim::oneDay())
+    {
+        double EIRdaily = std::max(static_cast<double>(daily[mpcday]), minEIR);
+
+        // istep is the time period to which the day is assigned.
+        size_t istep = sim::inSteps(mpcday);
+        nDays[istep]++;
+        interventionEIR[istep] += EIRdaily;
+    }
+    // divide by number of records assigned to each interval (usually one per day)
+    for (size_t i = 0; i < interventionEIR.size(); ++i)
+    {
+        interventionEIR[i] *= sim::oneTS() / static_cast<double>(nDays[i]);
+    }
+}
 
 void AnophelesModel::uninfectVectors()
 {

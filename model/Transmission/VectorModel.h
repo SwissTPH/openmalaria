@@ -75,6 +75,8 @@ public:
     virtual void deployVectorPopInterv(size_t instance);
     virtual void deployVectorTrap(size_t instance, double popSize, SimTime lifespan);
 
+    virtual void changeEIRIntervention(const scnXml::NonVector &nonVectorData);
+
     virtual void uninfectVectors();
 
     virtual void summarize();

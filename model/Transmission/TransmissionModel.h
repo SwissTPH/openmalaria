@@ -187,10 +187,7 @@ public:
      * when the vector model is used this updates mosquito populations. */
     virtual void vectorUpdate(const Population &population){};
 
-    virtual void changeEIRIntervention(const scnXml::NonVector &)
-    {
-        throw util::xml_scenario_error("changeEIR intervention can only be used with NonVectorModel!");
-    }
+    virtual void changeEIRIntervention(const scnXml::NonVector &) = 0;
 
     /** Does per-time-step updates and returns the EIR (inoculation rate per host
      * per time step). Should be called exactly once per time-step (at least,

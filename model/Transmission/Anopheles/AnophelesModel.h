@@ -337,6 +337,15 @@ public:
                    bool isDynamic,
                    vector<double>& partialEIR, double EIR_factor);
     
+    /// Intermediatary from vector model equations used to calculate EIR in intervention mode
+    inline double getInterventionEIR() const{ 
+        cout << "here: " << sim::intervTime() << " " << sim::inSteps(sim::intervTime()) << endl;
+        return interventionEIR[sim::inSteps(sim::intervTime())] / initAvail;
+    }
+    //@}
+
+    void changeEIRIntervention(const scnXml::NonVector &nonVectorData);
+
     ///@brief Interventions and reporting
     //@{
     void uninfectVectors();
@@ -447,6 +456,12 @@ public:
     *
     * Doesn't need to be checkpointed (is calculated during initialization). */
     std::vector<double> partialEIR;
+
+    /** Per time-step intervention EIR
+    *
+    * Doesn't need to be checkpointed (is calculated during initialization). */
+    std::vector<double> interventionEIR;
+
 
     // Emergence Model
     // -----  parameters (constant after initialisation)  -----
@@ -628,6 +643,20 @@ public:
 
     /** Description of intervention killing effects on emerging pupae */
     vector<util::SimpleDecayingValue> emergenceReduction;
+
+private:
+    double averageEIR(const scnXml::NonVector &nonVectorData)
+    {
+        // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
+        double valaverageEIR = 0.0;
+        size_t i = 0;
+        for (const scnXml::NonVector::EIRDailySequence &daily = nonVectorData.getEIRDaily(); i < daily.size(); ++i)
+        {
+            valaverageEIR += (double)daily[i];
+        }
+        if (i == 0) throw util::xml_scenario_error("no EIRDaily values given"); // pedantic check
+        return valaverageEIR / i;
+    }
 };
 
 }
