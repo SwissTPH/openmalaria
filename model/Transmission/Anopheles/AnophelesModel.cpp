@@ -20,6 +20,7 @@
  */
 
 #include "Global.h"
+#include "Transmission/TransmissionModel.h"
 #include "Transmission/Anopheles/AnophelesModel.h"
 #include "Transmission/PerHost.h"
 #include "Population.h"
@@ -826,13 +827,8 @@ void AnophelesModel::changeEIRIntervention(const scnXml::NonVector &nonVectorDat
 
     size_t required_days = static_cast<size_t>((sim::endDate() - sim::startDate()) + 1);
 
-    cout << "required " << required_days << " " << daily.size() <<  " " << interventionEIR.size() * 5 << ", nDays=" << nDays.size() << endl;
-
     if (daily.size() < required_days)
-    {
-        cerr << "Days: " << daily.size() << "\nIntervals: " << nDays.size() << "\nRequired: " << required_days << endl;
         throw util::xml_scenario_error("Insufficient intervention phase EIR values provided");
-    }
 
     for (SimTime mpcday = sim::zero(), endDay = sim::fromDays(daily.size()); mpcday < endDay; mpcday = mpcday + sim::oneDay())
     {

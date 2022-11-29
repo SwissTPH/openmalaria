@@ -228,7 +228,7 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
         const scnXml::DailyValues::ValueSequence &daily = seasM.getValue();
 
         // The minimum EIR allowed in the array. The product of the average EIR and a constant.
-        double minEIR = 0.01;//min_EIR_mult * averageEIR(nonVectorData);
+        double minEIR = 0.01 * averageEIR(seasM);
 
         if (daily.size() < static_cast<size_t>(sim::oneYear()))
             throw util::xml_scenario_error("entomology.anopheles.seasonality.dailyValues insufficient daily data for a year");
