@@ -339,7 +339,7 @@ public:
     
     /// Intermediatary from vector model equations used to calculate EIR in intervention mode
     inline double getInterventionEIR() const{ 
-        cout << "here: " << sim::intervTime() << " " << sim::inSteps(sim::intervTime()) << endl;
+        cout << "here: " << sim::intervTime() << " " << sim::inSteps(sim::intervTime()) << " " << sim::endDate() << endl;
         return interventionEIR[sim::inSteps(sim::intervTime())] / initAvail;
     }
     //@}

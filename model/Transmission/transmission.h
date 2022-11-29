@@ -237,7 +237,6 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
         initEIR365.resize(sim::oneYear(), 0.0);
         vector<int> nDays(sim::oneYear(), 0.0);
         
-        cout << initEIR365.size() << endl;
         for (SimTime d = sim::zero(), endDay = daily.size(); d < endDay; d = d + sim::oneDay())
         {
             double EIRdaily = std::max(static_cast<double>(daily[d]), minEIR);
@@ -246,13 +245,10 @@ inline Anopheles::AnophelesModel *createAnophelesModel(size_t i, const scnXml::A
             // first day(s) of the year. Correspondingly, the first 1 or 5 values
             // of EIRDaily affect this (1- or 5-day) time-step.
             size_t i = mod_nn(d, sim::oneYear());
-            cout << d << " " << i << endl;
 
             nDays[i] += 1;
             initEIR365[i] += EIRdaily;
         }
-
-        cout << "done" << endl;
 
         // Calculate total annual EIR
         // divide by number of records assigned to each interval (usually one per day)

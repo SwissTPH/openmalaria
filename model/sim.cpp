@@ -50,6 +50,8 @@ void sim::init( const scnXml::Scenario& scenario ){
     
     sim::s_interv = sim::never(); // large negative number
     sim::s_end = mon::readSurveyDates( mon );
+
+    cout << "END: " << sim::s_end << endl;
 }
 
 }
