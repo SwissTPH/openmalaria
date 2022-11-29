@@ -57,7 +57,7 @@ namespace Transmission
 {
 class PerHost;
 
-inline const double averageEIR(const scnXml::NonVector &nonVectorData)
+inline double averageEIR(const scnXml::NonVector &nonVectorData)
 {
     // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
     double valaverageEIR = 0.0;
@@ -70,7 +70,7 @@ inline const double averageEIR(const scnXml::NonVector &nonVectorData)
     return valaverageEIR / i;
 }
 
-inline const double averageEIR(const scnXml::DailyValues &vectorData)
+inline double averageEIR(const scnXml::DailyValues &vectorData)
 {
     // Calculates the arithmetic mean of the whole daily EIR vector read from the .XML file
     double valaverageEIR = 0.0;
