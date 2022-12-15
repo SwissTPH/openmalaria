@@ -1,4 +1,4 @@
-Open Malaria
+OpenMalaria
 ============
 
 This git-repository contains source-code for OpenMalaria, a simulator program
