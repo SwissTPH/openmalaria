@@ -34,7 +34,9 @@ namespace util {
 class BaseHetDecayFunction : public DecayFunction {
     LognormalSampler het;
 public:
-    BaseHetDecayFunction( const scnXml::DecayFunction& elt ){
+    BaseHetDecayFunction( const scnXml::DecayFunction& elt ) :
+        DecayFunction( elt )
+    {
         het.setMeanCV( 1.0, elt.getCV() );
     }
     
@@ -50,6 +52,10 @@ public:
 
 class ConstantDecayFunction : public DecayFunction {
 public:
+    ConstantDecayFunction( const scnXml::DecayFunction& elt ) :
+        DecayFunction( elt )
+    {}
+
     DecayFuncHet hetSample (LocalRng& rng) const{
         DecayFuncHet ret;
         ret.tMult = 1.0;
@@ -244,7 +250,7 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
     // Type mostly equivalent to a std::string:
     const scnXml::Function& func = elt.getFunction();
     if( func == "constant" ){
-        return unique_ptr<DecayFunction>(new ConstantDecayFunction);
+        return unique_ptr<DecayFunction>(new ConstantDecayFunction( elt ));
     }else if( func == "step" ){
         return unique_ptr<DecayFunction>(new StepDecayFunction( elt ));
     }else if( func == "linear" ){
@@ -261,9 +267,5 @@ unique_ptr<DecayFunction> DecayFunction::makeObject(
         throw util::xml_scenario_error("decay function type " + string(func) + " of " + string(eltName) + " unrecognized");
     }
 }
-unique_ptr<DecayFunction> DecayFunction::makeConstantObject(){
-    return unique_ptr<DecayFunction>(new ConstantDecayFunction);
-}
-
 
 } }

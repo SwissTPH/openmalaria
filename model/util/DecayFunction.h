@@ -72,6 +72,10 @@ public:
 class DecayFunction
 {
 public:
+    DecayFunction(const scnXml::DecayFunction& elt) :
+        complement(elt.getComplement())
+    {}
+
     virtual ~DecayFunction() {}
     
     /** Return a new decay function, constructed from an XML element.
@@ -82,9 +86,7 @@ public:
     static unique_ptr<DecayFunction> makeObject(
         const scnXml::DecayFunction& elt, const char* eltName
     );
-    /** Return an object representing no decay (useful default). */
-    static unique_ptr<DecayFunction> makeConstantObject();
-    
+
     /** Return a value in the range [0,1] describing remaining effectiveness of
      * the intervention.
      * 
@@ -97,7 +99,10 @@ public:
      * over this period (from age-1 to age), but difference should be small for
      * interventions being effective for a month or more. */
     inline double eval( SimTime age, DecayFuncHet sample )const{
-        return eval( age * sample.getTMult() );
+        if(complement)
+            return 1.0 - eval( age * sample.getTMult() );
+        else
+            return eval( age * sample.getTMult() );
     }
     
     /** Sample a DecayFuncHet value (should be stored per individual).
@@ -125,6 +130,9 @@ protected:
     // Protected version. Note that the het sample parameter is needed even
     // when heterogeneity is not used so don't try calling this without that.
     virtual double eval(double ageDays) const =0;
+
+private:
+    bool complement;
 };
 
 } }
