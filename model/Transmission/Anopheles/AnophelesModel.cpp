@@ -31,6 +31,100 @@
 
 #include <cmath>
 
+#include <stdio.h>
+#include <gsl/gsl_errno.h>
+#include <gsl/gsl_math.h>
+#include <gsl/gsl_roots.h>
+
+struct quadratic_params
+{
+    double ah; // The availability rate of hosts h. Time-1
+    double an; // The availability rate of hosts n. Time-1
+    double mu_v_interv; // Mosquito mortality rate while host-seeking. Time-1
+    double theta_d; // Proportion of the night that the mosquito spends host-seeking. Time.
+    double PAt_wanted; // PAt is the daily probability of a mosquito feeding on an ATSB
+};
+
+double quadratic_f (double x, void *params)
+{
+    struct quadratic_params *p = (struct quadratic_params *) params;
+
+    double ah = p->ah;
+    double an = p->an;
+    double mu_v_interv = p->mu_v_interv;
+    double theta_d = p->theta_d;
+    double PAt_wanted = p->PAt_wanted;
+    
+    double tmp = (x + ah + an + mu_v_interv);
+
+    return (1.0 - exp(-tmp * theta_d)) * x / tmp - PAt_wanted;
+}
+
+double quadratic_df (double x, void *params)
+{
+    struct quadratic_params *p = (struct quadratic_params *) params;
+
+    double ah = p->ah;
+    double an = p->an;
+    double mu_v_interv = p->mu_v_interv;
+    double theta_d = p->theta_d;
+
+    double tmp = (x + ah + an + mu_v_interv);
+
+    double a = (1.0 - exp(-tmp * theta_d)) * x / (tmp * tmp);
+    double b = (1.0 - exp(-tmp * theta_d)) / tmp;
+    double c = exp(-tmp * theta_d) * x * theta_d / tmp;
+
+    return -a + b + c;
+}
+
+void quadratic_fdf (double x, void *params, double *y, double *dy)
+{
+    struct quadratic_params *p = (struct quadratic_params *) params;
+
+    double ah = p->ah;
+    double an = p->an;
+    double mu_v_interv = p->mu_v_interv;
+    double theta_d = p->theta_d;
+    double PAt_wanted = p->PAt_wanted;
+
+    double tmp = (x + ah + an + mu_v_interv);
+
+    double a = (1.0 - exp(-tmp)) * x / (tmp * tmp);
+    double b = (1.0 - exp(-tmp)) / tmp;
+    double c = exp(-tmp * theta_d) * x * theta_d / tmp;
+
+    *y = (1.0 - exp(-tmp * theta_d)) * x / tmp - PAt_wanted;
+    *dy = -a + b + c;
+}
+
+#define USE_DERIVATIVE
+
+#ifdef USE_DERIVATIVE
+    using gsl_root_solver_type = gsl_root_fdfsolver_type;
+    using gsl_root_solver = gsl_root_fdfsolver;
+    auto gsl_root_solver_alloc = gsl_root_fdfsolver_alloc;
+    auto gsl_root_solver_free = gsl_root_fdfsolver_free;
+    auto gsl_root_solver_name = gsl_root_fdfsolver_name;
+    auto gsl_root_solver_iterate = gsl_root_fdfsolver_iterate;
+    auto gsl_root_solver_root = gsl_root_fdfsolver_root;
+    // auto gsl_root_solver_method = gsl_root_fdfsolver_newton;
+    auto gsl_root_solver_method = gsl_root_fdfsolver_secant;
+    // auto gsl_root_solver_method = gsl_root_fdfsolver_steffenson;
+#else
+    using gsl_root_solver_type = gsl_root_fsolver_type;
+    using gsl_root_solver = gsl_root_fsolver;
+    auto gsl_root_solver_alloc = gsl_root_fsolver_alloc;
+    auto gsl_root_solver_free = gsl_root_fsolver_free;
+    auto gsl_root_solver_name = gsl_root_fsolver_name;
+    auto gsl_root_solver_iterate = gsl_root_fsolver_iterate;
+    auto gsl_root_solver_root = gsl_root_fsolver_root;
+    // auto gsl_root_solver_method = gsl_root_fsolver_brent;
+    auto gsl_root_solver_method = gsl_root_fsolver_bisection;
+    // auto gsl_root_solver_method = gsl_root_fsolver_falsepos;
+#endif
+
+
 namespace OM
 {
 namespace Transmission
@@ -314,9 +408,16 @@ void AnophelesModel::initVectorInterv(const scnXml::VectorSpeciesIntervention &e
         if (elt2.getInitial() > 1.0) throw util::xml_scenario_error("emergenceReduction intervention: initial effect must be ≤ 1");
         emergenceReduction[instance].set(elt2.getInitial(), elt2.getDecay(), "emergenceReduction");
     }
+    if (probAdditionalDeathSugarFeedingIntervs.size() <= instance) probAdditionalDeathSugarFeedingIntervs.resize(instance + 1);
     if (seekingDeathRateIntervs.size() <= instance) seekingDeathRateIntervs.resize(instance + 1);
     if (probDeathOvipositingIntervs.size() <= instance) probDeathOvipositingIntervs.resize(instance + 1);
 
+    if (elt.getProbAdditionalDeathSugarFeeding().present())
+    {
+        const scnXml::ProbAdditionalDeathSugarFeeding &elt2 = elt.getProbAdditionalDeathSugarFeeding().get();
+        if (elt2.getInitial() < -1.0) throw util::xml_scenario_error("probAdditionalDeathSugarFeeding intervention: initial effect must be ≥ -1");
+        probAdditionalDeathSugarFeedingIntervs[instance].set(elt2.getInitial(), elt2.getDecay(), "seekingDeathRateIncrease");
+    }
     if (elt.getSeekingDeathRateIncrease().present())
     {
         const scnXml::SeekingDeathRateIncrease &elt2 = elt.getSeekingDeathRateIncrease().get();
@@ -346,6 +447,7 @@ void AnophelesModel::deployVectorPopInterv(LocalRng &rng, size_t instance)
     emergenceReduction[instance].deploy(rng, sim::now());
     // do same as in above function (of EmergenceModel)
     assert(instance < seekingDeathRateIntervs.size() && instance < probDeathOvipositingIntervs.size());
+    probAdditionalDeathSugarFeedingIntervs[instance].deploy(rng, sim::now());
     seekingDeathRateIntervs[instance].deploy(rng, sim::now());
     probDeathOvipositingIntervs[instance].deploy(rng, sim::now());
 }
@@ -403,6 +505,7 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     {
         leaveRate *= 1.0 + increase.current_value(sim::ts0());
     }
+    double mu_v_interv = leaveRate;
     leaveRate += sum_avail;
 
     // NON-HUMAN HOSTS INTERVENTIONS
@@ -495,6 +598,60 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
         it++;
     }
 
+    // Calculate alpha_t for ATSB interventions with fixed target PA
+    // =============================================================
+    double pDeathSeeking = 0.0;
+    for (const util::SimpleDecayingValue &pDeath : probAdditionalDeathSugarFeedingIntervs)
+        pDeathSeeking += pDeath.current_value(sim::ts0());
+
+    if(pDeathSeeking > 1.0)
+         throw xml_scenario_error("VectorPop: the cumulative probability of death wile seeking is greater than 1 during the simulation");
+
+    if(pDeathSeeking > 0.0)
+    {
+        int status;
+        int iter = 0, max_iter = 20;
+
+        double x0, a_t = 0.5; // guess
+
+        struct quadratic_params params = { sum_avail, modified_nhh_avail, mu_v_interv, mosq.seekingDuration, pDeathSeeking};
+
+        const gsl_root_solver_type *T = gsl_root_solver_method;
+        gsl_root_solver *s = gsl_root_solver_alloc(T);
+
+        #ifdef USE_DERIVATIVE
+            gsl_function_fdf FDF;
+            FDF.f = &quadratic_f;
+            FDF.df = &quadratic_df;
+            FDF.fdf = &quadratic_fdf;
+            FDF.params = &params;
+
+            gsl_root_fdfsolver_set (s, &FDF, a_t);
+        #else
+            gsl_function F;
+            F.function = &quadratic_f;
+            F.params = &params;
+
+            gsl_root_fsolver_set (s, &F, 0.0, 1.0);
+        #endif
+
+        do
+        {
+            iter++;
+            status = gsl_root_solver_iterate (s);
+            x0 = a_t;
+            a_t = gsl_root_solver_root (s);
+
+            status = gsl_root_test_delta (a_t, x0, 0, 1e-4);
+        }
+        while (status == GSL_CONTINUE && iter < max_iter);
+
+        gsl_root_solver_free (s);
+
+        leaveRate += a_t;
+    }
+    // =============================================================
+
     // Probability of a mosquito not finding a host this day:
     double tsP_A = exp(-leaveRate * mosq.seekingDuration);
     double availDivisor = (1.0 - tsP_A) / leaveRate; // α_d
@@ -520,9 +677,6 @@ void AnophelesModel::advancePeriod(double sum_avail, double sigma_df, vector<dou
     double tsP_Amu = (1 - tsP_A) * mosq.seekingDeathRate / (mosq.seekingDeathRate + sum_avail + modified_nhh_avail);
     double tsP_A1 = (1 - tsP_A) * sum_avail / (mosq.seekingDeathRate + sum_avail + modified_nhh_avail);
     double tsP_Ah = (1 - tsP_A) * modified_nhh_avail / (mosq.seekingDeathRate + sum_avail + modified_nhh_avail);
-    // for( auto it = currentNhh.begin(); it != currentNhh.end(); ++it){
-    //     tsP_Ah += (1-tsP_A) * it->second.avail_i / (mosqSeekingDeathRate + sum_avail + modified_nhh_avail);
-    // }
 
     // The code within the for loop needs to run per-day, wheras the main
     // simulation uses one or five day time steps.
