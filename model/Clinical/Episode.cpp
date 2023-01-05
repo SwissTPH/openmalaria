@@ -61,6 +61,9 @@ void Episode::report () {
         // Malarial fevers: report bout
         if (state & Episode::COMPLICATED) {
             mon::reportMSACI( mon::MHE_SEVERE_EPISODES, surveyPeriod, ageGroup, cohortSet, 1 );
+            if (state & Episode::SEVERE) {
+                mon::reportMSACI( mon::MHE_SEVERE_EPISODES_WITHOUT_COMORBIDITIES, surveyPeriod, ageGroup, cohortSet, 1 );
+            }
         } else { // UC or UC2
             mon::reportMSACI( mon::MHE_UNCOMPLICATED_EPISODES, surveyPeriod, ageGroup, cohortSet, 1 );
         }
