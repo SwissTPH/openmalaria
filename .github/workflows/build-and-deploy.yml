@@ -51,10 +51,6 @@ jobs:
             compiler: g++
             target: Linux
           
-          - os: ubuntu-18.04
-            compiler: g++
-            target: Linux
-
           - os: macos-12
             compiler: clang
           
