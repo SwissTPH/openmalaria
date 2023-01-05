@@ -3501,6 +3501,7 @@ where increase is this factor given. Must have increas ≥ -1.</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-type-52" id="documentation-type-52">Documentation (type)</a></h4>
@@ -3554,6 +3555,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-1" id="l-1">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-probdeathovipositinga-proportion-ovipositing-mosquitoes-killed" id="a-nameelt-probdeathovipositinga-proportion-ovipositing-mosquitoes-killed"><a name="elt-probDeathOvipositing"></a> Proportion ovipositing mosquitoes killed</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vectorPop">vectorPop</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-description">description</a> → <a href="#elt-anopheles">anopheles</a> → <a href="#elt-probDeathOvipositing">probDeathOvipositing</a></p>
 <pre><code class="language-xml">&lt;probDeathOvipositing
@@ -3585,6 +3596,7 @@ this intervention.</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-type-53" id="documentation-type-53">Documentation (type)</a></h4>
@@ -3605,7 +3617,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-1" id="l-1">L</a></h4>
+<h4><a class="header" href="#l-2" id="l-2">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -3638,6 +3650,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-3" id="l-3">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-emergencereductiona-proportion-of-emerging-pupa-killed" id="a-nameelt-emergencereductiona-proportion-of-emerging-pupa-killed"><a name="elt-emergenceReduction"></a> Proportion of emerging pupa killed</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vectorPop">vectorPop</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-description">description</a> → <a href="#elt-anopheles">anopheles</a> → <a href="#elt-emergenceReduction">emergenceReduction</a></p>
 <pre><code class="language-xml">&lt;emergenceReduction
@@ -3672,6 +3694,7 @@ value given here; thus, for example, using -1 will double emergence.</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-type-54" id="documentation-type-54">Documentation (type)</a></h4>
@@ -3692,7 +3715,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-2" id="l-2">L</a></h4>
+<h4><a class="header" href="#l-4" id="l-4">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -3725,6 +3748,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-5" id="l-5">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-probadditionaldeathsugarfeedinga-probability-of-death-while-host-searching-as-a-result-of-feeding-on-a-sugar-bait-used-to-dynamically-adjust-mu_va" id="a-nameelt-probadditionaldeathsugarfeedinga-probability-of-death-while-host-searching-as-a-result-of-feeding-on-a-sugar-bait-used-to-dynamically-adjust-mu_va"><a name="elt-probAdditionalDeathSugarFeeding"></a> Probability of death while host searching as a result of feeding on a sugar bait (used to dynamically adjust mu_vA)</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vectorPop">vectorPop</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-description">description</a> → <a href="#elt-anopheles">anopheles</a> → <a href="#elt-probAdditionalDeathSugarFeeding">probAdditionalDeathSugarFeeding</a></p>
 <pre><code class="language-xml">&lt;probAdditionalDeathSugarFeeding
@@ -3770,6 +3803,7 @@ cause a small drop in performance.</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-type-55" id="documentation-type-55">Documentation (type)</a></h4>
@@ -3790,7 +3824,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-3" id="l-3">L</a></h4>
+<h4><a class="header" href="#l-6" id="l-6">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -3823,6 +3857,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-7" id="l-7">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-timed-2a-vector-population-intervention-deployment" id="a-nameelt-timed-2a-vector-population-intervention-deployment"><a name="elt-timed-2"></a> Vector population intervention deployment</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vectorPop">vectorPop</a> → <a href="#elt-intervention">intervention</a> → <a href="#elt-timed-2">timed</a></p>
 <pre><code class="language-xml">&lt;timed&gt;
@@ -3951,6 +3995,7 @@ decay function.</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-element-67" id="documentation-element-67">Documentation (element)</a></h4>
@@ -3978,7 +4023,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-4" id="l-4">L</a></h4>
+<h4><a class="header" href="#l-8" id="l-8">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -4011,6 +4056,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-9" id="l-9">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-timed-3a-vector-trap-intervention-deployment" id="a-nameelt-timed-3a-vector-trap-intervention-deployment"><a name="elt-timed-3"></a> Vector trap intervention deployment</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-vectorTrap">vectorTrap</a> → <a href="#elt-intervention-2">intervention</a> → <a href="#elt-timed-3">timed</a></p>
 <pre><code class="language-xml">&lt;timed&gt;
@@ -4115,6 +4170,7 @@ IN THIS ORDER:
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-type-59" id="documentation-type-59">Documentation (type)</a></h4>
@@ -4135,7 +4191,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-5" id="l-5">L</a></h4>
+<h4><a class="header" href="#l-10" id="l-10">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -4168,6 +4224,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-11" id="l-11">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-description-3a-description" id="a-nameelt-description-3a-description"><a name="elt-description-3"></a> description</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-nonHumanHostsModifications">nonHumanHostsModifications</a> → <a href="#elt-intervention-3">intervention</a> → <a href="#elt-description-3">description</a></p>
 <pre><code class="language-xml">&lt;description&gt;
@@ -4766,6 +4832,7 @@ from commencing.</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-element-86" id="documentation-element-86">Documentation (element)</a></h4>
@@ -4789,7 +4856,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-6" id="l-6">L</a></h4>
+<h4><a class="header" href="#l-12" id="l-12">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -4822,6 +4889,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-13" id="l-13">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-efficacyba-variance-parameter-for-vaccine-efficacy" id="a-nameelt-efficacyba-variance-parameter-for-vaccine-efficacy"><a name="elt-efficacyB"></a> Variance parameter for vaccine efficacy</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-human">human</a> → <a href="#elt-component-2">component</a> → <a href="#elt-PEV">PEV</a> → <a href="#elt-efficacyB">efficacyB</a></p>
 <pre><code class="language-xml">&lt;efficacyB
@@ -5181,6 +5258,7 @@ same effect as not specifying distr at all.
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-element-99" id="documentation-element-99">Documentation (element)</a></h4>
@@ -5213,7 +5291,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-7" id="l-7">L</a></h4>
+<h4><a class="header" href="#l-14" id="l-14">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -5246,6 +5324,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-15" id="l-15">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-attritionofnetsa-attrition-of-nets" id="a-nameelt-attritionofnetsa-attrition-of-nets"><a name="elt-attritionOfNets"></a> Attrition of nets</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-human">human</a> → <a href="#elt-component-2">component</a> → <a href="#elt-ITN">ITN</a> → <a href="#elt-attritionOfNets">attritionOfNets</a></p>
 <pre><code class="language-xml">&lt;attritionOfNets
@@ -5253,6 +5341,7 @@ the half-life by the variable).</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-element-100" id="documentation-element-100">Documentation (element)</a></h4>
@@ -5287,7 +5376,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-8" id="l-8">L</a></h4>
+<h4><a class="header" href="#l-16" id="l-16">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -5320,6 +5409,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-17" id="l-17">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-anophelesparamsa-anophelesparams" id="a-nameelt-anophelesparamsa-anophelesparams"><a name="elt-anophelesParams"></a> anophelesParams</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-human">human</a> → <a href="#elt-component-2">component</a> → <a href="#elt-ITN">ITN</a> → <a href="#elt-anophelesParams">anophelesParams</a></p>
 <pre><code class="language-xml">&lt;anophelesParams
@@ -6046,6 +6145,7 @@ same effect as not specifying distr at all.
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-element-117" id="documentation-element-117">Documentation (element)</a></h4>
@@ -6070,7 +6170,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-9" id="l-9">L</a></h4>
+<h4><a class="header" href="#l-18" id="l-18">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -6103,6 +6203,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-19" id="l-19">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-anophelesparams-2a-per-mosquito-species-parameters" id="a-nameelt-anophelesparams-2a-per-mosquito-species-parameters"><a name="elt-anophelesParams-2"></a> Per-mosquito species parameters</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-human">human</a> → <a href="#elt-component-2">component</a> → <a href="#elt-IRS">IRS</a> → <a href="#elt-anophelesParams-2">anophelesParams</a></p>
 <pre><code class="language-xml">&lt;anophelesParams
@@ -6330,6 +6440,7 @@ wanted, a separate component can be used for each action.</p>
   [ L=string ]
   [ k=double ] DEFAULT VALUE 1.0
   [ CV=double ] DEFAULT VALUE 0
+  [ complement=boolean ] DEFAULT VALUE false
   /&gt;
 </code></pre>
 <h4><a class="header" href="#documentation-element-124" id="documentation-element-124">Documentation (element)</a></h4>
@@ -6354,7 +6465,7 @@ exponential: exp( - t/L * log(2) )
 weibull: exp( -(t/L)^k * log(2) )
 hill: 1 / (1 + (t/L)^k)
 smooth-compact: exp( k - k / (1 - (t/L)^2) ) for t less than L, otherwise 0</p>
-<h4><a class="header" href="#l-10" id="l-10">L</a></h4>
+<h4><a class="header" href="#l-20" id="l-20">L</a></h4>
 <pre><code class="language-xml">L=string
 </code></pre>
 <p><strong>Units:</strong> User-defined (defaults to years)
@@ -6387,6 +6498,16 @@ parameterised with mean=1 and CV as given.
 The effective age of decay is the real age multiplied by this variable
 (for decay functions with a half-life, this is equivalent to dividing
 the half-life by the variable).</p>
+<h4><a class="header" href="#l-21" id="l-21">L</a></h4>
+<pre><code class="language-xml">complement=boolean
+</code></pre>
+<p><strong>Units:</strong> User-defined (defaults to years)
+<strong>Min:</strong> 0</p>
+<p><strong>Default value:</strong> false</p>
+<p>(Boolean) If True, this tells OpenMalaria to use the complement of the
+DecayFunction defined as 1-f(x). This is useful to model increasing
+functions that will &quot;decay&quot; to 1. This only works if f(x) is contained
+between 0 and 1.</p>
 <h2><a class="header" href="#a-nameelt-anophelesparams-3a-per-mosquito-species-parameters" id="a-nameelt-anophelesparams-3a-per-mosquito-species-parameters"><a name="elt-anophelesParams-3"></a> Per-mosquito species parameters</a></h2>
 <p>→ <a href="#elt-scenario">scenario</a> → <a href="#elt-interventions">interventions</a> → <a href="#elt-human">human</a> → <a href="#elt-component-2">component</a> → <a href="#elt-GVI">GVI</a> → <a href="#elt-anophelesParams-3">anophelesParams</a></p>
 <pre><code class="language-xml">&lt;anophelesParams
