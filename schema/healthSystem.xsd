@@ -3,7 +3,7 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- HealthSystem & Clinical data -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_44" xmlns:om="http://openmalaria.org/schema/scenario_44" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_45" xmlns:om="http://openmalaria.org/schema/scenario_45" xmlns:xs="http://www.w3.org/2001/XMLSchema">
  <xs:include schemaLocation="util.xsd"/>
  <!-- root element for clinical data outside the healthSystem element -->
  <xs:complexType name="Clinical">

@@ -3,7 +3,7 @@
 Copyright © 2005-2011 Swiss Tropical Institute and Liverpool School Of Tropical Medicine
 Licence: GNU General Public Licence version 2 or later (see COPYING) -->
 <!-- standard types used -->
-<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_44" xmlns:om="http://openmalaria.org/schema/scenario_44" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+<xs:schema targetNamespace="http://openmalaria.org/schema/scenario_45" xmlns:om="http://openmalaria.org/schema/scenario_45" xmlns:xs="http://www.w3.org/2001/XMLSchema">
  <!-- Component and TriggeredDeployments would be in interventions.xsd, except
     that they are needed from healthSystem.xsd -->
  <xs:complexType name="Component">
