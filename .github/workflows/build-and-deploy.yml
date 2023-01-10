@@ -51,10 +51,6 @@ jobs:
             compiler: g++
             target: Linux
           
-          - os: ubuntu-18.04
-            compiler: g++
-            target: Linux
-
           - os: macos-12
             compiler: clang
           
@@ -62,7 +58,7 @@ jobs:
             compiler: clang
           
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       
       - name: Install - Ubuntu
         if: startsWith(matrix.os,'ubuntu')
