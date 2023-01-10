@@ -136,7 +136,7 @@ def runScenario(options,omOptions,name):
             print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
         return subprocess.call (cmd,cwd=testBuildDir)
     
-    cmd=options.wrapArgs+[openMalariaExec,"--deprecation-warnings","--resource-path",os.path.abspath(testSrcDir),"--scenario",scenarioSrc]+omOptions
+    cmd=options.wrapArgs+[openMalariaExec,"--resource-path",os.path.abspath(testSrcDir),"--scenario",scenarioSrc]+omOptions
     
     if not options.run:
         print("\033[0;32m  "+(" ".join(cmd))+"\033[0;00m")
