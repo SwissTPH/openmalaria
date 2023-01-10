@@ -54,6 +54,9 @@ namespace OM { namespace util {
 		string sVFile;
 #	endif
 
+		// Set DEPRECATION_WARNINGS to ON by default
+		options.set (DEPRECATION_WARNINGS);
+
 	/* Simple command line parser. Seems to work fine.
 	* If an extension is wanted, http://tclap.sourceforge.net/ looks good. */
 		for(int i = 1; i < argc; ++i) {
@@ -95,8 +98,8 @@ namespace OM { namespace util {
 					(ctsoutName = "ctsout").append(name).append(".txt");
 				} else if (clo == "validate-only") {
 					options.set (SKIP_SIMULATION);
-				} else if (clo == "deprecation-warnings") {
-					options.set (DEPRECATION_WARNINGS);
+				} else if (clo == "no-deprecation-warnings") {
+					options.reset (DEPRECATION_WARNINGS);
 				} else if (clo == "print-model") {
 					options.set (PRINT_MODEL_OPTIONS);
 					options.set (SKIP_SIMULATION);
@@ -218,9 +221,9 @@ namespace OM { namespace util {
 		<< "			--ctsout ctsoutNAME.txt" <<endl
 		<< " -z --compress-output	Compress output with gzip (writes output.txt.gz)." << endl
 		<< "    --validate-only	Initialise and validate scenario, but don't run simulation." << endl
-		<< "    --deprecation-warnings" << endl
-		<< "			Warn about the use of features deemed error-prone and where" << endl
-		<< "			more flexible alternatives are available." << endl
+		<< "    --no-deprecation-warnings" << endl
+		<< "			OpenMalaria warn about the use of features deemed error-prone and where" << endl
+		<< "			more flexible alternatives are available. Use this option to silence it." << endl
 		<< endl
 		<< "Debugging options:"<<endl
 		<< " -m --print-model	Print all model options with a non-default value and exit." << endl
