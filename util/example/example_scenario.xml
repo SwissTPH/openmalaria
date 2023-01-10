@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_44" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="R0068" schemaVersion="44" xsi:schemaLocation="http://openmalaria.org/schema/scenario_44 scenario_44.xsd">
+<om:scenario xmlns:om="http://openmalaria.org/schema/scenario_45" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="example" schemaVersion="45" xsi:schemaLocation="http://openmalaria.org/schema/scenario_45 scenario_45.xsd">
     <!-- This is an example scenario.
     More information is available in the official documentation: https://swisstph.github.io/openmalaria/schema-latest.html
     And in the wiki: https://github.com/SwissTPH/openmalaria/wiki 
