@@ -83,7 +83,35 @@
     </monitoring>
 
     <!-- Deploy interventions here, see: https://github.com/SwissTPH/openmalaria/wiki/ModelInterventions -->
-    <interventions name="No interventions">
+    <interventions name="GVI example">
+        <human>
+            <!-- Example deployment of a GVI intervention that models a deterrency postprandialKilling effects (to model 
+            a insecticide treated net for example). -->
+            <component id="GVI_example">
+                <GVI>
+                    <!-- Exponential decay with a half-life of 3 years, see: https://github.com/SwissTPH/openmalaria/wiki/ModelDecayFunctions -->
+                    <decay function="exponential" L="3y"/>
+                    <anophelesParams mosquito="gambiae_ss">
+                        <deterrency value="0.7696"/>
+                        <postprandialKillingEffect value="0.0544"/>
+                    </anophelesParams>
+                    <anophelesParams mosquito="funestus">
+                        <deterrency value="0.7696"/>
+                        <postprandialKillingEffect value="0.0544"/>
+                    </anophelesParams>
+                    <anophelesParams mosquito="arabiensis">
+                        <deterrency value="0.7696"/>
+                        <postprandialKillingEffect value="0.0544"/>
+                    </anophelesParams>
+                </GVI>
+            </component>
+            <deployment name="GVI_example">
+                <component id="GVI_example"/>
+                <timed>
+                    <deploy coverage="0.7" maxAge="95" minAge="0" time="2005-01-01"/> 
+                </timed>
+            </deployment>
+        </human>
     </interventions>
 
     <!-- Specify health system parameters here, see: https://github.com/SwissTPH/openmalaria/wiki/ScenarioHealthSystem -->
@@ -240,7 +268,7 @@
         </ModelOptions>
 
         <!-- Clinical model parameters.
-            The healthSystemMemory is often overlooked. It corresponds to the follow-up period during which a recurrence is considered to be a treatment failure and is not counted as new clinical case. A recurrence after this period will be counted as new clinical case. --> 
+        The healthSystemMemory is often overlooked. It corresponds to the follow-up period during which a recurrence is considered to be a treatment failure and is not counted as new clinical case. A recurrence after this period will be counted as new clinical case. --> 
         <clinical healthSystemMemory="30d">
             <NeonatalMortality diagnostic="deterministic"/>
         </clinical>

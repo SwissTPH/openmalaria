@@ -99,7 +99,7 @@ nUncomp = df[(df["measure"] == mmi['nUncomp'])].groupby(['survey', 'measure']).s
 fig = plt.figure()
 ax = fig.add_subplot(1,1,1)
 ax.plot(inputEIR.index, inputEIR.value, marker="v", markersize=1, label=f"inputEIR")
-ax.plot(inputEIR.index, inputEIR.value, marker="v", markersize=1, label=f"simulatedEIR")
+ax.plot(simulatedEIR.index, simulatedEIR.value, marker="v", markersize=1, label=f"simulatedEIR")
 ax.legend(loc="upper left")
 
 fig = plt.figure()
